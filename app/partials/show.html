@@ -1,0 +1,58 @@
+
+  
+  <div id="index_card" onclick="shelfPan('full');" ng-click="refreshMap();"> 
+    
+    <span ng-show="showNow">
+
+      <img style="max-width:100%;" src="img/demo/index_now.png">
+    </span>
+
+<!--     <div id="index_card_badge"> <img src="img/IF/IF_box_250_250.png"> </div>
+    <h2> World Title </h2>
+    <h4> Sub title </h4> -->
+    
+ 
+      <img style="max-width:100%;" src="img/demo/aicp_show_index.png">
+
+
+  </div>  
+
+  <br>
+  <div id="objects" style="margin-top:-6px;">
+
+
+
+    <div class="item"><img style="position:absolute;  margin-top:230px; width:188px; margin-left:-2px;" src="img/demo/aicp_more.png"><img src="img/demo/aicp_now_show.png"  ng-click="goNow();"></div>
+
+    <div class="item" ng-click="goTalkList()"><img src="img/demo/aicp_activity.png"></div>
+
+ <!--    <div class="item" style="" ng-click="goTalkList()"><img src="img/demo/instagram.png"></div> -->
+
+    <div class="item" style="width:100%; margin-bottom:20px;" onclick="shelfPan('full');" ng-click="refreshMap();" ><img src="img/demo/aicp_categories.png"></div>
+
+   <span style="color:#63b3fb; margin-left:15px;">ALL SHOWS</span>
+
+        <ul class="landmarks">
+          <!--Looping through data-->
+          <li ng-repeat="landmark in landmarks | filter:query | orderBy:orderProp" class="thumbnail"  style="padding-bottom:20px; border:0px;" >  
+              <a ng-href="#/landmark/{{landmark.id}}" class="thumb"><img ng-src="{{landmark.stats.avatar}}"></a> 
+              <h4><a ng-href="#/landmark/{{landmark.id}}" style="color:#63b3fb; text-decoration: none;">{{landmark.name}}</a></h4>
+              <p style="color:#929292;">{{landmark.shortDescription}}</p>
+              <p style="font-size:12px;"><strong> {{landmark.time.start | date:'h:mm a EEEE d MMMM'}} </strong> </p>
+
+              <!--Show hashtag button if there's a hashtag-->
+<!--               <span ng-show="landmark.tags">  
+                <button class="" ng-click="goTalk(landmark.tags)">#{{landmark.tags}}</button> 
+              </span>   -->
+
+              <!--Show location name for button or default is its empty-->
+ <!--              <button><a style="color:#34495e; text-decoration: none;" ng-href="#/map/coordinates/{{landmark.loc[0]}}/{{landmark.loc[1]}}/{{landmark.id}}"<i class="fui-location"></i>
+              <span ng-hide="landmark.loc_nicknames">Map Location</span>{{landmark.loc_nicknames[0]}}</a></button> -->
+
+          </li>
+      </ul>
+
+    <div id="gapfill" style="height:900px;"></div>
+
+
+  </div>
