@@ -9,7 +9,7 @@
 var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives']).
   config(['$routeProvider', function($routeProvider) {
   $routeProvider.
-      // when('/', {templateUrl: 'partials/landmark-list.html', controller: LandmarkListCtrl}).
+      when('/', {templateUrl: 'partials/loading.html', controller: BubbleRouteCtrl}).
 
       when('/lectures', {templateUrl: 'partials/lectures.html', controller: LecturesCtrl}).
 
@@ -36,7 +36,7 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
       when('/map', {templateUrl: 'partials/map.html', controller: mapCtrl}). 
       when('/map/:loc', {templateUrl: 'partials/map-loc.html', controller: maplocCtrl}). 
       when('/map/coordinates/:lat/:lng/:id', {templateUrl: 'partials/map-loc.html', controller: maplocCtrl}). 
-      otherwise({redirectTo: '/lectures'}); 
+      otherwise({redirectTo: '/'}); 
 }]);
 
 

@@ -416,7 +416,7 @@ body {
   color: #34495e;
   font-family: "Lato", sans-serif;
   font-size: 14px;
-  line-height: 1.231;
+  /*line-height: 1.231;*/
 }
 input,
 button,
@@ -547,13 +547,31 @@ h6 {
 .btn.btn-primary:hover,
 .btn.btn-primary:focus,
 .btn-group:focus .btn.btn-primary.dropdown-toggle {
-  background-color: #48c9b0;
+ /* background-color: #48c9b0;*/
+ opacity:0.6;
 }
+
+
 .btn.btn-primary:active,
 .btn-group.open .btn.btn-primary.dropdown-toggle,
 .btn.btn-primary.active {
-  background-color: #16a085;
+/*  background-color: #16a085;*/
+  border-bottom: solid 3px white;
 }
+
+.btn.btn-primary.active.awards{
+  border-bottom: solid 3px #a9dd00;
+}
+
+.btn.btn-primary.active.lectures{
+  border-bottom: solid 3px #ff34dd;
+}
+
+.btn.btn-primary.active.show{
+  border-bottom: solid 3px #35d4fe;
+}
+
+
 .btn.btn-info {
   background-color: #3498db;
 }
@@ -661,12 +679,12 @@ h6 {
   border-left-color: transparent;
 }
 .btn-group > .btn:first-of-type {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+/*  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;*/
 }
 .btn-group > .btn:last-of-type {
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+/*  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;*/
 }
 .btn-group > .btn + .btn {
   margin-left: 0;

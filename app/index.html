@@ -22,8 +22,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
   <title>AICP 2014</title>
-  <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel='stylesheet' href='fonts/typicons.min.css'>
+
   <link rel="stylesheet" href="css/tidepools/leaflet.css">
   <link rel="stylesheet" href="css/bootstrap-datepicker.css">
   <link rel="stylesheet" href="css/bootstrap-timepicker.css">
@@ -46,7 +48,7 @@
   <script src="lib/angular/angular-resource.js"></script>
   <script src="lib/angular/angular-strap.js"></script>
 
-  <script src="lib/angular/ui-bootstrap-0.3.0.min.js"></script>
+  <script src="lib/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
   <script src="lib/bootstrap-datepicker.js"></script>
   <script src="lib/bootstrap-timepicker.js"></script>
   <script src="lib/leaflet.js"></script>
@@ -80,22 +82,6 @@
 
         </div>
 
-
-<!--         <div class="btn-group" >
-          <a class="btn btn-primary slider" ng-click="showNow = true; showHome = false; " onclick="shelfPan('partial');" href="#">Culinary Theater</a>
-        </div> -->
-
-
-        <ul>
-          <div ng-controller="sessionsNow">
-            <li ng-repeat="landmark in landmarks | filter:query | orderBy:orderProp">
-              <h3>∆ <a ng-href="#/session/{{landmark.id}}">{{landmark.name}}</a></h3>
-              <br>
-            </li>
-            <li ng-show="!landmarks.length"><!--  No events happening now --></li>
-          </div>
-        </ul>
-        <!-- <img src="images/nyan.gif"> -->
       </div>
 
     <div id="main">
@@ -104,7 +90,17 @@
 
           <div id="show" style="position:absolute; opacity:0;" class="btn-primary" href="#" ><div style="position:absolute; padding:7px; font-size:30px; "></div></div>
           <img src="img/IF/search_bar.png">
-  
+
+
+          <!-- BUBBLE SWITCH WIDGET -->
+
+          <div ng-show="showSwitch" class="btn-group bubbleSwitcher card social" style="background-color:#161616; padding-bottom:0px; margin-top:0px;">
+              <h1 class="btn btn-primary awards" style="color:#a9dd00; font-size:85%; margin-top:8px;" ng-model="radioModel" btn-radio="'Tuesday'" ng-click="goPath('awards');" >Tuesday</h1>
+              <h1 class="btn btn-primary lectures" style="color:#ff34dd; font-size:85%; margin-top:8px;" ng-model="radioModel" btn-radio="'Wednesday'" ng-click="goPath('lectures');" >Wednesday</h1>
+              <h1 class="btn btn-primary show" style="color:#35d4fe; font-size:85%; margin-top:8px;" ng-model="radioModel" btn-radio="'Thursday'" ng-click="goPath('show');" >Thursday</h1>
+          </div>
+          <!--  -->
+
 <!--           <form ng-submit="sessionSearch()" style="margin-bottom:-21px;">
             <input style="width:70%;" type="text" ng-model="searchText" size="30" placeholder="What to find?">
             <input class="btn-primary" type="submit" value="search">
@@ -112,13 +108,13 @@
 
       </div>
 
+<!-- 
+      <div id="content"> -->
 
-      <div id="content">
+    <!--     <div class="container-fluid"> -->
+     <!--      <div class="row-fluid"> -->
 
-        <div class="container-fluid">
-          <div class="row-fluid">
-
-            <div class="span10">
+            <!-- <div class="span10"> -->
 
               <div id="wrapper">
 
@@ -147,9 +143,12 @@
 
 
                     <div id="shelf">
+                      <div class="container">
 
                       
                         <div ng-view></div>
+
+                      </div>
                      
 
                     </div>
@@ -159,12 +158,12 @@
                       
               </div>
                      
-            </div>
-          </div>
+            <!-- </div> -->
+        <!--   </div> -->
 
-        </div>
+     <!--    </div> -->
 
-      </div>
+   <!--    </div> -->
 
     </div>
 

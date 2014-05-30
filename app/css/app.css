@@ -27,11 +27,14 @@ body {
   max-width:100%;
 }
 
+.bubbleSwitcher .btn.btn-primary{
+  background-color: #161616;
+}
 
 
 #index_card {
   width:100%; 
-  background-color:#1de6ff;
+
   cursor:pointer;
   height:82px;
 
@@ -40,9 +43,7 @@ body {
   z-index: 100;
 }
 
-#index_card h1 {
 
-}
 
 #index_card_badge{
   float:left;
@@ -160,9 +161,9 @@ ul.specs dt {
   font-weight: bold;
 }
 
-h1 {
+/*h1 {
   border-bottom: 1px solid gray;
-}
+}*/
 
 
 /* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
@@ -432,3 +433,177 @@ body.lense2 #shelf {
 
 
 
+
+
+
+
+
+
+  /*ANGULAR BOOTSTRAP OVERIDE*/
+/*TYPICONS*/
+@font-face {
+  font-family: 'typicons';
+  src: url("../fonts/typicons.eot");
+  src: url("../fonts/typicons.eot?#iefix") format('embedded-opentype'),
+       url("../fonts/typicons.woff") format('woff'),
+       url("../fonts/typicons.ttf") format('truetype'),
+       url("../fonts/typicons.svg#typicons") format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/*ANGULAR BOOTSTRAP OVERIDE*/
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+/*GENERAL*/
+body{
+  background: rgb(112, 112, 112);
+}
+.container{
+  max-width: 384px;
+  background: black;
+  color: white;
+}
+
+/*CARDS*/
+.col-xs-6.card{
+  max-width: 50%;
+}
+
+.col-xs-12.card{
+  max-width: 100%;
+}
+
+.card{
+  padding: 0 5px 5px 5px;
+  margin: 0;
+}
+.card.social h1 {
+  color:  #3dc0fe;
+}
+.card h1{
+  font-size: 1.3rem;
+  padding: 0 10px;
+  font-weight: 100;
+  text-transform: uppercase;
+  letter-spacing: 0.2rem;
+  margin: 15px 0 8px 0;
+  color: #a9c512;
+}
+.card .container{
+  background: white;
+  color: #0f0f0e;
+  padding: 10px;
+  margin: 0;
+  border-radius: 2px;
+  word-wrap: auto;
+  width: 100%;
+  cursor: pointer;
+}
+.card .content{
+  margin: 0;
+}
+.card .container.more{
+  border-radius: 3px 3px 0 0;
+}
+.card.social.twitter .container .content{
+    color: gray;
+    font-size: 1.6rem;
+    font-weight: 100;
+    font-style: italic;
+}
+.card.social .footer{
+  text-align: left;
+  padding-left: 10px;  
+  letter-spacing: 0.1rem;
+}
+.card .header{
+  color: #d774c0;
+  font-size: 0.9em;
+  letter-spacing: 0.1rem;
+  margin-bottom: 5px;
+}
+.card .title{
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin: 0 0 3px 0;
+}
+.card .content{
+  font-size: 1.3rem;
+}
+.card .footer{
+  cursor: pointer;
+  text-align: right;
+  background: url('../img/more_bg.jpg') right center repeat-y;
+  color: black;
+  padding: 5px;
+  border-radius: 0 0 3px 3px;
+  font-size: 1.2rem;
+  letter-spacing: 0.2rem;
+}
+.card .footer .typcn{
+  color: #333;
+}
+.card .container .watermark{
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+.card .container.more .watermark{
+  bottom: 33px;
+  color: #333;
+  opacity: 0.7;
+  font-size: 2.4rem;
+}
+.card.instagram .container.more .watermark{
+  bottom: 42px;
+  right: 18px;
+  color: #fff;
+}
+
+.col-xs-12.card .footer{
+  background: url('../img/index_card_bg.jpg') right center repeat-y;
+}
+
+.card.social .footer .typcn-export{
+  font-size: 1.7rem;
+  line-height: 1.6rem;
+}
+
+/*INDEX CARD*/
+.index_card{
+  height: 83px;
+  overflow: hidden;
+  background: url('../img/index_card_bg.jpg') center center no-repeat;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  padding: 10px 0;
+  color: black;
+  cursor: pointer;
+  border-bottom: solid 1px gray;
+  border-top: solid 2px gray;
+}
+.index_card .logo{
+ max-height: 63px;
+ margin-right: 10px;
+ float: left;
+}
+.index_card h1{
+  font-size: 1.5rem;
+  padding: 0;
+  margin: 0;
+}
+.index_card h2{
+  font-size: 1.3rem;
+  padding: 0;
+  margin: 15px 0 0 0;
+}
+.index_card h3{
+  font-size: 1.2rem;
+  padding: 0;
+  margin: 3px 0 0 0;
+  font-weight: 200;
+  letter-spacing: 0rem;
+}

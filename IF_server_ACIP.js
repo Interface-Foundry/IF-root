@@ -102,6 +102,8 @@ app.get('/api/:collection', function(req, res) {
     //querying landmark collection (events, places, etc)
     if (req.params.collection == 'landmarks'){
 
+ 
+
         //return all items in landmarks
         if (req.query.queryType == "all"){
             var qw = {};
@@ -109,36 +111,89 @@ app.get('/api/:collection', function(req, res) {
             db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));         
         }
 
+
         //events
         if (req.query.queryType == "events"){
+            // console.log('events');
+            // console.log(req.query.queryFilter);
 
             if (req.query.queryFilter == "all"){
-                var qw = {
-                    'type' : 'event'
-                };
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+
+                
+                if (req.query.queryCat){
+
+                    var qw = {
+                        'type' : 'event',
+                        'subType' : req.query.queryCat
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+
+                }
+
+                else {
+
+                    var qw = {
+                        'type' : 'event'
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                }
+   
             }
 
             if (req.query.queryFilter == "now"){
 
-                var currentTime = new Date();
-                var qw = {
-                    'time.start': {$lt: currentTime},
-                    'time.end': {$gt: currentTime}
-                };
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                if (req.query.queryCat){
+
+                    var currentTime = new Date();
+                    var qw = {
+                        'time.start': {$lt: currentTime},
+                        'time.end': {$gt: currentTime},
+                        'subType' : req.query.queryCat
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                }
+
+                else{
+
+                    var currentTime = new Date();
+                    var qw = {
+                        'time.start': {$lt: currentTime},
+                        'time.end': {$gt: currentTime}
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+
+                }
+
+
             }
 
 
-            if (req.query.queryFilter == "soon"){
+            if (req.query.queryFilter == "upcoming"){
 
-                var currentTime = new Date(); 
-                currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-                var qw = {
-                    'time.start': {$lt: currentTime},
-                    'time.end': {$gt: currentTime}
-                };
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                if (req.query.queryCat){
+
+                    var currentTime = new Date(); 
+                    currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
+                    var qw = {
+                        'time.start': {$lt: currentTime},
+                        'time.end': {$gt: currentTime},
+                        'subType':req.query.queryCat
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                }
+
+                else {
+                    var currentTime = new Date(); 
+                    currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
+                    var qw = {
+                        'time.start': {$lt: currentTime},
+                        'time.end': {$gt: currentTime}
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));                   
+                }
+
+
+ 
             }
 
 
@@ -168,6 +223,8 @@ app.get('/api/:collection', function(req, res) {
         if (req.query.queryType == "places"){
 
             //do a location radius search here option
+
+            console.log(req.query.queryFilter);
 
             if (req.query.queryFilter == "all"){
                 var qw = {

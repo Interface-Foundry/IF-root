@@ -122,6 +122,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 
 var mainWindow;
 
+
 // $(document).ready(function() {
 
 //   mainWindow = $(window).height();
