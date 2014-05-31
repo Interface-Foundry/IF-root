@@ -14,20 +14,24 @@ function BubbleRouteCtrl($location, $scope, $routeParams, db) {
     console.log(today);
 
     if (today === '28/05/2014'){
-        $location.path('awards');
+        //$location.path('awards');
+        $location.path('lectures');
         
     }
 
     else if (today === '29/05/2014'){
         $location.path('lectures');
+
     }
 
     else if (today === '30/05/2014'){
-        $location.path('show');
+        $location.path('lectures');
+        //$location.path('show');
     }
 
     else {
-        $location.path('awards');
+        //$location.path('awards');
+        $location.path('lectures');
     }
 
  
@@ -96,7 +100,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
             lng: -83.069523,
             zoom: 14
         },
-        tiles: tilesDict.amc
+        tiles: tilesDict.mapbox
     });
 
     //for bubble widget switcher

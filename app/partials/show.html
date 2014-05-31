@@ -1,51 +1,218 @@
 
-  
-  <div id="index_card" onclick="shelfPan('full');" ng-click="refreshMap();"> 
-    
-
-    
- 
-      <img style="max-width:100%;" src="img/demo/aicp_show_index.png">
-
-
-  </div>  
-
-  <br>
-  <div id="objects" style="margin-top:-6px;">
 
 
 
-    <div class="item"><img style="position:absolute;  margin-top:230px; width:188px; margin-left:-2px;" src="img/demo/aicp_more.png"><img src="img/demo/aicp_now_show.png"  ng-click="goNow();"></div>
 
-    <div class="item" ng-click="goTalkList()"><img src="img/demo/aicp_activity.png"></div>
-
- <!--    <div class="item" style="" ng-click="goTalkList()"><img src="img/demo/instagram.png"></div> -->
-
-    <div class="item" style="width:100%; margin-bottom:20px;" onclick="shelfPan('full');" ng-click="refreshMap();" ><img src="img/demo/aicp_categories.png"></div>
-
-   <span style="color:#63b3fb; margin-left:15px;">ALL SHOWS</span>
-
-        <ul class="landmarks">
-          <!--Looping through data-->
-          <li ng-repeat="landmark in landmarks | filter:query | orderBy:orderProp" class="thumbnail"  style="padding-bottom:20px; border:0px;" >  
-              <a ng-href="#/landmark/{{landmark.id}}" class="thumb"><img ng-src="{{landmark.stats.avatar}}"></a> 
-              <h4><a ng-href="#/landmark/{{landmark.id}}" style="color:#63b3fb; text-decoration: none;">{{landmark.name}}</a></h4>
-              <p style="color:#929292;">{{landmark.shortDescription}}</p>
-              <p style="font-size:12px;"><strong> {{landmark.time.start | date:'h:mm a EEEE d MMMM'}} </strong> </p>
-
-              <!--Show hashtag button if there's a hashtag-->
-<!--               <span ng-show="landmark.tags">  
-                <button class="" ng-click="goTalk(landmark.tags)">#{{landmark.tags}}</button> 
-              </span>   -->
-
-              <!--Show location name for button or default is its empty-->
- <!--              <button><a style="color:#34495e; text-decoration: none;" ng-href="#/map/coordinates/{{landmark.loc[0]}}/{{landmark.loc[1]}}/{{landmark.id}}"<i class="fui-location"></i>
-              <span ng-hide="landmark.loc_nicknames">Map Location</span>{{landmark.loc_nicknames[0]}}</a></button> -->
-
-          </li>
-      </ul>
-
-    <div id="gapfill" style="height:900px;"></div>
-
-
+    <!-- INDEX CARD -->
+  <div class="row index_card show_index" onclick="shelfPan('full');" ng-click="refreshMap();">
+    <div class="col-lg-12">
+      <img src="img/AICP/AICP_week_logo.png" class="img-responsive logo" alt="2014 AICP WEEK">
+      
+      <h1>AICP SHOW</h1>
+      <h2>THURSDAY, JUNE 12</h2>
+      <h3>THE MUSEUM OF MODERN ART</h3>
+    </div>
   </div>
+
+
+
+      <!-- 2 COL CARDS -->
+        <div class="row">
+          <!-- HAPPENING NOW -->
+          <div class="col-xs-6 card col-card-2">
+            <h1>EXPLORE</h1>
+            <div class="container" onclick="shelfPan('full');" ng-click="refreshMap();">
+              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/food.png">
+              <p class="title" style="padding-top:10px; padding-left:28px;">Food</p>
+              
+            </div>
+            <!-- <div class="footer">MORE ></div> -->
+          </div>
+
+          <!-- UP NEXT -->
+          <div class="col-xs-6 card 2col">
+            <h1></h1>
+            <br>
+            <div class="container" onclick="shelfPan('full');" ng-click="refreshMap();">
+
+              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/bar.png">
+              <p class="title" style="padding-top:10px; padding-left:28px;">Bars</p>
+      
+            </div>
+           
+          </div>
+
+        </div>
+
+
+
+      <!-- 4 COL CARDS -->
+    <div class="row 4-col">
+          <div class="col-xs-12">
+
+            <div class="row">
+              <!-- HAPPENING NOW -->
+              <div class="col-xs-12 card">
+                <h1><!-- Happening Now --></h1>
+                <div class="container">
+                  <!-- <div class="header">11:30 <span class="pull-right">ROOM A</span></div> -->
+                  
+                  <!-- <p class="content">Lorem Ipsum dolor sit amet, consectetur adipiscing elit.</p> -->
+                  <!-- <img src="img/icons/food.png"> --><span class="pull-right"><img width="222" src="img/AICP/food_sample.jpg"></span>
+                  <p class="title">RECEPTION MENU</p>
+                      <p class="content "><span class="header">8:30pm</span>
+                        <br>
+                        Cocktails & Hors D'oeuvres
+                      </p>
+                      <br>
+                      <p>> MORE</p>
+
+                </div>
+                <!-- <div class="footer">MORE ></div> -->
+              </div>
+
+          </div>
+          <!-- <div class="footer">MORE ></div> -->
+
+        </div>
+    </div>
+
+<br>
+
+
+      <!-- 2 COL CARDS -->
+        <div class="row">
+          <!-- HAPPENING NOW -->
+          <div class="col-xs-6 card col-card-2">
+
+            <div class="container" onclick="shelfPan('full');" ng-click="refreshMap();">
+              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/washrooms.png">
+              <p class="title" style="padding-top:10px; padding-left:28px;">Washrooms</p>
+              
+            </div>
+            <!-- <div class="footer">MORE ></div> -->
+          </div>
+
+          <!-- UP NEXT -->
+          <div class="col-xs-6 card 2col">
+
+            <div class="container" onclick="shelfPan('full');" ng-click="refreshMap();">
+
+              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/sponsors.png">
+              <p class="title" style="padding-top:10px; padding-left:28px;">Sponsor Lounges</p>
+      
+            </div>
+           
+          </div>
+
+        </div>
+
+      <!-- 2 COL CARDS -->
+        <div class="row">
+          <!-- HAPPENING NOW -->
+          <div class="col-xs-6 card col-card-2">
+
+            <div class="container" onclick="shelfPan('full');" ng-click="refreshMap();">
+              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/smoking.png">
+              <p class="title" style="padding-top:10px; padding-left:28px;">Smoking Sections</p>
+              
+            </div>
+            <!-- <div class="footer">MORE ></div> -->
+          </div>
+
+          <!-- UP NEXT -->
+          <div class="col-xs-6 card 2col">
+ 
+            <div class="container" onclick="shelfPan('full');" ng-click="refreshMap();">
+
+              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/coolsculpt.png">
+              <p class="title" style="padding-top:10px; padding-left:28px;">Exhibits</p>
+      
+            </div>
+           
+          </div>
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+    <div class="row">
+
+          <!-- TWITTER -->
+          <div class="col-xs-6 card 2-col social twitter">
+            <h1>Twitter</h1>
+            <div class="container more">
+              <p class="content">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et ma</p>
+              <span class="watermark typcn typcn-social-twitter"></span>
+            </div>
+            <div class="footer show-footer">@username <span class="typcn typcn-export pull-right"><span></div>
+          </div>
+
+          <!-- INSTAGRAM -->
+          <div class="col-xs-6 card 2-col social instagram">
+            <h1>Instagram</h1>
+            <div class="container more">
+              <p class="content"><img src="img/instagram.jpg" width="100%"></p>
+              <span class="watermark typcn typcn-social-instagram"></span>
+            </div>
+            <div class="footer show-footer">@username <span class="typcn typcn-export pull-right"><span></div>
+          </div>
+
+    </div>
+
+
+
+      <!-- FOOTER -->
+      <div class="row">
+        
+        <div class="card">
+          <h1>AICP PARTNERS</h1>
+        </div>
+         
+          <div class="col-xs-6 card col-card-2">
+            
+              <img class="partner" src="img/AICP/partners/caps.png">
+              <img class="partner" src="img/AICP/partners/prosight.png">
+              <br><br>
+              <img class="partner" src="img/AICP/partners/universal.png">
+
+          </div>
+      
+          <div class="col-xs-6 card 2col">
+
+              <img class="partner" src="img/AICP/partners/deluxe.png">
+              <br><br>
+              <img class="partner" src="img/AICP/partners/shutterstock.png">
+
+          </div>
+
+      </div>
+
+    <div class="row 4-col">
+          <div class="col-xs-12">
+
+            <div class="row">
+              <!-- HAPPENING NOW -->
+              <div class="col-xs-12 card" style="margin:0 auto; width:100%;">
+                    
+                    <h1>AICP SHOW ARCHIVES</h1>
+
+                    <img width="73" src="img/AICP/partners/aicp.png">
+                    <br>
+                    <a href="http://www.aicpawards.com" style="text-decoration:none;" target="_blank"><h1 class="title" style=" color:#3dc0fe;">aicpawards.com</h1>
+
+              </div>
+
+          </div>
+        </div>
+    </div>
+
+
+    <!-- ////////////////////// -->

@@ -434,7 +434,12 @@ body.lense2 #shelf {
 
 
 
+.partner{
+  width:122px;
+  opacity: 0.8;
+  padding-left: 13px;
 
+}
 
 
 
@@ -541,6 +546,21 @@ body{
   font-size: 1.2rem;
   letter-spacing: 0.2rem;
 }
+
+.award-footer{
+  background: url('../img/AICP/more_bg_awards.png') right center repeat-y !important;
+}
+
+.lecture-footer{
+  background: url('../img/AICP/more_bg_lectures.png') right center repeat-y !important;
+}
+
+.show-footer{
+  background: url('../img/AICP/more_bg_show.png') right center repeat-y !important;
+}
+
+
+
 .card .footer .typcn{
   color: #333;
 }
@@ -585,10 +605,28 @@ body{
   border-bottom: solid 1px gray;
   border-top: solid 2px gray;
 }
+
+.award_index{
+  background: url('../img/AICP/index_card_bg_awards.png') center center no-repeat;
+}
+
+.lecture_index{
+  background: url('../img/AICP/index_card_bg_lectures.png') center center no-repeat;
+}
+
+.show_index{
+  background: url('../img/AICP/index_card_bg_show.png') center center no-repeat;
+}
+
+
+
+
 .index_card .logo{
- max-height: 63px;
- margin-right: 10px;
- float: left;
+   max-height: 72px;
+   margin-right: 14px;
+   float: left;
+   margin-top: -6px;
+
 }
 .index_card h1{
   font-size: 1.5rem;

@@ -19,10 +19,10 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
 
 
 
-      when('/landmark/:landmarkId', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}). 
-      when('/landmark/:landmarkId', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}).
-      when('/landmark/:landmarkId/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}). 
-      when('/landmark/:landmarkId/:option', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}). 
+      when('/post/:landmarkId', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}). 
+      when('/post/:landmarkId', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}).
+      when('/post:landmarkId/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}). 
+      when('/post/:landmarkId/:option', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}). 
       when('/poll',{templateUrl: 'partials/poll.html', controller: pollCtrl}).
 
       when('/new', {templateUrl: 'partials/landmark-new.html'}). 

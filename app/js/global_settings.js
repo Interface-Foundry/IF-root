@@ -45,7 +45,6 @@ var local_icons = {
 
 
 
-
 var tilesDict = {
     openstreetmap: {
         url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -54,9 +53,9 @@ var tilesDict = {
         }
     },
     mapbox: {
-        url: 'http://{s}.tiles.mapbox.com/v3/openplans.map-dmar86ym/{z}/{x}/{y}.png',
+        url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.id0joeg1/{z}/{x}/{y}.png',
         options: {
-            attribution: '&copy; OpenStreetMap contributors, CC-BY-SA. <a href="http://mapbox.com/about/maps" target="_blank">Terms &amp; Feedback</a>',
+            attribution: 'IF',
             minZoom: 1,
             maxZoom: 23,
             reuseTiles: true
