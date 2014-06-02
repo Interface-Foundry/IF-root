@@ -105,7 +105,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
     //for bubble widget switcher
     $scope.goPath = function(url){
-
+        shelfPan('return');
         $location.path(url);
     };
 
@@ -467,8 +467,6 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
             },
             tiles: tilesDict.amc
         });
-
-
 
         // leafletData.getMap().then(function(map) {
         //     map.panTo( [42.356886, -83.069523] );

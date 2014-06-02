@@ -29,7 +29,10 @@ body {
 
 .bubbleSwitcher .btn.btn-primary{
   background-color: #161616;
+  font-family:'simplreg', sans-serif;
+ 
 }
+
 
 
 #index_card {
@@ -434,7 +437,7 @@ body.lense2 #shelf {
 
 
 
-.partner{
+.partner {
   width:122px;
   opacity: 0.8;
   padding-left: 13px;
@@ -444,7 +447,8 @@ body.lense2 #shelf {
 
 
 
-  /*ANGULAR BOOTSTRAP OVERIDE*/
+/*ANGULAR BOOTSTRAP OVERIDE*/
+
 /*TYPICONS*/
 @font-face {
   font-family: 'typicons';
@@ -456,6 +460,20 @@ body.lense2 #shelf {
   font-weight: normal;
   font-style: normal;
 }
+
+
+
+/*AICP FONT*/
+@font-face {
+  font-family: 'simplreg';
+  src: url("../fonts/SimplReg.eot");
+  src: url("../fonts/SimplReg.eot?#iefix") format('embedded-opentype'),
+       url("../fonts/SimplReg.woff") format('woff'),
+       url("../fonts/SimplReg.ttf") format('truetype');
+}
+
+
+
 
 /*ANGULAR BOOTSTRAP OVERIDE*/
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
@@ -475,6 +493,13 @@ body{
   max-width: 50%;
 }
 
+.col-xs-4.card{
+  max-width: 33.3%;
+  font-size: 1.3rem;
+}
+
+
+
 .col-xs-12.card{
   max-width: 100%;
 }
@@ -487,13 +512,14 @@ body{
   color:  #3dc0fe;
 }
 .card h1{
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   padding: 0 10px;
   font-weight: 100;
   text-transform: uppercase;
   letter-spacing: 0.2rem;
   margin: 15px 0 8px 0;
   color: #a9c512;
+  font-family:'simplreg', sans-serif;
 }
 .card .container{
   background: white;
@@ -504,7 +530,11 @@ body{
   word-wrap: auto;
   width: 100%;
   cursor: pointer;
+  border-bottom: solid #cecece 2px;
+  border-right: solid #cecece 1px;
 }
+
+
 .card .content{
   margin: 0;
 }
@@ -527,15 +557,29 @@ body{
   font-size: 0.9em;
   letter-spacing: 0.1rem;
   margin-bottom: 5px;
+  font-family:'simplreg', sans-serif;
+  font-weight: bold;
 }
 .card .title{
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   margin: 0 0 3px 0;
+  font-family:'simplreg', sans-serif;
 }
+
+.searchTitle{
+  font-weight: bold;
+  font-size: 1.3rem;
+  margin: 0 0 3px 0;
+  font-family:'simplreg', sans-serif;
+  text-align: center;
+}
+
+
 .card .content{
   font-size: 1.3rem;
 }
+
 .card .footer{
   cursor: pointer;
   text-align: right;
@@ -543,8 +587,9 @@ body{
   color: black;
   padding: 5px;
   border-radius: 0 0 3px 3px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   letter-spacing: 0.2rem;
+  font-family:'simplreg', sans-serif;
 }
 
 .award-footer{
@@ -602,8 +647,8 @@ body{
   padding: 10px 0;
   color: black;
   cursor: pointer;
-  border-bottom: solid 1px gray;
-  border-top: solid 2px gray;
+  border-bottom: solid 1px #a8a7a7;
+  border-top: solid 2px #a8a7a7;
 }
 
 .award_index{
@@ -626,17 +671,20 @@ body{
    margin-right: 14px;
    float: left;
    margin-top: -6px;
-
 }
+
 .index_card h1{
-  font-size: 1.5rem;
+  font-size: 1.9rem;
   padding: 0;
   margin: 0;
+  font-family:'simplreg', sans-serif;
 }
+
 .index_card h2{
   font-size: 1.3rem;
   padding: 0;
   margin: 15px 0 0 0;
+  font-family:'simplreg', sans-serif;
 }
 .index_card h3{
   font-size: 1.2rem;
@@ -644,4 +692,5 @@ body{
   margin: 3px 0 0 0;
   font-weight: 200;
   letter-spacing: 0rem;
+  font-family:'simplreg', sans-serif;
 }
