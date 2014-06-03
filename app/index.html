@@ -36,7 +36,6 @@
 
   <script src="lib/jquery/jquery-2.0.3.min.js"></script>
 
-  <!-- <script src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
 
   <script src="lib/jquery/jquery.ui.widget.js"></script>
   <script src="lib/jquery/jquery.fileupload.js"></script>
@@ -65,13 +64,10 @@
 </head>
 <body style="background-color:#707070;">
 
-<!-- <div ng-controller="indexIF"> -->
 
   <div id="wrapper" style="margin:0 auto; width:384px; max-width:100%; ">
 
       <div id="menu">
-        <!-- <img src="img/IF/indexbar.png"> -->
-
 
         <img style="width:100%;" src="img/AICP/AICP14_week_color.gif">
 
@@ -79,10 +75,8 @@
 
         <img style="width:95%;" src="img/AICP/IF_large_horizontal.png">
         <a target="_blank" href="http://interfacefoundry.com">interfacefoundry.com</a>
-
-
-
       </div>
+      
 
     <div id="main">
 
@@ -99,77 +93,24 @@
               <h1 class="btn btn-primary lectures" style="color:#ff34dd; font-size:110%; margin-top:8px;" ng-model="radioModel" btn-radio="'Wednesday'" ng-click="goPath('lectures');" >Wednesday</h1>
               <h1 class="btn btn-primary show" style="color:#35d4fe; font-size:110%; margin-top:8px;" ng-model="radioModel" btn-radio="'Thursday'" ng-click="goPath('show');" >Thursday</h1>
           </div>
-          <!--  -->
-
-<!--           <form ng-submit="sessionSearch()" style="margin-bottom:-21px;">
-            <input style="width:70%;" type="text" ng-model="searchText" size="30" placeholder="What to find?">
-            <input class="btn-primary" type="submit" value="search">
-          </form>  -->
 
       </div>
 
-<!-- 
-      <div id="content"> -->
+        <div id="wrapper">
 
-    <!--     <div class="container-fluid"> -->
-     <!--      <div class="row-fluid"> -->
-
-            <!-- <div class="span10"> -->
-
-              <div id="wrapper">
-
-                  <!-- <div ng-controller="LandmarkListCtrl"> -->
-
-                    <div id="window" style="position:absolute;">
-
-                        <!-- <span ng-show="landmark.video"> -->
-
-<!--                           <iframe width="95%" height="300" src="//www.youtube.com/embed/{{landmark.video | youtubestrip}}" frameborder="0" allowfullscreen></iframe>
- -->                    
-
-<!--                       <span ng-show="showVideo">
-                        <div style="width:95%; height:300px; background-color:black;"></div>
-                      </span> -->
-
-                       <!--  </span> -->
-
-                      <!-- <div ng-controller="mapper">  -->
-                      <!-- <span ng-show="showMap"> -->
-                        <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers"></leaflet>
-                     <!--  </span> -->
-                      <!-- </div> -->
-   
-                    </div>
-
-
-                    <div id="shelf">
-                      <div class="container">
-
-                      
-                        <div ng-view></div>
-
-                      </div>
-                     
-
-                    </div>
-
-                  <!-- </div> -->
-
-                      
+              <div id="window" style="position:absolute;">
+                  <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers"></leaflet>
               </div>
-                     
-            <!-- </div> -->
-        <!--   </div> -->
 
-     <!--    </div> -->
-
-   <!--    </div> -->
+              <div id="shelf">
+                <div class="container">    
+                  <div ng-view></div>
+                </div>
+              </div>   
+        </div>
 
     </div>
-
   </div>
-
-<!-- </div> -->
 
 <script>
 
