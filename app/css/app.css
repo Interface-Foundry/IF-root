@@ -666,11 +666,11 @@ body{
 
 
 
-.index_card .logo{
-/*   max-height: 72px;
+.logo2{
+   max-height: 72px;
    margin-right: 14px;
    float: left;
-   margin-top: -6px;*/
+   margin-top: -6px;
 }
 
 .index_card h1{
