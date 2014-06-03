@@ -469,7 +469,17 @@ body.lense2 #shelf {
   src: url("../fonts/SimplReg.eot");
   src: url("../fonts/SimplReg.eot?#iefix") format('embedded-opentype'),
        url("../fonts/SimplReg.woff") format('woff'),
-       url("../fonts/SimplReg.ttf") format('truetype');
+       url("../fonts/SimplReg.ttf") format('truetype'),
+       url("../fonts/typicons.svg#typicons") format('svg');
+/*  font-weight: normal;
+  font-style: normal;*/
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
 }
 
 
@@ -520,6 +530,7 @@ body{
   margin: 15px 0 8px 0;
   color: #a9c512;
   font-family:'simplreg', sans-serif;
+
 }
 .card .container{
   background: white;
@@ -666,7 +677,7 @@ body{
 
 
 
-.logo2{
+.index-logo{
    max-height: 72px;
    margin-right: 14px;
    float: left;
@@ -694,3 +705,5 @@ body{
   letter-spacing: 0rem;
   font-family:'simplreg', sans-serif;
 }
+
+
