@@ -42,16 +42,21 @@ BubbleRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
+    $scope.goBack = function(){
+        shelfPan('return');
+        $rootScope.showSwitch = true;
+        $rootScope.showBack = false;
+        $rootScope.showMapNav = false;
+    }
 
+    $scope.goBackPage = function(){
+        $rootScope.showBackPage = false;
+        $rootScope.showMapNav = false;
+        window.history.back();
+        shelfPan('return');
+        
+    }
     
-
-   // var he = $(window).height();
-
-    //$("#leafletmap").css({"height": he - 47});
-
-    //map.queryLandmarks();
-
-    //map("asdf","lol");
 
 
 //--- GEO LOCK -----//
@@ -349,7 +354,33 @@ LandmarkListCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletDat
 function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $timeout, leafletData, $route, $rootScope) {  
 
     $rootScope.showSwitch = false;
+    $rootScope.showBackPage = true;
+
+    $scope.refreshMap = function(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
+    }
+
+
+   
     
+    //hiding bubble switcher and showing map nav instead
+    $scope.showMapNav = function(){
+        if ($rootScope.showMapNav == true){
+            
+            $rootScope.showMapNav = false;
+            shelfPan('partial');
+            
+        }
+
+        else {
+            
+            $rootScope.showMapNav = true;
+            
+        }
+    }
+
 
 
     if ($routeParams.option == 'm'){
@@ -391,15 +422,162 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
             }
         };
 
+        // IF EVENT, show MAPBOX
+        // IF PLACE, USE MOMA MAP
+        if (landmark.type == "event"){
 
-        angular.extend($rootScope, {
-            center: {
-                lat: $scope.landmark.loc[0],
-                lng: $scope.landmark.loc[1],
-                zoom: 16
-            },
-            markers: markerList
-        });
+            if (landmark.loc_nickname){
+
+                if (landmark.loc_nickname == "BASECAMP"){
+
+                    var markerList = {
+                        "m" : {
+                            lat: 40.7297,
+                            lng: -73.9978,
+                            message: '<h4>BASECAMP</h4>',
+                            focus: true,
+                            icon: local_icons.yellowIcon
+                        }
+                    };
+
+                    angular.extend($rootScope, {
+                        center: {
+                            lat: 40.7297,
+                            lng: -73.9978,
+                            zoom: 11
+                        },
+                        markers: markerList,
+                        tiles: tilesDict.mapbox
+                    });
+
+                    refreshMap();
+                }
+
+                else if (landmark.loc_nickname == "SKIRBALL"){
+
+
+                    var markerList = {
+                        "m" : {
+                            lat: 40.7297,
+                            lng: -73.9978,
+                            message: '<h4>SKIRBALL</h4>',
+                            focus: true,
+                            icon: local_icons.yellowIcon
+                        }
+                    };
+
+                    angular.extend($rootScope, {
+                        center: {
+                            lat: 40.7297,
+                            lng: -73.9978,
+                            zoom: 11
+                        },
+                        markers: markerList,
+                        tiles: tilesDict.mapbox
+                    });
+
+                    refreshMap();
+                }
+
+                else if (landmark.loc_nickname == "MoMA"){
+
+                    var markerList = {
+                        "m" : {
+                            lat: 40.7615,
+                            lng: -73.9777,
+                            message: '<h4>MoMA</h4>',
+                            focus: true,
+                            icon: local_icons.yellowIcon
+                        }
+                    };
+                    
+
+                    angular.extend($rootScope, {
+                        center: {
+                            lat: 40.7615,
+                            lng: -73.9777,
+                            zoom: 11
+                        },
+                        markers: markerList,
+                        tiles: tilesDict.mapbox
+                    });
+
+
+                    refreshMap();
+                }
+
+                else {
+
+                    var markerList = {
+                        "m" : {
+                            lat: 40.7127,
+                            lng: -74.0059,
+                            message: '<h4>NYC</h4>',
+                            focus: true,
+                            icon: local_icons.yellowIcon
+                        }
+                    };
+
+                    //DEFAULT MAP CENTER IN NYC BASECAMP
+                    angular.extend($rootScope, {
+                        center: {
+                            lat: 40.7127,
+                            lng: -74.0059,
+                            zoom: 11
+                        },
+                        markers: markerList,
+                        tiles: tilesDict.mapbox
+                    });
+
+                    refreshMap();
+                }
+
+
+            }
+
+            else {
+                    var markerList = {
+                        "m" : {
+                            lat: 40.7127,
+                            lng: -74.0059,
+                            message: '<h4>NYC</h4>',
+                            focus: true,
+                            icon: local_icons.yellowIcon
+                        }
+                    };
+
+                    //DEFAULT MAP CENTER IN NYC BASECAMP
+                    angular.extend($rootScope, {
+                        center: {
+                            lat: 40.7127,
+                            lng: -74.0059,
+                            zoom: 11
+                        },
+                        markers: markerList,
+                        tiles: tilesDict.mapbox
+                    });
+
+                    refreshMap();
+            } 
+
+        }
+
+
+        if (landmark.type == "place"){
+
+            // FOR MOMA MAP STUFF
+            angular.extend($rootScope, {
+                center: {
+                    lat: $scope.landmark.loc[0],
+                    lng: $scope.landmark.loc[1],
+                    zoom: 20
+                },
+                markers: markerList,
+                tiles: tilesDict.aicp
+            });           
+        }
+
+
 
     });
 
@@ -437,9 +615,12 @@ LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$loca
 
 function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
 
-    //shelfPan('new');
+    shelfPan('return');
 
     $rootScope.showSwitch = false;
+    $rootScope.showBack = false;
+    $rootScope.showBackPage = false;
+
 
     //Showing form options based on type of "new" request
     if ($routeParams.type == '' || $routeParams.type == 'place' || $routeParams.type == 'event' || $routeParams.type == 'job'){
@@ -1193,6 +1374,7 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     shelfPan('return');
  
     $rootScope.showSwitch = true;
+    $rootScope.showBackPage= false;
     $rootScope.radioModel = 'Tuesday'; //for bubble switcher selector
 
 
@@ -1207,10 +1389,21 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         tiles: tilesDict.mapbox
     });
 
+    //hiding bubble switcher and showing map nav instead
+    $scope.hideSwitch = function(){
+        if ($rootScope.showSwitch == true){
+            $rootScope.showSwitch = false;
+            $rootScope.showBack = true;
+        }
 
-    $scope.goBack = function(){
-        console.log('asdf');
-        $location.path('awards');
+        else {
+            $rootScope.showSwitch = true;
+            $rootScope.showBack = false;
+        }
+    }
+
+    $rootScope.goBack = function(){
+        window.history.back();
     }
 
     $scope.shelfUpdate = function(type){     
@@ -1220,6 +1413,12 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         else {
             $scope.shelfUpdate = type;
         }
+    }
+
+    $scope.refreshMap = function(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
     }
 
     //---- Initial Query on Page Load -----//
@@ -1278,6 +1477,7 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
 
     $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
     $rootScope.showSwitch = true;
+    $rootScope.showBackPage = false;
 
 
     angular.extend($rootScope, {
@@ -1289,8 +1489,21 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
         tiles: tilesDict.mapbox
     });
 
+    //hiding bubble switcher and showing map nav instead
+    $scope.hideSwitch = function(){
+        if ($rootScope.showSwitch == true){
+            $rootScope.showSwitch = false;
+            $rootScope.showBack = true;
+        }
 
-    $scope.goBack = function(){
+        else {
+            $rootScope.showSwitch = true;
+            $rootScope.showBack = false;
+        }
+    }
+
+
+    $rootScope.goBack = function(){
         window.history.back();
     }
 
@@ -1433,13 +1646,14 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     shelfPan('return');
 
     $rootScope.showSwitch = true;
+    $rootScope.showBackPage = false;
 
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
 
 
     angular.extend($rootScope, {
         center: {
-            lat: 40.76185,
+            lat: 40.76147,
             lng: -73.9778,
             zoom: 19
         },
@@ -1451,13 +1665,14 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         if ($rootScope.showSwitch == true){
             $rootScope.showSwitch = false;
             $rootScope.showMapNav = true;
+            $rootScope.showBack = true;
         }
 
         else {
             $rootScope.showSwitch = true;
             $rootScope.showMapNav = false;
+            $rootScope.showBack = false;
         }
-        
     }
 
 
@@ -1523,7 +1738,7 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     }
 
 
-    $scope.goBack = function(){
+    $rootScope.goBack = function(){
         window.history.back();
     }
 

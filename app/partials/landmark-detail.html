@@ -1,41 +1,62 @@
-<!-- 
-
-<div id="index_card" onclick="shelfPan('full');" > 
-  <div style="position:absolute; margin-left:93px; margin-top:10px; color:#0f0f0e;">
-    <h2> {{landmark.name}} </h2>
-    <h4> {{landmark.subType}} </h4>
-  </div>
-
-  <img style="max-width:100%;" src="img/demo/aicp_index_detail.png">
-  
-</div>  
- -->
 
 <!-- INDEX CARD -->
-<div class="row index_card lecture_index" onclick="shelfPan('full');" ng-click="refreshMap();">
-  <div class="col-lg-12">
-    <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
-    
-    <h1>{{landmark.name}}</h1>
-    <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
-    <h3>{{landmark.loc_nickname}}</h3>
-  </div>
-</div>
+<span ng-switch="landmark.subType">
+
+
+  <span ng-switch-when="lecture">
+    <div class="row index_card lecture_index" onclick="shelfPan('full');" ng-click="refreshMap();">
+      <div class="col-lg-12">
+        <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
+        
+        <h1>{{landmark.name}}</h1>
+        <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
+        <h3>{{landmark.loc_nickname}}</h3>
+      </div>
+    </div>
+  </span>
+
+
+  <span ng-switch-when="award">
+    <div class="row index_card award_index" onclick="shelfPan('full');" ng-click="refreshMap();">
+      <div class="col-lg-12">
+        <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
+        
+        <h1>{{landmark.name}}</h1>
+        <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
+        <h3>{{landmark.loc_nickname}}</h3>
+      </div>
+    </div>
+  </span>
+
+
+  <span ng-switch-default>
+    <div class="row index_card show_index" onclick="shelfPan('full');" ng-click="refreshMap(); showMapNav();">
+      <div class="col-lg-12">
+        <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
+        
+        <h1>{{landmark.name}}</h1>
+        <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
+        <h3>{{landmark.loc_nickname}}</h3>
+      </div>
+    </div>
+  </span>
+
+
+</span>
 
 
 
 
 
 <div class="landmark-detail">
-  <span ng-hide="option == 'new' "><button class="btn" ng-click="goBack()">< BACK </button></span>
-  <span ng-show="option == 'new' "><button class="btn" ng-click="edit()"> EDIT <i class="fui-new"></i></button></span>
+<!--   <span ng-hide="option == 'new' "><button class="btn" ng-click="goBack()">< BACK </button></span>
+ -->  <span ng-show="option == 'new' "><button class="btn" ng-click="edit()"> EDIT <i class="fui-new"></i></button></span>
 
-  <br>
-  <br>
+
 <!--   <img ng-src="{{mainImageUrl}}" class="landmark" style="width:90px; height:90px;">
  -->
 
-       <!-- 4 COL CARDS -->
+    <!-- 4 COL CARDS -->
     <div class="row 4-col">
           <div class="col-xs-12">
 

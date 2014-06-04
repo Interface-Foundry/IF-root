@@ -94,6 +94,9 @@
               <h1 class="btn btn-primary show" style="color:#35d4fe; font-size:110%; margin-top:8px;" ng-model="radioModel" btn-radio="'Thursday'" ng-click="goPath('show');" >Thursday</h1>
           </div>
 
+          <span ng-show="showBack"><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
+          <span ng-show="showBackPage"><button class="btn backbtn" ng-click="goBackPage()">< BACK </button></span>
+
           <!-- MAP NAV BUTTONS -->
           <div ng-show="showMapNav" class="btn-group bubbleSwitcher card social" style="padding-bottom:0px; margin-top:0px;">
               <button ng-click="mapPan('1F');">1F</button>

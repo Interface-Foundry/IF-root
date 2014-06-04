@@ -327,8 +327,14 @@ body.lense2 #shelf {
 #shelf {
   position: relative;
   min-height: 100%;
-  background: #161616;
-  box-shadow: -4px 0px 5px rgba(0,0,0,0.5);
+  background: #000;
+
+
+  border-top: solid gray 1px;
+
+  box-shadow: 0px -2px 5px rgba(37,99,110,0.5);
+
+  
   -webkit-transition: -webkit-transform 0.2s;
   -moz-transition: -moz-transform 0.2s;
   -ms-transition: -ms-transform 0.2s;
@@ -732,5 +738,17 @@ body {
 
   -moz-osx-font-smoothing: grayscale;
 
+}
+
+h4 {
+    font-family:'simplreg', sans-serif;
+    color: #000;
+    font-size: 1.4rem !important;
+}
+
+.backbtn {
+      font-family:'simplreg', sans-serif;
+      color:#000 !important;
+      padding:9px 12px 8px;
 }
 
