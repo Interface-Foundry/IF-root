@@ -1827,17 +1827,22 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         console.log("NOW");
         console.log($scope.landmarksNow);
 
-        
-        //IF THERE'S A NOW OBJECT 
-        if ($scope.landmarksNow[0]){
-            //passing now result as temporary DOESNT SCALE
-            queryUpcoming($scope.landmarksNow[0].time.end);
-        }
+        queryHappened();
 
-        // NO NOW OBJECT
-        else {
-            queryUpcoming("noNow");
-        }
+        // !!!!!!!! TAKEN OUT RIGHT NOW
+        
+        // //IF THERE'S A NOW OBJECT 
+        // if ($scope.landmarksNow[0]){
+        //     //passing now result as temporary DOESNT SCALE
+        //     queryUpcoming($scope.landmarksNow[0].time.end);
+        // }
+
+        // // NO NOW OBJECT
+        // else {
+        //     queryUpcoming("noNow");
+        // }
+
+
     });
 
     //---------//
