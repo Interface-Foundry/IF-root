@@ -1375,6 +1375,7 @@ sessionsNow.$inject = ['$scope', 'db'];
 function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     shelfPan('return');
+    window.scrollTo(0, 0);
  
     $rootScope.showSwitch = true;
     $rootScope.showBackPage= false;
@@ -1541,6 +1542,7 @@ AwardsCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$r
 function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     shelfPan('return');
+    window.scrollTo(0, 0);
 
     $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
     $rootScope.showSwitch = true;
@@ -1697,6 +1699,7 @@ LecturesCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData', 
 function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     shelfPan('return');
+    window.scrollTo(0, 0);
 
     $rootScope.showSwitch = true;
     $rootScope.showBackPage = false;
