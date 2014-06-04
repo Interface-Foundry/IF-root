@@ -358,7 +358,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
     refreshMap();
 
-
+    window.scrollTo(0, 0);
    
 
     //hiding bubble switcher and showing map nav instead
@@ -1830,7 +1830,7 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         queryHappened();
 
         // !!!!!!!! TAKEN OUT RIGHT NOW
-        
+
         // //IF THERE'S A NOW OBJECT 
         // if ($scope.landmarksNow[0]){
         //     //passing now result as temporary DOESNT SCALE
