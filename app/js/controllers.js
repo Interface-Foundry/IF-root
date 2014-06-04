@@ -163,7 +163,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
                     markerCollect[data[i].id] = {
                         lat: data[i].loc[0],
                         lng: data[i].loc[1],
-                        message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/landmark/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+                        message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
                         focus: false, 
                         icon: local_icons.yellowIcon
                     }
@@ -356,15 +356,11 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     $rootScope.showSwitch = false;
     $rootScope.showBackPage = true;
 
-    $scope.refreshMap = function(){ 
-        leafletData.getMap().then(function(map) {
-            map.invalidateSize();
-        });
-    }
+    refreshMap();
 
 
    
-    
+
     //hiding bubble switcher and showing map nav instead
     $scope.showMapNav = function(){
         if ($rootScope.showMapNav == true){
@@ -432,8 +428,8 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
                     var markerList = {
                         "m" : {
-                            lat: 40.7297,
-                            lng: -73.9978,
+                            lat: 40.7215408,
+                            lng: -73.9967013,
                             message: '<h4>BASECAMP</h4>',
                             focus: true,
                             icon: local_icons.yellowIcon
@@ -442,8 +438,8 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
                     angular.extend($rootScope, {
                         center: {
-                            lat: 40.7297,
-                            lng: -73.9978,
+                            lat: 40.7215408,
+                            lng: -73.9967013,
                             zoom: 11
                         },
                         markers: markerList,
@@ -538,19 +534,18 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
             else {
                     var markerList = {
                         "m" : {
-                            lat: 40.7127,
-                            lng: -74.0059,
-                            message: '<h4>NYC</h4>',
+                            lat: 40.7215408,
+                            lng: -73.9967013,
+                            message: '<h4>BASECAMP</h4>',
                             focus: true,
                             icon: local_icons.yellowIcon
                         }
                     };
 
-                    //DEFAULT MAP CENTER IN NYC BASECAMP
                     angular.extend($rootScope, {
                         center: {
-                            lat: 40.7127,
-                            lng: -74.0059,
+                            lat: 40.7215408,
+                            lng: -73.9967013,
                             zoom: 11
                         },
                         markers: markerList,
@@ -574,7 +569,9 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
                 },
                 markers: markerList,
                 tiles: tilesDict.aicp
-            });           
+            }); 
+
+            refreshMap();          
         }
 
 
@@ -605,6 +602,12 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
     $scope.edit = function(){
         $location.path('/landmark/'+$routeParams.landmarkId+'/edit');
+    }
+
+    function refreshMap(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
     }
 }
 LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
@@ -1378,7 +1381,7 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $rootScope.radioModel = 'Tuesday'; //for bubble switcher selector
 
 
-
+    $scope.tweets = db.tweets.query({limit:1});
 
     angular.extend($rootScope, {
         center: {
@@ -1421,103 +1424,8 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         });
     }
 
-    //---- Initial Query on Page Load -----//
-    $scope.queryType = "places";
-    $scope.queryFilter = "Award Nominee";
-    //Events Now example:
-    // $scope.queryType = "events";
-    // $scope.queryFilter = "now";
-
-    $scope.landmarks = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter });
-
-        console.log($scope.landmarks);
-
-    //---------//
-
-    //------- For Switching Button Classes ------//
-    $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-    $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
-
-    $scope.select= function(item) {
-       $scope.selected = item; 
-    };
-
-    $scope.itemClass = function(item) {
-        return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
-    };
-    //---------------------------//
-
-    //query function for all sorting buttons
-    $scope.filter = function(type, filter) {
-        $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
-    };
-
-    $scope.goTalk = function(url) {
-      $location.path('talk/'+url);
-    };
-
-    $scope.goTalkList = function(url) {
-      $location.path('talk');
-    };
-
-    $scope.goVote = function(url) {
-      $location.path('poll');
-    };
-
-
-}
-AwardsCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
-
-
-
-
-function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
-
-    shelfPan('return');
-
-    $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
-    $rootScope.showSwitch = true;
-    $rootScope.showBackPage = false;
-
-
-    angular.extend($rootScope, {
-        center: {
-            lat: 40.7615,
-            lng: -73.9777,
-            zoom: 12
-        },
-        tiles: tilesDict.mapbox
-    });
-
-    //hiding bubble switcher and showing map nav instead
-    $scope.hideSwitch = function(){
-        if ($rootScope.showSwitch == true){
-            $rootScope.showSwitch = false;
-            $rootScope.showBack = true;
-        }
-
-        else {
-            $rootScope.showSwitch = true;
-            $rootScope.showBack = false;
-        }
-    }
-
-
-    $rootScope.goBack = function(){
-        window.history.back();
-    }
-
-    $scope.shelfUpdate = function(type){     
-        if ($scope.shelfUpdate == type){
-            $scope.shelfUpdate = 'default';
-        }
-        else {
-            $scope.shelfUpdate = type;
-        }
-    }
-
     //---- EVENT CARDS WIDGET -----//
-    var queryCat = "lecture";
+    var queryCat = "award";
 
     //---- Happening Now -----//
     $scope.queryType = "events";
@@ -1606,19 +1514,164 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
 
 
 
-
-    //------- For Switching Button Classes ------//
-    $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-    $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
-
-    $scope.select= function(item) {
-       $scope.selected = item; 
+    //query function for all sorting buttons
+    $scope.filter = function(type, filter) {
+        $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
     };
 
-    $scope.itemClass = function(item) {
-        return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
+    $scope.goTalk = function(url) {
+      $location.path('talk/'+url);
     };
-    //---------------------------//
+
+    $scope.goTalkList = function(url) {
+      $location.path('talk');
+    };
+
+    $scope.goVote = function(url) {
+      $location.path('poll');
+    };
+
+    console.log($scope.tweets);
+}
+AwardsCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
+
+
+
+
+function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
+
+    shelfPan('return');
+
+    $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
+    $rootScope.showSwitch = true;
+    $rootScope.showBackPage = false;
+
+    $scope.tweets = db.tweets.query({limit:1});
+
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.7615,
+            lng: -73.9777,
+            zoom: 12
+        },
+        tiles: tilesDict.mapbox
+    });
+
+    //hiding bubble switcher and showing map nav instead
+    $scope.hideSwitch = function(){
+        if ($rootScope.showSwitch == true){
+            $rootScope.showSwitch = false;
+            $rootScope.showBack = true;
+        }
+
+        else {
+            $rootScope.showSwitch = true;
+            $rootScope.showBack = false;
+        }
+    }
+
+
+    $rootScope.goBack = function(){
+        window.history.back();
+    }
+
+    $scope.shelfUpdate = function(type){     
+        if ($scope.shelfUpdate == type){
+            $scope.shelfUpdate = 'default';
+        }
+        else {
+            $scope.shelfUpdate = type;
+        }
+    }
+
+
+
+    //---- EVENT CARDS WIDGET -----//
+    var queryCat = "lecture";
+
+    //---- Happening Now -----//
+    $scope.queryType = "events";
+    $scope.queryFilter = "now";
+    $scope.queryCat = queryCat;
+    //$scope.queryTime = new Date();
+    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+
+    $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
+        
+        console.log("NOW");
+        console.log($scope.landmarksNow);
+
+        
+        //IF THERE'S A NOW OBJECT 
+        if ($scope.landmarksNow[0]){
+            //passing now result as temporary DOESNT SCALE
+            queryUpcoming($scope.landmarksNow[0].time.end);
+        }
+
+        // NO NOW OBJECT
+        else {
+            queryUpcoming("noNow");
+        }
+    });
+
+    //---------//
+
+    function queryUpcoming(nowTimeEnd){
+        
+        //$scope.upcomingLimit = 2;
+
+        if ($scope.landmarksNow.length > 0){
+            $scope.upcomingLimit = 1;
+        }
+
+        else {
+            $scope.upcomingLimit = 2;
+        }
+
+
+        //---- Upcoming -----//
+        $scope.queryType = "events";
+        $scope.queryFilter = "upcoming";
+        $scope.queryCat = queryCat;
+
+
+        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+        
+            //console.log($scope.landmarksUpcoming.length);
+            console.log("UPCOMING");
+            console.log($scope.landmarksUpcoming);
+
+
+            if ($scope.landmarksUpcoming.length < 2){
+                //queryHappened();
+            }
+
+        });
+
+        //---------//
+        
+    }
+
+    function queryHappened(){
+
+        $scope.happenedLimit = 1;
+
+        //---- Happened -----//
+        $scope.queryType = "events";
+        $scope.queryFilter = "all";
+        $scope.queryCat = queryCat;
+
+        $scope.landmarksHappened = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat},function(){
+            console.log('HAPPENED');
+            console.log($scope.landmarksHappened);
+        });
+
+        //---------//
+
+    }
+
+    //------------------------//
+
 
     //query function for all sorting buttons
     $scope.filter = function(type, filter) {
@@ -1650,6 +1703,7 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
 
+    $scope.tweets = db.tweets.query({limit:1});
 
     angular.extend($rootScope, {
         center: {
@@ -1755,29 +1809,99 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         }
     }
 
-    //---- Initial Query on Page Load -----//
-    $scope.queryType = "places";
-    $scope.queryFilter = "Show";
-    //Events Now example:
-    // $scope.queryType = "events";
-    // $scope.queryFilter = "now";
 
-    $scope.landmarks = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter });
+
+
+    //---- EVENT CARDS WIDGET -----//
+    var queryCat = "show";
+
+    //---- Happening Now -----//
+    $scope.queryType = "events";
+    $scope.queryFilter = "now";
+    $scope.queryCat = queryCat;
+    //$scope.queryTime = new Date();
+    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+
+    $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
+        
+        console.log("NOW");
+        console.log($scope.landmarksNow);
+
+        
+        //IF THERE'S A NOW OBJECT 
+        if ($scope.landmarksNow[0]){
+            //passing now result as temporary DOESNT SCALE
+            queryUpcoming($scope.landmarksNow[0].time.end);
+        }
+
+        // NO NOW OBJECT
+        else {
+            queryUpcoming("noNow");
+        }
+    });
 
     //---------//
 
-    //------- For Switching Button Classes ------//
-    $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-    $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
+    function queryUpcoming(nowTimeEnd){
+        
+        //$scope.upcomingLimit = 2;
 
-    $scope.select= function(item) {
-       $scope.selected = item; 
-    };
+        if ($scope.landmarksNow.length > 0){
+            $scope.upcomingLimit = 1;
+        }
 
-    $scope.itemClass = function(item) {
-        return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
-    };
-    //---------------------------//
+        else {
+            $scope.upcomingLimit = 2;
+        }
+
+
+        //---- Upcoming -----//
+        $scope.queryType = "events";
+        $scope.queryFilter = "upcoming";
+        $scope.queryCat = queryCat;
+
+
+        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+        
+            //console.log($scope.landmarksUpcoming.length);
+            console.log("UPCOMING");
+            console.log($scope.landmarksUpcoming);
+
+
+            if ($scope.landmarksUpcoming.length < 2){
+                queryHappened();
+            }
+
+        });
+
+        //---------//
+        
+    }
+
+    function queryHappened(){
+
+        $scope.happenedLimit = 10;
+
+        //---- Happened -----//
+        $scope.queryType = "events";
+        $scope.queryFilter = "all";
+        $scope.queryCat = queryCat;
+
+        $scope.landmarksHappened = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat},function(){
+            console.log('HAPPENED');
+            console.log($scope.landmarksHappened);
+        });
+
+        //---------//
+
+    }
+
+    //------------------------//
+
+
+
+
+
 
     //query function for all sorting buttons
     $scope.filter = function(type, filter) {
@@ -1791,6 +1915,51 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $scope.goTalkList = function(url) {
       $location.path('talk');
     };
+
+
+    //----- MAP QUERY ------//
+    $scope.queryMap = function(type, cat){  
+
+        db.landmarks.query({ queryType: type, queryFilter: cat},
+
+        function (data) {   //success
+
+            var markerCollect = {};
+
+            for (var i=0;i < data.length;i++){ 
+
+                markerCollect[data[i].id] = {
+                    lat: data[i].loc[0],
+                    lng: data[i].loc[1],
+                    message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+                    focus: true, 
+                    icon: local_icons.yellowIcon
+                }
+            }
+
+            angular.extend($rootScope, {
+                center: {
+                    lat: data[0].loc[0],
+                    lng: data[0].loc[1],
+                    zoom: 22
+                },
+                markers: markerCollect,
+                tiles: tilesDict.aicp
+            });
+
+        },
+        function (data) {   //failure
+            //error handling goes here
+        });
+
+    }
+
+
+    angular.extend($rootScope, { 
+        markers : {}
+    });
+
+    //-------------------------// 
 
 }
 ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
@@ -1863,3 +2032,72 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 
 }
 ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
+
+
+function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
+
+    shelfPan('return');
+
+    $rootScope.showSwitch = false;
+
+    $scope.goBack = function(){
+        window.history.back();
+    }
+
+    $scope.shelfUpdate = function(type){     
+        if ($scope.shelfUpdate == type){
+            $scope.shelfUpdate = 'default';
+        }
+        else {
+            $scope.shelfUpdate = type;
+        }
+    }
+
+    //---- EVENT CARDS WIDGET -----//
+
+    $scope.menuType = $routeParams.type;
+    //var queryCat = $routeParams.category;
+
+    // if ($scope.listType == 'lecture' ){
+    //     $scope.day = "WEDNESDAY";
+    // }
+    // if ($scope.listType == 'award' ){
+    //     $scope.day = "TUESDAY";
+    // }
+    // if ($scope.listType == 'show' ){
+    //     $scope.day = "THURSDAY";
+    // }
+    
+
+    // queryList();
+
+
+    // function queryList(){
+
+    //     $scope.listLimit = 10;
+
+    //     //---- Happened -----//
+    //     $scope.queryType = "events";
+    //     $scope.queryFilter = $routeParams.filter;
+    //     $scope.queryCat = $routeParams.category;
+
+    //     $scope.landmarksList = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: "noNow"},function(){
+            
+            
+    //     });
+
+    //     //---------//
+
+    // }
+
+    // //------------------------//
+
+
+    // //query function for all sorting buttons
+    // $scope.filter = function(type, filter) {
+    //     $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
+    // };
+
+
+}
+MenuCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];

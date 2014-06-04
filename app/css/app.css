@@ -636,6 +636,10 @@ li {
 
 
 
+
+
+
+
 .card .footer .typcn{
   color: #333;
 }
@@ -659,6 +663,20 @@ li {
 .col-xs-12.card .footer{
   background: url('../img/index_card_bg.jpg') right center repeat-y;
 }
+
+
+.col-xs-12.card .award-footer{
+  background: url('../img/AICP/more_bg_awards_long.png') right center repeat-y !important;
+}
+
+.col-xs-12.card .lecture-footer{
+  background: url('../img/AICP/more_bg_lectures_long.png') right center repeat-y !important;
+}
+
+.col-xs-12.card .show-footer{
+  background: url('../img/AICP/more_bg_show_long.png') right center repeat-y !important;
+}
+
 
 .card.social .footer .typcn-export{
   font-size: 1.7rem;
@@ -749,6 +767,23 @@ h4 {
 .backbtn {
       font-family:'simplreg', sans-serif;
       color:#000 !important;
-      padding:9px 12px 8px;
+      padding:9px 12px 8px !important;
+      margin-top: 4px;
+      margin-bottom: 4px;
 }
 
+
+@media (max-width: 381px) {
+   .index_card h1{
+      font-size:1.5rem;
+      letter-spacing:-1px;
+   }
+
+   .index_card h3{
+      letter-spacing:-0.2px;
+   }
+
+   .card .header{
+      letter-spacing:-0.2px;
+   }
+}

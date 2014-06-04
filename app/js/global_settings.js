@@ -234,7 +234,7 @@ function shelfPan(amount){
 
         he = $(window).height();
 
-        he = he - 128;
+        he = he - 172;
 
         $('body').toggleClass('lense2');
         $('body').toggleClass('lense');
@@ -271,7 +271,7 @@ function shelfPan(amount){
 
         he = $(window).height();
 
-        he = he - 128;
+        he = he - 172;
 
         $('body').toggleClass('lense');
        // $("#shelf").css({"-webkit-transform": "translateY(" + he + "px" + ")"});
@@ -312,7 +312,7 @@ function shelfPan(amount){
         });
         //$('body').toggleClass('lense2');
 
-        $("#leafletmap").css({"height": 183 + "px" });
+        $("#leafletmap").css({"height": 149 + "px" });
       }
 
       else if ( $("body").hasClass("lense2") ) {
@@ -329,7 +329,7 @@ function shelfPan(amount){
           "transform": "translateY(" + 0 + "px" + ")"
         });
 
-        $("#leafletmap").css({"height": 183 + "px" });
+        $("#leafletmap").css({"height": 149 + "px" });
       }
 
       else {
@@ -338,14 +338,14 @@ function shelfPan(amount){
         $('body').toggleClass('lense2');
 
         $("#shelf").css({
-          "-webkit-transform": "translateY(" + 180 + "px" + ")",
-          "-moz-transform": "translateY(" + 180 + "px" + ")", 
-          "-ms-transform": "translateY(" + 180 + "px" + ")", 
-          "-o-transform": "translateY(" + 180 + "px" + ")",
-          "transform": "translateY(" + 180 + "px" + ")"
+          "-webkit-transform": "translateY(" + 149 + "px" + ")",
+          "-moz-transform": "translateY(" + 149 + "px" + ")", 
+          "-ms-transform": "translateY(" + 149 + "px" + ")", 
+          "-o-transform": "translateY(" + 149 + "px" + ")",
+          "transform": "translateY(" + 149 + "px" + ")"
         });
 
-        $("#leafletmap").css({"height": 183 + "px" });
+        $("#leafletmap").css({"height": 149 + "px" });
 
       }
 

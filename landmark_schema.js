@@ -9,6 +9,7 @@ monguurl = require('monguurl');
 		name: String, 
 		description: String, 
 		shortDescription: String,
+		people: String,
 		world: Boolean,
 		nestID: String,
 		type: String, 

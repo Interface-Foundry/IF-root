@@ -19,6 +19,8 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
 
       when('/list/:category/:filter', {templateUrl: 'partials/list.html', controller: ListCtrl}).
 
+      when('/menu/:type', {templateUrl: 'partials/menu.html', controller: MenuCtrl}).
+
 
 
 

@@ -205,7 +205,7 @@ app.get('/api/:collection', function(req, res) {
 
                         //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
 
-      
+
                         var qw = {
                             'time.start': {$gt: nowTimeEnd},
                             'subType' : req.query.queryCat
@@ -534,6 +534,9 @@ app.post('/api/:collection/create', function(req, res) {
                 }
                 if (req.body.shortDescription){
                     lm.shortDescription = req.body.shortDescription;
+                }
+                if (req.body.people){
+                    lm.people = req.body.people;
                 }
                 if (req.body.video){
                     lm.video = req.body.video;
