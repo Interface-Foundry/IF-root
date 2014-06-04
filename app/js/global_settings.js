@@ -61,12 +61,12 @@ var tilesDict = {
             reuseTiles: true
         }
     },
-    amc: {
-        url: '1.0.0/amc2013/{z}/{x}/{y}.png',
+    aicp: {
+        url: '1.0.0/aicpweek/{z}/{x}/{y}.png',
         options: {
-            minZoom: 1,
-            maxZoom: 20,
-            tms: 'true',
+            minZoom: 16,
+            maxZoom: 23,
+            
             reuseTiles: true
         }
     }
@@ -159,21 +159,10 @@ var he;
 
 function shelfPan(amount){
 
-
-
-    // leafletData.getMap().then(function(map) {
-    //     // map.panTo( [$scope.landmark.loc[0], $scope.landmark.loc[1]] );
-    //     // map.setZoom(16);
-    //     map.invalidateSize();
-    // });
-
-
-  
+ 
     if (amount == 'return'){
 
-      console.log(amount);
-
-
+ 
       if ( $("body").hasClass("lense2") ) {
 
         $('body').toggleClass('lense2');

@@ -166,10 +166,10 @@
 /* visual tweaks */
 
 .leaflet-container {
-/*	background: #f7b3ba;
-*/	
+	background: #000;
+	
 
-	background-image: linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
+/*	background-image: linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
 	background-image: -o-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
 	background-image: -moz-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
 	background-image: -webkit-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
@@ -183,7 +183,7 @@
 		color-stop(0.59, rgb(215,115,228)),
 		color-stop(0.84, rgb(247,179,186))
 	);
-	outline: 0;
+	outline: 0;*/
 	}
 .leaflet-container a {
 	color: #0078A8;

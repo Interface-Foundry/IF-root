@@ -96,11 +96,11 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
     angular.extend($rootScope, {
         center: {
-            lat: 42.356886,
-            lng: -83.069523,
-            zoom: 14
+            lat: 40.7615,
+            lng: -73.9777,
+            zoom: 20
         },
-        tiles: tilesDict.mapbox
+        tiles: tilesDict.aicp
     });
 
     //for bubble widget switcher
@@ -206,19 +206,6 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
     // $scope.tweets = db.tweets.query({limit:1});
 
-
-
-    $scope.mapPan = function(){
-
-        angular.extend($scope, {
-            center: {
-                lat: 42.3568700,
-                lng: -83.080400,
-                zoom: 16
-            },
-            tiles: tilesDict.amc
-        });
-    }
 
     //query function for all sorting buttons
     $scope.filter = function(type, filter) {
@@ -1209,6 +1196,18 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $rootScope.radioModel = 'Tuesday'; //for bubble switcher selector
 
 
+
+
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.7615,
+            lng: -73.9777,
+            zoom: 12
+        },
+        tiles: tilesDict.mapbox
+    });
+
+
     $scope.goBack = function(){
         console.log('asdf');
         $location.path('awards');
@@ -1279,6 +1278,17 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
 
     $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
     $rootScope.showSwitch = true;
+
+
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.7615,
+            lng: -73.9777,
+            zoom: 12
+        },
+        tiles: tilesDict.mapbox
+    });
+
 
     $scope.goBack = function(){
         window.history.back();
@@ -1425,6 +1435,92 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $rootScope.showSwitch = true;
 
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
+
+
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.76185,
+            lng: -73.9778,
+            zoom: 19
+        },
+        tiles: tilesDict.aicp
+    });
+
+    //hiding bubble switcher and showing map nav instead
+    $scope.hideSwitch = function(){
+        if ($rootScope.showSwitch == true){
+            $rootScope.showSwitch = false;
+            $rootScope.showMapNav = true;
+        }
+
+        else {
+            $rootScope.showSwitch = true;
+            $rootScope.showMapNav = false;
+        }
+        
+    }
+
+
+    $rootScope.mapPan = function(area){
+
+        if (area == "1F"){  
+
+            angular.extend($rootScope, {
+                center: {
+                    lat: 40.7618,
+                    lng: -73.978,
+                    zoom: 20
+                },
+                tiles: tilesDict.aicp
+            });
+        }
+
+        if (area == "2F"){
+            angular.extend($rootScope, {
+                center: {
+                    lat: 40.7612,
+                    lng: -73.978,
+                    zoom: 20
+                },
+                tiles: tilesDict.aicp
+            });
+        }
+
+        if (area == "5F"){
+            angular.extend($rootScope, {
+                center: {
+                    lat: 40.7607,
+                    lng: -73.978,
+                    zoom: 20
+                },
+                tiles: tilesDict.aicp
+            });
+        }
+
+        if (area == "GARDEN"){
+            angular.extend($rootScope, {
+                center: {
+                    lat: 40.7620,
+                    lng: -73.977,
+                    zoom: 20
+                },
+                tiles: tilesDict.aicp
+            });
+        }
+
+        if (area == "EDU"){
+            angular.extend($rootScope, {
+                center: {
+                    lat: 40.76195,
+                    lng: -73.9762,
+                    zoom: 20
+                },
+                tiles: tilesDict.aicp
+            });
+        } 
+
+
+    }
 
 
     $scope.goBack = function(){
