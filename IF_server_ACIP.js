@@ -10,6 +10,9 @@
   tidepools.co <3 <3 <3 
 */
 
+
+
+
 var fs = require('fs');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 var async = require('async');
@@ -114,19 +117,18 @@ app.get('/api/:collection', function(req, res) {
 
         //events
         if (req.query.queryType == "events"){
-            // console.log('events');
-            // console.log(req.query.queryFilter);
 
+            //GET ALL EVENTS
             if (req.query.queryFilter == "all"){
-
-                
+    
+                //IF HAS SUB CATEGORY (LIKE LECTURES)
                 if (req.query.queryCat){
 
                     var qw = {
                         'type' : 'event',
                         'subType' : req.query.queryCat
                     };
-                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
 
                 }
 
@@ -135,73 +137,129 @@ app.get('/api/:collection', function(req, res) {
                     var qw = {
                         'type' : 'event'
                     };
-                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
                 }
    
             }
 
+            // EVENTS HAPPENING NOW
             if (req.query.queryFilter == "now"){
 
+
+                //IF HAS SUB CATEGORY (LIKE LECTURES)
                 if (req.query.queryCat){
 
-                    var currentTime = new Date();
+                    //var currentTime = new Date();
+                    var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+      
                     var qw = {
                         'time.start': {$lt: currentTime},
                         'time.end': {$gt: currentTime},
                         'subType' : req.query.queryCat
                     };
-                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
-                }
-
-                else{
-
-                    var currentTime = new Date();
-                    var qw = {
-                        'time.start': {$lt: currentTime},
-                        'time.end': {$gt: currentTime}
-                    };
-                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
-
-                }
-
-
-            }
-
-
-            if (req.query.queryFilter == "upcoming"){
-
-                if (req.query.queryCat){
-
-                    var currentTime = new Date(); 
-                    currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-                    var qw = {
-                        'time.start': {$lt: currentTime},
-                        'time.end': {$gt: currentTime},
-                        'subType':req.query.queryCat
-                    };
-                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
                 }
 
                 else {
-                    var currentTime = new Date(); 
+
+                    //var currentTime = new Date();
+                    var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                    
+                    var qw = {
+                        'time.start': {$lt: currentTime},
+                        'time.end': {$gt: currentTime}
+                    };
+                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
+                }
+
+
+            }
+
+            //EVENTS UPCOMING
+            if (req.query.queryFilter == "upcoming"){
+
+                //IF HAS SUB CATEGORY (LIKE LECTURES)
+                if (req.query.queryCat){
+
+
+                    //FIRST QUERY FOR NOW
+
+                    //var currentTime = new Date();
+                    //var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+
+                    //TEMP ONLY WORKS WITH 1 HAPPENING NOW OBJECT
+
+                    console.log(req.query.nowTimeEnd);
+
+                    if (req.query.nowTimeEnd !== "noNow"){
+
+                        var nowTimeEnd = new Date(req.query.nowTimeEnd);
+
+                        console.log(nowTimeEnd);
+
+                        nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
+
+                        console.log(nowTimeEnd);
+
+
+                        //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
+
+      
+                        var qw = {
+                            'time.start': {$gt: nowTimeEnd},
+                            'subType' : req.query.queryCat
+                        };
+                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
+                    }
+
+                    else {
+                        var currentTime = new Date('Jun 11 2014 10:29:59 GMT-0400 (EDT)');
+
+                        var qw = {
+                            'time.start': {$gt: currentTime},
+                            'subType' : req.query.queryCat
+                        };
+                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+                    }
+                    
+                    // //var currentTime = new Date();
+                    // var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                    
+                    // currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
+                    // var qw = {
+                    //     'time.start': {$lt: currentTime},
+                    //     'time.end': {$gt: currentTime},
+                    //     'subType':req.query.queryCat
+                    // };
+                    // db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
+
+                }
+
+                else {
+
+                    //var currentTime = new Date();
+                    var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                    
                     currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
                     var qw = {
                         'time.start': {$lt: currentTime},
                         'time.end': {$gt: currentTime}
                     };
-                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));                   
+                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));                   
                 }
-
-
- 
             }
 
-
+            // EVENTS TODAY
             if (req.query.queryFilter == "today"){
 
                 //getting today & tomm
                 var tod = new Date();
                 var tom = new Date();
+                
+
                 tom.setDate(tod.getDate()+1);
                 tod.setHours(0,0,0,0);
                 tom.setHours(0,0,0,0);
@@ -432,7 +490,7 @@ app.post('/api/:collection/create', function(req, res) {
                     lm.loc.unshift(req.body.loc[0],req.body.loc[1]);
 
                     if (req.body.location){
-                        lm.loc_nicknames.addToSet(req.body.location);
+                        lm.loc_nickname = req.body.location;
                     }    
 
                     if (req.body.tags){
@@ -508,7 +566,7 @@ app.post('/api/:collection/create', function(req, res) {
                 lm.loc.unshift(req.body.loc[0],req.body.loc[1]);
 
                 if (req.body.location){
-                    lm.loc_nicknames.addToSet(req.body.location);
+                    lm.loc_nickname = req.body.location;
                 }    
 
                 if (req.body.tags){

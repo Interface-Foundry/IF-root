@@ -44,8 +44,7 @@ monguurl = require('monguurl');
 		},
 		video: String,
 		etherpad: String,
-		loc_nicknames : [String], 
-		loc_nicknames_stripe : [String],
+		loc_nickname : String, 
 		tags: String, 
 		permissions: {
 			hidden: Boolean,

@@ -478,7 +478,7 @@ body.lense2 #shelf {
   font-weight: normal;
   font-variant: normal;
   text-transform: none;
-  line-height: 1;
+  /*line-height: 1;*/
   -webkit-font-smoothing: antialiased;
 }
 
@@ -492,10 +492,20 @@ body.lense2 #shelf {
 body{
   background: rgb(112, 112, 112);
 }
+
+li {
+  list-style-type: none;
+}
+
 .container{
   max-width: 384px;
   background: black;
   color: white;
+
+}
+
+.container a{
+  text-decoration: none;
 }
 
 /*CARDS*/
@@ -543,7 +553,10 @@ body{
   cursor: pointer;
   border-bottom: solid #cecece 2px;
   border-right: solid #cecece 1px;
+  
 }
+
+
 
 
 .card .content{
@@ -572,14 +585,14 @@ body{
   font-weight: bold;
 }
 .card .title{
-  font-weight: bold;
+  /*font-weight: bold;*/
   font-size: 1.4rem;
   margin: 0 0 3px 0;
   font-family:'simplreg', sans-serif;
 }
 
 .searchTitle{
-  font-weight: bold;
+  /*font-weight: bold;*/
   font-size: 1.3rem;
   margin: 0 0 3px 0;
   font-family:'simplreg', sans-serif;
@@ -596,7 +609,7 @@ body{
   text-align: right;
   background: url('../img/more_bg.jpg') right center repeat-y;
   color: black;
-  padding: 5px;
+  padding: 6px;
   border-radius: 0 0 3px 3px;
   font-size: 1.3rem;
   letter-spacing: 0.2rem;
@@ -706,4 +719,18 @@ body{
   font-family:'simplreg', sans-serif;
 }
 
+.landmark-detail{
+  padding-left:5px; 
+  padding-top: 10px; 
+  padding-right:5px; 
+  width:100%; 
+  color:#cccdc8;
+}
+
+
+body {
+
+  -moz-osx-font-smoothing: grayscale;
+
+}
 

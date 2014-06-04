@@ -109,37 +109,23 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $location.path(url);
     };
 
-    // $scope.goLecture = function(url) {
 
-    //     console.log('asdf');
-    //   $location.path('lectures');
-    // };
+    // function findWorlds(lat,lon){
 
-    // $scope.goAward = function(url) {
-    //   $location.path('awards');
-    // };
-
-    // $scope.goShow = function(url) {
-    //   $location.path('show');
-    // };
+    //     //---- Find World -----//
+    //     // $scope.queryType = "all";
+    //     // $scope.queryFilter = "all";
 
 
-    function findWorlds(lat,lon){
+    //     //Events Now example:
+    //     // $scope.queryType = "events";
+    //     // $scope.queryFilter = "now";
 
-        //---- Find World -----//
-        // $scope.queryType = "all";
-        // $scope.queryFilter = "all";
+    //     $scope.worlds = db.worlds.query({ userLat:lat, userLon:lon });
 
+    //     //---------//
 
-        //Events Now example:
-        // $scope.queryType = "events";
-        // $scope.queryFilter = "now";
-
-        $scope.worlds = db.worlds.query({ userLat:lat, userLon:lon });
-
-        //---------//
-
-    }
+    // }
 
 
 
@@ -150,223 +136,6 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
     }
 
 
-
-
-        // $scope.changeTiles = function(tiles) {
-        //     $scope.tiles = tilesDict[tiles];
-        // };
-
-
-    //BACKUP CLOUD: "http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png"
-        // angular.extend($scope, {
-        //     defaults: {
-        //         tileLayer: "http://{s}.tiles.mapbox.com/v3/openplans.map-dmar86ym/{z}/{x}/{y}.png",
-        //         tileLayerOptions: {
-        //             reuseTiles: true
-        //         },
-        //         minZoom: 2,
-        //         maxZoom: 21,
-        //         icon: {
-        //             url: 'img/marker-icon.png',
-        //             size: [25, 41],
-        //             anchor: [12, 40],
-        //             popup: [0, -40],
-        //             shadow: {
-        //                 url: 'img/marker-shadow.png',
-        //                 size: [41, 41],
-        //                 anchor: [12, 40]
-        //             }
-        //         },
-        //         path: {
-        //             weight: 10,
-        //             color: '#800000',
-        //             opacity: 1
-        //         }
-        //     }
-        // });
-
-
-
-    // if (mapSelect == 'cloud'){
-
-    //     angular.extend($scope, {
-    //         defaults: {
-    //             tileLayer: "http://{s}.tiles.mapbox.com/v3/openplans.map-dmar86ym/{z}/{x}/{y}.png",
-    //             tileLayerOptions: {
-    //                 reuseTiles: true
-    //             },
-    //             minZoom: 2,
-    //             maxZoom: 21,
-    //             icon: {
-    //                 url: 'img/marker-icon.png',
-    //                 size: [25, 41],
-    //                 anchor: [12, 40],
-    //                 popup: [0, -40],
-    //                 shadow: {
-    //                     url: 'img/marker-shadow.png',
-    //                     size: [41, 41],
-    //                     anchor: [12, 40]
-    //                 }
-    //             },
-    //             path: {
-    //                 weight: 10,
-    //                 color: '#800000',
-    //                 opacity: 1
-    //             }
-    //         }
-    //     });
-    // }
-
-
-    // //-------------ENABLE TO LOAD CLOUD MAP -----------//
-    
-    //     var defaults = {
-    //         minZoom: 1,
-    //         maxZoom: 23,
-    //         //tileLayer: 'http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', //another tilelayer option
-    //         tileLayer: 'http://{s}.tiles.mapbox.com/v3/openplans.map-dmar86ym/{z}/{x}/{y}.png',
-    //         attribution: '&copy; OpenStreetMap contributors, CC-BY-SA. <a href="http://mapbox.com/about/maps" target="_blank">Terms &amp; Feedback</a>',
-    //         tileLayerOptions: {
-    //             reuseTiles: true
-    //         },
-    //         icon: {
-    //             url: 'img/marker-icon.png',
-    //             size: [25, 41],
-    //             anchor: [12, 40],
-    //             popup: [0, -40],
-    //             shadow: {
-    //                 url: 'img/marker-shadow.png',
-    //                 size: [41, 41],
-    //                 anchor: [12, 40]
-    //             }
-    //         },
-    //         path: {
-    //             weight: 10,
-    //             opacity: 1,
-    //             color: '#0000ff'
-    //         }
-    //     };    
-
-    // //--------------------------------------------------//
-    
-
-    // if (mapSelect == 'amc2013'){
-    // //-------------ENABLE TO LOAD LOCAL MAP -----------//
-
-    //     angular.extend($scope, {
-    //         defaults: {
-    //             tileLayer: '1.0.0/amc2013/{z}/{x}/{y}.png',
-    //             tileLayerOptions: {
-    //                 tms: 'true',
-    //                 reuseTiles: true
-    //             },
-    //             maxZoom: 17,
-    //             minZoom: 13,
-    //             icon: {
-    //                 url: 'img/marker-icon.png',
-    //                 size: [25, 41],
-    //                 anchor: [12, 40],
-    //                 popup: [0, -40],
-    //                 shadow: {
-    //                     url: 'img/marker-shadow.png',
-    //                     size: [41, 41],
-    //                     anchor: [12, 40]
-    //                 }
-    //             },
-    //             path: {
-    //                 weight: 10,
-    //                 opacity: 1,
-    //                 color: '#0000ff'
-    //             }
-    //         }
-    //     });
-
-    // }
-
-    //-----------------------------------------------//
-
-    // angular.extend($scope, {
-    //     defaults: {
-    //         tileLayer: "http://{s}.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png",
-    //         maxZoom: 14,
-    //         path: {
-    //             weight: 10,
-    //             color: '#800000',
-    //             opacity: 1
-    //         }
-    //     }
-    // });
-
-
-    // angular.extend($scope, {
-    //     center: {
-    //         lat: 49.505,
-    //         lng: -0.09,
-    //         zoom: 8
-    //     }
-    // });
-
-   // $timeout(leafletUpdate, 500); //temp solution? leaflet isn't updating properly after callback...
-
-   //  function leafletUpdate(){
-
-
-   //  }
-
-
-   // console.log(global_mapCenter);
-
-
-
-
-
-
-    
-    // var global_mapCenter = { 
-    //     lat: 40,
-    //     lng: -74.004618,
-    //     zoom: 15
-    // };
-
-    // angular.extend($scope, { 
-    //     amc: global_mapCenter,
-    //     markers : {}
-    // });
-
-    //GPS radial SEARCH for WORLDS
-    //Load nearest world
-    //extract same fields as places/events
-
-
-    
-    //---- Initial Query on Page Load -----//
-    // $scope.queryType = "all";
-    // $scope.queryFilter = "all";
-    // //Events Now example:
-    // // $scope.queryType = "events";
-    // // $scope.queryFilter = "now";
-
-    // $scope.landmarks = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter });
-    // //---------//
-
-    // //------- For Switching Button Classes ------//
-    // $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-    // $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
-
-    // $scope.select= function(item) {
-    //    $scope.selected = item; 
-    // };
-
-    // $scope.itemClass = function(item) {
-    //     return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
-    // };
-    // //---------------------------//
-
-
-    // function 
-
-
-
       //**** MAP STUFF *****//
 
         $scope.queryType = "all";
@@ -374,22 +143,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
         queryMap($scope.queryType, $scope.queryFilter); //showing all at first
 
-        // //------- For Switching Button Classes ------//
-        // $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-        // $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
 
-        // $scope.select= function(item) {
-        //    $scope.selected = item; 
-        // };
-
-        // $scope.itemClass = function(item) {
-        //     return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
-        // };
-        // //---------------------------//
-
-        // $scope.filter = function(type, filter) {
-        //     queryMap(type,filter);
-        // };
 
         function queryMap(type, filter){
 
@@ -428,9 +182,6 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
                 //     markers: singleMarker
                 // });
 
-
-
-
                 // $timeout(leafletUpdate, 500); //temp solution? leaflet isn't updating properly after callback...
 
                 // function leafletUpdate(){
@@ -467,12 +218,6 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
             },
             tiles: tilesDict.amc
         });
-
-        // leafletData.getMap().then(function(map) {
-        //     map.panTo( [42.356886, -83.069523] );
-        //     map.setZoom(14);
-        //     map.invalidateSize();
-        // });
     }
 
     //query function for all sorting buttons
@@ -579,12 +324,8 @@ function LandmarkListCtrl( $location, $scope, db, $timeout, leafletData) {
     };
     //---------------------------//
 
-    
-
 
     //$scope.tweets = db.tweets.query({limit:1});
-
-
 
 
     //query function for all sorting buttons
@@ -613,12 +354,6 @@ function LandmarkListCtrl( $location, $scope, db, $timeout, leafletData) {
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };
 
-
-
-
-
-    
-
 }
 LandmarkListCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData'];
 
@@ -628,25 +363,6 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
     $rootScope.showSwitch = false;
     
-
-    //shelfPan('partial');
-
-    // $scope.option = $routeParams.option;
-
-    // console.log($scope.option);
-
-
-    // angular.extend($scope, { 
-    //     markers : {}
-    // });
-
-    // leafletData.getMap().then(function(map) {
-    //     console.log(map._layers);
-
-
-
-    //     map._layers = {};
-    // });
 
 
     if ($routeParams.option == 'm'){
@@ -660,11 +376,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
     if ($routeParams.option == 'new'){
 
-        // leafletData.getMap().then(function(map) {
-        //     map.invalidateSize();
-        // });
 
-        // $scope.$apply();
     }
 
 
@@ -672,77 +384,6 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
         markers : {}
     });
 
-    // $scope.zoom = 20;
-
-    // angular.extend($scope, {
-    //     center: {
-    //         lat: 42.356886,
-    //         lng: -83.069523,
-    //         zoom: 20
-    //     }
-    // });
-
-
-
-
-
-    //mapper.what();
-
-
-   // $timeout(leafletUpdate, 500); //temp solution? leaflet isn't updating properly after callback...
-
-    //function leafletUpdate(){
-
-        //  angular.extend($scope, { 
-        //     amc: global_mapCenter,
-        //     markers: markerCollect
-        // });
-
-     //   console.log('asdf');
-
-        // angular.extend($scope, {
-        //     center: {
-        //         lat: 42.356810,
-        //         lng: -83.0610023,
-        //         zoom: 12
-        //     }
-            
-        // });
-
-        // console.log($scope.center.zoom);
-
-  //  }
-
-
-
-
-
-
-
-
-
-
-
-
-    // angular.extend($scope, {
-    //     center: {
-    //         lat: 42.3234,
-    //         lng: -83.069523,
-    //         zoom: 15
-    //     },
-    //     tiles: tilesDict.amc
-    // });
-
-
-
-        // angular.extend($scope, {
-        //     center: {
-        //         lat: 42.356886,
-        //         lng: -83.069523,
-        //         zoom: 15
-        //     },
-        //     tiles: tilesDict.amc
-        // });
 
     $scope.option = $routeParams.option;
 
@@ -753,16 +394,12 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
         $scope.tweets = db.tweets.query({tag: $scope.landmark.tags, time:$scope.time});
 
 
-
-
-
-
         var markerList = {
             "m" : {
                 lat: $scope.landmark.loc[0],
                 lng: $scope.landmark.loc[1],
-                message: '<h4><img style="width:70px;" src="'+ landmark.stats.avatar +'"><a href=#/landmark/'+ $routeParams.landmarkId +'/m> '+landmark.name+'</a></h4>',
-                focus: true,
+                message: '<h4><img style="width:70px;" src="'+ landmark.stats.avatar +'"><a href=#/post/'+ $routeParams.landmarkId +'/m> '+landmark.name+'</a></h4>',
+                focus: false,
                 icon: local_icons.yellowIcon
             }
         };
@@ -776,18 +413,6 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
             },
             markers: markerList
         });
-
-
-
-        //console.log($scope.landmark.loc[1]);
-
-
-        // leafletData.getMap().then(function(map) {
-        //     map.panTo( [$scope.landmark.loc[0], $scope.landmark.loc[1]] );
-        //     map.setZoom(16);
-        //     map.invalidateSize();
-        // });
-
 
     });
 
@@ -818,8 +443,6 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     }
 }
 LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
-
-
 
 
 
@@ -985,7 +608,7 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
         $scope.landmark.loc = [$scope.markers2.m.lat,$scope.markers2.m.lng];
 
         db.landmarks.create($scope.landmark, function(response){
-            $location.path('/landmark/'+response[0].id+'/new');
+            $location.path('/post/'+response[0].id+'/new');
         });
     }
 
@@ -1016,6 +639,8 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
 }
 
 LandmarkNewCtrl.$inject = ['$location', '$scope', '$routeParams','db', '$rootScope'];
+
+
 
 
 
@@ -1367,7 +992,7 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
 
         db.landmarks.create($scope.landmark, function(response){
 
-            $location.path('/landmark/'+response[0].id+'/new');
+            $location.path('/post/'+response[0].id+'/new');
         });
 
     }
@@ -1562,57 +1187,6 @@ maplocCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope'
 
 
 
-//handles showing a specific landmark's location on the map, accepts lat long coordinates in routeparams
-function pollCtrl($scope, $routeParams, db) {
-
-    $scope.goBack = function(){
-        window.history.back();
-    }
-
-    //---- Initial Query on Page Load -----//
-    $scope.queryType = "places";
-    $scope.queryFilter = "Award Nominee";
-    //Events Now example:
-    // $scope.queryType = "events";
-    // $scope.queryFilter = "now";
-
-    $scope.landmarks = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter });
-
-    //---------//
-
-
-
-
-    // //query function for all sorting buttons
-    // $scope.filter = function(type, filter) {
-    //     $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
-    // };
-
-    // $scope.goTalk = function(url) {
-    //   $location.path('talk/'+url);
-    // };
-
-    // $scope.goTalkList = function(url) {
-    //   $location.path('talk');
-    // };
-
-    // $scope.goMap = function(url) {
-    //   $location.path('map/'+url);
-    // };
-
-    // $scope.goNew = function() {
-    //     $location.path('new');
-    // };
-
-    //search query
-    $scope.sessionSearch = function() { 
-        $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
-    };
-
-
-}
-pollCtrl.$inject = ['$scope', '$routeParams', 'db'];
-
 
 
 var sessionsNow = function ($scope, db) {
@@ -1623,33 +1197,14 @@ var sessionsNow = function ($scope, db) {
 sessionsNow.$inject = ['$scope', 'db'];
 
 
-// var mapper = function ($scope) {
 
-//     // $scope.landmarks = db.landmarks.query({ queryType: 'events', queryFilter: 'now' });
-
-//     // console.log($scope.center.zoom);
-
-//     function what(){
-        
-//         angular.extend($scope, {
-//             center: {
-//                 lat: 42.356810,
-//                 lng: -83.0610023,
-//                 zoom: 12
-//             } 
-//         });
-//     }
-
-
-//     // console.log($scope.center.zoom);
-
-
-// };
 
 
 
 function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
+    shelfPan('return');
+ 
     $rootScope.showSwitch = true;
     $rootScope.radioModel = 'Tuesday'; //for bubble switcher selector
 
@@ -1720,9 +1275,9 @@ AwardsCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$r
 
 function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
-    var queryCat = "Lecture";
-    $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
+    shelfPan('return');
 
+    $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
     $rootScope.showSwitch = true;
 
     $scope.goBack = function(){
@@ -1739,26 +1294,36 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     }
 
     //---- EVENT CARDS WIDGET -----//
+    var queryCat = "lecture";
 
     //---- Happening Now -----//
     $scope.queryType = "events";
     $scope.queryFilter = "now";
     $scope.queryCat = queryCat;
-    //Events Now example:
-    // $scope.queryType = "events";
-    // $scope.queryFilter = "now";
+    //$scope.queryTime = new Date();
+    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
 
     $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
         
         console.log("NOW");
         console.log($scope.landmarksNow);
 
-        queryUpcoming();
+        
+        //IF THERE'S A NOW OBJECT 
+        if ($scope.landmarksNow[0]){
+            //passing now result as temporary DOESNT SCALE
+            queryUpcoming($scope.landmarksNow[0].time.end);
+        }
+
+        // NO NOW OBJECT
+        else {
+            queryUpcoming("noNow");
+        }
     });
 
     //---------//
 
-    function queryUpcoming(){
+    function queryUpcoming(nowTimeEnd){
         
         //$scope.upcomingLimit = 2;
 
@@ -1776,11 +1341,14 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
         $scope.queryFilter = "upcoming";
         $scope.queryCat = queryCat;
 
-        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat},function(){
 
+        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+        
             //console.log($scope.landmarksUpcoming.length);
             console.log("UPCOMING");
             console.log($scope.landmarksUpcoming);
+
+             //queryHappened();
 
             if ($scope.landmarksUpcoming.length < 2){
                 queryHappened();
@@ -1794,9 +1362,7 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
 
     function queryHappened(){
 
-
-
-        $scope.happenedLimit = 2;
+        $scope.happenedLimit = 10;
 
         //---- Happened -----//
         $scope.queryType = "events";
@@ -1813,7 +1379,6 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     }
 
     //------------------------//
-
 
 
 
@@ -1841,14 +1406,6 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
       $location.path('talk/'+url);
     };
 
-    $scope.goNow = function(url) {
-      $location.path('landmark/Kathryn_Gordon');
-    };
-
-    $scope.goNext = function(url) {
-      $location.path('landmark/Terrance_Howard');
-    };
-
     $scope.goTalkList = function(url) {
       $location.path('talk');
     };
@@ -1862,6 +1419,8 @@ LecturesCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData', 
 
 
 function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
+
+    shelfPan('return');
 
     $rootScope.showSwitch = true;
 
@@ -1926,24 +1485,70 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
 
 
-// var pageLoadHelper = function (input, $rootScope, $scope) {
+function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 
-//     console.log($rootScope);
+    shelfPan('return');
+
+    $rootScope.showSwitch = false;
+
+    $scope.goBack = function(){
+        window.history.back();
+    }
+
+    $scope.shelfUpdate = function(type){     
+        if ($scope.shelfUpdate == type){
+            $scope.shelfUpdate = 'default';
+        }
+        else {
+            $scope.shelfUpdate = type;
+        }
+    }
+
+    //---- EVENT CARDS WIDGET -----//
+
+    $scope.listType = $routeParams.category;
+    //var queryCat = $routeParams.category;
+
+    if ($scope.listType == 'lecture' ){
+        $scope.day = "WEDNESDAY";
+    }
+    if ($scope.listType == 'award' ){
+        $scope.day = "TUESDAY";
+    }
+    if ($scope.listType == 'show' ){
+        $scope.day = "THURSDAY";
+    }
+    
+
+    queryList();
 
 
+    function queryList(){
 
-//     //----------------------------------//
-//     //bad logic for showing bubble widget
-//     if (input == "/lectures" || input == "/awards" || input == "/show" ){
-//         $rootScope.showSwitch = true;
-//     }
+        $scope.listLimit = 10;
 
-//     else {
-//        $rootScope.showSwitch = false; 
-//     }
-//     //-----------------------------//
+        //---- Happened -----//
+        $scope.queryType = "events";
+        $scope.queryFilter = $routeParams.filter;
+        $scope.queryCat = $routeParams.category;
+
+        $scope.landmarksList = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: "noNow"},function(){
+            
+            
+        });
+
+        //---------//
+
+    }
+
+    //------------------------//
 
 
-// };
-// pageLoadHelper.$inject = ['input','$rootScope','$scope'];
+    //query function for all sorting buttons
+    $scope.filter = function(type, filter) {
+        $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
+    };
 
+
+}
+ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];

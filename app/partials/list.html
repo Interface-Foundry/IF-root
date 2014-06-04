@@ -1,0 +1,35 @@
+
+  <span ng-hide="option == 'new' "><button class="btn" ng-click="goBack()">< BACK </button></span>
+
+
+
+  <!-- 2 COL CARDS -->
+    <div class="row">
+
+        <div class="card"> 
+          <h1>{{queryFilter}} {{day}} EVENTS</h1>
+        </div>
+       <li ng-repeat="landmark in landmarksList"> 
+        <div class="col-xs-6 card 2col"> 
+            <a ng-href="#/post/{{landmark.id}}">
+              <div class="container">
+                <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
+                <p class="title">{{landmark.name}}</p>
+                <p class="content">{{landmark.shortDescription}}</p>
+              </div>
+            </a>
+
+          </div>
+        </li>
+
+    </div>
+
+
+
+
+
+
+
+
+
+

@@ -106,10 +106,16 @@ var global_hashtag = "#awards";
 //var global_hashtag = '#lol,#what,#soitgoes';
 //-------------------------------//
 
+// var fakeTime = 
 
-var eventCategories = ['Lecture','Show'];
 
-var placeCategories = ['Lecture','Show','Award Nominee'];
+var eventCategories = ['lecture','show','award'];
+
+//var placeCategories = ['lecture','show','award'];
+
+var placeCategories = ['food','bars','sponsors','washrooms','exhibits','smoking'];
+
+
 
 
 var globalEditLoc = {}; //this is a temp variable for an issue with angular leaflet directive in landmark-edit
