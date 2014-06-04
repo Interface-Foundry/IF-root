@@ -2047,6 +2047,7 @@ ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
 
     shelfPan('return');
+    window.scrollTo(0, 0);
 
     $rootScope.showSwitch = false;
 
