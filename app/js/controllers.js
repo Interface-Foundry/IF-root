@@ -1848,6 +1848,8 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     //---------//
 
     function queryUpcoming(nowTimeEnd){
+
+         window.scrollTo(0, 0);
         
         //$scope.upcomingLimit = 2;
 
