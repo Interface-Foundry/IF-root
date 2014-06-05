@@ -562,6 +562,10 @@ li {
   
 }
 
+.col-xs-6::nth-child(3n){
+  float:none;
+}
+
 
 
 
