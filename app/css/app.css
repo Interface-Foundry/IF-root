@@ -562,11 +562,14 @@ li {
   
 }
 
-.col-xs-6::nth-child(3n){
-  float:none;
+/*.col-xs-6.card:nth-child(4n){
+  float:none !important;
 }
+*/
 
-
+.third-elm {
+    color: red;
+}
 
 
 .card .content{

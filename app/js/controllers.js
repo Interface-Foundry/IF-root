@@ -103,9 +103,10 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         center: {
             lat: 40.7615,
             lng: -73.9777,
-            zoom: 20
+            zoom: 11
         },
-        tiles: tilesDict.aicp
+        tiles: tilesDict.aicp,
+        markers : {}
     });
 
     //for bubble widget switcher
@@ -141,75 +142,75 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
     }
 
 
-      //**** MAP STUFF *****//
+      // //**** MAP STUFF *****//
 
-        $scope.queryType = "all";
-        $scope.queryFilter = "all";
+      //   $scope.queryType = "all";
+      //   $scope.queryFilter = "all";
 
-        queryMap($scope.queryType, $scope.queryFilter); //showing all at first
+      //   queryMap($scope.queryType, $scope.queryFilter); //showing all at first
 
 
 
-        function queryMap(type, filter){
+      //   function queryMap(type, filter){
 
-            db.landmarks.query({ queryType: type, queryFilter: filter },
+      //       db.landmarks.query({ queryType: type, queryFilter: filter },
 
-            function (data) {   //success
+      //       function (data) {   //success
 
-                var markerCollect = {};
+      //           var markerCollect = {};
 
-                for (var i=0;i < data.length;i++){ 
+      //           for (var i=0;i < data.length;i++){ 
 
-                    markerCollect[data[i].id] = {
-                        lat: data[i].loc[0],
-                        lng: data[i].loc[1],
-                        message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
-                        focus: false, 
-                        icon: local_icons.yellowIcon
-                    }
-                }
+      //               markerCollect[data[i].id] = {
+      //                   lat: data[i].loc[0],
+      //                   lng: data[i].loc[1],
+      //                   message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+      //                   focus: false, 
+      //                   icon: local_icons.yellowIcon
+      //               }
+      //           }
 
-                angular.extend($rootScope, {
-                    markers: markerCollect
-                });
+      //           angular.extend($rootScope, {
+      //               markers: markerCollect
+      //           });
 
           
 
-                // var singleMarker = {
-                //     lat: 42.3568700,
-                //     lng: -83.080400,
-                //     message: 'Culinary Theater',
-                //     focus: true, 
-                //     icon: local_icons.yellowIcon
-                // }
+      //           // var singleMarker = {
+      //           //     lat: 42.3568700,
+      //           //     lng: -83.080400,
+      //           //     message: 'Culinary Theater',
+      //           //     focus: true, 
+      //           //     icon: local_icons.yellowIcon
+      //           // }
 
-                // angular.extend($scope, {
-                //     markers: singleMarker
-                // });
+      //           // angular.extend($scope, {
+      //           //     markers: singleMarker
+      //           // });
 
-                // $timeout(leafletUpdate, 500); //temp solution? leaflet isn't updating properly after callback...
+      //           // $timeout(leafletUpdate, 500); //temp solution? leaflet isn't updating properly after callback...
 
-                // function leafletUpdate(){
+      //           // function leafletUpdate(){
 
-                //      angular.extend($scope, { 
+      //           //      angular.extend($scope, { 
                         
-                //         markers: markerCollect
-                //     });
-                // }
-            },
-            function (data) {   //failure
-                //error handling goes here
-            });
+      //           //         markers: markerCollect
+      //           //     });
+      //           // }
+      //       },
+      //       function (data) {   //failure
+      //           //error handling goes here
+      //       });
 
-        }
+      //   }
 
-        angular.extend($rootScope, { 
-            markers : {}
-        });
+      //   angular.extend($rootScope, { 
+      //       markers : {}
+      //   });
 
     //-------------------------//
 
-    // $scope.tweets = db.tweets.query({limit:1});
+
 
 
     //query function for all sorting buttons
@@ -249,138 +250,40 @@ indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$root
 
 
 
-function LandmarkListCtrl( $location, $scope, db, $timeout, leafletData) {
-
-    // if (amount == "partial" || amount == "full"){
-    //     shelfPan('return');
-    // }
-
-    //$scope.showHome = true;
-
-
-    // angular.extend($scope, {
-    //     center: {
-    //         lat: 42.356886,
-    //         lng: -83.069523,
-    //         zoom: 1
-    //     },
-    //     tiles: tilesDict.amc,
-    // });
-
-
-    $scope.goBack = function(){
-        //$scope.showBeyonce = false;
-        //$scope.showCamp = false;
-        $scope.showHome = true;
-
-    }
-
-    $scope.shelfUpdate = function(type){
-        
-
-        if ($scope.shelfUpdate == type){
-
-            $scope.shelfUpdate = 'default';
-
-        }
-
-        else {
-            $scope.shelfUpdate = type;
-        }
-
-    }
-
-
-
-    //---- Initial Query on Page Load -----//
-    $scope.queryType = "all";
-    $scope.queryFilter = "all";
-    //Events Now example:
-    // $scope.queryType = "events";
-    // $scope.queryFilter = "now";
-
-    $scope.landmarks = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter });
-
-    //---------//
-
-    //------- For Switching Button Classes ------//
-    $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-    $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
-
-    $scope.select= function(item) {
-       $scope.selected = item; 
-    };
-
-    $scope.itemClass = function(item) {
-        return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
-    };
-    //---------------------------//
-
-
-    //$scope.tweets = db.tweets.query({limit:1});
-
-
-    //query function for all sorting buttons
-    $scope.filter = function(type, filter) {
-	    $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
-  	};
-
-    $scope.goTalk = function(url) {
-      $location.path('talk/'+url);
-    };
-
-    $scope.goTalkList = function(url) {
-      $location.path('talk');
-    };
-
-    $scope.goMap = function(url) {
-      $location.path('map/'+url);
-    };
-
-    $scope.goNew = function() {
-        $location.path('new');
-    };
-
-    //search query
-    $scope.sessionSearch = function() { 
-        $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
-    };
-
-}
-LandmarkListCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData'];
-
-
-
 function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $timeout, leafletData, $route, $rootScope) {  
 
     $rootScope.showSwitch = false;
     $rootScope.showBackPage = true;
 
-    refreshMap();
 
+    
     window.scrollTo(0, 0);
+
+    //nicknames
+    var geoLocs = {
+        "BASECAMP" : [40.7215408, -73.9967013],
+        "SKIRBALL" : [40.7297, -73.9978],
+        "MoMA" : [40.7615, -73.9777],
+        "NYC" : [40.7127, -74.0059]
+    }
+
+    var geoZoom = 16;
    
 
     //hiding bubble switcher and showing map nav instead
     $scope.showMapNav = function(){
-        if ($rootScope.showMapNav == true){
-            
-            $rootScope.showMapNav = false;
-            shelfPan('partial');
-            
-        }
 
-        else {
-            
-            $rootScope.showMapNav = true;
-            
+        if ($rootScope.showMapNav == true){      
+            $rootScope.showMapNav = false;
+            shelfPan('partial');     
+        }
+        else {       
+            $rootScope.showMapNav = true;      
         }
     }
 
 
-
     if ($routeParams.option == 'm'){
-
     }
 
     else {
@@ -388,208 +291,115 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     }
 
 
-    if ($routeParams.option == 'new'){
-
-
-    }
-
-
-    angular.extend($rootScope, { 
-        markers : {}
-    });
-
 
     $scope.option = $routeParams.option;
-
     $scope.landmark = Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
+
         $scope.mainImageUrl = landmark.stats.avatar;
-        $scope.time = "all";
-        $scope.currentTag = $scope.landmark.tags;
-        $scope.tweets = db.tweets.query({tag: $scope.landmark.tags, time:$scope.time});
+
+        processLandmark(landmark);
+
+        //if there's a sub hashtag for this object, query for tweets
+        if ($scope.landmark.tags){
+            $scope.time = "all";
+            $scope.currentTag = $scope.landmark.tags;
+            $scope.tweets = db.tweets.query({tag: $scope.landmark.tags, time:$scope.time});
+        }
+
+    });
+
+    
+    //after query, do stuff
+    function processLandmark(landmark){
 
 
-        var markerList = {
-            "m" : {
-                lat: $scope.landmark.loc[0],
-                lng: $scope.landmark.loc[1],
-                message: '<h4><img style="width:70px;" src="'+ landmark.stats.avatar +'"><a href=#/post/'+ $routeParams.landmarkId +'/m> '+landmark.name+'</a></h4>',
-                focus: false,
-                icon: local_icons.yellowIcon
-            }
-        };
-
-        // IF EVENT, show MAPBOX
-        // IF PLACE, USE MOMA MAP
+        //ALL EVENTS ARE PROCESSED WITH MAPBOX RIGHT NOW!
         if (landmark.type == "event"){
 
-            if (landmark.loc_nickname){
 
-                if (landmark.loc_nickname == "BASECAMP"){
-
-                    var markerList = {
-                        "m" : {
-                            lat: 40.7215408,
-                            lng: -73.9967013,
-                            message: '<h4>BASECAMP</h4>',
+            //does it have a nickname to place on map from nick list?
+            if (geoLocs[landmark.loc_nickname]){
+                
+                angular.extend($rootScope, {
+                    center: {
+                        lat: geoLocs[landmark.loc_nickname][0],
+                        lng: geoLocs[landmark.loc_nickname][1],
+                        zoom: geoZoom,
+                        autoDiscover:false
+                    },
+                    markers: {
+                        "m": {
+                            lat: geoLocs[landmark.loc_nickname][0],
+                            lng: geoLocs[landmark.loc_nickname][1],
+                            message: '<h4>'+landmark.loc_nickname+'</h4>',
                             focus: true,
                             icon: local_icons.yellowIcon
                         }
-                    };
+                    },
+                    tiles: tilesDict.mapbox
+                });
 
-                    angular.extend($rootScope, {
-                        center: {
-                            lat: 40.7215408,
-                            lng: -73.9967013,
-                            zoom: 11
-                        },
-                        markers: markerList,
-                        tiles: tilesDict.mapbox
-                    });
+                refreshMap();
 
-                    refreshMap();
-                }
+            }
 
-                else if (landmark.loc_nickname == "SKIRBALL"){
+            //no nickname, use default map place
+            else{
 
-
-                    var markerList = {
-                        "m" : {
-                            lat: 40.7297,
-                            lng: -73.9978,
-                            message: '<h4>SKIRBALL</h4>',
-                            focus: true,
-                            icon: local_icons.yellowIcon
-                        }
-                    };
-
-                    angular.extend($rootScope, {
-                        center: {
-                            lat: 40.7297,
-                            lng: -73.9978,
-                            zoom: 11
-                        },
-                        markers: markerList,
-                        tiles: tilesDict.mapbox
-                    });
-
-                    refreshMap();
-                }
-
-                else if (landmark.loc_nickname == "MoMA"){
-
-                    var markerList = {
-                        "m" : {
-                            lat: 40.7615,
-                            lng: -73.9777,
-                            message: '<h4>MoMA</h4>',
-                            focus: true,
-                            icon: local_icons.yellowIcon
-                        }
-                    };
-                    
-
-                    angular.extend($rootScope, {
-                        center: {
-                            lat: 40.7615,
-                            lng: -73.9777,
-                            zoom: 11
-                        },
-                        markers: markerList,
-                        tiles: tilesDict.mapbox
-                    });
-
-
-                    refreshMap();
-                }
-
-                else {
-
-                    var markerList = {
-                        "m" : {
-                            lat: 40.7127,
-                            lng: -74.0059,
+                angular.extend($rootScope, {
+                    center: {
+                        lat: geoLocs['NYC'][0],
+                        lng: geoLocs['NYC'][1],
+                        zoom: geoZoom
+                    },
+                    markers: {
+                        "m": {
+                            lat: geoLocs['NYC'][0],
+                            lng: geoLocs['NYC'][1],
                             message: '<h4>NYC</h4>',
                             focus: true,
                             icon: local_icons.yellowIcon
                         }
-                    };
+                    },
+                    tiles: tilesDict.mapbox
+                });
 
-                    //DEFAULT MAP CENTER IN NYC BASECAMP
-                    angular.extend($rootScope, {
-                        center: {
-                            lat: 40.7127,
-                            lng: -74.0059,
-                            zoom: 11
-                        },
-                        markers: markerList,
-                        tiles: tilesDict.mapbox
-                    });
-
-                    refreshMap();
-                }
-
+                refreshMap();
 
             }
 
-            else {
-                    var markerList = {
-                        "m" : {
-                            lat: 40.7215408,
-                            lng: -73.9967013,
-                            message: '<h4>BASECAMP</h4>',
-                            focus: true,
-                            icon: local_icons.yellowIcon
-                        }
-                    };
-
-                    angular.extend($rootScope, {
-                        center: {
-                            lat: 40.7215408,
-                            lng: -73.9967013,
-                            zoom: 11
-                        },
-                        markers: markerList,
-                        tiles: tilesDict.mapbox
-                    });
-
-                    refreshMap();
-            } 
-
         }
-
 
         if (landmark.type == "place"){
 
             // FOR MOMA MAP STUFF
             angular.extend($rootScope, {
                 center: {
-                    lat: $scope.landmark.loc[0],
-                    lng: $scope.landmark.loc[1],
-                    zoom: 20
+                    lat: landmark.loc[0],
+                    lng: landmark.loc[1],
+                    zoom: 20,
+                    autoDiscover:false
                 },
-                markers: markerList,
+                markers: {
+                    "m": {
+                        lat: landmark.loc[0],
+                        lng: landmark.loc[1],
+                        message: '<h4><img style="width:70px;" src="'+landmark.stats.avatar+'"><a href=#/post/'+landmark.id+'/m> '+landmark.name+'</a></h4>',
+                        focus: false,
+                        icon: local_icons.yellowIcon
+                    }
+                },
                 tiles: tilesDict.aicp
             }); 
 
-            refreshMap();          
+            refreshMap();  
         }
 
+    }
 
 
-    });
+  
 
-    $scope.open = function () {
-        $scope.etherpad = true;
-    };
-
-    $scope.close = function () {
-        $scope.etherpad = false;
-    };
-
-    $scope.opts = {
-        backdropFade: true,
-        dialogFade:true
-    };
 
     $scope.setImage = function(imageUrl) {
         $scope.mainImageUrl = imageUrl;
@@ -609,6 +419,10 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
             map.invalidateSize();
         });
     }
+
+    angular.extend($rootScope, { 
+        markers : {}
+    });
 }
 LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
 
@@ -1732,66 +1546,26 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         }
     }
 
+    //nicknames
+    var geoLocs = {
+        "1F" : [40.7618, -73.978],
+        "2F" : [40.7612, -73.978],
+        "5F" : [40.7607, -73.978],
+        "GARDEN" : [40.7620, -73.977],
+        "EDUCATION": [40.76195, -73.9762]
+    }
+
 
     $rootScope.mapPan = function(area){
 
-        if (area == "1F"){  
-
-            angular.extend($rootScope, {
-                center: {
-                    lat: 40.7618,
-                    lng: -73.978,
-                    zoom: 20
-                },
-                tiles: tilesDict.aicp
-            });
-        }
-
-        if (area == "2F"){
-            angular.extend($rootScope, {
-                center: {
-                    lat: 40.7612,
-                    lng: -73.978,
-                    zoom: 20
-                },
-                tiles: tilesDict.aicp
-            });
-        }
-
-        if (area == "5F"){
-            angular.extend($rootScope, {
-                center: {
-                    lat: 40.7607,
-                    lng: -73.978,
-                    zoom: 20
-                },
-                tiles: tilesDict.aicp
-            });
-        }
-
-        if (area == "GARDEN"){
-            angular.extend($rootScope, {
-                center: {
-                    lat: 40.7620,
-                    lng: -73.977,
-                    zoom: 20
-                },
-                tiles: tilesDict.aicp
-            });
-        }
-
-        if (area == "EDU"){
-            angular.extend($rootScope, {
-                center: {
-                    lat: 40.76195,
-                    lng: -73.9762,
-                    zoom: 20
-                },
-                tiles: tilesDict.aicp
-            });
-        } 
-
-
+        angular.extend($rootScope, {
+            center: {
+                lat: geoLocs[area][0],
+                lng: geoLocs[area][1],
+                zoom: 20
+            },
+            tiles: tilesDict.aicp
+        });
     }
 
 
@@ -1941,18 +1715,18 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
                 markerCollect[data[i].id] = {
                     lat: data[i].loc[0],
                     lng: data[i].loc[1],
-                    message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+                    message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'> '+data[i].name+'</a></h4>',
                     focus: true, 
                     icon: local_icons.yellowIcon
                 }
             }
 
             angular.extend($rootScope, {
-                center: {
-                    lat: data[0].loc[0],
-                    lng: data[0].loc[1],
-                    zoom: 22
-                },
+                // center: {
+                //     lat: data[0].loc[0],
+                //     lng: data[0].loc[1],
+                //     zoom: 22
+                // },
                 markers: markerCollect,
                 tiles: tilesDict.aicp
             });

@@ -83,11 +83,6 @@
     </div>
 
 
-
-
-  
-</ul>
-
   <ul class="feed" style="padding-left:5px; padding-right:5px;">
         <li ng-repeat="tweet in tweets| filter:query | orderBy:orderProp" class="thumbnail" style="padding-bottom:10px; border:0px;">
           <a ng-href="#/{{tweet.id}}" class="thumb"><img ng-src="{{tweet.user.profile_image_url}}"></a>
@@ -107,10 +102,7 @@
                <span ng-switch-default></span>
              </div>
         </li>  
-
-        <!-- <li ng-show="!tweets.length"> No tweets from #{{currentTag}} yet </li> -->
-
-     </ul>
+  </ul>
 
     <div id="gapfill" style="height:900px;"></div>
 

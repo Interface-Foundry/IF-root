@@ -352,6 +352,33 @@ function shelfPan(amount){
 
     }
 
+
+    // //ONLY FOR LANDMARK DETAIL//
+    // if (amount == 'partialDetail'){
+
+
+
+    //     console.log(amount);
+    //     console.log('lense2 else');
+        
+    //     $('body').toggleClass('lense2');
+
+    //     $("#shelf").css({
+    //       "-webkit-transform": "translateY(" + 149 + "px" + ")",
+    //       "-moz-transform": "translateY(" + 149 + "px" + ")", 
+    //       "-ms-transform": "translateY(" + 149 + "px" + ")", 
+    //       "-o-transform": "translateY(" + 149 + "px" + ")",
+    //       "transform": "translateY(" + 149 + "px" + ")"
+    //     });
+
+    //     $("#leafletmap").css({"height": 149 + "px" });
+
+      
+
+    // }
+
+    // //////////
+
     if (amount == "new"){
 
         $('body').toggleClass('lense');
