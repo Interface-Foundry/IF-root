@@ -4,13 +4,9 @@
 
 
   <!-- 2 COL CARDS -->
-    <div class="row">
+    <div class="row" id="card-container">
 
-        <div class="card"> 
-          <h1>{{queryFilter}} {{day}} EVENTS</h1>
-        </div>
-       <li ng-repeat="landmark in landmarksList"> 
-        <div class="col-xs-6 card 2col"> 
+        <div class="iso-card card" ng-repeat="landmark in landmarksList" my-post-repeat-directive> 
             <a ng-href="#/post/{{landmark.id}}">
               <div class="container">
                 <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
@@ -20,7 +16,6 @@
             </a>
 
           </div>
-        </li>
 
     </div>
 
@@ -29,6 +24,8 @@
 
     <div id="gapfill" style="height:900px;"></div>
 
-
+<style type="text/css" media="screen">
+  .iso-card{width: 50%;}
+</style>
 
 

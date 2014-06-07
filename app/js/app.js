@@ -6,7 +6,7 @@
 //Controllers located in controllers.js
 //Partials located in the Partials folder
 
-var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives']).
+var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives','IF-directives']).
   config(['$routeProvider', function($routeProvider) {
   $routeProvider.
       when('/', {templateUrl: 'partials/loading.html', controller: BubbleRouteCtrl}).
