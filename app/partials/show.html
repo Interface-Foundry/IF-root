@@ -16,80 +16,42 @@
   <!-- TEMP ONLY BEFORE SHOW -->
 
 
+    <!-- 4 COL CARDS -->
+    <div class="row 4-col">
+          <div class="col-xs-12">
 
+            <div class="row">
+              <!-- HAPPENING NOW -->
+              <div class="col-xs-12 card">
+                <h1>UPCOMING</h1>
+             
 
-  <!-- 2 COL CARDS -->
-    <div class="row">
+                  <div class="container more">
+                    <div class="header">8:30 AM <span class="pull-right">BASECAMP</span></div>
+                    
+                    <span class="pull-right"><img width="110" src="img/AICP/AICP_bootcamp_logo.svg"></span>
+                    <p class="title">Breakfast</p>
 
-      <!-- HAPPENING NOW -->
-      <span ng-show="landmarksNow.length > 0"> 
+                    <div class="header">9:15 AM</div>
+                    <p class="title">Leo Burnett Best Practices</p>
 
-        <div class="col-xs-6 card col-card-2">
-          <h1>Happening Now</h1>
-          <li ng-repeat="landmark in landmarksNow | limitTo:1">  
-            <a ng-href="#/post/{{landmark.id}}">
-              <div class="container">
-                <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
-                <p class="title">{{landmark.name}}</p>
-                <p class="content">{{landmark.shortDescription}}</p>
+                    <div class="header">10:15 AM</div>
+                    <p class="title">Production Insurance</p>
+
+                    <div class="header">11:15 AM</div>
+                    <p class="title">Legal Issues</p>
+
+                  </div>
+
+               
+                <div class="footer show-footer"></div>
               </div>
-            </a>
-          </li>
-          <!-- <div class="footer">MORE ></div> -->
-        </div>
-
-      </span>
-
-
-      <!-- UPCOMING -->
-      <span ng-show="landmarksUpcoming.length > 0">
-
-        <div class="col-xs-6 card 2col">
-          <h1>Upcoming</h1>
-         <li ng-repeat="landmark in landmarksUpcoming | limitTo:upcomingLimit">  
-            <a ng-href="#/post/{{landmark.id}}">
-              <div class="container more">
-                <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
-                <p class="title">{{landmark.name}}</p>
-                <p class="content">{{landmark.shortDescription}}</p>
-              </div>
-            </a>
-            <a ng-href="#/list/show/all"><div class="footer show-footer">MORE <span class="typcn typcn-th-list"></span></div></a>
-          </li>
-
-        </div>
-
-      </span>
-
-       <!-- HAPPENED -->
-      <span ng-show="landmarksHappened.length > 0">
-
-        <div class="card"> 
-
-          <!-- SWITCH BASED ON CURRENT DAY <h1>Happened</h1> -->
-          <h1>Schedule</h1>
-        </div>
-       <li ng-repeat="landmark in landmarksHappened | limitTo:happenedLimit"> 
-        <div class="col-xs-6 card 2col"> 
-            <a ng-href="#/post/{{landmark.id}}">
-              <div class="container" ng-class="{more: $last}">
-                <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
-                <p class="title">{{landmark.name}}</p>
-                <p class="content">{{landmark.shortDescription}}</p>
-              </div>
-            </a>
-
-            <span ng-show="($last)"><a ng-href="#/list/show/all"><div class="footer show-footer">MORE <span class="typcn typcn-th-list"></span></div></a></span>
 
           </div>
-        </li>
+         
 
-      </span>
-
+        </div>
     </div>
-
-
-
 
       <!-- !!!!!!!!!!!!!!!!!!!! -->
 
