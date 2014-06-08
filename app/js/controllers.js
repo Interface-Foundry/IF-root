@@ -1298,7 +1298,10 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
 
     $scope.tweets = db.tweets.query({limit:1});
-    $scope.instagrams = db.instagrams.query({limit:1});
+    $scope.instagrams = db.instagrams.query({limit:1}, function(data){
+        console.log(data);
+    });
+
 
     angular.extend($rootScope, {
         center: {
