@@ -65,9 +65,13 @@
               <div class="col-xs-12 card">
                 <h1><!-- Happening Now --></h1>
                 <div class="container">
-     
+                  
+                  <a target="_blank" href="{{landmark.extraURL}}"><p class="title">Flickr Links</p></a>
+
                   <p class="title" style="">{{landmark.description}}</p>
                   <br>
+      <!--             <div ng-bind-html="">{{landmark.description}}</div>
+                  <br> -->
                   <span ng-show="landmark.people"><p class="title" style="font-size:1.8rem; color:black; padding:0px;">Presenters</p></span>
                   <br>
                   <p class="title" style="">{{landmark.people}}</p>

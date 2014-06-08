@@ -55,6 +55,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showMapNav = false;
         window.history.back();
         shelfPan('return');
+        $rootScope.showNavIcons = false;
 
         
     }
@@ -67,6 +68,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showMapNav= true;
         shelfPan('full');
         refreshMap();
+         $rootScope.showNavIcons = true;
 
     }
 
@@ -338,11 +340,11 @@ indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$root
 
 
 
-function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $timeout, leafletData, $route, $rootScope) {  
+function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $timeout, leafletData, $route, $rootScope, $sce) {  
 
     $rootScope.showSwitch = false;
     $rootScope.showBackPage = true;
-
+    $rootScope.showNavIcons = false;
 
     
     window.scrollTo(0, 0);
@@ -408,6 +410,16 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     $scope.landmark = Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
 
         $scope.mainImageUrl = landmark.stats.avatar;
+
+        //if ____
+        //$scope.htmlDescription = landmark.description;
+
+        // $scope.myHTML = landmark.description;
+        // // $sce.trustAsHtml($scope.myHTML);
+
+        // $scope.trustedHtml = $sce.trustAsHtml($scope.myHTML);
+
+        // $scope.trustedHtml = $sce.trustAsHtml(landmark.description);
 
         processLandmark(landmark);
 
@@ -556,7 +568,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
 
 }
-LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
+LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope','$sce'];
 
 
 
@@ -766,6 +778,280 @@ LandmarkNewCtrl.$inject = ['$location', '$scope', '$routeParams','db', '$rootSco
 
 
 
+
+
+function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeout, $rootScope) {
+
+    //if authenticate, show and provide this functionality:
+
+    //if not, login plz k thx
+
+    $rootScope.showSwitch = false;
+
+    shelfPan('return');
+
+    Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
+
+        $scope.landmark = landmark;
+        if (landmark.loc_nicknames){
+            $scope.landmark.location = landmark.loc_nicknames[0];
+        }
+        
+        $scope.landmark.idCheck = landmark.id;
+
+        //----- Loading sub categories from global settings ----//
+        $scope.subTypes = [];
+
+        if (landmark.type == 'event'){
+            $scope.subTypes = $scope.subTypes.concat(eventCategories);
+        }
+
+        if (landmark.type == 'place'){
+            $scope.subTypes = $scope.subTypes.concat(placeCategories);
+        }
+        //-----//
+
+        if (landmark.type == "event"){
+
+            $scope.landmark.date = {
+                start : landmark.timetext.datestart,
+                end: landmark.timetext.dateend
+            }
+
+            $scope.landmark.time = {
+                start: landmark.timetext.timestart,
+                end: landmark.timetext.timeend
+            } 
+        }
+
+         console.log($scope.landmark.loc[0]);
+         console.log($scope.landmark.loc[1]);
+
+    // angular.extend($scope, {
+    //     // amc: {
+    //     //     lat: $scope.landmark.loc[0],
+    //     //     lng: $scope.landmark.loc[1],
+    //     //     zoom: global_mapCenter.zoom
+    //     // },
+    //     markers2: {
+    //         m: {
+    //             lat: $scope.center.lat,
+    //             lng: $scope.center.lng,
+    //             message: "Drag to Location on map",
+    //             focus: true,
+    //             draggable: true,
+    //             icon: local_icons.yellowIcon
+    //         }
+    //     }
+    // });
+
+
+        angular.extend($scope, {
+            center: {
+                lat: $scope.landmark.loc[0],
+                lng: $scope.landmark.loc[1],
+                zoom: 17
+            },
+            markers3: {
+                "m": {
+                    lat: $scope.landmark.loc[0],
+                    lng: $scope.landmark.loc[1],
+                    message: "Drag to Location on map",
+                    focus: true,
+                    draggable: true,
+                    icon: local_icons.yellowIcon
+                }
+            },
+            tiles: tilesDict.aicp
+        });
+
+                //     angular.extend($rootScope, {
+                //     center: {
+                //         lat: geoLocs[landmark.loc_nickname][0],
+                //         lng: geoLocs[landmark.loc_nickname][1],
+                //         zoom: geoZoom,
+                //         autoDiscover:false
+                //     },
+                //     markers: {
+                //         "m": {
+                //             lat: geoLocs[landmark.loc_nickname][0],
+                //             lng: geoLocs[landmark.loc_nickname][1],
+                //             message: '<h4>'+landmark.loc_nickname+'</h4>',
+                //             focus: true,
+                //             icon: local_icons.yellowIcon
+                //         }
+                //     },
+                //     tiles: tilesDict.mapbox
+                // });
+
+                // refreshMap();
+
+    //     angular.extend($scope, {
+    //     // amc: {
+    //     //     lat: $scope.landmark.loc[0],
+    //     //     lng: $scope.landmark.loc[1],
+    //     //     zoom: global_mapCenter.zoom
+    //     // },
+    //     markers2: {
+    //         m: {
+    //             lat: $scope.center.lat,
+    //             lng: $scope.center.lng,
+    //             message: "Drag to Location on map",
+    //             focus: true,
+    //             draggable: true,
+    //             icon: local_icons.yellowIcon
+    //         }
+    //     }
+    // });
+
+        console.log($scope.markers3);
+
+
+        $('<img src="'+ $scope.landmark.stats.avatar +'">').load(function() {
+          $(this).width(150).height(150).appendTo('#preview');
+        });
+
+    });
+
+
+    var currentDate = new Date();
+
+    $scope.addEndDate = function () {
+        $scope.landmark.date.end = $scope.landmark.date.start;
+    }
+
+    angular.element('#fileupload').fileupload({
+        url: '/api/upload',
+        dataType: 'text',
+        progressall: function (e, data) {  
+
+            $('#progress .bar').css('width', '0%');
+
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .bar').css(
+                'width',
+                progress + '%'
+            );
+        },
+        done: function (e, data) {
+
+            $('#uploadedpic').html('');
+            $('#preview').html('');
+
+            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
+
+            $('<img src="'+ data.result +'">').load(function() {
+              $(this).width(150).height(150).appendTo('#preview');
+            });
+
+            $scope.landmark.stats.avatar = data.result;
+
+        }
+    });
+
+
+
+
+    $scope.save = function () {
+
+        if ($scope.landmark.type =="event"){
+            if (!$scope.landmark.date.end){
+
+                $scope.landmark.date.end = $scope.landmark.date.start;
+            }
+
+            $scope.landmark.datetext = {
+                start: $scope.landmark.date.start,
+                end: $scope.landmark.date.end
+            }
+
+            //---- Date String converter to avoid timezone issues...could be optimized probably -----//
+            $scope.landmark.date.start = new Date($scope.landmark.date.start).toISOString();
+            $scope.landmark.date.end = new Date($scope.landmark.date.end).toISOString();
+
+            $scope.landmark.date.start = dateConvert($scope.landmark.date.start);
+            $scope.landmark.date.end = dateConvert($scope.landmark.date.end);
+
+            $scope.landmark.date.start = $scope.landmark.date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
+            $scope.landmark.date.end = $scope.landmark.date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
+
+            function dateConvert(input){
+                var s = input;
+                var n = s.indexOf('T');
+                return s.substring(0, n != -1 ? n : s.length);
+            }
+            //-----------//
+
+            if (!$scope.landmark.time.start){
+                $scope.landmark.time.start = "00:00";
+            }
+
+            if (!$scope.landmark.time.end){
+                $scope.landmark.time.end = "23:59";
+            }
+
+            $scope.landmark.timetext = {
+
+                start: $scope.landmark.time.start,
+                end: $scope.landmark.time.end
+            } 
+
+        }
+
+        //a temp fix for a problem with marker scope "unsyncing" from the marker's map position. using globalEditLoc global variable to pass values for now..better with $rootScope or legit fix...
+        if (!globalEditLoc.lat){
+
+            $scope.landmark.loc = [$scope.markers3.m.lat,$scope.markers3.m.lng];
+        }
+
+        else {
+            $scope.landmark.loc = [globalEditLoc.lat,globalEditLoc.lng];
+        }
+
+        db.landmarks.create($scope.landmark, function(response){
+
+            $location.path('/post/'+response[0].id+'/new');
+        });
+
+    }
+ 
+    $scope.delete = function (){
+
+        var deleteItem = confirm('Are you sure you want to delete this item?'); 
+
+        if (deleteItem) {
+            Landmark.del({_id: $scope.landmark._id}, function(landmark) {
+                $location.path('/'); 
+            });
+        }
+    }
+
+    // angular.extend($scope, {
+    //     // center: $scope.center,
+    //     // tiles: tilesDict.amc,
+    //     markers2: {
+    //         m: {
+    //             lat: $scope.center.lat,
+    //             lng: $scope.center.lng,
+    //             zoom: 15,
+    //             message: "Drag to Location",
+    //             focus: true,
+    //             draggable: true,
+    //             icon: local_icons.yellowIcon
+    //         }
+    //     }
+    // });
+
+}
+
+LandmarkEditCtrl.$inject = ['Landmark','$location', '$scope', '$routeParams','db','$timeout','$rootScope'];
+
+
+
+
+
+
+
 function WorldNewCtrl($location, $scope, $routeParams, db) {
 
  
@@ -934,218 +1220,6 @@ function WorldNewCtrl($location, $scope, $routeParams, db) {
 }
 
 WorldNewCtrl.$inject = ['$location', '$scope', '$routeParams','db'];
-
-
-
-
-
-
-
-function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeout, $rootScope) {
-
-    //if authenticate, show and provide this functionality:
-
-    //if not, login plz k thx
-
-    $rootScope.showSwitch = false;
-
-    shelfPan('return');
-
-    Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
-
-        $scope.landmark = landmark;
-        $scope.landmark.location = landmark.loc_nicknames[0];
-        $scope.landmark.idCheck = landmark.id;
-
-        //----- Loading sub categories from global settings ----//
-        $scope.subTypes = [];
-
-        if (landmark.type == 'event'){
-            $scope.subTypes = $scope.subTypes.concat(eventCategories);
-        }
-
-        if (landmark.type == 'place'){
-            $scope.subTypes = $scope.subTypes.concat(placeCategories);
-        }
-        //-----//
-
-        if (landmark.type == "event"){
-
-            $scope.landmark.date = {
-                start : landmark.timetext.datestart,
-                end: landmark.timetext.dateend
-            }
-
-            $scope.landmark.time = {
-                start: landmark.timetext.timestart,
-                end: landmark.timetext.timeend
-            } 
-        }
-
-        console.log($scope.markers3);
-
-
-        angular.extend($scope, {
-            center: {
-                lat: $scope.landmark.loc[0],
-                lng: $scope.landmark.loc[1],
-                zoom: 17
-            },
-            markers3: {
-                m: {
-                    lat: $scope.landmark.loc[0],
-                    lng: $scope.landmark.loc[1],
-                    message: "Drag to Location on map",
-                    focus: true,
-                    draggable: true,
-                    icon: local_icons.yellowIcon
-                }
-            }
-        });
-
-        console.log($scope.markers3);
-
-
-        $('<img src="'+ $scope.landmark.stats.avatar +'">').load(function() {
-          $(this).width(150).height(150).appendTo('#preview');
-        });
-
-    });
-
-
-    var currentDate = new Date();
-
-    $scope.addEndDate = function () {
-        $scope.landmark.date.end = $scope.landmark.date.start;
-    }
-
-    angular.element('#fileupload').fileupload({
-        url: '/api/upload',
-        dataType: 'text',
-        progressall: function (e, data) {  
-
-            $('#progress .bar').css('width', '0%');
-
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
-
-            $('#uploadedpic').html('');
-            $('#preview').html('');
-
-            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
-
-            $('<img src="'+ data.result +'">').load(function() {
-              $(this).width(150).height(150).appendTo('#preview');
-            });
-
-            $scope.landmark.stats.avatar = data.result;
-
-        }
-    });
-
-
-
-
-    $scope.save = function () {
-
-        if ($scope.landmark.type =="event"){
-            if (!$scope.landmark.date.end){
-
-                $scope.landmark.date.end = $scope.landmark.date.start;
-            }
-
-            $scope.landmark.datetext = {
-                start: $scope.landmark.date.start,
-                end: $scope.landmark.date.end
-            }
-
-            //---- Date String converter to avoid timezone issues...could be optimized probably -----//
-            $scope.landmark.date.start = new Date($scope.landmark.date.start).toISOString();
-            $scope.landmark.date.end = new Date($scope.landmark.date.end).toISOString();
-
-            $scope.landmark.date.start = dateConvert($scope.landmark.date.start);
-            $scope.landmark.date.end = dateConvert($scope.landmark.date.end);
-
-            $scope.landmark.date.start = $scope.landmark.date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
-            $scope.landmark.date.end = $scope.landmark.date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
-
-            function dateConvert(input){
-                var s = input;
-                var n = s.indexOf('T');
-                return s.substring(0, n != -1 ? n : s.length);
-            }
-            //-----------//
-
-            if (!$scope.landmark.time.start){
-                $scope.landmark.time.start = "00:00";
-            }
-
-            if (!$scope.landmark.time.end){
-                $scope.landmark.time.end = "23:59";
-            }
-
-            $scope.landmark.timetext = {
-
-                start: $scope.landmark.time.start,
-                end: $scope.landmark.time.end
-            } 
-
-        }
-
-        //a temp fix for a problem with marker scope "unsyncing" from the marker's map position. using globalEditLoc global variable to pass values for now..better with $rootScope or legit fix...
-        if (!globalEditLoc.lat){
-
-            $scope.landmark.loc = [$scope.markers3.m.lat,$scope.markers3.m.lng];
-        }
-
-        else {
-            $scope.landmark.loc = [globalEditLoc.lat,globalEditLoc.lng];
-        }
-
-        db.landmarks.create($scope.landmark, function(response){
-
-            $location.path('/post/'+response[0].id+'/new');
-        });
-
-    }
- 
-    $scope.delete = function (){
-
-        var deleteItem = confirm('Are you sure you want to delete this item?'); 
-
-        if (deleteItem) {
-            Landmark.del({_id: $scope.landmark._id}, function(landmark) {
-                $location.path('/'); 
-            });
-        }
-    }
-
-    // angular.extend($scope, {
-    //     // center: $scope.center,
-    //     // tiles: tilesDict.amc,
-    //     markers2: {
-    //         m: {
-    //             lat: $scope.center.lat,
-    //             lng: $scope.center.lng,
-    //             zoom: 15,
-    //             message: "Drag to Location",
-    //             focus: true,
-    //             draggable: true,
-    //             icon: local_icons.yellowIcon
-    //         }
-    //     }
-    // });
-
-}
-
-LandmarkEditCtrl.$inject = ['Landmark','$location', '$scope', '$routeParams','db','$timeout','$rootScope'];
-
-
 
 
 
@@ -1612,8 +1686,8 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         "1F" : [40.7618, -73.978],
         "2F" : [40.7612, -73.978],
         "5F" : [40.7607, -73.978],
-        "GARDEN" : [40.7620, -73.977],
-        "EDUCATION": [40.76195, -73.9762]
+        "GARDEN" : [40.7619, -73.9771],
+        "EDUCATION": [40.761999, -73.9764]
     }
 
 

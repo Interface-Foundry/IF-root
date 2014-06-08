@@ -44,6 +44,7 @@ monguurl = require('monguurl');
 			mapID: String
 		},
 		video: String,
+		extraURL: String,
 		etherpad: String,
 		loc_nickname : String, 
 		tags: String, 

@@ -464,6 +464,14 @@ app.post('/api/:collection/create', function(req, res) {
                         lm.video = req.body.video;
                     }
 
+                    if (req.body.people){
+                        lm.people = req.body.people;
+                    }
+        
+                    if (req.body.extraURL){
+                        lm.extraURL = req.body.extraURL;
+                    }
+
                     if (req.body.type == "event"){
 
                         lm.timetext.datestart = req.body.datetext.start;
@@ -540,6 +548,10 @@ app.post('/api/:collection/create', function(req, res) {
                 }
                 if (req.body.video){
                     lm.video = req.body.video;
+                }
+
+                if (req.body.extraURL){
+                    lm.extraURL = req.body.extraURL;
                 }
 
                 if (req.body.type == "event"){
