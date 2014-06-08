@@ -1929,6 +1929,8 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 
     shelfPan('return');
 
+    window.scrollTo(0, 0);
+
     $rootScope.showSwitch = false;
 
     $scope.goBack = function(){
