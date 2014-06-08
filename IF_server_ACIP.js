@@ -349,6 +349,29 @@ app.get('/api/:collection', function(req, res) {
         }
     }
 
+        //querying tweets (social media and internal comments too, eventually)
+    if (req.params.collection == 'instagrams'){
+
+        if (req.query.tag){ //hashtag filtering
+            var qw = {
+               'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+            };
+            db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));
+        }
+
+        else {
+
+            if (req.query.limit){ //limited tweet query
+                limit = parseInt(req.query.limit);
+                db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));
+            }
+
+            else {
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+            }
+        }
+    }
+
 
 });
 

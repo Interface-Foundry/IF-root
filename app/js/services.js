@@ -40,6 +40,7 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.worlds = $resource('api/worlds/:_id', {}, actions);
             db.landmarks = $resource('api/landmarks/:_id:id', {}, actions);
             db.tweets = $resource('api/tweets/:_id', {}, actions);
+            db.instagrams = $resource('api/instagrams/:_id', {}, actions);
             return db;
         }
     ]);
