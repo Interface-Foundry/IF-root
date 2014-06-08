@@ -801,7 +801,9 @@ h4 {
   letter-spacing: -0.9px;
 }
 
-
+.director{
+  width:200px;
+}
 
 @media (max-width: 381px) {
    .index_card h1{

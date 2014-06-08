@@ -71,11 +71,21 @@
 
                   <p class="title" style="">{{landmark.description}}</p>
                   <br>
-      <!--             <div ng-bind-html="">{{landmark.description}}</div>
-                  <br> -->
+
                   <span ng-show="landmark.people"><p class="title" style="font-size:1.8rem; color:black; padding:0px;">Presenters</p></span>
                   <br>
-                  <p class="title" style="">{{landmark.people}}</p>
+
+                  <span ng-hide="lectureHeadshots"><p class="title" style="">{{landmark.people}}</p></span>
+
+                  <span ng-show="lectureHeadshots">
+
+                    <div class="director"><img ng-src="img/AICP/directors/Ringan_Ledwidge.jpg"><p class="title">Ringan Ledwidge [Rattling Stick]</p></div>
+                    <div class="director"><img ng-src="img/AICP/directors/Murro_DGA_DSC3920.jpg"><p class="title">Noam Murro [Biscuit Filmworks]</p></div>
+                    <div class="director"><img ng-src="img/AICP/directors/Keith_Schofield_Headshot.jpg"><p class="title">Keith Schofield  [Caviar]</p></div>
+
+
+                  </span>
+
                   <br>
 
 

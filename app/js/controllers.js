@@ -373,6 +373,16 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     }
 
 
+
+    if ($routeParams.landmarkId == 'AICP_DIGITAL_PRESENTS3'){
+        $scope.lectureHeadshots = true;
+    }
+
+    else {
+        $scope.lectureHeadshots = false;
+    }
+
+
     if ($routeParams.option == 'm'){
 
         shelfPan('partial');
@@ -792,7 +802,7 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
 
     Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
 
-        
+
 
         $scope.landmark = landmark;
         if (landmark.loc_nicknames){
