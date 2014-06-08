@@ -56,6 +56,16 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         shelfPan('return');
         
     }
+
+    $scope.goBackMarkers = function(){
+        // $rootScope.showBackPage = false;
+        $rootScope.showBackMark = false;
+        $rootScope.showBackPage = true;
+        // $rootScope.showBack = false;
+        $rootScope.showMapNav= true;
+        shelfPan('full');
+        refreshMap();
+    }
     
 
 
@@ -133,6 +143,11 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
     // }
 
+    function refreshMap(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
+    }
 
 
     $scope.refreshMap = function(){ 
@@ -284,10 +299,34 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
 
     if ($routeParams.option == 'm'){
+
+        shelfPan('partial');
+        $rootScope.showSwitch = false;
+        $rootScope.showBackPage = false;
+        $rootScope.showBack = false;
+        $rootScope.showMapNav= false;
+        $rootScope.showBackMark = true;
+
+    
+
+        //if m then save search previous stored markers
+
+        // THEN MAKE SPECIAL BACK BUTTON GOES BACK TO MARKERS FULL VIEW MAP (special ng-href to special link)
     }
 
     else {
         shelfPan('partial');
+    }
+
+    if ($routeParams.option == 'm'){
+
+    }
+    else {
+        angular.extend($rootScope, { 
+            markers : {}
+        });
+
+        //process
     }
 
 
@@ -372,27 +411,49 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
         if (landmark.type == "place"){
 
-            // FOR MOMA MAP STUFF
-            angular.extend($rootScope, {
-                center: {
-                    lat: landmark.loc[0],
-                    lng: landmark.loc[1],
-                    zoom: 20,
-                    autoDiscover:false
-                },
-                markers: {
-                    "m": {
+            if ($routeParams.option == 'm'){
+
+                // FOR MOMA MAP STUFF
+                angular.extend($rootScope, {
+                    center: {
                         lat: landmark.loc[0],
                         lng: landmark.loc[1],
-                        message: '<h4><img style="width:70px;" src="'+landmark.stats.avatar+'"><a href=#/post/'+landmark.id+'/m> '+landmark.name+'</a></h4>',
-                        focus: false,
-                        icon: local_icons.yellowIcon
-                    }
-                },
-                tiles: tilesDict.aicp
-            }); 
+                        zoom: 19,
+                        autoDiscover:false
+                    },
+                    tiles: tilesDict.aicp
+                }); 
 
-            refreshMap();  
+                refreshMap(); 
+
+            }
+
+            else { 
+
+                // FOR MOMA MAP STUFF
+                angular.extend($rootScope, {
+                    center: {
+                        lat: landmark.loc[0],
+                        lng: landmark.loc[1],
+                        zoom: 19,
+                        autoDiscover:false
+                    },
+                    markers: {
+                        "m": {
+                            lat: landmark.loc[0],
+                            lng: landmark.loc[1],
+                            message: '<h4><img style="width:70px;" src="'+landmark.stats.avatar+'"><a href=#/post/'+landmark.id+'/m> '+landmark.name+'</a></h4>',
+                            focus: false,
+                            icon: local_icons.yellowIcon
+                        }
+                    },
+                    tiles: tilesDict.aicp
+                }); 
+
+                refreshMap();  
+
+            }
+
         }
 
     }
@@ -420,9 +481,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
         });
     }
 
-    angular.extend($rootScope, { 
-        markers : {}
-    });
+
 }
 LandmarkDetailCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
 
@@ -1067,119 +1126,13 @@ talktagCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope
 
 
 
-function mapCtrl($location, $scope, db, $timeout, $rootScope) {
-
-        $rootScope.showSwitch = false;
-
-        $scope.queryType = "all";
-        $scope.queryFilter = "all";
-
-        queryMap($scope.queryType, $scope.queryFilter); //showing all at first
-
-        //------- For Switching Button Classes ------//
-        $scope.items = ['all', 'events','places','search']; //specifying types, (probably better way to do this)
-        $scope.selected = $scope.items[0]; //starting out with selecting EVENTS 
-
-        $scope.select= function(item) {
-           $scope.selected = item; 
-        };
-
-        $scope.itemClass = function(item) {
-            return item === $scope.selected ? 'btn btn-block btn-lg btn-inverse' : 'btn';
-        };
-        //---------------------------//
-
-        $scope.filter = function(type, filter) {
-            queryMap(type,filter);
-        };
-
-        function queryMap(type, filter){
-
-            db.landmarks.query({ queryType: type, queryFilter: filter },
-
-            function (data) {   //success
-
-                var markerCollect = {};
-
-                for (var i=0;i<data.length;i++){ 
-
-                    markerCollect[data[i].id] = {
-                        lat: data[i].loc[0],
-                        lng: data[i].loc[1],
-                        message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/landmark/'+data[i].id+'> '+data[i].name+'</a></h4>' 
-                    }
-                }
-
-                $timeout(leafletUpdate, 500); //temp solution? leaflet isn't updating properly after callback...
-
-                function leafletUpdate(){
-
-                     angular.extend($scope, { 
-                        amc: global_mapCenter,
-                        markers: markerCollect
-                    });
-                }
-            },
-            function (data) {   //failure
-                //error handling goes here
-            });
-
-        }
-
-        angular.extend($scope, { 
-            amc: global_mapCenter,
-            markers : {}
-        });
-    
-}
-mapCtrl.$inject = [ '$location', '$scope', 'db', '$timeout', '$rootScope'];
 
 
 
 
 
-//handles showing a specific landmark's location on the map, accepts lat long coordinates in routeparams
-function maplocCtrl($location, $scope, $routeParams, db, $rootScope) {
-
-        $rootScope.showSwitch = false;
-
-        $scope.lat = $routeParams.lat;
-        $scope.lng = $routeParams.lng;
-      
-        angular.extend($scope, {
-                amc: {
-                    lat: $scope.lat,
-                    lng: $scope.lng,
-                    zoom: global_mapCenter.zoom
-                },
-                markers: {
-                    m: {
-                        lat: $scope.lat,
-                        lng: $scope.lng,
-                        message: '<h4><a href=#/landmark/'+$routeParams.id+'>'+$routeParams.id+'</a></h4>',
-                        focus: true
-                    }
-
-                }
-            });
-
-    $scope.goBack = function(){
-        window.history.back();
-    }
-
-}
-maplocCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope'];
 
 
-
-
-
-var sessionsNow = function ($scope, db) {
-
-
-    $scope.landmarks = db.landmarks.query({ queryType: 'events', queryFilter: 'now' });
-};
-sessionsNow.$inject = ['$scope', 'db'];
 
 
 
@@ -1513,6 +1466,7 @@ LecturesCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData', 
 function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     shelfPan('return');
+
     window.scrollTo(0, 0);
 
     $rootScope.showSwitch = true;
@@ -1700,9 +1654,13 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
       $location.path('talk');
     };
 
+    var dumbVar = "'partial'";
+
 
     //----- MAP QUERY ------//
     $scope.queryMap = function(type, cat){  
+
+        window.scrollTo(0, 0);
 
         db.landmarks.query({ queryType: type, queryFilter: cat},
 
@@ -1715,18 +1673,20 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
                 markerCollect[data[i].id] = {
                     lat: data[i].loc[0],
                     lng: data[i].loc[1],
-                    message: '<h4><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'> '+data[i].name+'</a></h4>',
+                    message: '<h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
                     focus: true, 
                     icon: local_icons.yellowIcon
                 }
             }
 
+            //$rootScope.map.markers.push({ lat: data[i].loc[0], lng: data[i].loc[1], message: 'asdf', draggable: false }); 
+
             angular.extend($rootScope, {
-                // center: {
-                //     lat: data[0].loc[0],
-                //     lng: data[0].loc[1],
-                //     zoom: 22
-                // },
+                center: {
+                    lat: data[0].loc[0],
+                    lng: data[0].loc[1],
+                    zoom: 18
+                },
                 markers: markerCollect,
                 tiles: tilesDict.aicp
             });
@@ -1744,6 +1704,12 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     });
 
     //-------------------------// 
+
+
+    $scope.mapIconClick = function() {
+      
+    };
+
 
 }
 ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
@@ -1886,3 +1852,18 @@ function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
 
 }
 MenuCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
+
+
+
+// function FetchViewData($scope) {
+//     console.log('asdf');
+//     // var test_link = "<MY LINK>";
+//     // $http.get(test_link).success( function(data) {
+//     //     $scope.viewData = data;
+//     // });
+//     // $scope.deleteRecord = function(docURL) {
+//     //     console.log(docURL);
+
+//     //     $http.delete(docURL);
+//     // }   
+// }

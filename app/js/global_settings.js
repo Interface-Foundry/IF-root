@@ -208,8 +208,8 @@ function shelfPan(amount){
   
       if ( $("body").hasClass("lense") ) {
 
-        console.log(amount);
-        console.log('lense');
+        // console.log(amount);
+        // console.log('lense');
 
         $('body').toggleClass('lense');
 
@@ -229,8 +229,8 @@ function shelfPan(amount){
 
       else if ( $("body").hasClass("lense2") ) {
 
-        console.log(amount);
-        console.log('lense2');
+        // console.log(amount);
+        // console.log('lense2');
 
         he = $(window).height();
 
@@ -266,8 +266,8 @@ function shelfPan(amount){
 
       else {
 
-        console.log(amount);
-        console.log('noclass');
+        // console.log(amount);
+        // console.log('noclass');
 
         he = $(window).height();
 
@@ -297,8 +297,8 @@ function shelfPan(amount){
 
       if ( $("body").hasClass("lense") ) {
 
-        console.log(amount);
-        console.log('lense');
+        // console.log(amount);
+        // console.log('lense');
 
         $('body').toggleClass('lense');
         // $('body').toggleClass('lense2');
@@ -317,8 +317,8 @@ function shelfPan(amount){
 
       else if ( $("body").hasClass("lense2") ) {
 
-        console.log(amount);
-        console.log('lense2 else if');
+        // console.log(amount);
+        // console.log('lense2 else if');
         $('body').toggleClass('lense2');
 
         $("#shelf").css({
@@ -333,8 +333,8 @@ function shelfPan(amount){
       }
 
       else {
-        console.log(amount);
-        console.log('lense2 else');
+        // console.log(amount);
+        // console.log('lense2 else');
         $('body').toggleClass('lense2');
 
         $("#shelf").css({

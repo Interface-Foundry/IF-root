@@ -5,7 +5,7 @@
 angular.module('IF-directives', [])
 .directive('myPostRepeatDirective', function() {
 
-	console.log('asdf');
+	
   return function(scope, element, attrs) {
     if (scope.$last){
       // iteration is complete, do whatever post-processing

@@ -97,6 +97,8 @@
 
           <span ng-show="showBack"><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
           <span ng-show="showBackPage"><button class="btn backbtn" ng-click="goBackPage()">< BACK </button></span>
+          <span ng-show="showBackMark"><button class="btn backbtn" ng-click="goBackMarkers()">< BACK </button></span>
+
 
           <!-- MAP NAV BUTTONS -->
           <div ng-show="showMapNav" class="btn-group bubbleSwitcher card social" style="padding-bottom:0px; margin-top:0px;">
@@ -112,7 +114,11 @@
         <div id="wrapper">
 
               <div id="window" style="position:absolute;">
-                  <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers"></leaflet>
+                  <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers" >
+
+<!--                     <span ng-repeat="marker in markers" ng-click="mapIconClick()">{{marker.markURL}}</span>
+ -->
+                  </leaflet>
               </div>
 
               <div id="shelf">
