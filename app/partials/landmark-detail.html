@@ -66,7 +66,8 @@
                 <h1><!-- Happening Now --></h1>
                 <div class="container">
                   
-                  <a target="_blank" href="{{landmark.extraURL}}"><p class="title">Flickr Links</p></a>
+
+                  <span ng-show="landmark.extraURL"><a target="_blank" href="{{landmark.extraURL}}"><p class="title">Flickr Links</p></a></span>
 
                   <p class="title" style="">{{landmark.description}}</p>
                   <br>
