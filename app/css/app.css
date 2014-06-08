@@ -444,9 +444,9 @@ body.lense2 #shelf {
 
 
 .partner {
-  width:122px;
+  width:67px;
   opacity: 0.8;
-  padding-left: 13px;
+  padding-left: 7px;
 
 }
 
@@ -797,6 +797,9 @@ h4 {
 }
 
 
+.baseHours{
+  letter-spacing: -0.9px;
+}
 
 
 
@@ -846,6 +849,23 @@ h4 {
    #smoking{
     margin-left: -17px !important;
    } 
+
+   .specialIndex{
+    letter-spacing: -1.2px !important;
+
+   }
+
+   .card.social .footer .typcn-export{
+    display: none;
+   }
+
+   .menupic{
+    max-width: 67%;
+   }
+
+  .menupic img{
+    width:198px;
+   }
 }
 
 
