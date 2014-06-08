@@ -1652,6 +1652,21 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
 
+   
+    if ($location.$$path == '/showPM/'){
+        
+        $scope.showBootCamp = false;
+        $scope.showMoMA = true;
+    }
+
+    if ($location.$$path == '/show/'){
+        $scope.showMoMA = false;
+        $scope.showBootCamp = true;
+    }
+
+
+
+
     $scope.tweets = db.tweets.query({limit:1});
     $scope.instagrams = db.instagrams.query({limit:1});
 

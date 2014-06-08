@@ -15,7 +15,9 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
 
       when('/awards', {templateUrl: 'partials/awards.html', controller: AwardsCtrl}).
 
-      when('/show', {templateUrl: 'partials/show.html', controller: ShowCtrl}).
+      when('/show/', {templateUrl: 'partials/show.html', controller: ShowCtrl}).
+
+      when('/showPM/', {templateUrl: 'partials/show.html', controller: ShowCtrl}).
 
       when('/list/:category/:filter', {templateUrl: 'partials/list.html', controller: ListCtrl}).
 
