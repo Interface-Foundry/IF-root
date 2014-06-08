@@ -6,7 +6,7 @@
   <!-- 2 COL CARDS -->
     <div class="row" id="card-container">
 
-        <div class="iso-card card" ng-repeat="landmark in landmarksList" my-post-repeat-directive> 
+        <div class="card" ng-repeat="landmark in landmarksList"> 
             <a ng-href="#/post/{{landmark.id}}">
               <div class="container">
                 <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
@@ -24,12 +24,5 @@
 
     <div id="gapfill" style="height:900px;"></div>
 
-<style type="text/css" media="screen">
-  .iso-card{
-    width: 50%;
-    margin-bottom: 15px;
-  }
-
-</style>
 
 
