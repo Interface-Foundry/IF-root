@@ -1298,9 +1298,7 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
 
     $scope.tweets = db.tweets.query({limit:1});
-    $scope.instagrams = db.instagrams.query({limit:1}, function(data){
-        console.log(data);
-    });
+    $scope.instagrams = db.instagrams.query({limit:1});
 
 
     angular.extend($rootScope, {
@@ -1483,6 +1481,7 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     $rootScope.showBackPage = false;
 
     $scope.tweets = db.tweets.query({limit:1});
+    $scope.instagrams = db.instagrams.query({limit:1});
 
     angular.extend($rootScope, {
         center: {
@@ -1642,6 +1641,7 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
 
     $scope.tweets = db.tweets.query({limit:1});
+    $scope.instagrams = db.instagrams.query({limit:1});
 
     angular.extend($rootScope, {
         center: {
@@ -1651,13 +1651,6 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         },
         tiles: tilesDict.aicp
     });
-
-
-
-   
-      
-   
-
 
 
     //hiding bubble switcher and showing map nav instead
