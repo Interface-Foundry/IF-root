@@ -792,9 +792,11 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
 
     Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
 
+        
+
         $scope.landmark = landmark;
         if (landmark.loc_nicknames){
-            $scope.landmark.location = landmark.loc_nicknames[0];
+            $scope.landmark.location = landmark.loc_nicknames;
         }
         
         $scope.landmark.idCheck = landmark.id;
