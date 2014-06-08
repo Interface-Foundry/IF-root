@@ -571,6 +571,23 @@ li {
     color: red;
 }
 
+.iconMenu{
+  -webkit-transform: translateY(716px);
+}
+
+#iconMenu {
+    width:100px;
+    height:100px;
+}
+
+.blue {
+     -webkit-transform: translateY(716px);
+}
+
+.red {
+     -webkit-transform: translateY(1000px); 
+}
+
 
 .card .content{
   margin: 0;
@@ -780,6 +797,9 @@ h4 {
 }
 
 
+
+
+
 @media (max-width: 381px) {
    .index_card h1{
       font-size:1.5rem;
@@ -793,4 +813,42 @@ h4 {
    .card .header{
       letter-spacing:-0.2px;
    }
+
+   .navIcons label img{
+    width:4.1rem !important;
+    
+   }
+
+  .navIcons label{
+    padding:6px ;    
+   }
+
+   #food{
+    margin-left: -17px !important;
+   }
+
+  #bars{
+    margin-left: -17px !important;
+   }
+
+   #sponsors{
+    margin-left: -20px !important; 
+   }
+  
+   #washrooms{
+    margin-left: -20px !important;
+   }
+
+   #exhibits{
+    margin-left: -19px !important;
+   }
+
+   #smoking{
+    margin-left: -17px !important;
+   } 
 }
+
+
+
+
+

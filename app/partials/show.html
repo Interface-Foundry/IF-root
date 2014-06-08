@@ -1,9 +1,8 @@
 
 
 
-
   <!-- INDEX CARD -->
-  <div class="row index_card show_index" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch();">
+  <div class="row index_card show_index" class="ng-style:iconMenu;" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch();">
     <div class="col-lg-12">
       <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
       
@@ -102,8 +101,8 @@
           <div class="col-xs-4 card col-card-2">
             <h1>EXPLORE</h1>
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','food');">
-              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/food.png">
-              <p class="searchTitle" style="padding-top:10px;">Food</p>          
+              <img id="food" style="width:90px; padding-left:25px; margin-left:-9px;" src="img/AICP/icons/food.png">
+              <p class="searchTitle" style="padding-top:10px; ">Food</p>          
             </div>
           </div>
 
@@ -111,7 +110,7 @@
           <div class="col-xs-4 card 2col">
             <h1 style="color:#000;">...</h1> 
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','bars');">
-              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/bar.png">
+              <img id="bars" style="width:90px; padding-left:25px; margin-left:-9px;" src="img/AICP/icons/bar.png">
               <p class="searchTitle" style="padding-top:10px;">Bars</p>
             </div>
           </div>
@@ -120,8 +119,8 @@
           <div class="col-xs-4 card 2col">
             <h1 style="color:#000;">...</h1>
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','sponsors');">
-              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/sponsors.png">
-              <p class="searchTitle" style="padding-top:10px;">Sponsors</p>
+              <img id="sponsors" style="width:90px; padding-left:25px; margin-left:-10px;" src="img/AICP/icons/sponsors.png">
+              <p class="searchTitle" style="margin-top:-8px;">Sponsor Lounges</p>
             </div>
           </div>
 
@@ -173,7 +172,7 @@
           <div class="col-xs-4 card col-card-2">
             <h1>EXPLORE</h1>
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','washrooms');">
-              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/washrooms.png">
+              <img id="washrooms" style="width:90px; padding-left:25px; margin-left:-12px;" src="img/AICP/icons/washrooms.png">
               <p class="searchTitle" style="padding-top:10px;">Washrooms</p>          
             </div>
           </div>
@@ -182,7 +181,7 @@
           <div class="col-xs-4 card 2col">
             <h1 style="color:#000;">...</h1> 
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','exhibits');">
-              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/coolsculpt.png">
+              <img id="exhibits" style="width:90px; padding-left:25px;  margin-left:-10px;" src="img/AICP/icons/coolsculpt.png">
               <p class="searchTitle" style="padding-top:10px;">Exhibits</p>
             </div>
           </div>
@@ -191,7 +190,7 @@
           <div class="col-xs-4 card 2col">
             <h1 style="color:#000;">...</h1>
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','smoking');">
-              <img style="width:90px; padding-left:25px;" src="img/AICP/icons/smoking.png">
+              <img id="smoking" style="width:90px; padding-left:25px;  margin-left:-10px;" src="img/AICP/icons/smoking.png">
               <p class="searchTitle" style="padding-top:10px;">Smoking</p>
             </div>
           </div>

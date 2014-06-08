@@ -47,6 +47,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showSwitch = true;
         $rootScope.showBack = false;
         $rootScope.showMapNav = false;
+        $rootScope.showNavIcons = false;
     }
 
     $scope.goBackPage = function(){
@@ -54,6 +55,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showMapNav = false;
         window.history.back();
         shelfPan('return');
+
         
     }
 
@@ -65,8 +67,13 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showMapNav= true;
         shelfPan('full');
         refreshMap();
+
     }
-    
+
+
+
+
+
 
 
 //--- GEO LOCK -----//
@@ -119,6 +126,9 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         markers : {}
     });
 
+
+
+
     //for bubble widget switcher
     $scope.goPath = function(url){
         shelfPan('return');
@@ -155,6 +165,69 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
             map.invalidateSize();
         });
     }
+
+
+ 
+  
+
+
+    //----- MAP QUERY ------//
+    $scope.queryMap = function(type, cat){  
+
+        window.scrollTo(0, 0);
+
+        
+        $rootScope.singleModel = 1;
+
+        $rootScope.iconModel = cat;
+
+    
+        db.landmarks.query({ queryType: type, queryFilter: cat},
+
+        function (data) {   //success
+
+            angular.extend($rootScope, { 
+                markers : {}
+            });
+
+            var markerCollect = {};
+
+            var dumbVar = "'partial'";
+
+            for (var i=0;i < data.length;i++){ 
+
+                markerCollect[data[i].id] = {
+                    lat: data[i].loc[0],
+                    lng: data[i].loc[1],
+                    message: '<h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+                    focus: true, 
+                    icon: local_icons.yellowIcon
+                }
+            }
+
+            //$rootScope.map.markers.push({ lat: data[i].loc[0], lng: data[i].loc[1], message: 'asdf', draggable: false }); 
+
+            angular.extend($rootScope, {
+                center: {
+                    lat: data[0].loc[0],
+                    lng: data[0].loc[1],
+                    zoom: 18
+                },
+                markers: markerCollect,
+                tiles: tilesDict.aicp
+            });
+
+        },
+        function (data) {   //failure
+            //error handling goes here
+        });
+
+    }
+
+
+
+
+    //-------------------------// 
 
 
       // //**** MAP STUFF *****//
@@ -916,7 +989,7 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
             center: {
                 lat: $scope.landmark.loc[0],
                 lng: $scope.landmark.loc[1],
-                zoom: 15
+                zoom: 17
             },
             markers3: {
                 m: {
@@ -1143,6 +1216,7 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     shelfPan('return');
     window.scrollTo(0, 0);
+
  
     $rootScope.showSwitch = true;
     $rootScope.showBackPage= false;
@@ -1155,9 +1229,10 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         center: {
             lat: 40.7615,
             lng: -73.9777,
-            zoom: 12
+            zoom: 9
         },
-        tiles: tilesDict.mapbox
+        tiles: tilesDict.mapbox,
+        markers : {}
     });
 
     //hiding bubble switcher and showing map nav instead
@@ -1165,11 +1240,14 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         if ($rootScope.showSwitch == true){
             $rootScope.showSwitch = false;
             $rootScope.showBack = true;
+
+
         }
 
         else {
             $rootScope.showSwitch = true;
             $rootScope.showBack = false;
+
         }
     }
 
@@ -1310,6 +1388,17 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
 
     shelfPan('return');
     window.scrollTo(0, 0);
+
+
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.7615,
+            lng: -73.9777,
+            zoom: 12
+        },
+        tiles: tilesDict.mapbox,
+        markers : {}
+    });
 
     $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
     $rootScope.showSwitch = true;
@@ -1485,18 +1574,36 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         tiles: tilesDict.aicp
     });
 
+
+
+   
+      
+   
+
+
+
     //hiding bubble switcher and showing map nav instead
     $scope.hideSwitch = function(){
+
+        //
         if ($rootScope.showSwitch == true){
             $rootScope.showSwitch = false;
             $rootScope.showMapNav = true;
             $rootScope.showBack = true;
+            $rootScope.showNavIcons = true;
+            // $( '#shelf' ).toggleClass( "iconMenu" );
+            // $('.index_card .h1.blue').toggleClass('red');
+            // $( "#shelf" ).addClass( ".iconMenu !important" );
+
         }
 
-        else {
+        //
+        else {  
             $rootScope.showSwitch = true;
             $rootScope.showMapNav = false;
             $rootScope.showBack = false;
+            $rootScope.showNavIcons = false;
+
         }
     }
 
@@ -1661,6 +1768,11 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $scope.queryMap = function(type, cat){  
 
         window.scrollTo(0, 0);
+
+
+        $rootScope.singleModel = 1;
+
+        $rootScope.iconModel = cat;
 
         db.landmarks.query({ queryType: type, queryFilter: cat},
 

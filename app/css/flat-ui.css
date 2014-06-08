@@ -543,12 +543,13 @@ h6 {
 }
 .btn.btn-primary {
   background-color: #1abc9c;
+
 }
 .btn.btn-primary:hover,
 .btn.btn-primary:focus,
 .btn-group:focus .btn.btn-primary.dropdown-toggle {
- /* background-color: #48c9b0;*/
- opacity:0.6;
+  
+ opacity:0.9;
 }
 
 
@@ -556,7 +557,16 @@ h6 {
 .btn-group.open .btn.btn-primary.dropdown-toggle,
 .btn.btn-primary.active {
 /*  background-color: #16a085;*/
-  border-bottom: solid 3px white;
+  
+
+  /*background-color: #cecece;*/
+}
+
+
+
+.btn.btn-primary.active.map{
+ 
+  border-top: solid 4px #2ECFFF;
 }
 
 .btn.btn-primary.active.awards{
