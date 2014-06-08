@@ -42,6 +42,7 @@ BubbleRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
+
     $scope.goBack = function(){
         shelfPan('return');
         $rootScope.showSwitch = true;
@@ -55,9 +56,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showMapNav = false;
         window.history.back();
         shelfPan('return');
-        $rootScope.showNavIcons = false;
-
-        
+        $rootScope.showNavIcons = false;      
     }
 
     $scope.goBackMarkers = function(){
@@ -68,8 +67,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showMapNav= true;
         shelfPan('full');
         refreshMap();
-         $rootScope.showNavIcons = true;
-
+        $rootScope.showNavIcons = true;
     }
 
 

@@ -5,7 +5,7 @@ var twitter = require('ntwitter'),
 var credentials = require('./credentials.js');
 //var hashtag = require('../app/js/global_settings.js').hashtag;
 
-var hashtag = "#awards";
+var hashtag = "#aicpshow";
 
 
 var t = new twitter({

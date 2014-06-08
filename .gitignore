@@ -46,4 +46,4 @@ build.xml
 ehthumbs.db
 Thumbs.db
 
-credentials.js
+#credentials.js
