@@ -618,23 +618,45 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
     }
 
 
+    // angular.extend($scope, {
+    //     // amc: {
+    //     //     lat: $scope.landmark.loc[0],
+    //     //     lng: $scope.landmark.loc[1],
+    //     //     zoom: global_mapCenter.zoom
+    //     // },
+    //     markers2: {
+    //         m: {
+    //             lat: $scope.center.lat,
+    //             lng: $scope.center.lng,
+    //             message: "Drag to Location on map",
+    //             focus: true,
+    //             draggable: true,
+    //             icon: local_icons.yellowIcon
+    //         }
+    //     }
+    // });
+
+
+
     angular.extend($scope, {
-        // amc: {
-        //     lat: $scope.landmark.loc[0],
-        //     lng: $scope.landmark.loc[1],
-        //     zoom: global_mapCenter.zoom
-        // },
+        center: {
+            lat: 40.76150,
+            lng: -73.9769,
+            zoom: 17
+        },
         markers2: {
-            m: {
-                lat: $scope.center.lat,
-                lng: $scope.center.lng,
+            "m": {
+                lat: 40.76150,
+                lng: -73.9769,
                 message: "Drag to Location on map",
                 focus: true,
                 draggable: true,
                 icon: local_icons.yellowIcon
             }
-        }
+        },
+        tiles: tilesDict.aicp
     });
+
 
 
     angular.element('#fileupload').fileupload({
