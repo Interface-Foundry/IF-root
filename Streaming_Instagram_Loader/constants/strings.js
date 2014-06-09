@@ -22,10 +22,7 @@ exports.IMAGE_SAVE_DESTINATION = '../app/images/instagram/';
 // Credentials
 
 exports.DEFAULT_DB_URL = 'mongodb://localhost/aicp';
-exports.ACCESS_TOKEN = 'xxx';
-// exports.CLIENT_ID = 'xxx';
-// exports.CLIENT_SECRET= 'xxx';
-
+exports.ACCESS_TOKEN = '519da9c304a147ddb12e0b58bf2a0598';
 exports.CLIENT_ID = '9069a9b469824abea0d0cce7acb51fa8';
 exports.CLIENT_SECRET= 'cb7a9f7cdb67498bbf0641b6d7489604';
 

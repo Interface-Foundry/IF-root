@@ -80,8 +80,10 @@ var saveImage = function(imageObject) {
   var createdTime = imageObject[strings.IMAGE_OBJECT_KEY_CREATED_TIME];
   createdTime = convertUnixTimestampToDate(createdTime);
 
+  var objectIDForDB = imageObject[strings.IMAGE_OBJECT_KEY_ID]
+
   var newInstagramImage = instagramModel.instagram({
-    objectID: imageObject[strings.IMAGE_OBJECT_KEY_ID],
+    objectID: objectIDForDB,
     user: {
       name: userObject[strings.IMAGE_OBJECT_KEY_USER_NAME],
       screen_name: userObject[strings.IMAGE_OBJECT_KEY_USER_SCREEN_NAME],
@@ -97,16 +99,32 @@ var saveImage = function(imageObject) {
     created: new Date()
   });
 
-  newInstagramImage.save(function(err) {
-    if(err) {
-      console.log('An error occured while saving image');
-      console.log(err);
-    }
-    else {
-      console.log('Image saved successfully');
-    }
+  instagramModel.instagram.find({objectID:objectIDForDB},
+    function(err, instagrams) {
+      if(err) {
+        console.log(err);
+        return;
+      }
+
+      console.log("Instgrams following;");
+      console.log(instagrams);
+
+      if(instagrams.length > 0) {
+        console.log("Will return without saving");
+        return;
+      }
+
+      newInstagramImage.save(function(err) {
+        if(err) {
+          console.log('An error occured while saving image');
+          console.log(err);
+        }
+        else {
+          console.log('Image saved successfully');
+        }
+      });
+      return;
   });
-  return;
 }
 
 var downloadWithImageList = function(listImageURL) {
