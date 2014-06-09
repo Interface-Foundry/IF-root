@@ -1051,6 +1051,8 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
             $scope.landmark.loc = [globalEditLoc.lat,globalEditLoc.lng];
         }
 
+        console.log($scope.landmark);
+
         db.landmarks.create($scope.landmark, function(response){
 
             $location.path('/post/'+response[0].id+'/new');
