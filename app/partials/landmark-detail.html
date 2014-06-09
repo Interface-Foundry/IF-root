@@ -70,7 +70,7 @@
  -->
                   
 
-                  <p class="title" style=""><span ng-hide="businessBootcamp">{{landmark.description}}</span></p>
+                  <span ng-hide="businessBootcamp"><p class="title" ng-bind-html="description"></p></span>
                   <br>
                     <span ng-show="mainImageUrl"><img ng-src="{{mainImageUrl}}"  style="width:70px; height:70px;"><br></span>
 

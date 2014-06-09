@@ -438,6 +438,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
         }
 
         $scope.people = landmark.people;
+        $scope.description = landmark.description;
 
         //if ____
         //$scope.htmlDescription = landmark.description;
