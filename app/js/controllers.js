@@ -371,7 +371,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     }
 
 
-
+    //CHANGE TO AICP other one from changes maybe
     if ($routeParams.landmarkId == 'AICP_DIGITAL_PRESENTS3'){
         $scope.lectureHeadshots = true;
     }
@@ -379,6 +379,17 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     else {
         $scope.lectureHeadshots = false;
     }
+
+
+    //CHANGE TO AICP other one from changes maybe
+    if ($routeParams.landmarkId == 'BUSINESS_AFFAIRS_BOOTCAMP'){
+        $scope.businessBootcamp = true;
+    }
+
+    else {
+        $scope.businessBootcamp = false;
+    }
+
 
 
     if ($routeParams.option == 'm'){

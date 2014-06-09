@@ -106,11 +106,11 @@
 
           <!-- MAP NAV BUTTONS -->
           <div ng-show="showMapNav" class="btn-group bubbleSwitcher card social" style="padding-bottom:0px; margin-top:0px;">
-              <button ng-click="mapPan('1F');">1F</button>
-              <button ng-click="mapPan('2F');">2F</button>
-              <button ng-click="mapPan('5F');">5F</button>
-              <button ng-click="mapPan('GARDEN');">GARDEN</button>
-              <button ng-click="mapPan('EDUCATION');">EDUCATION</button>
+              <div class="btn btn-primary floor" ng-click="mapPan('1F');">1F</div>
+              <div class="btn btn-primary floor" ng-click="mapPan('2F');">2F</div>
+              <div class="btn btn-primary floor" ng-click="mapPan('5F');">5F</div>
+              <div class="btn btn-primary floor" ng-click="mapPan('GARDEN');">GARDEN</div>
+              <div class="btn btn-primary floor" ng-click="mapPan('EDUCATION');">EDUCATION</div>
           </div>
 
       </div>

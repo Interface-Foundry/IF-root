@@ -805,6 +805,19 @@ h4 {
   width:200px;
 }
 
+.floor{
+  background-color: white !important;
+  color:black !important;
+  border-right:1px black solid !important;
+}
+
+@media (max-width: 378px) {
+
+  .floor{
+    padding: 6px !important; 
+  }
+}
+
 @media (max-width: 381px) {
    .index_card h1{
       font-size:1.5rem;
@@ -870,7 +883,17 @@ h4 {
    }
 }
 
+@media (max-width: 319px) {
 
+  .navIcons label{
+    padding:3px ;    
+   }
+
+  .floor{
+    padding: 2.5px !important; 
+  }
+
+}
 
 
 
