@@ -751,10 +751,11 @@ li {
 }
 
 .index_card h1{
-  font-size: 1.9rem;
+  font-size: 1.7rem;
   padding: 0;
   margin: 0;
   font-family:'simplreg', sans-serif;
+
 }
 
 .index_card h2{
@@ -813,13 +814,17 @@ h4 {
 .floor{
   background-color: white !important;
   color:black !important;
-  border-right:1px black solid !important;
+  padding: 8px !important; 
+  margin-right: 3px;
 }
+
+
 
 @media (max-width: 378px) {
 
   .floor{
-    padding: 6px !important; 
+    padding: 5px !important; 
+
   }
 }
 
