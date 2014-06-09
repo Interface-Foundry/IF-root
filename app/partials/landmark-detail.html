@@ -53,8 +53,7 @@
  -->  <span ng-show="option == 'new' "><button class="btn" ng-click="edit()"> EDIT <i class="fui-new"></i></button></span>
 
 
-<!--   <img ng-src="{{mainImageUrl}}" class="landmark" style="width:90px; height:90px;">
- -->
+
 
     <!-- 4 COL CARDS -->
     <div class="row 4-col">
@@ -67,15 +66,19 @@
                 <div class="container">
                   
 
-                  <span ng-show="landmark.extraURL"><a target="_blank" href="{{landmark.extraURL}}"><p class="title" style="font-size:1.8rem;">Flickr Links</p></a> <br></span>
+<!--                   <span ng-show="landmark.extraURL"><a target="_blank" href="{{landmark.extraURL}}"><p class="title" style="font-size:1.8rem;">Flickr Links</p></a> <br></span>
+ -->
+                  
 
-                  <p class="title" style="">{{landmark.description}}</p>
+                  <p class="title" style=""><span ng-hide="businessBootcamp">{{landmark.description}}</span></p>
+                  <br>
+                    <span ng-show="mainImageUrl"><img ng-src="{{mainImageUrl}}"  style="width:70px; height:70px;"><br></span>
+
+
+                  <span ng-show="landmark.people"><span ng-hide="businessBootcamp"><span ng-hide="landmark.type=='place'"><p class="title" style="font-size:1.8rem; color:black; padding:0px;">Presenters</p></span></span></span>
                   <br>
 
-                  <span ng-show="landmark.people"><p class="title" style="font-size:1.8rem; color:black; padding:0px;">Presenters</p></span>
-                  <br>
-
-                  <span ng-hide="lectureHeadshots || businessBootcamp"><p class="title" style="">{{landmark.people}}</p></span>
+                  <span ng-hide="lectureHeadshots || businessBootcamp"><p class="title" ng-bind-html="people"></p></span>
 
                   <span ng-show="lectureHeadshots">
 
@@ -88,41 +91,89 @@
 
                   <span ng-show="businessBootcamp">
 
-
-                          <!-- 4 COL CARDS -->
+                        <!-- 4 COL CARDS -->
                       <div class="row 4-col">
-                            <div class="col-xs-12">
+                            <div class="col-xs-12" style="margin-top:-37px; margin-bottom:-36px;">
 
-                              <div class="row">
-                                <!-- HAPPENING NOW -->
+                              <div class="row">         
                                 <div class="col-xs-12 card">
                                
-                               
-
                                     <div class="container more">
-                                      <div class="header">8:30 AM <span class="pull-right">BASECAMP</span></div>
+                                      <div class="header">8:30 AM - 9:15 AM</div>
                                       
-                                      <span class="pull-right"><img width="110" src="img/AICP/AICP_bootcamp_logo.svg"></span>
-                                      <p class="title">Breakfast</p>
+                                      <p class="title">Check-in, Breakfast & Networking</p>
 
-                                      <div class="header">9:15 AM</div>
-                                      <p class="title">Leo Burnett Best Practices</p>
+                                      <br>
+                                      <div class="header">9:15 AM - 10:00 AM</div>
+                                      <p class="title" style="font-size:1.7rem; color:black; padding:0px;">Can Cooperative Guidelines Lead To True Efficiency?</p>
+                                      <br>
+                                      <p class="title">
+                                        Members of AICP’s leadership and production executives from Leo Burnett discuss the benefits of laying out the “terms of engagement” on the table as transparent business practices. 
+                                        Panelists Include:
+                                        <br><br>
+                                        Vincent Geraghty <br>
+                                        • Executive VP/Executive Director of Production, Leo Burnett
+                                        <br><br>
+                                        Eriks Krumins <br>
+                                        • Executive Producer, Gorgeous
+                                        <br><br>
+                                        Jerry Solomon <br>
+                                        • Managing Partner, Persuade Content
+                                        <br><br>
+                                        Matt Miller <br>
+                                        • President/CEO of The AICP
+                                      </p>
+                                      <br>
+                                      <br>
+                                      <div class="header">10:00 AM - 10:15 AM</div>
+                                      
+                                      <p class="title">Coffee Break (featuring premium Hawaiian coffee)</p>
 
-                                      <div class="header">10:15 AM</div>
-                                      <p class="title">Production Insurance</p>
+                                      <br>
 
-                                      <div class="header">11:15 AM</div>
-                                      <p class="title">Legal Issues</p>
+                                      <br>
+                                      <div class="header">10:15 AM - 11:00 AM</div>
+                                      <p class="title" style="font-size:1.7rem; color:black; padding:0px;">The State of Production Insurance. Are you covered or exposed?</p>
+                                      <br>
+                                      <p class="title">
+                                        From Wrap-up to E&O, everyone needs to be a risk management specialist these days.  ProSight Specialty Insurance will host a discussion with other insurance experts regarding the complexities that lurk behind every set. Panelists include:
+                                        <br><br>
+                                        Joe Finnegan <br>
+                                        • President of Program Underwriting, ProSight Specialty Insurance
+                                        <br><br>
+                                        A. LeConte Moore<br> 
+                                        • Managing Director, DeWitt Stern
+                                        <br><br>
+                                        Scott Taylor <br>
+                                        • President, Taylor & Taylor
+                                        <br><br>
+                                        Matt Miller <br>
+                                        • President/CEO of The AICP
+                                        <br>
+                                      </p>
+
+                                      <br><br>
+                                      <div class="header">11:15 AM - 12:00 PM</div>
+                                      <p class="title" style="font-size:1.7rem; color:black; padding:0px;">Can you say “Lawsuit”? Everyone Else Can…</p>
+                                      <br>
+                                      <p class="title">
+                                        Some of the best "Legal Eagles" in the industry discuss the parameters of what everyone needs to know regarding intellectual property, copyright, trademarks and patents in today’s litigious media business. Get out your notebooks and take some tips from the following experts:
+                                        <br><br>
+                                        Tamany Bentz <br>
+                                        • Attorney, Venable
+                                        <br><br>
+                                        Jeffrey Greenbaum <br>
+                                        • Managing Partner, Frankfurt Kurnit Klein & Selz
+                                        <br><br>
+                                        Brendan McFeely <br>
+                                        • Senior Associate, Kane Kessler
+                                      </p>                                                                            
 
                                     </div>
 
-                                 
-                                  <div class="footer show-footer"></div>
                                 </div>
-
                             </div>
-                           
-
+                        
                           </div>
                       </div>
     

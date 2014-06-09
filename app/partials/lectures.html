@@ -1,4 +1,12 @@
 
+
+<style>
+  .card .container{
+    min-height: 142px !important;
+  }
+
+</style>
+
     <!-- INDEX CARD -->
     <div class="row index_card lecture_index" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch();">
       <div class="col-lg-12">
@@ -8,6 +16,37 @@
         <h2>WEDNESDAY, JUNE 11</h2>
         <h3>BASECAMP (8:30am - 4pm) & MoMA</h3>
       </div>
+    </div>
+
+
+    <!-- 4 COL CARDS -->
+    <div class="row 4-col">
+          <div class="col-xs-12">
+
+            <div class="row">
+              <!-- HAPPENING NOW -->
+              <div class="col-xs-12 card">
+                <h1>Wednesday Afternoon</h1>
+                <a ng-href="#/post/AICP_DIGITAL_PRESENTS3"> <!-- ///////////////////////// -->
+                  <div class="container">
+                    <div class="header">2:30 PM <span class="pull-right">MoMA</span></div>
+                    
+                    <!-- <p class="content">Lorem Ipsum dolor sit amet, consectetur adipiscing elit.</p> -->
+                    <!-- <img src="img/icons/food.png"> --><span class="pull-right"><img width="110" src="img/AICP/AICP_lecture_logo.svg"></span>
+                    <p class="title">The AICP Directors Lecture Series At Museum of Modern Art <br><br> Full AICP Week Passholders Only</p>
+                      
+                    
+                       <!--  <p>MORE <span class="typcn typcn-th-list"></span></p> -->
+
+                  </div>
+                </a>
+                <div class="footer lecture-footer"></div>
+              </div>
+
+          </div>
+          <!-- <div class="footer">MORE ></div> -->
+
+        </div>
     </div>
 
 
@@ -38,7 +77,11 @@
       <span ng-show="landmarksUpcoming.length > 0">
 
         <div class="col-xs-6 card 2col">
-          <h1>Upcoming</h1>
+
+          <h1>Next Event</h1>
+          <!-- CHANGE TO Next Event on DAY=true -->
+
+
          <li ng-repeat="landmark in landmarksUpcoming | limitTo:upcomingLimit">  
             <a ng-href="#/post/{{landmark.id}}">
               <div class="container more">
@@ -47,7 +90,7 @@
                 <p class="content">{{landmark.shortDescription}}</p>
               </div>
             </a>
-            <a ng-href="#/list/lecture/all"><div class="footer lecture-footer">MORE <span class="typcn typcn-th-list"></span></div></a>
+            <a ng-href="#/list/lecture/all"><div class="footer lecture-footer">FULL SCHEDULE <span class="typcn typcn-th-list"></span></div></a>
           </li>
 
         </div>
@@ -58,7 +101,9 @@
       <span ng-show="landmarksHappened.length > 0">
 
         <div class="card"> 
-          <h1>Happened</h1>
+          <h1>Schedule</h1>
+          <!--<h1>Happened</h1> USE WHEN AFTER DATE NOW-->
+
         </div>
        <li ng-repeat="landmark in landmarksHappened | limitTo:happenedLimit"> 
         <div class="col-xs-6 card 2col"> 
@@ -70,7 +115,7 @@
               </div>
             </a>
 
-            <span ng-show="($last)"><a ng-href="#/list/lecture/all"><div class="footer lecture-footer">MORE <span class="typcn typcn-th-list"></span></div></a></span>
+            <span ng-show="($last)"><a ng-href="#/list/lecture/all"><div class="footer lecture-footer">FULL SCHEDULE <span class="typcn typcn-th-list"></span></div></a></span>
 
           </div>
         </li>
@@ -80,36 +125,6 @@
     </div>
 
 
-
-    <!-- 4 COL CARDS -->
-    <div class="row 4-col">
-          <div class="col-xs-12">
-
-            <div class="row">
-              <!-- HAPPENING NOW -->
-              <div class="col-xs-12 card">
-                <h1>This Afternoon</h1>
-                <a ng-href="#/post/AICP_DIGITAL_PRESENTS3"> <!-- ///////////////////////// -->
-                  <div class="container">
-                    <div class="header">2:30 PM <span class="pull-right">MoMA</span></div>
-                    
-                    <!-- <p class="content">Lorem Ipsum dolor sit amet, consectetur adipiscing elit.</p> -->
-                    <!-- <img src="img/icons/food.png"> --><span class="pull-right"><img width="110" src="img/AICP/AICP_lecture_logo.svg"></span>
-                    <p class="title">The AICP Directors Lecture Series At Museum of Modern Art <br><br> Full AICP Week Passholders Only</p>
-                      
-                    
-                       <!--  <p>MORE <span class="typcn typcn-th-list"></span></p> -->
-
-                  </div>
-                </a>
-                <div class="footer lecture-footer"></div>
-              </div>
-
-          </div>
-          <!-- <div class="footer">MORE ></div> -->
-
-        </div>
-    </div>
 
 
 

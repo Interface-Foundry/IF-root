@@ -15,6 +15,11 @@
 
   <!-- TEMP ONLY BEFORE SHOW -->
 
+<span ng-hide="showMoMA">
+
+  <div class="card" style="margin-bottom:-10px;"> 
+    <h1>TICKETS AVAILABLE FOR PICKUP AT BASECAMP 8:30 AM - 4:30PM</h1>
+  </div>
 
   <span ng-show="showBootCamp">
   <!--   <!-- 4 COL CARDS -->
@@ -24,23 +29,55 @@
             <div class="row">
               <!-- HAPPENING NOW -->
               <div class="col-xs-12 card">
-                <h1>BUSINESS AFFAIRS BOOTCAMP</h1>
-             
-
+                <h1>Thursday Morning</h1>
+                  
+                  <a ng-href="/#/post/BUSINESS_AFFAIRS_BOOTCAMP">
                   <div class="container more">
-                    <div class="header">8:30 AM <span class="pull-right">BASECAMP</span></div>
+                    <div class="header">8:30 AM - 12:30 PM <span class="pull-right">BASECAMP</span></div>
                     
                     <span class="pull-right"><img width="110" src="img/AICP/AICP_bootcamp_logo.svg"></span>
-                    <p class="title">Breakfast</p>
+                    <p class="title">BUSINESS AFFAIRS BOOTCAMP</p>
+                    <br>
+                    <p class="title">This is a premium event available only to Business Affairs Boot Camp ticket holders – SOLD OUT</p>
 
-                    <div class="header">9:15 AM</div>
-                    <p class="title">Leo Burnett Best Practices</p>
+                  </div>
+                  </a>
+                <div class="footer show-footer"></div>
+              </div>
 
-                    <div class="header">10:15 AM</div>
-                    <p class="title">Production Insurance</p>
+          </div>
+         
+        </div>
+    </div>
+  </span>
+      <!-- !!!!!!!!!!!!!!!!!!!! -->
 
-                    <div class="header">11:15 AM</div>
-                    <p class="title">Legal Issues</p>
+
+    <!-- 4 COL CARDS -->
+    <div class="row 4-col">
+          <div class="col-xs-12">
+
+            <div class="row">
+              <!-- HAPPENING NOW -->
+              <div class="col-xs-12 card">
+                <h1>Thursday Night</h1>
+                
+                  <div ng-click="showMoMA=true;" class="container more">
+
+
+                    <div class="header">8:00 PM  <span class="pull-right">MoMA</span></div>
+                    
+                    <span class="pull-right"><img width="110" src="img/AICP/AICP_momashow_logo.svg"></span>
+                    <p class="title">Doors open for screening</p>
+
+                    <div class="header">8:15 PM</div>
+                    <p class="title">1st Screening <br>of the AICP Show</p>
+
+                    <div class="header">8:30 PM</div>
+                    <p class="title">Doors open for Gala Reception</p>
+
+                    <div class="header">9:30 PM</div>
+                    <p class="title">2nd Screening <br>of the AICP Show</p>
 
                   </div>
 
@@ -52,14 +89,18 @@
          
 
         </div>
-    </div> -->
-  </span>
+    </div>
+
       <!-- !!!!!!!!!!!!!!!!!!!! -->
 
+</span>
 
 
 
-  <span ng-show="showMoMA">
+
+<span ng-show="showMoMA">
+
+
     <!-- 4 COL CARDS -->
     <div class="row 4-col">
           <div class="col-xs-12">
@@ -68,9 +109,10 @@
               <!-- HAPPENING NOW -->
               <div class="col-xs-12 card">
                 <h1>TONIGHT</h1>
-             
-
+                
                   <div class="container more">
+
+
                     <div class="header">8:00 PM <span class="pull-right">MoMA</span></div>
                     
                     <span class="pull-right"><img width="110" src="img/AICP/AICP_momashow_logo.svg"></span>
@@ -96,13 +138,8 @@
 
         </div>
     </div>
-</span>
+
       <!-- !!!!!!!!!!!!!!!!!!!! -->
-
-
-
-
-
 
       <!-- 3 COL CARDS -->
         <div class="row">
@@ -130,7 +167,7 @@
             <h1 style="color:#000;">...</h1>
             <div class="container" onclick="shelfPan('full');" ng-click="refreshMap(); hideSwitch(); queryMap('places','sponsors');">
               <img id="sponsors" style="width:90px; padding-left:25px; margin-left:-10px;" src="img/AICP/icons/sponsors.png">
-              <p class="searchTitle" style="margin-top:-8px;">Sponsor Lounges</p>
+              <p class="searchTitle" style="margin-top:-8px;">Sponsored Lounges</p>
             </div>
           </div>
 
@@ -233,7 +270,7 @@
 
     </div>
 
-
+</span>
 
     <!-- FOOTER -->
       <br>

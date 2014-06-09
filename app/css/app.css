@@ -559,7 +559,12 @@ li {
   cursor: pointer;
   border-bottom: solid #cecece 2px;
   border-right: solid #cecece 1px;
-  
+}
+
+.boldTitle{
+  font-size:1.8rem; 
+  color:black; 
+  padding:0px;
 }
 
 /*.col-xs-6.card:nth-child(4n){
@@ -642,7 +647,7 @@ li {
   padding: 6px;
   border-radius: 0 0 3px 3px;
   font-size: 1.3rem;
-  letter-spacing: 0.2rem;
+  letter-spacing: 0.1rem;
   font-family:'simplreg', sans-serif;
 }
 

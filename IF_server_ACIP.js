@@ -150,7 +150,7 @@ app.get('/api/:collection', function(req, res) {
                 if (req.query.queryCat){
 
                     //var currentTime = new Date();
-                    var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                    var currentTime = new Date('Jun 10 2014 08:30:06 GMT-0400 (EDT)');
       
                     var qw = {
                         'time.start': {$lt: currentTime},
@@ -163,7 +163,7 @@ app.get('/api/:collection', function(req, res) {
                 else {
 
                     //var currentTime = new Date();
-                    var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                    var currentTime = new Date('Jun 10 2014 08:30:06 GMT-0400 (EDT)');
                     
                     var qw = {
                         'time.start': {$lt: currentTime},
@@ -215,7 +215,7 @@ app.get('/api/:collection', function(req, res) {
                     }
 
                     else {
-                        var currentTime = new Date('Jun 11 2014 10:29:59 GMT-0400 (EDT)');
+                        var currentTime = new Date('Jun 10 2014 08:30:59 GMT-0400 (EDT)');
 
                         var qw = {
                             'time.start': {$gt: currentTime},
@@ -241,7 +241,7 @@ app.get('/api/:collection', function(req, res) {
                 else {
 
                     //var currentTime = new Date();
-                    var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                    var currentTime = new Date('Jun 10 2014 08:30:06 GMT-0400 (EDT)');
                     
                     currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
                     var qw = {

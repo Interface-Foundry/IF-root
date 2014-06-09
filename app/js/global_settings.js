@@ -101,7 +101,7 @@ var mapSelect = 'cloud'; //loading 'cloud' setting as specified in: js/angular-l
 
 //---------- TWEET STREAM -------//
 //one or more hashtags for base twitter gathering 
-var global_hashtag = "#awards";
+var global_hashtag = "#aicpawards";
 //can also be multiple:
 //var global_hashtag = '#lol,#what,#soitgoes';
 //-------------------------------//
@@ -360,7 +360,7 @@ function shelfPan(amount){
 
     //     console.log(amount);
     //     console.log('lense2 else');
-        
+
     //     $('body').toggleClass('lense2');
 
     //     $("#shelf").css({

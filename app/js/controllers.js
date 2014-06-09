@@ -11,27 +11,27 @@ function BubbleRouteCtrl($location, $scope, $routeParams, db) {
     if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
     //document.getElementById("DATE").value = today;
 
-    console.log(today);
+    //console.log(today);
 
-    if (today === '28/05/2014'){
+    if (today === '10/06/2014'){
         //$location.path('awards');
-        $location.path('lectures');
+        $location.path('awards');
         
     }
 
-    else if (today === '29/05/2014'){
+    else if (today === '11/06/2014'){
         $location.path('lectures');
 
     }
 
-    else if (today === '30/05/2014'){
-        $location.path('lectures');
+    else if (today === '12/06/2014'){
+        $location.path('show');
         //$location.path('show');
     }
 
     else {
-        //$location.path('awards');
-        $location.path('lectures');
+        $location.path('awards');
+        //$location.path('lectures');
     }
 
  
@@ -199,7 +199,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
                 markerCollect[data[i].id] = {
                     lat: data[i].loc[0],
                     lng: data[i].loc[1],
-                    message: '<h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+                    message: '<a href=#/post/'+data[i].id+'/m><h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"> '+data[i].name+'</h4></a>',
                     focus: true, 
                     icon: local_icons.yellowIcon
                 }
@@ -356,6 +356,8 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     }
 
     var geoZoom = 16;
+
+ 
    
 
     //hiding bubble switcher and showing map nav instead
@@ -428,7 +430,14 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     $scope.option = $routeParams.option;
     $scope.landmark = Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
 
-        $scope.mainImageUrl = landmark.stats.avatar;
+        
+        if (landmark.stats.avatar){
+            if (landmark.stats.avatar !== "img/tidepools/default.jpg"){
+                $scope.mainImageUrl = landmark.stats.avatar;
+            }
+        }
+
+        $scope.people = landmark.people;
 
         //if ____
         //$scope.htmlDescription = landmark.description;
@@ -947,7 +956,7 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
     //     }
     // });
 
-        console.log($scope.markers3);
+      
 
 
         $('<img src="'+ $scope.landmark.stats.avatar +'">').load(function() {
@@ -1051,7 +1060,7 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
             $scope.landmark.loc = [globalEditLoc.lat,globalEditLoc.lng];
         }
 
-        console.log($scope.landmark);
+
 
         db.landmarks.create($scope.landmark, function(response){
 
@@ -1336,6 +1345,42 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     shelfPan('return');
     window.scrollTo(0, 0);
 
+
+    ///// TIME STUFF /////
+
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+
+    var yyyy = today.getFullYear();
+    if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
+    //document.getElementById("DATE").value = today;
+
+    //console.log(today);
+
+    // if (today === '10/06/2014'){
+    //     //$location.path('awards');
+    //     $location.path('awards');
+        
+    // }
+
+    // else if (today === '11/06/2014'){
+    //     $location.path('lectures');
+
+    // }
+
+    // else if (today === '12/06/2014'){
+    //     $location.path('show');
+    //     //$location.path('show');
+    // }
+
+    // else {
+    //     $location.path('awards');
+    //     //$location.path('lectures');
+    // }
+
+    //////////////////////
+
  
     $rootScope.showSwitch = true;
     $rootScope.showBackPage= false;
@@ -1394,69 +1439,71 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     //---- EVENT CARDS WIDGET -----//
     var queryCat = "award";
 
-    //---- Happening Now -----//
-    $scope.queryType = "events";
-    $scope.queryFilter = "now";
-    $scope.queryCat = queryCat;
-    //$scope.queryTime = new Date();
-    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+    queryHappened();
 
-    $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
+    // //---- Happening Now -----//
+    // $scope.queryType = "events";
+    // $scope.queryFilter = "now";
+    // $scope.queryCat = queryCat;
+    // //$scope.queryTime = new Date();
+    // // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+
+    // $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
         
-        console.log("NOW");
-        console.log($scope.landmarksNow);
+    //     console.log("NOW");
+    //     console.log($scope.landmarksNow);
 
         
-        //IF THERE'S A NOW OBJECT 
-        if ($scope.landmarksNow[0]){
-            //passing now result as temporary DOESNT SCALE
-            queryUpcoming($scope.landmarksNow[0].time.end);
-        }
+    //     //IF THERE'S A NOW OBJECT 
+    //     if ($scope.landmarksNow[0]){
+    //         //passing now result as temporary DOESNT SCALE
+    //         queryUpcoming($scope.landmarksNow[0].time.end);
+    //     }
 
-        // NO NOW OBJECT
-        else {
-            queryUpcoming("noNow");
-        }
-    });
+    //     // NO NOW OBJECT
+    //     else {
+    //         queryUpcoming("noNow");
+    //     }
+    // });
 
-    //---------//
+    // //---------//
 
-    function queryUpcoming(nowTimeEnd){
+    // function queryUpcoming(nowTimeEnd){
         
-        //$scope.upcomingLimit = 2;
+    //     //$scope.upcomingLimit = 2;
 
-        if ($scope.landmarksNow.length > 0){
-            $scope.upcomingLimit = 1;
-        }
+    //     if ($scope.landmarksNow.length > 0){
+    //         $scope.upcomingLimit = 1;
+    //     }
 
-        else {
-            $scope.upcomingLimit = 2;
-        }
-
-
-        //---- Upcoming -----//
-        $scope.queryType = "events";
-        $scope.queryFilter = "upcoming";
-        $scope.queryCat = queryCat;
+    //     else {
+    //         $scope.upcomingLimit = 2;
+    //     }
 
 
-        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+    //     //---- Upcoming -----//
+    //     $scope.queryType = "events";
+    //     $scope.queryFilter = "upcoming";
+    //     $scope.queryCat = queryCat;
+
+
+    //     $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
         
-            //console.log($scope.landmarksUpcoming.length);
-            console.log("UPCOMING");
-            console.log($scope.landmarksUpcoming);
+    //         //console.log($scope.landmarksUpcoming.length);
+    //         console.log("UPCOMING");
+    //         console.log($scope.landmarksUpcoming);
 
-             //queryHappened();
+    //          //queryHappened();
 
-            if ($scope.landmarksUpcoming.length < 2){
-                queryHappened();
-            }
+    //         if ($scope.landmarksUpcoming.length < 2){
+    //             queryHappened();
+    //         }
 
-        });
+    //     });
 
-        //---------//
+    //     //---------//
         
-    }
+    // }
 
     function queryHappened(){
 
@@ -1501,6 +1548,9 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     console.log($scope.tweets);
 }
 AwardsCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
+
+
+
 
 
 
@@ -1569,72 +1619,75 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     //---- EVENT CARDS WIDGET -----//
     var queryCat = "lecture";
 
-    //---- Happening Now -----//
-    $scope.queryType = "events";
-    $scope.queryFilter = "now";
-    $scope.queryCat = queryCat;
-    //$scope.queryTime = new Date();
-    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+    queryHappened();
 
-    $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
+    // //---- Happening Now -----//
+    // $scope.queryType = "events";
+    // $scope.queryFilter = "now";
+    // $scope.queryCat = queryCat;
+    // //$scope.queryTime = new Date();
+    // // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+
+    // $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
         
-        console.log("NOW");
-        console.log($scope.landmarksNow);
+    //     console.log("NOW");
+    //     console.log($scope.landmarksNow);
 
         
-        //IF THERE'S A NOW OBJECT 
-        if ($scope.landmarksNow[0]){
-            //passing now result as temporary DOESNT SCALE
-            queryUpcoming($scope.landmarksNow[0].time.end);
-        }
+    //     //IF THERE'S A NOW OBJECT 
+    //     if ($scope.landmarksNow[0]){
+    //         //passing now result as temporary DOESNT SCALE
+    //         queryUpcoming($scope.landmarksNow[0].time.end);
+    //     }
 
-        // NO NOW OBJECT
-        else {
-            queryUpcoming("noNow");
-        }
-    });
+    //     // NO NOW OBJECT
+    //     else {
+    //         queryUpcoming("noNow");
+    //     }
+    // });
 
-    //---------//
+    // //---------//
 
-    function queryUpcoming(nowTimeEnd){
+    // function queryUpcoming(nowTimeEnd){
         
-        //$scope.upcomingLimit = 2;
+    //     //$scope.upcomingLimit = 2;
 
-        if ($scope.landmarksNow.length > 0){
-            $scope.upcomingLimit = 1;
-        }
+    //     if ($scope.landmarksNow.length > 0){
+    //         $scope.upcomingLimit = 1;
+    //     }
 
-        else {
-            $scope.upcomingLimit = 2;
-        }
-
-
-        //---- Upcoming -----//
-        $scope.queryType = "events";
-        $scope.queryFilter = "upcoming";
-        $scope.queryCat = queryCat;
+    //     else {
+    //         $scope.upcomingLimit = 2;
+    //     }
 
 
-        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+    //     //---- Upcoming -----//
+    //     $scope.queryType = "events";
+    //     $scope.queryFilter = "upcoming";
+    //     $scope.queryCat = queryCat;
+
+
+    //     $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
         
-            //console.log($scope.landmarksUpcoming.length);
-            console.log("UPCOMING");
-            console.log($scope.landmarksUpcoming);
+    //         //console.log($scope.landmarksUpcoming.length);
+    //         console.log("UPCOMING");
+    //         console.log($scope.landmarksUpcoming);
 
+    //          //queryHappened();
 
-            if ($scope.landmarksUpcoming.length < 2){
-                //queryHappened();
-            }
+    //         if ($scope.landmarksUpcoming.length < 2){
+    //             queryHappened();
+    //         }
 
-        });
+    //     });
 
-        //---------//
+    //     //---------//
         
-    }
+    // }
 
     function queryHappened(){
 
-        $scope.happenedLimit = 1;
+        $scope.happenedLimit = 10;
 
         //---- Happened -----//
         $scope.queryType = "events";
