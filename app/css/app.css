@@ -725,7 +725,7 @@ li {
   color: black;
   cursor: pointer;
   border-bottom: solid 1px #a8a7a7;
-  border-top: solid 2px #a8a7a7;
+  border-top: solid 0px #a8a7a7;
 }
 
 .award_index{
@@ -825,12 +825,16 @@ h4 {
 
 @media (max-width: 381px) {
    .index_card h1{
-      font-size:1.5rem;
-      letter-spacing:-1px;
+      font-size:1.4rem;
+      letter-spacing:-2px;
+   }
+
+   .index_card h2{
+      letter-spacing:-0.8px;
    }
 
    .index_card h3{
-      letter-spacing:-0.2px;
+      letter-spacing:-0.8px;
    }
 
    .card .header{
