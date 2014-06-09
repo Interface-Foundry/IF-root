@@ -1,0 +1,30 @@
+<div class="container-fluid">
+  <div class="row-fluid">
+
+    <div class="span10">
+      <!--Body content-->
+
+       <span><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
+
+        
+      
+        <div class="card" ><h1 style="color:#63b3fb;"> Instagram {{globalhashtag}} </h1></div>
+
+
+        <li ng-repeat="instagram in instagrams">
+          
+          <div class="col-xs-12 card 4-col social instagram" style="margin-bottom:30px;">
+         
+            <div class="container more">
+              <p class="content"><img ng-src="images/instagram/{{instagram.local_path[0]}}" width="100%"></p>
+              <span class="watermark typcn typcn-social-instagram"></span>
+              <h1 style="color:black; text-transform:none; font-size:1.6rem;">@{{instagram.text}}</h1>
+            </div>
+            <a ng-href="http://instagram.com/{{instagram.user.screen_name}}" target="_blank"><div class="footer lecture-footer">@{{instagram.user.screen_name}} <span class="typcn typcn-export pull-right"><span></div></a>
+          </div>
+        </li>     
+
+
+    </div>
+  </div>
+</div>

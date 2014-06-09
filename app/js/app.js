@@ -40,6 +40,8 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: talklistCtrl}). 
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: talktagCtrl}). 
 
+      when('/insta', {templateUrl: 'partials/insta-list.html', controller: instalistCtrl}). 
+
 
       otherwise({redirectTo: '/'}); 
 }]);

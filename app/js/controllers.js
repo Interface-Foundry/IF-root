@@ -1300,7 +1300,21 @@ function talklistCtrl( $location, $scope, db, $rootScope) {
 talklistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope'];
 
 
+function instalistCtrl( $location, $scope, db, $rootScope) {
 
+    $rootScope.showSwitch = false;
+
+    $scope.instagrams = db.instagrams.query({limit:100});
+    $scope.globalhashtag = global_hashtag;
+
+
+
+    $scope.goBack = function(){
+        window.history.back();
+        // shelfPan('return');
+    }
+}
+instalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope'];
 
 
 function talktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
