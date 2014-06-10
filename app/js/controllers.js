@@ -13,6 +13,9 @@ function BubbleRouteCtrl($location, $scope, $routeParams, db) {
 
     //console.log(today);
 
+
+
+
     if (today === '10/06/2014'){
         //$location.path('awards');
         $location.path('awards');
@@ -34,7 +37,7 @@ function BubbleRouteCtrl($location, $scope, $routeParams, db) {
         //$location.path('lectures');
     }
 
- 
+
 
 }
 BubbleRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
@@ -70,8 +73,8 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         $rootScope.showNavIcons = true;
     }
 
-
-
+    var currentTime = new Date();
+    console.log(currentTime);
 
 
 
