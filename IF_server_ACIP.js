@@ -150,7 +150,7 @@ app.get('/api/:collection', function(req, res) {
                 if (req.query.queryCat){
 
                     var currentTime = new Date();
-                    //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
+                    //var currentTime = new Date('Jun 10 2014 10:46:06 GMT-0400 (EDT)');
       
                     var qw = {
                         'time.start': {$lt: currentTime},
@@ -163,7 +163,7 @@ app.get('/api/:collection', function(req, res) {
                 else {
 
                     var currentTime = new Date();
-                    //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
+                    //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
                     
                     var qw = {
                         'time.start': {$lt: currentTime},
@@ -194,11 +194,22 @@ app.get('/api/:collection', function(req, res) {
 
                     if (req.query.nowTimeEnd !== "noNow"){
 
-                        console.log('asdf');
+                        if (req.query.nowTimeEnd == "upcomingToday"){
 
-                        var nowTimeEnd = new Date(req.query.nowTimeEnd);
 
-                
+
+                            //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+                            var nowTimeEnd = new Date();
+
+                        }
+
+                        else {
+                            var nowTimeEnd = new Date(req.query.nowTimeEnd);
+                        }
+
+                        
+                        console.log(nowTimeEnd);
+                           
 
                         nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
 
@@ -206,7 +217,7 @@ app.get('/api/:collection', function(req, res) {
 
                         //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
                         //so only get upcmoning events till end of day
-                        // var endofDay = new Date();
+                        // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
                         // endofDay.setHours(23,59,59,999);
 
                         
@@ -222,7 +233,7 @@ app.get('/api/:collection', function(req, res) {
                     }
 
                     else {
-                        //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
+                        //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
                         var currentTime = new Date();
 
                         var qw = {
@@ -249,7 +260,7 @@ app.get('/api/:collection', function(req, res) {
                 else {
 
                     var currentTime = new Date();
-                    //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
+                    //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
                     
                     currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
                     var qw = {

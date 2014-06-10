@@ -751,10 +751,11 @@ li {
 }
 
 .index_card h1{
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   padding: 0;
   margin: 0;
   font-family:'simplreg', sans-serif;
+  letter-spacing: -0.1rem;
 
 }
 

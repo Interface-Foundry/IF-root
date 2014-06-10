@@ -434,6 +434,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     $scope.option = $routeParams.option;
     $scope.landmark = Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
 
+
         
         if (landmark.stats.avatar){
             if (landmark.stats.avatar !== "img/tidepools/default.jpg"){
@@ -1367,6 +1368,7 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     if (eventDate == dd){
         $scope.itisToday = true;
     }
+    ////////////////////
 
 
     //document.getElementById("DATE").value = today;
@@ -1495,6 +1497,8 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
             if (dd == eventDate){
 
 
+
+
                 $scope.upcomingLimit = 2;
 
 
@@ -1504,8 +1508,10 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
                 $scope.queryCat = queryCat;
 
 
-                $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(data){
-                
+                $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: "upcomingToday"},function(data){
+                    
+                     console.log("UPCOMING");
+                    console.log(data);
                     //no more events for that day    
                     if (data.length == 0) {
                         // console.log("asdfasdf");
@@ -1610,7 +1616,23 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     shelfPan('return');
     window.scrollTo(0, 0);
 
+
+    ///// TIME STUFF /////
+
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+
+    var yyyy = today.getFullYear();
+    if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
+
     var eventDate = 11;
+
+    if (eventDate == dd){
+        $scope.itisToday = true;
+    }
+    ////////////////////
+
 
     angular.extend($rootScope, {
         center: {
@@ -1667,74 +1689,108 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
 
 
 
+
     //---- EVENT CARDS WIDGET -----//
     var queryCat = "lecture";
 
-    queryHappened();
+    //queryHappened();
 
-    // //---- Happening Now -----//
-    // $scope.queryType = "events";
-    // $scope.queryFilter = "now";
-    // $scope.queryCat = queryCat;
-    // //$scope.queryTime = new Date();
-    // // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+    //---- Happening Now -----//
+    $scope.queryType = "events";
+    $scope.queryFilter = "now";
+    $scope.queryCat = queryCat;
+    //$scope.queryTime = new Date();
+    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
 
-    // $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
+    $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
         
-    //     console.log("NOW");
-    //     console.log($scope.landmarksNow);
+        console.log("NOW");
+        console.log($scope.landmarksNow);
 
         
-    //     //IF THERE'S A NOW OBJECT 
-    //     if ($scope.landmarksNow[0]){
-    //         //passing now result as temporary DOESNT SCALE
-    //         queryUpcoming($scope.landmarksNow[0].time.end);
-    //     }
+        //IF THERE'S A NOW OBJECT 
+        if ($scope.landmarksNow[0]){
+            //passing now result as temporary DOESNT SCALE
+            queryUpcoming($scope.landmarksNow[0].time.end);
+        }
 
-    //     // NO NOW OBJECT
-    //     else {
-    //         queryUpcoming("noNow");
-    //     }
-    // });
+        // NO NOW OBJECT
+        else {
+            queryUpcoming("noNow");
+        }
+    });
 
-    // //---------//
+    //---------//
 
-    // function queryUpcoming(nowTimeEnd){
+    function queryUpcoming(nowTimeEnd){
         
-    //     //$scope.upcomingLimit = 2;
+        //$scope.upcomingLimit = 2;
 
-    //     if ($scope.landmarksNow.length > 0){
-    //         $scope.upcomingLimit = 1;
-    //     }
+        if (nowTimeEnd == "noNow"){
 
-    //     else {
-    //         $scope.upcomingLimit = 2;
-    //     }
+            //if still day of event, not another day
+            if (dd == eventDate){
 
 
-    //     //---- Upcoming -----//
-    //     $scope.queryType = "events";
-    //     $scope.queryFilter = "upcoming";
-    //     $scope.queryCat = queryCat;
+                $scope.upcomingLimit = 2;
 
 
-    //     $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+                //---- Upcoming -----//
+                $scope.queryType = "events";
+                $scope.queryFilter = "upcoming";
+                $scope.queryCat = queryCat;
+
+
+                $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(data){
+                
+                    //no more events for that day    
+                    if (data.length == 0) {
+                        // console.log("asdfasdf");
+                        queryHappened();
+                    }
+
+                });     
+            }
+
+            else {
+                queryHappened();
+            }
+
+            
+        }
+
+        else {
+
+            $scope.upcomingLimit = 1;
+
+
+            //---- Upcoming -----//
+            $scope.queryType = "events";
+            $scope.queryFilter = "upcoming";
+            $scope.queryCat = queryCat;
+
+
+            $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+            
+                //console.log($scope.landmarksUpcoming.length);
+                console.log("UPCOMING");
+                console.log($scope.landmarksUpcoming);
+
+                 //queryHappened();
+
+                // if ($scope.landmarksUpcoming.length < 2){
+                //     queryHappened();
+                // }
+
+            });     
+
+        }
+
+
+
+        //---------//
         
-    //         //console.log($scope.landmarksUpcoming.length);
-    //         console.log("UPCOMING");
-    //         console.log($scope.landmarksUpcoming);
-
-    //          //queryHappened();
-
-    //         if ($scope.landmarksUpcoming.length < 2){
-    //             queryHappened();
-    //         }
-
-    //     });
-
-    //     //---------//
-        
-    // }
+    }
 
     function queryHappened(){
 
