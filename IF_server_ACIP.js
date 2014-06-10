@@ -511,8 +511,18 @@ app.post('/api/:collection/create', function(req, res) {
                     }
         
                     if (req.body.extraURL){
+
+                        console.log('adding url');
                         lm.extraURL = req.body.extraURL;
                     }
+
+                    if (!req.body.extraURL){
+
+                        console.log('removing url');
+                        lm.extraURL = undefined;
+                    }
+
+
 
                     if (req.body.type == "event"){
 
