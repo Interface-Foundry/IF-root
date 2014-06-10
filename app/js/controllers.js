@@ -1840,7 +1840,38 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     window.scrollTo(0, 0);
 
-    var eventDate = 11;
+    // var eventDate = 12;
+
+
+
+    //time check to show MoMA site:
+
+
+    var rightNow = new Date();
+
+    var momaStart = new Date('Jun 11 2014 15:59:59 GMT-0400 (EDT)');
+
+    if (rightNow > momaStart){
+        $scope.showBootCamp = false;
+        $scope.showMoMA = true;
+    }
+
+    else {
+        $scope.showBootCamp = true;
+        $scope.showMoMA = false;
+    }
+
+    // var mm = today.getMonth()+1; //January is 0!
+
+    // var yyyy = today.getFullYear();
+    // if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
+
+
+    //////////////
+
+
+
+    //if greater than 4pm june 11, showMoma = true
 
     $rootScope.showSwitch = true;
     $rootScope.showBackPage = false;
@@ -1848,16 +1879,16 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
 
    
-    if ($location.$$path == '/showPM/'){
+    // if ($location.$$path == '/showPM/'){
         
-        $scope.showBootCamp = false;
-        $scope.showMoMA = true;
-    }
+    //     $scope.showBootCamp = false;
+    //     $scope.showMoMA = true;
+    // }
 
-    if ($location.$$path == '/show/'){
-        $scope.showMoMA = false;
-        $scope.showBootCamp = true;
-    }
+    // if ($location.$$path == '/show/'){
+    //     $scope.showMoMA = false;
+    //     $scope.showBootCamp = true;
+    // }
 
 
 
