@@ -741,7 +741,12 @@ li {
 }
 
 
-
+.twitterFeed{
+    color: black;
+    font-size: 1.6rem;
+    font-weight: 100;
+    font-family:'simplreg', sans-serif;
+}
 
 .index-logo{
    max-height: 72px;

@@ -4,11 +4,10 @@
     <div class="span10">
       <!--Body content-->
 
-       <span><button class="btn" ng-click="goBack()">< BACK </button></span>
-      <ul class="phones">
-        
-         <h4 style="color:#63b3fb;"> {{globalhashtag}} Conversations</h4>
-     
+        <span><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
+
+        <div class="card" ><h1 style="color:#63b3fb;"> Twitter {{globalhashtag}} </h1></div>
+
 
 <!--         <form ng-submit="tagSearch()">
           <input style="width:95%;" type="text" ng-model="searchText" size="40"
@@ -16,13 +15,48 @@
           <input class="btn-primary" type="submit" value="search">
         </form>
  -->
-      </ul>
+
+
+        <li ng-repeat="tweet in tweets| filter:query | orderBy:orderProp">
+          
+          <div class="col-xs-12 card 4-col social instagram" style="margin-bottom:30px;">
+         
+            <div class="container more">
+
+              <img ng-src="{{tweet.user.profile_image_url}}">
+              <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.4rem;">{{tweet.user.name}}</h1>
+              <br>
+              <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.3rem; margin-top:-14px;">@{{tweet.user.screen_name}}</h1>
+              
+              <br><br>
+<!--               <p class="content"><img ng-src="images/instagram/{{instagram.local_path[0]}}" width="100%"></p>
+ -->          <!--     <span class="watermark typcn typcn-social-instagram"></span> -->
+              <p class="twitterFeed">{{tweet.text}}</p>
+
+              <div ng-switch on = "tweet.media.media_type">
+               <span ng-switch-when="image"> <img ng-src="{{tweet.media.media_url}}" width="250px"> </span>
+               <span ng-switch-when="vine"> <p><iframe src="{{tweet.media.media_url}}/card" width="250px" height="250px" frameborder="0"></iframe></p> </span>
+               <span ng-switch-when="youtube"> <iframe width="250px" src="{{tweet.media.media_url}}" frameborder="0" allowFullScreen></iframe></span>
+               <span ng-switch-when="instagram"><img ng-src="{{tweet.media.media_url}}media/?size=t" width="250px"> </span>
+               <span ng-switch-when="tumblr"><img ng-src="{{tweet.media.media_url}}" width="250px"> </span>
+               <span ng-switch-default></span>
+             </div>
+
+            </div>
+
+            <a ng-href="https://twitter.com/{{tweet.user.screen_name}}/status/{{tweet.tweetID_str}}" target="_blank"><div class="footer lecture-footer">{{tweet.created | date:'h:mm a EEEE d MMMM'}} <span class="typcn typcn-export pull-right"><span></div></a>
+         
+          </div>
+
+        </li>   
+
 
 
       <ul class="feed" style="padding-left:1%; padding-right:5px;">
 
         <li ng-repeat="tweet in tweets| filter:query | orderBy:orderProp" class="thumbnail" style="padding-bottom:10px; border:0px;">
-          <a ng-href="#/{{tweet.id}}" class="thumb"><img ng-src="{{tweet.user.profile_image_url}}"></a>
+
+          <img ng-src="{{tweet.user.profile_image_url}}">
           <h4 style="color:#63b3fb;">{{tweet.user.name}}</h4>
           <p style="opacity:0.7; color:#63b3fb;">@{{tweet.user.screen_name}}</a>
           <!-- <p ng-bind-html-unsafe="tweet.text | hashtag | url"></p> -->
@@ -30,14 +64,8 @@
 
          <a ng-href="https://twitter.com/{{tweet.user.screen_name}}/status/{{tweet.tweetID_str}}"><p style="font-size:12px; color:#63b3fb;">{{tweet.created | date:'h:mm a EEEE d MMMM'}}</p></a>
             <!--embedding media based on type -->
-            <div ng-switch on = "tweet.media.media_type">
-               <span ng-switch-when="image"> <img src="{{tweet.media.media_url}}" width="250px"> </span>
-               <span ng-switch-when="vine"> <p><iframe src="{{tweet.media.media_url}}/card" width="250px" height="250px" frameborder="0"></iframe></p> </span>
-               <span ng-switch-when="youtube"> <iframe width="250px" src="{{tweet.media.media_url}}" frameborder="0" allowFullScreen></iframe></span>
-               <span ng-switch-when="instagram"><img src="{{tweet.media.media_url}}media/?size=t" width="250px"> </span>
-               <span ng-switch-when="tumblr"><img src="{{tweet.media.media_url}}" width="250px"> </span>
-               <span ng-switch-default></span>
-             </div>
+
+
         </li>     
 
         <li ng-show="!tweets.length"> Nothing from {{globalhashtag}} </li>
