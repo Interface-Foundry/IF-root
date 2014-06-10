@@ -1364,6 +1364,10 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     var eventDate = 10;
 
+    if (eventDate == dd){
+        $scope.itisToday = true;
+    }
+
 
     //document.getElementById("DATE").value = today;
 
@@ -1509,7 +1513,6 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
                     }
 
                 });     
-
             }
 
             else {
@@ -1607,6 +1610,7 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     shelfPan('return');
     window.scrollTo(0, 0);
 
+    var eventDate = 11;
 
     angular.extend($rootScope, {
         center: {
@@ -1779,6 +1783,8 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     shelfPan('return');
 
     window.scrollTo(0, 0);
+
+    var eventDate = 11;
 
     $rootScope.showSwitch = true;
     $rootScope.showBackPage = false;

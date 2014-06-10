@@ -77,7 +77,9 @@
               <!-- HAPPENING NOW -->
               <div class="col-xs-12 card">
                 <!--<h1>Last Night</h1>-->
-                <h1>Tuesday Night</h1>
+                <span ng-hide="itisToday"><h1>Tuesday Night</h1></span>
+                <span ng-show="itisToday"><h1>This Evening</h1></span>
+
                 <a ng-href="#/post/THE_2014_AICP_NEXT_AWARDS">
 
                   <div class="container more">
