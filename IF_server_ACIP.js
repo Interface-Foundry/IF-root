@@ -149,8 +149,8 @@ app.get('/api/:collection', function(req, res) {
                 //IF HAS SUB CATEGORY (LIKE LECTURES)
                 if (req.query.queryCat){
 
-                    //var currentTime = new Date();
-                    var currentTime = new Date('Jun 10 2014 08:30:06 GMT-0400 (EDT)');
+                    var currentTime = new Date();
+                    //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
       
                     var qw = {
                         'time.start': {$lt: currentTime},
@@ -162,8 +162,8 @@ app.get('/api/:collection', function(req, res) {
 
                 else {
 
-                    //var currentTime = new Date();
-                    var currentTime = new Date('Jun 10 2014 08:30:06 GMT-0400 (EDT)');
+                    var currentTime = new Date();
+                    //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
                     
                     var qw = {
                         'time.start': {$lt: currentTime},
@@ -194,20 +194,27 @@ app.get('/api/:collection', function(req, res) {
 
                     if (req.query.nowTimeEnd !== "noNow"){
 
+                        console.log('asdf');
+
                         var nowTimeEnd = new Date(req.query.nowTimeEnd);
 
-                        console.log(nowTimeEnd);
+                
 
                         nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
 
-                        console.log(nowTimeEnd);
-
+                
 
                         //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
+                        //so only get upcmoning events till end of day
+                        // var endofDay = new Date();
+                        // endofDay.setHours(23,59,59,999);
+
+                        
 
 
                         var qw = {
                             'time.start': {$gt: nowTimeEnd},
+                            // 'time.end': {$lt: endofDay},
                             'subType' : req.query.queryCat
                         };
                         db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
@@ -215,7 +222,8 @@ app.get('/api/:collection', function(req, res) {
                     }
 
                     else {
-                        var currentTime = new Date('Jun 10 2014 08:30:59 GMT-0400 (EDT)');
+                        //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
+                        var currentTime = new Date();
 
                         var qw = {
                             'time.start': {$gt: currentTime},
@@ -240,8 +248,8 @@ app.get('/api/:collection', function(req, res) {
 
                 else {
 
-                    //var currentTime = new Date();
-                    var currentTime = new Date('Jun 10 2014 08:30:06 GMT-0400 (EDT)');
+                    var currentTime = new Date();
+                    //var currentTime = new Date('Jun 10 2014 08:46:06 GMT-0400 (EDT)');
                     
                     currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
                     var qw = {
