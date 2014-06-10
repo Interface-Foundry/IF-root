@@ -29,20 +29,32 @@ var downloadImage = function(imageURL) {
 
   //var fileName = url.parse(imageURL).pathname.split('/').pop();
   var fileName = getFileNameFromURL(imageURL);
+
   var writeStreamDestinaton = strings.IMAGE_SAVE_DESTINATION + fileName;
-  var file = fs.createWriteStream(writeStreamDestinaton);
 
-  var request = http.get(imageURL, function onImageDownload(response) {
+  if (fs.existsSync(writeStreamDestinaton)) {
 
-    response.on('data', function(data) {
-      file.write(data);
+    //do nothing
+  } 
+  else {
+
+    var file = fs.createWriteStream(writeStreamDestinaton);
+
+    var request = http.get(imageURL, function onImageDownload(response) {
+
+      console.log(response);
+
+      response.on('data', function(data) {
+        file.write(data);
+      });
+
+      response.on('end', function() {
+        file.end();
+      });
+
     });
 
-    response.on('end', function() {
-      file.end();
-    });
-
-  });
+  }
 
   return;
 }
