@@ -1925,7 +1925,7 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     var rightNow = new Date();
 
-    var momaStart = new Date('Jun 11 2014 15:59:59 GMT-0400 (EDT)');
+    var momaStart = new Date('Jun 12 2014 15:59:59 GMT-0400 (EDT)');
 
     if (rightNow > momaStart){
         $scope.showBootCamp = false;
