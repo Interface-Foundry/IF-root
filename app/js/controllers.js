@@ -873,8 +873,9 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
     Landmark.get({_id: $routeParams.landmarkId}, function(landmark) {
 
 
-
         $scope.landmark = landmark;
+
+
         if (landmark.loc_nicknames){
             $scope.landmark.location = landmark.loc_nicknames;
         }
@@ -906,35 +907,20 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
             } 
         }
 
-         console.log($scope.landmark.loc[0]);
-         console.log($scope.landmark.loc[1]);
 
-    // angular.extend($scope, {
-    //     // amc: {
-    //     //     lat: $scope.landmark.loc[0],
-    //     //     lng: $scope.landmark.loc[1],
-    //     //     zoom: global_mapCenter.zoom
-    //     // },
-    //     markers2: {
-    //         m: {
-    //             lat: $scope.center.lat,
-    //             lng: $scope.center.lng,
-    //             message: "Drag to Location on map",
-    //             focus: true,
-    //             draggable: true,
-    //             icon: local_icons.yellowIcon
-    //         }
-    //     }
-    // });
+        angular.extend($rootScope, { 
+            markers : {}
+        });
 
 
-        angular.extend($scope, {
+         
+        angular.extend($rootScope, {
             center: {
                 lat: $scope.landmark.loc[0],
                 lng: $scope.landmark.loc[1],
                 zoom: 17
             },
-            markers3: {
+            markers: {
                 "m": {
                     lat: $scope.landmark.loc[0],
                     lng: $scope.landmark.loc[1],
@@ -947,46 +933,8 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
             tiles: tilesDict.aicp
         });
 
-                //     angular.extend($rootScope, {
-                //     center: {
-                //         lat: geoLocs[landmark.loc_nickname][0],
-                //         lng: geoLocs[landmark.loc_nickname][1],
-                //         zoom: geoZoom,
-                //         autoDiscover:false
-                //     },
-                //     markers: {
-                //         "m": {
-                //             lat: geoLocs[landmark.loc_nickname][0],
-                //             lng: geoLocs[landmark.loc_nickname][1],
-                //             message: '<h4>'+landmark.loc_nickname+'</h4>',
-                //             focus: true,
-                //             icon: local_icons.yellowIcon
-                //         }
-                //     },
-                //     tiles: tilesDict.mapbox
-                // });
+  
 
-                // refreshMap();
-
-    //     angular.extend($scope, {
-    //     // amc: {
-    //     //     lat: $scope.landmark.loc[0],
-    //     //     lng: $scope.landmark.loc[1],
-    //     //     zoom: global_mapCenter.zoom
-    //     // },
-    //     markers2: {
-    //         m: {
-    //             lat: $scope.center.lat,
-    //             lng: $scope.center.lng,
-    //             message: "Drag to Location on map",
-    //             focus: true,
-    //             draggable: true,
-    //             icon: local_icons.yellowIcon
-    //         }
-    //     }
-    // });
-
-      
 
 
         $('<img src="'+ $scope.landmark.stats.avatar +'">').load(function() {
@@ -1081,14 +1029,16 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
         }
 
         //a temp fix for a problem with marker scope "unsyncing" from the marker's map position. using globalEditLoc global variable to pass values for now..better with $rootScope or legit fix...
-        if (!globalEditLoc.lat){
+        // if (!globalEditLoc.lat){
 
-            $scope.landmark.loc = [$scope.markers3.m.lat,$scope.markers3.m.lng];
-        }
+        //     $scope.landmark.loc = [$scope.markers3.m.lat,$scope.markers3.m.lng];
+        // }
 
-        else {
-            $scope.landmark.loc = [globalEditLoc.lat,globalEditLoc.lng];
-        }
+        // else {
+        //     $scope.landmark.loc = [globalEditLoc.lat,globalEditLoc.lng];
+        // }
+
+        $scope.landmark.loc = [$rootScope.markers.m.lat,$rootScope.markers.m.lng];
 
 
 
