@@ -28,13 +28,14 @@
           <h1>Happening Now</h1>
           <li ng-repeat="landmark in landmarksNow | limitTo:1">  
             <a ng-href="#/post/{{landmark.id}}">
-              <div class="container">
+              <div class="container" ng-class="{more: landmarksUpcoming < 1}">
                 <div class="header">{{landmark.time.start | date:'h:mm a'}}<span class="pull-right">{{landmark.loc_nickname}}</span></div>
                 <p class="title">{{landmark.name}}</p>
                 <p class="content">{{landmark.shortDescription}}</p>
               </div>
             </a>
           </li>
+          <span ng-show="landmarksUpcoming < 1"><a ng-href="#/list/award/all"><div class="footer award-footer">FULL SCHEDULE <span class="typcn typcn-th-list"></span></div></a></span>
         </div>
       </span>
 
