@@ -53,10 +53,10 @@ var tilesDict = {
         }
     },
     mapbox: {
-        url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.id0joeg1/{z}/{x}/{y}.png',
+        url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig1oichl/{z}/{x}/{y}.png',
         options: {
             attribution: 'IF',
-            minZoom: 1,
+            minZoom: 10,
             maxZoom: 23,
             reuseTiles: true
         }
@@ -158,7 +158,7 @@ var he;
 
 
 
-function shelfPan(amount){
+function shelfPan(amount,special){
 
 
 
@@ -208,20 +208,62 @@ function shelfPan(amount){
   
       if ( $("body").hasClass("lense") ) {
 
-        // console.log(amount);
-        // console.log('lense');
 
-        $('body').toggleClass('lense');
+        // THIS IS A TEMP WAY TO FIX A BUG
+        if (special == "navbar"){
 
-        $("#shelf").css({
-          "-webkit-transform": "translateY(" + 0 + "px" + ")",
-          "-moz-transform": "translateY(" + 0 + "px" + ")", 
-          "-ms-transform": "translateY(" + 0 + "px" + ")", 
-          "-o-transform": "translateY(" + 0 + "px" + ")",
-          "transform": "translateY(" + 0 + "px" + ")"
-        });
+            he = $(window).height();
 
-        $("#leafletmap").css({"height": 183 + "px" });
+            if (special == "navbar"){
+              he = he - 72;
+            }
+
+            else {
+              he = he - 172;
+            }
+            
+            $('body').toggleClass('lense2');
+            $('body').toggleClass('lense');
+
+
+            $("#shelf").css({
+              "-webkit-transform": "translateY(" + he + "px" + ")",
+              "-moz-transform": "translateY(" + he + "px" + ")", 
+              "-ms-transform": "translateY(" + he + "px" + ")", 
+              "-o-transform": "translateY(" + he + "px" + ")",
+              "transform": "translateY(" + he + "px" + ")"
+            });
+
+
+            $("#leafletmap").css({"height": he + "px" }); 
+            /// END BUG FIX
+            
+        }    
+
+        else {
+
+          $('body').toggleClass('lense');
+
+          $("#shelf").css({
+            "-webkit-transform": "translateY(" + 0 + "px" + ")",
+            "-moz-transform": "translateY(" + 0 + "px" + ")", 
+            "-ms-transform": "translateY(" + 0 + "px" + ")", 
+            "-o-transform": "translateY(" + 0 + "px" + ")",
+            "transform": "translateY(" + 0 + "px" + ")"
+          });
+
+          console.log('here2');
+
+          $("#leafletmap").css({"height": 183 + "px" });
+
+        }
+
+
+
+
+        
+
+        
 
 
 
@@ -229,16 +271,24 @@ function shelfPan(amount){
 
       else if ( $("body").hasClass("lense2") ) {
 
-        // console.log(amount);
-        // console.log('lense2');
+
+
+        console.log('here3');
 
         he = $(window).height();
 
-        he = he - 172;
+        if (special == "navbar"){
+          he = he - 72;
+        }
+
+        else {
+          he = he - 172;
+        }
+        
 
         $('body').toggleClass('lense2');
         $('body').toggleClass('lense');
-       // $("#shelf").css({"-webkit-transform": "translateY(" + he + "px" + ")"});
+
 
         $("#shelf").css({
           "-webkit-transform": "translateY(" + he + "px" + ")",
@@ -248,30 +298,31 @@ function shelfPan(amount){
           "transform": "translateY(" + he + "px" + ")"
         });
 
-        // var testHe = $(window).height();
 
-        // testHe = testHe - 128;
-
-        // console.log(testHe);
 
         $("#leafletmap").css({"height": he + "px" });
 
-        // $("#leafletmap").css({
-        //   "height":"1100px; !important"
-        //   "transform": "translateY(" + 1000 + "px" + ")"
-        // });
 
 
       }
 
       else {
 
+        console.log('here1');
+
         // console.log(amount);
         // console.log('noclass');
 
         he = $(window).height();
 
-        he = he - 172;
+
+        if (special == "navbar"){
+          he = he - 72;
+        }
+
+        else {
+          he = he - 172;
+        }
 
         $('body').toggleClass('lense');
        // $("#shelf").css({"-webkit-transform": "translateY(" + he + "px" + ")"});

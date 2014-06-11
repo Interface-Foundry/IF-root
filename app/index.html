@@ -83,7 +83,7 @@
 
       <div id="menu">
 
-        <a href="http://aicp.bubbl.li"><img style="width:100%;" src="img/AICP/AICP14_week_color.gif"></a>
+        <a href="http://aicp.bubbl.li" ng-click="panMenu()"><img style="width:100%;" src="img/AICP/AICP14_week_color.gif"></a>
         <div class="card">
           <h1 style="color:black; font-size:1.8rem;">Powered by</h1>
         </div>
@@ -105,17 +105,14 @@
 
     <div id="main">
 
+
       <div id="top-bar" class="row-fluid" >
 
-          <div id="show" style="position:absolute; opacity:0; margin-bottom:-12px;" class="btn-primary" href="#" ><div style="position:absolute; padding:7px; font-size:30px; "></div></div>
-          <!-- <img src="img/IF/search_bar.png"> -->
-          <div id="topbar" style="width:100%; background-color:#000; height:41px;"><img height="38" style="margin-right:-21px;" ng-src="/img/IF/IF_slideout.svg"><img height="38" ng-src="/img/IF/IF_logo.svg"><img height="38" style="position:absolute;" ng-src="/img/IF/search_bar2.png"></div>
-<!-- 
-          <div class="btn-group">
-
-          </div>
- -->
-
+          <span ng-hide="hideIFbar">
+            <div id="show" style="position:absolute; opacity:0; margin-bottom:-12px;" class="btn-primary" href="#" ><div style="position:absolute; padding:7px; font-size:30px; "></div></div>
+            <div id="topbar" style="width:100%; background-color:#000; height:41px;"><img height="38" style="margin-right:-21px;" ng-src="/img/IF/IF_slideout.svg"><img height="38" ng-src="/img/IF/IF_logo.svg"><img height="38" style="position:absolute;" ng-src="/img/IF/search_bar2.png"></div>
+          </span>
+          
           <!-- BUBBLE SWITCH WIDGET -->
 
           <div ng-show="showSwitch" class="btn-group bubbleSwitcher card social" style="padding-bottom:0px; margin-top:0px;">

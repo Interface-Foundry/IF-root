@@ -45,38 +45,64 @@ BubbleRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
+    var backMarkCount = 0;
 
     $scope.goBack = function(){
+
+        
+
         shelfPan('return');
         $rootScope.showSwitch = true;
         $rootScope.showBack = false;
         $rootScope.showMapNav = false;
         $rootScope.showNavIcons = false;
+        $rootScope.hideIFbar = false;
     }
 
     $scope.goBackPage = function(){
+
+       
+
         $rootScope.showBackPage = false;
         $rootScope.showMapNav = false;
         window.history.back();
         shelfPan('return');
-        $rootScope.showNavIcons = false;      
+        $rootScope.showNavIcons = false;   
+        $rootScope.hideIFbar = false;   
     }
 
     $scope.goBackMarkers = function(){
+
+        console.log('goBackMarkers');
+
+        // console.log('asdf');
         // $rootScope.showBackPage = false;
         $rootScope.showBackMark = false;
         $rootScope.showBackPage = true;
         // $rootScope.showBack = false;
-        $rootScope.showMapNav= true;
-        shelfPan('full');
+        $rootScope.showMapNav = true;
+        shelfPan('full','navbar');
         refreshMap();
         $rootScope.showNavIcons = true;
+        $rootScope.hideIFbar = true;
+
+        //stopping getting locked in "back" clicks on /show/view
+        // backMarkCount++;
+        // if (backMarkCount > 1){
+        //     $location.path('show');
+        //     backMarkCount = 0;
+        // }
+
+
     }
 
 
 
+    $scope.panMenu = function(){
+        $('body').toggleClass('menu');
 
-
+        return false;
+    }
 
 
 
@@ -119,14 +145,15 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
 //--------------//
 
-
+    
+    //this is temporary cause w/out leaflet won't render??
     angular.extend($rootScope, {
         center: {
-            lat: 40.7615,
-            lng: -73.9777,
-            zoom: 11
+            // lat: 40.7615,
+            // lng: -73.9777,
+            // zoom: 11
         },
-        tiles: tilesDict.aicp,
+        tiles: tilesDict.mapbox,
         markers : {}
     });
 
@@ -406,6 +433,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
         $rootScope.showBack = false;
         $rootScope.showMapNav= false;
         $rootScope.showBackMark = true;
+        $rootScope.hideIFbar = false;
 
     
 
@@ -416,18 +444,13 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
 
     else {
         shelfPan('partial');
-    }
-
-    if ($routeParams.option == 'm'){
-
-    }
-    else {
         angular.extend($rootScope, { 
             markers : {}
         });
 
-        //process
     }
+
+
 
 
 
@@ -469,6 +492,7 @@ function LandmarkDetailCtrl(Landmark, $routeParams, $scope, db, $location, $time
     
     //after query, do stuff
     function processLandmark(landmark){
+
 
 
         //ALL EVENTS ARE PROCESSED WITH MAPBOX RIGHT NOW!
@@ -1288,7 +1312,7 @@ function talklistCtrl( $location, $scope, db, $rootScope) {
 
     $rootScope.showSwitch = false;
 
-    $scope.tweets = db.tweets.query({limit:100});
+    $scope.tweets = db.tweets.query({limit:70});
     $scope.globalhashtag = global_hashtag;
 
     //search
@@ -1370,37 +1394,70 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     }
     ////////////////////
 
+    //fixing back button showing up glitches
+    $rootScope.showBack = false;
+    $rootScope.showBackPage = false;
+    $rootScope.showBackMark = false;
+    $rootScope.hideIFbar = false;
+    $rootScope.showNavIcons = false;
+    $rootScope.showMapNav = false;
 
-    //document.getElementById("DATE").value = today;
 
-    //console.log(today);
-
-    // if (today === '10/06/2014'){
-    //     //$location.path('awards');
-    //     $location.path('awards');
+    ///// MAP STUFF ///////
+    var geoLocs = {
+        "BASECAMP" : [40.7215408, -73.9967013],
+        "SKIRBALL" : [40.7297, -73.9978]
         
-    // }
+    }
 
-    // else if (today === '11/06/2014'){
-    //     $location.path('lectures');
+    angular.extend($rootScope, { 
+        markers : {}
+    });
 
-    // }
+    //refreshMap();
 
-    // else if (today === '12/06/2014'){
-    //     $location.path('show');
-    //     //$location.path('show');
-    // }
+    // console.log($rootScope.markers);
 
-    // else {
-    //     $location.path('awards');
-    //     //$location.path('lectures');
-    // }
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.7250,
+            lng: -73.9970,
+            zoom: 14
+        },
+        tiles: tilesDict.mapbox,
+        markers : {       
+            "b": {
+                lat: geoLocs["SKIRBALL"][0],
+                lng: geoLocs["SKIRBALL"][1],
+                message: '<h4>SKIRBALL</h4>',
+                focus: false,
+                icon: local_icons.yellowIcon
+            }, 
+            "a": {
+                lat: geoLocs["BASECAMP"][0],
+                lng: geoLocs["BASECAMP"][1],
+                message: '<h4>BASECAMP</h4>',
+                focus: true,
+                icon: local_icons.yellowIcon
+            }
+          
+        }
+    });
 
-    //////////////////////
+    refreshMap();
+   
+
+    function refreshMap(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
+    }
+    /////////////////////
+
 
  
     $rootScope.showSwitch = true;
-    $rootScope.showBackPage= false;
+
     $rootScope.radioModel = 'Tuesday'; //for bubble switcher selector
 
 
@@ -1408,15 +1465,15 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     $scope.instagrams = db.instagrams.query({limit:1});
 
 
-    angular.extend($rootScope, {
-        center: {
-            lat: 40.7615,
-            lng: -73.9777,
-            zoom: 9
-        },
-        tiles: tilesDict.mapbox,
-        markers : {}
-    });
+    // angular.extend($rootScope, {
+    //     center: {
+    //         lat: 40.7615,
+    //         lng: -73.9777,
+    //         zoom: 9
+    //     },
+    //     tiles: tilesDict.mapbox,
+    //     markers : {}
+    // });
 
 
 
@@ -1425,13 +1482,14 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
         if ($rootScope.showSwitch == true){
             $rootScope.showSwitch = false;
             $rootScope.showBack = true;
-
+            
 
         }
 
         else {
             $rootScope.showSwitch = true;
             $rootScope.showBack = false;
+
 
         }
     }
@@ -1633,32 +1691,85 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     }
     ////////////////////
 
+    //fixing back button showing up glitches
+    $rootScope.showBack = false;
+    $rootScope.showBackPage = false;
+    $rootScope.showBackMark = false;
+    $rootScope.hideIFbar = false;
+    $rootScope.showNavIcons = false;
+    $rootScope.showMapNav = false;
 
-    angular.extend($rootScope, {
-        center: {
-            lat: 40.7615,
-            lng: -73.9777,
-            zoom: 12
-        },
-        tiles: tilesDict.mapbox,
+
+
+    angular.extend($rootScope, { 
         markers : {}
     });
 
+    // refreshMap();
+
+    ///// MAP STUFF ///////
+    var geoLocs = {
+        "BASECAMP" : [40.7215408, -73.9967013],
+        // "SKIRBALL" : [40.7297, -73.9978],
+        "MoMA" : [40.7615, -73.9777]
+    }
+
+
+
+    angular.extend($rootScope, {
+        center: {
+            lat: 40.7415,
+            lng: -73.9850,
+            zoom: 12
+        },
+        tiles: tilesDict.mapbox,
+        markers : {       
+            "b": {
+                lat: geoLocs["MoMA"][0],
+                lng: geoLocs["MoMA"][1],
+                message: '<h4>MoMA</h4>',
+                focus: false,
+                icon: local_icons.yellowIcon
+            }, 
+            "a": {
+                lat: geoLocs["BASECAMP"][0],
+                lng: geoLocs["BASECAMP"][1],
+                message: '<h4>BASECAMP</h4>',
+                focus: true,
+                icon: local_icons.yellowIcon
+            }
+          
+        }
+    });
+
+    // refreshMap();
+
+    function refreshMap(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
+    }
+    /////////////////////
+
+
+
+
+
     $rootScope.radioModel = 'Wednesday'; //for bubble switcher selector
     $rootScope.showSwitch = true;
-    $rootScope.showBackPage = false;
+
 
     $scope.tweets = db.tweets.query({limit:1});
     $scope.instagrams = db.instagrams.query({limit:1});
 
-    angular.extend($rootScope, {
-        center: {
-            lat: 40.7615,
-            lng: -73.9777,
-            zoom: 12
-        },
-        tiles: tilesDict.mapbox
-    });
+    // angular.extend($rootScope, {
+    //     center: {
+    //         lat: 40.7615,
+    //         lng: -73.9777,
+    //         zoom: 12
+    //     },
+    //     tiles: tilesDict.mapbox
+    // });
 
     //hiding bubble switcher and showing map nav instead
     $scope.hideSwitch = function(){
@@ -1813,6 +1924,16 @@ function LecturesCtrl( $location, $scope, db, $timeout, leafletData, $rootScope)
     //------------------------//
 
 
+    // //preventing someone from breaking things with back button on map shelf pan
+    // $scope.$on("$locationChangeStart", function(event, next, current) {
+    //     if ($rootScope.showNavIcons == true){
+    //         event.preventDefault(); 
+    //         $scope.hideSwitch();
+    //         shelfPan('full');
+    //     }
+    // });
+
+
     //query function for all sorting buttons
     $scope.filter = function(type, filter) {
         $scope.landmarks = db.landmarks.query({ queryType: type, queryFilter: filter });
@@ -1842,6 +1963,11 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
     // var eventDate = 12;
 
+    $rootScope.hideIFbar = false;
+
+    $rootScope.showNavIcons = false;
+    $rootScope.showMapNav = false;
+
 
 
     //time check to show MoMA site:
@@ -1867,14 +1993,43 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
     // if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
 
 
+    //preventing someone from breaking things with back button on map shelf pan
+    // $scope.$on("$locationChangeStart", function(event, next, current) {
+    //     console.log($location.path());
+
+    //     if ($location.path().indexOf("post") >= 0){
+
+    //     }
+
+    //     else {
+    //         event.preventDefault(); 
+    //     }
+    //     // if ($rootScope.showNavIcons == true){
+    //     //     event.preventDefault(); 
+    //     //     $scope.hideSwitch();
+    //     //     shelfPan('full');
+    //     // }
+    // });
+
+
+    function refreshMap(){ 
+        leafletData.getMap().then(function(map) {
+            map.invalidateSize();
+        });
+    }
+
+
     //////////////
 
+    //fixing back button showing up glitches
+    $rootScope.showBack = false;
+    $rootScope.showBackPage = false;
+    $rootScope.showBackMark = false;
 
 
     //if greater than 4pm june 11, showMoma = true
 
     $rootScope.showSwitch = true;
-    $rootScope.showBackPage = false;
 
     $rootScope.radioModel = 'Thursday'; //for bubble switcher selector
 
@@ -1915,6 +2070,8 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
             $rootScope.showMapNav = true;
             $rootScope.showBack = true;
             $rootScope.showNavIcons = true;
+
+            $rootScope.hideIFbar = true;
             // $( '#shelf' ).toggleClass( "iconMenu" );
             // $('.index_card .h1.blue').toggleClass('red');
             // $( "#shelf" ).addClass( ".iconMenu !important" );
@@ -1927,6 +2084,8 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
             $rootScope.showMapNav = false;
             $rootScope.showBack = false;
             $rootScope.showNavIcons = false;
+
+            $rootScope.hideIFbar = false;
 
         }
     }
@@ -1955,7 +2114,9 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
 
     $rootScope.goBack = function(){
+        $rootScope.hideIFbar = false;
         window.history.back();
+
     }
 
     $scope.goNow = function(url) {
@@ -1974,98 +2135,98 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
 
 
-    //---- EVENT CARDS WIDGET -----//
-    var queryCat = "show";
+    // //---- EVENT CARDS WIDGET -----//
+    // var queryCat = "show";
 
-    //---- Happening Now -----//
-    $scope.queryType = "events";
-    $scope.queryFilter = "now";
-    $scope.queryCat = queryCat;
-    //$scope.queryTime = new Date();
-    // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
+    // //---- Happening Now -----//
+    // $scope.queryType = "events";
+    // $scope.queryFilter = "now";
+    // $scope.queryCat = queryCat;
+    // //$scope.queryTime = new Date();
+    // // ADD FAKE TIME FROM UNIVERSAL VAR TO NEW DATE!
 
-    $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
+    // $scope.landmarksNow = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat}, function(){
         
-        console.log("NOW");
-        console.log($scope.landmarksNow);
+    //     console.log("NOW");
+    //     console.log($scope.landmarksNow);
 
-        queryHappened();
+    //     queryHappened();
 
-        // !!!!!!!! TAKEN OUT RIGHT NOW
+    //     // !!!!!!!! TAKEN OUT RIGHT NOW
 
-        // //IF THERE'S A NOW OBJECT 
-        // if ($scope.landmarksNow[0]){
-        //     //passing now result as temporary DOESNT SCALE
-        //     queryUpcoming($scope.landmarksNow[0].time.end);
-        // }
+    //     // //IF THERE'S A NOW OBJECT 
+    //     // if ($scope.landmarksNow[0]){
+    //     //     //passing now result as temporary DOESNT SCALE
+    //     //     queryUpcoming($scope.landmarksNow[0].time.end);
+    //     // }
 
-        // // NO NOW OBJECT
-        // else {
-        //     queryUpcoming("noNow");
-        // }
+    //     // // NO NOW OBJECT
+    //     // else {
+    //     //     queryUpcoming("noNow");
+    //     // }
 
 
-    });
+    // });
 
-    //---------//
+    // //---------//
 
-    function queryUpcoming(nowTimeEnd){
+    // function queryUpcoming(nowTimeEnd){
 
-         window.scrollTo(0, 0);
+    //      window.scrollTo(0, 0);
         
-        //$scope.upcomingLimit = 2;
+    //     //$scope.upcomingLimit = 2;
 
-        if ($scope.landmarksNow.length > 0){
-            $scope.upcomingLimit = 1;
-        }
+    //     if ($scope.landmarksNow.length > 0){
+    //         $scope.upcomingLimit = 1;
+    //     }
 
-        else {
-            $scope.upcomingLimit = 2;
-        }
-
-
-        //---- Upcoming -----//
-        $scope.queryType = "events";
-        $scope.queryFilter = "upcoming";
-        $scope.queryCat = queryCat;
+    //     else {
+    //         $scope.upcomingLimit = 2;
+    //     }
 
 
-        $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
+    //     //---- Upcoming -----//
+    //     $scope.queryType = "events";
+    //     $scope.queryFilter = "upcoming";
+    //     $scope.queryCat = queryCat;
+
+
+    //     $scope.landmarksUpcoming = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat, nowTimeEnd: nowTimeEnd},function(){
         
-            //console.log($scope.landmarksUpcoming.length);
-            console.log("UPCOMING");
-            console.log($scope.landmarksUpcoming);
+    //         //console.log($scope.landmarksUpcoming.length);
+    //         console.log("UPCOMING");
+    //         console.log($scope.landmarksUpcoming);
 
 
-            if ($scope.landmarksUpcoming.length < 2){
-                queryHappened();
-            }
+    //         if ($scope.landmarksUpcoming.length < 2){
+    //             queryHappened();
+    //         }
 
-        });
+    //     });
 
-        //---------//
+    //     //---------//
         
-    }
+    // }
 
-    function queryHappened(){
+    // function queryHappened(){
 
-        $scope.happenedLimit = 10;
+    //     $scope.happenedLimit = 10;
 
-        //---- Happened -----//
-        $scope.queryType = "events";
-        $scope.queryFilter = "all";
-        $scope.queryCat = queryCat;
+    //     //---- Happened -----//
+    //     $scope.queryType = "events";
+    //     $scope.queryFilter = "all";
+    //     $scope.queryCat = queryCat;
 
-        $scope.landmarksHappened = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat},function(){
-            console.log('HAPPENED');
-            console.log($scope.landmarksHappened);
-        });
+    //     $scope.landmarksHappened = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat},function(){
+    //         console.log('HAPPENED');
+    //         console.log($scope.landmarksHappened);
+    //     });
 
-        //---------//
+    //     //---------//
 
-    }
+    // }
 
-    //------------------------//
+    // //------------------------//
 
 
 
@@ -2109,7 +2270,7 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
                 markerCollect[data[i].id] = {
                     lat: data[i].loc[0],
                     lng: data[i].loc[1],
-                    message: '<h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"><a href=#/post/'+data[i].id+'/m> '+data[i].name+'</a></h4>',
+                    message: '<a href=#/post/'+data[i].id+'/m><h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"> '+data[i].name+'</h4></a>',
                     focus: true, 
                     icon: local_icons.yellowIcon
                 }
@@ -2156,6 +2317,12 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
     shelfPan('return');
 
     window.scrollTo(0, 0);
+
+    //fixing back button showing up glitches
+    $rootScope.showBack = false;
+    $rootScope.showBackPage = false;
+    $rootScope.showBackMark = false;
+
 
     $rootScope.showSwitch = false;
 
@@ -2226,6 +2393,8 @@ function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
 
     shelfPan('return');
     window.scrollTo(0, 0);
+
+
 
     $rootScope.showSwitch = false;
 

@@ -51,29 +51,6 @@
         </li>   
 
 
-
-      <ul class="feed" style="padding-left:1%; padding-right:5px;">
-
-        <li ng-repeat="tweet in tweets| filter:query | orderBy:orderProp" class="thumbnail" style="padding-bottom:10px; border:0px;">
-
-          <img ng-src="{{tweet.user.profile_image_url}}">
-          <h4 style="color:#63b3fb;">{{tweet.user.name}}</h4>
-          <p style="opacity:0.7; color:#63b3fb;">@{{tweet.user.screen_name}}</a>
-          <!-- <p ng-bind-html-unsafe="tweet.text | hashtag | url"></p> -->
-          <p style="color:#929292;">{{tweet.text}}</p>
-
-         <a ng-href="https://twitter.com/{{tweet.user.screen_name}}/status/{{tweet.tweetID_str}}"><p style="font-size:12px; color:#63b3fb;">{{tweet.created | date:'h:mm a EEEE d MMMM'}}</p></a>
-            <!--embedding media based on type -->
-
-
-        </li>     
-
-<!--         <li ng-show="!tweets.length"> <img style="width:16px; margin:0 auto;" src="img/IF/IF_load.gif"> </li>
- -->
-      </ul>
-
-    
-
     </div>
   </div>
 </div>
