@@ -227,6 +227,26 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
             for (var i=0;i < data.length;i++){ 
 
+                if (data[i].stats.avatar == "img/tidepools/default.jpg"){
+
+                    if (data[i].subType == "bars"){
+                        data[i].stats.avatar = "img/AICP/icons/bar.png";
+                    }
+                    if (data[i].subType == "exhibits"){
+                        data[i].stats.avatar = "img/AICP/icons/coolsculpt.png";
+                    }
+                    if (data[i].subType == "food"){
+                        data[i].stats.avatar = "img/AICP/icons/food.png";
+                    }
+                    if (data[i].subType == "smoking"){
+                        data[i].stats.avatar = "img/AICP/icons/smoking.png";
+                    }
+
+                    if (data[i].subType == "washrooms"){
+                        data[i].stats.avatar = "img/AICP/icons/washrooms.png";
+                    }
+                }
+
                 markerCollect[data[i].id] = {
                     lat: data[i].loc[0],
                     lng: data[i].loc[1],
@@ -2216,6 +2236,28 @@ function ShowCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
             var markerCollect = {};
 
             for (var i=0;i < data.length;i++){ 
+
+
+
+                if (data[i].stats.avatar == "img/tidepools/default.jpg"){
+
+                    if (data[i].subType == "bars"){
+                        data[i].stats.avatar = "img/AICP/icons/bar.png";
+                    }
+                    if (data[i].subType == "exhibits"){
+                        data[i].stats.avatar = "img/AICP/icons/coolsculpt.png";
+                    }
+                    if (data[i].subType == "food"){
+                        data[i].stats.avatar = "img/AICP/icons/food.png";
+                    }
+                    if (data[i].subType == "smoking"){
+                        data[i].stats.avatar = "img/AICP/icons/smoking.png";
+                    }
+
+                    if (data[i].subType == "washrooms"){
+                        data[i].stats.avatar = "img/AICP/icons/washrooms.png";
+                    }
+                }
 
                 markerCollect[data[i].id] = {
                     lat: data[i].loc[0],
