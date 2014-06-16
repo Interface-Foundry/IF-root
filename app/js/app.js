@@ -6,7 +6,7 @@
 //Controllers located in controllers.js
 //Partials located in the Partials folder
 
-var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives','IF-directives']).
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives','IF-directives']).
   config(['$routeProvider', function($routeProvider) {
   $routeProvider.
       when('/', {templateUrl: 'partials/loading.html', controller: BubbleRouteCtrl}).
@@ -23,9 +23,6 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
 
       when('/menu/:type', {templateUrl: 'partials/menu.html', controller: MenuCtrl}).
 
-
-
-
       when('/post/:landmarkId', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}). 
       when('/post/:landmarkId', {templateUrl: 'partials/landmark-detail.html', controller: LandmarkDetailCtrl}).
       when('/post/:landmarkId/ramen/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}). 
@@ -34,8 +31,8 @@ var app = angular.module('Tidepools', ['ngRoute','tidepoolsFilters','tidepoolsSe
       when('/new', {templateUrl: 'partials/landmark-new.html'}). 
       when('/new/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl}). 
 
-      // when('/build', {templateUrl: 'partials/world-new.html'}). 
-      // when('/build/:type', {templateUrl: 'partials/world-new-type.html', controller: WorldNewCtrl}). 
+      when('/build', {templateUrl: 'partials/world-new.html'}). 
+      when('/build/:type', {templateUrl: 'partials/world-new-type.html', controller: WorldNewCtrl}). 
 
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: talklistCtrl}). 
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: talktagCtrl}). 
