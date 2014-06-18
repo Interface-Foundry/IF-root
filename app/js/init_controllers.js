@@ -120,12 +120,16 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
     }
 
 
-
+	$scope.drawer = '';
     $scope.panDrawer = function(){
+    	if (drawer == '') {
+    		$scope.drawer = 'drawer';
+    	} 
+	    
         //$('body').toggleClass('drawer');
-        $('#drawer').toggleClass('drawer');
+        /*$('#drawer').toggleClass('drawer');
         $('#main').toggleClass('drawer');
-		$('nav').toggleClass('drawer');
+		$('nav').toggleClass('drawer');*/
 		event.preventDefault();
         return false;
     }

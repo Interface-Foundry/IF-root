@@ -99,24 +99,23 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 </head>
 <body>
 
-
   <div id="wrap">
-	  <nav role="navigation">
+	  <nav role="navigation" ng-class="{'drawer': drawerOn}">
 	  		<ul>
-	  			<li><a class="logo" ng-click="panDrawer()" href="#">logo</a></li>
+	  			<li><img class="logo" ng-click="drawerOn = !drawerOn">logo</img></li>
 	  			<li><form role="search">
 	  					<input class="form-control" type="text" placeholder="Search">
 	  			</form></li>
 	  		</ul>	
 	  </nav>
 	  
-      <section id="drawer">
+      <section id="drawer" ng-class="{'drawer': drawerOn}">
       
      	 <a class="navbar-brand" ng-click="panDrawer()" href="#">Drawer Contents</a>
       
       </section>
 
-<div id="main">
+<div id="main" ng-class="{'drawer': drawerOn}">
           <section id="window">
 			  <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers">
 
