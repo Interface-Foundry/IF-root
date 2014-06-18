@@ -1,7 +1,151 @@
 /* app css stylesheet */
 
+/* 
+MAIN ELEMENTS & UX HOOKS
+*/
+
 body {
   margin: 0;
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+}
+
+/* Nav bar */
+
+nav {
+	position: fixed;
+	top: 0; left: 0;
+  width: 100%;
+  height: 46px;
+  margin: 0 0 1em 0;
+  padding: 0;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #ccc;  
+  
+  -webkit-transition: opacity 0 0, -webkit-transform 0.4s;
+  -moz-transition:    opacity 0 0, -moz-transform 0.4s;
+	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
+	-o-transition:      opacity 0 0, -o-transform 0.4s;
+	transition:         opacity 0 0, transform 0.4s;
+}
+
+nav .logo {
+	display: block;
+	margin: 5px;
+	height: 38px;
+	width: 38px;
+	background-color:#939393;
+}
+
+nav ul {
+  list-style: none;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0; 
+}
+
+nav li {
+  float: left; 
+}
+
+nav li form {
+	margin: 11px auto;
+	padding-left: 12px;
+	width: 220px;
+}
+
+nav li input.form-control { 
+	height: 24px;
+}
+
+/*nav li a {
+  display: block;
+  padding: 8px 15px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #069;
+  border-right: 1px solid #ccc; 
+}*/
+
+/*#nav li:first-child a {
+  border-left: 1px solid #ccc; 
+}
+
+#nav li a:hover {
+  color: #c00;
+  background-color: #fff; 
+}*/
+
+
+#drawer {
+	position:absolute;
+	top: 0;
+	left: 0;
+	width: 66%;
+	bottom: 0px;
+	
+	-ms-transform: translateX(-100%); -webkit-transform: translateX(-100%); -moz-transform: translateX(-100%); 
+	transform: translateX(-100%);
+	
+	background-color: #FFF;
+	border-right: 1px solid #ccc;
+	opacity: 1;
+	
+	-webkit-transition: opacity 0 0, -webkit-transform 0.4s;
+	-moz-transition:    opacity 0 0, -moz-transform 0.4s;
+	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
+	-o-transition:      opacity 0 0, -o-transform 0.4s;
+	transition:         opacity 0 0, transform 0.4s;
+	-webkit-backface-visibility: hidden;
+	
+	z-index: 10;
+}
+
+/* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
+#drawer.drawer {
+	
+	-ms-transform: translateX(0); -webkit-transform: translateX(0); -moz-transform: translateX(0); 
+	transform: translateX(0);
+	opacity: 1;
+
+}
+
+body.drawer #main {
+  -webkit-transform: translateX(66%);
+  -moz-transform: translateX(66%);
+  -ms-transform: translateX(66%);
+  -o-transform: translateX(66%);
+  transform: translateX(66%);
+  
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+}
+
+body.drawer nav {
+	-webkit-transform: translateX(66%);
+	-moz-transform: translateX(66%);
+	-ms-transform: translateX(66%);
+	-o-transform: translateX(66%);
+	transform: translateX(66%);
+}
+
+
+#main {
+  position: relative;
+  min-height: 100%;
+  
+  margin-top: 45px;
+  
+  background: #161616;
+  box-shadow: -4px 0px 5px rgba(0,0,0,0.5);
+  	-webkit-transition: opacity 0 0, -webkit-transform 0.4s;
+	-moz-transition:    opacity 0 0, -moz-transform 0.4s;
+	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
+	-o-transition:      opacity 0 0, -o-transform 0.4s;
+	transition:         opacity 0 0, transform 0.4s;
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+  z-index: 0;
 }
 
 /*#leafletmap{
@@ -170,24 +314,6 @@ ul.specs dt {
 }*/
 
 
-/* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
-body.menu #menu {
-  opacity: 1;
-  -webkit-transition: opacity 0 0;
-  -moz-transition:    opacity 0 0;
-  -ms-transition:     opacity 0 0;
-  -o-transition:      opacity 0 0;
-  transition:         opacity 0 0;
-}
-
-body.menu #main {
-  -webkit-transform: translateX(66%);
-  -moz-transform: translateX(66%);
-  -ms-transform: translateX(66%);
-  -o-transform: translateX(66%);
-  transform: translateX(66%);
-}
-
 
 
 /* SLIDE UP SLIDE DOWN */
@@ -242,54 +368,13 @@ body.lense2 #shelf {
 #wrap {
   position: relative;
   overflow-x: hidden;
-  margin:0 auto; width:384px; max-width:100%;
+  margin:0 auto; 
+  width:384px; max-width:100%;
 }
 
-#menu {
-  position:absolute;
-  top: 0;
-  left: 0;
-  width: 66%;
-  bottom: 0px;
-
-/*background-image: linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -o-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -moz-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -webkit-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -ms-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-
-  background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(153,0,255)),
-    color-stop(0.59, rgb(215,115,228)),
-    color-stop(0.84, rgb(247,179,186))
-  );*/
 
 
-  background-color: #abadae;
-  opacity: 0;
-  -webkit-transition: opacity 0 0.2s;
-  -moz-transition: opacity 0 0.2s;
-  -ms-transition: opacity 0 0.2s;
-  -o-transition: opacity 0 0.2s;
-  transition: opacity 0 0.2s;
-}
 
-#main {
-  position: relative;
-  min-height: 100%;
-  background: #161616;
-  box-shadow: -4px 0px 5px rgba(0,0,0,0.5);
-  -webkit-transition: -webkit-transform 0.2s;
-  -moz-transition: -moz-transform 0.2s;
-  -ms-transition: -ms-transform 0.2s;
-  -o-transition: -o-transform 0.2s;
-  transition: transform 0.2s;
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
-}
 
 #window {
 
@@ -395,52 +480,6 @@ body.lense2 #shelf {
   display: inline-block;
 }
 
-/* Nav bar */
-
-#nav {
-  width: 100%;
-  height: 45px;
-  float: left;
-  margin: 0 0 1em 0;
-  padding: 0;
-  background-color: #f2f2f2;
-  border-bottom: 1px solid #ccc;  
-}
-
-#nav ul {
-  list-style: none;
-  width: 800px;
-  margin: 0 auto;
-  padding: 0; 
-}
-
-#nav li {
-  float: left; 
-}
-
-#nav li a {
-  display: block;
-  padding: 8px 15px;
-  text-decoration: none;
-  font-weight: bold;
-  color: #069;
-  border-right: 1px solid #ccc; 
-}
-
-#nav li:first-child a {
-  border-left: 1px solid #ccc; 
-}
-
-#nav li a:hover {
-  color: #c00;
-  background-color: #fff; 
-}
-
-
-.menubutton {
-  float:left; 
-  width:10%;
-}
 
 
 
@@ -918,4 +957,4 @@ h4 {
 }
 
 
-
+main {display:block;}

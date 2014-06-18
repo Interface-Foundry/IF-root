@@ -121,8 +121,9 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
 
 
-    $scope.panMenu = function(){
-        $('body').toggleClass('menu');
+    $scope.panDrawer = function(){
+        $('body').toggleClass('drawer');
+        $('#drawer').toggleClass('drawer');
         return false;
     }
 

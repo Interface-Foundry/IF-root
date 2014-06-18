@@ -56,7 +56,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <link rel="stylesheet" href="css/tidepools/leaflet.css">
   <link rel="stylesheet" href="css/bootstrap-datepicker.css">
   <link rel="stylesheet" href="css/bootstrap-timepicker.css">
-  <link rel="stylesheet" href="css/flat-ui.css" >
+  <!--<link rel="stylesheet" href="css/flat-ui.css" > !-->
   <link rel="stylesheet" href="css/jquery.fileupload-ui.css">
 
   <link rel="shortcut icon" href="images/favicon.ico">
@@ -97,108 +97,45 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 
 </head>
-<body style="background-color:#707070;">
+<body>
 
 
   <div id="wrap">
-
-      <div id="menu">
-
-        <a href="http://aicp.bubbl.li" ng-click="panMenu()"><img style="width:100%;" src="img/AICP/AICP14_week_color.gif"></a>
-        <div class="card">
-          <h1 style="color:black; font-size:1.8rem;">Powered by</h1>
-        </div>
-
-        <img style="width:95%;" src="img/AICP/IF_large_horizontal.png">
-        <br><br>
-        <a style="font-size:1.8rem; text-decoration:none; font-family:'simplreg', sans-serif; color:#202B94; margin-left:15px; " target="_blank" href="http://interfacefoundry.com">interfacefoundry.com</a>
-     
-        <br><br>
-        <a style="font-size:1.8rem; text-decoration:none; font-family:'simplreg', sans-serif; color:#202B94; margin-left:15px; " target="_blank" href="https://twitter.com/interfoundry">@interfoundry</a>
-
-      </div>
+	  <nav role="navigation">
+	  		<ul>
+	  			<li><a class="logo" ng-click="panDrawer()" href="#">logo</a></li>
+	  			<li><form role="search">
+	  					<input class="form-control" type="text" placeholder="Search">
+	  			</form></li>
+	  		</ul>	
+	  </nav>
+	  
+      <section id="drawer">
+      
+     	 <a class="navbar-brand" ng-click="panDrawer()" href="#">Drawer Contents</a>
+      
+      </section>
 
 
-    <div id="main">
-
-
-      <div id="top-bar" class="row-fluid" >
-
-          <span ng-hide="hideIFbar">
-            <div id="show" style="position:absolute; opacity:0; margin-bottom:-12px;" class="btn-primary" href="#" ><div style="position:absolute; padding:7px; font-size:30px; "></div></div>
-            <div id="topbar" style="width:100%; background-color:#000; height:41px;"><img height="38" style="margin-right:-21px;" ng-src="/img/IF/IF_slideout.svg"><img height="38" ng-src="/img/IF/IF_logo.svg"><img height="38" style="position:absolute;" ng-src="/img/IF/search_bar2.png"></div>
-          </span>
-
-          <!-- BUBBLE SWITCH WIDGET -->
-
-          <div ng-show="showSwitch" class="btn-group bubbleSwitcher card social" style="padding-bottom:0px; margin-top:0px;">
-              <h1 class="btn btn-primary awards" style="color:#a9dd00; font-size:110%; margin-top:8px;" ng-model="radioModel" btn-radio="'Tuesday'" ng-click="goPath('awards');" >Tuesday</h1>
-              <h1 class="btn btn-primary lectures" style="color:#ff34dd; font-size:110%; margin-top:8px;" ng-model="radioModel" btn-radio="'Wednesday'" ng-click="goPath('lectures');" >Wednesday</h1>
-              <h1 class="btn btn-primary show" style="color:#35d4fe; font-size:110%; margin-top:8px;" ng-model="radioModel" btn-radio="'Thursday'" ng-click="goPath('show');" >Thursday</h1>
-          </div>
-
-          <span ng-show="showBack"><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
-          <span ng-show="showBackPage"><button class="btn backbtn" ng-click="goBackPage()">< BACK </button></span>
-          <span ng-show="showBackMark"><button class="btn backbtn" ng-click="goBackMarkers()">< BACK </button></span>
-
-
-          <!-- MAP NAV BUTTONS -->
-          <div ng-show="showMapNav" class="btn-group bubbleSwitcher card social" style="padding-bottom:0px; margin-top:0px;">
-              <div class="btn btn-primary floor" ng-click="mapPan('1F');">1F</div>
-              <div class="btn btn-primary floor" ng-click="mapPan('2F');">2F</div>
-              <div class="btn btn-primary floor" ng-click="mapPan('5F');">5F</div>
-              <div class="btn btn-primary floor" ng-click="mapPan('GARDEN');">GARDEN</div>
-              <div class="btn btn-primary floor" ng-click="mapPan('EDUCATION');">EDUCATION</div>
-          </div>
-
-      </div>
-
-        <div id="wrapper">
-
-              <div id="window" style="position:absolute;">
-                  <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers">
+    <main id="main">
+          <section id="window" style="position:absolute;">
+			  <leaflet id="leafletmap" tiles="tiles" center="center" markers="markers">
 
 <!--                     <span ng-repeat="marker in markers" ng-click="mapIconClick()">{{marker.markURL}}</span>
  -->
-                  </leaflet>
-              </div>
+              </leaflet>
+         </section>
 
-              <div id="shelf">
-
-                <div ng-show="showNavIcons" class="btn-group navIcons" style="margin-top:-42px; z-index:1000;">
-                    <label style="background-color:#fff;" class="btn btn-primary map" ng-click="queryMap('places','food');" ng-model="iconModel" btn-radio="'food'"><img style="width:40px;" src="img/AICP/icons/food.png"></label>
-                    <label style="background-color:#fff;" class="btn btn-primary map" ng-click="queryMap('places','bars');" ng-model="iconModel" btn-radio="'bars'"><img style="width:40px;" src="img/AICP/icons/bar.png"></label>
-                    <label style="background-color:#fff;" class="btn btn-primary map" ng-click="queryMap('places','sponsors');" ng-model="iconModel" btn-radio="'sponsors'"><img style="width:40px;" src="img/AICP/icons/sponsors.png"></label>
-                    <label style="background-color:#fff;" class="btn btn-primary map" ng-click="queryMap('places','washrooms');" ng-model="iconModel" btn-radio="'washrooms'"><img style="width:40px;" src="img/AICP/icons/washrooms.png"></label>
-                    <label style="background-color:#fff;" class="btn btn-primary map" ng-click="queryMap('places','exhibits');" ng-model="iconModel" btn-radio="'exhibits'"><img style="width:40px;" src="img/AICP/icons/coolsculpt.png"></label>
-                    <label style="background-color:#fff;" class="btn btn-primary map" ng-click="queryMap('places','smoking');" ng-model="iconModel" btn-radio="'smoking'"><img style="width:40px;" src="img/AICP/icons/smoking.png"></label>
-                </div>
-
-                <div class="container">    
+         <section id="shelf">
+			  <div class="container">    
                   <div ng-view></div>
-                </div>
-              </div>   
-        </div>
+              </div>
+		 </section>
+	</main>
 
     </div>
   </div>
-
-<script>
-
-  //temp use of jquery, switch to angular animation?
-  $('#show').click(function(e) {
-      $('body').toggleClass('menu');
-      return false;
-  });
-
-  //temp use of jquery, switch to angular animation?
-  $('.slider').click(function(e) {
-      $('body').toggleClass('menu');
-      return false;
-  });
-
-
-</script>
+  
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
