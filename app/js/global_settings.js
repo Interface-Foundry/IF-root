@@ -56,7 +56,7 @@ var tilesDict = {
         url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig1oichl/{z}/{x}/{y}.png',
         options: {
             attribution: 'IF',
-            minZoom: 10,
+            minZoom: 1,
             maxZoom: 23,
             reuseTiles: true
         }

@@ -150,11 +150,18 @@ app.get('/api/:collection', function(req, res) {
             // EVENTS HAPPENING NOW
             if (req.query.queryFilter == "now"){
 
-
+                // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
                 //IF HAS SUB CATEGORY (LIKE LECTURES)
                 if (req.query.queryCat){
 
-                    var currentTime = new Date();
+                    if (req.query.userTime){
+                        var currentTime = new Date(req.query.userTime);
+                    }
+
+                    else {
+                        var currentTime = new Date();
+                    }
+                    
                     //var currentTime = new Date('Jun 10 2014 10:46:06 GMT-0400 (EDT)');
       
                     var qw = {
@@ -175,9 +182,7 @@ app.get('/api/:collection', function(req, res) {
                         'time.end': {$gt: currentTime}
                     };
                     db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-
                 }
-
 
             }
 
