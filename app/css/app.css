@@ -10,6 +10,16 @@ body {
   
 }
 
+/* *WRAP* */
+#wrap {
+  position: relative;
+  width: 100%; 
+  
+  overflow-x: hidden;
+  margin:0 auto; 
+  /*width:384px;*/ max-width:100%;
+}
+
 /* *NAV* Navigation Bar */
 
 nav {
@@ -27,6 +37,9 @@ nav {
 	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
 	-o-transition:      opacity 0 0, -o-transform 0.4s;
 	transition:         opacity 0 0, transform 0.4s;
+	
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 
 nav .logo {
@@ -81,14 +94,11 @@ nav li input.form-control {
 #drawer {
 	position:absolute;
 	top: 0;
-	left: 0;
+	left: -66%;
 	width: 66%;
 	bottom: 0px;
 	
-	-ms-transform: translateX(-100%); -webkit-transform: translateX(-100%); -moz-transform: translateX(-100%); 
-	transform: translateX(-100%);
-	
-	background-color: #FFF;
+	background: #FFF;
 	border-right: 1px solid #ccc;
 	opacity: 1;
 	
@@ -97,31 +107,25 @@ nav li input.form-control {
 	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
 	-o-transition:      opacity 0 0, -o-transform 0.4s;
 	transition:         opacity 0 0, transform 0.4s;
+	
+		-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
 
 	z-index: 10;
 }
 
-/* *WRAP* */
-#wrap {
-  position: relative;
-  overflow-x: hidden;
-  margin:0 auto; 
-  /*width:384px;*/ max-width:100%;
-}
 
-main {
+
+#main {
   position: relative;
+  top: 45px;
+  left: 0px;
+  
+  width: 100%;
   min-height: 100%;
-  
-  margin-top: 45px;
-  
   background: #f6f6f6;
-  -webkit-transition: opacity 0 0, -webkit-transform 0.4s; -moz-transition: opacity 0 0, -moz-transform 0.4s; -ms-transition:     opacity 0 0, -ms-transform 0.4s; -o-transition: opacity 0 0, -o-transform 0.4s; transition:         opacity 0 0, transform 0.4s;
- 	 -webkit-perspective: 1000; 
- 	 -webkit-backface-visibility: hidden;
- 	 -webkit-transform-style: preserve-3d;
-  z-index: 0;
+  
+  -webkit-transition: opacity 0 0, -webkit-transform 0.4s; -moz-transition: opacity 0 0, -moz-transform 0.4s; -ms-transition:     opacity 0 0, -ms-transform 0.4s; -o-transition: opacity 0 0, -o-transform 0.4s; transition: opacity 0 0, transform 0.4s;
   
 }
 
@@ -157,7 +161,10 @@ main {
 
 .container{
   /* max-width: 384px; */
+  width: 100%;
   background: white;
+  	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 
 .container a{
@@ -186,7 +193,6 @@ main {
   font-family:'simplreg', sans-serif;
  
 }
-
 
 
 #index_card {
@@ -763,12 +769,11 @@ h4 {
 /* *Drawer* Switching UX */
 /* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
 #drawer.drawer {
-	-ms-transform: translateX(0); -webkit-transform: translateX(0); -moz-transform: translateX(0); 
-	transform: translateX(0);
+	-ms-transform:  translateX(100%); -webkit-transform: translateX(100%); -moz-transform: translateX(100%); 
+	transform: translateX(100%);
 	opacity: 1;
 	-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
-
 }
 
 body.drawer #main, #main.drawer {
