@@ -6,11 +6,11 @@ MAIN ELEMENTS & UX HOOKS
 
 body {
   margin: 0;
-  -webkit-backface-visibility: hidden;
-  -webkit-perspective: 1000;
+  background: #ccc;
+  
 }
 
-/* Nav bar */
+/* *NAV* Navigation Bar */
 
 nav {
 	position: fixed;
@@ -76,6 +76,7 @@ nav li input.form-control {
   background-color: #fff; 
 }*/
 
+/* *DRAWER* Drawer */
 
 #drawer {
 	position:absolute;
@@ -97,70 +98,78 @@ nav li input.form-control {
 	-o-transition:      opacity 0 0, -o-transform 0.4s;
 	transition:         opacity 0 0, transform 0.4s;
 	-webkit-backface-visibility: hidden;
-	
+
 	z-index: 10;
 }
 
-/* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
-#drawer.drawer {
-	
-	-ms-transform: translateX(0); -webkit-transform: translateX(0); -moz-transform: translateX(0); 
-	transform: translateX(0);
-	opacity: 1;
-
+/* *WRAP* */
+#wrap {
+  position: relative;
+  overflow-x: hidden;
+  margin:0 auto; 
+  /*width:384px;*/ max-width:100%;
 }
 
-body.drawer #main {
-  -webkit-transform: translateX(66%);
-  -moz-transform: translateX(66%);
-  -ms-transform: translateX(66%);
-  -o-transform: translateX(66%);
-  transform: translateX(66%);
-  
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
-}
-
-body.drawer nav {
-	-webkit-transform: translateX(66%);
-	-moz-transform: translateX(66%);
-	-ms-transform: translateX(66%);
-	-o-transform: translateX(66%);
-	transform: translateX(66%);
-}
-
-
-#main {
+main {
   position: relative;
   min-height: 100%;
   
   margin-top: 45px;
   
-  background: #161616;
-  box-shadow: -4px 0px 5px rgba(0,0,0,0.5);
-  	-webkit-transition: opacity 0 0, -webkit-transform 0.4s;
-	-moz-transition:    opacity 0 0, -moz-transform 0.4s;
-	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
-	-o-transition:      opacity 0 0, -o-transform 0.4s;
-	transition:         opacity 0 0, transform 0.4s;
+  background: #f6f6f6;
+  -webkit-transition: opacity 0 0, -webkit-transform 0.4s; -moz-transition: opacity 0 0, -moz-transform 0.4s; -ms-transition:     opacity 0 0, -ms-transform 0.4s; -o-transition: opacity 0 0, -o-transform 0.4s; transition:         opacity 0 0, transform 0.4s;
+ 	 -webkit-perspective: 1000; 
+ 	 -webkit-backface-visibility: hidden;
+ 	 -webkit-transform-style: preserve-3d;
+  z-index: 0;
+  
+}
+
+#window {
+  overflow: hidden;
+
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  bottom: 0px;
+  
+  color: white;
+  opacity: 0;
+  -webkit-transition: opacity 0 0.2s;
+  -moz-transition: opacity 0 0.2s;
+  -ms-transition: opacity 0 0.2s;
+  -o-transition: opacity 0 0.2s;
+  transition: opacity 0 0.2s;
+}
+
+#shelf {
+  position: relative;
+  min-height: 100%;
+  
+  border-top: solid gray 1px;
+
+  
   -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
-  z-index: 0;
+  -webkit-transform-style: preserve-3d;
 }
+
+.container{
+  /* max-width: 384px; */
+  background: white;
+}
+
+.container a{
+  text-decoration: none;
+}
+
 
 /*#leafletmap{
   height:183px !important;
 }*/
 
-::-webkit-scrollbar { 
-    display: none; 
-}
 
-
-
-.row-fluid{
-
-}
 
 .item {
   width:50%;
@@ -253,7 +262,6 @@ body.drawer nav {
 }
 
 /** Detail View **/
-
 img.landmark {
   float: right;
   margin-right: 3em;
@@ -286,7 +294,6 @@ ul.landmark-thumbs img:hover {
   cursor: pointer;
 }
 
-
 ul.specs {
   clear: both;
   margin: 0;
@@ -308,128 +315,13 @@ ul.specs > li > span{
 ul.specs dt {
   font-weight: bold;
 }
+/** End Detail View **/
 
 /*h1 {
   border-bottom: 1px solid gray;
 }*/
 
 
-
-
-/* SLIDE UP SLIDE DOWN */
-
-body.lense #window {
-  opacity: 1;
-  -webkit-transition: opacity 0 0;
-  -moz-transition:    opacity 0 0;
-  -ms-transition:     opacity 0 0;
-  -o-transition:      opacity 0 0;
-  transition:         opacity 0 0;
-}
-
-body.lense #shelf {
-/*-webkit-transform: translateY(732px);*/
-  /*
-  javascript read page height, change css of window height - height of index card, recalculate on window drag
-  */
-/*  
-  -moz-transform: translateY(31%);
-  -ms-transform: translateY(31%);
-  -o-transform: translateY(31%);
-  transform: translateY(31%);*/
-}
-
-/* SLIDE UP SLIDE DOWN */
-
-body.lense2 #window {
-  opacity: 1;
-  -webkit-transition: opacity 0 0;
-  -moz-transition:    opacity 0 0;
-  -ms-transition:     opacity 0 0;
-  -o-transition:      opacity 0 0;
-  transition:         opacity 0 0;
-}
-
-body.lense2 #shelf {
-
-  /*
-  javascript read page height, change css of window height - height of index card, recalculate on window drag
-  */
-/*  -webkit-transform: translateY(170px);
-  -moz-transform: translateY(170px);
-  -ms-transform: translateY(170px);
-  -o-transform: translateY(170px);
-  transform: translateY(170px);*/
-}
-
-
-
-
-#wrap {
-  position: relative;
-  overflow-x: hidden;
-  margin:0 auto; 
-  width:384px; max-width:100%;
-}
-
-
-
-
-
-#window {
-
-  overflow: hidden;
-
-  position:absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  bottom: 0px;
-
-/*background-image: linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -o-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -moz-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -webkit-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-  background-image: -ms-linear-gradient(bottom, rgb(153,0,255) 25%, rgb(215,115,228) 59%, rgb(247,179,186) 84%);
-
-  background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(153,0,255)),
-    color-stop(0.59, rgb(215,115,228)),
-    color-stop(0.84, rgb(247,179,186))
-  );
-*/
-
-  color: white;
-  opacity: 0;
-  -webkit-transition: opacity 0 0.2s;
-  -moz-transition: opacity 0 0.2s;
-  -ms-transition: opacity 0 0.2s;
-  -o-transition: opacity 0 0.2s;
-  transition: opacity 0 0.2s;
-}
-
-#shelf {
-  position: relative;
-  min-height: 100%;
-  background: #000;
-
-
-  border-top: solid gray 1px;
-
-  box-shadow: 0px -2px 5px rgba(37,99,110,0.5);
-
-  
-  -webkit-transition: -webkit-transform 0.2s;
-  -moz-transition: -moz-transform 0.2s;
-  -ms-transition: -ms-transform 0.2s;
-  -o-transition: -o-transform 0.2s;
-  transition: transform 0.2s;
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
-}
 
 #content { 
 /*  padding: 20px;*/ 
@@ -440,56 +332,6 @@ body.lense2 #shelf {
   background: #333;
 }
 
-/* --- end code by Dave Cole */
-
-/* App menu bar */
-
-#show { 
-  float: left;
-  color: #000; 
-  background: #9900ff;
-  width: 44px;
-  height: 47px;
-  cursor: pointer;
-  font-size: 20px;
-  display: inline-block;
-  position: absolute;
-
-}
-
-#selector {
-  float: left;
-  margin: 0 auto;
-  width: 65%;
-  height: 100%;
-  border: 1px;
-  background: #fff;
-  padding-left: 20px;
-  display: inline-block;
-  cursor: pointer;
-}
-
-#search { 
-  float: right;
-  color: #000; 
-  background: #9900ff;
-  width: 51px;
-  height: 100%;
-  cursor: pointer;
-  font-size: 15px;
-  display: inline-block;
-}
-
-
-
-
-
-.partner {
-  width:67px;
-  opacity: 0.8;
-  padding-left: 7px;
-
-}
 
 
 
@@ -510,49 +352,11 @@ body.lense2 #shelf {
 
 
 
-/*AICP FONT*/
-@font-face {
-  font-family: 'simplreg';
-  src: url("../fonts/SimplReg.eot");
-  src: url("../fonts/SimplReg.eot?#iefix") format('embedded-opentype'),
-       url("../fonts/SimplReg.woff") format('woff'),
-       url("../fonts/SimplReg.ttf") format('truetype'),
-       url("../fonts/typicons.svg#typicons") format('svg');
-/*  font-weight: normal;
-  font-style: normal;*/
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  /*line-height: 1;*/
-  -webkit-font-smoothing: antialiased;
-}
-
-
-
-
 /*ANGULAR BOOTSTRAP OVERIDE*/
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
-/*GENERAL*/
-body{
-  background: rgb(112, 112, 112);
-}
-
 li {
   list-style-type: none;
-}
-
-.container{
-  max-width: 384px;
-  background: black;
-  color: white;
-
-}
-
-.container a{
-  text-decoration: none;
 }
 
 /*CARDS*/
@@ -564,8 +368,6 @@ li {
   max-width: 33.3%;
   font-size: 1.3rem;
 }
-
-
 
 .col-xs-12.card{
   max-width: 100%;
@@ -956,5 +758,94 @@ h4 {
 
 }
 
+/* UX */
+
+/* *Drawer* Switching UX */
+/* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
+#drawer.drawer {
+	-ms-transform: translateX(0); -webkit-transform: translateX(0); -moz-transform: translateX(0); 
+	transform: translateX(0);
+	opacity: 1;
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
+
+}
+
+body.drawer #main, #main.drawer {
+  -webkit-transform: translateX(66%);
+  -moz-transform: translateX(66%);
+  -ms-transform: translateX(66%);
+  -o-transform: translateX(66%);
+  transform: translateX(66%);
+  
+  -webkit-perspective: 1000;
+  -webkit-backface-visibility: hidden;
+}
+
+body.drawer nav, nav.drawer {
+	-webkit-transform: translateX(66%);
+	-moz-transform: translateX(66%);
+	-ms-transform: translateX(66%);
+	-o-transform: translateX(66%);
+	transform: translateX(66%);
+	
+	  -webkit-perspective: 1000;
+	  -webkit-backface-visibility: hidden;
+}
+
+/* SLIDE UP SLIDE DOWN */
+
+body.lense #window {
+  opacity: 1;
+  -webkit-transition: opacity 0 0;
+  -moz-transition:    opacity 0 0;
+  -ms-transition:     opacity 0 0;
+  -o-transition:      opacity 0 0;
+  transition:         opacity 0 0;
+}
+
+body.lense #shelf {
+/*-webkit-transform: translateY(732px);*/
+  /*
+  javascript read page height, change css of window height - height of index card, recalculate on window drag
+  */
+/*  
+  -moz-transform: translateY(31%);
+  -ms-transform: translateY(31%);
+  -o-transform: translateY(31%);
+  transform: translateY(31%);*/
+}
+
+/* SLIDE UP SLIDE DOWN */
+
+body.lense2 #window {
+  opacity: 1;
+  -webkit-transition: opacity 0 0;
+  -moz-transition:    opacity 0 0;
+  -ms-transition:     opacity 0 0;
+  -o-transition:      opacity 0 0;
+  transition:         opacity 0 0;
+}
+
+body.lense2 #shelf {
+
+  /*
+  javascript read page height, change css of window height - height of index card, recalculate on window drag
+  */
+/*  -webkit-transform: translateY(170px);
+  -moz-transform: translateY(170px);
+  -ms-transform: translateY(170px);
+  -o-transform: translateY(170px);
+  transform: translateY(170px);*/
+}
+
+/* --- end code by Dave Cole */
+
+
+/* MAINTENENCE / BUGFIX / FIXES */
 
 main {display:block;}
+
+::-webkit-scrollbar { 
+    display: none; 
+}

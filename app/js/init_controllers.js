@@ -122,8 +122,10 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
 
 
     $scope.panDrawer = function(){
-        $('body').toggleClass('drawer');
+        //$('body').toggleClass('drawer');
         $('#drawer').toggleClass('drawer');
+        $('main').toggleClass('drawer');
+		$('nav').toggleClass('drawer');
         return false;
     }
 
