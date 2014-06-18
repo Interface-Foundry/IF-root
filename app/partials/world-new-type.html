@@ -1,16 +1,16 @@
 
-<div class="container-fluid" style="padding-left:5px; padding-right:19px;">
+<div class="container-fluid" style="padding-left:5px; padding-right:19px; background-color:#cecece;" >
   <div class="row-fluid">
 
     <div class="span10">
       <!--Body content-->
 
-       <label>Search for location:</label>
-      <p><input type="text" name="landmark.locsearch" ng-model="landmark.locsearch" placeholder="Example: Hicks and 9th Brooklyn NYC"/><button ng-click="locsearch()">Search</button></p>
+       <h4>Search for location:</h4>
+      <p><input type="text" name="landmark.locsearch" ng-model="landmark.locsearch" placeholder="Example: Hicks and 9th Brooklyn NYC"/><button style="color:#000;" ng-click="locsearch()">Search</button></p>
 
       <form>
         <br>
-          <h3>Build a {{landmark.type}} <span ng-show="landmark.type == 'place'"><i style="font-size:25px;" class="fui-location"></i></span><span ng-show="landmark.type == 'event'"><i style="font-size:25px;" class="fui-calendar-solid"></i> </span><span ng-show="landmark.type == 'job'"><i style="font-size:25px;" class="fui-user"></i></span></h3>
+          <h4>Build a {{landmark.type}} <span ng-show="landmark.type == 'place'"><i style="font-size:25px;" class="fui-location"></i></span><span ng-show="landmark.type == 'event'"><i style="font-size:25px;" class="fui-calendar-solid"></i> </span><span ng-show="landmark.type == 'job'"><i style="font-size:25px;" class="fui-user"></i></span></h4>
 
                 <p><h4>Name of {{landmark.type}} <input type="text" ng-required="true" name="landmark.name" ng:model="landmark.name" maxlength="50" /></p>
 
