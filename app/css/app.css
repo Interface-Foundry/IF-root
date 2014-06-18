@@ -5,7 +5,6 @@ body {
 }
 
 /*#leafletmap{
-
   height:183px !important;
 }*/
 
@@ -240,9 +239,10 @@ body.lense2 #shelf {
 
 
 
-#wrapper {
+#wrap {
   position: relative;
   overflow-x: hidden;
+  margin:0 auto; width:384px; max-width:100%;
 }
 
 #menu {
