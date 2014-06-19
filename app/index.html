@@ -51,6 +51,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
   <link rel="stylesheet" href="css/bootstrap.css">
   <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/editor.css">
   <link rel='stylesheet' href='fonts/typicons.min.css'>
 
   <link rel="stylesheet" href="css/tidepools/leaflet.css">
@@ -86,6 +87,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <script src="js/world_controllers.js"></script>
   <script src="js/widget_controllers.js"></script>
   <script src="js/admin_controllers.js"></script>
+  <script src="js/editor_controllers.js"></script>
 
   <script src="js/filters.js"></script>
   <script src="js/services.js"></script>
@@ -102,7 +104,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <div id="wrap">
 	  <nav role="navigation" ng-class="{'drawer': drawerOn}">
 	  		<ul>
-	  			<li><img class="logo" ng-click="drawerOn = !drawerOn">logo</img></li>
+	  			<li><img class="logo" ng-click="drawerOn = !drawerOn"></img></li>
 	  			<li><form role="search">
 	  					<input class="form-control" type="text" placeholder="Search">
 	  			</form></li>
@@ -124,10 +126,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
               </leaflet>
          </section>
 
-         <section id="shelf">
-			  <div class="container">    
+         <section id="shelf">  
                   <div ng-view></div>
-              </div>
 		 </section>
 </div>
   

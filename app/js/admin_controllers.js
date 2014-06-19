@@ -545,7 +545,7 @@ LandmarkEditCtrl.$inject = ['Landmark','$location', '$scope', '$routeParams','db
 // WorldNewCtrl.$inject = ['$location', '$scope', '$routeParams','db'];
 
 
-function WorldNewCtrl($location, $scope, $rootScope, $routeParams, db, leafletData) {
+/*function WorldNewCtrl($location, $scope, $rootScope, $routeParams, db, leafletData) {
 
     shelfPan('new');
 
@@ -801,8 +801,9 @@ function WorldNewCtrl($location, $scope, $rootScope, $routeParams, db, leafletDa
 
     $scope.landmark.loc = [];
 }
+*/
 
-WorldNewCtrl.$inject = ['$location', '$scope', '$rootScope','$routeParams','db','leafletData'];
+//WorldNewCtrl.$inject = ['$location', '$scope', '$rootScope','$routeParams','db','leafletData'];
 
 
 

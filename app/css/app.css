@@ -40,6 +40,8 @@ nav {
 	
 	-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
+	
+	z-index: 100;
 }
 
 nav .logo {
@@ -163,8 +165,6 @@ nav li input.form-control {
   /* max-width: 384px; */
   width: 100%;
   background: white;
-  	-webkit-perspective: 1000;
-	-webkit-backface-visibility: hidden;
 }
 
 .container a{

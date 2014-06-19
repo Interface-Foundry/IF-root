@@ -118,22 +118,6 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         //     backMarkCount = 0;
         // }
     }
-
-
-	$scope.drawer = '';
-    $scope.panDrawer = function(){
-    	if (drawer == '') {
-    		$scope.drawer = 'drawer';
-    	} 
-	    
-        //$('body').toggleClass('drawer');
-        /*$('#drawer').toggleClass('drawer');
-        $('#main').toggleClass('drawer');
-		$('nav').toggleClass('drawer');*/
-		event.preventDefault();
-        return false;
-    }
-
     
     //this is temporary cause w/out leaflet won't render??
     angular.extend($rootScope, {

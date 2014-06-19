@@ -27,9 +27,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newpost', {templateUrl: 'partials/landmark-new.html'}). 
       when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl}). 
 
-      when('/newworld', {templateUrl: 'partials/world-new.html'}). 
-      when('/newworld/:type', {templateUrl: 'partials/world-new-type.html', controller: WorldNewCtrl}). 
-
+      when('/newworld', {templateUrl: 'partials/editor/world-maker.html', controller: WorldMakerCtrl}). 
+      
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}). 
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}). 
 
