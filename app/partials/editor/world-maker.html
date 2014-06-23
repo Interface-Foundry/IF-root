@@ -1,21 +1,69 @@
-<ul id="maker-pages">
-	<li>
-		<img src="img/editor/syracuse.jpg"/>	
-	</li>
-	
-	<li>
-		<img src="img/editor/syracuse.jpg"/>
-	</li>
-	
-	<li>
-		<img src="img/editor/syracuse.jpg"/>
-	</li>
-	
-	<li>
-		<img src="img/editor/syracuse.jpg"/>
-	</li>
-	
-	<li>
-		<img src="img/editor/syracuse.jpg"/>
-	</li>
-</ul>
+<div class="container">
+
+		<form name="worldDetailForm" ng-submit="submitForm()" novalidate>
+			<legend>Create your World</legend>
+			<img src="img/editor/syracuse.jpg" width=100%/>
+			<div class="field">
+				<label>Name</label> <input name="worldName" type="text" ng-model="world.name"/>
+			</div>
+			<div class="field">
+				<label>Picture</label> <input name="worldPicture" type="file"/>
+			</div>
+			<div class="field">
+				<label>Summary</label> <input name="worldSummary" type="text" ng-model="world.summary"/>
+			</div>
+			<div class="field">
+				<label>Description</label> <input name="worldDescription" type="text" ng-model="world.description"/>
+			</div>
+			<div class="field">
+				<label>Hashtag</label> <input name="worldHashtag" type="text" ng-model="world.hashtag"/>
+			</div>
+			<div class="field">
+				<label>Category</label> <input name="worldCategory" type="text" ng-model="world.category"/>
+			</div>
+		</form>	
+		
+		<form name="mapStyleForm" novalidate>
+			<legend>Style your Map</legend>
+			<div class="field">
+				map theme
+			</div>
+			<div class="field">
+				marker
+			</div>
+			<div class="field">
+				upload your own
+			</div>
+		</form>
+		
+		<form name="landmarkCreator" novalidate>
+			<legend>Pin your Landmarks</legend>
+			<img src="img/editor/syracuse.jpg" width=100%/>
+			<button>+++</button>
+			<div class="field">
+				<label>Name</label> <input name="landmarkName" type="text" ng-model="landmark.name" />
+			</div>
+			<div class="field">
+				<label>Picture</label> <input name="landmarkPicture" type="file" />
+			</div>
+			<div class="field">
+				<label>Summary</label> <input name="landmarkSummary" type="text" ng-model="landmark.summary" />
+			</div>
+			<div class="field">
+				<label>Description</label> <input name="landmarkDescription" type="text" ng-model="landmark.category" />
+			</div>
+			<div class="field">
+				<label>Category</label> <input name="landmarkName" type="text" ng-model="landmark.tags" />
+			</div>
+		</form>
+
+		
+</div>
+
+<p>a</p>
+<p>a</p>
+<p>aa</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
+<p>a</p>
