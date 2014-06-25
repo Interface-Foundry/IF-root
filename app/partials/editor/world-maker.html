@@ -1,32 +1,73 @@
 <div class="container">
+<button ng-click="prevPage()">prev</button>
 
-		<form name="worldDetailForm" ng-submit="submitForm()" novalidate>
+<button ng-click="nextPage()">next</button>
+	<ul id="maker-pages">
+		<li ng-class="pageClass[0]"> 
+		<form name="worldDetail" ng-submit="submitForm()" id="worldDetail" novalidate>
 			<legend>Create your World</legend>
-			<img src="img/editor/syracuse.jpg" width=100%/>
+			 <leaflet id="worldDetailMap" tiles="tiles" center="center" markers="markers">
+			 	
+             </leaflet>
 			<div class="field">
-				<label>Name</label> <input name="worldName" type="text" ng-model="world.name"/>
+				<label>Name</label> <input name="worldName" type="text" ng-model="world.name" required />
+				<div class="error" ng-show="worldDetail.worldName.$dirty && worldDetail.worldName.$error.required">
+				Name is required.</div>
 			</div>
 			<div class="field">
-				<label>Picture</label> <input name="worldPicture" type="file"/>
+				<label>Picture</label> 
+				
+					<span class="btn btn-success fileinput-button">
+                    	<i class="icon-plus icon-white"></i>
+						<span>Add Profile Pic</span>
+						<input id="fileupload" type="file" name="files[]">
+						</span>
+						<label>Or Drag & Drop Pic ↑</label>
+
+						<div id="progress" class="progress">
+							<div class="bar" style="width: 0%;"></div>
+							</div>
+
+							<p id="uploadedpic"></p>
+							<div id="preview"></div>         
+
 			</div>
 			<div class="field">
-				<label>Summary</label> <input name="worldSummary" type="text" ng-model="world.summary"/>
+				<label>Summary</label> <input name="worldSummary" type="text" ng-model="world.summary" required/>
+				<div class="error" ng-show="worldDetail.worldSummary.$dirty && worldDetail.worldSummary.$error.required">
+				A summary is required!
+				</div>
 			</div>
 			<div class="field">
-				<label>Description</label> <input name="worldDescription" type="text" ng-model="world.description"/>
+				<label>Description</label> <input name="worldDescription" type="text" ng-model="world.description" required/>
+				<div class="error" ng-show="worldDetail.worldDescription.$dirty && worldDetail.worldDescription.$error.required">
+				A description is required! 
+				</div>
 			</div>
 			<div class="field">
-				<label>Hashtag</label> <input name="worldHashtag" type="text" ng-model="world.hashtag"/>
+				<label>Hashtag</label> <input name="worldHashtag" type="text" ng-model="world.hashtag" required/>
+				<div class="error" ng-show="worldDetail.worldHashtag.$dirty && worldDetail.worldHashtag.$error.required">
+				A hashtag is required!
+				</div>
 			</div>
 			<div class="field">
-				<label>Category</label> <input name="worldCategory" type="text" ng-model="world.category"/>
+				<label>Category</label> <input name="worldCategory" type="text" ng-model="world.category" required/>
+				<div class="error" ng-show="worldDetail.worldCategory.$dirty && worldDetail.worldCategory.$error.required">
+				A category is required
+				</div>
 			</div>
-		</form>	
+			<button ng-click="save()">Save</button>
+		</form>
+		</li>
 		
-		<form name="mapStyleForm" novalidate>
+		<li ng-class="pageClass[1]">
+		<form name="mapStyle" novalidate>
 			<legend>Style your Map</legend>
-			<div class="field">
-				map theme
+			<div class="mapbox field">
+				<img ng-src="/img/mapbox/urban_small.png"/>
+				<img ng-src="/img/mapbox/fairy_small.png"/>
+				<img ng-src="/img/mapbox/sunset_small.png"/>
+				<img ng-src="/img/mapbox/arabesque_small.png"/>
 			</div>
 			<div class="field">
 				marker
@@ -35,7 +76,9 @@
 				upload your own
 			</div>
 		</form>
+		</li>
 		
+		<li ng-class="pageClass[2]">
 		<form name="landmarkCreator" novalidate>
 			<legend>Pin your Landmarks</legend>
 			<img src="img/editor/syracuse.jpg" width=100%/>
@@ -56,14 +99,47 @@
 				<label>Category</label> <input name="landmarkName" type="text" ng-model="landmark.tags" />
 			</div>
 		</form>
-
+		</li>
+		
+		<li ng-class="pageClass[3]">
+		<form name="explorerStyle" novalidate>
+			<legend>Style your Explorer</legend>
+			<div class="field">
+				<label>Body BG</label> <input name="bodybg" type='text' class="color"/>
+			</div>
+			<div class="field">
+				<label>Card BG</label> <input name="cardbg" type='text' class="color"/>
+			</div>
+			<div class="field">
+				<label>Card Border</label> <input name="cardbg" type='text' class="color"/>
+			</div>
+			<div class="field">
+				<label>World Title Color</label> <input name="cardbg" type='text' class="color"/>
+			</div>
+			<div class="field">
+				<label>Landmark Title Color</label> <input name="cardbg" type='text' class="color" disabled/>
+			</div>
+			<div class="field">
+				<label>Category Title Color</label> <input name="cardbg" type='text' class="color" disabled/>
+			</div>
+			<div class="field">
+				<label>Accent Text Color</label> <input name="cardbg" type='text' class="color" disabled/>
+			</div>
+			<div class="field">
+				<label>Body Font</label> <select></select>
+			</div>
+			<div class="field">
+				<label>Theme Font</label> <select disabled></select>
+			</div>
+		</form>
+		<div class="livepreview">
+			
+		</div>
+		</li>
+		
+		<li ng-class="pageClass[4]">
+		congrats.
+		</li>
+	</ul>
 		
 </div>
-
-<p>a</p>
-<p>a</p>
-<p>aa</p>
-<p>a</p>
-<p>a</p>
-<p>a</p>
-<p>a</p>

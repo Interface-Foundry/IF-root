@@ -1,5 +1,5 @@
-input.ng-invalid {
-	border: 1px solid red;
+input.ng-invalid.ng-dirty {
+	border: 1px solid #ffb700;
 }
 
 input.ng-valid {
@@ -12,4 +12,52 @@ input {
 
 .field {
 	margin: 10px;
+}
+
+#maker-pages {
+	position: relative;
+	width: 100%;
+	height: 2000px;
+	margin: 0 auto;
+	overflow: hidden;
+}
+
+#maker-pages li {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	transform: translateX(100%);
+	-webkit-transform: translateX(100%);
+	transition: 0.2s linear;
+	-webkit-transition: 0.2s linear;
+}
+
+#maker-pages li.current {
+	transform: translateX(0%);
+	-webkit-transform: translateX(0%);
+	
+}
+
+#maker-pages li.left {
+	transform: translateX(-100%);
+	-webkit-transform: translateX(-100%);
+
+}
+
+#maker-pages li.right {
+	transform: translateX(100%);
+	-webkit-transform: translateX(100%);
+
+}
+
+.mapbox img {
+	width: 200px;
+	height: 150px;
+}
+
+.livepreview {
+	background-color: #CCC;
+	width: 320px;
+	height: 480px;
 }
