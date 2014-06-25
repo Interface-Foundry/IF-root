@@ -486,6 +486,7 @@ app.post('/api/:collection/create', function(req, res) {
     }
 
     function saveLandmark(finalID){
+    
         
         //EDITING A LANDMARK
         if (req.body._id){ //temp way to detect landmark edit by checking if mongo already generated _id
@@ -587,15 +588,29 @@ app.post('/api/:collection/create', function(req, res) {
             
         //NEW LANDMARK
          else { //not an edit, a new landmark entirely
+			 	
+			 	//console.log(req);
+
 
                 var landmarkModel = mongoose.model('landmark', landmarkSchema, 'landmarks');  
                 var lm = new landmarkModel();
 
                 lm.name = req.body.name;
                 lm.id = finalID;
+                
+                if (req.body.description){
+                    lm.description = req.body.description;
+                }
+                
+                if (req.body.shortDescription){
+                    lm.shortDescription = req.body.shortDescription;
+                }
+/*
                 lm.world = worldVal;
                 lm.type = req.body.type;
                 lm.subType = req.body.subType;
+*/
+/*
                 lm.stats.avatar = req.body.stats.avatar;
                 lm.mapID = "TidepoolsBaseMap"; //compatibility with Old Tidepools Interface
 
@@ -653,6 +668,7 @@ app.post('/api/:collection/create', function(req, res) {
                     lm.tags = newTag;
                     
                 }  
+*/
 
             lm.save(function (err, landmark) {
                 if (err)
@@ -706,7 +722,8 @@ app.post('/api/upload',  function (req, res) {
 
             var fileName = req.files.files[0].name.substr(0, req.files.files[0].name.lastIndexOf('.')) || req.files.files[0].name;
             var fileType = req.files.files[0].name.split('.').pop();
-
+			console.log(fileName);
+			console.log(fileType);
             while (1) {
 
                 var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
@@ -719,9 +736,9 @@ app.post('/api/upload',  function (req, res) {
                 } 
                 else {
                     var newPath = "app/uploads/" + current;
-
+					
                     fs.writeFile(newPath, data, function (err) {
-
+						console.log('writefile begins');
                         im.crop({
                           srcPath: newPath,
                           dstPath: newPath,
@@ -730,7 +747,7 @@ app.post('/api/upload',  function (req, res) {
                           quality: 1,
                           gravity: "Center"
                         }, function(err, stdout, stderr){
-
+							console.log(err);
                         
 
                             res.send("uploads/"+current);
