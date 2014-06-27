@@ -93,4 +93,4 @@ monguurl = require('monguurl');
 	// 	target: 'id'
 	// }));
 
-module.exports = mongoose.model('landmarkModel', landmarkSchema);
+module.exports = mongoose.model('landmarkModel', landmarkSchema, 'landmarks');

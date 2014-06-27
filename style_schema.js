@@ -34,4 +34,4 @@ monguurl = require('monguurl');
 	}); 
 
 
-module.exports = mongoose.model('styleModel', styleSchema);
+module.exports = mongoose.model('styleModel', styleSchema, 'styles');

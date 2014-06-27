@@ -88,24 +88,6 @@ monguurl = require('monguurl');
 		tags: [String] //search tags
 	}); 
 
-	landmarkSchema.plugin(textSearch);
 
-	landmarkSchema.index({loc:'2dsphere'});
-	landmarkSchema.index({loc_nickname:'2dsphere'});
 
-	//indexing for search
-	landmarkSchema.index({
-	    name  				  :"text",
-	    description           :"text",
-	    shortDescription      :"text",
-	    type                  :"text",
-	    loc_nicknames         :"text"
-	});
-
-	// landmarkSchema.plugin(monguurl({
-	// 	length: 40,
-	// 	source: 'name',
-	// 	target: 'id'
-	// }));
-
-module.exports = mongoose.model('projectModel', projectSchema);
+module.exports = mongoose.model('projectModel', projectSchema, 'projects');
