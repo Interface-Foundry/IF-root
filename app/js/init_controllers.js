@@ -4,28 +4,28 @@
 function WorldRouteCtrl($location, $scope, $routeParams, db) {
 
     //WIDGET find data and then route to correct bubble
-    var today = new Date();
-    var dd = today.getDate();
-    var mm = today.getMonth()+1; //January is 0!
+    // var today = new Date();
+    // var dd = today.getDate();
+    // var mm = today.getMonth()+1; //January is 0!
 
-    var yyyy = today.getFullYear();
-    if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
+    // var yyyy = today.getFullYear();
+    // if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
  
-    if (today === '10/06/2014'){
-        $location.path('awards');    
-    }
+    // if (today === '10/06/2014'){
+    //     $location.path('awards');    
+    // }
 
-    else if (today === '11/06/2014'){
-        $location.path('lectures');
-    }
+    // else if (today === '11/06/2014'){
+    //     $location.path('lectures');
+    // }
 
-    else if (today === '12/06/2014'){
-        $location.path('show');
-    }
+    // else if (today === '12/06/2014'){
+    //     $location.path('show');
+    // }
 
-    else {
-        $location.path('awards');
-    }
+    // else {
+    //     $location.path('awards');
+    // }
 
     //--- GEO LOCK -----//
 
@@ -58,19 +58,15 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
 
     function findWorlds(lat,lon){
 
-        //---- Find World -----//
-        // $scope.queryType = "all";
-        // $scope.queryFilter = "all";
-
-
-        //Events Now example:
-        // $scope.queryType = "events";
-        // $scope.queryFilter = "now";
-
-        $scope.worlds = db.worlds.query({ userLat:lat, userLon:lon });
-
-        //---------//
-
+        $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
+            console.log(data);
+            if (data[0].liveAndInside > 0) {
+              console.log(data[0].liveAndInside[0].id);
+            }
+            else {
+                //?? profit
+            }
+        });
     }
 
 }
