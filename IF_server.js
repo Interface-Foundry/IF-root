@@ -32,20 +32,31 @@ var urlify = require('urlify').create({
 });
 
 
+var bodyParser = require('body-parser');
+var integers = require('./server_bubblequery/constants/integers');
+var strings = require('./server_bubblequery/constants/strings');
+var bubble = require('./server_bubblequery/handlers/bubble');
+
+
+
+
 //----MONGOOOSE----//
 var mongoose = require('mongoose'),
     landmarkSchema = require('./landmark_schema.js'),
+    styleSchema = require('./style_schema.js'),
+    projectSchema = require('./project_schema.js'),
     monguurl = require('monguurl');
 
-mongoose.connect('mongodb://localhost/aicp');
+
+mongoose.connect('mongodb://localhost/mantle');
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
 
 
 var express = require('express'),
-    app = module.exports.app = express(), 
-    db = require('mongojs').connect('aicp');
+    app = module.exports.app = express(),
+    db = require('mongojs').connect('mantle');
 
 
     
@@ -95,23 +106,101 @@ app.get('/api/:collection', function(req, res) {
 
     // console.log(req.params.collection);
 
-    // if (req.params.collection == 'worlds'){
+    if (req.params.collection == 'worlds'){
 
-    //     console.log(req.query.userLat);
-    //     console.log(req.query.userLon);
+        bubble.listBubbles(req,res);
 
-    //     var qw = {
-    //         // 'world' : 1,
-    //         geo: { Building.collection.geoNear(longitude, latitude, {maxDistance: radius }, cb);}
-    //     };
-    //     db.collection(req.params.collection).find(qw).toArray(fn(req, res));
-    // }
+        // console.log(req.query.userLat);
+        // console.log(req.query.userLon);
+
+        // var qw = {
+        //     'world' : 1,
+        //     geo: { Building.collection.geoNear(longitude, latitude, {maxDistance: radius }, cb);}
+        // };
+        // db.collection(req.params.collection).find(qw).toArray(fn(req, res));
+
+        // var area = { center: [req.query.userLat, req.query.userLon], radius: 10 };
+        // db.collection(req.params.collection).where('loc').within().centerSphere(area);
+
+        // var area = { center: [req.query.userLat, req.query.userLon], radius: 10, unique: true, spherical: true };
+        // db.collection(req.params.collection).circle('loc', area);
+
+        // var results = landmarkQuery.where('loc').within().circle(area);
+
+        // results.toArray(fn(req, res));
+
+            // var qw = {};
+            // var limit;
+
+
+            // var landmarkModel = mongoose.model('landmark', landmarkSchema, 'landmarks');
+
+
+            // var coordinateObject = JSON.parse("[" + req.query.userLon+","+req.query.userLat+ "]");
+            // // console.log(coordinateObject);
+
+            // var normalizedCoordinate = coordinateObject.map(function(coordinate) {
+            //     return parseFloat(coordinate);
+            // });
+
+            // var geoQuery = { type : "Point", coordinates : normalizedCoordinate };
+
+            // var geoNearOptions = { spherical:true, distanceMultiplier: integers.DISTANCE_MULTIPLIER_METERS, maxDistance: integers.RADIUS_DATA_BUBBLE_WITH_PROXIMITY};
+
+            // landmarkModel.geoNear(geoQuery, geoNearOptions, function (err, data) {
+
+            //     // return callback(err, data);
+            //     console.log(err);
+            //     console.log(data);
+
+            //     var bubblesInside = [];
+            //     var bubblesNear = [];
+
+
+            //     //bubble inside
+            //     if (data[i].dis < integers.RADIUS_DATA_BUBBLE)){
+
+            //     }
+
+
+            // });
+
+
+
+
+
+
+            // query.exec(function (err, lm) {
+            //     console.log(lm);
+            //     console.log(err);
+            // });
+
+            // landmarkModel.where('loc').within().circle(area, function (err, lm) {
+
+            //     if (err){
+            //         console.log(err);
+            //     }
+
+            //     else {
+            //          console.log(lm);
+            //         //res.send(idArray);
+            //     }              
+
+            // });
+      
+    
+        //console.log(results);
+
+        // landmarkQuery.circle('loc',area),function(data){
+        //     console.log(data);
+        // }
+
+    }
 
     //querying landmark collection (events, places, etc)
     if (req.params.collection == 'landmarks'){
 
  
-
         //return all items in landmarks
         if (req.query.queryType == "all"){
             var qw = {};
@@ -205,33 +294,23 @@ app.get('/api/:collection', function(req, res) {
                     if (req.query.nowTimeEnd !== "noNow"){
 
                         if (req.query.nowTimeEnd == "upcomingToday"){
-
-
-
-                            //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+                            //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)'); 
                             var nowTimeEnd = new Date();
-
                         }
 
                         else {
                             var nowTimeEnd = new Date(req.query.nowTimeEnd);
                         }
-
-                        
+         
                         console.log(nowTimeEnd);
-                           
-
+                        
                         nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
 
-                
-
+    
                         //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
                         //so only get upcmoning events till end of day
                         // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
                         // endofDay.setHours(23,59,59,999);
-
-                        
-
 
                         var qw = {
                             'time.start': {$gt: nowTimeEnd},
@@ -406,22 +485,106 @@ app.get('/api/:collection', function(req, res) {
 
 // Read 
 app.get('/api/:collection/:id', function(req, res) {
-    db.collection(req.params.collection).findOne({id:objectId(req.params.id)}, fn(req, res));
+
+    //world
+    if (req.url.indexOf("/api/worlds/") > -1){
+        db.collection('landmarks').findOne({id:objectId(req.params.id),world:true}, fn(req, res));
+    }
+    //landmark
+    else {
+        db.collection(req.params.collection).findOne({id:objectId(req.params.id),world:false}, fn(req, res));
+    }
 });
 
 // Save 
 app.post('/api/:collection/create', function(req, res) {
 
-    //console.log(req.url);
+    if (req.url == "/api/styles/create"){
 
-    
-    if (req.url == "/api/worlds/create"){
-        var worldVal = 1;
+        var st = new styleSchema({
+
+            name: req.body.name,
+
+            bodyBG_color: req.body.bodyBG_color, // RGB Hex
+            cardBG_color: req.body.cardBG_color, // RGB Hex
+
+            cardBorder: req.body.cardBorder, // off by default
+            cardBorder_color: req.body.cardBorder_color, // RGB Hex
+            cardBorder_corner: req.body.cardBorder_corner, // px to round
+
+            worldTitle_color: req.body.worldTitle_color, // RGB Hex
+            landmarkTitle: req.body.landmarkTitle, // off by default
+            landmarkTitle_color: req.body.landmarkTitle_color, // RGB Hex
+            categoryTitle: req.body.categoryTitle, // off by default
+            categoryTitle_color: req.body.categoryTitle_color, // RGB Hex
+            accent: req.body.accent, // off by default
+            accent_color: req.body.accent_color, // RGB Hex
+            bodyText: req.body.bodyText, // off by default
+            bodyText_color: req.body.bodyText_color, // RGB Hex
+
+            bodyFontName: req.body.bodyFontName, // font name
+            bodyFontFamily: req.body.bodyFontFamily, // font family
+            themeFont: req.body.themeFont, // off by default
+            themeFontName: req.body.themeFontName // font name
+
+        });
+
+        st.save(function (err, style) {
+            if (err)
+                console.log(err);
+            else{
+                console.log(null, style);
+            }
+        });
+
     }
 
-    else {
+    if (req.url == "/api/projects/create"){
 
-        var worldVal = 0;
+        var st = new styleSchema({
+
+            name: req.body.name,
+
+            bodyBG_color: req.body.bodyBG_color, // RGB Hex
+            cardBG_color: req.body.cardBG_color, // RGB Hex
+
+            cardBorder: req.body.cardBorder, // off by default
+            cardBorder_color: req.body.cardBorder_color, // RGB Hex
+            cardBorder_corner: req.body.cardBorder_corner, // px to round
+
+            worldTitle_color: req.body.worldTitle_color, // RGB Hex
+            landmarkTitle: req.body.landmarkTitle, // off by default
+            landmarkTitle_color: req.body.landmarkTitle_color, // RGB Hex
+            categoryTitle: req.body.categoryTitle, // off by default
+            categoryTitle_color: req.body.categoryTitle_color, // RGB Hex
+            accent: req.body.accent, // off by default
+            accent_color: req.body.accent_color, // RGB Hex
+            bodyText: req.body.bodyText, // off by default
+            bodyText_color: req.body.bodyText_color, // RGB Hex
+
+            bodyFontName: req.body.bodyFontName, // font name
+            bodyFontFamily: req.body.bodyFontFamily, // font family
+            themeFont: req.body.themeFont, // off by default
+            themeFontName: req.body.themeFontName // font name
+
+        });
+
+        st.save(function (err, style) {
+            if (err)
+                console.log(err);
+            else{
+                console.log(null, style);
+            }
+        });
+    }
+
+    //a world
+    if (req.url == "/api/worlds/create"){
+        var worldVal = true;
+    }
+    //a landmark
+    else {
+        var worldVal = false;
     }
 
 
@@ -451,7 +614,7 @@ app.post('/api/:collection/create', function(req, res) {
 
         var uniqueIDer = urlify(input);
         urlify(uniqueIDer, function(){
-            db.collection('landmarks').findOne({'id':uniqueIDer}, function(err, data){
+            db.collection('landmarks').findOne({'id':uniqueIDer,'world':worldVal}, function(err, data){
 
                 if (data){
                     var uniqueNumber = 1;
@@ -461,7 +624,7 @@ app.post('/api/:collection/create', function(req, res) {
                       var uniqueNum_string = uniqueNumber.toString(); 
                       newUnique = data.id + uniqueNum_string;
 
-                      db.collection('landmarks').findOne({'id':newUnique}, function(err, data){
+                      db.collection('landmarks').findOne({'id':newUnique,'world':worldVal}, function(err, data){
                         if (data){
                           console.log('entry found!');
                           uniqueNumber++;
@@ -486,9 +649,9 @@ app.post('/api/:collection/create', function(req, res) {
     }
 
     function saveLandmark(finalID){
-    
         
         //EDITING A LANDMARK
+
         if (req.body._id){ //temp way to detect landmark edit by checking if mongo already generated _id
 
             var landmarkModel = mongoose.model('landmark', landmarkSchema, 'landmarks');
@@ -532,7 +695,6 @@ app.post('/api/:collection/create', function(req, res) {
                         console.log('removing url');
                         lm.extraURL = undefined;
                     }
-
 
 
                     if (req.body.type == "event"){
@@ -588,98 +750,120 @@ app.post('/api/:collection/create', function(req, res) {
             
         //NEW LANDMARK
          else { //not an edit, a new landmark entirely
-			 	
-			 	//console.log(req);
 
 
-                var landmarkModel = mongoose.model('landmark', landmarkSchema, 'landmarks');  
-                var lm = new landmarkModel();
 
-                lm.name = req.body.name;
-                lm.id = finalID;
+                var lm = new landmarkSchema({
+                    name: req.body.name,
+                    id: finalID,
+                    world: worldVal,
+                    valid: 1,
+                    loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
+                    shortDescription: 'asdfasdf',
+                    description: 'asdfasdfasdfasdfasdf',
+                    type: req.body.type,
+                    style: {
+                        interfaceID: "IDasdfasdfasdf", //link to landmark's style
+                        map: {
+                            type: 'cloud', //cloud, local, or both -- switch
+                            cloudMap: 'interfacefoundry.ig9jd86b'
+                        },
+                        markers: [{
+                            name: 'yellowIcon',
+                            category: 'all'
+                        }],
+                        avatar: "img/tidepools/default.jpg"
+                    },
+
+                });
+
+                lm.save(function (err, landmark) {
+                    if (err)
+                        console.log(err);
+                    else{
+                        console.log(null, landmark);
+                    }
+                });
+
+            //     lm.name = req.body.name;
+            //     lm.id = finalID;
+            //     lm.world = worldVal;
+            //     lm.type = req.body.type;
+            //     lm.subType = req.body.subType;
+            //     lm.stats.avatar = req.body.stats.avatar;
+            //     lm.mapID = "TidepoolsBaseMap"; //compatibility with Old Tidepools Interface
+
+            //     if (req.body.description){
+            //         lm.description = req.body.description;
+            //     }
+            //     if (req.body.shortDescription){
+            //         lm.shortDescription = req.body.shortDescription;
+            //     }
+            //     if (req.body.people){
+            //         lm.people = req.body.people;
+            //     }
+            //     if (req.body.video){
+            //         lm.video = req.body.video;
+            //     }
+
+            //     if (req.body.extraURL){
+            //         lm.extraURL = req.body.extraURL;
+            //     }
+
+            //     //for adding parent world ID to landmark
+            //     if (req.url == "/api/landmarks/create"){
+            //         lm.parentID = "FAKEID";
+            //     }
+
+            //     if (req.body.type == "event"){
+
+            //         lm.timetext.datestart = req.body.datetext.start;
+            //         lm.timetext.dateend = req.body.datetext.end;
+            //         lm.timetext.timestart = req.body.timetext.start;
+            //         lm.timetext.timeend = req.body.timetext.end;
+
+
+            //         //------ Combining Date and Time values -----//
+            //         var timeStart = req.body.time.start;
+            //         var timeEnd = req.body.time.end;
+
+            //         var dateStart = req.body.date.start;
+            //         var dateEnd = req.body.date.end;
+
+            //         var datetimeStart = new Date(dateStart+' '+timeStart);
+            //         var datetimeEnd = new Date(dateEnd+' '+timeEnd);
+            //         //----------//
+
+            //         lm.time.start = datetimeStart;
+            //         lm.time.end = datetimeEnd;
+            //     }
                 
-                if (req.body.description){
-                    lm.description = req.body.description;
-                }
-                
-                if (req.body.shortDescription){
-                    lm.shortDescription = req.body.shortDescription;
-                }
-/*
-                lm.world = worldVal;
-                lm.type = req.body.type;
-                lm.subType = req.body.subType;
-*/
-/*
-                lm.stats.avatar = req.body.stats.avatar;
-                lm.mapID = "TidepoolsBaseMap"; //compatibility with Old Tidepools Interface
-
-                if (req.body.description){
-                    lm.description = req.body.description;
-                }
-                if (req.body.shortDescription){
-                    lm.shortDescription = req.body.shortDescription;
-                }
-                if (req.body.people){
-                    lm.people = req.body.people;
-                }
-                if (req.body.video){
-                    lm.video = req.body.video;
-                }
-
-                if (req.body.extraURL){
-                    lm.extraURL = req.body.extraURL;
-                }
-
-                if (req.body.type == "event"){
-
-                    lm.timetext.datestart = req.body.datetext.start;
-                    lm.timetext.dateend = req.body.datetext.end;
-                    lm.timetext.timestart = req.body.timetext.start;
-                    lm.timetext.timeend = req.body.timetext.end;
 
 
-                    //------ Combining Date and Time values -----//
-                    var timeStart = req.body.time.start;
-                    var timeEnd = req.body.time.end;
+            //     lm.loc.unshift(req.body.loc[0],req.body.loc[1]);
 
-                    var dateStart = req.body.date.start;
-                    var dateEnd = req.body.date.end;
+            //     if (req.body.location){
+            //         lm.loc_nickname = req.body.location;
+            //     }    
 
-                    var datetimeStart = new Date(dateStart+' '+timeStart);
-                    var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-                    //----------//
-
-                    lm.time.start = datetimeStart;
-                    lm.time.end = datetimeEnd;
-                }
-                
-
-                lm.loc.unshift(req.body.loc[0],req.body.loc[1]);
-
-                if (req.body.location){
-                    lm.loc_nickname = req.body.location;
-                }    
-
-                if (req.body.tags){
+            //     if (req.body.tags){
                     
-                    var newTag = req.body.tags.replace(/[^ \w]+/, '');
-                    //lm.tags.addToSet(newTag);
-                    lm.tags = newTag;
+            //         var newTag = req.body.tags.replace(/[^ \w]+/, '');
+            //         //lm.tags.addToSet(newTag);
+            //         lm.tags = newTag;
                     
-                }  
-*/
+            //     }  
 
-            lm.save(function (err, landmark) {
-                if (err)
-                    console.log(err);
-                else{
-                    console.log(null, landmark);
-                    //console.log(finalID);
-                    var idArray = [{'id': finalID}];
-                    res.send(idArray);
-                }
-            });
+            // lm.save(function (err, landmark) {
+            //     if (err)
+            //         console.log(err);
+            //     else{
+            //         console.log(null, landmark);
+            //         //console.log(finalID);
+            //         var idArray = [{'id': finalID}];
+            //         res.send(idArray);
+            //     }
+            // });
         }  
     }
 
@@ -722,8 +906,7 @@ app.post('/api/upload',  function (req, res) {
 
             var fileName = req.files.files[0].name.substr(0, req.files.files[0].name.lastIndexOf('.')) || req.files.files[0].name;
             var fileType = req.files.files[0].name.split('.').pop();
-			console.log(fileName);
-			console.log(fileType);
+
             while (1) {
 
                 var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
@@ -736,9 +919,9 @@ app.post('/api/upload',  function (req, res) {
                 } 
                 else {
                     var newPath = "app/uploads/" + current;
-					
+
                     fs.writeFile(newPath, data, function (err) {
-						console.log('writefile begins');
+
                         im.crop({
                           srcPath: newPath,
                           dstPath: newPath,
@@ -747,7 +930,7 @@ app.post('/api/upload',  function (req, res) {
                           quality: 1,
                           gravity: "Center"
                         }, function(err, stdout, stderr){
-							console.log(err);
+
                         
 
                             res.send("uploads/"+current);
