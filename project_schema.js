@@ -5,7 +5,22 @@ monguurl = require('monguurl');
 	//schema construction
 	var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 
-	var landmarkSchema = new Schema({
+	var projectSchema = new Schema({
+
+		worldID: String,
+		styleID: String,
+		userID: String,
+		permissions: {
+			ownerID: String,
+			viewers: [String],
+			editors: [String]
+		},
+		avatar: String,
+		time: {
+			created: { type: Date, default: Date.now },
+			lastedited: { type: Date}
+		},
+
 		name: String, 
 		id: String, 
 		world: Boolean,
@@ -93,4 +108,4 @@ monguurl = require('monguurl');
 	// 	target: 'id'
 	// }));
 
-module.exports = mongoose.model('landmarkModel', landmarkSchema);
+module.exports = mongoose.model('projectModel', projectSchema);
