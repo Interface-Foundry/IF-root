@@ -162,13 +162,13 @@
 			<div class="row">
 				<div class="col-xs-6">
 					<div class="field">
-						<label>Body BG</label> <input name="bodybg" type='text' class="color"/>
+						<label>Body BG</label> <input name="bodyBG" type='text' class='color' value='#E6E6E6' ng-model='bodyBG'/>
 					</div>
 					<div class="field">
-						<label>Card BG</label> <input name="cardbg" type='text' class="color"/>
+						<label>Card BG</label> <input name="cardbg" type='text' class='color' value='#FFFFFF'/>
 					</div>
 					<div class="field">
-						<label>Card Border</label> <input name="cardbg" type='text' class="color"/>
+						<label>Card Border</label> <input name='cardbg' type='text' class='color' value='#808080'/>
 					</div>
 					<div class="field">
 						<label>World Title Color</label> <input name="cardbg" type='text' class="color"/>
@@ -188,10 +188,23 @@
 					<div class="field">
 						<label>Theme Font</label> <select disabled></select>
 					</div>
+					<div class="field">
+						<label>Twitter Widget</label> <input type="checkbox">
+					</div>
 				</div>
 				<div class="col-xs-6">
-						<div class="livepreview">
-			
+						<div class="livepreview" ng-style="{'background-color':bodyBG}">
+							<div class="container">
+							<div class="row">
+								<div ng-style="cardStyle" class="col-xs-12">
+								<h1 ng-style="worldTitleStyle">World Title Color</h1>
+								</div>
+								<span ng-style="categoryTitleStyle">Category Title Color</span>
+								<div ng-style="cardStyle" class="col-xs-12">
+								<span ng-style="landmarkTitleStyle">Landmark Title Color</span>
+								</div>
+							</div>
+							</div>
 						</div>
 				</div>
 			</div>

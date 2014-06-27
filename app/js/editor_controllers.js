@@ -17,7 +17,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.pageClass[3] = 'right';
 	$scope.pageClass[4] = 'right';
 	
-	$scope.markers.m = {};
 	
 	$scope.mapConfirm = 'false';
 	
@@ -47,13 +46,15 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	
 	$scope.markerSelect = $scope.markerOptions[0];
 	
+	$scope.bgColor = '#CCC';
+	
 	angular.extend($scope, {
 		worldDetailPaths: {}
 	});
 	
 	//custom elements, eventually replace with directives
 	$('.color').spectrum({
-		color: '#0000ff'
+		clickoutFiresChange: true
 	});
 	
 	angular.element('#fileupload').fileupload({
@@ -135,6 +136,12 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		}	
 	};
 	
+	function refreshMap(){ 
+        leafletData.getMap('worldDetailMap').then(function(map) {
+            map.invalidateSize();
+        });
+    }
+      
 
 	function showPosition(position) {
 
@@ -163,12 +170,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             refreshMap();
      }
 
-	function refreshMap(){ 
-        leafletData.getMap('worldDetailMap').then(function(map) {
-            map.invalidateSize();
-        });
-    }
-      
+	
     function locError(){
             console.log('no loc');
     }
@@ -188,9 +190,9 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     
     
     if (navigator.geolocation) {
-        // Get the user's current position
-        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
-       
+       // Get the user's current position
+       navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
+       refreshMap();
     }
 }
 
@@ -200,5 +202,5 @@ function UserCtrl($location, $scope, $routeParams, db, $rootScope) {
 	
 	$scope.worlds = db.worlds.query({queryType:'all',userID:'539533e5d22c979322000001'}, function(data){
           console.log(data);
-      });
+    });
 }

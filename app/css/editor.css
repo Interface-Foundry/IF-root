@@ -56,9 +56,12 @@ input {
 }
 
 .livepreview {
-	background-color: #CCC;
 	width: 320px;
 	height: 480px;
+}
+
+.livepreview .container {
+	background: none;
 }
 
 .mappos {
