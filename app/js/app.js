@@ -27,14 +27,15 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newpost', {templateUrl: 'partials/landmark-new.html'}). 
       when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl}). 
 
-      when('/newworld', {templateUrl: 'partials/editor/world-maker.html', controller: WorldMakerCtrl}). 
+      when('/newworld', {templateUrl: 'partials/editor/world-maker.html', controller: WorldMakerCtrl}).
+      when('/newworld/:projectID', {templateURL: 'partials/editor/world-maker.html', controller: WorldMakerCtrl}). 
       
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}). 
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}). 
 
       when('/insta', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}). 
 
-      when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserViewCtrl}). 
+      when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl}). 
 
       otherwise({redirectTo: '/'}); 
 }]);

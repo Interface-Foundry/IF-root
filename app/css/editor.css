@@ -51,13 +51,31 @@ input {
 
 }
 
-.mapbox img {
-	width: 200px;
-	height: 150px;
+.marker-img {
+	margin: 5px;
 }
 
 .livepreview {
 	background-color: #CCC;
 	width: 320px;
 	height: 480px;
+}
+
+.mappos {
+	color: #CCC;
+}
+
+.map-holder {
+	position: relative;
+	width: 100%;
+	height: 350px;
+}
+
+.map-holder .locsearch {
+	position: absolute;
+	width: 30%;
+	
+	right: 20px;
+	bottom: 5px;
+	
 }
