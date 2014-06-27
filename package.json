@@ -1,21 +1,32 @@
 {
-  "name": "tidepools-mobile",
-  "description": "Tidepools Mobile",
-  "author": "J.R. Baldwin <jrbaldwin@opentechinstitute.org>",
+  "name": "IF-root",
   "version": "0.0.2",
-  "private": false,
-  "scripts": {
-    "start": "node server.js" 
-  },
+  "description": "IF",
+  "main": "IF_server.js",
   "dependencies": {
-    "express": "3.3.x",
-    "mongojs": "0.7.x"
+    "async": "~0.9.0",
+    "express": "~3.3.8",
+    "imagemagick": "~0.1.3",
+    "instagram-realtime": "~0.0.4",
+    "moment": "~2.7.0",
+    "mongojs": "*",
+    "mongoose": "~3.8.12",
+    "monguurl": "~0.1.0",
+    "mongoose-text-search": "~0.0.2",
+    "ntwitter": "~0.5.0",
+    "urlify": "~0.3.5",
+    "mongodb-wrapper": "0.4.x"
   },
-  "repository": { 
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
     "type": "git",
-    "url": "git://github.com/opentechinstitute/Tidepools-Mobile.git"
+    "url": "https://github.com/Interface-Foundry/IF-root.git"
   },
-  "devDependencies": {
-  },
-  "engine": "node = 0.10.x"
+  "author": "IF",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "e624fcec4318dc2d4a5042f0bf2c806b4758a37b"
 }
