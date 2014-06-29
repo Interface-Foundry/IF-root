@@ -91,8 +91,11 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 					saveWorld(); 
 				}
 				else { //edit created world
-					editWorld(); 
+					saveWorld('edit');
 				}	
+			}
+			if ($scope.pageIndex == 1){ //adding/editing world map settings
+				saveWorld('map');	
 			}
 			$scope.pageIndex += 1;
 			$scope.pageClass[$scope.pageIndex] = 'current';
@@ -190,7 +193,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		
     }
     
-    function saveWorld(){
+    function saveWorld(option){
     	//set up json object w all attributes
     	//update object in database
     	
@@ -246,15 +249,37 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
         $scope.world.userID = $scope.userID;
 
-        db.worlds.create($scope.world, function(response){
-        	$scope.worldID = response[0].worldID;
-        	$scope.projectID = response[0].projectID;
-        	$scope.styleID = response[0].styleID;
-        });
+        //edit world
+        if (option == 'edit'){
+
+        	$scope.world.newStatus = false; //not new
+        	$scope.world.worldID = $scope.worldID;
+	        db.worlds.create($scope.world, function(response){
+	        	console.log(response);
+	        });  
+        }
+
+        else if (option == 'map'){
+        	$scope.world.editMap = true; //adding/editing world map
+        	$scope.world.worldID = $scope.worldID;
+        	db.worlds.create($scope.world, function(response){
+	        	console.log(response);
+	        });  
+        }
+
+        //new world
+        else {
+        	$scope.world.newStatus = true; //new
+	        db.worlds.create($scope.world, function(response){
+	        	$scope.worldID = response[0].worldID;
+	        	$scope.projectID = response[0].projectID;
+	        	$scope.styleID = response[0].styleID;
+	        });       	
+        }
+
     
     }
-    
-    
+
     
     if (navigator.geolocation) {
        // Get the user's current position

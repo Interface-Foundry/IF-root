@@ -501,23 +501,32 @@ app.post('/api/:collection/create', function(req, res) {
 
     if (req.url == "/api/styles/create"){
 
-        saveStyle();
+        editStyle();
     }
 
     if (req.url == "/api/projects/create"){
 
-        saveProject();
+        editProject();
     }
 
     //a world
     if (req.url == "/api/worlds/create"){
         var worldVal = true;
+
+        if (req.body.editMap){ //adding map options to world
+            worldMap();
+        }
     }
     //a landmark
     else {
         var worldVal = false;
     }
 
+
+    function worldMap(){ //adding world map
+        console.log(req.body);
+
+    }
 
     if (!req.body.name){
         console.log('must have name');
@@ -527,13 +536,17 @@ app.post('/api/:collection/create', function(req, res) {
 
         //FIND UNique ID based on user inputted Name
 
-        if (req.body._id){ //detecting if new landmark or an edit
-            if (req.body.idCheck == req.body.id){
-                saveLandmark(req.body.id);
-            }
-            else {
-                idGen(req.body.name);
-            }
+        // FIX ALL THIS!!!!!!!, needs to not gen another unique ID if EDIT
+        if (!req.body.newStatus){ //detecting if new landmark or an edit
+
+            idGen(req.body.name);
+
+            // if (req.body.idCheck == req.body.id){
+            //     saveLandmark(req.body.id);
+            // }
+            // else {
+            //     idGen(req.body.name);
+            // }
         }
 
         else {
@@ -581,109 +594,78 @@ app.post('/api/:collection/create', function(req, res) {
 
     function saveLandmark(finalID){
         
-        //EDITING A LANDMARK
 
-        if (req.body._id){ //temp way to detect landmark edit by checking if mongo already generated _id
-
-            var landmarkModel = mongoose.model('landmark', landmarkSchema, 'landmarks');
-
-            landmarkModel.findOne({ id: req.body.id }, function (err, lm) {
-
-                if (err)
-                    console.log(err);
-
-                else {
-
-                    lm.name = req.body.name;
-                    lm.id = finalID;
-                    lm.type = req.body.type;
-                    lm.subType = req.body.subType;
-                    lm.stats.avatar = req.body.stats.avatar;
-                    lm.mapID = "TidepoolsBaseMap"; //compatibility with Old Tidepools Interface
-
-                    if (req.body.description){
-                        lm.description = req.body.description;
-                    }
-                    if (req.body.shortDescription){
-                        lm.shortDescription = req.body.shortDescription;
-                    }
-                    if (req.body.video){
-                        lm.video = req.body.video;
-                    }
-
-                    if (req.body.people){
-                        lm.people = req.body.people;
-                    }
-        
-                    if (req.body.extraURL){
-
-                        console.log('adding url');
-                        lm.extraURL = req.body.extraURL;
-                    }
-
-                    if (!req.body.extraURL){
-
-                        console.log('removing url');
-                        lm.extraURL = undefined;
-                    }
-
-
-                    if (req.body.type == "event"){
-
-                        lm.timetext.datestart = req.body.datetext.start;
-                        lm.timetext.dateend = req.body.datetext.end;
-                        lm.timetext.timestart = req.body.timetext.start;
-                        lm.timetext.timeend = req.body.timetext.end;
-
-                        //------ Combining Date and Time values -----//
-                        var timeStart = req.body.time.start;
-                        var timeEnd = req.body.time.end;
-
-                        var dateStart = req.body.date.start;
-                        var dateEnd = req.body.date.end;
-
-                        var datetimeStart = new Date(dateStart+' '+timeStart);
-                        var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-                        //----------//
-
-                        lm.time.start = datetimeStart;
-                        lm.time.end = datetimeEnd;
-                    }
-                    
-                    lm.loc.length = 0;
-                    lm.loc.unshift(req.body.loc[0],req.body.loc[1]);
-
-                    if (req.body.location){
-                        lm.loc_nickname = req.body.location;
-                    }    
-
-                    if (req.body.tags){
-                        
-                        var newTag = req.body.tags.replace(/[^ \w]+/, '');
-                        //lm.tags.addToSet(newTag);
-                        lm.tags = newTag;
-                        
-                    }     
-
-                    lm.save(function (err, landmark) {
-                        if (err)
-                            console.log(err);
-                        else{
-                            console.log(null, landmark);
-                            //console.log(finalID);
-                            var idArray = [{'id': finalID}];
-                            res.send(idArray);
-                        }
-                    });
-                }
-            });         
-        }
+        //an edit
+        if (!req.body.newStatus){
             
-        //NEW LANDMARK
-         else { //not an edit, a new landmark entirely
+            landmarkSchema.findById(req.body.worldID, function(err, lm) {
+              if (!lm)
+                return next(new Error('Could not load Document'));
 
-         
-            if (worldVal == true){
+              else {
+                
+                lm.name = req.body.name;
+                lm.id = finalID;
+                lm.valid = 1;
+                lm.loc = {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] };
+                lm.avatar = req.body.stats.avatar;
+
+                if (req.body.description){
+                    lm.description = req.body.description;
+                }
+                if (req.body.summary){
+                    lm.summary = req.body.summary;
+                }
+                if (req.body.category){
+                    lm.category = req.body.category;
+                }
+
+                if (req.body.hashtag){
+                    lm.resources.hashtag = req.body.hashtag;
+                }
+
+                //if user checks box to activate time 
+                if (req.body.hasTime == true){
+
+                    lm.timetext.datestart = req.body.datetext.start;
+                    lm.timetext.dateend = req.body.datetext.end;
+                    lm.timetext.timestart = req.body.timetext.start;
+                    lm.timetext.timeend = req.body.timetext.end;
+
+
+                    //------ Combining Date and Time values -----//
+                    var timeStart = req.body.time.start;
+                    var timeEnd = req.body.time.end;
+
+                    var dateStart = req.body.date.start;
+                    var dateEnd = req.body.date.end;
+
+                    var datetimeStart = new Date(dateStart+' '+timeStart);
+                    var datetimeEnd = new Date(dateEnd+' '+timeEnd);
+                    //----------//
+
+                    lm.time.start = datetimeStart;
+                    lm.time.end = datetimeEnd;
+                }
+
+                lm.save(function(err, landmark) {
+                    if (err){
+                        console.log('error');
+                    }
+                    else {
+                        console.log(landmark);
+                        console.log('success');
+                    }
+                });
+              }
+            });
+
+        }
+
+        //not an edit
+        else {
+
+            if (worldVal){
                 saveStyle(req.body.name, function(styleRes){ //creating new style to add to landmark
                     saveNewLandmark(styleRes);
                 });
@@ -714,8 +696,8 @@ app.post('/api/:collection/create', function(req, res) {
                 if (req.body.description){
                     lm.description = req.body.description;
                 }
-                if (req.body.shortDescription){
-                    lm.shortDescription = req.body.shortDescription;
+                if (req.body.summary){
+                    lm.summary = req.body.summary;
                 }
                 if (req.body.category){
                     lm.category = req.body.category;
@@ -753,7 +735,7 @@ app.post('/api/:collection/create', function(req, res) {
                     if (err)
                         console.log(err);
                     else{
-
+                        console.log(landmark);
                         //world created
                         if (worldVal == true){
                             saveProject(landmark._id, styleRes, req.body.userID, function(projectRes){
@@ -771,9 +753,9 @@ app.post('/api/:collection/create', function(req, res) {
                     }
                 });
 
-            }
+            }             
+        }
 
-        }  
 
         function saveStyle(inputName, callback){
 
@@ -821,6 +803,12 @@ app.post('/api/:collection/create', function(req, res) {
 
         }
 
+
+
+        function editStyle(input){
+
+        }
+
         function saveProject(world,style,owner,callback){
 
             var pr = new projectSchema({
@@ -843,9 +831,14 @@ app.post('/api/:collection/create', function(req, res) {
                         callback(project._id);
                     }
                 });
-            }
+            }   
+        }
+
+        function editProject(input){
             
         }
+
+
     }
 
 });
