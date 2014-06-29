@@ -32,15 +32,17 @@ monguurl = require('monguurl');
 		category: String, //category of type
 		style: {
 			styleID: String, //link to landmark's style
-			map: {
-				type: String, //cloud, local, or both -- switch
-				cloudMap: String,
-				localMap: String
+			maps: {
+				type: { type: String }, //cloud, local, or both -- switch
+				cloudMapID: String,
+				cloudMapName: String,
+				localMapID: String,
+				localMapName: String
 			},
-			markers: [{
+			markers: {
 				name: String,
 				category: String
-			}]	
+			}	
 		},
 		time: {
 			created: { type: Date, default: Date.now },

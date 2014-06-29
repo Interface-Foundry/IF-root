@@ -26,6 +26,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             avatar: "img/tidepools/default.jpg" 
         }
     };
+
+    $scope.mapping = {};
 	
 	$scope.mapThemes = [
 		{name:'urban'},
@@ -34,7 +36,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		{name:'arabesque'}
 	];
 	
-	$scope.mapThemeSelect = $scope.mapThemes[0];
+	$scope.mapping.mapThemeSelect = $scope.mapThemes[0];
 	
 	$scope.markerOptions = [
 		{name:'red'},
@@ -45,7 +47,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		{name:'purple'}
 	];
 	
-	$scope.markerSelect = $scope.markerOptions[0];
+	$scope.mapping.markerSelect = $scope.markerOptions[0];
 	
 	$scope.bgColor = '#CCC';
 	
@@ -96,6 +98,10 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			}
 			if ($scope.pageIndex == 1){ //adding/editing world map settings
 				saveWorld('map');	
+			}
+
+			if ($scope.pageIndex == 3){ //editing style. needs to be moved back one page to "2"
+				saveStyle();
 			}
 			$scope.pageIndex += 1;
 			$scope.pageClass[$scope.pageIndex] = 'current';
@@ -259,12 +265,16 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        });  
         }
 
+        //adding/editing map theme options to world 
         else if (option == 'map'){
-        	$scope.world.editMap = true; //adding/editing world map
-        	$scope.world.worldID = $scope.worldID;
-        	db.worlds.create($scope.world, function(response){
+        	$scope.mapping.editMap = true; //adding/editing world map
+
+        	$scope.mapping.worldID = $scope.worldID;
+
+        	db.worlds.create($scope.mapping, function(response){
 	        	console.log(response);
 	        });  
+
         }
 
         //new world
@@ -280,13 +290,25 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     
     }
 
+    function saveStyle(){
+
+    	console.log('saving style');
+	    // db.styles.create($scope.mapping, function(response){
+     //    	console.log(response);
+     //    });  
+    }
     
     if (navigator.geolocation) {
        // Get the user's current position
        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
        refreshMap();
     }
+
+
+
 }
+
+
 
 function UserCtrl($location, $scope, $routeParams, db, $rootScope) {
 	$scope.userID = "53ab92d2ac23550e12600011";	

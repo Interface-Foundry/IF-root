@@ -514,248 +514,279 @@ app.post('/api/:collection/create', function(req, res) {
         var worldVal = true;
 
         if (req.body.editMap){ //adding map options to world
-            worldMap();
+            worldMapEdit();
+        }
+
+        else {
+            contSaveLandmark();
         }
     }
     //a landmark
     else {
         var worldVal = false;
+        contSaveLandmark();
     }
 
 
-    function worldMap(){ //adding world map
-        console.log(req.body);
+    function worldMapEdit(){ //adding/editing map to world
+   
+         landmarkSchema.findById(req.body.worldID, function(err, lm) {
+          if (!lm)
+            return next(new Error('Could not load Document'));
 
-    }
+          else {
 
-    if (!req.body.name){
-        console.log('must have name');
-    }
+            lm.style.maps = {type: 'cloud', cloudMapID: 'interfacefoundry.ig6a7dkn', cloudMapName:req.body.mapThemeSelect.name};
 
-    else {
+            //NEED TO CHANGE TO ARRAY to push new marker types, eventually
+            lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
 
-        //FIND UNique ID based on user inputted Name
-
-        // FIX ALL THIS!!!!!!!, needs to not gen another unique ID if EDIT
-        if (!req.body.newStatus){ //detecting if new landmark or an edit
-
-            idGen(req.body.name);
-
-            // if (req.body.idCheck == req.body.id){
-            //     saveLandmark(req.body.id);
-            // }
-            // else {
-            //     idGen(req.body.name);
-            // }
-        }
-
-        else {
-            idGen(req.body.name);
-        }
-    }
-
-    function idGen(input){
-
-        var uniqueIDer = urlify(input);
-        urlify(uniqueIDer, function(){
-            db.collection('landmarks').findOne({'id':uniqueIDer,'world':worldVal}, function(err, data){
-
-                if (data){
-                    var uniqueNumber = 1;
-                    var newUnique;
-
-                    async.forever(function (next) {
-                      var uniqueNum_string = uniqueNumber.toString(); 
-                      newUnique = data.id + uniqueNum_string;
-
-                      db.collection('landmarks').findOne({'id':newUnique,'world':worldVal}, function(err, data){
-                        if (data){
-                          console.log('entry found!');
-                          uniqueNumber++;
-                          next();
-                        }
-                        else {
-                          console.log('entry not found!');
-                          next('unique!'); // This is where the looping is stopped
-                        }
-                      });
-                    },
-                    function () {
-                      saveLandmark(newUnique);
-                    });
+            lm.save(function(err, landmark) {
+                if (err){
+                    console.log('error');
                 }
                 else {
-                    saveLandmark(uniqueIDer);
+                    console.log(landmark);
+                    console.log('success');
                 }
             });
-        });
+          }
+        });       
 
     }
 
-    function saveLandmark(finalID){
-        
+    function contSaveLandmark(){
 
-        //an edit
-        if (!req.body.newStatus){
-            
-            landmarkSchema.findById(req.body.worldID, function(err, lm) {
-              if (!lm)
-                return next(new Error('Could not load Document'));
-
-              else {
-                
-                lm.name = req.body.name;
-                lm.id = finalID;
-                lm.valid = 1;
-                lm.loc = {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] };
-                lm.avatar = req.body.stats.avatar;
-
-                if (req.body.description){
-                    lm.description = req.body.description;
-                }
-                if (req.body.summary){
-                    lm.summary = req.body.summary;
-                }
-                if (req.body.category){
-                    lm.category = req.body.category;
-                }
-
-                if (req.body.hashtag){
-                    lm.resources.hashtag = req.body.hashtag;
-                }
-
-                //if user checks box to activate time 
-                if (req.body.hasTime == true){
-
-                    lm.timetext.datestart = req.body.datetext.start;
-                    lm.timetext.dateend = req.body.datetext.end;
-                    lm.timetext.timestart = req.body.timetext.start;
-                    lm.timetext.timeend = req.body.timetext.end;
-
-
-                    //------ Combining Date and Time values -----//
-                    var timeStart = req.body.time.start;
-                    var timeEnd = req.body.time.end;
-
-                    var dateStart = req.body.date.start;
-                    var dateEnd = req.body.date.end;
-
-                    var datetimeStart = new Date(dateStart+' '+timeStart);
-                    var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-                    //----------//
-
-                    lm.time.start = datetimeStart;
-                    lm.time.end = datetimeEnd;
-                }
-
-                lm.save(function(err, landmark) {
-                    if (err){
-                        console.log('error');
-                    }
-                    else {
-                        console.log(landmark);
-                        console.log('success');
-                    }
-                });
-              }
-            });
-
+        if (!req.body.name){
+            console.log('must have name');
         }
 
-        //not an edit
         else {
 
-            if (worldVal){
-                saveStyle(req.body.name, function(styleRes){ //creating new style to add to landmark
-                    saveNewLandmark(styleRes);
-                });
+            //FIND UNique ID based on user inputted Name
+
+            // FIX ALL THIS!!!!!!!, needs to not gen another unique ID if EDIT
+            if (!req.body.newStatus){ //detecting if new landmark or an edit
+
+                idGen(req.body.name);
+
+                // if (req.body.idCheck == req.body.id){
+                //     saveLandmark(req.body.id);
+                // }
+                // else {
+                //     idGen(req.body.name);
+                // }
             }
 
             else {
-                saveNewLandmark();
+                idGen(req.body.name);
             }
-
-            function saveNewLandmark(styleRes){
-           
-                var lm = new landmarkSchema({
-                    name: req.body.name,
-                    id: finalID,
-                    world: worldVal,
-                    valid: 1,
-                    loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
-                    avatar: req.body.stats.avatar,
-                    permissions: {
-                        ownerID: req.body.userID
-                    }
-                });
-
-                if (styleRes !== undefined){ //if new styleID created for world
-                    lm.style.styleID = styleRes;
-                }
-
-                if (req.body.description){
-                    lm.description = req.body.description;
-                }
-                if (req.body.summary){
-                    lm.summary = req.body.summary;
-                }
-                if (req.body.category){
-                    lm.category = req.body.category;
-                }
-
-                if (req.body.hashtag){
-                    lm.resources.hashtag = req.body.hashtag;
-                }
-
-                //if user checks box to activate time 
-                if (req.body.hasTime == true){
-
-                    lm.timetext.datestart = req.body.datetext.start;
-                    lm.timetext.dateend = req.body.datetext.end;
-                    lm.timetext.timestart = req.body.timetext.start;
-                    lm.timetext.timeend = req.body.timetext.end;
-
-
-                    //------ Combining Date and Time values -----//
-                    var timeStart = req.body.time.start;
-                    var timeEnd = req.body.time.end;
-
-                    var dateStart = req.body.date.start;
-                    var dateEnd = req.body.date.end;
-
-                    var datetimeStart = new Date(dateStart+' '+timeStart);
-                    var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-                    //----------//
-
-                    lm.time.start = datetimeStart;
-                    lm.time.end = datetimeEnd;
-                }
-
-                lm.save(function (err, landmark) {
-                    if (err)
-                        console.log(err);
-                    else{
-                        console.log(landmark);
-                        //world created
-                        if (worldVal == true){
-                            saveProject(landmark._id, styleRes, req.body.userID, function(projectRes){
-                                
-                                var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes}];
-                                res.send(idArray);
-                            });
-                        }
-
-                        //landmark created
-                        else {
-                            res.send(landmark.id);
-                        }
-                     
-                    }
-                });
-
-            }             
         }
 
+        function idGen(input){
+
+            var uniqueIDer = urlify(input);
+            urlify(uniqueIDer, function(){
+                db.collection('landmarks').findOne({'id':uniqueIDer,'world':worldVal}, function(err, data){
+
+                    if (data){
+                        var uniqueNumber = 1;
+                        var newUnique;
+
+                        async.forever(function (next) {
+                          var uniqueNum_string = uniqueNumber.toString(); 
+                          newUnique = data.id + uniqueNum_string;
+
+                          db.collection('landmarks').findOne({'id':newUnique,'world':worldVal}, function(err, data){
+                            if (data){
+                              console.log('entry found!');
+                              uniqueNumber++;
+                              next();
+                            }
+                            else {
+                              console.log('entry not found!');
+                              next('unique!'); // This is where the looping is stopped
+                            }
+                          });
+                        },
+                        function () {
+                          saveLandmark(newUnique);
+                        });
+                    }
+                    else {
+                        saveLandmark(uniqueIDer);
+                    }
+                });
+            });
+
+        }
+
+        function saveLandmark(finalID){
+            
+
+            //an edit
+            if (!req.body.newStatus){
+                
+                landmarkSchema.findById(req.body.worldID, function(err, lm) {
+                  if (!lm)
+                    return next(new Error('Could not load Document'));
+
+                  else {
+                    
+                    lm.name = req.body.name;
+                    lm.id = finalID;
+                    lm.valid = 1;
+                    lm.loc = {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] };
+                    lm.avatar = req.body.stats.avatar;
+
+                    if (req.body.description){
+                        lm.description = req.body.description;
+                    }
+                    if (req.body.summary){
+                        lm.summary = req.body.summary;
+                    }
+                    if (req.body.category){
+                        lm.category = req.body.category;
+                    }
+
+                    if (req.body.hashtag){
+                        lm.resources.hashtag = req.body.hashtag;
+                    }
+
+                    //if user checks box to activate time 
+                    if (req.body.hasTime == true){
+
+                        lm.timetext.datestart = req.body.datetext.start;
+                        lm.timetext.dateend = req.body.datetext.end;
+                        lm.timetext.timestart = req.body.timetext.start;
+                        lm.timetext.timeend = req.body.timetext.end;
+
+
+                        //------ Combining Date and Time values -----//
+                        var timeStart = req.body.time.start;
+                        var timeEnd = req.body.time.end;
+
+                        var dateStart = req.body.date.start;
+                        var dateEnd = req.body.date.end;
+
+                        var datetimeStart = new Date(dateStart+' '+timeStart);
+                        var datetimeEnd = new Date(dateEnd+' '+timeEnd);
+                        //----------//
+
+                        lm.time.start = datetimeStart;
+                        lm.time.end = datetimeEnd;
+                    }
+
+                    lm.save(function(err, landmark) {
+                        if (err){
+                            console.log('error');
+                        }
+                        else {
+                            console.log(landmark);
+                            console.log('success');
+                        }
+                    });
+                  }
+                });
+
+            }
+
+            //not an edit
+            else {
+
+                if (worldVal){
+                    saveStyle(req.body.name, function(styleRes){ //creating new style to add to landmark
+                        saveNewLandmark(styleRes);
+                    });
+                }
+
+                else {
+                    saveNewLandmark();
+                }
+
+                function saveNewLandmark(styleRes){
+               
+                    var lm = new landmarkSchema({
+                        name: req.body.name,
+                        id: finalID,
+                        world: worldVal,
+                        valid: 1,
+                        loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
+                        avatar: req.body.stats.avatar,
+                        permissions: {
+                            ownerID: req.body.userID
+                        }
+                    });
+
+                    if (styleRes !== undefined){ //if new styleID created for world
+                        lm.style.styleID = styleRes;
+                    }
+
+                    if (req.body.description){
+                        lm.description = req.body.description;
+                    }
+                    if (req.body.summary){
+                        lm.summary = req.body.summary;
+                    }
+                    if (req.body.category){
+                        lm.category = req.body.category;
+                    }
+
+                    if (req.body.hashtag){
+                        lm.resources.hashtag = req.body.hashtag;
+                    }
+
+                    //if user checks box to activate time 
+                    if (req.body.hasTime == true){
+
+                        lm.timetext.datestart = req.body.datetext.start;
+                        lm.timetext.dateend = req.body.datetext.end;
+                        lm.timetext.timestart = req.body.timetext.start;
+                        lm.timetext.timeend = req.body.timetext.end;
+
+
+                        //------ Combining Date and Time values -----//
+                        var timeStart = req.body.time.start;
+                        var timeEnd = req.body.time.end;
+
+                        var dateStart = req.body.date.start;
+                        var dateEnd = req.body.date.end;
+
+                        var datetimeStart = new Date(dateStart+' '+timeStart);
+                        var datetimeEnd = new Date(dateEnd+' '+timeEnd);
+                        //----------//
+
+                        lm.time.start = datetimeStart;
+                        lm.time.end = datetimeEnd;
+                    }
+
+                    lm.save(function (err, landmark) {
+                        if (err)
+                            console.log(err);
+                        else{
+                            console.log(landmark);
+                            //world created
+                            if (worldVal == true){
+                                saveProject(landmark._id, styleRes, req.body.userID, function(projectRes){
+                                    
+                                    var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes}];
+                                    res.send(idArray);
+                                });
+                            }
+
+                            //landmark created
+                            else {
+                                res.send(landmark.id);
+                            }
+                         
+                        }
+                    });
+
+                }             
+            }
+
+
+        }
 
         function saveStyle(inputName, callback){
 
