@@ -28,6 +28,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     };
 
     $scope.mapping = {};
+    $scope.style = {};
 	
 	$scope.mapThemes = [
 		{name:'urban'},
@@ -49,7 +50,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	
 	$scope.mapping.markerSelect = $scope.markerOptions[0];
 	
-	$scope.bgColor = '#CCC';
+	$scope.style.bodyBG_color = '#CCC';
+	
 	
 	angular.extend($scope, {
 		worldDetailPaths: {}
