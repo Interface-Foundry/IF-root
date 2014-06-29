@@ -292,8 +292,10 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     function saveStyle(){
 
-    	console.log('saving style');
-	    // db.styles.create($scope.mapping, function(response){
+    	console.log($scope.style);
+
+    	$scope.style.styleID = $scope.styleID;
+	    // db.styles.create($scope.style, function(response){
      //    	console.log(response);
      //    });  
     }
