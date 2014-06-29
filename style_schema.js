@@ -1,6 +1,4 @@
-var mongoose = require('mongoose'),
-textSearch = require('mongoose-text-search');
-monguurl = require('monguurl');
+var mongoose = require('mongoose');
 
 	//schema construction
 	var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;

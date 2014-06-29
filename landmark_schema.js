@@ -11,26 +11,27 @@ monguurl = require('monguurl');
 		world: Boolean,
 		parentID: String,
 		valid: Boolean, //are all req. items inputted
+		avatar: String,
 		loc: { //user inputted loc
 	    	type: {
 	      		type: String
 	    	},
 	    	coordinates: []
 	  	},
-	  	loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
-	  		name: String,
-	  		type: {
-	      		type: String
-	    	},
-	    	coordinates: []
-	  	},
+	  	// loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
+	  	// 	name: String,
+	  	// 	type: {
+	   //    		type: String
+	   //  	},
+	   //  	coordinates: []
+	  	// },
 		shortDescription: String,
 		description: String, //full HTML?
 		type: String, //event, place
 		subType: String, // type of event/place	
 		category: String, //category of type
 		style: {
-			interfaceID: String, //link to landmark's style
+			styleID: String, //link to landmark's style
 			map: {
 				type: String, //cloud, local, or both -- switch
 				cloudMap: String,
@@ -39,8 +40,7 @@ monguurl = require('monguurl');
 			markers: [{
 				name: String,
 				category: String
-			}],
-			avatar: String
+			}]	
 		},
 		time: {
 			created: { type: Date, default: Date.now },
@@ -76,7 +76,7 @@ monguurl = require('monguurl');
 	landmarkSchema.plugin(textSearch);
 
 	landmarkSchema.index({loc:'2dsphere'});
-	landmarkSchema.index({loc_nickname:'2dsphere'});
+	// landmarkSchema.index({loc_nickname:'2dsphere'});
 
 	//indexing for search
 	landmarkSchema.index({

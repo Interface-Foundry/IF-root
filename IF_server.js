@@ -48,7 +48,7 @@ var mongoose = require('mongoose'),
     monguurl = require('monguurl');
 
 
-mongoose.connect('mongodb://localhost/mantle');
+mongoose.connect('mongodb://localhost/if');
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
@@ -56,7 +56,7 @@ db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 
 var express = require('express'),
     app = module.exports.app = express(),
-    db = require('mongojs').connect('mantle');
+    db = require('mongojs').connect('if');
 
 
     
@@ -501,81 +501,12 @@ app.post('/api/:collection/create', function(req, res) {
 
     if (req.url == "/api/styles/create"){
 
-        var st = new styleSchema({
-
-            name: req.body.name,
-
-            bodyBG_color: req.body.bodyBG_color, // RGB Hex
-            cardBG_color: req.body.cardBG_color, // RGB Hex
-
-            cardBorder: req.body.cardBorder, // off by default
-            cardBorder_color: req.body.cardBorder_color, // RGB Hex
-            cardBorder_corner: req.body.cardBorder_corner, // px to round
-
-            worldTitle_color: req.body.worldTitle_color, // RGB Hex
-            landmarkTitle: req.body.landmarkTitle, // off by default
-            landmarkTitle_color: req.body.landmarkTitle_color, // RGB Hex
-            categoryTitle: req.body.categoryTitle, // off by default
-            categoryTitle_color: req.body.categoryTitle_color, // RGB Hex
-            accent: req.body.accent, // off by default
-            accent_color: req.body.accent_color, // RGB Hex
-            bodyText: req.body.bodyText, // off by default
-            bodyText_color: req.body.bodyText_color, // RGB Hex
-
-            bodyFontName: req.body.bodyFontName, // font name
-            bodyFontFamily: req.body.bodyFontFamily, // font family
-            themeFont: req.body.themeFont, // off by default
-            themeFontName: req.body.themeFontName // font name
-
-        });
-
-        st.save(function (err, style) {
-            if (err)
-                console.log(err);
-            else{
-                console.log(null, style);
-            }
-        });
-
+        saveStyle();
     }
 
     if (req.url == "/api/projects/create"){
 
-        var st = new styleSchema({
-
-            name: req.body.name,
-
-            bodyBG_color: req.body.bodyBG_color, // RGB Hex
-            cardBG_color: req.body.cardBG_color, // RGB Hex
-
-            cardBorder: req.body.cardBorder, // off by default
-            cardBorder_color: req.body.cardBorder_color, // RGB Hex
-            cardBorder_corner: req.body.cardBorder_corner, // px to round
-
-            worldTitle_color: req.body.worldTitle_color, // RGB Hex
-            landmarkTitle: req.body.landmarkTitle, // off by default
-            landmarkTitle_color: req.body.landmarkTitle_color, // RGB Hex
-            categoryTitle: req.body.categoryTitle, // off by default
-            categoryTitle_color: req.body.categoryTitle_color, // RGB Hex
-            accent: req.body.accent, // off by default
-            accent_color: req.body.accent_color, // RGB Hex
-            bodyText: req.body.bodyText, // off by default
-            bodyText_color: req.body.bodyText_color, // RGB Hex
-
-            bodyFontName: req.body.bodyFontName, // font name
-            bodyFontFamily: req.body.bodyFontFamily, // font family
-            themeFont: req.body.themeFont, // off by default
-            themeFontName: req.body.themeFontName // font name
-
-        });
-
-        st.save(function (err, style) {
-            if (err)
-                console.log(err);
-            else{
-                console.log(null, style);
-            }
-        });
+        saveProject();
     }
 
     //a world
@@ -751,120 +682,170 @@ app.post('/api/:collection/create', function(req, res) {
         //NEW LANDMARK
          else { //not an edit, a new landmark entirely
 
+         
+            if (worldVal == true){
+                saveStyle(req.body.name, function(styleRes){ //creating new style to add to landmark
+                    saveNewLandmark(styleRes);
+                });
+            }
 
+            else {
+                saveNewLandmark();
+            }
 
+            function saveNewLandmark(styleRes){
+           
                 var lm = new landmarkSchema({
                     name: req.body.name,
                     id: finalID,
                     world: worldVal,
                     valid: 1,
                     loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
-                    shortDescription: 'asdfasdf',
-                    description: 'asdfasdfasdfasdfasdf',
-                    type: req.body.type,
-                    style: {
-                        interfaceID: "IDasdfasdfasdf", //link to landmark's style
-                        map: {
-                            type: 'cloud', //cloud, local, or both -- switch
-                            cloudMap: 'interfacefoundry.ig9jd86b'
-                        },
-                        markers: [{
-                            name: 'yellowIcon',
-                            category: 'all'
-                        }],
-                        avatar: "img/tidepools/default.jpg"
-                    },
-
+                    avatar: req.body.stats.avatar,
+                    permissions: {
+                        ownerID: req.body.userID
+                    }
                 });
+
+                if (styleRes !== undefined){ //if new styleID created for world
+                    lm.style.styleID = styleRes;
+                }
+
+                if (req.body.description){
+                    lm.description = req.body.description;
+                }
+                if (req.body.shortDescription){
+                    lm.shortDescription = req.body.shortDescription;
+                }
+                if (req.body.category){
+                    lm.category = req.body.category;
+                }
+
+                if (req.body.hashtag){
+                    lm.resources.hashtag = req.body.hashtag;
+                }
+
+                //if user checks box to activate time 
+                if (req.body.hasTime == true){
+
+                    lm.timetext.datestart = req.body.datetext.start;
+                    lm.timetext.dateend = req.body.datetext.end;
+                    lm.timetext.timestart = req.body.timetext.start;
+                    lm.timetext.timeend = req.body.timetext.end;
+
+
+                    //------ Combining Date and Time values -----//
+                    var timeStart = req.body.time.start;
+                    var timeEnd = req.body.time.end;
+
+                    var dateStart = req.body.date.start;
+                    var dateEnd = req.body.date.end;
+
+                    var datetimeStart = new Date(dateStart+' '+timeStart);
+                    var datetimeEnd = new Date(dateEnd+' '+timeEnd);
+                    //----------//
+
+                    lm.time.start = datetimeStart;
+                    lm.time.end = datetimeEnd;
+                }
 
                 lm.save(function (err, landmark) {
                     if (err)
                         console.log(err);
                     else{
-                        console.log(null, landmark);
+
+                        //world created
+                        if (worldVal == true){
+                            saveProject(landmark._id, styleRes, req.body.userID, function(projectRes){
+                                
+                                var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes}];
+                                res.send(idArray);
+                            });
+                        }
+
+                        //landmark created
+                        else {
+                            res.send(landmark.id);
+                        }
+                     
                     }
                 });
 
-            //     lm.name = req.body.name;
-            //     lm.id = finalID;
-            //     lm.world = worldVal;
-            //     lm.type = req.body.type;
-            //     lm.subType = req.body.subType;
-            //     lm.stats.avatar = req.body.stats.avatar;
-            //     lm.mapID = "TidepoolsBaseMap"; //compatibility with Old Tidepools Interface
+            }
 
-            //     if (req.body.description){
-            //         lm.description = req.body.description;
-            //     }
-            //     if (req.body.shortDescription){
-            //         lm.shortDescription = req.body.shortDescription;
-            //     }
-            //     if (req.body.people){
-            //         lm.people = req.body.people;
-            //     }
-            //     if (req.body.video){
-            //         lm.video = req.body.video;
-            //     }
-
-            //     if (req.body.extraURL){
-            //         lm.extraURL = req.body.extraURL;
-            //     }
-
-            //     //for adding parent world ID to landmark
-            //     if (req.url == "/api/landmarks/create"){
-            //         lm.parentID = "FAKEID";
-            //     }
-
-            //     if (req.body.type == "event"){
-
-            //         lm.timetext.datestart = req.body.datetext.start;
-            //         lm.timetext.dateend = req.body.datetext.end;
-            //         lm.timetext.timestart = req.body.timetext.start;
-            //         lm.timetext.timeend = req.body.timetext.end;
-
-
-            //         //------ Combining Date and Time values -----//
-            //         var timeStart = req.body.time.start;
-            //         var timeEnd = req.body.time.end;
-
-            //         var dateStart = req.body.date.start;
-            //         var dateEnd = req.body.date.end;
-
-            //         var datetimeStart = new Date(dateStart+' '+timeStart);
-            //         var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-            //         //----------//
-
-            //         lm.time.start = datetimeStart;
-            //         lm.time.end = datetimeEnd;
-            //     }
-                
-
-
-            //     lm.loc.unshift(req.body.loc[0],req.body.loc[1]);
-
-            //     if (req.body.location){
-            //         lm.loc_nickname = req.body.location;
-            //     }    
-
-            //     if (req.body.tags){
-                    
-            //         var newTag = req.body.tags.replace(/[^ \w]+/, '');
-            //         //lm.tags.addToSet(newTag);
-            //         lm.tags = newTag;
-                    
-            //     }  
-
-            // lm.save(function (err, landmark) {
-            //     if (err)
-            //         console.log(err);
-            //     else{
-            //         console.log(null, landmark);
-            //         //console.log(finalID);
-            //         var idArray = [{'id': finalID}];
-            //         res.send(idArray);
-            //     }
-            // });
         }  
+
+        function saveStyle(inputName, callback){
+
+            var st = new styleSchema({
+
+                name: inputName
+
+                // bodyBG_color: req.body.bodyBG_color, // RGB Hex
+                // cardBG_color: req.body.cardBG_color, // RGB Hex
+
+                // cardBorder: req.body.cardBorder, // off by default
+                // cardBorder_color: req.body.cardBorder_color, // RGB Hex
+                // cardBorder_corner: req.body.cardBorder_corner, // px to round
+
+                // worldTitle_color: req.body.worldTitle_color, // RGB Hex
+                // landmarkTitle: req.body.landmarkTitle, // off by default
+                // landmarkTitle_color: req.body.landmarkTitle_color, // RGB Hex
+                // categoryTitle: req.body.categoryTitle, // off by default
+                // categoryTitle_color: req.body.categoryTitle_color, // RGB Hex
+                // accent: req.body.accent, // off by default
+                // accent_color: req.body.accent_color, // RGB Hex
+                // bodyText: req.body.bodyText, // off by default
+                // bodyText_color: req.body.bodyText_color, // RGB Hex
+
+                // bodyFontName: req.body.bodyFontName, // font name
+                // bodyFontFamily: req.body.bodyFontFamily, // font family
+                // themeFont: req.body.themeFont, // off by default
+                // themeFontName: req.body.themeFontName // font name
+
+            });
+            
+            saveIt(function (res) {
+                callback(res);
+            });
+            
+            function saveIt(callback){
+                st.save(function (err, style) {
+                    if (err)
+                        console.log(err);
+                    else {
+                        callback(style._id);
+                    }
+                });
+            }
+
+        }
+
+        function saveProject(world,style,owner,callback){
+
+            var pr = new projectSchema({
+                worldID: world,
+                styleID: style,
+                permissions: {
+                    ownerID: owner
+                }
+            });
+
+            saveIt(function (res) {
+                callback(res);
+            });
+            
+            function saveIt(callback){
+                pr.save(function (err, project) {
+                    if (err)
+                        console.log(err);
+                    else {
+                        callback(project._id);
+                    }
+                });
+            }
+            
+        }
     }
 
 });

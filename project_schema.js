@@ -1,6 +1,5 @@
-var mongoose = require('mongoose'),
-textSearch = require('mongoose-text-search');
-monguurl = require('monguurl');
+var mongoose = require('mongoose');
+
 
 	//schema construction
 	var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
@@ -9,7 +8,6 @@ monguurl = require('monguurl');
 
 		worldID: String,
 		styleID: String,
-		userID: String,
 		permissions: {
 			ownerID: String,
 			viewers: [String],
@@ -18,74 +16,9 @@ monguurl = require('monguurl');
 		avatar: String,
 		time: {
 			created: { type: Date, default: Date.now },
-			lastedited: { type: Date}
-		},
+			lastedited: { type: Date, default: Date.now}
+		}
 
-		name: String, 
-		id: String, 
-		world: Boolean,
-		parentID: String,
-		valid: Boolean, //are all req. items inputted
-		loc: { //user inputted loc
-	    	type: {
-	      		type: String
-	    	},
-	    	coordinates: []
-	  	},
-	  	loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
-	  		name: String,
-	  		type: {
-	      		type: String
-	    	},
-	    	coordinates: []
-	  	},
-		shortDescription: String,
-		description: String, //full HTML?
-		type: String, //event, place
-		subType: String, // type of event/place	
-		category: String, //category of type
-		style: {
-			interfaceID: String, //link to landmark's style
-			map: {
-				type: String, //cloud, local, or both -- switch
-				cloudMap: String,
-				localMap: String
-			},
-			markers: [{
-				name: String,
-				category: String
-			}],
-			avatar: String
-		},
-		time: {
-			created: { type: Date, default: Date.now },
-			start: { type: Date},
-			end: { type: Date}
-		},
-		timetext: {
-			datestart: String,
-			dateend: String,
-			timestart: String,
-			timeend: String
-		},
-		stats: { 
-			relevance: Number,
-			activity: Number,
-			quality: Number	
-		},
-		resources: {
-			hashtag: String,
-			video: String,
-			extraURL: String,
-			etherpad: String,	
-		},
-		permissions: {
-			ownerID: String,
-			hidden: Boolean,
-			viewers: [String],
-			admins: [String]
-		},
-		tags: [String] //search tags
 	}); 
 
 

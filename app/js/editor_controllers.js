@@ -5,8 +5,9 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry";
-	
-	$scope.worldID = "53ab92d2ac23550e12600011";
+	$scope.worldID;
+	$scope.styleID;
+	$scope.projectID;
 	
 	//init vars
 	$scope.pageIndex = 0;
@@ -85,10 +86,19 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.nextPage = function () {
 		if ($scope.pageIndex<($scope.pageClass.length-1)) {
 			$scope.pageClass[$scope.pageIndex] = 'left';
-		
+			if ($scope.pageIndex == 0){ //making new world after first page
+				if (!$scope.worldID){ //new world
+					saveWorld(); 
+				}
+				else { //edit created world
+					editWorld(); 
+				}	
+			}
 			$scope.pageIndex += 1;
 			$scope.pageClass[$scope.pageIndex] = 'current';
 		}
+
+
 	};
 	
 	$scope.prevPage = function() {
@@ -185,6 +195,63 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     	//update object in database
     	
     	//todo only update things that have changed
+
+    	//---- TIME ----//
+    	//use checkbox to select "time" option, for now sending with no time: (use time icon, make it special, like TIME ACTIVATED glow)
+    	$scope.hasTime = false;
+
+    	//if no end date added, use start date
+
+
+        // if (!$scope.world.date.end){
+        //     $scope.world.date.end = $scope.world.date.start;
+        // }
+
+        // $scope.world.datetext = {
+        //     start: $scope.world.date.start,
+        //     end: $scope.world.date.end
+        // }
+        // //---- Date String converter to avoid timezone issues...could be optimized probably -----//
+        // $scope.world.date.start = new Date($scope.world.date.start).toISOString();
+        // $scope.world.date.end = new Date($scope.world.date.end).toISOString();
+
+        // $scope.world.date.start = dateConvert($scope.world.date.start);
+        // $scope.world.date.end = dateConvert($scope.world.date.end);
+
+        // $scope.world.date.start = $scope.world.date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
+        // $scope.world.date.end = $scope.world.date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
+
+        // function dateConvert(input){
+        //     var s = input;
+        //     var n = s.indexOf('T');
+        //     return s.substring(0, n != -1 ? n : s.length);
+        // }
+        // //-----------//
+
+        // if (!$scope.world.time.start){
+        //     $scope.world.time.start = "00:00";
+        // }
+
+        // if (!$scope.world.time.end){
+        //     $scope.world.time.end = "23:59";
+        // }
+
+        // $scope.world.timetext = {
+        //     start: $scope.world.time.start,
+        //     end: $scope.world.time.end
+        // } 
+        //------- END TIME --------//
+
+        $scope.world.loc = [$scope.markers.m.lat,$scope.markers.m.lng];
+
+        $scope.world.userID = $scope.userID;
+
+        db.worlds.create($scope.world, function(response){
+        	$scope.worldID = response[0].worldID;
+        	$scope.projectID = response[0].projectID;
+        	$scope.styleID = response[0].styleID;
+        });
+    
     }
     
     
