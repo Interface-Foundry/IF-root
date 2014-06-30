@@ -301,6 +301,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     function saveProject(){
     	$scope.project.projectID = $scope.projectID;
+
 	    db.projects.create($scope.project, function(response){
         	console.log(response);
         });  

@@ -142,7 +142,7 @@
 
 
 
-function WorldViewCtrl( Bubble, $routeParams, $scope, db, $location, $timeout, leafletData, $route, $rootScope ) {
+function WorldViewCtrl( World, $routeParams, $scope, db, $location, $timeout, leafletData, $route, $rootScope ) {
 
 
     if ($routeParams.option == 'm'){
@@ -171,7 +171,7 @@ function WorldViewCtrl( Bubble, $routeParams, $scope, db, $location, $timeout, l
   
     $scope.option = $routeParams.option;
 
-    $scope.landmark = Bubble.get({_id: $routeParams.bubbleId}, function(landmark) {
+    $scope.landmark = World.get({_id: $routeParams.worldID}, function(landmark) {
 
         //CHANGE HTML TITLE HEADER ++ META DATA
 
@@ -236,7 +236,7 @@ function WorldViewCtrl( Bubble, $routeParams, $scope, db, $location, $timeout, l
 
 
 }
-WorldViewCtrl.$inject = ['Landmark', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
+WorldViewCtrl.$inject = ['World', '$routeParams', '$scope', 'db', '$location','$timeout','leafletData', '$route','$rootScope'];
 
 
 
