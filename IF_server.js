@@ -489,6 +489,8 @@ app.get('/api/:collection/:id', function(req, res) {
     //world
     if (req.url.indexOf("/api/worlds/") > -1){
         db.collection('landmarks').findOne({id:objectId(req.params.id),world:true}, fn(req, res));
+
+        //
     }
     //landmark
     else {
@@ -522,7 +524,7 @@ app.post('/api/:collection/create', function(req, res) {
         }
     }
     //a landmark
-    else {
+    else if (req.url == "/api/landmarks/create"){
         var worldVal = false;
         contSaveLandmark();
     }
@@ -791,31 +793,7 @@ app.post('/api/:collection/create', function(req, res) {
         function saveStyle(inputName, callback){
 
             var st = new styleSchema({
-
                 name: inputName
-
-                // bodyBG_color: req.body.bodyBG_color, // RGB Hex
-                // cardBG_color: req.body.cardBG_color, // RGB Hex
-
-                // cardBorder: req.body.cardBorder, // off by default
-                // cardBorder_color: req.body.cardBorder_color, // RGB Hex
-                // cardBorder_corner: req.body.cardBorder_corner, // px to round
-
-                // worldTitle_color: req.body.worldTitle_color, // RGB Hex
-                // landmarkTitle: req.body.landmarkTitle, // off by default
-                // landmarkTitle_color: req.body.landmarkTitle_color, // RGB Hex
-                // categoryTitle: req.body.categoryTitle, // off by default
-                // categoryTitle_color: req.body.categoryTitle_color, // RGB Hex
-                // accent: req.body.accent, // off by default
-                // accent_color: req.body.accent_color, // RGB Hex
-                // bodyText: req.body.bodyText, // off by default
-                // bodyText_color: req.body.bodyText_color, // RGB Hex
-
-                // bodyFontName: req.body.bodyFontName, // font name
-                // bodyFontFamily: req.body.bodyFontFamily, // font family
-                // themeFont: req.body.themeFont, // off by default
-                // themeFontName: req.body.themeFontName // font name
-
             });
             
             saveIt(function (res) {
@@ -836,9 +814,6 @@ app.post('/api/:collection/create', function(req, res) {
 
 
 
-        function editStyle(input){
-
-        }
 
         function saveProject(world,style,owner,callback){
 
@@ -865,10 +840,72 @@ app.post('/api/:collection/create', function(req, res) {
             }   
         }
 
+    }
+
         function editProject(input){
-            
+             projectSchema.findById(req.body.projectID, function(err, lm) {
+              if (!lm)
+                return next(new Error('Could not load Document'));
+
+              else {
+
+                console.log(req.body);
+
+                lm.save(function(err, style) {
+                    if (err){
+                        console.log('error');
+                    }
+                    else {
+                        console.log(style);
+                        console.log('success');
+                    }
+                });
+              }
+            });             
         }
 
+        function editStyle(input){
+
+         styleSchema.findById(req.body.styleID, function(err, lm) {
+          if (!lm)
+            return next(new Error('Could not load Document'));
+
+          else {
+
+            console.log(req.body);
+            lm.bodyBG_color = req.body.bodyBG_color; // RGB Hex
+            lm.cardBG_color = req.body.cardBG_color; // RGB Hex
+
+            lm.cardBorder = req.body.cardBorder; // off by default
+            lm.cardBorder_color = req.body.cardBorder_color; // RGB Hex
+            lm.cardBorder_corner = req.body.cardBorder_corner; // px to round
+
+            lm.worldTitle_color = req.body.worldTitle_color; // RGB Hex
+            lm.landmarkTitle = req.body.landmarkTitle; // off by default
+            lm.landmarkTitle_color = req.body.landmarkTitle_color; // RGB Hex
+            lm.categoryTitle = req.body.categoryTitle; // off by default
+            lm.categoryTitle_color = req.body.categoryTitle_color; // RGB Hex
+            lm.accent = req.body.accent; // off by default
+            lm.accent_color = req.body.accent_color; // RGB Hex
+            lm.bodyText = req.body.bodyText; // off by default
+            lm.bodyText_color = req.body.bodyText_color; // RGB Hex
+
+            lm.bodyFontName = req.body.bodyFontName; // font name
+            lm.bodyFontFamily = req.body.bodyFontFamily; // font family
+            lm.themeFont = req.body.themeFont; // off by default
+            lm.themeFontName = req.body.themeFontName; // font name
+
+            lm.save(function(err, style) {
+                if (err){
+                    console.log('error');
+                }
+                else {
+                    console.log(style);
+                    console.log('success');
+                }
+            });
+          }
+        }); 
 
     }
 

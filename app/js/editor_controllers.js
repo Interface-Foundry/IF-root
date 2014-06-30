@@ -28,6 +28,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     };
 
     $scope.mapping = {};
+    $scope.styles = {};
+    $scope.project = {};
 	
 	$scope.mapThemes = [
 		{name:'urban'},
@@ -291,11 +293,17 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     }
 
     function saveStyle(){
+    	$scope.styles.styleID = $scope.styleID;
+	    db.styles.create($scope.styles, function(response){
+        	console.log(response);
+        });  
+    }
 
-    	console.log('saving style');
-	    // db.styles.create($scope.mapping, function(response){
-     //    	console.log(response);
-     //    });  
+    function saveProject(){
+    	$scope.project.projectID = $scope.projectID;
+	    db.projects.create($scope.project, function(response){
+        	console.log(response);
+        });  
     }
     
     if (navigator.geolocation) {
