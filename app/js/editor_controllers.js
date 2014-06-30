@@ -6,9 +6,10 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry";
 	$scope.worldID;
+	$scope.worldURL;
 	$scope.styleID;
 	$scope.projectID;
-	
+
 	//init vars
 	$scope.pageIndex = 0;
 	$scope.pageClass = [];
@@ -286,6 +287,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        	$scope.worldID = response[0].worldID;
 	        	$scope.projectID = response[0].projectID;
 	        	$scope.styleID = response[0].styleID;
+	        	$scope.worldURL = response[0].worldURL;
 	        });       	
         }
 

@@ -794,7 +794,7 @@ app.post('/api/:collection/create', function(req, res) {
                             if (worldVal == true){
                                 saveProject(landmark._id, styleRes, req.body.userID, function(projectRes){
                                     
-                                    var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes}];
+                                    var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
                                     res.send(idArray);
                                 });
                             }
