@@ -490,8 +490,7 @@ app.get('/api/:collection/:id', function(req, res) {
     //world
     if (req.url.indexOf("/api/worlds/") > -1){
 
-      
-        db.collection('landmarks').findOne({id:objectId(req.params.id),world:true}, function(err, data){
+        db.collection('landmarks').findOne({id:req.params.id,world:true}, function(err, data){
             
             styleSchema.findById(data.style.styleID, function(err, style) {
                 if (!style){
@@ -517,7 +516,7 @@ app.get('/api/:collection/:id', function(req, res) {
     }
     //landmark
     else {
-        db.collection(req.params.collection).findOne({id:objectId(req.params.id),world:false}, fn(req, res));
+        db.collection(req.params.collection).findOne({id:req.params.id,world:false}, fn(req, res));
     }
 });
 

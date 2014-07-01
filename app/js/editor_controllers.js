@@ -288,6 +288,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        	$scope.projectID = response[0].projectID;
 	        	$scope.styleID = response[0].styleID;
 	        	$scope.worldURL = response[0].worldURL;
+	        	console.log($scope.worldURL);
 	        });       	
         }
 
@@ -315,7 +316,19 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
        refreshMap();
     }
 
-
+	 $scope.myData = {
+	    link: "http://google.com",
+	    modalShown: false,
+	    hello: 'world',
+	    foo: 'bar'
+	  }
+	  $scope.logClose = function() {
+	    console.log('close!');
+	  };
+	  $scope.toggleModal = function() {
+	    $scope.myData.modalShown = !$scope.myData.modalShown;
+	  };
+	
 
 }
 
