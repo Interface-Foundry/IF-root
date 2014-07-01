@@ -7,7 +7,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
 
-      when('/w/:worldID', {templateUrl: 'partials/world-view.html', controller: WorldViewCtrl}).
+      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 

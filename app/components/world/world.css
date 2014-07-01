@@ -1,0 +1,28 @@
+.avatar {
+	height: auto;
+	width: auto;
+	max-height: 60px;
+	max-width: 60px;
+	    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+
+}
+
+.col-centered{
+float: none;
+margin: 0 auto;
+}
+
+.vertical-middle {
+
+}
+
+.media-body {
+	height: 100%;
+}
+
+.media {
+	border: 1px solid #CCC;
+	margin: 10px auto;
+}

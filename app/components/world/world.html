@@ -1,0 +1,20 @@
+<div class="container">
+	<div class="row">
+			<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" ng-style="{'background-color': style.cardBG_color}">
+				<div class="media center-block">
+					<div class="pull-left">
+						<img class="media-object avatar" ng-src="{{world.avatar}}">
+					</div>
+					<div class="media-body">
+						<h1 class="media-heading vertical-middle">{{world.name}}</h1> <a href="" ng-click="aperture.toggle('half')">worldtoggle</a>
+					</div>
+				</div>
+			</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-10 col-xs-offset-1">
+		 cards
+		</div>
+	</div>
+</div>
