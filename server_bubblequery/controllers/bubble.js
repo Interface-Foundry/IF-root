@@ -20,8 +20,6 @@ exports.listBubbles = function(currentDateTimeUser, userCoordinate, callback) {
     for(var d in data) {
       bubbleObject = data[d];
 
-      //console.log(bubbleObject);
-
       var isInBubble = helper.isInBubble(bubbleObject['dis']);
 
 
@@ -44,9 +42,15 @@ exports.listBubbles = function(currentDateTimeUser, userCoordinate, callback) {
       if(liveStatusSeconds === -1) // If bubble expired, do not add
         continue;
 
+
       bubblesUpcomingLive.push({ 'bubble':bubbleObject,
       'upcoming': liveStatusSeconds});
     }
+
+    // for (i=0;i<bubblesLiveInside.length;i++)
+    // {
+    //   console.log(bubblesLiveInside[i]);
+    // }
 
     bubblesUpcomingLive.sort(helper.compareUpcomingBubbles);
 
@@ -66,6 +70,8 @@ exports.listBubbles = function(currentDateTimeUser, userCoordinate, callback) {
       "live": bubblesLive,
       "upcoming": bubblesUpcomingLiveMapped
     }
+
+    //console.log(bubbleList);
 
     return callback(err, bubbleList);
   });

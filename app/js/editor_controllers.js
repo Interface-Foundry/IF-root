@@ -297,7 +297,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        	$scope.styleID = response[0].styleID;
 	        	$scope.worldURL = response[0].worldURL;
 	        	console.log($scope.worldURL);
-	        	console.log('new world created');
+				console.log('new world created');
 	        });       	
         }
 
@@ -326,7 +326,18 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
        refreshMap();
     }
-
+	 $scope.myData = {
+	    link: "http://google.com",
+	    modalShown: false,
+	    hello: 'world',
+	    foo: 'bar'
+	  }
+	  $scope.logClose = function() {
+	    console.log('close!');
+	  };
+	  $scope.toggleModal = function() {
+	    $scope.myData.modalShown = !$scope.myData.modalShown;
+	  };
 }
 
 

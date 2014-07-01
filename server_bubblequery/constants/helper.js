@@ -69,10 +69,11 @@ exports.returnCoordinateObject = function(coordinate) {
 
 exports.returnBubbleObject = function(bubble) {
   return {
-    'Lat': bubble['loc']['coordinates'][1],
-    'Lon': bubble['loc']['coordinates'][0],
-    'startTime': bubble['time']['start'],
-    'endTime': bubble['time']['end']
+    'id':bubble['id']
+    // 'Lat': bubble['loc']['coordinates'][1],
+    // 'Lon': bubble['loc']['coordinates'][0],
+    // 'startTime': bubble['time']['start'],
+    // 'endTime': bubble['time']['end']
   } 
 }
 

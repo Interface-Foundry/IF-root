@@ -57,11 +57,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
 
 
     function findWorlds(lat,lon){
-
+     
         $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
-            console.log(data);
-            if (data[0].liveAndInside > 0) {
-              console.log(data[0].liveAndInside[0].id);
+            if (data[0].liveAndInside[0].id) {
+                // PUT OTHER INSIDE RESULTS IN SCOPE FOR EASIER USER SELECT
+              $location.path('w/'+data[0].liveAndInside[0].id);
             }
             else {
                 //?? profit

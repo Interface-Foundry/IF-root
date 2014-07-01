@@ -22,6 +22,7 @@ var fs = require('fs');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 var async = require('async');
 var moment = require('moment');
+var passport = require('passport');
 
 var urlify = require('urlify').create({
   addEToUmlauts:true,
@@ -58,16 +59,9 @@ var express = require('express'),
     app = module.exports.app = express(),
     db = require('mongojs').connect('if');
 
-
+    app.use(express.static(__dirname + '/app'));
     
-app.configure(function () {
-	app.use(express.favicon());
-	app.use(express.bodyParser());
-	app.use(express.logger('dev'));  //tiny, short, default
-	app.use(app.router);
-	app.use(express.static(__dirname + '/app'));
-	app.use(express.errorHandler({dumpExceptions: true, showStack: true, showMessage: true}));
-});
+
 
 /* Helpers */
 
@@ -98,6 +92,9 @@ var fn = function (req, res) {
 };
 
 /* Routes */
+
+app.post('/login', passport.authenticate('local', { successRedirect: '/',
+                                                    failureRedirect: '/login' }));
 
 // Query
 app.get('/api/:collection', function(req, res) { 
@@ -490,8 +487,7 @@ app.get('/api/:collection/:id', function(req, res) {
     //world
     if (req.url.indexOf("/api/worlds/") > -1){
 
-      
-        db.collection('landmarks').findOne({id:objectId(req.params.id),world:true}, function(err, data){
+        db.collection('landmarks').findOne({id:req.params.id,world:true}, function(err, data){
             
             styleSchema.findById(data.style.styleID, function(err, style) {
                 if (!style){
@@ -517,7 +513,7 @@ app.get('/api/:collection/:id', function(req, res) {
     }
     //landmark
     else {
-        db.collection(req.params.collection).findOne({id:objectId(req.params.id),world:false}, fn(req, res));
+        db.collection(req.params.collection).findOne({id:req.params.id,world:false}, fn(req, res));
     }
 });
 

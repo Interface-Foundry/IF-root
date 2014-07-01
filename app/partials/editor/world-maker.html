@@ -124,6 +124,19 @@
 						</div>
 						<div class="field">
 								upload your own
+								  <modal-dialog show='myData.modalShown' width='500px' dialog-title='Modal Dialog Title' on-close='logClose()'>
+							        <p>This is some html content</p>
+							        <p>
+							          <label for='hello'>Hello:</label>
+							          <input type='text' name='hello' ng-model='myData.hello' />
+							        </p>
+							        <p>
+							          <label for='foo'>Foo:</label>
+							          <input type='text' name='foo' ng-model='myData.foo' />
+							        </p>
+							        <img src='http://upload.wikimedia.org/wikipedia/commons/2/22/Turkish_Van_Cat.jpg' width='300px'/>
+							      </modal-dialog>
+							      <button ng-click='toggleModal()'>Toggle Modal</button>
 						</div>
 						<div class="field">
 								Add a floorplan ---  
