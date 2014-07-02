@@ -1,4 +1,4 @@
-<button ng-click="prevPage()">prev</button>
+<div class="navfix editorbg"><button ng-click="prevPage()">prev</button>
 
 <button ng-click="nextPage()">next</button>
 	<ul id="maker-pages">
@@ -181,10 +181,10 @@
 						<label>Card BG</label> <input name="cardBG" type='text' class='color' value='#FFFFFF' ng-model='styles.cardBG_color'/>
 					</div>
 					<div class="field">
-						<label>Card Border</label> <input name='cardBorder' type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/>
+						<label>Card Border</label> <input name="cardBorder" type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/> 
 					</div>
 					<div class="field">
-						<label>World Title Color</label> <input name="worldTitle" type='text' class="color" ng-model='styles.worldTitle_color'/>
+						<label>World Title Color</label> <input name="worldTitle" type='text' class="color" value='#808080' ng-model='styles.worldTitle_color'/>
 					</div>
 					<div class="field">
 						<label>Landmark Title Color</label> <input name="landmarkTitle" type='text' class="color" ng-model='styles.landmarkTitle_color' disabled/>
@@ -209,12 +209,12 @@
 						<div class="livepreview" ng-style="{'background-color':styles.bodyBG_color}">
 							<div class="container">
 							<div class="row">
-								<div ng-style="cardStyle" class="col-xs-12">
-								<h1 ng-style="worldTitleStyle">World Title Color</h1>
+								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
+								<h1 ng-style="{'color': styles.worldTitle_color}">World Title Color</h1>
 								</div>
-								<span ng-style="categoryTitleStyle">Category Title Color</span>
-								<div ng-style="cardStyle" class="col-xs-12">
-								<span ng-style="landmarkTitleStyle">Landmark Title Color</span>
+									<span ng-style="categoryTitleStyle">Category Title Color</span>
+								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
+									<span ng-style="">Landmark Title Color</span>
 								</div>
 							</div>
 							</div>
@@ -227,8 +227,11 @@
 		</li>
 		
 		<li ng-class="pageClass[4]" class="container">
-		congrats.
+		congrats!!!
+		<a ng-href="#/w/{{worldURL}}">Go to your world!</a>
 		</li>
 	</ul>
 		
+</div>
+
 </div>

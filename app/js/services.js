@@ -37,7 +37,6 @@ angular.module('tidepoolsServices', ['ngResource'])
             return res;
         }
     ])
-
     .factory('db', ['$resource', '$http',    
         function($resource, $http) {
     		var actions = {
@@ -59,8 +58,55 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.instagrams = $resource('api/instagrams/:_id', {}, actions);
             return db;
         }
-    ]);
-
+    ])
+    .factory('apertureService', ['leafletData', 
+    	function(leafletData) {
+	    	var aperture = {};
+			aperture.off = true;
+	    	aperture.state = 'aperture-off';
+	    	aperture.navfix = 'navfix';
+	    	
+	    	function refreshMap(){ 
+		        leafletData.getMap().then(function(map) {
+		            map.invalidateSize();
+		        });
+		    }
+	    	
+	    	
+	    	aperture.toggle = function(state) {
+	    		if (aperture.off) {
+		    			aperture.off = false;
+		    			console.log('toggling aperture on');
+		    			aperture.navfix = '';
+						if (state == 'half') {
+						console.log('half');	
+							aperture.state = 'aperture-half';
+						}
+						if (state == 'full') {
+						console.log('full');
+							aperture.state = 'aperture-full';
+						}
+				} else {
+				console.log('off');
+					aperture.off = true;
+					aperture.state = 'aperture-off';
+					aperture.navfix = 'navfix';
+				}
+				/*if ($rootScope.apertureOn) {
+					//open
+					console.log('opening');
+					angular.extend($rootScope, {apertureSize: h});
+					console.log($rootScope.apertureSize);
+				} else { 
+					console.log('closing aperture');
+					angular.extend($rootScope, {apertureSize: 0});
+					console.log($rootScope.apertureSize);
+				}*/
+			refreshMap();
+			}
+			
+			return aperture;
+    	}]);
     // .service('mapper', ['$scope', function($scope) {
             
     //         this.view = function() {

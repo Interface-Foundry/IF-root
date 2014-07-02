@@ -2,11 +2,13 @@
 function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
 	var bubbleCircle;
-	
+	angular.extend($rootScope, {apertureSize: 0});
+	angular.extend($rootScope, {apertureOn: false});
+		
 	$scope.userID = "53ab92d2ac23550e12600011";	
-	$scope.username = "interfoundry";
-	$scope.worldID;
-	$scope.worldURL;
+	$scope.username = "interfoundry"; 
+	$scope.worldID; //mongo ID
+	//$scope.worldURL; //unique URL ID for that world
 	$scope.styleID;
 	$scope.projectID;
 
@@ -93,17 +95,21 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			$scope.pageClass[$scope.pageIndex] = 'left';
 			if ($scope.pageIndex == 0){ //making new world after first page
 				if (!$scope.worldID){ //new world
-					saveWorld(); 
+					console.log("Saving new world");
+					saveWorld();
 				}
 				else { //edit created world
+					console.log("Editing created world");
 					saveWorld('edit');
 				}	
 			}
 			if ($scope.pageIndex == 1){ //adding/editing world map settings
+				console.log("Adding/editing world map settings");
 				saveWorld('map');	
 			}
 
 			if ($scope.pageIndex == 3){ //editing style. needs to be moved back one page to "2"
+				console.log("Editing style");
 				saveStyle();
 			}
 			$scope.pageIndex += 1;
@@ -260,7 +266,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
         //edit world
         if (option == 'edit'){
-
+			console.log('saveWorld(edit)');
         	$scope.world.newStatus = false; //not new
         	$scope.world.worldID = $scope.worldID;
 	        db.worlds.create($scope.world, function(response){
@@ -269,7 +275,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         }
 
         //adding/editing map theme options to world 
-        else if (option == 'map'){
+        if (option == 'map'){
+        	console.log('saveWorld(map)');
         	$scope.mapping.editMap = true; //adding/editing world map
 
         	$scope.mapping.worldID = $scope.worldID;
@@ -281,7 +288,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         }
 
         //new world
-        else {
+        if (option === undefined) {
+        	console.log('saveWorld()');
         	$scope.world.newStatus = true; //new
 	        db.worlds.create($scope.world, function(response){
 	        	$scope.worldID = response[0].worldID;
@@ -289,6 +297,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        	$scope.styleID = response[0].styleID;
 	        	$scope.worldURL = response[0].worldURL;
 	        	console.log($scope.worldURL);
+				console.log('new world created');
 	        });       	
         }
 
@@ -296,6 +305,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     }
 
     function saveStyle(){
+    	console.log('saveStyle()');
     	$scope.styles.styleID = $scope.styleID;
 	    db.styles.create($scope.styles, function(response){
         	console.log(response);
@@ -303,6 +313,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     }
 
     function saveProject(){
+    	console.log('saveProject()');
     	$scope.project.projectID = $scope.projectID;
 
 	    db.projects.create($scope.project, function(response){
@@ -315,7 +326,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
        refreshMap();
     }
-
 	 $scope.myData = {
 	    link: "http://google.com",
 	    modalShown: false,
@@ -328,8 +338,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	  $scope.toggleModal = function() {
 	    $scope.myData.modalShown = !$scope.myData.modalShown;
 	  };
-	
-
 }
 
 

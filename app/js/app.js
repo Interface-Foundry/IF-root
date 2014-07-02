@@ -7,8 +7,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
 
-      when('/w/:worldID', {templateUrl: 'partials/world-view.html', controller: WorldViewCtrl}).
-      when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
+      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
+      //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 
       when('/lectures', {templateUrl: 'partials/lectures.html', controller: LecturesCtrl}).
@@ -27,8 +27,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newpost', {templateUrl: 'partials/landmark-new.html'}). 
       when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl}). 
 
-      when('/newworld', {templateUrl: 'partials/editor/world-maker.html', controller: WorldMakerCtrl}).
-      when('/newworld/:projectID', {templateURL: 'partials/editor/world-maker.html', controller: WorldMakerCtrl}). 
+      when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl}).
+      when('/newworld/:projectID', {templateURL: 'components/editor/world-maker.html', controller: WorldMakerCtrl}). 
       
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}). 
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}). 
@@ -39,4 +39,5 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       otherwise({redirectTo: '/'}); 
 }]);
+
 

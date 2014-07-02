@@ -73,10 +73,10 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
 WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 
-function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
+function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apertureService){
 
     var backMarkCount = 0;
-
+	
     $scope.goBack = function(){
 
         shelfPan('return');
@@ -114,6 +114,8 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
         //     backMarkCount = 0;
         // }
     }
+    
+    $scope.aperture = apertureService; 
     
     //this is temporary cause w/out leaflet won't render??
     angular.extend($rootScope, {
@@ -224,5 +226,5 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope){
     };
 
 }
-indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope'];
+indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope', 'apertureService'];
 

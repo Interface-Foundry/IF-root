@@ -3,21 +3,29 @@
 /* 
 MAIN ELEMENTS & UX HOOKS
 */
+html {
+	height: 100%;
+}
+
 
 body {
   margin: 0;
   background: #ccc;
-  
+  height: 100%; 
 }
 
 /* *WRAP* */
 #wrap {
   position: relative;
   width: 100%; 
-  
+  height: 100%;
   overflow-x: hidden;
   margin:0 auto; 
   /*width:384px;*/ max-width:100%;
+}
+
+.navfix {
+	padding-top: 45px;
 }
 
 /* *NAV* Navigation Bar */
@@ -29,7 +37,7 @@ nav {
   height: 46px;
   margin: 0 0 1em 0;
   padding: 0;
-  background-color: #FFFFFF;
+  background-color: rgba(255,255,255,0.5);
   border-bottom: 1px solid #ccc;  
   
   -webkit-transition: opacity 0 0, -webkit-transform 0.4s;
@@ -41,7 +49,7 @@ nav {
 	-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
 	
-	z-index: 100;
+	z-index: 1000;
 }
 
 nav .logo {
@@ -120,45 +128,44 @@ nav li input.form-control {
 
 #main {
   position: relative;
-  top: 45px;
   left: 0px;
   
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   background: #f6f6f6;
   
   -webkit-transition: opacity 0 0, -webkit-transform 0.4s; -moz-transition: opacity 0 0, -moz-transform 0.4s; -ms-transition:     opacity 0 0, -ms-transform 0.4s; -o-transition: opacity 0 0, -o-transform 0.4s; transition: opacity 0 0, transform 0.4s;
   
 }
 
-#window {
+#aperture {
   overflow: hidden;
-
+  
   position:absolute;
   top: 0;
   left: 0;
   width: 100%;
-  bottom: 0px;
+  height: 0px;
   
   color: white;
-  opacity: 0;
-  -webkit-transition: opacity 0 0.2s;
-  -moz-transition: opacity 0 0.2s;
-  -ms-transition: opacity 0 0.2s;
-  -o-transition: opacity 0 0.2s;
-  transition: opacity 0 0.2s;
+  opacity: 1;
+  -webkit-transition: 0.5s cubic-bezier(0, 1, 1, 1) all;
+
+  z-index: 20;
+  
 }
 
 #shelf {
   position: relative;
-  min-height: 100%;
-  
-  border-top: solid gray 1px;
+  height: 100%;
 
   
   -webkit-perspective: 1000;
   -webkit-backface-visibility: hidden;
   -webkit-transform-style: preserve-3d;
+  z-index: 100;
+  
+  -webkit-transition: 0.5s cubic-bezier(0, 1, 1, 1) all;
 }
 
 .container{
@@ -172,9 +179,9 @@ nav li input.form-control {
 }
 
 
-/*#leafletmap{
-  height:183px !important;
-}*/
+#leafletmap {
+ /* height:100%;*/
+}
 
 
 
@@ -800,7 +807,7 @@ body.drawer nav, nav.drawer {
 
 /* SLIDE UP SLIDE DOWN */
 
-body.lense #window {
+body.lense #aperture {
   opacity: 1;
   -webkit-transition: opacity 0 0;
   -moz-transition:    opacity 0 0;
@@ -823,7 +830,7 @@ body.lense #shelf {
 
 /* SLIDE UP SLIDE DOWN */
 
-body.lense2 #window {
+body.lense2 #aperture {
   opacity: 1;
   -webkit-transition: opacity 0 0;
   -moz-transition:    opacity 0 0;
@@ -846,6 +853,42 @@ body.lense2 #shelf {
 
 /* --- end code by Dave Cole */
 
+/*aperture-half*/
+#aperture.aperture-half {
+	height: 50%;
+}
+
+#aperture.aperture-full {
+	height: 100%;
+}
+
+#shelf.aperture-half {
+	transform: translateY(50%);
+	-webkit-transform: translateY(50%);
+	-moz-transform: translateY(50%);
+	-ms-transform: translateY(50%);
+	-o-transform: translateY(50%);
+}
+
+#shelf.aperture-full {
+	transform: translateY(100%);
+	-webkit-transform: translateY(100%);
+	-moz-transform: translateY(100%);
+	-ms-transform: translateY(100%);
+	-o-transform: translateY(100%);
+}
+
+#top-shelf {
+	-webkit-transition: 0.7s cubic-bezier(0, .8, .2, 1) all;
+}
+
+#top-shelf.aperture-full {
+	transform: translateY(-100%);
+	-webkit-transform: translateY(-100%);
+	-moz-transform: translateY(-100%);
+	-ms-transform: translateY(-100%);
+	-o-transform: translateY(-100%);
+}
 
 /* MAINTENENCE / BUGFIX / FIXES */
 
@@ -854,3 +897,5 @@ main {display:block;}
 ::-webkit-scrollbar { 
     display: none; 
 }
+
+/*cubic-bezier(.1,.9,.5,1.0)*/

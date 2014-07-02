@@ -58,6 +58,7 @@ input {
 .livepreview {
 	width: 320px;
 	height: 480px;
+	box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
 }
 
 .livepreview .container {
@@ -81,4 +82,8 @@ input {
 	right: 20px;
 	bottom: 5px;
 	
+}
+
+.editorbg {
+	background-color: white;
 }
