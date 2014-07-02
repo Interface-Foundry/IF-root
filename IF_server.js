@@ -22,7 +22,8 @@ var fs = require('fs');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 var async = require('async');
 var moment = require('moment');
-var passport = require('passport');
+
+var connectBusboy = require('connect-busboy');
 
 var urlify = require('urlify').create({
   addEToUmlauts:true,
@@ -60,9 +61,13 @@ var express = require('express'),
     db = require('mongojs').connect('if');
 
     app.use(express.static(__dirname + '/app'));
+
+app.use(bodyParser());
+app.use(connectBusboy());
     
+// var bodyParser   = require('body-parser');
 
-
+// app.use(express.bodyParser());
 /* Helpers */
 
 //Parts of express code from: https://github.com/dalcib/angular-phonecat-mongodb-rest
@@ -93,8 +98,6 @@ var fn = function (req, res) {
 
 /* Routes */
 
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/login' }));
 
 // Query
 app.get('/api/:collection', function(req, res) { 
@@ -962,11 +965,13 @@ app.post('/api/upload',  function (req, res) {
 
         //FILTER ANYTHING BUT GIF JPG PNG
 
+        var fstream;
+        req.pipe(req.busboy);
 
-        fs.readFile(req.files.files[0].path, function (err, data) {
+        req.busboy.on('file', function (fieldname, file, filename) {
 
-            var fileName = req.files.files[0].name.substr(0, req.files.files[0].name.lastIndexOf('.')) || req.files.files[0].name;
-            var fileType = req.files.files[0].name.split('.').pop();
+            var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
+            var fileType = filename.split('.').pop();
 
             while (1) {
 
@@ -979,35 +984,31 @@ app.post('/api/upload',  function (req, res) {
                     continue; //if there are max # of files in the dir this will infinite loop...
                 } 
                 else {
+
                     var newPath = "app/uploads/" + current;
 
-                    fs.writeFile(newPath, data, function (err) {
-
-                        im.crop({
+                    fstream = fs.createWriteStream(newPath);
+                    file.pipe(fstream);
+                    fstream.on('close', function () {
+                         im.crop({
                           srcPath: newPath,
                           dstPath: newPath,
                           width: 100,
                           height: 100,
-                          quality: 1,
+                          quality: 85,
                           gravity: "Center"
                         }, function(err, stdout, stderr){
 
-                        
-
                             res.send("uploads/"+current);
 
-                        });
+                        });                       
                     });
 
                     break;
                 }
             }
-        });
-  //  }
 
-  //  else {
-  //      res.send('Not Saved: File is bigger than 5MB, please try again.');
-  //  }
+        });
 
 });
 
