@@ -7,11 +7,13 @@ html {
 	height: 100%;
 }
 
-
 body {
   margin: 0;
   background: #ccc;
   height: 100%; 
+  
+  -moz-osx-font-smoothing: grayscale;
+
 }
 
 /* *WRAP* */
@@ -149,7 +151,7 @@ nav li input.form-control {
   
   color: white;
   opacity: 1;
-  -webkit-transition: 0.5s cubic-bezier(0, 1, 1, 1) all;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 
   z-index: 20;
   
@@ -165,7 +167,7 @@ nav li input.form-control {
   -webkit-transform-style: preserve-3d;
   z-index: 100;
   
-  -webkit-transition: 0.5s cubic-bezier(0, 1, 1, 1) all;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .container{
@@ -180,174 +182,13 @@ nav li input.form-control {
 
 
 #leafletmap {
- /* height:100%;*/
-}
-
-
-
-.item {
-  width:50%;
-  float:left;
-  cursor:pointer;
-}
-
-.item img{
-  max-width:100%;
-}
-
-.bubbleSwitcher .btn.btn-primary{
-  background-color: #161616;
-  font-family:'simplreg', sans-serif;
- 
-}
-
-
-#index_card {
-  width:100%; 
-
-  cursor:pointer;
-  height:82px;
-
-  border-top: 1px solid #a1a1a1;
-  border-bottom: 1px solid #a1a1a1;
-  z-index: 100;
-}
-
-
-
-#index_card_badge{
-  float:left;
-  height:100%;
-  width:85px;  
-}
-
-#index_card_badge img{
-  max-width: 100%;
-}
-
-.datacard {
-  width:100%;
-  margin-left: 10px;
-  margin-right: 10px;
-  background-color: #fff;
-  border-width: 1px;
-}
-
-.bar {
-    height: 18px;
-    background: green;
+ 	height:350px;
 }
 
 .angular-leaflet-map {
-  width: 100%;
-  height: 350px;
+	width: 100%;
+	height:350px;
 }
-
-.landmarks {
-  list-style: none;
-}
-
-.thumb {
-  float: left;
-  margin: -1em 1em 1.5em 0em;
-  padding-bottom: 1em;
-  height: 86px;
-  width: 64px;
-  padding-top: 17px;
-  padding-left: 9px;
-}
-
-.landmarks li {
-  clear: both;
-  height: 96px;
-  padding-top: 15px;
-
-}
-
-.feed {
-  list-style: none;
-}
-
-.feed li {
-  clear: both;
- /* height: 100px;*/
-  padding-top: 15px;
-}
-
-/** Detail View **/
-img.landmark {
-  float: right;
-  margin-right: 3em;
-  margin-bottom: 2em;
-  background-color: white;
-  /*padding: 2em;*/
-  height: 75px;
-  width: 75px;
-}
-
-ul.landmark-thumbs {
-  margin: 0;
-  list-style: none;
-}
-
-ul.landmark-thumbs li {
-  border: 1px solid black;
-  display: inline-block;
-  margin: 1em;
-  background-color: white;
-}
-
-ul.landmark-thumbs img {
-  height: 100px;
-  width: 100px;
-  padding: 1em;
-}
-
-ul.landmark-thumbs img:hover {
-  cursor: pointer;
-}
-
-ul.specs {
-  clear: both;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-ul.specs > li{
-  display: inline-block;
-  width: 200px;
-  vertical-align: top;
-}
-
-ul.specs > li > span{
-  font-weight: bold;
-  font-size: 1.2em;
-}
-
-ul.specs dt {
-  font-weight: bold;
-}
-/** End Detail View **/
-
-/*h1 {
-  border-bottom: 1px solid gray;
-}*/
-
-
-
-#content { 
-/*  padding: 20px;*/ 
-}
-
-#bar {
-  height: 54px;
-  background: #333;
-}
-
-
-
-
 
 /*ANGULAR BOOTSTRAP OVERIDE*/
 
@@ -363,8 +204,6 @@ ul.specs dt {
   font-style: normal;
 }
 
-
-
 /*ANGULAR BOOTSTRAP OVERIDE*/
 .nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
 
@@ -372,409 +211,7 @@ li {
   list-style-type: none;
 }
 
-/*CARDS*/
-.col-xs-6.card{
-  max-width: 50%;
-}
-
-.col-xs-4.card{
-  max-width: 33.3%;
-  font-size: 1.3rem;
-}
-
-.col-xs-12.card{
-  max-width: 100%;
-}
-
-.card{
-  padding: 0 5px 5px 5px;
-  margin: 0;
-}
-.card.social h1 {
-  color:  #3dc0fe;
-}
-.card h1{
-  font-size: 1.4rem;
-  padding: 0 10px;
-  font-weight: 100;
-  text-transform: uppercase;
-  letter-spacing: 0.2rem;
-  margin: 15px 0 8px 0;
-  color: #a9c512;
-  font-family:'simplreg', sans-serif;
-
-}
-.card .container{
-  background: white;
-  color: #0f0f0e;
-  padding: 10px;
-  margin: 0;
-  border-radius: 2px;
-  word-wrap: auto;
-  width: 100%;
-  cursor: pointer;
-  border-bottom: solid #cecece 2px;
-  border-right: solid #cecece 1px;
-}
-
-.boldTitle{
-  font-size:1.8rem; 
-  color:black; 
-  padding:0px;
-}
-
-/*.col-xs-6.card:nth-child(4n){
-  float:none !important;
-}
-*/
-
-.third-elm {
-    color: red;
-}
-
-.iconMenu{
-  -webkit-transform: translateY(716px);
-}
-
-#iconMenu {
-    width:100px;
-    height:100px;
-}
-
-.blue {
-     -webkit-transform: translateY(716px);
-}
-
-.red {
-     -webkit-transform: translateY(1000px); 
-}
-
-
-.card .content{
-  margin: 0;
-}
-.card .container.more{
-  border-radius: 3px 3px 0 0;
-}
-.card.social.twitter .container .content{
-    color: gray;
-    font-size: 1.6rem;
-    font-weight: 100;
-    font-style: italic;
-}
-.card.social .footer{
-  text-align: left;
-  padding-left: 10px;  
-  letter-spacing: 0.1rem;
-}
-.card .header{
-  color: #d774c0;
-  font-size: 0.9em;
-  letter-spacing: 0.1rem;
-  margin-bottom: 5px;
-  font-family:'simplreg', sans-serif;
-  font-weight: bold;
-}
-.card .title{
-  /*font-weight: bold;*/
-  font-size: 1.4rem;
-  margin: 0 0 3px 0;
-  font-family:'simplreg', sans-serif;
-}
-
-.searchTitle{
-  /*font-weight: bold;*/
-  font-size: 1.3rem;
-  margin: 0 0 3px 0;
-  font-family:'simplreg', sans-serif;
-  text-align: center;
-}
-
-
-.card .content{
-  font-size: 1.3rem;
-}
-
-.card .footer{
-  cursor: pointer;
-  text-align: right;
-  background: url('../img/more_bg.jpg') right center repeat-y;
-  color: black;
-  padding: 6px;
-  border-radius: 0 0 3px 3px;
-  font-size: 1.3rem;
-  letter-spacing: 0.1rem;
-  font-family:'simplreg', sans-serif;
-}
-
-.award-footer{
-  background: url('../img/AICP/more_bg_awards.png') right center repeat-y !important;
-}
-
-.lecture-footer{
-  background: url('../img/AICP/more_bg_lectures.png') right center repeat-y !important;
-}
-
-.show-footer{
-  background: url('../img/AICP/more_bg_show.png') right center repeat-y !important;
-}
-
-
-
-
-
-
-
-.card .footer .typcn{
-  color: #333;
-}
-.card .container .watermark{
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-}
-.card .container.more .watermark{
-  bottom: 33px;
-  color: #333;
-  opacity: 0.7;
-  font-size: 2.4rem;
-}
-.card.instagram .container.more .watermark{
-  bottom: 42px;
-  right: 18px;
-  color: #fff;
-}
-
-.col-xs-12.card .footer{
-  background: url('../img/index_card_bg.jpg') right center repeat-y;
-}
-
-
-.col-xs-12.card .award-footer{
-  background: url('../img/AICP/more_bg_awards_long.png') right center repeat-y !important;
-}
-
-.col-xs-12.card .lecture-footer{
-  background: url('../img/AICP/more_bg_lectures_long.png') right center repeat-y !important;
-}
-
-.col-xs-12.card .show-footer{
-  background: url('../img/AICP/more_bg_show_long.png') right center repeat-y !important;
-}
-
-
-.card.social .footer .typcn-export{
-  font-size: 1.7rem;
-  line-height: 1.6rem;
-}
-
-/*INDEX CARD*/
-.index_card{
-  height: 83px;
-  overflow: hidden;
-  background: url('../img/index_card_bg.jpg') center center no-repeat;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  padding: 10px 0;
-  color: black;
-  cursor: pointer;
-  border-bottom: solid 1px #a8a7a7;
-  border-top: solid 0px #a8a7a7;
-}
-
-.award_index{
-  background: url('../img/AICP/index_card_bg_awards.png') center center no-repeat;
-}
-
-.lecture_index{
-  background: url('../img/AICP/index_card_bg_lectures.png') center center no-repeat;
-}
-
-.show_index{
-  background: url('../img/AICP/index_card_bg_show.png') center center no-repeat;
-}
-
-
-.twitterFeed{
-    color: black;
-    font-size: 1.6rem;
-    font-weight: 100;
-    font-family:'simplreg', sans-serif;
-}
-
-.index-logo{
-   max-height: 72px;
-   margin-right: 14px;
-   float: left;
-   margin-top: -6px;
-}
-
-.index_card h1{
-  font-size: 1.6rem;
-  padding: 0;
-  margin: 0;
-  font-family:'simplreg', sans-serif;
-  letter-spacing: -0.1rem;
-
-}
-
-.index_card h2{
-  font-size: 1.3rem;
-  padding: 0;
-  margin: 15px 0 0 0;
-  font-family:'simplreg', sans-serif;
-}
-.index_card h3{
-  font-size: 1.2rem;
-  padding: 0;
-  margin: 3px 0 0 0;
-  font-weight: 200;
-  letter-spacing: 0rem;
-  font-family:'simplreg', sans-serif;
-}
-
-.landmark-detail{
-  padding-left:5px; 
-  padding-top: 10px; 
-  padding-right:5px; 
-  width:100%; 
-  color:#cccdc8;
-}
-
-
-body {
-
-  -moz-osx-font-smoothing: grayscale;
-
-}
-
-h4 {
-    font-family:'simplreg', sans-serif;
-    color: #000;
-    font-size: 1.4rem !important;
-}
-
-.backbtn {
-      font-family:'simplreg', sans-serif;
-      color:#000 !important;
-      padding:9px 12px 8px !important;
-      margin-top: 4px;
-      margin-bottom: 4px;
-}
-
-
-.baseHours{
-  letter-spacing: -0.9px;
-}
-
-.director{
-  width:200px;
-}
-
-.floor{
-  background-color: white !important;
-  color:black !important;
-  padding: 8px !important; 
-  margin-right: 3px;
-}
-
-
-
-@media (max-width: 378px) {
-
-  .floor{
-    padding: 3px !important; 
-
-  }
-}
-
-@media (max-width: 381px) {
-   .index_card h1{
-      font-size:1.4rem;
-      letter-spacing:-2px;
-   }
-
-   .index_card h2{
-      letter-spacing:-0.8px;
-   }
-
-   .index_card h3{
-      letter-spacing:-0.8px;
-   }
-
-   .card .header{
-      letter-spacing:-0.2px;
-   }
-
-   .navIcons label img{
-    width:4.1rem !important;
-    
-   }
-
-  .navIcons label{
-    padding:6px ;    
-   }
-
-   #food{
-    margin-left: -17px !important;
-   }
-
-  #bars{
-    margin-left: -17px !important;
-   }
-
-   #sponsors{
-    margin-left: -20px !important; 
-   }
-  
-   #washrooms{
-    margin-left: -20px !important;
-   }
-
-   #exhibits{
-    margin-left: -19px !important;
-   }
-
-   #smoking{
-    margin-left: -17px !important;
-   } 
-
-   .specialIndex{
-    letter-spacing: -1.2px !important;
-
-   }
-
-   .card.social .footer .typcn-export{
-    display: none;
-   }
-
-   .menupic {
-    max-width: 67%;
-   }
-
-  .menupic img{
-    width:198px;
-   }
-}
-
-@media (max-width: 319px) {
-
-  .navIcons label{
-    padding:3px ;    
-   }
-
-  .floor{
-    padding: 2.5px !important; 
-  }
-
-}
-
 /* UX */
-
-/* *Drawer* Switching UX */
-/* Code below by Dave Cole from: https://gist.github.com/dhcole/5368613 */
 #drawer.drawer {
 	-ms-transform:  translateX(100%); -webkit-transform: translateX(100%); -moz-transform: translateX(100%); 
 	transform: translateX(100%);
@@ -801,57 +238,11 @@ body.drawer nav, nav.drawer {
 	-o-transform: translateX(66%);
 	transform: translateX(66%);
 	
-	  -webkit-perspective: 1000;
-	  -webkit-backface-visibility: hidden;
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 
 /* SLIDE UP SLIDE DOWN */
-
-body.lense #aperture {
-  opacity: 1;
-  -webkit-transition: opacity 0 0;
-  -moz-transition:    opacity 0 0;
-  -ms-transition:     opacity 0 0;
-  -o-transition:      opacity 0 0;
-  transition:         opacity 0 0;
-}
-
-body.lense #shelf {
-/*-webkit-transform: translateY(732px);*/
-  /*
-  javascript read page height, change css of window height - height of index card, recalculate on window drag
-  */
-/*  
-  -moz-transform: translateY(31%);
-  -ms-transform: translateY(31%);
-  -o-transform: translateY(31%);
-  transform: translateY(31%);*/
-}
-
-/* SLIDE UP SLIDE DOWN */
-
-body.lense2 #aperture {
-  opacity: 1;
-  -webkit-transition: opacity 0 0;
-  -moz-transition:    opacity 0 0;
-  -ms-transition:     opacity 0 0;
-  -o-transition:      opacity 0 0;
-  transition:         opacity 0 0;
-}
-
-body.lense2 #shelf {
-
-  /*
-  javascript read page height, change css of window height - height of index card, recalculate on window drag
-  */
-/*  -webkit-transform: translateY(170px);
-  -moz-transform: translateY(170px);
-  -ms-transform: translateY(170px);
-  -o-transform: translateY(170px);
-  transform: translateY(170px);*/
-}
-
-/* --- end code by Dave Cole */
 
 /*aperture-half*/
 #aperture.aperture-half {
@@ -879,7 +270,7 @@ body.lense2 #shelf {
 }
 
 #top-shelf {
-	-webkit-transition: 0.7s cubic-bezier(0, .8, .2, 1) all;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 #top-shelf.aperture-full {

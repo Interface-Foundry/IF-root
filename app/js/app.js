@@ -11,18 +11,13 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 
-      when('/lectures', {templateUrl: 'partials/lectures.html', controller: LecturesCtrl}).
-      when('/awards', {templateUrl: 'partials/awards.html', controller: AwardsCtrl}).
-      when('/show/', {templateUrl: 'partials/show.html', controller: ShowCtrl}).
-
-
       when('/list/:category/:filter', {templateUrl: 'partials/list.html', controller: ListCtrl}).
 
       when('/w/:worldID/:pageID', {templateUrl: 'partials/menu.html', controller: MenuCtrl}).
 
-      when('/post/:landmarkID', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
-      when('/post/:landmarkID/:option', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}). 
-      when('/post/:landmarkID/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}). 
+      //when('/post/:landmarkID', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
+      //when('/post/:landmarkID/:option', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}). 
+      //when('/post/:landmarkID/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}). 
 
       when('/newpost', {templateUrl: 'partials/landmark-new.html'}). 
       when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl}). 

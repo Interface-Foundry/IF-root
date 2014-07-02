@@ -1,12 +1,12 @@
 <div class="container">
 	<div class="row">
 			<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" ng-style="{'background-color': style.cardBG_color}">
-				<div class="media center-block">
-					<div class="pull-left">
-						<img class="media-object avatar" ng-src="{{world.avatar}}">
+				<div class="media">
+					<div class="pull-left vertical-middle">
+						<img class="media-object avatar" ng-click="aperture.toggle('half')" ng-src="{{world.avatar}}">
 					</div>
-					<div class="media-body">
-						<h1 class="media-heading vertical-middle">{{world.name}}</h1> <a href="" ng-click="aperture.toggle('half')">worldtoggle</a>
+					<div class="media-body vertical-middle">
+						<a href="" ng-click="aperture.toggle('half')"><h1 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h1></a>
 					</div>
 				</div>
 			</div>

@@ -16,7 +16,12 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		            lng: $scope.world.loc.coordinates[0],
 		            zoom: 11
 		        },
-		        markers : {}
+		        markers : {
+			        m: {
+				        lat: $scope.world.loc.coordinates[1],
+						lng: $scope.world.loc.coordinates[0]
+			        }
+		        }
 		});
 		refreshMap();
 

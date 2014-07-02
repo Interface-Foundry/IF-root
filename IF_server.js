@@ -22,7 +22,6 @@ var fs = require('fs');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 var async = require('async');
 var moment = require('moment');
-var passport = require('passport');
 
 var urlify = require('urlify').create({
   addEToUmlauts:true,
@@ -93,8 +92,6 @@ var fn = function (req, res) {
 
 /* Routes */
 
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/login' }));
 
 // Query
 app.get('/api/:collection', function(req, res) { 

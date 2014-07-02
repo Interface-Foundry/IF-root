@@ -152,8 +152,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			$scope.markers.m.draggable = false;
 			console.log($scope.markers.m.lat);
 			console.log($scope.markers.m.lng);
-			$scope.worldDetailPaths = {};
-			$scope.worldDetailPaths['circle'] = {
+			$scope.paths = {};
+			$scope.paths['circle'] = {
 					type: "circle",
 					radius: 5000,
 					latlngs: {lat: $scope.markers.m.lat, lng: $scope.markers.m.lng}
@@ -260,7 +260,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         // } 
         //------- END TIME --------//
 
-        $scope.world.loc = [$scope.markers.m.lat,$scope.markers.m.lng];
+        $scope.world.loc = [$scope.markers.m.lat, $scope.markers.m.lng];
 
         $scope.world.userID = $scope.userID;
 
