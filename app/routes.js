@@ -3,15 +3,21 @@ module.exports = function(app, passport) {
 // normal routes ===============================================================
 
 	// show the home page (will also have our login links)
-	app.get('/', function(req, res) {
+	app.get('/signup2', function(req, res) {
 		res.render('index.ejs');
 	});
 
 	// PROFILE SECTION =========================
-	app.get('/profile', isLoggedIn, function(req, res) {
+	//isLoggedIn == AUTH
+	app.get('/#/profile', isLoggedIn, function(req, res) {
 		res.render('profile.ejs', {
 			user : req.user
-		});
+		});	
+		console.log('loggedin');
+
+		// console.log(req);
+
+
 	});
 
 	// LOGOUT ==============================
@@ -20,6 +26,9 @@ module.exports = function(app, passport) {
 		res.redirect('/');
 	});
 
+
+	//app.get('/users', auth, user.list); // BY ADDING THE "auth" function, will return 401 if not auth
+
 // =============================================================================
 // AUTHENTICATE (FIRST LOGIN) ==================================================
 // =============================================================================
@@ -27,14 +36,23 @@ module.exports = function(app, passport) {
 	// locally --------------------------------
 		// LOGIN ===============================
 		// show the login form
+
+		// route to test if the user is logged in or not 
+		app.get('/loggedin', function(req, res) { 
+			res.send(req.isAuthenticated() ? req.user : '0'); 
+		}); 
+
 		app.get('/login', function(req, res) {
+			console.log('1');
 			res.render('login.ejs', { message: req.flash('loginMessage') });
+			//res.send(req.user);
 		});
 
 		// process the login form
 		app.post('/login', passport.authenticate('local-login', {
-			successRedirect : '/profile', // redirect to the secure profile section
-			failureRedirect : '/login', // redirect back to the signup page if there is an error
+
+			successRedirect : '/#/profile', // redirect to the secure profile section
+			// failureRedirect : '/login', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
 
@@ -76,6 +94,17 @@ module.exports = function(app, passport) {
 			}));
 
 
+	// google ---------------------------------
+
+		// send to google to do the authentication
+		app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+
+		// the callback after google has authenticated the user
+		app.get('/auth/google/callback',
+			passport.authenticate('google', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
 
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
@@ -116,7 +145,17 @@ module.exports = function(app, passport) {
 			}));
 
 
+	// google ---------------------------------
 
+		// send to google to do the authentication
+		app.get('/connect/google', passport.authorize('google', { scope : ['profile', 'email'] }));
+
+		// the callback after google has authorized the user
+		app.get('/connect/google/callback',
+			passport.authorize('google', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
 
 // =============================================================================
 // UNLINK ACCOUNTS =============================================================
@@ -153,13 +192,28 @@ module.exports = function(app, passport) {
 		});
 	});
 
+	// google ---------------------------------
+	app.get('/unlink/google', function(req, res) {
+		var user          = req.user;
+		user.google.token = undefined;
+		user.save(function(err) {
+			res.redirect('/profile');
+		});
+	});
+
 
 };
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-	if (req.isAuthenticated())
-		return next();
+	// if (req.isAuthenticated())
+	// 	return next();
 
-	res.redirect('/');
+	// res.redirect('/');
+
+	console.log(req);
+	if (!req.isAuthenticated()) 
+		res.send(401);  //send unauthorized 
+	else 
+		return next();
 }
