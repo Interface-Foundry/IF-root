@@ -2,8 +2,8 @@
 <legend>Pin Landmarks</legend>
 <button ng-click="addLandmark()">Add Landmark</button>
 {{landmarksQuery}}
-<div ng-repeat="landmark in landmarks track by landmark.id">
-	{{landmark.name}} {{landmark.id}}
+<div ng-repeat="landmark in landmarks track by landmark._id">
+	{{landmark.name}} {{landmark._id}}
 </div>
 
 </div>
