@@ -3,6 +3,52 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
     //if authenticate, show and provide this functionality:
     //if not, login plz k thx
 
+    $scope.landmarkID;
+    $scope.worldID = '029345823045982345';
+
+    $scope.landmark = { 
+        stats: { 
+            avatar: "img/tidepools/default.jpg" 
+        }
+    };
+
+    $scope.landmark.loc = [-74.0059,40.7127];
+
+    $scope.landmark.name = "what";
+
+    saveLandmark();
+    //saveLandmark('edit'); //for editing landmark
+
+    function saveLandmark(option, editID){
+       
+        //edit world
+        if (option == 'edit'){
+            console.log('saveLandmark(edit)');
+            $scope.landmark.newStatus = false; //not new
+            $scope.landmark.landmarkID = editID; //from passed function, to edit landmark
+            db.landmarks.create($scope.landmark, function(response){
+                console.log(response);
+            });  
+        }
+
+        //new landmark
+        if (option === undefined) {
+            console.log('saveLandmark()');
+            $scope.landmark.newStatus = true; //new
+            $scope.landmark.parentID = $scope.worldID; //using worldID 
+
+            db.landmarks.create($scope.landmark, function(response){
+                $scope.landmarkID = response[0]._id;
+            });
+       
+        } 
+    }
+
+
+
+
+
+
     shelfPan('return');
 
     $rootScope.showSwitch = false;

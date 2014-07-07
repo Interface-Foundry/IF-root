@@ -24,6 +24,11 @@ var async = require('async');
 var moment = require('moment');
 var connectBusboy = require('connect-busboy');
 
+var configDB = require('./config/database.js');
+
+var passport = require('passport');
+var flash    = require('connect-flash');
+
 var urlify = require('urlify').create({
   addEToUmlauts:true,
   szToSs:true,
@@ -32,6 +37,9 @@ var urlify = require('urlify').create({
   trim:true
 });
 
+var morgan       = require('morgan');
+var cookieParser = require('cookie-parser');
+var session      = require('express-session');
 
 var bodyParser = require('body-parser');
 var integers = require('./server_bubblequery/constants/integers');
@@ -49,10 +57,14 @@ var mongoose = require('mongoose'),
     monguurl = require('monguurl');
 
 
-mongoose.connect('mongodb://localhost/if');
+mongoose.connect(configDB.url); 
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
+
+
 //---------------//
+
+require('./config/passport')(passport); // pass passport for configuration
 
 
 var express = require('express'),
@@ -61,8 +73,35 @@ var express = require('express'),
 
     app.use(express.static(__dirname + '/app'));
 
-app.use(bodyParser());
+
+    //===== PASSPORT =====//
+    // set up our express application
+    app.use(morgan('dev')); // log every request to the console
+    app.use(cookieParser()); // read cookies (needed for auth)
+
+    app.use(bodyParser.urlencoded({
+      extended: true
+    })); // get information from html forms
+
+    app.use(bodyParser.json({
+      extended: true
+    })); // get information from html forms
+
+
+    app.set('view engine', 'ejs'); // set up ejs for templating
+
+    // required for passport
+    app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret
+    app.use(passport.initialize());
+    app.use(passport.session()); // persistent login sessions
+    app.use(flash()); // use connect-flash for flash messages stored in session
+
+    //===================//
+
 app.use(connectBusboy());
+
+// routes ======================================================================
+require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
     
 // var bodyParser   = require('body-parser');
 
@@ -649,8 +688,16 @@ app.post('/api/:collection/create', function(req, res) {
 
             //an edit
             if (!req.body.newStatus){
+
+                if (req.body.worldID){
+                    var lookupID = req.body.worldID;
+                }
+
+                if (req.body.landmarkID){
+                    var lookupID = req.body.landmarkID;
+                }         
                 
-                landmarkSchema.findById(req.body.worldID, function(err, lm) {
+                landmarkSchema.findById(lookupID, function(err, lm) {
                   if (!lm)
                     return next(new Error('Could not load Document'));
 
@@ -661,6 +708,10 @@ app.post('/api/:collection/create', function(req, res) {
                     lm.valid = 1;
                     lm.loc = {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] };
                     lm.avatar = req.body.stats.avatar;
+
+                    if (req.body.parentID){
+                        lm.parentID = req.body.parentID;
+                    }
 
                     if (req.body.description){
                         lm.description = req.body.description;
@@ -745,6 +796,10 @@ app.post('/api/:collection/create', function(req, res) {
                         lm.style.styleID = styleRes;
                     }
 
+                    if (req.body.parentID){
+                        lm.parentID = req.body.parentID;
+                    }
+
                     if (req.body.description){
                         lm.description = req.body.description;
                     }
@@ -799,7 +854,7 @@ app.post('/api/:collection/create', function(req, res) {
 
                             //landmark created
                             else {
-                                res.send(landmark.id);
+                                res.send([{"_id":landmark._id}]);
                             }
                          
                         }
