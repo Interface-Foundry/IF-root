@@ -22,8 +22,8 @@ angular.module('tidepoolsServices', ['ngResource'])
         }
     ])
 
-    .factory('World', ['$resource', '$http',
-        function($resource, $http) {
+    .factory('World', ['$resource', '$http', 'leafletData', 
+        function($resource, $http, leafletData) {
             var actions = {
                 'count': {method:'PUT', params:{_id: 'count'}},                           
                 'distinct': {method:'PUT', params:{_id: 'distinct'}},      
@@ -106,7 +106,24 @@ angular.module('tidepoolsServices', ['ngResource'])
 			}
 			
 			return aperture;
-    	}]);
+    }])
+    .factory('mapManager', ['leafletData', 
+    	function(leafletData) {
+    	var mapManager = {};
+    	mapManager = {
+    		center: {
+	    		lat: 42,
+	    		lng: -83,
+	    		zoom: 14
+				},
+			markers: {},
+			tiles: tilesDict.mapbox
+			}
+		mapManager.setCenter = function(lat, lng, zoom) {
+			mapManager.center = {lat: lat, lng: lng, zoom: zoom};
+		}
+    	return mapManager;
+    }]);
     // .service('mapper', ['$scope', function($scope) {
             
     //         this.view = function() {

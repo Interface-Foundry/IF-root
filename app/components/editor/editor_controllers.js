@@ -153,11 +153,15 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			console.log($scope.markers.m.lat);
 			console.log($scope.markers.m.lng);
 			$scope.paths = {};
-			$scope.paths['circle'] = {
+			angular.extend($scope, {
+				paths: {
+					circle: {
 					type: "circle",
 					radius: 5000,
 					latlngs: {lat: $scope.markers.m.lat, lng: $scope.markers.m.lng}
-				};
+					}
+				}
+			});
 			} else {
 			//position is movable
 			$scope.markers.m.draggable = true;
@@ -339,8 +343,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	    $scope.myData.modalShown = !$scope.myData.modalShown;
 	  };
 }
-
-
 
 function UserCtrl($location, $scope, $routeParams, db, $rootScope) {
 	$scope.userID = "53ab92d2ac23550e12600011";	

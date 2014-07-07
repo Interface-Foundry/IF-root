@@ -14,7 +14,7 @@ monguurl = require('monguurl');
 		avatar: String,
 		loc: { //user inputted loc
 	    	type: {
-	      		type: String
+	      		type: String //GeoJSON-'point'
 	    	},
 	    	coordinates: []
 	  	},

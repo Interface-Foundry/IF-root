@@ -2,7 +2,7 @@
 /* IF Controllers */
 
 function WorldRouteCtrl($location, $scope, $routeParams, db) {
-
+	console.log('world routing');
     //WIDGET find data and then route to correct bubble
     // var today = new Date();
     // var dd = today.getDate();
@@ -73,12 +73,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
 WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 
-function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apertureService){
+function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apertureService, mapManager){
 
     var backMarkCount = 0;
 	
     $scope.goBack = function(){
-
         shelfPan('return');
         $rootScope.showSwitch = true;
         $rootScope.showBack = false;
@@ -116,9 +115,10 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apert
     }
     
     $scope.aperture = apertureService; 
-    
+    $scope.map = mapManager; 
     //this is temporary cause w/out leaflet won't render??
-    angular.extend($rootScope, {
+
+    /*angular.extend($rootScope, {
         center: {
             // lat: 40.7615,
             // lng: -73.9777,
@@ -126,7 +126,7 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apert
         },
         tiles: tilesDict.mapbox,
         markers : {}
-    });
+    });*/
 
     //for bubble widget switcher
     $scope.goPath = function(url){
@@ -226,5 +226,5 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apert
     };
 
 }
-indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope', 'apertureService'];
+indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope', 'apertureService', 'mapManager'];
 

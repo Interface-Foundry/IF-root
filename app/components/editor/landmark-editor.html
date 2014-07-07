@@ -1,0 +1,9 @@
+<div class="container navfix">
+<legend>Pin Landmarks</legend>
+<button ng-click="addLandmark()">Add Landmark</button>
+{{landmarksQuery}}
+<div ng-repeat="landmark in landmarks track by landmark.id">
+	{{landmark.name}} {{landmark.id}}
+</div>
+
+</div>

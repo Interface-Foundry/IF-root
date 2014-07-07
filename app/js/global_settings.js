@@ -69,6 +69,42 @@ var tilesDict = {
             
             reuseTiles: true
         }
+    },
+    urban: {
+	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+	    option: {
+		    attribution: 'IF',
+		    minZoom: 1,
+		    maxZoom: 23,
+		    reuseTiles: true
+	    }   
+    },
+    fairy: {
+	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig9jd86b/{z}/{x}/{y}.png',
+	    option: {
+		    attribution: 'IF',
+		    minZoom: 1,
+		    maxZoom: 23,
+		    reuseTiles: true
+	    }
+    },
+    sunset: {
+	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
+	    option: {
+		    attribution: 'IF',
+		    minZoom: 1,
+		    maxZoom: 23,
+		    reuseTiles: true
+	    }
+    },
+    arabesque: {
+	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig67e7eb/{z}/{x}/{y}.png',
+	    option: {
+		    attribution: 'IF',
+		    minZoom: 1,
+		    maxZoom: 23,
+		    reuseTiles: true
+	    }
     }
 };
 
@@ -449,5 +485,7 @@ function shelfPan(amount,special){
 
 
   }
+
+
 
   //---------------------//
