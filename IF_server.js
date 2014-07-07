@@ -238,236 +238,248 @@ app.get('/api/:collection', function(req, res) {
     //querying landmark collection (events, places, etc)
     if (req.params.collection == 'landmarks'){
 
- 
-        //return all items in landmarks
-        if (req.query.queryType == "all"){
-            var qw = {};
-            var limit;
-            db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));         
+        //if has parentID parameter (world landmark query)
+        if (req.query.parentID){
+            var qw = {
+                parentID:req.query.parentID,
+                world:false
+            };   
+            db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));  
         }
 
+        //not a world landmark query
+        else {
 
-        //events
-        if (req.query.queryType == "events"){
-
-            //GET ALL EVENTS
-            if (req.query.queryFilter == "all"){
-    
-                //IF HAS SUB CATEGORY (LIKE LECTURES)
-                if (req.query.queryCat){
-
-                    var qw = {
-                        'type' : 'event',
-                        'subType' : req.query.queryCat
-                    };
-                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-
-                }
-
-                else {
-
-                    var qw = {
-                        'type' : 'event'
-                    };
-                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                }
-   
+          //return all items in landmarks
+            if (req.query.queryType == "all"){
+                var qw = {};
+                var limit;
+                db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));         
             }
 
-            // EVENTS HAPPENING NOW
-            if (req.query.queryFilter == "now"){
+            //events
+            if (req.query.queryType == "events"){
 
-                // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
-                //IF HAS SUB CATEGORY (LIKE LECTURES)
-                if (req.query.queryCat){
+                //GET ALL EVENTS
+                if (req.query.queryFilter == "all"){
+        
+                    //IF HAS SUB CATEGORY (LIKE LECTURES)
+                    if (req.query.queryCat){
 
-                    if (req.query.userTime){
-                        var currentTime = new Date(req.query.userTime);
+                        var qw = {
+                            'type' : 'event',
+                            'subType' : req.query.queryCat
+                        };
+                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
                     }
 
                     else {
-                        var currentTime = new Date();
+
+                        var qw = {
+                            'type' : 'event'
+                        };
+                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
                     }
-                    
-                    //var currentTime = new Date('Jun 10 2014 10:46:06 GMT-0400 (EDT)');
-      
-                    var qw = {
-                        'time.start': {$lt: currentTime},
-                        'time.end': {$gt: currentTime},
-                        'subType' : req.query.queryCat
-                    };
-                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+       
                 }
 
-                else {
+                // EVENTS HAPPENING NOW
+                if (req.query.queryFilter == "now"){
 
-                    var currentTime = new Date();
-                    //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
-                    
-                    var qw = {
-                        'time.start': {$lt: currentTime},
-                        'time.end': {$gt: currentTime}
-                    };
-                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                }
+                    // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
+                    //IF HAS SUB CATEGORY (LIKE LECTURES)
+                    if (req.query.queryCat){
 
-            }
-
-            //EVENTS UPCOMING
-            if (req.query.queryFilter == "upcoming"){
-
-                //IF HAS SUB CATEGORY (LIKE LECTURES)
-                if (req.query.queryCat){
-
-
-                    //FIRST QUERY FOR NOW
-
-                    //var currentTime = new Date();
-                    //var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
-
-                    //TEMP ONLY WORKS WITH 1 HAPPENING NOW OBJECT
-
-                    console.log(req.query.nowTimeEnd);
-
-                    if (req.query.nowTimeEnd !== "noNow"){
-
-                        if (req.query.nowTimeEnd == "upcomingToday"){
-                            //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)'); 
-                            var nowTimeEnd = new Date();
+                        if (req.query.userTime){
+                            var currentTime = new Date(req.query.userTime);
                         }
 
                         else {
-                            var nowTimeEnd = new Date(req.query.nowTimeEnd);
+                            var currentTime = new Date();
                         }
-         
-                        console.log(nowTimeEnd);
                         
-                        nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
-
-    
-                        //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
-                        //so only get upcmoning events till end of day
-                        // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
-                        // endofDay.setHours(23,59,59,999);
-
+                        //var currentTime = new Date('Jun 10 2014 10:46:06 GMT-0400 (EDT)');
+          
                         var qw = {
-                            'time.start': {$gt: nowTimeEnd},
-                            // 'time.end': {$lt: endofDay},
+                            'time.start': {$lt: currentTime},
+                            'time.end': {$gt: currentTime},
                             'subType' : req.query.queryCat
                         };
                         db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+                    }
+
+                    else {
+
+                        var currentTime = new Date();
+                        //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+                        
+                        var qw = {
+                            'time.start': {$lt: currentTime},
+                            'time.end': {$gt: currentTime}
+                        };
+                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+                    }
+
+                }
+
+                //EVENTS UPCOMING
+                if (req.query.queryFilter == "upcoming"){
+
+                    //IF HAS SUB CATEGORY (LIKE LECTURES)
+                    if (req.query.queryCat){
+
+
+                        //FIRST QUERY FOR NOW
+
+                        //var currentTime = new Date();
+                        //var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+
+                        //TEMP ONLY WORKS WITH 1 HAPPENING NOW OBJECT
+
+                        console.log(req.query.nowTimeEnd);
+
+                        if (req.query.nowTimeEnd !== "noNow"){
+
+                            if (req.query.nowTimeEnd == "upcomingToday"){
+                                //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)'); 
+                                var nowTimeEnd = new Date();
+                            }
+
+                            else {
+                                var nowTimeEnd = new Date(req.query.nowTimeEnd);
+                            }
+             
+                            console.log(nowTimeEnd);
+                            
+                            nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
+
+        
+                            //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
+                            //so only get upcmoning events till end of day
+                            // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
+                            // endofDay.setHours(23,59,59,999);
+
+                            var qw = {
+                                'time.start': {$gt: nowTimeEnd},
+                                // 'time.end': {$lt: endofDay},
+                                'subType' : req.query.queryCat
+                            };
+                            db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
+                        }
+
+                        else {
+                            //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+                            var currentTime = new Date();
+
+                            var qw = {
+                                'time.start': {$gt: currentTime},
+                                'subType' : req.query.queryCat
+                            };
+                            db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+                        }
+                        
+                        // //var currentTime = new Date();
+                        // var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+                        
+                        // currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
+                        // var qw = {
+                        //     'time.start': {$lt: currentTime},
+                        //     'time.end': {$gt: currentTime},
+                        //     'subType':req.query.queryCat
+                        // };
+                        // db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
 
                     }
 
                     else {
-                        //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+
                         var currentTime = new Date();
-
+                        //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+                        
+                        currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
                         var qw = {
-                            'time.start': {$gt: currentTime},
-                            'subType' : req.query.queryCat
+                            'time.start': {$lt: currentTime},
+                            'time.end': {$gt: currentTime}
                         };
-                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));                   
                     }
+                }
+
+                // EVENTS TODAY
+                if (req.query.queryFilter == "today"){
+
+                    //getting today & tomm
+                    var tod = new Date();
+                    var tom = new Date();
                     
-                    // //var currentTime = new Date();
-                    // var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
-                    
-                    // currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-                    // var qw = {
-                    //     'time.start': {$lt: currentTime},
-                    //     'time.end': {$gt: currentTime},
-                    //     'subType':req.query.queryCat
-                    // };
-                    // db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
+                    tom.setDate(tod.getDate()+1);
+                    tod.setHours(0,0,0,0);
+                    tom.setHours(0,0,0,0);
+
+                    var qw = {
+                        'time.start': {
+                            $gte: tod,
+                            $lt: tom
+                        }
+                    };
+                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+
+                }
 
 
+            }
+
+            //places
+            if (req.query.queryType == "places"){
+
+                //do a location radius search here option
+
+                console.log(req.query.queryFilter);
+
+                if (req.query.queryFilter == "all"){
+                    var qw = {
+                        'type' : 'place'
+                    };
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
                 }
 
                 else {
-
-                    var currentTime = new Date();
-                    //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
-                    
-                    currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
                     var qw = {
-                        'time.start': {$lt: currentTime},
-                        'time.end': {$gt: currentTime}
+                        'subType' : req.query.queryFilter
                     };
-                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));                   
+                    db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
                 }
+
             }
 
-            // EVENTS TODAY
-            if (req.query.queryFilter == "today"){
+            //search
+            if (req.query.queryType == "search"){
 
-                //getting today & tomm
-                var tod = new Date();
-                var tom = new Date();
-                
-
-                tom.setDate(tod.getDate()+1);
-                tod.setHours(0,0,0,0);
-                tom.setHours(0,0,0,0);
+                var searchResults = {};
 
                 var qw = {
-                    'time.start': {
-                        $gte: tod,
-                        $lt: tom
-                    }
+                    "name" : {$regex : ".*"+req.query.queryFilter+".*", $options: 'i'}
                 };
-                db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+                db.collection('landmarks').find(qw).sort({_id: -1}).toArray(addSearch(req,res));
+                //searchResults.push(search);
 
+               
+
+                function addSearch(req,res){
+
+
+                     // console.log(req);
+                     console.log(res);
+                }
+
+                //.sort({_id: -1}).toArray(fn(req, res));
             }
-
-
-        }
-
-        //places
-        if (req.query.queryType == "places"){
-
-            //do a location radius search here option
-
-            console.log(req.query.queryFilter);
-
-            if (req.query.queryFilter == "all"){
-                var qw = {
-                    'type' : 'place'
-                };
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
-            }
-
-            else {
-                var qw = {
-                    'subType' : req.query.queryFilter
-                };
-                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
-            }
-
-        }
-
-        //search
-        if (req.query.queryType == "search"){
-
-            var searchResults = {};
-
-            var qw = {
-                "name" : {$regex : ".*"+req.query.queryFilter+".*", $options: 'i'}
-            };
-            db.collection('landmarks').find(qw).sort({_id: -1}).toArray(addSearch(req,res));
-            //searchResults.push(search);
-
-           
-
-            function addSearch(req,res){
-
-
-                 // console.log(req);
-                 console.log(res);
-            }
-
-            //.sort({_id: -1}).toArray(fn(req, res));
-        }
+  
+        }   
 
     }
 

@@ -9,13 +9,15 @@ module.exports = function(app, passport) {
 
 	// PROFILE SECTION =========================
 	//isLoggedIn == AUTH
-	app.get('/#/profile', isLoggedIn, function(req, res) {
-		res.render('profile.ejs', {
-			user : req.user
-		});	
-		console.log('loggedin');
+	app.get('/profile', isLoggedIn, function(req, res) {
 
-		// console.log(req);
+		res.send(req.user);
+
+		// var resWorldStyle = {
+  //           "world" : 'aasdf',
+  //           "style" : 'asdfa'
+  //       };
+  //       res.send(resWorldStyle);
 
 
 	});
@@ -52,7 +54,7 @@ module.exports = function(app, passport) {
 		app.post('/login', passport.authenticate('local-login', {
 
 			successRedirect : '/#/profile', // redirect to the secure profile section
-			// failureRedirect : '/login', // redirect back to the signup page if there is an error
+			failureRedirect : '/login', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
 
@@ -206,12 +208,7 @@ module.exports = function(app, passport) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-	// if (req.isAuthenticated())
-	// 	return next();
 
-	// res.redirect('/');
-
-	console.log(req);
 	if (!req.isAuthenticated()) 
 		res.send(401);  //send unauthorized 
 	else 

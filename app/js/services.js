@@ -47,7 +47,7 @@ angular.module('tidepoolsServices', ['ngResource'])
                     'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
                     'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
                     'create':  {method:'POST', params:{_id: 'create'}, isArray:true},
-                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true},
+                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true}
                 }
             var db = {};
             db.worlds = $resource('api/worlds/:_id', {}, actions);

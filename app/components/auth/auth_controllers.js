@@ -32,13 +32,12 @@ function ProfileCtrl($scope, $rootScope, $http, $location){
 	// This object will be filled by the form
   $scope.user = {};
 
-  console.log('asdf');
+  $http.get('/profile').success(function(user){
+  	console.log(user);
+  });
 
-  // $http.get('/profile').success(function(user){
-
-  // 	console.log(user);
-  //   // for (var i in users)
-  //   //   $scope.users.push(users[i]);
-  // });
-
+	$scope.user = db.users.query({queryType:'all',userID:'539533e5d22c979322000001'}, function(data){
+	      console.log(data);
+	});
 }
+
