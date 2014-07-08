@@ -1,4 +1,4 @@
-function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager) {
+function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark) {
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20,6 +20,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 	aperture.toggle('half');
 	
 	$scope.landmarks = [];
+	$scope.selectedIndex;
 	
 ////////////////////////////////////////////////////////////
 //////////////////////DEFINE FUNCTIONS//////////////////////
@@ -36,7 +37,6 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			db.landmarks.create(defaults, function(response) {
 				console.log('Response ID:'+response[0]._id);
 				
-				
 				var tempLandmark = new Object();
 				angular.extend(tempLandmark, defaults);
 				angular.extend(tempLandmark, response[0]);
@@ -52,12 +52,24 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 		}
 	}
 	
+	$scope.removeItem = function(i) {
+		//animates the removal
+		$scope.landmarks.splice(i, 1);
+	}	
+	
+	$scope.selectItem = function(i) {
+		//pan to new landmark, select the interface
+		$scope.selectedIndex = i;
+	}
+		
 	function loadLandmarks() {
 		$scope.queryType = "all";
 		$scope.queryFilter = "all";
 
-		$scope.landmarksQuery = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(){   
-			
+		$scope.landmarksQuery = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(data){
+			console.log(data);   
+			$scope.landmarks = $scope.landmarks.concat(data);
+			console.log($scope.landmarks);
 		});
 	}
 	
@@ -75,7 +87,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 	    });
 	}
 
-
+	
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -101,5 +113,27 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 		loadLandmarks();
 		
 	});
+	
+}
+
+function LandmarkEditorItemController($scope, db, Landmark, mapManager) {
+
+	$scope.deleteLandmark = function() {
+		var deleteItem = confirm('Are you sure you want to delete this item?'); 
+		
+	    if (deleteItem) {
+	    	$scope.$parent.removeItem($scope.$index);
+			//notify parent to remove from array with $index
+	    	console.log($scope.landmark._id);
+	        Landmark.del({_id: $scope.landmark._id}, function(landmark) {
+	            //$location.path('/'); 
+	            console.log('Delete');
+	        });
+	        }
+	}
+	
+	$scope.saveLandmark = function() {
+		
+	}
 	
 }

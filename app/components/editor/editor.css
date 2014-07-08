@@ -87,3 +87,13 @@ input {
 .editorbg {
 	background-color: white;
 }
+
+.landmark-editor {
+	border: solid 1px #CCC;
+	width: 600px;
+	margin: 10px;
+}
+
+.landmark-editor.active {
+	border: solid 1px green;
+}

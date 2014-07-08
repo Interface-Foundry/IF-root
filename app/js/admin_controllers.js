@@ -14,10 +14,10 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
 
     $scope.landmark.loc = [-74.0059,40.7127];
 
-    $scope.landmark.name = "what";
+    $scope.landmark.name = "Default";
 
     saveLandmark();
-    //saveLandmark('edit'); //for editing landmark
+    //saveLandmark('edit', id); //for editing landmark
 
     function saveLandmark(option, editID){
        
@@ -409,7 +409,7 @@ function LandmarkEditCtrl(Landmark, $location, $scope, $routeParams, db, $timeou
 
         if (deleteItem) {
             Landmark.del({_id: $scope.landmark._id}, function(landmark) {
-                $location.path('/'); 
+                //$location.path('/'); 
             });
         }
     }

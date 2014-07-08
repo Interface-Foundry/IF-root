@@ -1,9 +1,14 @@
 <div class="container navfix">
 <legend>Pin Landmarks</legend>
 <button ng-click="addLandmark()">Add Landmark</button>
-{{landmarksQuery}}
-<div ng-repeat="landmark in landmarks track by landmark._id">
-	{{landmark.name}} {{landmark._id}}
-</div>
+<ul>
+	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor" ng-class="{active: $index === selectedIndex}" ng-click="selectItem($index)">
+		{{landmark.name}} {{landmark._id}} <button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<div ng-form>
+			<label>Name</label> <input type="text" ng-model="landmark.name"/>
+			<button ng-click="saveLandmark()">Save</button>
+		</div>
+	</li>
+</ul>
 
 </div>
