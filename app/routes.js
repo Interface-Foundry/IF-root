@@ -1,4 +1,4 @@
-module.exports = function(app, passport) {
+module.exports = function(app, passport, landmarkSchema) {
 
 // normal routes ===============================================================
 
@@ -9,21 +9,23 @@ module.exports = function(app, passport) {
 
 	// PROFILE SECTION =========================
 	//isLoggedIn == AUTH
-	app.get('/profile', isLoggedIn, function(req, res) {
+	app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
-		res.send(req.user);
+		
+		var qw = {
+            'world':true,
+            'permissions.ownerID': req.user._id
+        };   
 
-		// var resWorldStyle = {
-  //           "world" : 'aasdf',
-  //           "style" : 'asdfa'
-  //       };
-  //       res.send(resWorldStyle);
+        landmarkSchema.find(qw, function(err, lm) {
+        	console.log(lm);
+        });
 
 
 	});
 
 	// LOGOUT ==============================
-	app.get('/logout', function(req, res) {
+	app.get('/api/user/logout', function(req, res) {
 		req.logout();
 		res.redirect('/');
 	});
@@ -40,21 +42,21 @@ module.exports = function(app, passport) {
 		// show the login form
 
 		// route to test if the user is logged in or not 
-		app.get('/loggedin', function(req, res) { 
+		app.get('/api/user/loggedin', function(req, res) { 
+
 			res.send(req.isAuthenticated() ? req.user : '0'); 
 		}); 
 
 		app.get('/login', function(req, res) {
-			console.log('1');
+			
 			res.render('login.ejs', { message: req.flash('loginMessage') });
 			//res.send(req.user);
 		});
 
 		// process the login form
-		app.post('/login', passport.authenticate('local-login', {
-
+		app.post('/api/user/login', passport.authenticate('local-login', {
 			successRedirect : '/#/profile', // redirect to the secure profile section
-			failureRedirect : '/login', // redirect back to the signup page if there is an error
+			failureRedirect : '/#/login', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
 
@@ -66,7 +68,7 @@ module.exports = function(app, passport) {
 
 		// process the signup form
 		app.post('/signup', passport.authenticate('local-signup', {
-			successRedirect : '/profile', // redirect to the secure profile section
+			successRedirect : '/#/profile', // redirect to the secure profile section
 			failureRedirect : '/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
@@ -79,7 +81,7 @@ module.exports = function(app, passport) {
 		// handle the callback after facebook has authenticated the user
 		app.get('/auth/facebook/callback',
 			passport.authenticate('facebook', {
-				successRedirect : '/profile',
+				successRedirect : '/#/profile',
 				failureRedirect : '/'
 			}));
 
@@ -91,23 +93,12 @@ module.exports = function(app, passport) {
 		// handle the callback after twitter has authenticated the user
 		app.get('/auth/twitter/callback',
 			passport.authenticate('twitter', {
-				successRedirect : '/profile',
+				successRedirect : '/#/profile',
 				failureRedirect : '/'
 			}));
 
 
-	// google ---------------------------------
-
-		// send to google to do the authentication
-		app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
-
-		// the callback after google has authenticated the user
-		app.get('/auth/google/callback',
-			passport.authenticate('google', {
-				successRedirect : '/profile',
-				failureRedirect : '/'
-			}));
-
+	
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
 // =============================================================================
@@ -147,17 +138,6 @@ module.exports = function(app, passport) {
 			}));
 
 
-	// google ---------------------------------
-
-		// send to google to do the authentication
-		app.get('/connect/google', passport.authorize('google', { scope : ['profile', 'email'] }));
-
-		// the callback after google has authorized the user
-		app.get('/connect/google/callback',
-			passport.authorize('google', {
-				successRedirect : '/profile',
-				failureRedirect : '/'
-			}));
 
 // =============================================================================
 // UNLINK ACCOUNTS =============================================================
@@ -189,15 +169,6 @@ module.exports = function(app, passport) {
 	app.get('/unlink/twitter', function(req, res) {
 		var user           = req.user;
 		user.twitter.token = undefined;
-		user.save(function(err) {
-			res.redirect('/profile');
-		});
-	});
-
-	// google ---------------------------------
-	app.get('/unlink/google', function(req, res) {
-		var user          = req.user;
-		user.google.token = undefined;
 		user.save(function(err) {
 			res.redirect('/profile');
 		});

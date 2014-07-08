@@ -13,12 +13,5 @@ module.exports = {
 		'consumerKey' 		: '79AqE2SPIW219Bx35So7KfTD1',
 		'consumerSecret' 	: 'N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R',
 		'callbackURL' 		: 'http://fuf.me:8080/auth/twitter/callback'
-	},
-
-	'googleAuth' : {
-		'clientID' 		: 'your-secret-clientID-here',
-		'clientSecret' 	: 'your-client-secret-here',
-		'callbackURL' 	: 'http://localhost:8080/auth/google/callback'
 	}
-
 };

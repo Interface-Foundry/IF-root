@@ -14,6 +14,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
                                                             _|_|  
 
   interfacefoundry.com <3 <3 <3 
+
+  v0.2 Illya 
 */
 
 
@@ -91,7 +93,7 @@ var express = require('express'),
     app.set('view engine', 'ejs'); // set up ejs for templating
 
     // required for passport
-    app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret
+    app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
     app.use(passport.initialize());
     app.use(passport.session()); // persistent login sessions
     app.use(flash()); // use connect-flash for flash messages stored in session
@@ -101,7 +103,7 @@ var express = require('express'),
 app.use(connectBusboy());
 
 // routes ======================================================================
-require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+require('./app/routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
     
 // var bodyParser   = require('body-parser');
 
@@ -135,7 +137,6 @@ var fn = function (req, res) {
 };
 
 /* Routes */
-
 
 // Query
 app.get('/api/:collection', function(req, res) { 
@@ -571,7 +572,7 @@ app.get('/api/:collection/:id', function(req, res) {
 });
 
 // Save 
-app.post('/api/:collection/create', function(req, res) {
+app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if (req.url == "/api/styles/create"){
 
@@ -605,10 +606,10 @@ app.post('/api/:collection/create', function(req, res) {
     function worldMapEdit(){ //adding/editing map to world
    
          landmarkSchema.findById(req.body.worldID, function(err, lm) {
-          if (!lm)
+          if (!lm){
             return next(new Error('Could not load Document'));
-
-          else {
+          }
+          else if (req.user._id == lm.permissions.ownerID){
 
             lm.style.maps = {type: 'cloud', cloudMapID: 'interfacefoundry.ig6a7dkn', cloudMapName:req.body.mapThemeSelect.name};
 
@@ -624,6 +625,9 @@ app.post('/api/:collection/create', function(req, res) {
                     console.log('success');
                 }
             });
+          }
+          else {
+            console.log('unauthorized user');
           }
         });       
 
@@ -713,7 +717,7 @@ app.post('/api/:collection/create', function(req, res) {
                   if (!lm)
                     return next(new Error('Could not load Document'));
 
-                  else {
+                  else if (req.user._id == lm.permissions.ownerID){ //checking if logged in user is owner
                     
                     lm.name = req.body.name;
                     lm.id = finalID;
@@ -773,6 +777,9 @@ app.post('/api/:collection/create', function(req, res) {
                         }
                     });
                   }
+                  else {
+                    console.log('unauthorized user');
+                  }
                 });
 
             }
@@ -791,6 +798,8 @@ app.post('/api/:collection/create', function(req, res) {
                 }
 
                 function saveNewLandmark(styleRes){
+
+
                
                     var lm = new landmarkSchema({
                         name: req.body.name,
@@ -800,7 +809,7 @@ app.post('/api/:collection/create', function(req, res) {
                         loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
                         avatar: req.body.stats.avatar,
                         permissions: {
-                            ownerID: req.body.userID
+                            ownerID: req.user._id //from auth user ID
                         }
                     });
 
@@ -857,7 +866,7 @@ app.post('/api/:collection/create', function(req, res) {
                             console.log(landmark);
                             //world created
                             if (worldVal == true){
-                                saveProject(landmark._id, styleRes, req.body.userID, function(projectRes){
+                                saveProject(landmark._id, styleRes, req.user._id, function(projectRes){
                                     
                                     var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
                                     res.send(idArray);
@@ -935,9 +944,7 @@ app.post('/api/:collection/create', function(req, res) {
               if (!lm)
                 return next(new Error('Could not load Document'));
 
-              else {
-
-                console.log(req.body);
+              else if (req.user._id == lm.permissions.ownerID) {
 
                 lm.save(function(err, style) {
                     if (err){
@@ -1000,7 +1007,7 @@ app.post('/api/:collection/create', function(req, res) {
 });
 
 // Delete
-app.delete('/api/:collection/:id', function(req, res) {
+app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
    db.collection(req.params.collection).remove({_id:objectId(req.params.id)}, {safe:true}, fn(req, res));
 });
 
@@ -1024,7 +1031,7 @@ app.put('/api/:collection/:cmd',  function (req, res) {
 })
 
 
-app.post('/api/upload',  function (req, res) {
+app.post('/api/upload', isLoggedIn, function (req, res) {
 
     //disabled Max image upload size for NOW << enable later...
    // if (req.files.files[0].size <= 5242880){
@@ -1079,9 +1086,18 @@ app.post('/api/upload',  function (req, res) {
 });
 
 
+// route middleware to ensure user is logged in
+function isLoggedIn(req, res, next) {
+
+    if (!req.isAuthenticated()) 
+        res.send(401);  //send unauthorized 
+    else 
+        return next();
+}
+
 
 app.listen(2998, function() {
-    console.log("Chillin' on 2998 ~ ~");
+    console.log("Illya casting magic on 2998 ~ ~ ♡");
 });
 
 

@@ -6,12 +6,12 @@ var mongoose = require('mongoose');
 
 	var projectSchema = new Schema({
 
-		worldID: String,
-		styleID: String,
+		worldID: Schema.Types.ObjectId,
+		styleID: Schema.Types.ObjectId,
 		permissions: {
-			ownerID: String,
-			viewers: [String],
-			editors: [String]
+			ownerID: Schema.Types.ObjectId,
+			viewers: [Schema.Types.ObjectId],
+			editors: [Schema.Types.ObjectId]
 		},
 		avatar: String,
 		time: {

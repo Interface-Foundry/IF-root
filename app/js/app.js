@@ -48,14 +48,20 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     // Check if the user is connected
     //================================================
     var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
+
+
       // Initialize a new promise
       var deferred = $q.defer();
 
       // Make an AJAX call to check if the user is logged in
-      $http.get('/loggedin').success(function(user){
+      $http.get('/api/user/loggedin').success(function(user){
+
+        console.log('auth '+user);
+
         // Authenticated
-        if (user !== '0')
+        if (user !== '0'){
           $timeout(deferred.resolve, 0);
+        }
 
         // Not Authenticated
         else {
@@ -113,19 +119,19 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       //when('/post/:landmarkID/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}).
 
       when('/newpost', {templateUrl: 'partials/landmark-new.html'}). 
-      when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl}).
+      when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl}).
-      when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl}).
+      when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
+      when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       
-	  when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController}).
+	when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController}).
       
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}).
 
       when('/insta', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
 
-      when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl}).
+      when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       otherwise({redirectTo: '/'}); 
 })
@@ -135,7 +141,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     // Logout function is available in any pages
     $rootScope.logout = function(){
       $rootScope.message = 'Logged out.';
-      $http.post('/logout');
+      $http.post('/api/user/logout');
     };
   });
 
