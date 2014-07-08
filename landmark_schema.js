@@ -11,6 +11,7 @@ monguurl = require('monguurl');
 		world: Boolean,
 		parentID: String,
 		valid: Boolean, //are all req. items inputted
+		archived: Boolean, //if object in archive or "live"
 		avatar: String,
 		loc: { //user inputted loc
 	    	type: {
@@ -28,7 +29,7 @@ monguurl = require('monguurl');
 		summary: String,
 		description: String, //full HTML?
 		type: String, //event, place
-		subType: String, // type of event/place	
+		subType: { type: [String], index: true }, // type of event/place	
 		category: String, //category of type
 		style: {
 			styleID: String, //link to landmark's style

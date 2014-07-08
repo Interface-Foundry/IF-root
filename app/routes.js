@@ -18,7 +18,7 @@ module.exports = function(app, passport, landmarkSchema) {
         };   
 
         landmarkSchema.find(qw, function(err, lm) {
-        	console.log(lm);
+        	res.send(lm);
         });
 
 
@@ -26,6 +26,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 	// LOGOUT ==============================
 	app.get('/api/user/logout', function(req, res) {
+		console.log('asdf');
 		req.logout();
 		res.redirect('/');
 	});
@@ -67,7 +68,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		});
 
 		// process the signup form
-		app.post('/signup', passport.authenticate('local-signup', {
+		app.post('/api/user/signup', passport.authenticate('local-signup', {
 			successRedirect : '/#/profile', // redirect to the secure profile section
 			failureRedirect : '/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages

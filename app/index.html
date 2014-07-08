@@ -132,7 +132,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  					<input class="form-control" type="text" placeholder="Search">
 	  			</form></li>
 	  		</ul>	
-        <a ng-click="logout()">Logout</a>
+        <div ng-show="!showLogout"><a ng-href="/#/login">Login</a></div>
+        <div ng-show="showLogout"><a ng-click="logout()">Logout</a></div>
 	  </nav>
 	  
       <section id="drawer" ng-class="{'drawer': drawerOn}">

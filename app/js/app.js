@@ -49,22 +49,21 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     //================================================
     var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
 
-
       // Initialize a new promise
       var deferred = $q.defer();
 
       // Make an AJAX call to check if the user is logged in
       $http.get('/api/user/loggedin').success(function(user){
 
-        console.log('auth '+user);
-
         // Authenticated
         if (user !== '0'){
+          $rootScope.showLogout = true;
           $timeout(deferred.resolve, 0);
         }
 
         // Not Authenticated
         else {
+          $rootScope.showLogout = false;
           $rootScope.message = 'You need to log in.';
           $timeout(function(){deferred.reject();}, 0);
           $location.url('/login');
@@ -102,6 +101,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
   $routeProvider.
       when('/', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
       when('/login', {templateUrl: 'components/auth/login.html', controller: LoginCtrl}).
+      when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
 
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
@@ -135,13 +135,15 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       otherwise({redirectTo: '/'}); 
 })
- .run(function($rootScope, $http){
+ .run(function($rootScope, $http, $location){
     $rootScope.message = '';
 
     // Logout function is available in any pages
     $rootScope.logout = function(){
       $rootScope.message = 'Logged out.';
-      $http.post('/api/user/logout');
+      $http.get('/api/user/logout');
+      $rootScope.showLogout = false;
+      $location.url('/');
     };
   });
 
