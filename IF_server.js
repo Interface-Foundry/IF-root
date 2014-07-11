@@ -709,21 +709,27 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     var lookupID = req.body.worldID;
                 }
 
-                if (req.body.landmarkID){
-                    var lookupID = req.body.landmarkID;
+                if (req.body._id){
+                    var lookupID = req.body._id;
                 }         
                 
+                console.log(lookupID);
+                
                 landmarkSchema.findById(lookupID, function(err, lm) {
-                  if (!lm)
-                    return next(new Error('Could not load Document'));
+                  if (!lm){
+                    console.log(err);
+                  }
 
                   else if (req.user._id == lm.permissions.ownerID){ //checking if logged in user is owner
                     
                     lm.name = req.body.name;
                     lm.id = finalID;
                     lm.valid = 1;
-                    lm.loc = {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] };
-                    lm.avatar = req.body.stats.avatar;
+                    lm.loc = {type:'Point', coordinates:[req.body.loc.coordinates[0],req.body.loc.coordinates[1]] };
+                    
+                    if (req.body.avatar){
+                    	lm.avatar = req.body.avatar;
+                    }
 
                     if (req.body.parentID){
                         lm.parentID = req.body.parentID;
@@ -769,7 +775,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                     lm.save(function(err, landmark) {
                         if (err){
-                            console.log('error');
+                        	console.log(err);
+                            console.log('lm.save error');
                         }
                         else {
                             console.log(landmark);
@@ -799,15 +806,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                 function saveNewLandmark(styleRes){
 
-
-               
                     var lm = new landmarkSchema({
                         name: req.body.name,
                         id: finalID,
                         world: worldVal,
                         valid: 1,
-                        loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
-                        avatar: req.body.stats.avatar,
+                        loc: {type:'Point', coordinates:[req.body.loc.coordinates[0], req.body.loc.coordinates[1]]},
+                        avatar: req.body.avatar,
                         permissions: {
                             ownerID: req.user._id //from auth user ID
                         }

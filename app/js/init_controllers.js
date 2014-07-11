@@ -115,18 +115,8 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apert
     }
     
     $scope.aperture = apertureService; 
-    $scope.map = mapManager; 
-    //this is temporary cause w/out leaflet won't render??
-
-    /*angular.extend($rootScope, {
-        center: {
-            // lat: 40.7615,
-            // lng: -73.9777,
-            // zoom: 11
-        },
-        tiles: tilesDict.mapbox,
-        markers : {}
-    });*/
+    $scope.map = mapManager;
+    
 
     //for bubble widget switcher
     $scope.goPath = function(url){

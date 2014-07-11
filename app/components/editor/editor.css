@@ -90,10 +90,21 @@ input {
 
 .landmark-editor {
 	border: solid 1px #CCC;
-	width: 600px;
 	margin: 10px;
 }
 
 .landmark-editor.active {
 	border: solid 1px green;
+}
+
+.leaflet-popup-content {
+	color: #6a6a6a;
+}
+
+li .landmark-form {
+	display: none;
+}
+
+li.active .landmark-form {
+	display: block;
 }

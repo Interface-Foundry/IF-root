@@ -1,11 +1,41 @@
 <div class="container navfix">
 <legend>Pin Landmarks</legend>
 <button ng-click="addLandmark()">Add Landmark</button>
-<ul>
-	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor" ng-class="{active: $index === selectedIndex}" ng-click="selectItem($index)">
-		{{landmark.name}} {{landmark._id}} <button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-		<div ng-form>
-			<label>Name</label> <input type="text" ng-model="landmark.name"/>
+<ul class="row">
+	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor col-xs-8" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()" ng-init="addFileUploads()">
+		<img ng-src='{{landmark.avatar}}' class='avatar' ng-cloak/> {{landmark.name}} {{landmark._id}} <button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<div ng-form class='landmark-form'>
+		
+			<label>Name</label> <input type="text" ng-model="landmark.name" class="form-control"/>
+						<label>Picture</label> 
+								
+						<span class="btn btn-success fileinput-button">
+				        	<i class="icon-plus icon-white"></i>
+							<span>Add Profile Pic</span>
+							<input id="fileupload" type="file" name="files[]">
+						</span>
+						
+						<label>Or Drag & Drop Pic</label>
+				
+						<div id="progress" class="progress">
+							<div class="bar" style="width: 0%;"></div>
+						</div>
+				
+						<p id="uploadedpic"></p>
+						<div id="preview"></div>         
+
+			<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
+			<label>Description</label> <textarea ng-model="landmark.description" class="form-control"/>
+			<label>Type</label> <select ng-model="typeSelect" ng-options="typeOption.name for typeOption in typeOptions" class="form-control"></select>
+			<label>Category</label> <input type="text" ng-model="landmark.category" class="form-control"/>
+			<button type="button" ng-click="time=!time">Toggle Time</button>
+			<div ngform class="landmark-time" ng-class="{hidden: !time}">
+				<label>Start Date</label> <input type="text" ng-model="landmark.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>
+				<label>End Date</label> <input type="text" ng-model="landmark.date.end" data-date-format="MM dd, yyyy" bs-datepicker/>
+				<label>Start Time</label> <input type="text" ng-model="landmark.time.start" data-date-format="hh:mm" bs-timepicker />
+				<label>End Time</label> <input type="text" ng-model="landmark.time.start" data-date-format="hh:mm" bs-timepicker />
+			</div>
+			</div>
 			<button ng-click="saveLandmark()">Save</button>
 		</div>
 	</li>

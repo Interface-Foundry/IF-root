@@ -3,7 +3,6 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
     function refreshMap(){ 
     	
 	    leafletData.getMap().then(function(map) {
-			
 	        map.invalidateSize();
 	    });
 	}
@@ -28,6 +27,14 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		map.tiles = tilesDict[$scope.world.style.maps.cloudMapName];
 		
 		refreshMap();
+		
+		$scope.queryType = "all";
+		$scope.queryFilter = "all";
+
+		db.landmarks.query({queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(data){   
+			console.log(data);
+			$scope.landmarks = data;
+		});
 		
 	});
 	$scope.aperture = apertureService;	

@@ -4,7 +4,12 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	var bubbleCircle;
 	angular.extend($rootScope, {apertureSize: 0});
 	angular.extend($rootScope, {apertureOn: false});
-		
+	
+	$scope.center = {};
+	$scope.tiles = tilesDict.mapbox;
+            
+    $scope.markers = {};
+	
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry"; 
 	$scope.worldID; //mongo ID
@@ -19,15 +24,11 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.pageClass[1] = 'right';
 	$scope.pageClass[2] = 'right';
 	$scope.pageClass[3] = 'right';
-	$scope.pageClass[4] = 'right';
-	
 	
 	$scope.mapConfirm = 'false';
 	
     $scope.world = { 
-        stats: { 
             avatar: "img/tidepools/default.jpg" 
-        }
     };
 
     $scope.mapping = {};
@@ -86,7 +87,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             $('<img src="'+ data.result +'">').load(function() {
               $(this).width(150).height(150).appendTo('#preview');
             });
-            $scope.world.stats.avatar = data.result;
+            $scope.world.avatar = data.result;
         }
     });
 
@@ -108,7 +109,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 				saveWorld('map');	
 			}
 
-			if ($scope.pageIndex == 3){ //editing style. needs to be moved back one page to "2"
+			if ($scope.pageIndex == 2){ //editing style.
 				console.log("Editing style");
 				saveStyle();
 			}
@@ -264,7 +265,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         // } 
         //------- END TIME --------//
 
-        $scope.world.loc = [$scope.markers.m.lat, $scope.markers.m.lng];
+        $scope.world.loc.coordinates = [$scope.markers.m.lat, $scope.markers.m.lng];
 
         $scope.world.userID = $scope.userID;
 
