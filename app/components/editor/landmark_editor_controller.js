@@ -11,9 +11,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 		newStatus: true,
 		parentID: 0,
 		loc: [-74.0059,40.7127], //DOES NOT MATCH SCHEMA
-		stats: {
-			avatar: "img/tidepools/default.jpg"
-		}
+		avatar: "img/tidepools/default.jpg"	
 	};
 	
 	var aperture = apertureService;

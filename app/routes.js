@@ -178,6 +178,9 @@ module.exports = function(app, passport, landmarkSchema) {
 
 };
 
+
+
+
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
 

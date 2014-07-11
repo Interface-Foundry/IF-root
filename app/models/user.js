@@ -20,6 +20,9 @@ var userSchema = mongoose.Schema({
         token        : String,
         displayName  : String,
         username     : String
+    },
+    auth: {
+        confirmedEmail : Boolean
     }
 
 });

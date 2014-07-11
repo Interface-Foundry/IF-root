@@ -542,14 +542,14 @@ app.get('/api/:collection/:id', function(req, res) {
     if (req.url.indexOf("/api/worlds/") > -1){
 
         db.collection('landmarks').findOne({id:req.params.id,world:true}, function(err, data){
-            
+
             styleSchema.findById(data.style.styleID, function(err, style) {
-                if (!style){
-                    return next(new Error('Could not load Document'));
-                }
+                  if (!style){
+                    console.log(err);
+                  }
 
-                else {
-
+                if(style) {
+                    console.log(style);
                     var resWorldStyle = {
                         "world" : data,
                         "style" : style
@@ -607,7 +607,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
    
          landmarkSchema.findById(req.body.worldID, function(err, lm) {
           if (!lm){
-            return next(new Error('Could not load Document'));
+            console.log(err);
           }
           else if (req.user._id == lm.permissions.ownerID){
 
@@ -714,16 +714,16 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 }         
                 
                 landmarkSchema.findById(lookupID, function(err, lm) {
-                  if (!lm)
-                    return next(new Error('Could not load Document'));
-
+                  if (!lm){
+                    console.log(err);
+                  }
                   else if (req.user._id == lm.permissions.ownerID){ //checking if logged in user is owner
                     
                     lm.name = req.body.name;
                     lm.id = finalID;
                     lm.valid = 1;
                     lm.loc = {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] };
-                    lm.avatar = req.body.stats.avatar;
+                    lm.avatar = req.body.avatar;
 
                     if (req.body.parentID){
                         lm.parentID = req.body.parentID;
@@ -798,16 +798,14 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 }
 
                 function saveNewLandmark(styleRes){
-
-
-               
+   
                     var lm = new landmarkSchema({
                         name: req.body.name,
                         id: finalID,
                         world: worldVal,
                         valid: 1,
                         loc: {type:'Point', coordinates:[req.body.loc[1],req.body.loc[0]] },
-                        avatar: req.body.stats.avatar,
+                        avatar: req.body.avatar,
                         permissions: {
                             ownerID: req.user._id //from auth user ID
                         }
@@ -941,9 +939,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         function editProject(input){
              projectSchema.findById(req.body.projectID, function(err, lm) {
-              if (!lm)
-                return next(new Error('Could not load Document'));
-
+              if (!lm){
+                console.log(err);
+              }
               else if (req.user._id == lm.permissions.ownerID) {
 
                 lm.save(function(err, style) {
@@ -962,9 +960,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         function editStyle(input){
 
          styleSchema.findById(req.body.styleID, function(err, lm) {
-          if (!lm)
-            return next(new Error('Could not load Document'));
-
+          if (!lm){
+            console.log(err);
+          }
           else {
 
             console.log(req.body);
@@ -1094,6 +1092,7 @@ function isLoggedIn(req, res, next) {
     else 
         return next();
 }
+
 
 
 app.listen(2998, function() {
