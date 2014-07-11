@@ -4,7 +4,6 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
-		
 	var aperture = apertureService;
 	aperture.toggle('half');
 	

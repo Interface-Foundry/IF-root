@@ -73,7 +73,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
 WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 
-function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apertureService, mapManager){
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager){
 
     var backMarkCount = 0;
 	
@@ -216,5 +216,5 @@ function indexIF($location, $scope, db, $timeout, leafletData, $rootScope, apert
     };
 
 }
-indexIF.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$rootScope', 'apertureService', 'mapManager'];
+indexIF.$inject = [ '$location', '$scope', 'db', 'leafletData','$rootScope', 'apertureService', 'mapManager'];
 
