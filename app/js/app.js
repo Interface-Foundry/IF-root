@@ -107,7 +107,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
-      when('/w/:worldURL/:landmarkURL', {templateURL: 'components/world/landmark.html', controller: LandmarkController}).
+      //when('/w/:worldURL/:landmarkURL', {templateURL: 'components/world/landmark.html', controller: LandmarkController}).
       //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 
