@@ -1112,54 +1112,12 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 //map upload
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
-    // var r = request.post('http://service.com/upload')
-    // var form = r.form()
-    // form.append('my_field', 'my_value')
-    // form.append('my_buffer', new Buffer([1, 2, 3]))
-    // form.append('my_file', fs.createReadStream(path.join(__dirname, 'doodle.png'))
-    // form.append('remote_file', request('http://google.com/doodle.png'))
-
-
-    //request.get(fs.createReadStream('/app/temp_map_uploads/14368660.png')).pipe(request.post('http://107.170.180.141:3000/api/upload'));
-
-    //request(req).pipe(request.post('http://107.170.180.141:3000/api/upload'));
-
-
-
-
-    //request.post('http://107.170.180.141:3000/api/upload').pipe(fs.createReadStream( __dirname +'/app/temp_map_uploads/14368660.png'));
-
-
-    // request('http://107.170.180.141:3000/api/upload').pipe(req.busboy);
-
-
     // TEMPORARY FILE UPLOAD AND DELETE, needs to direct stream from form upload....
     var fstream;
 
-    // console.log(req);
-
-    // console.log(req.body);
     req.pipe(req.busboy);
 
-   // console.log(req.busboy);
-    // //passed coordinates
-    // req.busyboy.on('data', function(data) {
-    //   console.log(data);
-    // });
-
     req.busboy.on('file', function (fieldname, file, filename) {
-
-        // console.log(fieldname[0]);
-        // console.log(fieldname[1]);
-     
-        //filename = fieldname.replace(/'/g, "''")
-
-        //fieldname = fieldname.replace("%22", "'", 'g');
-
-
-        //console.log(fieldname);
-
-
 
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
@@ -1182,39 +1140,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                 file.pipe(fstream);
                 fstream.on('close', function() {
 
-                    // after file saved locally, send to IF-Tiler server
-                    
-                    var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
-                      if (err) {
-
-                            //delete temp file
-                            fs.unlink(__dirname + '/app/temp_map_uploads/' + current, function (err) {
-                              if (err) throw err;
-                              console.log('successfully deleted '+__dirname + '/app/temp_map_uploads/' + current);
-                            });
-
-                        return console.error('upload failed:', err);
-                      }
-                      else{
-                        console.log('Upload successful! Server responded with:', body);
-
-                        worldMapTileUpdate(req, res, body);
-
-                            //delete temp file
-                            fs.unlink(__dirname + '/app/temp_map_uploads/' + current, function (err) {
-                              if (err) throw err;
-                              console.log('successfully deleted '+__dirname + '/app/temp_map_uploads/' + current);
-                            });
-
-                       }
-                    });
-
-
-                    var form = r.form();
-                    //form.append('my_field', fieldname);
-                    form.append('my_buffer', new Buffer([1, 2, 3]));
-                    form.append(fieldname, fs.createReadStream(__dirname + '/app/temp_map_uploads/' + current)); //passing fieldname as json cause ugh.
-
+                    res.send("temp_map_uploads/"+current);
 
                 }); 
 
@@ -1226,6 +1152,52 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     });
 
 });
+
+
+//map send to tile server
+app.post('/api/build_map', isLoggedIn, function (req, res) {
+
+
+    console.log(req.body.coords);
+
+    var map_text = JSON.stringify(req.body.coords);
+
+    console.log(map_text);
+
+    // after file saved locally, send to IF-Tiler server
+    var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
+      if (err) {
+
+            //delete temp file
+            fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
+              if (err) throw err;
+              console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
+            });
+
+        return console.error('upload failed:', err);
+      }
+      else{
+        console.log('Upload successful! Server responded with:', body);
+
+        worldMapTileUpdate(req, res, body);
+
+            //delete temp file
+            fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
+              if (err) throw err;
+              console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
+            });
+
+       }
+    });
+
+    var form = r.form();
+    //form.append('my_field', fieldname);
+    form.append('my_buffer', new Buffer([1, 2, 3]));
+    form.append(map_text, fs.createReadStream(__dirname + '/app/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
+
+
+});
+
 
 
     function worldMapTileUpdate(req, res, data){ //adding zooms, should be incorp into original function
