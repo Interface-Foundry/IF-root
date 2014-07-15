@@ -1238,7 +1238,6 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
                 else {
                     console.log(landmark);
                     console.log('success');
-                    res.send('Map Built');
                 }
             });
           }
