@@ -1157,12 +1157,12 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 //map send to tile server
 app.post('/api/build_map', isLoggedIn, function (req, res) {
 
+    //this entire area hurts my eyes, i can't even D:
 
-    console.log(req.body.coords);
+    var map_text = JSON.stringify(req.body.coords); 
+    map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
 
-    var map_text = JSON.stringify(req.body.coords);
-
-    console.log(map_text);
+    //console.log(__dirname + '/app/'+ req.body.mapIMG);
 
     // after file saved locally, send to IF-Tiler server
     var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {

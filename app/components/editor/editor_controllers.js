@@ -71,7 +71,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	});
 
 
-	// TEMPORARY
+	// =============  TEMPORARY  ============== //
 
     angular.element('#fileupload').fileupload({
         url: '/api/upload_maps',
@@ -128,7 +128,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     }
 
-    //===============//
+    //===================================//
 
 
 	
