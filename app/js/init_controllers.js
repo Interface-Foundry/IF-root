@@ -73,57 +73,13 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
 WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
 
 
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager){
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, $route, $routeParams){
 
-    var backMarkCount = 0;
-	
-    $scope.goBack = function(){
-        shelfPan('return');
-        $rootScope.showSwitch = true;
-        $rootScope.showBack = false;
-        $rootScope.showMapNav = false;
-        $rootScope.showNavIcons = false;
-        $rootScope.hideIFbar = false;
-    }
-
-    $scope.goBackPage = function(){
-
-        $rootScope.showBackPage = false;
-        $rootScope.showMapNav = false;
-        window.history.back();
-        shelfPan('return');
-        $rootScope.showNavIcons = false;   
-        $rootScope.hideIFbar = false;   
-    }
-
-    $scope.goBackMarkers = function(){
-
-        $rootScope.showBackMark = false;
-        $rootScope.showBackPage = true;
-        $rootScope.showMapNav = true;
-        shelfPan('full','navbar');
-        refreshMap();
-        $rootScope.showNavIcons = true;
-        $rootScope.hideIFbar = true;
-
-        //stopping getting locked in "back" clicks on /show/view
-        // backMarkCount++;
-        // if (backMarkCount > 1){
-        //     $location.path('show');
-        //     backMarkCount = 0;
-        // }
-    }
-    
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
-    
-
-    //for bubble widget switcher
-    $scope.goPath = function(url){
-        shelfPan('return');
-        $location.path(url);
-    };
-
+    		
+	angular.extend($rootScope, {loading: false});
+	
     //to refresh map after resize of leaflet map
     function refreshMap(){ 
         leafletData.getMap().then(function(map) {

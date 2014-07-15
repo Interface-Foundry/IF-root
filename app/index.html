@@ -82,14 +82,13 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <script src="lib/angular/angular-strap.js"></script>
   <script src="lib/spectrum/spectrum.js"></script>
 
-
-
   <script src="lib/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
   <script src="lib/bootstrap-datepicker.js"></script>
   <script src="lib/bootstrap-timepicker.js"></script>
   <script src="lib/leaflet.js"></script>
   <script src="lib/ng-infinite-scroll.min.js"></script>
   <script src="lib/ng-modal.min.js"></script>
+  
   
   <script src="js/services.js"></script>
 
@@ -128,23 +127,25 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  <nav role="navigation" ng-class="{'drawer': drawerOn}">
 	  		<ul>
 	  			<li><img class="logo" ng-click="drawerOn = !drawerOn"></img></li>
-	  			<li><form role="search">
-	  					<input class="form-control" type="text" placeholder="Search">
-	  			</form></li>
-	  		</ul>	
-        <div ng-show="!showLogout"><a ng-href="/#/login">Login</a></div>
+	  			<li></li>
+	  		</ul>
+	  	<div class="navbar-right">
+	  	<div ng-show="!showLogout"><a ng-href="/#/login">Login</a></div>
         <div ng-show="showLogout"><a ng-click="logout()">Logout</a></div>
+	  	</div>
 	  </nav>
-	  
+	  <div id="scrim" ng-class="{'loading': loading}">
+	  	<span class="glyphicon glyphicon-refresh"></span>
+	  </div>
       <section id="drawer" ng-class="{'drawer': drawerOn}">
-      
-     	 <a class="navbar-brand" ng-click="panDrawer()" href="#">Drawer Contents</a>
-      
+      	
+     	 <a class="navbar-brand" ng-click="panDrawer()" href="#"></a>
+	 	 
       </section>
 
 	  <div id="main" ng-class="{'drawer': drawerOn}">
           <section id="aperture" ng-class="[aperture.state]">
-			  <leaflet id="leafletmap" tiles="map.tiles" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds">
+			  <leaflet id="leafletmap" tiles="map.tiles" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults">
               </leaflet>
          </section>
 

@@ -1,0 +1,88 @@
+<div class="navfix container">
+		<form name="worldDetail" ng-submit="submitForm()" id="worldDetail" novalidate>
+			<legend>Create your World</legend>
+				<div class="map-holder">
+					<leaflet id="worldDetailMap" tiles="tiles" center="center" markers="markers" paths="paths">
+								 
+					</leaflet>
+					<input name="locsearchbar" type="text" class="locsearch" ng-model="locsearchbar" ng-keypress="maplocsearch($event)"/>
+				</div>
+			<div class="row">
+				<div class="col-xs-6">
+					<div class="field">
+						<label>Name</label> <input name="worldName" type="text" ng-model="world.name" required />
+						<div class="error" ng-show="worldDetail.worldName.$dirty && worldDetail.worldName.$error.required">
+								Name is required.</div>
+					</div>
+					<div class="field">
+						<label>Picture</label> 
+								
+						<span class="btn btn-success fileinput-button">
+				        	<i class="icon-plus icon-white"></i>
+							<span>Add Profile Pic</span>
+							<input id="fileupload" type="file" name="files[]">
+						</span>
+						
+						<label>Or Drag & Drop Pic ↑</label>
+				
+						<div id="progress" class="progress">
+							<div class="bar" style="width: 0%;"></div>
+						</div>
+				
+						<p id="uploadedpic"></p>
+						<div id="preview"></div>         
+				
+					</div>
+					<div class="field">
+						<label>Summary</label> <input name="worldSummary" type="text" ng-model="world.summary" required/>
+						<div class="error" ng-show="worldDetail.worldSummary.$dirty && worldDetail.worldSummary.$error.required">
+						A summary is required!
+						</div>
+					</div>
+					<div class="field">
+						<label>Description</label> <input name="worldDescription" type="text" ng-model="world.description" required/>
+						<div class="error" ng-show="worldDetail.worldDescription.$dirty && worldDetail.worldDescription.$error.required">
+						A description is required! 
+						</div>
+					</div>
+					<div class="field">
+						<label>Hashtag</label> <input name="worldHashtag" type="text" ng-model="world.hashtag" required/>
+						<div class="error" ng-show="worldDetail.worldHashtag.$dirty && worldDetail.worldHashtag.$error.required">
+						A hashtag is required!
+						</div>
+					</div>
+					<div class="field">
+						<label>Category</label> <input name="worldCategory" type="text" ng-model="world.category" required/>
+						<div class="error" ng-show="worldDetail.worldCategory.$dirty && worldDetail.worldCategory.$error.required">
+						A category is required
+					</div>
+				</div>
+				</div>
+				<div class="col-xs-6">
+					<div class="checkbox">
+						<label>Location<input ng-model="mapConfirm" ng-change="mapLock()" type="checkbox" value=""><span class="mappos">{{markers.m.lat}},{{markers.m.lng}}</span></label>
+					</div>
+					<div class="field">
+						<label>Start Date</label> <input type="text" ng-model="world.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>
+                      <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>
+                    </div>
+                    <div class="field">
+                      	<label>Start Time</label> <input type="text" ng-model="world.time.start" data-date-format="hh:mm" bs-timepicker />
+					  	<button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
+					</div>
+					<div class="field">
+                      	<label>End Time</label> <input type="text" ng-model="world.time.end" data-date-format="hh:mm" bs-timepicker />
+                      <button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
+					</div>
+
+                      <h4><a ng-click="showEndDateDetails = ! showEndDateDetails ; addEndDate()">Add End Date?</a></h4>
+                     		<span ng-show="showEndDateDetails" >
+					 		 <hr>
+					  		<label>End Date</label> <input type="text" ng-model="world.date.end" data-date-format="MM dd, yyyy" bs-datepicker/>                
+                          <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>    
+						  </span> 
+
+					  </div>
+			</div>
+		</form>
+</div>

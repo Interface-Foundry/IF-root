@@ -13,8 +13,22 @@
 	</div>
 	
 	<ul>
-		<li ng-repeat="landmark in landmarks">
-			{{landmark.name}}
+		<li ng-repeat="landmark in landmarks" ng-controller="WorldRepeatController" ng-class="{'topmark': selectedIndex==$index}">
+			<a ng-click="goToMark()">
+				<div class="media">
+					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left" ng-cloak> 
+					<div class="media-body">
+						<h4 class="media-heading" ng-cloak>{{landmark.name}}</h4>
+						<em ng-cloak>{{landmark.summary}}</em>
+						<div ng-show="selectedIndex==$index">
+						<p>{{landmark.description}}</p>
+						</div>
+					</div>
+				</div>
+			</a>
+			<hr>
 		</li>
 	</ul>
+
+<a href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a>
 </div>

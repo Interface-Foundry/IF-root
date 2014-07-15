@@ -6,7 +6,7 @@
 		<form name="worldDetail" ng-submit="submitForm()" id="worldDetail" novalidate>
 			<legend>Create your World</legend>
 				<div class="map-holder">
-					<leaflet id="worldDetailMap" tiles="tiles" center="center" markers="markers" paths="worldDetailPaths">
+					<leaflet id="worldDetailMap" tiles="tiles" center="center" markers="markers" paths="paths">
 								 
 					</leaflet>
 					<input name="locsearchbar" type="text" class="locsearch" ng-model="locsearchbar" ng-keypress="maplocsearch($event)"/>
@@ -63,8 +63,8 @@
 				</div>
 				</div>
 				<div class="col-xs-6">
-					<div class="checkbox">
-						<label>Location<input ng-model="mapConfirm" ng-change="mapLock()" type="checkbox" value=""><span class="mappos">{{markers.m.lat}},{{markers.m.lng}}</span></label>
+					<div class="field">
+						<button ng-click="mapLock()" type="button">Draw Bubble</button><span class="mappos">{{markers.m.lat}},{{markers.m.lng}}</span>
 					</div>
 					<div class="field">
 						<label>Start Date</label> <input type="text" ng-model="world.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>

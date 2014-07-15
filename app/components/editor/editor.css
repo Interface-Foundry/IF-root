@@ -108,3 +108,14 @@ li .landmark-form {
 li.active .landmark-form {
 	display: block;
 }
+
+
+.selectOutline {
+	outline: 2px solid #00ff96;
+}
+
+.toolbar {
+	text-align: center;
+	color: #44a6e3;
+	margin-top: 10px;
+}

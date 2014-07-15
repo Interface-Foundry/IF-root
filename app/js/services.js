@@ -59,22 +59,16 @@ angular.module('tidepoolsServices', ['ngResource'])
             return db;
         }
     ])
-    .factory('apertureService', ['leafletData',
-    	function(leafletData, leafletBoundsHelpers) {
+    .factory('apertureService', ['leafletData', 'mapManager', 
+    	function(leafletData, mapManager) {
 	    	var aperture = {};
 			aperture.off = true;
 	    	aperture.state = 'aperture-off';
 	    	aperture.navfix = 'navfix';
-	    	
-	    	function refreshMap(){ 
-		        leafletData.getMap().then(function(map) {
-		            map.invalidateSize();
-		        });
-		    }
-	    	
+	    	var map = mapManager;
 	    	
 	    	aperture.toggle = function(state) {
-	    		if (aperture.off) {
+	    		if (aperture.off)  {
 		    			aperture.off = false;
 		    			console.log('toggling aperture on');
 		    			aperture.navfix = '';
@@ -92,6 +86,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 					aperture.state = 'aperture-off';
 					aperture.navfix = 'navfix';
 				}
+				
 				/*if ($rootScope.apertureOn) {
 					//open
 					console.log('opening');
@@ -102,8 +97,28 @@ angular.module('tidepoolsServices', ['ngResource'])
 					angular.extend($rootScope, {apertureSize: 0});
 					console.log($rootScope.apertureSize);
 				}*/
-			refreshMap();
+				map.refresh();
 			}
+			
+			aperture.set = function(state) {
+				switch (state) {
+					case 'off':
+						aperture.off = true;
+						aperture.state = 'aperture-off';
+						aperture.navfix = 'navfix';
+						break;
+					case 'half':
+						aperture.off = false;
+						aperture.state = 'aperture-half';
+						aperture.navfix = '';
+						break;
+					case 'full':
+						aperture.off = false;
+						aperture.state = 'aperture-full';
+						aperture.navfix = '';
+						break;
+				}
+				}
 			
 			return aperture;
     }])
@@ -117,9 +132,24 @@ angular.module('tidepoolsServices', ['ngResource'])
 				},
 			markers: {},
 			tiles: tilesDict.mapbox,
-			paths: {},
-			maxbounds: {}
+			paths: {worldBounds: {
+					type: 'circle',
+					radius: 150,
+					latlngs: {lat:40, lng:20}
+				}},
+			maxbounds: {},
+			defaults: {
+				controls: {
+					layers: {
+						visible: true,
+						position: 'bottomright',
+						collapsed: true
+					}
+				},
+				zoomControlPosition: 'bottomleft'
+			}
 		};
+		
 		
 		mapManager.setCenter = function(latlng, z) {
 			console.log('--mapManager--');
@@ -151,7 +181,6 @@ angular.module('tidepoolsServices', ['ngResource'])
 				mapManager.markers[key] = angular.copy(marker);
 				console.log('Marker added');
 			}
-			refreshMap();
 			return true;
 		}
 		
@@ -179,11 +208,12 @@ angular.module('tidepoolsServices', ['ngResource'])
 			}
 		}
 		
-		mapManager.setMarkerMessage = function(key, string) {
-			console.log('--setMarkerMessage('+key+','+string+')--');
+		mapManager.setMarkerMessage = function(key, msg) {
+			console.log('--setMarkerMessage()--');
 			if (mapManager.markers.hasOwnProperty(key)) {
 				console.log('Setting marker message');
-				mapManager.markers[key].message = string;
+				angular.extend(mapManager.markers[key], {'message': msg});
+				//refreshMap();
 				return true;
 			} else {
 				console.log('Key not found in Markers');
@@ -195,11 +225,12 @@ angular.module('tidepoolsServices', ['ngResource'])
 			console.log('--setMarkerFocus('+key+')--');
 			if (mapManager.markers.hasOwnProperty(key)) {
 				console.log('Setting marker focus');
-				angular.forEach(mapManager.markers, function(marker) {
+				angular.forEach(mapManager.markers, function(marker) {					
+					marker.focus = false;
 					console.log(marker);
-					marker[focus] = false;	
 				});
 				mapManager.markers[key].focus = true; 
+				console.log(mapManager.markers);
 				return true;
 			} else {
 				console.log('Key not found in Markers');
@@ -220,12 +251,16 @@ angular.module('tidepoolsServices', ['ngResource'])
 					console.log('Safe mode cant add path: Key in use'); 
 					return false;
 				} else {
-					delete mapManager.paths[key];
+					console.log('else1');
 					mapManager.paths[key] = angular.copy(path);
+					console.log(mapManager.paths[key]);
 				}	
 			} else { //key is free
-				mapManager.paths[key] = angular.copy(path); 
+				console.log('else2');
+				mapManager.paths[key] = path; 
+				console.log(mapManager.paths[key]);
 			}
+			
 			refreshMap();
 			return true;
 		}
@@ -263,18 +298,24 @@ angular.module('tidepoolsServices', ['ngResource'])
 		*/ 
 		mapManager.setMaxBoundsFromPoint = function(point, distance) {
 			leafletData.getMap().then(function(map){
-				map.setMaxBounds([
+				setTimeout(function() {map.setMaxBounds([
 					[point[0]-distance, point[1]-distance],
 					[point[0]+distance, point[1]+distance]
-				]);
+				])}, 400);
 			});
 			refreshMap();
 			return true;
 		}
 		
-		function refreshMap(){ 
+		mapManager.refresh = function() {
+			refreshMap();
+		}
+		
+		function refreshMap() { 
+			console.log('--refreshMap()--');
 	        leafletData.getMap().then(function(map) {
-	        	map.invalidateSize();
+	        	console.log('invalidateSize() called');
+	        	setTimeout(function(){ map.invalidateSize()}, 400);
 	        });
 		}
 		

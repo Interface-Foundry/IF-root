@@ -44,7 +44,7 @@
 var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives','IF-directives']).
   config(function($routeProvider,$locationProvider, $httpProvider) {
 
-  //================================================
+    //================================================
     // Check if the user is connected
     //================================================
     var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){

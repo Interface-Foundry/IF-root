@@ -5,7 +5,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
 	var aperture = apertureService;
-	aperture.toggle('half');
+	aperture.set('half');
 	
 	var worldLoaded = false;
 	var landmarksLoaded = false;
@@ -43,7 +43,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
             $scope.landmarks[$scope.selectedIndex].avatar = data.result;
         }
     });
-	}	
+	}
 	
 	$scope.addLandmark = function() {
 		console.log('--addLandmark--');
@@ -117,9 +117,10 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 		console.log('Continue w select');
 		$scope.selectedIndex = i; //change landmarks
 		map.setCenter($scope.landmarks[i].loc.coordinates, 17);//center map on new markers
+		console.log($scope.landmarks[i].name);
 		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 		map.setMarkerFocus($scope.landmarks[i]._id);
-		
+		console.log('Complete select');
 	}
 		
 	function loadLandmarks() {

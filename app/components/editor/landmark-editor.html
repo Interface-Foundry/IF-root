@@ -2,7 +2,7 @@
 <legend>Pin Landmarks</legend>
 <button ng-click="addLandmark()">Add Landmark</button>
 <ul class="row">
-	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor col-xs-8" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()" ng-init="addFileUploads()">
+	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor col-xs-8" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()" ng-init="">
 		<img ng-src='{{landmark.avatar}}' class='avatar' ng-cloak/> {{landmark.name}} {{landmark._id}} <button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 		<div ng-form class='landmark-form'>
 		

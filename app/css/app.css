@@ -103,6 +103,39 @@ nav li input.form-control {
 
 /* *DRAWER* Drawer */
 
+#scrim {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	display: none;
+	z-index: 200; 
+	text-align: center;
+	
+	background-color: #3594ed;
+}
+
+#scrim.loading {
+	display: block;
+}
+
+#scrim span {
+	position: relative;
+	top: 50%;
+	font-size: 30px;
+	color: white;
+	-webkit-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
+	-webkit-animation: spin 2.5s infinite linear;
+}
+
+@-webkit-keyframes spin {
+	0% {-webkit-transform: rotate(0deg);}
+	100% {-webkit-transform: rotate(360deg);}
+}
+
 #drawer {
 	position:absolute;
 	top: 0;
@@ -143,7 +176,7 @@ nav li input.form-control {
 #aperture {
   overflow: hidden;
   
-  position:absolute;
+  position:fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -153,7 +186,7 @@ nav li input.form-control {
   opacity: 1;
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 
-  z-index: 20;
+  z-index: 200;
   
 }
 
@@ -182,7 +215,7 @@ nav li input.form-control {
 
 
 #leafletmap {
- 	height:350px;
+ 	height:100%;
 }
 
 .angular-leaflet-map {

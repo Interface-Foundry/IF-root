@@ -1,6 +1,19 @@
-<div class="navfix editorbg"><button ng-click="prevPage()">prev</button>
+<div class="navfix editorbg">
 
-<button ng-click="nextPage()">next</button>
+<div class="toolbar">
+<button type="button" class="btn btn-success" ng-click="prevPage()" ng-hide="pageIndex==0">
+  <span class="glyphicon glyphicon-chevron-left"></span>
+</button>
+{{pageIndex+1}}/3
+<button type="button" class="btn btn-success" ng-click="nextPage()" ng-hide="pageIndex==2">
+  <span class="glyphicon glyphicon-chevron-right"></span>
+</button>
+<a ng-href="#/w/{{worldURL}}"><button type="button" class="btn btn-primary" ng-hide="pageIndex!=2">Build your World
+</button></a>
+
+
+</div>
+
 	<ul id="maker-pages">
 		<li ng-class="pageClass[0]" class="container"> 
 		<form name="worldDetail" ng-submit="submitForm()" id="worldDetail" novalidate>
@@ -63,30 +76,34 @@
 				</div>
 				</div>
 				<div class="col-xs-6">
-					<div class="checkbox">
-						<label>Location<input ng-model="mapConfirm" ng-change="mapLock()" type="checkbox" value=""><span class="mappos">{{markers.m.lat}},{{markers.m.lng}}</span></label>
+					<div class="field">
+						<button ng-click="mapLock()" class="btn btn-primary">Redraw Border</button><span class="mappos">{{markers.m.lat}},{{markers.m.lng}}</span>
 					</div>
 					<div class="field">
+						<button ng-click="showTime=!showTime" class="btn btn-primary">Enable Time</button>
+					</div>
+					<span ng-show="showTime">
+						<div class="field">
 						<label>Start Date</label> <input type="text" ng-model="world.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>
                       <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>
                     </div>
-                    <div class="field">
+	                    <div class="field">
                       	<label>Start Time</label> <input type="text" ng-model="world.time.start" data-date-format="hh:mm" bs-timepicker />
 					  	<button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
 					</div>
-					<div class="field">
+						<div class="field">
                       	<label>End Time</label> <input type="text" ng-model="world.time.end" data-date-format="hh:mm" bs-timepicker />
                       <button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
 					</div>
-
-                      <h4><a ng-click="showEndDateDetails = ! showEndDateDetails ; addEndDate()">Add End Date?</a></h4>
-                     		<span ng-show="showEndDateDetails" >
-					 		 <hr>
-					  		<label>End Date</label> <input type="text" ng-model="world.date.end" data-date-format="MM dd, yyyy" bs-datepicker/>                
-                          <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>    
-						  </span> 
-
-					  </div>
+	
+	                      <h4><a ng-click="showEndDateDetails = ! showEndDateDetails ; addEndDate()">Add End Date?</a></h4>
+	                     		<span ng-show="showEndDateDetails" >
+						 		 <hr>
+						  		<label>End Date</label> <input type="text" ng-model="world.date.end" data-date-format="MM dd, yyyy" bs-datepicker/>                
+	                          <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>    
+							  </span> 
+					</span>
+				</div>
 			</div>
 		</form>
 		</li>
@@ -98,10 +115,10 @@
 					<div class="col-xs-8">		
 						<div class="mapbox field">
 							<div class="row">
-								<div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/urban_small.png"/>urban</div>
-								<div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/fairy_small.png"/>fairy</div>
-								<div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/sunset_small.png"/>sunset</div>
-								<div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/arabesque_small.png"/>arabesque</div>
+								<a ng-click='mapping.mapThemeSelect=mapThemes[0]'><div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/urban_small.png" ng-class="{selectOutline: mapping.mapThemeSelect == mapThemes[0]}"/>urban</div></a>
+								<a ng-click='mapping.mapThemeSelect=mapThemes[1]'><div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/fairy_small.png" ng-class="{selectOutline: mapping.mapThemeSelect == mapThemes[1]}"/>fairy</div></a>
+								<a ng-click='mapping.mapThemeSelect=mapThemes[2]'><div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/sunset_small.png" ng-class="{selectOutline: mapping.mapThemeSelect == mapThemes[2]}"/>sunset</div></a>
+								<a ng-click='mapping.mapThemeSelect=mapThemes[3]'><div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/arabesque_small.png" ng-class="{selectOutline: mapping.mapThemeSelect == mapThemes[3]}"/>arabesque</div></a>
 							</div>
 							<div class="row">
 								<div class='col-xs-4'>
@@ -111,32 +128,16 @@
 						</div>
 						<div class='field'>
 							<div class='row'>
-								<div class='col-xs-1'><img class="marker-img" ng-src='/img/marker/red-marker.png'/></div>
-								<div class='col-xs-1'><img class="marker-img" ng-src='/img/marker/orange-marker.png'/></div>
-								<div class='col-xs-1'><img class="marker-img" ng-src='/img/marker/yellow-marker.png'/></div>
-								<div class='col-xs-1'><img class="marker-img" ng-src='/img/marker/green-marker.png'/></div>
-								<div class='col-xs-1'><img class="marker-img" ng-src='/img/marker/blue-marker.png'/></div>
-								<div class='col-xs-1'><img class="marker-img" ng-src='/img/marker/purple-marker.png'/></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[0]"><img class="marker-img" ng-src='/img/marker/red-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[0]}"/></a></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[1]"><img class="marker-img" ng-src='/img/marker/orange-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[1]}"/></a></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[2]"><img class="marker-img" ng-src='/img/marker/yellow-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[2]}"/></a></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[3]"><img class="marker-img" ng-src='/img/marker/green-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[3]}"/></a></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[4]"><img class="marker-img" ng-src='/img/marker/blue-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[4]}"/></a></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[5]"><img class="marker-img" ng-src='/img/marker/purple-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[5]}"/></a></div>
 								<div class='col-xs-7'>
 									<select ng-model="mapping.markerSelect" ng-options="markerOption.name for markerOption in markerOptions" class='form-control'></select>
 								</div>
 							</div>
-						</div>
-						<div class="field">
-								upload your own
-								  <modal-dialog show='myData.modalShown' width='500px' dialog-title='Modal Dialog Title' on-close='logClose()'>
-							        <p>This is some html content</p>
-							        <p>
-							          <label for='hello'>Hello:</label>
-							          <input type='text' name='hello' ng-model='myData.hello' />
-							        </p>
-							        <p>
-							          <label for='foo'>Foo:</label>
-							          <input type='text' name='foo' ng-model='myData.foo' />
-							        </p>
-							        <img src='http://upload.wikimedia.org/wikipedia/commons/2/22/Turkish_Van_Cat.jpg' width='300px'/>
-							      </modal-dialog>
-							      <button ng-click='toggleModal()'>Toggle Modal</button>
 						</div>
 						<div class="field">
 								Add a floorplan ---  
@@ -158,19 +159,19 @@
 						<label>Card BG</label> <input name="cardBG" type='text' class='color' value='#FFFFFF' ng-model='styles.cardBG_color'/>
 					</div>
 					<div class="field">
-						<label>Card Border</label> <input name="cardBorder" type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/> 
+						<!--<label>Card Border</label> <input name="cardBorder" type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/> -->
 					</div>
 					<div class="field">
 						<label>World Title Color</label> <input name="worldTitle" type='text' class="color" value='#808080' ng-model='styles.worldTitle_color'/>
 					</div>
 					<div class="field">
-						<label>Landmark Title Color</label> <input name="landmarkTitle" type='text' class="color" ng-model='styles.landmarkTitle_color' disabled/>
+						<label>Landmark Title Color</label> <input name="landmarkTitle" type='text' class="color" value='#808080' ng-model='styles.landmarkTitle_color'/>
 					</div>
 					<div class="field">
-						<label>Category Title Color</label> <input name="categoryTitle" type='text' class="color" ng-model='styles.categoryTitle_color' disabled/>
+						<label>Category Title Color</label> <input name="categoryTitle" type='text' class="color" value='#808080' ng-model='styles.categoryTitle_color'/>
 					</div>
 					<div class="field">
-						<label>Accent Text Color</label> <input name="accent" type='text' class="color" ng-model='styles.accent_color' disabled/>
+						<label>Accent Text Color</label> <input name="accent" type='text' class="color" value='#808080' ng-model='styles.accent_color'/>
 					</div>
 					<div class="field">
 						<label>Body Font</label> <select></select>
@@ -189,9 +190,9 @@
 								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
 								<h1 ng-style="{'color': styles.worldTitle_color}">World Title Color</h1>
 								</div>
-									<span ng-style="categoryTitleStyle">Category Title Color</span>
+									<span ng-style="{'color': styles.categoryTitle_color}">Category Title Color</span>
 								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
-									<span ng-style="">Landmark Title Color</span>
+									<span ng-style="{'color': styles.landmarkTitle_color}">Landmark Title Color</span>
 								</div>
 							</div>
 							</div>
@@ -201,11 +202,6 @@
 			
 		</form>
 		
-		</li>
-		
-		<li ng-class="pageClass[3]" class="container">
-		congrats!!!
-		<a ng-href="#/w/{{worldURL}}">Go to your world!</a>
 		</li>
 	</ul>
 		

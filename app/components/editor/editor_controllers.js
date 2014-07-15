@@ -1,7 +1,7 @@
 //parent
-function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData) {
+function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
-	var bubbleCircle;
+	
 	angular.extend($rootScope, {apertureSize: 0});
 	angular.extend($rootScope, {apertureOn: false});
 	
@@ -9,6 +9,11 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.tiles = tilesDict.mapbox;
             
     $scope.markers = {};
+    angular.extend($scope, 
+    	{paths: {}}
+    	);
+	
+	angular.extend($rootScope, {loading: true});
 	
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry"; 
@@ -30,7 +35,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     $scope.world = { 
             avatar: "img/tidepools/default.jpg" 
     };
-
+	
+	$scope.world = {loc:{}};
     $scope.mapping = {};
     $scope.styles = {};
     $scope.project = {};
@@ -56,10 +62,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.mapping.markerSelect = $scope.markerOptions[0];
 	
 	$scope.bgColor = '#CCC';
+
 	
-	angular.extend($scope, {
-		worldDetailPaths: {}
-	});
 	
 	//custom elements, eventually replace with directives
 	$('.color').spectrum({
@@ -92,9 +96,11 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     });
 
 	$scope.nextPage = function () {
+		if ($scope.worldDetail.worldName.$valid) {
 		if ($scope.pageIndex<($scope.pageClass.length-1)) {
 			$scope.pageClass[$scope.pageIndex] = 'left';
 			if ($scope.pageIndex == 0){ //making new world after first page
+				
 				if (!$scope.worldID){ //new world
 					console.log("Saving new world");
 					saveWorld();
@@ -102,7 +108,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 				else { //edit created world
 					console.log("Editing created world");
 					saveWorld('edit');
-				}	
+				}
 			}
 			if ($scope.pageIndex == 1){ //adding/editing world map settings
 				console.log("Adding/editing world map settings");
@@ -117,13 +123,15 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			$scope.pageClass[$scope.pageIndex] = 'current';
 		}
 
-
+		} else {
+			window.alert("Add a name!");
+		}
 	};
 	
 	$scope.prevPage = function() {
 		if ($scope.pageIndex>0) {
 			$scope.pageClass[$scope.pageIndex] = 'right';
-			$scope.pageIndex = $scope.pageIndex - 1; 
+			$scope.pageIndex = $scope.pageIndex - 1;
 			$scope.pageClass[$scope.pageIndex] = 'current';
 		}
 	};
@@ -140,6 +148,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 								$scope.center.lng = results[0].geometry.location.lng();
 								$scope.markers.m.lat = results[0].geometry.location.lat();
 								$scope.markers.m.lng = results[0].geometry.location.lng();
+								
 							} else { console.log('No results found.')}
 						});
 					}
@@ -147,34 +156,25 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		};
 	
 	$scope.mapLock = function() {
-		console.log($scope.mapConfirm);
-		if ($scope.mapConfirm) {
 			//position is locked
-			$scope.markers.m.draggable = false;
 			console.log($scope.markers.m.lat);
 			console.log($scope.markers.m.lng);
-			$scope.paths = {};
-			angular.extend($scope, {
-				paths: {
-					circle: {
-					type: "circle",
-					radius: 5000,
-					latlngs: {lat: $scope.markers.m.lat, lng: $scope.markers.m.lng}
-					}
+			$scope.paths = {
+				worldBounds: {
+					type: 'circle',
+					radius: 150,
+					latlngs: {lat:$scope.markers.m.lat,
+							lng:$scope.markers.m.lng}
 				}
-			});
-			} else {
-			//position is movable
-			$scope.markers.m.draggable = true;
-		}	
-	};
+			};
+			refreshMap();	
+			};
 	
 	function refreshMap(){ 
         leafletData.getMap('worldDetailMap').then(function(map) {
             map.invalidateSize();
         });
     }
-      
 
 	function showPosition(position) {
 
@@ -186,7 +186,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             $scope.center = {
                     lat: userLat,
                     lng: userLon,
-                    zoom: 12
+                    zoom: 15
                 };
             $scope.tiles = tilesDict.mapbox;
             
@@ -200,7 +200,45 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
                         icon: local_icons.yellowIcon
                     }
                 };
+                
+                $scope.paths = {
+				worldBounds: {
+					type: 'circle',
+					radius: 150,
+					latlngs: {lat:$scope.markers.m.lat,
+							lng:$scope.markers.m.lng}
+				}
+			};
+			
+			$scope.$on('leafletDirectiveMap.moveend', function(event){
+                    console.log('moveend');
+                    /*angular.extend($scope, {
+	                    paths: {
+		                    worldBounds: {
+		                    type:'circle',
+		                    radius: 150,
+			                    latlngs: {lat:$scope.markers.m.lat,
+							lng:$scope.markers.m.lng}
+		                    }
+	                    }
+                    });*/
+                    
+	                $scope.paths = {
+		                    worldBounds: {
+		                    type:'circle',
+		                    radius: 150,
+			                    latlngs: {lat:$scope.markers.m.lat,
+							lng:$scope.markers.m.lng}
+		                    }
+	                    };
+	                    
+                    refreshMap();
+                    /*$scope.paths.worldBounds.latlngs = {lat:$scope.markers.m.lat,
+							lng:$scope.markers.m.lng};*/
+                });
+            angular.extend($rootScope, {loading: false});
             refreshMap();
+            
      }
 
 	
@@ -265,7 +303,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         // } 
         //------- END TIME --------//
 
-        $scope.world.loc.coordinates = [$scope.markers.m.lat, $scope.markers.m.lng];
+        $scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
 
         $scope.world.userID = $scope.userID;
 
