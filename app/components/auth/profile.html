@@ -1,2 +1,15 @@
+<div class="container-fluid navfix">
 <h1>Profile</h1>
 
+<ul>
+	<li ng-repeat="world in worlds">
+		<div class="media">
+			<img ng-src="{{world.avatar}}" class="avatar pull-left">
+			<div class="media-body">
+				<h4 class="media-heading">{{world.name}}</h4>
+				<a ng-href="#/w/{{world.id}}">Go to this world</a>
+			</div>
+		</div>
+	</li>
+</ul>
+</div>

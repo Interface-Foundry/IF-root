@@ -1,5 +1,5 @@
 function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager) {
-    
+   
     var map = mapManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	

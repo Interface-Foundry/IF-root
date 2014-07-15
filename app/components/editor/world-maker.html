@@ -113,6 +113,10 @@
 			<legend>Style your Map</legend>
 				<div class="row">
 					<div class="col-xs-8">		
+						<div class="field">
+								Add a floorplan
+								<div ng-include src='"partials/map-overlay-modal.html"' ng-controller='MapModalCtrl' onload='loadMe()' ></div>
+						</div>
 						<div class="mapbox field">
 							<div class="row">
 								<a ng-click='mapping.mapThemeSelect=mapThemes[0]'><div class='col-xs-6'><img class="col-xs-12 img-responsive" ng-src="/img/mapbox/urban_small.png" ng-class="{selectOutline: mapping.mapThemeSelect == mapThemes[0]}"/>urban</div></a>
@@ -139,9 +143,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="field">
-								Add a floorplan ---  
-						</div>
+						
 					</div>
 				</div>
 		</form>

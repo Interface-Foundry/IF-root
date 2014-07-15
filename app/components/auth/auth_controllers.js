@@ -44,9 +44,12 @@ function SignupCtrl($scope, $rootScope, $http, $location) {
 function ProfileCtrl($scope, $rootScope, $http, $location){
 	// This object will be filled by the form
   $scope.user = {};
+  
+  $scope.worlds = [];
 
   $http.get('/api/user/profile').success(function(user){
   	console.log(user);
+  	$scope.worlds = user; 
   });
 }
 
