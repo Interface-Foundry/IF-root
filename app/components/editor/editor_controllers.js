@@ -1,5 +1,5 @@
-//parent
-function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents, apertureService) {
+
+function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents, apertureService, $http) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
 	var aperture = apertureService;
 	aperture.set('off');
@@ -71,9 +71,12 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$('.color').spectrum({
 		clickoutFiresChange: true
 	});
-	
-	angular.element('#fileupload').fileupload({
-        url: '/api/upload',
+
+
+	// =============  TEMPORARY  ============== //
+
+    angular.element('#fileupload').fileupload({
+        url: '/api/upload_maps',
         dataType: 'text',
         progressall: function (e, data) {  
 
@@ -93,9 +96,68 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             $('<img src="'+ data.result +'">').load(function() {
               $(this).width(150).height(150).appendTo('#preview');
             });
-            $scope.world.avatar = data.result;
+                  
+            $scope.mapIMG = data.result;
         }
     });
+
+
+    $scope.buildMap = function(){
+
+        //fake data r/n
+        var coordBox = {
+            worldID: '53c4a0ab0ee5d8ccfa68a034',
+            nw_loc_lng: -73.99749,
+            nw_loc_lat:  40.75683,
+            sw_loc_lng: -73.99749,
+            sw_loc_lat:   40.7428,
+            ne_loc_lng: -73.98472,
+            ne_loc_lat:  40.75683,
+            se_loc_lng: -73.98472,
+            se_loc_lat:   40.7428
+        };
+
+        var coords_text = JSON.stringify(coordBox);
+
+        var data = {
+          mapIMG: $scope.mapIMG,
+          coords: coords_text
+        }
+
+        $http.post('/api/build_map', data).success(function(response){
+            console.log(response);
+        });
+
+    }
+
+    //===================================//
+
+
+	
+	// angular.element('#fileupload').fileupload({
+ //        url: '/api/upload',
+ //        dataType: 'text',
+ //        progressall: function (e, data) {  
+
+ //            $('#progress .bar').css('width', '0%');
+
+ //            var progress = parseInt(data.loaded / data.total * 100, 10);
+ //            $('#progress .bar').css(
+ //                'width',
+ //                progress + '%'
+ //            );
+ //        },
+ //        done: function (e, data) {
+
+ //            $('#uploadedpic').html('');
+ //            $('#preview').html('');
+ //            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
+ //            $('<img src="'+ data.result +'">').load(function() {
+ //              $(this).width(150).height(150).appendTo('#preview');
+ //            });
+ //            $scope.world.avatar = data.result;
+ //        }
+ //    });
 
 	$scope.nextPage = function () {
 		if ($scope.worldDetail.worldName.$valid) {

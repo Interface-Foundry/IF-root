@@ -125,20 +125,7 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
 
 
 
-    //fake data r/n
-    var coordBox = {
-        worldID: '53c4a0ab0ee5d8ccfa68a034',
-        nw_loc_lng: -73.99749,
-        nw_loc_lat:  40.75683,
-        sw_loc_lng: -73.99749,
-        sw_loc_lat:   40.7428,
-        ne_loc_lng: -73.98472,
-        ne_loc_lat:  40.75683,
-        se_loc_lng: -73.98472,
-        se_loc_lat:   40.7428
-    };
 
-    var coords_text = JSON.stringify(coordBox);
 
 
 
@@ -166,8 +153,39 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
               $(this).width(150).height(150).appendTo('#preview');
             });
             $scope.landmark.stats.avatar = data.result;
+      
+            $scope.mapIMG = data.result;
         }
     });
+
+
+    $scope.buildMap = function(){
+
+        //fake data r/n
+        var coordBox = {
+            worldID: '53c4a0ab0ee5d8ccfa68a034',
+            nw_loc_lng: -73.99749,
+            nw_loc_lat:  40.75683,
+            sw_loc_lng: -73.99749,
+            sw_loc_lat:   40.7428,
+            ne_loc_lng: -73.98472,
+            ne_loc_lat:  40.75683,
+            se_loc_lng: -73.98472,
+            se_loc_lat:   40.7428
+        };
+
+        var coords_text = JSON.stringify(coordBox);
+
+        var data = {
+          mapIMG: $scope.mapIMG,
+          coords: coords_text
+        }
+
+        $http.post('/api/build_map', data).success(function(response){
+            console.log(response);
+        });
+
+    }
 
 
     //location search by human string via google geo, temp not enabled
