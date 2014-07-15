@@ -77,7 +77,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
-    		
+    
 	angular.extend($rootScope, {loading: false});
 	
     //to refresh map after resize of leaflet map

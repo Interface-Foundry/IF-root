@@ -19,7 +19,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 //////////////////////DEFINE FUNCTIONS//////////////////////
 ////////////////////////////////////////////////////////////
 	$scope.addFileUploads = function() {
-		angular.element('#fileupload').fileupload({
+		angular.element('.fileupload').fileupload({
         url: '/api/upload',
         dataType: 'text',
         progressall: function (e, data) {  
@@ -33,13 +33,6 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
             );
         },
         done: function (e, data) {
-
-            $('#uploadedpic').html('');
-            $('#preview').html('');
-            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
-            $('<img src="'+ data.result +'">').load(function() {
-              $(this).width(150).height(150).appendTo('#preview');
-            });
             $scope.landmarks[$scope.selectedIndex].avatar = data.result;
         }
     });
@@ -222,5 +215,9 @@ function LandmarkEditorItemController($scope, db, Landmark, mapManager) {
 	
 	$scope.selectLandmark = function() {
 		$scope.$parent.selectItem($scope.$index);
+	}
+	
+	$scope.fUploads = function() {
+		$scope.$parent.addFileUploads();
 	}
 }

@@ -173,8 +173,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 					console.log('Safe mode cant add marker: Key in use');
 					return false;
 				} else {
-					delete mapManager.markers[key];
-					mapMapmanager.markers[key] = angular.copy(marker);
+					mapManager.markers[key] = angular.copy(marker);
 					console.log('Marker added');
 				}
 			} else {

@@ -2,7 +2,7 @@
 <legend>Pin Landmarks</legend>
 <button ng-click="addLandmark()">Add Landmark</button>
 <ul class="row">
-	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor col-xs-8" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()" ng-init="">
+	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor col-xs-8" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()" ng-init="fUploads()">
 		<img ng-src='{{landmark.avatar}}' class='avatar' ng-cloak/> {{landmark.name}} {{landmark._id}} <button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 		<div ng-form class='landmark-form'>
 		
@@ -12,7 +12,7 @@
 						<span class="btn btn-success fileinput-button">
 				        	<i class="icon-plus icon-white"></i>
 							<span>Add Profile Pic</span>
-							<input id="fileupload" type="file" name="files[]">
+							<input class="fileupload" type="file" name="files[]">
 						</span>
 						
 						<label>Or Drag & Drop Pic</label>
@@ -22,7 +22,7 @@
 						</div>
 				
 						<p id="uploadedpic"></p>
-						<div id="preview"></div>         
+						<div class="preview"></div>         
 
 			<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
 			<label>Description</label> <textarea ng-model="landmark.description" class="form-control"/>
