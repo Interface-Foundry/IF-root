@@ -39,6 +39,8 @@ var urlify = require('urlify').create({
   trim:true
 });
 
+var request = require('request');
+
 var morgan       = require('morgan');
 var cookieParser = require('cookie-parser');
 var session      = require('express-session');
@@ -137,6 +139,24 @@ var fn = function (req, res) {
 };
 
 /* Routes */
+
+
+/// USE A SWITCH HERE TO SWITCH BETWEEN REQUESTS /////
+
+  // switch (req.uri.path) {
+  //   case '/':
+  //     display_form(req, res);
+  //     break;
+  //   case '/upload':
+  //     upload_file(req, res);
+  //     break;
+  //   default:
+  //     show_404(req, res);
+  //     break;
+  // }
+
+//////////////////////////
+
 
 // Query
 app.get('/api/:collection', function(req, res) { 
@@ -555,7 +575,6 @@ app.get('/api/:collection/:id', function(req, res) {
                         "style" : style
                     };
                     res.send(resWorldStyle);
-                
                 }
 
             });       
@@ -1039,6 +1058,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
     //disabled Max image upload size for NOW << enable later...
    // if (req.files.files[0].size <= 5242880){
 
+        // SET FILE SIZE LIMIT HERE 
         //FILTER ANYTHING BUT GIF JPG PNG
 
         var fstream;
@@ -1088,6 +1108,173 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 
 });
 
+
+//map upload
+app.post('/api/upload_maps', isLoggedIn, function (req, res) {
+
+    // var r = request.post('http://service.com/upload')
+    // var form = r.form()
+    // form.append('my_field', 'my_value')
+    // form.append('my_buffer', new Buffer([1, 2, 3]))
+    // form.append('my_file', fs.createReadStream(path.join(__dirname, 'doodle.png'))
+    // form.append('remote_file', request('http://google.com/doodle.png'))
+
+
+    //request.get(fs.createReadStream('/app/temp_map_uploads/14368660.png')).pipe(request.post('http://107.170.180.141:3000/api/upload'));
+
+    //request(req).pipe(request.post('http://107.170.180.141:3000/api/upload'));
+
+
+
+
+    //request.post('http://107.170.180.141:3000/api/upload').pipe(fs.createReadStream( __dirname +'/app/temp_map_uploads/14368660.png'));
+
+
+    // request('http://107.170.180.141:3000/api/upload').pipe(req.busboy);
+
+
+    // TEMPORARY FILE UPLOAD AND DELETE, needs to direct stream from form upload....
+    var fstream;
+
+    // console.log(req);
+
+    // console.log(req.body);
+    req.pipe(req.busboy);
+
+   // console.log(req.busboy);
+    // //passed coordinates
+    // req.busyboy.on('data', function(data) {
+    //   console.log(data);
+    // });
+
+    req.busboy.on('file', function (fieldname, file, filename) {
+
+        // console.log(fieldname[0]);
+        // console.log(fieldname[1]);
+     
+        //filename = fieldname.replace(/'/g, "''")
+
+        //fieldname = fieldname.replace("%22", "'", 'g');
+
+
+        //console.log(fieldname);
+
+
+
+        var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
+        var fileType = filename.split('.').pop();
+
+        while (1) {
+
+            var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
+            var fileNumber_str = fileNumber.toString(); 
+            var current = fileNumber_str + '.' + fileType;
+
+            //checking for existing file, if unique, write to dir
+            if (fs.existsSync("app/temp_map_uploads/" + current)) {
+                continue; //if there are max # of files in the dir this will infinite loop...
+            } 
+            else {
+
+                var newPath = "app/temp_map_uploads/" + current;
+
+                fstream = fs.createWriteStream(newPath);
+                file.pipe(fstream);
+                fstream.on('close', function() {
+
+                    // after file saved locally, send to IF-Tiler server
+                    
+                    var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
+                      if (err) {
+
+                            //delete temp file
+                            fs.unlink(__dirname + '/app/temp_map_uploads/' + current, function (err) {
+                              if (err) throw err;
+                              console.log('successfully deleted '+__dirname + '/app/temp_map_uploads/' + current);
+                            });
+
+                        return console.error('upload failed:', err);
+                      }
+                      else{
+                        console.log('Upload successful! Server responded with:', body);
+
+                        worldMapTileUpdate(req, res, body);
+
+                            //delete temp file
+                            fs.unlink(__dirname + '/app/temp_map_uploads/' + current, function (err) {
+                              if (err) throw err;
+                              console.log('successfully deleted '+__dirname + '/app/temp_map_uploads/' + current);
+                            });
+
+                       }
+                    });
+
+
+                    var form = r.form();
+                    //form.append('my_field', fieldname);
+                    form.append('my_buffer', new Buffer([1, 2, 3]));
+                    form.append(fieldname, fs.createReadStream(__dirname + '/app/temp_map_uploads/' + current)); //passing fieldname as json cause ugh.
+
+
+                }); 
+
+
+                break;
+            }
+        }
+
+    });
+
+});
+
+
+    function worldMapTileUpdate(req, res, data){ //adding zooms, should be incorp into original function
+
+        var tileRes = JSON.parse(data); //incoming box coordinates
+
+         landmarkSchema.findById(tileRes.worldID, function(err, lm) {
+          if (!lm){
+            console.log(err);
+          }
+          else if (req.user._id == lm.permissions.ownerID){
+
+            var min = tileRes.zooms[0];
+            var max = tileRes.zooms.slice(-1)[0];
+
+            lm.style.maps = {
+                type: 'both', 
+                localMapID: tileRes.mapURL, 
+                localMapName: tileRes.worldID
+
+            };
+
+            lm.style.maps.localMapOptions = {
+                minZoom: min,
+                maxZoom: max,
+                attribution: "IF",
+                reuseTiles: true,
+                tms: true
+            }
+
+            //NEED TO CHANGE TO ARRAY to push new marker types, eventually
+          //  lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
+
+            lm.save(function(err, landmark) {
+                if (err){
+                    console.log('error');
+                }
+                else {
+                    console.log(landmark);
+                    console.log('success');
+                }
+            });
+          }
+          else {
+            console.log('unauthorized user');
+          }
+        });       
+
+    }
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {

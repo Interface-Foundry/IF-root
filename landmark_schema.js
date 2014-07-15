@@ -13,12 +13,14 @@ monguurl = require('monguurl');
 		valid: Boolean, //are all req. items inputted
 		archived: Boolean, //if object in archive or "live"
 		avatar: String,
+		hasLoc: Boolean,
 		loc: { //user inputted loc
 	    	type: {
 	      		type: String //GeoJSON-'point'
 	    	},
 	    	coordinates: []
 	  	},
+	  	loc_nickname: String,
 	  	// loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
 	  	// 	name: String,
 	  	// 	type: {
@@ -31,6 +33,7 @@ monguurl = require('monguurl');
 		type: String, //event, place
 		subType: { type: [String], index: true }, // type of event/place	
 		category: String, //category of type
+		landmarkCategories: [String],
 		style: {
 			styleID: String, //link to landmark's style
 			maps: {
@@ -38,17 +41,26 @@ monguurl = require('monguurl');
 				cloudMapID: String,
 				cloudMapName: String,
 				localMapID: String,
-				localMapName: String
+				localMapName: String,
+		        localMapOptions: {
+		            attribution: String,
+		            minZoom: Number,
+		            maxZoom: Number,
+		            reuseTiles: Boolean,
+		            tms: Boolean //needed for tile server renders
+		        }
 			},
 			markers: {
 				name: String,
 				category: String
 			}	
 		},
+		hasTime: Boolean,
 		time: {
 			created: { type: Date, default: Date.now },
 			start: { type: Date},
-			end: { type: Date}
+			end: { type: Date},
+			timezone: String
 		},
 		timetext: {
 			datestart: String,
@@ -73,8 +85,58 @@ monguurl = require('monguurl');
 			viewers: [String],
 			admins: [String]
 		},
+		updated_time: Date, // TO DO
+		source_fb: { //source of data bubble (is facebook event api)
+			is_source: Boolean,
+			id: String,
+			cover: {
+				id: String,
+				source: String,
+				offset_y: Number,
+				offset_x: Number
+			},
+			owner: String,
+			parent_group: String,
+			privacy: String,
+			ticket_uri: String,
+			updated_time: Date,
+			venue: String
+		},
+		source_meetup: {
+			id: Number,
+			status: String,
+			visibility: String,
+			updated: Number,
+			venue: {
+				id: Number,
+				repinned: Boolean,
+				name: String,
+				state: String,
+				address_1: String,
+				city: String,
+				country: String
+			},
+			fee: {
+				amount: Number,
+				description: String,
+				label: String,
+				required: String,
+				accepts: String,
+				currency: String	
+			},
+			yes_rsvp_count: Number,
+			rsvp_limit: Number,
+			event_url: String,
+			how_to_find_us: String,
+			group: {
+				id: Number,
+				name: String,
+				who: String
+			}
+		},
 		tags: [String] //search tags
 	}); 
+
 
 	landmarkSchema.plugin(textSearch);
 

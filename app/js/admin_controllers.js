@@ -1,7 +1,7 @@
 function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
 
     //if authenticate, show and provide this functionality:
-    //if not, login plz k thx
+    //if not, login plz k thx   
 
     $scope.landmarkID;
     $scope.worldID = '029345823045982345';
@@ -108,8 +108,44 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
     });
 
 
+    // var nw_loc_lng = -73.99749;
+    // var nw_loc_lat = 40.75683;
+
+    // var sw_loc_lng = -73.99749;
+    // var sw_loc_lat = 40.7428;
+
+    // var ne_loc_lng = -73.98472;
+    // var ne_loc_lat = 40.75683;
+
+    // var se_loc_lng = -73.98472;
+    // var se_loc_lat = 40.7428;
+
+
+
+
+
+
+    //fake data r/n
+    var coordBox = {
+        worldID: '53c4a0ab0ee5d8ccfa68a034',
+        nw_loc_lng: -73.99749,
+        nw_loc_lat:  40.75683,
+        sw_loc_lng: -73.99749,
+        sw_loc_lat:   40.7428,
+        ne_loc_lng: -73.98472,
+        ne_loc_lat:  40.75683,
+        se_loc_lng: -73.98472,
+        se_loc_lat:   40.7428
+    };
+
+    var coords_text = JSON.stringify(coordBox);
+
+
+
     angular.element('#fileupload').fileupload({
-        url: '/api/upload',
+        url: '/api/upload_maps',
+        paramName: coords_text, //sending map coordinates to backend
+        //formData: form,
         dataType: 'text',
         progressall: function (e, data) {  
 

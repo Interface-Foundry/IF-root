@@ -43,7 +43,7 @@ var local_icons = {
     }
 }
 
-
+//http://107.170.180.141/maps/ <<< extension for tile server
 
 var tilesDict = {
     openstreetmap: {
