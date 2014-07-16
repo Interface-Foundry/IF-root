@@ -28,13 +28,15 @@
 			<label>Description</label> <textarea ng-model="landmark.description" class="form-control"/>
 			<label>Type</label> <select ng-model="typeSelect" ng-options="typeOption.name for typeOption in typeOptions" class="form-control"></select>
 			<label>Category</label> <input type="text" ng-model="landmark.category" class="form-control"/>
-			<button type="button" ng-click="time=!time">Toggle Time</button>
-			<div ngform class="landmark-time" ng-class="{hidden: !time}">
+
+			<button type="button" ng-click="showTime=!showTime">Enable Time</button>
+			<div ngform class="landmark-time" ng-class="{hidden: !showTime}">
 				<label>Start Date</label> <input type="text" ng-model="landmark.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>
 				<label>End Date</label> <input type="text" ng-model="landmark.date.end" data-date-format="MM dd, yyyy" bs-datepicker/>
 				<label>Start Time</label> <input type="text" ng-model="landmark.time.start" data-date-format="hh:mm" bs-timepicker />
-				<label>End Time</label> <input type="text" ng-model="landmark.time.start" data-date-format="hh:mm" bs-timepicker />
+				<label>End Time</label> <input type="text" ng-model="landmark.time.end" data-date-format="hh:mm" bs-timepicker />
 			</div>
+
 			</div>
 			<button ng-click="saveLandmark()">Save</button>
 		</div>

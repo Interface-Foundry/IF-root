@@ -124,7 +124,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			console.log('--db.landmarks.query--');
 				console.log('data');
 				console.log(data);
-			data.shift();
+			//data.shift();
 			$scope.landmarks = $scope.landmarks.concat(data);
 				console.log('$scope.landmarks');
 				console.log($scope.landmarks);

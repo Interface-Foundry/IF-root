@@ -1,7 +1,7 @@
 
 /* IF Controllers */
 
-function WorldRouteCtrl($location, $scope, $routeParams, db) {
+function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope) {
 	console.log('world routing');
     //WIDGET find data and then route to correct bubble
     // var today = new Date();
@@ -26,6 +26,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
     // else {
     //     $location.path('awards');
     // }
+
+    
 
     //--- GEO LOCK -----//
 
@@ -59,6 +61,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
     function findWorlds(lat,lon){
      
         $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
+
+            $rootScope.nearbyBubbles = data[0].liveAndInside;
             if (data[0].liveAndInside[0].id) {
                 // PUT OTHER INSIDE RESULTS IN SCOPE FOR EASIER USER SELECT
               $location.path('w/'+data[0].liveAndInside[0].id);
@@ -70,7 +74,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db) {
     }
 
 }
-WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db'];
+WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope'];
 
 
 function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, $route, $routeParams){

@@ -35,10 +35,12 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.mapConfirm = 'false';
 	
     $scope.world = { 
-            avatar: "img/tidepools/default.jpg" 
+    	loc: {},
+        avatar: "img/tidepools/default.jpg",
+        date: {},
+        time: {}
     };
 	
-	$scope.world = {loc:{}};
     $scope.mapping = {};
     $scope.styles = {};
     $scope.project = {};
@@ -65,12 +67,55 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	
 	$scope.bgColor = '#CCC';
 
-	
+	$scope.showTime = false; //pre-set
+
+
 	
 	//custom elements, eventually replace with directives
 	$('.color').spectrum({
 		clickoutFiresChange: true
 	});
+
+
+
+  //==== SETTING UP DATETIME INPUTS ====//
+
+  //DATE
+  $scope.today = function() {
+    $scope.world.date.start = new Date();
+    $scope.world.time.start = new Date();
+    $scope.world.time.end = new Date();
+  };
+  $scope.today();
+
+  // $scope.clear = function () {
+  //   $scope.world.date.start = null;
+  // };
+
+  $scope.open = function($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.opened = true;
+  };
+
+  $scope.format = 'MMMM dd, yyyy';
+
+  //TIME
+  $scope.hstep = 1;
+  $scope.mstep = 15;
+
+  $scope.ismeridian = true;
+
+  // $scope.update = function() {
+  //   var d = new Date();
+  //   d.setHours( 14 );
+  //   d.setMinutes( 0 );
+  //   $scope.world.time.start= d;
+  // };
+
+  //===============================//
+
 
 
 	// =============  TEMPORARY  ============== //
@@ -110,6 +155,9 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		$location.path('/w/'+$scope.worldURL);
 	}
     //===================================//
+
+
+
 
 
 	
@@ -244,7 +292,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
                     }
                 };
                 
-                $scope.paths = {
+            $scope.paths = {
 				worldBounds: {
 					type: 'circle',
 					radius: 150,
@@ -302,49 +350,53 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     	//---- TIME ----//
     	//use checkbox to select "time" option, for now sending with no time: (use time icon, make it special, like TIME ACTIVATED glow)
-    	$scope.hasTime = false;
-
-    	//if no end date added, use start date
 
 
-        // if (!$scope.world.date.end){
-        //     $scope.world.date.end = $scope.world.date.start;
-        // }
+    	$scope.world.hasTime = $scope.showTime; //adding datetime to world
 
-        // $scope.world.datetext = {
-        //     start: $scope.world.date.start,
-        //     end: $scope.world.date.end
-        // }
-        // //---- Date String converter to avoid timezone issues...could be optimized probably -----//
-        // $scope.world.date.start = new Date($scope.world.date.start).toISOString();
-        // $scope.world.date.end = new Date($scope.world.date.end).toISOString();
 
-        // $scope.world.date.start = dateConvert($scope.world.date.start);
-        // $scope.world.date.end = dateConvert($scope.world.date.end);
+    	if ($scope.showTime){
+	   
+	   	    //if no end date added, use start date
+	        if (!$scope.world.date.end){
+	            $scope.world.date.end = $scope.world.date.start;
+	        }
 
-        // $scope.world.date.start = $scope.world.date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
-        // $scope.world.date.end = $scope.world.date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
+	        $scope.world.datetext = {
+	            start: $scope.world.date.start,
+	            end: $scope.world.date.end
+	        }
+	        //---- Date String converter to avoid timezone issues...could be optimized probably -----//
+	        $scope.world.date.start = new Date($scope.world.date.start).toISOString();
+	        $scope.world.date.end = new Date($scope.world.date.end).toISOString();
 
-        // function dateConvert(input){
-        //     var s = input;
-        //     var n = s.indexOf('T');
-        //     return s.substring(0, n != -1 ? n : s.length);
-        // }
-        // //-----------//
+	        $scope.world.date.start = dateConvert($scope.world.date.start);
+	        $scope.world.date.end = dateConvert($scope.world.date.end);
 
-        // if (!$scope.world.time.start){
-        //     $scope.world.time.start = "00:00";
-        // }
+	        $scope.world.date.start = $scope.world.date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
+	        $scope.world.date.end = $scope.world.date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
 
-        // if (!$scope.world.time.end){
-        //     $scope.world.time.end = "23:59";
-        // }
+	        function dateConvert(input){
+	            var s = input;
+	            var n = s.indexOf('T');
+	            return s.substring(0, n != -1 ? n : s.length);
+	        }
+	        //-----------//
 
-        // $scope.world.timetext = {
-        //     start: $scope.world.time.start,
-        //     end: $scope.world.time.end
-        // } 
-        //------- END TIME --------//
+	        if (!$scope.world.time.start){
+	            $scope.world.time.start = "00:00";
+	        }
+
+	        if (!$scope.world.time.end){
+	            $scope.world.time.end = "23:59";
+	        }
+
+	        $scope.world.timetext = {
+	            start: $scope.world.time.start,
+	            end: $scope.world.time.end
+	        } 
+	        //------- END TIME --------//
+	    }
 
         $scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
 
@@ -421,8 +473,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	  $scope.logClose = function() {
 	    console.log('close!');
 	  };
-	  
-	  
 	  
 	  
 	  $scope.toggleModal = function() {

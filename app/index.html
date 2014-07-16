@@ -161,6 +161,11 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
       <section id="drawer" ng-class="{'drawer': drawerOn}">
       	
      	 <a class="navbar-brand" ng-click="panDrawer()" href="#"></a>
+       <h4>Nearby Bubbles</h4>
+       <li ng-repeat="bubble in nearbyBubbles">
+           <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
+       </li>
+       <a ng-show="!nearbyBubbles" ng-href="/#/">Find Nearby Bubbles</a>
 	 	 
       </section>
 

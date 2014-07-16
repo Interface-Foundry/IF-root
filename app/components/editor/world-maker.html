@@ -85,26 +85,65 @@
 					<div class="field">
 						<button ng-click="showTime=!showTime" class="btn btn-primary">Enable Time</button>
 					</div>
+
 					<span ng-show="showTime">
+
+
+
+					   <h4>Start Date</h4>
+					    <div class="row">
+					        <div class="col-md-6">
+					            <p class="input-group">
+					              <input type="text" ng-click="open($event)" class="form-control" datepicker-popup="{{format}}" ng-model="world.date.start" is-open="opened" close-text="Close" />
+					              <span class="input-group-btn">
+					                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+					              </span>
+					            </p>
+					        </div>
+					    </div>
+
+
+					   <h4>Start Time</h4>
+					   <timepicker ng-model="world.time.start" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></timepicker>
+					
+
+					    <h4>End Time</h4>
+					    <timepicker ng-model="world.time.end" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></timepicker>
+
+
+
+<!-- 
 						<div class="field">
-						<label>Start Date</label> <input type="text" ng-model="world.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>
-                      <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>
-                    </div>
-	                    <div class="field">
-                      	<label>Start Time</label> <input type="text" ng-model="world.time.start" data-date-format="hh:mm" bs-timepicker />
-					  	<button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
-					</div>
+							<label>Start Date</label> <input type="text" ng-model="world.date.start" data-date-format="MM dd, yyyy" bs-datepicker/>
+	                      <button type="button" class="btn" data-toggle="datepicker"><span class="caret"></span></button>
+	                    </div> -->
+<!-- 		                <div class="field">
+	                      	<label>Start Time</label> <input type="text" ng-model="world.time.start" data-date-format="hh:mm" bs-timepicker />
+						  	<button type="button" class="btn" data-toggle="timepicker"><span class="caret"></span></button>
+						</div>
 						<div class="field">
-                      	<label>End Time</label> <input type="text" ng-model="world.time.end" data-date-format="hh:mm" bs-timepicker />
-                      <button type="button" class="btn" data-toggle="timepicker"><i class="icon-time"></i></button>
-					</div>
+	                      	<label>End Time</label> <input type="text" ng-model="world.time.end" data-date-format="hh:mm" bs-timepicker />
+	                      <button type="button" class="btn" data-toggle="timepicker"><span class="caret"></span></i></button>
+						</div> -->
 	
 	                      <h4><a ng-click="showEndDateDetails = ! showEndDateDetails ; addEndDate()">Add End Date?</a></h4>
-	                     		<span ng-show="showEndDateDetails" >
+
+	                     	<span ng-show="showEndDateDetails" >
 						 		 <hr>
-						  		<label>End Date</label> <input type="text" ng-model="world.date.end" data-date-format="MM dd, yyyy" bs-datepicker/>                
-	                          <button type="button" class="btn" data-toggle="datepicker"><i class="icon-calendar"></i></button>    
-							  </span> 
+
+								   <h4>End Date</h4>
+								    <div class="row">
+								        <div class="col-md-6">
+								            <p class="input-group">
+								              <input type="text" ng-click="open($event)" class="form-control" datepicker-popup="{{format}}" ng-model="world.date.end" is-open="opened" close-text="Close" />
+								              <span class="input-group-btn">
+								                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+								              </span>
+								            </p>
+								        </div>
+								    </div> 
+							</span> 
+
 					</span>
 				</div>
 			</div>

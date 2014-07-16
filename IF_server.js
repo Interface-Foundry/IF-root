@@ -816,14 +816,34 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             //not an edit
             else {
 
+
+                //new world
                 if (worldVal){
                     saveStyle(req.body.name, function(styleRes){ //creating new style to add to landmark
                         saveNewLandmark(styleRes);
                     });
                 }
 
+                //new landmark
                 else {
-                    saveNewLandmark();
+
+                    //checking for auth of parent ID (world) to add new landmarks...bad security if attacker changes world val?? idk!
+
+                    landmarkSchema.findById(req.body.parentID, function(err, lm) {
+                        if (!lm){
+                            console.log(err);
+                        }
+                        else if (req.user._id == lm.permissions.ownerID){ //checking if logged in user is owner
+                            saveNewLandmark();
+                        }
+                        else {
+                            console.log('unauthorized user');
+                        }
+                    });
+
+
+
+                    
                 }
 
                 function saveNewLandmark(styleRes){

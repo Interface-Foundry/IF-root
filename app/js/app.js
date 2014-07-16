@@ -8,11 +8,18 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     //================================================
     var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
 
+      // console.log($location.$$path);
+
+      // if ($location.$$path == '/' || $location.$$path.indexOf("/w/") > -1){
+      //       console.log
+      // }
+
       // Initialize a new promise
       var deferred = $q.defer();
 
       // Make an AJAX call to check if the user is logged in
       $http.get('/api/user/loggedin').success(function(user){
+
 
         // Authenticated
         if (user !== '0'){
@@ -31,6 +38,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
               }
 
           $rootScope.showLogout = true;
+
+           console.log($rootScope.showLogout);
           
           $timeout(deferred.resolve, 0);
         }
@@ -99,7 +108,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       
-	when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController}).
+	when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
       
       when('/talk', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}).
