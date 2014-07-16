@@ -8,8 +8,8 @@
 <button type="button" class="btn btn-success" ng-click="nextPage()" ng-hide="pageIndex==2">
   <span class="glyphicon glyphicon-chevron-right"></span>
 </button>
-<a ng-href="#/w/{{worldURL}}"><button type="button" class="btn btn-primary" ng-hide="pageIndex!=2">Build your World
-</button></a>
+<button type="button" class="btn btn-primary" ng-hide="pageIndex!=2" ng-click="buildOut()">Build your World
+</button>
 
 
 </div>
@@ -49,9 +49,7 @@
 						<p id="uploadedpic"></p>
 						<div id="preview"></div>         
 
-					<div class="field">
-						<button ng-click="buildMap()" class="btn btn-primary">Build Map</button>
-					</div>
+					
 
 	
 					</div>
@@ -120,7 +118,9 @@
 					<div class="col-xs-8">		
 						<div class="field">
 								Add a floorplan
-								<div ng-include src='"partials/map-overlay-modal.html"' ng-controller='MapModalCtrl' onload='loadMe()' ></div>
+								<div ng-include src='"partials/map-overlay-modal.html"' ng-controller='MapModalCtrl' onload='loadMe()' ></div><div class="field">
+						<button ng-click="buildMap()" class="btn btn-primary">Build Map</button>
+					</div>
 						</div>
 						<div class="mapbox field">
 							<div class="row">
@@ -165,9 +165,9 @@
 					<div class="field">
 						<label>Card BG</label> <input name="cardBG" type='text' class='color' value='#FFFFFF' ng-model='styles.cardBG_color'/>
 					</div>
-					<div class="field">
-						<!--<label>Card Border</label> <input name="cardBorder" type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/> -->
-					</div>
+					<!--<div class="field">
+						<label>Card Border</label> <input name="cardBorder" type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/> 
+					</div>-->
 					<div class="field">
 						<label>World Title Color</label> <input name="worldTitle" type='text' class="color" value='#808080' ng-model='styles.worldTitle_color'/>
 					</div>

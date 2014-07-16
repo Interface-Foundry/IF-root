@@ -75,32 +75,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 	// =============  TEMPORARY  ============== //
 
-    angular.element('#fileupload').fileupload({
-        url: '/api/upload_maps',
-        dataType: 'text',
-        progressall: function (e, data) {  
-
-            $('#progress .bar').css('width', '0%');
-
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
-
-            $('#uploadedpic').html('');
-            $('#preview').html('');
-            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
-            $('<img src="'+ data.result +'">').load(function() {
-              $(this).width(150).height(150).appendTo('#preview');
-            });
-                  
-            $scope.mapIMG = data.result;
-        }
-    });
-
+    
 
     $scope.buildMap = function(){
 
@@ -130,6 +105,10 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     }
 
+	$scope.buildOut = function() {
+		saveStyle();
+		$location.path('/w/'+$scope.worldURL);
+	}
     //===================================//
 
 
@@ -551,9 +530,36 @@ function MapModalCtrl($scope, $log, leafletData) {
 	
 			$scope.resetMap();
 /* 			$scope.myData.modalShown = !$scope.myData.modalShown; */
-	
-		  //map modal uplaod
+		  //map modal upload
+		  
 		  angular.element('#fileuploadmap').fileupload({
+        url: '/api/upload_maps',
+        dataType: 'text',
+        progressall: function (e, data) {  
+
+            $('#map_progress .bar').css('width', '0%');
+
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#map_progress .bar').css(
+                'width',
+                progress + '%'
+            );
+        },
+        done: function (e, data) {
+
+            $('#uploaded_map').html('');
+            $('#preview_map').html('');
+            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
+            $('<img src="'+ data.result +'">').load(function() {
+              $(this).appendTo('#preview_map').after($scope.addOverlay());
+            });
+                  
+            $scope.$parent.mapIMG = data.result;
+        }
+    });
+
+
+		 /* angular.element('#fileuploadmap').fileupload({
 		      url: '/api/upload_maps',
 		      dataType: 'text',
 		      progressall: function (e, data) {  
@@ -572,9 +578,9 @@ function MapModalCtrl($scope, $log, leafletData) {
 		          $('<img src="'+ data.result +'">').load(function() {
 		            $(this).appendTo('#preview_map').after( $scope.addOverlay());
 		          });
-		          $scope.world.stats.avatar = data.result;
+		          //$scope.world.stats.avatar = data.result;
 		      }
-		  });//fileupload
+		  });//fileupload*/
 	  }//loadMe
 };//mapmodalctrl
 
