@@ -1,7 +1,13 @@
 
 /* IF Controllers */
 
-function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope) {
+function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService) {
+
+    angular.extend($rootScope, {loading: true});
+
+    $scope.aperture = apertureService;  
+    $scope.aperture.set('off');
+
 	console.log('world routing');
     //WIDGET find data and then route to correct bubble
     // var today = new Date();
@@ -75,6 +81,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope) {
             }
             else {
                 //?? profit
+                angular.extend($rootScope, {loading: false});
                 $scope.showCreateNew = true;
                 console.log('no worlds');
             }
@@ -82,7 +89,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope) {
     }
 
 }
-WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope'];
+WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
 
 
 function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, $route, $routeParams){

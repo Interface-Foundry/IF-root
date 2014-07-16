@@ -1,9 +1,11 @@
 function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager) {
-   
+   	
     var map = mapManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
     $scope.aperture.set('half');
+
+    angular.extend($rootScope, {loading: false});
     
 	$scope.selectedIndex = 0;
 	
@@ -56,6 +58,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				
 			});
 		}
+		map.refresh();
 		
 	});
 	

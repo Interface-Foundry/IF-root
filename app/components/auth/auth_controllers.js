@@ -1,7 +1,10 @@
 /**********************************************************************
  * Login controller
  **********************************************************************/
-function LoginCtrl($scope, $rootScope, $http, $location) {
+function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
+
+  $scope.aperture = apertureService;  
+  $scope.aperture.set('off');
 
   // This object will be filled by the form
   $scope.user = {};
@@ -21,7 +24,10 @@ function LoginCtrl($scope, $rootScope, $http, $location) {
   }
 }
 
-function SignupCtrl($scope, $rootScope, $http, $location) {
+function SignupCtrl($scope, $rootScope, $http, $location, apertureService) {
+
+  $scope.aperture = apertureService;  
+  $scope.aperture.set('off');
 
   // This object will be filled by the form
   $scope.user = {};
@@ -41,7 +47,11 @@ function SignupCtrl($scope, $rootScope, $http, $location) {
   }
 }
 
-function ProfileCtrl($scope, $rootScope, $http, $location){
+function ProfileCtrl($scope, $rootScope, $http, $location, apertureService){
+
+  $scope.aperture = apertureService;  
+  $scope.aperture.set('off');
+  
 	// This object will be filled by the form
   $scope.user = {};
   

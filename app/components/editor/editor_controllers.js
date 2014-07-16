@@ -78,6 +78,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 
 
+
+
   //==== SETTING UP DATETIME INPUTS ====//
 
   //DATE
@@ -459,20 +461,28 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         });  
     }
     
+
+
+
+
+
     if (navigator.geolocation) {
        // Get the user's current position
        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
        refreshMap();
-	   }
-	   $scope.myData = {
+	}
+	
+
+	$scope.myData = {
 	    link: "http://google.com",
 	    modalShown: false,
 	    hello: 'world',
 	    foo: 'bar'
-		}
-	  $scope.logClose = function() {
-	    console.log('close!');
-	  };
+	}
+	 
+	$scope.logClose = function() {
+	   console.log('close!');
+	};
 	  
 	  
 	  $scope.toggleModal = function() {
