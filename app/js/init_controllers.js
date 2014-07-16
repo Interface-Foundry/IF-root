@@ -38,37 +38,45 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope) {
 
             function showPosition(position) {
 
-                userLat = position.coords.latitude;
-                userLon = position.coords.longitude;
+                var userLat = position.coords.latitude;
+                var userLon = position.coords.longitude;
                 findWorlds(userLat, userLon);
                 //use locate.path()
             }
 
             function locError(){
-
+                console.log('error finding loc');
                 //geo error
             }
 
         } else {
 
-            //no geo
+            //no geo, go to plan b for geo loc here from IP?
+            console.log('no geo');
             
         }
 
     //--------------//
 
 
-    function findWorlds(lat,lon){
+    function findWorlds(lat,lon){   
      
         $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
 
             $rootScope.nearbyBubbles = data[0].liveAndInside;
-            if (data[0].liveAndInside[0].id) {
-                // PUT OTHER INSIDE RESULTS IN SCOPE FOR EASIER USER SELECT
-              $location.path('w/'+data[0].liveAndInside[0].id);
+
+            if (data[0].liveAndInside[0] != null) {
+                if (data[0].liveAndInside[0].id){
+                    $location.path('w/'+data[0].liveAndInside[0].id);
+                }
+                else {
+                    console.log('world has no id');
+                }
             }
             else {
                 //?? profit
+                $scope.showCreateNew = true;
+                console.log('no worlds');
             }
         });
     }
