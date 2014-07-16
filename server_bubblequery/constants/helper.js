@@ -88,8 +88,7 @@ exports.listBubblesNearCoordinate = function(coordinate, callback) {
 
   var geoNearOptions = { spherical:true,
     distanceMultiplier: integers.DISTANCE_MULTIPLIER_METERS,
-    maxDistance: integers.RADIUS_DATA_BUBBLE_WITH_PROXIMITY,
-    world:true
+    maxDistance: integers.RADIUS_DATA_BUBBLE_WITH_PROXIMITY
   };
 
   Bubble.geoNear(coordinate, geoNearOptions, function (err, data) {

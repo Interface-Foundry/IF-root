@@ -20,6 +20,8 @@ exports.listBubbles = function(currentDateTimeUser, userCoordinate, callback) {
     for(var d in data) {
       bubbleObject = data[d];
 
+      var worldStatus = bubbleObject.obj.world;
+
       var isInBubble = helper.isInBubble(bubbleObject['dis']);
 
 
@@ -28,13 +30,13 @@ exports.listBubbles = function(currentDateTimeUser, userCoordinate, callback) {
       bubbleObject = helper.returnBubbleObject(bubbleObject['obj']);
 
       // If user is physically inside bubble and bubble is live
-      if(isInBubble && liveStatusSeconds === 0) {
+      if(isInBubble && liveStatusSeconds === 0 && worldStatus) {
         bubblesLiveInside.push(bubbleObject)
         continue;
       }
 
       // If bubble is live, sorted by the distance
-      if(liveStatusSeconds === 0) {
+      if(liveStatusSeconds === 0 && worldStatus) {
         bubblesLive.push(bubbleObject)
         continue;
       }
