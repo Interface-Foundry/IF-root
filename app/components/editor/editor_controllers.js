@@ -160,33 +160,30 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 
 
+	angular.element('#fileupload').fileupload({
+        url: '/api/upload',
+        dataType: 'text',
+        progressall: function (e, data) {  
 
+            $('#progress .bar').css('width', '0%');
 
-	
-	// angular.element('#fileupload').fileupload({
- //        url: '/api/upload',
- //        dataType: 'text',
- //        progressall: function (e, data) {  
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .bar').css(
+                'width',
+                progress + '%'
+            );
+        },
+        done: function (e, data) {
 
- //            $('#progress .bar').css('width', '0%');
-
- //            var progress = parseInt(data.loaded / data.total * 100, 10);
- //            $('#progress .bar').css(
- //                'width',
- //                progress + '%'
- //            );
- //        },
- //        done: function (e, data) {
-
- //            $('#uploadedpic').html('');
- //            $('#preview').html('');
- //            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
- //            $('<img src="'+ data.result +'">').load(function() {
- //              $(this).width(150).height(150).appendTo('#preview');
- //            });
- //            $scope.world.avatar = data.result;
- //        }
- //    });
+            $('#uploadedpic').html('');
+            $('#preview').html('');
+            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
+            $('<img src="'+ data.result +'">').load(function() {
+              $(this).width(150).height(150).appendTo('#preview');
+            });
+            $scope.world.avatar = data.result;
+        }
+    });
 
 	$scope.nextPage = function () {
 		if ($scope.worldDetail.worldName.$valid) {
@@ -588,35 +585,35 @@ function MapModalCtrl($scope, $log, leafletData) {
   //run when modal loads
 	$scope.loadMe = function () {
 	
-			$scope.resetMap();
+		$scope.resetMap();
 /* 			$scope.myData.modalShown = !$scope.myData.modalShown; */
 		  //map modal upload
 		  
-		  angular.element('#fileuploadmap').fileupload({
-        url: '/api/upload_maps',
-        dataType: 'text',
-        progressall: function (e, data) {  
+		// angular.element('#fileuploadmap').fileupload({
+	 //        url: '/api/upload_maps',
+	 //        dataType: 'text',
+	 //        progressall: function (e, data) {  
 
-            $('#map_progress .bar').css('width', '0%');
+	 //            $('#map_progress .bar').css('width', '0%');
 
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#map_progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
+	 //            var progress = parseInt(data.loaded / data.total * 100, 10);
+	 //            $('#map_progress .bar').css(
+	 //                'width',
+	 //                progress + '%'
+	 //            );
+	 //        },
+	 //        done: function (e, data) {
 
-            $('#uploaded_map').html('');
-            $('#preview_map').html('');
-            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
-            $('<img src="'+ data.result +'">').load(function() {
-              $(this).appendTo('#preview_map').after($scope.addOverlay());
-            });
-                  
-            $scope.$parent.mapIMG = data.result;
-        }
-    });
+	 //            $('#uploaded_map').html('');
+	 //            $('#preview_map').html('');
+	 //            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
+	 //            $('<img src="'+ data.result +'">').load(function() {
+	 //              $(this).appendTo('#preview_map').after($scope.addOverlay());
+	 //            });
+	                  
+	 //            $scope.$parent.mapIMG = data.result;
+	 //        }
+  //   	});
 
 
 		 /* angular.element('#fileuploadmap').fileupload({
