@@ -32,30 +32,30 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	}
   	
 	 World.get({id: $routeParams.worldURL}, function(data) {
-		 console.log(data);
-		 $scope.loadWorld(data);
-		 
-		
-		
-		
-		$scope.queryType = "all";
-		$scope.queryFilter = "all";
+		 if (data.err){
+		 	$location.path('/#/');
+		 }
+		 else {
+			$scope.loadWorld(data); 
+			$scope.queryType = "all";
+			$scope.queryFilter = "all";
 
-		db.landmarks.query({queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(data){   
-			console.log(data);
-			$scope.landmarks = data;
-			
-			angular.forEach($scope.landmarks, function(landmark) {
-				map.addMarker(landmark._id, {
-					lat:landmark.loc.coordinates[1],
-					lng:landmark.loc.coordinates[0],
-					draggable:false,
-					message:landmark.name
+			db.landmarks.query({queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(data){   
+				console.log(data);
+				$scope.landmarks = data;
+				
+				angular.forEach($scope.landmarks, function(landmark) {
+					map.addMarker(landmark._id, {
+						lat:landmark.loc.coordinates[1],
+						lng:landmark.loc.coordinates[0],
+						draggable:false,
+						message:landmark.name
+					});
 				});
+				landmarksLoaded=true;
+				
 			});
-			landmarksLoaded=true;
-			
-		});
+		}
 		
 	});
 	
