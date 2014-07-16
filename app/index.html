@@ -133,9 +133,27 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  			<li></li>
 	  		</ul>
 	  	<div class="navbar-right">
-	  	<div ng-show="!showLogout"><a ng-href="/#/login">Login</a></div>
-        <div ng-show="showLogout"><a ng-click="logout()">Logout</a></div>
+	  	  <div ng-show="!showLogout"><a ng-href="/#/login">Login</a></div>
+        <div ng-show="showLogout">
+
+          <!-- USER DROPDOWN -->
+          <span class="dropdown" on-toggle="toggled(open)">
+            <a href class="dropdown-toggle">
+              {{userName}} <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a ng-href="/#/profile">Profile</a></li>
+              <li><a ng-href="/#/newworld">+ New World</a></li>
+              <li><a href="">Report Issue</a></li>
+              <li><a href="" ng-click="logout()">Logout</a></li>
+            </ul>
+          </span>
+
+        </div>
+
+
 	  	</div>
+
 	  </nav>
 	  <div id="scrim" ng-class="{'loading': loading}">
 	  	<span class="glyphicon glyphicon-refresh"></span>

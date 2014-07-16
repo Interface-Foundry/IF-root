@@ -557,32 +557,36 @@ app.get('/api/:collection', function(req, res) {
 // Read 
 app.get('/api/:collection/:id', function(req, res) {
 
-
     //world
     if (req.url.indexOf("/api/worlds/") > -1){
 
         db.collection('landmarks').findOne({id:req.params.id,world:true}, function(err, data){
 
-            styleSchema.findById(data.style.styleID, function(err, style) {
-                  if (!style){
-                    console.log(err);
-                  }
+            if (data){
+                styleSchema.findById(data.style.styleID, function(err, style) {
+                      if (!style){
+                        console.log(err);
+                      }
 
-                if(style) {
-                    console.log(style);
-                    var resWorldStyle = {
-                        "world" : data,
-                        "style" : style
-                    };
-                    res.send(resWorldStyle);
-                }
+                    if(style) {
+                        console.log(style);
+                        var resWorldStyle = {
+                            "world" : data,
+                            "style" : style
+                        };
+                        res.send(resWorldStyle);
+                    }
 
-            });       
-
+                }); 
+            }
+            else {
+                console.log('world doesnt exist');
+                res.send({err:'world doesnt exist'});
+            }      
 
         });  
 
-        //
+    
     }
     //landmark
     else {

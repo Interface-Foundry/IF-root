@@ -22,7 +22,9 @@ var userSchema = mongoose.Schema({
         username     : String
     },
     auth: {
-        confirmedEmail : Boolean
+        confirmedEmail : Boolean,
+        lastLogin: Date,
+        loginCount: Number
     }
 
 });
