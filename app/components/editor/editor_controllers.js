@@ -589,31 +589,31 @@ function MapModalCtrl($scope, $log, leafletData) {
 /* 			$scope.myData.modalShown = !$scope.myData.modalShown; */
 		  //map modal upload
 		  
-		// angular.element('#fileuploadmap').fileupload({
-	 //        url: '/api/upload_maps',
-	 //        dataType: 'text',
-	 //        progressall: function (e, data) {  
+		angular.element('#fileuploadmap').fileupload({
+	        url: '/api/upload_maps',
+	        dataType: 'text',
+	        progressall: function (e, data) {  
 
-	 //            $('#map_progress .bar').css('width', '0%');
+	            $('#map_progress .bar').css('width', '0%');
 
-	 //            var progress = parseInt(data.loaded / data.total * 100, 10);
-	 //            $('#map_progress .bar').css(
-	 //                'width',
-	 //                progress + '%'
-	 //            );
-	 //        },
-	 //        done: function (e, data) {
+	            var progress = parseInt(data.loaded / data.total * 100, 10);
+	            $('#map_progress .bar').css(
+	                'width',
+	                progress + '%'
+	            );
+	        },
+	        done: function (e, data) {
 
-	 //            $('#uploaded_map').html('');
-	 //            $('#preview_map').html('');
-	 //            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
-	 //            $('<img src="'+ data.result +'">').load(function() {
-	 //              $(this).appendTo('#preview_map').after($scope.addOverlay());
-	 //            });
+	            $('#uploaded_map').html('');
+	            $('#preview_map').html('');
+	            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
+	            $('<img src="'+ data.result +'">').load(function() {
+	              $(this).appendTo('#preview_map').after($scope.addOverlay());
+	            });
 	                  
-	 //            $scope.$parent.mapIMG = data.result;
-	 //        }
-  //   	});
+	            $scope.$parent.mapIMG = data.result;
+	        }
+    	});
 
 
 		 /* angular.element('#fileuploadmap').fileupload({

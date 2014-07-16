@@ -171,7 +171,9 @@ module.exports = function(passport) {
                         if (!user.facebook.token) {
                             user.facebook.token = token;
                             user.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
-                            user.facebook.email = profile.emails[0].value;
+                            if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                                user.facebook.email = profile.emails[0].value;
+                            }
 
                             user.save(function(err) {
                                 if (err)
@@ -188,7 +190,10 @@ module.exports = function(passport) {
                         newUser.facebook.id    = profile.id;
                         newUser.facebook.token = token;
                         newUser.facebook.name  = profile.displayName;
-                        newUser.facebook.email = profile.emails[0].value;
+                        if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                            newUser.facebook.email = profile.emails[0].value; 
+                        }
+                        
 
                         newUser.save(function(err) {
                             if (err)
@@ -205,7 +210,9 @@ module.exports = function(passport) {
                 user.facebook.id    = profile.id;
                 user.facebook.token = token;
                 user.facebook.name  = profile.displayName;
-                user.facebook.email = profile.emails[0].value;
+                if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                    user.facebook.email = profile.emails[0].value;
+                }
 
                 user.save(function(err) {
                     if (err)
