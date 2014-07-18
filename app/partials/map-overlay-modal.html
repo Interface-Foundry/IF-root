@@ -8,29 +8,19 @@
 			<span>Select Image</span>
 			<input id="fileuploadmap" type="file" name="files[]">
 		</span>
-	
-		<!-- 		PROGRESS BAR -->
-		<!--
-<div id="map_progress" class="progress" ng-show="upload_bar">
-			<div class="bar" style="width: 0%;"></div>
-		</div>
--->
-		
+
 		<p class="recommended">Recommended size 3000px x 1000px .png or .jpg</p>
 		
 	</div>
 
 	<div class="map_panel">
-  	<leaflet id="modalMap" center="center" layers="layers" markers="markers" height="449px" width="800px"></leaflet>
-  	<button class="btn btn-success done-button" ng-click='printBounds()' ng-hide="upload_panel">Use Map</button>	
+	  	<leaflet id="modalMap" center="center" layers="layers" markers="markers" height="550px" width="1000px"></leaflet>
+	  	<button class="btn btn-success done-button" ng-click='buildMap()' ng-hide="upload_panel">Build Map</button>	
 	</div>
   
 	<button ng-click='resetMap()'>Reset Map</button>
 	
-		
-		
-
-		<!-- 		HIDDEN IMAGE PREVIEW -->
+		<!-- HIDDEN IMAGE PREVIEW -->
 		<div id="uploaded_map" class="ng-hide"></div>
 		<div id="preview_map"></div>      
 		

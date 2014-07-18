@@ -1,5 +1,5 @@
 
-function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents, apertureService, $http) {
+function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents, apertureService, $http, $timeout, $modal) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
 	var aperture = apertureService;
 	aperture.set('off');
@@ -124,33 +124,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     
 
-    $scope.buildMap = function(){
-
-        //fake data r/n
-        var coordBox = {
-            worldID: '53c4a0ab0ee5d8ccfa68a034',
-            nw_loc_lng: -73.99749,
-            nw_loc_lat:  40.75683,
-            sw_loc_lng: -73.99749,
-            sw_loc_lat:   40.7428,
-            ne_loc_lng: -73.98472,
-            ne_loc_lat:  40.75683,
-            se_loc_lng: -73.98472,
-            se_loc_lat:   40.7428
-        };
-
-        var coords_text = JSON.stringify(coordBox);
-
-        var data = {
-          mapIMG: $scope.mapIMG,
-          coords: coords_text
-        }
-
-        $http.post('/api/build_map', data).success(function(response){
-            console.log(response);
-        });
-
-    }
 
 	$scope.buildOut = function() {
 		saveStyle();
@@ -271,13 +244,21 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             userLat = position.coords.latitude;
             userLon = position.coords.longitude;
 
-            console.log(userLat);
+            //map builder map view
+	       	angular.extend($scope, {
+			  center: {
+			      lat: userLat, //adding these from world editor function
+			      lng: userLon,
+			      zoom: 15
+			  },
+			  markers:{}
+			});
 
             $scope.center = {
-                    lat: userLat,
-                    lng: userLon,
-                    zoom: 15
-                };
+                lat: userLat,
+                lng: userLon,
+                zoom: 15
+            };
             $scope.tiles = tilesDict.mapbox;
             
             $scope.markers = {
@@ -399,6 +380,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
         $scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
 
+        $rootScope.worldCoordinates = $scope.world.loc.coordinates; //updating to rootscope for modal process
+
         $scope.world.userID = $scope.userID;
 
         //edit world
@@ -457,9 +440,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         	console.log(response);
         });  
     }
-    
-
-
 
 
 
@@ -470,6 +450,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	}
 	
 
+
+	///////// MODAL ///////
 	$scope.myData = {
 	    link: "http://google.com",
 	    modalShown: false,
@@ -482,42 +464,39 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	};
 	  
 	  
-	  $scope.toggleModal = function() {
-	    console.log("toggle modal fired");
-	    $scope.myData.modalShown = !$scope.myData.modalShown;
-	    $timeout(resetModalMap(), 5000);
-	  };
-	  
-	  function resetModalMap(){
-		  leafletData.getMap('modalMap').then(function(map) {
-				map.invalidateSize();
-				window.console.log("map reset fired");
-			});
-	  }
-}
 
-function MapModalCtrl($scope, $log, leafletData) {
+	function resetModalMap(){
+		leafletData.getMap('modalMap').then(function(map) {
+			map.invalidateSize();
+			window.console.log("map reset fired");
+		});
+	}
+
+	angular.extend($scope, {
+ 	  layers: {
+	      baselayers: {	
+	        osm: {
+	          name: 'OpenStreetMap',
+		      url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+		      type: 'xyz'
+	        }
+	      }
+	  },
+	  markers: {}
+	});
+
+	//////// END MODAL ///////
 
 	$scope.upload_panel = true;
 	$scope.upload_bar = false;
 
-	angular.extend($scope, {
-		center: {
-	      lat: 40.7127,
-	      lng: -74.0059,
-	      zoom: 18
-	  },
-	  markers: {},
- 		layers: {
-      baselayers: {	
-        osm: {
-          name: 'OpenStreetMap',
-	        url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-	        type: 'xyz'
-        }
-      }
-	  }
-	});
+
+	function refreshMap(){ 
+        leafletData.getMap('worldDetailMap').then(function(map) {
+            setTimeout(function() {map.invalidateSize();}, 400);
+        });
+    }
+
 
   //add uploaded image as an overlay to map
 	$scope.addOverlay = function(){
@@ -535,36 +514,36 @@ function MapModalCtrl($scope, $log, leafletData) {
 		var img_width = $('#preview_map').find('img').width();
 		var img_height = $('#preview_map').find('img').height();
 	
-    leafletData.getMap('modalMap').then(function(map) {
-    	window.console.log("map found");
-    	window.console.log(map);
-			
-			$scope.areaSelect = L.areaSelect({
-			    width:img_width, 
-			    height:img_height, 
-			    keepAspectRatio:true
-			});
-			
-			$scope.areaSelect.addTo(map);
-			var bounds = $scope.areaSelect.getBounds();
-			window.console.log("area select added to map");
-			
-			//add image overlay layer
-			var image_layer = L.imageOverlay(imageUrl, bounds).addTo(map);
-			window.console.log("image overlay added to map");
-			
-			// Get a callback when the bounds change
-			$scope.areaSelect.on("change", function() {
-			    map.removeLayer(image_layer);
-			    image_layer = L.imageOverlay(imageUrl, this.getBounds()).addTo(map);
-			});
-			
-			map.on('move', function(){
-				this.removeLayer(image_layer);
-			  image_layer = L.imageOverlay(imageUrl, $scope.areaSelect.getBounds()).addTo(map);
-			});
-
+	    leafletData.getMap('modalMap').then(function(map) {
+	    	window.console.log("map found");
+	    	window.console.log(map);
+				
+				$scope.areaSelect = L.areaSelect({
+				    width:img_width, 
+				    height:img_height, 
+				    keepAspectRatio:true
+				});
+				
+				$scope.areaSelect.addTo(map);
+				var bounds = $scope.areaSelect.getBounds();
+				window.console.log("area select added to map");
+				
+				//add image overlay layer
+				var image_layer = L.imageOverlay(imageUrl, bounds).addTo(map);
+				window.console.log("image overlay added to map");
+				
+				// Get a callback when the bounds change
+				$scope.areaSelect.on("change", function() {
+				    map.removeLayer(image_layer);
+				    image_layer = L.imageOverlay(imageUrl, this.getBounds()).addTo(map);
+				});
+				
+				map.on('move', function(){
+					this.removeLayer(image_layer);
+				  image_layer = L.imageOverlay(imageUrl, $scope.areaSelect.getBounds()).addTo(map);
+				});
 		});
+
 	}
   
   $scope.resetMap = function(){
@@ -574,72 +553,116 @@ function MapModalCtrl($scope, $log, leafletData) {
 		});
   }
   
-  $scope.printBounds = function(){
-	  leafletData.getMap('modalMap').then(function(map) {
+
+	$scope.buildMap = function(){
+
+		console.log('uploaded map: '+$scope.$parent.mapIMG);
+
+		var coordBox;
+
+		//get image geo coordinates, add to var to send
+		leafletData.getMap('modalMap').then(function(map) {
 			var bounds = $scope.areaSelect.getBounds();
-			alert("Image bounds are " + JSON.stringify(bounds));
-/* 			$scope.myData.modalShown = !$scope.myData.modalShown; */
-		});
-  }
-  
-  //run when modal loads
-	$scope.loadMe = function () {
+		    var southEast = bounds.getSouthEast();
+		    var northWest = bounds.getNorthWest();
+		    var southWest = bounds.getSouthWest();
+		    var northEast = bounds.getNorthEast();
+			coordBox = {
+		        worldID: $scope.worldID,
+		        nw_loc_lng: northWest.lng,
+		        nw_loc_lat: northWest.lat,
+		        sw_loc_lng: southWest.lng,
+		        sw_loc_lat: southWest.lat,
+		        ne_loc_lng: northEast.lng,
+		        ne_loc_lat: northEast.lat,
+		        se_loc_lng: southEast.lng,
+		        se_loc_lat: southEast.lat
+		    };
+
+
+		    var coords_text = JSON.stringify(coordBox);
+
+		    var data = {
+		      mapIMG: $scope.mapIMG,
+		      coords: coords_text
+		    }
+		    //build map
+		    $http.post('/api/build_map', data).success(function(response){
+		        
+		    	//response = JSON.parse(response);
+		        console.log(response.style.maps.localMapOptions.maxZoom);
+				
+		        angular.extend($scope, {
+			 	  layers: {
+				      baselayers: {	
+				        osm: {
+	 						url: 'http://107.170.180.141/maps/'+response.style.maps.localMapID+'/{z}/{x}/{y}.png',
+						    option: {
+							    attribution: 'IF',
+							    minZoom: response.style.maps.localMapOptions.minZoom,
+							    maxZoom: response.style.maps.localMapOptions.maxZoom,
+							    reuseTiles: true,
+							    tms:true
+						    },
+							  center: {
 	
-		$scope.resetMap();
-/* 			$scope.myData.modalShown = !$scope.myData.modalShown; */
-		  //map modal upload
-		  
-		angular.element('#fileuploadmap').fileupload({
-	        url: '/api/upload_maps',
-	        dataType: 'text',
-	        progressall: function (e, data) {  
+							      zoom: response.style.maps.localMapOptions.maxZoom
+							  },
 
-	            $('#map_progress .bar').css('width', '0%');
+				        }
+				      }
+				  }
+				});
 
-	            var progress = parseInt(data.loaded / data.total * 100, 10);
-	            $('#map_progress .bar').css(
-	                'width',
-	                progress + '%'
-	            );
-	        },
-	        done: function (e, data) {
-
-	            $('#uploaded_map').html('');
-	            $('#preview_map').html('');
-	            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
-	            $('<img src="'+ data.result +'">').load(function() {
-	              $(this).appendTo('#preview_map').after($scope.addOverlay());
-	            });
-	                  
-	            $scope.$parent.mapIMG = data.result;
-	        }
-    	});
+				// leafletData.getMap('modalMap').then(function(map) {
+		  //           setTimeout(function() {map.invalidateSize();}, 400);
+		  //       });
 
 
-		 /* angular.element('#fileuploadmap').fileupload({
-		      url: '/api/upload_maps',
-		      dataType: 'text',
-		      progressall: function (e, data) {  
-		          $('#map_progress .bar').css('width', '0%');
-		          var progress = parseInt(data.loaded / data.total * 100, 10);
-		          $('#map_progress .bar').show();
-		          $('#map_progress .bar').css(
-		              'width',
-		              progress + '%'
-		          );
-		      },
-		      done: function (e, data) {
-		          $('#uploaded_map').html('');
-		          $('#preview_map').html('');
-		          $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
-		          $('<img src="'+ data.result +'">').load(function() {
-		            $(this).appendTo('#preview_map').after( $scope.addOverlay());
-		          });
-		          //$scope.world.stats.avatar = data.result;
-		      }
-		  });//fileupload*/
-	  }//loadMe
-};//mapmodalctrl
+		    });
+
+		});
+
+	}
+
+
+  
+	angular.element('#fileuploadmap').fileupload({
+        url: '/api/upload_maps',
+        dataType: 'text',
+        progressall: function (e, data) {  
+
+            $('#map_progress .bar').css('width', '0%');
+
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#map_progress .bar').css(
+                'width',
+                progress + '%'
+            );
+        },
+        done: function (e, data) {
+
+            $('#uploaded_map').html('');
+            $('#preview_map').html('');
+            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
+            $('<img src="'+ data.result +'">').load(function() {
+              $(this).appendTo('#preview_map').after($scope.addOverlay());
+            });
+
+            $scope.hideMapOptions = true; //hide map upload buttons
+
+           	angular.extend($scope, {
+			  markers:{}
+			});
+            
+            $scope.$parent.mapIMG = data.result;
+        }
+	});
+
+
+
+
+}
 
 
 function UserCtrl($location, $scope, $routeParams, db, $rootScope) {

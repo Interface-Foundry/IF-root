@@ -664,7 +664,7 @@ function AwardsCtrl( $location, $scope, db, $timeout, leafletData, $rootScope) {
 
         //---- Happened -----//
         $scope.queryType = "events";
-        $scope.queryFilter = "all";
+        $scope.queryFilter = "all"; 
         $scope.queryCat = queryCat;
 
         $scope.landmarksHappened = db.landmarks.query({ queryType:$scope.queryType, queryFilter:$scope.queryFilter, queryCat: $scope.queryCat},function(){

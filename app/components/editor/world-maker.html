@@ -31,6 +31,9 @@
 						<div class="error" ng-show="worldDetail.worldName.$dirty && worldDetail.worldName.$error.required">
 								Name is required.</div>
 					</div>
+
+	  
+	
 					<div class="field">
 						<label>Picture</label> 
 								
@@ -49,9 +52,6 @@
 						<p id="uploadedpic"></p>
 						<div id="preview"></div>         
 
-					
-
-	
 					</div>
 					<div class="field">
 						<label>Summary</label> <input name="worldSummary" type="text" ng-model="world.summary" required/>
@@ -112,25 +112,8 @@
 
 
 
-						<div class="field">
-							Add a floorplan
-							<div ng-include src='"partials/map-overlay-modal.html"' ng-controller='MapModalCtrl' onload='loadMe()' ></div>
-							<div class="field">
-								<button ng-click="buildMap()" class="btn btn-primary">Build Map</button>
-							</div>
-						</div>
+					    <!-- LOCATION OF MAP BUILDER -->
 
-						<div class="field">
-							<div class="row">
-								<h4>How your maps will be displayed</h4>
-								<input type="radio" ng-model="mapBuild" value="red"> Only Cloud Map: {{mapping.mapThemeSelect.name}} <br/>
-								<input type="radio" ng-model="mapBuild" value=""> Only Local Map <br/>
-								<input type="radio" ng-model="mapBuild" value="blue"> Both Maps (layered)<br/>
-							</div>
-						</div>
-
-
-						
 	                      <h4><a ng-click="showEndDateDetails = ! showEndDateDetails ; addEndDate()">Add End Date?</a></h4>
 
 	                     	<span ng-show="showEndDateDetails" >
@@ -187,6 +170,53 @@
 								</div>
 							</div>
 						</div>
+
+
+					<br>
+				
+
+					<!-- maps display type selector -->
+					<div class="field">
+						<h4> Upload your own map (like a floor plan)</h4>
+						<div class="row">
+							<h4>How your maps will be displayed</h4>
+							<input type="radio" ng-model="mapBuild" value="red"> Only Cloud Map:: {{mapping.mapThemeSelect.name}} <br/>
+							<input type="radio" ng-model="mapBuild" value=""> Only Local Map <br/>
+							<input type="radio" ng-model="mapBuild" value="blue"> Both Maps (layered)<br/>
+						</div>
+					</div>
+
+					<div class="map_panel">
+						  	<leaflet id="modalMap" center="center" layers="layers" markers="markers" height="550px" width="1000px"></leaflet>
+					</div>
+
+					<div ng-hide="hideMapOptions" id="map_uploader">	
+
+						<button ng-click='resetMap()'>Reset Map</button>		
+						<!-- UPLOAD BUTTON	 -->
+						<span class="btn btn-success btn-lg fileinput-button">
+					    <i class="icon-plus icon-white"></i>
+							<span>Select Image</span>
+							<input id="fileuploadmap" type="file" name="files[]">
+						</span>
+
+						<p class="recommended">Recommended size 3000px x 1000px .png or .jpg</p>
+						
+						</div>
+						
+						<!-- HIDDEN IMAGE PREVIEW -->
+						<div id="uploaded_map" class="ng-hide"></div>
+						<div id="preview_map"></div>   
+
+						<button ng-show="hideMapOptions" ng-click="buildMap()" class="btn btn-primary">Build Map</button>
+
+					</div>
+
+
+
+
+
+
 						
 					</div>
 				</div>
@@ -254,3 +284,61 @@
 </div>
 
 </div>
+
+
+<!-- Map Uploader Window -->
+<style>
+
+	#map_options{
+		width: 400px;
+
+	}
+
+	#map_uploader{
+		background: rgba(255,255,255,0.6);
+		height: 400px;
+		text-align: center;
+		position: absolute;
+		top:789px;
+		z-index: 4000;
+		height: 565px;
+		width: 1000px;		
+		margin: 0 auto;
+	}
+	#map_modal .upload_panel{
+		background: rgba(255,255,255,0.6);
+		height: 400px;
+		text-align: center;
+		position: absolute;
+		top:61px;
+		z-index: 4000;
+		height: 450px;
+		width: 800px;
+	}
+	#map_modal .upload_panel .fileinput-button{
+		margin-top: 20%;
+		margin-bottom: 20px;
+	}
+	#map_modal .ng-modal-dialog{
+		top: 40%;
+		padding: 0;
+	}
+	#map_modal .ng-modal-title{
+		padding: 10px;
+		margin: 0;
+	}
+	#preview_map{
+		position: absolute;
+		top: 400000000px;
+		left: 400000000px;
+		z-index: 0;
+	}
+	#map_modal #modalMap{
+	}
+	#map_modal .map_panel .done-button{
+		position: absolute;
+		bottom: 20px;
+		right: 20px;
+		z-index: 4001;
+	}
+</style>

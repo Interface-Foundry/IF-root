@@ -254,6 +254,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         // } 
         //------- END TIME --------//
 
+        
+
         $scope.world.loc = [$scope.markers.m.lat,$scope.markers.m.lng];
 
         $scope.world.userID = $scope.userID;
