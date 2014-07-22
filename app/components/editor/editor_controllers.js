@@ -46,13 +46,15 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     $scope.project = {};
 	
 	$scope.mapThemes = [
-		{name:'urban'},
-		{name:'fairy'},
-		{name:'sunset'},
-		{name:'arabesque'}
+		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
+		{cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
+		{cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
+		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'}
 	];
 	
 	$scope.mapping.mapThemeSelect = $scope.mapThemes[0];
+
+	$scope.mapping.type = 'cloud'; //pre-select cloud only map
 	
 	$scope.markerOptions = [
 		{name:'red'},
@@ -249,7 +251,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			  center: {
 			      lat: userLat, //adding these from world editor function
 			      lng: userLon,
-			      zoom: 15
+			      zoom: 17
 			  },
 			  markers:{}
 			});
@@ -257,7 +259,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             $scope.center = {
                 lat: userLat,
                 lng: userLon,
-                zoom: 15
+                zoom: 17
             };
             $scope.tiles = tilesDict.mapbox;
             
@@ -281,6 +283,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 				}
 			};
 			
+			//disable this for 2nd page of editor...
 			$scope.$on('leafletDirectiveMap.moveend', function(event){
                     console.log('moveend');
                     /*angular.extend($scope, {
@@ -378,14 +381,14 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        //------- END TIME --------//
 	    }
 
-        $scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
 
-        $rootScope.worldCoordinates = $scope.world.loc.coordinates; //updating to rootscope for modal process
+        //$rootScope.worldCoordinates = $scope.world.loc.coordinates; //updating to rootscope for modal process
 
         $scope.world.userID = $scope.userID;
 
         //edit world
         if (option == 'edit'){
+        	$scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
 			console.log('saveWorld(edit)');
         	$scope.world.newStatus = false; //not new
         	$scope.world.worldID = $scope.worldID;
@@ -401,6 +404,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
         	$scope.mapping.worldID = $scope.worldID;
 
+        	console.log($scope.mapping);
+
         	db.worlds.create($scope.mapping, function(response){
 	        	console.log(response);
 	        });  
@@ -410,6 +415,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
         //new world
         if (option === undefined) {
         	console.log('saveWorld()');
+        	$scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
         	$scope.world.newStatus = true; //new
 	        db.worlds.create($scope.world, function(response){
 	        	$scope.worldID = response[0].worldID;
@@ -556,7 +562,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 	$scope.buildMap = function(){
 
-		console.log('uploaded map: '+$scope.$parent.mapIMG);
+		console.log('building map: '+$scope.$parent.mapIMG);
 
 		var coordBox;
 
@@ -578,8 +584,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		        se_loc_lng: southEast.lng,
 		        se_loc_lat: southEast.lat
 		    };
-
-
+		      
 		    var coords_text = JSON.stringify(coordBox);
 
 		    var data = {
@@ -591,28 +596,34 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		        
 		    	//response = JSON.parse(response);
 		        console.log(response.style.maps.localMapOptions.maxZoom);
-				
-		        angular.extend($scope, {
-			 	  layers: {
-				      baselayers: {	
-				        osm: {
-	 						url: 'http://107.170.180.141/maps/'+response.style.maps.localMapID+'/{z}/{x}/{y}.png',
-						    option: {
-							    attribution: 'IF',
-							    minZoom: response.style.maps.localMapOptions.minZoom,
-							    maxZoom: response.style.maps.localMapOptions.maxZoom,
-							    reuseTiles: true,
-							    tms:true
-						    },
-							  center: {
-	
-							      zoom: response.style.maps.localMapOptions.maxZoom
-							  },
 
-				        }
-				      }
-				  }
-				});
+		        $scope.showMapBuilt = true;
+
+		        $scope.mapping.type = 'both';
+				
+		  //       angular.extend($scope, {
+
+			 // 	  layers: {
+				//       baselayers: {	
+				//         osm: {
+	 		// 				url: 'http://107.170.180.141/maps/'+response.style.maps.localMapID+'/{z}/{x}/{y}.png',
+				// 		    option: {
+				// 			    attribution: 'IF',
+				// 			    minZoom: response.style.maps.localMapOptions.minZoom,
+				// 			    maxZoom: response.style.maps.localMapOptions.maxZoom,
+				// 			    reuseTiles: true,
+				// 			    tms:true
+				// 		    },
+				// 			  center: {
+	
+				// 			      zoom: response.style.maps.localMapOptions.maxZoom
+				// 			  },
+
+				//         }
+				//       }
+				//   }
+
+				// });
 
 				// leafletData.getMap('modalMap').then(function(map) {
 		  //           setTimeout(function() {map.invalidateSize();}, 400);
@@ -651,10 +662,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
             $scope.hideMapOptions = true; //hide map upload buttons
 
-           	angular.extend($scope, {
-			  markers:{}
-			});
-            
             $scope.$parent.mapIMG = data.result;
         }
 	});

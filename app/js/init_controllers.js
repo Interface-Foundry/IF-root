@@ -1,6 +1,7 @@
 
 /* IF Controllers */
 
+//searching for bubbles
 function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService) {
 
     angular.extend($rootScope, {loading: true});
@@ -92,7 +93,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
 
 
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, $route, $routeParams){
+//loads everytime
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, $route, $routeParams, $timeout, $http,$q){
 
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
@@ -112,6 +114,62 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
             map.invalidateSize();
         });
     }
+
+
+    // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
+    //================================================
+    // Check if the user is connected
+    //================================================
+    var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
+
+      //============== Refresh page to show Login auth =====//
+      // Initialize a new promise
+      var deferred = $q.defer();
+
+      // Make an AJAX call to check if the user is logged in
+      $http.get('/api/user/loggedin').success(function(user){
+
+
+        // Authenticated
+        if (user !== '0'){
+              //determine name to display on login (should check for name extension before adding...)
+              if (user.facebook){
+                  $rootScope.userName = user.facebook.name;
+              }
+              else if (user.twitter){
+                  $rootScope.userName = user.twitter.displayName;
+              }
+              else if (user.local){
+                  $rootScope.userName = user.local.email;
+              }
+              else {
+                  $rootScope.userName = "Me";
+              }
+
+          $rootScope.showLogout = true;
+
+           console.log($rootScope.showLogout);
+          
+          $timeout(deferred.resolve, 0);
+        }
+
+        // Not Authenticated
+        else {
+          $rootScope.showLogout = false;
+          $rootScope.message = 'You need to log in.';
+          $timeout(function(){deferred.reject();}, 0);
+          $location.url('/login');
+        }
+      });
+
+      return deferred.promise;
+    };
+    //================================================//
+
+
+    //check if logged in
+    checkLoggedin($q, $timeout, $http, $location, $rootScope);
+
 
 
     //----- MAP QUERY, TEMPORARY, for "show" page map icon click panel. needs to be directive ------//
@@ -191,5 +249,5 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     };
 
 }
-indexIF.$inject = [ '$location', '$scope', 'db', 'leafletData','$rootScope', 'apertureService', 'mapManager'];
+// indexIF.$inject = [ '$location', '$scope', 'db', 'leafletData','$rootScope', 'apertureService', 'mapManager'];
 

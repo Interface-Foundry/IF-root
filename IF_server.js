@@ -634,10 +634,15 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
           }
           else if (req.user._id == lm.permissions.ownerID){
 
-            lm.style.maps = {type: 'cloud', cloudMapID: 'interfacefoundry.ig6a7dkn', cloudMapName:req.body.mapThemeSelect.name};
+            lm.style.maps.type = req.body.type;
+            lm.style.maps.cloudMapID = req.body.mapThemeSelect.cloudMapID;
+            lm.style.maps.cloudMapName = req.body.mapThemeSelect.cloudMapName;
 
             //NEED TO CHANGE TO ARRAY to push new marker types, eventually
-            lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
+            lm.style.markers = {
+                name:req.body.markerSelect.name, 
+                category:'all'
+            };
 
             lm.save(function(err, landmark) {
                 if (err){
@@ -1181,35 +1186,50 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 //map send to tile server
 app.post('/api/build_map', isLoggedIn, function (req, res) {
 
+    //console.log(req.body.mapBuild);
+
+    console.log(req.body);
+
     //this entire area hurts my eyes, i can't even D:
 
     var map_text = JSON.stringify(req.body.coords); 
     map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
 
-    //console.log(__dirname + '/app/'+ req.body.mapIMG);
-
     // after file saved locally, send to IF-Tiler server
     var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
       if (err) {
 
-            //delete temp file
-            fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
-              if (err) throw err;
-              console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
-            });
+            if (fs.existsSync(__dirname + '/app/'+ req.body.mapIMG)) {
+                //delete temp file
+                fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
+                  if (err) throw err;
+                  console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
+                });              
+            }
+            else {
+                console.log('could not delete, file does not exist: '+__dirname + '/app/'+ req.body.mapIMG);
+            }
+
 
         return console.error('upload failed:', err);
       }
+      
       else{
         console.log('Upload successful! Server responded with:', body);
 
-        worldMapTileUpdate(req, res, body);
+        worldMapTileUpdate(req, res, body, req.mapBuild);
 
-            //delete temp file
-            fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
-              if (err) throw err;
-              console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
-            });
+            if (fs.existsSync(__dirname + '/app/'+ req.body.mapIMG)) {
+                //delete temp file
+                fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
+                  if (err) throw err;
+                  console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
+                });
+            }
+            else {
+                console.log('could not delete, file does not exist: '+__dirname + '/app/'+ req.body.mapIMG);
+            }
+
 
        }
     });
@@ -1219,12 +1239,11 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
     form.append('my_buffer', new Buffer([1, 2, 3]));
     form.append(map_text, fs.createReadStream(__dirname + '/app/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
 
-
 });
 
 
 
-    function worldMapTileUpdate(req, res, data){ //adding zooms, should be incorp into original function
+    function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be incorp into original function
 
         var tileRes = JSON.parse(data); //incoming box coordinates
 
@@ -1238,10 +1257,8 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
             var max = tileRes.zooms.slice(-1)[0];
 
             lm.style.maps = {
-                type: 'both', 
                 localMapID: tileRes.mapURL, 
                 localMapName: tileRes.worldID
-
             };
 
             lm.style.maps.localMapOptions = {

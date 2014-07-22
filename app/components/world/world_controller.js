@@ -22,8 +22,16 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	$scope.loadWorld = function(data) {
 	  	$scope.world = data.world;
 		 $scope.style = data.style;
+
+		 // order of logic
+		 // if (type == cloud) ---> load cloud as basemap
+		 // else if (type == both && localMapID && cloudMapID) --> load cloud as basecamp, layer local map on top
+		 // else if (type == local && localMapID) --> load local map as base, use black background for leaflet style
+		 // else if (cloudMapID) ---> load cloudmap as basemap
+		 // else { load with default cloudMapID } ---> load a default cloudmap as basemap
+
 		 map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		 map.setCenter($scope.world.loc.coordinates, 15);
+		 map.setCenter($scope.world.loc.coordinates, 15); //pull zoom from mapoptions if exists
 		 map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
@@ -38,6 +46,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 	$location.path('/#/');
 		 }
 		 else {
+
 			$scope.loadWorld(data); 
 			$scope.queryType = "all";
 			$scope.queryFilter = "all";
