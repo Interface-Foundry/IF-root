@@ -15,7 +15,7 @@
 			
 			<div class="col-xs-12">
 				<div ng-style="{'background-color': style.cardBG_color}" class="landmark-description">
-				{{landmark.description}}
+				<div ng-bind-html="landmark.description"> </div>
 				</div>
 			</div>
 		</div>

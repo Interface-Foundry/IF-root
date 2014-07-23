@@ -383,3 +383,7 @@ main {display:block;}
 ul {
 -webkit-padding-start: 0px;
 }
+
+.leaflet-bottom.leaflet-right {
+	display: none;
+}
