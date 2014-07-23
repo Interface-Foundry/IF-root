@@ -50,13 +50,14 @@ $scope.goToLandmark = function(i) {
 		  			message:landmark.name,
 		  			icon: {
 		  				iconUrl: categoryURL,
-		  				iconSize: [100,100]
+		  				iconSize: [50,50]
 		  			}
 		  		});
 		  	}
 	  		
 	  		
-  		})
+  		});
+  		map.refresh();
   	}
   	
   	
