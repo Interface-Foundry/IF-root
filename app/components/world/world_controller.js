@@ -240,7 +240,10 @@ $scope.goToLandmark = function(i) {
 	
 	
 	$scope.currentTag = $scope.world.tags;
-	$scope.tweets = db.tweets.query({tag: $scope.world.tags, time:$scope.time});
+	//$scope.tweets = db.tweets.query({tag: $scope.world.tags, time:$scope.time});
+
+	$scope.tweets = db.tweets.query({limit:1});
+    $scope.instagrams = db.instagrams.query({limit:1});
 	
 	
 }
