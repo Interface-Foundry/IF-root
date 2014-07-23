@@ -129,7 +129,6 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
       // Make an AJAX call to check if the user is logged in
       $http.get('/api/user/loggedin').success(function(user){
 
-        console.log('uhhhhhh');
         // Authenticated
         if (user !== '0'){
               //determine name to display on login (should check for name extension before adding...)

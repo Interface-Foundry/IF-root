@@ -1,6 +1,6 @@
 	var mongoose = require('mongoose');
 
-	var safe = {j: 1, getLastError: 1, _id:false}; //for testing DB
+	//var safe = {j: 1, getLastError: 1, _id:false}; //for testing DB
 
 	//schema construction
 	var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
@@ -26,9 +26,7 @@
 		created: { type: Date, default: Date.now }
 		//_id: Schema.Types.ObjectId,
 		//geo: {type: String, coordinates: [Number]}
-	},
-	//{safe: safe}); //for testing db
-	{_id: false});
+	};
 
 
 module.exports = twitterSchema;
