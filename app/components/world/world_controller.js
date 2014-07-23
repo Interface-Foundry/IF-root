@@ -15,8 +15,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		console.log('--goToLandmark--');
 		$scope.selectedIndex = i;
 		map.setCenter($scope.landmarks[i].loc.coordinates, 17);
-		map.setMarkerFocus($scope.landmarks[i]._id);
-		
+		map.setMarkerFocus($scope.landmarks[i]._id);	
 	}
   	
   	$scope.loadWorld = function(data) {

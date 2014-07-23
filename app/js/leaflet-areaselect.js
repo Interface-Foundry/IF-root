@@ -9,9 +9,18 @@ L.AreaSelect = L.Class.extend({
 
     initialize: function(options) {
         L.Util.setOptions(this, options);
-        
-        this._width = this.options.width;
-        this._height = this.options.height;
+
+        // TEMPORARY!!!!
+        //map the dimension of the image to a ratio to divide it by, so if >2000px && <3000px then divide by range of 1-10
+        if (this.options.width > 1000 || this.options.height > 1000){
+            this._width = this.options.width / 8;
+            this._height = this.options.height / 8;
+        }
+        else {
+            this._width = this.options.width;
+            this._height = this.options.height;
+        }
+
     },
     
     addTo: function(map) {
@@ -133,6 +142,10 @@ L.AreaSelect = L.Class.extend({
         
         var topBottomHeight = Math.round((size.y-this._height)/2);
         var leftRightWidth = Math.round((size.x-this._width)/2);
+
+        console.log(handleOffset);
+        console.log(topBottomHeight);
+        console.log(leftRightWidth);
         
         function setDimensions(element, dimension) {
             element.style.width = dimension.width + "px";
@@ -143,6 +156,7 @@ L.AreaSelect = L.Class.extend({
             element.style.right = dimension.right + "px";
         }
         
+        //dimensions for shadows
         setDimensions(this._topShade, {width:size.x, height:topBottomHeight, top:0, left:0});
         setDimensions(this._bottomShade, {width:size.x, height:topBottomHeight, bottom:0, left:0});
         setDimensions(this._leftShade, {
@@ -158,6 +172,7 @@ L.AreaSelect = L.Class.extend({
             right: 0
         });
         
+        //dimensions for handles
         setDimensions(this._nwHandle, {left:leftRightWidth-handleOffset, top:topBottomHeight-7});
         setDimensions(this._neHandle, {right:leftRightWidth-handleOffset, top:topBottomHeight-7});
         setDimensions(this._swHandle, {left:leftRightWidth-handleOffset, bottom:topBottomHeight-7});
