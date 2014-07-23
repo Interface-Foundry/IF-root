@@ -584,6 +584,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		        se_loc_lng: southEast.lng,
 		        se_loc_lat: southEast.lat
 		    };
+
+		    console.log(coordBox);
 		      
 		    var coords_text = JSON.stringify(coordBox);
 
