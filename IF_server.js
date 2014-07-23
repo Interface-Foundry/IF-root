@@ -535,7 +535,7 @@ app.get('/api/:collection', function(req, res) {
             var qw = {
                'text' : {$regex : ".*"+'techmeetup2014'+".*", $options: 'i'}
             };
-            db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));
+            db.collection('instagrams').find(qw).sort({_id: -1}).toArray(fn(req, res));
         }
 
         else {
