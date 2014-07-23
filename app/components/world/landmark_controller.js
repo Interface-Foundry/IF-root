@@ -25,6 +25,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		});
 		
 		function goToMark() {
+			
 			map.setCenter($scope.landmark.loc.coordinates, 16); 
 				  			map.addMarker(landmark._id, {
 		  			lat: landmark.loc.coordinates[1],

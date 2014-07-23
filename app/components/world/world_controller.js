@@ -9,6 +9,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		$scope.stm = true;
 	}
 	
+	
+	
     angular.extend($rootScope, {loading: false});
     
 	$scope.selectedIndex = 0;
@@ -235,6 +237,11 @@ $scope.goToLandmark = function(i) {
 		
 	});
 	}
+	
+	
+	$scope.currentTag = $scope.world.tags;
+	$scope.tweets = db.tweets.query({tag: $scope.world.tags, time:$scope.time});
+	
 	
 }
 

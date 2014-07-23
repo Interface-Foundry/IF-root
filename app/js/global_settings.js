@@ -137,7 +137,7 @@ var mapSelect = 'cloud'; //loading 'cloud' setting as specified in: js/angular-l
 
 //---------- TWEET STREAM -------//
 //one or more hashtags for base twitter gathering 
-var global_hashtag = "#aicpawards";
+var global_hashtag = "#techmeetup2014";
 //can also be multiple:
 //var global_hashtag = '#lol,#what,#soitgoes';
 //-------------------------------//
