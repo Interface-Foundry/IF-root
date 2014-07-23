@@ -26,5 +26,13 @@ margin: 0 auto;
 
 .media {
 	margin: 10px;
-	height: 64px;
+	height: 80px;
+}
+
+.media-object {
+	margin-left: 10px;
+}
+
+.media-heading {
+	margin-top: 4px;
 }

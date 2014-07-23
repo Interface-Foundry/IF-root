@@ -29,7 +29,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
  
  <!--  
    <html ng-app="app" ng-controller="titleCtrl">
@@ -111,6 +111,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   
   <!--world component-->
   <script src="components/world/world_controller.js"></script>  
+  <script src="components/world/landmark_controller.js"></script>
   <link rel="stylesheet" href="components/world/world.css">
   
   <!--editor component-->
@@ -126,56 +127,46 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <!--for local map placement-->
   <script src="js/leaflet-areaselect.js"></script>
 </head>
-<body>
+<body ng-style="{'background-color': globalBGColor}">
 
   <div id="wrap">
-	  <nav role="navigation" ng-class="{'drawer': drawerOn}">
-	  		<ul>
-	  			<li><img class="logo" ng-click="drawerOn = !drawerOn"></img></li>
-	  			<li></li>
+	  <nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': globalNavColor}">
+	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn"></img>
+	  		<a class="pull-left" ng-show="backToWorld" ng-href="/#/w/{{backToWorldURL}}" ng-click="backToWorld=false">Back</a>
+	  		<ul class="navbar-right">
+	  			<li>
+	  				<img class="nav-icon" src="/img/icons/zoom.png">
+	  			</li>
+	  			<li>
+	  				<img class="nav-icon" src="/img/icons/compass.png">
+	  			</li>
+	  			<li><!-- USER DROPDOWN -->
+		  		<a ng-show="!showLogout" ng-href="/#/login" class="nav-user no-u">Login</a>
+			  	<span class="dropdown" on-toggle="toggled(open)" ng-show="showLogout">
+		   		  	<a href="" class="dropdown-toggle no-u">
+		   		  		<img class="nav-avatar" src="/img/icons/profile.png">
+			   		   	<span ng-bind="userName" class="nav-user no-u">Profile</span> <span class="caret"></span>
+			   		</a>
+			   		<ul class="dropdown-menu">
+				   		<li><a ng-href="/#/profile">Profile</a></li>
+				   		<li><a ng-href="/#/newworld">+ New World</a></li>
+				   		<li><a href="mailto:hello@interfacefoundry.com?Subject=Issue%20Report">Report Issue</a></li>
+				   		<li><a href="" ng-click="logout()">Logout</a></li>
+				   	</ul>
+		  		</span>
+	  			</li>
 	  		</ul>
-	  	<div class="navbar-right">
-	  	  <div ng-show="!showLogout"><a ng-href="/#/login">Login</a></div>
-        <div ng-show="showLogout">
-
-          <!-- USER DROPDOWN -->
-          <span class="dropdown" on-toggle="toggled(open)">
-            <a href class="dropdown-toggle">
-              {{userName}} <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a ng-href="/#/profile">Profile</a></li>
-              <li><a ng-href="/#/newworld">+ New World</a></li>
-              <li><a href="">Report Issue</a></li>
-              <li><a href="" ng-click="logout()">Logout</a></li>
-            </ul>
-          </span>
-
-        </div>
-
-
-	  	</div>
 
 	  </nav>
 	  <div id="scrim" ng-class="{'loading': loading}">
 	  	<span class="glyphicon glyphicon-refresh"></span>
 	  </div>
-      <section id="drawer" ng-class="{'drawer': drawerOn}">
-      	
-     	 <a class="navbar-brand" ng-click="panDrawer()" href="#"></a>
-       <li><a ng-href="/#/newworld">+ Add New World</a></li>
-       <hr>
-       <h4>Nearby Bubbles</h4>
-       <li ng-repeat="bubble in nearbyBubbles">
-           <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
-       </li>
-       <a ng-show="!nearbyBubbles" ng-href="/#/">Find Nearby Bubbles</a>
-	 	 
+      <section id="drawer" ng-class="{'drawer': drawerOn}" ng-include="'/components/drawer/drawer.html'">
       </section>
 
 	  <div id="main" ng-class="{'drawer': drawerOn}">
           <section id="aperture" ng-class="[aperture.state]">
-			  <leaflet id="leafletmap" tiles="map.tiles" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults">
+			  <leaflet id="leafletmap" tiles="map.tiles" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers">
               </leaflet>
          </section>
 

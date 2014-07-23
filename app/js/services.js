@@ -132,6 +132,18 @@ angular.module('tidepoolsServices', ['ngResource'])
 				},
 			markers: {},
 			tiles: tilesDict.mapbox,
+			layers: {
+				baselayers: {
+					baseMap: {
+					name: "Sunset",
+					url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
+					type: 'xyz',
+					layerParams: {},
+					layerOptions: {}
+				}
+			},
+				overlays: {}
+			},
 			paths: {worldBounds: {
 					type: 'circle',
 					radius: 150,
@@ -141,12 +153,12 @@ angular.module('tidepoolsServices', ['ngResource'])
 			defaults: {
 				controls: {
 					layers: {
-						visible: true,
+						visible: false,
 						position: 'bottomright',
 						collapsed: true
 					}
 				},
-				zoomControlPosition: 'bottomleft'
+				zoomControlPosition: 'bottomleft',
 			}
 		};
 		
@@ -268,7 +280,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 		Name: Name of tileset from dictionary
 		*/
 		mapManager.setTiles = function(name) {
-				console.log('--setTiles('+name+'--');
+			console.log('--setTiles('+name+'--');
 			angular.extend(mapManager.tiles, tilesDict[name]); 
 			refreshMap();
 		}

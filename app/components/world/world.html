@@ -1,34 +1,53 @@
-<div class="container" ng-style="{'background-color': style.bodyBG_color}">
+<div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
 	<div class="row">
-			<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" ng-style="{'background-color': style.cardBG_color}" ng-click="aperture.toggle('half')">
+			<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" ng-style="{'background-color': style.titleBG_color}" ng-click="aperture.toggle('half')">
 					<div class="media">
 						<div class="pull-left vertical-middle">
 							<img class="media-object avatar" ng-click="aperture.toggle('half')" ng-src="{{world.avatar}}">
 						</div>
 						<div class="media-body vertical-middle">
-							<h1 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h1>
+							<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h1>
 						</div>
 					</div>
 			</div>
 	</div>
 	
-	<ul>
-		<li ng-repeat="landmark in landmarks" ng-controller="WorldRepeatController" ng-class="{'topmark': selectedIndex==$index}">
-			<a ng-click="goToMark()">
-				<div class="media">
-					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left" ng-cloak> 
+	<!--explore--> 
+	<section ng-if="stm">
+	<div class="row">
+	 	<div class="col-xs-4">
+	 		<img class="img-responsive" src="img/icons/syracuse/food.png">
+	 		<p class="text-center small" ng-style="{'background-color': style.cardBG_color, color: style.category_color}">FOOD</p>
+	 	</div>
+	 	<div class="col-xs-4" >
+		 	<img class="img-responsive" src="img/icons/syracuse/building.png">
+		 	<p class="text-center small" ng-style="{'background-color': style.cardBG_color, color: style.category_color}">PLACES</p>
+	 	</div>
+	 	<div class="col-xs-4">
+		 	<img class="img-responsive" src="img/icons/syracuse/washroom.png">
+		 	<p class="text-center small" ng-style="{'background-color': style.cardBG_color, color: style.category_color}">BATHROOMS</p>
+	 	</div>
+	</div>
+	</section>
+	<h3 class="category-heading" ng-style="{color: style.categoryTitle_color}">COMPANIES</h4>
+	
+	<ul class="row">
+		<li ng-repeat="landmark in landmarks" 
+			ng-controller="WorldRepeatController"
+			class="col-sm-6 col-xs-12">
+			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
+				<div class="media" ng-style="{'background-color': style.cardBG_color}">
+					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h4 class="media-heading" ng-cloak>{{landmark.name}}</h4>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}}</h3>
 						<em ng-cloak>{{landmark.summary}}</em>
-						<div ng-show="selectedIndex==$index">
-						<p>{{landmark.description}}</p>
-						</div>
 					</div>
 				</div>
 			</a>
-			<hr>
 		</li>
 	</ul>
+	
+	
 
-<span ng-show="showLogout"><a href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></span>
+<span ng-show="showLogout"><a ng-href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></span>
 </div>
