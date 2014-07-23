@@ -2,6 +2,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		console.log('--Landmark Controller--');
 		var map = mapManager;
 		$scope.aperture = apertureService;
+		$scope.aperture.set('half');
 	
 		
 		$scope.worldURL = $routeParams.worldURL;
@@ -27,13 +28,17 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		function goToMark() {
 			
 			map.setCenter($scope.landmark.loc.coordinates, 16); 
-				  			map.addMarker(landmark._id, {
-		  			lat: landmark.loc.coordinates[1],
-		  			lng: landmark.loc.coordinates[0],
+				  			map.addMarker($scope.landmark._id, {
+		  			lat: $scope.landmark.loc.coordinates[1],
+		  			lng: $scope.landmark.loc.coordinates[0],
 		  			draggable:false,
-		  			message:landmark.name
+		  			message:$scope.landmark.name
 		  		});
-		 map.addMarker($scope.landmark._id, {
+		  		var markers = map.markers;
+		  	angular.forEach(markers, function(marker) {
+			  	map.removeMarker(marker);
+		  	});
+		  	map.addMarker($scope.landmark._id, {
 		  			lat: $scope.landmark.loc.coordinates[1],
 		  			lng: $scope.landmark.loc.coordinates[0],
 		  			draggable:false,
