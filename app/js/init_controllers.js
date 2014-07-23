@@ -47,9 +47,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
                 var userLat = position.coords.latitude;
                 var userLon = position.coords.longitude;
-                //findWorlds(userLat, userLon);
-                angular.extend($rootScope, {loading: false});
-                $location.path('w/Syracuse_Tech_Meetup');
+
+                findWorlds(userLat, userLon);
+ 
+                $location.path('w/Syracuse_Tech_Meetup'); // DELETE AFTER DEMO
+
 
             }
 
@@ -76,7 +78,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
             if (data[0].liveAndInside[0] != null) {
                 if (data[0].liveAndInside[0].id){
-                    $location.path('w/'+data[0].liveAndInside[0].id);
+                    //$location.path('w/'+data[0].liveAndInside[0].id); //ENABLE AFTER DEMO
                 }
                 else {
                     console.log('world has no id');
