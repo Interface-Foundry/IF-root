@@ -2,6 +2,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		console.log('--Landmark Controller--');
 		var map = mapManager;
 		$scope.aperture = apertureService;
+	
 		
 		$scope.worldURL = $routeParams.worldURL;
 		$scope.landmarkURL = $routeParams.landmarkURL;
@@ -19,5 +20,60 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 			console.log(landmark);
 			console.log('trying to get landmark');
 			//goto landmarker
+			goToMark();
+			
 		});
+		
+		function goToMark() {
+			map.setCenter($scope.landmark.loc.coordinates, 16); 
+				  			map.addMarker(landmark._id, {
+		  			lat: landmark.loc.coordinates[1],
+		  			lng: landmark.loc.coordinates[0],
+		  			draggable:false,
+		  			message:landmark.name
+		  		});
+		 map.addMarker($scope.landmark._id, {
+		  			lat: $scope.landmark.loc.coordinates[1],
+		  			lng: $scope.landmark.loc.coordinates[0],
+		  			draggable:false,
+		  			message:$scope.landmark.name
+		 });
+		 };
+		 
+		
+		map.tiles = {};
+		angular.extend(map.layers, {
+			overlays: {
+				localMap: {
+					name: 'Syracuse Tech Meetup',
+					visible: true,
+					type: 'xyz',
+					url: 'http://107.170.180.141/maps/demo/{z}/{x}/{y}.png',
+					opacity: 0.2,					
+					minZoom: 16,
+					maxZoom: 19,
+					tms: false,
+					reuseTiles: true,
+					layerParams: {
+					},
+					layerOptions: {
+					}
+					}
+			}
+		});
+		map.refresh();
+		
+		map.addMarker()
+		
+		
+		angular.extend($rootScope, {globalNavColor: "rgba(0,110,100, 0.9)", globalBGColor: "#00695C"});
+		
+		$scope.style = {
+			titleBG_color: "#009688",
+			cardBG_color: "#FFF",
+			category_color: "#E91E63",
+			categoryTitle_color: "#BBDEFB",
+			worldTitle_color: "#FFF",
+			landmarkTitle_color: "#2196F3"
+		}
 }

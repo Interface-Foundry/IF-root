@@ -15,12 +15,50 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	
 	var landmarksLoaded;
 	
-	$scope.goToLandmark = function(i) {
+$scope.goToLandmark = function(i) {
 		console.log('--goToLandmark--');
 		$scope.selectedIndex = i;
 		map.setCenter($scope.landmarks[i].loc.coordinates, 17);
 		map.setMarkerFocus($scope.landmarks[i]._id);	
 	}
+  	
+  	$scope.goToCategory = function(c) {
+	  	console.log('--goToCategory--');
+	  	$scope.aperture.set('half');
+	  	
+	  	redoMarkers($scope.landmarks, c);
+	 }
+	 
+	 $scope.returnToWorld = function() {
+		 redoMarkers($scope.landmarks);
+	 }
+
+  	
+  	function redoMarkers(landmarks, c) {
+  		var categoryURL;
+  		angular.forEach($scope.landmarks, function(landmark) {
+	  		if (landmark.category == 'food') {categoryURL="/img/marker/food-marker.png"}
+	  		if (landmark.category == 'bathroom') {categoryURL="/img/marker/washroom-marker.png"}
+	  		if (landmark.category == 'building') {categoryURL="/img/marker/building-marker.png"}
+	  		if (c != undefined && landmark.category != c) {
+	  			map.removeMarker(landmark._id); 
+	  		} else {
+	  			map.addMarker(landmark._id, {
+		  			lat: landmark.loc.coordinates[1],
+		  			lng: landmark.loc.coordinates[0],
+		  			draggable:false,
+		  			message:landmark.name,
+		  			icon: {
+		  				iconUrl: categoryURL,
+		  				iconSize: [100,100]
+		  			}
+		  		});
+		  	}
+	  		
+	  		
+  		})
+  	}
+  	
   	
   	$scope.loadWorld = function(data) {
 	  	 $scope.world = data.world;
@@ -50,7 +88,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	
   	if ($scope.stm) {
   	console.log("Syracuse Tech Meetup");
-  	angular.extend($rootScope, {globalNavColor: "#009688", globalBGColor: "#00695C"});
+  	angular.extend($rootScope, {globalNavColor: "rgba(0,110,100, 0.9)", globalBGColor: "#00695C"});
   	
 	 	$scope.world = {
 	"__v" : 0,
@@ -156,14 +194,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				console.log(data);
 				$scope.landmarks = data;
 				
-				angular.forEach($scope.landmarks, function(landmark) {
-					map.addMarker(landmark._id, {
-						lat:landmark.loc.coordinates[1],
-						lng:landmark.loc.coordinates[0],
-						draggable:false,
-						message:landmark.name
-					});
-				});
+				redoMarkers($scope.landmarks);
 				landmarksLoaded=true;
 				
 			});

@@ -57,7 +57,7 @@ nav .logo {
 	display: block;
 	height: 38px;
 	width: 38px;
-	background-color:#939393;
+	margin 2px;
 }
 
 nav ul {
