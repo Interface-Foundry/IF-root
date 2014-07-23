@@ -510,7 +510,7 @@ app.get('/api/:collection', function(req, res) {
 
         if (req.query.tag){ //hashtag filtering
             var qw = {
-               'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+               'text' : {$regex : ".*"+'techmeetup2014'+".*", $options: 'i'}
             };
             db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));
         }
@@ -533,7 +533,7 @@ app.get('/api/:collection', function(req, res) {
 
         if (req.query.tag){ //hashtag filtering
             var qw = {
-               'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+               'text' : {$regex : ".*"+'techmeetup2014'+".*", $options: 'i'}
             };
             db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));
         }
@@ -1213,7 +1213,7 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
         return console.error('upload failed:', err);
       }
-      
+
       else{
         console.log('Upload successful! Server responded with:', body);
 
