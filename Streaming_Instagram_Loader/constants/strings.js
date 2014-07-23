@@ -21,11 +21,11 @@ exports.IMAGE_SAVE_DESTINATION = '../app/images/instagram/';
 
 // Credentials
 
-exports.DEFAULT_DB_URL = 'mongodb://localhost/aicp';
+exports.DEFAULT_DB_URL = 'mongodb://localhost/if';
 exports.ACCESS_TOKEN = '519da9c304a147ddb12e0b58bf2a0598';
 exports.CLIENT_ID = '9069a9b469824abea0d0cce7acb51fa8';
 exports.CLIENT_SECRET= 'cb7a9f7cdb67498bbf0641b6d7489604';
 
 // Tag
 
-exports.TAG_FOR_IMAGES = 'aicpawards';
+exports.TAG_FOR_IMAGES = 'techmeetup2014';

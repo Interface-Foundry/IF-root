@@ -5,7 +5,7 @@ var twitter = require('ntwitter'),
 var credentials = require('./credentials.js');
 //var hashtag = require('../app/js/global_settings.js').hashtag;
 
-var hashtag = "#aicpawards";
+var hashtag = "#techmeetup2014";
 
 
 var t = new twitter({
@@ -16,7 +16,7 @@ var t = new twitter({
 });
 
 
-mongoose.connect('mongodb://localhost/aicp');
+mongoose.connect('mongodb://localhost/if');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
