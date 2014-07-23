@@ -26,7 +26,7 @@
 		created: { type: Date, default: Date.now }
 		//_id: Schema.Types.ObjectId,
 		//geo: {type: String, coordinates: [Number]}
-	};
+	});
 
 
 module.exports = twitterSchema;
