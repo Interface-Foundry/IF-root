@@ -9,7 +9,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		$scope.stm = true;
 	}
 	
-	
+	$scope.backOn = false;
 	
     angular.extend($rootScope, {loading: false});
     

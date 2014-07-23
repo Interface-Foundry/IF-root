@@ -1,4 +1,7 @@
 <div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
+	<div class="row" ng-show="backOn">
+		<button ng-class="btn btn-default">Back</button>
+	</div>
 	<div class="row">
 			<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" ng-style="{'background-color': style.titleBG_color}" ng-click="aperture.toggle('half')">
 					<div class="media">
@@ -28,7 +31,7 @@
 	 	</div>
 	</div>
 	</section>
-	<h3 class="category-heading" ng-style="{color: style.categoryTitle_color}">COMPANIES</h4>
+	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Companies</h4>
 	
 	<ul class="row">
 		<li ng-repeat="landmark in landmarks | filter : {category:'Company'}" 
@@ -51,7 +54,7 @@
 
           <!-- TWITTER -->
           <div class="col-xs-6 card 2-col social twitter">
-            <h1>Twitter</h1>
+            <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
             <a ng-href="#/talk">
               <div class="container more">
                 <p class="content">{{tweets[0].text}}</p>
@@ -63,7 +66,7 @@
 
           <!-- INSTAGRAM -->
           <div class="col-xs-6 card 2-col social instagram">
-            <h1>Instagram</h1>
+            <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
             <a ng-href="#/insta">
             <div class="container more">
               <p class="content"><img ng-src="images/instagram/{{instagrams[0].local_path[0]}}" width="100%"></p>
@@ -77,4 +80,10 @@
 	
 
 <span ng-show="showLogout"><a ng-href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></span>
+
+<div class="row">
+<p class="col-xs-6 col-xs-offset-6 text-center"><a href="http://interfacefoundry.com">Interface Foundry | </a><a href="http://startfast.net/">StartFast</a></p>
 </div>
+</div>
+
+
