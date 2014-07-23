@@ -47,8 +47,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
                 var userLat = position.coords.latitude;
                 var userLon = position.coords.longitude;
-                findWorlds(userLat, userLon);
-                //use locate.path()
+                //findWorlds(userLat, userLon);
+                $location.path('w/Syracuse_Tech_Meetup');
             }
 
             function locError(){
