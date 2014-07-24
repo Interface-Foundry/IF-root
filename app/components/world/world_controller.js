@@ -4,10 +4,6 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
     $scope.aperture.set('off');
-
-	if ($routeParams.worldURL == "Syracuse_Tech_Meetup") {
-		$scope.stm = true;
-	}
 	
 	$scope.backOn = false;
 	
@@ -88,130 +84,11 @@ $scope.goToLandmark = function(i) {
 		map.tiles = tilesDict[$scope.world.style.maps.cloudMapName];
 		map.refresh();
   	}
-  	
-  	if ($scope.stm) {
-  	console.log("Syracuse Tech Meetup");
-  	angular.extend($rootScope, {globalNavColor: "rgba(0,110,100, 0.9)", globalBGColor: "#00695C"});
-  	
-	 	$scope.world = {
-	"__v" : 0,
-	"_id" : "53cf6d5b1e218b73715cef47",
-	"avatar" : "uploads/82737527.png",
-	"category" : "Meetup",
-	"description" : "Six amazing tech start-ups from the StartFast Venture Accelerator will introduce their companies.  Networking. Food. Drink. Tech.",
-	"id" : "Syracuse_Tech_Meetup",
-	"landmarkCategories" : [ ],
-	"loc" : {
-		"type" : "Point",
-		"coordinates" : [
-			-76.15032400000001,
-			43.0444631
-		]
-	},
-	"name" : "Syracuse Tech Meetup",
-	"permissions" : {
-		"ownerID" : "53cf6cab1e218b73715cef3a",
-		"admins" : [ ],
-		"viewers" : [ ]
-	},
-	"resources" : {
-		"hashtag" : "techmeetup2014"
-	},
-	"style" : {
-		"maps" : {
-			"cloudMapID" : "interfacefoundry.ig6f6j6e",
-			"cloudMapName" : "sunset",
-			"localMapID" : "53cf6d5b1e218b73715cef47_warped.vrt",
-			"localMapName" : "53cf6d5b1e218b73715cef47",
-			"localMapOptions" : {
-				"minZoom" : 16,
-				"maxZoom" : 19,
-				"attribution" : "IF",
-				"reuseTiles" : true,
-				"tms" : true
-			},
-			"type" : "both"
-		},
-		"markers" : {
-			"name" : "red",
-			"category" : "all"
-		},
-		"styleID" : "53cf6d5b1e218b73715cef46"
-	},
-	"subType" : [ ],
-	"summary" : "Meet the Teams at StartFast",
-	"tags" : [ ],
-	"time" : {
-		"created" : "2014-07-23T08:07:55.604Z"
-	},
-	"valid" : true,
-	"world" : true
-};
-		
-		$scope.style = {
-			titleBG_color: "#009688",
-			cardBG_color: "#FFF",
-			category_color: "#E91E63",
-			categoryTitle_color: "#BBDEFB",
-			worldTitle_color: "#FFF",
-			landmarkTitle_color: "#2196F3"
-		}
-		
-		
-		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		map.setCenter($scope.world.loc.coordinates, 16); //pull zoom from mapoptions if exists
-		/*map.addPath('worldBounds', {
-				type: 'circle',
-                radius: 150,
-				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
-				});*/
-		//map.tiles = tilesDict['sunset']; http://107.170.180.141/maps/53cf6d5b1e218b73715cef47_warped.vrt/{z}/{x}/{y}.png',
 
-		map.tiles = {};
-		angular.extend(map.layers, {
-			overlays: {
-				localMap: {
-					name: 'Syracuse Tech Meetup',
-					visible: true,
-					type: 'xyz',
-					url: 'http://107.170.180.141/maps/demo/{z}/{x}/{y}.png',
-					opacity: 0.2,					
-					minZoom: 16,
-					maxZoom: 19,
-					tms: false,
-					reuseTiles: true,
-					layerParams: {
-					},
-					layerOptions: {
-					}
-					}
-			}
-		});
-		map.refresh();
-		
-		World.get({id: $routeParams.worldURL}, function(data) {
-		
-		$scope.queryType = "all";
-			$scope.queryFilter = "all";
-		db.landmarks.query({queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: data.world._id}, function(data){   
-				console.log(data);
-				$scope.landmarks = data;
-				
-				redoMarkers($scope.landmarks);
-				landmarksLoaded=true;
-				
-			});
-		
-		});
-		
-		
-		
-  	} else {
 	World.get({id: $routeParams.worldURL}, function(data) {
-		 if (data.err){
+		 if (data.err) {
 		 	$location.path('/#/');
-		 }
-		 else {
+		 } else {
 
 			$scope.loadWorld(data); 
 			$scope.queryType = "all";
@@ -236,15 +113,15 @@ $scope.goToLandmark = function(i) {
 		map.refresh();
 		
 	});
-	}
 	
-	
+	/*if ($scope.world.hasOwnProperty('tags')) {
 	$scope.currentTag = $scope.world.tags;
+	}
 	//$scope.tweets = db.tweets.query({tag: $scope.world.tags, time:$scope.time});
 
 	$scope.tweets = db.tweets.query({limit:1});
-    $scope.instagrams = db.instagrams.query({limit:1});
-	
+    $scope.instagrams = db.instagrams.query({limit:1});*/
+		
 	
 }
 
