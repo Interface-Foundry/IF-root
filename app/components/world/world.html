@@ -12,26 +12,9 @@
 			</div>
 	</div>
 	<!--explore-->
-	<section ng-if="stm">
-	<div class="row">
-	 	<div class="col-xs-4" ng-click="goToCategory('food')">
-	 		<img class="img-responsive" src="img/icons/syracuse/food.png">
-	 		<p class="text-center small" ng-style="{'background-color': style.cardBG_color, color: style.category_color}">FOOD</p>
-	 	</div>
-	 	<div class="col-xs-4" ng-click="goToCategory('building')">
-		 	<img class="img-responsive" src="img/icons/syracuse/building.png">
-		 	<p class="text-center small" ng-style="{'background-color': style.cardBG_color, color: style.category_color}">PLACES</p>
-	 	</div>
-	 	<div class="col-xs-4" ng-click="goToCategory('bathroom')">
-		 	<img class="img-responsive" src="img/icons/syracuse/washroom.png">
-		 	<p class="text-center small" ng-style="{'background-color': style.cardBG_color, color: style.category_color}">BATHROOMS</p>
-	 	</div>
-	</div>
-	</section>
-	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Companies</h4>
 	
 	<ul class="row">
-		<li ng-repeat="landmark in landmarks | filter : {category:'Company'}" 
+		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"
 			class="col-sm-6 col-xs-12">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
@@ -82,5 +65,3 @@
 <p class="col-xs-6 col-xs-offset-6 text-center"><a href="http://interfacefoundry.com">Interface Foundry | </a><a href="http://startfast.net/">StartFast</a></p>
 </div>
 </div>
-
-
