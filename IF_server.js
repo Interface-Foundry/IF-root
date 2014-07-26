@@ -554,6 +554,28 @@ app.get('/api/:collection', function(req, res) {
 
 });
 
+// Search
+
+app.get('/api/textsearch', function(req, res) {
+    landmarkSchema.find(
+        { $text : { $search : req.body.textQuery } },
+        { score : { $meta: "textScore" } }
+      ).
+      sort({ score : { $meta : 'textScore' } }).
+      limit(100).
+      exec(function(err, data) {
+        if (data){
+            res.send(data);
+        }
+        else {
+            console.log('no results');
+            res.send({err:'no results'});            
+        }
+      });
+});
+
+
+
 // Read 
 app.get('/api/:collection/:id', function(req, res) {
 

@@ -566,6 +566,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 		var coordBox;
 
+		$scope.showMapBuilding = true;
+
 		//get image geo coordinates, add to var to send
 		leafletData.getMap('modalMap').then(function(map) {
 			var bounds = $scope.areaSelect.getBounds();
@@ -599,6 +601,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		    	//response = JSON.parse(response);
 		        console.log(response.style.maps.localMapOptions.maxZoom);
 
+		        $scope.showMapBuilding = false;
 		        $scope.showMapBuilt = true;
 
 		        $scope.mapping.type = 'both';
