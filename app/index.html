@@ -30,24 +30,15 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
- 
- <!--  
-   <html ng-app="app" ng-controller="titleCtrl">
-   <head>
-     <title>{{ Page.title() }}</title> -->
- 
-  <title>{ IF world name }</title>
+  <title ng-bind="globalTitle">Bubbl.li</title>
+  <meta name="description" content="powered by Interface Foundry">
 
-
-  <meta name="description" content="AICP Awards 2014">
-
-  <meta property="og:title" content="AICP Awards 2014" />
-  <meta property="og:url" content="http://aicp.bubbl.li" />
-  <meta property="og:description" content="AICP Awards 2014 powered by Interface Foundry" />
+  <meta property="og:title" content="Bubbl.li" />
+  <meta property="og:url" content="http://bubbl.li" />
+  <meta property="og:description" content="powered by Interface Foundry" />
   <meta property="og:image" content="http://interfacefoundry.com/img/IF/IF_box_250_250.png" />
   <meta property="og:site_name" content="IF Bubbl.li"/>
   <meta property="og:type" content="website" /> 
-
 
   <link rel="stylesheet" href='css/bootstrap.css'>
   <link rel="stylesheet" href='css/app.css'>
@@ -130,8 +121,12 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <body ng-style="{'background-color': globalBGColor}">
 
   <div id="wrap">
+  		<div class="drawer-handle" ng-show="drawerOn" ng-style="{'background-color': globalNavColor}"> 
+  			<img class="handle toolbar-item" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
+  		</div>
 	  <nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': globalNavColor}">
-	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg"></img>
+	  		<img class="handle pull-left" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
+	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg">
 	  		<a class="pull-left" ng-show="backToWorld" ng-href="/#/w/{{backToWorldURL}}" ng-click="backToWorld=false">Back</a>
 	  		<ul class="navbar-right">
 	  			<li>
@@ -141,7 +136,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  				<img class="nav-icon" src="/img/icons/compass.png">
 	  			</li>
 	  			<li><!-- USER DROPDOWN -->
-		  		<a ng-show="!showLogout" ng-href="/#/login" class="nav-user no-u">Login</a>
+		  		<a ng-show="!showLogout" ng-href="/#/login" class="vertical-middle nav-user no-u">Login</a>
+		  		
 			  	<span class="dropdown" on-toggle="toggled(open)" ng-show="showLogout">
 		   		  	<a href="" class="dropdown-toggle no-u">
 		   		  		<img class="nav-avatar" src="/img/icons/profile.png">
@@ -170,7 +166,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
               </leaflet>
          </section>
 
-         <section id="shelf" ng-class="[aperture.state]">
+         <section id="view" ng-class="[aperture.state]">
                   <div ng-view></div>
 		 </section>
 	</div>

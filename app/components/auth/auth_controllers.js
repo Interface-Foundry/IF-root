@@ -3,7 +3,7 @@
  **********************************************************************/
 function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
 
-  $scope.aperture = apertureService;  
+  $scope.aperture = apertureService;
   $scope.aperture.set('off');
 
   // This object will be filled by the form
@@ -18,7 +18,7 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
 
     $http.post('/api/user/login', data).success(function(user){
         if (user){
-          $location.url('/profile');
+          $location.path('/profile');
         }   
     });
   }
@@ -41,7 +41,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService) {
 
     $http.post('/api/user/signup', data).success(function(user){
         if (user){
-          $location.url('/profile');
+          $location.path('/profile');
         }   
     });
   }
