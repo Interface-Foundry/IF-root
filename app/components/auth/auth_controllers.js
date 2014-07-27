@@ -3,14 +3,19 @@
  **********************************************************************/
 function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
 
+
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
+
+      console.log('asdf');
+
 
   // This object will be filled by the form
   $scope.user = {};
 
   // Register the login() function
   $scope.login = function(){
+
     var data = {
       email: $scope.user.email,
       password: $scope.user.password
@@ -20,8 +25,13 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
         if (user){
           $location.url('/profile');
         }   
+        else {
+          console.log('asdf');
+          $scope.user.response = true;
+        }
     });
-  }
+  };
+
 }
 
 function SignupCtrl($scope, $rootScope, $http, $location, apertureService) {

@@ -26,7 +26,7 @@ var async = require('async');
 var moment = require('moment');
 var connectBusboy = require('connect-busboy');
 
-var configDB = require('./config/database.js');
+var configDB = require('./server_auth/database.js');
 
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -68,7 +68,7 @@ db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 
 //---------------//
 
-require('./config/passport')(passport); // pass passport for configuration
+require('./server_auth/passport')(passport); // pass passport for configuration
 
 
 var express = require('express'),
@@ -105,11 +105,8 @@ var express = require('express'),
 app.use(connectBusboy());
 
 // routes ======================================================================
-require('./app/routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
-    
-// var bodyParser   = require('body-parser');
+require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 
-// app.use(express.bodyParser());
 /* Helpers */
 
 //Parts of express code from: https://github.com/dalcib/angular-phonecat-mongodb-rest
@@ -1195,7 +1192,6 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
                 }); 
 
-
                 break;
             }
         }
@@ -1207,8 +1203,6 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
 //map send to tile server
 app.post('/api/build_map', isLoggedIn, function (req, res) {
-
-    //console.log(req.body.mapBuild);
 
     console.log(req.body);
 
@@ -1265,62 +1259,60 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
 
 
-    function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be incorp into original function
+function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be incorp into original function
 
-        var tileRes = JSON.parse(data); //incoming box coordinates
+    var tileRes = JSON.parse(data); //incoming box coordinates
 
-         landmarkSchema.findById(tileRes.worldID, function(err, lm) {
-          if (!lm){
-            console.log(err);
-          }
-          else if (req.user._id == lm.permissions.ownerID){
+     landmarkSchema.findById(tileRes.worldID, function(err, lm) {
+      if (!lm){
+        console.log(err);
+      }
+      else if (req.user._id == lm.permissions.ownerID){
 
-            var min = tileRes.zooms[0];
-            var max = tileRes.zooms.slice(-1)[0];
+        var min = tileRes.zooms[0];
+        var max = tileRes.zooms.slice(-1)[0];
 
-            lm.style.maps = {
-                localMapID: tileRes.mapURL, 
-                localMapName: tileRes.worldID
-            };
+        lm.style.maps = {
+            localMapID: tileRes.mapURL, 
+            localMapName: tileRes.worldID
+        };
 
-            lm.style.maps.localMapOptions = {
-                minZoom: min,
-                maxZoom: max,
-                attribution: "IF",
-                reuseTiles: true,
-                tms: true
+        lm.style.maps.localMapOptions = {
+            minZoom: min,
+            maxZoom: max,
+            attribution: "IF",
+            reuseTiles: true,
+            tms: true
+        }
+
+        //NEED TO CHANGE TO ARRAY to push new marker types, eventually
+      //  lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
+
+        lm.save(function(err, landmark) {
+            if (err){
+                console.log('error');
             }
+            else {
+                console.log(landmark);
+                console.log('success');
+                res.send(landmark);
+            }
+        });
+      }
+      else {
+        console.log('unauthorized user');
+      }
+    });       
+}
 
-            //NEED TO CHANGE TO ARRAY to push new marker types, eventually
-          //  lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
-
-            lm.save(function(err, landmark) {
-                if (err){
-                    console.log('error');
-                }
-                else {
-                    console.log(landmark);
-                    console.log('success');
-                    res.send(landmark);
-                }
-            });
-          }
-          else {
-            console.log('unauthorized user');
-          }
-        });       
-
-    }
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-
     if (!req.isAuthenticated()) 
         res.send(401);  //send unauthorized 
     else 
         return next();
 }
-
 
 
 app.listen(2997, function() {
