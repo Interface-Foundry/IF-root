@@ -2,13 +2,11 @@
  * Login controller
  **********************************************************************/
 function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
-
+  
+  $scope.alerts = [];
 
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
-
-      console.log('asdf');
-
 
   // This object will be filled by the form
   $scope.user = {};
@@ -21,16 +19,35 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
       password: $scope.user.password
     }
 
-    $http.post('/api/user/login', data).success(function(user){
-        if (user){
-          $location.url('/profile');
-        }   
-        else {
-          console.log('asdf');
-          $scope.user.response = true;
+    $http.post('/api/user/login', data).
+      success(function(user){
+          if (user){
+            $location.url('/profile');
+          }   
+          else {
+            console.log('asdfasdf');
+            $scope.addAlert('danger','uhhhhh');
+          }
+      }).
+      error(function(err){
+        console.log('asdf');
+        if (err){
+           console.log(err);
         }
-    });
+
+      });
+
   };
+
+
+  $scope.addAlert = function(alertType,alertMsg) {
+    $scope.alerts.push({type: alertType, msg: alertMsg});
+  };
+
+  $scope.closeAlert = function(index) {
+    $scope.alerts.splice(index, 1);
+  };
+
 
 }
 

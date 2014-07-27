@@ -8,12 +8,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     //================================================
     var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
 
-      // console.log($location.$$path);
-
-      // if ($location.$$path == '/' || $location.$$path.indexOf("/w/") > -1){
-      //       console.log
-      // }
-
       // Initialize a new promise
       var deferred = $q.defer();
 
@@ -82,8 +76,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     // Define all the routes
     //================================================
   $routeProvider.
-      //when('/', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
-      when('/nearby', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
+      when('/', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
+      // when('/nearby', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
       when('/login', {templateUrl: 'components/auth/login.html', controller: LoginCtrl}).
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
@@ -118,7 +112,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/nearby'}); 
+      otherwise({redirectTo: '/'}); 
 })
  .run(function($rootScope, $http, $location){
     $rootScope.message = '';

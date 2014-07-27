@@ -2,16 +2,15 @@ module.exports = function(app, passport, landmarkSchema) {
 
 // normal routes ===============================================================
 
-	// show the home page (will also have our login links)
-	app.get('/signup2', function(req, res) {
-		res.render('index.ejs');
-	});
+	// // show the home page (will also have our login links)
+	// app.get('/signup2', function(req, res) {
+	// 	res.render('index.ejs');
+	// });
 
 	// PROFILE SECTION =========================
 	//isLoggedIn == AUTH
 	app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
-		
 		var qw = {
             'world':true,
             'permissions.ownerID': req.user._id
@@ -21,12 +20,10 @@ module.exports = function(app, passport, landmarkSchema) {
         	res.send(lm);
         });
 
-
 	});
 
 	// LOGOUT ==============================
 	app.get('/api/user/logout', function(req, res) {
-		console.log('asdf');
 		req.logout();
 		res.redirect('/');
 	});
