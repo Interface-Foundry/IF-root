@@ -415,3 +415,8 @@ ul {
 .leaflet-bottom.leaflet-right {
 	display: none;
 }
+
+.error_message{
+	background-color: red;
+
+}

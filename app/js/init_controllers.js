@@ -38,34 +38,30 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
     //--- GEO LOCK -----//
 
-        if (navigator.geolocation) {
+    if (navigator.geolocation) {
 
-            // Get the user's current position
-            navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
+        // Get the user's current position
+        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
 
-            function showPosition(position) {
+        function showPosition(position) {
 
-                var userLat = position.coords.latitude;
-                var userLon = position.coords.longitude;
+            var userLat = position.coords.latitude;
+            var userLon = position.coords.longitude;
 
-                findWorlds(userLat, userLon);
- 
-                //$location.path('w/Syracuse_Tech_Meetup'); // DELETE AFTER DEMO
-
-
-            }
-
-            function locError(){
-                console.log('error finding loc');
-                //geo error
-            }
-
-        } else {
-
-            //no geo, go to plan b for geo loc here from IP?
-            console.log('no geo');
-            
+            findWorlds(userLat, userLon);
         }
+
+        function locError(){
+            console.log('error finding loc');
+            //geo error
+        }
+
+    } else {
+
+        //no geo, go to plan b for geo loc here from IP?
+        console.log('no geo');
+        
+    }
 
     //--------------//
 
@@ -106,21 +102,6 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 	angular.extend($rootScope, {loading: false});
 	
-    //to refresh map after resize of leaflet map
-    function refreshMap(){ 
-        leafletData.getMap().then(function(map) {
-            map.invalidateSize();
-        });
-    }
-
-    //need both now?
-    $scope.refreshMap = function(){ 
-        leafletData.getMap().then(function(map) {
-            map.invalidateSize();
-        });
-    }
-
-
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
     //================================================
     // Check if the user is connected
@@ -150,10 +131,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
                   $rootScope.userName = "Me";
               }
 
-          $rootScope.showLogout = true;
-
-           console.log($rootScope.showLogout);
-          
+          $rootScope.showLogout = true;          
           $timeout(deferred.resolve, 0);
         }
 
@@ -162,7 +140,6 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
           $rootScope.showLogout = false;
           $rootScope.message = 'You need to log in.';
           $timeout(function(){deferred.reject();}, 0);
-          $location.url('/');
         }
       });
 
@@ -174,84 +151,10 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     //check if logged in
     checkLoggedin($q, $timeout, $http, $location, $rootScope);
 
-
-
-    //----- MAP QUERY, TEMPORARY, for "show" page map icon click panel. needs to be directive ------//
-    $scope.queryMap = function(type, cat){  
-
-        window.scrollTo(0, 0);
-
-        $rootScope.singleModel = 1;
-        $rootScope.iconModel = cat;
-
-        db.landmarks.query({ queryType: type, queryFilter: cat},
-
-        function (data) {   //success
-
-            angular.extend($rootScope, { 
-                markers : {}
-            });
-
-            var markerCollect = {};
-
-            var dumbVar = "'partial'";
-
-            for (var i=0;i < data.length;i++){ 
-
-                if (data[i].stats.avatar == "img/tidepools/default.jpg"){
-
-                    if (data[i].subType == "bars"){
-                        data[i].stats.avatar = "img/AICP/icons/bar.png";
-                    }
-                    if (data[i].subType == "exhibits"){
-                        data[i].stats.avatar = "img/AICP/icons/coolsculpt.png";
-                    }
-                    if (data[i].subType == "food"){
-                        data[i].stats.avatar = "img/AICP/icons/food.png";
-                    }
-                    if (data[i].subType == "smoking"){
-                        data[i].stats.avatar = "img/AICP/icons/smoking.png";
-                    }
-
-                    if (data[i].subType == "washrooms"){
-                        data[i].stats.avatar = "img/AICP/icons/washrooms.png";
-                    }
-                }
-
-                markerCollect[data[i].id] = {
-                    lat: data[i].loc[0],
-                    lng: data[i].loc[1],
-                    message: '<a href=#/post/'+data[i].id+'/m><h4 onclick="shelfPan('+dumbVar+');"><img style="width:70px;" src="'+data[i].stats.avatar+'"> '+data[i].name+'</h4></a>',
-                    focus: true, 
-                    icon: local_icons.yellowIcon
-                }
-            }
-
-            //$rootScope.map.markers.push({ lat: data[i].loc[0], lng: data[i].loc[1], message: 'asdf', draggable: false }); 
-
-            angular.extend($rootScope, {
-                center: {
-                    lat: data[0].loc[0],
-                    lng: data[0].loc[1],
-                    zoom: 18
-                },
-                markers: markerCollect,
-                tiles: tilesDict.aicp
-            });
-
-        },
-        function (data) {   //failure
-            //error handling goes here
-        });
-
-    }
-
-
     //search query
     $scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };
 
 }
-// indexIF.$inject = [ '$location', '$scope', 'db', 'leafletData','$rootScope', 'apertureService', 'mapManager'];
 
