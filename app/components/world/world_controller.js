@@ -13,7 +13,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	
 	var landmarksLoaded;
 	
-$scope.goToLandmark = function(i) {
+	$scope.goToLandmark = function(i) {
 		console.log('--goToLandmark--');
 		$scope.selectedIndex = i;
 		map.setCenter($scope.landmarks[i].loc.coordinates, 17);
@@ -87,6 +87,8 @@ $scope.goToLandmark = function(i) {
 
 	World.get({id: $routeParams.worldURL}, function(data) {
 		 if (data.err) {
+		 	console.log('Data error! Returning to root!');
+		 	console.log(data.err);
 		 	$location.path('/#/');
 		 } else {
 
@@ -127,9 +129,5 @@ $scope.goToLandmark = function(i) {
 
 
 function WorldRepeatController($scope) {
-	$scope.goToMark = function() {
-		$scope.$parent.goToLandmark($scope.$index);
-	}
-	
 	
 }

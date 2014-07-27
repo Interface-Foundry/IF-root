@@ -82,7 +82,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
+      //when('/', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
+      when('/nearby', {templateUrl: 'partials/loading.html', controller: WorldRouteCtrl}).
       when('/login', {templateUrl: 'components/auth/login.html', controller: LoginCtrl}).
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
@@ -90,7 +91,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
-      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
+      //when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
       //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 
@@ -117,7 +118,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/'}); 
+      otherwise({redirectTo: '/nearby'}); 
 })
  .run(function($rootScope, $http, $location){
     $rootScope.message = '';
