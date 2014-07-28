@@ -1,4 +1,6 @@
 <div class="container navfix">
+<alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
+
 <legend>Pin Landmarks</legend>
 <button ng-click="addLandmark()">Add Landmark</button>
 <ul class="row">

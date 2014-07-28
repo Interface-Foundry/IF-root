@@ -64,12 +64,25 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		{name:'blue'},
 		{name:'purple'}
 	];
+
+	//change categories based on "place" or "event" type select
+	$scope.categoryOptions = [
+		{name:'Conference'},
+		{name:'Meetup'},
+		{name:'Party'}
+	];
+
+	$scope.typeOptions = [
+		{name:'Place'},
+		{name:'Event'}
+	];
 	
 	$scope.mapping.markerSelect = $scope.markerOptions[0];
 	
 	$scope.bgColor = '#CCC';
 
 	$scope.showTime = false; //pre-set
+	$scope.buildLocalMap = false;
 
 
 	
@@ -177,6 +190,10 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			}
 			if ($scope.pageIndex == 1){ //adding/editing world map settings
 				console.log("Adding/editing world map settings");
+				//if user uploaded a map but didn't hit "build" button
+				if ($scope.buildLocalMap){
+					$scope.buildMap();
+				}
 				saveWorld('map');	
 			}
 
@@ -567,6 +584,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		var coordBox;
 
 		$scope.showMapBuilding = true;
+		$scope.buildLocalMap = false;
 
 		//get image geo coordinates, add to var to send
 		leafletData.getMap('modalMap').then(function(map) {
@@ -666,7 +684,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
             });
 
             $scope.hideMapOptions = true; //hide map upload buttons
-
+			$scope.buildLocalMap = true; 
             $scope.$parent.mapIMG = data.result;
         }
 	});

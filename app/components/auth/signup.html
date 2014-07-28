@@ -3,17 +3,20 @@
 	<form ng-submit="signup()">
 	  <p>
 	    <label class="control-label">Email</label>
-	  	<input type="text" placeholder="Email" ng-model="user.email" />
+	  	<input type="email" placeholder="Email" ng-model="user.email" required/>
 	  </p>
 	  <p>
 	    <label class="control-label">Password</label>
-	  	<input type="password" placeholder="Password" ng-model="user.password" /><br/>
+	  	<input type="password" placeholder="Password" ng-model="user.password" required/><br/>
+		<h5>Password minimum 6 characters</h5>
 	  </p>
 	  <p>
 	    <button type="submit" class="btn btn-primary">Signup</button>
 	  </p>
-	</form>
 
+	  <alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
+
+	</form>
 
 	<hr>
 

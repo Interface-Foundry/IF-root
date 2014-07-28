@@ -42,28 +42,35 @@ module.exports = function(passport) {
 
         //validate email as real address
         if (validateEmail(email)){
-            // asynchronous
-            process.nextTick(function() {
-                User.findOne({ 'local.email' :  email }, function(err, user) {
-                    // if there are any errors, return the error
-                    if (err)
-                        return done(err);
+            if (password.length >= 6){
+                //ADD PASSWORD VALIDATE HERE
+                // asynchronous
+                process.nextTick(function() {
+                    User.findOne({ 'local.email' :  email }, function(err, user) {
+                        // if there are any errors, return the error
+                        if (err)
+                            return done(err);
 
-                    // if no user is found, return the message
-                    if (!user)
-                        return done(null, false, req.send(500, 'Incorrect username or password'));
+                        // if no user is found, return the message
+                        if (!user)
+                            // return;
+                            return done('Incorrect username or password');
 
-                    if (!user.validPassword(password))
-                        return done(null, false, req.send(500, 'Incorrect username or password'));
+                        if (!user.validPassword(password))
+                            return done('Incorrect username or password');
 
-                    // all is well, return user
-                    else
-                        return done(null, user);
+                        // all is well, return user
+                        else
+                            return done(null, user);
+                    });
                 });
-            });
+            }
+            else {
+                return done('Password needs to be at least 6 characters');  
+            }
         }
         else {
-            console.log('need real email address');
+            return done('Please use a real email address');
         }
 
 
@@ -82,56 +89,59 @@ module.exports = function(passport) {
 
         //validate email as real address
         if (validateEmail(email)){
+            if (password.length >= 6){
+                // asynchronous
+                process.nextTick(function() {
 
-            // asynchronous
-            process.nextTick(function() {
+                    //  Whether we're signing up or connecting an account, we'll need
+                    //  to know if the email address is in use.
+                    User.findOne({'local.email': email}, function(err, existingUser) {
 
-                //  Whether we're signing up or connecting an account, we'll need
-                //  to know if the email address is in use.
-                User.findOne({'local.email': email}, function(err, existingUser) {
+                        // if there are any errors, return the error
+                        if (err)
+                            return done(err);
 
-                    // if there are any errors, return the error
-                    if (err)
-                        return done(err);
+                        // check to see if there's already a user with that email
+                        if (existingUser) 
+                            return done('This email address is already in use');
 
-                    // check to see if there's already a user with that email
-                    if (existingUser) 
-                        return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+                        //  If we're logged in, we're connecting a new local account.
+                        if(req.user) {
+                            var user            = req.user;
+                            user.local.email    = email;
+                            user.local.password = user.generateHash(password);
+                            user.save(function(err) {
+                                if (err)
+                                    throw err;
+                                return done(null, user);
+                                //ADDED TO YOUR ACCOUNT
+                            });
+                        } 
+                        //  We're not logged in, so we're creating a brand new user.
+                        else {
+                            // create the user
+                            var newUser            = new User();
 
-                    //  If we're logged in, we're connecting a new local account.
-                    if(req.user) {
-                        var user            = req.user;
-                        user.local.email    = email;
-                        user.local.password = user.generateHash(password);
-                        user.save(function(err) {
-                            if (err)
-                                throw err;
-                            return done(null, user);
-                        });
-                    } 
-                    //  We're not logged in, so we're creating a brand new user.
-                    else {
-                        // create the user
-                        var newUser            = new User();
+                            newUser.local.email    = email;
+                            newUser.local.password = newUser.generateHash(password);
 
-                        newUser.local.email    = email;
-                        newUser.local.password = newUser.generateHash(password);
+                            newUser.save(function(err) {
+                                if (err)
+                                    throw err;
 
-                        newUser.save(function(err) {
-                            if (err)
-                                throw err;
-
-                            return done(null, newUser);
-                        });
-                    }
-
+                                return done(null, newUser);
+                                //NEW USER CREATED
+                            });
+                        }
+                    });
                 });
-            });
-
-
+            }
+            else {
+                return done('Password needs to be at least 6 characters');  
+            }
         }
         else {
-            console.log('need real email address');
+            return done('Please use a real email address');
         }
 
 

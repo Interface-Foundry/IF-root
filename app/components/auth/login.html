@@ -1,51 +1,18 @@
-<!-- <br>
-<br>
-
-<form name="myForm">
-  <label>Enter your name:</label>
-  <input type="text"
-         name="myName"
-         ng-model="name"
-         ng-minlength="5"
-         ng-maxlength="20"
-         required />
-
-  <pre>myForm.myName.$error = {{ myForm.myName.$error | json }}</pre>
-
-  <div ng-messages="login.email.$error" style="color:maroon">
-    <div ng-message="required">You did not enter a field</div>
-  </div>
-</form> -->
-
-<alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
-<button class='btn btn-default' ng-click="addAlert()">Add Alert</button>
-
 <h1 class="navfix">Login</h1>
 <form ng-submit="login()">
   <p>
-
     <label class="control-label">Email</label>
   	<input name="email" type="email" placeholder="Email" ng-model="user.email" required />
-
-<!--     <div ng-messages="login.email.$error" style="color:maroon">
-      <div ng-message="required">You did not enter a field</div>
-      <div ng-message="minlength">Your field is too short</div>
-      <div ng-message="maxlength">Your field is too long</div>
-    </div> -->
-
   </p>
   <p>
     <label class="control-label">Password</label>
-  	<input name="password" pattern=".{6,}" ng-minlength="6" type="password" placeholder="Password" ng-model="user.password" required /><br/>
-    <h5>Minimum 6 characters</h5>
+  	<input name="password" type="password" placeholder="Password" ng-model="user.password" required /><br/>
   </p>
   <p>
     <button name="submit" type="submit" class="btn btn-primary">Login</button>
   </p>
 
-<!--   <pre>login.email.$error = {{ login.email.$error | json }}</pre>
- -->
-
+<alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
 
 </form>
 

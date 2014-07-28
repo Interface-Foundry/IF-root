@@ -1,4 +1,4 @@
-function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark) {
+function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager) {
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -12,7 +12,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 	
 	$scope.landmarks = [];
 	$scope.selectedIndex = 0;
-	
+	$scope.alerts = alertManager;
 
 	
 ////////////////////////////////////////////////////////////
@@ -102,6 +102,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			console.log(response);
 		});
 		console.log('Save complete');
+		$scope.alerts.addAlert('success','Landmark Saved');
 	}
 	
 	$scope.selectItem = function(i) {
