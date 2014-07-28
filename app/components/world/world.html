@@ -1,4 +1,4 @@
-<div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
+<div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
 	<div class="row">
 			<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" ng-style="{'background-color': style.titleBG_color}" ng-click="aperture.toggle('half')">
 					<div class="media">

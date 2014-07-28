@@ -10,6 +10,7 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
 
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
+
   $scope.aperture.set('off');
 
   // This object will be filled by the form
@@ -54,6 +55,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
       password: $scope.user.password
     }
 
+
     $http.post('/api/user/signup', data).
       success(function(user){
           if (user){
@@ -65,6 +67,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
           $scope.alerts.addAlert('danger',err);
         }
       });
+
   }
 }
 

@@ -99,7 +99,8 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
     
-	  angular.extend($rootScope, {loading: false});
+    angular.extend($rootScope, {globalTitle: "Bubbl.li"});
+	angular.extend($rootScope, {loading: false});
 	
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
     //================================================

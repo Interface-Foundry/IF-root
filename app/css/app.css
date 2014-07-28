@@ -9,7 +9,6 @@ html {
 
 body {
   margin: 0;
-  background: #ccc;
   height: 100%; 
   
   -moz-osx-font-smoothing: grayscale;
@@ -111,6 +110,11 @@ nav li input.form-control {
 	text-decoration: none;
 }
 
+.navbar-right {
+	float: right; 
+	margin: 0px 8px 0px 0px;
+}
+
 
 /*nav li a {
   display: block;
@@ -130,7 +134,7 @@ nav li input.form-control {
   background-color: #fff; 
 }*/
 
-/* *DRAWER* Drawer */
+
 
 #scrim {
 	position: fixed;
@@ -142,7 +146,7 @@ nav li input.form-control {
 	z-index: 200; 
 	text-align: center;
 	
-	background-color: #3594ed;
+	background-color: #00BCD4;
 }
 
 #scrim.loading {
@@ -165,6 +169,8 @@ nav li input.form-control {
 	100% {-webkit-transform: rotate(360deg);}
 }
 
+/* *DRAWER* Drawer */
+
 #drawer {
 	position:absolute;
 	top: 0;
@@ -182,7 +188,7 @@ nav li input.form-control {
 	-o-transition:      opacity 0 0, -o-transform 0.4s;
 	transition:         opacity 0 0, transform 0.4s;
 	
-		-webkit-perspective: 1000;
+	-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
 
 	z-index: 10;
@@ -215,21 +221,26 @@ nav li input.form-control {
   opacity: 1;
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 
-  z-index: 200;
+  z-index: 90;
   
 }
 
-#shelf {
+#view, #view>div {
   position: relative;
   height: 100%;
-
-  
-  -webkit-perspective: 1000;
-  -webkit-backface-visibility: hidden;
-  -webkit-transform-style: preserve-3d;
   z-index: 100;
-  
+  pointer-events: none;
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+#view * {
+	pointer-events: all;
+}
+
+#shelf {
+	position:relative;
+	height: 100%;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .container{
@@ -304,6 +315,23 @@ body.drawer nav, nav.drawer {
 	-webkit-backface-visibility: hidden;
 }
 
+.drawer-handle {
+	position: fixed;
+	top: 0px;
+	left: -10px;
+	width: 34px;
+	height: 40px;
+	z-index: 2000;
+	background-color: rgba(0,0,0,0.30);
+	border-radius: 10px;
+}
+
+.drawer-handle img {
+	position: relative;
+	left: 10px;
+}
+
+
 /* SLIDE UP SLIDE DOWN */
 
 /*aperture-half*/
@@ -351,7 +379,7 @@ body.drawer nav, nav.drawer {
 	-o-transform: translateY(-50%);
 }
 
-.drawer .drawer-bar {
+.drawer-bar {
 	position: absolute;
 	height: 100%;
 	width: 4px;

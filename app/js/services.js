@@ -254,7 +254,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 		Path: Object representing path in leafletjs style
 		Safe: Optional. If true, does not overwrite existing paths. Default false.
 		*/
-		mapManager.addPath = function(key, path, safe) { 
+		mapManager.addPath = function(key, path, safe) {
 			console.log('--addPath('+key+','+path+','+safe+')--');
 			if (mapManager.paths.hasOwnProperty(key)) { //key is in use
 				if (safe == true) {		
@@ -280,6 +280,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 		Name: Name of tileset from dictionary
 		*/
 		mapManager.setTiles = function(name) {
+			console.log('DO NOT USE');
 			console.log('--setTiles('+name+'--');
 			angular.extend(mapManager.tiles, tilesDict[name]); 
 			refreshMap();
