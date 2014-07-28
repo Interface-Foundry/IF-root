@@ -1040,6 +1040,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             console.log(req.body);
             lm.bodyBG_color = req.body.bodyBG_color; // RGB Hex
             lm.cardBG_color = req.body.cardBG_color; // RGB Hex
+            lm.titleBG_color = req.body.titleBG_color; //RGB Hex
+            lm.navBG_color = req.body.navBG_color;
 
             lm.cardBorder = req.body.cardBorder; // off by default
             lm.cardBorder_color = req.body.cardBorder_color; // RGB Hex

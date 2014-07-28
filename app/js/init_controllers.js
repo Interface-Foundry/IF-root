@@ -94,10 +94,11 @@ WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootSc
 
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, $route, $routeParams, $timeout, $http,$q){
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout, $http,$q){
 
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
+    $scope.style = styleManager;
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 	angular.extend($rootScope, {loading: false});

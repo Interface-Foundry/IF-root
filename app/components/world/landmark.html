@@ -1,22 +1,23 @@
-<div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
+<div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
 	<div class="row">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('half')">
 			<div class="media">
-						<div class="pull-left vertical-middle">
+				<div class="pull-left vertical-middle">
 							<img class="media-object avatar" ng-click="aperture.toggle('half')" ng-src="{{landmark.avatar}}">
 						</div>
-						<div class="media-body vertical-middle">
-							<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{landmark.name}}</h1>
-							<p>{{landmark.summary}}</p>
-						</div>
-			</div>
-			
-			<div class="col-xs-12">
-				<div ng-style="{'background-color': style.cardBG_color}" class="landmark-description">
-				<div ng-bind-html="landmark.description"> </div>
+				<div class="media-body vertical-middle">
+					<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{landmark.name}}</h2>
+					<p ng-cloak>{{landmark.summary}}</p>
 				</div>
+			</div>
+		</div>
+		
+			
+		<div class="col-xs-12">
+			<div ng-style="{'background-color': style.cardBG_color}" class="landmark-description">
+				<div ng-bind-html="landmark.description"> </div>
 			</div>
 		</div>
 	</div>

@@ -163,7 +163,7 @@
 								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[1]"><img class="marker-img" ng-src='/img/marker/orange-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[1]}"/></a></div>
 								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[2]"><img class="marker-img" ng-src='/img/marker/yellow-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[2]}"/></a></div>
 								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[3]"><img class="marker-img" ng-src='/img/marker/green-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[3]}"/></a></div>
-								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[4]"><img class="marker-img" ng-src='/img/marker/blue-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[4]}"/></a></div>
+								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[4]"><img class="marker-img" ng-src='/img/marker/blue-marker-old.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[4]}"/></a></div>
 								<div class='col-xs-1'><a ng-click="mapping.markerSelect = markerOptions[5]"><img class="marker-img" ng-src='/img/marker/purple-marker.png' ng-class="{selectOutline: mapping.markerSelect==markerOptions[5]}"/></a></div>
 								<div class='col-xs-7'>
 									<select ng-model="mapping.markerSelect" ng-options="markerOption.name for markerOption in markerOptions" class='form-control'></select>
@@ -186,7 +186,7 @@
 						</div>
 					</div>
 
-					<div class="map_uploader">
+					<div class="map_uploader" ng-hide="pageIndex==2">
 						<div class="map_panel">
 							  	<leaflet id="modalMap" center="center" layers="layers" height="550px" width="1000px"></leaflet>
 						</div>
@@ -220,13 +220,6 @@
 
 						
 					</div>
-
-
-
-
-
-
-						
 					</div>
 				</div>
 		</form>
@@ -235,53 +228,63 @@
 		<li ng-class="pageClass[2]" class="container">
 		<form name="explorerStyle" novalidate>
 			<legend>Style your Explorer</legend>
+			<h4>Theme Defaults from <em ng-cloak>{{styles.name}}</em></h4>
 			<div class="row">
 				<div class="col-xs-6">
 					<div class="field">
-						<label>Body BG</label> <input name="bodyBG" type='text' class='color' value='#E6E6E6' ng-model='styles.bodyBG_color'/>
+						<label>Navigator Background</label> <input name="navBG" type='text' class='color' value='#FFFFFF' ng-model='styles.navBG_color'/>
 					</div>
 					<div class="field">
-						<label>Card BG</label> <input name="cardBG" type='text' class='color' value='#FFFFFF' ng-model='styles.cardBG_color'/>
+						<label>Body Background</label> <input name="bodyBG" type='text' class='color' value='#E6E6E6' ng-model='styles.bodyBG_color'/>
+					</div>
+					<div class="field">
+						<label>Title Background</label> <input name="titleBG" type='text' class='color' value='#E6E6E6' ng-model='styles.titleBG_color'/>
+					</div>
+					<div class="field">
+						<label>Card BG</label> <input name="cardBG" type='text' class='color' value='#FFFFFF' ng-model='styles.cardBG_color' disabled/>
 					</div>
 					<!--<div class="field">
 						<label>Card Border</label> <input name="cardBorder" type='text' class='color' value='#808080' ng-model='styles.cardBorder_color'/> 
 					</div>-->
-					<div class="field">
-						<label>World Title Color</label> <input name="worldTitle" type='text' class="color" value='#808080' ng-model='styles.worldTitle_color'/>
-					</div>
+					<!--<div class="field">
+					<label>World Title Color</label> <input name="worldTitle" type='text' class="color" value='#808080' ng-model='styles.worldTitle_color'/>
+					</div>-->
 					<div class="field">
 						<label>Landmark Title Color</label> <input name="landmarkTitle" type='text' class="color" value='#808080' ng-model='styles.landmarkTitle_color'/>
 					</div>
 					<div class="field">
 						<label>Category Title Color</label> <input name="categoryTitle" type='text' class="color" value='#808080' ng-model='styles.categoryTitle_color'/>
 					</div>
-					<div class="field">
+					<!--<div class="field">
 						<label>Accent Text Color</label> <input name="accent" type='text' class="color" value='#808080' ng-model='styles.accent_color'/>
-					</div>
-					<div class="field">
+					</div>-->
+					<!--<div class="field">
 						<label>Body Font</label> <select></select>
-					</div>
-					<div class="field">
+					</div>-->
+					<!--<div class="field">
 						<label>Theme Font</label> <select disabled></select>
-					</div>
+					</div>-->
 					<div class="field">
 						<label>Twitter Widget</label> <input type="checkbox">
 					</div>
 				</div>
 				<div class="col-xs-6">
-						<div class="livepreview" ng-style="{'background-color':styles.bodyBG_color}">
-							<div class="container">
+					<div class="livepreview" ng-style="{'background-color':styles.bodyBG_color}">
+						<div class="container">
+							<div class="row" ng-style="{'background-color': styles.titleBG_color}">
+							
+							</div>
 							<div class="row">
-								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
-								<h1 ng-style="{'color': styles.worldTitle_color}">World Title Color</h1>
+								<div ng-style="{'background-color': styles.titleBG_color}" class="col-xs-12">
+									<h1 ng-style="{'color': styles.worldTitle_color}">World Title Color</h1>
 								</div>
 									<span ng-style="{'color': styles.categoryTitle_color}">Category Title Color</span>
 								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
 									<span ng-style="{'color': styles.landmarkTitle_color}">Landmark Title Color</span>
 								</div>
 							</div>
-							</div>
 						</div>
+					</div>
 				</div>
 			</div>
 			

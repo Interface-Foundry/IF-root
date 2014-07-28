@@ -67,7 +67,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService) {
     $http.post('/api/user/signup', data).success(function(user){
         if (user){
           $location.path('/profile');
-        }   
+        }
     });
   }
 }
@@ -86,5 +86,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService){
   	console.log(user);
   	$scope.worlds = user; 
   });
+  
+  
 }
 

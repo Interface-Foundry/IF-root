@@ -1,9 +1,11 @@
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager) {
+function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	
     var map = mapManager;
+  	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
     $scope.aperture.set('off');
+	
 	
     angular.extend($rootScope, {loading: false});
     
@@ -60,6 +62,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	$scope.loadWorld = function(data) {
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
+		 style.navBG_color = $scope.style.navBG_color;
+		 
 		 
 		 console.log($scope.world);
 		 console.log($scope.style);

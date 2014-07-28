@@ -85,13 +85,13 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
-      //when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
+      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
       //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 
       when('/list/:category/:filter', {templateUrl: 'partials/list.html', controller: ListCtrl}).
 
-      when('/w/:worldID/:pageID', {templateUrl: 'partials/menu.html', controller: MenuCtrl}).
+      //when('/w/:worldID/:pageID', {templateUrl: 'partials/menu.html', controller: MenuCtrl}).
 
       //when('/post/:landmarkID', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
       //when('/post/:landmarkID/:option', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
@@ -110,7 +110,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       when('/insta', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
 
-      when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
+      //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       otherwise({redirectTo: '/'}); 
 })

@@ -1,43 +1,44 @@
-function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager) {
+function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, leafletData, $rootScope, apertureService, mapManager) {
 		console.log('--Landmark Controller--');
 		var map = mapManager;
 		$scope.aperture = apertureService;
 		$scope.aperture.set('half');
-	
-		
+
 		$scope.worldURL = $routeParams.worldURL;
 		$scope.landmarkURL = $routeParams.landmarkURL;
-		
-		angular.extend($rootScope, {
-			backToWorld: true
-		});
-		
-		angular.extend($rootScope, {
-			backToWorldURL: $routeParams.worldURL
-		});
 		
 		//eventually landmarks can have non-unique names
 		$scope.landmark = Landmark.get({id: $routeParams.landmarkURL}, function(landmark) {
 			console.log(landmark);
 			console.log('trying to get landmark');
 			//goto landmarker
-			goToMark();
-			
+			goToMark();	
+		});
+		
+		World.get({id: $routeParams.worldURL}, function(data) {
+			console.log(data)
+			if (data.err) {
+				$log.error(data.err);
+				$location.path('/#/');
+			} else {
+				$scope.style = data.style;
+			}
 		});
 		
 		function goToMark() {
 			
 			map.setCenter($scope.landmark.loc.coordinates, 16); 
-				  			map.addMarker($scope.landmark._id, {
+			map.addMarker($scope.landmark._id, {
 		  			lat: $scope.landmark.loc.coordinates[1],
 		  			lng: $scope.landmark.loc.coordinates[0],
-		  			draggable:false,
+		  			draggable: false,
 		  			message:$scope.landmark.name
 		  		});
-		  		var markers = map.markers;
+		  	var markers = map.markers;
 		  	angular.forEach(markers, function(marker) {
 			  	map.removeMarker(marker);
 		  	});
+		  	
 		  	map.addMarker($scope.landmark._id, {
 		  			lat: $scope.landmark.loc.coordinates[1],
 		  			lng: $scope.landmark.loc.coordinates[0],
@@ -46,8 +47,6 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 });
 		 };
 		 
-		
-		map.tiles = {};
 		angular.extend(map.layers, {
 			overlays: {
 				localMap: {
@@ -69,17 +68,5 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		});
 		map.refresh();
 		
-		map.addMarker()
-		
-		
-		angular.extend($rootScope, {globalNavColor: "rgba(0,110,100, 0.9)", globalBGColor: "#00695C"});
-		
-		$scope.style = {
-			titleBG_color: "#009688",
-			cardBG_color: "#FFF",
-			category_color: "#E91E63",
-			categoryTitle_color: "#BBDEFB",
-			worldTitle_color: "#FFF",
-			landmarkTitle_color: "#2196F3"
-		}
+		map.addMarker();
 }

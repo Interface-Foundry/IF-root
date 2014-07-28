@@ -8,8 +8,10 @@ var mongoose = require('mongoose');
 		name: String,
 
 		bodyBG_color: String, // RGB Hex
-		cardBG_color: String, // RGB Hex
-
+		cardBG_color: String, // RGB Hex #FFF 
+		titleBG_color: String, //RGB Hex
+		navBG_color: String, //RGB Hex
+		
 		cardBorder: Boolean, // off by default
 		cardBorder_color: String, // RGB Hex
 		cardBorder_corner: Number, // px to round

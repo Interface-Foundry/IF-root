@@ -30,7 +30,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	$scope.pageClass[0] = 'current';
 	$scope.pageClass[1] = 'right';
 	$scope.pageClass[2] = 'right';
-	$scope.pageClass[3] = 'right';
 	
 	$scope.mapConfirm = 'false';
 	
@@ -177,9 +176,24 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			}
 			if ($scope.pageIndex == 1){ //adding/editing world map settings
 				console.log("Adding/editing world map settings");
-				saveWorld('map');	
+				saveWorld('map');
+				//now load theme from map
+				switch ($scope.mapping.mapThemeSelect.cloudMapName) {
+					case 'urban':
+						angular.extend($scope.styles, themeDict['urban']);
+						break;
+					case 'sunset':
+						angular.extend($scope.styles, themeDict['sunset']);
+						break;
+					case 'fairy':
+					
+						break;
+					case 'arabesque':
+					
+						break;
+					}	
 			}
-
+			
 			if ($scope.pageIndex == 2){ //editing style.
 				console.log("Editing style");
 				saveStyle();
@@ -272,7 +286,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
                         draggable: true,
                         icon: local_icons.yellowIcon
                     }
-                };
+            };
                 
             $scope.paths = {
 				worldBounds: {
@@ -676,7 +690,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 }
 
-
+/*
 function UserCtrl($location, $scope, $routeParams, db, $rootScope) {
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry";
@@ -684,4 +698,4 @@ function UserCtrl($location, $scope, $routeParams, db, $rootScope) {
 	$scope.worlds = db.worlds.query({queryType:'all',userID:'539533e5d22c979322000001'}, function(data){
           console.log(data);
     });
-}
+}*/
