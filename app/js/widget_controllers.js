@@ -151,4 +151,147 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
+function ChatCtrl($scope, socket, $sce) {
+
+  // Socket listeners
+  // ================
+
+  socket.on('init', function (data) {
+    $scope.name = data.name;
+    $scope.users = data.users;
+  });
+
+  socket.on('send:message', function (message) {
+    $scope.messages.push(message);
+  });
+
+  socket.on('change:name', function (data) {
+    changeName(data.oldName, data.newName);
+  });
+
+  // socket.on('user:join', function (data) {
+  //   $scope.messages.push({
+  //     user: 'chatroom',
+  //     text: 'User ' + data.name + ' has joined.'
+  //   });
+  //   $scope.users.push(data.name);
+  // });
+
+  // // add a message to the conversation when a user disconnects or leaves the room
+  // socket.on('user:left', function (data) {
+  //   $scope.messages.push({
+  //     user: 'chatroom',
+  //     text: 'User ' + data.name + ' has left.'
+  //   });
+  //   var i, user;
+  //   for (i = 0; i < $scope.users.length; i++) {
+  //     user = $scope.users[i];
+  //     if (user === data.name) {
+  //       $scope.users.splice(i, 1);
+  //       break;
+  //     }
+  //   }
+  // });
+
+  // Private helpers
+  // ===============
+
+  var changeName = function (oldName, newName) {
+    // rename user in list of users
+    var i;
+    for (i = 0; i < $scope.users.length; i++) {
+      if ($scope.users[i] === oldName) {
+        $scope.users[i] = newName;
+      }
+    }
+
+    // $scope.messages.push({
+    //   user: 'chatroom',
+    //   text: 'User ' + oldName + ' is now known as ' + newName + '.'
+    // });
+  }
+
+  // Methods published to the scope
+  // ==============================
+
+  $scope.changeName = function () {
+    socket.emit('change:name', {
+      name: $scope.newName
+    }, function (result) {
+      if (!result) {
+        alert('There was an error changing your name');
+      } else {
+        
+        changeName($scope.name, $scope.newName);
+
+        $scope.name = $scope.newName;
+        $scope.newName = '';
+      }
+    });
+  };
+
+  $scope.messages = [];
+
+  $scope.sendMessage = function () {
+
+    socket.emit('send:message', {
+      message: $scope.message
+    });
+
+    var date = new Date;
+    var seconds = date.getSeconds();
+    var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
+    var hour = date.getHours();
+
+    // add the message to our model locally
+    $scope.messages.push({
+      user: $scope.name,
+      text: $scope.message,
+      time: hour + ":" + minutes + ":" + seconds
+    });
+
+    // clear message box
+    $scope.message = '';
+  };
+
+  $scope.sendEmo = function (input) {
+    var path = "/img/emoji/";
+    var emoji;
+
+    switch(input) {
+        case "cool":
+            emoji = path+"cool.png";
+            break;
+        case "dolphin":
+            emoji = path+"dolphin.png";
+            break;
+        case "ghost":
+            emoji = path+"ghost.png";
+            break;
+        case "heart":
+            emoji = path+"heart.png";
+            break;
+        case "love":
+            emoji = path+"love.png";
+            break;
+        case "party":
+            emoji = path+"party.png";
+            break;
+        case "smile":
+            emoji = path+"smile.png";
+            break;
+        case "woah":
+            emoji = path+"woah.png";
+            break;
+        default:
+            emoji = path+"love.png";
+            break;
+    }
+    $scope.message = '<img src="'+emoji+'">';
+    $scope.sendMessage();
+  }
+
+
+}
+
 

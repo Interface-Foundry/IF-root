@@ -24,6 +24,7 @@ var fs = require('fs');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 var async = require('async');
 var moment = require('moment');
+var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
@@ -51,8 +52,6 @@ var strings = require('./server_bubblequery/constants/strings');
 var bubble = require('./server_bubblequery/handlers/bubble');
 
 
-
-
 //----MONGOOOSE----//
 var mongoose = require('mongoose'),
     landmarkSchema = require('./landmark_schema.js'),
@@ -65,15 +64,21 @@ mongoose.connect(configDB.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 
-
 //---------------//
 
 require('./server_auth/passport')(passport); // pass passport for configuration
 
+//socket.io init
+var socket = require('./socket_chat/socket.js');
 
+//express init
 var express = require('express'),
     app = module.exports.app = express(),
     db = require('mongojs').connect('if');
+
+    var server = http.createServer(app);
+    // Hook Socket.io into Express
+    var io = require('socket.io').listen(server);
 
     app.use(express.static(__dirname + '/app'));
 
@@ -107,9 +112,10 @@ app.use(connectBusboy({
   }
 }));
 
+// Socket.io Communication
+io.sockets.on('connection', socket);
 
-
-// routes ======================================================================
+// passport routes ======================================================================
 require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 
 /* Helpers */
@@ -1271,7 +1277,7 @@ function isLoggedIn(req, res, next) {
 }
 
 
-app.listen(2997, function() {
+server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });
 
