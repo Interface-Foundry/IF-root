@@ -81,18 +81,18 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 if (data[0].liveAndInside[0].id){
 
                     //DISABLE AFTER DEMO
-                    $location.path('/w/AlleyNYC_Startup_Showcase');
+                    //$location.path('/w/AlleyNYC_Startup_Showcase');
 
                     //ENABLE AFTER DEMO
-                    //$location.path('w/'+data[0].liveAndInside[0].id); 
+                    $location.path('w/'+data[0].liveAndInside[0].id); 
                 }
                 else {
                     //DISABLE AFTER DEMO
                     $location.path('/w/AlleyNYC_Startup_Showcase');
 
                     //ENABLE AFTER DEMO
-                    //console.log('world has no id');
-                    //noWorlds();
+                    console.log('world has no id');
+                    noWorlds();
                 }
             }
             else {
@@ -101,8 +101,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 $location.path('/w/AlleyNYC_Startup_Showcase');
 
                 //ENABLE AFTER DEMO
-                //console.log('not inside any worlds');
-                //noWorlds(); //not inside any worlds
+                console.log('not inside any worlds');
+                noWorlds(); //not inside any worlds
 
             }
         });
