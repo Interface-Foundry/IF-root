@@ -95,7 +95,7 @@ WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootSc
 
 //loads everytime
 function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout, $http,$q){
-
+	console.log('init controller-indexIF');
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
     $scope.style = styleManager;

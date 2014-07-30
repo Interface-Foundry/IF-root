@@ -18,7 +18,7 @@
 	<ul class="row">
 		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"
-			class="col-sm-6 col-xs-12">
+			class="col-sm-6 col-xs-12 landmark">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
 				<div class="media" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 

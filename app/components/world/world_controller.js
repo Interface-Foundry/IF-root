@@ -83,8 +83,11 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
                 radius: 150,
 				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
 				});
-		map.tiles = tilesDict[$scope.world.style.maps.cloudMapName];
-		map.refresh();
+		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+		if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
+			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
+			map.refresh();
+		}
   	}
 
 	World.get({id: $routeParams.worldURL}, function(data) {

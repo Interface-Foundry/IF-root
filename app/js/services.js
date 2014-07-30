@@ -332,7 +332,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 		}
 		
 		return mapManager;
-    }]);
+    }])
     // .service('mapper', ['$scope', function($scope) {
             
     //         this.view = function() {
@@ -363,3 +363,20 @@ angular.module('tidepoolsServices', ['ngResource'])
 
     // });
 
+	//handling alerts
+   .factory('alertManager', [function () {
+   		var alerts = {
+   			'list':[]
+   		};
+
+   		alerts.addAlert = function(alertType, alertMsg) {
+   			alerts.list = []; //clear alerts automatically for now to show one
+   			alerts.list.push({type: alertType, msg: alertMsg});
+   		}
+
+   		alerts.closeAlert = function(index) {
+   			alerts.list.splice(index, 1);
+   		}
+
+   		return alerts;
+   }]);

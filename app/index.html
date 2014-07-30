@@ -130,7 +130,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  <nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">
 	  		<img class="handle pull-left" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
 	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg">
-	  		<a class="pull-left" ng-show="backToWorld" ng-href="/#/w/{{backToWorldURL}}" ng-click="backToWorld=false">Back</a>
+	  		
 	  		<ul class="navbar-right">
 	  			<li>
 	  				<img class="nav-icon" src="/img/icons/zoom.png">
@@ -165,7 +165,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 	  <div id="main" ng-class="{'drawer': drawerOn}">
           <section id="aperture" ng-class="[aperture.state]">
-			  <leaflet id="leafletmap" tiles="map.tiles" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers">
+			  <leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers">
               </leaflet>
          </section>
 

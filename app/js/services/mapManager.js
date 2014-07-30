@@ -10,17 +10,15 @@ var mapManager = {
 		zoom: 14
 		},
 	markers: {},
-	tiles: tilesDict.mapbox,
 	layers: {
 		baselayers: {
 			baseMap: {
 			name: "Sunset",
 			url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
 			type: 'xyz',
-			layerParams: {},
-			layerOptions: {}
-		}
-	},
+			top: true,
+			}	
+		},
 		overlays: {}
 	},
 	paths: {worldBounds: {
@@ -209,6 +207,29 @@ function refreshMap() {
     	setTimeout(function(){ map.invalidateSize()}, 400);
     });
 }
+
+mapManager.setBaseLayer = function(layerURL) {
+	console.log('new base layer');
+	mapManager.layers.baselayers = {
+		newBaseMap: {
+		name: 'newBaseMap',
+		url: layerURL,
+		type: 'xyz',
+		layerParams: {},
+		layerOptions: {}
+	}};
+	
+}
+
+mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
+	var newOverlay = {};
+	newOverlay[localMapName] = {
+		name: localMapName,
+		url: 'http://107.170.180.141/maps/'+localMapID+'_warped.vrt/{z}/{x}/{y}.png',
+		layerOptions: localMapOptions
+	};
+	mapManager.layers.overlays = newOverlay;
+};
 
 return mapManager;
     }]);

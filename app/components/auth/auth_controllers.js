@@ -1,11 +1,16 @@
 /**********************************************************************
  * Login controller
  **********************************************************************/
-function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
-  
-  $scope.alerts = [];
+function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
-  $scope.aperture = apertureService;
+  //if already logged in
+  if ($rootScope.showLogout){
+    $location.url('/profile');
+  }
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
   $scope.aperture.set('off');
 
   // This object will be filled by the form
@@ -23,34 +28,20 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService) {
       success(function(user){
           if (user){
             $location.url('/profile');
-          }   
-          else {
-            console.log('asdfasdf');
-            $scope.addAlert('danger','uhhhhh');
           }
       }).
       error(function(err){
-        console.log('asdf');
         if (err){
-           console.log(err);
+          $scope.alerts.addAlert('danger',err);
         }
-
       });
-
   };
 
-
-  $scope.addAlert = function(alertType,alertMsg) {
-    $scope.alerts.push({type: alertType, msg: alertMsg});
-  };
-
-  $scope.closeAlert = function(index) {
-    $scope.alerts.splice(index, 1);
-  };
 }
 
-function SignupCtrl($scope, $rootScope, $http, $location, apertureService) {
+function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
+  $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
 
@@ -63,12 +54,18 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService) {
       email: $scope.user.email,
       password: $scope.user.password
     }
-
-    $http.post('/api/user/signup', data).success(function(user){
-        if (user){
-          $location.path('/profile');
+    $http.post('/api/user/signup', data).
+      success(function(user){
+          if (user){
+            $location.url('/profile');
+          }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
         }
-    });
+      });
+
   }
 }
 

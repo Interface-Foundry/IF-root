@@ -25,7 +25,7 @@ var im = require('imagemagick'); //must also install imagemagick package on serv
 var async = require('async');
 var moment = require('moment');
 var connectBusboy = require('connect-busboy');
-
+var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
 
 var passport = require('passport');
@@ -92,8 +92,6 @@ var express = require('express'),
     })); // get information from html forms
 
 
-    app.set('view engine', 'ejs'); // set up ejs for templating
-
     // required for passport
     app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
     app.use(passport.initialize());
@@ -102,7 +100,14 @@ var express = require('express'),
 
     //===================//
 
-app.use(connectBusboy());
+//LIMITING UPLOADS TO 10MB ?? 
+app.use(connectBusboy({
+  limits: {
+    fileSize: 10 * 1024 * 1024
+  }
+}));
+
+
 
 // routes ======================================================================
 require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
@@ -110,13 +115,13 @@ require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our rout
 /* Helpers */
 
 //Parts of express code from: https://github.com/dalcib/angular-phonecat-mongodb-rest
-//To allow use ObjectId or other any type of _id
-var objectId = function (_id) {
-    if (_id.length === 24 && parseInt(db.ObjectId(_id).getTimestamp().toISOString().slice(0,4), 10) >= 2010) {
-        return db.ObjectId(_id);
-    } 
-    return _id;
-}
+// //To allow use ObjectId or other any type of _id
+// var objectId = function (_id) {
+//     if (_id.length === 24 && parseInt(db.ObjectId(_id).getTimestamp().toISOString().slice(0,4), 10) >= 2010) {
+//         return db.ObjectId(_id);
+//     } 
+//     return _id;
+// }
 
 //Function callback
 var fn = function (req, res) {
@@ -160,97 +165,9 @@ app.get('/api/:collection', function(req, res) {
 
     var item, sort = {};
 
-    // console.log(req.params.collection);
-
+    //route to world
     if (req.params.collection == 'worlds'){
-
         bubble.listBubbles(req,res);
-
-        // console.log(req.query.userLat);
-        // console.log(req.query.userLon);
-
-        // var qw = {
-        //     'world' : 1,
-        //     geo: { Building.collection.geoNear(longitude, latitude, {maxDistance: radius }, cb);}
-        // };
-        // db.collection(req.params.collection).find(qw).toArray(fn(req, res));
-
-        // var area = { center: [req.query.userLat, req.query.userLon], radius: 10 };
-        // db.collection(req.params.collection).where('loc').within().centerSphere(area);
-
-        // var area = { center: [req.query.userLat, req.query.userLon], radius: 10, unique: true, spherical: true };
-        // db.collection(req.params.collection).circle('loc', area);
-
-        // var results = landmarkQuery.where('loc').within().circle(area);
-
-        // results.toArray(fn(req, res));
-
-            // var qw = {};
-            // var limit;
-
-
-            // var landmarkModel = mongoose.model('landmark', landmarkSchema, 'landmarks');
-
-
-            // var coordinateObject = JSON.parse("[" + req.query.userLon+","+req.query.userLat+ "]");
-            // // console.log(coordinateObject);
-
-            // var normalizedCoordinate = coordinateObject.map(function(coordinate) {
-            //     return parseFloat(coordinate);
-            // });
-
-            // var geoQuery = { type : "Point", coordinates : normalizedCoordinate };
-
-            // var geoNearOptions = { spherical:true, distanceMultiplier: integers.DISTANCE_MULTIPLIER_METERS, maxDistance: integers.RADIUS_DATA_BUBBLE_WITH_PROXIMITY};
-
-            // landmarkModel.geoNear(geoQuery, geoNearOptions, function (err, data) {
-
-            //     // return callback(err, data);
-            //     console.log(err);
-            //     console.log(data);
-
-            //     var bubblesInside = [];
-            //     var bubblesNear = [];
-
-
-            //     //bubble inside
-            //     if (data[i].dis < integers.RADIUS_DATA_BUBBLE)){
-
-            //     }
-
-
-            // });
-
-
-
-
-
-
-            // query.exec(function (err, lm) {
-            //     console.log(lm);
-            //     console.log(err);
-            // });
-
-            // landmarkModel.where('loc').within().circle(area, function (err, lm) {
-
-            //     if (err){
-            //         console.log(err);
-            //     }
-
-            //     else {
-            //          console.log(lm);
-            //         //res.send(idArray);
-            //     }              
-
-            // });
-      
-    
-        //console.log(results);
-
-        // landmarkQuery.circle('loc',area),function(data){
-        //     console.log(data);
-        // }
-
     }
 
     //querying landmark collection (events, places, etc)
@@ -1114,45 +1031,69 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         var fstream;
         req.pipe(req.busboy);
 
-        req.busboy.on('file', function (fieldname, file, filename) {
+        req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+
+             ////// SECURITY RISK ///////
+             ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
+             // var parseFile = JSON.stringify(req.files.files[0]);
+             // console.log(parseFile);
+             // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+             //  magic.detectFile(parseFile, function(err, result) {
+             //      if (err){ throw err};
+             //      console.log(result);
+             //      // output on Windows with 32-bit node:
+             //      //    application/x-dosexec
+             //  });
+              ///////////////////////////
 
             var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
             var fileType = filename.split('.').pop();
 
-            while (1) {
+            if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/gif' ){
 
-                var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
-                var fileNumber_str = fileNumber.toString(); 
-                var current = fileNumber_str + '.' + fileType;
+                while (1) {
 
-                //checking for existing file, if unique, write to dir
-                if (fs.existsSync("app/uploads/" + current)) {
-                    continue; //if there are max # of files in the dir this will infinite loop...
-                } 
-                else {
+                    var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
+                    var fileNumber_str = fileNumber.toString(); 
+                    var current = fileNumber_str + '.' + fileType;
 
-                    var newPath = "app/uploads/" + current;
+                    //checking for existing file, if unique, write to dir
+                    if (fs.existsSync("app/uploads/" + current)) {
+                        continue; //if there are max # of files in the dir this will infinite loop...
+                    } 
+                    else {
 
-                    fstream = fs.createWriteStream(newPath);
-                    file.pipe(fstream);
-                    fstream.on('close', function () {
-                         im.crop({
-                          srcPath: newPath,
-                          dstPath: newPath,
-                          width: 100,
-                          height: 100,
-                          quality: 85,
-                          gravity: "Center"
-                        }, function(err, stdout, stderr){
+                        var newPath = "app/uploads/" + current;
 
-                            res.send("uploads/"+current);
+                        fstream = fs.createWriteStream(newPath);
+                        file.pipe(fstream);
+                        fstream.on('close', function () {
+                             im.crop({
+                              srcPath: newPath,
+                              dstPath: newPath,
+                              width: 100,
+                              height: 100,
+                              quality: 85,
+                              gravity: "Center"
+                            }, function(err, stdout, stderr){
 
-                        });                       
-                    });
+                                res.send("uploads/"+current);
 
-                    break;
+                            });                       
+                        });
+
+                        break;
+                    }
                 }
+
             }
+
+            else {
+                console.log('Please use .jpg .png or .gif');
+                res.send(500,'Please use .jpg .png or .gif');
+            }
+
+
 
         });
 
@@ -1167,39 +1108,54 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
     req.pipe(req.busboy);
 
-    req.busboy.on('file', function (fieldname, file, filename) {
+    req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+
+         ////// SECURITY RISK ///////
+         ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
+         // var parseFile = JSON.stringify(req.files.files[0]);
+         // console.log(parseFile);
+         // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+         //  magic.detectFile(parseFile, function(err, result) {
+         //      if (err){ throw err};
+         //      console.log(result);
+         //      // output on Windows with 32-bit node:
+         //      //    application/x-dosexec
+         //  });
+          ///////////////////////////
 
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
 
-        while (1) {
+        if (mimetype == 'image/jpg' || mimetype == 'image/png'){
 
-            var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
-            var fileNumber_str = fileNumber.toString(); 
-            var current = fileNumber_str + '.' + fileType;
+            while (1) {
 
-            //checking for existing file, if unique, write to dir
-            if (fs.existsSync("app/temp_map_uploads/" + current)) {
-                continue; //if there are max # of files in the dir this will infinite loop...
-            } 
-            else {
+                var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
+                var fileNumber_str = fileNumber.toString(); 
+                var current = fileNumber_str + '.' + fileType;
 
-                var newPath = "app/temp_map_uploads/" + current;
+                //checking for existing file, if unique, write to dir
+                if (fs.existsSync("app/temp_map_uploads/" + current)) {
+                    continue; //if there are max # of files in the dir this will infinite loop...
+                } 
+                else {
 
-                fstream = fs.createWriteStream(newPath);
-                file.pipe(fstream);
-                fstream.on('close', function() {
+                    var newPath = "app/temp_map_uploads/" + current;
 
-                    res.send("temp_map_uploads/"+current);
-
-                }); 
-
-                break;
+                    fstream = fs.createWriteStream(newPath);
+                    file.pipe(fstream);
+                    fstream.on('close', function() {
+                        res.send("temp_map_uploads/"+current);
+                    }); 
+                    break;
+                }
             }
         }
-
+        else {
+            console.log('Please use .jpg .png or .gif');
+            res.send(500,'Please use .jpg .png or .gif');
+        }
     });
-
 });
 
 
