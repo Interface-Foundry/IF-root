@@ -116,9 +116,8 @@ app.use(connectBusboy({
 io.sockets.on('connection', socket);
 
 io.set('transports', [                     // enable all transports (optional if you want flashsocket)
-    'websocket'
-  , 'flashsocket'
-  , 'jsonp-polling'
+ 
+  'jsonp-polling'
 ]);
 
 // passport routes ======================================================================
