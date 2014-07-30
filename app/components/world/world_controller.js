@@ -13,14 +13,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	
 	var landmarksLoaded;
 	
-	$scope.goToLandmark = function(i) {
-		console.log('--goToLandmark--');
-		$scope.selectedIndex = i;
-		map.setCenter($scope.landmarks[i].loc.coordinates, 16);
-		map.setMarkerFocus($scope.landmarks[i]._id);	
-	}
-  	
-  	$scope.goToCategory = function(c) {
+  	$scope.filterCategory = function(c) {
 	  	console.log('--goToCategory--');
 	  	$scope.aperture.set('half');
 	  	
@@ -35,9 +28,17 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	function redoMarkers(landmarks, c) {
   		var categoryURL;
   		angular.forEach($scope.landmarks, function(landmark) {
-	  		if (landmark.category == 'food') {categoryURL="/img/marker/food-marker.png"}
-	  		if (landmark.category == 'bathroom') {categoryURL="/img/marker/washroom-marker.png"}
-	  		if (landmark.category == 'building') {categoryURL="/img/marker/building-marker.png"}
+  			switch (landmark.category) {
+	  			case 'food': 
+	  				categoryURL = 'img/jul30/marker/cake_arrow.png';
+	  				break;
+	  			case 'bar':
+	  				categoryURL = 'img/jul30/marker/cocktail_arrow.png';
+	  				break;
+	  			case 'fabric':
+	  				categoryURL = 'img/jul30/marker/spool_arrow.png';
+	  				break;
+	  		}
 	  		if (c != undefined && landmark.category != c) {
 	  			map.removeMarker(landmark._id); 
 	  		} else {
@@ -48,7 +49,12 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		  			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		  			icon: {
 		  				iconUrl: categoryURL,
-		  				iconSize: [50,50]
+		  				iconSize: [100,100],
+		  				iconAnchor: [50, 100],
+		  				shadowUrl: '',
+		  				shadowRetinaUrl: '',
+		  				shadowSize: [0,0],
+		  				popupAnchor: [0, -80]
 		  			},
 		  			_id: landmark._id
 		  		});
@@ -82,7 +88,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 // add zoom restrictions
 
 		 map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		 map.setCenter($scope.world.loc.coordinates, 15); //pull zoom from mapoptions if exists
+		 map.setCenter($scope.world.loc.coordinates, 17); //pull zoom from mapoptions if exists
 		 /*map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
@@ -110,12 +116,37 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				console.log(data);
 				$scope.landmarks = data;
 				
+				var categoryURL;
 				angular.forEach($scope.landmarks, function(landmark) {
+					switch (landmark.category) {
+		  			case 'food': 
+		  				categoryURL = 'img/jul30/marker/cake_arrow.png';
+		  				break;
+		  			case 'bar':
+		  				categoryURL = 'img/jul30/marker/cocktail_arrow.png';
+		  				break;
+		  			case 'fabric':
+		  				categoryURL = 'img/jul30/marker/spool_arrow.png';
+		  				break;
+		  			default:
+		  				categoryURL = 'img/marker/red-marker-100.png';
+		  				break;
+		  			}
+		  			
 					map.addMarker(landmark._id, {
 						lat:landmark.loc.coordinates[1],
 						lng:landmark.loc.coordinates[0],
 						draggable:false,
 						message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+						icon: {
+			  				iconUrl: categoryURL,
+			  				iconSize: [100,100],
+			  				iconAnchor: [50, 100],
+			  				shadowUrl: '',
+			  				shadowRetinaUrl: '',
+			  				shadowSize: [0,0],
+			  				popupAnchor: [0, -80]
+		  				},
 						_id: landmark._id
 					});
 				});

@@ -2,7 +2,7 @@
 	<div class="row">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
-							ng-click="aperture.toggle('half')">
+							ng-click="aperture.toggle('full')">
 			<div class="media">
 				<div class="pull-left vertical-middle">
 					<img class="media-object avatar" ng-click="aperture.toggle('half')" ng-src="{{world.avatar}}">
@@ -15,22 +15,25 @@
 		</div>
 	</div>
 	
-	<div ng-if="world.id=='AlleyNYC_Startup_Showcase'">
+	<div ><!--ng-if="world.id=='AlleyNYC_Startup_Showcase'"-->
 	<div class="row landmark" ng-style="{'background-color': style.bodyBG_color}">
 		<div class="col-xs-4">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}"
+								ng-click="filterCategory('food')">
 					<img class="img-responsive center-block category-img" src="img/jul30/cake_noarrow.png">
 					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Food</h4>
 			</div>
 		</div>
 		<div class="col-xs-4">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}"
+								ng-click="filterCategory('bar')">
 					<img class="center-block img-responsive category-img" src="img/jul30/cocktail_noarrow.png">
 					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Bars</h4>
 			</div>
 		</div>
 		<div class="col-xs-4">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}"
+								ng-click="filterCategory('fabric')">
 			<img class="center-block img-responsive category-img" src="img/jul30/spool_noarrow.png">
 			<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Fabric</h4>
 			</div>
@@ -44,14 +47,13 @@
 	<ul class="row" ng-style="{'background-color': style.bodyBG_color}">
 		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"
-			class="col-sm-6 col-xs-12 landmark card">
+			class="col-sm-6 col-xs-12 landmark">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
-				<div class="media" ng-style="{'background-color': style.cardBG_color}">
+				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small>{{landmark.timetext.timestart}}</small> @ </h3>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small>{{landmark.timetext.timestart}}</small></h3>
 						<em ng-cloak>{{landmark.summary}}</em>
-						
 					</div>
 				</div>
 			</a>
@@ -62,7 +64,7 @@
 		<!--Twitter-->
           <div class="col-xs-6 twitter">
             <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
-            <a ng-href="#/talk">
+            <a ng-href="#/talk" class="card" ng-style="{'background-color': style.cardBG_color}">
               <div class="more">
                 <p class="content">{{tweets[0].text}}</p>
                 <span class="watermark typcn typcn-social-twitter"></span>
@@ -76,7 +78,7 @@
 		  <!--INSTAGRAM-->
           <div class="col-xs-6 instagram">
             <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
-            <a ng-href="#/insta">
+            <a ng-href="#/insta" class="card" ng-style="{'background-color': style.cardBG_color}">
             <div class="more">
               <p class="content"><img ng-src="images/instagram/{{instagrams[0].local_path[0]}}" width="100%"></p>
               <span class="watermark typcn typcn-social-instagram"></span>
