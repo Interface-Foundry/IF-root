@@ -137,7 +137,21 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  				<img class="nav-icon" src="/img/icons/zoom.png">
 	  			</li>
 	  			<li>
-	  				<img class="nav-icon" src="/img/icons/compass.png">
+	  				
+          <span class="dropdown" on-toggle="toggled(open)">
+            <a href="" class="dropdown-toggle no-u">
+                <img class="nav-icon" src="/img/icons/compass.png">
+            </a>
+            <ul class="dropdown-menu">
+                <b>Overlapping Bubbles</b> 
+                <li ng-repeat="bubble in altBubbles">
+                  <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
+                </li>
+                <a ng-show="!altBubbles" ng-href="/#/">Find Overlapping Bubbles</a>
+            </ul>
+          </span>
+
+
 	  			</li>
 	  			<li><!-- USER DROPDOWN -->
 		  		<a ng-show="!showLogout" ng-href="/#/login" class="vertical-middle nav-user no-u">Login</a>
