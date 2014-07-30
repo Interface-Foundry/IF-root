@@ -24,6 +24,7 @@ var fs = require('fs');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 var async = require('async');
 var moment = require('moment');
+var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
@@ -51,8 +52,6 @@ var strings = require('./server_bubblequery/constants/strings');
 var bubble = require('./server_bubblequery/handlers/bubble');
 
 
-
-
 //----MONGOOOSE----//
 var mongoose = require('mongoose'),
     landmarkSchema = require('./landmark_schema.js'),
@@ -65,15 +64,21 @@ mongoose.connect(configDB.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 
-
 //---------------//
 
 require('./server_auth/passport')(passport); // pass passport for configuration
 
+//socket.io init
+var socket = require('./socket_chat/socket.js');
 
+//express init
 var express = require('express'),
     app = module.exports.app = express(),
     db = require('mongojs').connect('if');
+
+    var server = http.createServer(app);
+    // Hook Socket.io into Express
+    var io = require('socket.io').listen(server);
 
     app.use(express.static(__dirname + '/app'));
 
@@ -100,6 +105,7 @@ var express = require('express'),
 
     //===================//
 
+<<<<<<< HEAD
 //LIMITING UPLOADS TO 10MB ?? 
 app.use(connectBusboy({
   limits: {
@@ -108,8 +114,24 @@ app.use(connectBusboy({
 }));
 
 
+=======
+//LIMITING UPLOADS TO 10MB 
+app.use(connectBusboy({
+  limits: {
+    fileSize: 1024 * 1024 * 10 // 10MB
+  }
+}));
+>>>>>>> FETCH_HEAD
 
-// routes ======================================================================
+// Socket.io Communication
+io.sockets.on('connection', socket);
+
+// io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+//     'websocket'
+//   , 'jsonp-polling'
+// ]);
+
+// passport routes ======================================================================
 require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 
 /* Helpers */
@@ -1109,6 +1131,22 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     req.pipe(req.busboy);
 
     req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+<<<<<<< HEAD
+
+         ////// SECURITY RISK ///////
+         ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
+         // var parseFile = JSON.stringify(req.files.files[0]);
+         // console.log(parseFile);
+         // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+         //  magic.detectFile(parseFile, function(err, result) {
+         //      if (err){ throw err};
+         //      console.log(result);
+         //      // output on Windows with 32-bit node:
+         //      //    application/x-dosexec
+         //  });
+          ///////////////////////////
+=======
+>>>>>>> FETCH_HEAD
 
          ////// SECURITY RISK ///////
          ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
@@ -1123,9 +1161,13 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
          //  });
           ///////////////////////////
 
+<<<<<<< HEAD
+=======
+
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
 
+>>>>>>> FETCH_HEAD
         if (mimetype == 'image/jpg' || mimetype == 'image/png'){
 
             while (1) {
@@ -1273,7 +1315,7 @@ function isLoggedIn(req, res, next) {
 }
 
 
-app.listen(2997, function() {
+server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });
 

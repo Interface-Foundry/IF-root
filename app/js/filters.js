@@ -46,5 +46,18 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
     })  
               
   };
-});
+})
 
+//validate html
+.filter('unsafe', function($sce) {
+    return function(val) {
+        return $sce.trustAsHtml(val);
+    };
+})
+
+//convert from http to https urls
+.filter('httpsify', function() {
+    return function(val) {
+        return val.replace(/^http:\/\//i, 'https://');
+    };
+});

@@ -136,7 +136,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 				baselayers: {
 					baseMap: {
 					name: "Sunset",
-					url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
+					url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
 					type: 'xyz',
 					layerParams: {},
 					layerOptions: {}
@@ -379,4 +379,29 @@ angular.module('tidepoolsServices', ['ngResource'])
    		}
 
    		return alerts;
-   }]);
+   }])
+
+   //socket connection
+	.factory('socket', function ($rootScope) {
+	  var socket = io.connect();
+	  return {
+	    on: function (eventName, callback) {
+	      socket.on(eventName, function () {  
+	        var args = arguments;
+	        $rootScope.$apply(function () {
+	          callback.apply(socket, args);
+	        });
+	      });
+	    },
+	    emit: function (eventName, data, callback) {
+	      socket.emit(eventName, data, function () {
+	        var args = arguments;
+	        $rootScope.$apply(function () {
+	          if (callback) {
+	            callback.apply(socket, args);
+	          }
+	        });
+	      })
+	    }
+	  };
+	});

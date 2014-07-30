@@ -189,7 +189,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 			}
 			if ($scope.pageIndex == 1){ //adding/editing world map settings
 				console.log("Adding/editing world map settings");
-				saveWorld('map');
 				//now load theme from map
 				switch ($scope.mapping.mapThemeSelect.cloudMapName) {
 					case 'urban':
@@ -211,7 +210,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 				}
 				saveWorld('map');
 				}
-			
 			if ($scope.pageIndex == 2){ //editing style.
 				console.log("Editing style");
 				saveStyle();
@@ -515,7 +513,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	      baselayers: {	
 	        osm: {
 	          name: 'OpenStreetMap',
-		      url: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+		      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 		      type: 'xyz'
 	        }
 	      }

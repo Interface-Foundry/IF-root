@@ -4,6 +4,7 @@
     <div class="span10">
       <!--Body content-->
 
+        <br><br>
         <span><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
 
         <div class="card" ><h1 style="color:#63b3fb;"> Twitter {{globalhashtag}} </h1></div>
@@ -14,16 +15,15 @@
                  placeholder="Search {{globalhashtag}} Tweets">
           <input class="btn-primary" type="submit" value="search">
         </form>
+
  -->
-
-
         <li ng-repeat="tweet in tweets| filter:query | orderBy:orderProp">
           
           <div class="col-xs-12 card 4-col social instagram" style="margin-bottom:30px;">
          
             <div class="container more">
 
-              <img ng-src="{{tweet.user.profile_image_url}}">
+              <img ng-src="{{tweet.user.profile_image_url | httpsify}}">
               <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.4rem;">{{tweet.user.name}}</h1>
               <br>
               <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.3rem; margin-top:-14px;">@{{tweet.user.screen_name}}</h1>

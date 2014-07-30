@@ -65,7 +65,17 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
           $scope.alerts.addAlert('danger',err);
         }
       });
-
+    $http.post('/api/user/signup', data).
+      success(function(user){
+          if (user){
+            $location.url('/profile');
+          }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
   }
 }
 

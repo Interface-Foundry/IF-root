@@ -1,0 +1,31 @@
+<br><br><br>
+
+<div class="col">
+
+  <h3>Reactions</h3>
+
+   <form ng-submit="sendMessage()">
+    <div class="emoRow">
+      <div ng-click="sendEmo('cool')" class="emoButton"><img width="30" src="img/emoji/cool.png"></div>
+      <div ng-click="sendEmo('dolphin')" class="emoButton"><img width="30" src="img/emoji/dolphin.png"></div>
+      <div ng-click="sendEmo('ghost')" class="emoButton"><img width="30" src="img/emoji/ghost.png"></div>
+      <div ng-click="sendEmo('heart')" class="emoButton"><img width="30" src="img/emoji/heart.png"></div>
+      <div ng-click="sendEmo('love')" class="emoButton"><img width="30" src="img/emoji/love.png"></div>
+      <div ng-click="sendEmo('party')" class="emoButton"><img width="30" src="img/emoji/party.png"></div>
+      <div ng-click="sendEmo('smile')" class="emoButton"><img width="30" src="img/emoji/smile.png"></div>
+      <div ng-click="sendEmo('woah')" class="emoButton"><img width="30" src="img/emoji/woah.png"></div>
+    </div>
+  </form> 
+  <form ng-submit="changeName()">
+    <input placeholder="{{$root.chatName}}" ng-model="newName"/>
+    <input type="submit" value="Change Name"/>
+  </form>
+
+  <div ng-repeat="message in $root.messages.slice().reverse()">
+    <p>{{message.user}}</p> 
+    <p ng-bind-html="message.text | unsafe"></p>
+    <p>{{message.time}}</p> 
+    <hr>
+  </div>
+
+</div>
