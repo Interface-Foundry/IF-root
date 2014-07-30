@@ -86,8 +86,12 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                     //$location.path('w/'+data[0].liveAndInside[0].id); 
                 }
                 else {
-                    console.log('world has no id');
-                    noWorlds();
+                    //DISABLE AFTER DEMO
+                    $location.path('/w/AlleyNYC_Startup_Showcase');
+
+                    //ENABLE AFTER DEMO
+                    // console.log('world has no id');
+                    // noWorlds();
                 }
             }
             else {
