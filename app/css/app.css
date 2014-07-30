@@ -498,4 +498,8 @@ clear: both;
   background-color: white;
 }
 
+#reactionChat {
+	text-align: center;
+}
+
 /* end socket chat */
