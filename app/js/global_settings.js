@@ -47,13 +47,13 @@ var local_icons = {
 
 var tilesDict = {
     openstreetmap: {
-        url: "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         options: {
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }
     },
     mapbox: {
-        url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig1oichl/{z}/{x}/{y}.png',
+        url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig1oichl/{z}/{x}/{y}.png',
         options: {
             attribution: 'IF',
             minZoom: 1,
@@ -71,7 +71,7 @@ var tilesDict = {
         }
     },
     urban: {
-	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+	    url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
 	    option: {
 		    attribution: 'IF',
 		    minZoom: 1,
@@ -80,7 +80,7 @@ var tilesDict = {
 	    }   
     },
     fairy: {
-	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig9jd86b/{z}/{x}/{y}.png',
+	    url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig9jd86b/{z}/{x}/{y}.png',
 	    option: {
 		    attribution: 'IF',
 		    minZoom: 1,
@@ -89,7 +89,7 @@ var tilesDict = {
 	    }
     },
     sunset: {
-	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
+	    url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
 	    option: {
 		    attribution: 'IF',
 		    minZoom: 1,
@@ -98,7 +98,7 @@ var tilesDict = {
 	    }
     },
     arabesque: {
-	    url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig67e7eb/{z}/{x}/{y}.png',
+	    url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig67e7eb/{z}/{x}/{y}.png',
 	    option: {
 		    attribution: 'IF',
 		    minZoom: 1,
