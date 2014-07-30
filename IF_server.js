@@ -115,6 +115,14 @@ app.use(connectBusboy({
 // Socket.io Communication
 io.sockets.on('connection', socket);
 
+io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+    'websocket'
+  , 'flashsocket'
+  , 'htmlfile'
+  , 'xhr-polling'
+  , 'jsonp-polling'
+]);
+
 // passport routes ======================================================================
 require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 

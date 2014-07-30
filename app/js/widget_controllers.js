@@ -169,6 +169,7 @@ function ChatCtrl($scope, socket, $sce, $rootScope) {
     changeName(data.oldName, data.newName);
   });
 
+
   // socket.on('user:join', function (data) {
   //   $scope.messages.push({
   //     user: 'chatroom',
