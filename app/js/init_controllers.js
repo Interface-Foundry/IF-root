@@ -62,11 +62,12 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     //--------------//
 
     function noLoc(){
+      
+      console.log('no loc');  
+      
       $scope.showNoLoc = true;
       angular.extend($rootScope, {loading: false});
-      console.log('no loc');  
-      $scope.$digest();
-      $rootScope.$digest();  
+      $scope.$apply();
     }
 
     function findWorlds(lat,lon){   
@@ -90,7 +91,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                     //$location.path('/w/AlleyNYC_Startup_Showcase');
 
                     //ENABLE AFTER DEMO
-                    // console.log('world has no id');
+                    console.log('world has no id');
                     noWorlds();
                 }
             }
@@ -100,6 +101,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 //$location.path('/w/AlleyNYC_Startup_Showcase');
 
                 //ENABLE AFTER DEMO
+                console.log('not inside any worlds');
                 noWorlds(); //not inside any worlds
 
             }
@@ -107,11 +109,9 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     }
 
     function noWorlds(){
-        angular.extend($rootScope, {loading: false});
-        $scope.showCreateNew = true;
         console.log('no worlds');  
-        $scope.$digest();
-        $rootScope.$digest();  
+        $scope.showCreateNew = true;
+        angular.extend($rootScope, {loading: false});
     }
 
 }
