@@ -23,7 +23,7 @@
          
             <div class="container more">
 
-              <img ng-src="{{tweet.user.profile_image_url}}">
+              <img ng-src="{{tweet.user.profile_image_url | httpsify}}">
               <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.4rem;">{{tweet.user.name}}</h1>
               <br>
               <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.3rem; margin-top:-14px;">@{{tweet.user.screen_name}}</h1>
