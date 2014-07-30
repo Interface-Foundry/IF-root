@@ -124,12 +124,11 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <script src="js/leaflet-areaselect.js"></script>
 </head>
 <body ng-style="{'background-color': globalBGColor}">
-
   <div id="wrap">
   		<div class="drawer-handle" ng-show="drawerOn" ng-style="{'background-color': style.navBG_color}"> 
   			<img class="handle toolbar-item" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
   		</div>
-	  <nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">
+  		<nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">
 	  		<img class="handle pull-left" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
 	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg">
 	  		
@@ -159,24 +158,22 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  		</ul>
 
 	  </nav>
-	  <div id="scrim" ng-class="{'loading': loading}">
-	  	<span class="glyphicon glyphicon-refresh"></span>
-	  </div>
-      <section id="drawer" ng-class="{'drawer': drawerOn}" ng-include="'/components/drawer/drawer.html'">
-      </section>
+  		<div id="scrim" ng-class="{'loading': loading}">
+	  		<span class="glyphicon glyphicon-refresh"></span>
+	  	</div>
+	  	<section id="drawer" ng-class="{'drawer': drawerOn}" ng-include="'/components/drawer/drawer.html'">
+		</section>
 
-	  <div id="main" ng-class="{'drawer': drawerOn}">
-          <section id="aperture" ng-class="[aperture.state]">
+		<div id="main" ng-class="{'drawer': drawerOn}">
+         <section id="aperture" ng-class="[aperture.state]">
 			  <leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers">
               </leaflet>
-         </section>
+		</section>
 
          <section id="view" ng-class="[aperture.state]">
                   <div ng-view></div>
 		 </section>
-	</div>
-  
- 	</div>
+		 </div>
   </div>
 
 <script>
@@ -187,7 +184,6 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
   ga('create', 'UA-51752546-1', 'bubbl.li');
   ga('send', 'pageview');
-
 </script>
 </body>
 </html>
