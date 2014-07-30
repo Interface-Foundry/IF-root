@@ -11,15 +11,15 @@
 						</div>
 				<div class="media-body vertical-middle">
 					<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{landmark.name}}</h2>
-					<p ng-cloak>{{landmark.summary}}</p>
+					<p ng-cloak ng-style="{color: style.worldTitle_color}">{{landmark.summary}}</p>
 				</div>
 			</div>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-xs-12 landmark">
-			<div ng-style="{'background-color': style.cardBG_color}" class="landmark-description">
-				<div ng-bind-html="landmark.description"> </div>
+			<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">
+				<div ng-bind-html="landmark.description"></div>
 			</div>
 		</div>
 	</div>

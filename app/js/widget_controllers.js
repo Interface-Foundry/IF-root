@@ -151,8 +151,12 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
-function ChatCtrl($scope, socket, $sce, $rootScope) {
+function ChatCtrl($scope, socket, $sce, $rootScope, apertureService) {
+	
+	$scope.aperture = apertureService;	
+    $scope.aperture.set('off');
 
+	
   // Socket listeners
   // ================
 

@@ -44,6 +44,11 @@ margin: 0 auto;
 
 
 .card {
-	border-radius: 1px;
+	border-radius: 3px;
 	box-shadow: 0px 1px 1px rgba(0,0,0,.12);
+}
+
+.card .content {
+	padding: 4px;
+	width: 100%;
 }

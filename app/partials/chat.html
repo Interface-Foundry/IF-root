@@ -1,7 +1,9 @@
-<br><br><br>
+<a ng-href="#/w/{{world.id}}" class="btn btn-default backButton btn-xs">Back</a>
 
-<div class="col">
+<div id="shelf" class="container-fluid navfix" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
 
+<div class="row">
+	<div class="col-xs-10 col-xs-offset-1">
   <h3>Reactions</h3>
 
    <form ng-submit="sendMessage()">
@@ -16,9 +18,11 @@
       <div ng-click="sendEmo('woah')" class="emoButton"><img width="30" src="img/emoji/woah.png"></div>
     </div>
   </form> 
-  <form ng-submit="changeName()">
-    <input placeholder="{{$root.chatName}}" ng-model="newName"/>
-    <input type="submit" value="Change Name"/>
+  <form ng-submit="changeName()" class="form-inline">
+  	<div class="form-group">
+    <input placeholder="{{$root.chatName}}" ng-model="newName" class="form-control"/>
+    <input type="submit" value="Change Name" class="btn btn-default btn-sm"/>
+  	</div>
   </form>
 
   <div ng-repeat="message in $root.messages.slice().reverse()">
@@ -27,5 +31,6 @@
     <p>{{message.time}}</p> 
     <hr>
   </div>
-
+	</div>
+</div>
 </div>

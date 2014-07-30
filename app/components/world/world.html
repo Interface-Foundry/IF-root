@@ -9,7 +9,7 @@
 				</div>
 				<div class="media-body vertical-middle">
 					<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h2>
-					<h4 ng-cloak>{{world.timetext.timestart | date : shortTime}}-{{world.timetext.timeend | date: shortTime}} @ {{world.tempLocationName}}</h4>
+					<h4 ng-cloak ng-style="{color: style.worldTitle_color}">{{world.timetext.timestart | date : shortTime}}-{{world.timetext.timeend | date: shortTime}} @ {{world.tempLocationName}}</h4>
 				</div>
 			</div>
 		</div>
@@ -45,7 +45,9 @@
 	<!--explore-->
 	
 	<ul class="row" ng-style="{'background-color': style.bodyBG_color}">
-		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
+		<div class="row"><div class="col-xs-12">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Companies</h4>
+		</div></div>
 		<li ng-repeat="landmark in landmarks | filter:{category:'company'}" 
 			ng-controller="WorldRepeatController"
 			class="col-sm-6 col-xs-12 landmark">
@@ -53,7 +55,7 @@
 				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small>{{landmark.timetext.timestart}}</small></h3>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small style="color:#FFF;">{{landmark.timetext.timestart}}</small></h3>
 						<em ng-cloak>{{landmark.summary}}</em>
 					</div>
 				</div>
@@ -68,8 +70,8 @@
             <div class="card" ng-style="{'background-color': style.cardBG_color}">
             <a ng-href="#/talk">
               <div class="more">
-                <p class="content">{{tweets[0].text}}</p>
-                <span class="watermark typcn typcn-social-twitter"></span>
+              <p class="content">{{tweets[0].text}}</p>
+              <span class="watermark typcn typcn-social-twitter"></span>
               </div>
             </a>
             <a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
@@ -84,7 +86,7 @@
             <div class="card" ng-style="{'background-color': style.cardBG_color}">
             <a ng-href="#/insta">
             <div class="more">
-              <p class="content"><img ng-src="images/instagram/{{instagrams[0].local_path[0]}}" width="100%"></p>
+            <p class="content"><img ng-src="images/instagram/{{instagrams[0].local_path[0]}}" width="100%"></p>
               <span class="watermark typcn typcn-social-instagram"></span>
             </div>
             </a>
@@ -98,7 +100,7 @@
 	
 	<div class="row" ng-style="{'background-color': style.bodyBG_color}">
 		<div class="col-xs-12">
-		<h4 class="category-heading">Reactions</h4>
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Reactions</h4>
 			<div class="card" ng-style="{'background-color': style.cardBG_color}">
 			<div class="row">
 				<div class="col-xs-6">

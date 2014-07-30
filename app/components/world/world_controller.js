@@ -6,7 +6,6 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
     $scope.aperture = apertureService;	
     $scope.aperture.set('off');
 	
-	
     angular.extend($rootScope, {loading: false});
 	
 	$scope.selectedIndex = 0;
