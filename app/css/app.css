@@ -430,15 +430,7 @@ ul {
 
 .emoButton {
 cursor: pointer;
-width: 40px;
-height: 40px;
-background-color: #cecece;
 float: left;
-}
-
-.emoRow{
-display: inline-block;
-width: 200px;
 }
 
 .overflowable {
@@ -500,6 +492,7 @@ clear: both;
 
 #reactionChat {
 	text-align: center;
+	height:190px;
 }
 
 /* end socket chat */

@@ -32,7 +32,7 @@
 	</ul>
 	
 	<div class="row">
-		<div class="col-xs-12 landmark">
+		<div class="col-xs-12 landmark" ng-style="{'background-color': style.cardBG_color}">
 		<h3>Reactions</h3>
 		<div class="row">
 			<div class="col-xs-6">
@@ -44,15 +44,15 @@
 			</div>
 			<div class="col-xs-6">
 	   <form ng-submit="sendMessage()">
-	    <div class="emoRow">
-	      <div ng-click="sendEmo('cool')" class="emoButton"><img width="30" src="img/emoji/cool.png"></div>
-	      <div ng-click="sendEmo('dolphin')" class="emoButton"><img width="30" src="img/emoji/dolphin.png"></div>
-	      <div ng-click="sendEmo('ghost')" class="emoButton"><img width="30" src="img/emoji/ghost.png"></div>
-	      <div ng-click="sendEmo('heart')" class="emoButton"><img width="30" src="img/emoji/heart.png"></div>
-	      <div ng-click="sendEmo('love')" class="emoButton"><img width="30" src="img/emoji/love.png"></div>
-	      <div ng-click="sendEmo('party')" class="emoButton"><img width="30" src="img/emoji/party.png"></div>
-	      <div ng-click="sendEmo('smile')" class="emoButton"><img width="30" src="img/emoji/smile.png"></div>
-	      <div ng-click="sendEmo('woah')" class="emoButton"><img width="30" src="img/emoji/woah.png"></div>
+	    <div class="row">
+	      <div ng-click="sendEmo('cool')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/cool.png"></div>
+	      <div ng-click="sendEmo('dolphin')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/dolphin.png"></div>
+	      <div ng-click="sendEmo('ghost')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/ghost.png"></div>
+	      <div ng-click="sendEmo('heart')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/heart.png"></div>
+	      <div ng-click="sendEmo('love')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/love.png"></div>
+	      <div ng-click="sendEmo('party')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/party.png"></div>
+	      <div ng-click="sendEmo('smile')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/smile.png"></div>
+	      <div ng-click="sendEmo('woah')" class="col-xs-3 emoButton"><img width="30" src="img/emoji/woah.png"></div>
 		</div>
 		</form>
 			</div>

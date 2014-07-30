@@ -225,10 +225,12 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	var newOverlay = {};
 	newOverlay[localMapName] = {
 		name: localMapName,
-		url: 'https://107.170.180.141/maps/'+localMapID+'_warped.vrt/{z}/{x}/{y}.png',
+		url: 'https://107.170.180.141/maps/'+localMapID,
 		layerOptions: localMapOptions
 	};
 	mapManager.layers.overlays = newOverlay;
+	console.log(mapManager);
+	console.log(newOverlay);
 };
 
 return mapManager;
