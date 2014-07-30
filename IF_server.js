@@ -1122,7 +1122,6 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     req.pipe(req.busboy);
 
     req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
-<<<<<<< HEAD
 
          ////// SECURITY RISK ///////
          ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
@@ -1136,29 +1135,10 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
          //      //    application/x-dosexec
          //  });
           ///////////////////////////
-=======
->>>>>>> FETCH_HEAD
-
-         ////// SECURITY RISK ///////
-         ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
-         // var parseFile = JSON.stringify(req.files.files[0]);
-         // console.log(parseFile);
-         // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
-         //  magic.detectFile(parseFile, function(err, result) {
-         //      if (err){ throw err};
-         //      console.log(result);
-         //      // output on Windows with 32-bit node:
-         //      //    application/x-dosexec
-         //  });
-          ///////////////////////////
-
-<<<<<<< HEAD
-=======
 
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
 
->>>>>>> FETCH_HEAD
         if (mimetype == 'image/jpg' || mimetype == 'image/png'){
 
             while (1) {
