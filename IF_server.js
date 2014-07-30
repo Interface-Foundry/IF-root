@@ -105,12 +105,12 @@ var express = require('express'),
 
     //===================//
 
-//LIMITING UPLOADS TO 10MB ?? 
-// app.use(connectBusboy({
-//   limits: {
-//     fileSize: 1024 * 1024 * 10 // 10MB
-//   }
-// }));
+//LIMITING UPLOADS TO 10MB 
+app.use(connectBusboy({
+  limits: {
+    fileSize: 1024 * 1024 * 10 // 10MB
+  }
+}));
 
 // Socket.io Communication
 io.sockets.on('connection', socket);
@@ -1126,6 +1126,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
          //      //    application/x-dosexec
          //  });
           ///////////////////////////
+
 
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
