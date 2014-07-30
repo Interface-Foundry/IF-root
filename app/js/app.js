@@ -106,7 +106,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 	    when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
       
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
-      when('/twitter/:hashTag', {templateUrl: 'partials/talk-list.html', controller: TalkCtrl}).
+      when('/twitter/:hashTag', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
       when('/chat/:worldID', {templateUrl:'partials/chat.html', controller:ChatCtrl}).
 
