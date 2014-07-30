@@ -158,7 +158,7 @@ function ChatCtrl($scope, socket, $sce, $rootScope) {
 
   socket.on('init', function (data) {
     $rootScope.chatName = data.name;
-    $scope.users = data.users;
+    $rootScope.users = data.users;
   });
 
   socket.on('send:message', function (message) {
@@ -199,9 +199,9 @@ function ChatCtrl($scope, socket, $sce, $rootScope) {
   var changeName = function (oldName, newName) {
     // rename user in list of users
     var i;
-    for (i = 0; i < $scope.users.length; i++) {
-      if ($scope.users[i] === oldName) {
-        $scope.users[i] = newName;
+    for (i = 0; i < $rootScope.users.length; i++) {
+      if ($rootScope.users[i] === oldName) {
+        $rootScope.users[i] = newName;
       }
     }
 
@@ -221,9 +221,7 @@ function ChatCtrl($scope, socket, $sce, $rootScope) {
       if (!result) {
         alert('There was an error changing your name');
       } else {
-        
         changeName($rootScope.chatName, $scope.newName);
-
         $rootScope.chatName = $scope.newName;
         $scope.newName = '';
       }

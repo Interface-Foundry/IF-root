@@ -137,7 +137,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 
   socket.on('init', function (data) {
     $rootScope.chatName = data.name;
-    $scope.users = data.users;
+    $rootScope.users = data.users;
   });
 
   socket.on('send:message', function (message) {
