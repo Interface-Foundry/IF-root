@@ -226,7 +226,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	newOverlay[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
-		url: 'https://107.170.180.141/maps/'+localMapID,
+		url: 'http://107.170.180.141/maps/'+localMapID,
 		layerOptions: localMapOptions,
 		visible: true
 	};
