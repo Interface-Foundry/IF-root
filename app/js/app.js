@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives','IF-directives','ngMessages', 'ngAnimate']).
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','ui.bootstrap', 'leaflet-directive','infinite-scroll','$strap.directives','IF-directives','ngMessages']).
   config(function($routeProvider,$locationProvider, $httpProvider) {
 
     //================================================
@@ -105,11 +105,10 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       
 	    when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
       
-      when('/talk', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
-      when('/talk/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}).
-
-      when('/insta', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
-      when('/chat', {templateUrl:'partials/chat.html', controller:ChatCtrl}).
+      // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
+      when('/twitter/:hashTag', {templateUrl: 'partials/talk-tag.html', controller: TalktagCtrl}).
+      when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
+      when('/chat/:worldID', {templateUrl:'partials/chat.html', controller:ChatCtrl}).
 
       when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 

@@ -1,13 +1,8 @@
 <br><br><br>
+
 <div class="col">
 
   <h3>Reactions</h3>
-
-  <div id="singleCard">
-    <p>{{messages[messages.length-1].user}}</p>
-    <p class="animate" ng-bind-html="messages[messages.length-1].text | unsafe"></p>
-    <p>{{messages[messages.length-1].time}}</p> 
-  </div>
 
    <form ng-submit="sendMessage()">
     <div class="emoRow">
@@ -22,80 +17,15 @@
     </div>
   </form> 
   <form ng-submit="changeName()">
-    <input placeholder="{{name}}" ng-model="newName"/>
+    <input placeholder="{{$root.chatName}}" ng-model="newName"/>
     <input type="submit" value="Change Name"/>
   </form>
 
+  <div ng-repeat="message in $root.messages.slice().reverse()">
+    <p>{{message.user}}</p> 
+    <p ng-bind-html="message.text | unsafe"></p>
+    <p>{{message.time}}</p> 
+    <hr>
+  </div>
 
-    <div ng-repeat="message in messages.slice().reverse()">
-      <p>{{message.user}}</p> 
-      <p ng-bind-html="message.text | unsafe"></p>
-      <p>{{message.time}}</p> 
-      <hr>
-    </div>
-
- 
 </div>
-
-
-
-<style>
-
-
-
-.animate.ng-enter, 
-.animate.ng-leave{ 
-   -webkit-transition: color 0.6s, background-color 0.3s;
-  -moz-transition: color 0.6s, background-color 0.3s;
-  -ms-transition: color 0.6s, background-color 0.3s;
-  transition: color 0.6s, background-color 0.3s;
-}
-
-.animate.ng-leave.animate.ng-leave-active,
-.animate.ng-enter {
- -webkit-transition: color 0.6s, background-color 0.3s;
-  -moz-transition: color 0.6s, background-color 0.3s;
-  -ms-transition: color 0.6s, background-color 0.3s;
-  transition: color 0.6s, background-color 0.3s;
-}
-
-.animate.ng-enter.ng-enter-active, 
-.animate.ng-leave {
- -webkit-transition: color 0.6s, background-color 0.3s;
-  -moz-transition: color 0.6s, background-color 0.3s;
-  -ms-transition: color 0.6s, background-color 0.3s;
-  transition: color 0.6s, background-color 0.3s;
-}
-
-  .emoButton {
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    background-color: #cecece;
-    float: left;
-  }
-
-  .emoRow{
-    display: inline-block;
-    width: 200px;
-  }
-
-  .overflowable {
-    height: 240px;
-    overflow-y: auto;
-    border: 1px solid #000;
-  }
-
-  .overflowable p {
-    margin: 0;
-  }
-
-  .col {
-    float: left;
-    width: 350px;
-  }
-
-  .clr {
-    clear: both;
-  }
-</style>

@@ -151,18 +151,18 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
-function ChatCtrl($scope, socket, $sce) {
+function ChatCtrl($scope, socket, $sce, $rootScope) {
 
   // Socket listeners
   // ================
 
   socket.on('init', function (data) {
-    $scope.name = data.name;
+    $rootScope.chatName = data.name;
     $scope.users = data.users;
   });
 
   socket.on('send:message', function (message) {
-    $scope.messages.push(message);
+    $rootScope.messages.push(message);
   });
 
   socket.on('change:name', function (data) {
@@ -222,15 +222,15 @@ function ChatCtrl($scope, socket, $sce) {
         alert('There was an error changing your name');
       } else {
         
-        changeName($scope.name, $scope.newName);
+        changeName($rootScope.chatName, $scope.newName);
 
-        $scope.name = $scope.newName;
+        $rootScope.chatName = $scope.newName;
         $scope.newName = '';
       }
     });
   };
 
-  $scope.messages = [];
+  //$scope.messages = [];
 
   $scope.sendMessage = function () {
 
@@ -239,13 +239,13 @@ function ChatCtrl($scope, socket, $sce) {
     });
 
     var date = new Date;
-    var seconds = date.getSeconds();
+    var seconds = (date.getSeconds()<10?'0':'') + date.getSeconds();
     var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
     var hour = date.getHours();
 
     // add the message to our model locally
-    $scope.messages.push({
-      user: $scope.name,
+    $rootScope.messages.push({
+      user: $rootScope.chatName,
       text: $scope.message,
       time: hour + ":" + minutes + ":" + seconds
     });

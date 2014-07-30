@@ -29,7 +29,31 @@
 		</li>
 	</ul>
 	
-	
+	<div class="row">
+
+  	  <h3>Reactions</h3>
+
+	  <div id="singleCard" style="cursor:pointer;" ng-click="routeChat()">
+	    <p>{{messages[messages.length-1].user}}</p>
+	    <p ng-bind-html="messages[messages.length-1].text | unsafe"></p>
+	    <p>{{messages[messages.length-1].time}}</p> 
+	  </div>
+
+	   <form ng-submit="sendMessage()">
+	    <div class="emoRow">
+	      <div ng-click="sendEmo('cool')" class="emoButton"><img width="30" src="img/emoji/cool.png"></div>
+	      <div ng-click="sendEmo('dolphin')" class="emoButton"><img width="30" src="img/emoji/dolphin.png"></div>
+	      <div ng-click="sendEmo('ghost')" class="emoButton"><img width="30" src="img/emoji/ghost.png"></div>
+	      <div ng-click="sendEmo('heart')" class="emoButton"><img width="30" src="img/emoji/heart.png"></div>
+	      <div ng-click="sendEmo('love')" class="emoButton"><img width="30" src="img/emoji/love.png"></div>
+	      <div ng-click="sendEmo('party')" class="emoButton"><img width="30" src="img/emoji/party.png"></div>
+	      <div ng-click="sendEmo('smile')" class="emoButton"><img width="30" src="img/emoji/smile.png"></div>
+	      <div ng-click="sendEmo('woah')" class="emoButton"><img width="30" src="img/emoji/woah.png"></div>
+	    </div>
+	  </form> 	 
+	</div>
+
+
 	 <!--<div class="row"
 
           <!-- TWITTER

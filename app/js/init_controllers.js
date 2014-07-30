@@ -9,7 +9,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
 
-	console.log('world routing');
+	  console.log('world routing');
     //WIDGET find data and then route to correct bubble
     // var today = new Date();
     // var dd = today.getDate();
@@ -40,53 +40,69 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
     if (navigator.geolocation) {
 
-        // Get the user's current position
-        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
+      function showPosition(position) {
+          var userLat = position.coords.latitude;
+          var userLon = position.coords.longitude;
+          findWorlds(userLat, userLon); 
+      }
 
-        function showPosition(position) {
+      function locError(){
+          console.log('error finding loc');
+          //geo error
+          noLoc();
+      }
 
-            var userLat = position.coords.latitude;
-            var userLon = position.coords.longitude;
-
-            findWorlds(userLat, userLon);
-        }
-
-        function locError(){
-            console.log('error finding loc');
-            //geo error
-        }
+      navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:7000, enableHighAccuracy : true});
 
     } else {
-
-        //no geo, go to plan b for geo loc here from IP?
         console.log('no geo');
-        
+        alert('Your browser does not support geolocation :(');
     }
 
     //--------------//
 
+    function noLoc(){
+      $scope.showNoLoc = true;
+      angular.extend($rootScope, {loading: false});
+      console.log('no loc');  
+      $scope.$digest();
+      $rootScope.$digest();  
+    }
 
     function findWorlds(lat,lon){   
      
         $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
 
-            $rootScope.nearbyBubbles = data[0].liveAndInside;
+            $rootScope.altBubbles = data[0].liveAndInside;
+            $rootScope.nearbyBubbles = data[0].live;
 
             if (data[0].liveAndInside[0] != null) {
                 if (data[0].liveAndInside[0].id){
-                    $location.path('w/'+data[0].liveAndInside[0].id); //ENABLE AFTER DEMO
+
+                    //DISABLE AFTER DEMO
+                    $location.path('/w/AlleyNYC_Startup_Showcase');
+
+                    //ENABLE AFTER DEMO
+                    //$location.path('w/'+data[0].liveAndInside[0].id); 
                 }
                 else {
                     console.log('world has no id');
+                    noWorlds();
                 }
             }
             else {
-                //?? profit
-                angular.extend($rootScope, {loading: false});
-                $scope.showCreateNew = true;
-                console.log('no worlds');
+                //not inside any worlds
+                noWorlds();
             }
         });
+    }
+
+    function noWorlds(){
+        angular.extend($rootScope, {loading: false});
+        $scope.showCreateNew = true;
+        console.log('no worlds');  
+        $scope.$digest();
+        $rootScope.$digest();  
     }
 
 }
@@ -98,10 +114,12 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 
     $scope.aperture = apertureService; 
     $scope.map = mapManager;
+
+    $rootScope.messages = [];
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
-	angular.extend($rootScope, {loading: false});
-	
+	  angular.extend($rootScope, {loading: false});
+
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
     //================================================
     // Check if the user is connected
