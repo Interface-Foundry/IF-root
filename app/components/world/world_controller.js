@@ -1,4 +1,4 @@
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, socket, $sce) {
+function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce) {
    	
     var map = mapManager;
   	var style = styleManager;

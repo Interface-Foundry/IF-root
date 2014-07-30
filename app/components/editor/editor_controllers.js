@@ -198,10 +198,10 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 						angular.extend($scope.styles, themeDict['sunset']);
 						break;
 					case 'fairy':
-					
+						angular.extend($scope.styles, themeDict['fairy']);
 						break;
 					case 'arabesque':
-					
+						angular.extend($scope.styles, themeDict['arabesque']);
 						break;
 					}
 				//if user uploaded a map but didn't hit "build" button

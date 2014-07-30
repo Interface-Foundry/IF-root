@@ -186,7 +186,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
                 radius: 150,
 				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
 				});
-		map.setTiles($scope.world.style.maps.cloudMapName);
+		//map.setTiles($scope.world.style.maps.cloudMapName);
 		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 		
 		//world is finished loading
