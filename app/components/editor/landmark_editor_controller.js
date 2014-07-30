@@ -4,8 +4,8 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
-	var aperture = apertureService;
-	aperture.set('half');
+	$scope.aperture = apertureService;
+	$scope.aperture.set('half');
 	
 	var worldLoaded = false;
 	var landmarksLoaded = false;

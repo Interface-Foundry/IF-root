@@ -1,4 +1,4 @@
-<div class="container navfix">
+<div id="shelf" class="container navfix" ng-class="[aperture.state]">
 <alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
 
 <legend>Pin Landmarks</legend>
