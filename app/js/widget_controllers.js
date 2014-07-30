@@ -219,7 +219,7 @@ function ChatCtrl($scope, socket, $sce, $rootScope) {
       name: $scope.newName
     }, function (result) {
       if (!result) {
-        alert('There was an error changing your name');
+        alert('That name is already in use');
       } else {
         changeName($rootScope.chatName, $scope.newName);
         $rootScope.chatName = $scope.newName;

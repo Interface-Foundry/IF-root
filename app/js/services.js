@@ -136,7 +136,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 				baselayers: {
 					baseMap: {
 					name: "Sunset",
-					url: 'http://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
+					url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
 					type: 'xyz',
 					layerParams: {},
 					layerOptions: {}
