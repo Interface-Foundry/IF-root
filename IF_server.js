@@ -106,11 +106,11 @@ var express = require('express'),
     //===================//
 
 //LIMITING UPLOADS TO 10MB ?? 
-app.use(connectBusboy({
-  limits: {
-    fileSize: 1024 * 1024 * 10 // 10MB
-  }
-}));
+// app.use(connectBusboy({
+//   limits: {
+//     fileSize: 1024 * 1024 * 10 // 10MB
+//   }
+// }));
 
 // Socket.io Communication
 io.sockets.on('connection', socket);
