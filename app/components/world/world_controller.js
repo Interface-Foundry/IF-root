@@ -8,7 +8,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	
 	
     angular.extend($rootScope, {loading: false});
-    
+	
 	$scope.selectedIndex = 0;
 	
 	var landmarksLoaded;
@@ -16,7 +16,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	$scope.goToLandmark = function(i) {
 		console.log('--goToLandmark--');
 		$scope.selectedIndex = i;
-		map.setCenter($scope.landmarks[i].loc.coordinates, 17);
+		map.setCenter($scope.landmarks[i].loc.coordinates, 16);
 		map.setMarkerFocus($scope.landmarks[i]._id);	
 	}
   	
@@ -45,11 +45,12 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		  			lat: landmark.loc.coordinates[1],
 		  			lng: landmark.loc.coordinates[0],
 		  			draggable:false,
-		  			message:landmark.name,
+		  			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		  			icon: {
 		  				iconUrl: categoryURL,
 		  				iconSize: [50,50]
-		  			}
+		  			},
+		  			_id: landmark._id
 		  		});
 		  	}
 	  		
@@ -67,6 +68,10 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 
 		 console.log($scope.world);
 		 console.log($scope.style);
+		 
+		 if ($scope.world.id=="AlleyNYC_Startup_Showcase") {
+			 world.tempLocationName = "7th Ave & 37th St"
+		 }
 		 // order of logic
 		 // if (type == cloud) ---> load cloud as basemap
 		 // else if (type == both && localMapID && cloudMapID) --> load cloud as basecamp, layer local map on top
@@ -110,7 +115,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 						lat:landmark.loc.coordinates[1],
 						lng:landmark.loc.coordinates[0],
 						draggable:false,
-						message:landmark.name
+						message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+						_id: landmark._id
 					});
 				});
 				landmarksLoaded=true;

@@ -80,8 +80,9 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 	        Landmark.del({_id: $scope.landmarks[i]._id}, function(landmark) {
 	            //$location.path('/');
 	            console.log('Delete');
+	            $scope.landmarks.splice(i, 1); //Removes from local array
 	        });
-	        $scope.landmarks.splice(i, 1); //Removes from local array
+	        
 	        
 	    }
 	}	
@@ -122,7 +123,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 		//$scope.queryType = "all";
 		//$scope.queryFilter = "all";
 		db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
-			console.log('--db.landmarks.query--');
+				console.log('--db.landmarks.query--');
 				console.log('data');
 				console.log(data);
 			//data.shift();
@@ -188,6 +189,10 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 				});
 		//map.setTiles($scope.world.style.maps.cloudMapName);
 		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+		if ($scope.world.style.maps.type == "local" || $scope.world.style.maps.type == "both") {
+		map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
+		}
+		map.refresh();
 		
 		//world is finished loading
 		worldLoaded = true;

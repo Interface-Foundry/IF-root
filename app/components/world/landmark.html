@@ -1,3 +1,5 @@
+<a ng-href="#/w/{{world.id}}" class="btn btn-default backButton btn-sm">Back</a>
+
 <div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
 	<div class="row">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
@@ -13,9 +15,9 @@
 				</div>
 			</div>
 		</div>
-		
-			
-		<div class="col-xs-12">
+	</div>
+	<div class="row">
+		<div class="col-xs-12 landmark">
 			<div ng-style="{'background-color': style.cardBG_color}" class="landmark-description">
 				<div ng-bind-html="landmark.description"> </div>
 			</div>

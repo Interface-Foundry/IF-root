@@ -1,6 +1,7 @@
-function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, leafletData, $rootScope, apertureService, mapManager) {
+function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, leafletData, $rootScope, apertureService, mapManager, styleManager) {
 		console.log('--Landmark Controller--');
 		var map = mapManager;
+		var style = styleManager;
 		$scope.aperture = apertureService;
 		$scope.aperture.set('half');
 
@@ -21,52 +22,30 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 				$log.error(data.err);
 				$location.path('/#/');
 			} else {
+				$scope.world = data.world;
 				$scope.style = data.style;
+				style.navBG_color = $scope.style.navBG_color;
 			}
 		});
 		
 		function goToMark() {
 			
-			map.setCenter($scope.landmark.loc.coordinates, 16); 
-			map.addMarker($scope.landmark._id, {
-		  			lat: $scope.landmark.loc.coordinates[1],
-		  			lng: $scope.landmark.loc.coordinates[0],
-		  			draggable: false,
-		  			message:$scope.landmark.name
-		  		});
+			map.setCenter($scope.landmark.loc.coordinates, 19); 
 		  	var markers = map.markers;
 		  	angular.forEach(markers, function(marker) {
-			  	map.removeMarker(marker);
+		  		console.log(marker);
+			  	map.removeMarker(marker._id);
 		  	});
 		  	
 		  	map.addMarker($scope.landmark._id, {
 		  			lat: $scope.landmark.loc.coordinates[1],
 		  			lng: $scope.landmark.loc.coordinates[0],
 		  			draggable:false,
-		  			message:$scope.landmark.name
-		 });
+		  			message:$scope.landmark.name,
+		  			_id: $scope.landmark._id
+		  			});
+		  	map.setMarkerFocus($scope.landmark._id);
 		 };
 		 
-		angular.extend(map.layers, {
-			overlays: {
-				localMap: {
-					name: 'Syracuse Tech Meetup',
-					visible: true,
-					type: 'xyz',
-					url: 'http://107.170.180.141/maps/demo/{z}/{x}/{y}.png',
-					opacity: 0.2,					
-					minZoom: 16,
-					maxZoom: 19,
-					tms: false,
-					reuseTiles: true,
-					layerParams: {
-					},
-					layerOptions: {
-					}
-					}
-			}
-		});
 		map.refresh();
-		
-		map.addMarker();
 }

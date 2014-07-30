@@ -8,11 +8,37 @@
 					<img class="media-object avatar" ng-click="aperture.toggle('half')" ng-src="{{world.avatar}}">
 				</div>
 				<div class="media-body vertical-middle">
-					<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}} <small class="pull-right">{{world.timetext.timestart | date : shortTime}}</small></h2>
+					<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h2>
+					<h4 ng-cloak>{{world.timetext.timestart | date : shortTime}}-{{world.timetext.timeend}} @ {{world.tempLocationName}}</h4>
 				</div>
 			</div>
 		</div>
 	</div>
+	
+	<div ng-if="world.id=='AlleyNYC_Startup_Showcase'">
+	<div class="row landmark" ng-style="{'background-color': style.bodyBG_color}">
+		<div class="col-xs-4">
+			<div ng-style="{'background-color': style.cardBG_color}">
+					<img class="img-responsive center-block category-img" src="img/jul30/cake_noarrow.png">
+					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Food</h4>
+			</div>
+		</div>
+		<div class="col-xs-4">
+			<div ng-style="{'background-color': style.cardBG_color}">
+					<img class="center-block img-responsive category-img" src="img/jul30/cocktail_noarrow.png">
+					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Bars</h4>
+			</div>
+		</div>
+		<div class="col-xs-4">
+			<div ng-style="{'background-color': style.cardBG_color}">
+			<img class="center-block img-responsive category-img" src="img/jul30/spool_noarrow.png">
+			<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Fabric</h4>
+			</div>
+		</div>
+	</div>
+	</div>
+	
+	
 	<!--explore-->
 	
 	<ul class="row" ng-style="{'background-color': style.bodyBG_color}">
@@ -23,7 +49,7 @@
 				<div class="media" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small>{{landmark.timetext.timestart}}</small></h3>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small>{{landmark.timetext.timestart}}</small> @ </h3>
 						<em ng-cloak>{{landmark.summary}}</em>
 						
 					</div>

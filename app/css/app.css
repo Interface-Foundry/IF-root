@@ -500,3 +500,17 @@ clear: both;
 }
 
 /* end socket chat */
+
+.backButton {
+z-index: 100;
+position: absolute;
+top: 42px;
+left: 8px;
+}
+
+
+.category-img {
+	max-height: 100px;
+	width: 100%;
+	max-width: 100px;
+}
