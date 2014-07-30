@@ -70,7 +70,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 console.log($scope.style);
 		 
 		 if ($scope.world.id=="AlleyNYC_Startup_Showcase") {
-			 world.tempLocationName = "7th Ave & 37th St"
+			 $scope.world.tempLocationName = "7th Ave & 37th St"
 		 }
 		 // order of logic
 		 // if (type == cloud) ---> load cloud as basemap

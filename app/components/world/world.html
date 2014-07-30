@@ -18,19 +18,19 @@
 	<div ng-if="world.id=='AlleyNYC_Startup_Showcase'">
 	<div class="row landmark" ng-style="{'background-color': style.bodyBG_color}">
 		<div class="col-xs-4">
-			<div ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}">
 					<img class="img-responsive center-block category-img" src="img/jul30/cake_noarrow.png">
 					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Food</h4>
 			</div>
 		</div>
 		<div class="col-xs-4">
-			<div ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}">
 					<img class="center-block img-responsive category-img" src="img/jul30/cocktail_noarrow.png">
 					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Bars</h4>
 			</div>
 		</div>
 		<div class="col-xs-4">
-			<div ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}">
 			<img class="center-block img-responsive category-img" src="img/jul30/spool_noarrow.png">
 			<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Fabric</h4>
 			</div>
@@ -44,7 +44,7 @@
 	<ul class="row" ng-style="{'background-color': style.bodyBG_color}">
 		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"
-			class="col-sm-6 col-xs-12 landmark">
+			class="col-sm-6 col-xs-12 landmark card">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
 				<div class="media" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
@@ -92,7 +92,7 @@
 	<div class="row" ng-style="{'background-color': style.bodyBG_color}">
 		<div class="col-xs-12">
 		<h4 class="category-heading">Reactions</h4>
-			<div ng-style="{'background-color': style.cardBG_color}">
+			<div class="card" ng-style="{'background-color': style.cardBG_color}">
 			<div class="row">
 				<div class="col-xs-6">
 					<div id="reactionChat" style="cursor:pointer;" ng-click="routeChat()">
