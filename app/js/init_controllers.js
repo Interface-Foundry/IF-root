@@ -95,8 +95,13 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 }
             }
             else {
-                //not inside any worlds
-                noWorlds();
+          
+                //DISABLE AFTER DEMO
+                $location.path('/w/AlleyNYC_Startup_Showcase');
+
+                //ENABLE AFTER DEMO
+                //noWorlds(); //not inside any worlds
+
             }
         });
     }
