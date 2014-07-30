@@ -40,6 +40,7 @@ margin: 0 auto;
 
 .media-heading {
 	margin-top: 4px;
+	/*margin-bottom: 0px;*/
 }
 
 
@@ -51,4 +52,8 @@ margin: 0 auto;
 .card .content {
 	padding: 4px;
 	width: 100%;
+}
+
+h6 {
+	margin-top: 2px;
 }
