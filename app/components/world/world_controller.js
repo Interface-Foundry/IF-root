@@ -159,8 +159,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		
 	});
 	
-	$scope.tweets = db.tweets.query({limit:1,tag:'#NYC'});
-    $scope.instagrams = db.instagrams.query({limit:1});
+	$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.tags[0]});
+    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.tags[0]});
 	
 
 
