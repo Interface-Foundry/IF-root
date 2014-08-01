@@ -159,10 +159,11 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		
 	});
 	
+	console.log($scope.world.tags[0]);
+	
 	$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.tags[0]});
     $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.tags[0]});
 	
-
 
 	///////////////////////////////////////
 	//////////// Socket Chat //////////////
