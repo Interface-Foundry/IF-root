@@ -15,30 +15,30 @@
 		</div>
 	</div>
 	
-	<div ><!--ng-if="world.id=='AlleyNYC_Startup_Showcase'"-->
-	<div class="row landmark" ng-style="{'background-color': style.bodyBG_color}">
-		<div class="col-xs-4">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}"
-								ng-click="filterCategory('food')">
-					<img class="img-responsive center-block category-img" src="img/jul30/cake_noarrow.png">
-					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Food</h4>
+	<div ng-if="world.id=='AlleyNYC_Startup_Showcase'">
+		<div class="row landmark" ng-style="{'background-color': style.bodyBG_color}">
+			<div class="col-xs-4">
+				<div class="card" ng-style="{'background-color': style.cardBG_color}"
+									ng-click="filterCategory('food')">
+						<img class="img-responsive center-block category-img" src="img/jul30/cake_noarrow.png">
+						<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Food</h4>
+				</div>
 			</div>
-		</div>
-		<div class="col-xs-4">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}"
-								ng-click="filterCategory('bar')">
-					<img class="center-block img-responsive category-img" src="img/jul30/cocktail_noarrow.png">
-					<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Bars</h4>
+			<div class="col-xs-4">
+				<div class="card" ng-style="{'background-color': style.cardBG_color}"
+									ng-click="filterCategory('bar')">
+						<img class="center-block img-responsive category-img" src="img/jul30/cocktail_noarrow.png">
+						<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Bars</h4>
+				</div>
 			</div>
-		</div>
-		<div class="col-xs-4">
+			<div class="col-xs-4">
 			<div class="card" ng-style="{'background-color': style.cardBG_color}"
 								ng-click="filterCategory('fabric')">
 			<img class="center-block img-responsive category-img" src="img/jul30/spool_noarrow.png">
 			<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Fabric</h4>
 			</div>
 		</div>
-	</div>
+		</div>
 	</div>
 	
 
