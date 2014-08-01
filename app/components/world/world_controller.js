@@ -69,6 +69,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
+		 queryWidgets(); //load widget data
 		 
 		 
 		 console.log($scope.world);
@@ -159,11 +160,14 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		
 	});
 	
-	console.log($scope.world.tags[0]);
 	
-	$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.tags[0]});
-    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.tags[0]});
 	
+	function queryWidgets(){
+		console.log($scope.world.tags[0]);
+		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.tags[0]});
+	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.tags[0]});
+	}
+
 
 	///////////////////////////////////////
 	//////////// Socket Chat //////////////
