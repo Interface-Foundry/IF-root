@@ -437,7 +437,7 @@ app.get('/api/:collection', function(req, res) {
 
         if (req.query.tag){ //hashtag filtering
             var qw = {
-               'text' : {$regex : ".*"+'techmeetup2014'+".*", $options: 'i'}
+               'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
             };
             db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));
         }
