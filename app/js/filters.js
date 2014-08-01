@@ -60,4 +60,16 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
     return function(val) {
         return val.replace(/^http:\/\//i, 'https://');
     };
+})
+
+.filter('userName', function() {
+	return function(name) {
+		var i;
+		if (typeof name == 'string') {
+		i = name.indexOf('@');
+			if (i != -1) {
+				return name.substr(0,i);
+			} else {return name;}
+		} else { return name; }
+	}	
 });

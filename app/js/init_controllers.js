@@ -152,7 +152,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
                   $rootScope.userName = user.twitter.displayName;
               }
               else if (user.local){
-                  $rootScope.userName = user.local.email;
+                  $rootScope.userName = user.local.email;             
               }
               else {
                   $rootScope.userName = "Me";

@@ -48,7 +48,7 @@
 		<div class="row"><div class="col-xs-12">
 		<h4 class="category-heading" style="margin-left: 15px;" ng-style="{color: style.categoryTitle_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'">Companies</h4>
 		</div></div>
-		<li ng-repeat="landmark in landmarks | filter:{category:'company'}" 
+		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"
 			class="col-sm-6 col-xs-12 landmark">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
@@ -63,7 +63,7 @@
 		</li>
 	</ul>
 
-	<div class="row" ng-style="{'background-color': style.bodyBG_color}">
+	<div class="row" ng-style="{'background-color': style.bodyBG_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'">
 		<!--Twitter-->
           <div class="col-xs-6 twitter">
             <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>

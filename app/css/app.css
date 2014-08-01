@@ -44,7 +44,7 @@ nav {
 	-o-transition:      opacity 0 0, -o-transform 0.4s;
 	transition:         opacity 0 0, transform 0.4s;
 	
-	-webkit-perspective: 1000;
+	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
 	
 	z-index: 500;
@@ -186,7 +186,7 @@ nav li input.form-control {
 	-o-transition:      opacity 0 0, -o-transform 0.4s;
 	transition:         opacity 0 0, transform 0.4s;
 	
-	-webkit-perspective: 1000;
+	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
 
 	z-index: 1000;
@@ -196,9 +196,8 @@ nav li input.form-control {
   position: absolute;
   top: 0px;
   left: 0px;
-  
-  width: 100%;
   height: 100%;
+  width: 100%;
   /*background: #f6f6f6;*/
   
   -webkit-transition: opacity 0 0, -webkit-transform 0.4s; -moz-transition: opacity 0 0, -moz-transform 0.4s; -ms-transition:     opacity 0 0, -ms-transform 0.4s; -o-transition: opacity 0 0, -o-transform 0.4s; transition: opacity 0 0, transform 0.4s;
@@ -287,7 +286,7 @@ li {
 	-ms-transform:  translateX(100%); -webkit-transform: translateX(100%); -moz-transform: translateX(100%); 
 	transform: translateX(100%);
 	opacity: 1;
-	-webkit-perspective: 1000;
+	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
 }
 
@@ -298,7 +297,7 @@ body.drawer #main, #main.drawer {
   -o-transform: translateX(66%);
   transform: translateX(66%);
   
-  -webkit-perspective: 1000;
+  /*-webkit-perspective: 1000;*/
   -webkit-backface-visibility: hidden;
 }
 
@@ -309,7 +308,7 @@ body.drawer nav, nav.drawer {
 	-o-transform: translateX(66%);
 	transform: translateX(66%);
 	
-	-webkit-perspective: 1000;
+	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
 }
 
@@ -342,15 +341,11 @@ body.drawer nav, nav.drawer {
 }
 
 #shelf.aperture-half {
-	/*transform: translateY(50%);
+	transform: translateY(50%);
 	-webkit-transform: translateY(50%);
 	-moz-transform: translateY(50%);
 	-ms-transform: translateY(50%);
-	-o-transform: translateY(50%);*/
-	position: absolute;
-	height: 50%;
-	top: 50%;
-	overflow: scroll;
+	-o-transform: translateY(50%);
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
@@ -362,9 +357,10 @@ body.drawer nav, nav.drawer {
 	-o-transform: translateY(100%);
 }
 
+
 #top-shelf {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	box-shadow: 0px -1px 1px rgba(0,0,0,.2);
+	box-shadow: 0px -1px 2px rgba(0,0,0,.2);
 }
 
 #top-shelf.aperture-full {

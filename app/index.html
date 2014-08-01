@@ -134,22 +134,36 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  		
 	  		<ul class="navbar-right">
 	  			<li>
-	  				<img class="nav-icon" src="/img/icons/zoom.png">
+	  				<span class="dropdown" on-toggle="toggled(open)">
+	  					<a href="" class="dropdown-toggle no-u">
+	  						<img class="nav-icon" src="/img/icons/zoom.png">
+	  					</a>
+	  					<ul class="dropdown-menu">
+	  						<li>
+	  							<div class="input-group">
+	  								<input type="search" class="form-control">
+	  								<span class="input-group-btn">
+	  									<button class="btn btn-default" type="button">Search</button>
+	  								</span>
+	  							</div>
+	  						</li>
+	  					</ul>
+	  				</span>
 	  			</li>
 	  			<li>
 	  				
-          <span class="dropdown" on-toggle="toggled(open)">
-            <a href="" class="dropdown-toggle no-u">
-                <img class="nav-icon" src="/img/icons/compass.png">
-            </a>
-            <ul class="dropdown-menu">
-                <b>Overlapping Bubbles</b> 
-                <li ng-repeat="bubble in altBubbles">
-                  <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
-                </li>
-                <a ng-show="!altBubbles" ng-href="/#/">Find Overlapping Bubbles</a>
-            </ul>
-          </span>
+			          <span class="dropdown" on-toggle="toggled(open)">
+			            <a href="" class="dropdown-toggle no-u">
+			                <img class="nav-icon" src="/img/icons/compass.png">
+			            </a>
+			            <ul class="dropdown-menu">
+			                <b>Overlapping Bubbles</b> 
+			                <li ng-repeat="bubble in altBubbles">
+			                  <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
+			                </li>
+			                <a ng-show="!altBubbles" ng-href="/#/">Find Overlapping Bubbles</a>
+			            </ul>
+			          </span>
 
 	  			</li>
 	  			<li><!-- USER DROPDOWN -->
@@ -158,7 +172,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			  	<span class="dropdown" on-toggle="toggled(open)" ng-show="showLogout">
 		   		  	<a href="" class="dropdown-toggle no-u">
 		   		  		<img class="nav-avatar" src="/img/icons/profile.png">
-			   		   	<span ng-bind="userName" class="nav-user no-u">Profile</span> <span class="caret"></span>
+			   		   	<span ng-bind="userName | userName" class="nav-user no-u">Profile</span> <span class="caret nav-user"></span>
 			   		</a>
 			   		<ul class="dropdown-menu">
 				   		<li><a ng-href="/#/profile">Profile</a></li>

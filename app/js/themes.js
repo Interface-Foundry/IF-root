@@ -3,7 +3,7 @@ var themeDict = {
 		name: 'urban',
 		
 		bodyBG_color: '#80DEEA',
-		cardBG_color: '#FFF',
+		cardBG_color: '#FFFFFF',
 		titleBG_color: '#00BCD4',
 		navBG_color: 'rgba(0, 172, 193, 0.8)',
 		
@@ -15,7 +15,7 @@ var themeDict = {
 		name: 'sunset',
 		
 		bodyBG_color: '#FFE0B2',
-		cardBG_color: '#FFF',
+		cardBG_color: '#FFFFFF',
 		titleBG_color: '#FF9800',
 		navBG_color: 'rgba(245, 124, 0, 0.8)',
 		
@@ -27,7 +27,7 @@ var themeDict = {
 		name: 'fairy',
 		
 		bodyBG_color: '#FFE0B2',
-		cardBG_color: '#FFF',
+		cardBG_color: '#FFFFFF',
 		titleBG_color: '#FF9800',
 		navBG_color: 'rgba(245, 124, 0, 0.8)',
 		
@@ -39,7 +39,7 @@ var themeDict = {
 		name: 'arabesque',
 		
 		bodyBG_color: '#C5CAE9',
-		cardBG_color: '#FFF',
+		cardBG_color: '#FFFFFF',
 		titleBG_color: '#3F51B5',
 		navBG_color: 'rgba(57, 73, 171, 0.8)',
 		
