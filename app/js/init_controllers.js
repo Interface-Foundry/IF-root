@@ -88,7 +88,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 }
                 else {
                     //DISABLE AFTER DEMO
-                    $location.path('/w/AlleyNYC_Startup_Showcase');
+                    //$location.path('/w/AlleyNYC_Startup_Showcase');
 
                     //ENABLE AFTER DEMO
                     console.log('world has no id');
@@ -98,7 +98,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
             else {
 
                 //DISABLE AFTER DEMO
-                $location.path('/w/AlleyNYC_Startup_Showcase');
+                //$location.path('/w/AlleyNYC_Startup_Showcase');
 
                 //ENABLE AFTER DEMO
                 console.log('not inside any worlds');
