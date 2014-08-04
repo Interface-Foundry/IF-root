@@ -28,7 +28,7 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
-var mailer = require('./components/IF_mail/IF_mail.js')
+var mailerTransport = require('./components/IF_mail/IF_mail.js')
 
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -1117,7 +1117,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 //map upload
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
-    // setup e-mail data with unicode symbols
+
     var mailOptions = {
         from: 'Bubbl mail <mail@bubbl.li>', // sender address
         to: 'jrbaldwin@gmail.com', // list of receivers
@@ -1127,7 +1127,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     };
 
     // send mail with defined transport object
-    transport.sendMail(mailOptions, function(error, info){
+    mailerTransport.sendMail(mailOptions, function(error, info){
         if(error){
             console.log(error);
         }else{
