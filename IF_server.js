@@ -128,11 +128,17 @@ app.post('/forgot', function (req, res) {
 
     //CHECK HERE IN DB IF USER EXIST, IF NOT THEN SEND BACK ALERT ERROR TO WINDOW
     var email = req.body.email;
+
+    console.log(__dirname + '/app/components/auth/change-password.html');
+
+    console.log('1');
+
     var reset = forgot(email, function (err) {
         if (err) res.end('Error sending message: ' + err)
         else res.end('Check your inbox for a password reset message.')
     });
 
+     console.log('2');
     reset.on('request', function (req_, res_) {
 
         console.log("req_ "+req_);
