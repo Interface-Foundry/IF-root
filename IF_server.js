@@ -110,12 +110,12 @@ var express = require('express'),
 //======= RESET PASSWORD MAILER ======//
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-var multiparty = require('multiparty');
-var form = new multiparty.Form();
+// var multiparty = require('multiparty');
+// var form = new multiparty.Form();
 
 var forgot = require('password-reset')({
     uri : 'https://bubbl.li/password_reset',
-    from : 'IF Bubbl <mail@locahost>',
+    from : 'mail@localhost',
     host : 'localhost', 
     port : 25,
     strictSSL: false,
@@ -134,6 +134,9 @@ app.post('/forgot', function (req, res) {
     });
 
     reset.on('request', function (req_, res_) {
+
+        console.log("req_ "+req_);
+        console.log("res_ "+res_);
         req_.session.reset = { email : email, id : reset.id };
         fs.createReadStream(__dirname + '/app/components/auth/change-password.html').pipe(res_);
     });
