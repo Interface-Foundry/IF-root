@@ -28,7 +28,7 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
-var mailerTransport = require('./components/IF_mail/IF_mail.js')
+var mailerTransport = require('./components/IF_mail/IF_mail.js');
 
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -105,6 +105,50 @@ var express = require('express'),
     app.use(flash()); // use connect-flash for flash messages stored in session
 
     //===================//
+
+
+//======= RESET PASSWORD MAILER ======//
+
+app.use(require('sesame')()); // for sessions
+
+var forgot = require('password-reset')({
+    uri : 'https://bubbl.li/password_reset',
+    from : 'password-robot@localhost',
+    host : 'localhost', 
+    port : 25,
+    strictSSL: false,
+    rejectUnauthorized: false
+});
+app.use(forgot.middleware);
+
+app.post('/forgot', express.bodyParser(), function (req, res) {
+    var email = req.body.email;
+    var reset = forgot(email, function (err) {
+        if (err) res.end('Error sending message: ' + err)
+        else res.end('Check your inbox for a password reset message.')
+    });
+
+    reset.on('request', function (req_, res_) {
+        req_.session.reset = { email : email, id : reset.id };
+        fs.createReadStream(__dirname + '/change_password.html').pipe(res_);
+    });
+});
+
+app.post('/reset', express.bodyParser(), function (req, res) {
+    if (!req.session.reset) return res.end('reset token not set');
+
+    var password = req.body.password;
+    var confirm = req.body.confirm;
+    if (password !== confirm) return res.end('passwords do not match');
+
+    // update the user db here
+
+    forgot.expire(req.session.reset.id);
+    delete req.session.reset;
+    res.end('password reset');
+});
+//====================================//
+
 
 
 //LIMITING UPLOADS TO 10MB 
@@ -1119,7 +1163,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
 
     var mailOptions = {
-        from: 'Bubbl mail <mail@bubbl.li>', // sender address
+        from: 'IF Bubbl <mail@bubbl.li>', // sender address
         to: 'jrbaldwin@gmail.com', // list of receivers
         subject: 'hello', // Subject line
         text: 'asdf', // plaintext body
