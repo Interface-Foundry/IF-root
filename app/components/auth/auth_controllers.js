@@ -93,7 +93,74 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService){
   	console.log(user);
   	$scope.worlds = user; 
   });
-  
-  
+}
+
+
+function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
+
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  // This object will be filled by the form
+  $scope.user = {};
+
+  $scope.sendForgot = function(){
+
+    var data = {
+      email: $scope.user.email
+    }
+
+    $http.post('/forgot', data).
+      success(function(data){
+          console.log(data);
+          // if (user){
+          //   $location.url('/profile');
+          // }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+}
+
+
+
+function ResetCtrl($scope, $http, $location, apertureService, alertManager) {
+
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  // // This object will be filled by the form
+  // $scope.user = {};
+
+  // $scope.sendForgot = function(){
+
+  //   var data = {
+  //     email: $scope.user.email
+  //   }
+
+  //   $http.post('/forgot', data).
+  //     success(function(data){
+  //         console.log(data);
+  //         // if (user){
+  //         //   $location.url('/profile');
+  //         // }
+  //     }).
+  //     error(function(err){
+  //       if (err){
+  //         $scope.alerts.addAlert('danger',err);
+  //       }
+  //     });
+  // };
+
 }
 

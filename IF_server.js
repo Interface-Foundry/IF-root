@@ -109,7 +109,8 @@ var express = require('express'),
 
 //======= RESET PASSWORD MAILER ======//
 
-app.use(require('sesame')()); // for sessions
+var multiparty = require('multiparty');
+var form = new multiparty.Form();
 
 var forgot = require('password-reset')({
     uri : 'https://bubbl.li/password_reset',
@@ -119,9 +120,12 @@ var forgot = require('password-reset')({
     strictSSL: false,
     rejectUnauthorized: false
 });
+
 app.use(forgot.middleware);
 
-app.post('/forgot', express.bodyParser(), function (req, res) {
+app.post('/forgot', form.parse, function (req, res) {
+
+    //CHECK HERE IN DB IF USER EXIST, IF NOT THEN SEND BACK ALERT ERROR TO WINDOW
     var email = req.body.email;
     var reset = forgot(email, function (err) {
         if (err) res.end('Error sending message: ' + err)
@@ -130,11 +134,11 @@ app.post('/forgot', express.bodyParser(), function (req, res) {
 
     reset.on('request', function (req_, res_) {
         req_.session.reset = { email : email, id : reset.id };
-        fs.createReadStream(__dirname + '/change_password.html').pipe(res_);
+        fs.createReadStream(__dirname + '/app/components/auth/change-password.html').pipe(res_);
     });
 });
 
-app.post('/reset', express.bodyParser(), function (req, res) {
+app.post('/reset', form.parse, function (req, res) {
     if (!req.session.reset) return res.end('reset token not set');
 
     var password = req.body.password;
