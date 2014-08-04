@@ -109,12 +109,13 @@ var express = require('express'),
 
 //======= RESET PASSWORD MAILER ======//
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var multiparty = require('multiparty');
 var form = new multiparty.Form();
 
 var forgot = require('password-reset')({
     uri : 'https://bubbl.li/password_reset',
-    from : 'password-robot@localhost',
+    from : 'IF Bubbl <mail@locahost>',
     host : 'localhost', 
     port : 25,
     strictSSL: false,
@@ -123,7 +124,7 @@ var forgot = require('password-reset')({
 
 app.use(forgot.middleware);
 
-app.post('/forgot', form.parse, function (req, res) {
+app.post('/forgot', function (req, res) {
 
     //CHECK HERE IN DB IF USER EXIST, IF NOT THEN SEND BACK ALERT ERROR TO WINDOW
     var email = req.body.email;
@@ -138,7 +139,7 @@ app.post('/forgot', form.parse, function (req, res) {
     });
 });
 
-app.post('/reset', form.parse, function (req, res) {
+app.post('/reset', function (req, res) {
     if (!req.session.reset) return res.end('reset token not set');
 
     var password = req.body.password;
@@ -1166,22 +1167,22 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
 
-    var mailOptions = {
-        from: 'IF Bubbl <mail@bubbl.li>', // sender address
-        to: 'jrbaldwin@gmail.com', // list of receivers
-        subject: 'hello', // Subject line
-        text: 'asdf', // plaintext body
-        html: '<h2>asdf</h2>' // html body
-    };
+    // var mailOptions = {
+    //     from: 'IF Bubbl <mail@bubbl.li>', // sender address
+    //     to: 'jrbaldwin@gmail.com', // list of receivers
+    //     subject: 'hello', // Subject line
+    //     text: 'asdf', // plaintext body
+    //     html: '<h2>asdf</h2>' // html body
+    // };
 
-    // send mail with defined transport object
-    mailerTransport.sendMail(mailOptions, function(error, info){
-        if(error){
-            console.log(error);
-        }else{
-            console.log('Message sent: ' + info.response);
-        }
-    });
+    // // send mail with defined transport object
+    // mailerTransport.sendMail(mailOptions, function(error, info){
+    //     if(error){
+    //         console.log(error);
+    //     }else{
+    //         console.log('Message sent: ' + info.response);
+    //     }
+    // });
 
     // TEMPORARY FILE UPLOAD AND DELETE, needs to direct stream from form upload....
     var fstream;
