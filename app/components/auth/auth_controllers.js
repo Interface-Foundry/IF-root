@@ -115,7 +115,8 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
     $http.post('/forgot', data).
       success(function(data){
-          console.log(data);
+          // console.log(data);
+          $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
           // if (user){
           //   $location.url('/profile');
           // }
@@ -141,7 +142,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 
   $http.post('/resetConfirm/'+$routeParams.token).
     success(function(data){
-        console.log(data);
+        
         // if (user){
         //   $location.url('/profile');
         // }
@@ -152,21 +153,6 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
         $location.url('/forgot');
       }
     });
-
-
-  // $http.get('/reset/'+$routeParams.token).
-  //   success(function(data){
-        
-  //       // if (user){
-  //       //   $location.url('/profile');
-  //       // }
-  //   }).
-  //   error(function(err){
-  //     if (err){
-  //       $scope.alerts.addAlert('danger',err);
-  //       $location.url('/');
-  //     }
-  //   });
 
   
   $scope.sendUpdatePassword = function(){

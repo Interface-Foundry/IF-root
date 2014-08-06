@@ -138,7 +138,7 @@ app.post('/forgot', function (req, res, next) {
     function(token, done) {
       User.findOne({ 'local.email': req.body.email }, function(err, user) {
         if (!user) {
-          done('No account with that email address exists, or you logged in through facebook/twitter');
+          done('No account with that email address exists, or you signed up only through Facebook/Twitter');
           //return res.redirect('/#/forgot');
         }
 
