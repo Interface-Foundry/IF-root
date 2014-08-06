@@ -131,13 +131,29 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
 
 
-function ResetCtrl($scope, $http, $location, apertureService, alertManager) {
+function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
 
 
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
 
   $scope.aperture.set('off');
+
+  
+
+  $http.get('/reset'+$routeParams.token).
+      success(function(data){
+          console.log(data);
+          // if (user){
+          //   $location.url('/profile');
+          // }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
 
   // // This object will be filled by the form
   // $scope.user = {};
