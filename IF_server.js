@@ -142,12 +142,14 @@ app.post('/forgot', function (req, res, next) {
           //return res.redirect('/#/forgot');
         }
 
-        user.local.resetPasswordToken = token;
-        user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        else {
+            user.local.resetPasswordToken = token;
+            user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
-        user.save(function(err) {
-          done(err, token, user);
-        });
+            user.save(function(err) {
+              done(err, token, user);
+            }); 
+        }
       });
     },
     function(token, user, done) {
@@ -221,20 +223,24 @@ app.post('/reset/:token', function(req, res) {
           return res.redirect('/#/forgot');
         }
 
-        if (req.body.password.length >= 6){
-            user.local.password = user.generateHash(req.body.password);
-            user.local.resetPasswordToken = undefined;
-            user.local.resetPasswordExpires = undefined;
-
-            user.save(function(err) {
-              req.logIn(user, function(err) {
-                done(err, user);
-              });
-            });
-        }
         else {
-            return done('Password needs to be at least 6 characters');  
+            if (req.body.password.length >= 6){
+                user.local.password = user.generateHash(req.body.password);
+                user.local.resetPasswordToken = undefined;
+                user.local.resetPasswordExpires = undefined;
+
+                user.save(function(err) {
+                  req.logIn(user, function(err) {
+                    done(err, user);
+                  });
+                });
+            }
+            else {
+                return done('Password needs to be at least 6 characters');  
+            }          
         }
+
+ 
 
       });
     },
@@ -245,7 +251,7 @@ app.post('/reset/:token', function(req, res) {
         from: 'IF Bubbl <mail@bubbl.li>',
         subject: 'Node.js Password Reset',
         text: 'Hello,\n\n' +
-          'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed.\n'
+          'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed. If this is an error, please contact: hello@interfacefoundry.com\n'
       };
       mailerTransport.sendMail(mailOptions, function(err) {
         req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
