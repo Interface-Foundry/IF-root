@@ -109,55 +109,126 @@ var express = require('express'),
 
 //======= RESET PASSWORD MAILER ======//
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 // var multiparty = require('multiparty');
 // var form = new multiparty.Form();
 
-var forgot = require('password-reset')({
-    uri : 'https://bubbl.li/password_reset',
-    from : 'mail@localhost',
-    host : 'localhost', 
-    port : 25,
-    strictSSL: false,
-    rejectUnauthorized: false
-});
+// var forgot = require('password-reset')({
+//     uri : 'https://bubbl.li/password_reset',
+//     from : 'mail@localhost',
+//     host : 'localhost', 
+//     port : 25,
+//     strictSSL: false,
+//     rejectUnauthorized: false
+// });
 
-app.use(forgot.middleware);
+// app.use(forgot.middleware);
 
 app.post('/forgot', function (req, res) {
 
-    //CHECK HERE IN DB IF USER EXIST, IF NOT THEN SEND BACK ALERT ERROR TO WINDOW
-    var email = req.body.email;
+    
 
-    var reset = forgot(email, function (err) {
-        if (err) res.end('Error sending message: ' + err)
-        else res.end('Check your inbox for a password reset message.')
-    });
+  async.waterfall([
+    function(done) {
+      crypto.randomBytes(20, function(err, buf) {
+        var token = buf.toString('hex');
+        done(err, token);
+      });
+    },
+    function(token, done) {
+      User.findOne({ email: req.body.email }, function(err, user) {
+        if (!user) {
+          console.log('No account with that email address exists.');
 
-    reset.on('request', function (req_, res_) {
+          return res.redirect('/forgot');
+        }
 
-             console.log('2');
-        console.log("req_ "+req_);
-        console.log("res_ "+res_);
-        req_.session.reset = { email : email, id : reset.id };
-        fs.createReadStream(__dirname + '/app/components/auth/change-password.html').pipe(res_);
-    });
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+        user.save(function(err) {
+          done(err, token, user);
+        });
+      });
+    },
+    function(token, user, done) {
+      // var smtpTransport = nodemailer.createTransport('SMTP', {
+      //   service: 'SendGrid',
+      //   auth: {
+      //     user: '!!! YOUR SENDGRID USERNAME !!!',
+      //     pass: '!!! YOUR SENDGRID PASSWORD !!!'
+      //   }
+      // });
+      var mailOptions = {
+        to: user.email,
+        from: 'IF Bubbl <mail@bubbl.li>',
+        subject: 'Node.js Password Reset',
+        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+          'http://' + req.headers.host + '/reset/' + token + '\n\n' +
+          'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+      };
+      mailerTransport.sendMail(mailOptions, function(err) {
+        req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+        done(err, 'done');
+      });
+    }
+  ], function(err) {
+    if (err) return next(err);
+    res.redirect('/forgot');
+  });
+
+
+
+
+    // var mailOptions = {
+    //     from: 'IF Bubbl <mail@bubbl.li>', // sender address
+    //     to: req.body.email, // list of receivers
+    //     subject: 'hello', // Subject line
+    //     text: 'asdf', // plaintext body
+    //     html: '<h2>asdf</h2>' // html body
+    // };
+
+    // // send mail with defined transport object
+    // mailerTransport.sendMail(mailOptions, function(error, info){
+    //     if(error){
+    //         console.log(error);
+    //     }else{
+    //         console.log('Message sent: ' + info.response);
+    //     }
+    // });
+
+    // //CHECK HERE IN DB IF USER EXIST, IF NOT THEN SEND BACK ALERT ERROR TO WINDOW
+    // var email = req.body.email;
+
+    // var reset = forgot(email, function (err) {
+    //     if (err) res.end('Error sending message: ' + err)
+    //     else res.end('Check your inbox for a password reset message.')
+    // });
+
+    //  console.log('2');
+    // reset.on('request', function (req_, res_) {
+
+    //     console.log("req_ "+req_);
+    //     console.log("res_ "+res_);
+    //     req_.session.reset = { email : email, id : reset.id };
+    //     fs.createReadStream(__dirname + '/app/components/auth/change-password.html').pipe(res_);
+    // });
 });
 
 app.post('/reset', function (req, res) {
-    if (!req.session.reset) return res.end('reset token not set');
+    // if (!req.session.reset) return res.end('reset token not set');
 
-    var password = req.body.password;
-    var confirm = req.body.confirm;
-    if (password !== confirm) return res.end('passwords do not match');
+    // var password = req.body.password;
+    // var confirm = req.body.confirm;
+    // if (password !== confirm) return res.end('passwords do not match');
 
-    // update the user db here
+    // // update the user db here
 
-    forgot.expire(req.session.reset.id);
-    delete req.session.reset;
-    res.end('password reset');
+    // forgot.expire(req.session.reset.id);
+    // delete req.session.reset;
+    // res.end('password reset');
 });
-//====================================//
+// //====================================//
 
 
 
@@ -1170,24 +1241,6 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 
 //map upload
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
-
-
-    // var mailOptions = {
-    //     from: 'IF Bubbl <mail@bubbl.li>', // sender address
-    //     to: 'jrbaldwin@gmail.com', // list of receivers
-    //     subject: 'hello', // Subject line
-    //     text: 'asdf', // plaintext body
-    //     html: '<h2>asdf</h2>' // html body
-    // };
-
-    // // send mail with defined transport object
-    // mailerTransport.sendMail(mailOptions, function(error, info){
-    //     if(error){
-    //         console.log(error);
-    //     }else{
-    //         console.log('Message sent: ' + info.response);
-    //     }
-    // });
 
     // TEMPORARY FILE UPLOAD AND DELETE, needs to direct stream from form upload....
     var fstream;
