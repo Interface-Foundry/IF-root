@@ -110,21 +110,10 @@ var express = require('express'),
     //===================//
 
 
+
+//====================================//
 //======= RESET PASSWORD MAILER ======//
-
-// var multiparty = require('multiparty');
-// var form = new multiparty.Form();
-
-// var forgot = require('password-reset')({
-//     uri : 'https://bubbl.li/password_reset',
-//     from : 'mail@localhost',
-//     host : 'localhost', 
-//     port : 25,
-//     strictSSL: false,
-//     rejectUnauthorized: false
-// });
-
-// app.use(forgot.middleware);
+//====================================//
 
 app.post('/forgot', function (req, res, next) {
 
@@ -141,13 +130,11 @@ app.post('/forgot', function (req, res, next) {
               User.findOne({ 'local.email': req.body.email }, function(err, user) {
                 if (!user) {
                   done('No account with that email address exists, or you signed up only through Facebook/Twitter');
-                  //return res.redirect('/#/forgot');
                 }
 
                 else {
                     user.local.resetPasswordToken = token;
                     user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
                     user.save(function(err) {
                       done(err, token, user);
                     }); 
@@ -198,14 +185,13 @@ app.post('/resetConfirm/:token', function(req, res) {
     if (!user) {
       //req.flash('error', 'Password reset token is invalid or has expired.');
       // return res.redirect('/#/forgot');
-       return res.send(err);
+        res.send(403);
     }
     else {
         res.send('yeah its fine');
     }
   });
 });
-
 
 app.post('/reset/:token', function(req, res) {
   async.waterfall([
@@ -214,7 +200,7 @@ app.post('/reset/:token', function(req, res) {
         if (!user) {
           req.flash('error', 'Password reset token is invalid or has expired.');
           //return res.redirect('/#/forgot');
-          return res.send(err);
+          res.send(403);
         }
 
         else {
@@ -234,8 +220,6 @@ app.post('/reset/:token', function(req, res) {
             }          
         }
 
- 
-
       });
     },
     function(user, done) {
@@ -254,24 +238,13 @@ app.post('/reset/:token', function(req, res) {
 
     }
   ], function(err) {
-    return res.send(err);
+    res.send(403);
   });
 }); 
 
-// app.post('/reset', function (req, res) {
-//     // if (!req.session.reset) return res.end('reset token not set');
-
-//     // var password = req.body.password;
-//     // var confirm = req.body.confirm;
-//     // if (password !== confirm) return res.end('passwords do not match');
-
-//     // // update the user db here
-
-//     // forgot.expire(req.session.reset.id);
-//     // delete req.session.reset;
-//     // res.end('password reset');
-// });
-// //====================================//
+//====================================//
+//========  END MAIL RESET  ==========//
+//====================================//
 
 
 
