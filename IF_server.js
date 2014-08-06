@@ -128,8 +128,6 @@ var express = require('express'),
 
 app.post('/forgot', function (req, res, next) {
 
-  if (validateEmail(req.body.email)){
-
       async.waterfall([
         function(done) {
           crypto.randomBytes(20, function(err, buf) {
@@ -138,21 +136,28 @@ app.post('/forgot', function (req, res, next) {
           });
         },
         function(token, done) {
-          User.findOne({ 'local.email': req.body.email }, function(err, user) {
-            if (!user) {
-              done('No account with that email address exists, or you signed up only through Facebook/Twitter');
-              //return res.redirect('/#/forgot');
-            }
+          if (validateEmail(req.body.email)){
+          
+              User.findOne({ 'local.email': req.body.email }, function(err, user) {
+                if (!user) {
+                  done('No account with that email address exists, or you signed up only through Facebook/Twitter');
+                  //return res.redirect('/#/forgot');
+                }
 
-            else {
-                user.local.resetPasswordToken = token;
-                user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+                else {
+                    user.local.resetPasswordToken = token;
+                    user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
-                user.save(function(err) {
-                  done(err, token, user);
-                }); 
-            }
-          });
+                    user.save(function(err) {
+                      done(err, token, user);
+                    }); 
+                }
+              });
+
+          }
+          else {
+            return done('Please use a real email address');
+          }
         },
         function(token, user, done) {
 
@@ -180,16 +185,11 @@ app.post('/forgot', function (req, res, next) {
         res.redirect('/#/forgot');
       });
 
-  }
-  else {
-    return done('Please use a real email address');
-  }
 
     function validateEmail(email) { 
         var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     } 
-
 });
 
 
