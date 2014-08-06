@@ -29,6 +29,9 @@ var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
+var crypto = require('crypto');
+var User = require('./app/models/user');
+
 
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -125,7 +128,7 @@ var express = require('express'),
 
 app.post('/forgot', function (req, res) {
 
-    
+
 
   async.waterfall([
     function(done) {
