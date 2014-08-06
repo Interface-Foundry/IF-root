@@ -193,36 +193,15 @@ app.post('/forgot', function (req, res, next) {
 });
 
 
-
-// app.get('/reset/:token', function(req, res) {
-//   User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
-//     if (!user) {
-//       req.flash('error', 'Password reset token is invalid or has expired.');
-//       return res.redirect('/forgot');
-//       res.send('yeah its fine');
-//     }
-//     else {
-//         res.send('yeah its fine');
-//     }
-//     // res.render('reset', {
-//     //   user: req.user
-//     // });
-//   });
-// });
-
 app.post('/resetConfirm/:token', function(req, res) {
   User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
     if (!user) {
-      req.flash('error', 'Password reset token is invalid or has expired.');
-      //return res.redirect('/#/forgot');
-      res.send(err,'not fine');
+      //req.flash('error', 'Password reset token is invalid or has expired.');
+      return res.redirect('/#/forgot');
     }
     else {
         res.send('yeah its fine');
     }
-    // res.render('reset', {
-    //   user: req.user
-    // });
   });
 });
 
