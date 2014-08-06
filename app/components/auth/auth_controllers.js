@@ -139,9 +139,9 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 
   $scope.aperture.set('off');
 
-  $http.get('/reset'+$routeParams.token).
+  $http.post('/resetConfirm/'+$routeParams.token).
     success(function(data){
-        
+        console.log(data);
         // if (user){
         //   $location.url('/profile');
         // }
@@ -149,9 +149,23 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
     error(function(err){
       if (err){
         $scope.alerts.addAlert('danger',err);
-        $location.url('/');
       }
     });
+
+
+  // $http.get('/reset/'+$routeParams.token).
+  //   success(function(data){
+        
+  //       // if (user){
+  //       //   $location.url('/profile');
+  //       // }
+  //   }).
+  //   error(function(err){
+  //     if (err){
+  //       $scope.alerts.addAlert('danger',err);
+  //       $location.url('/');
+  //     }
+  //   });
 
   
   $scope.sendUpdatePassword = function(){
@@ -160,9 +174,9 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
       password: $scope.user.password
     }
 
-    $http.post('/forgot'+$routeParams.token, data).
+    $http.post('/reset/'+$routeParams.token, data).
       success(function(data){
-          // console.log(data);
+          console.log(data);
           // if (user){
           //   $location.url('/profile');
           // }
