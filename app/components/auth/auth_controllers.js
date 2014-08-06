@@ -153,7 +153,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
           $scope.alerts.addAlert('danger',err);
         }
       });
-  };
+  
 
   // // This object will be filled by the form
   // $scope.user = {};
