@@ -129,7 +129,6 @@ var express = require('express'),
 app.post('/forgot', function (req, res) {
 
 
-
   async.waterfall([
     function(done) {
       crypto.randomBytes(20, function(err, buf) {
@@ -138,9 +137,9 @@ app.post('/forgot', function (req, res) {
       });
     },
     function(token, done) {
-      User.findOne({ local : { email: req.body.email } }, function(err, user) {
+      User.findOne({ 'local.email': req.body.email }, function(err, user) {
         if (!user) {
-          console.log('No account with that email address exists.');
+          console.log('No account with that email address exists, or you logged in through facebook/twitter');
 
           return res.redirect('/forgot');
         }
