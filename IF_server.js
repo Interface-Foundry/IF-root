@@ -128,7 +128,6 @@ var express = require('express'),
 
 app.post('/forgot', function (req, res, next) {
 
-
   async.waterfall([
     function(done) {
       crypto.randomBytes(20, function(err, buf) {
@@ -160,7 +159,7 @@ app.post('/forgot', function (req, res, next) {
       //   }
       // });
       var mailOptions = {
-        to: user.email,
+        to: user.local.email,
         from: 'IF Bubbl <mail@bubbl.li>',
         subject: 'Node.js Password Reset',
         text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
