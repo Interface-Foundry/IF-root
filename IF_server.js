@@ -126,7 +126,7 @@ var express = require('express'),
 
 // app.use(forgot.middleware);
 
-app.post('/forgot', function (req, res) {
+app.post('/forgot', function (req, res, next) {
 
 
   async.waterfall([
@@ -140,7 +140,6 @@ app.post('/forgot', function (req, res) {
       User.findOne({ 'local.email': req.body.email }, function(err, user) {
         if (!user) {
           console.log('No account with that email address exists, or you logged in through facebook/twitter');
-
           return res.redirect('/forgot');
         }
 
