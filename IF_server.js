@@ -194,8 +194,8 @@ app.post('/resetConfirm/:token', function(req, res) {
   User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
     if (!user) {
       req.flash('error', 'Password reset token is invalid or has expired.');
-      return res.redirect('/#/forgot');
-      //res.send(err,'not fine');
+      //return res.redirect('/#/forgot');
+      res.send(err,'not fine');
     }
     else {
         res.send('yeah its fine');
