@@ -138,8 +138,8 @@ app.post('/forgot', function (req, res, next) {
     function(token, done) {
       User.findOne({ 'local.email': req.body.email }, function(err, user) {
         if (!user) {
-          console.log('No account with that email address exists, or you logged in through facebook/twitter');
-          return res.redirect('/forgot');
+          done('No account with that email address exists, or you logged in through facebook/twitter');
+          //return res.redirect('/#/forgot');
         }
 
         user.local.resetPasswordToken = token;
@@ -168,7 +168,7 @@ app.post('/forgot', function (req, res, next) {
     }
   ], function(err) {
     if (err) return next(err);
-    res.redirect('/forgot');
+    res.redirect('/#/forgot');
   });
 
 });
