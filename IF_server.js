@@ -142,8 +142,8 @@ app.post('/forgot', function (req, res, next) {
           return res.redirect('/forgot');
         }
 
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        user.local.resetPasswordToken = token;
+        user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
         user.save(function(err) {
           done(err, token, user);
