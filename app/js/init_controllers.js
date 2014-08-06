@@ -191,9 +191,9 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     $scope.sendFeedback = function(){
 
         var data = {
-          emailText: 'a test thing' + $rootScope.userName
+          emailText: 'a test thing ' + $rootScope.userName
         }
-        
+
         $http.post('feedback', data).
           success(function(data){
             console.log('feedback sent');
