@@ -162,7 +162,7 @@ app.post('/forgot', function (req, res, next) {
           'If you did not request this, please ignore this email and your password will remain unchanged.\n'
       };
       mailerTransport.sendMail(mailOptions, function(err) {
-        req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+        req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
         done(err, 'done');
       });
     }
@@ -180,9 +180,10 @@ app.get('/reset/:token', function(req, res) {
       req.flash('error', 'Password reset token is invalid or has expired.');
       return res.redirect('/#/forgot');
     }
-    else {
-        res.send(user);
-    }
+    // else {
+    //     //res.send(user);
+
+    // }
     // res.render('reset', {
     //   user: req.user
     // });
@@ -199,15 +200,21 @@ app.post('/reset/:token', function(req, res) {
           return res.redirect('back');
         }
 
-        user.local.password = req.body.password;
-        user.local.resetPasswordToken = undefined;
-        user.local.resetPasswordExpires = undefined;
+        if (req.body.password.length >= 6){
+            user.local.password = req.body.password;
+            user.local.resetPasswordToken = undefined;
+            user.local.resetPasswordExpires = undefined;
 
-        user.save(function(err) {
-          req.logIn(user, function(err) {
-            done(err, user);
-          });
-        });
+            user.save(function(err) {
+              req.logIn(user, function(err) {
+                done(err, user);
+              });
+            });
+        }
+        else {
+            return done('Password needs to be at least 6 characters');  
+        }
+
       });
     },
     function(user, done) {
@@ -216,13 +223,11 @@ app.post('/reset/:token', function(req, res) {
         to: user.local.email,
         from: 'IF Bubbl <mail@bubbl.li>',
         subject: 'Node.js Password Reset',
-        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-          'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-          'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+        text: 'Hello,\n\n' +
+          'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed.\n'
       };
       mailerTransport.sendMail(mailOptions, function(err) {
-        req.flash('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+        req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
         done(err, 'done');
       });
 

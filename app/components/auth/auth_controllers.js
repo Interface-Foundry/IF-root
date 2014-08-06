@@ -140,8 +140,13 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
   $scope.aperture.set('off');
 
   
+  $scope.sendUpdatePassword = function(){
 
-  $http.get('/reset'+$routeParams.token).
+    var data = {
+      password: $scope.user.password
+    }
+
+    $http.post('/forgot'+$routeParams.token, data).
       success(function(data){
           console.log(data);
           // if (user){
@@ -153,6 +158,20 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
           $scope.alerts.addAlert('danger',err);
         }
       });
+  };
+
+  // $http.get('/reset'+$routeParams.token).
+  //     success(function(data){
+  //         console.log(data);
+  //         // if (user){
+  //         //   $location.url('/profile');
+  //         // }
+  //     }).
+  //     error(function(err){
+  //       if (err){
+  //         $scope.alerts.addAlert('danger',err);
+  //       }
+  //     });
   
 
   // // This object will be filled by the form
