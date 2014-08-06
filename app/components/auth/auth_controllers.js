@@ -93,8 +93,65 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
   	console.log(user);
   	$scope.worlds = user; 
   });
-  
-  $scope.deleteWorld = function(i) {
+}
+
+
+function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
+
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  // This object will be filled by the form
+  $scope.user = {};
+
+  $scope.sendForgot = function(){
+
+    var data = {
+      email: $scope.user.email
+    }
+
+    $http.post('/forgot', data).
+      success(function(data){
+          // console.log(data);
+          $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
+          $scope.user.email = '';
+          // if (user){
+          //   $location.url('/profile');
+          // }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+}
+
+
+
+function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  $http.post('/resetConfirm/'+$routeParams.token).
+    success(function(data){
+        
+    }).
+    error(function(err){
+      if (err){
+        //$scope.alerts.addAlert('danger',err);
+        $location.path('/forgot');
+      }
+    });
+
+ $scope.deleteWorld = function(i) {
   	 var deleteConfirm = confirm("Are you sure you want to delete this?");
   	 if (deleteConfirm) {
 	  Landmark.del({_id: $scope.worlds[i]._id}, function(world) {
@@ -104,5 +161,22 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 	  });
 	  }
   }
+  $scope.sendUpdatePassword = function(){
+
+    var data = {
+      password: $scope.user.password
+    }
+
+    $http.post('/reset/'+$routeParams.token, data).
+      success(function(data){
+        $location.path('/profile');
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
 }
 

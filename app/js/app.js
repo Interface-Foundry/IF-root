@@ -79,6 +79,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
       when('/login', {templateUrl: 'components/auth/login.html', controller: LoginCtrl}).
+      when('/forgot', {templateUrl: 'components/auth/forgot.html', controller: ForgotCtrl}).
+      when('/reset/:token', {templateUrl: 'components/auth/change-password.html', controller: ResetCtrl}).
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
 

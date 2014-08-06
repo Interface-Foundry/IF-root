@@ -6,10 +6,13 @@ var TwitterStrategy  = require('passport-twitter').Strategy;
 // load up the user model
 var User       = require('../app/models/user');
 
+
+
 // load the auth variables
 var configAuth = require('./auth'); // use this one for testing
 
 module.exports = function(passport) {
+
 
     // =========================================================================
     // passport session setup ==================================================
@@ -151,6 +154,13 @@ module.exports = function(passport) {
         var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     } 
+
+    // =========================================================================
+    // LOCAL PASSWORD RESET ====================================================
+    // =========================================================================
+
+    // passport.use('password-reset', function 
+
 
     // =========================================================================
     // FACEBOOK ================================================================

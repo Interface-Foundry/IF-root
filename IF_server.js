@@ -28,6 +28,10 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
+var mailerTransport = require('./components/IF_mail/IF_mail.js');
+var crypto = require('crypto');
+var User = require('./app/models/user');
+var validator = require('validator');
 
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -104,6 +108,165 @@ var express = require('express'),
     app.use(flash()); // use connect-flash for flash messages stored in session
 
     //===================//
+
+//email feedback
+app.post('/feedback', function (req, res) {
+
+    var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+
+    if (req.body.emailText){
+        var mailOptions = {
+            to: feedbackTo,
+            from: 'IF Bubbl <mail@bubbl.li>',
+            subject: 'Bubbl Feedback',
+            text: req.body.emailText
+          };
+          mailerTransport.sendMail(mailOptions, function(err) {
+            res.send('email sent');
+          });  
+    }
+    else {
+        res.send(500,'bad email parameters');
+    }
+ 
+});
+
+
+//====================================//
+//======= RESET PASSWORD MAILER ======//
+//====================================//
+
+app.post('/forgot', function (req, res, next) {
+
+      async.waterfall([
+        function(done) {
+          crypto.randomBytes(20, function(err, buf) {
+            var token = buf.toString('hex');
+            done(err, token);
+          });
+        },
+        function(token, done) {
+          if (validateEmail(req.body.email)){
+          
+              User.findOne({ 'local.email': req.body.email }, function(err, user) {
+                if (!user) {
+                  done('No account with that email address exists, or you signed up only through Facebook/Twitter');
+                }
+
+                else {
+                    user.local.resetPasswordToken = token;
+                    user.local.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+                    user.save(function(err) {
+                      done(err, token, user);
+                    }); 
+                }
+              });
+
+          }
+          else {
+            return done('Please use a real email address');
+          }
+        },
+        function(token, user, done) {
+
+            if (req.headers.host){
+
+              var mailOptions = {
+                to: user.local.email,
+                from: 'IF Bubbl <mail@bubbl.li>',
+                subject: 'Node.js Password Reset',
+                text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+                  'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+                  'https://' + req.headers.host + '/#/reset/' + token + '\n\n' +
+                  'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+              };
+              mailerTransport.sendMail(mailOptions, function(err) {
+                req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
+                done(err, 'done');
+              });  
+
+            }
+
+        }
+      ], function(err) {
+        if (err) return next(err);
+        res.redirect('/#/forgot');
+      });
+
+
+    function validateEmail(email) { 
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    } 
+});
+
+
+app.post('/resetConfirm/:token', function(req, res) {
+  User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
+    if (!user) {
+      //req.flash('error', 'Password reset token is invalid or has expired.');
+      // return res.redirect('/#/forgot');
+        res.send(403);
+    }
+    else {
+        res.send('yeah its fine');
+    }
+  });
+});
+
+app.post('/reset/:token', function(req, res) {
+  async.waterfall([
+    function(done) {
+      User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
+        if (!user) {
+          req.flash('error', 'Password reset token is invalid or has expired.');
+          //return res.redirect('/#/forgot');
+          res.send(403);
+        }
+
+        else {
+            if (req.body.password.length >= 6){
+                user.local.password = user.generateHash(req.body.password);
+                user.local.resetPasswordToken = undefined;
+                user.local.resetPasswordExpires = undefined;
+
+                user.save(function(err) {
+                  req.logIn(user, function(err) {
+                    done(err, user);
+                  });
+                });
+            }
+            else {
+                return done('Password needs to be at least 6 characters');  
+            }          
+        }
+
+      });
+    },
+    function(user, done) {
+
+      var mailOptions = {
+        to: user.local.email,
+        from: 'IF Bubbl <mail@bubbl.li>',
+        subject: 'Node.js Password Reset',
+        text: 'Hello,\n\n' +
+          'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed. If this is an error, please contact: hello@interfacefoundry.com\n'
+      };
+      mailerTransport.sendMail(mailOptions, function(err) {
+        req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
+        done(err, 'done');
+      });
+
+    }
+  ], function(err) {
+    res.send('password changed successfully');
+  });
+}); 
+
+//====================================//
+//========  END MAIL RESET  ==========//
+//====================================//
+
 
 
 //LIMITING UPLOADS TO 10MB 

@@ -11,6 +11,7 @@
   <p>
     <button name="submit" type="submit" class="btn btn-primary">Login</button>
   </p>
+<p><a ng-href="/#/forgot">Forgot your password?</a></p>
 
 <alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
 
@@ -21,3 +22,5 @@
 <a href="/auth/twitter" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
 
 <p>Don't have an account? <a ng-href="/#/signup">Signup</a></p>
+
+
