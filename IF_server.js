@@ -152,19 +152,24 @@ app.post('/forgot', function (req, res, next) {
     },
     function(token, user, done) {
 
-      var mailOptions = {
-        to: user.local.email,
-        from: 'IF Bubbl <mail@bubbl.li>',
-        subject: 'Node.js Password Reset',
-        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-          'https://' + req.headers.host + '/#/reset/' + token + '\n\n' +
-          'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-      };
-      mailerTransport.sendMail(mailOptions, function(err) {
-        req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
-        done(err, 'done');
-      });
+        if (req.headers.host){
+
+          var mailOptions = {
+            to: user.local.email,
+            from: 'IF Bubbl <mail@bubbl.li>',
+            subject: 'Node.js Password Reset',
+            text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+              'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+              'https://' + req.headers.host + '/#/reset/' + token + '\n\n' +
+              'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+          };
+          mailerTransport.sendMail(mailOptions, function(err) {
+            req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
+            done(err, 'done');
+          });  
+
+        }
+
     }
   ], function(err) {
     if (err) return next(err);
