@@ -233,7 +233,7 @@ app.post('/reset/:token', function(req, res) {
 
     }
   ], function(err) {
-    res.redirect('/');
+    res.redirect('/#/');
   });
 }); 
 
