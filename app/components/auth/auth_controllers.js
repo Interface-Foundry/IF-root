@@ -134,7 +134,6 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
 function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
 
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
 
@@ -147,7 +146,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
     error(function(err){
       if (err){
         //$scope.alerts.addAlert('danger',err);
-        $location.path('/#/forgot');
+        $location.path('/forgot');
       }
     });
 
@@ -160,7 +159,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 
     $http.post('/reset/'+$routeParams.token, data).
       success(function(data){
-        $location.path('/#/profile');
+        $location.path('/profile');
       }).
       error(function(err){
         if (err){
