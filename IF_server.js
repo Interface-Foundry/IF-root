@@ -124,7 +124,6 @@ app.post('/feedback', function (req, res) {
           mailerTransport.sendMail(mailOptions, function(err) {
             res.send('email sent');
           });  
-        }
     }
     else {
         res.send(500,'bad email parameters');
