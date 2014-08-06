@@ -194,8 +194,8 @@ app.post('/resetConfirm/:token', function(req, res) {
   User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
     if (!user) {
       req.flash('error', 'Password reset token is invalid or has expired.');
-      //return res.redirect('/forgot');
-      res.send(err,'not fine');
+      return res.redirect('/#/forgot');
+      //res.send(err,'not fine');
     }
     else {
         res.send('yeah its fine');
@@ -213,11 +213,11 @@ app.post('/reset/:token', function(req, res) {
       User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
         if (!user) {
           req.flash('error', 'Password reset token is invalid or has expired.');
-          return res.redirect('back');
+          return res.redirect('/#/forgot');
         }
 
         if (req.body.password.length >= 6){
-            user.local.password = req.body.password;
+            user.local.password = user.generateHash(req.body.password);
             user.local.resetPasswordToken = undefined;
             user.local.resetPasswordExpires = undefined;
 
@@ -249,7 +249,7 @@ app.post('/reset/:token', function(req, res) {
 
     }
   ], function(err) {
-    res.redirect('/');
+    res.redirect('/#/');
   });
 }); 
 

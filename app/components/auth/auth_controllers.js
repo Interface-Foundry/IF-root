@@ -142,32 +142,14 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
   $http.post('/resetConfirm/'+$routeParams.token).
     success(function(data){
         console.log(data);
-        // if (user){
-        //   $location.url('/profile');
-        // }
     }).
     error(function(err){
       if (err){
         $scope.alerts.addAlert('danger',err);
+        $location.url('/forgot');
       }
     });
 
-
-  // $http.get('/reset/'+$routeParams.token).
-  //   success(function(data){
-        
-  //       // if (user){
-  //       //   $location.url('/profile');
-  //       // }
-  //   }).
-  //   error(function(err){
-  //     if (err){
-  //       $scope.alerts.addAlert('danger',err);
-  //       $location.url('/');
-  //     }
-  //   });
-
-  
   $scope.sendUpdatePassword = function(){
 
     var data = {
@@ -176,10 +158,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 
     $http.post('/reset/'+$routeParams.token, data).
       success(function(data){
-          console.log(data);
-          // if (user){
-          //   $location.url('/profile');
-          // }
+        $location.url('/profile');
       }).
       error(function(err){
         if (err){
@@ -187,32 +166,6 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
         }
       });
   };
-
-
-  
-
-  // // This object will be filled by the form
-  // $scope.user = {};
-
-  // $scope.sendForgot = function(){
-
-  //   var data = {
-  //     email: $scope.user.email
-  //   }
-
-  //   $http.post('/forgot', data).
-  //     success(function(data){
-  //         console.log(data);
-  //         // if (user){
-  //         //   $location.url('/profile');
-  //         // }
-  //     }).
-  //     error(function(err){
-  //       if (err){
-  //         $scope.alerts.addAlert('danger',err);
-  //       }
-  //     });
-  // };
 
 }
 
