@@ -138,7 +138,7 @@ app.post('/forgot', function (req, res) {
       });
     },
     function(token, done) {
-      User.findOne({ local.email: req.body.email }, function(err, user) {
+      User.findOne({ local : { email: req.body.email } }, function(err, user) {
         if (!user) {
           console.log('No account with that email address exists.');
 
