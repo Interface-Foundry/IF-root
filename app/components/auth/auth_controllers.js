@@ -117,6 +117,7 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
       success(function(data){
           // console.log(data);
           $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
+          $scope.user.email = '';
           // if (user){
           //   $location.url('/profile');
           // }

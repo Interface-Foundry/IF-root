@@ -31,7 +31,7 @@ var configDB = require('./server_auth/database.js');
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var crypto = require('crypto');
 var User = require('./app/models/user');
-
+var validator = require('validator');
 
 var passport = require('passport');
 var flash    = require('connect-flash');
@@ -109,6 +109,28 @@ var express = require('express'),
 
     //===================//
 
+//email feedback
+app.post('/feedback', function (req, res) {
+
+    var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+
+    if (req.body.emailText){
+        var mailOptions = {
+            to: feedbackTo,
+            from: 'IF Bubbl <mail@bubbl.li>',
+            subject: 'Bubbl Feedback',
+            text: req.body.emailText
+          };
+          mailerTransport.sendMail(mailOptions, function(err) {
+            res.send('email sent');
+          });  
+        }
+    }
+    else {
+        res.send(500,'bad email parameters');
+    }
+ 
+});
 
 
 //====================================//

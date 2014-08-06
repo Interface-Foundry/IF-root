@@ -174,6 +174,20 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     };
     //================================================//
 
+    $scope.sendFeedback = function(){
+
+        var data = {
+          emailText: 'a test thing' + $rootScope.userName
+        }
+        
+        $http.post('feedback', data).
+          success(function(data){
+            console.log('feedback sent');
+          }).
+          error(function(err){
+            console.log('there was a problem');
+        });
+    };
 
     //check if logged in
     checkLoggedin($q, $timeout, $http, $location, $rootScope);
