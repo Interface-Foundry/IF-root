@@ -1,4 +1,5 @@
 <div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+<div class="row" ng-style="{'background-color': style.bodyBG_color}">
 	<div class="row">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
@@ -9,45 +10,48 @@
 				</div>
 				<div class="media-body vertical-middle">
 					<h3 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h3>
-					<h6 ng-cloak ng-style="{color: style.worldTitle_color}">{{world.timetext.timestart | date : 'shortTime'}}-{{world.timetext.timeend | date: 'shortTime'}} @ {{world.tempLocationName}}</h6>
+					<h6 ng-cloak ng-style="{color: style.worldTitle_color}">{{world.timetext.timestart | date : 'shortTime'}} {{world.timetext.timeend | date: 'shortTime'}}</h6>
 				</div>
 			</div>
 		</div>
 	</div>
 	
-	<div ng-if="world.id=='AlleyNYC_Startup_Showcase'">
-		<div class="row landmark" ng-style="{'background-color': style.bodyBG_color}">
-			<div class="col-xs-4">
-				<div class="card" ng-style="{'background-color': style.cardBG_color}"
-									ng-click="filterCategory('food')">
-						<img class="img-responsive center-block category-img" src="img/jul30/cake_noarrow.png">
-						<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Food</h4>
+	<!--upcoming-->
+	<div class="col-xs-12" ng-if="style.widgets.upcoming==true">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Upcoming</h4>
+		<div class="col-xs-12 landmark">
+			<a ng-href="/#/w/{{upcoming.id}}/{{upcoming.id}}">
+				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
+					<img ng-src="{{upcoming.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
+					<div class="media-body">
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{upcoming.name}} <small style="color:#ccc;">{{upcoming.timetext.timestart}}</small></h3>
+						<em ng-cloak>{{upcoming.summary}}</em>
+					</div>
 				</div>
-			</div>
-			<div class="col-xs-4">
-				<div class="card" ng-style="{'background-color': style.cardBG_color}"
-									ng-click="filterCategory('bar')">
-						<img class="center-block img-responsive category-img" src="img/jul30/cocktail_noarrow.png">
-						<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Bars</h4>
-				</div>
-			</div>
-			<div class="col-xs-4">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}"
-								ng-click="filterCategory('fabric')">
-			<img class="center-block img-responsive category-img" src="img/jul30/spool_noarrow.png">
-			<h4 class="text-center" ng-style="{color: style.landmarkTitle_color}">Fabric</h4>
-			</div>
-		</div>
-		</div>
-	</div>
-	
+			</a>
 
+	</div>
+	
+	<!--category-->
+	<div class="col-xs-12" ng-if="style.widgets.category==true">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Categories</h4>
+		<div class="category-switch">
+			 <!--assuming 6 categories for now-->
+				<div class="col-xs-2" ng-repeat="landmarkCategory in world.landmarkCategories" ng-class="{'selected-category': landmarkCategory.name == category}">
+				<div class="col-xs-12 card" ng-style="{'background-color': style.cardBG_color}">
+					<a class="text-center" ng-href="#/w/{{worldURL}}/category/{{landmarkCategory.name}}">{{landmarkCategory.name}}					</a>
+				</div>
+				</div>
+		</div>
+
+	</div>
+	
 	<!--explore-->
 	
-	<ul class="row" ng-style="{'background-color': style.bodyBG_color}">
-		<div class="row"><div class="col-xs-12">
-		<h4 class="category-heading" style="margin-left: 15px;" ng-style="{color: style.categoryTitle_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'">Companies</h4>
-		</div></div>
+	<ul ng-style="{'background-color': style.bodyBG_color}">
+		<div class="col-xs-12">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
+		</div>
 		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"
 			class="col-sm-6 col-xs-12 landmark">
@@ -55,51 +59,46 @@
 				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small style="color:#FFF;">{{landmark.timetext.timestart}}</small></h3>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small style="color:#CCC">{{landmark.timetext.timestart}}</small></h3>
 						<em ng-cloak>{{landmark.summary}}</em>
 					</div>
 				</div>
 			</a>
 		</li>
 	</ul>
-
-	<div class="row" ng-style="{'background-color': style.bodyBG_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'">
-		<!--Twitter-->
-          <div class="col-xs-6 twitter">
-            <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
-            <div class="card" ng-style="{'background-color': style.cardBG_color}">
-            <a ng-href="#/twitter/{{world.tags[0]}}">
-              <div class="more">
-              <p class="content">{{tweets[0].text}}</p>
-              <span class="watermark typcn typcn-social-twitter"></span>
-              </div>
-            </a>
-            <a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
-            <div class="footer show-footer">@{{tweets[0].user.name}} <span class="typcn typcn-export pull-right"><span></div>
-            </a>
-            </div>
-          </div>
-
-		  <!--INSTAGRAM-->
-          <div class="col-xs-6 instagram">
+		<!--TWITTER-->
+		<div class="col-xs-6 twitter" ng-if="style.widgets.twitter">
+			<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
+	            <div class="card" ng-style="{'background-color': style.cardBG_color}">
+	            <a ng-href="#/twitter/{{world.tags[0]}}">
+	              <div class="more">
+	              <p class="content">{{tweets[0].text}}</p>
+	              <span class="watermark typcn typcn-social-twitter"></span>
+	              </div>
+	            </a>
+	            <a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
+	            <div class="footer show-footer">@{{tweets[0].user.name}} <span class="typcn typcn-export pull-right"><span></div>
+	            </a>
+	            </div>
+         </div>
+		
+		<!--INSTAGRAM-->
+        <div class="col-xs-6 instagram" ng-if="style.widgets.instagram">
             <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
-            <div class="card" ng-style="{'background-color': style.cardBG_color}">
-            <a ng-href="#/instagram/HappyHourShowcase">
-            <div class="more">
-            <p class="content"><img ng-src="images/instagram/{{instagrams[0].local_path[0]}}" width="100%"></p>
-              <span class="watermark typcn typcn-social-instagram"></span>
-            </div>
-            </a>
-            <a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
-            <div class="footer show-footer">@{{instagrams[0].user.screen_name}}
-            <span class="typcn typcn-export pull-right">
-            <span>
-	            
-            </div>
-            </a>
+            	<div class="card col-padding" ng-style="{'background-color': style.cardBG_color}">
+	            <a ng-href="#/instagram/HappyHourShowcase">
+		            <img class="img-responsive instagram" ng-src="images/instagram/test.jpg{{instagrams[0].local_path[0]}}">
+		            <span class="watermark typcn typcn-social-instagram"></span>
+				</a>
+				<a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
+		            <div class="instagram footer">
+			            @{{instagrams[0].user.screen_name}}
+			            <span class="typcn typcn-export pull-right"></span>
+		            </div>
+	            </a>
 			</div>
           </div>
-    </div>
+ 
 	
 	<div class="row" ng-style="{'background-color': style.bodyBG_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'"> 
 		<div class="col-xs-12">
@@ -132,31 +131,9 @@
 		</div>
 	</div>
 
-	<div class="row" ng-style="{'background-color': style.bodyBG_color}">
-		<div class="col-xs-12">
-			<div class="card" ng-style="{'background-color': style.cardBG_color}">
-				<div class="col-xs-8">
-				<form action="//interfacefoundry.us3.list-manage.com/subscribe/post?u=ac66b7064177bb1b23c6cc522&amp;id=aea15b72e4" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>    
-				<div class="form-group">                        
-				<h4>Subscribe to our mailing list</h4>
-				<div class="input-group">
-					<input type="email" value="" name="EMAIL" class="form-control" id="mce-EMAIL" placeholder="email address" required>
-					<span class="input-group-btn">
-					<button class="btn btn-default" style="background-color:#EB4BA6; color:white;" type="submit">Submit</button>
-					</span>
-				</div>
-		<!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-				<div class="hidden">
-				<input type="text" name="b_ac66b7064177bb1b23c6cc522_aea15b72e4" tabindex="-1" value="">
-				</div>
-				</div>
-		    </form><br>
-				</div>
-			</div>
-		</div>
-	</div>
 
-	
 
-<span ng-show="showLogout"><button><a ng-href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></button></span>
 </div>
+
+</div>
+<div style="padding: 15px;" ng-show="showLogout"><a class="btn btn-default btn-sm" ng-href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></div>

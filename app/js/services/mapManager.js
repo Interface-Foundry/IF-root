@@ -96,6 +96,11 @@ mapManager.removeMarker = function(key) {
 	}
 }
 
+mapManager.removeAllMarkers = function() {
+	console.log('--removeAllMarkers--');
+	mapManager.markers = {};
+}
+
 mapManager.setMarkerMessage = function(key, msg) {
 	console.log('--setMarkerMessage()--');
 	if (mapManager.markers.hasOwnProperty(key)) {
@@ -228,7 +233,8 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 		type: 'xyz',
 		url: 'http://107.170.180.141/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
-		visible: true
+		visible: true,
+		opacity: 0.8
 	};
 	mapManager.layers.overlays = newOverlay;
 	console.log(mapManager);

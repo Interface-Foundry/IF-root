@@ -79,7 +79,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
   }
 }
 
-function ProfileCtrl($scope, $rootScope, $http, $location, apertureService){
+function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark){
 
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
@@ -94,6 +94,15 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService){
   	$scope.worlds = user; 
   });
   
-  
+  $scope.deleteWorld = function(i) {
+  	 var deleteConfirm = confirm("Are you sure you want to delete this?");
+  	 if (deleteConfirm) {
+	  Landmark.del({_id: $scope.worlds[i]._id}, function(world) {
+	            //$location.path('/');
+	            console.log('Delete');
+	            $scope.worlds.splice(i, 1); //Removes from local array
+	  });
+	  }
+  }
 }
 

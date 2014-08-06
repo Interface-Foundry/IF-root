@@ -37,7 +37,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     	loc: {},
         avatar: "img/tidepools/default.jpg",
         date: {},
-        time: {}
+        time: {},
+        landmarkCategories: []
     };
 	
     $scope.mapping = {};
@@ -90,7 +91,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		clickoutFiresChange: true
 	});
 
-
+	
 
 
 
@@ -141,6 +142,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 	$scope.buildOut = function() {
 		saveStyle();
+		//saveWorld('edit');
 		$location.path('/w/'+$scope.worldURL);
 	}
     //===================================//
@@ -231,8 +233,17 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 		}
 	};
 	
+	$scope.addLandmarkCategory = function() {
+		$scope.world.landmarkCategories.unshift({name:$scope.tempLandmarkCategory});
+		console.log($scope.world);
+	}
+	
+	$scope.removeLandmarkCategory = function(index) {
+		$scope.world.landmarkCategories.splice(index, 1);
+	} 
+	
 	$scope.maplocsearch = function(keypressEvent) {
-		if (keypressEvent.keyCode == 13) {
+		if (keypressEvent.keyCode == 13 || keypressEvent.button == 0) {
 			console.log("enter");
 			var geocoder = new google.maps.Geocoder();
 			if (geocoder) {
@@ -410,7 +421,6 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	        } 
 	        //------- END TIME --------//
 	    }
-
 
         //$rootScope.worldCoordinates = $scope.world.loc.coordinates; //updating to rootscope for modal process
 

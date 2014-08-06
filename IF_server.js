@@ -720,26 +720,35 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     if (req.body.category){
                         lm.category = req.body.category;
                     }
-
+                    if (req.body.landmarkCategories){
+	                    lm.landmarkCategories = req.body.landmarkCategories;
+                    }
+					
                     if (req.body.hashtag){
                         lm.resources.hashtag = req.body.hashtag;
+                    }
+                    
+                    if (req.body.widgets) {
+	                   lm.widgets.twitter = req.body.widgets.twitter;
+	                   lm.widgets.instagram = req.body.widgets.instagram;
+	                   lm.widgets.upcoming = req.body.widgets.upcoming;
+	                   lm.widgets.category = req.body.widgets.category; 
                     }
 
                     //if user checks box to activate time 
                     if (req.body.hasTime == true){
-
-                        lm.timetext.datestart = req.body.datetext.start;
-                        lm.timetext.dateend = req.body.datetext.end;
-                        lm.timetext.timestart = req.body.timetext.start;
-                        lm.timetext.timeend = req.body.timetext.end;
-
+						
+                        lm.timetext.datestart = req.body.timetext.datestart;
+                        lm.timetext.dateend = req.body.timetext.dateend;
+                        lm.timetext.timestart = req.body.timetext.timestart;
+                        lm.timetext.timeend = req.body.timetext.timeend;
 
                         //------ Combining Date and Time values -----//
-                        var timeStart = req.body.time.start;
-                        var timeEnd = req.body.time.end;
+                        var timeStart = req.body.timetext.timestart;
+                        var timeEnd = req.body.timetext.timeend;
 
-                        var dateStart = req.body.date.start;
-                        var dateEnd = req.body.date.end;
+                        var dateStart = req.body.timetext.datestart;
+                        var dateEnd = req.body.timetext.dateend;
 
                         var datetimeStart = new Date(dateStart+' '+timeStart);
                         var datetimeEnd = new Date(dateEnd+' '+timeEnd);
@@ -829,6 +838,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     }
                     if (req.body.category){
                         lm.category = req.body.category;
+                    }
+                    if (req.body.landmarkCategories){
+	                    lm.landmarkCategories = req.body.landmarkCategories;
                     }
 
                     if (req.body.hashtag){
@@ -992,6 +1004,11 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.themeFont = req.body.themeFont; // off by default
             lm.themeFontName = req.body.themeFontName; // font name
 
+			lm.widgets.twitter = req.body.widgets.twitter;
+			lm.widgets.instagram = req.body.widgets.instagram;
+			lm.widgets.upcoming = req.body.widgets.upcoming;
+			lm.widgets.category = req.body.widgets.category;
+			
             lm.save(function(err, style) {
                 if (err){
                     console.log('error');

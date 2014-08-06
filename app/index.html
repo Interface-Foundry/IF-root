@@ -108,6 +108,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <!--world component-->
   <script src="components/world/world_controller.js"></script>  
   <script src="components/world/landmark_controller.js"></script>
+  <script src="components/world/category_controller.js"></script>
   <link rel="stylesheet" href="components/world/world.css">
   
   <!--editor component-->
@@ -120,6 +121,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <!--auth component-->
   <script src="components/auth/auth_controllers.js"></script>
   
+  <script src="components/search/search_controller.js"></script>
+  
   <!--for local map placement-->
   <script src="js/leaflet-areaselect.js"></script>
 </head>
@@ -131,24 +134,11 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   		<nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">
 	  		<img class="handle pull-left" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
 	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg">
-	  		
-	  		<ul class="navbar-right">
-	  			<li>
-	  				<span class="dropdown" on-toggle="toggled(open)">
-	  					<a href="" class="dropdown-toggle no-u">
+	  		<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
+	  			<li class="search-icon">
+	  					<a href="" class="no-u" ng-click="search()">
 	  						<img class="nav-icon" src="/img/icons/zoom.png">
 	  					</a>
-	  					<ul class="dropdown-menu">
-	  						<li>
-	  							<div class="input-group">
-	  								<input type="search" class="form-control">
-	  								<span class="input-group-btn">
-	  									<button class="btn btn-default" type="button">Search</button>
-	  								</span>
-	  							</div>
-	  						</li>
-	  					</ul>
-	  				</span>
 	  			</li>
 	  			<li>
 	  				
@@ -183,7 +173,9 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 		  		</span>
 	  			</li>
 	  		</ul>
-
+	  		<div class="search">
+	  		<input type="text" class="form-control input-sm" placeholder="..." ng-model="searchText" ng-show="searchOn" ng-enter="search()">
+	  		</div>
 	  </nav>
   		<div id="scrim" ng-class="{'loading': loading}">
 	  		<span class="glyphicon glyphicon-refresh"></span>

@@ -25,7 +25,7 @@ body {
 }
 
 .navfix {
-	padding-top: 45px;
+	padding-top: 40px;
 }
 
 /* *NAV* Navigation Bar */
@@ -174,7 +174,7 @@ nav li input.form-control {
 	top: 0;
 	left: -66%;
 	width: 66%;
-	bottom: 0px;
+	min-height: 100%;
 	
 	background: #FFF;
 	/*border-right: 1px solid #ccc;*/
@@ -498,11 +498,27 @@ clear: both;
 
 /* end socket chat */
 
-.backButton {
+.back {
 z-index: 100;
 position: absolute;
 top: 42px;
 left: 8px;
+}
+
+.search {
+	position: absolute;
+	top: 5px;
+	left: 76px;
+	right: 48px;
+	width: auto;
+}
+
+.searchSlide {
+	transform: translateX(100%);
+}
+
+.searchSlide .search-icon {
+	transform: translateX(-100%);
 }
 
 
@@ -510,4 +526,8 @@ left: 8px;
 	max-height: 100px;
 	width: 100%;
 	max-width: 100px;
+}
+
+.datepicker {
+	z-index: 100 !important;
 }

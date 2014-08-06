@@ -2,10 +2,12 @@
 /* IF Controllers */
 
 //searching for bubbles
-function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService) {
+function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager) {
 
     angular.extend($rootScope, {loading: true});
-
+	var style = styleManager;
+	style.resetNavBG();
+	
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
 
@@ -52,7 +54,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
           noLoc();
       }
 
-      navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:7000, enableHighAccuracy : true});
+      navigator.geolocation.getCurrentPosition(showPosition, locError, {/*timeout:15000,*/ enableHighAccuracy : true});
 
     } else {
         console.log('no geo');
@@ -115,7 +117,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     }
 
 }
-WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
+//WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
 
 
 //loads everytime
@@ -128,7 +130,19 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 	  angular.extend($rootScope, {loading: false});
-
+	  
+	  
+	$scope.search = function() {
+		if ($scope.searchOn == true) {
+			//call search
+			console.log('searching');
+			$location.path('/search/'+$scope.searchText);
+			$scope.searchOn = false;
+		} else {
+			$scope.searchOn = true;
+		}
+	}  
+	  
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
     //================================================
     // Check if the user is connected

@@ -86,6 +86,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
+      when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: CategoryController}).
       //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
       // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
 
@@ -103,7 +104,9 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       
-	    when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
+	  when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
+      
+      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController, resolve: {loggedin: checkLoggedin}}).
       
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/twitter/:hashTag', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).

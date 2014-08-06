@@ -180,6 +180,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			console.log('-Style-');
 			console.log($scope.style);
 		
+		$scope.worldURL = $routeParams.worldID;
 		//initialize map with world settings
 		map.setCenter($scope.world.loc.coordinates, 15);
 		map.addPath('worldBounds', {

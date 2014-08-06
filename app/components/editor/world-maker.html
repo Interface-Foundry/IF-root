@@ -1,17 +1,14 @@
 <div class="navfix editorbg">
 
 <div class="toolbar">
-<button type="button" class="btn btn-success" ng-click="prevPage()" ng-hide="pageIndex==0">
-  <span class="glyphicon glyphicon-chevron-left"></span>
-</button>
-{{pageIndex+1}}/3
-<button type="button" class="btn btn-success" ng-click="nextPage()" ng-hide="pageIndex==2">
-  <span class="glyphicon glyphicon-chevron-right"></span>
-</button>
-<button type="button" class="btn btn-primary" ng-hide="pageIndex!=2" ng-click="buildOut()">Build your World
-</button>
-
-
+	<button type="button" class="btn btn-success" ng-click="prevPage()" ng-hide="pageIndex==0">
+	  <span class="glyphicon glyphicon-chevron-left"></span>
+	</button>
+	{{pageIndex+1}}/3
+	<button type="button" class="btn btn-success" ng-click="nextPage()" ng-hide="pageIndex==2">
+	  <span class="glyphicon glyphicon-chevron-right"></span>
+	</button>
+	<button type="button" class="btn btn-primary" ng-hide="pageIndex!=2" ng-click="buildOut()">Build your World</button>
 </div>
 
 	<ul id="maker-pages">
@@ -22,7 +19,12 @@
 					<leaflet id="worldDetailMap" tiles="tiles" center="center" markers="markers" paths="paths">
 								 
 					</leaflet>
-					<input name="locsearchbar" type="text" class="locsearch" ng-model="locsearchbar" ng-keypress="maplocsearch($event)"/>
+					<div class="input-group locsearch">
+						<input name="locsearchbar" type="text" class="form-control" ng-model="locsearchbar" ng-keypress="maplocsearch($event)"/>
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="maplocsearch($event)">Search</button>
+						</span>
+					</div>
 				</div>
 			<div class="row">
 				<div class="col-xs-6">
@@ -31,8 +33,6 @@
 						<div class="error" ng-show="worldDetail.worldName.$dirty && worldDetail.worldName.$error.required">Name is required.</div>
 					</div>
 
-	  
-	
 					<div class="field">
 						<label>Picture</label> 
 								
@@ -74,8 +74,22 @@
 						<label>Category</label> <input name="worldCategory" type="text" ng-model="world.category" required/>
 						<div class="error" ng-show="worldDetail.worldCategory.$dirty && worldDetail.worldCategory.$error.required">
 						A category is required
+						</div>
 					</div>
-				</div>
+					<div class="field">
+						<label>Landmark Categories</label> 
+						<div class="input-group">
+						<input name="landmarkCategory" ng-model="tempLandmarkCategory" type="text" class="form-control">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="addLandmarkCategory()">Add</button>
+						</span>
+						</div>
+						<ul>
+							<li ng-repeat="landmarkCategory in world.landmarkCategories" class="clearfix">
+							{{landmarkCategory.name}} <button type="button" class="close" ng-click="removeLandmarkCategory($index)"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+							</li>
+						</ul>
+					</div>
 				</div>
 				<div class="col-xs-6">
 					<div class="field">
@@ -86,9 +100,6 @@
 					</div>
 
 					<span ng-show="showTime">
-
-
-
 					   <h4>Start Date</h4>
 					    <div class="row">
 					        <div class="col-md-6">
@@ -108,21 +119,19 @@
 
 					    <h4>End Time</h4>
 					    <timepicker ng-model="world.time.end" hour-step="hstep" minute-step="mstep" show-meridian="ismeridian"></timepicker>
-
-
-
+					
 					    <!-- LOCATION OF MAP BUILDER -->
 
 	                      <h4><a ng-click="showEndDateDetails = ! showEndDateDetails ; addEndDate()">Add End Date?</a></h4>
 
-	                     	<span ng-show="showEndDateDetails" >
+	                     	<span ng-show="showEndDateDetails">
 						 		 <hr>
 
 								   <h4>End Date</h4>
 								    <div class="row">
 								        <div class="col-md-6">
 								            <p class="input-group">
-								              <input type="text" ng-click="open($event)" class="form-control" datepicker-popup="{{format}}" ng-model="world.date.end" is-open="opened" close-text="Close" />
+								              <input type="text" ng-click="open($event)" class="form-control" datepicker-popup="{{format}}" ng-model="world.date.end" is-open="opened" close-text="Close">
 								              <span class="input-group-btn">
 								                <button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
 								              </span>
@@ -197,13 +206,13 @@
 								<input id="fileuploadmap" type="file" name="files[]">
 							</span>
 
-							<p class="recommended">Recommended size 3000px x 1000px .png or .jpg</p>
+							<p class="recommended">Recommended Size: 3000px x 1000px .png or .jpg</p>
 						</div>
 
-						<!-- Temporary to show map building -->
+						<!--Temporary to show map building -->
 						<div ng-show="showMapBuilding" id="map_building">	
 							<h4 style="font-size:52px;">Building Map...might take a while</h4>
-							<h5>The map will build in the background, so you can go to step 3 now -> </h5>
+							<h5>The map will build in the background</h5>
 						</div>
 
 						<!-- Temporary to show map built -->
@@ -230,7 +239,7 @@
 			<legend>Style your Explorer</legend>
 			<h4>Theme Defaults from <em ng-cloak>{{styles.name}}</em></h4>
 			<div class="row">
-				<div class="col-xs-6">
+				<div class="col-xs-4">
 					<div class="field">
 						<label>Navigator Background</label> <input name="navBG" type='text' class='color' value='#FFFFFF' ng-model='styles.navBG_color'/>
 					</div>
@@ -265,7 +274,24 @@
 						<label>Theme Font</label> <select disabled></select>
 					</div>-->
 					<div class="field">
-						<label>Twitter Widget</label> <input type="checkbox">
+						<div class="row">
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="twitter" id="twitter" ng-model="styles.widgets.twitter">
+							<label for="twitter">Twitter</label>
+						</div>
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="instagram" id="instagram" ng-model="styles.widgets.instagram">
+							<label for="instagram">Instagram</label>
+						</div>
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="upcoming" id="upcoming" ng-model="styles.widgets.upcoming">
+							<label for="upcoming">Upcoming</label>
+						</div>
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="categorySwitch" id="categorySwitch" ng-model="styles.widgets.category">
+							<label for="categorySwitch">Categories</label>
+						</div>
+						</div>
 					</div>
 				</div>
 				<div class="col-xs-6">
@@ -354,7 +380,7 @@
 		top:61px;
 		z-index: 4000;
 		height: 450px;
-		width: 800px;
+		width: 100%;
 	}
 	#map_modal .upload_panel .fileinput-button{
 		margin-top: 20%;

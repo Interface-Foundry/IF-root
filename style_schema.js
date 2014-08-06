@@ -29,8 +29,14 @@ var mongoose = require('mongoose');
 		bodyFontName: String, // font name
 		bodyFontFamily: String, // font family
 		themeFont: Boolean, // off by default
-		themeFontName: String // font name
-
+		themeFontName: String, // font name
+		
+		widgets: {
+			twitter: Boolean,
+			instagram: Boolean,
+			upcoming: Boolean,
+			category: Boolean
+		}
 	}); 
 
 

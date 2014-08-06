@@ -33,7 +33,9 @@ monguurl = require('monguurl');
 		type: String, //event, place
 		subType: { type: [String], index: true }, // type of event/place	
 		category: String, //category of type
-		landmarkCategories: [String],
+		landmarkCategories: [{
+			name: String 
+		}],
 		style: {
 			styleID: String, //link to landmark's style
 			maps: {
@@ -133,6 +135,12 @@ monguurl = require('monguurl');
 				name: String,
 				who: String
 			}
+		},
+		widgets: {
+			twitter: Boolean,
+			instagram: Boolean,
+			upcoming: Boolean,
+			category: Boolean
 		},
 		tags: [String] //search tags
 	}); 

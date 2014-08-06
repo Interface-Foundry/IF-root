@@ -15,6 +15,10 @@ var styleManager = {
 	landmarkTitle_color		*/
 }
 
+styleManager.resetNavBG = function() {
+	styleManager.navBG_color = 'rgba(0,188,212,0.8)';
+}
+
 return styleManager;
 		}
 	]);

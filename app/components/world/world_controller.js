@@ -87,18 +87,20 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 
 		 // add zoom restrictions
 
-		 map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		 map.setCenter($scope.world.loc.coordinates, 17); //pull zoom from mapoptions if exists
+		
 		 /*map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
 				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
 				});*/
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],15)
 		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
 		if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
 			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
 			map.refresh();
 		}
+		
+		
   	}
 
 	World.get({id: $routeParams.worldURL}, function(data) {
@@ -116,9 +118,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				console.log(data);
 				$scope.landmarks = data;
 				
+				if ($scope.style.widgets.upcoming) {
+					setUpcoming();
+				}
+				
 				var categoryURL;
 				angular.forEach($scope.landmarks, function(landmark) {
-					switch (landmark.category) {
+					/*switch (landmark.category) {
 		  			case 'food': 
 		  				categoryURL = 'img/jul30/marker/cake_arrow.png';
 		  				break;
@@ -131,7 +137,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		  			default:
 		  				categoryURL = 'img/marker/red-marker-100.png';
 		  				break;
-		  			}
+		  			}*/
 		  			
 					map.addMarker(landmark._id, {
 						lat:landmark.loc.coordinates[1],
@@ -139,13 +145,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 						draggable:false,
 						message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 						icon: {
-			  				iconUrl: categoryURL,
+			  				/*iconUrl: 'img/marker/red-marker-100.png',
 			  				iconSize: [100,100],
 			  				iconAnchor: [50, 100],
 			  				shadowUrl: '',
 			  				shadowRetinaUrl: '',
 			  				shadowSize: [0,0],
-			  				popupAnchor: [0, -80]
+			  				popupAnchor: [0, -80]*/
 		  				},
 						_id: landmark._id
 					});
@@ -160,9 +166,21 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		
 	});
 	
+	function setUpcoming() {
+		console.log('setUpcoming');
+		var t = Date.parse('July 21, 1983 23:59:00');
+		console.log(t);
+		angular.forEach($scope.landmarks, function(landmark) {
+			if (t>Date.parse('July 21, 1983 '+landmark.timetext.timestart)) {
+				console.log('compare');
+				t = Date.parse('July 21, 1983 '+landmark.timetext.timestart);
+				$scope.upcoming = landmark;
+				console.log(t);
+			}
+		});
+	}
 	
-	
-	function queryWidgets(){
+	function queryWidgets() {
 		console.log($scope.world.tags[0]);
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.tags[0]});
 	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.tags[0]});

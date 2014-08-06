@@ -45,6 +45,7 @@ margin: 0 auto;
 
 
 .card {
+	cursor: pointer;
 	border-radius: 3px;
 	box-shadow: 0px 1px 1px rgba(0,0,0,.12);
 }
@@ -56,4 +57,39 @@ margin: 0 auto;
 
 h6 {
 	margin-top: 2px;
+}
+
+.category-switch {
+	background: #FFF;
+}
+
+.category-switch a {
+	display: block;
+	padding-top: 10px;
+	height: 40px;
+	width: 100%;
+}
+
+.selected-category {
+	background: #f1f1f1;
+}
+
+.category-heading {
+	margin-top:15px;
+}
+
+.img-responsive.instagram {
+	padding-top: 15px;
+}
+
+.footer.instagram {
+	max-width: 300px;
+}
+
+.col-xs-6.instagram {
+	max-width: 300px;
+}
+.col-padding {
+	padding-left: 15px;
+	padding-right: 15px;
 }
