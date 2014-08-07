@@ -892,10 +892,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     }
                     
                     if (req.body.widgets) {
-	                   lm.widgets.twitter = req.body.widgets.twitter;
-	                   lm.widgets.instagram = req.body.widgets.instagram;
-	                   lm.widgets.upcoming = req.body.widgets.upcoming;
-	                   lm.widgets.category = req.body.widgets.category; 
+                    	/*if (req.body.widgets.twitter) {lm.widgets.twitter = req.body.widgets.twitter;}
+	                   	if (req.body.widgets.instagram) {lm.widgets.instagram = req.body.widgets.instagram;}
+	                    if (req.body.widgets.upcoming) {lm.widgets.upcoming = req.body.widgets.upcoming;}
+	                    if (req.body.widgets.category) {lm.widgets.category = req.body.widgets.category;}*/
                     }
 
                     //if user checks box to activate time 

@@ -118,8 +118,10 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				console.log(data);
 				$scope.landmarks = data;
 				
-				if ($scope.style.widgets.upcoming) {
+				if ($scope.style.widgets) {
+					if ($scope.style.widgets.upcoming) {
 					setUpcoming();
+					}
 				}
 				
 				var categoryURL;
@@ -167,24 +169,27 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	});
 	
 	function setUpcoming() {
-		console.log('setUpcoming');
-		var t = Date.parse('July 21, 1983 23:59:00');
+		/*console.log('setUpcoming');
+		var t = new Date();
 		console.log(t);
 		angular.forEach($scope.landmarks, function(landmark) {
-			if (t>Date.parse('July 21, 1983 '+landmark.timetext.timestart)) {
+			if (t<Date.parse(t.toDateString()+' '+landmark.timetext.timestart)) {
 				console.log('compare');
-				t = Date.parse('July 21, 1983 '+landmark.timetext.timestart);
+				t = Date.parse(t.toDateString()+' '+landmark.timetext.timestart);
 				$scope.upcoming = landmark;
 				console.log(t);
 			}
-		});
+		});*/
+		//$scope.upcoming = db.landmarks.query({queryFilter:'now'}, function(){});
 	}
 	
 	
 	function queryWidgets(){
 		console.log($scope.world);
+		if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
 	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	    }
 	}
 
 

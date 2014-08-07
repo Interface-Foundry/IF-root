@@ -291,23 +291,29 @@
 							<input type="checkbox" name="categorySwitch" id="categorySwitch" ng-model="styles.widgets.category">
 							<label for="categorySwitch">Categories</label>
 						</div>
+						<div class="col-xs-12" ng-show="styles.widgets.twitter || styles.widgets.instagram">
+						Current Tag: {{world.hashtag}}
+						</div>
 						</div>
 					</div>
 				</div>
 				<div class="col-xs-6">
 					<div class="livepreview" ng-style="{'background-color':styles.bodyBG_color}">
 						<div class="container">
-							<div class="row" ng-style="{'background-color': styles.titleBG_color}">
-							
-							</div>
 							<div class="row">
 								<div ng-style="{'background-color': styles.titleBG_color}" class="col-xs-12">
 									<h1 ng-style="{'color': styles.worldTitle_color}">World Title Color</h1>
 								</div>
-									<span ng-style="{'color': styles.categoryTitle_color}">Category Title Color</span>
-								<div ng-style="{'background-color': styles.cardBG_color}" class="col-xs-12">
-									<span ng-style="{'color': styles.landmarkTitle_color}">Landmark Title Color</span>
-								</div>
+									<h4 class='category-heading' ng-style="{'color': styles.categoryTitle_color}">Category Title Color</h4>
+								<div  class="col-xs-12 landmark">
+									<div class="media card" ng-style="{'background-color': styles.cardBG_color}">
+										<img ng-src="img/tidepools/default.jpg" class="avatar media-object pull-left vertical-middle" ng-cloak>
+										<div class="media-body">
+											<h3 class="media-heading" ng-style="{color: styles.landmarkTitle_color}" ng-cloak>Landmark Name</h3>
+											<em>Landmark Summary</em>
+										</div>
+									</div>
+									
 							</div>
 						</div>
 					</div>

@@ -531,3 +531,15 @@ left: 8px;
 .datepicker {
 	z-index: 100 !important;
 }
+
+.feedbackWindow {
+	z-index: 10000;
+	position: absolute;
+	top: 48px;
+	right: 8px;
+	width: 320px;
+	background: #FFF;
+	border: 1px solid #CCC;
+	border-radius: 8px;
+	padding: 8px;
+}

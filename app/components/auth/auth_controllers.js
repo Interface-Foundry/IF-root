@@ -93,6 +93,18 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
   	console.log(user);
   	$scope.worlds = user; 
   });
+  
+   $scope.deleteWorld = function(i) {
+  	 var deleteConfirm = confirm("Are you sure you want to delete this?");
+  	 if (deleteConfirm) {
+	  Landmark.del({_id: $scope.worlds[i]._id}, function(world) {
+	            //$location.path('/');
+	            console.log('Delete');
+	            $scope.worlds.splice(i, 1); //Removes from local array
+	  });
+	  }
+  }
+  
 }
 
 
@@ -151,16 +163,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
       }
     });
 
- $scope.deleteWorld = function(i) {
-  	 var deleteConfirm = confirm("Are you sure you want to delete this?");
-  	 if (deleteConfirm) {
-	  Landmark.del({_id: $scope.worlds[i]._id}, function(world) {
-	            //$location.path('/');
-	            console.log('Delete');
-	            $scope.worlds.splice(i, 1); //Removes from local array
-	  });
-	  }
-  }
+
   $scope.sendUpdatePassword = function(){
 
     var data = {

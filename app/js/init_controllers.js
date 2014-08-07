@@ -191,7 +191,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     $scope.sendFeedback = function(){
 
         var data = {
-          emailText: 'a test thing' + $rootScope.userName
+          emailText: $scope.feedbackText + '===\n===\n' + $rootScope.userName
         }
         
         $http.post('feedback', data).
@@ -201,6 +201,8 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
           error(function(err){
             console.log('there was a problem');
         });
+        
+        $scope.feedbackOn = false;
     };
 
     //check if logged in

@@ -475,7 +475,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     	$scope.styles.styleID = $scope.styleID;
 	    db.styles.create($scope.styles, function(response){
         	console.log(response);
-        });  
+        });
     }
 
     function saveProject(){
@@ -491,7 +491,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
     if (navigator.geolocation) {
        // Get the user's current position
-       navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:50000});
+       navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000});
        refreshMap();
 	}
 	

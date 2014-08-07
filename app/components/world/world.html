@@ -29,7 +29,7 @@
 					</div>
 				</div>
 			</a>
-
+		</div>
 	</div>
 	
 	<!--category-->
@@ -37,9 +37,9 @@
 		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Categories</h4>
 		<div class="category-switch">
 			 <!--assuming 6 categories for now-->
-				<div class="col-xs-2" ng-repeat="landmarkCategory in world.landmarkCategories" ng-class="{'selected-category': landmarkCategory.name == category}">
-				<div class="col-xs-12 card" ng-style="{'background-color': style.cardBG_color}">
-					<a class="text-center" ng-href="#/w/{{worldURL}}/category/{{landmarkCategory.name}}">{{landmarkCategory.name}}					</a>
+				<div class="col-xs-3" ng-repeat="landmarkCategory in world.landmarkCategories" ng-class="{'selected-category': landmarkCategory.name == category}">
+					<div class="col-xs-12 card" ng-style="{'background-color': style.cardBG_color}">
+					<a class="text-center" ng-href="#/w/{{worldURL}}/category/{{landmarkCategory.name}}">{{landmarkCategory.name}}</a>
 				</div>
 				</div>
 		</div>
@@ -87,7 +87,7 @@
             <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
             	<div class="card col-padding" ng-style="{'background-color': style.cardBG_color}">
 	            <a ng-href="#/instagram/HappyHourShowcase">
-		            <img class="img-responsive instagram" ng-src="images/instagram/test.jpg{{instagrams[0].local_path[0]}}">
+		            <img class="img-responsive instagram" ng-src="images/instagram/{{instagrams[0].local_path[0]}}">
 		            <span class="watermark typcn typcn-social-instagram"></span>
 				</a>
 				<a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
@@ -134,6 +134,6 @@
 
 
 </div>
+<div style="padding: 15px;" ng-show="showLogout"><a class="btn btn-default btn-sm" ng-href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></div>
 
 </div>
-<div style="padding: 15px;" ng-show="showLogout"><a class="btn btn-default btn-sm" ng-href="#/edit/{{worldURL}}/landmarks">Edit Landmarks</a></div>
