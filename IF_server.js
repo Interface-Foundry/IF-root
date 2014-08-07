@@ -61,7 +61,7 @@ var mongoose = require('mongoose'),
     styleSchema = require('./style_schema.js'),
     projectSchema = require('./project_schema.js'),
     User = require('./app/models/user'), //temp? need to integrate into passport module
-    serverwidgetsSchema = require('./serverWidgets_schema.js'),
+    serverwidgetsSchema = require('./serverwidgets_schema.js'),
     monguurl = require('monguurl');
 
 
