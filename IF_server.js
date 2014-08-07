@@ -1297,7 +1297,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
             var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
             var fileType = filename.split('.').pop();
 
-            if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/gif' ){
+            if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
 
                 while (1) {
 
