@@ -113,6 +113,10 @@ var express = require('express'),
 //email feedback
 app.post('/feedback', function (req, res) {
 
+    var sText = blacklist(req.body.emailText, "/[\[\]<>\*\?]/");
+
+    console.log(sText);
+
     var feedbackTo = 'jrbaldwin@interfacefoundry.com';
 
     if (req.body.emailText){
