@@ -132,7 +132,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   			<img class="handle toolbar-item" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
   		</div>
   		<div class="feedbackWindow" ng-show="feedbackOn">
-  			<textarea class="form-control" rows="3" ng-bind-html="feedbackText"></textarea>
+  			<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
   			<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button> <button type="button" class="close" ng-click="feedbackOn=!feedbackOn"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
   		</div>
   		<nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">

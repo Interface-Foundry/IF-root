@@ -191,7 +191,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     $scope.sendFeedback = function(){
 
         var data = {
-          emailText: $scope.feedbackText + '===\n===\n' + $rootScope.userName
+          emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
         }
 
         $http.post('feedback', data).
