@@ -20,7 +20,7 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
 var twitterSchema = require('./tweet_schema.js');
-var serverwidgetsSchema = require('../serverWidgets_schema.js');
+var serverwidgetsSchema = require('../serverwidgets_schema.js');
 
 var tweetModel = mongoose.model('tweet', twitterSchema, 'tweets');  // compiling schema model into mongoose
 
