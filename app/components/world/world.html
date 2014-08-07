@@ -70,7 +70,7 @@
 		<div class="col-xs-6 twitter" ng-if="style.widgets.twitter">
 			<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
 	            <div class="card" ng-style="{'background-color': style.cardBG_color}">
-	            <a ng-href="#/twitter/{{world.tags[0]}}">
+	            <a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}">
 	              <div class="more">
 	              <p class="content">{{tweets[0].text}}</p>
 	              <span class="watermark typcn typcn-social-twitter"></span>
@@ -86,7 +86,7 @@
         <div class="col-xs-6 instagram" ng-if="style.widgets.instagram">
             <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
             	<div class="card col-padding" ng-style="{'background-color': style.cardBG_color}">
-	            <a ng-href="#/instagram/HappyHourShowcase">
+	            <a ng-href="#/instagram/{{world.resources.hashtag}}">
 		            <img class="img-responsive instagram" ng-src="images/instagram/{{instagrams[0].local_path[0]}}">
 		            <span class="watermark typcn typcn-social-instagram"></span>
 				</a>
