@@ -5,7 +5,7 @@ var twitter = require('ntwitter'),
 var credentials = require('./credentials.js');
 //var hashtag = require('../app/js/global_settings.js').hashtag;
 
-var hashtag = ['df','sdfg','asf'];
+var hashtag = ['#comics'];
 
 var t = new twitter({
     consumer_key: credentials.consumer_key,
@@ -26,7 +26,7 @@ var tweetModel = mongoose.model('tweet', twitterSchema, 'tweets');  // compiling
 
 t.stream(
     'statuses/filter',
-    { track: [hashtag] },
+    { track: hashtag },
     function(stream) {
         stream.on('data', function(tweet) {
 

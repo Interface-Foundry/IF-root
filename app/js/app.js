@@ -106,9 +106,9 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       
-	  when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
+	    when('/edit/:worldID/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
       
-      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController, resolve: {loggedin: checkLoggedin}}).
+      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
       
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TweetlistCtrl}).

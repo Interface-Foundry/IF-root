@@ -113,18 +113,17 @@ var express = require('express'),
 //email feedback
 app.post('/feedback', function (req, res) {
 
-    var sText = blacklist(req.body.emailText, "/[\[\]<>\*\?]/");
+    if (req.body.emailText){   
 
-    console.log(sText);
+        var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
 
-    var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+        var feedbackTo = 'jrbaldwin@interfacefoundry.com';
 
-    if (req.body.emailText){
         var mailOptions = {
             to: feedbackTo,
             from: 'IF Bubbl <mail@bubbl.li>',
             subject: 'Bubbl Feedback',
-            text: req.body.emailText
+            text: sText
           };
           mailerTransport.sendMail(mailOptions, function(err) {
             res.send('email sent');
@@ -133,6 +132,7 @@ app.post('/feedback', function (req, res) {
     else {
         res.send(500,'bad email parameters');
     }
+    
  
 });
 
@@ -652,21 +652,24 @@ app.get('/api/:collection', function(req, res) {
 // Search
 
 app.get('/api/textsearch', function(req, res) {
-    landmarkSchema.find(
-        { $text : { $search : req.body.textQuery } },
-        { score : { $meta: "textScore" } }
-      ).
-      sort({ score : { $meta : 'textScore' } }).
-      limit(100).
-      exec(function(err, data) {
-        if (data){
-            res.send(data);
-        }
-        else {
-            console.log('no results');
-            res.send({err:'no results'});            
-        }
-      });
+
+    var sText = req.body.textQuery.replace(/[^\w\s]/gi, '');
+
+    // landmarkSchema.find(
+    //     { $text : { $search : sText } },
+    //     { score : { $meta: "textScore" } }
+    //   ).
+    //   sort({ score : { $meta : 'textScore' } }).
+    //   limit(100).
+    //   exec(function(err, data) {
+    //     if (data){
+    //         res.send(data);
+    //     }
+    //     else {
+    //         console.log('no results');
+    //         res.send({err:'no results'});            
+    //     }
+    //   });
 });
 
 

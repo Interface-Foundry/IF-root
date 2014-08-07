@@ -2,9 +2,9 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 	/*$scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };*/    
-    db.landmarks.query({queryType:"search", queryFilter: $routeParams.searchQuery}, function(data) {
-	    console.log(data);
-    });
+    // db.landmarks.query({queryType:"search", queryFilter: $routeParams.searchQuery}, function(data) {
+	   //  console.log(data);
+    // });
 
 
 }

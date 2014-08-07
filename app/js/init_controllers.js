@@ -197,6 +197,8 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
         $http.post('feedback', data).
           success(function(data){
             console.log('feedback sent');
+            alert('Feedback sent, thanks!');
+
           }).
           error(function(err){
             console.log('there was a problem');
