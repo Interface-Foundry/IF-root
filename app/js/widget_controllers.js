@@ -3,8 +3,9 @@ function TalklistCtrl( $location, $scope, db, $rootScope) {
     $rootScope.showSwitch = false;
 
     //query tweets
-    $scope.tweets = db.tweets.query({limit:70}); // make infinite scroll?
-    $scope.globalhashtag = global_hashtag;
+    $scope.currentTag = $routeParams.hashTag;
+    $scope.tweets = db.tweets.query({limit:70, tag:$scope.currentTag}); // make infinite scroll?
+    // $scope.globalhashtag = global_hashtag;
 
     //not enabled right now
     $scope.tagSearch = function() { 
@@ -25,8 +26,10 @@ function InstalistCtrl( $location, $scope, db, $rootScope) {
     $rootScope.showSwitch = false;
 
     //query instagram
-    $scope.instagrams = db.instagrams.query({limit:70}); // make infinite scroll?
-    $scope.globalhashtag = global_hashtag;
+    $scope.currentTag = $routeParams.hashTag;
+    $scope.instagrams = db.instagrams.query({limit:70, tag:$scope.currentTag}); // make infinite scroll?
+
+    // $scope.globalhashtag = global_hashtag;
 
     $scope.goBack = function(){
         window.history.back();

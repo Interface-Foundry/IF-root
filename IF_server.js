@@ -30,7 +30,6 @@ var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./server_auth/database.js');
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var crypto = require('crypto');
-var User = require('./app/models/user');
 var validator = require('validator');
 
 var passport = require('passport');
@@ -61,6 +60,8 @@ var mongoose = require('mongoose'),
     landmarkSchema = require('./landmark_schema.js'),
     styleSchema = require('./style_schema.js'),
     projectSchema = require('./project_schema.js'),
+    User = require('./app/models/user'), //temp? need to integrate into passport module
+    serverwidgetsSchema = require('./serverWidgets_schema.js'),
     monguurl = require('monguurl');
 
 
