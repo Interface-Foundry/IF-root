@@ -401,7 +401,7 @@ app.get('/api/:collection', function(req, res) {
 
                     // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
                     //IF HAS SUB CATEGORY (LIKE LECTURES)
-                    if (req.query.queryCat){
+                    /*if (req.query.queryCat){
 
                         if (req.query.userTime){
                             var currentTime = new Date(req.query.userTime);
@@ -431,7 +431,7 @@ app.get('/api/:collection', function(req, res) {
                             'time.end': {$gt: currentTime}
                         };
                         db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                    }
+                    }*/
 
                 }
 
@@ -911,8 +911,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         var timeStart = req.body.timetext.timestart;
                         var timeEnd = req.body.timetext.timeend;
 
-                        var dateStart = req.body.timetext.datestart;
-                        var dateEnd = req.body.timetext.dateend;
+                        var dateStart = new Date(req.body.timetext.datestart).toDateString();
+                        var dateEnd = new Date(req.body.timetext.dateend).toDateString();
 
                         var datetimeStart = new Date(dateStart+' '+timeStart);
                         var datetimeEnd = new Date(dateEnd+' '+timeEnd);

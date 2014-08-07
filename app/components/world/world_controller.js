@@ -180,7 +180,12 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				console.log(t);
 			}
 		});*/
-		//$scope.upcoming = db.landmarks.query({queryFilter:'now'}, function(){});
+		db.landmarks.query({queryType:'events', queryFilter:'upcoming', nowTimeEnd: "upcomingToday"}, function(data){
+			console.log(data);
+			$scope.upcoming = data[0];
+			
+		});
+		console.log($scope.upcoming);
 	}
 	
 	
