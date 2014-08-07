@@ -27,7 +27,7 @@ function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams) {
 
     //query instagram
     $scope.currentTag = $routeParams.hashTag;
-    $scope.instagrams = db.instagrams.query({limit:70, tag:$scope.currentTag}); // make infinite scroll?
+    $scope.instagrams = db.instagrams.query({limit:20, tag:$scope.currentTag}); // make infinite scroll?
 
     // $scope.globalhashtag = global_hashtag;
 
