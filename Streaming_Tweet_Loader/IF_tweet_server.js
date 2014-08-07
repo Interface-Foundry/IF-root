@@ -5,8 +5,7 @@ var twitter = require('ntwitter'),
 var credentials = require('./credentials.js');
 //var hashtag = require('../app/js/global_settings.js').hashtag;
 
-var hashtag = "#HappyHourShowcase";
-
+var hashtag = ['df','sdfg','asf'];
 
 var t = new twitter({
     consumer_key: credentials.consumer_key,
@@ -21,6 +20,8 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
 var twitterSchema = require('./tweet_schema.js');
+var serverwidgetsSchema = require('../serverWidgets_schema.js');
+
 var tweetModel = mongoose.model('tweet', twitterSchema, 'tweets');  // compiling schema model into mongoose
 
 t.stream(

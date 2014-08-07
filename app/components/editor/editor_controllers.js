@@ -23,6 +23,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	//$scope.worldURL; //unique URL ID for that world
 	$scope.styleID;
 	$scope.projectID;
+	$scope.worldTag;
 
 	//init vars
 	$scope.pageIndex = 0;
@@ -141,6 +142,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 
 
 	$scope.buildOut = function() {
+
 		saveStyle();
 		//saveWorld('edit');
 		$location.path('/w/'+$scope.worldURL);
@@ -473,6 +475,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     function saveStyle(){
     	console.log('saveStyle()');
     	$scope.styles.styleID = $scope.styleID;
+    	$scope.styles.worldID = $scope.worldID;
+    	$scope.styles.worldTag = $scope.world.hashtag;
 	    db.styles.create($scope.styles, function(response){
         	console.log(response);
         });

@@ -111,7 +111,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController, resolve: {loggedin: checkLoggedin}}).
       
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
-      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TalklistCtrl}).
+      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TweetlistCtrl}).
       when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
       when('/chat/:worldID', {templateUrl:'partials/chat.html', controller:ChatCtrl}).
 

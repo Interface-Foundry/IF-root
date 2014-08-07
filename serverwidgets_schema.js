@@ -4,8 +4,10 @@ var mongoose = require('mongoose');
 	var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 
 	var serverwidgetsSchema = new Schema({
-		twitterTags: [Schema.Types.Mixed],
-		instagramTags: [Schema.Types.Mixed]
+		worldID: String,
+		worldTag: String,
+		twitter: Boolean,
+		instagram: Boolean
 	}); 
 
 module.exports = mongoose.model('serverwidgetsModel', serverwidgetsSchema, 'serverwidgets');

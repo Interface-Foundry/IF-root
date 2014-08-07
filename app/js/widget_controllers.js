@@ -1,4 +1,4 @@
-function TalklistCtrl( $location, $scope, db, $rootScope) {
+function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams) {
 
     $rootScope.showSwitch = false;
 
@@ -17,11 +17,11 @@ function TalklistCtrl( $location, $scope, db, $rootScope) {
         window.history.back();
     }
 }
-TalklistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope'];
+TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams'];
 
 
 
-function InstalistCtrl( $location, $scope, db, $rootScope) {
+function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams) {
 
     $rootScope.showSwitch = false;
 
@@ -35,7 +35,7 @@ function InstalistCtrl( $location, $scope, db, $rootScope) {
         window.history.back();
     }
 }
-InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope'];
+InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams'];
 
 
 

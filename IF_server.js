@@ -967,10 +967,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             console.log('unauthorized user');
                         }
                     });
-
-
-
-                    
+   
                 }
 
                 function saveNewLandmark(styleRes){
@@ -1180,6 +1177,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 else {
                     console.log(style);
                     console.log('success');
+                    if (req.body.worldID && req.body.worldTag){
+                        manageServerWidgets(req.body.worldID, req.body.worldTag, lm.widgets); //add/remove server tags
+                    }
                 }
             });
           }
@@ -1188,6 +1188,53 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     }
 
 });
+
+
+function manageServerWidgets(id, tag, widgets){
+
+    if(widgets.twitter == undefined){
+        widgets.twitter = false;
+    }
+
+    if(widgets.instagram == undefined){
+        widgets.instagram = false;
+    }
+
+    if (widgets.twitter || widgets.instagram){
+
+        var sw = new serverwidgetsSchema({
+            worldID : id,
+            worldTag: tag,
+            twitter: widgets.twitter,
+            instagram: widgets.instagram
+        });
+        
+        sw.save(function (err, data) {
+            if (err)
+                console.log(err);
+            else {
+                console.log(data);
+            }
+        });
+    }
+    else {
+
+        console.log('nothing');
+        //CHECK TO FIND WIDGET, IF SO then change boolean to false
+
+        //findbyidandupdate
+        // Contact.findByIdAndUpdate(
+        //     info._id,
+        //     {$push: {"messages": {title: title, msg: msg}}},
+        //     {safe: true, upsert: true},
+        //     function(err, model) {
+        //         console.log(err);
+        //     }
+        // );
+    }
+
+    
+}
 
 // Delete
 app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
@@ -1465,7 +1512,6 @@ function isLoggedIn(req, res, next) {
     else 
         return next();
 }
-
 
 server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
