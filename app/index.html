@@ -61,20 +61,24 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <link rel="stylesheet" href="css/leaflet-areaselect.css"/>
 
 
-  <script src='lib/jquery/jquery-2.0.3.min.js'></script>
+  <link rel="stylesheet" href="components/editor/editor.css"></script>
+  
+  <link rel="stylesheet" href="components/world/world.css">
+
+ <!-- <script src='lib/jquery/jquery-2.0.3.min.js'></script>-->
 
   <script src='lib/jquery/jquery.ui.widget.js'></script>
   <script src='lib/jquery/jquery.fileupload.js'></script>
   <script src='lib/jquery/jquery.iframe-transport.js'></script>
   <script src='lib/isotope.pkgd.min.js'></script>  
 
-  <script src="lib/angular/angular.min.js"></script>
+  <script src="lib/angular/angular.js"></script>
   <script src="lib/angular/angular-messages.js"></script>
   <script src="lib/angular/angular-route.js"></script>
   <script src="lib/angular/angular-sanitize.min.js"></script>
   <script src="lib/angular/angular-resource.js"></script>
   <script src="lib/angular/angular-strap.js"></script>
-  <script src="lib/angular/angular-animate.min.js"></script>
+  <script src="lib/angular/angular-animate.js"></script>
   <script src="lib/spectrum/spectrum.js"></script>
 
   <script src="lib/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
@@ -109,11 +113,10 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <script src="components/world/world_controller.js"></script>  
   <script src="components/world/landmark_controller.js"></script>
   <script src="components/world/category_controller.js"></script>
-  <link rel="stylesheet" href="components/world/world.css">
   
   <!--editor component-->
   <script src="components/editor/editor_controllers.js"></script>
-  <link rel="stylesheet" href="components/editor/editor.css"></script>
+  <script src="components/edit/edit_controllers.js"></script>
   
   <!--landmark editor component-->
   <script src="components/editor/landmark_editor_controller.js"></script>
@@ -194,7 +197,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 		</section>
 
          <section id="view" ng-class="[aperture.state]">
-                  <div ng-view></div>
+                  <div ng-view class="if-animate"></div>
 		 </section>
 		 </div>
   </div>

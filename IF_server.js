@@ -405,7 +405,7 @@ app.get('/api/:collection', function(req, res) {
 
                     // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
                     //IF HAS SUB CATEGORY (LIKE LECTURES)
-                    /*if (req.query.queryCat){
+                    if (req.query.queryCat){
 
                         if (req.query.userTime){
                             var currentTime = new Date(req.query.userTime);
@@ -435,7 +435,7 @@ app.get('/api/:collection', function(req, res) {
                             'time.end': {$gt: currentTime}
                         };
                         db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                    }*/
+                    }//*/
 
                 }
 
