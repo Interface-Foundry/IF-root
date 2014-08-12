@@ -370,12 +370,15 @@ app.get('/api/:collection', function(req, res) {
 
               case 'now':
 
+                
                 if (req.query.userTime){
                     var currentTime = new Date(req.query.userTime);
                 }
                 else {
                     var currentTime = new Date();
                 }
+
+                console.log(currentTime);
 
                 var qw = {
                     parentID:req.query.parentID,
@@ -389,6 +392,7 @@ app.get('/api/:collection', function(req, res) {
 
               case 'upcoming':
 
+                console.log('upcoming');
                 if (req.query.userTime){
                     var currentTime = new Date(req.query.userTime);
                 }
