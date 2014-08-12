@@ -355,199 +355,252 @@ app.get('/api/:collection', function(req, res) {
     if (req.params.collection == 'landmarks'){
 
         //if has parentID parameter (world landmark query)
-        if (req.query.parentID){
-            var qw = {
-                parentID:req.query.parentID,
-                world:false
-            };   
-            db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));  
+        if (req.query.parentID && req.query.queryFilter){
+
+            switch (req.query.queryFilter) {
+
+              case 'all':
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false
+                };   
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));     
+                break;
+
+              case 'now':
+
+                if (req.query.userTime){
+                    var currentTime = new Date(req.query.userTime);
+                }
+                else {
+                    var currentTime = new Date();
+                }
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false,
+                    'time.start': {$lt: currentTime},
+                    'time.end': {$gt: currentTime}
+                };   
+                db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));     
+
+                break;
+
+              case 'upcoming':
+
+                if (req.query.userTime){
+                    var currentTime = new Date(req.query.userTime);
+                }
+                else {
+                    var currentTime = new Date();
+                }
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false,
+                    'time.start': {$gt: currentTime}
+                };   
+                db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));     
+
+                break;
+              default:
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false
+                };   
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));   
+
+                break;
+            }
+
         }
 
         //not a world landmark query
         else {
 
-          //return all items in landmarks
-            if (req.query.queryType == "all"){
-                var qw = {};
-                var limit;
-                db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));         
-            }
+          //START COMMENTED 
+          // //return all items in landmarks
+          //   if (req.query.queryType == "all"){
+          //       var qw = {};
+          //       var limit;
+          //       db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));         
+          //   }
 
-            //events
-            if (req.query.queryType == "events"){
+          //   //events
+          //   if (req.query.queryType == "events"){
 
-                //GET ALL EVENTS
-                if (req.query.queryFilter == "all"){
+          //       //GET ALL EVENTS
+          //       if (req.query.queryFilter == "all"){
         
-                    //IF HAS SUB CATEGORY (LIKE LECTURES)
-                    if (req.query.queryCat){
+          //           //IF HAS SUB CATEGORY (LIKE LECTURES)
+          //           if (req.query.queryCat){
 
-                        var qw = {
-                            'type' : 'event',
-                            'subType' : req.query.queryCat
-                        };
-                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //               var qw = {
+          //                   'type' : 'event',
+          //                   'subType' : req.query.queryCat
+          //               };
+          //               db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //           }
 
-                    }
+          //           else {
+          //               var qw = {
+          //                   'type' : 'event'
+          //               };
+          //               db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //           }
+          //       }
 
-                    else {
+          //       // EVENTS HAPPENING NOW
+          //       if (req.query.queryFilter == "now"){
 
-                        var qw = {
-                            'type' : 'event'
-                        };
-                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                    }
-       
-                }
 
-                // EVENTS HAPPENING NOW
-                if (req.query.queryFilter == "now"){
+          //           // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
+          //           //IF HAS SUB CATEGORY (LIKE LECTURES)
+          //           if (req.query.queryCat){
 
-                    // CHANGE THIS LOGIC to be WORLD QUERY - so it queries the correct world
-                    //IF HAS SUB CATEGORY (LIKE LECTURES)
-                    /*if (req.query.queryCat){
+          //               if (req.query.userTime){
+          //                   var currentTime = new Date(req.query.userTime);
+          //               }
 
-                        if (req.query.userTime){
-                            var currentTime = new Date(req.query.userTime);
-                        }
-
-                        else {
-                            var currentTime = new Date();
-                        }
+          //               else {
+          //                   var currentTime = new Date();
+          //               }
                         
-                        //var currentTime = new Date('Jun 10 2014 10:46:06 GMT-0400 (EDT)');
+          //               //var currentTime = new Date('Jun 10 2014 10:46:06 GMT-0400 (EDT)');
           
-                        var qw = {
-                            'time.start': {$lt: currentTime},
-                            'time.end': {$gt: currentTime},
-                            'subType' : req.query.queryCat
-                        };
-                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                    }
+          //               var qw = {
+          //                   'time.start': {$lt: currentTime},
+          //                   'time.end': {$gt: currentTime},
+          //                   'subType' : req.query.queryCat
+          //               };
+          //               db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //           }
 
-                    else {
+          //           else {
 
-                        var currentTime = new Date();
-                        //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+          //               var currentTime = new Date();
+          //               //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
                         
-                        var qw = {
-                            'time.start': {$lt: currentTime},
-                            'time.end': {$gt: currentTime}
-                        };
-                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                    }*/
+          //               var qw = {
+          //                   'time.start': {$lt: currentTime},
+          //                   'time.end': {$gt: currentTime}
+          //               };
+          //               db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //           }
 
-                }
+          //       }
 
-                //EVENTS UPCOMING
-                if (req.query.queryFilter == "upcoming"){
+          //       //EVENTS UPCOMING
+          //       if (req.query.queryFilter == "upcoming"){
 
-                    //IF HAS SUB CATEGORY (LIKE LECTURES)
-                    if (req.query.queryCat){
+          //           //IF HAS SUB CATEGORY (LIKE LECTURES)
+          //           if (req.query.queryCat){
 
 
-                        //FIRST QUERY FOR NOW
+          //               //FIRST QUERY FOR NOW
 
-                        //var currentTime = new Date();
-                        //var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+          //               //var currentTime = new Date();
+          //               //var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
 
-                        //TEMP ONLY WORKS WITH 1 HAPPENING NOW OBJECT
+          //               //TEMP ONLY WORKS WITH 1 HAPPENING NOW OBJECT
 
-                        console.log(req.query.nowTimeEnd);
+          //               console.log(req.query.nowTimeEnd);
 
-                        if (req.query.nowTimeEnd !== "noNow"){
+          //               if (req.query.nowTimeEnd !== "noNow"){
 
-                            if (req.query.nowTimeEnd == "upcomingToday"){
-                                //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)'); 
-                                var nowTimeEnd = new Date();
-                            }
+          //                   if (req.query.nowTimeEnd == "upcomingToday"){
+          //                       //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)'); 
+          //                       var nowTimeEnd = new Date();
+          //                   }
 
-                            else {
-                                var nowTimeEnd = new Date(req.query.nowTimeEnd);
-                            }
+          //                   else {
+          //                       var nowTimeEnd = new Date(req.query.nowTimeEnd);
+          //                   }
              
-                            console.log(nowTimeEnd);
+          //                   console.log(nowTimeEnd);
                             
-                            nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
+          //                   nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
 
         
-                            //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
-                            //so only get upcmoning events till end of day
-                            // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
-                            // endofDay.setHours(23,59,59,999);
+          //                   //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
+          //                   //so only get upcmoning events till end of day
+          //                   // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
+          //                   // endofDay.setHours(23,59,59,999);
 
-                            var qw = {
-                                'time.start': {$gt: nowTimeEnd},
-                                // 'time.end': {$lt: endofDay},
-                                'subType' : req.query.queryCat
-                            };
-                            db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //                   var qw = {
+          //                       'time.start': {$gt: nowTimeEnd},
+          //                       // 'time.end': {$lt: endofDay},
+          //                       'subType' : req.query.queryCat
+          //                   };
+          //                   db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
 
-                        }
+          //               }
 
-                        else {
-                            //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
-                            var currentTime = new Date();
+          //               else {
+          //                   //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+          //                   var currentTime = new Date();
 
-                            var qw = {
-                                'time.start': {$gt: currentTime},
-                                'subType' : req.query.queryCat
-                            };
-                            db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-                        }
+          //                   var qw = {
+          //                       'time.start': {$gt: currentTime},
+          //                       'subType' : req.query.queryCat
+          //                   };
+          //                   db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //               }
                         
-                        // //var currentTime = new Date();
-                        // var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
+          //               // //var currentTime = new Date();
+          //               // var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
                         
-                        // currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-                        // var qw = {
-                        //     'time.start': {$lt: currentTime},
-                        //     'time.end': {$gt: currentTime},
-                        //     'subType':req.query.queryCat
-                        // };
-                        // db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //               // currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
+          //               // var qw = {
+          //               //     'time.start': {$lt: currentTime},
+          //               //     'time.end': {$gt: currentTime},
+          //               //     'subType':req.query.queryCat
+          //               // };
+          //               // db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
 
 
-                    }
+          //           }
 
-                    else {
+          //           else {
 
-                        var currentTime = new Date();
-                        //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
+          //               var currentTime = new Date();
+          //               //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
                         
-                        currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-                        var qw = {
-                            'time.start': {$lt: currentTime},
-                            'time.end': {$gt: currentTime}
-                        };
-                        db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));                   
-                    }
-                }
+          //               currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
+          //               var qw = {
+          //                   'time.start': {$lt: currentTime},
+          //                   'time.end': {$gt: currentTime}
+          //               };
+          //               db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));                   
+          //           }
+          //       }
 
-                // EVENTS TODAY
-                if (req.query.queryFilter == "today"){
+          //       // EVENTS TODAY
+          //       if (req.query.queryFilter == "today"){
 
-                    //getting today & tomm
-                    var tod = new Date();
-                    var tom = new Date();
+          //           //getting today & tomm
+          //           var tod = new Date();
+          //           var tom = new Date();
                     
 
-                    tom.setDate(tod.getDate()+1);
-                    tod.setHours(0,0,0,0);
-                    tom.setHours(0,0,0,0);
+          //           tom.setDate(tod.getDate()+1);
+          //           tod.setHours(0,0,0,0);
+          //           tom.setHours(0,0,0,0);
 
-                    var qw = {
-                        'time.start': {
-                            $gte: tod,
-                            $lt: tom
-                        }
-                    };
-                    db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
+          //           var qw = {
+          //               'time.start': {
+          //                   $gte: tod,
+          //                   $lt: tom
+          //               }
+          //           };
+          //           db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
 
-                }
+          //       }
 
 
-            }
+          //   }
 
             //places
             if (req.query.queryType == "places"){
