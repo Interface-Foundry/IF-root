@@ -492,114 +492,6 @@ app.get('/api/:collection', function(req, res) {
 
           //       }
 
-          //       //EVENTS UPCOMING
-          //       if (req.query.queryFilter == "upcoming"){
-
-          //           //IF HAS SUB CATEGORY (LIKE LECTURES)
-          //           if (req.query.queryCat){
-
-
-          //               //FIRST QUERY FOR NOW
-
-          //               //var currentTime = new Date();
-          //               //var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
-
-          //               //TEMP ONLY WORKS WITH 1 HAPPENING NOW OBJECT
-
-          //               console.log(req.query.nowTimeEnd);
-
-          //               if (req.query.nowTimeEnd !== "noNow"){
-
-          //                   if (req.query.nowTimeEnd == "upcomingToday"){
-          //                       //var nowTimeEnd = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)'); 
-          //                       var nowTimeEnd = new Date();
-          //                   }
-
-          //                   else {
-          //                       var nowTimeEnd = new Date(req.query.nowTimeEnd);
-          //                   }
-             
-          //                   console.log(nowTimeEnd);
-                            
-          //                   nowTimeEnd.setSeconds(nowTimeEnd.getSeconds() - 1);
-
-        
-          //                   //ADD IN LESS THAN TIME FOR END OF DAY!!!!!!!!!
-          //                   //so only get upcmoning events till end of day
-          //                   // var endofDay = new Date('Jun 11 2014 10:16:06 GMT-0400 (EDT)');
-          //                   // endofDay.setHours(23,59,59,999);
-
-          //                   var qw = {
-          //                       'time.start': {$gt: nowTimeEnd},
-          //                       // 'time.end': {$lt: endofDay},
-          //                       'subType' : req.query.queryCat
-          //                   };
-          //                   db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-
-          //               }
-
-          //               else {
-          //                   //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
-          //                   var currentTime = new Date();
-
-          //                   var qw = {
-          //                       'time.start': {$gt: currentTime},
-          //                       'subType' : req.query.queryCat
-          //                   };
-          //                   db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-          //               }
-                        
-          //               // //var currentTime = new Date();
-          //               // var currentTime = new Date('Jun 11 2014 09:44:06 GMT-0400 (EDT)');
-                        
-          //               // currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-          //               // var qw = {
-          //               //     'time.start': {$lt: currentTime},
-          //               //     'time.end': {$gt: currentTime},
-          //               //     'subType':req.query.queryCat
-          //               // };
-          //               // db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-
-
-          //           }
-
-          //           else {
-
-          //               var currentTime = new Date();
-          //               //var currentTime = new Date('Jun 11 2014 11:16:06 GMT-0400 (EDT)');
-                        
-          //               currentTime.setMinutes(currentTime.getMinutes() + 45); // adding 30minutes to current time for "soon"
-          //               var qw = {
-          //                   'time.start': {$lt: currentTime},
-          //                   'time.end': {$gt: currentTime}
-          //               };
-          //               db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));                   
-          //           }
-          //       }
-
-          //       // EVENTS TODAY
-          //       if (req.query.queryFilter == "today"){
-
-          //           //getting today & tomm
-          //           var tod = new Date();
-          //           var tom = new Date();
-                    
-
-          //           tom.setDate(tod.getDate()+1);
-          //           tod.setHours(0,0,0,0);
-          //           tom.setHours(0,0,0,0);
-
-          //           var qw = {
-          //               'time.start': {
-          //                   $gte: tod,
-          //                   $lt: tom
-          //               }
-          //           };
-          //           db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));
-
-          //       }
-
-
           //   }
 
             //places
@@ -1224,7 +1116,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.bodyFontFamily = req.body.bodyFontFamily; // font family
             lm.themeFont = req.body.themeFont; // off by default
             lm.themeFontName = req.body.themeFontName; // font name
-
+			
 			lm.widgets.twitter = req.body.widgets.twitter;
 			lm.widgets.instagram = req.body.widgets.instagram;
 			lm.widgets.upcoming = req.body.widgets.upcoming;

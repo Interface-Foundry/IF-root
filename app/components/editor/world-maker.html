@@ -276,19 +276,19 @@
 					<div class="field">
 						<div class="row">
 						<div class="col-xs-6 widgetCheck">
-							<input type="checkbox" name="twitter" id="twitter" ng-model="styles.widgets.twitter">
+							<input type="checkbox" name="twitter" id="twitter" ng-model="styles.widgets.twitter" ng-init="styles.widgets.twitter=false">
 							<label for="twitter">Twitter</label>
 						</div>
 						<div class="col-xs-6 widgetCheck">
-							<input type="checkbox" name="instagram" id="instagram" ng-model="styles.widgets.instagram">
+							<input type="checkbox" name="instagram" id="instagram" ng-model="styles.widgets.instagram" ng-init="styles.widgets.instagram=false">
 							<label for="instagram">Instagram</label>
 						</div>
 						<div class="col-xs-6 widgetCheck">
-							<input type="checkbox" name="upcoming" id="upcoming" ng-model="styles.widgets.upcoming">
+							<input type="checkbox" name="upcoming" id="upcoming" ng-model="styles.widgets.upcoming" ng-init="styles.widgets.upcoming=false">
 							<label for="upcoming">Upcoming</label>
 						</div>
 						<div class="col-xs-6 widgetCheck">
-							<input type="checkbox" name="categorySwitch" id="categorySwitch" ng-model="styles.widgets.category">
+							<input type="checkbox" name="categorySwitch" id="categorySwitch" ng-model="styles.widgets.category" ng-init="styles.widgets.category=false">
 							<label for="categorySwitch">Categories</label>
 						</div>
 						<div class="col-xs-12" ng-show="styles.widgets.twitter || styles.widgets.instagram">

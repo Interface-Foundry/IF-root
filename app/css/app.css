@@ -211,7 +211,7 @@ nav li input.form-control {
   top: 0;
   left: 0;
   width: 100%;
-  height: 0px;
+  height: 100%;
   
   color: white;
   opacity: 80;
@@ -221,11 +221,13 @@ nav li input.form-control {
 }
 
 #view, #view>div {
-  position: relative;
+  position: absolute;
   height: 100%;
+  width: 100%;
   z-index: 100;
   pointer-events: none;
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+
 }
 
 #view * {
@@ -332,6 +334,11 @@ body.drawer nav, nav.drawer {
 /* SLIDE UP SLIDE DOWN */
 
 /*aperture-half*/
+
+#aperture.aperture-off {
+	opacity: 0;
+}
+
 #aperture.aperture-half {
 	height: 50%;
 }
@@ -359,7 +366,7 @@ body.drawer nav, nav.drawer {
 
 
 #top-shelf {
-	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	-webkit-transition: all 0.35s cubic-bezier(.5,.1,0,1);
 	box-shadow: 0px -1px 2px rgba(0,0,0,.2);
 }
 
@@ -500,7 +507,7 @@ clear: both;
 
 .back {
 z-index: 100;
-position: absolute;
+position: fixed;
 top: 42px;
 left: 8px;
 }
@@ -543,3 +550,22 @@ left: 8px;
 	border-radius: 8px;
 	padding: 8px;
 }
+
+.edit-view {
+	position:absolute;
+	top:0px;
+	width:40%;
+	height:100%;
+	background: rgba(255,255,255,0.8);
+}
+
+.textarea-v-resize {
+	resize: vertical;
+}
+
+.ng-enter {z-index:9999; opacity:0;}
+.ng-enter.ng-enter-active {opacity:1;}
+
+.ng-leave {z-index:-9999; opacity:1;}
+
+.ng-leave.ng-leave-active {opacity:0;}

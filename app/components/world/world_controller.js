@@ -169,23 +169,28 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	});
 	
 	function setUpcoming() {
-		/*console.log('setUpcoming');
+		
 		var t = new Date();
-		console.log(t);
+		$scope.upcoming = $scope.landmarks[0];
 		angular.forEach($scope.landmarks, function(landmark) {
-			if (t<Date.parse(t.toDateString()+' '+landmark.timetext.timestart)) {
-				console.log('compare');
-				t = Date.parse(t.toDateString()+' '+landmark.timetext.timestart);
-				$scope.upcoming = landmark;
-				console.log(t);
+			var startTime = new Date(landmark.time.start);
+			var upcomingStartTime = new Date($scope.upcoming.time.start);
+			if (startTime>t) {
+				//start time is after now
+				if (startTime<upcomingStartTime) {
+					//start time is before current upcoming landmark
+					$scope.upcoming = landmark;
+				}
+			} 
+			if (landmark.time.start<t) {
+				//start time has already passed
 			}
-		});*/
-		db.landmarks.query({queryType:'events', queryFilter:'upcoming', nowTimeEnd: "upcomingToday"}, function(data){
-			console.log(data);
-			$scope.upcoming = data[0];
-			
 		});
 		console.log($scope.upcoming);
+		
+		
+		//replace with query!! :(
+		
 	}
 	
 	
