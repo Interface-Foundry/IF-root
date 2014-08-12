@@ -1171,7 +1171,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.bodyFontFamily = req.body.bodyFontFamily; // font family
             lm.themeFont = req.body.themeFont; // off by default
             lm.themeFontName = req.body.themeFontName; // font name
-
+			
 			lm.widgets.twitter = req.body.widgets.twitter;
 			lm.widgets.instagram = req.body.widgets.instagram;
 			lm.widgets.upcoming = req.body.widgets.upcoming;
