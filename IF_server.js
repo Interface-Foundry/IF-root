@@ -738,21 +738,31 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         else {
 
-            //FIND UNique ID based on user inputted Name
+            //not a new landmark
+            if (!req.body.newStatus){ 
 
-            // FIX ALL THIS!!!!!!!, needs to not gen another unique ID if EDIT
-            if (!req.body.newStatus){ //detecting if new landmark or an edit
+                if (req.body.worldID){
+                    var lookupID = req.body.worldID;
+                }
 
-                idGen(req.body.name);
+                if (req.body._id){
+                    var lookupID = req.body._id;
+                }    
 
-                // if (req.body.idCheck == req.body.id){
-                //     saveLandmark(req.body.id);
-                // }
-                // else {
-                //     idGen(req.body.name);
-                // }
+                landmarkSchema.findById(lookupID, function(err, lm) {
+                  //same name, so dont gen new id
+                  if (lm.name == req.body.name){
+                    saveLandmark(lm.id);
+                  }
+                  //a new name was used
+                  else {
+                    idGen(req.body.name);
+                  }
+                });
+
             }
 
+            //new landmark
             else {
                 idGen(req.body.name);
             }
@@ -801,6 +811,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
             //an edit
             if (!req.body.newStatus){
+
+
+
+              //if name is diff. than 
+
+              //fix from finalID
+
 
                 if (req.body.worldID){
                     var lookupID = req.body.worldID;
