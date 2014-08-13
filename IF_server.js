@@ -82,6 +82,7 @@ var express = require('express'),
     db = require('mongojs').connect('if');
 
     //express compression
+    var oneDay = 86400000;
     var compression = require('compression');
     app.use(compression());
 
@@ -89,7 +90,7 @@ var express = require('express'),
     // Hook Socket.io into Express
     var io = require('socket.io').listen(server);
 
-    app.use(express.static(__dirname + '/app'));
+    app.use(express.static(__dirname + '/app', { maxAge: oneDay }));
 
 
     //===== PASSPORT =====//
@@ -183,7 +184,7 @@ app.post('/forgot', function (req, res, next) {
               var mailOptions = {
                 to: user.local.email,
                 from: 'IF Bubbl <mail@bubbl.li>',
-                subject: 'Node.js Password Reset',
+                subject: 'Bubbl Password Reset',
                 text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
                   'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
                   'https://' + req.headers.host + '/#/reset/' + token + '\n\n' +
@@ -879,7 +880,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     //if user checks box to activate time 
                     if (req.body.hasTime == true){
 						
-                        /*lm.timetext.datestart = req.body.timetext.datestart;
+                        lm.timetext.datestart = req.body.timetext.datestart;
                         lm.timetext.dateend = req.body.timetext.dateend;
                         lm.timetext.timestart = req.body.timetext.timestart;
                         lm.timetext.timeend = req.body.timetext.timeend;
@@ -896,7 +897,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         //----------//
 						
                         lm.time.start = datetimeStart;
-                        lm.time.end = datetimeEnd;*/
+                        lm.time.end = datetimeEnd;
                         
                         lm.time.start = req.body.time.start;
                         
@@ -908,6 +909,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         
                         //if no end time, match start time
                     }
+
+                    
 
                     lm.save(function(err, landmark) {
                         if (err){
