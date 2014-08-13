@@ -384,7 +384,7 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     	if ($scope.showTime){
 	   
 	   	    //if no end date added, use start date
-	        if (!$scope.world.date.end){
+	        if (!$scope.world.date.end) {
 	            $scope.world.date.end = $scope.world.date.start;
 	        }
 

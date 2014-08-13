@@ -1,7 +1,6 @@
-<div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
-<div style="width:100%;" ng-style="{'background-color': style.bodyBG_color}">
-<div class="row" ng-style="{'background-color': style.bodyBG_color}">
-	<div class="row">
+<div id="shelf" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+<div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
+<div class="row">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full')">
@@ -15,7 +14,6 @@
 				</div>
 			</div>
 		</div>
-	</div>
 	
 	<!--upcoming-->
 	<div class="col-xs-12" ng-if="style.widgets.upcoming==true">
@@ -25,7 +23,7 @@
 				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
 					<img ng-src="{{upcoming.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{upcoming.name}} <small style="color:#ccc;">{{upcoming.timetext.timestart}}</small></h3>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{upcoming.name}} <small style="color:#ccc;" >{{upcoming.timetext.timestart}}</small></h3>
 						<em ng-cloak>{{upcoming.summary}}</em>
 					</div>
 				</div>
@@ -58,10 +56,13 @@
 			class="col-sm-6 col-xs-12 landmark">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
 				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
-					<img ng-src="{{landmark.avatar}}" class="avatar media-object pull-left vertical-middle" ng-cloak> 
+					<img ng-src="{{landmark.avatar}}" class="avatar media-object vertical-middle" ng-cloak> 
 					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>{{landmark.name}} <small style="color:#CCC">{{landmark.timetext.timestart}}</small></h3>
-						<em ng-cloak>{{landmark.summary}}</em>
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>
+							<span once-text="landmark.name">{{landmark.name}}
+							<small style="color:#CCC">{{landmark.time.start | date:'shortTime'}}</small></span>
+						</h3>
+						<span ng-cloak>{{landmark.summary}}</span>
 					</div>
 				</div>
 			</a>

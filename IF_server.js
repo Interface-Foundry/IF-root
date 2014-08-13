@@ -909,7 +909,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     //if user checks box to activate time 
                     if (req.body.hasTime == true){
 						
-                        lm.timetext.datestart = req.body.timetext.datestart;
+                        /*lm.timetext.datestart = req.body.timetext.datestart;
                         lm.timetext.dateend = req.body.timetext.dateend;
                         lm.timetext.timestart = req.body.timetext.timestart;
                         lm.timetext.timeend = req.body.timetext.timeend;
@@ -924,9 +924,19 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         var datetimeStart = new Date(dateStart+' '+timeStart);
                         var datetimeEnd = new Date(dateEnd+' '+timeEnd);
                         //----------//
-
+						
                         lm.time.start = datetimeStart;
-                        lm.time.end = datetimeEnd;
+                        lm.time.end = datetimeEnd;*/
+                        
+                        lm.time.start = req.body.time.start;
+                        
+                        if (req.body.time.hasOwnProperty('end')) {
+	                        lm.time.end = req.body.time.end;
+                        } else {
+	                        lm.time.end = lm.time.start;
+                        }
+                        
+                        //if no end time, match start time
                     }
 
                     lm.save(function(err, landmark) {
@@ -950,9 +960,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             //not an edit
             else {
 
-
                 //new world
-                if (worldVal){
+                if (worldVal) {
                     saveStyle(req.body.name, function(styleRes){ //creating new style to add to landmark
                         saveNewLandmark(styleRes);
                     });

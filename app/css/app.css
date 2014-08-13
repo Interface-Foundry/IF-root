@@ -220,7 +220,7 @@ nav li input.form-control {
   z-index: 100;
 }
 
-#view, #view>div {
+#view {
   position: absolute;
   height: 100%;
   width: 100%;
@@ -330,13 +330,12 @@ body.drawer nav, nav.drawer {
 	left: 10px;
 }
 
-
 /* SLIDE UP SLIDE DOWN */
 
 /*aperture-half*/
 
 #aperture.aperture-off {
-	opacity: 0;
+	height: 0%;
 }
 
 #aperture.aperture-half {

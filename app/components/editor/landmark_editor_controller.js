@@ -96,10 +96,57 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			return false;}
 		$scope.landmarks[i].loc.coordinates = [tempMarker.lng, tempMarker.lat];
 		
+		/*
+if ($scope.landmark.hasTime) {
+	   
+	   	    //if no end date added, use start date
+	        if (!$scope.landmark[i].date.end) {
+	            $scope.landmark[i].date.end = $scope.landmark[i].date.start;
+	        }
+
+	        $scope.landmark[i].datetext = {
+	            start: $scope.landmark[i].date.start,
+	            end: $scope.landmark[i].date.end
+	        }
+	        //---- Date String converter to avoid timezone issues...could be optimized probably -----//
+	        $scope.landmark[i].date.start = new Date($scope.landmark[i].date.start).toISOString();
+	        $scope.landmark[i].date.end = new Date($scope.landmark[i].date.end).toISOString();
+
+	        $scope.landmark[i].date.start = dateConvert($scope.landmark[i].date.start);
+	        $scope.landmark[i].date.end = dateConvert($scope.landmark[i].date.end);
+
+	        $scope.landmark[i].date.start = $scope.landmark[i].date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
+	        $scope.landmark[i].date.end = $scope.landmark[i].date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
+
+	        function dateConvert(input){
+	            var s = input;
+	            var n = s.indexOf('T');
+	            return s.substring(0, n != -1 ? n : s.length);
+	        }
+	        //-----------//
+
+	        if (!$scope.landmark[i].time.start){
+	            $scope.landmark[i].time.start = "00:00";
+	        }
+
+	        if (!$scope.landmark[i].time.end){
+	            $scope.landmark[i].time.end = "23:59";
+	        }
+
+	        $scope.landmark[i].timetext = {
+	            start: $scope.landmark[i].time.start,
+	            end: $scope.landmark[i].time.end
+	        } 
+	        //------- END TIME --------//
+		}
+*/
+		
+		
+		
 		console.log('Saving...');
 		console.log($scope.landmarks[i]);
 		db.landmarks.create($scope.landmarks[i], function(response) {
-			console.log('-db.landmarks.create-');
+			console.log('--db.landmarks.create--');
 			console.log(response);
 		});
 		console.log('Save complete');

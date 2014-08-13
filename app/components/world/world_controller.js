@@ -24,6 +24,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	 }
 
   	
+/*
   	function redoMarkers(landmarks, c) {
   		var categoryURL;
   		angular.forEach($scope.landmarks, function(landmark) {
@@ -63,6 +64,25 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   		});
   		map.refresh();
   	}
+*/
+  	
+  	function reorderById (landmarks, idArray) {
+  		console.log('reorderById');
+	  	var lookup = {};
+	  	
+	  	for (var i = 0, len = landmarks.length; i<len; i++) {
+		  	lookup[landmarks[i]._id] = landmarks[i];
+	  	}
+	  	//maps the lookup object to each landmark
+	  	
+	  	var newLandmarks = [];
+	  	for (var i = 0, len = idArray.length; i<len; i++) {
+		  	newLandmarks[i] = lookup[idArray[i]]; 
+	  	}
+	  	
+	  	console.log(newLandmarks);
+	  	landmarks = newLandmarks;
+  	}
   	
   	
   	$scope.loadWorld = function(data) {
@@ -75,6 +95,9 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 console.log($scope.world);
 		 console.log($scope.style);
 		 
+		 if ($scope.world.name) {
+			 angular.extend($rootScope, {globalTitle: $scope.world.name});
+		 }
 		 if ($scope.world.id=="AlleyNYC_Startup_Showcase") {
 			 $scope.world.tempLocationName = "7th Ave & 37th St"
 		 }

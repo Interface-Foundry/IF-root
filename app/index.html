@@ -48,7 +48,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <link rel="stylesheet" href='css/ng-modal.css'>
 
   <link rel="stylesheet" href='css/tidepools/leaflet.css'>
-  <link rel="stylesheet" href='css/bootstrap-datepicker.css'>
+  <!--<link rel="stylesheet" href='css/bootstrap-datepicker.css'>
   <link rel="stylesheet" href='css/bootstrap-timepicker.css'>
   <!--<link rel="stylesheet" href="css/flat-ui.css" >-->
   <link rel="stylesheet" href='css/jquery.fileupload-ui.css'>
@@ -77,13 +77,22 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <script src="lib/angular/angular-route.js"></script>
   <script src="lib/angular/angular-sanitize.min.js"></script>
   <script src="lib/angular/angular-resource.js"></script>
+
   <script src="lib/angular/angular-strap.js"></script>
+  <script src="lib/angular/angular-strap.tpl.js"></script>
   <script src="lib/angular/angular-animate.js"></script>
+  <script src="lib/angular/once.js"></script>
+    
   <script src="lib/spectrum/spectrum.js"></script>
 
   <script src="lib/angular/ui-bootstrap-tpls-0.11.0.min.js"></script>
-  <script src="lib/bootstrap-datepicker.js"></script>
-  <script src="lib/bootstrap-timepicker.js"></script>
+  <script src="lib/date-parser.js"></script>
+
+  <script src="lib/angular/datepicker.js"></script>
+  <script src="lib/angular/datepicker.tpl.js"></script>
+
+  <script src="lib/angular/timepicker.js"></script>
+  <script src="lib/angular/timepicker.tpl.js"></script>
   <script src="lib/leaflet.js"></script>
   <script src="lib/ng-infinite-scroll.min.js"></script>
   <script src="lib/ng-modal.min.js"></script>
@@ -196,8 +205,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
               </leaflet>
 		</section>
 
-         <section id="view" ng-class="[aperture.state]">
-                  <div ng-view class="if-animate"></div>
+         <section id="view" ng-class="[aperture.state]" ng-view class="if-animate">
+                  <!--<div ng-view class="if-animate"></div>-->
 		 </section>
 		 </div>
   </div>
