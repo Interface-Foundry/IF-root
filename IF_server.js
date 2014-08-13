@@ -81,6 +81,10 @@ var express = require('express'),
     app = module.exports.app = express(),
     db = require('mongojs').connect('if');
 
+    //express compression
+    var compression = require('compression');
+    app.use(compression());
+
     var server = http.createServer(app);
     // Hook Socket.io into Express
     var io = require('socket.io').listen(server);
