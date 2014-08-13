@@ -137,6 +137,16 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.queryType = "all";
 			$scope.queryFilter = "all";
 
+			var userTime = new Date();
+
+			db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){  
+				console.log(data);
+			}); 
+
+			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){  
+				console.log(data);
+			}); 
+
 			db.landmarks.query({queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(data){   
 				console.log(data);
 				$scope.landmarks = data;
