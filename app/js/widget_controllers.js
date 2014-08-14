@@ -1,7 +1,7 @@
 function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureService) {	
     $rootScope.showSwitch = false;
-    
-	apertureService.set('off');
+    var aperture = apertureService
+    aperture.set('off');
     //query tweets
     $scope.currentTag = $routeParams.hashTag;
     $scope.tweets = db.tweets.query({limit:70, tag:$scope.currentTag}); // make infinite scroll?
@@ -22,7 +22,8 @@ TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 
 
 function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
-	apertureService.set('off');
+	var aperture = apertureService;
+	aperture.set('off');
     $rootScope.showSwitch = false;
 
     //query instagram

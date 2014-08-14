@@ -146,3 +146,15 @@ width: 260px;
 l.agenda li em {
 	float:right;
 }
+
+.footer.wyzerr {
+height: 14px;
+background: #abd362;
+background: -moz-linear-gradient(left,  #abd362 0%, #43c2e9 100%);
+background: -webkit-gradient(linear, left top, right top, color-stop(0%,#abd362), color-stop(100%,#43c2e9));
+background: -webkit-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
+background: -o-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
+background: -ms-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
+background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#abd362', endColorstr='#43c2e9',GradientType=1 );
+}
