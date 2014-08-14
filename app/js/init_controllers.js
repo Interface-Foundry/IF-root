@@ -54,7 +54,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
           noLoc();
       }
 
-      navigator.geolocation.getCurrentPosition(showPosition, locError, {/*timeout:15000,*/ enableHighAccuracy : true});
+      navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
 
     } else {
         console.log('no geo');
@@ -66,7 +66,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     function noLoc(){
       
       console.log('no loc');  
-      
+
+
       $scope.showNoLoc = true;
       angular.extend($rootScope, {loading: false});
       $scope.$apply();
@@ -111,9 +112,17 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     }
 
     function noWorlds(){
-        console.log('no worlds');  
-        $scope.showCreateNew = true;
-        angular.extend($rootScope, {loading: false});
+
+
+     //-------- DISABLE AFTER DEMO ------//
+      angular.extend($rootScope, {loading: false});
+      $location.path('/w/AlleyNYC_Startup_Showcase'); 
+
+
+      //-------- ENABLE AFTER DEMO ------//
+        // console.log('no worlds');  
+        // $scope.showCreateNew = true;
+        // angular.extend($rootScope, {loading: false});
     }
 
 }

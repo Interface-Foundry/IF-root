@@ -391,7 +391,18 @@ app.get('/api/:collection', function(req, res) {
                     'time.start': {$lt: currentTime},
                     'time.end': {$gt: currentTime}
                 };   
-                db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));     
+                //db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));     
+
+                landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
+                  if (data){
+                      console.log('NOW'+data);
+                      res.send(data);
+                  }
+                  else {
+                      console.log('no results');
+                      res.send({err:'no results'});            
+                  }
+                });
 
                 break;
 
@@ -880,7 +891,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     //if user checks box to activate time 
                     if (req.body.hasTime == true){
 						
-                        lm.timetext.datestart = req.body.timetext.datestart;
+                        /*lm.timetext.datestart = req.body.timetext.datestart;
                         lm.timetext.dateend = req.body.timetext.dateend;
                         lm.timetext.timestart = req.body.timetext.timestart;
                         lm.timetext.timeend = req.body.timetext.timeend;
@@ -897,7 +908,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         //----------//
 						
                         lm.time.start = datetimeStart;
-                        lm.time.end = datetimeEnd;
+                        lm.time.end = datetimeEnd;*/
                         
                         lm.time.start = req.body.time.start;
                         
@@ -910,7 +921,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         //if no end time, match start time
                     }
 
-                    
+
 
                     lm.save(function(err, landmark) {
                         if (err){
