@@ -219,7 +219,7 @@ nav li input.form-control {
 }
 
 #view * {
-	pointer-events: all;
+	pointer-events: auto;
 }
 
 #shelf {
