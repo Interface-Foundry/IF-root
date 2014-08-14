@@ -63,7 +63,7 @@ nav ul {
   padding: 0; 
 }
 
-nav li {
+.nav-item {
 	float: left;
 	height: 40px;
 }
@@ -86,7 +86,7 @@ nav li input.form-control {
 .nav-avatar {
 	width: 34px;
 	height: 34px;
-	margin: 3px;
+	margin: 3px 3px 3px 10px;
 	background-color: white;
 	
 	-moz-border-radius: 50%;
@@ -113,25 +113,14 @@ nav li input.form-control {
 	margin: 0px 8px 0px 0px;
 }
 
-
-/*nav li a {
-  display: block;
-  padding: 8px 15px;
-  text-decoration: none;
-  font-weight: bold;
-  color: #069;
-  border-right: 1px solid #ccc; 
-}*/
-
-/*#nav li:first-child a {
-  border-left: 1px solid #ccc; 
+.compass.badge {
+	position: absolute;
+	bottom:-10px;
+	right:-2px;
+	z-index: 100;
+	
+	background: #0091EA;
 }
-
-#nav li a:hover {
-  color: #c00;
-  background-color: #fff; 
-}*/
-
 
 
 #scrim {

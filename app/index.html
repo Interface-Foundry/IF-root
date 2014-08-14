@@ -151,37 +151,36 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  		<img class="handle pull-left" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
 	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg">
 	  		<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
-	  			<li class="search-icon">
-	  					<a href="" class="no-u" ng-click="search()">
+	  			<li class="search-icon nav-item">
+	  					<a href="" class="no-u" ng-click="">
 	  						<img class="nav-icon" src="/img/icons/zoom.png">
 	  					</a>
 	  			</li>
-	  			<li>
-	  				
+	  			<li class="nav-item">
 			          <span class="dropdown" on-toggle="toggled(open)">
 			            <a href="" class="dropdown-toggle no-u">
 			                <img class="nav-icon" src="/img/icons/compass.png">
+			                <span ng-show="altBubbles" class="compass badge">{{altBubbles.length}}</span>
 			            </a>
 			            <ul class="dropdown-menu">
-			                <b>Overlapping Bubbles</b> 
+			                <li ng-show="altBubbles" class="dropdown-header"><a>Other Bubbles</a></li> 
 			                <li ng-repeat="bubble in altBubbles">
 			                  <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
 			                </li>
-			                <a ng-show="!altBubbles" ng-href="/#/">Find Overlapping Bubbles</a>
+			                <li ng-show="!altBubbles"><a ng-href="/#/">Find Other Bubbles</a></li>
 			            </ul>
+			            
 			          </span>
-
 	  			</li>
-	  			<li><!-- USER DROPDOWN -->
-		  		<a ng-show="!showLogout" ng-href="/#/login" class="vertical-middle nav-user no-u">Login</a>
-		  		
+	  			<li class="nav-item"><!-- USER DROPDOWN -->
+		  		<a ng-show="!showLogout" ng-href="/#/login" class="vertical-middle nav-user no-u">Login</a>		  		
 			  	<span class="dropdown" on-toggle="toggled(open)" ng-show="showLogout">
 		   		  	<a href="" class="dropdown-toggle no-u">
 		   		  		<img class="nav-avatar" src="/img/icons/profile.png">
 			   		   	<span ng-bind="userName | userName" class="nav-user no-u">Profile</span> <span class="caret nav-user"></span>
 			   		</a>
 			   		<ul class="dropdown-menu">
-				   		<li><a ng-href="/#/profile">Profile</a></li>
+				   		<li><a role="menuitem" tabindex="-1" ng-href="/#/profile">Profile</a></li>
 				   		<li><a ng-href="/#/newworld">+ New World</a></li>
 				   		<li><a href="" ng-click="feedbackOn=true">Report Issue</a></li>
 				   		<li><a href="" ng-click="logout()">Logout</a></li>
