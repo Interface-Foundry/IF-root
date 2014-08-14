@@ -59,13 +59,12 @@ angular.module('tidepoolsServices', ['ngResource'])
             return db;
         }
     ])
-    .factory('apertureService', ['leafletData', 'mapManager', 
-    	function(leafletData, mapManager) {
+    .factory('apertureService', ['leafletData', 
+    	function(leafletData) {
 	    	var aperture = {};
 			aperture.off = true;
 	    	aperture.state = 'aperture-off';
 	    	aperture.navfix = 'navfix';
-	    	var map = mapManager;
 	    	
 	    	aperture.toggle = function(state) {
 	    		if (aperture.off)  {
@@ -78,7 +77,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 						}
 						if (state == 'full') {
 						console.log('full');
-							aperture.state = 'aperture-full';
+						aperture.state = 'aperture-full';
 						}
 				} else {
 				console.log('off');
@@ -97,7 +96,6 @@ angular.module('tidepoolsServices', ['ngResource'])
 					angular.extend($rootScope, {apertureSize: 0});
 					console.log($rootScope.apertureSize);
 				}*/
-				map.refresh();
 			}
 			
 			aperture.set = function(state) {

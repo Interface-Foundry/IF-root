@@ -1,10 +1,11 @@
-function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, leafletData, $rootScope, apertureService, mapManager, styleManager) {
+function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, $window, leafletData, $rootScope, apertureService, mapManager, styleManager) {
 		console.log('--Landmark Controller--');
 		var map = mapManager;
 		var style = styleManager;
 		$scope.aperture = apertureService;
 		$scope.aperture.set('half');
-
+		
+		
 		$scope.worldURL = $routeParams.worldURL;
 		$scope.landmarkURL = $routeParams.landmarkURL;
 		

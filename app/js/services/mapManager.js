@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData',
-    	function(leafletData) {
+    .factory('mapManager', ['leafletData','apertureService', 
+    	function(leafletData, apertureService) {
 var mapManager = {
 	center: {
 		lat: 42,
@@ -36,17 +36,33 @@ var mapManager = {
 			}
 		},
 		zoomControlPosition: 'bottomleft',
-	}
+	},
 };
-
 
 mapManager.setCenter = function(latlng, z) {
 	console.log('--mapManager--');
 	console.log('--setCenter--');
 	console.log(latlng);
 	console.log(z);
+	if (apertureService.state == 'aperture-half') {
+	console.log('--setCenter w half--');
+	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+	console.log(h);
+	var targetPt, targetLatLng;
+	leafletData.getMap().then(function(map) {
+		targetPt = map.project([latlng[1], latlng[0]], z).add([0,h/2]);
+		console.log(targetPt);
+		targetLatLng = map.unproject(targetPt, z);
+		console.log(targetLatLng);
+		angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+		console.log(mapManager.center);
+	});
+	
+	
+	} else {
 	angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
-	refreshMap();
+	}
+	mapManager.refresh();
 }
 		
 /* addMarker

@@ -89,18 +89,17 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 queryWidgets(); //load widget data
-		 
-		 
+		 loadWidgets(); //load widget data
+
 		 console.log($scope.world);
 		 console.log($scope.style);
 		 
 		 if ($scope.world.name) {
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
 		 }
-		 if ($scope.world.id=="AlleyNYC_Startup_Showcase") {
-			 $scope.world.tempLocationName = "7th Ave & 37th St"
-		 }
+		 
+		 
+		 
 		 // order of logic
 		 // if (type == cloud) ---> load cloud as basemap
 		 // else if (type == both && localMapID && cloudMapID) --> load cloud as basecamp, layer local map on top
@@ -123,57 +122,51 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			map.refresh();
 		}
 		
-		
+		$scope.loadLandmarks();
   	}
-
-	World.get({id: $routeParams.worldURL}, function(data) {
-		 if (data.err) {
-		 	console.log('Data error! Returning to root!');
-		 	console.log(data.err);
-		 	$location.path('/#/');
-		 } else {
-
-			$scope.loadWorld(data); 
-			$scope.queryType = "all";
-			$scope.queryFilter = "all";
-
-			var userTime = new Date();
-
-			db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){  
+  	
+  	function loadWidgets() {
+		console.log($scope.world);
+		if ($scope.style.widgets.twitter) {
+			$scope.twitter = true;
+		}
+		
+		if ($scope.world.resources) {
+		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	    }
+	     	
+	  	if ($scope.style.widgets.upcoming) {
+	  		$scope.upcoming = true;
+	  		var userTime = new Date();
+	  		db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
+				console.log('queryFilter:now');
 				console.log(data);
+				$scope.now = data[0];
 			}); 
-
-			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){  
+			
+			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
+				console.log('queryFilter:upcoming');
 				console.log(data);
+				$scope.upcoming = data;
 			}); 
+		}
+	    
+	}
 
-			db.landmarks.query({queryType:$scope.queryType, queryFilter:$scope.queryFilter, parentID: $scope.world._id}, function(data){   
-				console.log(data);
-				$scope.landmarks = data;
-				
-				if ($scope.style.widgets) {
-					if ($scope.style.widgets.upcoming) {
-					setUpcoming();
-					}
-				}
-				
-				var categoryURL;
-				angular.forEach($scope.landmarks, function(landmark) {
-					/*switch (landmark.category) {
-		  			case 'food': 
-		  				categoryURL = 'img/jul30/marker/cake_arrow.png';
-		  				break;
-		  			case 'bar':
-		  				categoryURL = 'img/jul30/marker/cocktail_arrow.png';
-		  				break;
-		  			case 'fabric':
-		  				categoryURL = 'img/jul30/marker/spool_arrow.png';
-		  				break;
-		  			default:
-		  				categoryURL = 'img/marker/red-marker-100.png';
-		  				break;
-		  			}*/
-		  			
+  	$scope.loadLandmarks = function(data) {
+  		console.log('--loadLandmarks--');
+  		//STATE: EXPLORE
+	  	db.landmarks.query({queryFilter:'all', parentID: $scope.world._id}, function(data) { 
+	  		console.log(data);
+	  		$scope.landmarks = data;
+	  		console.log($scope.landmarks);
+	  		initLandmarks($scope.landmarks);
+	  	});
+  	}
+  	
+  	function initLandmarks(landmarks) {
+	  	angular.forEach($scope.landmarks, function(landmark) {
 					map.addMarker(landmark._id, {
 						lat:landmark.loc.coordinates[1],
 						lng:landmark.loc.coordinates[0],
@@ -191,135 +184,18 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 						_id: landmark._id
 					});
 				});
-				landmarksLoaded=true;
-				
-			});
-	
+  	}
 
+	World.get({id: $routeParams.worldURL}, function(data) {
+		 if (data.err) {
+		 	console.log('Data error! Returning to root!');
+		 	console.log(data.err);
+		 	$location.path('/#/');
+		 } else {
+			$scope.loadWorld(data); 
 		}
-		map.refresh();
-		
-	});
+	});	
 	
-	function setUpcoming() {
-		
-		var t = new Date();
-		$scope.upcoming = $scope.landmarks[0];
-		angular.forEach($scope.landmarks, function(landmark) {
-			var startTime = new Date(landmark.time.start);
-			var upcomingStartTime = new Date($scope.upcoming.time.start);
-			if (startTime>t) {
-				//start time is after now
-				if (startTime<upcomingStartTime) {
-					//start time is before current upcoming landmark
-					$scope.upcoming = landmark;
-				}
-			} 
-			if (landmark.time.start<t) {
-				//start time has already passed
-			}
-		});
-		console.log($scope.upcoming);
-		
-		
-		//replace with query!! :(
-		
-	}
-	
-	
-	function queryWidgets(){
-		console.log($scope.world);
-		if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
-	    }
-	}
-
-
-	///////////////////////////////////////
-	//////////// Socket Chat //////////////
-	///////////////////////////////////////
-
-  $scope.routeChat = function () {
-  	$location.path('/chat/'+$scope.worldURL);
-  }
-
-	// Socket listeners
-	//==================
-
-  socket.on('init', function (data) {
-    $rootScope.chatName = data.name;
-    $rootScope.users = data.users;
-  });
-
-  socket.on('send:message', function (message) {
-    $rootScope.messages.push(message);
-  });
-
-  //$scope.messages = [];
-
-  $scope.sendMessage = function () {
-
-    socket.emit('send:message', {
-      message: $scope.message
-    });
-
-    var date = new Date;
-    var seconds = (date.getSeconds()<10?'0':'') + date.getSeconds();
-    var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
-    var hour = date.getHours();
-
-    // add the message to our model locally
-    $rootScope.messages.push({
-      user: $rootScope.chatName,
-      text: $scope.message,
-      time: hour + ":" + minutes + ":" + seconds
-    });
-
-    // clear message box
-    $scope.message = '';
-  };
-
-  $scope.sendEmo = function (input) {
-    var path = "/img/emoji/";
-    var emoji;
-
-    switch(input) {
-        case "cool":
-            emoji = path+"cool.png";
-            break;
-        case "dolphin":
-            emoji = path+"dolphin.png";
-            break;
-        case "ghost":
-            emoji = path+"ghost.png";
-            break;
-        case "heart":
-            emoji = path+"heart.png";
-            break;
-        case "love":
-            emoji = path+"love.png";
-            break;
-        case "party":
-            emoji = path+"party.png";
-            break;
-        case "smile":
-            emoji = path+"smile.png";
-            break;
-        case "woah":
-            emoji = path+"woah.png";
-            break;
-        default:
-            emoji = path+"love.png";
-            break;
-    }
-    $scope.message = '<img src="'+emoji+'">';
-    $scope.sendMessage();
-  }
-  /////////////////////////////////////////
-  /////////// End Socket Chat /////////////
-  ////////////////////////////////////////
-
 
 }
 

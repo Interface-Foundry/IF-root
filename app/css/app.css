@@ -16,7 +16,7 @@ body {
 /* *WRAP* */
 #wrap {
   position: relative;
-  width: 100%; 
+  width: 100%;
   height: 100%;
   overflow-x: hidden;
   margin:0;
@@ -64,8 +64,8 @@ nav ul {
 }
 
 nav li {
-  float: left;
-  height: 40px;
+	float: left;
+	height: 40px;
 }
 
 nav li form {
@@ -214,7 +214,6 @@ nav li input.form-control {
   height: 100%;
   
   color: white;
-  opacity: 80;
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 
   z-index: 100;
@@ -266,14 +265,14 @@ nav li input.form-control {
 
 /*TYPICONS*/
 @font-face {
-  font-family: 'typicons';
-  src: url("../fonts/typicons.eot");
-  src: url("../fonts/typicons.eot?#iefix") format('embedded-opentype'),
-       url("../fonts/typicons.woff") format('woff'),
-       url("../fonts/typicons.ttf") format('truetype'),
-       url("../fonts/typicons.svg#typicons") format('svg');
-  font-weight: normal;
-  font-style: normal;
+	font-family: 'typicons';
+	src: url("../fonts/typicons.eot");
+	src: url("../fonts/typicons.eot?#iefix") format('embedded-opentype'),
+	   url("../fonts/typicons.woff") format('woff'),
+	   url("../fonts/typicons.ttf") format('truetype'),
+	   url("../fonts/typicons.svg#typicons") format('svg');
+	font-weight: normal;
+	font-style: normal;
 }
 
 /*ANGULAR BOOTSTRAP OVERIDE*/
@@ -293,14 +292,13 @@ li {
 }
 
 body.drawer #main, #main.drawer {
-  -webkit-transform: translateX(66%);
-  -moz-transform: translateX(66%);
-  -ms-transform: translateX(66%);
-  -o-transform: translateX(66%);
-  transform: translateX(66%);
-  
-  /*-webkit-perspective: 1000;*/
-  -webkit-backface-visibility: hidden;
+	-webkit-transform: translateX(66%);
+	-moz-transform: translateX(66%);
+	-ms-transform: translateX(66%);
+	-o-transform: translateX(66%);
+	transform: translateX(66%);
+	
+	-webkit-backface-visibility: hidden;
 }
 
 body.drawer nav, nav.drawer {
@@ -310,7 +308,6 @@ body.drawer nav, nav.drawer {
 	-o-transform: translateX(66%);
 	transform: translateX(66%);
 	
-	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
 }
 
@@ -335,15 +332,15 @@ body.drawer nav, nav.drawer {
 /*aperture-half*/
 
 #aperture.aperture-off {
-	height: 0%;
+/* 	height: 0%; */
 }
 
 #aperture.aperture-half {
-	height: 50%;
+/* 	height: 50%; */
 }
 
 #aperture.aperture-full {
-	height: 100%;
+/* 	height: 100%; */
 }
 
 #shelf.aperture-half {
@@ -462,18 +459,20 @@ clear: both;
 .change {
     background-color: red;
 }
-.change-add,.change-remove {
-  background-color: white;
-  transition: all 1s;
-  -webkit-transition: all 1s ease-in-out;
+.change-add, .change-remove {
+	background-color: white;
+	transition: all 1s;
+	-webkit-transition: all 1s ease-in-out;
 }
+
 .change-add-active {
-  background-color: red;
+	background-color: red;
 }
+
 .change-remove {
     background-color: red;
-
 }
+
 .change-remove-active {
   background-color: white;
 }
@@ -481,14 +480,17 @@ clear: both;
 .change-up {
     background-color: green;
 }
+
 .change-up-add,.change-up-remove {
   background-color: white;
   transition: all 1s;
   -webkit-transition: all 1s ease-in-out;
 }
+
 .change-up-add-active {
   background-color: green;
 }
+
 .change-up-remove {
     background-color: green;
 
@@ -538,6 +540,10 @@ left: 8px;
 	z-index: 100 !important;
 }
 
+.defaultBG {
+	background: #FFF;
+}
+
 .feedbackWindow {
 	z-index: 10000;
 	position: absolute;
@@ -551,11 +557,18 @@ left: 8px;
 }
 
 .edit-view {
-	position:absolute;
-	top:0px;
-	width:40%;
-	height:100%;
+	position: absolute;
+	top: 0px;
+	width: 40%;
+	height: 100%;
 	background: rgba(255,255,255,0.8);
+	overflow: scroll;
+}
+
+.edit-save {
+	position: absolute;
+	right: 8px;
+	top: 48px;
 }
 
 .textarea-v-resize {

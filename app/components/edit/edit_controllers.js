@@ -4,7 +4,7 @@ var map = mapManager;
 var style = styleManager;
 aperture.set('full');
 
-$scope.loadWorld = function(data) {
+var loadWorld = function(data) {
 	  	$scope.world = data.world;
 		$scope.style = data.style;
 		style.navBG_color = $scope.style.navBG_color;
@@ -20,6 +20,15 @@ $scope.loadWorld = function(data) {
 		}
 }
 
+$scope.saveWorld = function() {
+	console.log('saveWorld(edit)');
+	$scope.world.newStatus = false; //not new
+	//$scope.world.worldID = $scope.worldID;
+    db.worlds.create($scope.world, function(response){
+    	console.log(response);
+    });  
+}
+
 
 
 ////////////////////////////////////////////////////////////
@@ -30,7 +39,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 		 console.log('World not found!');
 		 console.log(data.err);
 	} else {
-		$scope.loadWorld(data);
+		loadWorld(data);
 	}
 	map.refresh();
 		
