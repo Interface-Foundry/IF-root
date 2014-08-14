@@ -375,7 +375,7 @@ app.get('/api/:collection', function(req, res) {
 
               case 'now':
 
-                
+                console.log('now');
                 if (req.query.userTime){
                     var currentTime = new Date(req.query.userTime);
                 }
@@ -383,20 +383,25 @@ app.get('/api/:collection', function(req, res) {
                     var currentTime = new Date();
                 }
 
-                console.log(currentTime);
-
                 var qw = {
                     parentID:req.query.parentID,
                     world:false,
                     'time.start': {$lt: currentTime},
                     'time.end': {$gt: currentTime}
                 };   
-                //db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));     
 
                 landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
+
                   if (data){
-                      console.log('NOW'+data);
-                      res.send(data);
+                      var stringArr = [];
+                      async.forEach(data, function (obj, done){ 
+                          stringArr.push(obj._id);
+                          done(); 
+                      }, function(err) {
+                          console.log(stringArr);
+                          res.send(stringArr);
+                      });  
+                      //res.send(data);
                   }
                   else {
                       console.log('no results');
@@ -421,7 +426,25 @@ app.get('/api/:collection', function(req, res) {
                     world:false,
                     'time.start': {$gt: currentTime}
                 };   
-                db.collection(req.params.collection).find(qw).sort({'time.start': 1}).toArray(fn(req, res));     
+
+                landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
+
+                  if (data){
+                      var stringArr = [];
+                      async.forEach(data, function (obj, done){ 
+                          stringArr.push(obj._id);
+                          done(); 
+                      }, function(err) {
+                          console.log(stringArr);
+                          res.send(stringArr);
+                      });  
+                      //res.send(data);
+                  }
+                  else {
+                      console.log('no results');
+                      res.send({err:'no results'});            
+                  }
+                });    
 
                 break;
               default:
@@ -889,6 +912,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     }
 
                     //if user checks box to activate time 
+
                     if (req.body.hasTime == true){
 						
                         /*lm.timetext.datestart = req.body.timetext.datestart;
@@ -909,13 +933,14 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 						
                         lm.time.start = datetimeStart;
                         lm.time.end = datetimeEnd;*/
-                        
-                        lm.time.start = req.body.time.start;
-                        
-                        if (req.body.time.hasOwnProperty('end')) {
-	                        lm.time.end = req.body.time.end;
-                        } else {
-	                        lm.time.end = lm.time.start;
+                        if (req.body.time.start){
+                          lm.time.start = req.body.time.start;
+                          
+                          if (req.body.time.hasOwnProperty('end')) {
+  	                        lm.time.end = req.body.time.end;
+                          } else {
+  	                        lm.time.end = lm.time.start;
+                          }
                         }
                         
                         //if no end time, match start time
