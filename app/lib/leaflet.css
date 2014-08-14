@@ -492,3 +492,16 @@
 	background: #fff;
 	border: 1px solid #666;
 	}
+	
+.leaflet-marker-pane,
+.leaflet-shadow-pane,
+.leaflet-overlay-pane {
+/* hack to work around https://github.com/CloudMade/Leaflet/issues/335 */
+-webkit-transform: translateZ(0px);
+}
+
+.leaflet-control-container
+{
+-webkit-transform: translate3d(0,0,0);
+-webkit-transform: translateZ(0px);
+}
