@@ -84,14 +84,14 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 if (data[0].liveAndInside[0].id){
 
                     //-------- DISABLE AFTER DEMO ------//
-                    $location.path('/w/Startfast_Demo_Day_2014');
+                    $location.path('/w/StartFast_Demo_Day_2014');
 
                     ///-------- ENABLE AFTER DEMO ------//
                     //$location.path('w/'+data[0].liveAndInside[0].id); 
                 }
                 else {
                     //-------- DISABLE AFTER DEMO ------//
-                    $location.path('/w/Startfast_Demo_Day_2014');
+                    $location.path('/w/StartFast_Demo_Day_2014');
 
                     ///-------- ENABLE AFTER DEMO ------//
                     //console.log('world has no id');
@@ -101,7 +101,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
             else {
 
                 //-------- DISABLE AFTER DEMO ------//
-                $location.path('/w/Startfast_Demo_Day_2014');
+                $location.path('/w/StartFast_Demo_Day_2014');
 
                 //-------- ENABLE AFTER DEMO ------//
                 //console.log('not inside any worlds');
