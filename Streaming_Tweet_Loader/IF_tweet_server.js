@@ -5,7 +5,7 @@ var twitter = require('ntwitter'),
 var credentials = require('./credentials.js');
 //var hashtag = require('../app/js/global_settings.js').hashtag;
 
-var hashtag = ['#comics'];
+var hashtag = ['#SFDemoDay'];
 
 var t = new twitter({
     consumer_key: credentials.consumer_key,

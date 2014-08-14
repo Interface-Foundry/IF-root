@@ -28,4 +28,4 @@ exports.CLIENT_SECRET= 'cb7a9f7cdb67498bbf0641b6d7489604';
 
 // Tag
 
-exports.TAG_FOR_IMAGES = 'comics';
+exports.TAG_FOR_IMAGES = 'SFDemoDay';
