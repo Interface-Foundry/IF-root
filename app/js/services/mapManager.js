@@ -237,7 +237,10 @@ mapManager.setBaseLayer = function(layerURL) {
 		url: layerURL,
 		type: 'xyz',
 		layerParams: {},
-		layerOptions: {}
+		layerOptions: {
+			minZoom: 1,
+			maxZoom: 19
+		}
 	}};
 	
 }
