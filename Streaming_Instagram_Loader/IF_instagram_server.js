@@ -19,7 +19,7 @@ var processTagMediaRecent = function(err, data, limit) {
     return;
   }
 
-  for(var i = 0; i < data.length; i++) {
+  for(var i = 0; i < 25; i++) {
     helper.downloadImageObject(data[i]);
   }
 
