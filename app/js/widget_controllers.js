@@ -17,7 +17,7 @@ function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureS
         window.history.back();
     }
 }
-TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams'];
+TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
 
 
 
@@ -36,7 +36,7 @@ function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, aperture
         window.history.back();
     }
 }
-InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams'];
+InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
 
 
 
