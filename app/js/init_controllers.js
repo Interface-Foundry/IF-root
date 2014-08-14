@@ -57,25 +57,21 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
 
     } else {
-
-        $location.path('/w/StartFast_Demo_Day_2014');
-        ///-------- ENABLE AFTER DEMO ------//
-        // console.log('no geo');
-        // alert('Your browser does not support geolocation :(');
+        console.log('no geo');
+        alert('Your browser does not support geolocation :(');
     }
 
     //--------------//
 
     function noLoc(){
   
-        //-------- DISABLE AFTER DEMO ------//
-      $location.path('/w/StartFast_Demo_Day_2014');
+  
+      console.log('no loc');  
 
-      ///-------- ENABLE AFTER DEMO ------//
-      // console.log('no loc');  
-      // $scope.showNoLoc = true;
-      // angular.extend($rootScope, {loading: false});
-      // $scope.$apply();
+
+      $scope.showNoLoc = true;
+      angular.extend($rootScope, {loading: false});
+      $scope.$apply();
     }
 
     function findWorlds(lat,lon){   
