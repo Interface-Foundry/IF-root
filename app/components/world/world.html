@@ -37,7 +37,7 @@
 							<span>{{ landmark.name }}
 							<small style="color:#CCC">{{landmark.time.start | date: 'shortTime'}}</small></span>
 						</h3>
-						<span ng-cloak>{{landmark.summary}}</span>
+						<span class="media-body-text" ng-cloak>{{landmark.summary}}</span>
 					</div>
 				</div>
 			</a>
@@ -49,8 +49,10 @@
 	
 	<!--INSTAGRAM-->
 	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null"></div>
-</div>
 
+	<!--WYZERR-->
+	<div ng-include="wyzerr ? 'components/world/templates/wyzerr.html' : null"></div>
+</div>
 <div style="padding: 15px;" ng-show="showLogout"><a class="btn btn-default btn-sm" ng-href="#/edit/landmarks/{{worldURL}}"><span class="glyphicon glyphicon-plus"></span> Add a Landmark</a></div>
 
 </div>

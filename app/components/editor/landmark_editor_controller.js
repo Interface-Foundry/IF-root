@@ -5,7 +5,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
 	$scope.aperture = apertureService;
-	$scope.aperture.set('aperture-half');
+	$scope.aperture.set('half');
 	
 	var worldLoaded = false;
 	var landmarksLoaded = false;
@@ -230,11 +230,11 @@ if ($scope.landmark.hasTime) {
 		$scope.worldURL = $routeParams.worldID;
 		//initialize map with world settings
 		map.setCenter($scope.world.loc.coordinates, 15);
-		map.addPath('worldBounds', {
+		/*map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
 				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
-				});
+				});*/
 		//map.setTiles($scope.world.style.maps.cloudMapName);
 		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 		if ($scope.world.style.maps.type == "local" || $scope.world.style.maps.type == "both") {

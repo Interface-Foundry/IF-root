@@ -135,6 +135,9 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		if ($scope.style.widgets.twitter) {
 			$scope.twitter = true;
 		}
+		if ($scope.style.widgets.instagram) {
+			$scope.instagram = true;
+		}
 		
 		if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
@@ -210,5 +213,9 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 
 
 function WorldRepeatController($scope) {
+	
+}
+
+function UpcomingController($scope) {
 	
 }
