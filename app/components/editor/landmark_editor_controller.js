@@ -158,7 +158,7 @@ if ($scope.landmark.hasTime) {
 		//$scope.saveItem($scope.selectedIndex);//save previous landmark
 		console.log('Continue w select');
 		$scope.selectedIndex = i; //change landmarks
-		map.setCenter($scope.landmarks[i].loc.coordinates.reverse(), 17);//center map on new markers
+		map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
 		console.log($scope.landmarks[i].name);
 		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 		map.setMarkerFocus($scope.landmarks[i]._id);
