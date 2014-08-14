@@ -250,6 +250,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	var newOverlay = {};
 	if (localMapOptions.maxZoom>19) {
 		localMapOptions.maxZoom = 19;
+		localMapOptions.zIndex = 10;
 	}
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
@@ -257,7 +258,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 		url: 'http://107.170.180.141/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
-		opacity: 0.8
+		opacity: 0.8,
 	};/*
 
 	mapManager.layers.overlays = newOverlay;

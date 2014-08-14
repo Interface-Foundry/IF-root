@@ -31,7 +31,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		
 		function goToMark() {
 			
-			map.setCenter($scope.landmark.loc.coordinates, 19); 
+			map.setCenter($scope.landmark.loc.coordinates, 20); 
 		  	var markers = map.markers;
 		  	angular.forEach(markers, function(marker) {
 		  		console.log(marker);
