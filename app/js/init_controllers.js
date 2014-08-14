@@ -64,13 +64,15 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     //--------------//
 
     function noLoc(){
-      
-      console.log('no loc');  
+  
+        //-------- DISABLE AFTER DEMO ------//
+      $location.path('/w/StartFast_Demo_Day_2014');
 
-
-      $scope.showNoLoc = true;
-      angular.extend($rootScope, {loading: false});
-      $scope.$apply();
+      ///-------- ENABLE AFTER DEMO ------//
+      // console.log('no loc');  
+      // $scope.showNoLoc = true;
+      // angular.extend($rootScope, {loading: false});
+      // $scope.$apply();
     }
 
     function findWorlds(lat,lon){   
