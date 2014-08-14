@@ -11,7 +11,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
 
-	  console.log('world routing');
+	console.log('world routing');
     //WIDGET find data and then route to correct bubble
     // var today = new Date();
     // var dd = today.getDate();
@@ -130,16 +130,20 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout, $http,$q, $sanitize) {
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
     $rootScope.messages = [];
     
+    
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 	angular.extend($rootScope, {loading: false});
-	  
+	
+	$scope.$on('$viewContentLoaded', function() {
+		document.getElementById("wrap").scrollTop = 0
+	});
 	  
 	$scope.search = function() {
 		if ($scope.searchOn == true) {

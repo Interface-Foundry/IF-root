@@ -17,7 +17,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	  	$scope.aperture.set('half');
 	  	
 	  	redoMarkers($scope.landmarks, c);
-	 }
+	}
 	 
 	 $scope.returnToWorld = function() {
 		 redoMarkers($scope.landmarks);
@@ -148,7 +148,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:upcoming');
 				console.log(data);
+				
+for (var i = 0, len = data.length; i<len; i++) {
+					data[i] = data.join();
+				}
+
 				$scope.upcoming = data;
+				console.log($scope.upcoming);
 			}); 
 		}
 	    
