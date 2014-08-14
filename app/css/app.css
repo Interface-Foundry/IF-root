@@ -354,6 +354,7 @@ body.drawer nav, nav.drawer {
 #top-shelf {
 	-webkit-transition: all 0.35s cubic-bezier(.5,.1,0,1);
 	box-shadow: 0px -1px 2px rgba(0,0,0,.2);
+	cursor: pointer;
 }
 
 #top-shelf.aperture-full {

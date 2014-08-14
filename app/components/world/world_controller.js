@@ -138,6 +138,10 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		if ($scope.style.widgets.instagram) {
 			$scope.instagram = true;
 		}
+		if ($scope.world.id = "StartFast_Demo_Day_2014") {
+			console.log('wyzerr');
+			$scope.wyzerr = true;
+		}
 		
 		if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});

@@ -1,11 +1,11 @@
-<div class="container-fluid">
-  <div class="row-fluid">
+<a href="#/w/{{worldURL}}" class="back btn btn-default btn-sm"><span class="glyphicon glyphicon-chevron-left"></span>Back</a>
+<div class="container-fluid defaultBG navfix">
+  <div class="row">
 
-    <div class="span10">
+    <div class="col-xs-10 col-offset-1">
       <!--Body content-->
 
         <br><br>
-        <span><button class="btn backbtn" ng-click="goBack()">< BACK </button></span>
 
         <div class="card" ><h3 style="color:#63b3fb;"> Twitter #{{currentTag}} </h3></div>
 
@@ -19,9 +19,9 @@
  -->
         <li ng-repeat="tweet in tweets| filter:query | orderBy:orderProp">
           
-          <div class="col-xs-12 card 4-col social instagram" style="margin-bottom:30px;">
+          <div class="col-xs-12 4-col social instagram" style="margin-bottom:30px;">
          
-            <div class="container more">
+            <div class="card container more">
 
               <img ng-src="{{tweet.user.profile_image_url | httpsify}}">
               <h1 class="pull-right" style="color:gray; text-transform:none; font-size:1.4rem;">{{tweet.user.name}}</h1>
@@ -54,9 +54,3 @@
     </div>
   </div>
 </div>
-
-<style>
-#shelf{
-  border-top:0px;
-}
-</style>
