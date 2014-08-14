@@ -83,29 +83,29 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
             if (data[0].liveAndInside[0] != null) {
                 if (data[0].liveAndInside[0].id){
 
-                    //DISABLE AFTER DEMO
-                    //$location.path('/w/AlleyNYC_Startup_Showcase');
+                    //-------- DISABLE AFTER DEMO ------//
+                    $location.path('/w/Startfast_Demo_Day_2014');
 
-                    //ENABLE AFTER DEMO
-                    $location.path('w/'+data[0].liveAndInside[0].id); 
+                    ///-------- ENABLE AFTER DEMO ------//
+                    //$location.path('w/'+data[0].liveAndInside[0].id); 
                 }
                 else {
-                    //DISABLE AFTER DEMO
-                    //$location.path('/w/AlleyNYC_Startup_Showcase');
+                    //-------- DISABLE AFTER DEMO ------//
+                    $location.path('/w/Startfast_Demo_Day_2014');
 
-                    //ENABLE AFTER DEMO
-                    console.log('world has no id');
-                    noWorlds();
+                    ///-------- ENABLE AFTER DEMO ------//
+                    //console.log('world has no id');
+                    //noWorlds();
                 }
             }
             else {
 
-                //DISABLE AFTER DEMO
-                //$location.path('/w/AlleyNYC_Startup_Showcase');
+                //-------- DISABLE AFTER DEMO ------//
+                $location.path('/w/Startfast_Demo_Day_2014');
 
-                //ENABLE AFTER DEMO
-                console.log('not inside any worlds');
-                noWorlds(); //not inside any worlds
+                //-------- ENABLE AFTER DEMO ------//
+                //console.log('not inside any worlds');
+                //noWorlds(); //not inside any worlds
 
             }
         });
@@ -115,14 +115,14 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
 
      //-------- DISABLE AFTER DEMO ------//
-      angular.extend($rootScope, {loading: false});
-      $location.path('/w/AlleyNYC_Startup_Showcase'); 
+      // angular.extend($rootScope, {loading: false});
+      // $location.path('/w/Startfast_Demo_Day'); 
 
 
       //-------- ENABLE AFTER DEMO ------//
-        // console.log('no worlds');  
-        // $scope.showCreateNew = true;
-        // angular.extend($rootScope, {loading: false});
+        console.log('no worlds');  
+        $scope.showCreateNew = true;
+        angular.extend($rootScope, {loading: false});
     }
 
 }
