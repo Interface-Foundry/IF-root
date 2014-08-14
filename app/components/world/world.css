@@ -138,3 +138,11 @@ h6 {
 	
 	color: #FFF;
 }
+
+ul.agenda {
+width: 260px;
+}
+
+l.agenda li em {
+	float:right;
+}
