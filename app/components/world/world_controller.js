@@ -65,23 +65,26 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   		map.refresh();
   	}
 */
+  	//currently only for upcoming...
+  	function setLookup() {
+	  	$scope.lookup = {}; 
+	  	
+	  	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+		  	$scope.lookup[$scope.landmarks[i]._id] = i;
+	  	}
+	  	console.log($scope.lookup);
+  	}
   	
-  	function reorderById (landmarks, idArray) {
+  	
+  	function reorderById (idArray) {
   		console.log('reorderById');
-	  	var lookup = {};
 	  	
-	  	for (var i = 0, len = landmarks.length; i<len; i++) {
-		  	lookup[landmarks[i]._id] = landmarks[i];
-	  	}
-	  	//maps the lookup object to each landmark
-	  	
-	  	var newLandmarks = [];
+	  	$scope.upcoming = [];
 	  	for (var i = 0, len = idArray.length; i<len; i++) {
-		  	newLandmarks[i] = lookup[idArray[i]]; 
+		  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1)[0];
 	  	}
 	  	
-	  	console.log(newLandmarks);
-	  	landmarks = newLandmarks;
+	  	console.log($scope.upcoming);
   	}
   	
   	
@@ -89,7 +92,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 loadWidgets(); //load widget data
+		 
 
 		 console.log($scope.world);
 		 console.log($scope.style);
@@ -115,10 +118,12 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
                 radius: 150,
 				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
 				});*/
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],15)
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],18)
 		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
 		if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
-			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
 			map.refresh();
 		}
 		
@@ -142,19 +147,15 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	  		db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:now');
 				console.log(data);
-				$scope.now = data[0];
+				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];
+				console.log($scope.now);
 			}); 
 			
 			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:upcoming');
 				console.log(data);
-				
-for (var i = 0, len = data.length; i<len; i++) {
-					data[i] = data.join();
-				}
-
-				$scope.upcoming = data;
-				console.log($scope.upcoming);
+				//console.log(angular.fromJson(data[0]));
+				reorderById(data);
 			}); 
 		}
 	    
@@ -167,6 +168,8 @@ for (var i = 0, len = data.length; i<len; i++) {
 	  		console.log(data);
 	  		$scope.landmarks = data;
 	  		console.log($scope.landmarks);
+	  		setLookup();
+	  		loadWidgets(); //load widget data
 	  		initLandmarks($scope.landmarks);
 	  	});
   	}

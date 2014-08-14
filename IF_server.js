@@ -395,12 +395,12 @@ app.get('/api/:collection', function(req, res) {
                   if (data){
                       var stringArr = [];
                       async.forEach(data, function (obj, done){ 
-                          stringArr.push(obj._id);
+                          stringArr.push({_id: obj._id});
                           done(); 
                       }, function(err) {
                           console.log(stringArr);
-                          res.send(JSON.stringify( stringArr ));
-                      });  
+                          res.send(JSON.stringify(stringArr));
+                      }); 
                       
                   }
                   else {
@@ -432,17 +432,17 @@ app.get('/api/:collection', function(req, res) {
                   if (data){
                       var stringArr = [];
                       async.forEach(data, function (obj, done){ 
-                          stringArr.push(obj._id);
-                          done(); 
+                         stringArr.push({_id: obj._id});
+                         done(); 
                       }, function(err) {
-                          console.log(stringArr);
-                          res.send(JSON.stringify( stringArr ));
-                      });  
+                         console.log(stringArr);
+                         console.log(JSON.stringify(stringArr));
+                         res.send(JSON.stringify( stringArr ));
+                      });
                       
-                  }
-                  else {
+                  } else {
                       console.log('no results');
-                      res.send({err:'no results'});            
+                      res.send({err:'no results'});
                   }
                 });    
 

@@ -75,7 +75,7 @@ var tilesDict = {
 	    option: {
 		    attribution: 'IF',
 		    minZoom: 1,
-		    maxZoom: 23,
+		    maxZoom: 19,
 		    reuseTiles: true
 	    }   
     },

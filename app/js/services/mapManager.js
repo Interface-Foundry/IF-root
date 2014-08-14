@@ -243,16 +243,22 @@ mapManager.setBaseLayer = function(layerURL) {
 }
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
+	console.log('addOverlay');
 	var newOverlay = {};
-	newOverlay[localMapName] = {
+	if (localMapOptions.maxZoom>19) {
+		localMapOptions.maxZoom = 19;
+	}
+	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
 		url: 'http://107.170.180.141/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
 		opacity: 0.8
-	};
+	};/*
+
 	mapManager.layers.overlays = newOverlay;
+*/
 	console.log(mapManager);
 	console.log(newOverlay);
 };
