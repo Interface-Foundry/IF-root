@@ -333,8 +333,8 @@ body.drawer nav, nav.drawer {
 }
 
 #shelf.aperture-half {
-	transform: translateY(50%);
-	-webkit-transform: translateY(50%);
+	transform: translateY(50%) translateZ(0px);
+	-webkit-transform: translateY(50%) translateZ(0px);
 	-moz-transform: translateY(50%);
 	-ms-transform: translateY(50%);
 	-o-transform: translateY(50%);
@@ -342,11 +342,12 @@ body.drawer nav, nav.drawer {
 }
 
 #shelf.aperture-full {
-	transform: translateY(100%);
-	-webkit-transform: translateY(100%);
+	transform: translateY(100%) translateZ(0px);
+	-webkit-transform: translateY(100%) translateZ(0px);
 	-moz-transform: translateY(100%);
 	-ms-transform: translateY(100%);
 	-o-transform: translateY(100%);
+	
 }
 
 
