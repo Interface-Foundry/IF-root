@@ -57,8 +57,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
 
     } else {
-        console.log('no geo');
-        alert('Your browser does not support geolocation :(');
+
+        $location.path('/w/StartFast_Demo_Day_2014');
+        ///-------- ENABLE AFTER DEMO ------//
+        // console.log('no geo');
+        // alert('Your browser does not support geolocation :(');
     }
 
     //--------------//
