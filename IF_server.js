@@ -395,13 +395,13 @@ app.get('/api/:collection', function(req, res) {
                   if (data){
                       var stringArr = [];
                       async.forEach(data, function (obj, done){ 
-                          stringArr.push(obj._id);
+                          stringArr.push(obj._id.toString());
                           done(); 
                       }, function(err) {
                           console.log(stringArr);
-                          res.send(stringArr);
+                          res.send(JSON.stringify( stringArr ));
                       });  
-                      //res.send(data);
+                      
                   }
                   else {
                       console.log('no results');
@@ -436,9 +436,9 @@ app.get('/api/:collection', function(req, res) {
                           done(); 
                       }, function(err) {
                           console.log(stringArr);
-                          res.send(stringArr);
+                          res.send(JSON.stringify( stringArr ));
                       });  
-                      //res.send(data);
+                      
                   }
                   else {
                       console.log('no results');
