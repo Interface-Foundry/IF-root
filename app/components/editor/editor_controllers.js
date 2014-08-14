@@ -89,7 +89,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
 	
 	//custom elements, eventually replace with directives
 	$('.color').spectrum({
-		clickoutFiresChange: true
+		clickoutFiresChange: true,
+		showInput: true
 	});
 
 	
