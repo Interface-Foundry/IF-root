@@ -914,6 +914,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                     //if user checks box to activate time 
 
+					if (req.body.style) {
+						lm.style = req.body.style;
+					}
+					
                     if (req.body.hasTime == true){
 						
                         /*lm.timetext.datestart = req.body.timetext.datestart;

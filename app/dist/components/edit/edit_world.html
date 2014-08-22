@@ -1,4 +1,5 @@
 <ul class="edit-toolbar">
+
 <li>
 		<button ng-click="saveWorld()" class="btn btn-default"><span class="glyphicon glyphicon-floppy-disk"></span></button>
 </li>
@@ -9,6 +10,9 @@
 				<span class="glyphicon glyphicon-search"></span>
 			</button>
 		</span>
+</li>
+<li class="full-width">
+	<a href="#/w/{{worldURL}}" class="btn btn-primary btn-xs pull-right">Go to {{world.name}}</a>
 </li>
 </ul>
 

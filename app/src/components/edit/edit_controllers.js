@@ -7,11 +7,12 @@ var style = styleManager;
 aperture.set('full');
 
 $scope.mapThemes = [
-		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
+		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
 		{cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
 		{cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'}
+		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
 ];
+console.log($scope.mapThemes);
 
 $scope.mapThemeSelect = $scope.mapThemes[0];
 
@@ -91,6 +92,15 @@ $scope.saveWorld = function() {
 	$scope.world.loc.coordinates[0] = tempMarker.lng;
 	$scope.world.loc.coordinates[1] = tempMarker.lat;
 	
+	if (typeof $scope.world.style.maps == undefined) {
+		$scope.world.style.maps = {};
+	}
+	console.log($scope.mapThemeSelect);
+	$scope.world.style.maps.cloudMapName = $scope.mapThemeSelect.cloudMapName;
+	$scope.world.style.maps.cloudMapID = $scope.mapThemeSelect.cloudMapID;
+	
+	
+	console.log($scope.world);
     db.worlds.create($scope.world, function(response){
     	console.log(response);
     });  

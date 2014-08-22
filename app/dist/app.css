@@ -26,6 +26,10 @@
 	width: 70%;
 }
 
+.edit-toolbar > li.full-width {
+	width:100%;
+}
+
 .edit-nav > li {
 	float: left;
 }

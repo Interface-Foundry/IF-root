@@ -7744,11 +7744,12 @@ var style = styleManager;
 aperture.set('full');
 
 $scope.mapThemes = [
-		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
+		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
 		{cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
 		{cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'}
+		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
 ];
+console.log($scope.mapThemes);
 
 $scope.mapThemeSelect = $scope.mapThemes[0];
 
@@ -7828,6 +7829,15 @@ $scope.saveWorld = function() {
 	$scope.world.loc.coordinates[0] = tempMarker.lng;
 	$scope.world.loc.coordinates[1] = tempMarker.lat;
 	
+	if (typeof $scope.world.style.maps == undefined) {
+		$scope.world.style.maps = {};
+	}
+	console.log($scope.mapThemeSelect);
+	$scope.world.style.maps.cloudMapName = $scope.mapThemeSelect.cloudMapName;
+	$scope.world.style.maps.cloudMapID = $scope.mapThemeSelect.cloudMapID;
+	
+	
+	console.log($scope.world);
     db.worlds.create($scope.world, function(response){
     	console.log(response);
     });  
@@ -9197,6 +9207,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	
   	function loadWidgets() {
 		console.log($scope.world);
+		if ($scope.style.widgets) {
 		if ($scope.style.widgets.twitter) {
 			$scope.twitter = true;
 		}
@@ -9208,11 +9219,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.wyzerr = true;
 		}
 		
-		if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
-	    }
-	     	
+		
 	  	if ($scope.style.widgets.upcoming) {
 	  		$scope.upcoming = true;
 	  		var userTime = new Date();
@@ -9230,7 +9237,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				reorderById(data);
 			}); 
 		}
-	    
+		}
+		
+	   if ($scope.world.resources) {
+		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	    }
+	     	 
 	}
 
   	$scope.loadLandmarks = function(data) {

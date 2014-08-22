@@ -27,11 +27,13 @@
 	<div class="col-xs-12 col-sm-6">
 		<label>Urban</label>
 		<div class="edit-map-card"
-			ng-class="{selected: mapThemeSelect == mapThemes[3]}">
-		<img src="/img/mapbox/urban_small.png" class="img-responsive"
-				ng-click="mapThemeSelect=mapThemes[3]">
+			ng-class="{selected: mapThemeSelect == mapThemes[3]}"
+			ng-click="mapThemeSelect=mapThemes[3]">
+		<img src="/img/mapbox/urban_small.png" class="img-responsive">
 		</div>
 	</div>
 </div>
+
+<select ng-model="mapThemeSelect" ng-options="mapTheme.cloudMapName for mapTheme in mapThemes" class='form-control'></select>
 
 <h3>Local Map</h3>

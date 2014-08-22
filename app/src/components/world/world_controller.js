@@ -132,6 +132,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	
   	function loadWidgets() {
 		console.log($scope.world);
+		if ($scope.style.widgets) {
 		if ($scope.style.widgets.twitter) {
 			$scope.twitter = true;
 		}
@@ -143,11 +144,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.wyzerr = true;
 		}
 		
-		if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
-	    }
-	     	
+		
 	  	if ($scope.style.widgets.upcoming) {
 	  		$scope.upcoming = true;
 	  		var userTime = new Date();
@@ -165,7 +162,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				reorderById(data);
 			}); 
 		}
-	    
+		}
+		
+	   if ($scope.world.resources) {
+		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	    }
+	     	 
 	}
 
   	$scope.loadLandmarks = function(data) {

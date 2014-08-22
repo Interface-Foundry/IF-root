@@ -21,3 +21,27 @@
 </div>
 
 <h3>Widgets</h3>
+					<div class="field">
+						<div class="row">
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="twitter" id="twitter" ng-model="style.widgets.twitter" ng-init="style.widgets.twitter=false">
+							<label for="twitter">Twitter</label>
+						</div>
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="instagram" id="instagram" ng-model="style.widgets.instagram" ng-init="style.widgets.instagram=false">
+							<label for="instagram">Instagram</label>
+						</div>
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="upcoming" id="upcoming" ng-model="style.widgets.upcoming" ng-init="style.widgets.upcoming=false">
+							<label for="upcoming">Upcoming</label>
+						</div>
+						<div class="col-xs-6 widgetCheck">
+							<input type="checkbox" name="categorySwitch" id="categorySwitch" ng-model="style.widgets.category" ng-init="style.widgets.category=false">
+							<label for="categorySwitch">Categories</label>
+						</div>
+						<div class="col-xs-12" ng-show="style.widgets.twitter || style.widgets.instagram">
+						Current Tag: {{world.hashtag}}
+						</div>
+						</div>
+					</div>
+				</div>
