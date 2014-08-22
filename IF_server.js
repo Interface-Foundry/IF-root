@@ -90,7 +90,7 @@ var express = require('express'),
     // Hook Socket.io into Express
     var io = require('socket.io').listen(server);
 
-    app.use(express.static(__dirname + '/app', { maxAge: oneDay }));
+    app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
 
 
     //===== PASSPORT =====//
@@ -235,7 +235,7 @@ app.post('/reset/:token', function(req, res) {
         }
 
         else {
-            if (req.body.password.length >= 6){
+            if (req.body.password.length >= 6) {
                 user.local.password = user.generateHash(req.body.password);
                 user.local.resetPasswordToken = undefined;
                 user.local.resetPasswordExpires = undefined;
@@ -878,6 +878,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     lm.id = finalID;
                     lm.valid = 1;
                     lm.loc = {type:'Point', coordinates:[req.body.loc.coordinates[0],req.body.loc.coordinates[1]] };
+                    lm.hasLoc = req.body.hasLoc || false;
                     
                     if (req.body.avatar){
                     	lm.avatar = req.body.avatar;
@@ -1001,13 +1002,24 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         id: finalID,
                         world: worldVal,
                         valid: 1,
-                        loc: {type:'Point', coordinates:[req.body.loc.coordinates[0], req.body.loc.coordinates[1]]},
                         avatar: req.body.avatar,
                         permissions: {
                             ownerID: req.user._id //from auth user ID
                         }
                     });
-
+					
+					if (req.body.loc) {
+						lm.loc = {type: 'Point',
+								coordinates: [req.body.loc.coordinates[0],
+									req.body.loc.coordinates[1]]}
+						lm.hasLoc = true;
+					} else {
+						//fake location
+						lm.loc = {type: 'Point',
+								coordinates: [-74.0059,40.7127]}
+						lm.hasLoc = false;	
+					}
+					
                     if (styleRes !== undefined){ //if new styleID created for world
                         lm.style.styleID = styleRes;
                     }
@@ -1032,29 +1044,16 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     if (req.body.hashtag){
                         lm.resources.hashtag = req.body.hashtag;
                     }
+                    
+                    if (!req.body.avatar) {
+	                    lm.avatar = "img/tidepools/default.jpg";
+                    }
 
                     //if user checks box to activate time 
-                    if (req.body.hasTime == true){
-
-                        lm.timetext.datestart = req.body.datetext.start;
-                        lm.timetext.dateend = req.body.datetext.end;
-                        lm.timetext.timestart = req.body.timetext.start;
-                        lm.timetext.timeend = req.body.timetext.end;
-
-
-                        //------ Combining Date and Time values -----//
-                        var timeStart = req.body.time.start;
-                        var timeEnd = req.body.time.end;
-
-                        var dateStart = req.body.date.start;
-                        var dateEnd = req.body.date.end;
-
-                        var datetimeStart = new Date(dateStart+' '+timeStart);
-                        var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-                        //----------//
-
-                        lm.time.start = datetimeStart;
-                        lm.time.end = datetimeEnd;
+                    if (req.body.hasTime == true){   
+                        lm.time.start = req.body.time.start || null;
+                        lm.time.end = req.body.time.end || null;
+                        lm.hasTime = true;
                     }
 
                     lm.save(function (err, landmark) {
@@ -1066,7 +1065,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             if (worldVal == true){
                                 saveProject(landmark._id, styleRes, req.user._id, function(projectRes){
                                     
-                                    var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
+                                var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
                                     res.send(idArray);
                                 });
                             }
@@ -1159,7 +1158,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         function editStyle(input){
 
-         styleSchema.findById(req.body.styleID, function(err, lm) {
+         styleSchema.findById(req.body._id, function(err, lm) {
           if (!lm){
             console.log(err);
           }
@@ -1190,10 +1189,12 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.themeFont = req.body.themeFont; // off by default
             lm.themeFontName = req.body.themeFontName; // font name
 			
-			lm.widgets.twitter = req.body.widgets.twitter;
-			lm.widgets.instagram = req.body.widgets.instagram;
-			lm.widgets.upcoming = req.body.widgets.upcoming;
+			if (req.body.widgets) {
+			lm.widgets.twitter = req.body.widgets.twitter
+			lm.widgets.instagram = req.body.widgets.instagram
+			lm.widgets.upcoming = req.body.widgets.upcoming 
 			lm.widgets.category = req.body.widgets.category;
+			}
 			
             lm.save(function(err, style) {
                 if (err){
@@ -1324,12 +1325,12 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
                     var current = fileNumber_str + '.' + fileType;
 
                     //checking for existing file, if unique, write to dir
-                    if (fs.existsSync("app/uploads/" + current)) {
+                    if (fs.existsSync("app/dist/uploads/" + current)) {
                         continue; //if there are max # of files in the dir this will infinite loop...
                     } 
                     else {
 
-                        var newPath = "app/uploads/" + current;
+                        var newPath = "app/dist/uploads/" + current;
 
                         fstream = fs.createWriteStream(newPath);
                         file.pipe(fstream);

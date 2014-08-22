@@ -1,0 +1,32 @@
+<div class="container-fluid">
+	
+	<div class="row">
+		<div class="col-xs-12 col-sm-10 col-sm-offset-1">
+			<h3><a ng-href="/#/newworld">+ Add New World</a></h3>
+			<hr>
+			<h4>Nearby Bubbles</h4> 
+			<li ng-repeat="bubble in nearbyBubbles">
+				<a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
+			</li>
+			<a ng-show="!nearbyBubbles" ng-href="/#/">Find Nearby Bubbles</a>
+			
+			<form action="//interfacefoundry.us3.list-manage.com/subscribe/post?u=ac66b7064177bb1b23c6cc522&amp;id=aea15b72e4" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>                            
+				<h4>Subscribe to our mailing list</h4>
+				<div class="input-group">
+					<input type="email" value="" name="EMAIL" class="form-control" id="mce-EMAIL" placeholder="email address" required>
+					<span class="input-group-btn">
+					<button class="btn btn-default" style="background-color:#EB4BA6; color:white;" type="submit">Submit</button>
+					</span>
+				</div>
+		<!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+				<div class="hidden">
+				<input type="text" name="b_ac66b7064177bb1b23c6cc522_aea15b72e4" tabindex="-1" value="">
+				</div>
+		    </form>
+			
+			<h4>Powered By</h4>
+			<a href="http://interfacefoundry.com"><img class="img-responsive" src="img/IF/IF_horizontal.png"></a>
+		</div>
+	</div>
+<div class="drawer-bar"></div>
+</div>

@@ -1,0 +1,29 @@
+<a href="#/w/{{worldURL}}" class="back btn btn-default btn-sm"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
+<div id="shelf" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]" class="navfix">
+<div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
+<div class="row">
+
+<div class="col-xs-12" ng-class="{'col-sm-6': now}">
+	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Upcoming</h4>
+	<div ng-class="{'row': !now}">
+	<div class="landmark" ng-class="{'col-sm-6': !now}" 
+						ng-repeat="landmark in upcoming">
+	<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
+		<div class="media card" ng-style="{'background-color': style.cardBG_color}" ng-class="{'last': $last}">
+			<img ng-src="{{landmark.avatar}}" class="avatar media-object vertical-middle" ng-cloak> 
+			<div class="media-body">
+				<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>
+					<span>{{ landmark.name }}
+					<small style="color:#CCC">{{landmark.time.start | date: 'shortTime'}}</small></span>
+				</h3>
+				<span ng-cloak>{{landmark.summary}}</span>
+			
+			</div>
+			
+		</div>
+	</a>
+</div>
+
+</div>
+</div>
+</div>

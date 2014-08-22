@@ -1,0 +1,30 @@
+<div class="container-fluid defaultBG navfix">
+<div class="row">
+<div class="col-xs-12">
+<h1>Login</h1>
+<form ng-submit="login()">
+  <p>
+    <label class="control-label">Email</label>
+  	<input name="email" type="email" placeholder="Email" ng-model="user.email" required />
+  </p>
+  <p>
+    <label class="control-label">Password</label>
+  	<input name="password" type="password" placeholder="Password" ng-model="user.password" required /><br/>
+  </p>
+  <p>
+    <button name="submit" type="submit" class="btn btn-primary">Login</button>
+  </p>
+<p><a ng-href="/#/forgot">Forgot your password?</a></p>
+
+<alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
+
+</form>
+
+<p>Or Login with:</p>
+<a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+<a href="/auth/twitter" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
+
+<p>Don't have an account? <a ng-href="/#/signup">Signup</a></p>
+</div>
+</div>
+</div>

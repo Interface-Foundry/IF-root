@@ -1,0 +1,68 @@
+.edit-view {
+	position: absolute;
+	top: 0px;
+	width: 40%;
+	height: 100%;
+	
+	
+	overflow: scroll;
+}
+
+.edit-toolbar {
+	position: absolute;
+	right: 0px;
+	top: 40px;
+	width: 60%;
+}
+
+.edit-toolbar > li {
+	position: relative;
+	float: right;
+	margin-right: 8px;
+	margin-top: 8px;
+}
+
+.edit-toolbar > li.input-group {
+	width: 70%;
+}
+
+.edit-nav > li {
+	float: left;
+}
+
+.edit-container {
+	min-height: 100%;
+	background: rgba(255,255,255,0.8);	
+}
+
+.world-icon {
+	text-align: center;
+	cursor: pointer;
+}
+.world-icon span { 
+	font-size: 50px;
+}
+.world-icon label {
+	display: block;
+	margin: 0px;
+}
+
+.edit-map-card {
+	padding: 4px;
+	margin-bottom: 20px;
+	background: white;
+	box-shadow: 0px 2px 2px rgba(0,0,0,.23);
+}
+
+.edit-map-card.selected {
+	box-shadow: 0px 0px 2px 2px rgba(0,135,158,0.2);
+}
+
+.live-preview {
+	position: absolute;
+	bottom:5%;
+	right:16px;
+	width: 320px;
+height: 480px;
+box-shadow: 2px 2px 2px rgba(0,0,0,0.2)
+}

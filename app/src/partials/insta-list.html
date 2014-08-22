@@ -1,0 +1,32 @@
+<div id="shelf">
+<div class="container-fluid defaultBG navfix">
+  <div class="row-fluid">
+
+    <div class="col-xs-10 col-offset-1">
+      <!--Body content-->
+
+      <br><br>
+       <span><button class="btn btn-default btn-sm back" ng-click="goBack()"><span class="glyphicon glyphicon-chevron-left"></span> BACK </button></span>
+
+        
+        <div class=""><h3 style="color:#63b3fb;"> Instagram #{{currentTag}} </h3></div>
+
+
+        <li ng-repeat="instagram in instagrams">
+          
+          <div class="col-xs-12  4-col social instagram" style="margin-bottom:30px;">
+         
+            <div class="card container more">
+              <p class="content"><img ng-src="images/instagram/{{instagram.local_path[0]}}" width="100%"></p>
+              <span class="watermark typcn typcn-social-instagram"></span>
+              <h1 style="color:black; text-transform:none; font-size:1.6rem;">{{instagram.text}}</h1>
+            </div>
+            <a ng-href="http://instagram.com/{{instagram.user.screen_name}}" target="_blank"><div class="footer lecture-footer">@{{instagram.user.screen_name}} <span class="typcn typcn-export pull-right"><span></div></a>
+          </div>
+        </li>     
+
+
+    </div>
+  </div>
+</div>
+</div>

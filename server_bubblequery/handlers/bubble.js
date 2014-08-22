@@ -40,13 +40,13 @@ exports.listBubbles = function(req, res) {
             err.message,
             null);
           console.log(listBubblesResponse);
-          return res.send(listBubblesResponse);
+          return res.send([data]);
         }
         listBubblesResponse = new Response(integers.CODE_SUCCESS,
           strings.MESSAGE_SUCCESS,
           data);
         console.log(listBubblesResponse);
-        return res.send(listBubblesResponse);
+        return res.send([data]);
       });
   }
   catch (err) {

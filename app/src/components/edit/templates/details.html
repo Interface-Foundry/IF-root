@@ -1,0 +1,71 @@
+<h3>Details</h3>
+<div class="form-group">
+	<label for="name">Name</label>
+	<input type="text" class="form-control"
+							name="name"
+							ng-model="world.name">
+</div>
+<div class="form-group">
+	<label for="summary">Summary</label>
+	<input type="text" class="form-control"
+						name="summary"
+						ng-model="world.summary">
+</div>
+<div class="form-group">
+	<label for="description">Description</label>
+	<textarea class="form-control textarea-v-resize"
+						name="description"
+						ng-model="world.description">
+	</textarea>
+</div>
+
+
+<div class="row">
+	<div class="col-xs-12 col-sm-6">
+		<div class="form-group">
+			<label for="hashtag">Hashtag</label>
+			<input type="text" class="form-control"
+								name="hashtag"
+								ng-model="world.hashtag">
+		</div>
+		<div class="form-group">
+			<label for="category">Category</label>
+			<input type="text" class="form-control"
+								name="category"
+								ng-model="world.category">
+		</div>
+		</div>
+		<div class="col-xs-12 col-sm-6">
+		<div class="form-group">
+			<label>World Icon</label>
+			<div class="well world-icon">
+				<span class="glyphicon glyphicon-picture" ng-file-select="onWorldIconSelect($files)">
+				</span>
+				<label>Upload</label>
+			</div>
+		</div>
+	</div>
+</div>
+
+<a href="" ng-click="world.hasTime=true" ng-hide="world.hasTime=true">Enable Time</a>
+
+<div ng-show="world.hasTime">
+	<div class="form-group form-inline">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> Start Time</label><br>
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="world.time.start" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="world.time.start" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+	<div class="form-group form-inline">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time</label><br>
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="world.time.end" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="world.time.end" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+</div>

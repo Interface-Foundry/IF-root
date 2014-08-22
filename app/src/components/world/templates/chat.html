@@ -1,0 +1,30 @@
+	<div class="row" ng-style="{'background-color': style.bodyBG_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'"> 
+		<div class="col-xs-12">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Reactions</h4>
+			<div class="card" ng-style="{'background-color': style.cardBG_color}">
+			<div class="row">
+				<div class="col-xs-6">
+					<div id="reactionChat" style="cursor:pointer;" ng-click="routeChat()">
+				    <p>{{messages[messages.length-1].user}}</p>
+				    <p ng-bind-html="messages[messages.length-1].text | unsafe"></p>
+				    <p>{{messages[messages.length-1].time}}</p> 
+					</div>
+				</div>
+				<div class="col-xs-6 emoForm">
+					   <form ng-submit="sendMessage()">
+						    <div class="row emoGrid">
+						      <div ng-click="sendEmo('cool')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/cool.png"></div>
+						      <div ng-click="sendEmo('dolphin')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/dolphin.png"></div>
+						      <div ng-click="sendEmo('ghost')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/ghost.png"></div>
+						      <div ng-click="sendEmo('heart')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/heart.png"></div>
+						      <div ng-click="sendEmo('love')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/love.png"></div>
+						      <div ng-click="sendEmo('party')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/party.png"></div>
+						      <div ng-click="sendEmo('smile')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/smile.png"></div>
+						      <div ng-click="sendEmo('woah')" class="col-xs-6 col-sm-3 emoButton"><img width="30" src="img/emoji/woah.png"></div>
+							</div>
+						</form>
+				</div>
+			</div>
+			</div>
+		</div>
+	</div>

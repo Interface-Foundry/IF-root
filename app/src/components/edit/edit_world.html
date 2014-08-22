@@ -1,0 +1,70 @@
+<ul class="edit-toolbar">
+<li>
+		<button ng-click="saveWorld()" class="btn btn-default"><span class="glyphicon glyphicon-floppy-disk"></span></button>
+</li>
+<li class="input-group">
+		<input type="text" class="form-control" ng-model="searchText" ng-enter="search()">
+		<span class="input-group-btn">
+			<button class="btn btn-default" type="button" ng-click="search()">
+				<span class="glyphicon glyphicon-search"></span>
+			</button>
+		</span>
+</li>
+</ul>
+
+<div class="live-preview" ng-style="{'background-color':style.bodyBG_color}"
+						ng-show="view=='styles'">
+						<div class="container-fluid">
+							<div class="row">
+								<div ng-style="{'background-color': style.titleBG_color}" class="col-xs-12">
+									<h1 ng-style="{'color': style.worldTitle_color}">World Title Color</h1>
+								</div>
+									<h4 class='category-heading' ng-style="{'color': style.categoryTitle_color}">Category Title Color</h4>
+								<div  class="col-xs-12 landmark">
+									<div class="media card" ng-style="{'background-color': style.cardBG_color}">
+										<img ng-src="img/tidepools/default.jpg" class="avatar media-object pull-left vertical-middle" ng-cloak>
+										<div class="media-body">
+											<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>Landmark Name</h3>
+											<em>Landmark Summary</em>
+										</div>
+									</div>
+									
+							</div>
+						</div>
+					</div>
+</div>
+
+
+<div class="edit-view navfix">
+<!--details editor-->
+<div class="edit-container container-fluid">
+	<div class="row">
+		<div class="col-xs-12">
+		<ul class="nav edit-nav">
+			<li ng-class="{'active': view=='details'}">
+				<a ng-href="#/edit/w/{{worldURL}}/details">Details</a>
+			</li>
+			<li ng-class="{'active': view=='maps'}">
+				<a ng-href="#/edit/w/{{worldURL}}/maps">Maps</a>
+			</li>
+			<li ng-class="{'active': view=='styles'}">
+				<a ng-href="#/edit/w/{{worldURL}}/styles">Styles</a>
+			</li>
+		</ul>
+		<hr>
+			<div ng-switch on="view">
+				<div ng-switch-when="details">
+					<div ng-include="'components/edit/templates/details.html'"></div>
+				</div>
+				<div ng-switch-when="maps">
+					<div ng-include="'components/edit/templates/maps.html'"></div>
+				</div>
+				<div ng-switch-when="styles">
+					<div ng-include="'components/edit/templates/styles.html'"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</div>

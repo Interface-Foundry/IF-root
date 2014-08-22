@@ -1,0 +1,61 @@
+<div id="shelf" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+<div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
+<div class="row">
+		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
+							ng-style="{'background-color': style.titleBG_color}" 
+							ng-click="aperture.toggle('full')">
+			<div class="media">
+				<div class="pull-left vertical-middle">
+					<img class="media-object avatar" ng-src="{{world.avatar}}">
+				</div>
+				<div class="media-body vertical-middle">
+					<h3 class="media-heading" ng-style="{color: style.worldTitle_color}">{{world.name}}</h3>
+					<h6 ng-cloak ng-style="{color: style.worldTitle_color}">{{world.timetext.timestart | date : 'shortTime'}} {{world.timetext.timeend | date: 'shortTime'}}</h6>
+				</div>
+			</div>
+		</div>
+	
+	<!--category-->
+	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
+	
+	<!--now--> <!--upcoming-->
+	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
+
+	<!--explore-->
+	<ul ng-style="{'background-color': style.bodyBG_color}">
+		<div class="col-xs-12">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
+		</div>
+		<li ng-repeat="landmark in landmarks" 
+			ng-controller="WorldRepeatController"
+			class="col-sm-6 col-xs-12 landmark">
+			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
+				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
+					<img ng-src="{{landmark.avatar}}" class="avatar media-object vertical-middle" ng-cloak> 
+					<div class="media-body">
+						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>
+							<span>{{ landmark.name }}
+							<small style="color:#CCC">{{landmark.time.start | date: 'shortTime'}}</small></span>
+						</h3>
+						<span class="media-body-text" ng-cloak>{{landmark.summary}}</span>
+					</div>
+				</div>
+			</a>
+		</li>
+	</ul>
+	
+	<!--TWITTER-->
+	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null"></div>
+	
+	<!--INSTAGRAM-->
+	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null"></div>
+
+	<!--WYZERR-->
+	<div ng-include="wyzerr ? 'components/world/templates/wyzerr.html' : null"></div>
+	
+	<div class="col-xs-12"><div style="height:200px;"></div></div>
+</div>
+<div style="padding: 15px;" ng-show="showLogout"><a class="btn btn-default btn-sm" ng-href="#/edit/landmarks/{{worldURL}}"><span class="glyphicon glyphicon-plus"></span> Add a Landmark</a></div>
+
+</div>
+</div>
