@@ -1,35 +1,34 @@
-<h3>Maps</h3>
 <div class="row">
 	<div class="col-xs-12 col-sm-6">
 		<label>Arabesque</label>
 		<div class="edit-map-card"
-			ng-class="{selected: mapThemeSelect == mapThemes[0]}">
+			ng-class="{selected: mapThemeSelect == 'arabesque'}">
 		<img src="/img/mapbox/arabesque_small.png" class="img-responsive"
-				ng-click="mapThemeSelect=mapThemes[0]">
+				ng-click="selectMapTheme('arabesque')">
 		</div>
 	</div>
 	<div class="col-xs-12 col-sm-6">
 		<label>Fairy</label>
 		<div class="edit-map-card"
-			ng-class="{selected: mapThemeSelect == mapThemes[1]}">
+			ng-class="{selected: mapThemeSelect == 'fairy'}">
 		<img src="/img/mapbox/fairy_small.png" class="img-responsive"
-				ng-click="mapThemeSelect=mapThemes[1]">
+				ng-click="selectMapTheme('fairy')">
 		</div>
 	</div>
 	<div class="col-xs-12 col-sm-6">
 		<label>Sunset</label>
 		<div class="edit-map-card"
-			ng-class="{selected: mapThemeSelect == mapThemes[2]}">
+			ng-class="{selected: mapThemeSelect == 'sunset'}">
 		<img src="/img/mapbox/sunset_small.png" class="img-responsive"
-				ng-click="mapThemeSelect=mapThemes[2]">
+				ng-click="selectMapTheme('sunset')">
 		</div>
 	</div>
 	<div class="col-xs-12 col-sm-6">
 		<label>Urban</label>
 		<div class="edit-map-card"
-			ng-class="{selected: mapThemeSelect == mapThemes[3]}"
-			ng-click="mapThemeSelect=mapThemes[3]">
-		<img src="/img/mapbox/urban_small.png" class="img-responsive">
+			ng-class="{selected: mapThemeSelect == 'urban'}">
+		<img src="/img/mapbox/urban_small.png" class="img-responsive"
+				ng-click="selectMapTheme('urban')">
 		</div>
 	</div>
 </div>

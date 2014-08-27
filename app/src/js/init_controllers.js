@@ -132,11 +132,12 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
+    $scope.alerts = alertManager;
     $rootScope.messages = [];
     
     

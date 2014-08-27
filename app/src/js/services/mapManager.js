@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData','apertureService', 
-    	function(leafletData, apertureService) {
+    .factory('mapManager', ['leafletData','apertureService', '$rootScope', 
+    	function(leafletData, apertureService, $rootScope) {
 var mapManager = {
 	center: {
 		lat: 42,
@@ -38,7 +38,7 @@ worldBounds: {
 			}
 		},
 		zoomControlPosition: 'bottomleft',
-	},
+	}
 };
 
 mapManager.setCenter = function(latlng, z) {
@@ -80,11 +80,11 @@ mapManager.addMarker = function(key, marker, safe) {
 			console.log('Safe mode cant add marker: Key in use');
 			return false;
 		} else {
-			mapManager.markers[key] = angular.copy(marker);
+			mapManager.markers[key] = marker;
 			console.log('Marker added');
 		}
 	} else {
-		mapManager.markers[key] = angular.copy(marker);
+		mapManager.markers[key] = marker;
 		console.log('Marker added');
 	}
 	return true;
@@ -269,6 +269,23 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log(mapManager);
 	console.log(newOverlay);
 };
+
+mapManager.addCircleMaskToMarker = function(key, radius, state) {
+	console.log('addCircleMaskToMarker');
+	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 150, state);
+	leafletData.getMap().then(function(map){map.addLayer(mapManager.circleMaskLayer);});
+	$rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+		mapManager.circleMaskLayer._draw();
+	});
+}
+
+mapManager.setCircleMaskState = function(state) {
+	if (mapManager.circleMaskLayer) {
+		mapManager.circleMaskLayer._setState(state);
+	} else {
+		console.log('no circleMaskLayer');
+	}
+}
 
 return mapManager;
     }]);

@@ -1,18 +1,33 @@
 .edit-view {
 	position: absolute;
 	top: 0px;
+	bottom: 0px;
 	width: 40%;
-	height: 100%;
 	
-	
-	overflow: scroll;
+	margin-top: 40px;
+	overflow: hidden;
+}
+
+div.edit-aperture {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 60%;
+	pointer-events: none !important;
+}
+
+.edit-aperture * {
+	pointer-events: auto;
 }
 
 .edit-toolbar {
 	position: absolute;
 	right: 0px;
 	top: 40px;
-	width: 60%;
+	width: 100%;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .edit-toolbar > li {
@@ -26,17 +41,62 @@
 	width: 70%;
 }
 
-.edit-toolbar > li.full-width {
-	width:100%;
+.edit-toolbar.tuck {
+	top: -8px;
 }
 
-.edit-nav > li {
+.edit-nav {
+	width: 100%;
+	height: 44px;
+	margin: 0px;
+}
+
+.edit-nav li {
+	height: 44px;
+	width: 25%;
+	
 	float: left;
+	
+	background-color: rgba(255,255,255,0.8);
+	
+	text-align: center;
+	font-size: 14px;
+	line-height: 44px;
+}
+
+.edit-nav li > span {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;
+	
+	color: #808080;
+}
+
+.edit-nav::before {
+	width: 100%;
+	height: 6px;
+	background-color: rgba(230,230,230,0.8);
+	display: block;
+	content: '';
+}
+
+.edit-nav li.active {
+	border-bottom: 4px solid #0091ea;
+}
+
+.edit-nav li.active > span {
+	color: #0091ea;
 }
 
 .edit-container {
-	min-height: 100%;
-	background: rgba(255,255,255,0.8);	
+	position: absolute;
+	top: 50px;
+	bottom: 0px;
+	width: 100%;
+	
+	padding-top: 16px;
+	overflow: auto;
+	background: rgba(255,255,255,0.8);
 }
 
 .world-icon {
@@ -51,22 +111,128 @@
 	margin: 0px;
 }
 
+.edit-widget-well {
+	height: 190px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.edit-widget {
+	position: relative;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.edit-widget > label {
+	position: relative;
+	z-index: 10;
+	background: #f5f5f5;
+}
+
+.edit-widget.active > label {
+	transform: translateX(46px);
+	-webkit-transform: translateX(46px);
+	background: #FFF;
+}
+
+.edit-widget > .icon {
+	display: block;
+	position: absolute;
+	top: 25px;
+	z-index: 0;
+	
+	font-size: 30px;
+	color: #4caf50;
+}
+
+.edit-widget > label > input {
+	position: absolute;
+	visibility: hidden;
+}
+
 .edit-map-card {
 	padding: 4px;
 	margin-bottom: 20px;
 	background: white;
 	box-shadow: 0px 2px 2px rgba(0,0,0,.23);
+	
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .edit-map-card.selected {
-	box-shadow: 0px 0px 2px 2px rgba(0,135,158,0.2);
+	box-shadow: 0px 6px 6px rgba(0,0,0,.23);
+	background: #0091EA;
 }
 
 .live-preview {
 	position: absolute;
-	bottom:5%;
-	right:16px;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+	-webkit-transform: translateX(-50%) translateY(-50%);
 	width: 320px;
-height: 480px;
-box-shadow: 2px 2px 2px rgba(0,0,0,0.2)
+	height: 480px;
+	
+	margin: 0 auto;
+	box-shadow: 2px 2px 2px rgba(0,0,0,0.2)
+}
+
+.btn-search {
+	width: 72px;
+	color: #FFF;
+	background-color: #0091EA;
+	border-color: #9999FF;
+}
+
+.edit-nav > li.edit-publish {
+	position: relative;
+	background-color: rgba(230,230,230,0.8);
+	padding: 4px;
+	line-height: normal;
+}
+
+.edit-status {
+	display: block;
+	font-size: 10px;
+	margin-top: 5px;
+	margin-right: 4px;
+	float: right;
+}
+
+.btn.btn-publish {
+	position: relative;
+	margin-top: 4px; 
+	/* padding: 0px 4px; */
+	border-radius: 8px;
+	/* font-size: 10px; */
+	
+	background-color: #0091EA;
+	color: #FFF;
+	border: none;
+}
+
+.btn.btn-draft {
+	display: block;
+	float: right;
+}
+
+.btn.btn-publish:hover {
+	color: #FFF;
+}
+
+.btn.btn-publish:active, .btn.btn-publish:focus, .btn.btn-publish:active:focus {
+	outline: none;
+	box-shadow: none;
+	color: #FFF;
+}
+
+.btn.btn-save {
+	width: 100%;
+}
+
+.if-circle-mask {
+	
 }

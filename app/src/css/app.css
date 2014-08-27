@@ -203,7 +203,7 @@ nav li input.form-control {
   height: 100%;
   
   color: white;
-  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+ 
 
   z-index: 100;
 }
@@ -230,10 +230,32 @@ nav li input.form-control {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
+#alerts {
+	position: absolute;
+	top: 48px;
+	left: 0px;
+	width: 100%;
+	z-index: 200;
+}
+
+#alerts > li {
+	-webkit-transition: 0.5s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
+	transform: translateY(0);
+}
+
+#alerts > li.ng-enter {
+	transform: translateY(30px);
+}
+
+#alerts > li.ng-enter.ng-enter-active {
+	transform: translateY(0px);
+}
+
 .container{
   /* max-width: 384px; */
   width: 100%;
-  background: white;
+  /* background: white; */
 }
 
 .container a{

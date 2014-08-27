@@ -152,14 +152,35 @@ angular.module('tidepoolsServices', ['ngResource'])
     // });
 
 	//handling alerts
-   .factory('alertManager', [function () {
+   .factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[]
    		};
 
-   		alerts.addAlert = function(alertType, alertMsg) {
-   			alerts.list = []; //clear alerts automatically for now to show one
-   			alerts.list.push({type: alertType, msg: alertMsg});
+   		alerts.addAlert = function(alertType, alertMsg, timeout) {
+   			alerts.list = []; //clear alerts automatically for now to show onerror
+   			var alertClass;
+   			switch (alertType) {
+	   			case 'success':
+	   				alertClass = 'alert-success';
+	   				break;
+	   			case 'info':
+	   				alertClass = 'alert-info';
+	   				break;
+	   			case 'warning':
+	   				alertClass = 'alert-warning';
+	   				break;
+	   			case 'danger': 
+	   				alertClass = 'alert-danger';
+	   				break;
+   			}
+   			var len = alerts.list.push({class: alertClass, msg: alertMsg});
+   			if (timeout) {
+   			$timeout(function () {
+	   			alerts.list.splice(len-1, 1);
+   			}, 2000);
+   			
+   			}
    		}
 
    		alerts.closeAlert = function(index) {

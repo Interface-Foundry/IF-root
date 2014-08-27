@@ -5255,11 +5255,12 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
+    $scope.alerts = alertManager;
     $rootScope.messages = [];
     
     
@@ -5696,14 +5697,35 @@ angular.module('tidepoolsServices', ['ngResource'])
     // });
 
 	//handling alerts
-   .factory('alertManager', [function () {
+   .factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[]
    		};
 
-   		alerts.addAlert = function(alertType, alertMsg) {
-   			alerts.list = []; //clear alerts automatically for now to show one
-   			alerts.list.push({type: alertType, msg: alertMsg});
+   		alerts.addAlert = function(alertType, alertMsg, timeout) {
+   			alerts.list = []; //clear alerts automatically for now to show onerror
+   			var alertClass;
+   			switch (alertType) {
+	   			case 'success':
+	   				alertClass = 'alert-success';
+	   				break;
+	   			case 'info':
+	   				alertClass = 'alert-info';
+	   				break;
+	   			case 'warning':
+	   				alertClass = 'alert-warning';
+	   				break;
+	   			case 'danger': 
+	   				alertClass = 'alert-danger';
+	   				break;
+   			}
+   			var len = alerts.list.push({class: alertClass, msg: alertMsg});
+   			if (timeout) {
+   			$timeout(function () {
+	   			alerts.list.splice(len-1, 1);
+   			}, 2000);
+   			
+   			}
    		}
 
    		alerts.closeAlert = function(index) {
@@ -5740,8 +5762,8 @@ angular.module('tidepoolsServices', ['ngResource'])
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData','apertureService', 
-    	function(leafletData, apertureService) {
+    .factory('mapManager', ['leafletData','apertureService', '$rootScope', 
+    	function(leafletData, apertureService, $rootScope) {
 var mapManager = {
 	center: {
 		lat: 42,
@@ -5777,7 +5799,7 @@ worldBounds: {
 			}
 		},
 		zoomControlPosition: 'bottomleft',
-	},
+	}
 };
 
 mapManager.setCenter = function(latlng, z) {
@@ -5819,11 +5841,11 @@ mapManager.addMarker = function(key, marker, safe) {
 			console.log('Safe mode cant add marker: Key in use');
 			return false;
 		} else {
-			mapManager.markers[key] = angular.copy(marker);
+			mapManager.markers[key] = marker;
 			console.log('Marker added');
 		}
 	} else {
-		mapManager.markers[key] = angular.copy(marker);
+		mapManager.markers[key] = marker;
 		console.log('Marker added');
 	}
 	return true;
@@ -6008,6 +6030,23 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log(mapManager);
 	console.log(newOverlay);
 };
+
+mapManager.addCircleMaskToMarker = function(key, radius, state) {
+	console.log('addCircleMaskToMarker');
+	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 150, state);
+	leafletData.getMap().then(function(map){map.addLayer(mapManager.circleMaskLayer);});
+	$rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+		mapManager.circleMaskLayer._draw();
+	});
+}
+
+mapManager.setCircleMaskState = function(state) {
+	if (mapManager.circleMaskLayer) {
+		mapManager.circleMaskLayer._setState(state);
+	} else {
+		console.log('no circleMaskLayer');
+	}
+}
 
 return mapManager;
     }]);
@@ -7735,28 +7774,55 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 });
 }
 
-function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, $upload) {
+function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload) {
 console.log('--EditController--');
 
 var aperture = apertureService;
 var map = mapManager;
 var style = styleManager;
+var alerts = alertManager;
 aperture.set('full');
 
-$scope.mapThemes = [
-		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-		{cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-		{cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
-];
-console.log($scope.mapThemes);
-
-$scope.mapThemeSelect = $scope.mapThemes[0];
+$scope.mapThemeSelect = 'arabesque';
 
 if ($routeParams.view) {
 	$scope.view = $routeParams.view;
 } else {
 	$scope.view = 'details';
+}
+
+console.log($scope.view); 
+$scope.worldURL = $routeParams.worldURL;
+
+var lastRoute = $route.current;
+$scope.$on('$locationChangeSuccess', function (event) {
+    if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
+        $scope.view = $route.current.params.view;
+        $route.current = lastRoute;
+        console.log($scope.view);
+    }
+    $scope.initView();
+});
+
+$scope.$watch('style.navBG_color', function(current, old) {
+	style.navBG_color = current;
+});
+
+$scope.initView = function() {
+	switch ($scope.view) {
+		case 'details':
+		map.setCircleMaskState('mask');
+		
+			break;
+		case 'maps': 
+		map.setCircleMaskState('mask');
+		
+			break;
+		case 'styles':
+		console.log('switching to styles');
+		map.setCircleMaskState('cover');
+			break;
+	}
 }
 
 $scope.onWorldIconSelect = function($files) {
@@ -7772,17 +7838,18 @@ $scope.onWorldIconSelect = function($files) {
 	});
 }
 
-console.log($scope.view); 
-$scope.worldURL = $routeParams.worldURL;
-
-var lastRoute = $route.current;
-$scope.$on('$locationChangeSuccess', function (event) {
-    if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
-        $scope.view = $route.current.params.view;
-        $route.current = lastRoute;
-        console.log($scope.view);
-    }
-});
+$scope.selectMapTheme = function(name) {
+	console.log('--selectMapTheme--', name);
+	var mapThemes = {
+		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
+		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
+		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
+		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
+	};
+	if (typeof name === 'string') {
+		$scope.mapThemeSelect = name;
+	}
+}
 
 $scope.loadWorld = function(data) {
 	  	$scope.world = data.world;
@@ -7820,6 +7887,7 @@ $scope.loadWorld = function(data) {
 }
 
 $scope.saveWorld = function() {
+	$scope.whenSaving = true;
 	console.log('saveWorld(edit)');
 	$scope.world.newStatus = false; //not new
 	//$scope.world.worldID = $scope.worldID;
@@ -7833,17 +7901,20 @@ $scope.saveWorld = function() {
 		$scope.world.style.maps = {};
 	}
 	console.log($scope.mapThemeSelect);
-	$scope.world.style.maps.cloudMapName = $scope.mapThemeSelect.cloudMapName;
-	$scope.world.style.maps.cloudMapID = $scope.mapThemeSelect.cloudMapID;
+	//$scope.world.style.maps.cloudMapName = $scope.mapThemeSelect.cloudMapName;
+	//$scope.world.style.maps.cloudMapID = $scope.mapThemeSelect.cloudMapID;
 	
 	
 	console.log($scope.world);
-    db.worlds.create($scope.world, function(response){
+    db.worlds.create($scope.world, function(response) {
+    	console.log('--db.worlds.create response--');
     	console.log(response);
+    	$scope.whenSaving = false;
+    	alerts.addAlert('success', 'Save successful!', true);
     });  
     
     db.styles.create($scope.style, function(response){
-        	console.log(response);
+        console.log(response);
     });
 }
 
@@ -7864,6 +7935,15 @@ $scope.search = function() {
 					} else { console.log('No results found.')}
 				});
 	}
+}
+
+$scope.setEndTime = function() {
+	var time = {
+		start: new Date($scope.world.time.start),
+		end: new Date($scope.world.time.end)
+		}
+	
+	time.end = new Date(time.start.setUTCHours(time.start.getUTCHours()+3));
 }
 
 
@@ -7891,8 +7971,23 @@ function showPosition(position) {
 		draggable: true,
 		icon: local_icons.yellowIcon
 	});
-			
-	/*
+	
+	var state;
+	console.log('$scope.view', $scope.view);
+	switch ($scope.view) {
+		case 'details':
+		state = 'mask';
+		break;
+		case 'maps':
+		state = 'mask';
+		break;
+		case 'styles':
+		state = 'cover';
+		break;
+	}
+	map.addCircleMaskToMarker('m', 150, state);
+
+/*
 map.addPath('worldBounds', {
 		type: 'circle',
 		radius: 150,

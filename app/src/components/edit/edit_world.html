@@ -1,18 +1,12 @@
-<ul class="edit-toolbar">
-
-<li>
-		<button ng-click="saveWorld()" class="btn btn-default"><span class="glyphicon glyphicon-floppy-disk"></span></button>
-</li>
+<div class="edit-aperture">
+<ul class="edit-toolbar" ng-class="{'tuck': view=='styles'}">
 <li class="input-group">
 		<input type="text" class="form-control" ng-model="searchText" ng-enter="search()">
 		<span class="input-group-btn">
-			<button class="btn btn-default" type="button" ng-click="search()">
+			<button class="btn btn-search" type="button" ng-click="search()">
 				<span class="glyphicon glyphicon-search"></span>
 			</button>
 		</span>
-</li>
-<li class="full-width">
-	<a href="#/w/{{worldURL}}" class="btn btn-primary btn-xs pull-right">Go to {{world.name}}</a>
 </li>
 </ul>
 
@@ -37,25 +31,34 @@
 						</div>
 					</div>
 </div>
-
-
-<div class="edit-view navfix">
-<!--details editor-->
-<div class="edit-container container-fluid">
-	<div class="row">
-		<div class="col-xs-12">
-		<ul class="nav edit-nav">
+</div>
+<div class="edit-view">
+<ul class="edit-nav">
+			<a ng-href="#/edit/w/{{worldURL}}/details">
 			<li ng-class="{'active': view=='details'}">
-				<a ng-href="#/edit/w/{{worldURL}}/details">Details</a>
+				<span>Details</span>
 			</li>
+			</a>
+			<a ng-href="#/edit/w/{{worldURL}}/maps">
 			<li ng-class="{'active': view=='maps'}">
-				<a ng-href="#/edit/w/{{worldURL}}/maps">Maps</a>
+				<span>Maps</span>
 			</li>
+			</a>
+			<a ng-href="#/edit/w/{{worldURL}}/styles">
 			<li ng-class="{'active': view=='styles'}">
-				<a ng-href="#/edit/w/{{worldURL}}/styles">Styles</a>
+				<span>Styles</span>
+			</li>
+			</a>
+			<li class="edit-publish">
+				<button class="btn btn-publish btn-save" ng-click="saveWorld()">Save</button>
+				<!--<button class="btn btn-publish btn-draft">draft <span class="caret"></span></button><span class="edit-status">status</span>
+				<button class="btn btn-publish btn-save" ng-click="saveWorld()">save</button>-->
 			</li>
 		</ul>
-		<hr>
+<div class="edit-container">
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12">
 			<div ng-switch on="view">
 				<div ng-switch-when="details">
 					<div ng-include="'components/edit/templates/details.html'"></div>
@@ -70,5 +73,5 @@
 		</div>
 	</div>
 </div>
-
+</div>
 </div>

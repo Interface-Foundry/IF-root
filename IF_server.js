@@ -961,6 +961,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         else {
                             console.log(landmark);
                             console.log('success');
+                            res.send([landmark]);
                         }
                     });
                   }
