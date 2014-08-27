@@ -166,7 +166,7 @@ $scope.setEndTime = function() {
 		start: new Date($scope.world.time.start),
 		end: new Date($scope.world.time.end)
 		}
-	
+	console.log(time);
 	time.end = new Date(time.start.setUTCHours(time.start.getUTCHours()+3));
 }
 
