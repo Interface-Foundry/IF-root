@@ -1,13 +1,26 @@
-function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload) {
+function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
 console.log('--EditController--');
 
 var aperture = apertureService;
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
+var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+zoomControl.style.top = "50px";
+zoomControl.style.left = "40%";
 aperture.set('full');
 
 $scope.mapThemeSelect = 'arabesque';
+
+$scope.categories = [
+	{name:'Convention'},
+	{name: 'Park'}
+];
+
+$http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
+	$scope.locale = angular.fromJson(data);
+	$scope.tooltips = $scope.locale.tooltips;
+});
 
 if ($routeParams.view) {
 	$scope.view = $routeParams.view;
@@ -19,18 +32,7 @@ console.log($scope.view);
 $scope.worldURL = $routeParams.worldURL;
 
 var lastRoute = $route.current;
-$scope.$on('$locationChangeSuccess', function (event) {
-    if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
-        $scope.view = $route.current.params.view;
-        $route.current = lastRoute;
-        console.log($scope.view);
-    }
-    $scope.initView();
-});
 
-$scope.$watch('style.navBG_color', function(current, old) {
-	style.navBG_color = current;
-});
 
 $scope.initView = function() {
 	switch ($scope.view) {
@@ -59,7 +61,21 @@ $scope.onWorldIconSelect = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.world.avatar = data;
+		$scope.uploadFinished = true;
 	});
+}
+
+$scope.onLocalMapSelect = function($files) {
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload_maps',
+		file: file
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+		$scope.mapImage = data;
+	})
 }
 
 $scope.selectMapTheme = function(name) {
@@ -72,7 +88,33 @@ $scope.selectMapTheme = function(name) {
 	};
 	if (typeof name === 'string') {
 		$scope.mapThemeSelect = name;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		
+		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
+		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		
+		if ($scope.style.hasOwnProperty('navBG_color')==false) {
+			$scope.setThemeFromMap();
+		}
 	}
+	
+}
+
+$scope.setThemeFromMap = function() {
+switch ($scope.world.style.maps.cloudMapName) {
+	case 'urban':
+		angular.extend($scope.style, themeDict['urban']);
+		break;
+	case 'sunset':
+		angular.extend($scope.style, themeDict['sunset']);
+		break;
+	case 'fairy':
+		angular.extend($scope.style, themeDict['fairy']);
+		break;
+	case 'arabesque':
+		angular.extend($scope.style, themeDict['arabesque']);
+		break;
+}
 }
 
 $scope.loadWorld = function(data) {
@@ -96,7 +138,15 @@ $scope.loadWorld = function(data) {
 			findLoc();
 		}
 		
-		//map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+		if ($scope.world.hasOwnProperty('style')==false) {$scope.world.style = {};}
+		if ($scope.world.style.hasOwnProperty('maps')==false) {$scope.world.style.maps = {};}
+		if ($scope.world.style.maps.cloudMapName) {
+		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+		$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
+		
+		} else {
+			$scope.selectMapTheme('arabesque');
+		}
 		
 		/*if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
 			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
@@ -134,7 +184,7 @@ $scope.saveWorld = function() {
     	console.log('--db.worlds.create response--');
     	console.log(response);
     	$scope.whenSaving = false;
-    	alerts.addAlert('success', 'Save successful!', true);
+    	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     });  
     
     db.styles.create($scope.style, function(response){
@@ -161,13 +211,35 @@ $scope.search = function() {
 	}
 }
 
+$scope.setStartTime = function() {
+	var timeStart = new Date();
+	$scope.world.time.start = timeStart.toISO8601String();
+}
+
 $scope.setEndTime = function() {
-	var time = {
-		start: new Date($scope.world.time.start),
-		end: new Date($scope.world.time.end)
-		}
-	console.log(time);
-	time.end = new Date(time.start.setUTCHours(time.start.getUTCHours()+3));
+	var timeStart = new Date();
+	console.log(timeStart);
+	
+	if (typeof $scope.world.time.start === 'string') {
+		timeStart.setISO8601($scope.world.time.start);
+	} //correct, its a string
+	
+	if ($scope.world.time.start instanceof Date) {
+		//incorrect but deal with it anyway
+		timeStart = $scope.world.time.start;
+	}
+	//timeStart is currently a date object
+	console.log('timeStart', timeStart.toString());	 
+	timeStart.setUTCHours(timeStart.getUTCHours()+3);
+	
+	 //timeStart is now the default end time.
+	var timeEnd = timeStart;
+	console.log('--timeEnd', timeEnd.toString());
+	$scope.world.time.end = timeEnd.toISO8601String();
+
+	if ($scope.world.time.start instanceof Date) {
+		$scope.world.time.end = new Date().setTime($scope.world.time.start.setUTCHours(time.start.getUTCHours()+3)).toISO8601String();
+	}
 }
 
 
@@ -184,13 +256,11 @@ function showPosition(position) {
 	userLng = position.coords.longitude;
 			
 	map.setCenter([userLng, userLat], 17);
-
-	map.setBaseLayer(tilesDict.mapbox.url);
  
 	map.addMarker('m', {
 		lat: userLat,
 		lng: userLng,
-		message: "<p style='color:black;'>Drag to Location on Map</p>",
+		message: "<p style='color:black;'>Drag to World's Location</p>",
 		focus: true,
 		draggable: true,
 		icon: local_icons.yellowIcon
@@ -209,6 +279,8 @@ function showPosition(position) {
 		state = 'cover';
 		break;
 	}
+	
+	map.removeCircleMask();
 	map.addCircleMaskToMarker('m', 150, state);
 
 /*
@@ -233,7 +305,38 @@ function locError(){
         console.log('no loc');
 }
 
+////////////////////////////////////////////////////////////
+/////////////////////////LISTENERS//////////////////////////
+////////////////////////////////////////////////////////////
+$scope.$on('$locationChangeSuccess', function (event) {
+    if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
+        $scope.view = $route.current.params.view;
+        $route.current = lastRoute;
+        console.log($scope.view);
+    }
+    $scope.initView();
+});
 
+$scope.$on('$destroy', function (event) {
+	console.log('$destroy event', event);
+	if (event.targetScope===$scope) {
+	map.removeCircleMask();
+	
+	if (zoomControl) {
+	zoomControl.style.top = "";
+	zoomControl.style.left = "";
+	}
+	}
+});
+
+$scope.$watch('style.navBG_color', function(current, old) {
+	style.navBG_color = current;
+});
+
+$scope.$watch('world.name', function(current, old) {
+	console.log('world name watch', current);
+	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
+});
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

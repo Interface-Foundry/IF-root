@@ -1398,7 +1398,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
 
-        if (mimetype == 'image/jpg' || mimetype == 'image/png'){
+        if (mimetype == 'image/jpg' || mimetype == 'image/png') {
 
             while (1) {
 
@@ -1407,12 +1407,12 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                 var current = fileNumber_str + '.' + fileType;
 
                 //checking for existing file, if unique, write to dir
-                if (fs.existsSync("app/temp_map_uploads/" + current)) {
+                if (fs.existsSync("app/dist/temp_map_uploads/" + current)) {
                     continue; //if there are max # of files in the dir this will infinite loop...
                 } 
                 else {
 
-                    var newPath = "app/temp_map_uploads/" + current;
+                    var newPath = "app/dist/temp_map_uploads/" + current;
 
                     fstream = fs.createWriteStream(newPath);
                     file.pipe(fstream);
@@ -1445,15 +1445,15 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
     var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
       if (err) {
 
-            if (fs.existsSync(__dirname + '/app/'+ req.body.mapIMG)) {
+            if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
                 //delete temp file
-                fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
+                fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
                   if (err) throw err;
-                  console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
+                  console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
                 });              
             }
             else {
-                console.log('could not delete, file does not exist: '+__dirname + '/app/'+ req.body.mapIMG);
+                console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
             }
 
 
@@ -1465,15 +1465,15 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
         worldMapTileUpdate(req, res, body, req.mapBuild);
 
-            if (fs.existsSync(__dirname + '/app/'+ req.body.mapIMG)) {
+            if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
                 //delete temp file
-                fs.unlink(__dirname + '/app/'+ req.body.mapIMG, function (err) {
+                fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
                   if (err) throw err;
-                  console.log('successfully deleted '+__dirname + '/app/'+ req.body.mapIMG);
+                  console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
                 });
             }
             else {
-                console.log('could not delete, file does not exist: '+__dirname + '/app/'+ req.body.mapIMG);
+                console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
             }
 
 
@@ -1483,7 +1483,7 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
     var form = r.form();
     //form.append('my_field', fieldname);
     form.append('my_buffer', new Buffer([1, 2, 3]));
-    form.append(map_text, fs.createReadStream(__dirname + '/app/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
+    form.append(map_text, fs.createReadStream(__dirname + '/app/dist/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
 
 });
 

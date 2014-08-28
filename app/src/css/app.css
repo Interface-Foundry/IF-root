@@ -57,6 +57,19 @@ nav .logo {
 	margin 2px;
 }
 
+nav .nav-title {
+	padding-left: 16px;
+	color: white;
+	font-size: 30px;
+	font-weight: 400;
+	text-shadow: 0px 1px rgba(0,0,0,0.5);
+	-webkit-text-shadow: 0px 1px rgba(0,0,0,0.5);
+}
+
+nav .nav-title small {
+	color: #0091EA;
+}
+
 nav ul {
   list-style: none;
   margin: 0 auto;
@@ -426,10 +439,6 @@ main {display:block;}
 
 ul {
 -webkit-padding-start: 0px;
-}
-
-.leaflet-bottom.leaflet-right {
-	display: none;
 }
 
 .error_message{

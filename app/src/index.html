@@ -169,7 +169,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   		</div>
   		<ul id="alerts" class="container">
 	  		<li ng-repeat="alert in alerts.list" class="alert if-animate" ng-class="alert.class" role="alert">
-	  			<span>{{alert.msg}}</span>
+	  			<span ng-bind-html="alert.msg"></span>
 	  		</li>
   		</ul>
   		<div class="feedbackWindow" ng-show="feedbackOn">
@@ -179,6 +179,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   		<nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">
 	  		<img class="handle pull-left" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.svg">
 	  		<img class="logo pull-left" ng-click="drawerOn = !drawerOn" src="/img/IF/IF_logo.svg">
+	  		<span class="nav-title pull-left vertical-middle hidden-xs" ng-bind-html="navTitle"></span>
 	  		<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
 	  			<li class="search-icon nav-item">
 	  					<a href="" class="no-u" ng-click="">

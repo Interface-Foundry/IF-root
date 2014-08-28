@@ -1,7 +1,7 @@
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker']).
-  config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider) {
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker'])
+  .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
     //================================================
@@ -129,6 +129,12 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       
       
       //animation
+
+	angular.extend($tooltipProvider.defaults, {
+  		animation: 'am-fade',
+  		placement: 'right',
+  		delay: {show: '0', hide: '250'}
+  		});
 
 })
  .run(function($rootScope, $http, $location){

@@ -178,7 +178,7 @@ angular.module('tidepoolsServices', ['ngResource'])
    			if (timeout) {
    			$timeout(function () {
 	   			alerts.list.splice(len-1, 1);
-   			}, 2000);
+   			}, 3000);
    			
    			}
    		}

@@ -21,8 +21,9 @@ div.edit-aperture {
 	pointer-events: auto;
 }
 
-.edit-toolbar {
+ul.edit-toolbar {
 	position: absolute;
+	pointer-events: none !important;
 	right: 0px;
 	top: 40px;
 	width: 100%;
@@ -32,6 +33,7 @@ div.edit-aperture {
 
 .edit-toolbar > li {
 	position: relative;
+	pointer-events: auto;
 	float: right;
 	margin-right: 8px;
 	margin-top: 8px;
@@ -39,10 +41,11 @@ div.edit-aperture {
 
 .edit-toolbar > li.input-group {
 	width: 70%;
+	pointer-events: auto;
 }
 
 .edit-toolbar.tuck {
-	top: -8px;
+	top: -32px;
 }
 
 .edit-nav {
@@ -103,12 +106,22 @@ div.edit-aperture {
 	text-align: center;
 	cursor: pointer;
 }
-.world-icon span { 
+.world-icon .glyphicon { 
 	font-size: 50px;
 }
 .world-icon label {
 	display: block;
 	margin: 0px;
+}
+
+.world-icon img {
+	
+}
+
+.info {
+	display:block; 
+	color: #888;
+	font-size: 13px;
 }
 
 .edit-widget-well {
@@ -175,9 +188,11 @@ div.edit-aperture {
 	-webkit-transform: translateX(-50%) translateY(-50%);
 	width: 320px;
 	height: 480px;
+	border-radius: 2px;
+	overflow: hidden;
 	
-	margin: 0 auto;
-	box-shadow: 2px 2px 2px rgba(0,0,0,0.2)
+	box-shadow: 0px 2px 2px rgba(0,0,0,0.14),
+				0px 6px 6px rgba(0,0,0,0.2);
 }
 
 .btn-search {
@@ -233,10 +248,36 @@ div.edit-aperture {
 	width: 100%;
 }
 
-.if-circle-mask {
-	
+.hashtag::before {
+	content:'#';
+	float: left;
+	color: #AAA;
+	font-size: 20px;
+	padding: 3px 0px;
 }
 
+.hashtag input {
+	float: right;
+	width: 90%;
+}
+
+.preview-link {
+	display: inline-block;
+	color: #FFF;
+	
+	font-size: 12px;
+	padding: 0px 6px;
+	
+	vertical-align: middle;
+	border: 2px solid white;
+	border-radius: 15px;
+}
+
+.preview-link:hover, .preview-link:visited, .preview-link:active, .preview-link:hover:active {
+	cursor: pointer;
+	color: #FFF;
+	text-decoration: none;
+}
 
 input {
 
@@ -602,6 +643,19 @@ nav .logo {
 	height: 38px;
 	width: 38px;
 	margin 2px;
+}
+
+nav .nav-title {
+	padding-left: 16px;
+	color: white;
+	font-size: 30px;
+	font-weight: 400;
+	text-shadow: 0px 1px rgba(0,0,0,0.5);
+	-webkit-text-shadow: 0px 1px rgba(0,0,0,0.5);
+}
+
+nav .nav-title small {
+	color: #0091EA;
 }
 
 nav ul {
@@ -973,10 +1027,6 @@ main {display:block;}
 
 ul {
 -webkit-padding-start: 0px;
-}
-
-.leaflet-bottom.leaflet-right {
-	display: none;
 }
 
 .error_message{
@@ -7637,8 +7687,10 @@ text-decoration: none !important;
 
 .leaflet-control-container
 {
+/*
 -webkit-transform: translate3d(0,0,0);
 -webkit-transform: translateZ(0px);
+*/
 }
 
 /***

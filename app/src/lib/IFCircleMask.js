@@ -11,7 +11,7 @@ L.IFCircleMask = L.Layer.extend({
 	},
 	
 	onAdd: function (map) {
-		
+		this._map = map;
 		this._el = L.DomUtil.create('canvas', 'if-circle-mask');
 		var mapSize = map.getSize();
 		this._el.width = mapSize.x;
@@ -36,8 +36,6 @@ L.IFCircleMask = L.Layer.extend({
 			}, this);		
 		}
 		
-		console.log('map!!!!', map);
-		
 		map.on('move', function() {
 			this._draw();
 		}, this);
@@ -45,7 +43,11 @@ L.IFCircleMask = L.Layer.extend({
 	},
 	
 	onRemove: function (map) {
-		
+		map.getPanes().mapPane.removeChild(this._el);
+		map.off('viewreset', this._reset, this);
+		map.off('resize', this._reset, this);
+		delete this._marker;
+		//remove
 	},
 	
 	_reset: function () {
@@ -69,9 +71,7 @@ L.IFCircleMask = L.Layer.extend({
     },
     
     _getRadius: function () {
-    	console.log(this._marker);
 	     var lngRadius = this._getLngRadius();
-	     console.log(lngRadius);
 		 var latlng2 = new L.LatLng(this._marker.lat, this._marker.lng - lngRadius),
 		 point2 = this._map.latLngToLayerPoint(latlng2),
 		 point = this._map.latLngToLayerPoint([this._marker.lat, this._marker.lng]);
@@ -81,20 +81,18 @@ L.IFCircleMask = L.Layer.extend({
 	
 	_draw: function () {
 		console.log('_draw');
-		console.log(this.state);
-		if (this.state==="cover" || this.state==="mask") {
-		var c = this._ctx;
-		c.clearRect(0,0,c.canvas.width,c.canvas.height);
-
-		var point = this._map.latLngToContainerPoint([this._marker.lat, this._marker.lng]);
-		console.log(point);
-		c.fillStyle = "rgba(0,0,0,.43)";
-		c.beginPath();
-		if (this.state==="mask") {
-		c.arc(point.x, point.y, this._getRadius(), 0, 2 * Math.PI);
-		}
-		c.rect(this._el.width, 0, -this._el.width, this._el.height);
-		c.fill();
+		if (this.state==="cover" || this.state==="mask" && this._marker) {
+			var c = this._ctx;
+			c.clearRect(0,0,c.canvas.width,c.canvas.height);
+	
+			var point = this._map.latLngToContainerPoint([this._marker.lat, this._marker.lng]);
+			c.fillStyle = "rgba(0,0,0,.43)";
+			c.beginPath();
+			if (this.state==="mask") {
+			c.arc(point.x, point.y, this._getRadius(), 0, 2 * Math.PI);
+			}
+			c.rect(this._el.width, 0, -this._el.width, this._el.height);
+			c.fill();
 		}
 	},
 	

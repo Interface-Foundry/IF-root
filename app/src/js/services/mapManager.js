@@ -287,5 +287,17 @@ mapManager.setCircleMaskState = function(state) {
 	}
 }
 
+mapManager.removeCircleMask = function() {
+	if (mapManager.circleMaskLayer) {
+		leafletData.getMap().then(function(map){
+			map.removeLayer(mapManager.circleMaskLayer);
+		})
+	} else {
+		console.log('No circle mask layer.');
+	}
+}
+
+
+
 return mapManager;
     }]);

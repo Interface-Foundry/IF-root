@@ -12785,7 +12785,7 @@ L.IFCircleMask = L.Layer.extend({
 	},
 	
 	onAdd: function (map) {
-		
+		this._map = map;
 		this._el = L.DomUtil.create('canvas', 'if-circle-mask');
 		var mapSize = map.getSize();
 		this._el.width = mapSize.x;
@@ -12810,8 +12810,6 @@ L.IFCircleMask = L.Layer.extend({
 			}, this);		
 		}
 		
-		console.log('map!!!!', map);
-		
 		map.on('move', function() {
 			this._draw();
 		}, this);
@@ -12819,7 +12817,11 @@ L.IFCircleMask = L.Layer.extend({
 	},
 	
 	onRemove: function (map) {
-		
+		map.getPanes().mapPane.removeChild(this._el);
+		map.off('viewreset', this._reset, this);
+		map.off('resize', this._reset, this);
+		delete this._marker;
+		//remove
 	},
 	
 	_reset: function () {
@@ -12843,9 +12845,7 @@ L.IFCircleMask = L.Layer.extend({
     },
     
     _getRadius: function () {
-    	console.log(this._marker);
 	     var lngRadius = this._getLngRadius();
-	     console.log(lngRadius);
 		 var latlng2 = new L.LatLng(this._marker.lat, this._marker.lng - lngRadius),
 		 point2 = this._map.latLngToLayerPoint(latlng2),
 		 point = this._map.latLngToLayerPoint([this._marker.lat, this._marker.lng]);
@@ -12855,20 +12855,18 @@ L.IFCircleMask = L.Layer.extend({
 	
 	_draw: function () {
 		console.log('_draw');
-		console.log(this.state);
-		if (this.state==="cover" || this.state==="mask") {
-		var c = this._ctx;
-		c.clearRect(0,0,c.canvas.width,c.canvas.height);
-
-		var point = this._map.latLngToContainerPoint([this._marker.lat, this._marker.lng]);
-		console.log(point);
-		c.fillStyle = "rgba(0,0,0,.43)";
-		c.beginPath();
-		if (this.state==="mask") {
-		c.arc(point.x, point.y, this._getRadius(), 0, 2 * Math.PI);
-		}
-		c.rect(this._el.width, 0, -this._el.width, this._el.height);
-		c.fill();
+		if (this.state==="cover" || this.state==="mask" && this._marker) {
+			var c = this._ctx;
+			c.clearRect(0,0,c.canvas.width,c.canvas.height);
+	
+			var point = this._map.latLngToContainerPoint([this._marker.lat, this._marker.lng]);
+			c.fillStyle = "rgba(0,0,0,.43)";
+			c.beginPath();
+			if (this.state==="mask") {
+			c.arc(point.x, point.y, this._getRadius(), 0, 2 * Math.PI);
+			}
+			c.rect(this._el.width, 0, -this._el.width, this._el.height);
+			c.fill();
 		}
 	},
 	
@@ -12881,6 +12879,538 @@ L.IFCircleMask = L.Layer.extend({
 });
 
 }(window, document));
+/*
+    The MIT License
+
+    Copyright (c) 2011 Mike Chambers
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+*/
+
+/*
+From https://github.com/jsmarkus/ExamplesByMesh/tree/master/JavaScript/QuadTree, slightly modified
+*/
+
+
+/**
+* A QuadTree implementation in JavaScript, a 2d spatial subdivision algorithm.
+* @module QuadTree
+**/
+
+(function(window) {
+
+/****************** QuadTree ****************/
+
+/**
+* QuadTree data structure.
+* @class QuadTree
+* @constructor
+* @param {Object} An object representing the bounds of the top level of the QuadTree. The object
+* should contain the following properties : x, y, width, height
+* @param {Boolean} pointQuad Whether the QuadTree will contain points (true), or items with bounds
+* (width / height)(false). Default value is false.
+* @param {Number} maxDepth The maximum number of levels that the quadtree will create. Default is 4.
+* @param {Number} maxChildren The maximum number of children that a node can contain before it is split into sub-nodes.
+**/
+function QuadTree(bounds, pointQuad, maxDepth, maxChildren)
+{
+    var node;
+    if(pointQuad)
+    {
+
+        node = new Node(bounds, 0, maxDepth, maxChildren);
+    }
+    else
+    {
+        node = new BoundsNode(bounds, 0, maxDepth, maxChildren);
+    }
+
+    this.root = node;
+}
+
+/**
+* The root node of the QuadTree which covers the entire area being segmented.
+* @property root
+* @type Node
+**/
+QuadTree.prototype.root = null;
+
+
+/**
+* Inserts an item into the QuadTree.
+* @method insert
+* @param {Object|Array} item The item or Array of items to be inserted into the QuadTree. The item should expose x, y
+* properties that represents its position in 2D space.
+**/
+QuadTree.prototype.insert = function(item)
+{
+    if(item instanceof Array)
+    {
+        var len = item.length;
+
+        for(var i = 0; i < len; i++)
+        {
+            this.root.insert(item[i]);
+        }
+    }
+    else
+    {
+        this.root.insert(item);
+    }
+};
+
+/**
+* Clears all nodes and children from the QuadTree
+* @method clear
+**/
+QuadTree.prototype.clear = function()
+{
+    this.root.clear();
+};
+
+/**
+* Retrieves all items / points in the same node as the specified item / point. If the specified item
+* overlaps the bounds of a node, then all children in both nodes will be returned.
+* @method retrieve
+* @param {Object} item An object representing a 2D coordinate point (with x, y properties), or a shape
+* with dimensions (x, y, width, height) properties.
+**/
+QuadTree.prototype.retrieve = function(item)
+{
+    //get a copy of the array of items
+    var out = this.root.retrieve(item).slice(0);
+    //return QuadTree._filterResults(out, {x:item.x, y:item.y, width:0, height:0});
+    return out;
+};
+
+QuadTree.prototype.retrieveInBounds = function (bounds)
+{
+    var treeResult = this.root.retrieveInBounds(bounds);
+    return QuadTree._filterResults(treeResult, bounds);
+};
+
+QuadTree._filterResults = function(treeResult, bounds)
+{
+    var filteredResult = [];
+
+    if(this.root instanceof BoundsNode)
+    {
+        for (var i=0; i < treeResult.length; i++)
+        {
+            var node = treeResult[i];
+            if (QuadTree._isBoundOverlappingBound(node, bounds))
+            {
+                filteredResult.push(node);
+            }
+        }
+    }
+    else
+    {
+        treeResult.forEach(function(node){
+            if(QuadTree._isPointInsideBounds(node, bounds))
+            {
+                filteredResult.push(node);
+            }
+        });
+    }
+
+    return filteredResult;
+};
+
+QuadTree._isPointInsideBounds = function (point, bounds)
+{
+    return (
+        (point.x >= bounds.x) &&
+        (point.x <= bounds.x + bounds.width) &&
+        (point.y >= bounds.y) &&
+        (point.y <= bounds.y + bounds.height)
+    );
+};
+
+
+QuadTree._isBoundOverlappingBound = function (b1, b2)
+{
+    return !(
+            b1.x > (b2.x + b2.width)  ||
+            b2.x > (b1.x + b1.width)  ||
+            b1.y > (b2.y + b2.height) ||
+            b2.y > (b1.y + b1.height)
+       );
+};
+
+/************** Node ********************/
+
+
+function Node(bounds, depth, maxDepth, maxChildren)
+{
+    this._bounds = bounds;
+    this.children = [];
+    this.nodes = [];
+
+    if(maxChildren)
+    {
+        this._maxChildren = maxChildren;
+
+    }
+
+    if(maxDepth)
+    {
+        this._maxDepth = maxDepth;
+    }
+
+    if(depth)
+    {
+        this._depth = depth;
+    }
+};
+
+//subnodes
+Node.prototype.nodes = null;
+Node.prototype._classConstructor = Node;
+
+//children contained directly in the node
+Node.prototype.children = null;
+Node.prototype._bounds = null;
+
+//read only
+Node.prototype._depth = 0;
+
+Node.prototype._maxChildren = 4;
+Node.prototype._maxDepth = 4;
+
+Node.TOP_LEFT = 0;
+Node.TOP_RIGHT = 1;
+Node.BOTTOM_LEFT = 2;
+Node.BOTTOM_RIGHT = 3;
+
+
+Node.prototype.insert = function(item)
+{
+    if(this.nodes.length)
+    {
+        var index = this._findIndex(item);
+
+        this.nodes[index].insert(item);
+
+        return;
+    }
+
+    this.children.push(item);
+
+    var len = this.children.length;
+    if(!(this._depth >= this._maxDepth) &&
+        len > this._maxChildren)
+    {
+        this.subdivide();
+
+        for(var i = 0; i < len; i++)
+        {
+            this.insert(this.children[i]);
+        }
+
+        this.children.length = 0;
+    }
+};
+
+Node.prototype.retrieve = function(item)
+{
+    if(this.nodes.length)
+    {
+        var index = this._findIndex(item);
+
+        return this.nodes[index].retrieve(item);
+    }
+
+    return this.children;
+};
+
+Node.prototype.retrieveInBounds = function(bounds)
+{
+    var result = [];
+
+    if(this.collidesWith(bounds))
+    {
+        result = result.concat(this._stuckChildren);
+
+        if(this.children.length)
+        {
+            result = result.concat(this.children);
+        }
+        else
+        {
+            if(this.nodes.length)
+            {
+                for (var i = 0; i < this.nodes.length; i++)
+                {
+                    result = result.concat(this.nodes[i].retrieveInBounds(bounds));
+                }
+            }
+        }
+    }
+
+    return result;
+};
+
+
+Node.prototype.collidesWith = function (bounds)
+{
+    var b1 = this._bounds;
+    var b2 = bounds;
+
+    return !(
+            b1.x > (b2.x + b2.width)  ||
+            b2.x > (b1.x + b1.width)  ||
+            b1.y > (b2.y + b2.height) ||
+            b2.y > (b1.y + b1.height)
+       );
+};
+
+Node.prototype._findIndex = function(item)
+{
+    var b = this._bounds;
+    var left = (item.x > b.x + b.width / 2)? false : true;
+    var top = (item.y > b.y + b.height / 2)? false : true;
+
+    //top left
+    var index = Node.TOP_LEFT;
+    if(left)
+    {
+        //left side
+        if(!top)
+        {
+            //bottom left
+            index = Node.BOTTOM_LEFT;
+        }
+    }
+    else
+    {
+        //right side
+        if(top)
+        {
+            //top right
+            index = Node.TOP_RIGHT;
+        }
+        else
+        {
+            //bottom right
+            index = Node.BOTTOM_RIGHT;
+        }
+    }
+
+    return index;
+};
+
+
+Node.prototype.subdivide = function()
+{
+    var depth = this._depth + 1;
+
+    var bx = this._bounds.x;
+    var by = this._bounds.y;
+
+    //floor the values
+    var b_w_h = (this._bounds.width / 2)|0;
+    var b_h_h = (this._bounds.height / 2)|0;
+    var bx_b_w_h = bx + b_w_h;
+    var by_b_h_h = by + b_h_h;
+
+    //top left
+    this.nodes[Node.TOP_LEFT] = new this._classConstructor({
+        x:bx,
+        y:by,
+        width:b_w_h,
+        height:b_h_h
+    },
+    depth, this._maxDepth, this._maxChildren);
+
+    //top right
+    this.nodes[Node.TOP_RIGHT] = new this._classConstructor({
+        x:bx_b_w_h,
+        y:by,
+        width:b_w_h,
+        height:b_h_h
+    },
+    depth, this._maxDepth, this._maxChildren);
+
+    //bottom left
+    this.nodes[Node.BOTTOM_LEFT] = new this._classConstructor({
+        x:bx,
+        y:by_b_h_h,
+        width:b_w_h,
+        height:b_h_h
+    },
+    depth, this._maxDepth, this._maxChildren);
+
+
+    //bottom right
+    this.nodes[Node.BOTTOM_RIGHT] = new this._classConstructor({
+        x:bx_b_w_h,
+        y:by_b_h_h,
+        width:b_w_h,
+        height:b_h_h
+    },
+    depth, this._maxDepth, this._maxChildren);
+};
+
+Node.prototype.clear = function()
+{
+    this.children.length = 0;
+
+    var len = this.nodes.length;
+    for(var i = 0; i < len; i++)
+    {
+        this.nodes[i].clear();
+    }
+
+    this.nodes.length = 0;
+};
+
+
+/******************** BoundsQuadTree ****************/
+
+function BoundsNode(bounds, depth, maxChildren, maxDepth)
+{
+    Node.call(this, bounds, depth, maxChildren, maxDepth);
+    this._stuckChildren = [];
+}
+
+BoundsNode.prototype = new Node();
+BoundsNode.prototype._classConstructor = BoundsNode;
+BoundsNode.prototype._stuckChildren = null;
+
+//we use this to collect and conctenate items being retrieved. This way
+//we dont have to continuously create new Array instances.
+//Note, when returned from QuadTree.retrieve, we then copy the array
+BoundsNode.prototype._out = [];
+
+BoundsNode.prototype.insert = function(item)
+{
+    if(this.nodes.length)
+    {
+        var index = this._findIndex(item);
+        var node = this.nodes[index];
+
+        //todo: make _bounds bounds
+        if(item.x >= node._bounds.x &&
+            item.x + item.width <= node._bounds.x + node._bounds.width &&
+            item.y >= node._bounds.y &&
+            item.y + item.height <= node._bounds.y + node._bounds.height)
+        {
+            this.nodes[index].insert(item);
+        }
+        else
+        {
+            this._stuckChildren.push(item);
+        }
+
+        return;
+    }
+
+    this.children.push(item);
+
+    var len = this.children.length;
+
+    if(this._depth < this._maxDepth &&
+        len > this._maxChildren)
+    {
+        this.subdivide();
+
+        for(var i = 0; i < len; i++)
+        {
+            this.insert(this.children[i]);
+        }
+
+        this.children.length = 0;
+    }
+};
+
+BoundsNode.prototype.getChildren = function()
+{
+    return this.children.concat(this._stuckChildren);
+};
+
+BoundsNode.prototype.retrieve = function(item)
+{
+    var out = this._out;
+    out.length = 0;
+    if(this.nodes.length)
+    {
+        var index = this._findIndex(item);
+
+        out.push.apply(out, this.nodes[index].retrieve(item));
+    }
+
+    out.push.apply(out, this._stuckChildren);
+    out.push.apply(out, this.children);
+
+    return out;
+};
+
+BoundsNode.prototype.clear = function()
+{
+
+    this._stuckChildren.length = 0;
+
+    //array
+    this.children.length = 0;
+
+    var len = this.nodes.length;
+
+    if(!len)
+    {
+        return;
+    }
+
+    for(var i = 0; i < len; i++)
+    {
+        this.nodes[i].clear();
+    }
+
+    //array
+    this.nodes.length = 0;
+
+    //we could call the super clear function but for now, im just going to inline it
+    //call the hidden super.clear, and make sure its called with this = this instance
+    //Object.getPrototypeOf(BoundsNode.prototype).clear.call(this);
+};
+
+//BoundsNode.prototype.getChildCount
+
+window.QuadTree = QuadTree;
+
+/*
+//http://ejohn.org/blog/objectgetprototypeof/
+if ( typeof Object.getPrototypeOf !== "function" ) {
+  if ( typeof "test".__proto__ === "object" ) {
+    Object.getPrototypeOf = function(object){
+      return object.__proto__;
+    };
+  } else {
+    Object.getPrototypeOf = function(object){
+      // May break if the constructor has been tampered with
+      return object.constructor.prototype;
+    };
+  }
+}
+*/
+
+}(this));
 /*!
  * angular-spectrum-colorpicker v1.2.0
  * https://github.com/Jimdo/angular-spectrum-colorpicker
@@ -13474,857 +14004,13 @@ angular.module('mgcrea.ngStrap.typeahead').run([
 angular.module('mgcrea.ngStrap.tooltip').run([
   '$templateCache',
   function ($templateCache) {
-    $templateCache.put('tooltip/tooltip.tpl.html', '<div class="tooltip in" ng-show="title"><div class="tooltip-arrow"></div><div class="tooltip-inner" ng-bind="title"></div></div>');
+    $templateCache.put('tooltip/tooltip.tpl.html', '<div class="tooltip" ng-show="title"><div class="tooltip-arrow"></div><div class="tooltip-inner" ng-bind="title"></div></div>');
   }
 ]);
 
 
 })(window, document);
 
-/**
- * AngularStrap - Twitter Bootstrap directives for AngularJS
- * @version v0.7.4 - 2013-05-26
- * @link http://mgcrea.github.com/angular-strap
- * @author Olivier Louvignes <olivier@mg-crea.com>
- * @license MIT License, http://www.opensource.org/licenses/MIT
- */
-angular.module('$strap.config', []).value('$strapConfig', {});
-angular.module('$strap.filters', ['$strap.config']);
-angular.module('$strap.directives', ['$strap.config']);
-angular.module('$strap', [
-  '$strap.filters',
-  '$strap.directives',
-  '$strap.config'
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsAlert', [
-  '$parse',
-  '$timeout',
-  '$compile',
-  function ($parse, $timeout, $compile) {
-    return {
-      restrict: 'A',
-      link: function postLink(scope, element, attrs) {
-        var getter = $parse(attrs.bsAlert), setter = getter.assign, value = getter(scope);
-        if (!attrs.bsAlert) {
-          if (angular.isUndefined(attrs.closeButton) || attrs.closeButton !== '0' && attrs.closeButton !== 'false') {
-            element.prepend('<button type="button" class="close" data-dismiss="alert">&times;</button>');
-          }
-        } else {
-          scope.$watch(attrs.bsAlert, function (newValue, oldValue) {
-            value = newValue;
-            element.html((newValue.title ? '<strong>' + newValue.title + '</strong>&nbsp;' : '') + newValue.content || '');
-            if (!!newValue.closed) {
-              element.hide();
-            }
-            $compile(element.contents())(scope);
-            if (newValue.type || oldValue.type) {
-              oldValue.type && element.removeClass('alert-' + oldValue.type);
-              newValue.type && element.addClass('alert-' + newValue.type);
-            }
-            if (angular.isUndefined(attrs.closeButton) || attrs.closeButton !== '0' && attrs.closeButton !== 'false') {
-              element.prepend('<button type="button" class="close" data-dismiss="alert">&times;</button>');
-            }
-          }, true);
-        }
-        element.addClass('alert').alert();
-        if (element.hasClass('fade')) {
-          element.removeClass('in');
-          setTimeout(function () {
-            element.addClass('in');
-          });
-        }
-        var parentArray = attrs.ngRepeat && attrs.ngRepeat.split(' in ').pop();
-        element.on('close', function (ev) {
-          var removeElement;
-          if (parentArray) {
-            ev.preventDefault();
-            element.removeClass('in');
-            removeElement = function () {
-              element.trigger('closed');
-              if (scope.$parent) {
-                scope.$parent.$apply(function () {
-                  var path = parentArray.split('.');
-                  var curr = scope.$parent;
-                  for (var i = 0; i < path.length; ++i) {
-                    if (curr) {
-                      curr = curr[path[i]];
-                    }
-                  }
-                  if (curr) {
-                    curr.splice(scope.$index, 1);
-                  }
-                });
-              }
-            };
-            $.support.transition && element.hasClass('fade') ? element.on($.support.transition.end, removeElement) : removeElement();
-          } else if (value) {
-            ev.preventDefault();
-            element.removeClass('in');
-            removeElement = function () {
-              element.trigger('closed');
-              scope.$apply(function () {
-                value.closed = true;
-              });
-            };
-            $.support.transition && element.hasClass('fade') ? element.on($.support.transition.end, removeElement) : removeElement();
-          } else {
-          }
-        });
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsButton', [
-  '$parse',
-  '$timeout',
-  function ($parse, $timeout) {
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      link: function postLink(scope, element, attrs, controller) {
-        if (controller) {
-          if (!element.parent('[data-toggle="buttons-checkbox"], [data-toggle="buttons-radio"]').length) {
-            element.attr('data-toggle', 'button');
-          }
-          var startValue = !!scope.$eval(attrs.ngModel);
-          if (startValue) {
-            element.addClass('active');
-          }
-          scope.$watch(attrs.ngModel, function (newValue, oldValue) {
-            var bNew = !!newValue, bOld = !!oldValue;
-            if (bNew !== bOld) {
-              $.fn.button.Constructor.prototype.toggle.call(button);
-            } else if (bNew && !startValue) {
-              element.addClass('active');
-            }
-          });
-        }
-        if (!element.hasClass('btn')) {
-          element.on('click.button.data-api', function (ev) {
-            element.button('toggle');
-          });
-        }
-        element.button();
-        var button = element.data('button');
-        button.toggle = function () {
-          if (!controller) {
-            return $.fn.button.Constructor.prototype.toggle.call(this);
-          }
-          var $parent = element.parent('[data-toggle="buttons-radio"]');
-          if ($parent.length) {
-            element.siblings('[ng-model]').each(function (k, v) {
-              $parse($(v).attr('ng-model')).assign(scope, false);
-            });
-            scope.$digest();
-            if (!controller.$modelValue) {
-              controller.$setViewValue(!controller.$modelValue);
-              scope.$digest();
-            }
-          } else {
-            scope.$apply(function () {
-              controller.$setViewValue(!controller.$modelValue);
-            });
-          }
-        };
-      }
-    };
-  }
-]).directive('bsButtonsCheckbox', [
-  '$parse',
-  function ($parse) {
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      compile: function compile(tElement, tAttrs, transclude) {
-        tElement.attr('data-toggle', 'buttons-checkbox').find('a, button').each(function (k, v) {
-          $(v).attr('bs-button', '');
-        });
-      }
-    };
-  }
-]).directive('bsButtonsRadio', [
-  '$timeout',
-  function ($timeout) {
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      compile: function compile(tElement, tAttrs, transclude) {
-        tElement.attr('data-toggle', 'buttons-radio');
-        if (!tAttrs.ngModel) {
-          tElement.find('a, button').each(function (k, v) {
-            $(v).attr('bs-button', '');
-          });
-        }
-        return function postLink(scope, iElement, iAttrs, controller) {
-          if (controller) {
-            $timeout(function () {
-              iElement.find('[value]').button().filter('[value="' + controller.$viewValue + '"]').addClass('active');
-            });
-            iElement.on('click.button.data-api', function (ev) {
-              scope.$apply(function () {
-                controller.$setViewValue($(ev.target).closest('button').attr('value'));
-              });
-            });
-            scope.$watch(iAttrs.ngModel, function (newValue, oldValue) {
-              if (newValue !== oldValue) {
-                var $btn = iElement.find('[value="' + scope.$eval(iAttrs.ngModel) + '"]');
-                if ($btn.length) {
-                  $btn.button('toggle');
-                }
-              }
-            });
-          }
-        };
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsButtonSelect', [
-  '$parse',
-  '$timeout',
-  function ($parse, $timeout) {
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      link: function postLink(scope, element, attrs, ctrl) {
-        var getter = $parse(attrs.bsButtonSelect), setter = getter.assign;
-        if (ctrl) {
-          element.text(scope.$eval(attrs.ngModel));
-          scope.$watch(attrs.ngModel, function (newValue, oldValue) {
-            element.text(newValue);
-          });
-        }
-        var values, value, index, newValue;
-        element.bind('click', function (ev) {
-          values = getter(scope);
-          value = ctrl ? scope.$eval(attrs.ngModel) : element.text();
-          index = values.indexOf(value);
-          newValue = index > values.length - 2 ? values[0] : values[index + 1];
-          scope.$apply(function () {
-            element.text(newValue);
-            if (ctrl) {
-              ctrl.$setViewValue(newValue);
-            }
-          });
-        });
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsDatepicker', [
-  '$timeout',
-  '$strapConfig',
-  function ($timeout, $strapConfig) {
-    var isAppleTouch = /(iP(a|o)d|iPhone)/g.test(navigator.userAgent);
-    var regexpMap = function regexpMap(language) {
-      language = language || 'en';
-      return {
-        '/': '[\\/]',
-        '-': '[-]',
-        '.': '[.]',
-        ' ': '[\\s]',
-        'dd': '(?:(?:[0-2]?[0-9]{1})|(?:[3][01]{1}))',
-        'd': '(?:(?:[0-2]?[0-9]{1})|(?:[3][01]{1}))',
-        'mm': '(?:[0]?[1-9]|[1][012])',
-        'm': '(?:[0]?[1-9]|[1][012])',
-        'DD': '(?:' + $.fn.datepicker.dates[language].days.join('|') + ')',
-        'D': '(?:' + $.fn.datepicker.dates[language].daysShort.join('|') + ')',
-        'MM': '(?:' + $.fn.datepicker.dates[language].months.join('|') + ')',
-        'M': '(?:' + $.fn.datepicker.dates[language].monthsShort.join('|') + ')',
-        'yyyy': '(?:(?:[1]{1}[0-9]{1}[0-9]{1}[0-9]{1})|(?:[2]{1}[0-9]{3}))(?![[0-9]])',
-        'yy': '(?:(?:[0-9]{1}[0-9]{1}))(?![[0-9]])'
-      };
-    };
-    var regexpForDateFormat = function regexpForDateFormat(format, language) {
-      var re = format, map = regexpMap(language), i;
-      i = 0;
-      angular.forEach(map, function (v, k) {
-        re = re.split(k).join('${' + i + '}');
-        i++;
-      });
-      i = 0;
-      angular.forEach(map, function (v, k) {
-        re = re.split('${' + i + '}').join(v);
-        i++;
-      });
-      return new RegExp('^' + re + '$', ['i']);
-    };
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      link: function postLink(scope, element, attrs, controller) {
-        var options = angular.extend({ autoclose: true }, $strapConfig.datepicker || {}), type = attrs.dateType || options.type || 'date';
-        angular.forEach([
-          'format',
-          'weekStart',
-          'calendarWeeks',
-          'startDate',
-          'endDate',
-          'daysOfWeekDisabled',
-          'autoclose',
-          'startView',
-          'minViewMode',
-          'todayBtn',
-          'todayHighlight',
-          'keyboardNavigation',
-          'language',
-          'forceParse'
-        ], function (key) {
-          if (angular.isDefined(attrs[key]))
-            options[key] = attrs[key];
-        });
-        var language = options.language || 'en', readFormat = attrs.dateFormat || options.format || $.fn.datepicker.dates[language] && $.fn.datepicker.dates[language].format || 'mm/dd/yyyy', format = isAppleTouch ? 'yyyy-mm-dd' : readFormat, dateFormatRegexp = regexpForDateFormat(format, language);
-        if (controller) {
-          controller.$formatters.unshift(function (modelValue) {
-            return type === 'date' && angular.isString(modelValue) && modelValue ? $.fn.datepicker.DPGlobal.parseDate(modelValue, $.fn.datepicker.DPGlobal.parseFormat(readFormat), language) : modelValue;
-          });
-          controller.$parsers.unshift(function (viewValue) {
-            if (!viewValue) {
-              controller.$setValidity('date', true);
-              return null;
-            } else if (type === 'date' && angular.isDate(viewValue)) {
-              controller.$setValidity('date', true);
-              return viewValue;
-            } else if (angular.isString(viewValue) && dateFormatRegexp.test(viewValue)) {
-              controller.$setValidity('date', true);
-              if (isAppleTouch)
-                return new Date(viewValue);
-              return type === 'string' ? viewValue : $.fn.datepicker.DPGlobal.parseDate(viewValue, $.fn.datepicker.DPGlobal.parseFormat(format), language);
-            } else {
-              controller.$setValidity('date', false);
-              return undefined;
-            }
-          });
-          controller.$render = function ngModelRender() {
-            if (isAppleTouch) {
-              var date = controller.$viewValue ? $.fn.datepicker.DPGlobal.formatDate(controller.$viewValue, $.fn.datepicker.DPGlobal.parseFormat(format), language) : '';
-              element.val(date);
-              return date;
-            }
-            if (!controller.$viewValue)
-              element.val('');
-            return element.datepicker('update', controller.$viewValue);
-          };
-        }
-        if (isAppleTouch) {
-          element.prop('type', 'date').css('-webkit-appearance', 'textfield');
-        } else {
-          if (controller) {
-            element.on('changeDate', function (ev) {
-              scope.$apply(function () {
-                controller.$setViewValue(type === 'string' ? element.val() : ev.date);
-              });
-            });
-          }
-          element.datepicker(angular.extend(options, {
-            format: format,
-            language: language
-          }));
-          scope.$on('$destroy', function () {
-            var datepicker = element.data('datepicker');
-            if (datepicker) {
-              datepicker.picker.remove();
-              element.data('datepicker', null);
-            }
-          });
-        }
-        var component = element.siblings('[data-toggle="datepicker"]');
-        if (component.length) {
-          component.on('click', function () {
-            element.trigger('focus');
-          });
-        }
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsDropdown', [
-  '$parse',
-  '$compile',
-  '$timeout',
-  function ($parse, $compile, $timeout) {
-    var buildTemplate = function (items, ul) {
-      if (!ul)
-        ul = [
-          '<ul class="dropdown-menu" role="menu" aria-labelledby="drop1">',
-          '</ul>'
-        ];
-      angular.forEach(items, function (item, index) {
-        if (item.divider)
-          return ul.splice(index + 1, 0, '<li class="divider"></li>');
-        var li = '<li' + (item.submenu && item.submenu.length ? ' class="dropdown-submenu"' : '') + '>' + '<a tabindex="-1" ng-href="' + (item.href || '') + '"' + (item.click ? '" ng-click="' + item.click + '"' : '') + (item.target ? '" target="' + item.target + '"' : '') + (item.method ? '" data-method="' + item.method + '"' : '') + '>' + (item.text || '') + '</a>';
-        if (item.submenu && item.submenu.length)
-          li += buildTemplate(item.submenu).join('\n');
-        li += '</li>';
-        ul.splice(index + 1, 0, li);
-      });
-      return ul;
-    };
-    return {
-      restrict: 'EA',
-      scope: true,
-      link: function postLink(scope, iElement, iAttrs) {
-        var getter = $parse(iAttrs.bsDropdown), items = getter(scope);
-        $timeout(function () {
-          if (!angular.isArray(items)) {
-          }
-          var dropdown = angular.element(buildTemplate(items).join(''));
-          dropdown.insertAfter(iElement);
-          $compile(iElement.next('ul.dropdown-menu'))(scope);
-        });
-        iElement.addClass('dropdown-toggle').attr('data-toggle', 'dropdown');
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').factory('$modal', [
-  '$rootScope',
-  '$compile',
-  '$http',
-  '$timeout',
-  '$q',
-  '$templateCache',
-  '$strapConfig',
-  function ($rootScope, $compile, $http, $timeout, $q, $templateCache, $strapConfig) {
-    var ModalFactory = function ModalFactory(config) {
-      function Modal(config) {
-        var options = angular.extend({ show: true }, $strapConfig.modal, config), scope = options.scope ? options.scope : $rootScope.$new(), templateUrl = options.template;
-        return $q.when($templateCache.get(templateUrl) || $http.get(templateUrl, { cache: true }).then(function (res) {
-          return res.data;
-        })).then(function onSuccess(template) {
-          var id = templateUrl.replace('.html', '').replace(/[\/|\.|:]/g, '-') + '-' + scope.$id;
-          var $modal = $('<div class="modal hide" tabindex="-1"></div>').attr('id', id).addClass('fade').html(template);
-          if (options.modalClass)
-            $modal.addClass(options.modalClass);
-          $('body').append($modal);
-          $timeout(function () {
-            $compile($modal)(scope);
-          });
-          scope.$modal = function (name) {
-            $modal.modal(name);
-          };
-          angular.forEach([
-            'show',
-            'hide'
-          ], function (name) {
-            scope[name] = function () {
-              $modal.modal(name);
-            };
-          });
-          scope.dismiss = scope.hide;
-          angular.forEach([
-            'show',
-            'shown',
-            'hide',
-            'hidden'
-          ], function (name) {
-            $modal.on(name, function (ev) {
-              scope.$emit('modal-' + name, ev);
-            });
-          });
-          $modal.on('shown', function (ev) {
-            $('input[autofocus]', $modal).first().trigger('focus');
-          });
-          $modal.on('hidden', function (ev) {
-            if (!options.persist)
-              scope.$destroy();
-          });
-          scope.$on('$destroy', function () {
-            $modal.remove();
-          });
-          $modal.modal(options);
-          return $modal;
-        });
-      }
-      return new Modal(config);
-    };
-    return ModalFactory;
-  }
-]).directive('bsModal', [
-  '$q',
-  '$modal',
-  function ($q, $modal) {
-    return {
-      restrict: 'A',
-      scope: true,
-      link: function postLink(scope, iElement, iAttrs, controller) {
-        var options = {
-            template: scope.$eval(iAttrs.bsModal),
-            persist: true,
-            show: false,
-            scope: scope
-          };
-        angular.forEach([
-          'modalClass',
-          'backdrop',
-          'keyboard'
-        ], function (key) {
-          if (angular.isDefined(iAttrs[key]))
-            options[key] = iAttrs[key];
-        });
-        $q.when($modal(options)).then(function onSuccess(modal) {
-          iElement.attr('data-target', '#' + modal.attr('id')).attr('data-toggle', 'modal');
-        });
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsNavbar', [
-  '$location',
-  function ($location) {
-    return {
-      restrict: 'A',
-      link: function postLink(scope, element, attrs, controller) {
-        scope.$watch(function () {
-          return $location.path();
-        }, function (newValue, oldValue) {
-          $('li[data-match-route]', element).each(function (k, li) {
-            var $li = angular.element(li), pattern = $li.attr('data-match-route'), regexp = new RegExp('^' + pattern + '$', ['i']);
-            if (regexp.test(newValue)) {
-              $li.addClass('active');
-            } else {
-              $li.removeClass('active');
-            }
-          });
-        });
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsPopover', [
-  '$parse',
-  '$compile',
-  '$http',
-  '$timeout',
-  '$q',
-  '$templateCache',
-  function ($parse, $compile, $http, $timeout, $q, $templateCache) {
-    $('body').on('keyup', function (ev) {
-      if (ev.keyCode === 27) {
-        $('.popover.in').each(function () {
-          $(this).popover('hide');
-        });
-      }
-    });
-    return {
-      restrict: 'A',
-      scope: true,
-      link: function postLink(scope, element, attr, ctrl) {
-        var getter = $parse(attr.bsPopover), setter = getter.assign, value = getter(scope), options = {};
-        if (angular.isObject(value)) {
-          options = value;
-        }
-        $q.when(options.content || $templateCache.get(value) || $http.get(value, { cache: true })).then(function onSuccess(template) {
-          if (angular.isObject(template)) {
-            template = template.data;
-          }
-          if (!!attr.unique) {
-            element.on('show', function (ev) {
-              $('.popover.in').each(function () {
-                var $this = $(this), popover = $this.data('popover');
-                if (popover && !popover.$element.is(element)) {
-                  $this.popover('hide');
-                }
-              });
-            });
-          }
-          if (!!attr.hide) {
-            scope.$watch(attr.hide, function (newValue, oldValue) {
-              if (!!newValue) {
-                popover.hide();
-              } else if (newValue !== oldValue) {
-                popover.show();
-              }
-            });
-          }
-          element.popover(angular.extend({}, options, {
-            content: template,
-            html: true
-          }));
-          var popover = element.data('popover');
-          popover.hasContent = function () {
-            return this.getTitle() || template;
-          };
-          popover.getPosition = function () {
-            var r = $.fn.popover.Constructor.prototype.getPosition.apply(this, arguments);
-            $compile(this.$tip)(scope);
-            scope.$digest();
-            this.$tip.data('popover', this);
-            return r;
-          };
-          scope.$popover = function (name) {
-            popover(name);
-          };
-          angular.forEach([
-            'show',
-            'hide'
-          ], function (name) {
-            scope[name] = function () {
-              popover[name]();
-            };
-          });
-          scope.dismiss = scope.hide;
-          angular.forEach([
-            'show',
-            'shown',
-            'hide',
-            'hidden'
-          ], function (name) {
-            element.on(name, function (ev) {
-              scope.$emit('popover-' + name, ev);
-            });
-          });
-        });
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsSelect', [
-  '$timeout',
-  function ($timeout) {
-    var NG_OPTIONS_REGEXP = /^\s*(.*?)(?:\s+as\s+(.*?))?(?:\s+group\s+by\s+(.*))?\s+for\s+(?:([\$\w][\$\w\d]*)|(?:\(\s*([\$\w][\$\w\d]*)\s*,\s*([\$\w][\$\w\d]*)\s*\)))\s+in\s+(.*)$/;
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      link: function postLink(scope, element, attrs, controller) {
-        var options = scope.$eval(attrs.bsSelect) || {};
-        $timeout(function () {
-          element.selectpicker(options);
-          element.next().removeClass('ng-scope');
-        });
-        if (controller) {
-          scope.$watch(attrs.ngModel, function (newValue, oldValue) {
-            if (newValue !== oldValue) {
-              element.selectpicker('refresh');
-            }
-          });
-        }
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsTabs', [
-  '$parse',
-  '$compile',
-  '$timeout',
-  function ($parse, $compile, $timeout) {
-    var template = '<div class="tabs">' + '<ul class="nav nav-tabs">' + '<li ng-repeat="pane in panes" ng-class="{active:pane.active}">' + '<a data-target="#{{pane.id}}" data-index="{{$index}}" data-toggle="tab">{{pane.title}}</a>' + '</li>' + '</ul>' + '<div class="tab-content" ng-transclude>' + '</div>';
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      priority: 0,
-      scope: true,
-      template: template,
-      replace: true,
-      transclude: true,
-      compile: function compile(tElement, tAttrs, transclude) {
-        return function postLink(scope, iElement, iAttrs, controller) {
-          var getter = $parse(iAttrs.bsTabs), setter = getter.assign, value = getter(scope);
-          scope.panes = [];
-          var $tabs = iElement.find('ul.nav-tabs');
-          var $panes = iElement.find('div.tab-content');
-          var activeTab = 0, id, title, active;
-          $timeout(function () {
-            $panes.find('[data-title], [data-tab]').each(function (index) {
-              var $this = angular.element(this);
-              id = 'tab-' + scope.$id + '-' + index;
-              title = $this.data('title') || $this.data('tab');
-              active = !active && $this.hasClass('active');
-              $this.attr('id', id).addClass('tab-pane');
-              if (iAttrs.fade)
-                $this.addClass('fade');
-              scope.panes.push({
-                id: id,
-                title: title,
-                content: this.innerHTML,
-                active: active
-              });
-            });
-            if (scope.panes.length && !active) {
-              $panes.find('.tab-pane:first-child').addClass('active' + (iAttrs.fade ? ' in' : ''));
-              scope.panes[0].active = true;
-            }
-          });
-          if (controller) {
-            iElement.on('show', function (ev) {
-              var $target = $(ev.target);
-              scope.$apply(function () {
-                controller.$setViewValue($target.data('index'));
-              });
-            });
-            scope.$watch(iAttrs.ngModel, function (newValue, oldValue) {
-              if (angular.isUndefined(newValue))
-                return;
-              activeTab = newValue;
-              setTimeout(function () {
-                var $next = $($tabs[0].querySelectorAll('li')[newValue * 1]);
-                if (!$next.hasClass('active')) {
-                  $next.children('a').tab('show');
-                }
-              });
-            });
-          }
-        };
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsTimepicker', [
-  '$timeout',
-  function ($timeout) {
-    var TIME_REGEXP = '((?:(?:[0-1][0-9])|(?:[2][0-3])|(?:[0-9])):(?:[0-5][0-9])(?::[0-5][0-9])?(?:\\s?(?:am|AM|pm|PM))?)';
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      link: function postLink(scope, element, attrs, controller) {
-        if (controller) {
-          element.on('changeTime.timepicker', function (ev) {
-            $timeout(function () {
-              controller.$setViewValue(element.val());
-            });
-          });
-          var timeRegExp = new RegExp('^' + TIME_REGEXP + '$', ['i']);
-          controller.$parsers.unshift(function (viewValue) {
-            if (!viewValue || timeRegExp.test(viewValue)) {
-              controller.$setValidity('time', true);
-              return viewValue;
-            } else {
-              controller.$setValidity('time', false);
-              return;
-            }
-          });
-        }
-        element.attr('data-toggle', 'timepicker');
-        element.parent().addClass('bootstrap-timepicker');
-        element.timepicker();
-        var timepicker = element.data('timepicker');
-        var component = element.siblings('[data-toggle="timepicker"]');
-        if (component.length) {
-          component.on('click', $.proxy(timepicker.showWidget, timepicker));
-        }
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsTooltip', [
-  '$parse',
-  '$compile',
-  function ($parse, $compile) {
-    return {
-      restrict: 'A',
-      scope: true,
-      link: function postLink(scope, element, attrs, ctrl) {
-        var getter = $parse(attrs.bsTooltip), setter = getter.assign, value = getter(scope);
-        scope.$watch(attrs.bsTooltip, function (newValue, oldValue) {
-          if (newValue !== oldValue) {
-            value = newValue;
-          }
-        });
-        if (!!attrs.unique) {
-          element.on('show', function (ev) {
-            $('.tooltip.in').each(function () {
-              var $this = $(this), tooltip = $this.data('tooltip');
-              if (tooltip && !tooltip.$element.is(element)) {
-                $this.tooltip('hide');
-              }
-            });
-          });
-        }
-        element.tooltip({
-          title: function () {
-            return angular.isFunction(value) ? value.apply(null, arguments) : value;
-          },
-          html: true
-        });
-        var tooltip = element.data('tooltip');
-        tooltip.show = function () {
-          var r = $.fn.tooltip.Constructor.prototype.show.apply(this, arguments);
-          this.tip().data('tooltip', this);
-          return r;
-        };
-        scope._tooltip = function (event) {
-          element.tooltip(event);
-        };
-        scope.hide = function () {
-          element.tooltip('hide');
-        };
-        scope.show = function () {
-          element.tooltip('show');
-        };
-        scope.dismiss = scope.hide;
-      }
-    };
-  }
-]);
-'use strict';
-angular.module('$strap.directives').directive('bsTypeahead', [
-  '$parse',
-  function ($parse) {
-    return {
-      restrict: 'A',
-      require: '?ngModel',
-      link: function postLink(scope, element, attrs, controller) {
-        var getter = $parse(attrs.bsTypeahead), setter = getter.assign, value = getter(scope);
-        scope.$watch(attrs.bsTypeahead, function (newValue, oldValue) {
-          if (newValue !== oldValue) {
-            value = newValue;
-          }
-        });
-        element.attr('data-provide', 'typeahead');
-        element.typeahead({
-          source: function (query) {
-            return angular.isFunction(value) ? value.apply(null, arguments) : value;
-          },
-          minLength: attrs.minLength || 1,
-          items: attrs.items,
-          updater: function (value) {
-            if (controller) {
-              scope.$apply(function () {
-                controller.$setViewValue(value);
-              });
-            }
-            scope.$emit('typeahead-updated', value);
-            return value;
-          }
-        });
-        var typeahead = element.data('typeahead');
-        typeahead.lookup = function (ev) {
-          var items;
-          this.query = this.$element.val() || '';
-          if (this.query.length < this.options.minLength) {
-            return this.shown ? this.hide() : this;
-          }
-          items = $.isFunction(this.source) ? this.source(this.query, $.proxy(this.process, this)) : this.source;
-          return items ? this.process(items) : this;
-        };
-        if (!!attrs.matchAll) {
-          typeahead.matcher = function (item) {
-            return true;
-          };
-        }
-        if (attrs.minLength === '0') {
-          setTimeout(function () {
-            element.on('focus', function () {
-              element.val().length === 0 && setTimeout(element.typeahead.bind(element, 'lookup'), 200);
-            });
-          });
-        }
-      }
-    };
-  }
-]);
 /**
  * angular-strap
  * @version v2.0.5 - 2014-08-07
@@ -15005,171 +14691,131 @@ angular.module('mgcrea.ngStrap.datepicker').run([
   }
 ]);
 /**
- * angular-once - one time bindings for AngularJS
- * @version v0.1.7
- * @link https://github.com/tadeuszwojcik/angular-once
- * @author Tadeusz Wójcik <tadeuszwojcik@gmail.com>
- * @license WTFPL License, https://github.com/tadeuszwojcik/angular-once/blob/master/LICENSE.txt
+ * angular-strap
+ * @version v2.0.5 - 2014-08-07
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes (olivier@mg-crea.com)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
  */
-
-(function (window, angular, undefined) {
-  'use strict';
-
-  function setOneTimeBinding($scope, element, watch, watcherParser, bindingParser, done) {
-    // get value to watch
-    var watchingValue = watcherParser($scope);
-    // if we have a valid value, render the binding's value
-    if (watchingValue !== undefined) {
-      // if watching and binding $parsers are the same, use watching's value, else $parse the new value
-      return done(element, watcherParser == bindingParser ? watchingValue : bindingParser($scope));
-    }
-    
-    // we do not have a valid value, so we register a $watch
-    var watcherRemover = $scope.$watch(watch, function (newValue) {
-      // wait until we have a valid value
-      if (newValue == undefined) return;
-      // remove this $watch
-      removeWatcher();
-      // if watching and binding $parsers are the same, use watching's value, else $parse the new value
-      return done(element, watcherParser == bindingParser ? newValue : bindingParser($scope));
-    });
-
-    function removeWatcher() {
-      if (watcherRemover) {
-        watcherRemover();
-      }
-    }
-
-    $scope.$on("$destroy", removeWatcher);
-  }
-
-  var once = angular.module('once', []);
-
-  function makeBindingDirective(definition) {
-    once.directive(definition.name, ['$parse', function ($parse) {
-      return function ($scope, element, attrs) {
-        var watch = attrs.onceWaitFor || attrs[definition.name];
-        var watcherParser = $parse(watch);
-        var bindingParser = attrs.onceWaitFor ? $parse(attrs[definition.name]) : watcherParser;
-        setOneTimeBinding($scope, element, watch, watcherParser, bindingParser, definition.binding);
-      };
-    }]);
-  }
-
-  var bindingsDefinitions = [
-    {
-      name: 'onceText',
-      binding: function (element, value) {
-        element.text(value !== null ? value : "");
-      }
-    },
-    {
-      name: 'onceHtml',
-      binding: function (element, value) {
-        element.html(value);
-      }
-    },
-    {
-      name: 'onceSrc',
-      binding: function (element, value) {
-        element.attr('src', value);
-      }
-    },
-    {
-      name: 'onceHref',
-      binding: function (element, value) {
-        element.attr('href', value);
-      }
-    },
-    {
-      name: 'onceTitle',
-      binding: function (element, value) {
-        element.attr('title', value);
-      }
-    },
-    {
-      name: 'onceAlt',
-      binding: function (element, value) {
-        element.attr('alt', value);
-      }
-    },
-    {
-      name: 'onceId',
-      binding: function (element, value) {
-        element.attr('id', value);
-      }
-    },
-    {
-      name: 'onceIf',
-      binding: function (element, value) {
-        if (!value) {
-          element.remove();
+'use strict';
+angular.module('mgcrea.ngStrap.popover', ['mgcrea.ngStrap.tooltip']).provider('$popover', function () {
+  var defaults = this.defaults = {
+      animation: 'am-fade',
+      customClass: '',
+      container: false,
+      target: false,
+      placement: 'right',
+      template: 'popover/popover.tpl.html',
+      contentTemplate: false,
+      trigger: 'click',
+      keyboard: true,
+      html: false,
+      title: '',
+      content: '',
+      delay: 0
+    };
+  this.$get = [
+    '$tooltip',
+    function ($tooltip) {
+      function PopoverFactory(element, config) {
+        // Common vars
+        var options = angular.extend({}, defaults, config);
+        var $popover = $tooltip(element, options);
+        // Support scope as string options [/*title, */content]
+        if (options.content) {
+          $popover.$scope.content = options.content;
         }
+        return $popover;
       }
-    },
-    {
-      name: 'onceClass',
-      binding: function (element, value) {
-        if (angular.isObject(value) && !angular.isArray(value)) {
-          var results = [];
-          angular.forEach(value, function (val, index) {
-            if (val) results.push(index);
-          });
-          value = results;
-        }
-        if (value) {
-          element.addClass(angular.isArray(value) ? value.join(' ') : value);
-        }
-      }
-    },
-    {
-      name: 'onceStyle',
-      binding: function (element, value) {
-        element.css(value);
-      }
-    },
-    {
-      name: 'onceShow',
-      binding: function (element, value) {
-        if (value) {
-          element.css('display', '');
-        } else {
-          element.css('display', 'none');
-        }
-      }
-    },
-    {
-      name: 'onceHide',
-      binding: function (element, value) {
-        if (value) {
-          element.css('display', 'none');
-        } else {
-          element.css('display', '');
-        }
-      }
+      return PopoverFactory;
     }
   ];
-
-  angular.forEach(bindingsDefinitions, makeBindingDirective);
-
-  once.directive('once', function () {
-    return function ($scope, element, attrs) {
-      angular.forEach(attrs, function (attr, attrName) {
-
-        if (!/^onceAttr[A-Z]/.test(attrName)) return;
-        var bind = function(element, value) {
-          var dashedName = attrName.replace(/[A-Z]/g, function(match) { return '-' + match.toLowerCase(); });
-          var name = dashedName.substr(10);
-
-          element.attr(name, value);
-        };
-
-        setOneTimeBinding($scope, element, attrs, attrName, bind);
-      });
+}).directive('bsPopover', [
+  '$window',
+  '$location',
+  '$sce',
+  '$popover',
+  function ($window, $location, $sce, $popover) {
+    var requestAnimationFrame = $window.requestAnimationFrame || $window.setTimeout;
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr) {
+        // Directive options
+        var options = { scope: scope };
+        angular.forEach([
+          'template',
+          'contentTemplate',
+          'placement',
+          'container',
+          'target',
+          'delay',
+          'trigger',
+          'keyboard',
+          'html',
+          'animation',
+          'customClass'
+        ], function (key) {
+          if (angular.isDefined(attr[key]))
+            options[key] = attr[key];
+        });
+        // Support scope as data-attrs
+        angular.forEach([
+          'title',
+          'content'
+        ], function (key) {
+          attr[key] && attr.$observe(key, function (newValue, oldValue) {
+            scope[key] = $sce.trustAsHtml(newValue);
+            angular.isDefined(oldValue) && requestAnimationFrame(function () {
+              popover && popover.$applyPlacement();
+            });
+          });
+        });
+        // Support scope as an object
+        attr.bsPopover && scope.$watch(attr.bsPopover, function (newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.content = newValue;
+          }
+          angular.isDefined(oldValue) && requestAnimationFrame(function () {
+            popover && popover.$applyPlacement();
+          });
+        }, true);
+        // Visibility binding support
+        attr.bsShow && scope.$watch(attr.bsShow, function (newValue, oldValue) {
+          if (!popover || !angular.isDefined(newValue))
+            return;
+          if (angular.isString(newValue))
+            newValue = newValue.match(',?(popover),?');
+          newValue === true ? popover.show() : popover.hide();
+        });
+        // Initialize popover
+        var popover = $popover(element, options);
+        // Garbage collection
+        scope.$on('$destroy', function () {
+          popover.destroy();
+          options = null;
+          popover = null;
+        });
+      }
     };
-  });
-
-})(window, window.angular);
+  }
+]);
+/**
+ * angular-strap
+ * @version v2.0.5 - 2014-08-07
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes (olivier@mg-crea.com)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+'use strict';
+angular.module('mgcrea.ngStrap.popover').run([
+  '$templateCache',
+  function ($templateCache) {
+    $templateCache.put('popover/popover.tpl.html', '<div class="popover"><div class="arrow"></div><h3 class="popover-title" ng-bind="title" ng-show="title"></h3><div class="popover-content" ng-bind="content"></div></div>');
+  }
+]);
 /**
  * angular-strap
  * @version v2.0.5 - 2014-08-07
@@ -15664,6 +15310,763 @@ angular.module('mgcrea.ngStrap.timepicker').run([
     $templateCache.put('timepicker/timepicker.tpl.html', '<div class="dropdown-menu timepicker" style="min-width: 0px;width: auto"><table height="100%"><thead><tr class="text-center"><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(-1, 0)"><i class="{{ $iconUp }}"></i></button></th><th>&nbsp;</th><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(-1, 1)"><i class="{{ $iconUp }}"></i></button></th></tr></thead><tbody><tr ng-repeat="(i, row) in rows"><td class="text-center"><button tabindex="-1" style="width: 100%" type="button" class="btn btn-default" ng-class="{\'btn-primary\': row[0].selected}" ng-click="$select(row[0].date, 0)" ng-disabled="row[0].disabled"><span ng-class="{\'text-muted\': row[0].muted}" ng-bind="row[0].label"></span></button></td><td><span ng-bind="i == midIndex ? timeSeparator : \' \'"></span></td><td class="text-center"><button tabindex="-1" ng-if="row[1].date" style="width: 100%" type="button" class="btn btn-default" ng-class="{\'btn-primary\': row[1].selected}" ng-click="$select(row[1].date, 1)" ng-disabled="row[1].disabled"><span ng-class="{\'text-muted\': row[1].muted}" ng-bind="row[1].label"></span></button></td><td ng-if="showAM">&nbsp;</td><td ng-if="showAM"><button tabindex="-1" ng-show="i == midIndex - !isAM * 1" style="width: 100%" type="button" ng-class="{\'btn-primary\': !!isAM}" class="btn btn-default" ng-click="$switchMeridian()" ng-disabled="el.disabled">AM</button> <button tabindex="-1" ng-show="i == midIndex + 1 - !isAM * 1" style="width: 100%" type="button" ng-class="{\'btn-primary\': !isAM}" class="btn btn-default" ng-click="$switchMeridian()" ng-disabled="el.disabled">PM</button></td></tr></tbody><tfoot><tr class="text-center"><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(1, 0)"><i class="{{ $iconDown }}"></i></button></th><th>&nbsp;</th><th><button tabindex="-1" type="button" class="btn btn-default pull-left" ng-click="$arrowAction(1, 1)"><i class="{{ $iconDown }}"></i></button></th></tr></tfoot></table></div>');
   }
 ]);
+/**
+ * angular-strap
+ * @version v2.0.5 - 2014-08-07
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes (olivier@mg-crea.com)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+'use strict';
+angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.helpers.dimensions']).provider('$tooltip', function () {
+  var defaults = this.defaults = {
+      animation: 'am-fade',
+      customClass: '',
+      prefixClass: 'tooltip',
+      prefixEvent: 'tooltip',
+      container: false,
+      target: false,
+      placement: 'top',
+      template: 'tooltip/tooltip.tpl.html',
+      contentTemplate: false,
+      trigger: 'hover focus',
+      keyboard: false,
+      html: false,
+      show: false,
+      title: '',
+      type: '',
+      delay: 0
+    };
+  this.$get = [
+    '$window',
+    '$rootScope',
+    '$compile',
+    '$q',
+    '$templateCache',
+    '$http',
+    '$animate',
+    'dimensions',
+    '$$rAF',
+    function ($window, $rootScope, $compile, $q, $templateCache, $http, $animate, dimensions, $$rAF) {
+      var trim = String.prototype.trim;
+      var isTouch = 'createTouch' in $window.document;
+      var htmlReplaceRegExp = /ng-bind="/gi;
+      function TooltipFactory(element, config) {
+        var $tooltip = {};
+        // Common vars
+        var nodeName = element[0].nodeName.toLowerCase();
+        var options = $tooltip.$options = angular.extend({}, defaults, config);
+        $tooltip.$promise = fetchTemplate(options.template);
+        var scope = $tooltip.$scope = options.scope && options.scope.$new() || $rootScope.$new();
+        if (options.delay && angular.isString(options.delay)) {
+          options.delay = parseFloat(options.delay);
+        }
+        // Support scope as string options
+        if (options.title) {
+          $tooltip.$scope.title = options.title;
+        }
+        // Provide scope helpers
+        scope.$hide = function () {
+          scope.$$postDigest(function () {
+            $tooltip.hide();
+          });
+        };
+        scope.$show = function () {
+          scope.$$postDigest(function () {
+            $tooltip.show();
+          });
+        };
+        scope.$toggle = function () {
+          scope.$$postDigest(function () {
+            $tooltip.toggle();
+          });
+        };
+        $tooltip.$isShown = scope.$isShown = false;
+        // Private vars
+        var timeout, hoverState;
+        // Support contentTemplate option
+        if (options.contentTemplate) {
+          $tooltip.$promise = $tooltip.$promise.then(function (template) {
+            var templateEl = angular.element(template);
+            return fetchTemplate(options.contentTemplate).then(function (contentTemplate) {
+              var contentEl = findElement('[ng-bind="content"]', templateEl[0]);
+              if (!contentEl.length)
+                contentEl = findElement('[ng-bind="title"]', templateEl[0]);
+              contentEl.removeAttr('ng-bind').html(contentTemplate);
+              return templateEl[0].outerHTML;
+            });
+          });
+        }
+        // Fetch, compile then initialize tooltip
+        var tipLinker, tipElement, tipTemplate, tipContainer;
+        $tooltip.$promise.then(function (template) {
+          if (angular.isObject(template))
+            template = template.data;
+          if (options.html)
+            template = template.replace(htmlReplaceRegExp, 'ng-bind-html="');
+          template = trim.apply(template);
+          tipTemplate = template;
+          tipLinker = $compile(template);
+          $tooltip.init();
+        });
+        $tooltip.init = function () {
+          // Options: delay
+          if (options.delay && angular.isNumber(options.delay)) {
+            options.delay = {
+              show: options.delay,
+              hide: options.delay
+            };
+          }
+          // Replace trigger on touch devices ?
+          // if(isTouch && options.trigger === defaults.trigger) {
+          //   options.trigger.replace(/hover/g, 'click');
+          // }
+          // Options : container
+          if (options.container === 'self') {
+            tipContainer = element;
+          } else if (angular.isElement(options.container)) {
+            tipContainer = options.container;
+          } else if (options.container) {
+            tipContainer = findElement(options.container);
+          }
+          // Options: trigger
+          var triggers = options.trigger.split(' ');
+          angular.forEach(triggers, function (trigger) {
+            if (trigger === 'click') {
+              element.on('click', $tooltip.toggle);
+            } else if (trigger !== 'manual') {
+              element.on(trigger === 'hover' ? 'mouseenter' : 'focus', $tooltip.enter);
+              element.on(trigger === 'hover' ? 'mouseleave' : 'blur', $tooltip.leave);
+              nodeName === 'button' && trigger !== 'hover' && element.on(isTouch ? 'touchstart' : 'mousedown', $tooltip.$onFocusElementMouseDown);
+            }
+          });
+          // Options: target
+          if (options.target) {
+            options.target = angular.isElement(options.target) ? options.target : findElement(options.target)[0];
+          }
+          // Options: show
+          if (options.show) {
+            scope.$$postDigest(function () {
+              options.trigger === 'focus' ? element[0].focus() : $tooltip.show();
+            });
+          }
+        };
+        $tooltip.destroy = function () {
+          // Unbind events
+          var triggers = options.trigger.split(' ');
+          for (var i = triggers.length; i--;) {
+            var trigger = triggers[i];
+            if (trigger === 'click') {
+              element.off('click', $tooltip.toggle);
+            } else if (trigger !== 'manual') {
+              element.off(trigger === 'hover' ? 'mouseenter' : 'focus', $tooltip.enter);
+              element.off(trigger === 'hover' ? 'mouseleave' : 'blur', $tooltip.leave);
+              nodeName === 'button' && trigger !== 'hover' && element.off(isTouch ? 'touchstart' : 'mousedown', $tooltip.$onFocusElementMouseDown);
+            }
+          }
+          // Remove element
+          if (tipElement) {
+            tipElement.remove();
+            tipElement = null;
+          }
+          // Cancel pending callbacks
+          clearTimeout(timeout);
+          // Destroy scope
+          scope.$destroy();
+        };
+        $tooltip.enter = function () {
+          clearTimeout(timeout);
+          hoverState = 'in';
+          if (!options.delay || !options.delay.show) {
+            return $tooltip.show();
+          }
+          timeout = setTimeout(function () {
+            if (hoverState === 'in')
+              $tooltip.show();
+          }, options.delay.show);
+        };
+        $tooltip.show = function () {
+          scope.$emit(options.prefixEvent + '.show.before', $tooltip);
+          var parent = options.container ? tipContainer : null;
+          var after = options.container ? null : element;
+          // Hide any existing tipElement
+          if (tipElement)
+            tipElement.remove();
+          // Fetch a cloned element linked from template
+          tipElement = $tooltip.$element = tipLinker(scope, function (clonedElement, scope) {
+          });
+          // Set the initial positioning.  Make the tooltip invisible
+          // so IE doesn't try to focus on it off screen.
+          tipElement.css({
+            top: '-9999px',
+            left: '-9999px',
+            display: 'block',
+            visibility: 'hidden'
+          }).addClass(options.placement);
+          // Options: animation
+          if (options.animation)
+            tipElement.addClass(options.animation);
+          // Options: type
+          if (options.type)
+            tipElement.addClass(options.prefixClass + '-' + options.type);
+          // Options: custom classes
+          if (options.customClass)
+            tipElement.addClass(options.customClass);
+          $animate.enter(tipElement, parent, after, function () {
+            scope.$emit(options.prefixEvent + '.show', $tooltip);
+          });
+          $tooltip.$isShown = scope.$isShown = true;
+          scope.$$phase || scope.$root && scope.$root.$$phase || scope.$digest();
+          $$rAF(function () {
+            $tooltip.$applyPlacement();
+            // Once placed, make the tooltip visible
+            tipElement.css({ visibility: 'visible' });
+          });
+          // var a = bodyEl.offsetWidth + 1; ?
+          // Bind events
+          if (options.keyboard) {
+            if (options.trigger !== 'focus') {
+              $tooltip.focus();
+              tipElement.on('keyup', $tooltip.$onKeyUp);
+            } else {
+              element.on('keyup', $tooltip.$onFocusKeyUp);
+            }
+          }
+        };
+        $tooltip.leave = function () {
+          clearTimeout(timeout);
+          hoverState = 'out';
+          if (!options.delay || !options.delay.hide) {
+            return $tooltip.hide();
+          }
+          timeout = setTimeout(function () {
+            if (hoverState === 'out') {
+              $tooltip.hide();
+            }
+          }, options.delay.hide);
+        };
+        $tooltip.hide = function (blur) {
+          if (!$tooltip.$isShown)
+            return;
+          scope.$emit(options.prefixEvent + '.hide.before', $tooltip);
+          $animate.leave(tipElement, function () {
+            scope.$emit(options.prefixEvent + '.hide', $tooltip);
+            // Allow to blur the input when hidden, like when pressing enter key
+            if (blur && options.trigger === 'focus') {
+              return element[0].blur();
+            }
+          });
+          $tooltip.$isShown = scope.$isShown = false;
+          scope.$$phase || scope.$root && scope.$root.$$phase || scope.$digest();
+          // Unbind events
+          if (options.keyboard && tipElement !== null) {
+            tipElement.off('keyup', $tooltip.$onKeyUp);
+          }
+        };
+        $tooltip.toggle = function () {
+          $tooltip.$isShown ? $tooltip.leave() : $tooltip.enter();
+        };
+        $tooltip.focus = function () {
+          tipElement[0].focus();
+        };
+        // Protected methods
+        $tooltip.$applyPlacement = function () {
+          if (!tipElement)
+            return;
+          // Get the position of the tooltip element.
+          var elementPosition = getPosition();
+          // Get the height and width of the tooltip so we can center it.
+          var tipWidth = tipElement.prop('offsetWidth'), tipHeight = tipElement.prop('offsetHeight');
+          // Get the tooltip's top and left coordinates to center it with this directive.
+          var tipPosition = getCalculatedOffset(options.placement, elementPosition, tipWidth, tipHeight);
+          // Now set the calculated positioning.
+          tipPosition.top += 'px';
+          tipPosition.left += 'px';
+          tipElement.css(tipPosition);
+        };
+        $tooltip.$onKeyUp = function (evt) {
+          evt.which === 27 && $tooltip.hide();
+        };
+        $tooltip.$onFocusKeyUp = function (evt) {
+          evt.which === 27 && element[0].blur();
+        };
+        $tooltip.$onFocusElementMouseDown = function (evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+          // Some browsers do not auto-focus buttons (eg. Safari)
+          $tooltip.$isShown ? element[0].blur() : element[0].focus();
+        };
+        // Private methods
+        function getPosition() {
+          if (options.container === 'body') {
+            return dimensions.offset(options.target[0] || element[0]);
+          } else {
+            return dimensions.position(options.target[0] || element[0]);
+          }
+        }
+        function getCalculatedOffset(placement, position, actualWidth, actualHeight) {
+          var offset;
+          var split = placement.split('-');
+          switch (split[0]) {
+          case 'right':
+            offset = {
+              top: position.top + position.height / 2 - actualHeight / 2,
+              left: position.left + position.width
+            };
+            break;
+          case 'bottom':
+            offset = {
+              top: position.top + position.height,
+              left: position.left + position.width / 2 - actualWidth / 2
+            };
+            break;
+          case 'left':
+            offset = {
+              top: position.top + position.height / 2 - actualHeight / 2,
+              left: position.left - actualWidth
+            };
+            break;
+          default:
+            offset = {
+              top: position.top - actualHeight,
+              left: position.left + position.width / 2 - actualWidth / 2
+            };
+            break;
+          }
+          if (!split[1]) {
+            return offset;
+          }
+          // Add support for corners @todo css
+          if (split[0] === 'top' || split[0] === 'bottom') {
+            switch (split[1]) {
+            case 'left':
+              offset.left = position.left;
+              break;
+            case 'right':
+              offset.left = position.left + position.width - actualWidth;
+            }
+          } else if (split[0] === 'left' || split[0] === 'right') {
+            switch (split[1]) {
+            case 'top':
+              offset.top = position.top - actualHeight;
+              break;
+            case 'bottom':
+              offset.top = position.top + position.height;
+            }
+          }
+          return offset;
+        }
+        return $tooltip;
+      }
+      // Helper functions
+      function findElement(query, element) {
+        return angular.element((element || document).querySelectorAll(query));
+      }
+      function fetchTemplate(template) {
+        return $q.when($templateCache.get(template) || $http.get(template)).then(function (res) {
+          if (angular.isObject(res)) {
+            $templateCache.put(template, res.data);
+            return res.data;
+          }
+          return res;
+        });
+      }
+      return TooltipFactory;
+    }
+  ];
+}).directive('bsTooltip', [
+  '$window',
+  '$location',
+  '$sce',
+  '$tooltip',
+  '$$rAF',
+  function ($window, $location, $sce, $tooltip, $$rAF) {
+    return {
+      restrict: 'EAC',
+      scope: true,
+      link: function postLink(scope, element, attr, transclusion) {
+        // Directive options
+        var options = { scope: scope };
+        angular.forEach([
+          'template',
+          'contentTemplate',
+          'placement',
+          'container',
+          'target',
+          'delay',
+          'trigger',
+          'keyboard',
+          'html',
+          'animation',
+          'type',
+          'customClass'
+        ], function (key) {
+          if (angular.isDefined(attr[key]))
+            options[key] = attr[key];
+        });
+        // Observe scope attributes for change
+        angular.forEach(['title'], function (key) {
+          attr.$observe(key, function (newValue, oldValue) {
+            scope[key] = $sce.trustAsHtml(newValue);
+            angular.isDefined(oldValue) && $$rAF(function () {
+              tooltip && tooltip.$applyPlacement();
+            });
+          });
+        });
+        // Support scope as an object
+        attr.bsTooltip && scope.$watch(attr.bsTooltip, function (newValue, oldValue) {
+          if (angular.isObject(newValue)) {
+            angular.extend(scope, newValue);
+          } else {
+            scope.title = newValue;
+          }
+          angular.isDefined(oldValue) && $$rAF(function () {
+            tooltip && tooltip.$applyPlacement();
+          });
+        }, true);
+        // Visibility binding support
+        attr.bsShow && scope.$watch(attr.bsShow, function (newValue, oldValue) {
+          if (!tooltip || !angular.isDefined(newValue))
+            return;
+          if (angular.isString(newValue))
+            newValue = newValue.match(',?(tooltip),?');
+          newValue === true ? tooltip.show() : tooltip.hide();
+        });
+        // Initialize popover
+        var tooltip = $tooltip(element, options);
+        // Garbage collection
+        scope.$on('$destroy', function () {
+          if (tooltip)
+            tooltip.destroy();
+          options = null;
+          tooltip = null;
+        });
+      }
+    };
+  }
+]);
+/**
+ * angular-strap
+ * @version v2.0.5 - 2014-08-07
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes (olivier@mg-crea.com)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+'use strict';
+angular.module('mgcrea.ngStrap.tooltip').run([
+  '$templateCache',
+  function ($templateCache) {
+    $templateCache.put('tooltip/tooltip.tpl.html', '<div class="tooltip in" ng-show="title"><div class="tooltip-arrow"></div><div class="tooltip-inner" ng-bind="title"></div></div>');
+  }
+]);
+/**
+ * angular-strap
+ * @version v2.0.5 - 2014-08-07
+ * @link http://mgcrea.github.io/angular-strap
+ * @author Olivier Louvignes (olivier@mg-crea.com)
+ * @license MIT License, http://www.opensource.org/licenses/MIT
+ */
+'use strict';
+angular.module('mgcrea.ngStrap.helpers.dimensions', []).factory('dimensions', [
+  '$document',
+  '$window',
+  function ($document, $window) {
+    var jqLite = angular.element;
+    var fn = {};
+    /**
+     * Test the element nodeName
+     * @param element
+     * @param name
+     */
+    var nodeName = fn.nodeName = function (element, name) {
+        return element.nodeName && element.nodeName.toLowerCase() === name.toLowerCase();
+      };
+    /**
+     * Returns the element computed style
+     * @param element
+     * @param prop
+     * @param extra
+     */
+    fn.css = function (element, prop, extra) {
+      var value;
+      if (element.currentStyle) {
+        //IE
+        value = element.currentStyle[prop];
+      } else if (window.getComputedStyle) {
+        value = window.getComputedStyle(element)[prop];
+      } else {
+        value = element.style[prop];
+      }
+      return extra === true ? parseFloat(value) || 0 : value;
+    };
+    /**
+     * Provides read-only equivalent of jQuery's offset function:
+     * @required-by bootstrap-tooltip, bootstrap-affix
+     * @url http://api.jquery.com/offset/
+     * @param element
+     */
+    fn.offset = function (element) {
+      var boxRect = element.getBoundingClientRect();
+      var docElement = element.ownerDocument;
+      return {
+        width: boxRect.width || element.offsetWidth,
+        height: boxRect.height || element.offsetHeight,
+        top: boxRect.top + (window.pageYOffset || docElement.documentElement.scrollTop) - (docElement.documentElement.clientTop || 0),
+        left: boxRect.left + (window.pageXOffset || docElement.documentElement.scrollLeft) - (docElement.documentElement.clientLeft || 0)
+      };
+    };
+    /**
+     * Provides read-only equivalent of jQuery's position function
+     * @required-by bootstrap-tooltip, bootstrap-affix
+     * @url http://api.jquery.com/offset/
+     * @param element
+     */
+    fn.position = function (element) {
+      var offsetParentRect = {
+          top: 0,
+          left: 0
+        }, offsetParentElement, offset;
+      // Fixed elements are offset from window (parentOffset = {top:0, left: 0}, because it is it's only offset parent
+      if (fn.css(element, 'position') === 'fixed') {
+        // We assume that getBoundingClientRect is available when computed position is fixed
+        offset = element.getBoundingClientRect();
+      } else {
+        // Get *real* offsetParentElement
+        offsetParentElement = offsetParent(element);
+        offset = fn.offset(element);
+        // Get correct offsets
+        offset = fn.offset(element);
+        if (!nodeName(offsetParentElement, 'html')) {
+          offsetParentRect = fn.offset(offsetParentElement);
+        }
+        // Add offsetParent borders
+        offsetParentRect.top += fn.css(offsetParentElement, 'borderTopWidth', true);
+        offsetParentRect.left += fn.css(offsetParentElement, 'borderLeftWidth', true);
+      }
+      // Subtract parent offsets and element margins
+      return {
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        top: offset.top - offsetParentRect.top - fn.css(element, 'marginTop', true),
+        left: offset.left - offsetParentRect.left - fn.css(element, 'marginLeft', true)
+      };
+    };
+    /**
+     * Returns the closest, non-statically positioned offsetParent of a given element
+     * @required-by fn.position
+     * @param element
+     */
+    var offsetParent = function offsetParentElement(element) {
+      var docElement = element.ownerDocument;
+      var offsetParent = element.offsetParent || docElement;
+      if (nodeName(offsetParent, '#document'))
+        return docElement.documentElement;
+      while (offsetParent && !nodeName(offsetParent, 'html') && fn.css(offsetParent, 'position') === 'static') {
+        offsetParent = offsetParent.offsetParent;
+      }
+      return offsetParent || docElement.documentElement;
+    };
+    /**
+     * Provides equivalent of jQuery's height function
+     * @required-by bootstrap-affix
+     * @url http://api.jquery.com/height/
+     * @param element
+     * @param outer
+     */
+    fn.height = function (element, outer) {
+      var value = element.offsetHeight;
+      if (outer) {
+        value += fn.css(element, 'marginTop', true) + fn.css(element, 'marginBottom', true);
+      } else {
+        value -= fn.css(element, 'paddingTop', true) + fn.css(element, 'paddingBottom', true) + fn.css(element, 'borderTopWidth', true) + fn.css(element, 'borderBottomWidth', true);
+      }
+      return value;
+    };
+    /**
+     * Provides equivalent of jQuery's width function
+     * @required-by bootstrap-affix
+     * @url http://api.jquery.com/width/
+     * @param element
+     * @param outer
+     */
+    fn.width = function (element, outer) {
+      var value = element.offsetWidth;
+      if (outer) {
+        value += fn.css(element, 'marginLeft', true) + fn.css(element, 'marginRight', true);
+      } else {
+        value -= fn.css(element, 'paddingLeft', true) + fn.css(element, 'paddingRight', true) + fn.css(element, 'borderLeftWidth', true) + fn.css(element, 'borderRightWidth', true);
+      }
+      return value;
+    };
+    return fn;
+  }
+]);
+/**
+ * angular-once - one time bindings for AngularJS
+ * @version v0.1.7
+ * @link https://github.com/tadeuszwojcik/angular-once
+ * @author Tadeusz Wójcik <tadeuszwojcik@gmail.com>
+ * @license WTFPL License, https://github.com/tadeuszwojcik/angular-once/blob/master/LICENSE.txt
+ */
+
+(function (window, angular, undefined) {
+  'use strict';
+
+  function setOneTimeBinding($scope, element, watch, watcherParser, bindingParser, done) {
+    // get value to watch
+    var watchingValue = watcherParser($scope);
+    // if we have a valid value, render the binding's value
+    if (watchingValue !== undefined) {
+      // if watching and binding $parsers are the same, use watching's value, else $parse the new value
+      return done(element, watcherParser == bindingParser ? watchingValue : bindingParser($scope));
+    }
+    
+    // we do not have a valid value, so we register a $watch
+    var watcherRemover = $scope.$watch(watch, function (newValue) {
+      // wait until we have a valid value
+      if (newValue == undefined) return;
+      // remove this $watch
+      removeWatcher();
+      // if watching and binding $parsers are the same, use watching's value, else $parse the new value
+      return done(element, watcherParser == bindingParser ? newValue : bindingParser($scope));
+    });
+
+    function removeWatcher() {
+      if (watcherRemover) {
+        watcherRemover();
+      }
+    }
+
+    $scope.$on("$destroy", removeWatcher);
+  }
+
+  var once = angular.module('once', []);
+
+  function makeBindingDirective(definition) {
+    once.directive(definition.name, ['$parse', function ($parse) {
+      return function ($scope, element, attrs) {
+        var watch = attrs.onceWaitFor || attrs[definition.name];
+        var watcherParser = $parse(watch);
+        var bindingParser = attrs.onceWaitFor ? $parse(attrs[definition.name]) : watcherParser;
+        setOneTimeBinding($scope, element, watch, watcherParser, bindingParser, definition.binding);
+      };
+    }]);
+  }
+
+  var bindingsDefinitions = [
+    {
+      name: 'onceText',
+      binding: function (element, value) {
+        element.text(value !== null ? value : "");
+      }
+    },
+    {
+      name: 'onceHtml',
+      binding: function (element, value) {
+        element.html(value);
+      }
+    },
+    {
+      name: 'onceSrc',
+      binding: function (element, value) {
+        element.attr('src', value);
+      }
+    },
+    {
+      name: 'onceHref',
+      binding: function (element, value) {
+        element.attr('href', value);
+      }
+    },
+    {
+      name: 'onceTitle',
+      binding: function (element, value) {
+        element.attr('title', value);
+      }
+    },
+    {
+      name: 'onceAlt',
+      binding: function (element, value) {
+        element.attr('alt', value);
+      }
+    },
+    {
+      name: 'onceId',
+      binding: function (element, value) {
+        element.attr('id', value);
+      }
+    },
+    {
+      name: 'onceIf',
+      binding: function (element, value) {
+        if (!value) {
+          element.remove();
+        }
+      }
+    },
+    {
+      name: 'onceClass',
+      binding: function (element, value) {
+        if (angular.isObject(value) && !angular.isArray(value)) {
+          var results = [];
+          angular.forEach(value, function (val, index) {
+            if (val) results.push(index);
+          });
+          value = results;
+        }
+        if (value) {
+          element.addClass(angular.isArray(value) ? value.join(' ') : value);
+        }
+      }
+    },
+    {
+      name: 'onceStyle',
+      binding: function (element, value) {
+        element.css(value);
+      }
+    },
+    {
+      name: 'onceShow',
+      binding: function (element, value) {
+        if (value) {
+          element.css('display', '');
+        } else {
+          element.css('display', 'none');
+        }
+      }
+    },
+    {
+      name: 'onceHide',
+      binding: function (element, value) {
+        if (value) {
+          element.css('display', 'none');
+        } else {
+          element.css('display', '');
+        }
+      }
+    }
+  ];
+
+  angular.forEach(bindingsDefinitions, makeBindingDirective);
+
+  once.directive('once', function () {
+    return function ($scope, element, attrs) {
+      angular.forEach(attrs, function (attr, attrName) {
+
+        if (!/^onceAttr[A-Z]/.test(attrName)) return;
+        var bind = function(element, value) {
+          var dashedName = attrName.replace(/[A-Z]/g, function(match) { return '-' + match.toLowerCase(); });
+          var name = dashedName.substr(10);
+
+          element.attr(name, value);
+        };
+
+        setOneTimeBinding($scope, element, attrs, attrName, bind);
+      });
+    };
+  });
+
+})(window, window.angular);
 angular.module("ui.bootstrap",["ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dialog","ui.bootstrap.dropdownToggle","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.position","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.tabs","ui.bootstrap.typeahead"]),angular.module("ui.bootstrap.transition",[]).factory("$transition",["$q","$timeout","$rootScope",function(t,e,n){function o(t){for(var e in t)if(void 0!==a.style[e])return t[e]}var i=function(o,a,r){r=r||{};var s=t.defer(),l=i[r.animation?"animationEndEventName":"transitionEndEventName"],c=function(){n.$apply(function(){o.unbind(l,c),s.resolve(o)})};return l&&o.bind(l,c),e(function(){angular.isString(a)?o.addClass(a):angular.isFunction(a)?a(o):angular.isObject(a)&&o.css(a),l||s.resolve(o)}),s.promise.cancel=function(){l&&o.unbind(l,c),s.reject("Transition cancelled")},s.promise},a=document.createElement("trans"),r={WebkitTransition:"webkitTransitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd",transition:"transitionend"},s={WebkitTransition:"webkitAnimationEnd",MozTransition:"animationend",OTransition:"oAnimationEnd",transition:"animationend"};return i.transitionEndEventName=o(r),i.animationEndEventName=o(s),i}]),angular.module("ui.bootstrap.collapse",["ui.bootstrap.transition"]).directive("collapse",["$transition",function(t){var e=function(t,e,n){e.removeClass("collapse"),e.css({height:n}),e[0].offsetWidth,e.addClass("collapse")};return{link:function(n,o,i){var a,r=!0;n.$watch(function(){return o[0].scrollHeight},function(){0!==o[0].scrollHeight&&(a||(r?e(n,o,o[0].scrollHeight+"px"):e(n,o,"auto")))}),n.$watch(i.collapse,function(t){t?u():c()});var s,l=function(e){return s&&s.cancel(),s=t(o,e),s.then(function(){s=void 0},function(){s=void 0}),s},c=function(){r?(r=!1,a||e(n,o,"auto")):l({height:o[0].scrollHeight+"px"}).then(function(){a||e(n,o,"auto")}),a=!1},u=function(){a=!0,r?(r=!1,e(n,o,0)):(e(n,o,o[0].scrollHeight+"px"),l({height:"0"}))}}}}]),angular.module("ui.bootstrap.accordion",["ui.bootstrap.collapse"]).constant("accordionConfig",{closeOthers:!0}).controller("AccordionController",["$scope","$attrs","accordionConfig",function(t,e,n){this.groups=[],this.closeOthers=function(o){var i=angular.isDefined(e.closeOthers)?t.$eval(e.closeOthers):n.closeOthers;i&&angular.forEach(this.groups,function(t){t!==o&&(t.isOpen=!1)})},this.addGroup=function(t){var e=this;this.groups.push(t),t.$on("$destroy",function(){e.removeGroup(t)})},this.removeGroup=function(t){var e=this.groups.indexOf(t);-1!==e&&this.groups.splice(this.groups.indexOf(t),1)}}]).directive("accordion",function(){return{restrict:"EA",controller:"AccordionController",transclude:!0,replace:!1,templateUrl:"template/accordion/accordion.html"}}).directive("accordionGroup",["$parse","$transition","$timeout",function(t){return{require:"^accordion",restrict:"EA",transclude:!0,replace:!0,templateUrl:"template/accordion/accordion-group.html",scope:{heading:"@"},controller:["$scope",function(){this.setHeading=function(t){this.heading=t}}],link:function(e,n,o,i){var a,r;i.addGroup(e),e.isOpen=!1,o.isOpen&&(a=t(o.isOpen),r=a.assign,e.$watch(function(){return a(e.$parent)},function(t){e.isOpen=t}),e.isOpen=a?a(e.$parent):!1),e.$watch("isOpen",function(t){t&&i.closeOthers(e),r&&r(e.$parent,t)})}}}]).directive("accordionHeading",function(){return{restrict:"E",transclude:!0,template:"",replace:!0,require:"^accordionGroup",compile:function(t,e,n){return function(t,e,o,i){i.setHeading(n(t,function(){}))}}}}).directive("accordionTransclude",function(){return{require:"^accordionGroup",link:function(t,e,n,o){t.$watch(function(){return o[n.accordionTransclude]},function(t){t&&(e.html(""),e.append(t))})}}}),angular.module("ui.bootstrap.alert",[]).directive("alert",function(){return{restrict:"EA",templateUrl:"template/alert/alert.html",transclude:!0,replace:!0,scope:{type:"=",close:"&"},link:function(t,e,n){t.closeable="close"in n}}}),angular.module("ui.bootstrap.buttons",[]).constant("buttonConfig",{activeClass:"active",toggleEvent:"click"}).directive("btnRadio",["buttonConfig",function(t){var e=t.activeClass||"active",n=t.toggleEvent||"click";return{require:"ngModel",link:function(t,o,i,a){var r=t.$eval(i.btnRadio);t.$watch(function(){return a.$modelValue},function(t){angular.equals(t,r)?o.addClass(e):o.removeClass(e)}),o.bind(n,function(){o.hasClass(e)||t.$apply(function(){a.$setViewValue(r)})})}}}]).directive("btnCheckbox",["buttonConfig",function(t){var e=t.activeClass||"active",n=t.toggleEvent||"click";return{require:"ngModel",link:function(t,o,i,a){var r=t.$eval(i.btnCheckboxTrue),s=t.$eval(i.btnCheckboxFalse);r=angular.isDefined(r)?r:!0,s=angular.isDefined(s)?s:!1,t.$watch(function(){return a.$modelValue},function(t){angular.equals(t,r)?o.addClass(e):o.removeClass(e)}),o.bind(n,function(){t.$apply(function(){a.$setViewValue(o.hasClass(e)?s:r)})})}}}]),angular.module("ui.bootstrap.carousel",["ui.bootstrap.transition"]).controller("CarouselController",["$scope","$timeout","$transition","$q",function(t,e,n){function o(){function n(){a?(t.next(),o()):t.pause()}i&&e.cancel(i);var r=+t.interval;!isNaN(r)&&r>=0&&(i=e(n,r))}var i,a,r=this,s=r.slides=[],l=-1;r.currentSlide=null,r.select=function(i,a){function c(){r.currentSlide&&angular.isString(a)&&!t.noTransition&&i.$element?(i.$element.addClass(a),i.$element[0].offsetWidth=i.$element[0].offsetWidth,angular.forEach(s,function(t){angular.extend(t,{direction:"",entering:!1,leaving:!1,active:!1})}),angular.extend(i,{direction:a,active:!0,entering:!0}),angular.extend(r.currentSlide||{},{direction:a,leaving:!0}),t.$currentTransition=n(i.$element,{}),function(e,n){t.$currentTransition.then(function(){u(e,n)},function(){u(e,n)})}(i,r.currentSlide)):u(i,r.currentSlide),r.currentSlide=i,l=p,o()}function u(e,n){angular.extend(e,{direction:"",active:!0,leaving:!1,entering:!1}),angular.extend(n||{},{direction:"",active:!1,leaving:!1,entering:!1}),t.$currentTransition=null}var p=s.indexOf(i);void 0===a&&(a=p>l?"next":"prev"),i&&i!==r.currentSlide&&(t.$currentTransition?(t.$currentTransition.cancel(),e(c)):c())},r.indexOfSlide=function(t){return s.indexOf(t)},t.next=function(){var t=(l+1)%s.length;return r.select(s[t],"next")},t.prev=function(){var t=0>l-1?s.length-1:l-1;return r.select(s[t],"prev")},t.select=function(t){r.select(t)},t.isActive=function(t){return r.currentSlide===t},t.slides=function(){return s},t.$watch("interval",o),t.play=function(){a||(a=!0,o())},t.pause=function(){a=!1,i&&e.cancel(i)},r.addSlide=function(e,n){e.$element=n,s.push(e),1===s.length||e.active?(r.select(s[s.length-1]),1==s.length&&t.play()):e.active=!1},r.removeSlide=function(t){var e=s.indexOf(t);s.splice(e,1),s.length>0&&t.active&&(e>=s.length?r.select(s[e-1]):r.select(s[e]))}}]).directive("carousel",[function(){return{restrict:"EA",transclude:!0,replace:!0,controller:"CarouselController",require:"carousel",templateUrl:"template/carousel/carousel.html",scope:{interval:"=",noTransition:"="}}}]).directive("slide",[function(){return{require:"^carousel",restrict:"EA",transclude:!0,replace:!0,templateUrl:"template/carousel/slide.html",scope:{active:"="},link:function(t,e,n,o){o.addSlide(t,e),t.$on("$destroy",function(){o.removeSlide(t)}),t.$watch("active",function(e){e&&o.select(t)})}}}]);var dialogModule=angular.module("ui.bootstrap.dialog",["ui.bootstrap.transition"]);dialogModule.controller("MessageBoxController",["$scope","dialog","model",function(t,e,n){t.title=n.title,t.message=n.message,t.buttons=n.buttons,t.close=function(t){e.close(t)}}]),dialogModule.provider("$dialog",function(){var t={backdrop:!0,dialogClass:"modal",backdropClass:"modal-backdrop",transitionClass:"fade",triggerClass:"in",dialogOpenClass:"modal-open",resolve:{},backdropFade:!1,dialogFade:!1,keyboard:!0,backdropClick:!0},e={},n={value:0};this.options=function(t){e=t},this.$get=["$http","$document","$compile","$rootScope","$controller","$templateCache","$q","$transition","$injector",function(o,i,a,r,s,l,c,u,p){function d(t){var e=angular.element("<div>");return e.addClass(t),e}function f(n){var o=this,i=this.options=angular.extend({},t,e,n);this._open=!1,this.backdropEl=d(i.backdropClass),i.backdropFade&&(this.backdropEl.addClass(i.transitionClass),this.backdropEl.removeClass(i.triggerClass)),this.modalEl=d(i.dialogClass),i.dialogFade&&(this.modalEl.addClass(i.transitionClass),this.modalEl.removeClass(i.triggerClass)),this.handledEscapeKey=function(t){27===t.which&&(o.close(),t.preventDefault(),o.$scope.$apply())},this.handleBackDropClick=function(t){o.close(),t.preventDefault(),o.$scope.$apply()},this.handleLocationChange=function(){o.close()}}var h=i.find("body");return f.prototype.isOpen=function(){return this._open},f.prototype.open=function(t,e){var n=this,o=this.options;if(t&&(o.templateUrl=t),e&&(o.controller=e),!o.template&&!o.templateUrl)throw Error("Dialog.open expected template or templateUrl, neither found. Use options or open method to specify them.");return this._loadResolves().then(function(t){var e=t.$scope=n.$scope=t.$scope?t.$scope:r.$new();if(n.modalEl.html(t.$template),n.options.controller){var o=s(n.options.controller,t);n.modalEl.children().data("ngControllerController",o)}a(n.modalEl)(e),n._addElementsToDom(),h.addClass(n.options.dialogOpenClass),setTimeout(function(){n.options.dialogFade&&n.modalEl.addClass(n.options.triggerClass),n.options.backdropFade&&n.backdropEl.addClass(n.options.triggerClass)}),n._bindEvents()}),this.deferred=c.defer(),this.deferred.promise},f.prototype.close=function(t){function e(t){t.removeClass(o.options.triggerClass)}function n(){o._open&&o._onCloseComplete(t)}var o=this,i=this._getFadingElements();if(h.removeClass(o.options.dialogOpenClass),i.length>0)for(var a=i.length-1;a>=0;a--)u(i[a],e).then(n);else this._onCloseComplete(t)},f.prototype._getFadingElements=function(){var t=[];return this.options.dialogFade&&t.push(this.modalEl),this.options.backdropFade&&t.push(this.backdropEl),t},f.prototype._bindEvents=function(){this.options.keyboard&&h.bind("keydown",this.handledEscapeKey),this.options.backdrop&&this.options.backdropClick&&this.backdropEl.bind("click",this.handleBackDropClick),this.$scope.$on("$locationChangeSuccess",this.handleLocationChange)},f.prototype._unbindEvents=function(){this.options.keyboard&&h.unbind("keydown",this.handledEscapeKey),this.options.backdrop&&this.options.backdropClick&&this.backdropEl.unbind("click",this.handleBackDropClick)},f.prototype._onCloseComplete=function(t){this._removeElementsFromDom(),this._unbindEvents(),this.deferred.resolve(t)},f.prototype._addElementsToDom=function(){h.append(this.modalEl),this.options.backdrop&&(0===n.value&&h.append(this.backdropEl),n.value++),this._open=!0},f.prototype._removeElementsFromDom=function(){this.modalEl.remove(),this.options.backdrop&&(n.value--,0===n.value&&this.backdropEl.remove()),this._open=!1},f.prototype._loadResolves=function(){var t,e=[],n=[],i=this;return this.options.template?t=c.when(this.options.template):this.options.templateUrl&&(t=o.get(this.options.templateUrl,{cache:l}).then(function(t){return t.data})),angular.forEach(this.options.resolve||[],function(t,o){n.push(o),e.push(angular.isString(t)?p.get(t):p.invoke(t))}),n.push("$template"),e.push(t),c.all(e).then(function(t){var e={};return angular.forEach(t,function(t,o){e[n[o]]=t}),e.dialog=i,e})},{dialog:function(t){return new f(t)},messageBox:function(t,e,n){return new f({templateUrl:"template/dialog/message.html",controller:"MessageBoxController",resolve:{model:function(){return{title:t,message:e,buttons:n}}}})}}}]}),angular.module("ui.bootstrap.dropdownToggle",[]).directive("dropdownToggle",["$document","$location","$window",function(t){var e=null,n=angular.noop;return{restrict:"CA",link:function(o,i){o.$watch("$location.path",function(){n()}),i.parent().bind("click",function(){n()}),i.bind("click",function(o){o.preventDefault(),o.stopPropagation();var a=i===e;e&&n(),a||(i.parent().addClass("open"),e=i,n=function(o){o&&(o.preventDefault(),o.stopPropagation()),t.unbind("click",n),i.parent().removeClass("open"),n=angular.noop,e=null},t.bind("click",n))})}}}]),angular.module("ui.bootstrap.modal",["ui.bootstrap.dialog"]).directive("modal",["$parse","$dialog",function(t,e){return{restrict:"EA",terminal:!0,link:function(n,o,i){var a,r=angular.extend({},n.$eval(i.uiOptions||i.bsOptions||i.options)),s=i.modal||i.show;r=angular.extend(r,{template:o.html(),resolve:{$scope:function(){return n}}});var l=e.dialog(r);o.remove(),a=i.close?function(){t(i.close)(n)}:function(){angular.isFunction(t(s).assign)&&t(s).assign(n,!1)},n.$watch(s,function(t){t?l.open().then(function(){a()}):l.isOpen()&&l.close()})}}}]),angular.module("ui.bootstrap.pagination",[]).constant("paginationConfig",{boundaryLinks:!1,directionLinks:!0,firstText:"First",previousText:"Previous",nextText:"Next",lastText:"Last"}).directive("pagination",["paginationConfig",function(t){return{restrict:"EA",scope:{numPages:"=",currentPage:"=",maxSize:"=",onSelectPage:"&"},templateUrl:"template/pagination/pagination.html",replace:!0,link:function(e,n,o){function i(t,e,n,o){return{number:t,text:e,active:n,disabled:o}}var a=angular.isDefined(o.boundaryLinks)?e.$eval(o.boundaryLinks):t.boundaryLinks,r=angular.isDefined(o.directionLinks)?e.$eval(o.directionLinks):t.directionLinks,s=angular.isDefined(o.firstText)?o.firstText:t.firstText,l=angular.isDefined(o.previousText)?o.previousText:t.previousText,c=angular.isDefined(o.nextText)?o.nextText:t.nextText,u=angular.isDefined(o.lastText)?o.lastText:t.lastText;e.$watch("numPages + currentPage + maxSize",function(){e.pages=[];var t=1,n=e.numPages;e.maxSize&&e.maxSize<e.numPages&&(t=Math.max(e.currentPage-Math.floor(e.maxSize/2),1),n=t+e.maxSize-1,n>e.numPages&&(n=e.numPages,t=n-e.maxSize+1));for(var o=t;n>=o;o++){var p=i(o,o,e.isActive(o),!1);e.pages.push(p)}if(r){var d=i(e.currentPage-1,l,!1,e.noPrevious());e.pages.unshift(d);var f=i(e.currentPage+1,c,!1,e.noNext());e.pages.push(f)}if(a){var h=i(1,s,!1,e.noPrevious());e.pages.unshift(h);var g=i(e.numPages,u,!1,e.noNext());e.pages.push(g)}e.currentPage>e.numPages&&e.selectPage(e.numPages)}),e.noPrevious=function(){return 1===e.currentPage},e.noNext=function(){return e.currentPage===e.numPages},e.isActive=function(t){return e.currentPage===t},e.selectPage=function(t){!e.isActive(t)&&t>0&&e.numPages>=t&&(e.currentPage=t,e.onSelectPage({page:t}))}}}}]),angular.module("ui.bootstrap.position",[]).factory("$position",["$document","$window",function(t,e){function n(t,n){return t.currentStyle?t.currentStyle[n]:e.getComputedStyle?e.getComputedStyle(t)[n]:t.style[n]}function o(t){return"static"===(n(t,"position")||"static")}var i=function(e){for(var n=t[0],i=e.offsetParent||n;i&&i!==n&&o(i);)i=i.offsetParent;return i||n};return{position:function(e){var n=this.offset(e),o={top:0,left:0},a=i(e[0]);return a!=t[0]&&(o=this.offset(angular.element(a)),o.top+=a.clientTop,o.left+=a.clientLeft),{width:e.prop("offsetWidth"),height:e.prop("offsetHeight"),top:n.top-o.top,left:n.left-o.left}},offset:function(n){var o=n[0].getBoundingClientRect();return{width:n.prop("offsetWidth"),height:n.prop("offsetHeight"),top:o.top+(e.pageYOffset||t[0].body.scrollTop),left:o.left+(e.pageXOffset||t[0].body.scrollLeft)}}}}]),angular.module("ui.bootstrap.tooltip",["ui.bootstrap.position"]).provider("$tooltip",function(){function t(t){var e=/[A-Z]/g,n="-";return t.replace(e,function(t,e){return(e?n:"")+t.toLowerCase()})}var e={placement:"top",animation:!0,popupDelay:0},n={mouseenter:"mouseleave",click:"click",focus:"blur"},o={};this.options=function(t){angular.extend(o,t)},this.$get=["$window","$compile","$timeout","$parse","$document","$position",function(i,a,r,s,l,c){return function(i,u,p){function d(t){var e,o;return e=t||f.trigger||p,o=angular.isDefined(f.trigger)?n[f.trigger]||e:n[e]||e,{show:e,hide:o}}var f=angular.extend({},e,o),h=t(i),g=d(void 0),m="<"+h+"-popup "+'title="{{tt_title}}" '+'content="{{tt_content}}" '+'placement="{{tt_placement}}" '+'animation="tt_animation()" '+'is-open="tt_isOpen"'+">"+"</"+h+"-popup>";return{restrict:"EA",scope:!0,link:function(t,e,n){function o(){t.tt_isOpen?h():p()}function p(){t.tt_popupDelay?y=r(v,t.tt_popupDelay):t.$apply(v)}function h(){t.$apply(function(){$()})}function v(){var n,o,i,a;if(t.tt_content){switch(b&&r.cancel(b),x.css({top:0,left:0,display:"block"}),f.appendToBody?(k=k||l.find("body"),k.append(x)):e.after(x),n=c.position(e),o=x.prop("offsetWidth"),i=x.prop("offsetHeight"),t.tt_placement){case"right":a={top:n.top+n.height/2-i/2+"px",left:n.left+n.width+"px"};break;case"bottom":a={top:n.top+n.height+"px",left:n.left+n.width/2-o/2+"px"};break;case"left":a={top:n.top+n.height/2-i/2+"px",left:n.left-o+"px"};break;default:a={top:n.top-i+"px",left:n.left+n.width/2-o/2+"px"}}x.css(a),t.tt_isOpen=!0}}function $(){t.tt_isOpen=!1,r.cancel(y),angular.isDefined(t.tt_animation)&&t.tt_animation()?b=r(function(){x.remove()},500):x.remove()}var b,y,k,x=a(m)(t);t.tt_isOpen=!1,n.$observe(i,function(e){t.tt_content=e}),n.$observe(u+"Title",function(e){t.tt_title=e}),n.$observe(u+"Placement",function(e){t.tt_placement=angular.isDefined(e)?e:f.placement}),n.$observe(u+"Animation",function(e){t.tt_animation=angular.isDefined(e)?s(e):function(){return f.animation}}),n.$observe(u+"PopupDelay",function(e){var n=parseInt(e,10);t.tt_popupDelay=isNaN(n)?f.popupDelay:n}),n.$observe(u+"Trigger",function(t){e.unbind(g.show),e.unbind(g.hide),g=d(t),g.show===g.hide?e.bind(g.show,o):(e.bind(g.show,p),e.bind(g.hide,h))})}}}}]}).directive("tooltipPopup",function(){return{restrict:"E",replace:!0,scope:{content:"@",placement:"@",animation:"&",isOpen:"&"},templateUrl:"template/tooltip/tooltip-popup.html"}}).directive("tooltip",["$tooltip",function(t){return t("tooltip","tooltip","mouseenter")}]).directive("tooltipHtmlUnsafePopup",function(){return{restrict:"E",replace:!0,scope:{content:"@",placement:"@",animation:"&",isOpen:"&"},templateUrl:"template/tooltip/tooltip-html-unsafe-popup.html"}}).directive("tooltipHtmlUnsafe",["$tooltip",function(t){return t("tooltipHtmlUnsafe","tooltip","mouseenter")}]),angular.module("ui.bootstrap.popover",["ui.bootstrap.tooltip"]).directive("popoverPopup",function(){return{restrict:"EA",replace:!0,scope:{title:"@",content:"@",placement:"@",animation:"&",isOpen:"&"},templateUrl:"template/popover/popover.html"}}).directive("popover",["$compile","$timeout","$parse","$window","$tooltip",function(t,e,n,o,i){return i("popover","popover","click")}]),angular.module("ui.bootstrap.progressbar",["ui.bootstrap.transition"]).constant("progressConfig",{animate:!0,autoType:!1,stackedTypes:["success","info","warning","danger"]}).controller("ProgressBarController",["$scope","$attrs","progressConfig",function(t,e,n){function o(t){return r[t]}var i=angular.isDefined(e.animate)?t.$eval(e.animate):n.animate,a=angular.isDefined(e.autoType)?t.$eval(e.autoType):n.autoType,r=angular.isDefined(e.stackedTypes)?t.$eval("["+e.stackedTypes+"]"):n.stackedTypes;this.makeBar=function(t,e,n){var r=angular.isObject(t)?t.value:t||0,s=angular.isObject(e)?e.value:e||0,l=angular.isObject(t)&&angular.isDefined(t.type)?t.type:a?o(n||0):null;return{from:s,to:r,type:l,animate:i}},this.addBar=function(e){t.bars.push(e),t.totalPercent+=e.to},this.clearBars=function(){t.bars=[],t.totalPercent=0},this.clearBars()}]).directive("progress",function(){return{restrict:"EA",replace:!0,controller:"ProgressBarController",scope:{value:"=",onFull:"&",onEmpty:"&"},templateUrl:"template/progressbar/progress.html",link:function(t,e,n,o){t.$watch("value",function(t,e){if(o.clearBars(),angular.isArray(t))for(var n=0,i=t.length;i>n;n++)o.addBar(o.makeBar(t[n],e[n],n));else o.addBar(o.makeBar(t,e))},!0),t.$watch("totalPercent",function(e){e>=100?t.onFull():0>=e&&t.onEmpty()},!0)}}}).directive("progressbar",["$transition",function(t){return{restrict:"EA",replace:!0,scope:{width:"=",old:"=",type:"=",animate:"="},templateUrl:"template/progressbar/bar.html",link:function(e,n){e.$watch("width",function(o){e.animate?(n.css("width",e.old+"%"),t(n,{width:o+"%"})):n.css("width",o+"%")})}}}]),angular.module("ui.bootstrap.rating",[]).constant("ratingConfig",{max:5}).directive("rating",["ratingConfig","$parse",function(t,e){return{restrict:"EA",scope:{value:"="},templateUrl:"template/rating/rating.html",replace:!0,link:function(n,o,i){var a=angular.isDefined(i.max)?n.$eval(i.max):t.max;n.range=[];for(var r=1;a>=r;r++)n.range.push(r);n.rate=function(t){n.readonly||(n.value=t)},n.enter=function(t){n.readonly||(n.val=t)},n.reset=function(){n.val=angular.copy(n.value)},n.reset(),n.$watch("value",function(t){n.val=t}),n.readonly=!1,i.readonly&&n.$parent.$watch(e(i.readonly),function(t){n.readonly=!!t})}}}]),angular.module("ui.bootstrap.tabs",[]).controller("TabsController",["$scope","$element",function(t){var e=t.panes=[];this.select=t.select=function(t){angular.forEach(e,function(t){t.selected=!1}),t.selected=!0},this.addPane=function(n){e.length||t.select(n),e.push(n)},this.removePane=function(n){var o=e.indexOf(n);e.splice(o,1),n.selected&&e.length>0&&t.select(e[e.length>o?o:o-1])}}]).directive("tabs",function(){return{restrict:"EA",transclude:!0,scope:{},controller:"TabsController",templateUrl:"template/tabs/tabs.html",replace:!0}}).directive("pane",["$parse",function(t){return{require:"^tabs",restrict:"EA",transclude:!0,scope:{heading:"@"},link:function(e,n,o,i){var a,r;e.selected=!1,o.active&&(a=t(o.active),r=a.assign,e.$watch(function(){return a(e.$parent)},function(t){e.selected=t}),e.selected=a?a(e.$parent):!1),e.$watch("selected",function(t){t&&i.select(e),r&&r(e.$parent,t)}),i.addPane(e),e.$on("$destroy",function(){i.removePane(e)})},templateUrl:"template/tabs/pane.html",replace:!0}}]),angular.module("ui.bootstrap.typeahead",["ui.bootstrap.position"]).factory("typeaheadParser",["$parse",function(t){var e=/^\s*(.*?)(?:\s+as\s+(.*?))?\s+for\s+(?:([\$\w][\$\w\d]*))\s+in\s+(.*)$/;return{parse:function(n){var o=n.match(e);if(!o)throw Error("Expected typeahead specification in form of '_modelValue_ (as _label_)? for _item_ in _collection_' but got '"+n+"'.");return{itemName:o[3],source:t(o[4]),viewMapper:t(o[2]||o[1]),modelMapper:t(o[1])}}}}]).directive("typeahead",["$compile","$parse","$q","$document","$position","typeaheadParser",function(t,e,n,o,i,a){var r=[9,13,27,38,40];return{require:"ngModel",link:function(s,l,c,u){var p,d=s.$eval(c.typeaheadMinLength)||1,f=a.parse(c.typeahead),h=s.$eval(c.typeaheadEditable)!==!1,g=e(c.typeaheadLoading).assign||angular.noop,m=angular.element("<typeahead-popup matches='matches' active='activeIdx' select='select(activeIdx)' query='query' position='position'></typeahead-popup>"),v=s.$new();s.$on("$destroy",function(){v.$destroy()});var $=function(){v.matches=[],v.activeIdx=-1},b=function(t){var e={$viewValue:t};g(s,!0),n.when(f.source(v,e)).then(function(n){if(t===u.$viewValue){if(n.length>0){v.activeIdx=0,v.matches.length=0;for(var o=0;n.length>o;o++)e[f.itemName]=n[o],v.matches.push({label:f.viewMapper(v,e),model:n[o]});v.query=t,v.position=i.position(l),v.position.top=v.position.top+l.prop("offsetHeight")}else $();g(s,!1)}},function(){$(),g(s,!1)})};$(),v.query=void 0,u.$parsers.push(function(t){return $(),p?t:(t&&t.length>=d&&b(t),h?t:void 0)}),u.$render=function(){var t={};t[f.itemName]=p||u.$viewValue,l.val(f.viewMapper(v,t)||u.$viewValue),p=void 0},v.select=function(t){var e={};e[f.itemName]=p=v.matches[t].model,u.$setViewValue(f.modelMapper(v,e)),u.$render()},l.bind("keydown",function(t){0!==v.matches.length&&-1!==r.indexOf(t.which)&&(t.preventDefault(),40===t.which?(v.activeIdx=(v.activeIdx+1)%v.matches.length,v.$digest()):38===t.which?(v.activeIdx=(v.activeIdx?v.activeIdx:v.matches.length)-1,v.$digest()):13===t.which||9===t.which?v.$apply(function(){v.select(v.activeIdx)}):27===t.which&&(t.stopPropagation(),$(),v.$digest()))}),o.bind("click",function(){$(),v.$digest()}),l.after(t(m)(v))}}}]).directive("typeaheadPopup",function(){return{restrict:"E",scope:{matches:"=",query:"=",active:"=",position:"=",select:"&"},replace:!0,templateUrl:"template/typeahead/typeahead.html",link:function(t){t.isOpen=function(){return t.matches.length>0},t.isActive=function(e){return t.active==e},t.selectActive=function(e){t.active=e},t.selectMatch=function(e){t.select({activeIdx:e})}}}}).filter("typeaheadHighlight",function(){function t(t){return t.replace(/([.?*+^$[\]\\(){}|-])/g,"\\$1")}return function(e,n){return n?e.replace(RegExp(t(n),"gi"),"<strong>$&</strong>"):n}});
 /*
  * angular-ui-bootstrap
@@ -19819,6 +20222,78 @@ navigator.geolocation.getAccurateCurrentPosition = function (geolocationSuccess,
 /* ng-infinite-scroll - v1.0.0 - 2013-02-23 */
 var mod;mod=angular.module("infinite-scroll",[]),mod.directive("infiniteScroll",["$rootScope","$window","$timeout",function(i,n,e){return{link:function(t,l,o){var r,c,f,a;return n=angular.element(n),f=0,null!=o.infiniteScrollDistance&&t.$watch(o.infiniteScrollDistance,function(i){return f=parseInt(i,10)}),a=!0,r=!1,null!=o.infiniteScrollDisabled&&t.$watch(o.infiniteScrollDisabled,function(i){return a=!i,a&&r?(r=!1,c()):void 0}),c=function(){var e,c,u,d;return d=n.height()+n.scrollTop(),e=l.offset().top+l.height(),c=e-d,u=n.height()*f>=c,u&&a?i.$$phase?t.$eval(o.infiniteScroll):t.$apply(o.infiniteScroll):u?r=!0:void 0},n.on("scroll",c),t.$on("$destroy",function(){return n.off("scroll",c)}),e(function(){return o.infiniteScrollImmediateCheck?t.$eval(o.infiniteScrollImmediateCheck)?c():void 0:c()},0)}}}]);
 (function(){var a;a=angular.module("ngModal",[]),a.provider("ngModalDefaults",function(){return{options:{closeButtonHtml:"<span class='ng-modal-close-x'>X</span>"},$get:function(){return this.options},set:function(a,b){var c,d,e;if("object"==typeof a){e=[];for(c in a)d=a[c],e.push(this.options[c]=d);return e}return this.options[a]=b}}}),a.directive("modalDialog",["ngModalDefaults","$sce",function(a,b){return{restrict:"E",scope:{show:"=",dialogTitle:"@",onClose:"&?"},replace:!0,transclude:!0,link:function(c,d,e){var f,g;return f=function(){return c.closeButtonHtml=b.trustAsHtml(a.closeButtonHtml)},g=function(){return c.dialogStyle={},e.width&&(c.dialogStyle.width=e.width),e.height?c.dialogStyle.height=e.height:void 0},c.hideModal=function(){return c.show=!1},c.$watch("show",function(a,b){return document.getElementsByTagName("body")[0].style.overflow=a&&!b?"hidden":"",!a&&b&&null!=c.onClose?c.onClose():void 0}),f(),g()},template:"<div class='ng-modal' ng-show='show'>\n  <div class='ng-modal-overlay' ng-click='hideModal()'></div>\n  <div class='ng-modal-dialog' ng-style='dialogStyle'>\n    <span class='ng-modal-title' ng-show='dialogTitle && dialogTitle.length' ng-bind='dialogTitle'></span>\n    <div class='ng-modal-close' ng-click='hideModal()'>\n      <div ng-bind-html='closeButtonHtml'></div>\n    </div>\n    <div class='ng-modal-dialog-content' ng-transclude></div>\n  </div>\n</div>"}}])}).call(this);
+Date.prototype.setISO8601 = function (string) {
+    var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
+        "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+        "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?";
+    var d = string.match(new RegExp(regexp));
+
+    var offset = 0;
+    var date = new Date(d[1], 0, 1);
+
+    if (d[3]) { date.setMonth(d[3] - 1); }
+    if (d[5]) { date.setDate(d[5]); }
+    if (d[7]) { date.setHours(d[7]); }
+    if (d[8]) { date.setMinutes(d[8]); }
+    if (d[10]) { date.setSeconds(d[10]); }
+    if (d[12]) { date.setMilliseconds(Number("0." + d[12]) * 1000); }
+    if (d[14]) {
+        offset = (Number(d[16]) * 60) + Number(d[17]);
+        offset *= ((d[15] == '-') ? 1 : -1);
+    }
+
+    offset -= date.getTimezoneOffset();
+    time = (Number(date) + (offset * 60 * 1000));
+    this.setTime(Number(time));
+}
+
+Date.prototype.toISO8601String = function (format, offset) {
+    /* accepted values for the format [1-6]:
+     1 Year:
+       YYYY (eg 1997)
+     2 Year and month:
+       YYYY-MM (eg 1997-07)
+     3 Complete date:
+       YYYY-MM-DD (eg 1997-07-16)
+     4 Complete date plus hours and minutes:
+       YYYY-MM-DDThh:mmTZD (eg 1997-07-16T19:20+01:00)
+     5 Complete date plus hours, minutes and seconds:
+       YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+     6 Complete date plus hours, minutes, seconds and a decimal
+       fraction of a second
+       YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+    */
+    if (!format) { var format = 6; }
+    if (!offset) {
+        var offset = 'Z';
+        var date = this;
+    } else {
+        var d = offset.match(/([-+])([0-9]{2}):([0-9]{2})/);
+        var offsetnum = (Number(d[2]) * 60) + Number(d[3]);
+        offsetnum *= ((d[1] == '-') ? -1 : 1);
+        var date = new Date(Number(Number(this) + (offsetnum * 60000)));
+    }
+
+    var zeropad = function (num) { return ((num < 10) ? '0' : '') + num; }
+
+    var str = "";
+    str += date.getUTCFullYear();
+    if (format > 1) { str += "-" + zeropad(date.getUTCMonth() + 1); }
+    if (format > 2) { str += "-" + zeropad(date.getUTCDate()); }
+    if (format > 3) {
+        str += "T" + zeropad(date.getUTCHours()) +
+               ":" + zeropad(date.getUTCMinutes());
+    }
+    if (format > 5) {
+        var secs = Number(date.getUTCSeconds() + "." +
+                   ((date.getUTCMilliseconds() < 100) ? '0' : '') +
+                   zeropad(date.getUTCMilliseconds()));
+        str += ":" + zeropad(secs);
+    } else if (format > 4) { str += ":" + zeropad(date.getUTCSeconds()); }
+
+    if (format > 3) { str += offset; }
+    return str;
+}
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.io=e():"undefined"!=typeof global?global.io=e():"undefined"!=typeof self&&(self.io=e())}(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){module.exports=require("./lib/")},{"./lib/":2}],2:[function(require,module,exports){var url=require("./url");var parser=require("socket.io-parser");var Manager=require("./manager");var debug=require("debug")("socket.io-client");module.exports=exports=lookup;var cache=exports.managers={};function lookup(uri,opts){if(typeof uri=="object"){opts=uri;uri=undefined}opts=opts||{};var parsed=url(uri);var source=parsed.source;var id=parsed.id;var io;if(opts.forceNew||opts["force new connection"]||false===opts.multiplex){debug("ignoring socket cache for %s",source);io=Manager(source,opts)}else{if(!cache[id]){debug("new io instance for %s",source);cache[id]=Manager(source,opts)}io=cache[id]}return io.socket(parsed.path)}exports.protocol=parser.protocol;exports.connect=lookup;exports.Manager=require("./manager");exports.Socket=require("./socket")},{"./manager":3,"./socket":5,"./url":6,debug:9,"socket.io-parser":40}],3:[function(require,module,exports){var url=require("./url");var eio=require("engine.io-client");var Socket=require("./socket");var Emitter=require("component-emitter");var parser=require("socket.io-parser");var on=require("./on");var bind=require("component-bind");var object=require("object-component");var debug=require("debug")("socket.io-client:manager");module.exports=Manager;function Manager(uri,opts){if(!(this instanceof Manager))return new Manager(uri,opts);if(uri&&"object"==typeof uri){opts=uri;uri=undefined}opts=opts||{};opts.path=opts.path||"/socket.io";this.nsps={};this.subs=[];this.opts=opts;this.reconnection(opts.reconnection!==false);this.reconnectionAttempts(opts.reconnectionAttempts||Infinity);this.reconnectionDelay(opts.reconnectionDelay||1e3);this.reconnectionDelayMax(opts.reconnectionDelayMax||5e3);this.timeout(null==opts.timeout?2e4:opts.timeout);this.readyState="closed";this.uri=uri;this.connected=0;this.attempts=0;this.encoding=false;this.packetBuffer=[];this.encoder=new parser.Encoder;this.decoder=new parser.Decoder;this.open()}Manager.prototype.emitAll=function(){this.emit.apply(this,arguments);for(var nsp in this.nsps){this.nsps[nsp].emit.apply(this.nsps[nsp],arguments)}};Emitter(Manager.prototype);Manager.prototype.reconnection=function(v){if(!arguments.length)return this._reconnection;this._reconnection=!!v;return this};Manager.prototype.reconnectionAttempts=function(v){if(!arguments.length)return this._reconnectionAttempts;this._reconnectionAttempts=v;return this};Manager.prototype.reconnectionDelay=function(v){if(!arguments.length)return this._reconnectionDelay;this._reconnectionDelay=v;return this};Manager.prototype.reconnectionDelayMax=function(v){if(!arguments.length)return this._reconnectionDelayMax;this._reconnectionDelayMax=v;return this};Manager.prototype.timeout=function(v){if(!arguments.length)return this._timeout;this._timeout=v;return this};Manager.prototype.maybeReconnectOnOpen=function(){if(!this.openReconnect&&!this.reconnecting&&this._reconnection){this.openReconnect=true;this.reconnect()}};Manager.prototype.open=Manager.prototype.connect=function(fn){debug("readyState %s",this.readyState);if(~this.readyState.indexOf("open"))return this;debug("opening %s",this.uri);this.engine=eio(this.uri,this.opts);var socket=this.engine;var self=this;this.readyState="opening";var openSub=on(socket,"open",function(){self.onopen();fn&&fn()});var errorSub=on(socket,"error",function(data){debug("connect_error");self.cleanup();self.readyState="closed";self.emitAll("connect_error",data);if(fn){var err=new Error("Connection error");err.data=data;fn(err)}self.maybeReconnectOnOpen()});if(false!==this._timeout){var timeout=this._timeout;debug("connect attempt will timeout after %d",timeout);var timer=setTimeout(function(){debug("connect attempt timed out after %d",timeout);openSub.destroy();socket.close();socket.emit("error","timeout");self.emitAll("connect_timeout",timeout)},timeout);this.subs.push({destroy:function(){clearTimeout(timer)}})}this.subs.push(openSub);this.subs.push(errorSub);return this};Manager.prototype.onopen=function(){debug("open");this.cleanup();this.readyState="open";this.emit("open");var socket=this.engine;this.subs.push(on(socket,"data",bind(this,"ondata")));this.subs.push(on(this.decoder,"decoded",bind(this,"ondecoded")));this.subs.push(on(socket,"error",bind(this,"onerror")));this.subs.push(on(socket,"close",bind(this,"onclose")))};Manager.prototype.ondata=function(data){this.decoder.add(data)};Manager.prototype.ondecoded=function(packet){this.emit("packet",packet)};Manager.prototype.onerror=function(err){debug("error",err);this.emitAll("error",err)};Manager.prototype.socket=function(nsp){var socket=this.nsps[nsp];if(!socket){socket=new Socket(this,nsp);this.nsps[nsp]=socket;var self=this;socket.on("connect",function(){self.connected++})}return socket};Manager.prototype.destroy=function(socket){--this.connected||this.close()};Manager.prototype.packet=function(packet){debug("writing packet %j",packet);var self=this;if(!self.encoding){self.encoding=true;this.encoder.encode(packet,function(encodedPackets){for(var i=0;i<encodedPackets.length;i++){self.engine.write(encodedPackets[i])}self.encoding=false;self.processPacketQueue()})}else{self.packetBuffer.push(packet)}};Manager.prototype.processPacketQueue=function(){if(this.packetBuffer.length>0&&!this.encoding){var pack=this.packetBuffer.shift();this.packet(pack)}};Manager.prototype.cleanup=function(){var sub;while(sub=this.subs.shift())sub.destroy();this.packetBuffer=[];this.encoding=false;this.decoder.destroy()};Manager.prototype.close=Manager.prototype.disconnect=function(){this.skipReconnect=true;this.engine.close()};Manager.prototype.onclose=function(reason){debug("close");this.cleanup();this.readyState="closed";this.emit("close",reason);if(this._reconnection&&!this.skipReconnect){this.reconnect()}};Manager.prototype.reconnect=function(){if(this.reconnecting)return this;var self=this;this.attempts++;if(this.attempts>this._reconnectionAttempts){debug("reconnect failed");this.emitAll("reconnect_failed");this.reconnecting=false}else{var delay=this.attempts*this.reconnectionDelay();delay=Math.min(delay,this.reconnectionDelayMax());debug("will wait %dms before reconnect attempt",delay);this.reconnecting=true;var timer=setTimeout(function(){debug("attempting reconnect");self.emitAll("reconnect_attempt",self.attempts);self.emitAll("reconnecting",self.attempts);self.open(function(err){if(err){debug("reconnect attempt error");self.reconnecting=false;self.reconnect();self.emitAll("reconnect_error",err.data)}else{debug("reconnect success");self.onreconnect()}})},delay);this.subs.push({destroy:function(){clearTimeout(timer)}})}};Manager.prototype.onreconnect=function(){var attempt=this.attempts;this.attempts=0;this.reconnecting=false;this.emitAll("reconnect",attempt)}},{"./on":4,"./socket":5,"./url":6,"component-bind":7,"component-emitter":8,debug:9,"engine.io-client":11,"object-component":37,"socket.io-parser":40}],4:[function(require,module,exports){module.exports=on;function on(obj,ev,fn){obj.on(ev,fn);return{destroy:function(){obj.removeListener(ev,fn)}}}},{}],5:[function(require,module,exports){var parser=require("socket.io-parser");var Emitter=require("component-emitter");var toArray=require("to-array");var on=require("./on");var bind=require("component-bind");var debug=require("debug")("socket.io-client:socket");var hasBin=require("has-binary-data");var indexOf=require("indexof");module.exports=exports=Socket;var events={connect:1,connect_error:1,connect_timeout:1,disconnect:1,error:1,reconnect:1,reconnect_attempt:1,reconnect_failed:1,reconnect_error:1,reconnecting:1};var emit=Emitter.prototype.emit;function Socket(io,nsp){this.io=io;this.nsp=nsp;this.json=this;this.ids=0;this.acks={};this.open();this.receiveBuffer=[];this.sendBuffer=[];this.connected=false;this.disconnected=true;this.subEvents()}Emitter(Socket.prototype);Socket.prototype.subEvents=function(){var io=this.io;this.subs=[on(io,"open",bind(this,"onopen")),on(io,"packet",bind(this,"onpacket")),on(io,"close",bind(this,"onclose"))]};Socket.prototype.open=Socket.prototype.connect=function(){if(this.connected)return this;this.io.open();if("open"==this.io.readyState)this.onopen();return this};Socket.prototype.send=function(){var args=toArray(arguments);args.unshift("message");this.emit.apply(this,args);return this};Socket.prototype.emit=function(ev){if(events.hasOwnProperty(ev)){emit.apply(this,arguments);return this}var args=toArray(arguments);var parserType=parser.EVENT;if(hasBin(args)){parserType=parser.BINARY_EVENT}var packet={type:parserType,data:args};if("function"==typeof args[args.length-1]){debug("emitting packet with ack id %d",this.ids);this.acks[this.ids]=args.pop();packet.id=this.ids++}if(this.connected){this.packet(packet)}else{this.sendBuffer.push(packet)}return this};Socket.prototype.packet=function(packet){packet.nsp=this.nsp;this.io.packet(packet)};Socket.prototype.onopen=function(){debug("transport is open - connecting");if("/"!=this.nsp){this.packet({type:parser.CONNECT})}};Socket.prototype.onclose=function(reason){debug("close (%s)",reason);this.connected=false;this.disconnected=true;this.emit("disconnect",reason)};Socket.prototype.onpacket=function(packet){if(packet.nsp!=this.nsp)return;switch(packet.type){case parser.CONNECT:this.onconnect();break;case parser.EVENT:this.onevent(packet);break;case parser.BINARY_EVENT:this.onevent(packet);break;case parser.ACK:this.onack(packet);break;case parser.BINARY_ACK:this.onack(packet);break;case parser.DISCONNECT:this.ondisconnect();break;case parser.ERROR:this.emit("error",packet.data);break}};Socket.prototype.onevent=function(packet){var args=packet.data||[];debug("emitting event %j",args);if(null!=packet.id){debug("attaching ack callback to event");args.push(this.ack(packet.id))}if(this.connected){emit.apply(this,args)}else{this.receiveBuffer.push(args)}};Socket.prototype.ack=function(id){var self=this;var sent=false;return function(){if(sent)return;sent=true;var args=toArray(arguments);debug("sending ack %j",args);var type=hasBin(args)?parser.BINARY_ACK:parser.ACK;self.packet({type:type,id:id,data:args})}};Socket.prototype.onack=function(packet){debug("calling ack %s with %j",packet.id,packet.data);var fn=this.acks[packet.id];fn.apply(this,packet.data);delete this.acks[packet.id]};Socket.prototype.onconnect=function(){this.connected=true;this.disconnected=false;this.emit("connect");this.emitBuffered()};Socket.prototype.emitBuffered=function(){var i;for(i=0;i<this.receiveBuffer.length;i++){emit.apply(this,this.receiveBuffer[i])}this.receiveBuffer=[];for(i=0;i<this.sendBuffer.length;i++){this.packet(this.sendBuffer[i])}this.sendBuffer=[]};Socket.prototype.ondisconnect=function(){debug("server disconnect (%s)",this.nsp);this.destroy();this.onclose("io server disconnect")};Socket.prototype.destroy=function(){for(var i=0;i<this.subs.length;i++){this.subs[i].destroy()}this.io.destroy(this)};Socket.prototype.close=Socket.prototype.disconnect=function(){if(!this.connected)return this;debug("performing disconnect (%s)",this.nsp);this.packet({type:parser.DISCONNECT});this.destroy();this.onclose("io client disconnect");return this}},{"./on":4,"component-bind":7,"component-emitter":8,debug:9,"has-binary-data":32,indexof:36,"socket.io-parser":40,"to-array":43}],6:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var parseuri=require("parseuri");var debug=require("debug")("socket.io-client:url");module.exports=url;function url(uri,loc){var obj=uri;var loc=loc||global.location;if(null==uri)uri=loc.protocol+"//"+loc.hostname;if("string"==typeof uri){if("/"==uri.charAt(0)){if("undefined"!=typeof loc){uri=loc.hostname+uri}}if(!/^(https?|wss?):\/\//.test(uri)){debug("protocol-less url %s",uri);if("undefined"!=typeof loc){uri=loc.protocol+"//"+uri}else{uri="https://"+uri}}debug("parse %s",uri);obj=parseuri(uri)}if(!obj.port){if(/^(http|ws)$/.test(obj.protocol)){obj.port="80"}else if(/^(http|ws)s$/.test(obj.protocol)){obj.port="443"}}obj.path=obj.path||"/";obj.id=obj.protocol+"://"+obj.host+":"+obj.port;obj.href=obj.protocol+"://"+obj.host+(loc&&loc.port==obj.port?"":":"+obj.port);return obj}},{debug:9,parseuri:38}],7:[function(require,module,exports){var slice=[].slice;module.exports=function(obj,fn){if("string"==typeof fn)fn=obj[fn];if("function"!=typeof fn)throw new Error("bind() requires a function");var args=slice.call(arguments,2);return function(){return fn.apply(obj,args.concat(slice.call(arguments)))}}},{}],8:[function(require,module,exports){module.exports=Emitter;function Emitter(obj){if(obj)return mixin(obj)}function mixin(obj){for(var key in Emitter.prototype){obj[key]=Emitter.prototype[key]}return obj}Emitter.prototype.on=Emitter.prototype.addEventListener=function(event,fn){this._callbacks=this._callbacks||{};(this._callbacks[event]=this._callbacks[event]||[]).push(fn);return this};Emitter.prototype.once=function(event,fn){var self=this;this._callbacks=this._callbacks||{};function on(){self.off(event,on);fn.apply(this,arguments)}on.fn=fn;this.on(event,on);return this};Emitter.prototype.off=Emitter.prototype.removeListener=Emitter.prototype.removeAllListeners=Emitter.prototype.removeEventListener=function(event,fn){this._callbacks=this._callbacks||{};if(0==arguments.length){this._callbacks={};return this}var callbacks=this._callbacks[event];if(!callbacks)return this;if(1==arguments.length){delete this._callbacks[event];return this}var cb;for(var i=0;i<callbacks.length;i++){cb=callbacks[i];if(cb===fn||cb.fn===fn){callbacks.splice(i,1);break}}return this};Emitter.prototype.emit=function(event){this._callbacks=this._callbacks||{};var args=[].slice.call(arguments,1),callbacks=this._callbacks[event];if(callbacks){callbacks=callbacks.slice(0);for(var i=0,len=callbacks.length;i<len;++i){callbacks[i].apply(this,args)}}return this};Emitter.prototype.listeners=function(event){this._callbacks=this._callbacks||{};return this._callbacks[event]||[]};Emitter.prototype.hasListeners=function(event){return!!this.listeners(event).length}},{}],9:[function(require,module,exports){module.exports=debug;function debug(name){if(!debug.enabled(name))return function(){};return function(fmt){fmt=coerce(fmt);var curr=new Date;var ms=curr-(debug[name]||curr);debug[name]=curr;fmt=name+" "+fmt+" +"+debug.humanize(ms);window.console&&console.log&&Function.prototype.apply.call(console.log,console,arguments)}}debug.names=[];debug.skips=[];debug.enable=function(name){try{localStorage.debug=name}catch(e){}var split=(name||"").split(/[\s,]+/),len=split.length;for(var i=0;i<len;i++){name=split[i].replace("*",".*?");if(name[0]==="-"){debug.skips.push(new RegExp("^"+name.substr(1)+"$"))}else{debug.names.push(new RegExp("^"+name+"$"))}}};debug.disable=function(){debug.enable("")};debug.humanize=function(ms){var sec=1e3,min=60*1e3,hour=60*min;if(ms>=hour)return(ms/hour).toFixed(1)+"h";if(ms>=min)return(ms/min).toFixed(1)+"m";if(ms>=sec)return(ms/sec|0)+"s";return ms+"ms"};debug.enabled=function(name){for(var i=0,len=debug.skips.length;i<len;i++){if(debug.skips[i].test(name)){return false}}for(var i=0,len=debug.names.length;i<len;i++){if(debug.names[i].test(name)){return true}}return false};function coerce(val){if(val instanceof Error)return val.stack||val.message;return val}try{if(window.localStorage)debug.enable(localStorage.debug)}catch(e){}},{}],10:[function(require,module,exports){var index=require("indexof");module.exports=Emitter;function Emitter(obj){if(obj)return mixin(obj)}function mixin(obj){for(var key in Emitter.prototype){obj[key]=Emitter.prototype[key]}return obj}Emitter.prototype.on=function(event,fn){this._callbacks=this._callbacks||{};(this._callbacks[event]=this._callbacks[event]||[]).push(fn);return this};Emitter.prototype.once=function(event,fn){var self=this;this._callbacks=this._callbacks||{};function on(){self.off(event,on);fn.apply(this,arguments)}fn._off=on;this.on(event,on);return this};Emitter.prototype.off=Emitter.prototype.removeListener=Emitter.prototype.removeAllListeners=function(event,fn){this._callbacks=this._callbacks||{};if(0==arguments.length){this._callbacks={};return this}var callbacks=this._callbacks[event];if(!callbacks)return this;if(1==arguments.length){delete this._callbacks[event];return this}var i=index(callbacks,fn._off||fn);if(~i)callbacks.splice(i,1);return this};Emitter.prototype.emit=function(event){this._callbacks=this._callbacks||{};var args=[].slice.call(arguments,1),callbacks=this._callbacks[event];if(callbacks){callbacks=callbacks.slice(0);for(var i=0,len=callbacks.length;i<len;++i){callbacks[i].apply(this,args)}}return this};Emitter.prototype.listeners=function(event){this._callbacks=this._callbacks||{};return this._callbacks[event]||[]};Emitter.prototype.hasListeners=function(event){return!!this.listeners(event).length}},{indexof:36}],11:[function(require,module,exports){module.exports=require("./lib/")},{"./lib/":12}],12:[function(require,module,exports){module.exports=require("./socket");module.exports.parser=require("engine.io-parser")},{"./socket":13,"engine.io-parser":22}],13:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var transports=require("./transports");var Emitter=require("component-emitter");var debug=require("debug")("engine.io-client:socket");var index=require("indexof");var parser=require("engine.io-parser");var parseuri=require("parseuri");var parsejson=require("parsejson");var parseqs=require("parseqs");module.exports=Socket;function noop(){}function Socket(uri,opts){if(!(this instanceof Socket))return new Socket(uri,opts);opts=opts||{};if(uri&&"object"==typeof uri){opts=uri;uri=null}if(uri){uri=parseuri(uri);opts.host=uri.host;opts.secure=uri.protocol=="https"||uri.protocol=="wss";opts.port=uri.port;if(uri.query)opts.query=uri.query}this.secure=null!=opts.secure?opts.secure:global.location&&"https:"==location.protocol;if(opts.host){var pieces=opts.host.split(":");opts.hostname=pieces.shift();if(pieces.length)opts.port=pieces.pop()}this.agent=opts.agent||false;this.hostname=opts.hostname||(global.location?location.hostname:"localhost");this.port=opts.port||(global.location&&location.port?location.port:this.secure?443:80);this.query=opts.query||{};if("string"==typeof this.query)this.query=parseqs.decode(this.query);this.upgrade=false!==opts.upgrade;this.path=(opts.path||"/engine.io").replace(/\/$/,"")+"/";this.forceJSONP=!!opts.forceJSONP;this.forceBase64=!!opts.forceBase64;this.timestampParam=opts.timestampParam||"t";this.timestampRequests=opts.timestampRequests;this.transports=opts.transports||["polling","websocket"];this.readyState="";this.writeBuffer=[];this.callbackBuffer=[];this.policyPort=opts.policyPort||843;this.rememberUpgrade=opts.rememberUpgrade||false;this.open();this.binaryType=null;this.onlyBinaryUpgrades=opts.onlyBinaryUpgrades}Socket.priorWebsocketSuccess=false;Emitter(Socket.prototype);Socket.protocol=parser.protocol;Socket.Socket=Socket;Socket.Transport=require("./transport");Socket.transports=require("./transports");Socket.parser=require("engine.io-parser");Socket.prototype.createTransport=function(name){debug('creating transport "%s"',name);var query=clone(this.query);query.EIO=parser.protocol;query.transport=name;if(this.id)query.sid=this.id;var transport=new transports[name]({agent:this.agent,hostname:this.hostname,port:this.port,secure:this.secure,path:this.path,query:query,forceJSONP:this.forceJSONP,forceBase64:this.forceBase64,timestampRequests:this.timestampRequests,timestampParam:this.timestampParam,policyPort:this.policyPort,socket:this});return transport};function clone(obj){var o={};for(var i in obj){if(obj.hasOwnProperty(i)){o[i]=obj[i]}}return o}Socket.prototype.open=function(){var transport;if(this.rememberUpgrade&&Socket.priorWebsocketSuccess&&this.transports.indexOf("websocket")!=-1){transport="websocket"}else{transport=this.transports[0]}this.readyState="opening";var transport=this.createTransport(transport);transport.open();this.setTransport(transport)};Socket.prototype.setTransport=function(transport){debug("setting transport %s",transport.name);var self=this;if(this.transport){debug("clearing existing transport %s",this.transport.name);this.transport.removeAllListeners()}this.transport=transport;transport.on("drain",function(){self.onDrain()}).on("packet",function(packet){self.onPacket(packet)}).on("error",function(e){self.onError(e)}).on("close",function(){self.onClose("transport close")})};Socket.prototype.probe=function(name){debug('probing transport "%s"',name);var transport=this.createTransport(name,{probe:1}),failed=false,self=this;Socket.priorWebsocketSuccess=false;function onTransportOpen(){if(self.onlyBinaryUpgrades){var upgradeLosesBinary=!this.supportsBinary&&self.transport.supportsBinary;failed=failed||upgradeLosesBinary}if(failed)return;debug('probe transport "%s" opened',name);transport.send([{type:"ping",data:"probe"}]);transport.once("packet",function(msg){if(failed)return;if("pong"==msg.type&&"probe"==msg.data){debug('probe transport "%s" pong',name);self.upgrading=true;self.emit("upgrading",transport);Socket.priorWebsocketSuccess="websocket"==transport.name;debug('pausing current transport "%s"',self.transport.name);self.transport.pause(function(){if(failed)return;if("closed"==self.readyState||"closing"==self.readyState){return}debug("changing transport and sending upgrade packet");cleanup();self.setTransport(transport);transport.send([{type:"upgrade"}]);self.emit("upgrade",transport);transport=null;self.upgrading=false;self.flush()})}else{debug('probe transport "%s" failed',name);var err=new Error("probe error");err.transport=transport.name;self.emit("upgradeError",err)}})}function freezeTransport(){if(failed)return;failed=true;cleanup();transport.close();transport=null}function onerror(err){var error=new Error("probe error: "+err);error.transport=transport.name;freezeTransport();debug('probe transport "%s" failed because of error: %s',name,err);self.emit("upgradeError",error)}function onTransportClose(){onerror("transport closed")}function onclose(){onerror("socket closed")}function onupgrade(to){if(transport&&to.name!=transport.name){debug('"%s" works - aborting "%s"',to.name,transport.name);freezeTransport()}}function cleanup(){transport.removeListener("open",onTransportOpen);transport.removeListener("error",onerror);transport.removeListener("close",onTransportClose);self.removeListener("close",onclose);self.removeListener("upgrading",onupgrade)}transport.once("open",onTransportOpen);transport.once("error",onerror);transport.once("close",onTransportClose);this.once("close",onclose);this.once("upgrading",onupgrade);transport.open()};Socket.prototype.onOpen=function(){debug("socket open");this.readyState="open";Socket.priorWebsocketSuccess="websocket"==this.transport.name;this.emit("open");this.flush();if("open"==this.readyState&&this.upgrade&&this.transport.pause){debug("starting upgrade probes");for(var i=0,l=this.upgrades.length;i<l;i++){this.probe(this.upgrades[i])}}};Socket.prototype.onPacket=function(packet){if("opening"==this.readyState||"open"==this.readyState){debug('socket receive: type "%s", data "%s"',packet.type,packet.data);this.emit("packet",packet);this.emit("heartbeat");switch(packet.type){case"open":this.onHandshake(parsejson(packet.data));break;case"pong":this.setPing();break;case"error":var err=new Error("server error");err.code=packet.data;this.emit("error",err);break;case"message":this.emit("data",packet.data);this.emit("message",packet.data);break}}else{debug('packet received with socket readyState "%s"',this.readyState)}};Socket.prototype.onHandshake=function(data){this.emit("handshake",data);this.id=data.sid;this.transport.query.sid=data.sid;this.upgrades=this.filterUpgrades(data.upgrades);this.pingInterval=data.pingInterval;this.pingTimeout=data.pingTimeout;this.onOpen();if("closed"==this.readyState)return;this.setPing();this.removeListener("heartbeat",this.onHeartbeat);this.on("heartbeat",this.onHeartbeat)};Socket.prototype.onHeartbeat=function(timeout){clearTimeout(this.pingTimeoutTimer);var self=this;self.pingTimeoutTimer=setTimeout(function(){if("closed"==self.readyState)return;self.onClose("ping timeout")},timeout||self.pingInterval+self.pingTimeout)};Socket.prototype.setPing=function(){var self=this;clearTimeout(self.pingIntervalTimer);self.pingIntervalTimer=setTimeout(function(){debug("writing ping packet - expecting pong within %sms",self.pingTimeout);self.ping();self.onHeartbeat(self.pingTimeout)},self.pingInterval)};Socket.prototype.ping=function(){this.sendPacket("ping")};Socket.prototype.onDrain=function(){for(var i=0;i<this.prevBufferLen;i++){if(this.callbackBuffer[i]){this.callbackBuffer[i]()}}this.writeBuffer.splice(0,this.prevBufferLen);this.callbackBuffer.splice(0,this.prevBufferLen);this.prevBufferLen=0;if(this.writeBuffer.length==0){this.emit("drain")}else{this.flush()}};Socket.prototype.flush=function(){if("closed"!=this.readyState&&this.transport.writable&&!this.upgrading&&this.writeBuffer.length){debug("flushing %d packets in socket",this.writeBuffer.length);this.transport.send(this.writeBuffer);this.prevBufferLen=this.writeBuffer.length;this.emit("flush")}};Socket.prototype.write=Socket.prototype.send=function(msg,fn){this.sendPacket("message",msg,fn);return this};Socket.prototype.sendPacket=function(type,data,fn){var packet={type:type,data:data};this.emit("packetCreate",packet);this.writeBuffer.push(packet);this.callbackBuffer.push(fn);this.flush()};Socket.prototype.close=function(){if("opening"==this.readyState||"open"==this.readyState){this.onClose("forced close");debug("socket closing - telling transport to close");this.transport.close()}return this};Socket.prototype.onError=function(err){debug("socket error %j",err);Socket.priorWebsocketSuccess=false;this.emit("error",err);this.onClose("transport error",err)};Socket.prototype.onClose=function(reason,desc){if("opening"==this.readyState||"open"==this.readyState){debug('socket close with reason: "%s"',reason);var self=this;clearTimeout(this.pingIntervalTimer);clearTimeout(this.pingTimeoutTimer);setTimeout(function(){self.writeBuffer=[];self.callbackBuffer=[];self.prevBufferLen=0},0);this.transport.removeAllListeners("close");this.transport.close();this.transport.removeAllListeners();this.readyState="closed";this.id=null;this.emit("close",reason,desc)}};Socket.prototype.filterUpgrades=function(upgrades){var filteredUpgrades=[];for(var i=0,j=upgrades.length;i<j;i++){if(~index(this.transports,upgrades[i]))filteredUpgrades.push(upgrades[i])}return filteredUpgrades}},{"./transport":14,"./transports":15,"component-emitter":8,debug:9,"engine.io-parser":22,indexof:36,parsejson:29,parseqs:30,parseuri:38}],14:[function(require,module,exports){var parser=require("engine.io-parser");var Emitter=require("component-emitter");module.exports=Transport;function Transport(opts){this.path=opts.path;this.hostname=opts.hostname;this.port=opts.port;this.secure=opts.secure;this.query=opts.query;this.timestampParam=opts.timestampParam;this.timestampRequests=opts.timestampRequests;this.readyState="";this.agent=opts.agent||false;this.socket=opts.socket}Emitter(Transport.prototype);Transport.timestamps=0;Transport.prototype.onError=function(msg,desc){var err=new Error(msg);err.type="TransportError";err.description=desc;this.emit("error",err);return this};Transport.prototype.open=function(){if("closed"==this.readyState||""==this.readyState){this.readyState="opening";this.doOpen()}return this};Transport.prototype.close=function(){if("opening"==this.readyState||"open"==this.readyState){this.doClose();this.onClose()}return this};Transport.prototype.send=function(packets){if("open"==this.readyState){this.write(packets)}else{throw new Error("Transport not open")}};Transport.prototype.onOpen=function(){this.readyState="open";this.writable=true;this.emit("open")};Transport.prototype.onData=function(data){try{var packet=parser.decodePacket(data,this.socket.binaryType);this.onPacket(packet)}catch(e){e.data=data;this.onError("parser decode error",e)}};Transport.prototype.onPacket=function(packet){this.emit("packet",packet)};Transport.prototype.onClose=function(){this.readyState="closed";this.emit("close")}},{"component-emitter":8,"engine.io-parser":22}],15:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var XMLHttpRequest=require("xmlhttprequest");var XHR=require("./polling-xhr");var JSONP=require("./polling-jsonp");var websocket=require("./websocket");exports.polling=polling;exports.websocket=websocket;function polling(opts){var xhr;var xd=false;if(global.location){var isSSL="https:"==location.protocol;var port=location.port;if(!port){port=isSSL?443:80}xd=opts.hostname!=location.hostname||port!=opts.port}opts.xdomain=xd;xhr=new XMLHttpRequest(opts);if("open"in xhr&&!opts.forceJSONP){return new XHR(opts)}else{return new JSONP(opts)}}},{"./polling-jsonp":16,"./polling-xhr":17,"./websocket":19,xmlhttprequest:20}],16:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var Polling=require("./polling");var inherit=require("component-inherit");module.exports=JSONPPolling;var rNewline=/\n/g;var rEscapedNewline=/\\n/g;var callbacks;var index=0;function empty(){}function JSONPPolling(opts){Polling.call(this,opts);this.query=this.query||{};if(!callbacks){if(!global.___eio)global.___eio=[];callbacks=global.___eio}this.index=callbacks.length;var self=this;callbacks.push(function(msg){self.onData(msg)});this.query.j=this.index;if(global.document&&global.addEventListener){global.addEventListener("beforeunload",function(){if(self.script)self.script.onerror=empty})}}inherit(JSONPPolling,Polling);JSONPPolling.prototype.supportsBinary=false;JSONPPolling.prototype.doClose=function(){if(this.script){this.script.parentNode.removeChild(this.script);this.script=null}if(this.form){this.form.parentNode.removeChild(this.form);this.form=null}Polling.prototype.doClose.call(this)};JSONPPolling.prototype.doPoll=function(){var self=this;var script=document.createElement("script");if(this.script){this.script.parentNode.removeChild(this.script);this.script=null}script.async=true;script.src=this.uri();script.onerror=function(e){self.onError("jsonp poll error",e)};var insertAt=document.getElementsByTagName("script")[0];insertAt.parentNode.insertBefore(script,insertAt);this.script=script;var isUAgecko="undefined"!=typeof navigator&&/gecko/i.test(navigator.userAgent);if(isUAgecko){setTimeout(function(){var iframe=document.createElement("iframe");document.body.appendChild(iframe);document.body.removeChild(iframe)},100)}};JSONPPolling.prototype.doWrite=function(data,fn){var self=this;if(!this.form){var form=document.createElement("form");var area=document.createElement("textarea");var id=this.iframeId="eio_iframe_"+this.index;var iframe;form.className="socketio";form.style.position="absolute";form.style.top="-1000px";form.style.left="-1000px";form.target=id;form.method="POST";form.setAttribute("accept-charset","utf-8");area.name="d";form.appendChild(area);document.body.appendChild(form);this.form=form;this.area=area}this.form.action=this.uri();function complete(){initIframe();fn()}function initIframe(){if(self.iframe){try{self.form.removeChild(self.iframe)
 }catch(e){self.onError("jsonp polling iframe removal error",e)}}try{var html='<iframe src="javascript:0" name="'+self.iframeId+'">';iframe=document.createElement(html)}catch(e){iframe=document.createElement("iframe");iframe.name=self.iframeId;iframe.src="javascript:0"}iframe.id=self.iframeId;self.form.appendChild(iframe);self.iframe=iframe}initIframe();data=data.replace(rEscapedNewline,"\\\n");this.area.value=data.replace(rNewline,"\\n");try{this.form.submit()}catch(e){}if(this.iframe.attachEvent){this.iframe.onreadystatechange=function(){if(self.iframe.readyState=="complete"){complete()}}}else{this.iframe.onload=complete}}},{"./polling":18,"component-inherit":21}],17:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var XMLHttpRequest=require("xmlhttprequest");var Polling=require("./polling");var Emitter=require("component-emitter");var inherit=require("component-inherit");var debug=require("debug")("engine.io-client:polling-xhr");module.exports=XHR;module.exports.Request=Request;function empty(){}function XHR(opts){Polling.call(this,opts);if(global.location){var isSSL="https:"==location.protocol;var port=location.port;if(!port){port=isSSL?443:80}this.xd=opts.hostname!=global.location.hostname||port!=opts.port}}inherit(XHR,Polling);XHR.prototype.supportsBinary=true;XHR.prototype.request=function(opts){opts=opts||{};opts.uri=this.uri();opts.xd=this.xd;opts.agent=this.agent||false;opts.supportsBinary=this.supportsBinary;return new Request(opts)};XHR.prototype.doWrite=function(data,fn){var isBinary=typeof data!=="string"&&data!==undefined;var req=this.request({method:"POST",data:data,isBinary:isBinary});var self=this;req.on("success",fn);req.on("error",function(err){self.onError("xhr post error",err)});this.sendXhr=req};XHR.prototype.doPoll=function(){debug("xhr poll");var req=this.request();var self=this;req.on("data",function(data){self.onData(data)});req.on("error",function(err){self.onError("xhr poll error",err)});this.pollXhr=req};function Request(opts){this.method=opts.method||"GET";this.uri=opts.uri;this.xd=!!opts.xd;this.async=false!==opts.async;this.data=undefined!=opts.data?opts.data:null;this.agent=opts.agent;this.create(opts.isBinary,opts.supportsBinary)}Emitter(Request.prototype);Request.prototype.create=function(isBinary,supportsBinary){var xhr=this.xhr=new XMLHttpRequest({agent:this.agent,xdomain:this.xd});var self=this;try{debug("xhr open %s: %s",this.method,this.uri);xhr.open(this.method,this.uri,this.async);if(supportsBinary){xhr.responseType="arraybuffer"}if("POST"==this.method){try{if(isBinary){xhr.setRequestHeader("Content-type","application/octet-stream")}else{xhr.setRequestHeader("Content-type","text/plain;charset=UTF-8")}}catch(e){}}if("withCredentials"in xhr){xhr.withCredentials=true}xhr.onreadystatechange=function(){var data;try{if(4!=xhr.readyState)return;if(200==xhr.status||1223==xhr.status){var contentType=xhr.getResponseHeader("Content-Type");if(contentType==="application/octet-stream"){data=xhr.response}else{if(!supportsBinary){data=xhr.responseText}else{data="ok"}}}else{setTimeout(function(){self.onError(xhr.status)},0)}}catch(e){self.onError(e)}if(null!=data){self.onData(data)}};debug("xhr data %s",this.data);xhr.send(this.data)}catch(e){setTimeout(function(){self.onError(e)},0);return}if(global.document){this.index=Request.requestsCount++;Request.requests[this.index]=this}};Request.prototype.onSuccess=function(){this.emit("success");this.cleanup()};Request.prototype.onData=function(data){this.emit("data",data);this.onSuccess()};Request.prototype.onError=function(err){this.emit("error",err);this.cleanup()};Request.prototype.cleanup=function(){if("undefined"==typeof this.xhr||null===this.xhr){return}this.xhr.onreadystatechange=empty;try{this.xhr.abort()}catch(e){}if(global.document){delete Request.requests[this.index]}this.xhr=null};Request.prototype.abort=function(){this.cleanup()};if(global.document){Request.requestsCount=0;Request.requests={};if(global.attachEvent){global.attachEvent("onunload",unloadHandler)}else if(global.addEventListener){global.addEventListener("beforeunload",unloadHandler)}}function unloadHandler(){for(var i in Request.requests){if(Request.requests.hasOwnProperty(i)){Request.requests[i].abort()}}}},{"./polling":18,"component-emitter":8,"component-inherit":21,debug:9,xmlhttprequest:20}],18:[function(require,module,exports){var Transport=require("../transport");var parseqs=require("parseqs");var parser=require("engine.io-parser");var inherit=require("component-inherit");var debug=require("debug")("engine.io-client:polling");module.exports=Polling;var hasXHR2=function(){var XMLHttpRequest=require("xmlhttprequest");var xhr=new XMLHttpRequest({agent:this.agent,xdomain:false});return null!=xhr.responseType}();function Polling(opts){var forceBase64=opts&&opts.forceBase64;if(!hasXHR2||forceBase64){this.supportsBinary=false}Transport.call(this,opts)}inherit(Polling,Transport);Polling.prototype.name="polling";Polling.prototype.doOpen=function(){this.poll()};Polling.prototype.pause=function(onPause){var pending=0;var self=this;this.readyState="pausing";function pause(){debug("paused");self.readyState="paused";onPause()}if(this.polling||!this.writable){var total=0;if(this.polling){debug("we are currently polling - waiting to pause");total++;this.once("pollComplete",function(){debug("pre-pause polling complete");--total||pause()})}if(!this.writable){debug("we are currently writing - waiting to pause");total++;this.once("drain",function(){debug("pre-pause writing complete");--total||pause()})}}else{pause()}};Polling.prototype.poll=function(){debug("polling");this.polling=true;this.doPoll();this.emit("poll")};Polling.prototype.onData=function(data){var self=this;debug("polling got data %s",data);var callback=function(packet,index,total){if("opening"==self.readyState){self.onOpen()}if("close"==packet.type){self.onClose();return false}self.onPacket(packet)};parser.decodePayload(data,this.socket.binaryType,callback);if("closed"!=this.readyState){this.polling=false;this.emit("pollComplete");if("open"==this.readyState){this.poll()}else{debug('ignoring poll - transport state "%s"',this.readyState)}}};Polling.prototype.doClose=function(){var self=this;function close(){debug("writing close packet");self.write([{type:"close"}])}if("open"==this.readyState){debug("transport open - closing");close()}else{debug("transport not open - deferring close");this.once("open",close)}};Polling.prototype.write=function(packets){var self=this;this.writable=false;var callbackfn=function(){self.writable=true;self.emit("drain")};var self=this;parser.encodePayload(packets,this.supportsBinary,function(data){self.doWrite(data,callbackfn)})};Polling.prototype.uri=function(){var query=this.query||{};var schema=this.secure?"https":"http";var port="";if(false!==this.timestampRequests){query[this.timestampParam]=+new Date+"-"+Transport.timestamps++}if(!this.supportsBinary&&!query.sid){query.b64=1}query=parseqs.encode(query);if(this.port&&("https"==schema&&this.port!=443||"http"==schema&&this.port!=80)){port=":"+this.port}if(query.length){query="?"+query}return schema+"://"+this.hostname+port+this.path+query}},{"../transport":14,"component-inherit":21,debug:9,"engine.io-parser":22,parseqs:30,xmlhttprequest:20}],19:[function(require,module,exports){var Transport=require("../transport");var parser=require("engine.io-parser");var parseqs=require("parseqs");var inherit=require("component-inherit");var debug=require("debug")("engine.io-client:websocket");var WebSocket=require("ws");module.exports=WS;function WS(opts){var forceBase64=opts&&opts.forceBase64;if(forceBase64){this.supportsBinary=false}Transport.call(this,opts)}inherit(WS,Transport);WS.prototype.name="websocket";WS.prototype.supportsBinary=true;WS.prototype.doOpen=function(){if(!this.check()){return}var self=this;var uri=this.uri();var protocols=void 0;var opts={agent:this.agent};this.ws=new WebSocket(uri,protocols,opts);if(this.ws.binaryType===undefined){this.supportsBinary=false}this.ws.binaryType="arraybuffer";this.addEventListeners()};WS.prototype.addEventListeners=function(){var self=this;this.ws.onopen=function(){self.onOpen()};this.ws.onclose=function(){self.onClose()};this.ws.onmessage=function(ev){self.onData(ev.data)};this.ws.onerror=function(e){self.onError("websocket error",e)}};if("undefined"!=typeof navigator&&/iPad|iPhone|iPod/i.test(navigator.userAgent)){WS.prototype.onData=function(data){var self=this;setTimeout(function(){Transport.prototype.onData.call(self,data)},0)}}WS.prototype.write=function(packets){var self=this;this.writable=false;for(var i=0,l=packets.length;i<l;i++){parser.encodePacket(packets[i],this.supportsBinary,function(data){try{self.ws.send(data)}catch(e){debug("websocket closed before onclose event")}})}function ondrain(){self.writable=true;self.emit("drain")}setTimeout(ondrain,0)};WS.prototype.onClose=function(){Transport.prototype.onClose.call(this)};WS.prototype.doClose=function(){if(typeof this.ws!=="undefined"){this.ws.close()}};WS.prototype.uri=function(){var query=this.query||{};var schema=this.secure?"wss":"ws";var port="";if(this.port&&("wss"==schema&&this.port!=443||"ws"==schema&&this.port!=80)){port=":"+this.port}if(this.timestampRequests){query[this.timestampParam]=+new Date}if(!this.supportsBinary){query.b64=1}query=parseqs.encode(query);if(query.length){query="?"+query}return schema+"://"+this.hostname+port+this.path+query};WS.prototype.check=function(){return!!WebSocket&&!("__initialize"in WebSocket&&this.name===WS.prototype.name)}},{"../transport":14,"component-inherit":21,debug:9,"engine.io-parser":22,parseqs:30,ws:31}],20:[function(require,module,exports){var hasCORS=require("has-cors");module.exports=function(opts){var xdomain=opts.xdomain;try{if("undefined"!=typeof XMLHttpRequest&&(!xdomain||hasCORS)){return new XMLHttpRequest}}catch(e){}if(!xdomain){try{return new ActiveXObject("Microsoft.XMLHTTP")}catch(e){}}}},{"has-cors":34}],21:[function(require,module,exports){module.exports=function(a,b){var fn=function(){};fn.prototype=b.prototype;a.prototype=new fn;a.prototype.constructor=a}},{}],22:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var keys=require("./keys");var sliceBuffer=require("arraybuffer.slice");var base64encoder=require("base64-arraybuffer");var after=require("after");var utf8=require("utf8");var isAndroid=navigator.userAgent.match(/Android/i);exports.protocol=2;var packets=exports.packets={open:0,close:1,ping:2,pong:3,message:4,upgrade:5,noop:6};var packetslist=keys(packets);var err={type:"error",data:"parser error"};var Blob=require("blob");exports.encodePacket=function(packet,supportsBinary,callback){if(typeof supportsBinary=="function"){callback=supportsBinary;supportsBinary=false}var data=packet.data===undefined?undefined:packet.data.buffer||packet.data;if(global.ArrayBuffer&&data instanceof ArrayBuffer){return encodeArrayBuffer(packet,supportsBinary,callback)}else if(Blob&&data instanceof global.Blob){return encodeBlob(packet,supportsBinary,callback)}var encoded=packets[packet.type];if(undefined!==packet.data){encoded+=utf8.encode(String(packet.data))}return callback(""+encoded)};function encodeArrayBuffer(packet,supportsBinary,callback){if(!supportsBinary){return exports.encodeBase64Packet(packet,callback)}var data=packet.data;var contentArray=new Uint8Array(data);var resultBuffer=new Uint8Array(1+data.byteLength);resultBuffer[0]=packets[packet.type];for(var i=0;i<contentArray.length;i++){resultBuffer[i+1]=contentArray[i]}return callback(resultBuffer.buffer)}function encodeBlobAsArrayBuffer(packet,supportsBinary,callback){if(!supportsBinary){return exports.encodeBase64Packet(packet,callback)}var fr=new FileReader;fr.onload=function(){packet.data=fr.result;exports.encodePacket(packet,supportsBinary,callback)};return fr.readAsArrayBuffer(packet.data)}function encodeBlob(packet,supportsBinary,callback){if(!supportsBinary){return exports.encodeBase64Packet(packet,callback)}if(isAndroid){return encodeBlobAsArrayBuffer(packet,supportsBinary,callback)}var length=new Uint8Array(1);length[0]=packets[packet.type];var blob=new Blob([length.buffer,packet.data]);return callback(blob)}exports.encodeBase64Packet=function(packet,callback){var message="b"+exports.packets[packet.type];if(Blob&&packet.data instanceof Blob){var fr=new FileReader;fr.onload=function(){var b64=fr.result.split(",")[1];callback(message+b64)};return fr.readAsDataURL(packet.data)}var b64data;try{b64data=String.fromCharCode.apply(null,new Uint8Array(packet.data))}catch(e){var typed=new Uint8Array(packet.data);var basic=new Array(typed.length);for(var i=0;i<typed.length;i++){basic[i]=typed[i]}b64data=String.fromCharCode.apply(null,basic)}message+=global.btoa(b64data);return callback(message)};exports.decodePacket=function(data,binaryType){if(typeof data=="string"||data===undefined){if(data.charAt(0)=="b"){return exports.decodeBase64Packet(data.substr(1),binaryType)}data=utf8.decode(data);var type=data.charAt(0);if(Number(type)!=type||!packetslist[type]){return err}if(data.length>1){return{type:packetslist[type],data:data.substring(1)}}else{return{type:packetslist[type]}}}var asArray=new Uint8Array(data);var type=asArray[0];var rest=sliceBuffer(data,1);if(Blob&&binaryType==="blob"){rest=new Blob([rest])}return{type:packetslist[type],data:rest}};exports.decodeBase64Packet=function(msg,binaryType){var type=packetslist[msg.charAt(0)];if(!global.ArrayBuffer){return{type:type,data:{base64:true,data:msg.substr(1)}}}var data=base64encoder.decode(msg.substr(1));if(binaryType==="blob"&&Blob){data=new Blob([data])}return{type:type,data:data}};exports.encodePayload=function(packets,supportsBinary,callback){if(typeof supportsBinary=="function"){callback=supportsBinary;supportsBinary=null}if(supportsBinary){if(Blob&&!isAndroid){return exports.encodePayloadAsBlob(packets,callback)}return exports.encodePayloadAsArrayBuffer(packets,callback)}if(!packets.length){return callback("0:")}function setLengthHeader(message){return message.length+":"+message}function encodeOne(packet,doneCallback){exports.encodePacket(packet,supportsBinary,function(message){doneCallback(null,setLengthHeader(message))})}map(packets,encodeOne,function(err,results){return callback(results.join(""))})};function map(ary,each,done){var result=new Array(ary.length);var next=after(ary.length,done);var eachWithIndex=function(i,el,cb){each(el,function(error,msg){result[i]=msg;cb(error,result)})};for(var i=0;i<ary.length;i++){eachWithIndex(i,ary[i],next)}}exports.decodePayload=function(data,binaryType,callback){if(typeof data!="string"){return exports.decodePayloadAsBinary(data,binaryType,callback)}if(typeof binaryType==="function"){callback=binaryType;binaryType=null}var packet;if(data==""){return callback(err,0,1)}var length="",n,msg;for(var i=0,l=data.length;i<l;i++){var chr=data.charAt(i);if(":"!=chr){length+=chr}else{if(""==length||length!=(n=Number(length))){return callback(err,0,1)}msg=data.substr(i+1,n);if(length!=msg.length){return callback(err,0,1)}if(msg.length){packet=exports.decodePacket(msg,binaryType);if(err.type==packet.type&&err.data==packet.data){return callback(err,0,1)}var ret=callback(packet,i+n,l);if(false===ret)return}i+=n;length=""}}if(length!=""){return callback(err,0,1)}};exports.encodePayloadAsArrayBuffer=function(packets,callback){if(!packets.length){return callback(new ArrayBuffer(0))}function encodeOne(packet,doneCallback){exports.encodePacket(packet,true,function(data){return doneCallback(null,data)})}map(packets,encodeOne,function(err,encodedPackets){var totalLength=encodedPackets.reduce(function(acc,p){var len;if(typeof p==="string"){len=p.length}else{len=p.byteLength}return acc+len.toString().length+len+2},0);var resultArray=new Uint8Array(totalLength);var bufferIndex=0;encodedPackets.forEach(function(p){var isString=typeof p==="string";var ab=p;if(isString){var view=new Uint8Array(p.length);for(var i=0;i<p.length;i++){view[i]=p.charCodeAt(i)}ab=view.buffer}if(isString){resultArray[bufferIndex++]=0}else{resultArray[bufferIndex++]=1}var lenStr=ab.byteLength.toString();for(var i=0;i<lenStr.length;i++){resultArray[bufferIndex++]=parseInt(lenStr[i])}resultArray[bufferIndex++]=255;var view=new Uint8Array(ab);for(var i=0;i<view.length;i++){resultArray[bufferIndex++]=view[i]}});return callback(resultArray.buffer)})};exports.encodePayloadAsBlob=function(packets,callback){function encodeOne(packet,doneCallback){exports.encodePacket(packet,true,function(encoded){var binaryIdentifier=new Uint8Array(1);binaryIdentifier[0]=1;if(typeof encoded==="string"){var view=new Uint8Array(encoded.length);for(var i=0;i<encoded.length;i++){view[i]=encoded.charCodeAt(i)}encoded=view.buffer;binaryIdentifier[0]=0}var len=encoded instanceof ArrayBuffer?encoded.byteLength:encoded.size;var lenStr=len.toString();var lengthAry=new Uint8Array(lenStr.length+1);for(var i=0;i<lenStr.length;i++){lengthAry[i]=parseInt(lenStr[i])}lengthAry[lenStr.length]=255;if(Blob){var blob=new Blob([binaryIdentifier.buffer,lengthAry.buffer,encoded]);doneCallback(null,blob)}})}map(packets,encodeOne,function(err,results){return callback(new Blob(results))})};exports.decodePayloadAsBinary=function(data,binaryType,callback){if(typeof binaryType==="function"){callback=binaryType;binaryType=null}var bufferTail=data;var buffers=[];while(bufferTail.byteLength>0){var tailArray=new Uint8Array(bufferTail);var isString=tailArray[0]===0;var msgLength="";for(var i=1;;i++){if(tailArray[i]==255)break;msgLength+=tailArray[i]}bufferTail=sliceBuffer(bufferTail,2+msgLength.length);msgLength=parseInt(msgLength);var msg=sliceBuffer(bufferTail,0,msgLength);if(isString){try{msg=String.fromCharCode.apply(null,new Uint8Array(msg))}catch(e){var typed=new Uint8Array(msg);msg="";for(var i=0;i<typed.length;i++){msg+=String.fromCharCode(typed[i])}}}buffers.push(msg);bufferTail=sliceBuffer(bufferTail,msgLength)}var total=buffers.length;buffers.forEach(function(buffer,i){callback(exports.decodePacket(buffer,binaryType),i,total)})}},{"./keys":23,after:24,"arraybuffer.slice":25,"base64-arraybuffer":26,blob:27,utf8:28}],23:[function(require,module,exports){module.exports=Object.keys||function keys(obj){var arr=[];var has=Object.prototype.hasOwnProperty;for(var i in obj){if(has.call(obj,i)){arr.push(i)}}return arr}},{}],24:[function(require,module,exports){module.exports=after;function after(count,callback,err_cb){var bail=false;err_cb=err_cb||noop;proxy.count=count;return count===0?callback():proxy;function proxy(err,result){if(proxy.count<=0){throw new Error("after called too many times")}--proxy.count;if(err){bail=true;callback(err);callback=err_cb}else if(proxy.count===0&&!bail){callback(null,result)}}}function noop(){}},{}],25:[function(require,module,exports){module.exports=function(arraybuffer,start,end){var bytes=arraybuffer.byteLength;start=start||0;end=end||bytes;if(arraybuffer.slice){return arraybuffer.slice(start,end)}if(start<0){start+=bytes}if(end<0){end+=bytes}if(end>bytes){end=bytes}if(start>=bytes||start>=end||bytes===0){return new ArrayBuffer(0)}var abv=new Uint8Array(arraybuffer);var result=new Uint8Array(end-start);for(var i=start,ii=0;i<end;i++,ii++){result[ii]=abv[i]}return result.buffer}},{}],26:[function(require,module,exports){(function(chars){"use strict";exports.encode=function(arraybuffer){var bytes=new Uint8Array(arraybuffer),i,len=bytes.length,base64="";for(i=0;i<len;i+=3){base64+=chars[bytes[i]>>2];base64+=chars[(bytes[i]&3)<<4|bytes[i+1]>>4];base64+=chars[(bytes[i+1]&15)<<2|bytes[i+2]>>6];base64+=chars[bytes[i+2]&63]}if(len%3===2){base64=base64.substring(0,base64.length-1)+"="}else if(len%3===1){base64=base64.substring(0,base64.length-2)+"=="}return base64};exports.decode=function(base64){var bufferLength=base64.length*.75,len=base64.length,i,p=0,encoded1,encoded2,encoded3,encoded4;if(base64[base64.length-1]==="="){bufferLength--;if(base64[base64.length-2]==="="){bufferLength--}}var arraybuffer=new ArrayBuffer(bufferLength),bytes=new Uint8Array(arraybuffer);for(i=0;i<len;i+=4){encoded1=chars.indexOf(base64[i]);encoded2=chars.indexOf(base64[i+1]);encoded3=chars.indexOf(base64[i+2]);encoded4=chars.indexOf(base64[i+3]);bytes[p++]=encoded1<<2|encoded2>>4;bytes[p++]=(encoded2&15)<<4|encoded3>>2;bytes[p++]=(encoded3&3)<<6|encoded4&63}return arraybuffer}})("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")},{}],27:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var BlobBuilder=global.BlobBuilder||global.WebKitBlobBuilder||global.MSBlobBuilder||global.MozBlobBuilder;var blobSupported=function(){try{var b=new Blob(["hi"]);return b.size==2}catch(e){return false}}();var blobBuilderSupported=BlobBuilder&&BlobBuilder.prototype.append&&BlobBuilder.prototype.getBlob;function BlobBuilderConstructor(ary,options){options=options||{};var bb=new BlobBuilder;for(var i=0;i<ary.length;i++){bb.append(ary[i])}return options.type?bb.getBlob(options.type):bb.getBlob()}module.exports=function(){if(blobSupported){return global.Blob}else if(blobBuilderSupported){return BlobBuilderConstructor}else{return undefined}}()},{}],28:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};(function(root){var freeExports=typeof exports=="object"&&exports;var freeModule=typeof module=="object"&&module&&module.exports==freeExports&&module;var freeGlobal=typeof global=="object"&&global;if(freeGlobal.global===freeGlobal||freeGlobal.window===freeGlobal){root=freeGlobal}var stringFromCharCode=String.fromCharCode;function ucs2decode(string){var output=[];var counter=0;var length=string.length;var value;var extra;while(counter<length){value=string.charCodeAt(counter++);if(value>=55296&&value<=56319&&counter<length){extra=string.charCodeAt(counter++);if((extra&64512)==56320){output.push(((value&1023)<<10)+(extra&1023)+65536)}else{output.push(value);counter--}}else{output.push(value)}}return output}function ucs2encode(array){var length=array.length;var index=-1;var value;var output="";while(++index<length){value=array[index];if(value>65535){value-=65536;output+=stringFromCharCode(value>>>10&1023|55296);value=56320|value&1023}output+=stringFromCharCode(value)}return output}function createByte(codePoint,shift){return stringFromCharCode(codePoint>>shift&63|128)}function encodeCodePoint(codePoint){if((codePoint&4294967168)==0){return stringFromCharCode(codePoint)}var symbol="";if((codePoint&4294965248)==0){symbol=stringFromCharCode(codePoint>>6&31|192)}else if((codePoint&4294901760)==0){symbol=stringFromCharCode(codePoint>>12&15|224);symbol+=createByte(codePoint,6)}else if((codePoint&4292870144)==0){symbol=stringFromCharCode(codePoint>>18&7|240);symbol+=createByte(codePoint,12);symbol+=createByte(codePoint,6)}symbol+=stringFromCharCode(codePoint&63|128);return symbol}function utf8encode(string){var codePoints=ucs2decode(string);var length=codePoints.length;var index=-1;var codePoint;var byteString="";while(++index<length){codePoint=codePoints[index];byteString+=encodeCodePoint(codePoint)}return byteString}function readContinuationByte(){if(byteIndex>=byteCount){throw Error("Invalid byte index")}var continuationByte=byteArray[byteIndex]&255;byteIndex++;if((continuationByte&192)==128){return continuationByte&63}throw Error("Invalid continuation byte")}function decodeSymbol(){var byte1;var byte2;var byte3;var byte4;var codePoint;if(byteIndex>byteCount){throw Error("Invalid byte index")}if(byteIndex==byteCount){return false}byte1=byteArray[byteIndex]&255;byteIndex++;if((byte1&128)==0){return byte1}if((byte1&224)==192){var byte2=readContinuationByte();codePoint=(byte1&31)<<6|byte2;if(codePoint>=128){return codePoint}else{throw Error("Invalid continuation byte")}}if((byte1&240)==224){byte2=readContinuationByte();byte3=readContinuationByte();codePoint=(byte1&15)<<12|byte2<<6|byte3;if(codePoint>=2048){return codePoint}else{throw Error("Invalid continuation byte")}}if((byte1&248)==240){byte2=readContinuationByte();byte3=readContinuationByte();byte4=readContinuationByte();codePoint=(byte1&15)<<18|byte2<<12|byte3<<6|byte4;if(codePoint>=65536&&codePoint<=1114111){return codePoint}}throw Error("Invalid UTF-8 detected")}var byteArray;var byteCount;var byteIndex;function utf8decode(byteString){byteArray=ucs2decode(byteString);byteCount=byteArray.length;byteIndex=0;var codePoints=[];var tmp;while((tmp=decodeSymbol())!==false){codePoints.push(tmp)}return ucs2encode(codePoints)}var utf8={version:"2.0.0",encode:utf8encode,decode:utf8decode};if(typeof define=="function"&&typeof define.amd=="object"&&define.amd){define(function(){return utf8})}else if(freeExports&&!freeExports.nodeType){if(freeModule){freeModule.exports=utf8}else{var object={};var hasOwnProperty=object.hasOwnProperty;for(var key in utf8){hasOwnProperty.call(utf8,key)&&(freeExports[key]=utf8[key])}}}else{root.utf8=utf8}})(this)},{}],29:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var rvalidchars=/^[\],:{}\s]*$/;var rvalidescape=/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;var rvalidtokens=/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;var rvalidbraces=/(?:^|:|,)(?:\s*\[)+/g;var rtrimLeft=/^\s+/;var rtrimRight=/\s+$/;module.exports=function parsejson(data){if("string"!=typeof data||!data){return null}data=data.replace(rtrimLeft,"").replace(rtrimRight,"");if(global.JSON&&JSON.parse){return JSON.parse(data)}if(rvalidchars.test(data.replace(rvalidescape,"@").replace(rvalidtokens,"]").replace(rvalidbraces,""))){return new Function("return "+data)()}}},{}],30:[function(require,module,exports){exports.encode=function(obj){var str="";for(var i in obj){if(obj.hasOwnProperty(i)){if(str.length)str+="&";str+=encodeURIComponent(i)+"="+encodeURIComponent(obj[i])}}return str};exports.decode=function(qs){var qry={};var pairs=qs.split("&");for(var i=0,l=pairs.length;i<l;i++){var pair=pairs[i].split("=");qry[decodeURIComponent(pair[0])]=decodeURIComponent(pair[1])}return qry}},{}],31:[function(require,module,exports){var global=function(){return this}();var WebSocket=global.WebSocket||global.MozWebSocket;module.exports=WebSocket?ws:null;function ws(uri,protocols,opts){var instance;if(protocols){instance=new WebSocket(uri,protocols)}else{instance=new WebSocket(uri)}return instance}if(WebSocket)ws.prototype=WebSocket.prototype},{}],32:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var isArray=require("isarray");module.exports=hasBinary;function hasBinary(data){function recursiveCheckForBinary(obj){if(!obj)return false;if(global.Buffer&&Buffer.isBuffer(obj)||global.ArrayBuffer&&obj instanceof ArrayBuffer||global.Blob&&obj instanceof Blob||global.File&&obj instanceof File){return true}if(isArray(obj)){for(var i=0;i<obj.length;i++){if(recursiveCheckForBinary(obj[i])){return true}}}else if(obj&&"object"==typeof obj){if(obj.toJSON){obj=obj.toJSON()}for(var key in obj){if(recursiveCheckForBinary(obj[key])){return true}}}return false}return recursiveCheckForBinary(data)}},{isarray:33}],33:[function(require,module,exports){module.exports=Array.isArray||function(arr){return Object.prototype.toString.call(arr)=="[object Array]"}},{}],34:[function(require,module,exports){var global=require("global");try{module.exports="XMLHttpRequest"in global&&"withCredentials"in new global.XMLHttpRequest}catch(err){module.exports=false}},{global:35}],35:[function(require,module,exports){module.exports=function(){return this}()},{}],36:[function(require,module,exports){var indexOf=[].indexOf;module.exports=function(arr,obj){if(indexOf)return arr.indexOf(obj);for(var i=0;i<arr.length;++i){if(arr[i]===obj)return i}return-1}},{}],37:[function(require,module,exports){var has=Object.prototype.hasOwnProperty;exports.keys=Object.keys||function(obj){var keys=[];for(var key in obj){if(has.call(obj,key)){keys.push(key)}}return keys};exports.values=function(obj){var vals=[];for(var key in obj){if(has.call(obj,key)){vals.push(obj[key])}}return vals};exports.merge=function(a,b){for(var key in b){if(has.call(b,key)){a[key]=b[key]}}return a};exports.length=function(obj){return exports.keys(obj).length};exports.isEmpty=function(obj){return 0==exports.length(obj)}},{}],38:[function(require,module,exports){var re=/^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;var parts=["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"];module.exports=function parseuri(str){var m=re.exec(str||""),uri={},i=14;while(i--){uri[parts[i]]=m[i]||""}return uri}},{}],39:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var isArray=require("isarray");exports.deconstructPacket=function(packet){var buffers=[];var packetData=packet.data;function deconstructBinPackRecursive(data){if(!data)return data;if(global.Buffer&&Buffer.isBuffer(data)||global.ArrayBuffer&&data instanceof ArrayBuffer){var placeholder={_placeholder:true,num:buffers.length};buffers.push(data);return placeholder}else if(isArray(data)){var newData=new Array(data.length);for(var i=0;i<data.length;i++){newData[i]=deconstructBinPackRecursive(data[i])}return newData}else if("object"==typeof data&&!(data instanceof Date)){var newData={};for(var key in data){newData[key]=deconstructBinPackRecursive(data[key])}return newData}return data}var pack=packet;pack.data=deconstructBinPackRecursive(packetData);pack.attachments=buffers.length;return{packet:pack,buffers:buffers}};exports.reconstructPacket=function(packet,buffers){var curPlaceHolder=0;function reconstructBinPackRecursive(data){if(data&&data._placeholder){var buf=buffers[data.num];return buf}else if(isArray(data)){for(var i=0;i<data.length;i++){data[i]=reconstructBinPackRecursive(data[i])}return data}else if(data&&"object"==typeof data){for(var key in data){data[key]=reconstructBinPackRecursive(data[key])}return data}return data}packet.data=reconstructBinPackRecursive(packet.data);packet.attachments=undefined;return packet};exports.removeBlobs=function(data,callback){function removeBlobsRecursive(obj,curKey,containingObject){if(!obj)return obj;if(global.Blob&&obj instanceof Blob||global.File&&obj instanceof File){pendingBlobs++;var fileReader=new FileReader;fileReader.onload=function(){if(containingObject){containingObject[curKey]=this.result}else{bloblessData=this.result}if(!--pendingBlobs){callback(bloblessData)}};fileReader.readAsArrayBuffer(obj)}if(isArray(obj)){for(var i=0;i<obj.length;i++){removeBlobsRecursive(obj[i],i,obj)}}else if(obj&&"object"==typeof obj&&!isBuf(obj)){for(var key in obj){removeBlobsRecursive(obj[key],key,obj)}}}var pendingBlobs=0;var bloblessData=data;removeBlobsRecursive(bloblessData);if(!pendingBlobs){callback(bloblessData)}};function isBuf(obj){return global.Buffer&&Buffer.isBuffer(obj)||global.ArrayBuffer&&obj instanceof ArrayBuffer}},{isarray:41}],40:[function(require,module,exports){var global=typeof self!=="undefined"?self:typeof window!=="undefined"?window:{};var debug=require("debug")("socket.io-parser");var json=require("json3");var isArray=require("isarray");var Emitter=require("emitter");var binary=require("./binary");exports.protocol=3;exports.types=["CONNECT","DISCONNECT","EVENT","BINARY_EVENT","ACK","BINARY_ACK","ERROR"];exports.CONNECT=0;exports.DISCONNECT=1;exports.EVENT=2;exports.ACK=3;exports.ERROR=4;exports.BINARY_EVENT=5;exports.BINARY_ACK=6;exports.Encoder=Encoder;function Encoder(){}Encoder.prototype.encode=function(obj,callback){debug("encoding packet %j",obj);if(exports.BINARY_EVENT==obj.type||exports.BINARY_ACK==obj.type){encodeAsBinary(obj,callback)}else{var encoding=encodeAsString(obj);
 callback([encoding])}};function encodeAsString(obj){var str="";var nsp=false;str+=obj.type;if(exports.BINARY_EVENT==obj.type||exports.BINARY_ACK==obj.type){str+=obj.attachments;str+="-"}if(obj.nsp&&"/"!=obj.nsp){nsp=true;str+=obj.nsp}if(null!=obj.id){if(nsp){str+=",";nsp=false}str+=obj.id}if(null!=obj.data){if(nsp)str+=",";str+=json.stringify(obj.data)}debug("encoded %j as %s",obj,str);return str}function encodeAsBinary(obj,callback){function writeEncoding(bloblessData){var deconstruction=binary.deconstructPacket(bloblessData);var pack=encodeAsString(deconstruction.packet);var buffers=deconstruction.buffers;buffers.unshift(pack);callback(buffers)}binary.removeBlobs(obj,writeEncoding)}exports.Decoder=Decoder;function Decoder(){this.reconstructor=null}Emitter(Decoder.prototype);Decoder.prototype.add=function(obj){var packet;if("string"==typeof obj){packet=decodeString(obj);if(exports.BINARY_EVENT==packet.type||exports.BINARY_ACK==packet.type){this.reconstructor=new BinaryReconstructor(packet);if(this.reconstructor.reconPack.attachments==0){this.emit("decoded",packet)}}else{this.emit("decoded",packet)}}else if(global.Buffer&&Buffer.isBuffer(obj)||global.ArrayBuffer&&obj instanceof ArrayBuffer||obj.base64){if(!this.reconstructor){throw new Error("got binary data when not reconstructing a packet")}else{packet=this.reconstructor.takeBinaryData(obj);if(packet){this.reconstructor=null;this.emit("decoded",packet)}}}else{throw new Error("Unknown type: "+obj)}};function decodeString(str){var p={};var i=0;p.type=Number(str.charAt(0));if(null==exports.types[p.type])return error();if(exports.BINARY_EVENT==p.type||exports.BINARY_ACK==p.type){p.attachments="";while(str.charAt(++i)!="-"){p.attachments+=str.charAt(i)}p.attachments=Number(p.attachments)}if("/"==str.charAt(i+1)){p.nsp="";while(++i){var c=str.charAt(i);if(","==c)break;p.nsp+=c;if(i+1==str.length)break}}else{p.nsp="/"}var next=str.charAt(i+1);if(""!=next&&Number(next)==next){p.id="";while(++i){var c=str.charAt(i);if(null==c||Number(c)!=c){--i;break}p.id+=str.charAt(i);if(i+1==str.length)break}p.id=Number(p.id)}if(str.charAt(++i)){try{p.data=json.parse(str.substr(i))}catch(e){return error()}}debug("decoded %s as %j",str,p);return p}Decoder.prototype.destroy=function(){if(this.reconstructor){this.reconstructor.finishedReconstruction()}};function BinaryReconstructor(packet){this.reconPack=packet;this.buffers=[]}BinaryReconstructor.prototype.takeBinaryData=function(binData){this.buffers.push(binData);if(this.buffers.length==this.reconPack.attachments){var packet=binary.reconstructPacket(this.reconPack,this.buffers);this.finishedReconstruction();return packet}return null};BinaryReconstructor.prototype.finishedReconstruction=function(){this.reconPack=null;this.buffers=[]};function error(data){return{type:exports.ERROR,data:"parser error"}}},{"./binary":39,debug:9,emitter:10,isarray:41,json3:42}],41:[function(require,module,exports){module.exports=require(33)},{}],42:[function(require,module,exports){(function(window){var getClass={}.toString,isProperty,forEach,undef;var isLoader=typeof define==="function"&&define.amd;var nativeJSON=typeof JSON=="object"&&JSON;var JSON3=typeof exports=="object"&&exports&&!exports.nodeType&&exports;if(JSON3&&nativeJSON){JSON3.stringify=nativeJSON.stringify;JSON3.parse=nativeJSON.parse}else{JSON3=window.JSON=nativeJSON||{}}var isExtended=new Date(-0xc782b5b800cec);try{isExtended=isExtended.getUTCFullYear()==-109252&&isExtended.getUTCMonth()===0&&isExtended.getUTCDate()===1&&isExtended.getUTCHours()==10&&isExtended.getUTCMinutes()==37&&isExtended.getUTCSeconds()==6&&isExtended.getUTCMilliseconds()==708}catch(exception){}function has(name){if(has[name]!==undef){return has[name]}var isSupported;if(name=="bug-string-char-index"){isSupported="a"[0]!="a"}else if(name=="json"){isSupported=has("json-stringify")&&has("json-parse")}else{var value,serialized='{"a":[1,true,false,null,"\\u0000\\b\\n\\f\\r\\t"]}';if(name=="json-stringify"){var stringify=JSON3.stringify,stringifySupported=typeof stringify=="function"&&isExtended;if(stringifySupported){(value=function(){return 1}).toJSON=value;try{stringifySupported=stringify(0)==="0"&&stringify(new Number)==="0"&&stringify(new String)=='""'&&stringify(getClass)===undef&&stringify(undef)===undef&&stringify()===undef&&stringify(value)==="1"&&stringify([value])=="[1]"&&stringify([undef])=="[null]"&&stringify(null)=="null"&&stringify([undef,getClass,null])=="[null,null,null]"&&stringify({a:[value,true,false,null,"\x00\b\n\f\r	"]})==serialized&&stringify(null,value)==="1"&&stringify([1,2],null,1)=="[\n 1,\n 2\n]"&&stringify(new Date(-864e13))=='"-271821-04-20T00:00:00.000Z"'&&stringify(new Date(864e13))=='"+275760-09-13T00:00:00.000Z"'&&stringify(new Date(-621987552e5))=='"-000001-01-01T00:00:00.000Z"'&&stringify(new Date(-1))=='"1969-12-31T23:59:59.999Z"'}catch(exception){stringifySupported=false}}isSupported=stringifySupported}if(name=="json-parse"){var parse=JSON3.parse;if(typeof parse=="function"){try{if(parse("0")===0&&!parse(false)){value=parse(serialized);var parseSupported=value["a"].length==5&&value["a"][0]===1;if(parseSupported){try{parseSupported=!parse('"	"')}catch(exception){}if(parseSupported){try{parseSupported=parse("01")!==1}catch(exception){}}if(parseSupported){try{parseSupported=parse("1.")!==1}catch(exception){}}}}}catch(exception){parseSupported=false}}isSupported=parseSupported}}return has[name]=!!isSupported}if(!has("json")){var functionClass="[object Function]";var dateClass="[object Date]";var numberClass="[object Number]";var stringClass="[object String]";var arrayClass="[object Array]";var booleanClass="[object Boolean]";var charIndexBuggy=has("bug-string-char-index");if(!isExtended){var floor=Math.floor;var Months=[0,31,59,90,120,151,181,212,243,273,304,334];var getDay=function(year,month){return Months[month]+365*(year-1970)+floor((year-1969+(month=+(month>1)))/4)-floor((year-1901+month)/100)+floor((year-1601+month)/400)}}if(!(isProperty={}.hasOwnProperty)){isProperty=function(property){var members={},constructor;if((members.__proto__=null,members.__proto__={toString:1},members).toString!=getClass){isProperty=function(property){var original=this.__proto__,result=property in(this.__proto__=null,this);this.__proto__=original;return result}}else{constructor=members.constructor;isProperty=function(property){var parent=(this.constructor||constructor).prototype;return property in this&&!(property in parent&&this[property]===parent[property])}}members=null;return isProperty.call(this,property)}}var PrimitiveTypes={"boolean":1,number:1,string:1,undefined:1};var isHostType=function(object,property){var type=typeof object[property];return type=="object"?!!object[property]:!PrimitiveTypes[type]};forEach=function(object,callback){var size=0,Properties,members,property;(Properties=function(){this.valueOf=0}).prototype.valueOf=0;members=new Properties;for(property in members){if(isProperty.call(members,property)){size++}}Properties=members=null;if(!size){members=["valueOf","toString","toLocaleString","propertyIsEnumerable","isPrototypeOf","hasOwnProperty","constructor"];forEach=function(object,callback){var isFunction=getClass.call(object)==functionClass,property,length;var hasProperty=!isFunction&&typeof object.constructor!="function"&&isHostType(object,"hasOwnProperty")?object.hasOwnProperty:isProperty;for(property in object){if(!(isFunction&&property=="prototype")&&hasProperty.call(object,property)){callback(property)}}for(length=members.length;property=members[--length];hasProperty.call(object,property)&&callback(property));}}else if(size==2){forEach=function(object,callback){var members={},isFunction=getClass.call(object)==functionClass,property;for(property in object){if(!(isFunction&&property=="prototype")&&!isProperty.call(members,property)&&(members[property]=1)&&isProperty.call(object,property)){callback(property)}}}}else{forEach=function(object,callback){var isFunction=getClass.call(object)==functionClass,property,isConstructor;for(property in object){if(!(isFunction&&property=="prototype")&&isProperty.call(object,property)&&!(isConstructor=property==="constructor")){callback(property)}}if(isConstructor||isProperty.call(object,property="constructor")){callback(property)}}}return forEach(object,callback)};if(!has("json-stringify")){var Escapes={92:"\\\\",34:'\\"',8:"\\b",12:"\\f",10:"\\n",13:"\\r",9:"\\t"};var leadingZeroes="000000";var toPaddedString=function(width,value){return(leadingZeroes+(value||0)).slice(-width)};var unicodePrefix="\\u00";var quote=function(value){var result='"',index=0,length=value.length,isLarge=length>10&&charIndexBuggy,symbols;if(isLarge){symbols=value.split("")}for(;index<length;index++){var charCode=value.charCodeAt(index);switch(charCode){case 8:case 9:case 10:case 12:case 13:case 34:case 92:result+=Escapes[charCode];break;default:if(charCode<32){result+=unicodePrefix+toPaddedString(2,charCode.toString(16));break}result+=isLarge?symbols[index]:charIndexBuggy?value.charAt(index):value[index]}}return result+'"'};var serialize=function(property,object,callback,properties,whitespace,indentation,stack){var value,className,year,month,date,time,hours,minutes,seconds,milliseconds,results,element,index,length,prefix,result;try{value=object[property]}catch(exception){}if(typeof value=="object"&&value){className=getClass.call(value);if(className==dateClass&&!isProperty.call(value,"toJSON")){if(value>-1/0&&value<1/0){if(getDay){date=floor(value/864e5);for(year=floor(date/365.2425)+1970-1;getDay(year+1,0)<=date;year++);for(month=floor((date-getDay(year,0))/30.42);getDay(year,month+1)<=date;month++);date=1+date-getDay(year,month);time=(value%864e5+864e5)%864e5;hours=floor(time/36e5)%24;minutes=floor(time/6e4)%60;seconds=floor(time/1e3)%60;milliseconds=time%1e3}else{year=value.getUTCFullYear();month=value.getUTCMonth();date=value.getUTCDate();hours=value.getUTCHours();minutes=value.getUTCMinutes();seconds=value.getUTCSeconds();milliseconds=value.getUTCMilliseconds()}value=(year<=0||year>=1e4?(year<0?"-":"+")+toPaddedString(6,year<0?-year:year):toPaddedString(4,year))+"-"+toPaddedString(2,month+1)+"-"+toPaddedString(2,date)+"T"+toPaddedString(2,hours)+":"+toPaddedString(2,minutes)+":"+toPaddedString(2,seconds)+"."+toPaddedString(3,milliseconds)+"Z"}else{value=null}}else if(typeof value.toJSON=="function"&&(className!=numberClass&&className!=stringClass&&className!=arrayClass||isProperty.call(value,"toJSON"))){value=value.toJSON(property)}}if(callback){value=callback.call(object,property,value)}if(value===null){return"null"}className=getClass.call(value);if(className==booleanClass){return""+value}else if(className==numberClass){return value>-1/0&&value<1/0?""+value:"null"}else if(className==stringClass){return quote(""+value)}if(typeof value=="object"){for(length=stack.length;length--;){if(stack[length]===value){throw TypeError()}}stack.push(value);results=[];prefix=indentation;indentation+=whitespace;if(className==arrayClass){for(index=0,length=value.length;index<length;index++){element=serialize(index,value,callback,properties,whitespace,indentation,stack);results.push(element===undef?"null":element)}result=results.length?whitespace?"[\n"+indentation+results.join(",\n"+indentation)+"\n"+prefix+"]":"["+results.join(",")+"]":"[]"}else{forEach(properties||value,function(property){var element=serialize(property,value,callback,properties,whitespace,indentation,stack);if(element!==undef){results.push(quote(property)+":"+(whitespace?" ":"")+element)}});result=results.length?whitespace?"{\n"+indentation+results.join(",\n"+indentation)+"\n"+prefix+"}":"{"+results.join(",")+"}":"{}"}stack.pop();return result}};JSON3.stringify=function(source,filter,width){var whitespace,callback,properties,className;if(typeof filter=="function"||typeof filter=="object"&&filter){if((className=getClass.call(filter))==functionClass){callback=filter}else if(className==arrayClass){properties={};for(var index=0,length=filter.length,value;index<length;value=filter[index++],(className=getClass.call(value),className==stringClass||className==numberClass)&&(properties[value]=1));}}if(width){if((className=getClass.call(width))==numberClass){if((width-=width%1)>0){for(whitespace="",width>10&&(width=10);whitespace.length<width;whitespace+=" ");}}else if(className==stringClass){whitespace=width.length<=10?width:width.slice(0,10)}}return serialize("",(value={},value[""]=source,value),callback,properties,whitespace,"",[])}}if(!has("json-parse")){var fromCharCode=String.fromCharCode;var Unescapes={92:"\\",34:'"',47:"/",98:"\b",116:"	",110:"\n",102:"\f",114:"\r"};var Index,Source;var abort=function(){Index=Source=null;throw SyntaxError()};var lex=function(){var source=Source,length=source.length,value,begin,position,isSigned,charCode;while(Index<length){charCode=source.charCodeAt(Index);switch(charCode){case 9:case 10:case 13:case 32:Index++;break;case 123:case 125:case 91:case 93:case 58:case 44:value=charIndexBuggy?source.charAt(Index):source[Index];Index++;return value;case 34:for(value="@",Index++;Index<length;){charCode=source.charCodeAt(Index);if(charCode<32){abort()}else if(charCode==92){charCode=source.charCodeAt(++Index);switch(charCode){case 92:case 34:case 47:case 98:case 116:case 110:case 102:case 114:value+=Unescapes[charCode];Index++;break;case 117:begin=++Index;for(position=Index+4;Index<position;Index++){charCode=source.charCodeAt(Index);if(!(charCode>=48&&charCode<=57||charCode>=97&&charCode<=102||charCode>=65&&charCode<=70)){abort()}}value+=fromCharCode("0x"+source.slice(begin,Index));break;default:abort()}}else{if(charCode==34){break}charCode=source.charCodeAt(Index);begin=Index;while(charCode>=32&&charCode!=92&&charCode!=34){charCode=source.charCodeAt(++Index)}value+=source.slice(begin,Index)}}if(source.charCodeAt(Index)==34){Index++;return value}abort();default:begin=Index;if(charCode==45){isSigned=true;charCode=source.charCodeAt(++Index)}if(charCode>=48&&charCode<=57){if(charCode==48&&(charCode=source.charCodeAt(Index+1),charCode>=48&&charCode<=57)){abort()}isSigned=false;for(;Index<length&&(charCode=source.charCodeAt(Index),charCode>=48&&charCode<=57);Index++);if(source.charCodeAt(Index)==46){position=++Index;for(;position<length&&(charCode=source.charCodeAt(position),charCode>=48&&charCode<=57);position++);if(position==Index){abort()}Index=position}charCode=source.charCodeAt(Index);if(charCode==101||charCode==69){charCode=source.charCodeAt(++Index);if(charCode==43||charCode==45){Index++}for(position=Index;position<length&&(charCode=source.charCodeAt(position),charCode>=48&&charCode<=57);position++);if(position==Index){abort()}Index=position}return+source.slice(begin,Index)}if(isSigned){abort()}if(source.slice(Index,Index+4)=="true"){Index+=4;return true}else if(source.slice(Index,Index+5)=="false"){Index+=5;return false}else if(source.slice(Index,Index+4)=="null"){Index+=4;return null}abort()}}return"$"};var get=function(value){var results,hasMembers;if(value=="$"){abort()}if(typeof value=="string"){if((charIndexBuggy?value.charAt(0):value[0])=="@"){return value.slice(1)}if(value=="["){results=[];for(;;hasMembers||(hasMembers=true)){value=lex();if(value=="]"){break}if(hasMembers){if(value==","){value=lex();if(value=="]"){abort()}}else{abort()}}if(value==","){abort()}results.push(get(value))}return results}else if(value=="{"){results={};for(;;hasMembers||(hasMembers=true)){value=lex();if(value=="}"){break}if(hasMembers){if(value==","){value=lex();if(value=="}"){abort()}}else{abort()}}if(value==","||typeof value!="string"||(charIndexBuggy?value.charAt(0):value[0])!="@"||lex()!=":"){abort()}results[value.slice(1)]=get(lex())}return results}abort()}return value};var update=function(source,property,callback){var element=walk(source,property,callback);if(element===undef){delete source[property]}else{source[property]=element}};var walk=function(source,property,callback){var value=source[property],length;if(typeof value=="object"&&value){if(getClass.call(value)==arrayClass){for(length=value.length;length--;){update(value,length,callback)}}else{forEach(value,function(property){update(value,property,callback)})}}return callback.call(source,property,value)};JSON3.parse=function(source,callback){var result,value;Index=0;Source=""+source;result=get(lex());if(lex()!="$"){abort()}Index=Source=null;return callback&&getClass.call(callback)==functionClass?walk((value={},value[""]=result,value),"",callback):result}}}if(isLoader){define(function(){return JSON3})}})(this)},{}],43:[function(require,module,exports){module.exports=toArray;function toArray(list,index){var array=[];index=index||0;for(var i=index||0;i<list.length;i++){array[i-index]=list[i]}return array}},{}]},{},[1])(1)});

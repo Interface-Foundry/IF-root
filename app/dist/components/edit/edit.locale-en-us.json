@@ -1,0 +1,9 @@
+{
+	"tooltips": {
+		"kind": "text kind",
+		"summary": "text",
+		"description": "text2",
+		"world_icon": "text3",
+		"hashtag": "text4"
+	}
+}

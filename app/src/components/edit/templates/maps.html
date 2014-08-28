@@ -33,6 +33,7 @@
 	</div>
 </div>
 
-<select ng-model="mapThemeSelect" ng-options="mapTheme.cloudMapName for mapTheme in mapThemes" class='form-control'></select>
+<hr>
+<label>Local Map <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.local_map"></span></label> <br>
 
-<h3>Local Map</h3>
+<button class="btn btn-default btn-sm" ng-file-select="onLocalMapSelect($files)">+ Add a Local Map</button>
