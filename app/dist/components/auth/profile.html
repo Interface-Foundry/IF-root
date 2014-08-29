@@ -1,3 +1,4 @@
+<div id="shelf" class="defaultBG">
 <div class="container-fluid navfix defaultBG">
 <div class="row">
 
@@ -6,15 +7,15 @@
 </div>
 
 <div class="col-xs-12 col-sm-6">
-<div class="add-world-group">
-<a href="" class="btn btn-default" ng-click="whenNewWorld=true" ng-hide="whenNewWorld">+ Create a New World</a>
+<div class="well">
+<a href="" class="btn btn-success" ng-click="whenNewWorld=true" ng-hide="whenNewWorld">+ Create a New World</a>
 <div ng-show="whenNewWorld">
 	<label>Name</label>
 	<div class="input-group">
 		<input name="worldname" type="text" 
 				class="form-control" 
 				placeholder="What's it named?"
-				ng-model="world.name"
+				ng-model="world.name" ng-minlength="5"
 				ry-focus="whenNewWorld">
 		<span class="input-group-btn">
 			<button class="btn btn-success" ng-click="newWorld()">Go</button>
@@ -40,5 +41,6 @@
 		</div>
 	</li>
 </ul>
+</div>
 </div>
 </div>

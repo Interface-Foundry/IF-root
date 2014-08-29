@@ -184,7 +184,7 @@ $scope.saveWorld = function() {
     	console.log('--db.worlds.create response--');
     	console.log(response);
     	$scope.whenSaving = false;
-    	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
+    	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     });  
     
     db.styles.create($scope.style, function(response){
@@ -232,14 +232,11 @@ $scope.setEndTime = function() {
 	console.log('timeStart', timeStart.toString());	 
 	timeStart.setUTCHours(timeStart.getUTCHours()+3);
 	
-	 //timeStart is now the default end time.
+	//timeStart is now the default end time.
 	var timeEnd = timeStart;
 	console.log('--timeEnd', timeEnd.toString());
 	$scope.world.time.end = timeEnd.toISO8601String();
-
-	if ($scope.world.time.start instanceof Date) {
-		$scope.world.time.end = new Date().setTime($scope.world.time.start.setUTCHours(time.start.getUTCHours()+3)).toISO8601String();
-	}
+	
 }
 
 
@@ -257,6 +254,7 @@ function showPosition(position) {
 			
 	map.setCenter([userLng, userLat], 17);
  
+	map.removeAllMarkers();
 	map.addMarker('m', {
 		lat: userLat,
 		lng: userLng,
@@ -322,7 +320,7 @@ $scope.$on('$destroy', function (event) {
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
 	
-	if (zoomControl) {
+	if (zoomControl.style) {
 	zoomControl.style.top = "";
 	zoomControl.style.left = "";
 	}

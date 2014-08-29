@@ -918,7 +918,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 						lm.style = req.body.style;
 					}
 					
-                    if (req.body.hasTime == true){
+                    if (req.body.time.hasOwnProperty('start')) {
 						
                         /*lm.timetext.datestart = req.body.timetext.datestart;
                         lm.timetext.dateend = req.body.timetext.dateend;

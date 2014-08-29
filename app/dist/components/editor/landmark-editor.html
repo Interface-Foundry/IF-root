@@ -1,76 +1,100 @@
-<a href="#/w/{{worldURL}}" class="back btn btn-default btn-sm"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
-<div id="shelf" class="container navfix" ng-class="[aperture.state]">
-<alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
+<!-- <a href="#/w/{{worldURL}}" class="back btn btn-default btn-sm"><span class="glyphicon glyphicon-chevron-left"></span> Back</a> -->
+<div class="edit-view">
+<ul class="edit-nav">
+	<li class="active">
+		<span>Landmarks</span>
+	</li>
+	<li class="edit-landmark-navback">
+		<a ng-href="#/w/{{world.id}}" class="btn badge">Go to {{world.name}}</a>
+		<a ng-href="#/edit/w/{{world.id}}" class="btn badge">Edit {{world.name}}</a>
+	</li>
+</ul>
+<div class="edit-container">
 
-<legend>Pin Landmarks</legend>
-<button ng-click="addLandmark()">Add Landmark</button>
-<ul class="row" style="background-color:#FFF;">
-	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="landmark-editor col-sm-5" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()" ng-init="fUploads()">
-		<img ng-src='{{landmark.avatar}}' class='avatar' ng-cloak/> {{landmark.name}} {{landmark._id}} <button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-		<div ng-form class='landmark-form'>
-		
-			<label>Name</label> <input type="text" ng-model="landmark.name" class="form-control"/>
-						<label>Picture</label> 
-								
-						<span class="btn btn-success fileinput-button">
-				        	<i class="icon-plus icon-white"></i>
-							<span>Add Profile Pic</span>
-							<input class="fileupload" type="file" name="files[]">
-						</span>
-						
-						<label>Or Drag & Drop Pic</label>
-				
-						<div id="progress" class="progress">
-							<div class="bar" style="width: 0%;"></div>
-						</div>
-				
-						<p id="uploadedpic"></p>
-						<div class="preview"></div>         
+<div class="container-fluid">
+<div class="form-group">
+<button class="btn btn-success" ng-click="addLandmark()">Add a Landmark</button>
 
-			<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
-			<label>Description</label> <textarea ng-model="landmark.description" class="form-control"/>
-			<label>Type</label> <select ng-model="typeSelect" ng-options="typeOption.name for typeOption in typeOptions" class="form-control"></select>
-			<label>Category</label> <select ng-model="landmark.category" ng-options="category.name as category.name for category in world.landmarkCategories"></select>
-			<br>
-			<button type="button" class="btn btn-default" ng-click="landmark.hasTime=!landmark.hasTime">Enable Time</button>
-			<div ngform class="landmark-time" ng-class="{hidden: !landmark.hasTime}">
-				<div class="form-group">
-				<label>Start Date</label> <input type="text" ng-model="landmark.timetext.datestart" data-date-format="MM dd, yyyy" bs-datepicker/>
-				</div>
-				<div class="form-group">
-				<label>End Date</label> <input type="text" ng-model="landmark.timetext.dateend" data-date-format="MM dd, yyyy" bs-datepicker/>
-				</div>
-				<div class="form-group">
-				<label>Start Time</label> <input type="text" ng-model="landmark.timetext.timestart" data-date-format="hh:mm" bs-timepicker />
-				</div>
-				<div class="form-group">
-				<label>End Time</label> <input type="text" ng-model="landmark.timetext.timeend" data-date-format="hh:mm" bs-timepicker />
-				</div>
-				
-				<div class="form-group">
-					<label class="control-label"><i class="fa fa-calendar"></i>Start Time</label>
-					<div class="form-group">
-						<input type="text" size="10" class="form-control" ng-model="landmark.time.start" placeholder="Date" bs-datepicker>
-					</div>
-					<div class="form-group">
-						<input type="text" size="8" class="form-control" ng-model="landmark.time.start" data-autoclose="1" placeholder="Time" bs-timepicker>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label"><i class="fa fa-calendar"></i>End Time</label>
-					<div class="form-group">
-						<input type="text" size="10" class="form-control" ng-model="landmark.time.end" data-autoclose="1" placeholder="Date" bs-datepicker>
-					</div>
-					<div class="form-group">
-						<input type="text" size="8" class="form-control" ng-model="landmark.time.end" data-autoclose="1" placeholder="Time" bs-timepicker>
-					</div>
-				</div>
-			</div>
 
-			</div>
-			<button class="btn btn-default" ng-click="saveLandmark()">Save</button>
+</div>
+<ul class="row">
+	<div class="col-xs-12">
+	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="panel panel-default" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()">
+		<div class="panel-heading" ng-click="selectLandmark()">
+		<span class="panel-title" ng-cloak>{{landmark.name}} 
+			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			<button type="button" class="btn badge save-badge" ng-click="saveLandmark()">Save</button>
+			</span>
 		</div>
+		<div ng-form class='panel-body' ng-show="$index === selectedIndex">
+		<div class="form-group">
+			
+			<div class="media">
+				<div class="media-object edit-landmark-avatar">
+				<img ng-src='{{landmark.avatar}}' class="img-responsive" ng-cloak/>
+				
+				</div>
+				<div class="media-body">
+					<div class="form-group">
+						<label>Name</label> <input type="text" ng-model="landmark.name" class="form-control"/>
+						</div>
+				</div>
+			</div>
+			<div class="btn" ng-file-select="onUploadAvatar($files)">Upload</div>
+		</div>
+		<div class="form-group">
+		<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
+		</div>
+		<div class="form-group">
+		<label>Description</label> <textarea ng-model="landmark.description" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<label>Category</label> 
+			<select class="form-control" ng-model="landmark.category" ng-options="category.name as category.name for category in world.landmarkCategories"></select>
+		</div>
+	
+		<button class="btn btn-primary btn-sm" ng-click="setStartTime()" ng-hide="landmark.time.start">Add a Start Time</button>
+<div ng-show="landmark.time.start">
+	<div class="form-group form-inline">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> Start Time <span class="glyphicon glyphicon-info-sign info"></span></label>
+		
+		<button type="button" class="close" ng-click="landmark.time.start = null">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close </span>
+		</button><br>
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.start" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.start" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+	<button class="btn btn-primary btn-sm" ng-click="setEndTime()" ng-hide="landmark.time.end">Add End Time</button>
+	<div class="form-group form-inline" ng-show="landmark.time.end">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time <span class="glyphicon glyphicon-info-sign info"></span></label>
+		
+		<button type="button" class="close" ng-click="landmark.time.end = null">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+		</button><br> 
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.end" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.end" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+			</div>
+
+		</div>
+	</div>
 	</li>
 </ul>
 
+</div>
+</div>
 </div>

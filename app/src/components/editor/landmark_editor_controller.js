@@ -1,12 +1,19 @@
-function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager) {
+function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
+	
+	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+		zoomControl.style.top = "50px";
+		zoomControl.style.left = "40%";
+	/*
+
 	$scope.aperture = apertureService;
 	$scope.aperture.set('half');
-	
+	*/
+		
 	var worldLoaded = false;
 	var landmarksLoaded = false;
 	
@@ -18,6 +25,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 ////////////////////////////////////////////////////////////
 //////////////////////DEFINE FUNCTIONS//////////////////////
 ////////////////////////////////////////////////////////////
+/*
 	$scope.addFileUploads = function() {
 		angular.element('.fileupload').fileupload({
         url: '/api/upload',
@@ -37,6 +45,7 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
         }
     });
 	}
+*/
 	
 	$scope.addLandmark = function() {
 		console.log('--addLandmark--');
@@ -150,7 +159,7 @@ if ($scope.landmark.hasTime) {
 			console.log(response);
 		});
 		console.log('Save complete');
-		$scope.alerts.addAlert('success','Landmark Saved');
+		$scope.alerts.addAlert('success','Landmark Saved', true);
 	}
 	
 	$scope.selectItem = function(i) {
@@ -165,6 +174,8 @@ if ($scope.landmark.hasTime) {
 		console.log('Complete select');
 	}
 		
+	
+	
 	function loadLandmarks() {
 		console.log('--loadLandmarks--');
 		//$scope.queryType = "all";
@@ -217,7 +228,7 @@ if ($scope.landmark.hasTime) {
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
 		console.log('controller active');
-	World.get({id: $routeParams.worldID}, function(data) {
+	World.get({id: $routeParams.worldURL}, function(data) {
 			console.log('--World.get--');
 			console.log(data);
 		$scope.world = data.world;
@@ -227,9 +238,25 @@ if ($scope.landmark.hasTime) {
 			console.log('-Style-');
 			console.log($scope.style);
 		
-		$scope.worldURL = $routeParams.worldID;
+		$scope.worldURL = $routeParams.worldURL;
 		//initialize map with world settings
-		map.setCenter($scope.world.loc.coordinates, 15);
+		map.setCenter($scope.world.loc.coordinates, 18);
+		map.addMarker('m', {
+			lat: $scope.world.loc.coordinates[1],
+			lng: $scope.world.loc.coordinates[0],
+			focus: false,
+			draggable: false,
+			icon: {
+				iconUrl: '',
+				shadowUrl: '',
+				iconSize: [0,0],
+				shadowSize: [0,0],
+				iconAnchor: [0,0],
+				shadowAnchor: [0,0]
+			}
+		});
+		map.removeCircleMask();
+		map.addCircleMaskToMarker('m', 150, 'mask');
 		/*map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
@@ -250,14 +277,9 @@ if ($scope.landmark.hasTime) {
 	});
 }
 
-function LandmarkEditorItemController($scope, db, Landmark, mapManager) {
+function LandmarkEditorItemController ($scope, db, Landmark, mapManager, $upload) {
+	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
-	$scope.typeOptions = [
-		{name:'Place'},
-		{name:'Event'}
-	];
-	$scope.typeSelect = $scope.typeOptions[0];
-	
 	
 	$scope.deleteLandmark = function() {
 		$scope.$parent.removeItem($scope.$index);
@@ -271,7 +293,48 @@ function LandmarkEditorItemController($scope, db, Landmark, mapManager) {
 		$scope.$parent.selectItem($scope.$index);
 	}
 	
-	$scope.fUploads = function() {
-		$scope.$parent.addFileUploads();
+	$scope.setStartTime = function() {
+	var timeStart = new Date();
+	$scope.$parent.landmark.time.start = timeStart.toISO8601String();
 	}
+	
+	$scope.setEndTime = function() {
+		var timeStart = new Date();
+		console.log(timeStart);
+		
+		if (typeof $scope.$parent.landmark.time.start === 'string') {
+			timeStart.setISO8601($scope.$parent.landmark.time.start);
+		} //correct, its a string
+		
+		if ($scope.$parent.landmark.time.start instanceof Date) {
+			//incorrect but deal with it anyway
+			timeStart = $scope.$parent.landmark.time.start;
+		}
+		
+		//timeStart is currently a date object
+		console.log('timeStart', timeStart.toString());	 
+		
+		timeStart.setUTCHours(timeStart.getUTCHours()+3); //!!!Mutates timeStart itself, ECMA Date() design sucks!
+		//timeStart is now the default end time
+		var timeEnd = timeStart;
+		console.log('--timeEnd', timeEnd.toString());
+		$scope.$parent.landmark.time.end = timeEnd.toISO8601String();
+	
+	}
+	
+	$scope.onUploadAvatar = function($files) {
+		console.log('uploadAvatar');
+		var file = $files[0];
+		$scope.upload = $upload.upload({
+			url: '/api/upload/',
+			file: file,
+		}).progress(function(e) {
+			console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		}).success(function(data, status, headers, config) {
+			console.log(data);
+		$scope.$parent.landmark.avatar = data;
+		$scope.uploadFinished = true;
+		});
+	}
+	
 }

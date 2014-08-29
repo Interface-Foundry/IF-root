@@ -12806,14 +12806,13 @@ L.IFCircleMask = L.Layer.extend({
 			map.dragging._draggable.on('predrag', function() {
 				var d = map.dragging._draggable;
 				L.DomUtil.setPosition(this._el, { x: -d._newPos.x, y: -d._newPos.y });
-				this._draw();
+				this._reset();
 			}, this);		
 		}
 		
 		map.on('move', function() {
-			this._draw();
-		}, this);
-		
+			this._reset();
+		}, this);		
 	},
 	
 	onRemove: function (map) {
@@ -12827,12 +12826,14 @@ L.IFCircleMask = L.Layer.extend({
 	_reset: function () {
 		console.log('_reset')
 		
+		if (this._map) {
 		L.DomUtil.setPosition(this._el, this._map.containerPointToLayerPoint([0,0]));
 		
 		var mapSize = this._map.getSize();
 		this._el
 		this._el.width = mapSize.x;
 		this._el.height = mapSize.y;
+		}
 		this._draw();
 	},
 	

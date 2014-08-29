@@ -278,3 +278,30 @@ ul.edit-toolbar {
 	color: #FFF;
 	text-decoration: none;
 }
+
+.btn.save-badge {
+	background-color: #0091EA;
+}
+
+.edit-landmark-avatar.media-object {
+	position: relative;
+}
+
+.edit-landmark-avatar.glyphicon {
+	position: absolute;
+	top:auto;
+	bottom: 2px;
+	right: 2px;
+}
+
+.edit-nav li.edit-landmark-navback {
+	position: relative;
+	width: 75%;
+	background-color: rgba(230,230,230,0.8);
+	padding: 4px;
+	line-height: normal;
+}
+
+.edit-landmark-navback a {
+	margin-top: 12px;
+}
