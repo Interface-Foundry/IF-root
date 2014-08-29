@@ -4,7 +4,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 
 // load up the user model
-var User       = require('../app/models/user');
+var User       = require('../IF_schemas/user_schema.js');
 
 
 

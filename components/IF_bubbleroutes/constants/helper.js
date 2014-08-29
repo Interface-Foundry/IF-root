@@ -1,5 +1,5 @@
 var integers = require('./integers');
-var Bubble = require('../../landmark_schema.js');
+var Bubble = require('../../../components/IF_schemas/landmark_schema.js');
 
 function distanceInRadians(distance) {
   re
