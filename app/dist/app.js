@@ -4013,7 +4013,7 @@ UserViewCtrl.$inject = [ '$location', '$scope', 'db'];
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker'])
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker', 'ui.slider'])
   .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
@@ -6022,8 +6022,8 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	var newOverlay = {};
 	if (localMapOptions.maxZoom>19) {
 		localMapOptions.maxZoom = 19;
-		localMapOptions.zIndex = 10;
 	}
+	localMapOptions.zIndex = 10;
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
@@ -6032,12 +6032,19 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 		visible: true,
 		opacity: 0.8,
 	};/*
+	
 
 	mapManager.layers.overlays = newOverlay;
 */
 	console.log(mapManager);
 	console.log(newOverlay);
 };
+
+mapManager.removeOverlays = function() {
+	mapManager.layers.overlays = {};
+	map.refresh();
+}
+
 
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
@@ -6066,7 +6073,35 @@ mapManager.removeCircleMask = function() {
 	}
 }
 
+mapManager.placeImage = function(key, url) {
+	console.log('placeImage');
+	mapManager.placeImageLayer = new L.IFPlaceImage(url, mapManager.markers[key]);
+	leafletData.getMap().then(
+		function(map) {
+			map.addLayer(mapManager.placeImageLayer);
+		});
+	return function(i) {mapManager.placeImageLayer.setScale(i)}
+}
 
+mapManager.setPlaceImageScale = function(i) {
+	mapManager.placeImageLayer.setScale(i);
+}
+
+mapManager.removePlaceImage = function() {
+	if (mapManager.placeImageLayer) {
+		leafletData.getMap().then(function(map){
+			map.removeLayer(mapManager.placeImageLayer);
+		})
+	} else {
+		console.log('No place image layer.');
+	}
+}
+
+mapManager.getPlaceImageBounds = function() {
+	if (mapManager.placeImageLayer) {
+		return mapManager.placeImageLayer.getBounds();
+	}
+}
 
 return mapManager;
     }]);
@@ -7813,6 +7848,11 @@ $scope.categories = [
 	{name: 'Park'}
 ];
 
+$scope.temp = {
+	scale: 1
+}
+
+
 $http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
@@ -7871,6 +7911,7 @@ $scope.onLocalMapSelect = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.mapImage = data;
+		map.placeImage('m', data);
 	})
 }
 
@@ -7914,9 +7955,11 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 
 $scope.addLandmarkCategory = function() {
-	console.log($scope.tempLandmarkCategory);
-	$scope.world.landmarkCategories.unshift({name: $scope.tempLandmarkCategory});
+	if ($scope.temp) {
+	console.log($scope.temp.LandmarkCategory);
+	$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory});
 	console.log($scope.world);
+	}
 }
 
 $scope.removeLandmarkCategory = function(index) {
@@ -8047,6 +8090,57 @@ $scope.setEndTime = function() {
 	
 }
 
+$scope.removePlaceImage = function () {
+	$scope.mapImage = null;
+	map.removePlaceImage();
+}
+
+$scope.buildLocalMap = function () {
+	console.log('--buildLocalMap--');
+	//get image geo coordinates, add to var to send
+	var bounds = map.getPlaceImageBounds(),
+		southEast = bounds.getSouthEast(),
+		northWest = bounds.getNorthWest(),
+		southWest = bounds.getSouthWest(),
+		northEast = bounds.getNorthEast(),
+		coordBox = {
+			worldID: $scope.world._id,
+			nw_loc_lng: northWest.lng,
+		    nw_loc_lat: northWest.lat,
+		    sw_loc_lng: southWest.lng,
+			sw_loc_lat: southWest.lat,
+			ne_loc_lng: northEast.lng,
+			ne_loc_lat: northEast.lat,
+			se_loc_lng: southEast.lng,
+			se_loc_lat: southEast.lat 
+		};
+	console.log('bounds', bounds);
+	console.log('coordBox', coordBox);
+	var coords_text = JSON.stringify(coordBox);
+		var data = {
+		      mapIMG: $scope.mapImage,
+		      coords: coords_text
+		    }
+	//build map
+	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
+	$http.post('/api/build_map', data).success(function(response){
+		//response = JSON.parse(response);
+		alerts.addAlert('success', 'Map built!', true);
+		console.log(response);
+		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
+		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} //remove this when world objects arent fd up
+		if (response[0]) { //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
+		$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
+		$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
+		$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
+			} else {
+		$scope.world.style.maps.localMapID = response.style.maps.localMapID;
+		$scope.world.style.maps.localMapName = response.style.maps.localMapName;
+		$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
+		}
+		$scope.saveWorld();
+		});
+}
 
 function findLoc() {
 	if (navigator.geolocation && !$scope.world.hasLoc) {
@@ -8127,7 +8221,7 @@ $scope.$on('$destroy', function (event) {
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
-	
+	map.removePlaceImage();
 	if (zoomControl.style) {
 	zoomControl.style.top = "";
 	zoomControl.style.left = "";
@@ -8146,6 +8240,13 @@ $scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
 	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
 });
+
+$scope.$watch('temp.scale', function(current, old) {
+	if (current!=old) {
+		map.setPlaceImageScale(current);
+		console.log(map.getPlaceImageBounds());
+	}
+})
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -9508,7 +9609,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				});*/
 		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],19)
 		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-		if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
+		if ($scope.world.style.maps.localMapID) {
 			map.addOverlay($scope.world.style.maps.localMapID, 
 							$scope.world.style.maps.localMapName, 
 							$scope.world.style.maps.localMapOptions);

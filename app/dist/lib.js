@@ -12880,6 +12880,193 @@ L.IFCircleMask = L.Layer.extend({
 });
 
 }(window, document));
+L.IFPlaceImage = L.Layer.extend({
+
+	options: {
+		opacity: 1,
+		alt: '',
+	},
+
+	initialize: function (url, marker, options) { // (String, LatLngBounds, Object)
+		this._url = url;
+		this._marker = marker;
+		this.scale = 1;
+		this.eScale = 1;
+		this.on('load', this._imgLoaded, this);
+		
+		L.setOptions(this, options);
+	},
+
+	onAdd: function () {
+		console.log('getEvents');
+		if (!this._image) {
+			this._initImage();
+
+			if (this.options.opacity < 1) {
+				this._updateOpacity();
+			}
+		}
+
+		this.getPane().appendChild(this._image);
+
+		this._reset();
+	},
+
+	onRemove: function () {
+		L.DomUtil.remove(this._image);
+	},
+
+	setOpacity: function (opacity) {
+		this.options.opacity = opacity;
+
+		if (this._image) {
+			this._updateOpacity();
+		}
+		return this;
+	},
+
+	bringToFront: function () {
+		if (this._map) {
+			L.DomUtil.toFront(this._image);
+		}
+		return this;
+	},
+
+	bringToBack: function () {
+		if (this._map) {
+			L.DomUtil.toBack(this._image);
+		}
+		return this;
+	},
+
+	setUrl: function (url) {
+		console.log('setUrl');
+		this._url = url;
+
+		if (this._image) {
+			this._image.src = url;
+		}
+		return this;
+	},
+
+	getAttribution: function () {
+		return this.options.attribution;
+	},
+
+	getEvents: function () {
+		console.log('getEvents');
+		var events = {
+			viewreset: this._reset
+		};
+
+		if (this._zoomAnimated) {
+			events.zoomanim = this._animateZoom;
+		}
+
+		return events;
+	},
+	
+	getBounds: function() {
+		console.log('getBounds');
+		return this._bounds;
+	},
+
+	_initImage: function () {
+		console.log('_initImage');
+		var img = this._image = L.DomUtil.create('img',
+				'leaflet-image-layer ' + (this._zoomAnimated ? 'leaflet-zoom-animated' : ''));
+					
+		img.onselectstart = L.Util.falseFn;
+		img.onmousemove = L.Util.falseFn;
+
+		img.onload = L.bind(this.fire, this, 'load');
+		img.src = this._url;
+		img.alt = this.options.alt;
+	},
+	
+	setScale: function(i) {
+		console.log('setScale');
+		if (!this.loaded) {return false}
+		this.scale = i;
+		
+		
+		this._reset();
+	},
+	
+	_imgLoaded: function () {
+		console.log('_imgLoaded');
+		console.log(this._marker)
+		var img = this._image;
+		this.loaded = true;
+		this._naturalWidth = img.width;
+		this._naturalHeight = img.height;
+		console.log(this);
+		var xoffset = this._naturalWidth*this.scale/2,
+			yoffset = this._naturalHeight*this.scale/2,
+			center = this._map.latLngToLayerPoint([this._marker.lat, this._marker.lng]);
+		console.log(xoffset, yoffset, center);
+		this.bounds = L.bounds(
+					[center.x-xoffset, center.y-yoffset],
+					[center.x+xoffset, center.y+yoffset]);
+		//this.bounds = L.bounds([0,0],[this._naturalWidth, this._naturalHeight]);
+			var southWest = this._map.layerPointToLatLng(L.point(this.bounds.min.x, this.bounds.max.y)),
+				northEast = this._map.layerPointToLatLng(L.point(this.bounds.max.x, this.bounds.min.y));
+		this._bounds = L.latLngBounds(southWest, northEast);
+		console.log(this.bounds, southWest, northEast, this._bounds);
+	
+		this._reset();
+	},
+
+	_animateZoom: function (e) {
+	console.log('_animateZoom');
+	/*var topLeft = this._map._latLngToNewLayerPoint(this._bounds.getNorthWest(), e.zoom, e.center),
+		    size = this._map._latLngToNewLayerPoint(this._bounds.getSouthEast(), e.zoom, e.center).subtract(topLeft),
+		    offset = topLeft.add(size._multiplyBy((1 - 1 / e.scale) / 2));
+		console.log(topLeft, size, offset);*/
+		//L.DomUtil.setTransform(this._image, offset, e.scale);
+		//L.DomUtil.setPosition(image, offset);
+		this.eScale = this.eScale*e.scale;
+		
+		console.log(this);
+	},
+
+	_reset: function () {
+		console.log('_reset');
+		if (this.loaded) {
+		var image = this._image;
+		
+		var xoffset = this._naturalWidth*this.scale/2,
+			yoffset = this._naturalHeight*this.scale/2,
+			center = this._map.latLngToLayerPoint([this._marker.lat, this._marker.lng]);
+		this.bounds = L.bounds(
+					[center.x-xoffset, center.y-yoffset],
+					[center.x+xoffset, center.y+yoffset]);
+		//this.bounds = L.bounds([0,0],[this._naturalWidth, this._naturalHeight]);
+			var southWest = this._map.layerPointToLatLng(L.point(this.bounds.min.x, this.bounds.max.y)),
+				northEast = this._map.layerPointToLatLng(L.point(this.bounds.max.x, this.bounds.min.y));
+		this._bounds = L.latLngBounds(southWest, northEast);
+		console.log(this.bounds, southWest, northEast, this._bounds);
+		
+		
+		var xoffset_zoomed = xoffset*this.eScale,
+			yoffset_zoomed = yoffset*this.eScale,
+			bounds_zoomed = L.bounds(
+					[center.x-xoffset_zoomed, center.y-yoffset_zoomed],
+					[center.x+xoffset_zoomed, center.y+yoffset_zoomed]),
+			size = bounds_zoomed.getSize();
+		
+
+		L.DomUtil.setPosition(image, bounds_zoomed.min);
+
+		image.style.width  = size.x + 'px';
+		image.style.height = size.y + 'px';
+		}
+	},
+
+	_updateOpacity: function () {
+		L.DomUtil.setOpacity(this._image, this.options.opacity);
+	}
+});
 /*
     The MIT License
 
@@ -16068,6 +16255,328 @@ angular.module('mgcrea.ngStrap.helpers.dimensions', []).factory('dimensions', [
   });
 
 })(window, window.angular);
+// Generated by CoffeeScript 1.7.1
+(function() {
+  var MODULE_NAME, SLIDER_TAG, angularize, gap, halfWidth, hide, inputEvents, module, offset, offsetLeft, pixelize, qualifiedDirectiveDefinition, roundStep, show, sliderDirective, width;
+
+  MODULE_NAME = 'ui.slider';
+
+  SLIDER_TAG = 'slider';
+
+  angularize = function(element) {
+    return angular.element(element);
+  };
+
+  pixelize = function(position) {
+    return "" + position + "px";
+  };
+
+  hide = function(element) {
+    return element.css({
+      opacity: 0
+    });
+  };
+
+  show = function(element) {
+    return element.css({
+      opacity: 1
+    });
+  };
+
+  offset = function(element, position) {
+    return element.css({
+      left: position
+    });
+  };
+
+  halfWidth = function(element) {
+    return element[0].offsetWidth / 2;
+  };
+
+  offsetLeft = function(element) {
+    return element[0].offsetLeft;
+  };
+
+  width = function(element) {
+    return element[0].offsetWidth;
+  };
+
+  gap = function(element1, element2) {
+    return offsetLeft(element2) - offsetLeft(element1) - width(element1);
+  };
+
+  roundStep = function(value, precision, step, floor) {
+    var decimals, remainder, roundedValue, steppedValue;
+    if (floor == null) {
+      floor = 0;
+    }
+    if (step == null) {
+      step = 1 / Math.pow(10, precision);
+    }
+    remainder = (value - floor) % step;
+    steppedValue = remainder > (step / 2) ? value + step - remainder : value - remainder;
+    decimals = Math.pow(10, precision);
+    roundedValue = steppedValue * decimals / decimals;
+    return roundedValue.toFixed(precision);
+  };
+
+  inputEvents = {
+    mouse: {
+      start: 'mousedown',
+      move: 'mousemove',
+      end: 'mouseup'
+    },
+    touch: {
+      start: 'touchstart',
+      move: 'touchmove',
+      end: 'touchend'
+    }
+  };
+
+  sliderDirective = function($timeout) {
+    return {
+      restrict: 'E',
+      scope: {
+        floor: '@',
+        ceiling: '@',
+        values: '=?',
+        range: '@',
+        step: '@',
+        highlight: '@',
+        precision: '@',
+        buffer: '@',
+        dragstop: '@',
+        ngModel: '=?',
+        ngModelLow: '=?',
+        ngModelHigh: '=?'
+      },
+      template: '<div class="bar"><div class="selection"></div></div>\n<div class="handle low"></div><div class="handle high"></div>\n<div class="bubble limit low">{{ values.length ? ( values[floor || 0] || floor ) : floor }}</div>\n<div class="bubble limit high">{{ values.length ? ( values[ceiling || values.length - 1] || ceiling ) : ceiling }}</div>\n<div class="bubble value low">{{ values.length ? ( values[local.ngModelLow || local.ngModel] || local.ngModelLow || local.ngModel ) : local.ngModelLow || local.ngModel}}</div>\n<div class="bubble value high">{{ values.length ? ( values[local.ngModelHigh] || local.ngModelHigh ) : local.ngModelHigh }}</div>',
+      compile: function(element, attributes) {
+        var bar, ceilBub, e, flrBub, high, highBub, low, lowBub, maxPtr, minPtr, range, selection, watchables, _i, _len, _ref, _ref1;
+        range = (attributes.ngModel == null) && (attributes.ngModelLow != null) && (attributes.ngModelHigh != null);
+        _ref = (function() {
+          var _i, _len, _ref, _results;
+          _ref = element.children();
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            e = _ref[_i];
+            _results.push(angularize(e));
+          }
+          return _results;
+        })(), bar = _ref[0], minPtr = _ref[1], maxPtr = _ref[2], flrBub = _ref[3], ceilBub = _ref[4], lowBub = _ref[5], highBub = _ref[6];
+        selection = angularize(bar.children()[0]);
+        if (!range) {
+          _ref1 = [maxPtr, highBub];
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            element = _ref1[_i];
+            element.remove();
+          }
+          if (!attributes.highlight) {
+            selection.remove();
+          }
+        }
+        low = range ? 'ngModelLow' : 'ngModel';
+        high = 'ngModelHigh';
+        watchables = ['floor', 'ceiling', 'values', low];
+        if (range) {
+          watchables.push(high);
+        }
+        return {
+          post: function(scope, element, attributes) {
+            var barWidth, boundToInputs, dimensions, handleHalfWidth, maxOffset, maxValue, minOffset, minValue, ngDocument, offsetRange, updateDOM, valueRange, w, _j, _len1;
+            scope.local = {};
+            scope.local[low] = scope[low];
+            scope.local[high] = scope[high];
+            boundToInputs = false;
+            ngDocument = angularize(document);
+            handleHalfWidth = barWidth = minOffset = maxOffset = minValue = maxValue = valueRange = offsetRange = void 0;
+            dimensions = function() {
+              var value, _j, _len1, _ref2;
+              if (scope.step == null) {
+                scope.step = 1;
+              }
+              if (scope.floor == null) {
+                scope.floor = 0;
+              }
+              if (scope.precision == null) {
+                scope.precision = 0;
+              }
+              if (!range) {
+                scope.ngModelLow = scope.ngModel;
+              }
+              if ((_ref2 = scope.values) != null ? _ref2.length : void 0) {
+                if (scope.ceiling == null) {
+                  scope.ceiling = scope.values.length - 1;
+                }
+              }
+              scope.local[low] = scope[low];
+              scope.local[high] = scope[high];
+              for (_j = 0, _len1 = watchables.length; _j < _len1; _j++) {
+                value = watchables[_j];
+                if (typeof value === 'number') {
+                  scope[value] = roundStep(parseFloat(scope[value]), parseInt(scope.precision), parseFloat(scope.step), parseFloat(scope.floor));
+                }
+              }
+              handleHalfWidth = halfWidth(minPtr);
+              barWidth = width(bar);
+              minOffset = 0;
+              maxOffset = barWidth - width(minPtr);
+              minValue = parseFloat(scope.floor);
+              maxValue = parseFloat(scope.ceiling);
+              valueRange = maxValue - minValue;
+              return offsetRange = maxOffset - minOffset;
+            };
+            updateDOM = function() {
+              var bindToInputEvents, fitToBar, percentOffset, percentToOffset, percentValue, setBindings, setPointers;
+              dimensions();
+              percentOffset = function(offset) {
+                return ((offset - minOffset) / offsetRange) * 100;
+              };
+              percentValue = function(value) {
+                return ((value - minValue) / valueRange) * 100;
+              };
+              percentToOffset = function(percent) {
+                return pixelize(percent * offsetRange / 100);
+              };
+              fitToBar = function(element) {
+                return offset(element, pixelize(Math.min(Math.max(0, offsetLeft(element)), barWidth - width(element))));
+              };
+              setPointers = function() {
+                var newHighValue, newLowValue;
+                offset(ceilBub, pixelize(barWidth - width(ceilBub)));
+                newLowValue = percentValue(scope.local[low]);
+                offset(minPtr, percentToOffset(newLowValue));
+                offset(lowBub, pixelize(offsetLeft(minPtr) - (halfWidth(lowBub)) + handleHalfWidth));
+                offset(selection, pixelize(offsetLeft(minPtr) + handleHalfWidth));
+                switch (true) {
+                  case range:
+                    newHighValue = percentValue(scope.local[high]);
+                    offset(maxPtr, percentToOffset(newHighValue));
+                    offset(highBub, pixelize(offsetLeft(maxPtr) - (halfWidth(highBub)) + handleHalfWidth));
+                    return selection.css({
+                      width: percentToOffset(newHighValue - newLowValue)
+                    });
+                  case attributes.highlight === 'right':
+                    return selection.css({
+                      width: percentToOffset(110 - newLowValue)
+                    });
+                  case attributes.highlight === 'left':
+                    selection.css({
+                      width: percentToOffset(newLowValue)
+                    });
+                    return offset(selection, 0);
+                }
+              };
+              bindToInputEvents = function(handle, bubble, ref, events) {
+                var currentRef, onEnd, onMove, onStart;
+                currentRef = ref;
+                onEnd = function() {
+                  bubble.removeClass('active');
+                  handle.removeClass('active');
+                  ngDocument.unbind(events.move);
+                  ngDocument.unbind(events.end);
+                  if (scope.dragstop) {
+                    scope[high] = scope.local[high];
+                    scope[low] = scope.local[low];
+                  }
+                  return currentRef = ref;
+                };
+                onMove = function(event) {
+                  var eventX, newOffset, newPercent, newValue;
+                  eventX = event.clientX || event.touches[0].clientX;
+                  newOffset = eventX - element[0].getBoundingClientRect().left - handleHalfWidth;
+                  newOffset = Math.max(Math.min(newOffset, maxOffset), minOffset);
+                  newPercent = percentOffset(newOffset);
+                  newValue = minValue + (valueRange * newPercent / 100.0);
+                  if (range) {
+                    switch (currentRef) {
+                      case low:
+                        if (newValue > scope.local[high]) {
+                          currentRef = high;
+                          minPtr.removeClass('active');
+                          lowBub.removeClass('active');
+                          maxPtr.addClass('active');
+                          highBub.addClass('active');
+                          setPointers();
+                        } else if (scope.buffer > 0) {
+                          newValue = Math.min(newValue, scope.local[high] - scope.buffer);
+                        }
+                        break;
+                      case high:
+                        if (newValue < scope.local[low]) {
+                          currentRef = low;
+                          maxPtr.removeClass('active');
+                          highBub.removeClass('active');
+                          minPtr.addClass('active');
+                          lowBub.addClass('active');
+                          setPointers();
+                        } else if (scope.buffer > 0) {
+                          newValue = Math.max(newValue, parseInt(scope.local[low]) + parseInt(scope.buffer));
+                        }
+                    }
+                  }
+                  newValue = roundStep(newValue, parseInt(scope.precision), parseFloat(scope.step), parseFloat(scope.floor));
+                  scope.local[currentRef] = newValue;
+                  if (!scope.dragstop) {
+                    scope[currentRef] = newValue;
+                  }
+                  setPointers();
+                  return scope.$apply();
+                };
+                onStart = function(event) {
+                  dimensions();
+                  bubble.addClass('active');
+                  handle.addClass('active');
+                  setPointers();
+                  event.stopPropagation();
+                  event.preventDefault();
+                  ngDocument.bind(events.move, onMove);
+                  return ngDocument.bind(events.end, onEnd);
+                };
+                return handle.bind(events.start, onStart);
+              };
+              setBindings = function() {
+                var bind, inputMethod, _j, _len1, _ref2, _results;
+                boundToInputs = true;
+                bind = function(method) {
+                  bindToInputEvents(minPtr, lowBub, low, inputEvents[method]);
+                  return bindToInputEvents(maxPtr, highBub, high, inputEvents[method]);
+                };
+                _ref2 = ['touch', 'mouse'];
+                _results = [];
+                for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                  inputMethod = _ref2[_j];
+                  _results.push(bind(inputMethod));
+                }
+                return _results;
+              };
+              if (!boundToInputs) {
+                setBindings();
+              }
+              return setPointers();
+            };
+            $timeout(updateDOM);
+            for (_j = 0, _len1 = watchables.length; _j < _len1; _j++) {
+              w = watchables[_j];
+              scope.$watch(w, updateDOM, true);
+            }
+            return window.addEventListener("resize", updateDOM);
+          }
+        };
+      }
+    };
+  };
+
+  qualifiedDirectiveDefinition = ['$timeout', sliderDirective];
+
+  module = function(window, angular) {
+    return angular.module(MODULE_NAME, []).directive(SLIDER_TAG, qualifiedDirectiveDefinition);
+  };
+
+  module(window, window.angular);
+
+}).call(this);
+
 angular.module("ui.bootstrap",["ui.bootstrap.transition","ui.bootstrap.collapse","ui.bootstrap.accordion","ui.bootstrap.alert","ui.bootstrap.buttons","ui.bootstrap.carousel","ui.bootstrap.dialog","ui.bootstrap.dropdownToggle","ui.bootstrap.modal","ui.bootstrap.pagination","ui.bootstrap.position","ui.bootstrap.tooltip","ui.bootstrap.popover","ui.bootstrap.progressbar","ui.bootstrap.rating","ui.bootstrap.tabs","ui.bootstrap.typeahead"]),angular.module("ui.bootstrap.transition",[]).factory("$transition",["$q","$timeout","$rootScope",function(t,e,n){function o(t){for(var e in t)if(void 0!==a.style[e])return t[e]}var i=function(o,a,r){r=r||{};var s=t.defer(),l=i[r.animation?"animationEndEventName":"transitionEndEventName"],c=function(){n.$apply(function(){o.unbind(l,c),s.resolve(o)})};return l&&o.bind(l,c),e(function(){angular.isString(a)?o.addClass(a):angular.isFunction(a)?a(o):angular.isObject(a)&&o.css(a),l||s.resolve(o)}),s.promise.cancel=function(){l&&o.unbind(l,c),s.reject("Transition cancelled")},s.promise},a=document.createElement("trans"),r={WebkitTransition:"webkitTransitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd",transition:"transitionend"},s={WebkitTransition:"webkitAnimationEnd",MozTransition:"animationend",OTransition:"oAnimationEnd",transition:"animationend"};return i.transitionEndEventName=o(r),i.animationEndEventName=o(s),i}]),angular.module("ui.bootstrap.collapse",["ui.bootstrap.transition"]).directive("collapse",["$transition",function(t){var e=function(t,e,n){e.removeClass("collapse"),e.css({height:n}),e[0].offsetWidth,e.addClass("collapse")};return{link:function(n,o,i){var a,r=!0;n.$watch(function(){return o[0].scrollHeight},function(){0!==o[0].scrollHeight&&(a||(r?e(n,o,o[0].scrollHeight+"px"):e(n,o,"auto")))}),n.$watch(i.collapse,function(t){t?u():c()});var s,l=function(e){return s&&s.cancel(),s=t(o,e),s.then(function(){s=void 0},function(){s=void 0}),s},c=function(){r?(r=!1,a||e(n,o,"auto")):l({height:o[0].scrollHeight+"px"}).then(function(){a||e(n,o,"auto")}),a=!1},u=function(){a=!0,r?(r=!1,e(n,o,0)):(e(n,o,o[0].scrollHeight+"px"),l({height:"0"}))}}}}]),angular.module("ui.bootstrap.accordion",["ui.bootstrap.collapse"]).constant("accordionConfig",{closeOthers:!0}).controller("AccordionController",["$scope","$attrs","accordionConfig",function(t,e,n){this.groups=[],this.closeOthers=function(o){var i=angular.isDefined(e.closeOthers)?t.$eval(e.closeOthers):n.closeOthers;i&&angular.forEach(this.groups,function(t){t!==o&&(t.isOpen=!1)})},this.addGroup=function(t){var e=this;this.groups.push(t),t.$on("$destroy",function(){e.removeGroup(t)})},this.removeGroup=function(t){var e=this.groups.indexOf(t);-1!==e&&this.groups.splice(this.groups.indexOf(t),1)}}]).directive("accordion",function(){return{restrict:"EA",controller:"AccordionController",transclude:!0,replace:!1,templateUrl:"template/accordion/accordion.html"}}).directive("accordionGroup",["$parse","$transition","$timeout",function(t){return{require:"^accordion",restrict:"EA",transclude:!0,replace:!0,templateUrl:"template/accordion/accordion-group.html",scope:{heading:"@"},controller:["$scope",function(){this.setHeading=function(t){this.heading=t}}],link:function(e,n,o,i){var a,r;i.addGroup(e),e.isOpen=!1,o.isOpen&&(a=t(o.isOpen),r=a.assign,e.$watch(function(){return a(e.$parent)},function(t){e.isOpen=t}),e.isOpen=a?a(e.$parent):!1),e.$watch("isOpen",function(t){t&&i.closeOthers(e),r&&r(e.$parent,t)})}}}]).directive("accordionHeading",function(){return{restrict:"E",transclude:!0,template:"",replace:!0,require:"^accordionGroup",compile:function(t,e,n){return function(t,e,o,i){i.setHeading(n(t,function(){}))}}}}).directive("accordionTransclude",function(){return{require:"^accordionGroup",link:function(t,e,n,o){t.$watch(function(){return o[n.accordionTransclude]},function(t){t&&(e.html(""),e.append(t))})}}}),angular.module("ui.bootstrap.alert",[]).directive("alert",function(){return{restrict:"EA",templateUrl:"template/alert/alert.html",transclude:!0,replace:!0,scope:{type:"=",close:"&"},link:function(t,e,n){t.closeable="close"in n}}}),angular.module("ui.bootstrap.buttons",[]).constant("buttonConfig",{activeClass:"active",toggleEvent:"click"}).directive("btnRadio",["buttonConfig",function(t){var e=t.activeClass||"active",n=t.toggleEvent||"click";return{require:"ngModel",link:function(t,o,i,a){var r=t.$eval(i.btnRadio);t.$watch(function(){return a.$modelValue},function(t){angular.equals(t,r)?o.addClass(e):o.removeClass(e)}),o.bind(n,function(){o.hasClass(e)||t.$apply(function(){a.$setViewValue(r)})})}}}]).directive("btnCheckbox",["buttonConfig",function(t){var e=t.activeClass||"active",n=t.toggleEvent||"click";return{require:"ngModel",link:function(t,o,i,a){var r=t.$eval(i.btnCheckboxTrue),s=t.$eval(i.btnCheckboxFalse);r=angular.isDefined(r)?r:!0,s=angular.isDefined(s)?s:!1,t.$watch(function(){return a.$modelValue},function(t){angular.equals(t,r)?o.addClass(e):o.removeClass(e)}),o.bind(n,function(){t.$apply(function(){a.$setViewValue(o.hasClass(e)?s:r)})})}}}]),angular.module("ui.bootstrap.carousel",["ui.bootstrap.transition"]).controller("CarouselController",["$scope","$timeout","$transition","$q",function(t,e,n){function o(){function n(){a?(t.next(),o()):t.pause()}i&&e.cancel(i);var r=+t.interval;!isNaN(r)&&r>=0&&(i=e(n,r))}var i,a,r=this,s=r.slides=[],l=-1;r.currentSlide=null,r.select=function(i,a){function c(){r.currentSlide&&angular.isString(a)&&!t.noTransition&&i.$element?(i.$element.addClass(a),i.$element[0].offsetWidth=i.$element[0].offsetWidth,angular.forEach(s,function(t){angular.extend(t,{direction:"",entering:!1,leaving:!1,active:!1})}),angular.extend(i,{direction:a,active:!0,entering:!0}),angular.extend(r.currentSlide||{},{direction:a,leaving:!0}),t.$currentTransition=n(i.$element,{}),function(e,n){t.$currentTransition.then(function(){u(e,n)},function(){u(e,n)})}(i,r.currentSlide)):u(i,r.currentSlide),r.currentSlide=i,l=p,o()}function u(e,n){angular.extend(e,{direction:"",active:!0,leaving:!1,entering:!1}),angular.extend(n||{},{direction:"",active:!1,leaving:!1,entering:!1}),t.$currentTransition=null}var p=s.indexOf(i);void 0===a&&(a=p>l?"next":"prev"),i&&i!==r.currentSlide&&(t.$currentTransition?(t.$currentTransition.cancel(),e(c)):c())},r.indexOfSlide=function(t){return s.indexOf(t)},t.next=function(){var t=(l+1)%s.length;return r.select(s[t],"next")},t.prev=function(){var t=0>l-1?s.length-1:l-1;return r.select(s[t],"prev")},t.select=function(t){r.select(t)},t.isActive=function(t){return r.currentSlide===t},t.slides=function(){return s},t.$watch("interval",o),t.play=function(){a||(a=!0,o())},t.pause=function(){a=!1,i&&e.cancel(i)},r.addSlide=function(e,n){e.$element=n,s.push(e),1===s.length||e.active?(r.select(s[s.length-1]),1==s.length&&t.play()):e.active=!1},r.removeSlide=function(t){var e=s.indexOf(t);s.splice(e,1),s.length>0&&t.active&&(e>=s.length?r.select(s[e-1]):r.select(s[e]))}}]).directive("carousel",[function(){return{restrict:"EA",transclude:!0,replace:!0,controller:"CarouselController",require:"carousel",templateUrl:"template/carousel/carousel.html",scope:{interval:"=",noTransition:"="}}}]).directive("slide",[function(){return{require:"^carousel",restrict:"EA",transclude:!0,replace:!0,templateUrl:"template/carousel/slide.html",scope:{active:"="},link:function(t,e,n,o){o.addSlide(t,e),t.$on("$destroy",function(){o.removeSlide(t)}),t.$watch("active",function(e){e&&o.select(t)})}}}]);var dialogModule=angular.module("ui.bootstrap.dialog",["ui.bootstrap.transition"]);dialogModule.controller("MessageBoxController",["$scope","dialog","model",function(t,e,n){t.title=n.title,t.message=n.message,t.buttons=n.buttons,t.close=function(t){e.close(t)}}]),dialogModule.provider("$dialog",function(){var t={backdrop:!0,dialogClass:"modal",backdropClass:"modal-backdrop",transitionClass:"fade",triggerClass:"in",dialogOpenClass:"modal-open",resolve:{},backdropFade:!1,dialogFade:!1,keyboard:!0,backdropClick:!0},e={},n={value:0};this.options=function(t){e=t},this.$get=["$http","$document","$compile","$rootScope","$controller","$templateCache","$q","$transition","$injector",function(o,i,a,r,s,l,c,u,p){function d(t){var e=angular.element("<div>");return e.addClass(t),e}function f(n){var o=this,i=this.options=angular.extend({},t,e,n);this._open=!1,this.backdropEl=d(i.backdropClass),i.backdropFade&&(this.backdropEl.addClass(i.transitionClass),this.backdropEl.removeClass(i.triggerClass)),this.modalEl=d(i.dialogClass),i.dialogFade&&(this.modalEl.addClass(i.transitionClass),this.modalEl.removeClass(i.triggerClass)),this.handledEscapeKey=function(t){27===t.which&&(o.close(),t.preventDefault(),o.$scope.$apply())},this.handleBackDropClick=function(t){o.close(),t.preventDefault(),o.$scope.$apply()},this.handleLocationChange=function(){o.close()}}var h=i.find("body");return f.prototype.isOpen=function(){return this._open},f.prototype.open=function(t,e){var n=this,o=this.options;if(t&&(o.templateUrl=t),e&&(o.controller=e),!o.template&&!o.templateUrl)throw Error("Dialog.open expected template or templateUrl, neither found. Use options or open method to specify them.");return this._loadResolves().then(function(t){var e=t.$scope=n.$scope=t.$scope?t.$scope:r.$new();if(n.modalEl.html(t.$template),n.options.controller){var o=s(n.options.controller,t);n.modalEl.children().data("ngControllerController",o)}a(n.modalEl)(e),n._addElementsToDom(),h.addClass(n.options.dialogOpenClass),setTimeout(function(){n.options.dialogFade&&n.modalEl.addClass(n.options.triggerClass),n.options.backdropFade&&n.backdropEl.addClass(n.options.triggerClass)}),n._bindEvents()}),this.deferred=c.defer(),this.deferred.promise},f.prototype.close=function(t){function e(t){t.removeClass(o.options.triggerClass)}function n(){o._open&&o._onCloseComplete(t)}var o=this,i=this._getFadingElements();if(h.removeClass(o.options.dialogOpenClass),i.length>0)for(var a=i.length-1;a>=0;a--)u(i[a],e).then(n);else this._onCloseComplete(t)},f.prototype._getFadingElements=function(){var t=[];return this.options.dialogFade&&t.push(this.modalEl),this.options.backdropFade&&t.push(this.backdropEl),t},f.prototype._bindEvents=function(){this.options.keyboard&&h.bind("keydown",this.handledEscapeKey),this.options.backdrop&&this.options.backdropClick&&this.backdropEl.bind("click",this.handleBackDropClick),this.$scope.$on("$locationChangeSuccess",this.handleLocationChange)},f.prototype._unbindEvents=function(){this.options.keyboard&&h.unbind("keydown",this.handledEscapeKey),this.options.backdrop&&this.options.backdropClick&&this.backdropEl.unbind("click",this.handleBackDropClick)},f.prototype._onCloseComplete=function(t){this._removeElementsFromDom(),this._unbindEvents(),this.deferred.resolve(t)},f.prototype._addElementsToDom=function(){h.append(this.modalEl),this.options.backdrop&&(0===n.value&&h.append(this.backdropEl),n.value++),this._open=!0},f.prototype._removeElementsFromDom=function(){this.modalEl.remove(),this.options.backdrop&&(n.value--,0===n.value&&this.backdropEl.remove()),this._open=!1},f.prototype._loadResolves=function(){var t,e=[],n=[],i=this;return this.options.template?t=c.when(this.options.template):this.options.templateUrl&&(t=o.get(this.options.templateUrl,{cache:l}).then(function(t){return t.data})),angular.forEach(this.options.resolve||[],function(t,o){n.push(o),e.push(angular.isString(t)?p.get(t):p.invoke(t))}),n.push("$template"),e.push(t),c.all(e).then(function(t){var e={};return angular.forEach(t,function(t,o){e[n[o]]=t}),e.dialog=i,e})},{dialog:function(t){return new f(t)},messageBox:function(t,e,n){return new f({templateUrl:"template/dialog/message.html",controller:"MessageBoxController",resolve:{model:function(){return{title:t,message:e,buttons:n}}}})}}}]}),angular.module("ui.bootstrap.dropdownToggle",[]).directive("dropdownToggle",["$document","$location","$window",function(t){var e=null,n=angular.noop;return{restrict:"CA",link:function(o,i){o.$watch("$location.path",function(){n()}),i.parent().bind("click",function(){n()}),i.bind("click",function(o){o.preventDefault(),o.stopPropagation();var a=i===e;e&&n(),a||(i.parent().addClass("open"),e=i,n=function(o){o&&(o.preventDefault(),o.stopPropagation()),t.unbind("click",n),i.parent().removeClass("open"),n=angular.noop,e=null},t.bind("click",n))})}}}]),angular.module("ui.bootstrap.modal",["ui.bootstrap.dialog"]).directive("modal",["$parse","$dialog",function(t,e){return{restrict:"EA",terminal:!0,link:function(n,o,i){var a,r=angular.extend({},n.$eval(i.uiOptions||i.bsOptions||i.options)),s=i.modal||i.show;r=angular.extend(r,{template:o.html(),resolve:{$scope:function(){return n}}});var l=e.dialog(r);o.remove(),a=i.close?function(){t(i.close)(n)}:function(){angular.isFunction(t(s).assign)&&t(s).assign(n,!1)},n.$watch(s,function(t){t?l.open().then(function(){a()}):l.isOpen()&&l.close()})}}}]),angular.module("ui.bootstrap.pagination",[]).constant("paginationConfig",{boundaryLinks:!1,directionLinks:!0,firstText:"First",previousText:"Previous",nextText:"Next",lastText:"Last"}).directive("pagination",["paginationConfig",function(t){return{restrict:"EA",scope:{numPages:"=",currentPage:"=",maxSize:"=",onSelectPage:"&"},templateUrl:"template/pagination/pagination.html",replace:!0,link:function(e,n,o){function i(t,e,n,o){return{number:t,text:e,active:n,disabled:o}}var a=angular.isDefined(o.boundaryLinks)?e.$eval(o.boundaryLinks):t.boundaryLinks,r=angular.isDefined(o.directionLinks)?e.$eval(o.directionLinks):t.directionLinks,s=angular.isDefined(o.firstText)?o.firstText:t.firstText,l=angular.isDefined(o.previousText)?o.previousText:t.previousText,c=angular.isDefined(o.nextText)?o.nextText:t.nextText,u=angular.isDefined(o.lastText)?o.lastText:t.lastText;e.$watch("numPages + currentPage + maxSize",function(){e.pages=[];var t=1,n=e.numPages;e.maxSize&&e.maxSize<e.numPages&&(t=Math.max(e.currentPage-Math.floor(e.maxSize/2),1),n=t+e.maxSize-1,n>e.numPages&&(n=e.numPages,t=n-e.maxSize+1));for(var o=t;n>=o;o++){var p=i(o,o,e.isActive(o),!1);e.pages.push(p)}if(r){var d=i(e.currentPage-1,l,!1,e.noPrevious());e.pages.unshift(d);var f=i(e.currentPage+1,c,!1,e.noNext());e.pages.push(f)}if(a){var h=i(1,s,!1,e.noPrevious());e.pages.unshift(h);var g=i(e.numPages,u,!1,e.noNext());e.pages.push(g)}e.currentPage>e.numPages&&e.selectPage(e.numPages)}),e.noPrevious=function(){return 1===e.currentPage},e.noNext=function(){return e.currentPage===e.numPages},e.isActive=function(t){return e.currentPage===t},e.selectPage=function(t){!e.isActive(t)&&t>0&&e.numPages>=t&&(e.currentPage=t,e.onSelectPage({page:t}))}}}}]),angular.module("ui.bootstrap.position",[]).factory("$position",["$document","$window",function(t,e){function n(t,n){return t.currentStyle?t.currentStyle[n]:e.getComputedStyle?e.getComputedStyle(t)[n]:t.style[n]}function o(t){return"static"===(n(t,"position")||"static")}var i=function(e){for(var n=t[0],i=e.offsetParent||n;i&&i!==n&&o(i);)i=i.offsetParent;return i||n};return{position:function(e){var n=this.offset(e),o={top:0,left:0},a=i(e[0]);return a!=t[0]&&(o=this.offset(angular.element(a)),o.top+=a.clientTop,o.left+=a.clientLeft),{width:e.prop("offsetWidth"),height:e.prop("offsetHeight"),top:n.top-o.top,left:n.left-o.left}},offset:function(n){var o=n[0].getBoundingClientRect();return{width:n.prop("offsetWidth"),height:n.prop("offsetHeight"),top:o.top+(e.pageYOffset||t[0].body.scrollTop),left:o.left+(e.pageXOffset||t[0].body.scrollLeft)}}}}]),angular.module("ui.bootstrap.tooltip",["ui.bootstrap.position"]).provider("$tooltip",function(){function t(t){var e=/[A-Z]/g,n="-";return t.replace(e,function(t,e){return(e?n:"")+t.toLowerCase()})}var e={placement:"top",animation:!0,popupDelay:0},n={mouseenter:"mouseleave",click:"click",focus:"blur"},o={};this.options=function(t){angular.extend(o,t)},this.$get=["$window","$compile","$timeout","$parse","$document","$position",function(i,a,r,s,l,c){return function(i,u,p){function d(t){var e,o;return e=t||f.trigger||p,o=angular.isDefined(f.trigger)?n[f.trigger]||e:n[e]||e,{show:e,hide:o}}var f=angular.extend({},e,o),h=t(i),g=d(void 0),m="<"+h+"-popup "+'title="{{tt_title}}" '+'content="{{tt_content}}" '+'placement="{{tt_placement}}" '+'animation="tt_animation()" '+'is-open="tt_isOpen"'+">"+"</"+h+"-popup>";return{restrict:"EA",scope:!0,link:function(t,e,n){function o(){t.tt_isOpen?h():p()}function p(){t.tt_popupDelay?y=r(v,t.tt_popupDelay):t.$apply(v)}function h(){t.$apply(function(){$()})}function v(){var n,o,i,a;if(t.tt_content){switch(b&&r.cancel(b),x.css({top:0,left:0,display:"block"}),f.appendToBody?(k=k||l.find("body"),k.append(x)):e.after(x),n=c.position(e),o=x.prop("offsetWidth"),i=x.prop("offsetHeight"),t.tt_placement){case"right":a={top:n.top+n.height/2-i/2+"px",left:n.left+n.width+"px"};break;case"bottom":a={top:n.top+n.height+"px",left:n.left+n.width/2-o/2+"px"};break;case"left":a={top:n.top+n.height/2-i/2+"px",left:n.left-o+"px"};break;default:a={top:n.top-i+"px",left:n.left+n.width/2-o/2+"px"}}x.css(a),t.tt_isOpen=!0}}function $(){t.tt_isOpen=!1,r.cancel(y),angular.isDefined(t.tt_animation)&&t.tt_animation()?b=r(function(){x.remove()},500):x.remove()}var b,y,k,x=a(m)(t);t.tt_isOpen=!1,n.$observe(i,function(e){t.tt_content=e}),n.$observe(u+"Title",function(e){t.tt_title=e}),n.$observe(u+"Placement",function(e){t.tt_placement=angular.isDefined(e)?e:f.placement}),n.$observe(u+"Animation",function(e){t.tt_animation=angular.isDefined(e)?s(e):function(){return f.animation}}),n.$observe(u+"PopupDelay",function(e){var n=parseInt(e,10);t.tt_popupDelay=isNaN(n)?f.popupDelay:n}),n.$observe(u+"Trigger",function(t){e.unbind(g.show),e.unbind(g.hide),g=d(t),g.show===g.hide?e.bind(g.show,o):(e.bind(g.show,p),e.bind(g.hide,h))})}}}}]}).directive("tooltipPopup",function(){return{restrict:"E",replace:!0,scope:{content:"@",placement:"@",animation:"&",isOpen:"&"},templateUrl:"template/tooltip/tooltip-popup.html"}}).directive("tooltip",["$tooltip",function(t){return t("tooltip","tooltip","mouseenter")}]).directive("tooltipHtmlUnsafePopup",function(){return{restrict:"E",replace:!0,scope:{content:"@",placement:"@",animation:"&",isOpen:"&"},templateUrl:"template/tooltip/tooltip-html-unsafe-popup.html"}}).directive("tooltipHtmlUnsafe",["$tooltip",function(t){return t("tooltipHtmlUnsafe","tooltip","mouseenter")}]),angular.module("ui.bootstrap.popover",["ui.bootstrap.tooltip"]).directive("popoverPopup",function(){return{restrict:"EA",replace:!0,scope:{title:"@",content:"@",placement:"@",animation:"&",isOpen:"&"},templateUrl:"template/popover/popover.html"}}).directive("popover",["$compile","$timeout","$parse","$window","$tooltip",function(t,e,n,o,i){return i("popover","popover","click")}]),angular.module("ui.bootstrap.progressbar",["ui.bootstrap.transition"]).constant("progressConfig",{animate:!0,autoType:!1,stackedTypes:["success","info","warning","danger"]}).controller("ProgressBarController",["$scope","$attrs","progressConfig",function(t,e,n){function o(t){return r[t]}var i=angular.isDefined(e.animate)?t.$eval(e.animate):n.animate,a=angular.isDefined(e.autoType)?t.$eval(e.autoType):n.autoType,r=angular.isDefined(e.stackedTypes)?t.$eval("["+e.stackedTypes+"]"):n.stackedTypes;this.makeBar=function(t,e,n){var r=angular.isObject(t)?t.value:t||0,s=angular.isObject(e)?e.value:e||0,l=angular.isObject(t)&&angular.isDefined(t.type)?t.type:a?o(n||0):null;return{from:s,to:r,type:l,animate:i}},this.addBar=function(e){t.bars.push(e),t.totalPercent+=e.to},this.clearBars=function(){t.bars=[],t.totalPercent=0},this.clearBars()}]).directive("progress",function(){return{restrict:"EA",replace:!0,controller:"ProgressBarController",scope:{value:"=",onFull:"&",onEmpty:"&"},templateUrl:"template/progressbar/progress.html",link:function(t,e,n,o){t.$watch("value",function(t,e){if(o.clearBars(),angular.isArray(t))for(var n=0,i=t.length;i>n;n++)o.addBar(o.makeBar(t[n],e[n],n));else o.addBar(o.makeBar(t,e))},!0),t.$watch("totalPercent",function(e){e>=100?t.onFull():0>=e&&t.onEmpty()},!0)}}}).directive("progressbar",["$transition",function(t){return{restrict:"EA",replace:!0,scope:{width:"=",old:"=",type:"=",animate:"="},templateUrl:"template/progressbar/bar.html",link:function(e,n){e.$watch("width",function(o){e.animate?(n.css("width",e.old+"%"),t(n,{width:o+"%"})):n.css("width",o+"%")})}}}]),angular.module("ui.bootstrap.rating",[]).constant("ratingConfig",{max:5}).directive("rating",["ratingConfig","$parse",function(t,e){return{restrict:"EA",scope:{value:"="},templateUrl:"template/rating/rating.html",replace:!0,link:function(n,o,i){var a=angular.isDefined(i.max)?n.$eval(i.max):t.max;n.range=[];for(var r=1;a>=r;r++)n.range.push(r);n.rate=function(t){n.readonly||(n.value=t)},n.enter=function(t){n.readonly||(n.val=t)},n.reset=function(){n.val=angular.copy(n.value)},n.reset(),n.$watch("value",function(t){n.val=t}),n.readonly=!1,i.readonly&&n.$parent.$watch(e(i.readonly),function(t){n.readonly=!!t})}}}]),angular.module("ui.bootstrap.tabs",[]).controller("TabsController",["$scope","$element",function(t){var e=t.panes=[];this.select=t.select=function(t){angular.forEach(e,function(t){t.selected=!1}),t.selected=!0},this.addPane=function(n){e.length||t.select(n),e.push(n)},this.removePane=function(n){var o=e.indexOf(n);e.splice(o,1),n.selected&&e.length>0&&t.select(e[e.length>o?o:o-1])}}]).directive("tabs",function(){return{restrict:"EA",transclude:!0,scope:{},controller:"TabsController",templateUrl:"template/tabs/tabs.html",replace:!0}}).directive("pane",["$parse",function(t){return{require:"^tabs",restrict:"EA",transclude:!0,scope:{heading:"@"},link:function(e,n,o,i){var a,r;e.selected=!1,o.active&&(a=t(o.active),r=a.assign,e.$watch(function(){return a(e.$parent)},function(t){e.selected=t}),e.selected=a?a(e.$parent):!1),e.$watch("selected",function(t){t&&i.select(e),r&&r(e.$parent,t)}),i.addPane(e),e.$on("$destroy",function(){i.removePane(e)})},templateUrl:"template/tabs/pane.html",replace:!0}}]),angular.module("ui.bootstrap.typeahead",["ui.bootstrap.position"]).factory("typeaheadParser",["$parse",function(t){var e=/^\s*(.*?)(?:\s+as\s+(.*?))?\s+for\s+(?:([\$\w][\$\w\d]*))\s+in\s+(.*)$/;return{parse:function(n){var o=n.match(e);if(!o)throw Error("Expected typeahead specification in form of '_modelValue_ (as _label_)? for _item_ in _collection_' but got '"+n+"'.");return{itemName:o[3],source:t(o[4]),viewMapper:t(o[2]||o[1]),modelMapper:t(o[1])}}}}]).directive("typeahead",["$compile","$parse","$q","$document","$position","typeaheadParser",function(t,e,n,o,i,a){var r=[9,13,27,38,40];return{require:"ngModel",link:function(s,l,c,u){var p,d=s.$eval(c.typeaheadMinLength)||1,f=a.parse(c.typeahead),h=s.$eval(c.typeaheadEditable)!==!1,g=e(c.typeaheadLoading).assign||angular.noop,m=angular.element("<typeahead-popup matches='matches' active='activeIdx' select='select(activeIdx)' query='query' position='position'></typeahead-popup>"),v=s.$new();s.$on("$destroy",function(){v.$destroy()});var $=function(){v.matches=[],v.activeIdx=-1},b=function(t){var e={$viewValue:t};g(s,!0),n.when(f.source(v,e)).then(function(n){if(t===u.$viewValue){if(n.length>0){v.activeIdx=0,v.matches.length=0;for(var o=0;n.length>o;o++)e[f.itemName]=n[o],v.matches.push({label:f.viewMapper(v,e),model:n[o]});v.query=t,v.position=i.position(l),v.position.top=v.position.top+l.prop("offsetHeight")}else $();g(s,!1)}},function(){$(),g(s,!1)})};$(),v.query=void 0,u.$parsers.push(function(t){return $(),p?t:(t&&t.length>=d&&b(t),h?t:void 0)}),u.$render=function(){var t={};t[f.itemName]=p||u.$viewValue,l.val(f.viewMapper(v,t)||u.$viewValue),p=void 0},v.select=function(t){var e={};e[f.itemName]=p=v.matches[t].model,u.$setViewValue(f.modelMapper(v,e)),u.$render()},l.bind("keydown",function(t){0!==v.matches.length&&-1!==r.indexOf(t.which)&&(t.preventDefault(),40===t.which?(v.activeIdx=(v.activeIdx+1)%v.matches.length,v.$digest()):38===t.which?(v.activeIdx=(v.activeIdx?v.activeIdx:v.matches.length)-1,v.$digest()):13===t.which||9===t.which?v.$apply(function(){v.select(v.activeIdx)}):27===t.which&&(t.stopPropagation(),$(),v.$digest()))}),o.bind("click",function(){$(),v.$digest()}),l.after(t(m)(v))}}}]).directive("typeaheadPopup",function(){return{restrict:"E",scope:{matches:"=",query:"=",active:"=",position:"=",select:"&"},replace:!0,templateUrl:"template/typeahead/typeahead.html",link:function(t){t.isOpen=function(){return t.matches.length>0},t.isActive=function(e){return t.active==e},t.selectActive=function(e){t.active=e},t.selectMatch=function(e){t.select({activeIdx:e})}}}}).filter("typeaheadHighlight",function(){function t(t){return t.replace(/([.?*+^$[\]\\(){}|-])/g,"\\$1")}return function(e,n){return n?e.replace(RegExp(t(n),"gi"),"<strong>$&</strong>"):n}});
 /*
  * angular-ui-bootstrap

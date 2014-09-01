@@ -253,8 +253,8 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	var newOverlay = {};
 	if (localMapOptions.maxZoom>19) {
 		localMapOptions.maxZoom = 19;
-		localMapOptions.zIndex = 10;
 	}
+	localMapOptions.zIndex = 10;
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
@@ -263,12 +263,19 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 		visible: true,
 		opacity: 0.8,
 	};/*
+	
 
 	mapManager.layers.overlays = newOverlay;
 */
 	console.log(mapManager);
 	console.log(newOverlay);
 };
+
+mapManager.removeOverlays = function() {
+	mapManager.layers.overlays = {};
+	map.refresh();
+}
+
 
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
@@ -297,7 +304,35 @@ mapManager.removeCircleMask = function() {
 	}
 }
 
+mapManager.placeImage = function(key, url) {
+	console.log('placeImage');
+	mapManager.placeImageLayer = new L.IFPlaceImage(url, mapManager.markers[key]);
+	leafletData.getMap().then(
+		function(map) {
+			map.addLayer(mapManager.placeImageLayer);
+		});
+	return function(i) {mapManager.placeImageLayer.setScale(i)}
+}
 
+mapManager.setPlaceImageScale = function(i) {
+	mapManager.placeImageLayer.setScale(i);
+}
+
+mapManager.removePlaceImage = function() {
+	if (mapManager.placeImageLayer) {
+		leafletData.getMap().then(function(map){
+			map.removeLayer(mapManager.placeImageLayer);
+		})
+	} else {
+		console.log('No place image layer.');
+	}
+}
+
+mapManager.getPlaceImageBounds = function() {
+	if (mapManager.placeImageLayer) {
+		return mapManager.placeImageLayer.getBounds();
+	}
+}
 
 return mapManager;
     }]);

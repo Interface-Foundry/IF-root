@@ -120,7 +120,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				});*/
 		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],19)
 		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-		if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
+		if ($scope.world.style.maps.localMapID) {
 			map.addOverlay($scope.world.style.maps.localMapID, 
 							$scope.world.style.maps.localMapName, 
 							$scope.world.style.maps.localMapOptions);

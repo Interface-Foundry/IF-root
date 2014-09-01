@@ -1,9 +1,9 @@
 {
 	"tooltips": {
-		"kind": "text kind",
-		"summary": "text",
-		"description": "text2",
-		"world_icon": "text3",
-		"hashtag": "text4"
+		"kind": "What kind of world is it?",
+		"summary": "Short explanation of the world",
+		"description": "Describe world & contents",
+		"world_icon": "Add an icon to your world",
+		"hashtag": "Your official hashtag for twitter and instagram"
 	}
 }

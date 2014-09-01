@@ -17,6 +17,11 @@ $scope.categories = [
 	{name: 'Park'}
 ];
 
+$scope.temp = {
+	scale: 1
+}
+
+
 $http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
@@ -75,6 +80,7 @@ $scope.onLocalMapSelect = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.mapImage = data;
+		map.placeImage('m', data);
 	})
 }
 
@@ -118,9 +124,11 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 
 $scope.addLandmarkCategory = function() {
-	console.log($scope.tempLandmarkCategory);
-	$scope.world.landmarkCategories.unshift({name: $scope.tempLandmarkCategory});
+	if ($scope.temp) {
+	console.log($scope.temp.LandmarkCategory);
+	$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory});
 	console.log($scope.world);
+	}
 }
 
 $scope.removeLandmarkCategory = function(index) {
@@ -251,6 +259,57 @@ $scope.setEndTime = function() {
 	
 }
 
+$scope.removePlaceImage = function () {
+	$scope.mapImage = null;
+	map.removePlaceImage();
+}
+
+$scope.buildLocalMap = function () {
+	console.log('--buildLocalMap--');
+	//get image geo coordinates, add to var to send
+	var bounds = map.getPlaceImageBounds(),
+		southEast = bounds.getSouthEast(),
+		northWest = bounds.getNorthWest(),
+		southWest = bounds.getSouthWest(),
+		northEast = bounds.getNorthEast(),
+		coordBox = {
+			worldID: $scope.world._id,
+			nw_loc_lng: northWest.lng,
+		    nw_loc_lat: northWest.lat,
+		    sw_loc_lng: southWest.lng,
+			sw_loc_lat: southWest.lat,
+			ne_loc_lng: northEast.lng,
+			ne_loc_lat: northEast.lat,
+			se_loc_lng: southEast.lng,
+			se_loc_lat: southEast.lat 
+		};
+	console.log('bounds', bounds);
+	console.log('coordBox', coordBox);
+	var coords_text = JSON.stringify(coordBox);
+		var data = {
+		      mapIMG: $scope.mapImage,
+		      coords: coords_text
+		    }
+	//build map
+	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
+	$http.post('/api/build_map', data).success(function(response){
+		//response = JSON.parse(response);
+		alerts.addAlert('success', 'Map built!', true);
+		console.log(response);
+		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
+		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} //remove this when world objects arent fd up
+		if (response[0]) { //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
+		$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
+		$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
+		$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
+			} else {
+		$scope.world.style.maps.localMapID = response.style.maps.localMapID;
+		$scope.world.style.maps.localMapName = response.style.maps.localMapName;
+		$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
+		}
+		$scope.saveWorld();
+		});
+}
 
 function findLoc() {
 	if (navigator.geolocation && !$scope.world.hasLoc) {
@@ -331,7 +390,7 @@ $scope.$on('$destroy', function (event) {
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
-	
+	map.removePlaceImage();
 	if (zoomControl.style) {
 	zoomControl.style.top = "";
 	zoomControl.style.left = "";
@@ -350,6 +409,13 @@ $scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
 	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
 });
+
+$scope.$watch('temp.scale', function(current, old) {
+	if (current!=old) {
+		map.setPlaceImageScale(current);
+		console.log(map.getPlaceImageBounds());
+	}
+})
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

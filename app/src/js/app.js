@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker'])
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker', 'ui.slider'])
   .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);

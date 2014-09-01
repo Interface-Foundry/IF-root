@@ -34,13 +34,50 @@
 			<img class="media-object" src="/img/widgets/twitter.png">
 		</div>
 		<div class="media-body">
-			<h4 class="media-heading">Twitter</h4>
-			
+			<h4 class="media-heading">Twitter <small ng-cloak>{{world.hashtag}}</small></h4>
+			<span ng-cloak>Shows relevant tweets on the world page.</span>
 		</div>
 		<input type="checkbox" name="twitter" id="twitter" ng-model="style.widgets.twitter">
 	</label>
 	<span class="icon glyphicon glyphicon-ok-circle"></span>
 	</div>
-
-
+	<div class="edit-widget" ng-class="{'active': style.widgets.instagram}">
+	<label for="instagram" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/instagram.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Instagram <small ng-cloak>{{world.hashtag}}</small></h4>
+			<span ng-cloak>Shows instagram posts on the world.</span>
+		</div>
+		<input type="checkbox" name="instagram" id="instagram" ng-model="style.widgets.instagram">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.upcoming}">
+	<label for="upcoming" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/upcoming.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Upcoming</h4>
+			<span ng-cloak>Organizes landmark by time and shows current events.</span>
+		</div>
+		<input type="checkbox" name="upcoming" id="upcoming" ng-model="style.widgets.upcoming">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.category}">
+	<label for="category" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/category.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Category</h4>
+			<span ng-cloak>Adds a category switcher to the world.</span>
+		</div>
+		<input type="checkbox" name="category" id="category" ng-model="style.widgets.category">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
 </div>
