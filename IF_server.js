@@ -1327,9 +1327,38 @@ function isLoggedIn(req, res, next) {
         return next();
 }
 
+
+
+// Delete
+app.delete('/api/:collection/:id', function(req, res) {
+   db.collection(req.params.collection).remove({_id:objectId(req.params.id)}, {safe:true}, fn(req, res));
+});
+
+//Group
+app.put('/api/:collection/group', function(req, res) {
+    db.collection(req.params.collection).group(req.body, fn(req, res));
+})
+
+// MapReduce
+app.put('/api/:collection/mapReduce', function(req, res) {
+    if (!req.body.options) {req.body.options  = {}};
+    req.body.options.out = { inline : 1};
+    req.body.options.verbose = false;
+    db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));    
+})
+
+// Command (count, distinct, find, aggregate)
+app.put('/api/:collection/:cmd',  function (req, res) {
+    if (req.params.cmd === 'distinct') {req.body = req.body.key}
+    db.collection(req.params.collection)[req.params.cmd](req.body, fn(req, res)); 
+})
+
+
+
 server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });
+
 
 
 

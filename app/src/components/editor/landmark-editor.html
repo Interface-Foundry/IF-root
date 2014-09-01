@@ -13,7 +13,7 @@
 
 <div class="container-fluid">
 <div class="form-group">
-<button class="btn btn-success" ng-click="addLandmark()">Add a Landmark</button>
+<button class="btn btn-success" ng-click="addLandmark()"><b>+</b> Add a Landmark</button>
 
 
 </div>
@@ -40,7 +40,8 @@
 						</div>
 				</div>
 			</div>
-			<div class="btn" ng-file-select="onUploadAvatar($files)">Upload</div>
+			<div class="btn" ng-file-select="onUploadAvatar($files)">+ Add Picture</div>
+
 		</div>
 		<div class="form-group">
 		<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
