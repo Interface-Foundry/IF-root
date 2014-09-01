@@ -35,34 +35,39 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     // else {
     //     $location.path('awards');
     // }
-
     
+    $scope.initGeo = function() {
+      //--- GEO LOCK -----//
 
-    //--- GEO LOCK -----//
+      if (navigator.geolocation) {
 
-    if (navigator.geolocation) {
+        function showPosition(position) {
+            var userLat = position.coords.latitude;
+            var userLon = position.coords.longitude;
+            findWorlds(userLat, userLon); 
+        }
 
-      function showPosition(position) {
-          var userLat = position.coords.latitude;
-          var userLon = position.coords.longitude;
-          findWorlds(userLat, userLon); 
+        function locError(){
+            console.log('error finding loc');
+            //geo error
+            noLoc();
+        }
+
+        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
+
+      } else {
+          console.log('no geo');
+          alert('Your browser does not support geolocation :(');
       }
 
-      function locError(){
-          console.log('error finding loc');
-          //geo error
-          noLoc();
-      }
-
-      navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
-
-    } else {
-        console.log('no geo');
-        alert('Your browser does not support geolocation :(');
+      //--------------//     
     }
 
-    //--------------//
 
+    //initial loc bubble query
+    $scope.initGeo();
+
+   
     function noLoc(){
   
 
@@ -126,6 +131,10 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
         $scope.showCreateNew = true;
         angular.extend($rootScope, {loading: false});
     }
+
+    $scope.addWorld = function (){
+      $location.path( '/profile' );
+    };
 
 }
 //WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];

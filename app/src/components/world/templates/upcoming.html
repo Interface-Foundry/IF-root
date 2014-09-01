@@ -1,4 +1,4 @@
-<div ng-if="now" class="col-xs-12 col-sm-6">
+<div ng-if="now" class="col-xs-12 col-sm-6 widget_margin">
 	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Now</h4>
 	<div class="landmark">
 	<a ng-href="/#/w/{{world.id}}/{{now.id}}">
@@ -16,7 +16,7 @@
 </div>
 </div>
 
-<div class="col-xs-12" ng-class="{'col-sm-6': now}">
+<div class="col-xs-12 widget_margin" ng-class="{'col-sm-6': now}">
 	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Upcoming</h4>
 	<div ng-class="{'row': !now}">
 	<div class="landmark" ng-class="{'col-sm-6': !now}" 

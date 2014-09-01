@@ -1,9 +1,12 @@
 {
 	"tooltips": {
 		"kind": "What kind of world is it?",
-		"summary": "Short explanation of the world",
-		"description": "Describe world & contents",
+		"summary": "Short explanation of the world, like a tweet (< 140 characters)",
+		"description": "Describe your world, can add some HTML tags",
 		"world_icon": "Add an icon to your world",
-		"hashtag": "Your official hashtag for twitter and instagram"
+		"hashtag": "Your official hashtag for twitter and instagram",
+		"landmarkcategories": "Kinds of places for your world (i.e. a park has: benches, washrooms, bbqs, ponds)",
+		"local_map": "Upload a picture to place on your map, such as a floorplan or hand drawing of the area",
+		"widgets": "Add widgets to your world to help organize and add new information"
 	}
 }

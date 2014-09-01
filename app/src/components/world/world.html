@@ -23,7 +23,7 @@
 
 	<!--explore-->
 	<ul ng-style="{'background-color': style.bodyBG_color}">
-		<div class="col-xs-12">
+		<div class="col-xs-12 widget_margin">
 		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
 		</div>
 		<li ng-repeat="landmark in landmarks" 
@@ -52,10 +52,14 @@
 
 	<!--WYZERR-->
 	<div ng-include="wyzerr ? 'components/world/templates/wyzerr.html' : null"></div>
+
+	<!--DESCRIPTION-->
+	<div ng-include="description ? 'components/world/templates/description.html' : null"></div>
 	
 	<div class="col-xs-12"><div style="height:200px;"></div></div>
 </div>
-<div style="padding: 15px;" ng-show="showLogout"><a class="btn btn-default btn-sm" ng-href="#/edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add a Landmark</a></div>
+<div ng-show="showLogout"><a class="btn btn-default" ng-href="#/edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Landmarks</a>
+<a class="btn btn-default" ng-href="#/edit/w/{{worldURL}}">Edit World</a></div>
 
 </div>
 </div>

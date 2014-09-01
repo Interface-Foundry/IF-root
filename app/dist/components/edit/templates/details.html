@@ -38,7 +38,7 @@
 <div class="row">
 	<div class="col-xs-12 col-sm-6">
 		<div class="form-group">
-			<label>World Icon <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.world_icon"></span></label>
+			<label>World Picture <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.world_icon"></span></label>
 			<div class="well world-icon">
 				<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
 					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
@@ -60,7 +60,7 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<label>Landmark Categories</label> 
+			<label>Landmark Categories <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.landmarkcategories"></span></label> 
 			<div class="input-group">
 				<input type="text" name="temp.LandmarkCategory" ng-model="temp.LandmarkCategory"  class="form-control">
 				<span class="input-group-btn">
@@ -77,9 +77,7 @@
 	</div>
 </div>
 
-<hr>
-
-<button class="btn btn-primary btn-sm" ng-click="setStartTime()" ng-hide="world.time.start">Add a Start Time</button>
+<button class="btn btn-info" ng-click="setStartTime()" ng-hide="world.time.start">Add a Start Time</button>
 <div ng-show="world.time.start">
 	<div class="form-group form-inline">
 		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> Start Time <span class="glyphicon glyphicon-info-sign info"></span></label>
@@ -94,7 +92,7 @@
 			<input type="text" size="8" class="form-control" ng-model="world.time.start" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
 		</div>
 	</div>
-	<button class="btn btn-primary btn-sm" ng-click="setEndTime()" ng-hide="world.time.end">Add End Time</button>
+	<button class="btn btn-info" ng-click="setEndTime()" ng-hide="world.time.end">Add End Time</button>
 	<div class="form-group form-inline" ng-show="world.time.end">
 		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time <span class="glyphicon glyphicon-info-sign info"></span></label>
 		

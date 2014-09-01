@@ -5166,34 +5166,39 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     // else {
     //     $location.path('awards');
     // }
-
     
+    $scope.initGeo = function() {
+      //--- GEO LOCK -----//
 
-    //--- GEO LOCK -----//
+      if (navigator.geolocation) {
 
-    if (navigator.geolocation) {
+        function showPosition(position) {
+            var userLat = position.coords.latitude;
+            var userLon = position.coords.longitude;
+            findWorlds(userLat, userLon); 
+        }
 
-      function showPosition(position) {
-          var userLat = position.coords.latitude;
-          var userLon = position.coords.longitude;
-          findWorlds(userLat, userLon); 
+        function locError(){
+            console.log('error finding loc');
+            //geo error
+            noLoc();
+        }
+
+        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
+
+      } else {
+          console.log('no geo');
+          alert('Your browser does not support geolocation :(');
       }
 
-      function locError(){
-          console.log('error finding loc');
-          //geo error
-          noLoc();
-      }
-
-      navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
-
-    } else {
-        console.log('no geo');
-        alert('Your browser does not support geolocation :(');
+      //--------------//     
     }
 
-    //--------------//
 
+    //initial loc bubble query
+    $scope.initGeo();
+
+   
     function noLoc(){
   
 
@@ -5257,6 +5262,10 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
         $scope.showCreateNew = true;
         angular.extend($rootScope, {loading: false});
     }
+
+    $scope.addWorld = function (){
+      $location.path( '/profile' );
+    };
 
 }
 //WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
@@ -8034,6 +8043,7 @@ $scope.saveWorld = function() {
     db.worlds.create($scope.world, function(response) {
     	console.log('--db.worlds.create response--');
     	console.log(response);
+    	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     });  
@@ -9436,6 +9446,11 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	   
 }
 function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, $window, leafletData, $rootScope, apertureService, mapManager, styleManager) {
+
+		var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+		zoomControl.style.top = "100px";
+		zoomControl.style.left = "1%";
+
 		console.log('--Landmark Controller--');
 		var map = mapManager;
 		var style = styleManager;
@@ -9488,7 +9503,11 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		map.refresh();
 }
 function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce) {
-   	
+
+	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+	zoomControl.style.top = "60px";
+	zoomControl.style.left = "1%";
+
     var map = mapManager;
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
@@ -9590,6 +9609,16 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
 		 }
 		 
+		//switching between descrip and summary for descrip card
+		if ($scope.world.description || $scope.world.summary) {
+			$scope.description = true;
+			if ($scope.world.description){
+				$scope.descriptionType = "description";
+			}
+			else {
+				$scope.descriptionType = "summary";
+			}
+		}
 		 
 		 
 		 // order of logic

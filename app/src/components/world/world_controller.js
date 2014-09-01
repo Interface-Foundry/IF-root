@@ -1,5 +1,9 @@
 function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce) {
-   	
+
+	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+	zoomControl.style.top = "60px";
+	zoomControl.style.left = "1%";
+
     var map = mapManager;
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
@@ -101,6 +105,16 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
 		 }
 		 
+		//switching between descrip and summary for descrip card
+		if ($scope.world.description || $scope.world.summary) {
+			$scope.description = true;
+			if ($scope.world.description){
+				$scope.descriptionType = "description";
+			}
+			else {
+				$scope.descriptionType = "summary";
+			}
+		}
 		 
 		 
 		 // order of logic

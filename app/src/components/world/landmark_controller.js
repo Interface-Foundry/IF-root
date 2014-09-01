@@ -1,4 +1,9 @@
 function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, $window, leafletData, $rootScope, apertureService, mapManager, styleManager) {
+
+		var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+		zoomControl.style.top = "100px";
+		zoomControl.style.left = "1%";
+
 		console.log('--Landmark Controller--');
 		var map = mapManager;
 		var style = styleManager;

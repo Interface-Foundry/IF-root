@@ -125,7 +125,7 @@ ul.edit-toolbar {
 }
 
 .edit-widget-well {
-	height: 230px;
+	height: 390px;
 	overflow-y: scroll;
 	overflow-x: hidden;
 }
@@ -143,12 +143,20 @@ ul.edit-toolbar {
 	z-index: 10;
 	background: #e9e9e9;
 	font-weight: 400;
+	color:#909090;
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	filter: grayscale(100%);
 }
 
 .edit-widget.active > label {
 	transform: translateX(46px);
 	-webkit-transform: translateX(46px);
 	background: #FFF;
+	color:#000;
+	-webkit-filter: grayscale(0%);
+	-moz-filter: grayscale(0%);
+	filter: grayscale(0%);
 }
 
 .edit-widget > .icon {
@@ -476,7 +484,7 @@ margin: 0 auto;
 
 
 .landmark {
-	margin-top: 16px;
+	margin-top: 1px;
 }
 
 .media {
@@ -612,6 +620,10 @@ background: -o-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -ms-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#abd362', endColorstr='#43c2e9',GradientType=1 );
+}
+
+.widget_margin {
+	margin-top:15px;
 }
 /* app css stylesheet */
 

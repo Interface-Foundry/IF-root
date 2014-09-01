@@ -15,8 +15,11 @@
 			</span>		
 
 			<span ng-show="showCreateNew">
-				<h4>NO WORLDS NEAR YOU</h4>
-				<h4><a ng-href="/#/newworld">+ Create a New World?</a></h4>
+				<h4>NO WORLDS NEAR YOU :(</h4>
+				<button class="btn btn-success" ng-click="addWorld()"><span class="glyphicon glyphicon-plus"></span> Create New World</button>
+				<br><br>
+				<button class="btn btn-default" ng-click="initGeo()">Refresh</button>
+				<br><br>
 			</span>
 		
 		</div>

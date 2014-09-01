@@ -203,6 +203,7 @@ $scope.saveWorld = function() {
     db.worlds.create($scope.world, function(response) {
     	console.log('--db.worlds.create response--');
     	console.log(response);
+    	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     });  

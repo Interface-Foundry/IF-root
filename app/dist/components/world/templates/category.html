@@ -1,11 +1,11 @@
-<div class="col-xs-12">
+<div class="col-xs-12 widget_margin">
 	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Categories</h4>
 	<div class="category-switch">
 		 <!--assuming 6 categories for now-->
 			<div class="col-xs-3" ng-repeat="landmarkCategory in world.landmarkCategories" ng-class="{'selected-category': landmarkCategory.name == category}">
 				<div class="col-xs-12 card" ng-style="{'background-color': style.cardBG_color}">
-				<a class="text-center" ng-href="#/w/{{worldURL}}/category/{{landmarkCategory.name}}">{{landmarkCategory.name}}</a>
-			</div>
+					<a class="text-center" ng-href="#/w/{{worldURL}}/category/{{landmarkCategory.name}}">{{landmarkCategory.name}}</a>
+				</div>
 			</div>
 	</div>
 </div>
