@@ -1193,7 +1193,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
 
-        if (mimetype == 'image/jpg' || mimetype == 'image/png') {
+        if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/jpeg') {
 
             while (1) {
 
@@ -1219,8 +1219,8 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
             }
         }
         else {
-            console.log('Please use .jpg .png or .gif');
-            res.send(500,'Please use .jpg .png or .gif');
+            console.log('Please use .jpg or .png');
+            res.send(500,'Please use .jpg or .png');
         }
     });
 });
