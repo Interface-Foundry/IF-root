@@ -118,7 +118,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
                 radius: 150,
 				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
 				});*/
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],19)
+		var zoomLevel = 19;
+		if ($scope.world.style.hasOwnProperty('maps')) {
+			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom;
+			}
+		}
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel)
 		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
 		if ($scope.world.style.maps.localMapID) {
 			map.addOverlay($scope.world.style.maps.localMapID, 
