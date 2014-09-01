@@ -121,7 +121,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		var zoomLevel = 19;
 		if ($scope.world.style.hasOwnProperty('maps')) {
 			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom;
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
 			}
 		}
 		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel)
@@ -150,6 +150,9 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.wyzerr = true;
 		}
 		
+		if ($scope.style.widgets.category) {
+			$scope.category = true;
+		}
 		
 	  	if ($scope.style.widgets.upcoming) {
 	  		$scope.upcoming = true;
