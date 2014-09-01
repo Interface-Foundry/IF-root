@@ -223,7 +223,23 @@ if ($scope.landmark.hasTime) {
 		console.log(defaults);
 		return defaults;
 	}
+
+////////////////////////////////////////////////////////////
+/////////////////////////LISTENERS//////////////////////////
+////////////////////////////////////////////////////////////
+
+$scope.$on('$destroy', function (event) {
+	console.log('$destroy event', event);
+	if (event.targetScope===$scope) {
+	map.removeCircleMask();
 	
+	if (zoomControl.style) {
+	zoomControl.style.top = "";
+	zoomControl.style.left = "";
+	}
+	}
+});
+
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -240,6 +256,7 @@ if ($scope.landmark.hasTime) {
 		
 		$scope.worldURL = $routeParams.worldURL;
 		//initialize map with world settings
+		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
 		map.setCenter($scope.world.loc.coordinates, 18);
 		map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
@@ -257,6 +274,7 @@ if ($scope.landmark.hasTime) {
 		});
 		map.removeCircleMask();
 		map.addCircleMaskToMarker('m', 150, 'mask');
+		
 		/*map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
@@ -264,8 +282,9 @@ if ($scope.landmark.hasTime) {
 				});*/
 		//map.setTiles($scope.world.style.maps.cloudMapName);
 		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+		
 		if ($scope.world.style.maps.type == "local" || $scope.world.style.maps.type == "both") {
-		map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
+			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
 		}
 		map.refresh();
 		

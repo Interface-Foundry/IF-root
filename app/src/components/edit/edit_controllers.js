@@ -117,6 +117,16 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 }
 
+$scope.addLandmarkCategory = function() {
+	console.log($scope.tempLandmarkCategory);
+	$scope.world.landmarkCategories.unshift({name: $scope.tempLandmarkCategory});
+	console.log($scope.world);
+}
+
+$scope.removeLandmarkCategory = function(index) {
+	$scope.world.landmarkCategories.splice(index, 1);
+}
+
 $scope.loadWorld = function(data) {
 	  	$scope.world = data.world;
 		$scope.style = data.style;
@@ -140,9 +150,11 @@ $scope.loadWorld = function(data) {
 		
 		if ($scope.world.hasOwnProperty('style')==false) {$scope.world.style = {};}
 		if ($scope.world.style.hasOwnProperty('maps')==false) {$scope.world.style.maps = {};}
+		if ($scope.world.hasOwnProperty('landmarkCategories')==false) {$scope.world.landmarkCategories = [];}
+		
 		if ($scope.world.style.maps.cloudMapName) {
-		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-		$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
+			map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
 		
 		} else {
 			$scope.selectMapTheme('arabesque');
@@ -154,8 +166,8 @@ $scope.loadWorld = function(data) {
 		}*/
 		
 		if (!$scope.style.bodyBG_color) {
-		$scope.style.bodyBG_color = "#FFFFFF";
-		$scope.style.cardBG_color = "#FFFFFF";
+			$scope.style.bodyBG_color = "#FFFFFF";
+			$scope.style.cardBG_color = "#FFFFFF";
 		}
 		
 }
@@ -325,6 +337,9 @@ $scope.$on('$destroy', function (event) {
 	zoomControl.style.left = "";
 	}
 	}
+	
+	angular.extend($rootScope, {navTitle: ""});
+	
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {

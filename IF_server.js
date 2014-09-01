@@ -918,6 +918,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 						lm.style = req.body.style;
 					}
 					
+					if (req.body.hasOwnProperty('time')) {
                     if (req.body.time.hasOwnProperty('start')) {
 						
                         /*lm.timetext.datestart = req.body.timetext.datestart;
@@ -949,6 +950,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         }
                         
                         //if no end time, match start time
+                    }
                     }
 
 

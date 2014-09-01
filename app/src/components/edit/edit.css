@@ -250,7 +250,6 @@ ul.edit-toolbar {
 
 .hashtag::before {
 	content:'#';
-	float: left;
 	color: #AAA;
 	font-size: 20px;
 	padding: 3px 0px;

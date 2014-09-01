@@ -7913,6 +7913,16 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 }
 
+$scope.addLandmarkCategory = function() {
+	console.log($scope.tempLandmarkCategory);
+	$scope.world.landmarkCategories.unshift({name: $scope.tempLandmarkCategory});
+	console.log($scope.world);
+}
+
+$scope.removeLandmarkCategory = function(index) {
+	$scope.world.landmarkCategories.splice(index, 1);
+}
+
 $scope.loadWorld = function(data) {
 	  	$scope.world = data.world;
 		$scope.style = data.style;
@@ -7936,9 +7946,11 @@ $scope.loadWorld = function(data) {
 		
 		if ($scope.world.hasOwnProperty('style')==false) {$scope.world.style = {};}
 		if ($scope.world.style.hasOwnProperty('maps')==false) {$scope.world.style.maps = {};}
+		if ($scope.world.hasOwnProperty('landmarkCategories')==false) {$scope.world.landmarkCategories = [];}
+		
 		if ($scope.world.style.maps.cloudMapName) {
-		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-		$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
+			map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
 		
 		} else {
 			$scope.selectMapTheme('arabesque');
@@ -7950,8 +7962,8 @@ $scope.loadWorld = function(data) {
 		}*/
 		
 		if (!$scope.style.bodyBG_color) {
-		$scope.style.bodyBG_color = "#FFFFFF";
-		$scope.style.cardBG_color = "#FFFFFF";
+			$scope.style.bodyBG_color = "#FFFFFF";
+			$scope.style.cardBG_color = "#FFFFFF";
 		}
 		
 }
@@ -8121,6 +8133,9 @@ $scope.$on('$destroy', function (event) {
 	zoomControl.style.left = "";
 	}
 	}
+	
+	angular.extend($rootScope, {navTitle: ""});
+	
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
@@ -9106,7 +9121,23 @@ if ($scope.landmark.hasTime) {
 		console.log(defaults);
 		return defaults;
 	}
+
+////////////////////////////////////////////////////////////
+/////////////////////////LISTENERS//////////////////////////
+////////////////////////////////////////////////////////////
+
+$scope.$on('$destroy', function (event) {
+	console.log('$destroy event', event);
+	if (event.targetScope===$scope) {
+	map.removeCircleMask();
 	
+	if (zoomControl.style) {
+	zoomControl.style.top = "";
+	zoomControl.style.left = "";
+	}
+	}
+});
+
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -9123,6 +9154,7 @@ if ($scope.landmark.hasTime) {
 		
 		$scope.worldURL = $routeParams.worldURL;
 		//initialize map with world settings
+		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
 		map.setCenter($scope.world.loc.coordinates, 18);
 		map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
@@ -9140,6 +9172,7 @@ if ($scope.landmark.hasTime) {
 		});
 		map.removeCircleMask();
 		map.addCircleMaskToMarker('m', 150, 'mask');
+		
 		/*map.addPath('worldBounds', {
 				type: 'circle',
                 radius: 150,
@@ -9147,8 +9180,9 @@ if ($scope.landmark.hasTime) {
 				});*/
 		//map.setTiles($scope.world.style.maps.cloudMapName);
 		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+		
 		if ($scope.world.style.maps.type == "local" || $scope.world.style.maps.type == "both") {
-		map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
+			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
 		}
 		map.refresh();
 		
