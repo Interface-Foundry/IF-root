@@ -27,32 +27,22 @@
 			</span>
 		</div>
 		<div ng-form class='panel-body' ng-show="$index === selectedIndex">
-	
+		<div class="form-group">
 			
-		<div class="row">
-			<div class="col-xs-12 col-sm-4">
-				<div class="form-group">
-					<label>Picture <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.world_icon"></span></label>
-					<div class="well world-icon">
-						<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
-							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-						</button>
-						<button class="btn btn-default" ng-file-select="onUploadAvatar($files)" ng-hide="uploadFinished">
-							<span class="glyphicon glyphicon-picture"></span>
-							<label>Upload</label>
-						</button>
-						<img ng-show="uploadFinished" ng-src="{{landmark.avatar}}"> 
-					</div>
+			<div class="media">
+				<div class="media-object edit-landmark-avatar">
+				<img ng-src='{{landmark.avatar}}' class="img-responsive" ng-cloak/>
+				
+				</div>
+				<div class="media-body">
+					<div class="form-group">
+						<label>Name</label> <input type="text" ng-model="landmark.name" class="form-control"/>
+						</div>
 				</div>
 			</div>
-			<div class="col-xs-12 col-sm-8">
-				<div class="form-group">
-					<label>Name</label> <input type="text" ng-model="landmark.name" class="form-control"/>
-				</div>
-			</div>
-		</div>
+			<div class="btn" ng-file-select="onUploadAvatar($files)">+ Add Picture</div>
 
-	
+		</div>
 		<div class="form-group">
 		<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
 		</div>
