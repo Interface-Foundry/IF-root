@@ -14,7 +14,14 @@ $scope.mapThemeSelect = 'arabesque';
 
 $scope.categories = [
 	{name:'Convention'},
-	{name: 'Park'}
+	{name: 'Park'},
+	{name: 'Retail'},
+	{name: 'Venue'},
+	{name: 'Event'},
+	{name: 'Venue'},
+	{name: 'Campus'},
+	{name: 'Home'},
+	{name: 'Neighborhood'}
 ];
 
 $scope.temp = {

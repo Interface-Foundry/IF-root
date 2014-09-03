@@ -16,7 +16,8 @@
 		</div>
 	
 	<!--category-->
-	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
+	<div ng-include="category ? 'components/world/templates/category.html' : null">
+	</div>	
 	
 	<!--now--> <!--upcoming-->
 	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
@@ -31,7 +32,7 @@
 			class="col-sm-6 col-xs-12 landmark">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
 				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
-					<img ng-src="{{landmark.avatar}}" class="avatar media-object vertical-middle" ng-cloak> 
+					<img ng-src="{{landmark.avatar}}" class="avatar media-object" ng-cloak> 
 					<div class="media-body">
 						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>
 							<span>{{ landmark.name }}

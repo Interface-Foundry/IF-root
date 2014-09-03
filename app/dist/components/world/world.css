@@ -1,7 +1,6 @@
 .avatar {
 	height: 80px;
 	width: 80px;
-	background-color:#fff;
 	/*
 -moz-border-radius: 50%;
     -webkit-border-radius: 50%;
@@ -19,6 +18,8 @@ margin: 0 auto;
 	position: relative;
 	top: 50%;
 	-webkit-transform: translateY(-50%);
+	transform: translateY(-50%);
+	-moz-transform: translateY(-50%);
 }
 
 
@@ -105,7 +106,7 @@ h6 {
 }
 
 .category-heading {
-	margin-top:15px;
+	padding-top:16px;
 }
 
 .img-responsive.instagram {
@@ -158,9 +159,4 @@ background: -webkit-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -o-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -ms-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#abd362', endColorstr='#43c2e9',GradientType=1 );
-}
-
-.widget_margin {
-	margin-top:15px;
 }
