@@ -113,7 +113,7 @@ h6 {
 	padding-top: 15px;
 }
 
-.col-xs-6.instagram {
+.col-xs-6.instagram, .col-xs-6.twitter {
 	max-width: 300px;
 }
 .col-padding {

@@ -3,7 +3,9 @@
     	<div class="landmark">
     	<div class="card last" ng-style="{'background-color': style.cardBG_color}">
         <a ng-href="#/instagram/{{world.resources.hashtag}}">
-            <img class="img-responsive instagram" ng-src="images/instagram/{{instagrams[0].local_path[0]}}">
+            <img class="img-responsive instagram" ng-src="images/instagram/{{instagrams[0].local_path[0]}}" 
+            									ng-show="instagrams[0].local_path[0]">
+			<img class="img-responsive instagram" src="img/widgets/placeholder.png" ng-hide="instagrams[0].local_path[0]">
             <span class="watermark typcn typcn-social-instagram"></span>
 		</a>
     	</div>

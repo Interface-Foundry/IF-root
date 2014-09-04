@@ -4129,7 +4129,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
 	 when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
 	 
-
+	 when('/edit/walkthrough/:_id/', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, rsolve: {loggedin: checkLoggedin}}).
       
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
       
@@ -8279,6 +8279,17 @@ World.get({id: $routeParams.worldURL}, function(data) {
 })
 
 //end editcontroller
+}
+function WalkthroughController($scope) {
+	$scope.progress = new Array(10).fill({test: 'test'}, 0, 10);
+	console.log($scope.progress);
+
+	$scope.walk = {
+		title: 'something',
+		caption: 'what',
+		length: 7,
+		position: 0
+	}
 }
 
 function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents, apertureService, $http, $timeout, $modal) {

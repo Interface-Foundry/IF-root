@@ -1,0 +1,23 @@
+<div class="walkthrough-wrap">
+
+<div class="walkthrough">
+	<div class="walkthrough-header">
+		<h2 ng-cloak>{{walk.title}}</h2>
+		<span ng-cloak>{{walk.caption}}</span>
+	</div>
+	<div class="walkthrough-body">
+	
+	</div>
+	<div class="walkthrough-footer">
+		<a href="" class="save-exit">Save & Exit</a>
+		<div class="footer-right">
+			<span class="walk-progress">
+			
+			{{walk.position+1}}/{{walk.length}}</span>
+			<a href="" class="skip">Skip</a>
+			<a href="" class="continue" ng-hide="walk.position!=0">Continue</a>
+		</div>
+	</div>
+</div>
+
+</div>

@@ -313,6 +313,87 @@ ul.edit-toolbar {
 .edit-landmark-navback a {
 	margin-top: 12px;
 }
+.walkthrough-wrap {
+	height: 100%;
+	text-align: center;
+}
+
+.walkthrough-wrap:before {
+	content: '';
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+	margin-right: -0.25em;
+}
+
+.walkthrough {
+	display: inline-block;
+	vertical-align: middle;
+	width: 496px;
+	overflow: hidden;
+	
+	text-align: left;
+	
+	background: #FFF;
+	border-radius: 2px;
+}
+
+.walkthrough-header {
+	min-height: 88px;
+	overflow: hidden;
+	padding: 16px;
+}
+
+.walkthrough-header > h2 {
+	margin-top: 0px;
+	margin-bottom: 4px;
+	
+	color: #673ab7;
+}
+
+.walkthrough-header > span {
+	font-size: 21px;
+	line-height: 1;
+}
+
+.walkthrough-body {
+	background: #fafafa;
+	border-top: 1px solid #e6e6e6;
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.walkthrough-footer {
+	height: 32px;
+}
+
+.walkthrough-footer a, .walkthrough-footer span {
+	display: block;
+	font-size: 16px;
+	line-height: 1;
+	padding: 8px;
+}
+
+.walkthrough-footer > .save-exit {
+	display: block;
+	float: left;
+	padding-left: 16px;
+}
+
+.walkthrough-footer > .footer-right {
+	float: right;
+}
+
+.footer-right > a, .footer-right > span {
+	float: left;
+}
+
+.skip {
+	color: #b3b3b3;	
+}
+
+.skip:hover, .skip:focus {
+	color: #909090;
+}
 
 input {
 
@@ -574,7 +655,7 @@ h6 {
 	padding-top: 15px;
 }
 
-.col-xs-6.instagram {
+.col-xs-6.instagram, .col-xs-6.twitter {
 	max-width: 300px;
 }
 .col-padding {
