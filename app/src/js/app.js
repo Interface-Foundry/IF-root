@@ -116,7 +116,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
 	 when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
 	 
-	 when('/edit/walkthrough/:_id/:walk?', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, rsolve: {loggedin: checkLoggedin}}).
+	 when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, rsolve: {loggedin: checkLoggedin}}).
       
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
       
