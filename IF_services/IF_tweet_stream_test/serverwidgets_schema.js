@@ -10,5 +10,4 @@ var mongoose = require('mongoose');
 		instagram: Boolean
 	}); 
 
-	module.exports = mongoose.model('ServerWidgets',serverwidgetsSchema);
-//module.exports = mongoose.model('serverwidgetsModel', serverwidgetsSchema, 'serverwidgets');
+module.exports = mongoose.model('serverwidgetsModel', serverwidgetsSchema, 'serverwidgets');

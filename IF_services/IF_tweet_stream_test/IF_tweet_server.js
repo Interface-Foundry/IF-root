@@ -5,16 +5,10 @@ var logger = require('morgan');
 
 app.use(logger('dev'));
 
-var twitter = require('ntwitter'),
-    mongoose = require('mongoose'),
+var mongoose = require('mongoose'),
     monguurl = require('monguurl');
 
 var credentials = require('./credentials.js');
-//var hashtag = require('../app/js/global_settings.js').hashtag;
-
-var hashtag = ['#SFDemoDay'];
-
-
 
 var Twit = require('twit');
 
@@ -27,30 +21,23 @@ var T = new Twit({
 
 var twitterConnecionOn=true;
 
-var stream = T.stream('statuses/filter', { track: '#apple', language: 'en' });
-var tweet={};
-stream.on('tweet', function (twt) {
-    console.log("tweet");
-    console.log(twt);
-    tweet=twt;
-    //TwitterTweets
+// var stream = T.stream('statuses/filter', { track: '#apple', language: 'en' });
+// var tweet={};
+// stream.on('tweet', function (twt) {
+//     console.log("tweet");
+//     console.log(twt);
+//     tweet=twt;
+//     //TwitterTweets
 
-});
-/*stream.on('connected', function (response) {
- //...
- console.log("-------------");
- console.log("connected to twiiter");
- //console.log(response);
- });*/
-stream.on('disconnect', function (disconnectMessage) {
-    //...
-    console.log("-------------");
-    console.log("disconnecting from twitter");
-    console.log(disconnectMessage);
-    twitterConnecionFlag=false;
-});
+// });
 
-
+// stream.on('disconnect', function (disconnectMessage) {
+//     //...
+//     console.log("-------------");
+//     console.log("disconnecting from twitter");
+//     console.log(disconnectMessage);
+//     twitterConnecionFlag=false;
+// });
 
 mongoose.connect('mongodb://localhost/if');
 var db = mongoose.connection;
@@ -59,102 +46,134 @@ db.on('error', console.error.bind(console, 'connection error:'));
 var TwitterTweets = require('./tweet_schema.js');
 var TwitterModel = mongoose.model('TwitterTweets', TwitterTweets);
 var ServerWidgets = require('./serverwidgets_schema.js');
-console.log("!!!!!!!!!!!!!!!!!!!!!!");
-console.log(TwitterTweets.methods);
-//var tweetModel = mongoose.model('tweet', twitterSchema, 'tweets');  // compiling schema model into mongoose
-var twitterFalseTags=[];
+
+//var twitterFalseTags = [];
+
+var twitterTags = [];
 
 setInterval(function(){
+
     ServerWidgets.find({},function(err,docs){
 
+        for (var i=0; i < docs.length; i++){
 
-        for (var i=0;i<docs.length;i++)
-        {
-            if(docs[i].twitter==true){
+            if(docs[i].twitter == true){ //tag turned on
 
-                if(hashtag.indexOf(docs[i].worldTag)==-1)
-                {
-                    if(hashtag.length<=400)
-                    {
-                        hashtag.push(docs[i].worldTag);
+                if(docs[i].worldTag){ //tag is present and greater than or equal to 3 characters
+
+                    if (docs[i].worldTag.length >= 3){ //only hashtag greater than 3
+
+                       twitterTags.push(docs[i].worldTag);
+
+                    }
+                    else {
+                        console.log('hashtag must be at least 3 characters');
                     }
                 }
+                else {
+                    console.log('no hashtag');
+                }
             }
-            else{
+            else { //tag turned off, check for tag in array
                 fillTwiiterFalseArray(docs[i].worldTag);
-
-
+                //check for tag in array and if 
             }
+
         }
-        removeHashtags();
+        //removeHashtags();
 
     });
 
-//as it was not clear about reconnection so commenting this code.
-    /*if(twitterConnecionOn){
-     stream = T.stream('statuses/filter', { track: hashtag, language: 'en' });
-     stream.on('reconnect', function (request, response, connectInterval) {
-     //...
-     });
-     }
-     else{
-
-     }*/
-//the logic for reconnecting or whatever startegy for capturing tweets will be set above
-//stream = T.stream('statuses/filter', { track: hashtag, language: 'en' })
-
-
-//saving tweets
-    var user={};
-
-    if(typeof tweet.user.name!='undefined')
-    {
-        user.name=tweet.user.name;
-    }
-    else{
-        user.name="";
-    }
-    if(typeof tweet.user.screen_name!='undefined')
-    {
-        user.screen_name=tweet.user.screen_name;
-    }
-    else{
-        user.screen_name="";
-    }
-    if(typeof tweet.user.id!='undefined')
-    {
-        user.userId=tweet.user.id;
-    }
-    else{
-        user.userId="";
-    }
-    if(typeof tweet.user.id_str!='undefined')
-    {
-        user.userId_str=tweet.user.id_str;
-    }
-    else{
-        user.userId_str="";
-    }
-    if(typeof tweet.user.profile_image_url!='undefined')
-    {
-        user.profile_image_url=tweet.user.profile_image_url;
-    }
-    else{
-        user.profile_image_url="";
-    }
+    //console.log(twitterFalseTags);
 
 
 
-    var small = new TwitterModel({ tweetID:tweet.id,tweetID_str:tweet.id_str,user:user,text:tweet.text,created:tweet.created_at });
-    small.save(function (err) {
-        if (err) return handleError(err);
-        // saved!
+
+
+// //saving tweets
+//     var user={};
+
+//     if(typeof tweet.user.name!='undefined')
+//     {
+//         user.name=tweet.user.name;
+//     }
+//     else{
+//         user.name="";
+//     }
+//     if(typeof tweet.user.screen_name!='undefined')
+//     {
+//         user.screen_name=tweet.user.screen_name;
+//     }
+//     else{
+//         user.screen_name="";
+//     }
+//     if(typeof tweet.user.id!='undefined')
+//     {
+//         user.userId=tweet.user.id;
+//     }
+//     else{
+//         user.userId="";
+//     }
+//     if(typeof tweet.user.id_str!='undefined')
+//     {
+//         user.userId_str=tweet.user.id_str;
+//     }
+//     else{
+//         user.userId_str="";
+//     }
+//     if(typeof tweet.user.profile_image_url!='undefined')
+//     {
+//         user.profile_image_url=tweet.user.profile_image_url;
+//     }
+//     else{
+//         user.profile_image_url="";
+//     }
+
+
+
+//     var small = new TwitterModel({ tweetID:tweet.id,tweetID_str:tweet.id_str,user:user,text:tweet.text,created:tweet.created_at });
+//     small.save(function (err) {
+//         if (err) return handleError(err);
+//         // saved!
+//     });
+
+    setInterval(function(){
+
+        searchTwitter();
+        console.log(twitterTags);
+
+    },20000);
+
+
+},10000);
+
+
+
+while(0){
+    T.get('search/tweets', { q: '#fun', count: 100 }, function(err, data, response) {
+        console.log(data);
+        console.log(err);
+        console.log(response);
+    });  
+    sleep 
+
+}
+
+
+
+
+
+
+function searchTwitter(){
+
+
+    T.get('search/tweets', { q: '#fun', count: 100 }, function(err, data, response) {
+        console.log(data)
     });
 
+    //upsert
+}
 
-
-
-},20000);
 //a function which tracks the tag that occur only once in in the db and has twiiter value true
 function fillTwiiterFalseArray(worldTag){
     var found=false;
