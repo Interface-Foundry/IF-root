@@ -16,16 +16,16 @@
 		</div>
 	
 	<!--category-->
-	<div ng-include="category ? 'components/world/templates/category.html' : null">
-	</div>	
+	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
 	
 	<!--now--> <!--upcoming-->
 	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
 
 	<!--explore-->
-	<ul ng-style="{'background-color': style.bodyBG_color}">
+	<ul ng-style="{'background-color': style.bodyBG_color}"
+		class="clearfix">
 		<div class="col-xs-12 widget_margin">
-		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
+			<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
 		</div>
 		<li ng-repeat="landmark in landmarks" 
 			ng-controller="WorldRepeatController"

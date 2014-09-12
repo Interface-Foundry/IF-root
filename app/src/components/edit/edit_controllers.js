@@ -12,7 +12,7 @@ aperture.set('full');
 
 $scope.mapThemeSelect = 'arabesque';
 
-$scope.categories = [
+$scope.kinds = [
 	{name:'Convention'},
 	{name: 'Park'},
 	{name: 'Retail'},
@@ -330,7 +330,7 @@ function showPosition(position) {
 	console.log('--showPosition--');
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
-			
+	
 	map.setCenter([userLng, userLat], 17);
  
 	map.removeAllMarkers();

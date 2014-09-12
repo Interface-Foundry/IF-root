@@ -20,3 +20,7 @@ text-decoration: none !important;
 	min-height: 200px;
 	padding: 10px;
 }
+
+.blue500-text {
+	color: #2196f3;
+}

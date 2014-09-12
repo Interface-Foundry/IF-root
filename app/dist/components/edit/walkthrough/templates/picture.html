@@ -1,0 +1,30 @@
+<div class="walkthrough-pic-upload">
+<div class="pic-preview">
+	<img class="pic-preview-img" 
+		ng-src="{{world.avatar}}" 
+		ng-show="world.avatar">
+	<div class="preview-img-well"
+		ng-hide="world.avatar"
+		ng-file-drop="pictureSelect($files)"
+		ng-file-select="pictureSelect($files)">
+		<p class="vertical-middle">
+			Upload<br>
+			an<br>
+			Image
+		</p>
+	</div>
+</div>
+<div class="walkthrough-pic-upload-body"
+	ng-file-select="pictureSelect($files)"
+	ng-file-drop="pictureSelect($files)" data-accept="image/*">
+	<p class="vertical-middle">
+	<span ng-file-drop-available="dropSupported=true"
+		 ng-show="dropSupported">Drag & Drop an Image<br>
+	or<br></span>
+	<span class="blue500-text">Select a File</span>
+	</p>
+</div>
+<div class="walkthrough-progress">
+	<div></div>
+</div>
+</div>

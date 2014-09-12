@@ -231,7 +231,7 @@ nav li input.form-control {
 
 }
 
-#view * {
+#view > div {
 	pointer-events: auto;
 }
 
