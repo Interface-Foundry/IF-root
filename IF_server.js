@@ -530,29 +530,47 @@ app.get('/api/:collection/:id', function(req, res) {
 
     //Return a world
     if (req.url.indexOf("/api/worlds/") > -1){ 
-
-        db.collection('landmarks').findOne({id:req.params.id,world:true}, function(err, data){
-            if (data){
-                //look up style associated with world
-                styleSchema.findById(data.style.styleID, function(err, style) {
-                      if (!style){
-                        console.log(err);
-                      }
-                    if(style) {
-                        console.log(style);
-                        var resWorldStyle = {
-                            "world" : data,
-                            "style" : style
-                        };
-                        res.send(resWorldStyle);
-                    }
-                }); 
-            }
-            else {
-                console.log('world doesnt exist');
-                res.send({err:'world doesnt exist'});
-            }      
-        });  
+        //return by mongo id
+        if (req.params._id){
+          db.collection('landmarks').findOne({_id:req.params._id,world:true}, function(err, data){
+              if (data){
+                  combineQuery(data, res);
+              }
+              else {
+                  console.log('world doesnt exist');
+                  res.send({err:'world doesnt exist'});
+              }      
+          }); 
+        }
+        //return by IF id
+        else {
+          db.collection('landmarks').findOne({id:req.params.id,world:true}, function(err, data){
+              if (data){
+                  combineQuery(data, res);
+              }
+              else {
+                  console.log('world doesnt exist');
+                  res.send({err:'world doesnt exist'});
+              }      
+          }); 
+        }
+        //if world, query for style and return
+        function combineQuery(data, res){
+          //look up style associated with world
+          styleSchema.findById(data.style.styleID, function(err, style) {
+                if (!style){
+                  console.log(err);
+                }
+              if(style) {
+                  console.log(style);
+                  var resWorldStyle = {
+                      "world" : data,
+                      "style" : style
+                  };
+                  res.send(resWorldStyle);
+              }
+          }); 
+        }
     }
     //Return a landmark
     else {
