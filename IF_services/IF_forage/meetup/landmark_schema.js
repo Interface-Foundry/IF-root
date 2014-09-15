@@ -65,7 +65,7 @@ module.exports = {
     _schema: null,
 
     _schema_def: {
-       name: String, 
+       	name: String, 
 		id: String, 
 	  	lat: Number,
 	  	lon: Number,
@@ -79,6 +79,7 @@ module.exports = {
 			status: String,
 			visibility: String,
 			updated: Number,
+			event_hosts: [Schema.Types.Mixed],
 			venue: {
 				id: Number,
 				name: String,
@@ -125,8 +126,8 @@ module.exports = {
     model: function(new_instance){
         if (!module.exports._model){
             var schema = module.exports.schema();
-            mongoose.model('landmarkSchema', schema);
-            module.exports._model = mongoose.model('landmarkSchema');
+            mongoose.model('landmarks', schema);
+            module.exports._model = mongoose.model('landmarks');
         }
 
         return new_instance ?
