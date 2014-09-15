@@ -21,12 +21,13 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
   }
 
 	$scope.newWorld = function() {
-		console.log('saveWorld()');
+		console.log('newWorld()');
+		$scope.world = {};
 		$scope.world.newStatus = true; //new
 		db.worlds.create($scope.world, function(response){
 			console.log('##Create##');
-			console.log(response);
-			$location.path('/edit/w/'+response[0].worldURL);
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0]._id);
 		});
 	}
 

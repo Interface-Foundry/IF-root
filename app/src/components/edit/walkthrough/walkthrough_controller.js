@@ -1,4 +1,4 @@
-function WalkthroughController($scope, $route, $routeParams, $http, $timeout, ifGlobals, leafletData, $upload, mapManager) {
+function WalkthroughController($scope, $route, $routeParams, $http, $timeout, ifGlobals, leafletData, $upload, mapManager, World) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -144,6 +144,14 @@ $scope.progress[$scope.position].status = 'active';
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
 
+World.get({_id: $routeParams._id}, function(data) {
+	if (data.err) {
+		 console.log('World not found!');
+		 console.log(data.err);
+	} else {
+		console.log(data);	
+	}
+});
 
 
 

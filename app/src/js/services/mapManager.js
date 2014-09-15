@@ -18,7 +18,7 @@ var mapManager = {
 			type: 'xyz',
 			top: true,
 			maxZoom: 25
-			}	
+			}
 		},
 		overlays: {}
 	},
@@ -42,17 +42,6 @@ worldBounds: {
 	}
 };
 
-mapManager.getMap = function() {
-	if (this._map) {
-		return this._map;
-	} else {
-		leafletData.getMap('leafletmap').then(function(map) {
-			this._map = map;
-			return this._map;
-		})
-	}
-}
-
 mapManager.setCenter = function(latlng, z) {
 	console.log('--mapManager--');
 	console.log('--setCenter--');
@@ -63,14 +52,14 @@ mapManager.setCenter = function(latlng, z) {
 	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 	console.log(h);
 	var targetPt, targetLatLng;
-	var map = mapManager.getMap();
+	leafletData.getMap().then(function(map) {
 		targetPt = map.project([latlng[1], latlng[0]], z).add([0,h/2]);
 		console.log(targetPt);
 		targetLatLng = map.unproject(targetPt, z);
 		console.log(targetLatLng);
 		angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
 		console.log(mapManager.center);
-	
+		});
 	} else {
 	angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
 	}
@@ -204,13 +193,13 @@ northEast: array of latitude, lng
 */
 mapManager.setMaxBounds = function(sWest, nEast) {
 		console.log('--setMaxBounds('+sWest+','+nEast+')--');
-	var map = mapManager.getMap();
+	leafletData.getMap().then(function(map) {
 		map.setMaxBounds([
 			[sWest[0], sWest[1]],
 			[nEast[0], nEast[1]]
 		]);
-	refreshMap();
-	return true;
+	mapManager.refresh();
+	});
 }
 
 /* setMaxBoundsFromPoint
@@ -219,12 +208,13 @@ mapManager.setMaxBounds = function(sWest, nEast) {
 	distance: orthogonal distance from point to bounds
 */ 
 mapManager.setMaxBoundsFromPoint = function(point, distance) {
-	var map = mapManager.getMap();
+	leafletData.getMap().then(function(map) {
 		setTimeout(function() {map.setMaxBounds([
 			[point[0]-distance, point[1]-distance],
 			[point[0]+distance, point[1]+distance]
 		])}, 400);
-	refreshMap();
+	mapManager.refresh();
+	});
 	return true;
 }
 
@@ -234,9 +224,10 @@ mapManager.refresh = function() {
 
 function refreshMap() { 
 	console.log('--refreshMap()--');
-    var map = mapManager.getMap();
-    	console.log('invalidateSize() called');
-    	setTimeout(function(){ map.invalidateSize()}, 400);
+    console.log('invalidateSize() called');
+    leafletData.getMap().then(function(map){
+   	 setTimeout(function(){ map.invalidateSize()}, 400);
+    });
 }
 
 mapManager.setBaseLayer = function(layerURL) {
@@ -287,10 +278,11 @@ mapManager.removeOverlays = function() {
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
 	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 150, state);
-	var map = mapManager.getMap();
+	leafletData.getMap().then(function(map) {
 	map.addLayer(mapManager.circleMaskLayer);
 	$rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
 		mapManager.circleMaskLayer._draw();
+	});
 	});
 }
 
@@ -304,8 +296,9 @@ mapManager.setCircleMaskState = function(state) {
 
 mapManager.removeCircleMask = function() {
 	if (mapManager.circleMaskLayer) {
-		var map = mapManager.getMap();
+		leafletData.getMap().then(function(map) {
 			map.removeLayer(mapManager.circleMaskLayer);
+		});
 	} else {
 		console.log('No circle mask layer.');
 	}
@@ -314,8 +307,9 @@ mapManager.removeCircleMask = function() {
 mapManager.placeImage = function(key, url) {
 	console.log('placeImage');
 	mapManager.placeImageLayer = new L.IFPlaceImage(url, mapManager.markers[key]);
-	var map = mapManager.getMap();
-			map.addLayer(mapManager.placeImageLayer);
+	leafletData.getMap().then(function(map) {
+		map.addLayer(mapManager.placeImageLayer);
+	});
 	return function(i) {mapManager.placeImageLayer.setScale(i)}
 }
 
@@ -325,8 +319,9 @@ mapManager.setPlaceImageScale = function(i) {
 
 mapManager.removePlaceImage = function() {
 	if (mapManager.placeImageLayer) {
-		var map = mapManager.getMap();
+		leafletData.getMap().then(function(map) {
 			map.removeLayer(mapManager.placeImageLayer);
+		});
 	} else {
 		console.log('No place image layer.');
 	}
@@ -337,6 +332,7 @@ mapManager.getPlaceImageBounds = function() {
 		return mapManager.placeImageLayer.getBounds();
 	}
 }
+
 
 return mapManager;
     }]);
