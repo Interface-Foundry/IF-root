@@ -215,6 +215,20 @@ $scope.saveWorld = function() {
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     });  
     
+    console.log('scope world');
+    console.log($scope.world);
+
+    //adding world data to pass to style save function (for widget processing not saving to style)
+    if ($scope.world.resources.hashtag){
+    	$scope.style.hashtag = $scope.world.resources.hashtag;
+    }
+    if ($scope.world._id){
+    	$scope.style.world_id = $scope.world._id;
+    }
+
+    console.log($scope.style);
+    //end extra data
+
     db.styles.create($scope.style, function(response){
         console.log(response);
     });

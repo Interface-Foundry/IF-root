@@ -675,7 +675,6 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     idGen(req.body.name);
                   }
                 });
-
             }
 
             //new landmark
@@ -766,9 +765,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     if (req.body.landmarkCategories){
 	                    lm.landmarkCategories = req.body.landmarkCategories;
                     }
-					
-                    if (req.body.hashtag){
-                        lm.resources.hashtag = req.body.hashtag;
+					           
+                    if (req.body.resources.hashtag){
+                        lm.resources.hashtag = req.body.resources.hashtag;
                     }
                     
                     if (req.body.widgets) {
@@ -828,6 +827,11 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             console.log(landmark);
                             console.log('success');
                             res.send([landmark]);
+
+                            //update serverwidget object for world
+                            if (req.body.world_id && req.body.hashtag){
+                                manageServerWidgets(req.body.world_id, req.body.hashtag, lm.widgets); //add/remove server tags
+                            }
                         }
                     });
                   }
@@ -911,8 +915,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 	                    lm.landmarkCategories = req.body.landmarkCategories;
                     }
 
-                    if (req.body.hashtag){
-                        lm.resources.hashtag = req.body.hashtag;
+                    if (req.body.resources){
+                      if (req.body.resources.hashtag){
+                        lm.resources.hashtag = req.body.resources.hashtag;
+                      }
                     }
                     
                     if (!req.body.avatar) {
@@ -1025,7 +1031,6 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
           }
           else {
 
-            console.log(req.body);
             lm.bodyBG_color = req.body.bodyBG_color; // RGB Hex
             lm.cardBG_color = req.body.cardBG_color; // RGB Hex
             lm.titleBG_color = req.body.titleBG_color; //RGB Hex
@@ -1049,6 +1054,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.bodyFontFamily = req.body.bodyFontFamily; // font family
             lm.themeFont = req.body.themeFont; // off by default
             lm.themeFontName = req.body.themeFontName; // font name
+
+            console.log(req.body.widgets);
 			
       			if (req.body.widgets) {
         			lm.widgets.twitter = req.body.widgets.twitter
@@ -1064,8 +1071,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 else {
                     console.log(style);
                     console.log('success');
-                    if (req.body.worldID && req.body.worldTag){
-                        manageServerWidgets(req.body.worldID, req.body.worldTag, lm.widgets); //add/remove server tags
+
+                    //if parameters from world passed to style, then add to serverwidget object
+                    if (req.body.world_id && req.body.hashtag){
+                        manageServerWidgets(req.body.world_id, req.body.hashtag, lm.widgets); //add/remove server tags
                     }
                 }
             });
@@ -1087,36 +1096,121 @@ function manageServerWidgets(id, tag, widgets){
         widgets.instagram = false;
     }
 
-    if (widgets.twitter || widgets.instagram){
-        var sw = new serverwidgetsSchema({
-            worldID : id,
-            worldTag: tag,
-            twitter: widgets.twitter,
-            instagram: widgets.instagram
-        });
-        
-        sw.save(function (err, data) {
-            if (err)
-                console.log(err);
-            else {
-                console.log(data);
-            }
-        });
-    }
-    else {
-        console.log('nothing');
-        //CHECK TO FIND WIDGET, IF SO then change boolean to false
+    serverwidgetsSchema.findOne({worldID:id}, function(err, sw) {
 
-        //findbyidandupdate
-        // Contact.findByIdAndUpdate(
-        //     info._id,
-        //     {$push: {"messages": {title: title, msg: msg}}},
-        //     {safe: true, upsert: true},
-        //     function(err, model) {
-        //         console.log(err);
-        //     }
-        // );
-    }  
+      if (err) {
+        console.log(err);
+      }
+      else {
+
+        //doesn't exist, create new
+        if (sw == null){
+          //doc doesn't exist, write new
+          console.log('new');
+
+          var sw = new serverwidgetsSchema({
+              worldID : id,
+              worldTag: tag,
+              twitter: widgets.twitter,
+              instagram: widgets.instagram
+          });
+
+          sw.save(function (err, data) {
+              if (err)
+                  console.log(err);
+              else {
+                  console.log('SAVED NEW '+data);
+              }
+          });
+        }
+        //exists, update
+        else {
+
+          sw.worldID = id;
+          sw.worldTag = tag;
+          sw.twitter = widgets.twitter;
+          sw.instagram = widgets.instagram;
+
+          console.log('update=');
+          //previously saved doc updated
+          sw.save(function (err, data) {
+              if (err)
+                  console.log(err);
+              else {
+                  console.log('SAVED UPDATE '+data);
+              }
+          });  
+
+        }
+
+      }
+
+    });
+
+
+
+    // db.collection('serverwidgets').findOne({worldID:id}, function (err, doc) {
+    //   if (err) {
+    //     //doc doesn't exist, write new
+    //     console.log('new');
+    //     sw.save(function (err, data) {
+    //         if (err)
+    //             console.log(err);
+    //         else {
+    //             console.log('SAVED NEW '+data);
+    //         }
+    //     });
+    //   }
+    //   else {
+    //     // doc.name = 'jason borne';
+    //     // doc.save(callback);    
+    //     console.log('update=');
+    //     //previously saved doc updated
+    //     sw.save(function (err, data) {
+    //         if (err)
+    //             console.log(err);
+    //         else {
+    //             console.log('SAVED UPDATE '+data);
+    //         }
+    //     });    
+    //   }
+
+    // });
+
+    //sw.findByIdAndUpdate(id, { name: 'jason borne' }, options, callback)
+
+    // if (widgets.twitter || widgets.instagram){
+
+
+    //   //findbyidandupdate (BY WORLD ID)
+
+    //   //if not found, save new servwidget
+
+    //     var sw = new serverwidgetsSchema({
+    //         worldID : id,
+    //         worldTag: tag,
+    //         twitter: widgets.twitter,
+    //         instagram: widgets.instagram
+    //     });
+
+
+        
+
+    // }
+    // else {
+    //     console.log('nothing');
+    //     //CHECK TO FIND WIDGET, IF SO then change boolean to false
+
+    //     //findbyidandupdate
+    //     // Contact.findByIdAndUpdate(
+    //     //     info._id,
+    //     //     {$push: {"messages": {title: title, msg: msg}}},
+    //     //     {safe: true, upsert: true},
+    //     //     function(err, model) {
+    //     //         console.log(err);
+    //     //     }
+    //     // );
+    // }  
 }
 
 //upload profile pictures for worlds and landmarks and (users?)
