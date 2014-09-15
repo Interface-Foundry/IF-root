@@ -765,11 +765,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     if (req.body.landmarkCategories){
 	                    lm.landmarkCategories = req.body.landmarkCategories;
                     }
-					           
-                    if (req.body.resources.hashtag){
-                        lm.resources.hashtag = req.body.resources.hashtag;
+					          
+                    if (req.body.resources){
+                      if (req.body.resources.hashtag){
+                          lm.resources.hashtag = req.body.resources.hashtag;
+                      }                 
                     }
-                    
+
                     if (req.body.widgets) {
                     	/*if (req.body.widgets.twitter) {lm.widgets.twitter = req.body.widgets.twitter;}
 	                   	if (req.body.widgets.instagram) {lm.widgets.instagram = req.body.widgets.instagram;}

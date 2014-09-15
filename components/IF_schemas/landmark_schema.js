@@ -105,18 +105,22 @@ monguurl = require('monguurl');
 			venue: String
 		},
 		source_meetup: {
-			id: Number,
+			id: String,
 			status: String,
 			visibility: String,
 			updated: Number,
+			event_hosts: [Schema.Types.Mixed],
 			venue: {
 				id: Number,
-				repinned: Boolean,
 				name: String,
 				state: String,
 				address_1: String,
+				address_2: String,
 				city: String,
-				country: String
+				zip: Number,
+				country: String,
+				phone: String,
+				zip:String
 			},
 			fee: {
 				amount: Number,
@@ -133,7 +137,9 @@ monguurl = require('monguurl');
 			group: {
 				id: Number,
 				name: String,
-				who: String
+				who: String,
+				group_lat: Number,
+				group_lon: Number
 			}
 		},
 		widgets: {

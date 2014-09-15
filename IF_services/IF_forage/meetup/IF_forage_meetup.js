@@ -11,7 +11,7 @@ var mongoose = require('mongoose'),
 
 //----MONGOOOSE----//
 var mongoose = require('mongoose'),
-    landmarks = require('./landmark_schema.js');
+    landmarkSchema = require('../../../components/IF_schemas/landmark_schema.js');
 
 mongoose.connect('mongodb://localhost/if');
 var db_mongoose = mongoose.connection;
@@ -94,7 +94,8 @@ function searchMeetup(tag, done) {
                     }
                     else{
 
-                        var lmSchema = new landmarks.model(true);
+                       //var lmSchema = new landmarks.model(true);
+                        var lmSchema = new landmarkSchema();
 
                         if(typeof result.id=='undefined')
                         {
@@ -107,6 +108,17 @@ function searchMeetup(tag, done) {
 
 
                         function processMeetup(){
+
+                        	lmSchema.world = true;
+                        	lmSchema.valid = true;
+                        	lmSchema.archived = false;
+
+                        	if(typeof result.photo_url=='undefined'){
+                        		lmSchema.avatar = 'img/IF/meetup_default.jpg';
+                        	}
+                        	else {
+                        		lmSchema.avatar = result.photo_url;
+                        	}
 
                             //lmSchema.name= result.name;
                             if(typeof result.name=='undefined')
@@ -183,6 +195,7 @@ function searchMeetup(tag, done) {
                             else{
                                 lmSchema.source_meetup.updated=result.updated;
                             }
+
                             //lmSchema.source_meetup.updated= result.updated;
                             /*venue: {
                              id: Number,
@@ -195,18 +208,16 @@ function searchMeetup(tag, done) {
                              country: String,
                              phone: String,
                              },*/
-                            if(typeof result.venue=='undefined')
-                            {
+                            if(typeof result.venue=='undefined'){
                                 lmSchema.source_meetup.venue={};
-                                lmSchema.lat= 0;
-                                lmSchema.lon=  0;
+                                lmSchema.loc = {type: 'Point',coordinates: [-74.0059,40.7127]};
+          						lmSchema.hasLoc = false;	
                             }
                             else{
                                 lmSchema.source_meetup.venue=result.venue;
-                                lmSchema.lat= result.venue.lat;
-                                lmSchema.lon=  result.venue.lon;
+          						lmSchema.loc = {type: 'Point', coordinates: [result.venue.lon, result.venue.lat]};
+          						lmSchema.hasLoc = true;
                             }
-
 
                             /*landmarkSchema.fee: {
                              amount: Number,
@@ -299,9 +310,12 @@ function searchMeetup(tag, done) {
 }
 
 
-
 function processData(i,result,callback){
-    landmarks.model(false).find({"source_meetup.id":result.id.toString()}, function(err, docs) {
+
+	console.log(result.id.toString());
+    landmarkSchema.find({"source_meetup.id":result.id.toString()}, function(err, docs) {
+
+
 
         if(err){
             console.log("sds")

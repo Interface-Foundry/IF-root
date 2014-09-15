@@ -8710,8 +8710,12 @@ $scope.saveWorld = function() {
     console.log($scope.world);
 
     //adding world data to pass to style save function (for widget processing not saving to style)
-    if ($scope.world.resources.hashtag){
-    	$scope.style.hashtag = $scope.world.resources.hashtag;
+    
+
+    if ($scope.world.resources){
+    	if ($scope.world.resources.hashtag){
+    		$scope.style.hashtag = $scope.world.resources.hashtag;
+    	}
     }
     if ($scope.world._id){
     	$scope.style.world_id = $scope.world._id;
