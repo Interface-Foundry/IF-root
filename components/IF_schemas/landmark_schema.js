@@ -146,7 +146,9 @@ monguurl = require('monguurl');
 			twitter: Boolean,
 			instagram: Boolean,
 			upcoming: Boolean,
-			category: Boolean
+			category: Boolean,
+			googledoc: Boolean,
+			checkin: Boolean
 		},
 		tags: [String] //search tags
 	}); 
