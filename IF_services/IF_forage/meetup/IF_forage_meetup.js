@@ -119,6 +119,7 @@ function searchMeetup(tag, done) {
                         	lmSchema.valid = true;
                         	lmSchema.style.maps.cloudMapID = cloudMapID;
                         	lmSchema.style.maps.cloudMapName = cloudMapName;
+                        	lmSchema.views = 0;
 
                         	// if (lmSchema.widgets){
 	                        //  	lmSchema.widgets.googledoc = true;

@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var im = require('imagemagick'); //must also install imagemagick package on server /!\
 
 var lists = require('./lists');
 var strings = require('./strings');
@@ -34,7 +35,7 @@ var downloadImage = function(imageURL) {
 
   if (fs.existsSync(writeStreamDestinaton)) {
 
-    //do nothing
+    //do nothing, don't rewrite image
   } 
   else {
 
@@ -42,14 +43,24 @@ var downloadImage = function(imageURL) {
 
     var request = http.get(imageURL, function onImageDownload(response) {
 
-      //console.log(response);
-
       response.on('data', function(data) {
         file.write(data);
       });
 
       response.on('end', function() {
         file.end();
+
+          //RESIZING IMAGES
+          im.resize({
+            srcPath: writeStreamDestinaton,
+            dstPath: writeStreamDestinaton,
+            width: 300,
+            height: 300,
+            quality: 0.8
+          }, function(err, stdout, stderr){
+              console.log('RESIZED IMAGE');
+          });
+
       });
 
     });

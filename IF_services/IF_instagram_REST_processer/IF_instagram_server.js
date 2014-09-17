@@ -3,6 +3,9 @@ var express = require('express'), app = module.exports.app = express();
 var request=require('request');
 var logger = require('morgan');
 var async = require('async');
+var fs = require('fs');
+var path = require('path');
+var rimraf = require('rimraf');
 
 app.use(logger('dev'));
 
@@ -124,21 +127,6 @@ function searchInstagram(tag, done) {
     instagram.tag_media_recent(tag, processTagMediaRecent);
 
     done();
-
-    // T.get('search/tweets', { q: '#'+tag, count: 50 }, function(err, data, response) {
-
-    //     if (err){
-    //         console.log(err);
-    //     }
-    //     else {
-    //         async.each(data.statuses, function( tweet, callback) {
-    //           saveTweet(tweet);
-    //         }, function(err){
-    //             console.log(err);    
-    //         });                
-    //     }
-    //     done(); 
-    // });
 }
 
 
@@ -180,6 +168,45 @@ function removeHashtags(){
     //console.log('asdfasdf'+hashtag);
     //liveTags = hashtag.splice();
 }
+
+
+
+
+//Routinely checks size of image directory and removes images older than 2 weeks
+//from: http://stackoverflow.com/questions/19167297/in-node-delete-all-files-older-than-an-hour
+async.whilst(
+    function () { return true }, 
+    function (callback) {
+
+        fs.readdir(strings.IMAGE_SAVE_DESTINATION, function(err, files) {
+          files.forEach(function(file, index) {
+            fs.stat(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err, stat) {
+              var endTime, now;
+              if (err) {
+                return console.error(err);
+              }
+              now = new Date().getTime();
+              endTime = new Date(stat.ctime).getTime() + 1209600000; //if file is older than 2 weeks, remove
+              if (now > endTime) {
+                return rimraf(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err) {
+                  if (err) {
+                    return console.error(err);
+                  }
+                  console.log('successfully deleted');
+                });
+              }
+            });
+          });
+        });
+
+        setTimeout(callback, 43200000); // every 12 hours check
+        
+    },
+    function (err) {
+    }
+);
+
+
 
 app.listen(3130, function() {
     console.log("3130 ~ ~");

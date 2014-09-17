@@ -64,6 +64,12 @@ var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
 
+
+//----- For checking on size of instagram upload dir -----//
+var util  = require('util');
+//----//
+
+
 // passport config
 require('./components/IF_auth/passport')(passport); 
 
@@ -237,7 +243,7 @@ app.post('/reset/:token', function(req, res) {
       var mailOptions = {
         to: user.local.email,
         from: 'IF Bubbl <mail@bubbl.li>',
-        subject: 'Node.js Password Reset',
+        subject: 'Your Bubbl Password was reset',
         text: 'Hello,\n\n' +
           'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed. If this is an error, please contact: hello@interfacefoundry.com\n'
       };
@@ -564,9 +570,9 @@ app.get('/api/:collection/:id', function(req, res) {
           if (data.style){
             if (data.style.styleID){
               styleSchema.findById(data.style.styleID, function(err, style) {
-                    if (!style){
-                      console.log(err);
-                    }
+                  if (!style){
+                    console.log(err);
+                  }
                   if(style) {
                       console.log(style);
                       var resWorldStyle = {
@@ -576,6 +582,17 @@ app.get('/api/:collection/:id', function(req, res) {
                       res.send(resWorldStyle);
                   }
               }); 
+
+              landmarkSchema.update({ _id : data._id}, { $inc: { views : 1 } }, function(err){
+                  if(err){
+                      console.log('view update failed');
+                  }
+                  else{ 
+                      console.log('view update succes');
+                  }
+              });
+
+
             }
           }
           else {
@@ -898,22 +915,23 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 function saveNewLandmark(styleRes){
                     var lm = new landmarkSchema({
                         	name: req.body.name,
-							id: finalID,
-							world: worldVal,
-							valid: 1,
-							avatar: req.body.avatar,
-							status: 'draft',
-							permissions: {
-                            	ownerID: req.user._id //from auth user ID
-							},
-							style: {
-								maps: {
-									cloudMapID: 'interfacefoundry.jh58g2al',
-									cloudMapName: 'forum'
-								}
-							},
-							resources: {
-							}
+            							id: finalID,
+            							world: worldVal,
+            							valid: 1,
+                          views: 0,
+            							avatar: req.body.avatar,
+            							status: 'draft',
+            							permissions: {
+                            ownerID: req.user._id //from auth user ID
+            							},
+            							style: {
+            								maps: {
+            									cloudMapID: 'interfacefoundry.jh58g2al',
+            									cloudMapName: 'forum'
+            								}
+            							},
+            							resources: {
+            							}
                     });
 					
           					if (req.body.loc) {
@@ -1515,6 +1533,41 @@ app.put('/api/:collection/:cmd',  function (req, res) {
     db.collection(req.params.collection)[req.params.cmd](req.body, fn(req, res)); 
 })
 
+
+//3 Hour checkup on size of image directories, emails if over 10gb
+//from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
+async.whilst(
+    function () { return true }, 
+    function (callback) {
+
+        var spawn = require('child_process').spawn,
+        size = spawn('du', ['-sh', './app/dist/img/instagram/']);
+
+        size.stdout.on('data', function (data) {
+
+          if (parseFloat(data.toString('utf8')) > 10000){ //size is 10gb send email warning!
+      
+            var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
+            var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+
+            var mailOptions = {
+                to: feedbackTo,
+                from: 'IF Bubbl <mail@bubbl.li>',
+                subject: 'INSTAGRAM SIZE WARNING, exceeded 10gb',
+                text: 'help me'
+              };
+              mailerTransport.sendMail(mailOptions, function(err) {
+                console.log('warning size message sent');
+              });  
+          }
+
+        });
+
+        setTimeout(callback, 10800000); // every 3 hour check
+    },
+    function (err) {
+    }
+);
 
 
 server.listen(2997, function() {

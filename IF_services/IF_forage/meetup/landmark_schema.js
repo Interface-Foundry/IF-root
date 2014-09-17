@@ -73,6 +73,7 @@ module.exports = {
 			timestart: String,
 			timeend: String
 		},
+		views: Number,
 		stats: { 
 			relevance: Number,
 			activity: Number,

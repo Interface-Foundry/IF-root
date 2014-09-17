@@ -1,2 +1,2 @@
-
-*.jpg
+#Preventing Git Upload of User Images
+[^.]*
