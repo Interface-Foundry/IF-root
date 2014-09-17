@@ -9,14 +9,103 @@ module.exports = {
     _schema: null,
 
     _schema_def: {
-       	name: String, 
+		name: String, 
 		id: String, 
-	  	lat: Number,
-	  	lon: Number,
-		description: String, 
+		world: Boolean,
+		parentID: String,
+		valid: Boolean, //are all req. items inputted
+		archived: Boolean, //if object in archive or "live"
+		avatar: String,
+		hasLoc: Boolean,
+		loc: { //user inputted loc
+	    	type: {
+	      		type: String //GeoJSON-'point'
+	    	},
+	    	coordinates: []
+	  	},
+	  	loc_nickname: String,
+	  	// loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
+	  	// 	name: String,
+	  	// 	type: {
+	   //    		type: String
+	   //  	},
+	   //  	coordinates: []
+	  	// },
+		summary: String,
+		description: String, //full HTML?
+		type: String, //event, place
+		subType: { type: [String], index: true }, // type of event/place	
+		category: String, //category of type
+		landmarkCategories: [{
+			name: String 
+		}],
+		style: {
+			styleID: String, //link to landmark's style
+			maps: {
+				type: { type: String }, //cloud, local, or both -- switch
+				cloudMapID: String,
+				cloudMapName: String,
+				localMapID: String,
+				localMapName: String,
+		        localMapOptions: {
+		            attribution: String,
+		            minZoom: Number,
+		            maxZoom: Number,
+		            reuseTiles: Boolean,
+		            tms: Boolean //needed for tile server renders
+		        }
+			},
+			markers: {
+				name: String,
+				category: String
+			}	
+		},
+		hasTime: Boolean,
 		time: {
+			created: { type: Date, default: Date.now },
 			start: { type: Date},
-			end: { type: Date}
+			end: { type: Date},
+			timezone: String
+		},
+		timetext: {
+			datestart: String,
+			dateend: String,
+			timestart: String,
+			timeend: String
+		},
+		stats: { 
+			relevance: Number,
+			activity: Number,
+			quality: Number	
+		},
+		resources: {
+			hashtag: String,
+			video: String,
+			extraURL: String,
+			etherpad: String,	
+		},
+		permissions: {
+			ownerID: String,
+			hidden: Boolean,
+			viewers: [String],
+			admins: [String]
+		},
+		updated_time: Date, // TO DO
+		source_fb: { //source of data bubble (is facebook event api)
+			is_source: Boolean,
+			id: String,
+			cover: {
+				id: String,
+				source: String,
+				offset_y: Number,
+				offset_x: Number
+			},
+			owner: String,
+			parent_group: String,
+			privacy: String,
+			ticket_uri: String,
+			updated_time: Date,
+			venue: String
 		},
 		source_meetup: {
 			id: String,
@@ -55,12 +144,34 @@ module.exports = {
 				group_lat: Number,
 				group_lon: Number
 			}
-		}
+		},
+		widgets: {
+			twitter: Boolean,
+			instagram: Boolean,
+			upcoming: Boolean,
+			category: Boolean,
+			googledoc: Boolean,
+			checkin: Boolean
+		},
+		tags: [String] //search tags
     },
 
     schema: function(){
         if (!module.exports._schema){
+
             module.exports._schema = new mongoose.Schema(module.exports._schema_def);
+            
+			module.exports._schema.plugin(textSearch);
+			module.exports._schema.index({loc:'2dsphere'});
+			//indexing for search
+			module.exports._schema.index({
+			    name  				  :"text",
+			    description           :"text",
+			    shortDescription      :"text",
+			    type                  :"text",
+			    loc_nicknames         :"text"
+			});
+
         }
         return module.exports._schema;
     },
