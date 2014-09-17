@@ -310,7 +310,6 @@ function searchMeetup(tag, done) {
 
                             //loading style from JSON, saving
 					        function saveStyle(inputName, callback){
-					        	console.log('--saveStyle()');
 
 					        	var st = new styles.model(true);
 
@@ -347,28 +346,23 @@ function searchMeetup(tag, done) {
 					     //        });
 					            
 					            function saveIt(callback){
-					            	console.log('--saveIt()--')
 					            	
 					                st.save(function (err, style) {
-					                	console.log('inside st.save');
 					                    if (err)
 					                        handleError(res, err);
 					                    else {
-					                    	console.log('style', style);
 					                        callback(style._id);
 					                    }
 					                });
 					            }
-					            console.log('before saveit()');
 					            saveIt(function (res) {
-					            	console.log('save it callback')
+					            	
 					                callback(res);
 					            });
 					        }
 
 					        function saveNewLandmark(styleRes){
 					        	
-					        	console.log('style '+styleRes);
 					        	if (styleRes !== undefined){ //if new styleID created for world
                         			lmSchema.style.styleID = styleRes;
                     			}
