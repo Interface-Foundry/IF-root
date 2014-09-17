@@ -27,48 +27,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 redoMarkers($scope.landmarks);
 	 }
 
-  	
-/*
-  	function redoMarkers(landmarks, c) {
-  		var categoryURL;
-  		angular.forEach($scope.landmarks, function(landmark) {
-  			switch (landmark.category) {
-	  			case 'food': 
-	  				categoryURL = 'img/jul30/marker/cake_arrow.png';
-	  				break;
-	  			case 'bar':
-	  				categoryURL = 'img/jul30/marker/cocktail_arrow.png';
-	  				break;
-	  			case 'fabric':
-	  				categoryURL = 'img/jul30/marker/spool_arrow.png';
-	  				break;
-	  		}
-	  		if (c != undefined && landmark.category != c) {
-	  			map.removeMarker(landmark._id); 
-	  		} else {
-	  			map.addMarker(landmark._id, {
-		  			lat: landmark.loc.coordinates[1],
-		  			lng: landmark.loc.coordinates[0],
-		  			draggable:false,
-		  			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-		  			icon: {
-		  				iconUrl: categoryURL,
-		  				iconSize: [100,100],
-		  				iconAnchor: [50, 100],
-		  				shadowUrl: '',
-		  				shadowRetinaUrl: '',
-		  				shadowSize: [0,0],
-		  				popupAnchor: [0, -80]
-		  			},
-		  			_id: landmark._id
-		  		});
-		  	}
-	  		
-	  		
-  		});
-  		map.refresh();
-  	}
-*/
+
   	//currently only for upcoming...
   	function setLookup() {
 	  	$scope.lookup = {}; 
@@ -115,36 +74,33 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				$scope.descriptionType = "summary";
 			}
 		}
-		 
-		 
-		 // order of logic
-		 // if (type == cloud) ---> load cloud as basemap
-		 // else if (type == both && localMapID && cloudMapID) --> load cloud as basecamp, layer local map on top
-		 // else if (type == local && localMapID) --> load local map as base, use black background for leaflet style
-		 // else if (cloudMapID) ---> load cloudmap as basemap
-		 // else { load with default cloudMapID } ---> load a default cloudmap as basemap
-		 
-		 // add zoom restrictions
-
 		
-		 /*map.addPath('worldBounds', {
-				type: 'circle',
-                radius: 150,
-				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
-				});*/
 		var zoomLevel = 19;
-		if ($scope.world.style.hasOwnProperty('maps')) {
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
-			}
+		
+		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel);
+		} else {
+			console.error('No center found! Error!');
 		}
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel)
-		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-		if ($scope.world.style.maps.localMapID) {
+		
+		if ($scope.world.style.hasOwnProperty('maps')) {
+			if ($scope.world.style.maps.localMapID) {
 			map.addOverlay($scope.world.style.maps.localMapID, 
 							$scope.world.style.maps.localMapName, 
 							$scope.world.style.maps.localMapOptions);
-			map.refresh();
+			}
+			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			}
+		
+			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+			} else {
+				console.warn('No base layer found! Defaulting to forum.');
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+			}
 		}
 		
 		$scope.loadLandmarks();

@@ -527,18 +527,20 @@ app.get('/api/textsearch', function(req, res) {
 
 // Read 
 app.get('/api/:collection/:id', function(req, res) {
-
     //Return a world
     if (req.url.indexOf("/api/worlds/") > -1){ 
         //return by mongo id
-        if (req.params._id){
-          db.collection('landmarks').findOne({_id:req.params._id,world:true}, function(err, data){
+        console.log(req.query.m);
+        if (req.query.m == "true") {
+			
+          db.collection('landmarks').findOne({_id:objectId(req.params.id),world:true}, function(err, data){
               if (data){
                   combineQuery(data, res);
               }
               else {
-                  console.log('world doesnt exist');
-                  res.send({err:'world doesnt exist'});
+                  console.log('540: world doesnt exist');
+                  console.log(err);
+                  res.send({err:'540: world doesnt exist'});
               }      
           }); 
         }
@@ -549,8 +551,8 @@ app.get('/api/:collection/:id', function(req, res) {
                   combineQuery(data, res);
               }
               else {
-                  console.log('world doesnt exist');
-                  res.send({err:'world doesnt exist'});
+                  console.log('552: world doesnt exist');
+                  res.send({err:'552: world doesnt exist'});
               }      
           }); 
         }
@@ -582,7 +584,7 @@ app.get('/api/:collection/:id', function(req, res) {
 app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if (req.url == "/api/styles/create"){
-        editStyle(); //edit style 
+        editStyle(); //edit style
     }
 
     if (req.url == "/api/projects/create"){
@@ -646,7 +648,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     function contSaveLandmark(){
 
         //new landmark, no name
-        if (!req.body.name){
+        if (!req.body.name) {
             console.log('generating number id');
             idGen(crypto.randomBytes(15).toString('hex'));
         }
@@ -657,22 +659,26 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             //not a new landmark
             if (!req.body.newStatus){ 
 
-                if (req.body.worldID){
+                if (req.body.worldID) {
                     var lookupID = req.body.worldID;
                 }
 
-                if (req.body._id){
+                if (req.body._id) {
                     var lookupID = req.body._id;
                 }    
 
                 landmarkSchema.findById(lookupID, function(err, lm) {
                   //same name, so dont gen new id
-                  if (lm.name == req.body.name){
-                    saveLandmark(lm.id);
-                  }
-                  //a new name was used
-                  else {
-                    idGen(req.body.name);
+				  if (!lm) {
+					 console.log(err);
+				  } else {
+	                  if (lm.name == req.body.name){
+	                    saveLandmark(lm.id);
+	                  }
+	                  //a new name was used
+	                  else {
+	                    idGen(req.body.name);
+	                  }
                   }
                 });
             }
@@ -731,7 +737,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 if (req.body._id){
                     var lookupID = req.body._id;
                 }         
-                console.log(lookupID);
+                console.log('lookupID', lookupID);
                 
                 landmarkSchema.findById(lookupID, function(err, lm) {
                   if (!lm){
@@ -742,7 +748,14 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     lm.name = req.body.name;
                     lm.id = finalID;
                     lm.valid = 1;
-                    lm.loc = {type:'Point', coordinates:[req.body.loc.coordinates[0],req.body.loc.coordinates[1]] };
+                    lm.status = req.body.status || 'draft';
+                    
+                    if (req.body.hasOwnProperty('loc')) {
+                    	if (req.body.loc.hasOwnProperty('coordinates')) {
+                    	lm.loc = {type:'Point', coordinates:[req.body.loc.coordinates[0],req.body.loc.coordinates[1]]};
+                    	}
+                    }
+              
                     lm.hasLoc = req.body.hasLoc || false;
                     
                     if (req.body.avatar){
@@ -874,14 +887,23 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                 function saveNewLandmark(styleRes){
                     var lm = new landmarkSchema({
-                        name: req.body.name,
-                        id: finalID,
-                        world: worldVal,
-                        valid: 1,
-                        avatar: req.body.avatar,
-                        permissions: {
-                            ownerID: req.user._id //from auth user ID
-                        }
+                        	name: req.body.name,
+							id: finalID,
+							world: worldVal,
+							valid: 1,
+							avatar: req.body.avatar,
+							status: 'draft',
+							permissions: {
+                            	ownerID: req.user._id //from auth user ID
+							},
+							style: {
+								maps: {
+									cloudMapID: 'interfacefoundry.jh58g2al',
+									cloudMapName: 'forum'
+								}
+							},
+							resources: {
+							}
                     });
 					
           					if (req.body.loc) {
@@ -961,7 +983,20 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         function saveStyle(inputName, callback){
             var st = new styleSchema({
-                name: inputName
+                name: inputName,
+                bodyBG_color: "#eceff1",  
+				titleBG_color: "#ff7043", 
+				navBG_color: "rgba(244,81,30,.8)",  
+	
+				landmarkTitle_color: "#455a64", // RGB Hex
+				categoryTitle_color: "#ff5722", // RGB Hex
+		
+				widgets: {
+					twitter: false,
+					instagram: false,
+					upcoming: false,
+					category: false
+				}
             });
             
             saveIt(function (res) {

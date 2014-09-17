@@ -11,7 +11,7 @@ monguurl = require('monguurl');
 		world: Boolean,
 		parentID: String,
 		valid: Boolean, //are all req. items inputted
-		archived: Boolean, //if object in archive or "live"
+		status: String, //'draft' 'archived' 'public'
 		avatar: String,
 		hasLoc: Boolean,
 		loc: { //user inputted loc

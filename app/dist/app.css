@@ -693,6 +693,69 @@ ul.walkthrough-grid > li > label {
 	
 }
 
+.loading-spin {
+	left: 211px;
+	top: 91px;
+	width: 40px;
+	height: 40px;
+
+	position: absolute;
+	z-index: 1050;
+}
+
+.db1, .db2 {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #FFF;
+  opacity: 0.6;
+  position: absolute;
+  top: 0;
+  left: 0;
+  -webkit-animation: loading-bounce 2.0s infinite ease-in-out;
+  animation: loading-bounce 2.0s infinite ease-in-out;
+}
+
+.db2 {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+@-webkit-keyframes loading-bounce {
+  0%, 100% { -webkit-transform: scale(0.0) }
+  50% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes loading-bounce {
+  0%, 100% { 
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 50% { 
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}
+
+.loc-loading-overlay {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 462px;
+	height: 222px;
+	background-color: #3f51b5;
+	z-index:1000;
+}
+
+.done-list {
+	width: 100%;
+	padding: 0px 8px;
+}
+
+.done-list-item {
+	float: left; 
+	margin-right: 32px;
+	font-size: 16px;
+}
 
 input {
 

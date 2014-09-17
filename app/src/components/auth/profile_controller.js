@@ -27,7 +27,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		db.worlds.create($scope.world, function(response){
 			console.log('##Create##');
 			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0]._id);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
 		});
 	}
 

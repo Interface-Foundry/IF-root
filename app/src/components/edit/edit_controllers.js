@@ -325,13 +325,13 @@ $scope.buildLocalMap = function () {
 		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
 		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} //remove this when world objects arent fd up
 		if (response[0]) { //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
-		$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
-		$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
-		$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
-			} else {
-		$scope.world.style.maps.localMapID = response.style.maps.localMapID;
-		$scope.world.style.maps.localMapName = response.style.maps.localMapName;
-		$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
+			$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
+			$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
+			$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
+		} else {
+			$scope.world.style.maps.localMapID = response.style.maps.localMapID;
+			$scope.world.style.maps.localMapName = response.style.maps.localMapName;
+			$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
 		}
 		$scope.saveWorld();
 		});

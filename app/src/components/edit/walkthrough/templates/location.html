@@ -36,13 +36,18 @@
 						$event.stopPropagation()">Find</button>
 		</span>
 	</div>
-	<div ng-show="temp.MapActive">
-	<leaflet id="locMap" 
-		width="462px" height="222px" 
-		center="center"
-		tiles="tiles"
-		markers="markers">
-	</leaflet>
+	<div ng-show="temp.MapActive" style="position:relative;">
+		<leaflet id="locMap"
+			width="462px" height="222px" 
+			center="center"
+			tiles="tiles"
+			markers="markers">
+		</leaflet>
+		<div class="loc-loading-overlay" ng-show="locLoading"></div>
+		<div class="loading-spin" ng-show="locLoading">
+			<div class="db1"></div>
+			<div class="db2"></div>
+		</div>
 	</div>
 </div>
 </div>

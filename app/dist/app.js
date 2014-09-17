@@ -8476,7 +8476,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		db.worlds.create($scope.world, function(response){
 			console.log('##Create##');
 			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0]._id);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
 		});
 	}
 
@@ -8813,13 +8813,13 @@ $scope.buildLocalMap = function () {
 		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
 		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} //remove this when world objects arent fd up
 		if (response[0]) { //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
-		$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
-		$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
-		$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
-			} else {
-		$scope.world.style.maps.localMapID = response.style.maps.localMapID;
-		$scope.world.style.maps.localMapName = response.style.maps.localMapName;
-		$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
+			$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
+			$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
+			$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
+		} else {
+			$scope.world.style.maps.localMapID = response.style.maps.localMapID;
+			$scope.world.style.maps.localMapName = response.style.maps.localMapName;
+			$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
 		}
 		$scope.saveWorld();
 		});
@@ -8946,7 +8946,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 //end editcontroller
 }
-function WalkthroughController($scope, $route, $routeParams, $http, $timeout, ifGlobals, leafletData, $upload, mapManager, World) {
+function WalkthroughController($scope, $location, $route, $routeParams, $http, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -8971,18 +8971,26 @@ $scope.next = function() {
 			}
 		}
 	}
+	$scope.save();
 }
 
 $scope.prev = function() {
 	if ($scope.position > 0) {
 		$scope.position--;
+		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+			if ($scope.walk[$scope.position].jump()) {
+				$scope.prev();
+			}
+		}
 	}
+	$scope.save();
 }
 
 $scope.slowNext = function() {
 	$timeout(function() {
 		$scope.next();
 	}, 200);
+	$scope.save();
 }
 
 $scope.pictureSelect = function($files) {
@@ -9017,9 +9025,29 @@ $scope.selectMapTheme = function(name) {
 			//	$scope.setThemeFromMap();
 			//}
 		}
+}
+	
+$scope.saveAndExit = function() {
+	$scope.save();
+	if ($scope.world.id) {
+		$location.path("/edit/w/"+$scope.world.id);
+	} else {
+		//console
+		console.log('no world id'); 
 	}
+}
 
-$scope.walk = [
+$scope.save = function() {
+	$scope.world.newStatus = false;
+	console.log($scope.world);
+	db.worlds.create($scope.world, function(response) {
+    	console.log('--db.worlds.create response--');
+    	console.log(response);
+    	$scope.world.id = response[0].id; //updating world id with server new ID
+    });
+}
+
+var firstWalk = [
 	//0 - intro
 	{title: 'Need a hand?',
 	caption: 'If you haven’t built a world before, we can walk you through it.',
@@ -9067,14 +9095,36 @@ $scope.walk = [
 	caption: 'Choose a map',
 	view: 'maptheme.html',
 	height: 426,
-	valid: function() {return typeof $scope.mapThemeSelect == "string"},
+	valid: function() {return true},
 	skip: true},
 	//
 	{title: 'Done!',
-	caption: 'Now you can add landmarks',
+	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
+	height: 48,
 	skip: false}
 ];
+
+var meetupWalk = [
+	//0 intro
+	{title: 'Claim your Meetup Event',
+	caption: 'text text text',
+	view:0,
+	height:0,
+	valid: function() {return true},
+	skip:false
+	},
+	//1 
+	{title: 'Confirm',
+	caption: 'Make sure the information we got from Meetup.com is correct',
+	view: 'meetup_confirm.html',
+	height: 400,
+	valid: function() {return true},
+	skip: false
+	}
+];
+
+$scope.walk = firstWalk;
 		
 $scope.progress = [];
 
@@ -9092,17 +9142,18 @@ $scope.progress[$scope.position].status = 'active';
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
 
-World.get({_id: $routeParams._id}, function(data) {
+console.log($routeParams._id);
+World.get({id: $routeParams._id, m: true}, function(data) {
 	if (data.err) {
 		 console.log('World not found!');
 		 console.log(data.err);
 	} else {
-		console.log(data);	
+		console.log(data);
+		angular.extend($scope.world, data.world);	
+		//angular.extend($scope.style, data.style);
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 	}
 });
-
-
-
 }
 
 function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
@@ -9129,20 +9180,30 @@ function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
 							m: {
 								lat: tempLat,
 								lng: tempLng,
-								focus: true,
-								message: 'Drag to the location!',
-								draggable: true
+								draggable: false
 							}}});		
 		$scope.center.lat = tempLat;
 		$scope.center.lng = tempLng;
+		$scope.world.loc = { 
+			coordinates: [tempLng,tempLat]
+		}
 		
 		$scope.world.hasLoc = true;
+		$scope.$apply(function() {
+			$scope.locLoading = false;
+		});
+		leafletData.getMap('locMap').then(function(map) {
+			console.log('invalidating size');
+			map.invalidateSize();
+		});
+		console.log('showPosition done', $scope.locLoading);
 	}
 	
 	$scope.searchByAddress = function() {
 		console.log('--searchByAddress()--');
 		var geocoder = new google.maps.Geocoder();
 		if (geocoder) {
+			$scope.locLoading = true; 
 			geocoder.geocode({'address': $scope.temp.address},
 				function (results, status) {
 					if (status == google.maps.GeocoderStatus.OK) {
@@ -9152,7 +9213,7 @@ function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
 						
 						console.log(results[0].geometry.location.lat());
 						$scope.showPosition(results[0].geometry.location.lat(),
-						 	results[0].geometry.location.lng());
+						 					results[0].geometry.location.lng());
 						 
 					} else { console.log('No results found.')}
 					
@@ -9163,6 +9224,7 @@ function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
 	
 	$scope.searchByLocation = function() {
 		if (navigator.geolocation) {
+			$scope.locLoading = true;
    			navigator.geolocation.getCurrentPosition(function(position) {
    				//position
 				$scope.showPosition(position.coords.latitude, position.coords.longitude);	
@@ -10435,48 +10497,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 redoMarkers($scope.landmarks);
 	 }
 
-  	
-/*
-  	function redoMarkers(landmarks, c) {
-  		var categoryURL;
-  		angular.forEach($scope.landmarks, function(landmark) {
-  			switch (landmark.category) {
-	  			case 'food': 
-	  				categoryURL = 'img/jul30/marker/cake_arrow.png';
-	  				break;
-	  			case 'bar':
-	  				categoryURL = 'img/jul30/marker/cocktail_arrow.png';
-	  				break;
-	  			case 'fabric':
-	  				categoryURL = 'img/jul30/marker/spool_arrow.png';
-	  				break;
-	  		}
-	  		if (c != undefined && landmark.category != c) {
-	  			map.removeMarker(landmark._id); 
-	  		} else {
-	  			map.addMarker(landmark._id, {
-		  			lat: landmark.loc.coordinates[1],
-		  			lng: landmark.loc.coordinates[0],
-		  			draggable:false,
-		  			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-		  			icon: {
-		  				iconUrl: categoryURL,
-		  				iconSize: [100,100],
-		  				iconAnchor: [50, 100],
-		  				shadowUrl: '',
-		  				shadowRetinaUrl: '',
-		  				shadowSize: [0,0],
-		  				popupAnchor: [0, -80]
-		  			},
-		  			_id: landmark._id
-		  		});
-		  	}
-	  		
-	  		
-  		});
-  		map.refresh();
-  	}
-*/
+
   	//currently only for upcoming...
   	function setLookup() {
 	  	$scope.lookup = {}; 
@@ -10523,36 +10544,33 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				$scope.descriptionType = "summary";
 			}
 		}
-		 
-		 
-		 // order of logic
-		 // if (type == cloud) ---> load cloud as basemap
-		 // else if (type == both && localMapID && cloudMapID) --> load cloud as basecamp, layer local map on top
-		 // else if (type == local && localMapID) --> load local map as base, use black background for leaflet style
-		 // else if (cloudMapID) ---> load cloudmap as basemap
-		 // else { load with default cloudMapID } ---> load a default cloudmap as basemap
-		 
-		 // add zoom restrictions
-
 		
-		 /*map.addPath('worldBounds', {
-				type: 'circle',
-                radius: 150,
-				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
-				});*/
 		var zoomLevel = 19;
-		if ($scope.world.style.hasOwnProperty('maps')) {
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
-			}
+		
+		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel);
+		} else {
+			console.error('No center found! Error!');
 		}
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel)
-		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-		if ($scope.world.style.maps.localMapID) {
+		
+		if ($scope.world.style.hasOwnProperty('maps')) {
+			if ($scope.world.style.maps.localMapID) {
 			map.addOverlay($scope.world.style.maps.localMapID, 
 							$scope.world.style.maps.localMapName, 
 							$scope.world.style.maps.localMapOptions);
-			map.refresh();
+			}
+			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			}
+		
+			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+			} else {
+				console.warn('No base layer found! Defaulting to forum.');
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+			}
 		}
 		
 		$scope.loadLandmarks();
