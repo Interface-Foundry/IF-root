@@ -11,6 +11,13 @@
 	margin-right: -0.25em;
 }
 
+.close.walkthrough-exit {
+	position: absolute;
+	top: 40px;
+	right: 4px;	
+	opacity: .4;
+}
+
 .walkthrough {
 	position: relative;
 	display: inline-block;
@@ -129,7 +136,6 @@ li.progress-dot {
 	margin: 12px 4px;
 	border-radius:8px;
 	background-color: #CCC;
-	cursor: pointer;
 }
 
 .progress-dot.visited {
@@ -201,7 +207,7 @@ ul.walkthrough-grid > li.active {
 	outline: 4px solid #3f51b5;
 }
 
-ul.walkthrough-grid > li > label { 
+ul.walkthrough-grid > li > label {
 	position: absolute;
 	bottom: 0px;
 	width: 100%;
@@ -441,3 +447,4 @@ ul.walkthrough-grid > li > label {
 	margin-right: 32px;
 	font-size: 16px;
 }
+
