@@ -55,7 +55,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		// process the signup form
 		app.post('/api/user/signup', passport.authenticate('local-signup', {
 			successRedirect : '/#/profile', // redirect to the secure profile section
-			failureRedirect : '/signup', // redirect back to the signup page if there is an error
+			failureRedirect : '/#/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
 
@@ -84,6 +84,19 @@ module.exports = function(app, passport, landmarkSchema) {
 			}));
 
 
+	// meetup --------------------------------
+
+		// send to meetup to do the authentication
+		app.get('/auth/meetup', passport.authenticate('meetup', { scope : 'email' }));
+
+		// handle the callback after meetup has authenticated the user
+		app.get('/auth/meetup/callback',
+			passport.authenticate('meetup', {
+				successRedirect : '/#/profile/meetup',
+				failureRedirect : '/'
+			}));
+
+
 	
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
@@ -94,8 +107,8 @@ module.exports = function(app, passport, landmarkSchema) {
 			res.render('connect-local.ejs', { message: req.flash('loginMessage') });
 		});
 		app.post('/connect/local', passport.authenticate('local-signup', {
-			successRedirect : '/profile', // redirect to the secure profile section
-			failureRedirect : '/connect/local', // redirect back to the signup page if there is an error
+			successRedirect : '/#/profile', // redirect to the secure profile section
+			failureRedirect : '/#/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
 
@@ -107,7 +120,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		// handle the callback after facebook has authorized the user
 		app.get('/connect/facebook/callback',
 			passport.authorize('facebook', {
-				successRedirect : '/profile',
+				successRedirect : '/#/profile',
 				failureRedirect : '/'
 			}));
 
@@ -119,7 +132,20 @@ module.exports = function(app, passport, landmarkSchema) {
 		// handle the callback after twitter has authorized the user
 		app.get('/connect/twitter/callback',
 			passport.authorize('twitter', {
-				successRedirect : '/profile',
+				successRedirect : '/#/profile',
+				failureRedirect : '/'
+			}));
+
+
+	// meetup --------------------------------
+
+		// send to meetup to do the authentication
+		app.get('/connect/meetup', passport.authorize('meetup', { scope : 'email' }));
+
+		// handle the callback after meetup has authorized the user
+		app.get('/connect/meetup/callback',
+			passport.authorize('meetup', {
+				successRedirect : '/#/profile/',
 				failureRedirect : '/'
 			}));
 

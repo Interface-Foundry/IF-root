@@ -11,12 +11,7 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
-
 var map = mapManager;
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-
-zoomControl.style.display = 'none'; 
-
 
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
@@ -79,34 +74,11 @@ $scope.selectMapTheme = function(name) {
 			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
 			
 			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
-			$scope.setThemeFromMap(name);
+			//	$scope.setThemeFromMap();
 			//}
 		}
 }
 	
-$scope.setThemeFromMap = function(name) {
-switch (name) { 
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-}
-console.log($scope.style)
-
-    db.styles.create($scope.style, function(response){
-        console.log(response);
-    });
-}	
-
-
 $scope.saveAndExit = function() {
 	$scope.save();
 	if ($scope.world.id) {
@@ -125,7 +97,6 @@ $scope.save = function() {
     	console.log(response);
     	$scope.world.id = response[0].id; //updating world id with server new ID
     });
-    
 }
 
 var firstWalk = [
@@ -182,7 +153,7 @@ var firstWalk = [
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
-	height: 56,
+	height: 48,
 	skip: false}
 ];
 
@@ -218,19 +189,6 @@ while (i < $scope.walk.length) {
 $scope.position = 0;
 $scope.progress[$scope.position].status = 'active';
 
-////////////////////////////////////////////////////////////
-////////////////////////LISTENERS///////////////////////////
-////////////////////////////////////////////////////////////
-$scope.$on('$destroy', function (event) {
-	console.log('$destroy event', event);
-	if (event.targetScope===$scope) {
-		if (zoomControl) {
-			zoomControl.style.display = 'block';
-		}
-	}
-});
-
-
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -243,8 +201,8 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		 console.log(data.err);
 	} else {
 		console.log(data);
-		angular.extend($scope.world, data.world);
-		angular.extend($scope.style, data.style);
+		angular.extend($scope.world, data.world);	
+		//angular.extend($scope.style, data.style);
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 	}
 });

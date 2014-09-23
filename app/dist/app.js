@@ -4656,12 +4656,19 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
         // Authenticated
         if (user !== '0'){
+              console.log('------- USER -------');
+
+              console.log('user:'+user);
+
               //determine name to display on login (should check for name extension before adding...)
               if (user.facebook){
                   $rootScope.userName = user.facebook.name;
               }
               else if (user.twitter){
                   $rootScope.userName = user.twitter.displayName;
+              }
+              else if (user.meetup){
+                  $rootScope.userName = user.meetup.displayName;
               }
               else if (user.local){
                   $rootScope.userName = user.local.email;
@@ -4722,6 +4729,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/reset/:token', {templateUrl: 'components/auth/change-password.html', controller: ResetCtrl}).
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
+      when('/profile/:incoming', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
 
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
@@ -4748,13 +4756,13 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       
-     when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
+      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
       
       when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
 
-	 when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
+	    when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
 	 
-	 when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, rsolve: {loggedin: checkLoggedin}}).
+	    when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, rsolve: {loggedin: checkLoggedin}}).
       
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
       
@@ -4824,62 +4832,6 @@ angular.module('IF-directives', [])
             }
         });
     };
-});
-angular.module('IF-directives', [])
-.directive('fitFont', function($rootScope) {
-	return {
-		restrict: 'A',
-		link: function($scope, $element, attrs) {
-			var fontSize = parseInt($element.css('font-size'));
-			var domElement = $element[0];
-			var ears = []; //listeners
-			
-			function hasOverflow(e) {
-				if (e.offsetHeight < e.scrollHeight || e.offsetWidth < e.scrollWidth) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-			
-			function resolveOverflow() {
-				while (hasOverflow(domElement) && fontSize > 12) {
-					fontSize--;
-					$element.css('font-size', fontSize+'px');
-				} 
-			}
-			
-			ears.push(
-			$scope.$watch( //watch for resizes
-				function() {
-					return domElement.clientWidth;
-				}, 
-				function (newWidth, oldWidth) {
-					if (newWidth != oldWidth ) {
-						if (newWidth < oldWidth) {
-							resolveOverflow();
-						} else {
-							do {
-								fontSize++;
-								$element.css('font-size', fontSize+'px');
-							} while(hasOverflow(domElement)==false);
-							resolveOverflow();
-						}			
-					}
-			}))
-			
-			ears.push(
-			$scope.$watch('world.name', function(value) {
-				resolveOverflow();
-			}))
-			
-			$scope.$on("$destroy", function() {
-				for (var i = 0, len = ears.length; i < len; i++) {
-					ears[i].pop()();
-				}
-			});
-		}
-	}
 });
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
@@ -6328,6 +6280,17 @@ angular.module('tidepoolsServices', ['ngResource'])
 					aperture.state = 'aperture-off';
 					aperture.navfix = 'navfix';
 				}
+				
+				/*if ($rootScope.apertureOn) {
+					//open
+					console.log('opening');
+					angular.extend($rootScope, {apertureSize: h});
+					console.log($rootScope.apertureSize);
+				} else { 
+					console.log('closing aperture');
+					angular.extend($rootScope, {apertureSize: 0});
+					console.log($rootScope.apertureSize);
+				}*/
 			}
 			
 			aperture.set = function(state) {
@@ -6336,11 +6299,6 @@ angular.module('tidepoolsServices', ['ngResource'])
 						aperture.off = true;
 						aperture.state = 'aperture-off';
 						aperture.navfix = 'navfix';
-						break;
-					case 'third': 
-						aperture.off = false;
-						aperture.state = 'aperture-third';
-						aperture.navfix = '';
 						break;
 					case 'half':
 						aperture.off = false;
@@ -6818,7 +6776,7 @@ angular.module('tidepoolsServices')
 	.factory('styleManager', [
 		function() {
 var styleManager = {
-	navBG_color: 'rgba(0,188,212,0.96)'
+	navBG_color: 'rgba(0,188,212,0.8)'
 	//---local settings---
 	/*bodyBG_color: '#FFF',
 	titleBG_color,
@@ -6891,7 +6849,7 @@ function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureS
     aperture.set('off');
     //query tweets
     $scope.currentTag = $routeParams.hashTag;
-    $scope.tweets = db.tweets.query({limit:70, tag:$scope.currentTag}); // make infinite scroll?
+    $scope.tweets = db.tweets.query({limit:60, tag:$scope.currentTag}); // make infinite scroll?
     // $scope.globalhashtag = global_hashtag;
 	
     //not enabled right now
@@ -6911,11 +6869,11 @@ TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
 	var aperture = apertureService;
 	aperture.set('off');
-    $rootScope.showSwitch = false;
+    $rootScope.showSwitch = false;  
 
     //query instagram
     $scope.currentTag = $routeParams.hashTag;
-    $scope.instagrams = db.instagrams.query({limit:20, tag:$scope.currentTag}); // make infinite scroll?
+    $scope.instagrams = db.instagrams.query({limit:30, tag:$scope.currentTag}); // make infinite scroll?
 
     // $scope.globalhashtag = global_hashtag;
 
@@ -6935,7 +6893,7 @@ function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
     $scope.globalhashtag = global_hashtag;
 
     $scope.time = "all";
-    $scope.tweets = db.tweets.query({tag: $routeParams.hashTag, time:$scope.time});
+    $scope.tweets = db.tweets.query({limit:60, tag: $routeParams.hashTag, time:$scope.time});
 
     $scope.goBack = function(){
         window.history.back();
@@ -8497,7 +8455,7 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 }
 
 
-function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db) {
+function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
 
 	$scope.aperture = apertureService;  
 	$scope.aperture.set('off');
@@ -8517,7 +8475,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		$scope.worlds.splice(i, 1); //Removes from local array
 	  });
 	  }
-  }
+  	}
 
 	$scope.newWorld = function() {
 		console.log('newWorld()');
@@ -8530,16 +8488,31 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		});
 	}
 
-	$http.get('/api/user/profile').success(function(user){
-	console.log(user);
-	$scope.worlds = user;
-});
+	//if user login came from Meetup, then process new meetup worlds
+	if ($routeParams.incoming == 'meetup'){
+		angular.extend($rootScope, {loading: true});
+
+		$http.post('/api/process_meetups').success(function(response){
+			angular.extend($rootScope, {loading: false});
+			
+			$http.get('/api/user/profile').success(function(user){
+				console.log('asdf24232');
+				console.log(user);
+				$scope.worlds = user;		
+			});
+		});
+
+	}
+	else {
+		$http.get('/api/user/profile').success(function(user){
+			console.log(user);
+			$scope.worlds = user;		
+		});
+	}
 }
 
 function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
 console.log('--EditController--');
-
-var ears = []
 
 var aperture = apertureService;
 var map = mapManager;
@@ -8963,33 +8936,25 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
-	
-	var len = ears.length;
-	for (var i = 0; i < len; i++) {
-		console.log(ears);
-		ears[i]();
-	}
+	angular.extend($rootScope, {navTitle: ""});
 	
 });
 
-ears.push(
 $scope.$watch('style.navBG_color', function(current, old) {
 	style.navBG_color = current;
-}));
+});
 
-ears.push(
 $scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
-	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$scope.world.id+"' class='preview-link' target='_blank'>Preview</a>"});
-}));
+	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
+});
 
-ears.push($scope.$watch('temp.scale', function(current, old) {
+$scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
 		console.log(map.getPlaceImageBounds());
 	}
-}))
+})
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -9019,12 +8984,7 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
-
 var map = mapManager;
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-
-zoomControl.style.display = 'none'; 
-
 
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
@@ -9087,34 +9047,11 @@ $scope.selectMapTheme = function(name) {
 			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
 			
 			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
-			$scope.setThemeFromMap(name);
+			//	$scope.setThemeFromMap();
 			//}
 		}
 }
 	
-$scope.setThemeFromMap = function(name) {
-switch (name) { 
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-}
-console.log($scope.style)
-
-    db.styles.create($scope.style, function(response){
-        console.log(response);
-    });
-}	
-
-
 $scope.saveAndExit = function() {
 	$scope.save();
 	if ($scope.world.id) {
@@ -9133,7 +9070,6 @@ $scope.save = function() {
     	console.log(response);
     	$scope.world.id = response[0].id; //updating world id with server new ID
     });
-    
 }
 
 var firstWalk = [
@@ -9190,7 +9126,7 @@ var firstWalk = [
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
-	height: 56,
+	height: 48,
 	skip: false}
 ];
 
@@ -9226,19 +9162,6 @@ while (i < $scope.walk.length) {
 $scope.position = 0;
 $scope.progress[$scope.position].status = 'active';
 
-////////////////////////////////////////////////////////////
-////////////////////////LISTENERS///////////////////////////
-////////////////////////////////////////////////////////////
-$scope.$on('$destroy', function (event) {
-	console.log('$destroy event', event);
-	if (event.targetScope===$scope) {
-		if (zoomControl) {
-			zoomControl.style.display = 'block';
-		}
-	}
-});
-
-
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -9251,8 +9174,8 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		 console.log(data.err);
 	} else {
 		console.log(data);
-		angular.extend($scope.world, data.world);
-		angular.extend($scope.style, data.style);
+		angular.extend($scope.world, data.world);	
+		//angular.extend($scope.style, data.style);
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 	}
 });
@@ -10580,13 +10503,25 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
-    $scope.aperture.set('third');
+    $scope.aperture.set('off');
 	
     angular.extend($rootScope, {loading: false});
 	
 	$scope.selectedIndex = 0;
 	
 	var landmarksLoaded;
+	
+  	$scope.filterCategory = function(c) {
+	  	console.log('--goToCategory--');
+	  	$scope.aperture.set('half');
+	  	
+	  	redoMarkers($scope.landmarks, c);
+	}
+	 
+	 $scope.returnToWorld = function() {
+		 redoMarkers($scope.landmarks);
+	 }
+
 
   	//currently only for upcoming...
   	function setLookup() {
