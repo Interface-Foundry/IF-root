@@ -1,0 +1,110 @@
+.tour {
+	padding: 0;
+	margin: 0;
+}
+
+.tour-page {
+	display: block;
+	width: 100%;
+	height: 800px;
+}
+
+.tour-page:nth-child(odd) {
+	background-color: #CCC;
+}
+
+.tour-page:nth-child(even) {
+	background-color: #DDD;
+}
+
+.tour-img {
+	position: absolute;
+}
+
+.tour-img.map-left {
+	opacity: .5;
+	margin-left: -768px;
+	background-color: #111;
+}
+
+.tour-img.map-right {
+	opacity: .5;
+	margin-left: 768px;
+	background-color: #111;
+}
+
+.tour-container {
+	width: 768px;
+	position: relative;
+	left: 50%;
+	margin-left: -384px;
+}
+
+.radar1 {
+position: absolute;
+top: 400px;
+left: 200px;
+}
+
+.radar-inner {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	border-radius: 100%;
+	background-color: #000;
+}
+
+.radar-outer {
+	position: absolute;
+	top: -10px;
+	left: -10px;
+	width: 40px;
+	height: 40px;
+	border-radius: 100%;
+	-webkit-animation: radar 1s infinite ease-out;
+	animation: radar 1s infinite ease-out;
+	
+	background-color: rgba(0,0,0,0.2); 
+	outline: 1px solid transparent;
+}
+
+@-webkit-keyframes radar {
+	from {-webkit-transform: scale(0.5);}
+	to {-webkit-transform: scale(1.0); opacity:0;}
+}
+
+.tour-iphone {
+	position: relative;
+	width: 228px;
+	height: 424px;
+	border: 20px solid rgba(0,0,0,.30);
+	border-radius: 30px;
+}
+
+.tour-iphone-button {
+	position: absolute;
+	left: 78px;
+	bottom: 12px;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: rgba(0,0,0,0.3);
+}
+
+.tour-ipad {
+	position: relative;
+	width: 300px;
+	height: 232px;
+	border: 12px solid rgba(0,0,0,.30);
+	border-radius: 30px;
+}
+
+.tour-ipad-button {
+	position: absolute; 
+	right: 8px;
+	top: 102px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background-color: rgba(0,0,0,.30);
+}

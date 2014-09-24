@@ -17,6 +17,5 @@ var ifGlobals = {
 	}
 }
 
-
 return ifGlobals;
 }]);

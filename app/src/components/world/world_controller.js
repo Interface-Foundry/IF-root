@@ -1,10 +1,11 @@
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce) {
+function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce, worldTree, $q) {
 
 	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 	zoomControl.style.top = "60px";
 	zoomControl.style.left = "1%";
 
     var map = mapManager;
+    	map.resetMap();
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
@@ -66,7 +67,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		var zoomLevel = 19;
 		
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel);
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 		} else {
 			console.error('No center found! Error!');
 		}
@@ -172,7 +173,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				});
   	}
 
-	World.get({id: $routeParams.worldURL}, function(data) {
+	/*
+World.get({id: $routeParams.worldURL}, function(data) {
 		 if (data.err) {
 		 	console.log('Data error! Returning to root!');
 		 	console.log(data.err);
@@ -180,9 +182,17 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 } else {
 			$scope.loadWorld(data); 
 		}
-	});	
-	
-
+	});
+*/
+		
+	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+		console.log('worldtree success');
+		console.log(data);
+		$scope.loadWorld(data);
+	}, function(error) {
+		console.log(error);
+		//handle this better
+	});
 }
 
 

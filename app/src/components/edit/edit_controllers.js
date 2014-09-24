@@ -351,7 +351,7 @@ function showPosition(position) {
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
 	
-	map.setCenter([userLng, userLat], 17);
+	map.setCenter([userLng, userLat], 17, 'editor');
  
 	map.removeAllMarkers();
 	map.addMarker('m', {

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData','apertureService', '$rootScope', 
-    	function(leafletData, apertureService, $rootScope) {
+    .factory('mapManager', ['leafletData', '$rootScope', 
+    	function(leafletData, $rootScope) {
 var mapManager = {
 	center: {
 		lat: 42,
@@ -42,30 +42,61 @@ worldBounds: {
 	}
 };
 
-mapManager.setCenter = function(latlng, z) {
+mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	console.log('--mapManager--');
 	console.log('--setCenter--');
-	console.log(latlng);
-	console.log(z);
-	if (apertureService.state == 'aperture-half') {
-	console.log('--setCenter w half--');
-	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-	console.log(h);
-	var targetPt, targetLatLng;
-	leafletData.getMap().then(function(map) {
-		targetPt = map.project([latlng[1], latlng[0]], z).add([0,h/2]);
-		console.log(targetPt);
-		targetLatLng = map.unproject(targetPt, z);
-		console.log(targetLatLng);
-		angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
-		console.log(mapManager.center);
-		});
-	} else {
-	angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
+	mapManager._actualCenter = latlng;
+	mapManager._z = z;
+	
+	switch (state) {
+		case 'aperture-half':
+			setCenterWithAperture(latlng, z, 0, .5)
+			break;
+		case 'aperture-third': 
+			setCenterWithAperture(latlng, z, 0, .35);
+			break;
+		case 'editor':
+			setCenterWithAperture(latlng, z, -.2,0);
+			break;
+		default:
+			angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
+			mapManager.refresh();
 	}
+	
+	
+	function setCenterWithAperture(latlng, z, xpart, ypart) {
+		console.log('setCenterWithAperture');
+			var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+			w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
+			targetPt, targetLatLng;
+			
+		leafletData.getMap().then(function(map) {
+				targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
+				console.log(targetPt);
+				targetLatLng = map.unproject(targetPt, z);
+				console.log(targetLatLng);
+				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+				console.log(mapManager.center);
+				mapManager.refresh();
+		});
+	}
+}
+
+mapManager.apertureUpdate = function(state) {
+	if (mapManager._actualCenter && mapManager._z) {
+		mapManager.setCenter(mapManager._actualCenter, mapManager._z, state);
+	}
+}
+
+mapManager.resetMap = function() {
+	mapManager.removeAllMarkers();
+	mapManager.removeAllPaths();
+	mapManager.removeOverlays();
+	mapManager.removeCircleMask();
+	mapManager.removePlaceImage();
 	mapManager.refresh();
 }
-		
+
 /* addMarker
 Key: Name of marker to be added
 Marker: Object representing marker
@@ -176,6 +207,10 @@ mapManager.addPath = function(key, path, safe) {
 	refreshMap();
 }
 
+mapManager.removeAllPaths = function() {
+	mapManager.paths = {};
+}
+
 /* setTiles
 Name: Name of tileset from dictionary
 */
@@ -271,7 +306,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 
 mapManager.removeOverlays = function() {
 	mapManager.layers.overlays = {};
-	map.refresh();
+	mapManager.refresh();
 }
 
 

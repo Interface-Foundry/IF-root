@@ -59,28 +59,29 @@ angular.module('tidepoolsServices', ['ngResource'])
             return db;
         }
     ])
-    .factory('apertureService', ['leafletData', 
-    	function(leafletData) {
-	    	var aperture = {};
-			aperture.off = true;
-	    	aperture.state = 'aperture-off';
-	    	aperture.navfix = 'navfix';
+    .factory('apertureService', ['leafletData','mapManager',
+    	function(leafletData,mapManager) {
+	    	var aperture = {
+				off: true,
+				state: 'aperture-off',
+				navfix:  'navfix'
+	    	}
+	    	var map = mapManager;
+	    	
 	    	
 	    	aperture.toggle = function(state) {
-	    		if (aperture.off)  {
+	    		if (aperture.state != 'aperture-full')  {
 		    			aperture.off = false;
 		    			console.log('toggling aperture on');
 		    			aperture.navfix = '';
 						if (state == 'half') {
-						console.log('half');	
-						aperture.state = 'aperture-half';
+						aperture.set('half');
 						}
 						if (state == 'full') {
-						console.log('full');
-						aperture.state = 'aperture-full';
+						aperture.set('full');
 						}
 				} else {
-				console.log('off');
+					console.log('off');
 					aperture.off = true;
 					aperture.state = 'aperture-off';
 					aperture.navfix = 'navfix';
@@ -93,25 +94,28 @@ angular.module('tidepoolsServices', ['ngResource'])
 						aperture.off = true;
 						aperture.state = 'aperture-off';
 						aperture.navfix = 'navfix';
+						map.apertureUpdate('aperture-off');
 						break;
 					case 'third': 
 						aperture.off = false;
 						aperture.state = 'aperture-third';
 						aperture.navfix = '';
+						map.apertureUpdate('aperture-third');
 						break;
 					case 'half':
 						aperture.off = false;
 						aperture.state = 'aperture-half';
 						aperture.navfix = '';
+						map.apertureUpdate('aperture-half');
 						break;
 					case 'full':
 						aperture.off = false;
 						aperture.state = 'aperture-full';
 						aperture.navfix = '';
+						map.apertureUpdate('aperture-full');
 						break;
 				}
 				}
-			
 			return aperture;
     }])
 

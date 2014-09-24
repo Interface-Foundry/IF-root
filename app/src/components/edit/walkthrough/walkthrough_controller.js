@@ -17,7 +17,6 @@ var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 
 zoomControl.style.display = 'none'; 
 
-
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
 		$scope.position++; 
@@ -197,12 +196,42 @@ var meetupWalk = [
 	},
 	//1 
 	{title: 'Confirm',
-	caption: 'Make sure the information we got from Meetup.com is correct',
+	caption: 'Make sure this information from Meetup.com is correct',
 	view: 'meetup_confirm.html',
 	height: 400,
 	valid: function() {return true},
 	skip: false
-	}
+	},
+	{title: 'Kind',
+	caption: 'What kind is it?',
+	view: 'kind.html',
+	height: 220,
+	valid: function() {return typeof $scope.world.category == "string"},
+	skip: false},
+	{title: 'Hashtag',
+	caption: '//for insta and twitter//',
+	view: 'hashtag.html',
+	height: 400,
+	valid: function() {return true},
+	skip: false,
+	},
+	{title: 'Picture',
+	caption: 'Upload a picture',
+	view: 'picture.html',
+	height: 194,
+	valid: function() {return typeof $scope.world.avatar == "string"},
+	skip: true},
+	{title: 'Maps',
+	caption: 'Choose a map',
+	view: 'maptheme.html',
+	height: 426,
+	valid: function() {return true},
+	skip: true},
+	{title: 'Done!',
+	caption: 'Now you can add landmarks or edit your world',
+	view: 'done.html',
+	height: 56,
+	skip: false}
 ];
 
 $scope.walk = firstWalk;
@@ -245,6 +274,10 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		console.log(data);
 		angular.extend($scope.world, data.world);
 		angular.extend($scope.style, data.style);
+		
+		if ($scope.world.source_meetup) {
+			$scope.walk = meetupWalk;
+		}
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 	}
 });

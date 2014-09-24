@@ -4742,9 +4742,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       //when('/post/:landmarkID/:option', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
       //when('/post/:landmarkID/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}).
 
-      when('/newpost', {templateUrl: 'partials/landmark-new.html'}). 
-      when('/newpost/:type', {templateUrl: 'partials/landmark-new-type.html', controller: LandmarkNewCtrl, resolve: {loggedin: checkLoggedin}}).
-
       when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
       
@@ -4754,7 +4751,9 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
 	 when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
 	 
-	 when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, rsolve: {loggedin: checkLoggedin}}).
+	 when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, resolve: {loggedin: checkLoggedin}}).
+      
+      when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: MeetupController}).
       
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
       
@@ -6302,28 +6301,29 @@ angular.module('tidepoolsServices', ['ngResource'])
             return db;
         }
     ])
-    .factory('apertureService', ['leafletData', 
-    	function(leafletData) {
-	    	var aperture = {};
-			aperture.off = true;
-	    	aperture.state = 'aperture-off';
-	    	aperture.navfix = 'navfix';
+    .factory('apertureService', ['leafletData','mapManager',
+    	function(leafletData,mapManager) {
+	    	var aperture = {
+				off: true,
+				state: 'aperture-off',
+				navfix:  'navfix'
+	    	}
+	    	var map = mapManager;
+	    	
 	    	
 	    	aperture.toggle = function(state) {
-	    		if (aperture.off)  {
+	    		if (aperture.state != 'aperture-full')  {
 		    			aperture.off = false;
 		    			console.log('toggling aperture on');
 		    			aperture.navfix = '';
 						if (state == 'half') {
-						console.log('half');	
-						aperture.state = 'aperture-half';
+						aperture.set('half');
 						}
 						if (state == 'full') {
-						console.log('full');
-						aperture.state = 'aperture-full';
+						aperture.set('full');
 						}
 				} else {
-				console.log('off');
+					console.log('off');
 					aperture.off = true;
 					aperture.state = 'aperture-off';
 					aperture.navfix = 'navfix';
@@ -6336,25 +6336,28 @@ angular.module('tidepoolsServices', ['ngResource'])
 						aperture.off = true;
 						aperture.state = 'aperture-off';
 						aperture.navfix = 'navfix';
+						map.apertureUpdate('aperture-off');
 						break;
 					case 'third': 
 						aperture.off = false;
 						aperture.state = 'aperture-third';
 						aperture.navfix = '';
+						map.apertureUpdate('aperture-third');
 						break;
 					case 'half':
 						aperture.off = false;
 						aperture.state = 'aperture-half';
 						aperture.navfix = '';
+						map.apertureUpdate('aperture-half');
 						break;
 					case 'full':
 						aperture.off = false;
 						aperture.state = 'aperture-full';
 						aperture.navfix = '';
+						map.apertureUpdate('aperture-full');
 						break;
 				}
 				}
-			
 			return aperture;
     }])
 
@@ -6470,14 +6473,13 @@ var ifGlobals = {
 	}
 }
 
-
 return ifGlobals;
 }]);
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData','apertureService', '$rootScope', 
-    	function(leafletData, apertureService, $rootScope) {
+    .factory('mapManager', ['leafletData', '$rootScope', 
+    	function(leafletData, $rootScope) {
 var mapManager = {
 	center: {
 		lat: 42,
@@ -6517,30 +6519,61 @@ worldBounds: {
 	}
 };
 
-mapManager.setCenter = function(latlng, z) {
+mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	console.log('--mapManager--');
 	console.log('--setCenter--');
-	console.log(latlng);
-	console.log(z);
-	if (apertureService.state == 'aperture-half') {
-	console.log('--setCenter w half--');
-	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-	console.log(h);
-	var targetPt, targetLatLng;
-	leafletData.getMap().then(function(map) {
-		targetPt = map.project([latlng[1], latlng[0]], z).add([0,h/2]);
-		console.log(targetPt);
-		targetLatLng = map.unproject(targetPt, z);
-		console.log(targetLatLng);
-		angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
-		console.log(mapManager.center);
-		});
-	} else {
-	angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
+	mapManager._actualCenter = latlng;
+	mapManager._z = z;
+	
+	switch (state) {
+		case 'aperture-half':
+			setCenterWithAperture(latlng, z, 0, .5)
+			break;
+		case 'aperture-third': 
+			setCenterWithAperture(latlng, z, 0, .35);
+			break;
+		case 'editor':
+			setCenterWithAperture(latlng, z, -.2,0);
+			break;
+		default:
+			angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
+			mapManager.refresh();
 	}
+	
+	
+	function setCenterWithAperture(latlng, z, xpart, ypart) {
+		console.log('setCenterWithAperture');
+			var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+			w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
+			targetPt, targetLatLng;
+			
+		leafletData.getMap().then(function(map) {
+				targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
+				console.log(targetPt);
+				targetLatLng = map.unproject(targetPt, z);
+				console.log(targetLatLng);
+				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+				console.log(mapManager.center);
+				mapManager.refresh();
+		});
+	}
+}
+
+mapManager.apertureUpdate = function(state) {
+	if (mapManager._actualCenter && mapManager._z) {
+		mapManager.setCenter(mapManager._actualCenter, mapManager._z, state);
+	}
+}
+
+mapManager.resetMap = function() {
+	mapManager.removeAllMarkers();
+	mapManager.removeAllPaths();
+	mapManager.removeOverlays();
+	mapManager.removeCircleMask();
+	mapManager.removePlaceImage();
 	mapManager.refresh();
 }
-		
+
 /* addMarker
 Key: Name of marker to be added
 Marker: Object representing marker
@@ -6651,6 +6684,10 @@ mapManager.addPath = function(key, path, safe) {
 	refreshMap();
 }
 
+mapManager.removeAllPaths = function() {
+	mapManager.paths = {};
+}
+
 /* setTiles
 Name: Name of tileset from dictionary
 */
@@ -6746,7 +6783,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 
 mapManager.removeOverlays = function() {
 	mapManager.layers.overlays = {};
-	map.refresh();
+	mapManager.refresh();
 }
 
 
@@ -6835,6 +6872,71 @@ styleManager.resetNavBG = function() {
 return styleManager;
 		}
 	]);
+angular.module('tidepoolsServices')
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db',
+	function($cacheFactory, $q, World, db) {
+
+var worldTree = {
+	worldCache: $cacheFactory('worlds'),
+	styleCache: $cacheFactory('styles'),
+	landmarkCache: $cacheFactory('landmarks')
+}
+
+worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
+	var deferred = $q.defer();
+	
+	var world = worldTree.worldCache.get(id);
+	if (world && world.style) {
+		var style = worldTree.styleCache.get(world.style.styleID);
+			if (style) {
+				deferred.resolve({world: world, style: style});
+				console.log('world & style in cache!');
+			} else {
+				askServer();
+			}
+	} else {
+		askServer();
+	}
+		
+	function askServer() {
+		World.get({id: id}, function(data) {
+			if (data.err) {
+				deferred.reject(data.err);
+	 		} else {
+	 			worldTree.worldCache.put(data.world.id, data.world);
+	 			worldTree.styleCache.put(data.style._id, data.style);
+		 		deferred.resolve(data);
+		 	}
+		 });
+	}
+	
+	return deferred.promise;
+}
+
+worldTree.getLandmarks = function(_id) { //takes world's _id
+	var deferred = $q.defer();
+	
+	var landmarks = worldTree.landmarkCache.get(_id);
+	if (landmarks) {
+		deferred.resolve(landmarks);
+		console.log('landmarks in cache!');
+	} else {
+		db.landmarks.query({queryFilter:'all', parentID: _id}, function(data) {
+			if (data.err) {
+				deferred.reject(data.err);
+			} else {
+				worldTree.landmarkCache.put(_id, data);
+				deferred.resolve(data);
+			}
+		});
+	}
+	
+	return deferred.promise;
+}
+
+return worldTree;
+}
+]);
 var themeDict = {
 	urban: {
 		name: 'urban',
@@ -8889,7 +8991,7 @@ function showPosition(position) {
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
 	
-	map.setCenter([userLng, userLat], 17);
+	map.setCenter([userLng, userLat], 17, 'editor');
  
 	map.removeAllMarkers();
 	map.addMarker('m', {
@@ -9024,7 +9126,6 @@ var map = mapManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 
 zoomControl.style.display = 'none'; 
-
 
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
@@ -9205,12 +9306,42 @@ var meetupWalk = [
 	},
 	//1 
 	{title: 'Confirm',
-	caption: 'Make sure the information we got from Meetup.com is correct',
+	caption: 'Make sure this information from Meetup.com is correct',
 	view: 'meetup_confirm.html',
 	height: 400,
 	valid: function() {return true},
 	skip: false
-	}
+	},
+	{title: 'Kind',
+	caption: 'What kind is it?',
+	view: 'kind.html',
+	height: 220,
+	valid: function() {return typeof $scope.world.category == "string"},
+	skip: false},
+	{title: 'Hashtag',
+	caption: '//for insta and twitter//',
+	view: 'hashtag.html',
+	height: 400,
+	valid: function() {return true},
+	skip: false,
+	},
+	{title: 'Picture',
+	caption: 'Upload a picture',
+	view: 'picture.html',
+	height: 194,
+	valid: function() {return typeof $scope.world.avatar == "string"},
+	skip: true},
+	{title: 'Maps',
+	caption: 'Choose a map',
+	view: 'maptheme.html',
+	height: 426,
+	valid: function() {return true},
+	skip: true},
+	{title: 'Done!',
+	caption: 'Now you can add landmarks or edit your world',
+	view: 'done.html',
+	height: 56,
+	skip: false}
 ];
 
 $scope.walk = firstWalk;
@@ -9253,6 +9384,10 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		console.log(data);
 		angular.extend($scope.world, data.world);
 		angular.extend($scope.style, data.style);
+		
+		if ($scope.world.source_meetup) {
+			$scope.walk = meetupWalk;
+		}
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 	}
 });
@@ -10444,6 +10579,9 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 
 
 }
+function MeetupController($scope) {
+	
+}
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
   	var style = styleManager;
@@ -10570,13 +10708,14 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 
 		map.refresh();
 }
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce) {
+function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce, worldTree, $q) {
 
 	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 	zoomControl.style.top = "60px";
 	zoomControl.style.left = "1%";
 
     var map = mapManager;
+    	map.resetMap();
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
@@ -10638,7 +10777,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		var zoomLevel = 19;
 		
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]],zoomLevel);
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 		} else {
 			console.error('No center found! Error!');
 		}
@@ -10744,7 +10883,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				});
   	}
 
-	World.get({id: $routeParams.worldURL}, function(data) {
+	/*
+World.get({id: $routeParams.worldURL}, function(data) {
 		 if (data.err) {
 		 	console.log('Data error! Returning to root!');
 		 	console.log(data.err);
@@ -10752,9 +10892,17 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 } else {
 			$scope.loadWorld(data); 
 		}
-	});	
-	
-
+	});
+*/
+		
+	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+		console.log('worldtree success');
+		console.log(data);
+		$scope.loadWorld(data);
+	}, function(error) {
+		console.log(error);
+		//handle this better
+	});
 }
 
 

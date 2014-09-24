@@ -1,0 +1,50 @@
+<div class="col-xs-12">
+<div class="form-group">
+	<label for="worldName">Name</label>
+	<input type="text" name="worldName" class="form-control" ng-model="world.name" required ng-minlength="1">
+</div>
+<div class="form-group">
+	<label for=""></label>
+	<textarea name="worldDescription" class="form-control" ng-model="world.description" ng-show="world.description"></textarea>
+</div>
+<form name="time" class="form-inline" role="form">
+	<div class="form-group">
+		<label class="control-label">
+		<i class="glyphicon glyphicon-calendar"></i> Start Time 
+		<span class="glyphicon glyphicon-info-sign info"></span></label><br>
+			<input type="text" size="8" class="form-control" 
+					name="startTimeDate"
+					ng-model="world.time.start"
+					data-autoclose="1"
+					placement="bottom-right" 
+					placeholder="Date" 
+					dateType="iso" bs-datepicker>
+			<input type="text" size="6" class="form-control" 
+					name="startTimeHours"
+					ng-model="world.time.start"
+					data-autoclose="1"
+					placement="bottom"
+					placeholder="Time" 
+					timeType="iso" bs-timepicker>
+	</div>
+	<div class="form-group">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time 
+		<span class="glyphicon glyphicon-info-sign info"></span></label><br>
+			<input type="text" size="8" class="form-control" 
+					name="endTimeDate"
+					ng-model="world.time.end"
+					data-autoclose="1" 
+					placement="bottom-left"
+					placeholder="Date" 
+					dateType="iso" bs-datepicker>
+			<input type="text" size="6" class="form-control" 
+					name="endTimeHours"
+					ng-model="world.time.end" 
+					data-autoclose="1"
+					placeholder="Time"
+					placement="bottom"
+					timeType="iso" bs-timepicker>
+	</div>
+</form>
+
+</div>
