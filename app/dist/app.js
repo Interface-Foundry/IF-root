@@ -4829,6 +4829,63 @@ angular.module('IF-directives', [])
         });
     };
 });
+angular.module('IF-directives', [])
+.directive('fitFont', function($rootScope) {
+	return {
+		restrict: 'A',
+		link: function($scope, $element, attrs) {
+			var fontSize = parseInt($element.css('font-size'));
+			var domElement = $element[0];
+			var ears = []; //listeners
+			
+			function hasOverflow(e) {
+				if (e.offsetHeight < e.scrollHeight || e.offsetWidth < e.scrollWidth) {
+					return true;
+					} else {
+					return false;
+				}
+			}
+			
+			function resolveOverflow() {
+				while (hasOverflow(domElement) && fontSize > 12) {
+					fontSize--;
+					$element.css('font-size', fontSize+'px');
+				} 
+			}
+			
+			ears.push(
+			$scope.$watch( //watch for resizes
+				function() {
+					return domElement.clientWidth;
+				}, 
+				function (newWidth, oldWidth) {
+					if (newWidth != oldWidth ) {
+					if (newWidth < oldWidth) {
+							resolveOverflow();
+						} else {
+							do {
+								fontSize++;
+								$element.css('font-size', fontSize+'px');
+							} while(hasOverflow(domElement)==false);
+							resolveOverflow();
+						}			
+					}
+			}))
+			
+			ears.push(
+			$scope.$watch('world.name', function(value) {
+				resolveOverflow();
+			}))
+			
+		$scope.$on("$destroy", function() {
+				for (var i = 0, len = ears.length; i < len; i++) {
+					ears[i].pop()();
+				}
+			});
+		}
+	}
+});
+
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
 	return {
@@ -6283,16 +6340,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 					aperture.navfix = 'navfix';
 				}
 				
-				/*if ($rootScope.apertureOn) {
-					//open
-					console.log('opening');
-					angular.extend($rootScope, {apertureSize: h});
-					console.log($rootScope.apertureSize);
-				} else { 
-					console.log('closing aperture');
-					angular.extend($rootScope, {apertureSize: 0});
-					console.log($rootScope.apertureSize);
-				}*/
+			
 			}
 			
 			aperture.set = function(state) {
@@ -6820,7 +6868,7 @@ angular.module('tidepoolsServices')
 	.factory('styleManager', [
 		function() {
 var styleManager = {
-	navBG_color: 'rgba(0,188,212,0.8)'
+	navBG_color: 'rgba(0,188,212,0.96)'
 	//---local settings---
 	/*bodyBG_color: '#FFF',
 	titleBG_color,
@@ -6831,7 +6879,7 @@ var styleManager = {
 }
 
 styleManager.resetNavBG = function() {
-	styleManager.navBG_color = 'rgba(0,188,212,0.8)';
+	styleManager.navBG_color = 'rgba(0,188,212,0.96)';
 }
 
 return styleManager;
@@ -8623,10 +8671,11 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
 console.log('--EditController--');
 
-var aperture = apertureService;
-var map = mapManager;
-var style = styleManager;
-var alerts = alertManager;
+var aperture = apertureService,
+	ears = [],
+	map = mapManager,
+	style = styleManager,
+	alerts = alertManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
@@ -9045,25 +9094,32 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: ""});
+	angular.extend($rootScope, {navTitle: "Bubbl.li"});
 	
+	var len = ears.length;
+	for (var i = 0; i < len; i++) {
+		console.log(ears);
+		ears[i]();
+	}
 });
 
+ears.push(
 $scope.$watch('style.navBG_color', function(current, old) {
 	style.navBG_color = current;
-});
+}));
 
-$scope.$watch('world.name', function(current, old) {
+ears.push($scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
 	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
-});
+}));
 
+ears.push(
 $scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
 		console.log(map.getPlaceImageBounds());
 	}
-})
+}));
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -9160,9 +9216,32 @@ $scope.selectMapTheme = function(name) {
 			
 			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
 			//	$scope.setThemeFromMap();
+			$scope.setThemeFromMap(name);
 			//}
 		}
 }
+
+$scope.setThemeFromMap = function(name) {
+switch (name) { 
+	case 'urban':
+		angular.extend($scope.style, themeDict['urban']);
+		break;
+	case 'sunset':
+		angular.extend($scope.style, themeDict['sunset']);
+		break;
+	case 'fairy':
+		angular.extend($scope.style, themeDict['fairy']);
+		break;
+	case 'arabesque':
+		angular.extend($scope.style, themeDict['arabesque']);
+		break;
+}
+console.log($scope.style)
+
+    db.styles.create($scope.style, function(response){
+        console.log(response);
+    });
+}	
 	
 $scope.saveAndExit = function() {
 	$scope.save();
@@ -9238,7 +9317,7 @@ var firstWalk = [
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
-	height: 48,
+	height: 56,
 	skip: false}
 ];
 
@@ -9304,6 +9383,17 @@ while (i < $scope.walk.length) {
 $scope.position = 0;
 $scope.progress[$scope.position].status = 'active';
 
+////////////////////////////////////////////////////////////
+////////////////////////LISTENERS///////////////////////////
+////////////////////////////////////////////////////////////
+$scope.$on('$destroy', function (event) {
+	console.log('$destroy event', event);
+	if (event.targetScope===$scope) {
+		if (zoomControl) {
+			zoomControl.style.display = 'block';
+		}
+	}
+});
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -10653,25 +10743,13 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
-    $scope.aperture.set('off');
+    $scope.aperture.set('third');
 	
     angular.extend($rootScope, {loading: false});
 	
 	$scope.selectedIndex = 0;
 	
 	var landmarksLoaded;
-	
-  	$scope.filterCategory = function(c) {
-	  	console.log('--goToCategory--');
-	  	$scope.aperture.set('half');
-	  	
-	  	redoMarkers($scope.landmarks, c);
-	}
-	 
-	 $scope.returnToWorld = function() {
-		 redoMarkers($scope.landmarks);
-	 }
-
 
   	//currently only for upcoming...
   	function setLookup() {
