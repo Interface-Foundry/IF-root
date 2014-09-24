@@ -902,7 +902,6 @@ li.active .landmark-form {
 }
 
 .widgetCheck input {visibility:hidden}
-<<<<<<< HEAD
 .tour {
 	padding: 0;
 	margin: 0;
@@ -1013,32 +1012,6 @@ left: 200px;
 	border-radius: 50%;
 	background-color: rgba(0,0,0,.30);
 }
-.world-toolbar {
-	height: 88px;
-	width: 100%;	
-}
-
-.world-avatar {
-	width: 88px;
-	height: 88px;
-	float: left;
-}
-
-.world-title {
-	height: 72px;
-	font-size: 30px;
-	overflow: hidden;
-	padding: 8px;
-}
-
-.world-footer {
-	height: 16px;
-	width: 100%;
-	/*background: rgba(0,0,0,0.1);*/
-}
-
-=======
->>>>>>> FETCH_HEAD
 .avatar {
 	height: 80px;
 	width: 80px;
