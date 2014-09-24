@@ -5954,6 +5954,9 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
               else if (user.twitter){
                   $rootScope.userName = user.twitter.displayName;
               }
+              else if (user.meetup){
+                  $rootScope.userName = user.meetup.displayName;
+              }
               else if (user.local){
                   $rootScope.userName = user.local.email;             
               }
