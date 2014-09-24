@@ -45,6 +45,15 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
 		 
+		 //show edit buttons if user is world owner
+		 if ($rootScope.userID && $scope.world.permissions){
+			 if ($rootScope.userID == $scope.world.permissions.ownerID){
+			 	$scope.showEdit = true;
+			 }
+			 else {
+			 	$scope.showEdit = false;
+			 }
+		 }
 
 		 console.log($scope.world);
 		 console.log($scope.style);
