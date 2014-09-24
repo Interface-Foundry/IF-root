@@ -4656,9 +4656,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
         // Authenticated
         if (user !== '0'){
-              console.log('------- USER -------');
-
-              console.log('user:'+user);
 
               //determine name to display on login (should check for name extension before adding...)
               if (user.facebook){
@@ -5946,6 +5943,8 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 
         // Authenticated
         if (user !== '0'){
+
+            console.log("user "+user);
               //determine name to display on login (should check for name extension before adding...)
               if (user.facebook){
                   $rootScope.userName = user.facebook.name;
