@@ -1,8 +1,6 @@
 function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
 console.log('--EditController--');
 
-var ears = []
-
 var aperture = apertureService;
 var map = mapManager;
 var style = styleManager;
@@ -425,33 +423,25 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
-	
-	var len = ears.length;
-	for (var i = 0; i < len; i++) {
-		console.log(ears);
-		ears[i]();
-	}
+	angular.extend($rootScope, {navTitle: ""});
 	
 });
 
-ears.push(
 $scope.$watch('style.navBG_color', function(current, old) {
 	style.navBG_color = current;
-}));
+});
 
-ears.push(
 $scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
-	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$scope.world.id+"' class='preview-link' target='_blank'>Preview</a>"});
-}));
+	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
+});
 
-ears.push($scope.$watch('temp.scale', function(current, old) {
+$scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
 		console.log(map.getPlaceImageBounds());
 	}
-}))
+})
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

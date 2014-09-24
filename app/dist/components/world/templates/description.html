@@ -1,15 +1,25 @@
-<div class="col-xs-12">
-	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Description</h4>
-</div>
-<div class="col-xs-12 landmark">
-	<div class="card description" ng-style="{'background-color': style.cardBG_color}">
-		<div ng-switch on="descriptionType">
-		    <div ng-switch-when="description">
-		        <div ng-bind-html="world.description"></div>
-		    </div>
-		   	<div ng-switch-when="summary">
-		        <span>{{world.summary}}</span>
-		    </div>
+	<div ng-style="{'background-color': style.bodyBG_color}">
+		<div class="col-xs-12 widget_margin">
+		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Description</h4>
+		</div>
+		<div class="col-sm-6 col-xs-12 landmark">
+			<div class="media card" ng-style="{'background-color': style.cardBG_color}">
+				<div class="media-body">
+					<h4 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>
+
+						<div ng-switch on="descriptionType">
+						    <div ng-switch-when="description">
+						        <div ng-bind-html="world.description"></div>
+						    </div>
+						   	<div ng-switch-when="summary">
+						        <span>{{world.summary}}</span>
+						    </div>
+						    <div ng-switch-default>
+						    </div>
+						</div>	
+					</h4>
+
+				</div>
+			</div>
 		</div>
 	</div>
-</div>

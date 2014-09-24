@@ -4,7 +4,7 @@ function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureS
     aperture.set('off');
     //query tweets
     $scope.currentTag = $routeParams.hashTag;
-    $scope.tweets = db.tweets.query({limit:70, tag:$scope.currentTag}); // make infinite scroll?
+    $scope.tweets = db.tweets.query({limit:60, tag:$scope.currentTag}); // make infinite scroll?
     // $scope.globalhashtag = global_hashtag;
 	
     //not enabled right now
@@ -24,11 +24,11 @@ TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
 	var aperture = apertureService;
 	aperture.set('off');
-    $rootScope.showSwitch = false;
+    $rootScope.showSwitch = false;  
 
     //query instagram
     $scope.currentTag = $routeParams.hashTag;
-    $scope.instagrams = db.instagrams.query({limit:20, tag:$scope.currentTag}); // make infinite scroll?
+    $scope.instagrams = db.instagrams.query({limit:30, tag:$scope.currentTag}); // make infinite scroll?
 
     // $scope.globalhashtag = global_hashtag;
 
@@ -48,7 +48,7 @@ function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
     $scope.globalhashtag = global_hashtag;
 
     $scope.time = "all";
-    $scope.tweets = db.tweets.query({tag: $routeParams.hashTag, time:$scope.time});
+    $scope.tweets = db.tweets.query({limit:60, tag: $routeParams.hashTag, time:$scope.time});
 
     $scope.goBack = function(){
         window.history.back();

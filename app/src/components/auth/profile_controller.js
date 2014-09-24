@@ -1,4 +1,4 @@
-function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db) {
+function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
 
 	$scope.aperture = apertureService;  
 	$scope.aperture.set('off');
@@ -18,7 +18,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		$scope.worlds.splice(i, 1); //Removes from local array
 	  });
 	  }
-  }
+  	}
 
 	$scope.newWorld = function() {
 		console.log('newWorld()');
@@ -31,8 +31,25 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		});
 	}
 
-	$http.get('/api/user/profile').success(function(user){
-	console.log(user);
-	$scope.worlds = user;
-});
+	//if user login came from Meetup, then process new meetup worlds
+	if ($routeParams.incoming == 'meetup'){
+		angular.extend($rootScope, {loading: true});
+
+		$http.post('/api/process_meetups').success(function(response){
+			angular.extend($rootScope, {loading: false});
+			
+			$http.get('/api/user/profile').success(function(user){
+				console.log('asdf24232');
+				console.log(user);
+				$scope.worlds = user;		
+			});
+		});
+
+	}
+	else {
+		$http.get('/api/user/profile').success(function(user){
+			console.log(user);
+			$scope.worlds = user;		
+		});
+	}
 }

@@ -9,13 +9,25 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	var style = styleManager;
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
-    $scope.aperture.set('third');
+    $scope.aperture.set('off');
 	
     angular.extend($rootScope, {loading: false});
 	
 	$scope.selectedIndex = 0;
 	
 	var landmarksLoaded;
+	
+  	$scope.filterCategory = function(c) {
+	  	console.log('--goToCategory--');
+	  	$scope.aperture.set('half');
+	  	
+	  	redoMarkers($scope.landmarks, c);
+	}
+	 
+	 $scope.returnToWorld = function() {
+		 redoMarkers($scope.landmarks);
+	 }
+
 
   	//currently only for upcoming...
   	function setLookup() {

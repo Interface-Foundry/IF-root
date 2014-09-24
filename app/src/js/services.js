@@ -86,6 +86,17 @@ angular.module('tidepoolsServices', ['ngResource'])
 					aperture.state = 'aperture-off';
 					aperture.navfix = 'navfix';
 				}
+				
+				/*if ($rootScope.apertureOn) {
+					//open
+					console.log('opening');
+					angular.extend($rootScope, {apertureSize: h});
+					console.log($rootScope.apertureSize);
+				} else { 
+					console.log('closing aperture');
+					angular.extend($rootScope, {apertureSize: 0});
+					console.log($rootScope.apertureSize);
+				}*/
 			}
 			
 			aperture.set = function(state) {

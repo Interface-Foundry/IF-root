@@ -2,6 +2,7 @@
 var LocalStrategy    = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
+var MeetupStrategy = require('passport-meetup').Strategy;
 
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
@@ -311,6 +312,90 @@ module.exports = function(passport) {
             }
 
         });
+
+    }));
+
+   // =========================================================================
+   // MEETUP  =================================================================
+   // =========================================================================
+
+    passport.use(new MeetupStrategy({
+
+        consumerKey     : configAuth.meetupAuth.consumerKey,
+        consumerSecret  : configAuth.meetupAuth.consumerSecret,
+        callbackURL     : configAuth.meetupAuth.callbackURL,
+        passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+
+
+      },
+      function(req, token, tokenSecret, profile, done) {
+
+        // User.findOrCreate({ meetupId: profile.id }, function (err, user) {
+        //   return done(err, user);
+        // });
+
+        // asynchronous
+        process.nextTick(function() {
+
+            // check if the user is already logged in
+            if (!req.user) {
+
+                User.findOne({ 'meetup.id' : profile.id }, function(err, user) {
+                    if (err)
+                        return done(err);
+
+                    if (user) {
+                        // if there is a user id already but no token (user was linked at one point and then removed)
+                        if (!user.meetup.token) {
+                            user.meetup.token       = token;
+                            user.meetup.displayName = profile.displayName;
+                            user.meetup.raw         = profile._raw;
+
+                            user.save(function(err) {
+                                if (err){
+                                    throw err;
+                                }
+                                return done(null, user);
+                            });
+                        }
+                        return done(null, user); // user found, return that user
+                    } else {
+                        // if there is no user, create them
+                        var newUser                 = new User();
+
+                        newUser.meetup.id          = profile.id;
+                        newUser.meetup.token       = token;
+                        newUser.meetup.displayName = profile.displayName;
+                        newUser.meetup.raw         = profile._raw;
+
+                        newUser.save(function(err) {
+                            if (err){
+                                throw err;
+                            }
+                            return done(null, newUser);
+                        });
+                    }
+                });
+
+            } else {
+                // user already exists and is logged in, we have to link accounts
+                var user                 = req.user; // pull the user out of the session
+
+                user.meetup.id          = profile.id;
+                user.meetup.token       = token;
+                user.meetup.displayName = profile.displayName;
+                user.meetup.raw         = profile._raw;
+
+                user.save(function(err) {
+                    if (err){
+                        throw err;
+                    }
+                    return done(null, user);
+                });
+            }
+
+        });
+
 
     }));
 

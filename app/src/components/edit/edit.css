@@ -71,6 +71,7 @@ ul.edit-toolbar {
 	display: inline-block;
 	vertical-align: middle;
 	line-height: normal;
+	
 	color: #808080;
 }
 
@@ -96,14 +97,9 @@ ul.edit-toolbar {
 	bottom: 0px;
 	width: 100%;
 	
-	
-	overflow: visible;
-}
-
-.edit-bg {
 	padding-top: 16px;
+	overflow: visible;
 	background: rgba(255,255,255,0.8);
-	min-height: 100%;
 }
 
 .world-icon {

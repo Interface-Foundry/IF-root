@@ -468,10 +468,21 @@ app.get('/api/:collection', function(req, res) {
     if (req.params.collection == 'tweets'){
 
         if (req.query.tag){ //hashtag filtering
-            var qw = {
-               'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
-            };
-            db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));
+            //has limit
+            if (req.query.limit){
+              var Twlimit = parseInt(req.query.limit);
+              var qw = {
+                 'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+              };
+              db.collection('tweets').find(qw).limit(Twlimit).sort({_id: -1}).toArray(fn(req, res));
+            }
+            //no limit
+            else {
+              var qw = {
+                 'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+              };
+              db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));            
+            }
         }
         else {
             if (req.query.limit){ //limited tweet query
@@ -488,10 +499,22 @@ app.get('/api/:collection', function(req, res) {
     if (req.params.collection == 'instagrams'){
 
         if (req.query.tag){ //hashtag filtering
-            var qw = {
-               'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
-            };
-            db.collection('instagrams').find(qw).sort({_id: -1}).toArray(fn(req, res));
+            //has limit
+            if (req.query.limit){
+              var Inlimit = parseInt(req.query.limit);
+              var qw = {
+                 'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+              };
+              db.collection('instagrams').find(qw).limit(Inlimit).sort({_id: -1}).toArray(fn(req, res));
+            }
+            //no limit
+            else {
+              var qw = {
+                 'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+              };
+              db.collection('instagrams').find(qw).sort({_id: -1}).toArray(fn(req, res));            
+            }
+
         }
         else {
             if (req.query.limit){ //limited tweet query
@@ -1211,71 +1234,7 @@ function manageServerWidgets(id, tag, widgets){
       }
 
     });
-
-
-
-    // db.collection('serverwidgets').findOne({worldID:id}, function (err, doc) {
-    //   if (err) {
-    //     //doc doesn't exist, write new
-    //     console.log('new');
-    //     sw.save(function (err, data) {
-    //         if (err)
-    //             console.log(err);
-    //         else {
-    //             console.log('SAVED NEW '+data);
-    //         }
-    //     });
-    //   }
-    //   else {
-    //     // doc.name = 'jason borne';
-    //     // doc.save(callback);    
-    //     console.log('update=');
-    //     //previously saved doc updated
-    //     sw.save(function (err, data) {
-    //         if (err)
-    //             console.log(err);
-    //         else {
-    //             console.log('SAVED UPDATE '+data);
-    //         }
-    //     });    
-    //   }
-
-    // });
-
-    //sw.findByIdAndUpdate(id, { name: 'jason borne' }, options, callback)
-
-    // if (widgets.twitter || widgets.instagram){
-
-
-    //   //findbyidandupdate (BY WORLD ID)
-
-    //   //if not found, save new servwidget
-
-    //     var sw = new serverwidgetsSchema({
-    //         worldID : id,
-    //         worldTag: tag,
-    //         twitter: widgets.twitter,
-    //         instagram: widgets.instagram
-    //     });
-
-
-        
-
-    // }
-    // else {
-    //     console.log('nothing');
-    //     //CHECK TO FIND WIDGET, IF SO then change boolean to false
-
-    //     //findbyidandupdate
-    //     // Contact.findByIdAndUpdate(
-    //     //     info._id,
-    //     //     {$push: {"messages": {title: title, msg: msg}}},
-    //     //     {safe: true, upsert: true},
-    //     //     function(err, model) {
-    //     //         console.log(err);
-    //     //     }
-    //     // );
-    // }  
+ 
 }
 
 //upload profile pictures for worlds and landmarks and (users?)
@@ -1497,6 +1456,63 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
       }
     });       
 }
+
+//looking for meetups in system created by user who logs in via meetup, then add them as owner
+app.post('/api/process_meetups', isLoggedIn, function (req, res) {
+
+  if (req.user.meetup){
+    if (req.user.meetup.id){
+
+      landmarkSchema.find({ 'source_meetup.event_hosts.member_id': parseInt(req.user.meetup.id) }, function(err, ls) {
+
+        if (err){
+          res.send({err:'there was an error'});
+          console.log('there was an error');
+        }
+        else if (ls){
+            
+            async.forEach(ls, function (obj, done){ 
+
+                obj.permissions.ownerID = req.user._id;
+                console.log('update=');
+                obj.save(function (err, data) {
+                    if (err)
+                        console.log(err);
+                    else {
+                        console.log('Updated Owner on world');
+                    }
+                });  
+                done(); 
+
+            }, function(err) {
+                if (err){
+                  console.log(err);
+                }
+                res.send('success');
+                console.log('added user as owner to all matching worlds');
+            }); 
+            
+        }
+        else {
+            console.log('no results');
+            res.send('no results');            
+        }
+
+      });
+    }
+    else {
+      console.log('user doesnt have meetup id');
+      res.send('could not find any matching worlds');
+    }
+  }
+  else {
+    console.log('user doesnt have meetup entry');
+    res.send('could not find any matching worlds');
+  }
+
+});
+
+
 
 
 // route middleware to ensure user is logged in

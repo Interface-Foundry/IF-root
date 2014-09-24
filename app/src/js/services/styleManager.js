@@ -5,7 +5,7 @@ angular.module('tidepoolsServices')
 	.factory('styleManager', [
 		function() {
 var styleManager = {
-	navBG_color: 'rgba(0,188,212,0.96)'
+	navBG_color: 'rgba(0,188,212,0.8)'
 	//---local settings---
 	/*bodyBG_color: '#FFF',
 	titleBG_color,

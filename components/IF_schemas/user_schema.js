@@ -25,6 +25,12 @@ var userSchema = mongoose.Schema({
         displayName  : String,
         username     : String
     },
+    meetup           : {
+        id           : String,
+        token        : String,
+        displayName  : String,
+        raw          : String
+    },
     auth: {
         confirmedEmail : Boolean,
         lastLogin: Date,
