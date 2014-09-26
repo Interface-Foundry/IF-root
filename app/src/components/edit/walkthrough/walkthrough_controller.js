@@ -130,6 +130,7 @@ var firstWalk = [
 	{title: 'Need a hand?',
 	caption: 'If you haven’t built a world before, we can walk you through it.',
 	height: 0,
+	view: '0',
 	valid: function() {return true},
 	skip: false},
 	//1
@@ -187,7 +188,7 @@ var meetupWalk = [
 	//0 intro
 	{title: 'Claim your Meetup',
 	caption: "We'll use your Meetup group to create a bubble.",
-	view:0,
+	view:'0',
 	height:0,
 	valid: function() {return true},
 	skip:false

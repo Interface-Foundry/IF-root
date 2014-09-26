@@ -1554,16 +1554,39 @@ app.put('/api/:collection/:cmd',  function (req, res) {
 })
 
 
-//for routing auth to passport
-var router = express.Router();
-router.get('/auth/*', function (req, res, next) {
-  next();
-})
-app.use(router);
+// //for routing auth to passport
+// var router = express.Router();
+// router.get('/auth/*', function (req, res, next) {
+//   next();
+// })
+// app.use(router);
+
+// app.all('/w/*', function(req, res) {
+//   console.log('asdf '+req.url);
+// });
+
+
 
 //for routing all else to angular
 app.all('/*', function(req, res) {
-  res.sendfile('index.html', { root: __dirname + '/app/dist' });
+
+  function endsWith(str, suffix) {
+      return str.indexOf(suffix, str.length - suffix.length) !== -1;
+  }
+
+  //if file path, then add file to end
+  if (req.url.indexOf('.') != -1 ){
+    res.sendfile(req.url, { root: __dirname + '/app/dist' });
+  }
+
+  else if (endsWith(req.url,'/0')){
+    console.log('dont send back, but who cares');
+  }
+
+  else {
+    res.sendfile('index.html', { root: __dirname + '/app/dist' });
+  }
+
 });
 
 
