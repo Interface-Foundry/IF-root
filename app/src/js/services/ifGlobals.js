@@ -6,14 +6,14 @@ angular.module('tidepoolsServices')
 function() {
 var ifGlobals = {
 	kinds: {
-		Convention: {name: 'Convention', hasTime: true, img: 'convention.png'},
-		Event: {name: 'Event', hasTime: true, img: 'event.png'},
-		Neighborhood: {name: 'Neighborhood', hasTime: false, img: 'neighborhood.png'},
-		Venue: {name: 'Venue', hasTime: false, img: 'venue.png'},
-		Park: {name: 'Park', hasTime: false, img: 'park.png'},
-		Retail: {name: 'Retail', hasTime: false, img: 'retail.png'},
-		Campus: {name: 'Campus', hasTime: false, img: 'campus.png'},
-		Home: {name: 'Home', hasTime: false, img: 'home.png'}
+		Convention: {name: 'Convention', hasTime: true},
+		Event: {name: 'Event', hasTime: true},
+		Neighborhood: {name: 'Neighborhood', hasTime: false},
+		Venue: {name: 'Venue', hasTime: false},
+		Park: {name: 'Park', hasTime: false},
+		Retail: {name: 'Retail', hasTime: false},
+		Campus: {name: 'Campus', hasTime: false},
+		Home: {name: 'Home', hasTime: false}
 	}
 }
 
