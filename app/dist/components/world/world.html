@@ -1,8 +1,8 @@
-<div class="aperture-pop" ng-click="aperture.set('full')" ng-show="aperture.state=='aperture-third'"></div>
+<div class="aperture-pop" ng-click="aperture.set('full'); zoomOn()" ng-show="aperture.state=='aperture-third'"></div>
 <div id="shelf" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
-							ng-click="aperture.toggle('full')">
+							ng-click="aperture.toggle('full'); zoomOn()">
 			<div class="world-toolbar">
 				<img class="world-avatar" ng-src="{{world.avatar}}">
 				<div class="world-title" fit-font>
@@ -33,7 +33,7 @@
 
 	<!--explore-->
 	<ul ng-style="{'background-color': style.bodyBG_color}"
-		class="clearfix">
+		class="clearfix" ng-show="landmarks">
 		<div class="col-xs-12 widget_margin">
 			<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
 		</div>

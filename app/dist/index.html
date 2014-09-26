@@ -65,8 +65,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 </head>
 <body ng-style="{'background-color': globalBGColor}">
   <div id="wrap">
-  		<div class="drawer-handle" ng-show="drawerOn" ng-style="{'background-color': style.navBG_color}"> 
-  			<img width="10px" height="16px" class="handle toolbar-item show" ng-click="drawerOn = !drawerOn" src="/img/icons/drawer.png">
+  		<div class="drawer-handle" ng-show="drawerOn" ng-style="{'background-color': style.navBG_color}" ng-click="drawerOn = !drawerOn"> 
+  			<img width="10px" height="16px" class="handle toolbar-item show" src="/img/icons/drawer.png">
   		</div>
   		<ul id="alerts" class="container">
 	  		<li ng-repeat="alert in alerts.list" class="alert if-animate" ng-class="alert.class" role="alert">
