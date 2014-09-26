@@ -77,8 +77,10 @@ require('./components/IF_auth/passport')(passport);
 var socket = require('./components/IF_chat/socket.js');
 
 //===== EXPRESS INIT =====//
+
 var express = require('express'),
     app = module.exports.app = express(),
+    // cors = require('cors'),
     db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
 
     //express compression
@@ -90,6 +92,7 @@ var express = require('express'),
     var io = require('socket.io').listen(server); // Hook Socket.io into Express
 
     app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
+
 
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
@@ -109,6 +112,7 @@ var express = require('express'),
     app.use(passport.initialize());
     app.use(passport.session()); // persistent login sessions
     app.use(flash()); // use connect-flash for flash messages stored in session
+
 //===================//
 
 
@@ -278,7 +282,7 @@ io.sockets.on('connection', socket);
 // ]);
 
 // passport routes ======================================================================
-require('./app/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
+require('./components/IF_auth/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 
 /* Helpers */
 
@@ -1548,6 +1552,19 @@ app.put('/api/:collection/:cmd',  function (req, res) {
     if (req.params.cmd === 'distinct') {req.body = req.body.key}
     db.collection(req.params.collection)[req.params.cmd](req.body, fn(req, res)); 
 })
+
+
+//for routing auth to passport
+var router = express.Router();
+router.get('/auth/*', function (req, res, next) {
+  next();
+})
+app.use(router);
+
+//for routing all else to angular
+app.all('/*', function(req, res) {
+  res.sendfile('index.html', { root: __dirname + '/app/dist' });
+});
 
 
 //3 Hour checkup on size of image directories, emails if over 10gb

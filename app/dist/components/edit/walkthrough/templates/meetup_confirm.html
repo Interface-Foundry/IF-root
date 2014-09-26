@@ -3,9 +3,9 @@
 	<label for="worldName">Name</label>
 	<input type="text" name="worldName" class="form-control" ng-model="world.name" required ng-minlength="1">
 </div>
-<div class="form-group">
-	<label for=""></label>
-	<textarea name="worldDescription" class="form-control" ng-model="world.description" ng-show="world.description"></textarea>
+<div class="form-group" ng-show="world.description">
+	<label for="">Description</label>
+	<textarea name="worldDescription" class="form-control" style="min-height: 100px;" ng-model="world.description"></textarea>
 </div>
 <form name="time" class="form-inline" role="form">
 	<div class="form-group">
