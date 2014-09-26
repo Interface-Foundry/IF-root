@@ -78,9 +78,32 @@ $scope.selectMapTheme = function(name) {
 			
 			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
 			//	$scope.setThemeFromMap();
+			$scope.setThemeFromMap(name);
 			//}
 		}
 }
+
+$scope.setThemeFromMap = function(name) {
+switch (name) { 
+	case 'urban':
+		angular.extend($scope.style, themeDict['urban']);
+		break;
+	case 'sunset':
+		angular.extend($scope.style, themeDict['sunset']);
+		break;
+	case 'fairy':
+		angular.extend($scope.style, themeDict['fairy']);
+		break;
+	case 'arabesque':
+		angular.extend($scope.style, themeDict['arabesque']);
+		break;
+}
+console.log($scope.style)
+
+    db.styles.create($scope.style, function(response){
+        console.log(response);
+    });
+}	
 	
 $scope.saveAndExit = function() {
 	$scope.save();
@@ -156,7 +179,7 @@ var firstWalk = [
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
-	height: 48,
+	height: 56,
 	skip: false}
 ];
 
@@ -222,6 +245,17 @@ while (i < $scope.walk.length) {
 $scope.position = 0;
 $scope.progress[$scope.position].status = 'active';
 
+////////////////////////////////////////////////////////////
+////////////////////////LISTENERS///////////////////////////
+////////////////////////////////////////////////////////////
+$scope.$on('$destroy', function (event) {
+	console.log('$destroy event', event);
+	if (event.targetScope===$scope) {
+		if (zoomControl) {
+			zoomControl.style.display = 'block';
+		}
+	}
+});
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

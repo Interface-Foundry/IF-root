@@ -11,6 +11,15 @@
 	margin-right: -0.25em;
 }
 
+.close.walkthrough-exit {
+	position: absolute;
+	top: 40px;
+	right: 4px;	
+	opacity: .4;
+}
+
+
+
 .walkthrough {
 	position: relative;
 	display: inline-block;
@@ -129,7 +138,6 @@ li.progress-dot {
 	margin: 12px 4px;
 	border-radius:8px;
 	background-color: #CCC;
-	cursor: pointer;
 }
 
 .progress-dot.visited {
