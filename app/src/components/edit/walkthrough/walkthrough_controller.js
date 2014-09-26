@@ -123,6 +123,12 @@ $scope.save = function() {
     	console.log(response);
     	$scope.world.id = response[0].id; //updating world id with server new ID
     });
+    
+    if ($scope.style) {
+	    db.styles.create($scope.style, function(response){
+        console.log(response);
+		});
+    }
 }
 
 var firstWalk = [
@@ -229,7 +235,7 @@ var meetupWalk = [
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
-	height: 56,
+	height: 72,
 	skip: false}
 ];
 
