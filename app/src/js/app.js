@@ -2,7 +2,6 @@
 
 var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker', 'ui.slider'])
   .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
-  // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
     //================================================
@@ -81,7 +80,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     });
     //================================================
 
-
     //================================================
     // Define all the routes
     //================================================
@@ -94,10 +92,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/profile/:incoming', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/auth/:type', {templateUrl: 'components/auth/login.html', controller: resolveAuth}).
-      when('/auth/:type/:callback', {templateUrl: 'components/auth/login.html', controller: resolveAuth}).
-      // when('/connect/:type', {templateUrl: '_self'}).
-      // when('/unlink/:type', {templateUrl: '_self'}).
+
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
@@ -126,7 +121,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
 	    when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
 	 
-	    when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, resolve: {loggedin: checkLoggedin}}).
+	 when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, resolve: {loggedin: checkLoggedin}}).
       
       when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: MeetupController}).
       
@@ -141,8 +136,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 
       otherwise({redirectTo: '/'}); 
       
-      // use the HTML5 History API
-      $locationProvider.html5Mode(true);
       
       //animation
 

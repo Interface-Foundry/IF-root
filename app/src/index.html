@@ -29,7 +29,6 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 <head>
   <meta charset="utf-8">
-  <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
   <title ng-bind="globalTitle">Bubbl.li</title>
   <meta name="description" content="powered by Interface Foundry">
@@ -41,23 +40,23 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   <meta property="og:site_name" content="IF Bubbl.li"/>
   <meta property="og:type" content="website" /> 
   
-	<link rel="stylesheet" href="app.css">
-	
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  	<link rel="stylesheet" href="app.css">
+  	
+  	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-animate.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-resource.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-route.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-sanitize.min.js"></script>
+  	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-touch.min.js"></script> 
+  	
+  	<script async="" src="//www.google-analytics.com/analytics.js"></script>
+  	
+  	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-animate.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-resource.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-route.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-sanitize.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.22/angular-touch.min.js"></script> 
-	
-	<script async="" src="//www.google-analytics.com/analytics.js"></script>
-	
-	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
-
-	<script src="lib.js"></script>
-	<script src="app.js"></script>
+  	<script src="lib.js"></script>
+  	<script src="app.js"></script>
   
   
   
@@ -202,7 +201,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			          </span>
 	  			</li>
 	  			<li class="nav-item"><!-- USER DROPDOWN -->
-		  		<a ng-show="!showLogout" ng-href="login" class="vertical-middle nav-user no-u">Login</a>		  		
+		  		<a ng-show="!showLogout" ng-href="/#/login" class="vertical-middle nav-user no-u">Login</a>		  		
 			  	<span class="dropdown" ng-show="showLogout">
 		   		  	<a href="" data-toggle="dropdown" class="dropdown-toggle no-u">
 		   		  		<img class="nav-avatar" src="/img/icons/profile.png">
@@ -210,7 +209,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			   		</a>
 			   		<ul class="dropdown-menu">
 				   		<li><a role="menuitem" tabindex="-1" ng-href="/#/profile">Profile</a></li>
-				   		<li><a ng-href="profile">+ New World</a></li>
+				   		<li><a ng-href="/#/profile">+ New World</a></li>
 				   		<li><a href="" ng-click="feedbackOn=true">Report Issue</a></li>
 				   		<li><a href="" ng-click="logout()">Logout</a></li>
 				   	</ul>
