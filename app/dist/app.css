@@ -1709,7 +1709,7 @@ body.drawer nav, nav.drawer {
 	transform: translateX(66%);
 	
 	-webkit-backface-visibility: hidden;
-	padding: 12px 7px;
+	padding: 0;
 }
 
 .drawer-handle {
@@ -1721,6 +1721,7 @@ body.drawer nav, nav.drawer {
 	z-index: 2000;
 	background-color: rgba(0,0,0,0.30);
 	border-radius: 10px;
+	padding: 12px 8px;
 }
 
 .drawer-handle img {
