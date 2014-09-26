@@ -4797,6 +4797,44 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
   });
 
 
+_ = {};
+
+_.debounce = function(func, wait, immediate) {
+    var timeout, args, context, timestamp, result;
+
+    var later = function() {
+      var last = _.now() - timestamp;
+
+      if (last < wait && last >= 0) {
+        timeout = setTimeout(later, wait - last);
+      } else {
+        timeout = null;
+        if (!immediate) {
+          result = func.apply(context, args);
+          if (!timeout) context = args = null;
+        }
+      }
+    };
+
+    return function() {
+      context = this;
+      args = arguments;
+      timestamp = _.now();
+      var callNow = immediate && !timeout;
+      if (!timeout) timeout = setTimeout(later, wait);
+      if (callNow) {
+        result = func.apply(context, args);
+        context = args = null;
+      }
+
+      return result;
+    };
+  };
+
+
+_.now = Date.now || function() {
+    return new Date().getTime();
+ };
 'use strict';
 
 /* Directives */
@@ -10607,8 +10645,17 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 
 
 }
-function MeetupController($scope) {
+function MeetupController($scope, $window) {
+	angular.element('#view').bind("scroll", function () {
+		console.log(this.scrollTop);
+	});
 	
+	angular.element('#wrap').scroll(
+	_.debounce(function() {
+		console.log(this.scrollTop);
+		$scope.scroll = this.scrollTop;
+		$scope.$apply();
+		}, 20));
 }
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
