@@ -16,6 +16,33 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
   // This object will be filled by the form
   $scope.user = {};
 
+
+  //fire socialLogin
+  $scope.socialLogin = function(type){
+
+    console.log(type);
+
+    $location.url('/auth/'+type);
+
+    $http.post('/auth/'+type).
+      success(function(user){
+  
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+
+
+  //FIRE function on click
+  //---> http.post(/auth/meetup)
+
+
+
+
   // Register the login() function
   $scope.login = function(){
 
@@ -153,6 +180,13 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
         }
       });
   };
+
+}
+
+
+function resolveAuth($scope, $route) {
+
+  location.reload(true);
 
 }
 
