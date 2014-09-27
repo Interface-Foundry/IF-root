@@ -607,7 +607,7 @@ app.get('/api/:collection/:id', function(req, res) {
                           "world" : data,
                           "style" : style
                       };
-                      res.send(resWorldStyle);
+                      res.send(200, resWorldStyle);
                   }
               }); 
 
@@ -896,7 +896,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         else {
                             console.log(landmark);
                             console.log('success');
-                            res.send([landmark]);
+                            res.send(200,[landmark]);
 
                             //update serverwidget object for world
                             if (req.body.world_id && req.body.hashtag){
@@ -1022,13 +1022,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                                 saveProject(landmark._id, styleRes, req.user._id, function(projectRes){
                                     
                                 var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
-                                    res.send(idArray);
+                                    res.send(200,idArray);
                                 });
                             }
 
                             //landmark created
                             else {
-                                res.send([{"_id":landmark._id}]);
+                                res.send(200,[{"_id":landmark._id}]);
                             }
                         }
                     });
@@ -1164,6 +1164,11 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 else {
                     console.log(style);
                     console.log('success');
+
+                    if(res){
+                      res.send(200);
+                    }
+                    
 
                     //if parameters from world passed to style, then add to serverwidget object
                     if (req.body.world_id && req.body.hashtag){
@@ -1452,7 +1457,7 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
             else {
                 console.log(landmark);
                 console.log('success');
-                res.send(landmark);
+                res.send(200,landmark);
             }
         });
       }

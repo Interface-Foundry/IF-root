@@ -10692,7 +10692,7 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 
 
 }
-function MeetupController($scope, $window) {
+function MeetupController($scope, $window, $location) {
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
 	});
