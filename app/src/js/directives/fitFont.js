@@ -46,11 +46,11 @@ angular.module('IF-directives', [])
 				resolveOverflow();
 			}))
 			
-		$scope.$on("$destroy", function() {
+		/*$scope.$on("$destroy", function() {
 				for (var i = 0, len = ears.length; i < len; i++) {
 					ears[i].pop()();
 				}
-			});
+			});*/
 		}
 	}
 });

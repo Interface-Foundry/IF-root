@@ -4925,11 +4925,11 @@ angular.module('IF-directives', [])
 				resolveOverflow();
 			}))
 			
-		$scope.$on("$destroy", function() {
+		/*$scope.$on("$destroy", function() {
 				for (var i = 0, len = ears.length; i < len; i++) {
 					ears[i].pop()();
 				}
-			});
+			});*/
 		}
 	}
 });
@@ -6018,9 +6018,9 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
 	angular.extend($rootScope, {loading: false});
 	
-	$scope.$on('$viewContentLoaded', function() {
+	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
-	});
+	});*/
 	  
 	$scope.search = function() {
 		if ($scope.searchOn == true) {
@@ -9219,12 +9219,12 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 //end editcontroller
 }
-function WalkthroughController($scope, $location, $route, $routeParams, $http, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
-
+function WalkthroughController($scope, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 $scope.global = ifGlobals;
+$scope.position = 0;
 $scope.world = {};
 $scope.world.time = {};
 $scope.world.time.start = new Date();
@@ -9353,35 +9353,30 @@ $scope.save = function() {
 }
 
 var firstWalk = [
-	//0 - intro
 	{title: 'Need a hand?',
 	caption: 'If you haven’t built a world before, we can walk you through it.',
 	height: 0,
-	view: '0',
+	view: '0.html',
 	valid: function() {return true},
 	skip: false},
-	//1
 	{title: 'Kind',
 	caption: 'What kind is it?',
 	view: 'kind.html',
 	height: 220,
 	valid: function() {return typeof $scope.world.category == "string"},
 	skip: false},
-	//3
 	{title: 'Location', 
 	caption: 'Find its location',
 	view: 'location.html',
 	height: 290,
 	valid: function() {return $scope.world.hasLoc},
 	skip: false},
-	//4
 	{title: 'Name',
 	caption: 'What\'s it named?',
 	view: 'name.html',
 	height: 62,
 	valid: function() {return $scope.form.worldName.$valid},
 	skip: false},
-	//5
 	{title: 'Time',
 	caption: 'Give it a start and end time',
 	view: 'time.html',
@@ -9389,21 +9384,18 @@ var firstWalk = [
 	valid: function() {return $scope.form.time.$valid},
 	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
 	skip: true},
-	//6
 	{title: 'Picture',
 	caption: 'Upload a picture',
 	view: 'picture.html',
 	height: 194,
-	valid: function() {return typeof $scope.world.avatar == "string"},
+	valid: function() {return true},
 	skip: true},
-	//
 	{title: 'Maps',
 	caption: 'Choose a map',
 	view: 'maptheme.html',
 	height: 426,
 	valid: function() {return true},
 	skip: true},
-	//
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
 	view: 'done.html',
@@ -9415,10 +9407,10 @@ var meetupWalk = [
 	//0 intro
 	{title: 'Claim your Meetup',
 	caption: "We'll use your Meetup group to create a bubble.",
-	view:'0',
-	height:0,
+	view:'0.html',
+	height: 0,
 	valid: function() {return true},
-	skip:false
+	skip: false
 	},
 	//1 
 	{title: 'Confirm',
@@ -9455,41 +9447,39 @@ var meetupWalk = [
 	skip: true},
 	{title: 'Done!',
 	caption: 'Now you can add landmarks or edit your world',
-	view: 'done.html',
-	height: 72,
+	view: 'done_meetup.html',
+	height: 120,
 	skip: false}
 ];
 
 $scope.walk = firstWalk;
 
-
 function setUpProgress() {
-$scope.progress = [];
+	$scope.progress = [];
 
-var i = 0;
-while (i < $scope.walk.length) {
-	$scope.progress[i] = {status: ''};
-	i++;
-}
-
-$scope.position = 0;
+	var i = 0;
+	if ($scope.walk) {
+		while (i < $scope.walk.length) {
+		$scope.progress[i] = {status: ''};
+		i++;
+	}
+	}
+	
 $scope.progress[$scope.position].status = 'active';
 
-$scope.$apply();
 }
-
 
 ////////////////////////////////////////////////////////////
 ////////////////////////LISTENERS///////////////////////////
 ////////////////////////////////////////////////////////////
-$scope.$on('$destroy', function (event) {
+/*$scope.$on('$destroy', function (event) {
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 		if (zoomControl) {
 			zoomControl.style.display = 'block';
 		}
 	}
-});
+});*/
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -9513,70 +9503,6 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 	}
 });
 
-/*$scope.world = {
-"_id" : "54188829effb040000eb34d9",
-"hasLoc" : false,
-"description" : "<p>Has been While we did Thai Food Event:</p> <p>Let's Try Famous Tuk Tuk~! </p> <p>Attention: (Every individual order one favorite Appetizer and one favorite Entrance dish) We are going to eat Family Style with serving spoon, Do not RSVP if Family style is not for you. we will split the final bill of food . Every individual is responsible to pay their own drinks.</p> <p><img src=\"http://photos3.meetupstatic.com/photos/event/9/1/c/600_400742332.jpeg\" /></p> <p>Payment: Cash Only! (Please bring change to make organizer's job easier.)</p> <p>Please take your RSVP seriously as other guests often have to be turned away. There will be a $3.00 organization fee for this meetup to be collected at the day of the event.</p> <p>Cash Only to make event organizer Job easier.</p> <p>Dinner Price: For Dinner should be around $18 to $29 per person , Big Range Because I have never been On Tuk Tuk before ( Including Tax and tips and Event fee), Plus Each individual Pays your own drinks.</p> <p><img src=\"http://photos3.meetupstatic.com/photos/event/5/d/4/a/600_400883882.jpeg\" /></p> <p>Their Yelp Link With 300+ high reviews, WE can't go wrong </p> <p><a href=\"http://www.yelp.com/biz/tuk-tuk-long-island-city\"><a href=\"http://www.yelp.com/biz/tuk-tuk-long-island-city\" class=\"linkified\">http://www.yelp.com/biz/tuk-tuk-long-island-city</a></a></p> <p>Here is some yelp review and pictures</p> <p><img src=\"http://photos1.meetupstatic.com/photos/event/6/2/e/600_400741582.jpeg\" /></p> <p>Everything was so fresh! </p> <p><img src=\"http://photos4.meetupstatic.com/photos/event/6/6/0/600_400741632.jpeg\" /></p> <p>\n\nThe summer rolls was really refreshing! Crisp veggies (more veggies than noodles). I was most impressed by the pillow soft skin, really- pillow soft and perfectly moist. I felt the basil taste was a bit overpowering. </p> <p>Also had the massaman curry with roti which was good but nothing to rave about. I enjoyed the peanuts and potato chunks in the curry! Probably would skip this next time. </p> <p><img src=\"http://photos1.meetupstatic.com/photos/event/6/b/a/600_400741722.jpeg\" /></p> <p>\n\nI had the green curry with chicken. Delicious and a good helping for $10. I have to point out on how fresh the individual vegetable ingredients were, and perfectly cooked. Seriously, \"fresh\" is the main theme of this review. </p> <p><img src=\"http://photos2.meetupstatic.com/photos/event/6/f/6/600_400741782.jpeg\" /></p> <p>\n\nTried the very raved about dish \"pad cha talay\" which I believe was about $16 for a great variety of seafood... That... Dare I say it? Was very fresh! I hate dead seafood or tiny ugly excuses of shrimp of octopus. Very generous here ESP for the price. But the real winner of the dish is the flavor itself. </p> <p><br/><img src=\"http://photos2.meetupstatic.com/photos/event/7/b/e/600_400741982.jpeg\" /></p> <p><img src=\"http://photos2.meetupstatic.com/photos/event/7/6/e/600_400741902.jpeg\" /></p> <p>There were so many spices, like what the heck is that berry looking twig thing? The blend of spices was Devine, very tasty; fairly spicy for the average person but not overwhelming where it's impossible to eat. </p> <p><img src=\"http://photos1.meetupstatic.com/photos/event/7/2/8/600_400741832.jpeg\" /></p> <p>Green tea fried ice cream for dessert. So glad I got to try this. The outer layer was so crispy and delicious.... God just so tasty just order it and see for yourself, I should have to convince you any further! </p> <p><img src=\"http://photos1.meetupstatic.com/photos/event/5/d/8/6/600_400883942.jpeg\" /></p> <p>Other things to note: great presentation of food. Everything was plated beautifully, the restaurant itself had a classy upscale vibe (I noticed this esp since I wore sweatpants and a hello kitty t shirt.....) altho you could go either way on the dress code here I feel. Attentive staff! Always refilling water (spicy food!)</p> <p><img src=\"http://photos1.meetupstatic.com/photos/event/6/7/e/600_400741662.jpeg\" /></p> <p>\n\nConclusion for the evening: definitely a repeat restaurant in our book!</p>",
-"name" : "Thai Food @ Tuk Tuk",
-"avatar" : "img/IF/meetup_default.jpg",
-"valid" : true,
-"world" : true,
-"id" : "meetup_202546102",
-"tags" : [ ],
-"source_meetup" : {
-	"how_to_find_us" : "",
-	"event_url" : "http://www.meetup.com/New-York-city-Newbies-20-30S-going-out-group/events/202546102/",
-	"rsvp_limit" : 0,
-	"yes_rsvp_count" : 12,
-	"updated" : 1408730322000,
-	"visibility" : "public",
-	"status" : "upcoming",
-	"id" : "202546102",
-	"group" : {
-		"id" : 11008462,
-		"group_lat" : 40.7400016784668,
-		"name" : "! New York city Newbies 20-30'S going out group",
-		"group_lon" : -73.98999786376953,
-		"who" : "New york city Newbies"
-	},
-	"fee" : null,
-	"venue" : null,
-	"event_hosts" : [
-		{
-			"member_id" : 12202738,
-			"member_name" : "Elizabeth"
-		}
-	]
-	},
-"permissions" : {
-	"admins" : [ ],
-	"viewers" : [ ]
-},
-"time" : {
-	"end" : "1970-01-01T00:00:00Z",
-	"start" : "2014-09-16T23:00:00Z",
-	"created" : "2014-09-16T18:57:45.111Z"
-},
-"style" : {
-"styleID" : "54188829effb040000eb34da",
-"maps" : {
-"cloudMapName" : "forum",
-"cloudMapID" : "interfacefoundry.jh58g2al"
-}
-},
-"landmarkCategories" : [ ],
-"subType" : [ ],
-"loc" : {
-"type" : "Point",
-"coordinates" : [
--74.0059,
-40.7127
-]
-},
-"__v" : 0
-}
-$scope.style = {};*/
-
 }
 
 function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
@@ -9587,6 +9513,7 @@ function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
 	angular.extend($scope, {markers: {}});
 	
 	$scope.$watch('temp.MapActive', function(current, old) {
+		console.log('scopewatch');
 		console.log(current, old);
 		if (current==true) {
 		leafletData.getMap('locMap').then(function(map) {

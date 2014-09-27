@@ -64,6 +64,7 @@ var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
 
+http.globalAgent.maxSockets = 100;
 
 //----- For checking on size of instagram upload dir -----//
 var util  = require('util');
@@ -1579,9 +1580,10 @@ app.all('/*', function(req, res) {
     res.sendfile(req.url, { root: __dirname + '/app/dist' });
   }
 
-  else if (endsWith(req.url,'/0')){
+  /*else if (endsWith(req.url,'/0')){
     console.log('dont send back, but who cares');
-  }
+    res.status(404).send({err: '/0'});
+  }*/
 
   else {
     res.sendfile('index.html', { root: __dirname + '/app/dist' });

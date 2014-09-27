@@ -153,9 +153,9 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
 	angular.extend($rootScope, {loading: false});
 	
-	$scope.$on('$viewContentLoaded', function() {
+	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
-	});
+	});*/
 	  
 	$scope.search = function() {
 		if ($scope.searchOn == true) {
