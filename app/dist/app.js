@@ -9112,7 +9112,13 @@ function showPosition(position) {
 		message: "<p style='color:black;'>Drag to World's Location</p>",
 		focus: true,
 		draggable: true,
-		icon: local_icons.yellowIcon
+		icon: {
+			iconUrl: 'img/marker/bubble-marker-50.png',
+			shadowUrl: '',
+			iconSize: [30, 57.60],
+			iconAnchor: [15, 50],
+			popupAnchor:  [0, -40]
+		}
 	});
 	
 	var state;
@@ -10393,6 +10399,12 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [25, 48],
+					iconAnchor: [13, 10]
+				},
 				draggable:true,
 			});
 			
@@ -10521,6 +10533,12 @@ if ($scope.landmark.hasTime) {
 					lat:value.loc.coordinates[1],
 					lng:value.loc.coordinates[0],
 					draggable: true,
+					icon: {
+						iconUrl: 'img/marker/bubble-marker-50.png',
+						shadowUrl: '',
+						iconSize: [25, 48],
+						iconAnchor: [13, 10]
+					},
 					message:value.name
 				});
 			});
@@ -10564,6 +10582,7 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 });
+
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -10818,11 +10837,18 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 			  	map.removeMarker(marker._id);
 		  	});
 		  	
+
 		  	map.addMarker($scope.landmark._id, {
 		  			lat: $scope.landmark.loc.coordinates[1],
 		  			lng: $scope.landmark.loc.coordinates[0],
 		  			draggable:false,
 		  			message:$scope.landmark.name,
+				  	icon: {
+						iconUrl: 'img/marker/bubble-marker-50.png',
+						shadowUrl: '',
+						iconSize: [25, 48],
+						iconAnchor: [13, 48]
+					},
 		  			_id: $scope.landmark._id
 		  			});
 		  	map.setMarkerFocus($scope.landmark._id);

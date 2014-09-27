@@ -68,6 +68,12 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [25, 48],
+					iconAnchor: [13, 10]
+				},
 				draggable:true,
 			});
 			
@@ -196,6 +202,12 @@ if ($scope.landmark.hasTime) {
 					lat:value.loc.coordinates[1],
 					lng:value.loc.coordinates[0],
 					draggable: true,
+					icon: {
+						iconUrl: 'img/marker/bubble-marker-50.png',
+						shadowUrl: '',
+						iconSize: [25, 48],
+						iconAnchor: [13, 10]
+					},
 					message:value.name
 				});
 			});
@@ -239,6 +251,7 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 });
+
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

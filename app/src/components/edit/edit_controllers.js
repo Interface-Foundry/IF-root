@@ -359,7 +359,13 @@ function showPosition(position) {
 		message: "<p style='color:black;'>Drag to World's Location</p>",
 		focus: true,
 		draggable: true,
-		icon: local_icons.yellowIcon
+		icon: {
+			iconUrl: 'img/marker/bubble-marker-50.png',
+			shadowUrl: '',
+			iconSize: [30, 57.60],
+			iconAnchor: [15, 50],
+			popupAnchor:  [0, -40]
+		}
 	});
 	
 	var state;

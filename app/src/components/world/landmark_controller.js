@@ -43,11 +43,18 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 			  	map.removeMarker(marker._id);
 		  	});
 		  	
+
 		  	map.addMarker($scope.landmark._id, {
 		  			lat: $scope.landmark.loc.coordinates[1],
 		  			lng: $scope.landmark.loc.coordinates[0],
 		  			draggable:false,
 		  			message:$scope.landmark.name,
+				  	icon: {
+						iconUrl: 'img/marker/bubble-marker-50.png',
+						shadowUrl: '',
+						iconSize: [25, 48],
+						iconAnchor: [13, 48]
+					},
 		  			_id: $scope.landmark._id
 		  			});
 		  	map.setMarkerFocus($scope.landmark._id);
