@@ -72,4 +72,19 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
 			} else {return name;}
 		} else { return name; }
 	}	
+})
+
+
+.filter('datetime', function($filter)
+{
+ return function(input)
+ {
+  if(input == null){ return ""; } 
+ 
+  var _date = $filter('date')(new Date(input),
+                              'MMM dd, yyyy - hh:mm a');
+ 
+  return _date.toUpperCase();
+
+ };
 });

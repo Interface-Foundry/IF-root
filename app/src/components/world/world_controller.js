@@ -80,18 +80,18 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 		var zoomLevel = 19;
 		
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
-		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
-		console.log('setcenter');
-		map.addMarker('c', {
-			lat: $scope.world.loc.coordinates[1],
-			lng: $scope.world.loc.coordinates[0],
-			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
-				shadowUrl: '',
-				iconSize: [25, 48],
-				iconAnchor: [13, 48]
-			}
-		});
+			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
+			console.log('setcenter');
+			map.addMarker('c', {
+				lat: $scope.world.loc.coordinates[1],
+				lng: $scope.world.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [25, 48],
+					iconAnchor: [13, 48]
+				}
+			});
 		} else {
 			console.error('No center found! Error!');
 		}

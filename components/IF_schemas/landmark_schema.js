@@ -105,6 +105,52 @@ monguurl = require('monguurl');
 		// 	updated_time: Date,
 		// 	venue: String
 		// },
+		source_meetup: {
+			id: String,
+			status: String,
+			visibility: String,
+			updated: Number,
+			event_hosts: [Schema.Types.Mixed],
+			venue: {
+				id: Number,
+				name: String,
+				state: String,
+				address_1: String,
+				address_2: String,
+				city: String,
+				zip: Number,
+				country: String,
+				phone: String,
+				zip:String
+			},
+			fee: {
+				amount: Number,
+				description: String,
+				label: String,
+				required: String,
+				accepts: String,
+				currency: String	
+			},
+			yes_rsvp_count: Number,
+			rsvp_limit: Number,
+			event_url: String,
+			how_to_find_us: String,
+			group: {
+				id: Number,
+				name: String,
+				who: String,
+				group_lat: Number,
+				group_lon: Number
+			}
+		},
+		widgets: {
+			twitter: Boolean,
+			instagram: Boolean,
+			upcoming: Boolean,
+			category: Boolean,
+			googledoc: Boolean,
+			checkin: Boolean
+		},
 		widgets: {
 			twitter: Boolean,
 			instagram: Boolean,
