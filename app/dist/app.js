@@ -5882,16 +5882,20 @@ function shelfPan(amount,special){
 /* IF Controllers */
 
 //searching for bubbles
-function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager) {
+function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager) {
+
+    var map = mapManager;
+    // map.resetMap();
 
     angular.extend($rootScope, {loading: true});
-	var style = styleManager;
-	style.resetNavBG();
+	  var style = styleManager;
+	  style.resetNavBG();
 	
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
 
-	console.log('world routing');
+	  console.log('world routing');
+
     //WIDGET find data and then route to correct bubble
     // var today = new Date();
     // var dd = today.getDate();
@@ -5982,7 +5986,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
                     ///-------- ENABLE AFTER DEMO ------//
                     console.log('world has no id');
-                    noWorlds();
+                    noWorlds(lat,lon);
                 }
             }
             else {
@@ -5992,18 +5996,20 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
                 //-------- ENABLE AFTER DEMO ------//
                 console.log('not inside any worlds');
-                noWorlds(); //not inside any worlds
+                noWorlds(lat,lon); //not inside any worlds
 
             }
         });
     }
 
-    function noWorlds(){
+    function noWorlds(lat,lon){
 
 
      //-------- DISABLE AFTER DEMO ------//
       // angular.extend($rootScope, {loading: false});
       // $location.path('/w/Startfast_Demo_Day'); 
+
+      map.setCenter([lon, lat], 15, $scope.aperture.state);
 
 
       //-------- ENABLE AFTER DEMO ------//

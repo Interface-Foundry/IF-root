@@ -2185,6 +2185,7 @@ left: 8px;
 	background-color: #E6FFE5;
 	border-color: #AEE4B3;
 }
+
 .leaflet-areaselect-shade {
     position: absolute;
     background: rgba(0,0,0, 0.4);
