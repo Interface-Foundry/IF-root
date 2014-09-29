@@ -277,8 +277,14 @@ mapManager.setBaseLayer = function(layerURL) {
 			minZoom: 1,
 			maxZoom: 19
 		}
-	};
-	
+	};	
+}
+
+mapManager.setBaseLayerFromID = function(ID) {
+	mapManager.setBaseLayer(
+	'https://{s}.tiles.mapbox.com/v3/'+
+	ID+
+	'/{z}/{x}/{y}.png');
 }
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {

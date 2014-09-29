@@ -17,13 +17,13 @@
 		<div class="media card">
 			<img ng-src="{{world.avatar}}" class="avatar pull-left">
 			<div class="media-body">
-				<h4 class="media-heading">{{world.name}} 
+				<h4 class="media-heading">{{world.name || 'New'}} 
 				<button type="button" class="close" ng-click="deleteWorld($index)">
 				<span aria-hidden="true">&times;</span>
 				<span class="sr-only">Close</span>
 				</button>
 				</h4>
-				<a ng-href="/edit/walkthrough/{{world._id}}" ng-show="world.source_meetup">Set Up Meetup | </a>
+				<a ng-href="/edit/walkthrough/{{world._id}}" ng-show="world.source_meetup.id">Set Up Meetup | </a>
 				<a ng-href="#/w/{{world.id}}">Go to this world</a> | <a ng-href="#/edit/w/{{world.id}}">Edit</a> | {{world.views || 0}} views
 			</div>
 		</div>

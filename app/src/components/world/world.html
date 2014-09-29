@@ -3,19 +3,18 @@
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full'); zoomOn()">
-			<div class="world-toolbar">
 				<img class="world-avatar" ng-src="{{world.avatar}}">
-				<div class="world-title" fit-font>
-					<span ng-style="{color: style.worldTitle_color||'#FFF'}">{{world.name}}</span>
+				<div class="world-toolbar">
+					<div class="world-title" fit-font>
+						<span ng-style="{color: style.worldTitle_color||'#FFF'}">{{world.name}}</span>
+					</div>
+					<div class="world-footer">
+				<!-- 		{{world.timetext.timestart | date : 'shortTime'}}
+						{{world.timetext.timeend | date: 'shortTime'}} -->
+						<span>{{world.time.start | date: "h:mm a MMM d"}}</span>
+						<span ng-show="world.time.end">to {{world.time.end | date: "h:mm a MMM d"}}</span>
+					</div>
 				</div>
-				<div class="world-footer" fit-font>
-			<!-- 		{{world.timetext.timestart | date : 'shortTime'}}
-					{{world.timetext.timeend | date: 'shortTime'}} -->
-					<span ng-style="{color: style.worldTitle_color||'#FFF'}" style="font-size:14px; margin-left:9px;">{{world.time.start | datetime}}</span>
-
-					<span ng-hide="world.time.end.indexOf('1970') == 0" fit-font ng-style="{color: style.worldTitle_color||'#FFF'}" > to {{world.time.end | datetime}}</span>
-				</div>
-			</div>
 		</div>
 	
 <div class="container-fluid" ng-style="{'background-color': style.bodyBG_color}">
@@ -26,12 +25,12 @@
 	
 	<!--category-->
 	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
-	
+
 	<!--now--> <!--upcoming-->
 	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
 
 	<!---meetup-->
-	<div ng-include="world.source_meetup ? 'components/world/templates/meetup.html' : null"></div>
+	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
 	
 
 	<!--explore-->

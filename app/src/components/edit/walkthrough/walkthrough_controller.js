@@ -1,4 +1,4 @@
-function WalkthroughController($scope, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
+function WalkthroughController($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -125,8 +125,9 @@ $scope.save = function() {
     });
     
     if ($scope.style) {
+    	console.log('saving style');
 	    db.styles.create($scope.style, function(response){
-        console.log(response);
+      		console.log(response);
 		});
     }
 }
@@ -159,7 +160,7 @@ var firstWalk = [
 	{title: 'Time',
 	caption: 'Give it a start and end time',
 	view: 'time.html',
-	height: 348,
+	height: 88,
 	valid: function() {return $scope.form.time.$valid},
 	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
 	skip: true},
@@ -274,7 +275,7 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		angular.extend($scope.world, data.world);
 		angular.extend($scope.style, data.style);
 		
-		if ($scope.world.source_meetup) {
+		if ($scope.world.source_meetup && $scope.world.source_meetup.id) {
 			$scope.walk = meetupWalk;
 		}
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');

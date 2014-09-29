@@ -169,9 +169,8 @@ $scope.loadWorld = function(data) {
 		if ($scope.world.hasOwnProperty('landmarkCategories')==false) {$scope.world.landmarkCategories = [];}
 		
 		if ($scope.world.style.maps.cloudMapName) {
-			map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID);
 			$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
-		
 		} else {
 			$scope.selectMapTheme('arabesque');
 		}
@@ -214,8 +213,8 @@ $scope.saveWorld = function() {
     	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
-    });  
-    
+    });
+
     console.log('scope world');
     console.log($scope.world);
 

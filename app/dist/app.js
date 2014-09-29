@@ -6546,7 +6546,8 @@ var ifGlobals = {
 		Park: {name: 'Park', hasTime: false, img: 'park.png'},
 		Retail: {name: 'Retail', hasTime: false, img: 'retail.png'},
 		Campus: {name: 'Campus', hasTime: false, img: 'campus.png'},
-		Home: {name: 'Home', hasTime: false, img: 'home.png'}
+		Home: {name: 'Home', hasTime: false, img: 'home.png'},
+		Other: {name: 'Other', hasTime: false, img: 'other.png'}
 	}
 }
 
@@ -6831,8 +6832,14 @@ mapManager.setBaseLayer = function(layerURL) {
 			minZoom: 1,
 			maxZoom: 19
 		}
-	};
-	
+	};	
+}
+
+mapManager.setBaseLayerFromID = function(ID) {
+	mapManager.setBaseLayer(
+	'https://{s}.tiles.mapbox.com/v3/'+
+	ID+
+	'/{z}/{x}/{y}.png');
 }
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
@@ -8937,9 +8944,8 @@ $scope.loadWorld = function(data) {
 		if ($scope.world.hasOwnProperty('landmarkCategories')==false) {$scope.world.landmarkCategories = [];}
 		
 		if ($scope.world.style.maps.cloudMapName) {
-			map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID);
 			$scope.mapThemeSelect = $scope.world.style.maps.cloudMapName;
-		
 		} else {
 			$scope.selectMapTheme('arabesque');
 		}
@@ -8982,8 +8988,8 @@ $scope.saveWorld = function() {
     	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
-    });  
-    
+    });
+
     console.log('scope world');
     console.log($scope.world);
 
@@ -9240,7 +9246,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 //end editcontroller
 }
-function WalkthroughController($scope, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
+function WalkthroughController($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -9367,8 +9373,9 @@ $scope.save = function() {
     });
     
     if ($scope.style) {
+    	console.log('saving style');
 	    db.styles.create($scope.style, function(response){
-        console.log(response);
+      		console.log(response);
 		});
     }
 }
@@ -9401,7 +9408,7 @@ var firstWalk = [
 	{title: 'Time',
 	caption: 'Give it a start and end time',
 	view: 'time.html',
-	height: 348,
+	height: 88,
 	valid: function() {return $scope.form.time.$valid},
 	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
 	skip: true},
@@ -9516,7 +9523,7 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		angular.extend($scope.world, data.world);
 		angular.extend($scope.style, data.style);
 		
-		if ($scope.world.source_meetup) {
+		if ($scope.world.source_meetup && $scope.world.source_meetup.id) {
 			$scope.walk = meetupWalk;
 		}
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');

@@ -1291,7 +1291,8 @@ li.active .landmark-form {
 }
 .world-toolbar {
 	height: 88px;
-	width: 100%;	
+	width: 100%;
+	padding: 0px 0px 0px 88px;
 }
 
 .world-avatar {
@@ -1301,18 +1302,22 @@ li.active .landmark-form {
 }
 
 .world-title {
-	height: 62px;
+	height: 64px;
 	font-size: 30px;
 	overflow: hidden;
 	padding: 8px;
 }
 
 .world-footer {
-	height: 16px;
+	height: 24px;
 	width: 100%;
 	/*background: rgba(0,0,0,0.1);*/
-	font-size:15px; 
-	margin-left:9px; 
+	font-size: 12px;
+	text-align: right;
+	line-height: 20px;
+	padding: 4px 8px 4px 0px;
+	color: #FFF;
+	overflow: hidden;
 }
 
 .avatar {
@@ -1626,6 +1631,7 @@ nav li input.form-control {
 .nav-user {
 	color: white;
 	text-shadow: 0px 1px 0px rgba(0,0,0,0.5);
+	padding: 0px 4px;
 }
 
 .no-u:hover, .no-u:focus {

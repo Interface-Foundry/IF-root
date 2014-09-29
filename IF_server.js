@@ -1166,7 +1166,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     console.log('success');
 
                     if(res){
-                      res.send(200);
+                      res.send(200, [style]);
                     }
                     
 

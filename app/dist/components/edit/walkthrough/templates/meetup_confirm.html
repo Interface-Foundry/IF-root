@@ -16,7 +16,8 @@
 					name="startTimeDate"
 					ng-model="world.time.start"
 					data-autoclose="1"
-					placement="bottom-right" 
+					placement="bottom" 
+					container="body"
 					placeholder="Date" 
 					dateType="iso" bs-datepicker>
 			<input type="text" size="6" class="form-control" 
@@ -24,6 +25,7 @@
 					ng-model="world.time.start"
 					data-autoclose="1"
 					placement="bottom"
+					container="body"
 					placeholder="Time" 
 					timeType="iso" bs-timepicker>
 	</div>
@@ -34,7 +36,8 @@
 					name="endTimeDate"
 					ng-model="world.time.end"
 					data-autoclose="1" 
-					placement="bottom-left"
+					placement="bottom"
+					container="body"
 					placeholder="Date" 
 					dateType="iso" bs-datepicker>
 			<input type="text" size="6" class="form-control" 
@@ -43,6 +46,7 @@
 					data-autoclose="1"
 					placeholder="Time"
 					placement="bottom"
+					container="body"
 					timeType="iso" bs-timepicker>
 	</div>
 </form>
