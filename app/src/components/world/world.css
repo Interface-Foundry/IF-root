@@ -22,9 +22,9 @@
 	width: 100%;
 	/*background: rgba(0,0,0,0.1);*/
 	font-size: 12px;
-	text-align: right;
+	text-align: left;
 	line-height: 20px;
-	padding: 4px 8px 4px 0px;
+	padding: 4px 0px 4px 8px;
 	color: #FFF;
 	overflow: hidden;
 }
