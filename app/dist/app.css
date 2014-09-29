@@ -973,15 +973,10 @@ li.active .landmark-form {
 
 .tour-page h6 {
 	font-family: 'Fabrica', sans-serif;
-	position: absolute;
 	color: black;
-	top: 89px;
-	left: 14px;
-	width: 83%;
 	z-index: 100;
 	letter-spacing: 1.6px;
 	font-size:26px;
-	max-width: 100%;
 	line-height: 35px;
 }
 
@@ -1214,17 +1209,17 @@ li.active .landmark-form {
 	font-family: 'Fabrica', sans-serif;
 	font-size: 18px;
 	padding-top: 172px;
-	max-width: 600px;
+	max-width: 500px;
+	text-align: center;
 }
 
 .tour-iphone {
 	position: relative;
-	top: -19px;
 	width: 228px;
 	height: 424px;
 	border-radius: 30px;
 	background: rgba(0,0,0,0.7);
-	margin: 100px auto;
+	margin: 142px auto;
 }
 
 .tour-iphone-screen {
@@ -1234,16 +1229,6 @@ li.active .landmark-form {
 	top: 42px;
 	background: rgba(0,0,0,1);
 
-}
-
-.tour-iphone-button {
-	position: absolute;
-	left: 78px;
-	bottom: 12px;
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	background: rgba(0,0,0,0.3);
 }
 
 .tour-world-sq {
@@ -1285,7 +1270,9 @@ li.active .landmark-form {
 .tour-bubblli {
 	color: #03a9f4;
 	text-align: center;
-	margin: 200px 0;
+	margin: 160px 0 124px 0;
+	max-width: 600px;
+	
 }
 
 .tour-min-sq {
@@ -1348,9 +1335,9 @@ li.active .landmark-form {
 	width: 100%;
 	/*background: rgba(0,0,0,0.1);*/
 	font-size: 12px;
-	text-align: right;
+	text-align: left;
 	line-height: 20px;
-	padding: 4px 8px 4px 0px;
+	padding: 4px 0px 4px 8px;
 	color: #FFF;
 	overflow: hidden;
 }
@@ -2171,10 +2158,6 @@ left: 8px;
 	border-radius: 4px;
 	background-color: #EBEBEB;
 	padding: 8px;
-}
-
-.badge.meetup-badge {
-	background: #508dbd;
 }
 
 .profile-media-heading {
