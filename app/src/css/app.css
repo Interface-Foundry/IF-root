@@ -638,3 +638,16 @@ left: 8px;
 	background-color: #EBEBEB;
 	padding: 8px;
 }
+
+.badge.meetup-badge {
+	background: #508dbd;
+}
+
+.profile-media-heading {
+	width: 90%;
+}
+
+.well.meetup-well {
+	background-color: #E6FFE5;
+	border-color: #AEE4B3;
+}

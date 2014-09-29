@@ -10,44 +10,50 @@
 			<img width="1600px" height="800px" class="tour-img" src="img/tour/72nd-1600.png">
 			<!--<img width="768px" height="800px" class="tour-img" src="img/tour/72nd-768.png" ng-class="{'tour-srcset-on': viewW > 320}">
 			<img width="320px" height="800px" class="tour-img tour-srcset-on" src="img/tour/72nd-320.png">-->
-			<div class="radar radar1" ng-class="{'radar-gray': scroll > 720}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="radar radar2" ng-class="{'radar-gray': scroll > 720}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="tour-title radar3" ng-class="{'scroll-on': scroll > 710}">
-				<span>My Meetup</span>
-				<div class="radar">
+			<div ng-class="{'radar-gray': scroll > 830}">
+				<div class="radar radar1">
 					<div class="radar-inner"></div>
 					<div class="radar-outer"></div>
 				</div>
-			</div>
-			<div class="radar radar4" ng-class="{'radar-gray': scroll > 800}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="radar radar5" ng-class="{'radar-gray': scroll > 820}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="radar radar6" ng-class="{'radar-gray': scroll > 830}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="radar radar7" ng-class="{'radar-gray': scroll > 835}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="radar radar8" ng-class="{'radar-gray': scroll > 840}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
-			</div>
-			<div class="radar radar9" ng-class="{'radar-gray': scroll > 850}">
-				<div class="radar-inner"></div>
-				<div class="radar-outer"></div>
+				<div class="radar radar2">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
+				<div class="radar3">
+					<div class="tour-title-corner"></div>
+					<div class="tour-title">
+						<span>My Meetup</span>
+					</div>
+					
+					<div class="radar radar3a">
+							<div class="radar-inner"></div>
+							<div class="radar-outer"></div>
+						</div>
+				</div>
+				<div class="radar radar4">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
+				<div class="radar radar5">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
+				<div class="radar radar6">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
+				<div class="radar radar7">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
+				<div class="radar radar8">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
+				<div class="radar radar9">
+					<div class="radar-inner"></div>
+					<div class="radar-outer"></div>
+				</div>
 			</div>
 		</div>
 	</li>
@@ -67,11 +73,13 @@
 					<h6>Personalize your Meetup with our widgets</h6>
 
 					<br>
-					<div class="tour-features">
-						<p><img width="40px" height="40px"  src="img/tour/exchange.svg">  Easily exchange contacts to catch up again</p>
-						<p><img width="40px" height="40px"  src="img/tour/photoshare.svg">  Drop images into the group for easy sharing during meetups</p>
-						<p><img width="40px" height="40px"  src="img/tour/shy.svg">  Feeling shy? Icebreaker widgets help start conversations in large meetups</p>
-						<br>
+					<div class="tour-features center-block">
+						<img width="40px" height="40px" class="center-block" src="img/tour/exchange.svg">
+						<p>Easily exchange contacts to catch up again</p>
+						<img width="40px" height="40px" class="center-block" src="img/tour/photoshare.svg">
+						<p>Drop images into the group for easy sharing during meetups</p>
+						<img width="40px" height="40px" class="center-block" src="img/tour/shy.svg">
+						<p>Feeling shy? Icebreaker widgets help start conversations in large meetups</p>
 						<p>… & many more </p>	
 					</div>			
 
@@ -82,27 +90,18 @@
 	<li class="tour-page">
 		<div class="container-fluid">
 		<h1 class="tour-bubblli">Bubbl.li</h1>
-<!-- 		<h2>Gives you what you need, when you need it, based on who you are</h2>
- -->		<p>At your next Meetup, tell your community to visit Bubbl.li, share their location and we'll give them what they need, when they need it</p>
-
-<!--  		<p>
- 		What you need, when you need it
- 		Experience your world with Bubbl.li
- 		</p>
- -->
-		<em class="center-block text-center">Sign in with Meetup to import your meetups</em>
+		<p>At your next Meetup, tell your community to visit Bubbl.li, share their location and we'll give them what they need, when they need it</p>
+ 
+		<p><em class="center-block text-center">Sign in to import your Meetups</em></p>
 		<button class="btn btn-meetup center-block">sign in with meetup</button>
 		<button class="btn btn-default center-block">create new account</button>
 
 
-		<p>
-			Questions?
-			<br>
-			Email us at: hello@interfacefoundry.com
-		</p>
+		<p class="center-block text-center"><strong>Questions?</strong> Email us at <a href="mailto:hello@interfacefoundry.com">hello@interfacefoundry.com</a>
+		
 
 		<form action="//interfacefoundry.us3.list-manage.com/subscribe/post?u=ac66b7064177bb1b23c6cc522&amp;id=aea15b72e4" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>                            
-			<p>or Subscribe to our mailing list</p>
+			<p>or subscribe to our mailing list:</p>
 			<div class="input-group">
 				<input type="email" value="" name="EMAIL" class="form-control" id="mce-EMAIL" placeholder="email address" required>
 				<span class="input-group-btn">
@@ -178,19 +177,15 @@
 				</div>
 			</div>
 		</div>-->
+		<hr>
+		<p><strong>Photo</strong> <a href="http://www.meetup.com/sketching/members/3905165/">Jesse Richards</a> from <a href="http://www.meetup.com/sketching/photos/23884792/400433052/">Central Park Sketching & Art Meetup Group</a></p>
+<p><strong>Exchange icon</strong> <a href="http://www.thenounproject.com/Carolina.Carvallo">Carolina Andrea</a> from the <a href="http://www.thenounproject.com">Noun Project</a></p>
+<p><strong>Selfie icon</strong> <a href="http://www.thenounproject.com/AcceleratorMT">Michael Thompson</a> from the <a href="http://www.thenounproject.com">Noun Project</a></p>
+<p><strong>Shy icon</strong><a href="http://www.thenounproject.com/danirolli">Dani Rolli</a> from the <a href="http://www.thenounproject.com">Noun Project</a></p>
 		</div>
 	</li>
 </ul>
 
-
-<br>
-Photo credit <a href="http://www.meetup.com/sketching/members/3905165/">Jesse Richards</a> from <a href="http://www.meetup.com/sketching/photos/23884792/400433052/">Central Park Sketching & Art Meetup Group</a>
-<br>
-Exchange icon designed by <a href="http://www.thenounproject.com/Carolina.Carvallo">Carolina Andrea</a> from the <a href="http://www.thenounproject.com">Noun Project</a>
-<br>
-Selfie icon designed by <a href="http://www.thenounproject.com/AcceleratorMT">Michael Thompson</a> from the <a href="http://www.thenounproject.com">Noun Project</a>
-<br>
-Shy icon designed by <a href="http://www.thenounproject.com/danirolli">Dani Rolli</a> from the <a href="http://www.thenounproject.com">Noun Project</a>
 
 </div>
 

@@ -917,6 +917,8 @@ li.active .landmark-form {
 .tour {
 	padding: 0;
 	margin: 0;
+	width: 100%;
+	overflow: hidden;
 }
 
 .tour-page {
@@ -1056,27 +1058,28 @@ li.active .landmark-form {
 	height: 22px;
 	border-radius: 100%;
 	background-color: #3491FF;
-	border: 1px solid #1668DA;
+	border: 2px solid #1668DA;
 	-webkit-transition: .5s cubic-bezier(.5,.1,0,1) all;
 	transition: .5s cubic-bezier(.5,.1,0,1) all;
 }
 
 .radar-gray .radar-inner {
 	background-color: rgba(157,157,157,1);
+	border: 2px solid #686868;
 }
 
 .radar-outer {
 	position: absolute;
-	top: -23px;
-	left: -23px;
-	width: 69px;
-	height: 69px;
+	top: -22px;
+	left: -22px;
+	width: 66px;
+	height: 66px;
 	border-radius: 100%;
 	-webkit-animation: radar 2s infinite ease-out;
 	animation: radar 2s infinite ease-out;
 	
 	background-color: rgba(83,109,254,0.3);
-		-webkit-transition: .1s cubic-bezier(.5,.1,0,1) all;
+	-webkit-transition: .1s cubic-bezier(.5,.1,0,1) all;
 	transition: .1s cubic-bezier(.5,.1,0,1) all;
 }
 
@@ -1085,7 +1088,7 @@ li.active .landmark-form {
 }
 
 @-webkit-keyframes radar {
-	from {-webkit-transform: scale(0.5);}
+	from {-webkit-transform: scale(0.3);}
 	to {-webkit-transform: scale(1.0); opacity:0;}
 }
 
@@ -1108,25 +1111,56 @@ li.active .landmark-form {
 	left: 50%;
 	margin-left:-32px;
 	top:520px;
+	
+}
+
+.radar-gray .radar3 {
+	box-shadow: 0px 1px 1px rgba(0,0,0,.3);
+}
+
+.radar3a {
+	position: absolute;
+	right: 7px;
+	bottom: -36px;
+}
+
+.radar3a .radar-inner {
+	background-color: #3491FF;
+	border: 2px solid #1668DA;
 }
 
 .tour-title {
-	width: 205px;
-	height: 49px;
-	padding: 12px;
-	font-size: 26px;
+	padding: 8px;
+	font-size: 24px;
 	line-height: 1;
 	color: rgba(0,0,0,0);
 	background: rgba(255,255,255,0);
 	-webkit-transition: .5s cubic-bezier(.5,.1,0,1) all;
 	transition: .5s cubic-bezier(.5,.1,0,1) all;
-	font-family: 'Fabrica', sans-serif;
+	transform: translate3d(0,0,0);
 }
 
-.tour-title.scroll-on {
+.tour-title-corner {
+	position: absolute;
+	right: 10px;
+	bottom: -6px;
+	width: 16px;
+	height: 16px;
+	background: none;
+	transform: rotate(45deg);
+	-webkit-transition: .5s cubic-bezier(.5,.1,0,1) all;
+	transition: .5s cubic-bezier(.5,.1,0,1) all;
+}
+
+.radar-gray .tour-title-corner {
+	background: #FFF;
+	box-shadow: 0px 1px 1px rgba(0,0,0,.3);
+}
+
+
+.radar-gray .tour-title {
 	color: rgba(0,0,0,1);
 	background: rgba(255,255,255,.96);
-	box-shadow: 0px 1px 1px rgba(0,0,0,.3);
 }
 
 .tour-title .radar {
@@ -1180,6 +1214,7 @@ li.active .landmark-form {
 	font-family: 'Fabrica', sans-serif;
 	font-size: 18px;
 	padding-top: 172px;
+	max-width: 600px;
 }
 
 .tour-iphone {
@@ -1188,7 +1223,7 @@ li.active .landmark-form {
 	width: 228px;
 	height: 424px;
 	border-radius: 30px;
-	background: rgba(0,0,0,0.4);
+	background: rgba(0,0,0,0.7);
 	margin: 100px auto;
 }
 
@@ -2136,6 +2171,19 @@ left: 8px;
 	border-radius: 4px;
 	background-color: #EBEBEB;
 	padding: 8px;
+}
+
+.badge.meetup-badge {
+	background: #508dbd;
+}
+
+.profile-media-heading {
+	width: 90%;
+}
+
+.well.meetup-well {
+	background-color: #E6FFE5;
+	border-color: #AEE4B3;
 }
 .leaflet-areaselect-shade {
     position: absolute;
