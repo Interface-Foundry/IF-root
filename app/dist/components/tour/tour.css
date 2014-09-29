@@ -10,13 +10,6 @@
 	height: 800px;
 }
 
-
-@font-face {
-	font-family: Fabrica;
-	src: url("fonts/Fabrica.otf") format("opentype");
-}
-
-
 .tour-page h3 {
 	font-family: 'Fabrica', sans-serif;
 	position: absolute;
@@ -279,7 +272,7 @@
 	width: 228px;
 	height: 424px;
 	border-radius: 30px;
-	background: rgba(0,0,0,0.2);
+	background: rgba(0,0,0,0.4);
 	margin: 100px auto;
 }
 
@@ -289,6 +282,7 @@
 	height: 328px;
 	top: 42px;
 	background: rgba(0,0,0,1);
+
 }
 
 .tour-iphone-button {

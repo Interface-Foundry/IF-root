@@ -926,13 +926,6 @@ li.active .landmark-form {
 	height: 800px;
 }
 
-
-@font-face {
-	font-family: Fabrica;
-	src: url("fonts/Fabrica.otf") format("opentype");
-}
-
-
 .tour-page h3 {
 	font-family: 'Fabrica', sans-serif;
 	position: absolute;
@@ -1195,7 +1188,7 @@ li.active .landmark-form {
 	width: 228px;
 	height: 424px;
 	border-radius: 30px;
-	background: rgba(0,0,0,0.2);
+	background: rgba(0,0,0,0.4);
 	margin: 100px auto;
 }
 
@@ -1205,6 +1198,7 @@ li.active .landmark-form {
 	height: 328px;
 	top: 42px;
 	background: rgba(0,0,0,1);
+
 }
 
 .tour-iphone-button {
@@ -1402,6 +1396,20 @@ li.active .landmark-form {
 	color: #CCC;
 }
 
+.twitter {
+	padding: 4px;
+	width: 100%;
+	font-size: 16px;
+	color: #6A7178;
+}
+
+.instagram {
+	padding: 4px;
+	width: 100%;
+	font-size: 16px;
+	color: #6A7178;
+}
+
 .card.last {
 	border-radius:4px 4px 0px 0px;
 }
@@ -1497,6 +1505,11 @@ body {
   margin: 0;
    height: 100%;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@font-face {
+	font-family: Fabrica;
+	src: url("fonts/Fabrica.otf") format("opentype");
 }
 
 /* *WRAP* */
