@@ -10,7 +10,7 @@
 }
 
 .world-title {
-	height: 72px;
+	height: 62px;
 	font-size: 30px;
 	overflow: hidden;
 	padding: 8px;
@@ -20,6 +20,8 @@
 	height: 16px;
 	width: 100%;
 	/*background: rgba(0,0,0,0.1);*/
+	font-size:15px; 
+	margin-left:9px; 
 }
 
 .avatar {

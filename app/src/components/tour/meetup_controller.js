@@ -1,4 +1,9 @@
-function MeetupController($scope, $window, $location) {
+function MeetupController($scope, $window, $location, styleManager) {
+
+	var style = styleManager;
+
+	style.navBG_color = "rgba(244, 81, 30, 0.8)";
+
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
 	});

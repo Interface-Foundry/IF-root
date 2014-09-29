@@ -82,7 +82,7 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   if(input == null){ return ""; } 
  
   var _date = $filter('date')(new Date(input),
-                              'MMM dd, yyyy - hh:mm a');
+                              'hh:mm a - MMM dd, yyyy');
  
   return _date.toUpperCase();
 

@@ -5380,7 +5380,7 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   if(input == null){ return ""; } 
  
   var _date = $filter('date')(new Date(input),
-                              'MMM dd, yyyy - hh:mm a');
+                              'hh:mm a - MMM dd, yyyy');
  
   return _date.toUpperCase();
 
@@ -10726,7 +10726,12 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 
 
 }
-function MeetupController($scope, $window, $location) {
+function MeetupController($scope, $window, $location, styleManager) {
+
+	var style = styleManager;
+
+	style.navBG_color = "rgba(244, 81, 30, 0.8)";
+
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
 	});
