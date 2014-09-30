@@ -14,4 +14,5 @@ function MeetupController($scope, $window, $location, styleManager) {
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
 		}, 20));
+
 }

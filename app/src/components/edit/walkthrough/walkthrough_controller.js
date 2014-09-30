@@ -177,9 +177,9 @@ var firstWalk = [
 	valid: function() {return true},
 	skip: true},
 	{title: 'Done!',
-	caption: 'Now you can add landmarks or edit your world',
+	caption: 'Now spread the word :)',
 	view: 'done.html',
-	height: 56,
+	height: 200,
 	skip: false}
 ];
 
@@ -226,9 +226,9 @@ var meetupWalk = [
 	valid: function() {return true},
 	skip: true},
 	{title: 'Done!',
-	caption: 'Now you can add landmarks or edit your world',
+	caption: 'Now spread the word :)',
 	view: 'done_meetup.html',
-	height: 120,
+	height: 200,
 	skip: false}
 ];
 

@@ -4732,8 +4732,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/profile/:incoming', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/auth/:type', {templateUrl: 'components/auth/login.html', controller: resolveAuth}).
-      when('/auth/:type/:callback', {templateUrl: 'components/auth/login.html', controller: resolveAuth}).
+      when('/auth/:type', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
+      when('/auth/:type/:callback', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
       // when('/connect/:type', {templateUrl: '_self'}).
       // when('/unlink/:type', {templateUrl: '_self'}).
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
@@ -8716,7 +8716,9 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 }
 
 
-function resolveAuth($scope, $route) {
+function resolveAuth($scope, $rootScope) {
+
+  angular.extend($rootScope, {loading: true});
 
   location.reload(true);
 
@@ -8725,6 +8727,7 @@ function resolveAuth($scope, $route) {
 
 function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
 
+	angular.extend($rootScope, {loading: false});
 	$scope.aperture = apertureService;  
 	$scope.aperture.set('off');
 
@@ -9431,9 +9434,9 @@ var firstWalk = [
 	valid: function() {return true},
 	skip: true},
 	{title: 'Done!',
-	caption: 'Now you can add landmarks or edit your world',
+	caption: 'Now spread the word :)',
 	view: 'done.html',
-	height: 56,
+	height: 200,
 	skip: false}
 ];
 
@@ -9480,9 +9483,9 @@ var meetupWalk = [
 	valid: function() {return true},
 	skip: true},
 	{title: 'Done!',
-	caption: 'Now you can add landmarks or edit your world',
+	caption: 'Now spread the word :)',
 	view: 'done_meetup.html',
-	height: 120,
+	height: 200,
 	skip: false}
 ];
 
@@ -10755,6 +10758,7 @@ function MeetupController($scope, $window, $location, styleManager) {
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
 		}, 20));
+
 }
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;

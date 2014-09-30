@@ -18,7 +18,7 @@ module.exports = {
 	'meetupAuth' : {
 		'consumerKey' 		: 'aoovuf60qkmeot5ed3jk4au0pt',
 		'consumerSecret' 	: 'llbldc45u0d4nfabqqmpl4s28q',
-		'callbackURL' 		: 'http://localhost:2997/auth/meetup/callback'
+		'callbackURL' 		: 'https://bubbl.li/auth/meetup/callback'
 	},
 
 };

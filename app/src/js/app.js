@@ -94,8 +94,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
       when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/profile/:incoming', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/auth/:type', {templateUrl: 'components/auth/login.html', controller: resolveAuth}).
-      when('/auth/:type/:callback', {templateUrl: 'components/auth/login.html', controller: resolveAuth}).
+      when('/auth/:type', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
+      when('/auth/:type/:callback', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
       // when('/connect/:type', {templateUrl: '_self'}).
       // when('/unlink/:type', {templateUrl: '_self'}).
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).

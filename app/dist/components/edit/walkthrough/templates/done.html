@@ -1,5 +1,13 @@
-<ul class="done-list">
-	<li class="done-list-item"><a ng-href="#/edit/landmarks/{{world.id}}">Add Landmarks</a></li>
-	<li class="done-list-item"><a ng-href="#/edit/w/{{world.id}}">Edit {{world.name}}</a></li>
-	<li class="done-list-item"><a ng-href="#/w/{{world.id}}">View {{world.name}}</a></li>
-</ul>
+<div class="container" style="width:472px;">
+	<p>Tell your friends to visit <a target="_blank" href="https://bubbl.li">https://bubbl.li</a> when they're at your Bubble. 
+		<br>
+		Your Bubble will automatically pop up! You can also share the direct link: <br><span style="font-size:16px; background-color:#ececec; text-align:center; padding:5px; border-radius:2px;">https://bubbl.li/w/{{world.id}}</span></p>
+</div>
+<div class="container" style="width:472px;">
+	<ul class="done-list">
+		<a target="_blank" ng-href="/w/{{world.id}}"><button class="btn btn-primary center-block">View your new Bubble now!</button></a>
+		<br>
+		<a ng-href="/edit/landmarks/{{world.id}}"><button class="btn btn-info center-block">Add Points of Interest and the Schedule for your Bubble</button></a>
+	</ul>
+</div>
+

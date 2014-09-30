@@ -8,11 +8,13 @@
 
 <div class="col-xs-12 col-sm-6" ng-show="fromMeetup">
 <div class="meetup-well well">
-Welcome to Bubbl.li! Start setting up bubbles for your meetups below: 
+	<span ng-show="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
+	<span ng-show="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 </div>
 </div>
 
-<div class="col-xs-12 col-sm-6">
+
+<div class="col-xs-12 col-sm-6" ng-hide="fromMeetup && worlds.length > 0">
 <div class="well">
 <button class="btn btn-success" ng-click="newWorld()">+ Create a New World</button>
 </div>
@@ -30,7 +32,7 @@ Welcome to Bubbl.li! Start setting up bubbles for your meetups below:
 				</button>
 				<h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4>
 				
-				<a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div> <br></a>
+				<a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div><div class="text-muted btn btn-xs btn-default" ng-hide="world.source_meetup.id">Set Up Bubble</div> <br></a>
 				<a ng-href="#/w/{{world.id}}">Go to this world</a> | <a ng-href="#/edit/w/{{world.id}}">Edit</a> | {{world.views || 0}} views
 			</div>
 		</div>
