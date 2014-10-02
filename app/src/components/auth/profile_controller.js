@@ -1,5 +1,6 @@
 function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
 
+	angular.extend($rootScope, {loading: false});
 	$scope.aperture = apertureService;  
 	$scope.aperture.set('off');
 

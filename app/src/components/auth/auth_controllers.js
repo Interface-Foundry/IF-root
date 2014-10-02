@@ -184,7 +184,9 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
 }
 
 
-function resolveAuth($scope, $route) {
+function resolveAuth($scope, $rootScope) {
+
+  angular.extend($rootScope, {loading: true});
 
   location.reload(true);
 

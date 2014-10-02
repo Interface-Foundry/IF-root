@@ -1524,6 +1524,243 @@ app.post('/api/process_meetups', isLoggedIn, function (req, res) {
 
 
 
+//updates user profile
+app.post('/api/updateuser', isLoggedIn, function (req, res) {
+
+    if (req.body._id == req.user._id){
+
+      User.findById(req.user._id, function(err, us) {
+      if (err){
+        console.log(err);
+        res.send(200, 'there was an error');
+      }
+      else if(!us){
+        console.log('user not found');
+        res.send(200, 'user not found');
+      }
+      else {  
+
+        if (req.body.addr && req.body.addrP){
+          us.addr = req.body.addr;
+          us.addrP = req.body.addrP;         
+        }
+
+        if (req.body.bday && req.body.bdayP){
+          us.bday = req.body.bday;
+          us.bdayP = req.body.bdayP;
+        }
+
+        if (req.body.lang){
+          us.lang = req.body.lang;
+        }
+
+        if (req.body.avatar){
+          us.avatar = req.body.avatar;
+        }
+
+        if (req.body.name){
+          us.name = req.body.name;
+        }
+
+        if (req.body.note){
+          us.note = req.body.note;
+        }
+
+        if (req.body.social){
+
+            if (req.body.social.linkedIn && req.body.social.linkedInP){
+              us.social.linkedIn = req.body.social.linkedIn;
+              us.social.linkedInP = req.body.social.linkedInP;
+            }
+
+            if (req.body.social.twitter && req.body.social.twitterP){
+              us.social.twitter = req.body.social.twitter;
+              us.social.twitterP = req.body.social.twitterP;
+            }
+
+            if (req.body.social.facebook && req.body.social.facebookP){
+              us.social.facebook = req.body.social.facebook;
+              us.social.facebookP = req.body.social.facebookP;
+            }
+
+            if (req.body.social.gplus && req.body.social.gplusP){
+              us.social.gplus = req.body.social.gplus;
+              us.social.gplusP = req.body.social.gplusP;
+            }
+
+            if (req.body.social.github && req.body.social.githubP){
+              us.social.github = req.body.social.github;
+              us.social.githubP = req.body.social.githubP;
+            }
+        }
+
+
+        async.parallel({
+            one: function(callback){
+
+                //this should allow insert of mixed array, not sure...
+                if (req.body.org){
+                  async.each(req.body.org, function( z, callback) {
+
+                    var orgObj = {};
+
+                    if (z.label){
+                      orgObj.label = z.label;
+                    }
+                    if (z.name){
+                      orgObj.name = z.name;
+                    }
+                    if (z.P){
+                      orgObj.P = z.P;
+                    }
+
+                    us.org.push(orgObj);
+                    callback();
+                    
+                  }, function(err){
+                      if( err ) {
+                        console.log(err);
+                      } else {
+                        console.log('user org object array finished');
+                        callback();
+                      }
+                  });
+                }
+                else {
+                  callback();
+                }
+            },
+            two: function(callback){
+
+                //this should allow insert of mixed array, not sure...
+                if (req.body.email){
+                  async.each(req.body.email, function( e, callback) {
+
+                    var emailObj = {};
+
+                    if (e.label){
+                      emailObj.label = e.label;
+                    }
+                    if (e.addr){
+                      emailObj.addr = e.addr;
+                    }
+                    if (e.P){
+                      emailObj.P = e.P;
+                    }
+
+                    us.email.push(emailObj);
+                    callback();
+                    
+                  }, function(err){
+                      if( err ) {
+                        console.log(err);
+                      } else {
+                        console.log('user email object array finished');
+                        callback();
+                      }
+                  });
+                }
+                else {
+                  callback();
+                }
+            },
+            three: function(callback){
+                //this should allow insert of mixed array, not sure...
+                if (req.body.tel){
+                  async.each(req.body.tel, function( e, callback) {
+
+                    var telObj = {};
+
+                    if (e.label){
+                      telObj.label = e.label;
+                    }
+                    if (e.number){
+                      telObj.number = e.number;
+                    }
+                    if (e.P){
+                      telObj.P = e.P;
+                    }
+
+                    us.tel.push(telObj);
+                    callback();
+                    
+                  }, function(err){
+                      if( err ) {
+                        console.log(err);
+                      } else {
+                        console.log('user email object array finished');
+                        callback();
+                      }
+                  });
+                }
+                else{
+                  callback();
+                }
+            },
+            four: function(callback){
+                //this should allow insert of mixed array, not sure...
+                if (req.body.contact){
+                  async.each(req.body.contact, function( e, callback) {
+
+                    var contactObj = {};
+
+                    if (e.fauserID){
+                      contactObj.fauserID = e.fauserID;
+                    }
+                    if (e.permission){
+                      contactObj.permission = e.permission;
+                    }
+
+                    us.contact.push(contactObj);
+                    callback();
+                    
+                  }, function(err){
+                      if( err ) {
+                        console.log(err);
+                      } else {
+                        console.log('user contact object array finished');
+                        callback();
+                      }
+                  });
+                }
+                else{
+                  callback();
+                }
+            }
+        },
+        function(err, results) {
+            if (err){
+              console.log(err);
+            }
+            else {
+              //processed all array things, now update user
+              us.save(function(err){
+                if (err){
+                  console.log(err);
+                  res.send(200, 'there was an error saving user info');
+                }
+                else {
+                  res.send(200, 'user updated'); 
+                }
+
+              });
+            }
+        });
+
+      }
+
+    });
+
+  }
+  else {
+    console.log('unauthorized user');
+  }
+
+
+});
+
+
+
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
