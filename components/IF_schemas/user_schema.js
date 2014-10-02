@@ -2,6 +2,8 @@
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 
+var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
+
 
 // define the schema for our user model
 var userSchema = mongoose.Schema({
@@ -35,7 +37,54 @@ var userSchema = mongoose.Schema({
         confirmedEmail : Boolean,
         lastLogin: Date,
         loginCount: Number
-    }
+    },
+    addr: String, //address 
+    addrP: Number,
+    bday: Number, //birthday
+    bdayP: Number,
+    lang: String, // ex: ‘EN-us’ 
+    avatar: String,
+    name: String,
+    note: String,
+    // org: [{
+    //     label: String,
+    //     name: String,
+    //     P: Number,
+    // }],
+    org: [Schema.Types.Mixed],
+    social: {
+        linkedIn: String,
+        linkedInP: Number,
+        twitter: String,
+        twitterP: Number,
+        facebook: String,
+        facebookP: Number,
+        gplus: String,
+        gplusP: Number,
+        github: String,
+        githubP: Number,
+    },
+    contact: [Schema.Types.Mixed],
+    // contact: [{
+    //     fauserID: String,
+    //     permission: Number
+    // }],
+    // email: [{
+    //     label: String,
+    //     addr: String,
+    //     P: Number
+    // }],
+    email: [Schema.Types.Mixed],
+    // tel: [{
+    //     label: String,
+    //     number: String,
+    //     P: Number
+    // }],
+    tel: [Schema.Types.Mixed],
+    permissions: [{
+        
+    }]
+
 
 });
 
