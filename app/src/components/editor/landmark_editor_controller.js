@@ -277,7 +277,7 @@ $scope.$on('$destroy', function (event) {
 			focus: false,
 			draggable: false,
 			icon: {
-				iconUrl: '',
+				iconUrl: 'img/marker/bubble-marker-50.png',
 				shadowUrl: '',
 				iconSize: [0,0],
 				shadowSize: [0,0],
