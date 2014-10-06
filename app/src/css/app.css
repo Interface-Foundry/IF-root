@@ -35,19 +35,19 @@ body {
 
 /* *NAV* Navigation Bar */
 
-nav {
+nav.main-nav {
 	position: fixed;
 	top: 0; left: 0;
   width: 100%;
   height: 40px;
   margin: 0;
   padding: 0;
-  background-color: rgba(0,188,212,0.8);
+  background-color: rgba(92,107,191,0.96);
   -webkit-transition: opacity 0 0, -webkit-transform 0.4s;
   -moz-transition:    opacity 0 0, -moz-transform 0.4s;
-	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
-	-o-transition:      opacity 0 0, -o-transform 0.4s;
-	transition:         opacity 0 0, transform 0.4s;
+  -ms-transition:     opacity 0 0, -ms-transform 0.4s;
+  -o-transition:      opacity 0 0, -o-transform 0.4s;
+  transition:         opacity 0 0, transform 0.4s;
 	
 	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;

@@ -209,7 +209,8 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
               else {
                   $rootScope.userName = "Me";
               }
-
+              
+              $rootScope.avatar = user.avatar;
           $rootScope.showLogout = true;          
           $timeout(deferred.resolve, 0);
         }

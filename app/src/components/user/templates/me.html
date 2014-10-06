@@ -1,0 +1,75 @@
+<div class="profile-sort">
+<div class="profile-card">
+<span class="sort-heading indigo700">YOU</span>
+	<div class="profile-card-pic" ng-file-select="onAvatarSelect($files)">
+		<img ng-src="{{user.avatar}}" ng-show="user.avatar">
+		<span class="profile-card-pic-upload">upload</span>
+	</div>
+	<div class="profile-card-body">
+		<div class="form-group">
+		<input type="text" class="marble-control" placeholder="Enter your Name" ng-model="user.name">
+		</div>
+		<span>{{user.title}}</span>
+		<hr>
+		
+	</div>
+</div>
+</div>
+<div class="profile-contact-sort">
+<div class="profile-contact-card">
+<span class="sort-heading indigo700">CONTACT</span>
+	<form role="form">
+		<div class="form-group">
+			<label for="userEmail" class="marble-label">Email</label>
+			<input type="text" class="marble-control" ng-model="user.email" placeholder="Enter your contact email.">
+			<div class="marble-privacy-bit-container hidden">
+			<select class="marble-privacy-bit">
+				<option>on card</option>
+				<option>private</option>
+			</select>
+			<span class="caret"></span>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+		<div class="form-group">
+			<label for="userAddress" class="marble-label">Address</label>
+			<input type="text" class="marble-control" ng-model="user.addr" placeholder="Street Address">
+			<input type="text" class="marble-control" ng-model="user.addr2" placeholder="City, State, ZIP">
+			<div class="clearfix"></div>
+		</div>
+		<div class="form-group">
+			<label for="userPhone" class="marble-label">Phone</label>
+			<input type="text" class="marble-control" ng-model="user.tel" placeholder="Phone">
+			<div class="clearfix"></div>
+		</div>
+		
+	</form>
+
+</div>
+</div>
+
+
+<div class="col-xs-12 col-sm-6" ng-hide="fromMeetup && worlds.length > 0">
+<div class="well">
+<button class="btn btn-success" ng-click="newWorld()">+ Create a New World</button>
+</div>
+</div>
+
+
+<ul>
+	<li class="landmark col-xs-12 col-sm-6" ng-repeat="world in worlds">
+		<div class="media card">
+			<img ng-src="{{world.avatar}}" class="avatar pull-left">
+			<div class="media-body">
+				<button type="button" class="close" ng-click="deleteWorld($index)">
+				<span aria-hidden="true">&times;</span>
+				<span class="sr-only">Close</span>
+				</button>
+				<h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4>
+				
+				<a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div><div class="text-muted btn btn-xs btn-default" ng-hide="world.source_meetup.id">Set Up Bubble</div> <br></a>
+				<a ng-href="#/w/{{world.id}}">Go to this world</a> | <a ng-href="#/edit/w/{{world.id}}">Edit</a> | {{world.views || 0}} views
+			</div>
+		</div>
+	</li>
+</ul>

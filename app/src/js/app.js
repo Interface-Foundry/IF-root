@@ -88,17 +88,21 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
   $routeProvider.
       when('/', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
-      when('/login', {templateUrl: 'components/auth/login.html', controller: LoginCtrl}).
-      when('/forgot', {templateUrl: 'components/auth/forgot.html', controller: ForgotCtrl}).
-      when('/reset/:token', {templateUrl: 'components/auth/change-password.html', controller: ResetCtrl}).
-      when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
-      when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/profile/:incoming', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/auth/:type', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
-      when('/auth/:type/:callback', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
+      when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
+      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
+      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).
+      when('/signup', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
+      //when('/profile', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
+      //when('/profile/:incoming', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
+      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
+      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
       // when('/connect/:type', {templateUrl: '_self'}).
       // when('/unlink/:type', {templateUrl: '_self'}).
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
+      
+      when('/profile', {redirectTo:'/profile/me'}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).

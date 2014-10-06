@@ -1,0 +1,24 @@
+
+<nav class="subnav">
+	<select class="menu pull-left" ng-model="state.menu" ng-change="update(state.menu)" ng-init="state.menu = 'me'">
+		<option value="me">My Profile</option>
+		<option value="worlds">My Worlds</option>
+	</select>
+	<ul class="tab-group" ng-show="state.myProfile">
+		<li class="tab" ng-class="{'selected': state.profile}">
+			<a href="#/profile/me" class="tab-link">Profile</a></li>
+		<li class="tab hidden" ng-class="{'selected': state.contacts}">
+			<a href="#/profile/contacts" class="tab-link ">Contacts</a></li>
+		<li class="tab hidden" ng-class="{'selected': state.history}">
+			<a href="#/profile/history" class="tab-link">History</a></li>
+	</ul>
+	<ul class="tab-group" ng-show="state.myWorlds">
+		<li class="tab" ng-class="{'selected': state.public}">
+			<a href="#/profile/worlds" class="tab-link">Public</a></li>
+		<li class="hidden">Drafts</li>
+		<li class="hidden">Filter</li>
+	</ul>
+</nav>
+<div class="surface">
+	<div ng-include="state.template"></div>
+</div>

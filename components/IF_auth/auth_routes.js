@@ -92,7 +92,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		// handle the callback after meetup has authenticated the user
 		app.get('/auth/meetup/callback',
 			passport.authenticate('meetup', {
-				successRedirect : '/profile/meetup',
+				successRedirect : '/profile/worlds/meetup',
 				failureRedirect : '/login'
 			}));
 

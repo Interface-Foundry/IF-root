@@ -4726,17 +4726,21 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
   $routeProvider.
       when('/', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
-      when('/login', {templateUrl: 'components/auth/login.html', controller: LoginCtrl}).
-      when('/forgot', {templateUrl: 'components/auth/forgot.html', controller: ForgotCtrl}).
-      when('/reset/:token', {templateUrl: 'components/auth/change-password.html', controller: ResetCtrl}).
-      when('/signup', {templateUrl: 'components/auth/signup.html', controller: SignupCtrl}).
-      when('/profile', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/profile/:incoming', {templateUrl: 'components/auth/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/auth/:type', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
-      when('/auth/:type/:callback', {templateUrl: 'components/auth/loading.html', controller: resolveAuth}).
+      when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
+      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
+      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).
+      when('/signup', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
+      //when('/profile', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
+      //when('/profile/:incoming', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
+      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
+      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
       // when('/connect/:type', {templateUrl: '_self'}).
       // when('/unlink/:type', {templateUrl: '_self'}).
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
+      
+      when('/profile', {redirectTo:'/profile/me'}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
@@ -6089,7 +6093,8 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
               else {
                   $rootScope.userName = "Me";
               }
-
+              
+              $rootScope.avatar = user.avatar;
           $rootScope.showLogout = true;          
           $timeout(deferred.resolve, 0);
         }
@@ -6503,7 +6508,7 @@ angular.module('tidepoolsServices', ['ngResource'])
    			if (timeout) {
    			$timeout(function () {
 	   			alerts.list.splice(len-1, 1);
-   			}, 3000);
+   			}, 1000);
    			
    			}
    		}
@@ -6947,7 +6952,7 @@ angular.module('tidepoolsServices')
 	.factory('styleManager', [
 		function() {
 var styleManager = {
-	navBG_color: 'rgba(0,188,212,0.96)'
+	navBG_color: 'rgba(92,107,191,0.96)' 
 	//---local settings---
 	/*bodyBG_color: '#FFF',
 	titleBG_color,
@@ -6964,6 +6969,38 @@ styleManager.resetNavBG = function() {
 return styleManager;
 		}
 	]);
+angular.module('tidepoolsServices')
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', 
+    	function($rootScope, $http, $resource, $q) {
+    	
+var userManager = {
+	userRes: $resource('/api/updateuser', {})
+}
+
+userManager.getUser = function() {
+	var deferred = $q.defer();
+	
+	var user = userManager._user;
+	if (user) {
+		deferred.resolve(user);
+	} else {
+		$http.get('/api/user/loggedin').success(function(user){
+			userManager._user = user;
+			deferred.resolve(user);
+		});
+	}
+	return deferred.promise;
+}
+
+userManager.saveUser = function(user) {
+	userManager.userRes.save(user, function() {
+		console.log('saveUser() succeeded');
+	});
+}
+
+
+return userManager;
+}]);
 angular.module('tidepoolsServices')
 	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db',
 	function($cacheFactory, $q, World, db) {
@@ -8531,255 +8568,6 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-
-/**********************************************************************
- * Login controller
- **********************************************************************/
-function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
-
-  //if already logged in
-  if ($rootScope.showLogout){
-    $location.url('/profile');
-  }
-
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  // This object will be filled by the form
-  $scope.user = {};
-
-
-  //fire socialLogin
-  $scope.socialLogin = function(type){
-
-    console.log(type);
-
-    $location.url('/auth/'+type);
-
-    $http.post('/auth/'+type).
-      success(function(user){
-  
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
-  };
-
-
-
-  //FIRE function on click
-  //---> http.post(/auth/meetup)
-
-
-
-
-  // Register the login() function
-  $scope.login = function(){
-
-    var data = {
-      email: $scope.user.email,
-      password: $scope.user.password
-    }
-
-    $http.post('/api/user/login', data).
-      success(function(user){
-          if (user){
-            $location.url('/profile');
-          }
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
-  };
-
-}
-
-function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
-
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-  $scope.aperture.set('off');
-
-  // This object will be filled by the form
-  $scope.user = {};
-
-  // Register the login() function
-  $scope.signup = function(){
-    var data = {
-      email: $scope.user.email,
-      password: $scope.user.password
-    }
-    $http.post('/api/user/signup', data).
-      success(function(user){
-          if (user){
-            $location.url('/profile');
-          }
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
-    $http.post('/api/user/signup', data).
-      success(function(user){
-          if (user){
-            $location.url('/profile');
-          }
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
-  }
-}
-
-
-
-function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
-
-
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  // This object will be filled by the form
-  $scope.user = {};
-
-  $scope.sendForgot = function(){
-
-    var data = {
-      email: $scope.user.email
-    }
-
-    $http.post('/forgot', data).
-      success(function(data){
-          // console.log(data);
-          $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
-          $scope.user.email = '';
-          // if (user){
-          //   $location.url('/profile');
-          // }
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
-  };
-
-}
-
-
-
-function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
-
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  $http.post('/resetConfirm/'+$routeParams.token).
-    success(function(data){
-        
-    }).
-    error(function(err){
-      if (err){
-        //$scope.alerts.addAlert('danger',err);
-        $location.path('/forgot');
-      }
-    });
-
-
-  $scope.sendUpdatePassword = function(){
-
-    var data = {
-      password: $scope.user.password
-    }
-
-    $http.post('/reset/'+$routeParams.token, data).
-      success(function(data){
-        $location.path('/profile');
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
-  };
-
-}
-
-
-function resolveAuth($scope, $rootScope) {
-
-  angular.extend($rootScope, {loading: true});
-
-  location.reload(true);
-
-}
-
-
-function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
-
-	angular.extend($rootScope, {loading: false});
-	$scope.aperture = apertureService;  
-	$scope.aperture.set('off');
-
-	// This object will be filled by the form
-	$scope.user = {};
-	
-	$scope.worlds = [];
-
-	$scope.deleteWorld = function(i) {
-	var deleteConfirm = confirm("Are you sure you want to delete this?");
-	if (deleteConfirm) {
-		Landmark.del({_id: $scope.worlds[i]._id}, function(data) {
-		//$location.path('/');
-		console.log('##Delete##');
-		console.log(data);
-		$scope.worlds.splice(i, 1); //Removes from local array
-	  });
-	  }
-  	}
-
-	$scope.newWorld = function() {
-		console.log('newWorld()');
-		$scope.world = {};
-		$scope.world.newStatus = true; //new
-		db.worlds.create($scope.world, function(response){
-			console.log('##Create##');
-			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0].worldID);
-		});
-	}
-
-	//if user login came from Meetup, then process new meetup worlds
-	if ($routeParams.incoming == 'meetup'){
-		angular.extend($rootScope, {loading: true});
-		$scope.fromMeetup = true;
-		$http.post('/api/process_meetups').success(function(response){
-			angular.extend($rootScope, {loading: false});
-			$http.get('/api/user/profile').success(function(user){
-				$scope.worlds = user;		
-			});
-		});
-
-	}
-	else {
-		$http.get('/api/user/profile').success(function(user){
-			console.log(user);
-			$scope.worlds = user;		
-		});
-	}
-}
 
 function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService) {
   var aperture = apertureService;
@@ -10976,6 +10764,383 @@ function MeetupController($scope, $window, $location, styleManager, $rootScope) 
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
 	// }
+
+}
+/**********************************************************************
+ * Login controller
+ **********************************************************************/
+function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+
+  //if already logged in
+  if ($rootScope.showLogout){
+    $location.url('/profile');
+  }
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  // This object will be filled by the form
+  $scope.user = {};
+
+
+  //fire socialLogin
+  $scope.socialLogin = function(type){
+
+    console.log(type);
+
+    $location.url('/auth/'+type);
+
+    $http.post('/auth/'+type).
+      success(function(user){
+  
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+
+
+  //FIRE function on click
+  //---> http.post(/auth/meetup)
+
+
+
+
+  // Register the login() function
+  $scope.login = function(){
+
+    var data = {
+      email: $scope.user.email,
+      password: $scope.user.password
+    }
+
+    $http.post('/api/user/login', data).
+      success(function(user){
+          if (user){
+            $location.url('/profile');
+          }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+}
+
+function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+  $scope.aperture.set('off');
+
+  // This object will be filled by the form
+  $scope.user = {};
+
+  // Register the login() function
+  $scope.signup = function(){
+    var data = {
+      email: $scope.user.email,
+      password: $scope.user.password
+    }
+    $http.post('/api/user/signup', data).
+      success(function(user){
+          if (user){
+            $location.url('/profile');
+          }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+    $http.post('/api/user/signup', data).
+      success(function(user){
+          if (user){
+            $location.url('/profile');
+          }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  }
+}
+
+
+
+function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
+
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  // This object will be filled by the form
+  $scope.user = {};
+
+  $scope.sendForgot = function(){
+
+    var data = {
+      email: $scope.user.email
+    }
+
+    $http.post('/forgot', data).
+      success(function(data){
+          // console.log(data);
+          $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
+          $scope.user.email = '';
+          // if (user){
+          //   $location.url('/profile');
+          // }
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+}
+
+
+
+function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
+
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  $http.post('/resetConfirm/'+$routeParams.token).
+    success(function(data){
+        
+    }).
+    error(function(err){
+      if (err){
+        //$scope.alerts.addAlert('danger',err);
+        $location.path('/forgot');
+      }
+    });
+
+
+  $scope.sendUpdatePassword = function(){
+
+    var data = {
+      password: $scope.user.password
+    }
+
+    $http.post('/reset/'+$routeParams.token, data).
+      success(function(data){
+        $location.path('/profile');
+      }).
+      error(function(err){
+        if (err){
+          $scope.alerts.addAlert('danger',err);
+        }
+      });
+  };
+
+}
+
+
+function resolveAuth($scope, $rootScope) {
+
+  angular.extend($rootScope, {loading: true});
+
+  location.reload(true);
+
+}
+
+
+function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
+
+	angular.extend($rootScope, {loading: false});
+	$scope.aperture = apertureService;  
+	$scope.aperture.set('off');
+
+	// This object will be filled by the form
+	$scope.user = {};
+	
+	$scope.worlds = [];
+
+	$scope.deleteWorld = function(i) {
+	var deleteConfirm = confirm("Are you sure you want to delete this?");
+	if (deleteConfirm) {
+		Landmark.del({_id: $scope.worlds[i]._id}, function(data) {
+		//$location.path('/');
+		console.log('##Delete##');
+		console.log(data);
+		$scope.worlds.splice(i, 1); //Removes from local array
+	  });
+	  }
+  	}
+
+	$scope.newWorld = function() {
+		console.log('newWorld()');
+		$scope.world = {};
+		$scope.world.newStatus = true; //new
+		db.worlds.create($scope.world, function(response){
+			console.log('##Create##');
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
+		});
+	}
+
+	//if user login came from Meetup, then process new meetup worlds
+	if ($routeParams.incoming == 'meetup'){
+		angular.extend($rootScope, {loading: true});
+		$scope.fromMeetup = true;
+		$http.post('/api/process_meetups').success(function(response){
+			angular.extend($rootScope, {loading: false});
+			$http.get('/api/user/profile').success(function(user){
+				$scope.worlds = user;		
+			});
+		});
+
+	}
+	else {
+		$http.get('/api/user/profile').success(function(user){
+			console.log(user);
+			$scope.worlds = user;		
+		});
+	}
+}
+
+function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager) {
+
+$scope.state = {};
+$scope.subnav = {
+	profile: ['me', 'contacts', 'history'],
+	worlds: ['worlds', 'drafts', 'filter']
+}
+var saveTimer = null;
+var alert = alertManager;
+
+$scope.onAvatarSelect = function($files) {
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file,
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+		$scope.user.avatar = data;
+		$rootScope.avatar = data;
+		$scope.uploadFinished = true;
+	});
+}
+
+
+function saveUser() {
+	if ($scope.user) {
+		userManager.saveUser($scope.user);
+		alert.addAlert('success', 'Your contact info has been successfully saved!', true);
+	} else {
+		console.log('error');
+	}
+}
+
+$scope.update = function(tab) {
+	$scope.state.myProfile = $scope.subnav.profile.indexOf(tab) > -1 || !tab;
+	$scope.state.myWorlds = $scope.subnav.worlds.indexOf(tab) > -1;
+	$scope.state.profile = tab == 'me';
+	$scope.state.contacts = tab == 'contacts';
+	$scope.state.history = tab == 'history';
+	$scope.state.worlds = tab == 'worlds';
+	$scope.state.drafts = tab == 'drafts';
+	
+	$scope.state.template = 'components/user/templates/'+tab+'.html';
+	
+	console.log($scope.state);
+}
+
+////////////////////////////////////////////////////////////
+/////////////////////////LISTENERS//////////////////////////
+////////////////////////////////////////////////////////////
+var lastRoute = $route.current;
+$scope.$on('$locationChangeSuccess', function (event) {
+    if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
+        $scope.update($route.current.params.tab);
+        $route.current = lastRoute;        
+    }
+});
+
+$scope.$watchCollection('user', function (newCol, oldCol) {
+	if (newCol != oldCol && oldCol!=undefined) {
+		if (saveTimer) {
+			$timeout.cancel(saveTimer);
+		}
+		saveTimer = $timeout(saveUser, 1000);
+	}
+});
+
+////////////////////////////////////////////////////////////
+/////////////////////////EXECUTING//////////////////////////
+////////////////////////////////////////////////////////////
+
+$scope.update($route.current.params.tab);
+
+if ($routeParams.incoming == 'meetup'){
+	angular.extend($rootScope, {loading: true});
+	$scope.fromMeetup = true;
+	$http.post('/api/process_meetups').success(function(response){
+		angular.extend($rootScope, {loading: false});
+		
+		$http.get('/api/user/profile').success(function(user){
+			console.log('asdf24232');
+			console.log(user);
+			$scope.worlds = user;		
+		});
+	});
+
+}
+else {
+	$http.get('/api/user/profile').success(function(user){
+		console.log(user);
+		$scope.worlds = user;		
+	});
+}
+
+$scope.deleteWorld = function(i) {
+	var deleteConfirm = confirm("Are you sure you want to delete this?");
+	if (deleteConfirm) {
+		Landmark.del({_id: $scope.worlds[i]._id}, function(data) {
+		//$location.path('/');
+		console.log('##Delete##');
+		console.log(data);
+		$scope.worlds.splice(i, 1); //Removes from local array
+	  });
+	  }
+  	}
+
+$scope.newWorld = function() {
+		console.log('newWorld()');
+		$scope.world = {};
+		$scope.world.newStatus = true; //new
+		db.worlds.create($scope.world, function(response){
+			console.log('##Create##');
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
+		});
+	}
+
+
+
+userManager.getUser().then(
+	function(response) {
+	console.log(response);
+	$scope.user = response;
+})
 
 }
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {

@@ -40,6 +40,7 @@ var userSchema = mongoose.Schema({
     },
     addr: String, //address 
     addrP: Number,
+    addr2: String, //second line
     bday: Number, //birthday
     bdayP: Number,
     lang: String, // ex: ‘EN-us’ 
@@ -51,7 +52,7 @@ var userSchema = mongoose.Schema({
     //     name: String,
     //     P: Number,
     // }],
-    org: [Schema.Types.Mixed],
+    //org: [Schema.Types.Mixed],
     social: {
         linkedIn: String,
         linkedInP: Number,
@@ -74,13 +75,16 @@ var userSchema = mongoose.Schema({
     //     addr: String,
     //     P: Number
     // }],
-    email: [Schema.Types.Mixed],
+   // email: [Schema.Types.Mixed],
+   email: String,
     // tel: [{
+    
     //     label: String,
     //     number: String,
     //     P: Number
     // }],
-    tel: [Schema.Types.Mixed],
+    //tel: [Schema.Types.Mixed],
+    tel: String,
     permissions: [{
         
     }]
