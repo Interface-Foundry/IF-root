@@ -10868,7 +10868,7 @@ $scope.$on('$locationChangeSuccess', function (event) {
 });
 
 $scope.$watchCollection('user', function (newCol, oldCol) {
-	if (newCol != oldCol) {
+	if (newCol != oldCol && oldCol!=undefined) {
 		if (saveTimer) {
 			$timeout.cancel(saveTimer);
 		}
