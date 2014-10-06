@@ -1,11 +1,11 @@
-function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark) {
+function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db) {
 
 $scope.state = {};
 $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
-var saveTimer = null; 
+var saveTimer = null;
 
 $scope.onAvatarSelect = function($files) {
 	var file = $files[0];
@@ -17,6 +17,7 @@ $scope.onAvatarSelect = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
+		$rootScope.avatar = data;
 		$scope.uploadFinished = true;
 	});
 }
@@ -103,7 +104,7 @@ $scope.deleteWorld = function(i) {
 	  }
   	}
 
-	$scope.newWorld = function() {
+$scope.newWorld = function() {
 		console.log('newWorld()');
 		$scope.world = {};
 		$scope.world.newStatus = true; //new
