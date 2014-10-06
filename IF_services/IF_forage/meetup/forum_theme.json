@@ -14,6 +14,13 @@
 			"upcoming": false,
 			"category": false,
 			"googledoc": true,
-			"checkin": true
+			"checkin": true,
+			"chat": true,
+			"mailing_list":true,
+			"icebreaker":true,
+			"photo_share":true,
+			"stickers":true
 		}
 } 
+
+

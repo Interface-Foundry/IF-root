@@ -37,7 +37,13 @@ module.exports = {
 			twitter: Boolean,
 			instagram: Boolean,
 			upcoming: Boolean,
-			category: Boolean
+			category: Boolean,
+			googledoc: Boolean,
+			chat: Boolean,
+			mailing_list:Boolean,
+			icebreaker:Boolean,
+			photo_share:Boolean,
+			stickers:Boolean
 		}
     },
 
