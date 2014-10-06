@@ -6507,7 +6507,7 @@ angular.module('tidepoolsServices', ['ngResource'])
    			if (timeout) {
    			$timeout(function () {
 	   			alerts.list.splice(len-1, 1);
-   			}, 3000);
+   			}, 1000);
    			
    			}
    		}
@@ -10807,7 +10807,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 	}
 }
 
-function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db) {
+function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager) {
 
 $scope.state = {};
 $scope.subnav = {
@@ -10815,6 +10815,7 @@ $scope.subnav = {
 	worlds: ['worlds', 'drafts', 'filter']
 }
 var saveTimer = null;
+var alert = alertManager;
 
 $scope.onAvatarSelect = function($files) {
 	var file = $files[0];
@@ -10835,6 +10836,7 @@ $scope.onAvatarSelect = function($files) {
 function saveUser() {
 	if ($scope.user) {
 		userManager.saveUser($scope.user);
+		alert.addAlert('success', 'Your contact info has been successfully saved!', true);
 	} else {
 		console.log('error');
 	}
