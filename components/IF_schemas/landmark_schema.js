@@ -105,6 +105,7 @@ monguurl = require('monguurl');
 		// 	updated_time: Date,
 		// 	venue: String
 		// },
+		source_meetup_on: Boolean,
 		source_meetup: {
 			id: String,
 			status: String,
@@ -142,14 +143,6 @@ monguurl = require('monguurl');
 				group_lat: Number,
 				group_lon: Number
 			}
-		},
-		widgets: {
-			twitter: Boolean,
-			instagram: Boolean,
-			upcoming: Boolean,
-			category: Boolean,
-			googledoc: Boolean,
-			checkin: Boolean
 		},
 		widgets: {
 			twitter: Boolean,

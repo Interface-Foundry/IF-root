@@ -108,6 +108,7 @@ module.exports = {
 			updated_time: Date,
 			venue: String
 		},
+		source_meetup_on: Boolean,
 		source_meetup: {
 			id: String,
 			status: String,

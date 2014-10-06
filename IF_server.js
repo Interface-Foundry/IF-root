@@ -1473,42 +1473,57 @@ app.post('/api/process_meetups', isLoggedIn, function (req, res) {
   if (req.user.meetup){
     if (req.user.meetup.id){
 
-      landmarkSchema.find({ 'source_meetup.event_hosts.member_id': parseInt(req.user.meetup.id) }, function(err, ls) {
-
-        if (err){
-          res.send({err:'there was an error'});
-          console.log('there was an error');
-        }
-        else if (ls){
-            
-            async.forEach(ls, function (obj, done){ 
-
-                obj.permissions.ownerID = req.user._id;
-                console.log('update=');
-                obj.save(function (err, data) {
-                    if (err)
-                        console.log(err);
-                    else {
-                        console.log('Updated Owner on world');
-                    }
-                });  
-                done(); 
-
-            }, function(err) {
-                if (err){
-                  console.log(err);
-                }
-                res.send('success');
-                console.log('added user as owner to all matching worlds');
-            }); 
-            
-        }
-        else {
-            console.log('no results');
-            res.send('no results');            
-        }
-
+      //find new meetups user organizes on Meetup
+      findNewMeetups(parseInt(req.user.meetup.id), req.user._id, function(err){
+        findRelatedMeetups();
       });
+
+      //after new meetups created, find any others in DB tied to user
+      function findRelatedMeetups(){
+        landmarkSchema.find({ 'source_meetup.event_hosts.member_id': parseInt(req.user.meetup.id) }, function(err, ls) {
+
+          if (err){
+            res.send({err:'there was an error'});
+            console.log('there was an error');
+          }
+          else if (ls){
+              
+              async.forEach(ls, function (obj, done){ 
+
+                  //skip if there's already an owner ID
+                  if (!Object.keys(obj.permissions.ownerID).length === 0){
+                    done();
+                  }
+                  else {
+                    obj.permissions.ownerID = req.user._id;
+                    console.log('update=');
+                    obj.save(function (err, data) {
+                        if (err)
+                            console.log(err);
+                        else {
+                            console.log('Updated Owner on world');
+                        }
+                    });  
+                    done();              
+                  }
+
+              }, function(err) {
+                  if (err){
+                    console.log(err);
+                  }
+                  res.send('success');
+                  console.log('added user as owner to all matching worlds');
+              }); 
+              
+          }
+          else {
+              console.log('no results');
+              res.send('no results');            
+          }
+
+        });      
+      }
+
     }
     else {
       console.log('user doesnt have meetup id');
@@ -1521,6 +1536,64 @@ app.post('/api/process_meetups', isLoggedIn, function (req, res) {
   }
 
 });
+
+//this finds the latest meetups by signed in Meetup user
+function findNewMeetups(meetupID, userID, callback){
+
+    findNew(function (err) {
+       callback();
+    }); 
+
+    function findNew(callback){
+
+      var source = "https://api.meetup.com/2/profiles?&sign=true&photo-host=public&role=leads&member_id="+meetupID+"&format=json&page=100&key=b22467d19d797837175c661932275c"
+        request({uri:source},function(err,response,body){
+
+            if (err){
+              console.log(err);
+            }
+            var roleArray=[]; 
+            var results=JSON.parse(body).results;
+
+            //adding only groups where member has a role value (are all roles admin though?)
+            async.forEach(results, function (obj, done){ 
+
+                if (obj.role && obj.group){
+                  roleArray.push(obj.group.id.toString());
+                }
+                done(); 
+
+            }, function(err) {
+                if (err){
+                  console.log(err);
+                }
+
+                var toMeetupServer = {
+                  "userID" : userID,
+                  "groupIDs": roleArray
+                };
+
+                postArray(function(err){
+                  callback();
+                });
+
+                function postArray(callback){
+
+                  request.post({
+                    headers: {'content-type' : 'application/json'},
+                    url:     'http://localhost:3134/api/process_meetups',
+                    body:    JSON.stringify(toMeetupServer) 
+                  }, function(err, response, body){
+                    if (err){
+                      console.log(err);
+                    }
+                    callback();
+                  });
+                }
+            }); 
+        });
+    }
+}
 
 
 
@@ -1797,19 +1870,6 @@ app.put('/api/:collection/:cmd',  function (req, res) {
 })
 
 
-// //for routing auth to passport
-// var router = express.Router();
-// router.get('/auth/*', function (req, res, next) {
-//   next();
-// })
-// app.use(router);
-
-// app.all('/w/*', function(req, res) {
-//   console.log('asdf '+req.url);
-// });
-
-
-
 //for routing all else to angular
 app.all('/*', function(req, res) {
 
@@ -1819,7 +1879,12 @@ app.all('/*', function(req, res) {
 
   //if file path, then add file to end
   if (req.url.indexOf('.') != -1 ){
-    res.sendfile(req.url, { root: __dirname + '/app/dist' });
+    res.sendfile(req.url, { root: __dirname + '/app/dist' }, function(err){
+      if (err) {
+        console.log(err);
+        res.status(err.status).end();
+      }   
+    });
   }
 
   /*else if (endsWith(req.url,'/0')){

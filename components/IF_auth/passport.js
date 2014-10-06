@@ -349,7 +349,7 @@ module.exports = function(passport) {
                         if (!user.meetup.token) {
                             user.meetup.token       = token;
                             user.meetup.displayName = profile.displayName;
-                            user.meetup.raw         = profile._raw;
+                            //user.meetup.raw         = profile._raw;
 
                             user.save(function(err) {
                                 if (err){
@@ -366,7 +366,7 @@ module.exports = function(passport) {
                         newUser.meetup.id          = profile.id;
                         newUser.meetup.token       = token;
                         newUser.meetup.displayName = profile.displayName;
-                        newUser.meetup.raw         = profile._raw;
+                        //newUser.meetup.raw         = profile._raw;
 
                         newUser.save(function(err) {
                             if (err){
@@ -384,7 +384,7 @@ module.exports = function(passport) {
                 user.meetup.id          = profile.id;
                 user.meetup.token       = token;
                 user.meetup.displayName = profile.displayName;
-                user.meetup.raw         = profile._raw;
+                //user.meetup.raw         = profile._raw;
 
                 user.save(function(err) {
                     if (err){
