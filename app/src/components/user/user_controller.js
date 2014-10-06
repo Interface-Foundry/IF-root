@@ -73,15 +73,13 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 
 $scope.update($route.current.params.tab);
 
+//if user login came from Meetup, then process new meetup worlds
 if ($routeParams.incoming == 'meetup'){
 	angular.extend($rootScope, {loading: true});
 	$scope.fromMeetup = true;
 	$http.post('/api/process_meetups').success(function(response){
 		angular.extend($rootScope, {loading: false});
-		
 		$http.get('/api/user/profile').success(function(user){
-			console.log('asdf24232');
-			console.log(user);
 			$scope.worlds = user;		
 		});
 	});
