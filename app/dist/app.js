@@ -8835,7 +8835,6 @@ $scope.setEndTime = function() {
 	var timeStart = new Date();
 	console.log(timeStart);
 	
-<<<<<<< HEAD
 	if (typeof $scope.world.time.start === 'string') {
 		timeStart.setISO8601($scope.world.time.start);
 	} //correct, its a string
@@ -8843,50 +8842,6 @@ $scope.setEndTime = function() {
 	if ($scope.world.time.start instanceof Date) {
 		//incorrect but deal with it anyway
 		timeStart = $scope.world.time.start;
-=======
-	$scope.worlds = [];
-
-	$scope.deleteWorld = function(i) {
-	var deleteConfirm = confirm("Are you sure you want to delete this?");
-	if (deleteConfirm) {
-		Landmark.del({_id: $scope.worlds[i]._id}, function(data) {
-		//$location.path('/');
-		console.log('##Delete##');
-		console.log(data);
-		$scope.worlds.splice(i, 1); //Removes from local array
-	  });
-	  }
-  	}
-
-	$scope.newWorld = function() {
-		console.log('newWorld()');
-		$scope.world = {};
-		$scope.world.newStatus = true; //new
-		db.worlds.create($scope.world, function(response){
-			console.log('##Create##');
-			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0].worldID);
-		});
-	}
-
-	//if user login came from Meetup, then process new meetup worlds
-	if ($routeParams.incoming == 'meetup'){
-		angular.extend($rootScope, {loading: true});
-		$scope.fromMeetup = true;
-		$http.post('/api/process_meetups').success(function(response){
-			angular.extend($rootScope, {loading: false});
-			$http.get('/api/user/profile').success(function(user){
-				$scope.worlds = user;		
-			});
-		});
-
-	}
-	else {
-		$http.get('/api/user/profile').success(function(user){
-			console.log(user);
-			$scope.worlds = user;		
-		});
->>>>>>> FETCH_HEAD
 	}
 	//timeStart is currently a date object
 	console.log('timeStart', timeStart.toString());	 
@@ -10579,7 +10534,7 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 
 
 }
-function MeetupController($scope, $window, $location, styleManager) {
+function MeetupController($scope, $window, $location, styleManager, $rootScope) {
 
 	var style = styleManager;
 
@@ -10595,6 +10550,11 @@ function MeetupController($scope, $window, $location, styleManager) {
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
 		}, 20));
+
+
+	// $scope.loadmeetup = function() {
+	// 	$location.path('/auth/meetup');
+	// }
 
 }
 /**********************************************************************
@@ -10832,10 +10792,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		$scope.fromMeetup = true;
 		$http.post('/api/process_meetups').success(function(response){
 			angular.extend($rootScope, {loading: false});
-			
 			$http.get('/api/user/profile').success(function(user){
-				console.log('asdf24232');
-				console.log(user);
 				$scope.worlds = user;		
 			});
 		});
@@ -10954,7 +10911,6 @@ $scope.deleteWorld = function(i) {
 	  }
   	}
 
-<<<<<<< HEAD
 	$scope.newWorld = function() {
 		console.log('newWorld()');
 		$scope.world = {};
@@ -10965,10 +10921,6 @@ $scope.deleteWorld = function(i) {
 			$location.path('/edit/walkthrough/'+response[0].worldID);
 		});
 	}
-=======
-}
-function MeetupController($scope, $window, $location, styleManager, $rootScope) {
->>>>>>> FETCH_HEAD
 
 
 
@@ -10977,11 +10929,6 @@ userManager.getUser().then(
 	console.log(response);
 	$scope.user = response;
 })
-
-
-	// $scope.loadmeetup = function() {
-	// 	$location.path('/auth/meetup');
-	// }
 
 }
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
