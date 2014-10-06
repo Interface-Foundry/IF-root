@@ -129,7 +129,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       // angular.extend($rootScope, {loading: false});
       // $location.path('/w/Startfast_Demo_Day'); 
 
-      map.setCenter([lon, lat], 15, $scope.aperture.state);
+      map.setCenter([lon, lat], 18, $scope.aperture.state);
 
 
       //-------- ENABLE AFTER DEMO ------//

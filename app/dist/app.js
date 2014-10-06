@@ -4773,7 +4773,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TweetlistCtrl}).
       when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
-      when('/chat/:worldID', {templateUrl:'partials/chat.html', controller:ChatCtrl}).
+      when('/chat/:worldID', {templateUrl:'components/chat/worldchat.html', controller: WorldChatCtrl}).
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -6009,7 +6009,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       // angular.extend($rootScope, {loading: false});
       // $location.path('/w/Startfast_Demo_Day'); 
 
-      map.setCenter([lon, lat], 15, $scope.aperture.state);
+      map.setCenter([lon, lat], 18, $scope.aperture.state);
 
 
       //-------- ENABLE AFTER DEMO ------//
@@ -6380,6 +6380,7 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.projects = $resource('api/projects/:_id', {}, actions);
             db.tweets = $resource('api/tweets/:_id', {}, actions);
             db.instagrams = $resource('api/instagrams/:_id', {}, actions);
+            db.worldchats = $resource('api/worldchats/:_id', {}, actions);
             return db;
         }
     ])
@@ -7235,152 +7236,152 @@ function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
 ListCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
-function ChatCtrl($scope, socket, $sce, $rootScope, apertureService) {
+// function ChatCtrl($scope, socket, $sce, $rootScope, apertureService) {
 	
-	$scope.aperture = apertureService;	
-    $scope.aperture.set('off');
+// 	$scope.aperture = apertureService;	
+//     $scope.aperture.set('off');
 
 	
-  // Socket listeners
-  // ================
+//   // Socket listeners
+//   // ================
 
-  socket.on('init', function (data) {
-    $rootScope.chatName = data.name;
-    $rootScope.users = data.users;
-  });
+//   socket.on('init', function (data) {
+//     $rootScope.chatName = data.name;
+//     $rootScope.users = data.users;
+//   });
 
-  socket.on('send:message', function (message) {
-    $rootScope.messages.push(message);
-  });
+//   socket.on('send:message', function (message) {
+//     $rootScope.messages.push(message);
+//   });
 
-  socket.on('change:name', function (data) {
-    changeName(data.oldName, data.newName);
-  });
+//   socket.on('change:name', function (data) {
+//     changeName(data.oldName, data.newName);
+//   });
 
-  // socket.on('reconnect');
+//   // socket.on('reconnect');
   
-  // socket.on('user:join', function (data) {
-  //   $scope.messages.push({
-  //     user: 'chatroom',
-  //     text: 'User ' + data.name + ' has joined.'
-  //   });
-  //   $scope.users.push(data.name);
-  // });
+//   // socket.on('user:join', function (data) {
+//   //   $scope.messages.push({
+//   //     user: 'chatroom',
+//   //     text: 'User ' + data.name + ' has joined.'
+//   //   });
+//   //   $scope.users.push(data.name);
+//   // });
 
-  // // add a message to the conversation when a user disconnects or leaves the room
-  // socket.on('user:left', function (data) {
-  //   $scope.messages.push({
-  //     user: 'chatroom',
-  //     text: 'User ' + data.name + ' has left.'
-  //   });
-  //   var i, user;
-  //   for (i = 0; i < $scope.users.length; i++) {
-  //     user = $scope.users[i];
-  //     if (user === data.name) {
-  //       $scope.users.splice(i, 1);
-  //       break;
-  //     }
-  //   }
-  // });
+//   // // add a message to the conversation when a user disconnects or leaves the room
+//   // socket.on('user:left', function (data) {
+//   //   $scope.messages.push({
+//   //     user: 'chatroom',
+//   //     text: 'User ' + data.name + ' has left.'
+//   //   });
+//   //   var i, user;
+//   //   for (i = 0; i < $scope.users.length; i++) {
+//   //     user = $scope.users[i];
+//   //     if (user === data.name) {
+//   //       $scope.users.splice(i, 1);
+//   //       break;
+//   //     }
+//   //   }
+//   // });
 
-  // Private helpers
-  // ===============
+//   // Private helpers
+//   // ===============
 
-  var changeName = function (oldName, newName) {
-    // rename user in list of users
-    var i;
-    for (i = 0; i < $rootScope.users.length; i++) {
-      if ($rootScope.users[i] === oldName) {
-        $rootScope.users[i] = newName;
-      }
-    }
+//   var changeName = function (oldName, newName) {
+//     // rename user in list of users
+//     var i;
+//     for (i = 0; i < $rootScope.users.length; i++) {
+//       if ($rootScope.users[i] === oldName) {
+//         $rootScope.users[i] = newName;
+//       }
+//     }
 
-    // $scope.messages.push({
-    //   user: 'chatroom',
-    //   text: 'User ' + oldName + ' is now known as ' + newName + '.'
-    // });
-  }
+//     // $scope.messages.push({
+//     //   user: 'chatroom',
+//     //   text: 'User ' + oldName + ' is now known as ' + newName + '.'
+//     // });
+//   }
 
-  // Methods published to the scope
-  // ==============================
+//   // Methods published to the scope
+//   // ==============================
 
-  $scope.changeName = function () {
-    socket.emit('change:name', {
-      name: $scope.newName
-    }, function (result) {
-      if (!result) {
-        alert('That name is already in use');
-      } else {
-        changeName($rootScope.chatName, $scope.newName);
-        $rootScope.chatName = $scope.newName;
-        $scope.newName = '';
-      }
-    });
-  };
+//   $scope.changeName = function () {
+//     socket.emit('change:name', {
+//       name: $scope.newName
+//     }, function (result) {
+//       if (!result) {
+//         alert('That name is already in use');
+//       } else {
+//         changeName($rootScope.chatName, $scope.newName);
+//         $rootScope.chatName = $scope.newName;
+//         $scope.newName = '';
+//       }
+//     });
+//   };
 
-  //$scope.messages = [];
+//   //$scope.messages = [];
 
-  $scope.sendMessage = function () {
+//   $scope.sendMessage = function () {
 
-    socket.emit('send:message', {
-      message: $scope.message
-    });
+//     socket.emit('send:message', {
+//       message: $scope.message
+//     });
 
-    var date = new Date;
-    var seconds = (date.getSeconds()<10?'0':'') + date.getSeconds();
-    var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
-    var hour = date.getHours();
+//     var date = new Date;
+//     var seconds = (date.getSeconds()<10?'0':'') + date.getSeconds();
+//     var minutes = (date.getMinutes()<10?'0':'') + date.getMinutes();
+//     var hour = date.getHours();
 
-    // add the message to our model locally
-    $rootScope.messages.push({
-      user: $rootScope.chatName,
-      text: $scope.message,
-      time: hour + ":" + minutes + ":" + seconds
-    });
+//     // add the message to our model locally
+//     $rootScope.messages.push({
+//       user: $rootScope.chatName,
+//       text: $scope.message,
+//       time: hour + ":" + minutes + ":" + seconds
+//     });
 
-    // clear message box
-    $scope.message = '';
-  };
+//     // clear message box
+//     $scope.message = '';
+//   };
 
-  $scope.sendEmo = function (input) {
-    var path = "/img/emoji/";
-    var emoji;
+//   $scope.sendEmo = function (input) {
+//     var path = "/img/emoji/";
+//     var emoji;
 
-    switch(input) {
-        case "cool":
-            emoji = path+"cool.png";
-            break;
-        case "dolphin":
-            emoji = path+"dolphin.png";
-            break;
-        case "ghost":
-            emoji = path+"ghost.png";
-            break;
-        case "heart":
-            emoji = path+"heart.png";
-            break;
-        case "love":
-            emoji = path+"love.png";
-            break;
-        case "party":
-            emoji = path+"party.png";
-            break;
-        case "smile":
-            emoji = path+"smile.png";
-            break;
-        case "woah":
-            emoji = path+"woah.png";
-            break;
-        default:
-            emoji = path+"love.png";
-            break;
-    }
-    $scope.message = '<img src="'+emoji+'">';
-    $scope.sendMessage();
-  }
+//     switch(input) {
+//         case "cool":
+//             emoji = path+"cool.png";
+//             break;
+//         case "dolphin":
+//             emoji = path+"dolphin.png";
+//             break;
+//         case "ghost":
+//             emoji = path+"ghost.png";
+//             break;
+//         case "heart":
+//             emoji = path+"heart.png";
+//             break;
+//         case "love":
+//             emoji = path+"love.png";
+//             break;
+//         case "party":
+//             emoji = path+"party.png";
+//             break;
+//         case "smile":
+//             emoji = path+"smile.png";
+//             break;
+//         case "woah":
+//             emoji = path+"woah.png";
+//             break;
+//         default:
+//             emoji = path+"love.png";
+//             break;
+//     }
+//     $scope.message = '<img src="'+emoji+'">';
+//     $scope.sendMessage();
+//   }
 
 
-}
+// }
 
 
 
@@ -8778,6 +8779,213 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 			$scope.worlds = user;		
 		});
 	}
+}
+
+function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService) {
+  var aperture = apertureService;
+  aperture.set('off');
+
+    //angular while loop the query every 2 seconds
+    //$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
+    ///
+
+    var side = 'left';
+
+    //Messages, client info & sending
+    $scope.messages = [];
+
+
+    $scope.sendMessage = function () {
+
+        //$scope.messageText;
+
+        var newChat = {
+            worldID: $routeParams.worldID,
+            nickname: 'lel',
+            userID: 'REPLACE ME',
+            msg: $scope.messageText
+        };
+
+        if ($scope.messageImg){
+            newChat.img = $scope.messageImg;
+        }
+
+
+        db.worldchat.create(newChat, function(response) {
+
+            console.log(response);
+          
+                
+        });
+
+
+        // $scope.messages.push({
+        //   user: $rootScope.chatName,
+        //   text: $scope.messageText,
+        //   time: hour + ":" + minutes + ":" + seconds,
+        //   side: side,
+        //   avatar: '/img/emoji/cool.png'
+        // });
+
+        $scope.messageText = "";
+    };
+
+
+
+    //greater than mongoID
+    // db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
+    //         console.log('--db.landmarks.query--');
+    //         console.log('data');
+    //         console.log(data);
+    //     //data.shift();
+    //     $scope.landmarks = $scope.landmarks.concat(data);
+    //         console.log('$scope.landmarks');
+    //         console.log($scope.landmarks);
+        
+    //     //add markers to map
+    //     angular.forEach($scope.landmarks, function(value, key) {
+    //         //for each landmark add a marker
+    //         map.addMarker(value._id, {
+    //             lat:value.loc.coordinates[1],
+    //             lng:value.loc.coordinates[0],
+    //             draggable: true,
+    //             icon: {
+    //                 iconUrl: 'img/marker/bubble-marker-50.png',
+    //                 shadowUrl: '',
+    //                 iconSize: [25, 48],
+    //                 iconAnchor: [13, 10]
+    //             },
+    //             message:value.name
+    //         });
+    //     });
+    //     landmarksLoaded = true;
+        
+    // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //Occurs when we receive chat messages
+
+    // server.ngChatMessagesInform = function (p) {
+
+
+    //     $scope.messages.push({
+    //         avatar: "data:image/png;base64," + p.avatar.toBase64(),
+    //         text: p.message,
+    //         side: side
+    //     });
+    //     $scope.$apply();
+
+    //     // Animate
+    //     $("#viewport-content").animate({
+    //         bottom: $("#viewport-content").height() - $("#viewport").height()
+    //     }, 250);
+
+    //     // flip the side
+    //     side = side == 'left' ? 'right' : 'left';
+
+    // };
+
+
+
+
+    
+  // Socket listeners
+  // ================
+
+  // socket.on('init', function (data) {
+  //   $rootScope.chatName = data.name;
+  //   $rootScope.users = data.users;
+  // });
+
+  // //receiving messages
+  // socket.on('send:message', function (p) {
+
+  //       console.log(p);
+
+  //       $scope.messages.push({
+  //           avatar: p.avatar,
+  //           text: p.text,
+  //           side: p.side,
+  //           time: p.time,
+  //           user: p.user
+  //       });
+  //       //$scope.$apply();
+
+  //       // Animate
+  //       $("#viewport-content").animate({
+  //           bottom: $("#viewport-content").height() - $("#viewport").height()
+  //       }, 250);
+
+  //       // flip the side
+  //       side = side == 'left' ? 'right' : 'left';
+  // });
+
+
+
+
+
+
+
+
+
+
+  // socket.on('change:name', function (data) {
+  //   changeName(data.oldName, data.newName);
+  // });
+
+
+  // // Private helpers
+  // // ===============
+
+  // var changeName = function (oldName, newName) {
+  //   // rename user in list of users
+  //   var i;
+  //   for (i = 0; i < $rootScope.users.length; i++) {
+  //     if ($rootScope.users[i] === oldName) {
+  //       $rootScope.users[i] = newName;
+  //     }
+  //   }
+  // }
+
+  // // Methods published to the scope
+  // // ==============================
+
+  // $scope.changeName = function () {
+  //   socket.emit('change:name', {
+  //     name: $scope.newName
+  //   }, function (result) {
+  //     if (!result) {
+  //       alert('That name is already in use');
+  //     } else {
+  //       changeName($rootScope.chatName, $scope.newName);
+  //       $rootScope.chatName = $scope.newName;
+  //       $scope.newName = '';
+  //     }
+  //   });
+  // };
+
+
+
+    $scope.goBack = function(){
+        window.history.back();
+    }
 }
 
 function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
@@ -11037,6 +11245,14 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			console.log('wyzerr');
 			$scope.wyzerr = true;
 		}
+
+		if ($scope.style.widgets.chat) {
+			$scope.chat = true;
+
+			//angular while loop the query every 2 seconds
+			//$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
+			///
+		}
 		
 		if ($scope.style.widgets.category) {
 			$scope.category = true;
@@ -11064,7 +11280,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	   if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
 	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
-	    }
+	   }
 	     	 
 	}
 

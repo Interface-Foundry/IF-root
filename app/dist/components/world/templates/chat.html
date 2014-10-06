@@ -1,4 +1,4 @@
-	<div class="row" ng-style="{'background-color': style.bodyBG_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'"> 
+<!-- 	<div class="row" ng-style="{'background-color': style.bodyBG_color}" ng-if="world.id=='AlleyNYC_Startup_Showcase'"> 
 		<div class="col-xs-12 widget_margin">
 		<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Reactions</h4>
 			<div class="card" ng-style="{'background-color': style.cardBG_color}">
@@ -28,3 +28,27 @@
 			</div>
 		</div>
 	</div>
+ -->
+
+
+ <div class="col-xs-6 twitter">
+	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Chat</h4>
+
+        <h4># of people online in bubble</h4>
+
+        <div class="card last" ng-style="{'background-color': style.cardBG_color}">
+
+        <a ng-href="#/twitter/{{world.resources.hashtag}}">
+
+          <div class="more">
+          <p class="twitter">{{tweets[0].text}}</p>
+          <img class="img-responsive instagram" style="padding-top:2px;" src="img/widgets/placeholder-t.png" ng-hide="tweets[0].tweetID_str"> 
+          <span class="watermark typcn typcn-social-twitter"></span>
+          </div>
+        </a>
+        <a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
+        
+        <div class="footer show-footer">@{{tweets[0].user.name}} <span class="typcn typcn-export pull-right"><span></div>
+        </a>
+        </div>
+ </div>

@@ -24,16 +24,16 @@
 <ul>
 	<li class="landmark col-xs-12 col-sm-6" ng-repeat="world in worlds">
 		<div class="media card">
-			<img ng-src="{{world.avatar}}" class="avatar pull-left">
+			<a ng-href="#/w/{{world.id}}"><img ng-src="{{world.avatar}}" class="avatar pull-left"></a>
 			<div class="media-body">
 				<button type="button" class="close" ng-click="deleteWorld($index)">
 				<span aria-hidden="true">&times;</span>
 				<span class="sr-only">Close</span>
 				</button>
-				<h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4>
+				<a ng-href="#/w/{{world.id}}"><h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4></a>
 				
 				<a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div><div class="text-muted btn btn-xs btn-default" ng-hide="world.source_meetup.id">Set Up Bubble</div> <br></a>
-				<a ng-href="#/w/{{world.id}}">Go to this world</a> | <a ng-href="#/edit/w/{{world.id}}">Edit</a> | {{world.views || 0}} views
+				<a ng-href="#/edit/w/{{world.id}}">Edit</a> | <a ng-href="#/w/{{world.id}}">Go to this world</a> | {{world.views || 0}} views
 			</div>
 		</div>
 	</li>

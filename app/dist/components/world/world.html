@@ -11,8 +11,8 @@
 					<div class="world-footer">
 				<!-- 		{{world.timetext.timestart | date : 'shortTime'}}
 						{{world.timetext.timeend | date: 'shortTime'}} -->
-						<span>{{world.time.start | date: "h:mm a MMM d"}}</span>
-						<span ng-show="world.time.end">to {{world.time.end | date: "h:mm a MMM d"}}</span>
+						<span>{{world.time.start | date: "MMM d h:mm a"}}</span>
+						<span ng-show="world.time.end">to {{world.time.end | date: "MMM d h:mm a"}}</span>
 					</div>
 				</div>
 		</div>
@@ -28,6 +28,9 @@
 
 	<!--now--> <!--upcoming-->
 	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
+
+	<!--CHAT-->
+<!-- 	<div ng-include="chat ? 'components/world/templates/chat.html' : null"></div> -->
 
 	<!---meetup-->
 	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>

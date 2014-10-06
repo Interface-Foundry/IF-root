@@ -39,7 +39,7 @@ var cloudMapID ='interfacefoundry.jh58g2al';
 //var meetupAPI = 'b22467d19d797837175c661932275c'; //testing
 var meetupAPI = '361e46474141d775c5f353f7e4f151b'; //production
 
-var zipLow = 1145;
+var zipLow = 1001;
 var zipHigh = 99950;
 
 //search meetup in loops

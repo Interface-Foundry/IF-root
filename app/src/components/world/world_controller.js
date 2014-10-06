@@ -132,6 +132,14 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			console.log('wyzerr');
 			$scope.wyzerr = true;
 		}
+
+		if ($scope.style.widgets.chat) {
+			$scope.chat = true;
+
+			//angular while loop the query every 2 seconds
+			//$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
+			///
+		}
 		
 		if ($scope.style.widgets.category) {
 			$scope.category = true;
@@ -159,7 +167,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	   if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
 	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
-	    }
+	   }
 	     	 
 	}
 

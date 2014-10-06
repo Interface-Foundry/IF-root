@@ -1,3 +1,119 @@
+/*
+body
+{
+	font-family: 'Open Sans', Arial, sans-serif;
+	font-weight: 300;
+	font-size: 14px;
+}*/
+
+#browser-window{
+	background: url("components/chat/background.png") ;
+	height: 538px;
+	width: 335px;
+	padding: 49px 25px 10px 25px;
+	margin: auto;
+	position:relative;
+}
+
+#viewport{
+	overflow:hidden;
+	height: 420px;
+}
+
+#viewport-content{
+	position: relative;
+	bottom: -500px;
+}
+
+.row-chat{
+	position:absolute;
+	bottom: 20px;
+	margin: 0;
+	width: 286px;
+}
+
+.bubble-container{
+	display:block;
+	clear: both;
+	position:relative;
+	margin-bottom:10px;
+	min-height: 53px;
+}
+
+.avatar{
+	border: 2px solid #ffffff;
+	box-sizing: initial;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.avatar,.avatar img{
+	width: 50px;
+	height: 50px;
+	-webkit-border-radius: 30px; /* Saf3+, Chrome */
+	border-radius: 30px; /* Opera 10.5, IE 9 */
+}
+
+
+.bubble{
+	padding: 13px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.9);
+	color: #575858;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.avatar-left:before {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 10px 14px 10px 0;
+	border-color: transparent #ffffff;
+	display: block;
+	width: 0;
+	z-index: 1;
+	left: 61px;
+	top: 13px;
+}
+
+.avatar-right:before 
+{
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 10px 0 10px 14px;
+	border-color: transparent #ffffff;
+	display: block;
+	width: 0;
+	z-index: 1;
+	right: 61px;
+	top: 13px;
+}
+
+/* Positionning of the avatar and the bubble */
+.avatar-left{
+	float: left;
+	width: 50px;
+}
+
+.bubble-left{
+	overflow: hidden;
+	margin-left: 75px;
+}
+
+.avatar-right{
+	float: right;
+	width: 50px;
+}
+
+.bubble-right{
+	overflow: hidden;
+	margin-right: 75px;
+}
+
+
+
 .edit-view {
 	position: absolute;
 	top: 0px;
@@ -1381,12 +1497,13 @@ li.active .landmark-form {
 	height: 24px;
 	width: 100%;
 	/*background: rgba(0,0,0,0.1);*/
-	font-size: 12px;
+	font-size: 14px;
 	text-align: left;
 	line-height: 20px;
 	padding: 4px 0px 4px 8px;
 	color: #FFF;
 	overflow: hidden;
+	margin-top:-7px;
 }
 
 .avatar {

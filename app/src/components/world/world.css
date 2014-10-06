@@ -21,12 +21,13 @@
 	height: 24px;
 	width: 100%;
 	/*background: rgba(0,0,0,0.1);*/
-	font-size: 12px;
+	font-size: 14px;
 	text-align: left;
 	line-height: 20px;
 	padding: 4px 0px 4px 8px;
 	color: #FFF;
 	overflow: hidden;
+	margin-top:-7px;
 }
 
 .avatar {
