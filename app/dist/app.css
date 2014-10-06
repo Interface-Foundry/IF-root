@@ -1603,19 +1603,19 @@ body {
 
 /* *NAV* Navigation Bar */
 
-nav {
+nav.main-nav {
 	position: fixed;
 	top: 0; left: 0;
   width: 100%;
   height: 40px;
   margin: 0;
   padding: 0;
-  background-color: rgba(0,188,212,0.8);
+  background-color: rgba(92,107,191,0.96);
   -webkit-transition: opacity 0 0, -webkit-transform 0.4s;
   -moz-transition:    opacity 0 0, -moz-transform 0.4s;
-	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
-	-o-transition:      opacity 0 0, -o-transform 0.4s;
-	transition:         opacity 0 0, transform 0.4s;
+  -ms-transition:     opacity 0 0, -ms-transform 0.4s;
+  -o-transition:      opacity 0 0, -o-transform 0.4s;
+  transition:         opacity 0 0, transform 0.4s;
 	
 	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
@@ -2214,6 +2214,193 @@ left: 8px;
 .well.meetup-well {
 	background-color: #E6FFE5;
 	border-color: #AEE4B3;
+}
+
+nav {
+  pointer-events: auto;
+}
+.subnav {
+  height: 88px;
+  width: 100%;
+  background: #f5f5f5;
+  padding: 40px 0px 0px 0px;
+}
+.tab-group {
+  text-align: center;
+}
+.tab {
+  display: inline-block;
+  height: 48px;
+  font-size: 14px;
+  line-height: 16px;
+  padding: 16px 8px;
+  color: #737373;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  cursor: pointer;
+}
+.tab-link {
+  color: inherit;
+}
+.tab.selected {
+  color: #5c6bc0;
+}
+.menu {
+  font-size: 14px;
+  line-height: 16px;
+  padding: 8px 10px;
+  margin: 8px;
+  -webkit-appearance: none;
+  background: #FFF;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.16);
+  color: #737373;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  cursor: pointer;
+}
+.surface {
+  width: 100%;
+  min-height: 100%;
+  padding: 8px 0px;
+  background: #e6e6e6;
+  overflow: auto;
+}
+.surface:before,
+.surface:after,
+.surface-sort:before,
+.surface-sort:after {
+  content: ' ';
+  display: table;
+}
+.sort-heading {
+  position: absolute;
+  top: -16px;
+  left: 0px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+.marble-smooth-card {
+  position: relative;
+  background: #FFF;
+  border-radius: 5px;
+}
+.profile-card {
+  width: 100%;
+  height: 128px;
+  float: left;
+  min-height: 1px;
+  position: relative;
+  background: #FFF;
+  border-radius: 5px;
+}
+@media only screen and (min-width: 768px) {
+  .profile-card {
+    /*card goes vertical*/
+    height: 208px;
+  }
+}
+.sort {
+  width: 100%;
+  float: left;
+  padding: 16px 8px;
+}
+.profile-sort {
+  max-width: 360px;
+  width: 100%;
+  float: left;
+  padding: 16px 8px;
+}
+@media only screen and (min-width: 768px) {
+  .profile-sort {
+    width: 160px;
+  }
+}
+.profile-card-pic {
+  width: 96px;
+  height: 96px;
+  float: left;
+  margin: 16px 16px 16px 24px;
+  border-radius: 50%;
+  background: #78909c;
+  overflow: hidden;
+}
+@media only screen and (min-width: 768px) {
+  .profile-card-pic {
+    margin: 8px auto;
+    float: none;
+  }
+}
+.profile-card-pic-upload {
+  display: block;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  line-height: 12px;
+  margin: 42px 0px;
+}
+.profile-card-body {
+  overflow: hidden;
+  height: 100%;
+  padding: 8px;
+}
+.profile-contact-card {
+  position: relative;
+  background: #FFF;
+  border-radius: 5px;
+  padding: 8px;
+}
+.profile-contact-sort {
+  width: 100%;
+  float: left;
+  padding: 16px 8px;
+  max-width: 500px;
+}
+.marble-label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 12px;
+}
+.marble-control {
+  display: block;
+  float: left;
+  width: 100%;
+  padding: 2px 4px;
+  font-size: 14px;
+  line-height: 16px;
+  color: #555;
+  border: none;
+  border-bottom: 1px solid #e6e6e6;
+  background: #FFF;
+  margin-bottom: 4px;
+}
+.marble-privacy-bit {
+  width: 72px;
+  -webkit-appearance: none;
+  color: #999999;
+  border: none;
+  background: none;
+  margin: 0px 4px;
+  padding: 0px 8px 0px 0px;
+}
+.marble-privacy-bit-container {
+  position: relative;
+  float: left;
+  width: 72px;
+  color: #999999;
+}
+.marble-privacy-bit-container .caret {
+  position: absolute;
+  right: 0px;
+  bottom: 7px;
+  pointer-events: none;
+}
+.indigo700 {
+  color: #303f9f;
 }
 
 .leaflet-areaselect-shade {

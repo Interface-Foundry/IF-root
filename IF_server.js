@@ -1540,10 +1540,14 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
       }
       else {  
 
-        if (req.body.addr && req.body.addrP){
+        if (req.body.addr){
           us.addr = req.body.addr;
-          us.addrP = req.body.addrP;         
+          //us.addrP = req.body.addrP;         
         }
+		
+		if (req.body.addr2) {
+			us.addr2 = req.body.addr2;
+		}
 
         if (req.body.bday && req.body.bdayP){
           us.bday = req.body.bday;
@@ -1593,9 +1597,28 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
               us.social.githubP = req.body.social.githubP;
             }
         }
+		
+		if (req.body.email) {
+			us.email = req.body.email;
+		}
+		
+		if (req.body.tel) {
+			us.tel = req.body.tel;
+		}
+
+		 us.save(function(err){
+                if (err){
+                  console.log(err);
+                  res.send(200, 'there was an error saving user info');
+                }
+                else {
+                  res.send(200, 'user updated'); 
+                }
+
+          });
 
 
-        async.parallel({
+        /*async.parallel({
             one: function(callback){
 
                 //this should allow insert of mixed array, not sure...
@@ -1745,7 +1768,7 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
 
               });
             }
-        });
+        });*/
 
       }
 
@@ -1819,7 +1842,15 @@ app.all('/*', function(req, res) {
 
   //if file path, then add file to end
   if (req.url.indexOf('.') != -1 ){
-    res.sendfile(req.url, { root: __dirname + '/app/dist' });
+    res.sendfile(req.url, { root: __dirname + '/app/dist' },  function (err) {
+	   if (err) {
+	      	console.log(err);
+	      	res.status(err.status).end();
+	   }
+	   else {
+	   		console.log('Sent:', req.url);
+	   }
+	  });
   }
 
   /*else if (endsWith(req.url,'/0')){

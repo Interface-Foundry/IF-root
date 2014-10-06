@@ -58,12 +58,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 	<script src="lib.js"></script>
 	<script src="app.js"></script>
-  
-  
-  
-  
 </head>
-<body ng-style="{'background-color': globalBGColor}">
+<body>
   <div id="wrap">
   		<div class="drawer-handle" ng-show="drawerOn" ng-style="{'background-color': style.navBG_color}" ng-click="drawerOn = !drawerOn"> 
   			<img width="10px" height="16px" class="handle toolbar-item show" src="/img/icons/drawer.png">
@@ -77,7 +73,10 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   			<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
   			<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button> <button type="button" class="close" ng-click="feedbackOn=!feedbackOn"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
   		</div>
-  		<nav role="navigation" ng-class="{'drawer': drawerOn}" ng-style="{'background-color': style.navBG_color}">
+  		<nav role="navigation" 
+  			class="main-nav"
+  			ng-class="{'drawer': drawerOn}" 
+  			ng-style="{'background-color': style.navBG_color}">
 	  		<button class="drawer-toggle pull-left" ng-click="drawerOn = !drawerOn">
 	  			<img width="13px" height="16px" class="handle pull-left" src="/img/icons/drawer.png">
   			</button>
@@ -112,7 +111,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			   		   	<span ng-bind="userName | userName" class="no-u">Profile</span> <span class="caret"></span> 
 			   		</a>
 			   		<ul class="dropdown-menu">
-				   		<li><a role="menuitem" tabindex="-1" ng-href="/#/profile">Profile</a></li>
+				   		<li><a role="menuitem" tabindex="-1" ng-href="/profile">Profile</a></li>
 				   		<li><a ng-href="profile">+ New World</a></li>
 				   		<li><a href="" ng-click="feedbackOn=true">Report Issue</a></li>
 				   		<li><a href="" ng-click="logout()">Logout</a></li>
