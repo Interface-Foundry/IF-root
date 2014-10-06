@@ -39,7 +39,7 @@ var cloudMapID ='interfacefoundry.jh58g2al';
 //var meetupAPI = 'b22467d19d797837175c661932275c'; //testing
 var meetupAPI = '361e46474141d775c5f353f7e4f151b'; //production
 
-var zipLow = 1001;
+var zipLow = 1145;
 var zipHigh = 99950;
 
 //search meetup in loops
@@ -167,16 +167,6 @@ function searchMeetup(tag, done) {
 	                        	lmSchema.style.maps.cloudMapID = cloudMapID;
 	                        	lmSchema.style.maps.cloudMapName = cloudMapName;
 	                        	lmSchema.views = 0;
-
-	                        	// if (lmSchema.widgets){
-		                        //  	lmSchema.widgets.googledoc = true;
-		                        // 	lmSchema.widgets.checkin = true;
-		                        // 	lmSchema.widgets.twitter = false;
-		                        // 	lmSchema.widgets.instagram = false;
-		                        // 	lmSchema.widgets.upcoming = false;
-		                        // 	lmSchema.widgets.category = false;                      		
-	                        	// }
-
 
 	                        	if(typeof result.photo_url=='undefined'){
 	                        		lmSchema.avatar = 'img/IF/meetup_default.jpg';
@@ -473,318 +463,321 @@ function searchMeetupGroups(tag, userID, done) {
 
             var idArray=[];
             var results=JSON.parse(body).results;
-            //console.log(results)
-            for(var i=0;i<results.length;i++){
-                idArray.push(results[i].id);
-                processData(i,results[i],function(found,result,docs){
-                    if(found){
 
-                        /**/
-                        /*Compare source_meetup.updated to Meetup "updated" value.
-                         If they are == then continue to next document in the Meetup data loop.
-                         If they are !== then update the landmarkSchema with new/edited data and continue to next document in the Meetup data loop.*/
-                        if(typeof result.updated == 'undefined'){
-                            //lmSchema.name=0;
-                        }
-                        else{
-                            docs[0].source_meetup.updated=result.updated;
-                        }
+            if (results){
+	            //console.log(results)
+	            for(var i=0;i<results.length;i++){
+	                idArray.push(results[i].id);
+	                processData(i,results[i],function(found,result,docs){
+	                    if(found){
 
-                        docs[0].save(function(err,docs){
+	                        /**/
+	                        /*Compare source_meetup.updated to Meetup "updated" value.
+	                         If they are == then continue to next document in the Meetup data loop.
+	                         If they are !== then update the landmarkSchema with new/edited data and continue to next document in the Meetup data loop.*/
+	                        if(typeof result.updated == 'undefined'){
+	                            //lmSchema.name=0;
+	                        }
+	                        else{
+	                            docs[0].source_meetup.updated=result.updated;
+	                        }
 
-                            if(err){
+	                        docs[0].save(function(err,docs){
 
-                                console.log("Erorr Occurred");
-                                console.log(err)
-                            }
-                            else if(!err)
-                            {
-                                console.log("documents saved");
-                            }
-                            else{
+	                            if(err){
 
-                                console.log('jajja');
+	                                console.log("Erorr Occurred");
+	                                console.log(err)
+	                            }
+	                            else if(!err)
+	                            {
+	                                console.log("documents saved");
+	                            }
+	                            else{
 
-                            }
-                        });
+	                                console.log('jajja');
 
-                    }
-                    else{
+	                            }
+	                        });
 
-                        var lmSchema = new landmarks.model(true);
+	                    }
+	                    else{
 
-                        if(typeof result.id=='undefined')
-                        {
-                            console.log('meetup doesnt have id');
-                        }
-                        else{
-                            lmSchema.id = 'meetup_'+result.id;
-                            processMeetup();
-                        }
+	                        var lmSchema = new landmarks.model(true);
 
-
-                        function processMeetup(){
-
-                        	lmSchema.world = true;
-                        	lmSchema.valid = true;
-                        	lmSchema.style.maps.cloudMapID = cloudMapID;
-                        	lmSchema.style.maps.cloudMapName = cloudMapName;
-                        	lmSchema.views = 0;
-
-                        	//
-                        	if (userID){	
-                        		//**TEMPORARY to prevent overwriting another owner
-                        		if(!lmSchema.permissions.ownerID){
-                        			lmSchema.permissions.ownerID = userID; //from auth'd user meetup login
-                        		}
-                        	}
-
-                        	lmSchema.avatar = 'img/IF/meetup_default.jpg';
-
-                            //lmSchema.name= result.name;
-                            if(typeof result.name=='undefined')
-                            {
-                                lmSchema.name=0;
-                            }
-                            else{
-                                lmSchema.name=result.name;
-                            }
-                            
-                            //lmSchema.description= result.description;
-                            if(typeof result.description=='undefined')
-                            {
-                                lmSchema.description=0;
-                            }
-                            else{
-                                lmSchema.description=result.description;
-                            }
-
-                            //add event_hosts data as specified in fields parameter
-                            if(typeof result.event_hosts=='undefined')
-                            {
-                                lmSchema.event_hosts=0;
-                            }
-                            else{
-                                lmSchema.source_meetup.event_hosts=result.event_hosts;
-                            }
-
-                            //lmSchema.time.start=result.time;
-                            if(typeof result.time=='undefined')
-                            {
-                                lmSchema.time.start=0;
-                            }
-                            else{
-                                lmSchema.time.start=result.time;
-                            }
-
-                            if(typeof result.duration=='undefined')
-                            {
-                                lmSchema.time.end=0;
-                            }
-                            else{
-                                lmSchema.time.end=result.time+result.duration;
-                            }
-
-                            //data source is from Meetup
-                            lmSchema.source_meetup_on = true;
+	                        if(typeof result.id=='undefined')
+	                        {
+	                            console.log('meetup doesnt have id');
+	                        }
+	                        else{
+	                            lmSchema.id = 'meetup_'+result.id;
+	                            processMeetup();
+	                        }
 
 
-                            //lmSchema.source_meetup.id= result.id;
-                            if(typeof result.id=='undefined')
-                            {
-                                lmSchema.source_meetup.id=0;
-                            }
-                            else{
-                                lmSchema.source_meetup.id=result.id;
-                            }
-                            if(typeof result.status=='undefined')
-                            {
-                                lmSchema.source_meetup.status="";
-                            }
-                            else{
-                                lmSchema.source_meetup.status=result.status;
-                            }
-                            //lmSchema.source_meetup.status= result.status;
-                            if(typeof result.visibility=='undefined')
-                            {
-                                lmSchema.source_meetup.visibility="";
-                            }
-                            else{
-                                lmSchema.source_meetup.visibility=result.visibility;
-                            }
-                            //lmSchema.source_meetup.visibility= result.visibility;
+	                        function processMeetup(){
 
-                            if(typeof result.updated=='undefined')
-                            {
-                                lmSchema.source_meetup.updated=0;
-                            }
-                            else{
-                                lmSchema.source_meetup.updated=result.updated;
-                            }
+	                        	lmSchema.world = true;
+	                        	lmSchema.valid = true;
+	                        	lmSchema.style.maps.cloudMapID = cloudMapID;
+	                        	lmSchema.style.maps.cloudMapName = cloudMapName;
+	                        	lmSchema.views = 0;
 
-                            //lmSchema.source_meetup.updated= result.updated;
-                            /*venue: {
-                             id: Number,
-                             name: String,
-                             state: String,
-                             address_1: String,
-                             address_2: String,
-                             city: String,
-                             zip: Number,
-                             country: String,
-                             phone: String,
-                             },*/
-                            if(typeof result.venue=='undefined'){
-                                lmSchema.source_meetup.venue={};
-                                lmSchema.loc = {type: 'Point',coordinates: [-74.0059,40.7127]};
-          						lmSchema.hasLoc = false;	
-                            }
-                            else{
-                                lmSchema.source_meetup.venue=result.venue;
-          						lmSchema.loc = {type: 'Point', coordinates: [result.venue.lon, result.venue.lat]};
-          						lmSchema.hasLoc = true;
-                            }
+	                        	//
+	                        	if (userID){	
+	                        		//**TEMPORARY to prevent overwriting another owner
+	                        		if(!lmSchema.permissions.ownerID){
+	                        			lmSchema.permissions.ownerID = userID; //from auth'd user meetup login
+	                        		}
+	                        	}
 
-                            /*landmarkSchema.fee: {
-                             amount: Number,
-                             description: String,
-                             label: String,
-                             required: String,
-                             accepts: String,
-                             currency: String
-                             },*/
-                            if(typeof result.fee=='undefined')
-                            {
-                                lmSchema.source_meetup.fee={};
-                            }
-                            else{
-                                lmSchema.source_meetup.fee=result.fee;
-                            }
-                            //lmSchema.source_meetup.fees=result.fees;
-                            if(typeof result.yes_rsvp_count=='undefined')
-                            {
-                                lmSchema.source_meetup.yes_rsvp_count=0;
-                            }
-                            else{
-                                lmSchema.source_meetup.yes_rsvp_count=result.yes_rsvp_count;
-                            }
+	                        	lmSchema.avatar = 'img/IF/meetup_default.jpg';
 
-                            //lmSchema.yes_rsvp_count=result.yes_rsvp_count,
-                            //lmSchema.rsvp_limit= result.rsvp_limit,
-                            if(typeof result.rsvp_limit=='undefined')
-                            {
-                                lmSchema.source_meetup.rsvp_limit=0;
-                            }
-                            else{
-                                lmSchema.source_meetup.rsvp_limit=result.rsvp_limit;
-                            }
-                            //lmSchema.event_url=result.event_url;
-                            if(typeof result.event_url=='undefined')
-                            {
-                                lmSchema.source_meetup.event_url="";
-                            }
-                            else{
-                                lmSchema.source_meetup.event_url=result.event_url;
-                            }
+	                            //lmSchema.name= result.name;
+	                            if(typeof result.name=='undefined')
+	                            {
+	                                lmSchema.name=0;
+	                            }
+	                            else{
+	                                lmSchema.name=result.name;
+	                            }
+	                            
+	                            //lmSchema.description= result.description;
+	                            if(typeof result.description=='undefined')
+	                            {
+	                                lmSchema.description=0;
+	                            }
+	                            else{
+	                                lmSchema.description=result.description;
+	                            }
 
-                            //lmSchema.how_to_find_us=result.how_to_find_us;
-                            if(typeof result.how_to_find_us=='undefined')
-                            {
-                                lmSchema.source_meetup.how_to_find_us="";
-                            }
-                            else{
-                                lmSchema.source_meetup.how_to_find_us=result.how_to_find_us;
-                            }
-                            /*landmarkSchema.group: {
-                             id: Number,
-                             name: String,
-                             who: String,
-                             group_lat: Number,
-                             group_lon: Number
-                             }*/
-                            //lmSchema.group=result.group;
-                            if(typeof result.group=='undefined')
-                            {
-                                lmSchema.source_meetup.group={};
-                            }
-                            else{
-                                lmSchema.source_meetup.group=result.group;
-                            }
+	                            //add event_hosts data as specified in fields parameter
+	                            if(typeof result.event_hosts=='undefined')
+	                            {
+	                                lmSchema.event_hosts=0;
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.event_hosts=result.event_hosts;
+	                            }
 
-                            saveStyle(forumStyle.name, function(styleRes){ //creating new style to add to landmark
+	                            //lmSchema.time.start=result.time;
+	                            if(typeof result.time=='undefined')
+	                            {
+	                                lmSchema.time.start=0;
+	                            }
+	                            else{
+	                                lmSchema.time.start=result.time;
+	                            }
 
-                        		saveNewLandmark(styleRes);
-                    		});
+	                            if(typeof result.duration=='undefined')
+	                            {
+	                                lmSchema.time.end=0;
+	                            }
+	                            else{
+	                                lmSchema.time.end=result.time+result.duration;
+	                            }
 
-                            //loading style from JSON, saving
-					        function saveStyle(inputName, callback){
+	                            //data source is from Meetup
+	                            lmSchema.source_meetup_on = true;
 
-					        	var st = new styles.model(true);
 
-					        	st.name = inputName;
-					        	st.bodyBG_color = forumStyle.bodyBG_color;
-					        	st.titleBG_color = forumStyle.titleBG_color;
-					        	st.navBG_color = forumStyle.navBG_color;
-					        	st.landmarkTitle_color = forumStyle.landmarkTitle_color;
-					            st.categoryTitle_color = forumStyle.categoryTitle_color;
-					            st.widgets.twitter = forumStyle.widgets.twitter;
-					            st.widgets.instagram = forumStyle.widgets.instagram;
-					            st.widgets.upcoming = forumStyle.widgets.upcoming;
-					            st.widgets.category = forumStyle.widgets.category;
-					            st.widgets.googledoc = forumStyle.widgets.googledoc;
-					            st.widgets.checkin = forumStyle.widgets.checkin;
+	                            //lmSchema.source_meetup.id= result.id;
+	                            if(typeof result.id=='undefined')
+	                            {
+	                                lmSchema.source_meetup.id=0;
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.id=result.id;
+	                            }
+	                            if(typeof result.status=='undefined')
+	                            {
+	                                lmSchema.source_meetup.status="";
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.status=result.status;
+	                            }
+	                            //lmSchema.source_meetup.status= result.status;
+	                            if(typeof result.visibility=='undefined')
+	                            {
+	                                lmSchema.source_meetup.visibility="";
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.visibility=result.visibility;
+	                            }
+	                            //lmSchema.source_meetup.visibility= result.visibility;
 
-					            //Meetup tests
-					            st.widgets.chat = forumStyle.widgets.chat;
-					            st.widgets.mailing_list = forumStyle.widgets.mailing_list;
-					            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
-					            st.widgets.photo_share = forumStyle.widgets.photo_share;
-					            st.widgets.stickers = forumStyle.widgets.stickers;
+	                            if(typeof result.updated=='undefined')
+	                            {
+	                                lmSchema.source_meetup.updated=0;
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.updated=result.updated;
+	                            }
 
-					            
-					            function saveIt(callback){
-					            	
-					                st.save(function (err, style) {
-					                    if (err)
-					                        handleError(res, err);
-					                    else {
-					                        callback(style._id);
-					                    }
-					                });
-					            }
-					            saveIt(function (res) {
-					            	
-					                callback(res);
-					            });
-					        }
+	                            //lmSchema.source_meetup.updated= result.updated;
+	                            /*venue: {
+	                             id: Number,
+	                             name: String,
+	                             state: String,
+	                             address_1: String,
+	                             address_2: String,
+	                             city: String,
+	                             zip: Number,
+	                             country: String,
+	                             phone: String,
+	                             },*/
+	                            if(typeof result.venue=='undefined'){
+	                                lmSchema.source_meetup.venue={};
+	                                lmSchema.loc = {type: 'Point',coordinates: [-74.0059,40.7127]};
+	          						lmSchema.hasLoc = false;	
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.venue=result.venue;
+	          						lmSchema.loc = {type: 'Point', coordinates: [result.venue.lon, result.venue.lat]};
+	          						lmSchema.hasLoc = true;
+	                            }
 
-					        function saveNewLandmark(styleRes){
-					        	
-					        	if (styleRes !== undefined){ //if new styleID created for world
-                        			lmSchema.style.styleID = styleRes;
-                    			}
+	                            /*landmarkSchema.fee: {
+	                             amount: Number,
+	                             description: String,
+	                             label: String,
+	                             required: String,
+	                             accepts: String,
+	                             currency: String
+	                             },*/
+	                            if(typeof result.fee=='undefined')
+	                            {
+	                                lmSchema.source_meetup.fee={};
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.fee=result.fee;
+	                            }
+	                            //lmSchema.source_meetup.fees=result.fees;
+	                            if(typeof result.yes_rsvp_count=='undefined')
+	                            {
+	                                lmSchema.source_meetup.yes_rsvp_count=0;
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.yes_rsvp_count=result.yes_rsvp_count;
+	                            }
 
-	         					lmSchema.save(function(err,docs){
-	                                if(err){
-	                                    console.log("Erorr Occurred");
-	                                    console.log(err)
-	                                }
-	                                else if(!err)
-	                                {
-	                                    console.log("documents saved");
-	                                }
-	                                else{
-	                                    console.log('jajja')
-	                                }
-	                            });
+	                            //lmSchema.yes_rsvp_count=result.yes_rsvp_count,
+	                            //lmSchema.rsvp_limit= result.rsvp_limit,
+	                            if(typeof result.rsvp_limit=='undefined')
+	                            {
+	                                lmSchema.source_meetup.rsvp_limit=0;
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.rsvp_limit=result.rsvp_limit;
+	                            }
+	                            //lmSchema.event_url=result.event_url;
+	                            if(typeof result.event_url=='undefined')
+	                            {
+	                                lmSchema.source_meetup.event_url="";
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.event_url=result.event_url;
+	                            }
 
-					        }
-                   
-                        }
+	                            //lmSchema.how_to_find_us=result.how_to_find_us;
+	                            if(typeof result.how_to_find_us=='undefined')
+	                            {
+	                                lmSchema.source_meetup.how_to_find_us="";
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.how_to_find_us=result.how_to_find_us;
+	                            }
+	                            /*landmarkSchema.group: {
+	                             id: Number,
+	                             name: String,
+	                             who: String,
+	                             group_lat: Number,
+	                             group_lon: Number
+	                             }*/
+	                            //lmSchema.group=result.group;
+	                            if(typeof result.group=='undefined')
+	                            {
+	                                lmSchema.source_meetup.group={};
+	                            }
+	                            else{
+	                                lmSchema.source_meetup.group=result.group;
+	                            }
 
-                    }
-                });
-            }
+	                            saveStyle(forumStyle.name, function(styleRes){ //creating new style to add to landmark
+
+	                        		saveNewLandmark(styleRes);
+	                    		});
+
+	                            //loading style from JSON, saving
+						        function saveStyle(inputName, callback){
+
+						        	var st = new styles.model(true);
+
+						        	st.name = inputName;
+						        	st.bodyBG_color = forumStyle.bodyBG_color;
+						        	st.titleBG_color = forumStyle.titleBG_color;
+						        	st.navBG_color = forumStyle.navBG_color;
+						        	st.landmarkTitle_color = forumStyle.landmarkTitle_color;
+						            st.categoryTitle_color = forumStyle.categoryTitle_color;
+						            st.widgets.twitter = forumStyle.widgets.twitter;
+						            st.widgets.instagram = forumStyle.widgets.instagram;
+						            st.widgets.upcoming = forumStyle.widgets.upcoming;
+						            st.widgets.category = forumStyle.widgets.category;
+						            st.widgets.googledoc = forumStyle.widgets.googledoc;
+						            st.widgets.checkin = forumStyle.widgets.checkin;
+
+						            //Meetup tests
+						            st.widgets.chat = forumStyle.widgets.chat;
+						            st.widgets.mailing_list = forumStyle.widgets.mailing_list;
+						            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
+						            st.widgets.photo_share = forumStyle.widgets.photo_share;
+						            st.widgets.stickers = forumStyle.widgets.stickers;
+
+						            
+						            function saveIt(callback){
+						            	
+						                st.save(function (err, style) {
+						                    if (err)
+						                        handleError(res, err);
+						                    else {
+						                        callback(style._id);
+						                    }
+						                });
+						            }
+						            saveIt(function (res) {
+						            	
+						                callback(res);
+						            });
+						        }
+
+						        function saveNewLandmark(styleRes){
+						        	
+						        	if (styleRes !== undefined){ //if new styleID created for world
+	                        			lmSchema.style.styleID = styleRes;
+	                    			}
+
+		         					lmSchema.save(function(err,docs){
+		                                if(err){
+		                                    console.log("Erorr Occurred");
+		                                    console.log(err)
+		                                }
+		                                else if(!err)
+		                                {
+		                                    console.log("documents saved");
+		                                }
+		                                else{
+		                                    console.log('jajja')
+		                                }
+		                            });
+
+						        }
+	                   
+	                        }
+
+	                    }
+	                });
+	            }
+        	}
             console.log(idArray);
     });
 

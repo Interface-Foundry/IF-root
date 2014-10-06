@@ -154,10 +154,11 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     $scope.style = styleManager;
     $scope.alerts = alertManager;
     $rootScope.messages = [];
+    //$rootScope.loadMeetup = false;
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
-	angular.extend($rootScope, {loading: false});
+	  angular.extend($rootScope, {loading: false});
 	
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0

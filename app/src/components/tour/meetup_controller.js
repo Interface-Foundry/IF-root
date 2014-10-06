@@ -1,4 +1,4 @@
-function MeetupController($scope, $window, $location, styleManager) {
+function MeetupController($scope, $window, $location, styleManager, $rootScope) {
 
 	var style = styleManager;
 
@@ -14,5 +14,10 @@ function MeetupController($scope, $window, $location, styleManager) {
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
 		}, 20));
+
+
+	// $scope.loadmeetup = function() {
+	// 	$location.path('/auth/meetup');
+	// }
 
 }

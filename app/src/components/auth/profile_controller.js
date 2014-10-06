@@ -38,10 +38,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		$scope.fromMeetup = true;
 		$http.post('/api/process_meetups').success(function(response){
 			angular.extend($rootScope, {loading: false});
-			
 			$http.get('/api/user/profile').success(function(user){
-				console.log('asdf24232');
-				console.log(user);
 				$scope.worlds = user;		
 			});
 		});

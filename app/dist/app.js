@@ -6034,10 +6034,11 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     $scope.style = styleManager;
     $scope.alerts = alertManager;
     $rootScope.messages = [];
+    //$rootScope.loadMeetup = false;
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
-	angular.extend($rootScope, {loading: false});
+	  angular.extend($rootScope, {loading: false});
 	
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
@@ -8765,10 +8766,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 		$scope.fromMeetup = true;
 		$http.post('/api/process_meetups').success(function(response){
 			angular.extend($rootScope, {loading: false});
-			
 			$http.get('/api/user/profile').success(function(user){
-				console.log('asdf24232');
-				console.log(user);
 				$scope.worlds = user;		
 			});
 		});
@@ -10749,7 +10747,7 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 
 
 }
-function MeetupController($scope, $window, $location, styleManager) {
+function MeetupController($scope, $window, $location, styleManager, $rootScope) {
 
 	var style = styleManager;
 
@@ -10765,6 +10763,11 @@ function MeetupController($scope, $window, $location, styleManager) {
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
 		}, 20));
+
+
+	// $scope.loadmeetup = function() {
+	// 	$location.path('/auth/meetup');
+	// }
 
 }
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {

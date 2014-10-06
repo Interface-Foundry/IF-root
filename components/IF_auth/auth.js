@@ -27,6 +27,6 @@ module.exports = {
 	// 	'consumerKey' 		: 'vim0att4d71oa1qjhe1mq1t1dl',
 	// 	'consumerSecret' 	: '6qc9nn459v9bbhuui2ceeiqi4e',
 	// 	'callbackURL' 		: 'http://localhost:2997/auth/meetup/callback'
-	// }
+	// },
 
 };
