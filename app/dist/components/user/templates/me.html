@@ -48,6 +48,13 @@
 </div>
 </div>
 
+<div class="col-xs-12 col-sm-6" ng-show="fromMeetup">
+<div class="meetup-well well">
+	<span ng-show="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
+	<span ng-show="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
+</div>
+</div>
+
 
 <div class="col-xs-12 col-sm-6" ng-hide="fromMeetup && worlds.length > 0">
 <div class="well">
