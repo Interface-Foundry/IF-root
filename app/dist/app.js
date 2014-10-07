@@ -6078,7 +6078,10 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
                 $rootScope.userID = user._id;
               }
               //determine name to display on login (should check for name extension before adding...)
-              if (user.facebook){
+              if (user.name){
+                  $rootScope.userName = user.name;
+              }
+              else if (user.facebook){
                   $rootScope.userName = user.facebook.name;
               }
               else if (user.twitter){
@@ -9385,13 +9388,13 @@ $scope.save = function() {
 
 var firstWalk = [
 	{title: 'Need a hand?',
-	caption: 'If you haven’t built a world before, we can walk you through it.',
+	caption: 'If you haven’t built a bubble before, we can walk you through it.',
 	height: 0,
 	view: '0.html',
 	valid: function() {return true},
 	skip: false},
 	{title: 'Kind',
-	caption: 'What kind is it?',
+	caption: 'What kind of bubble is it?',
 	view: 'kind.html',
 	height: 220,
 	valid: function() {return typeof $scope.world.category == "string"},
@@ -9403,7 +9406,7 @@ var firstWalk = [
 	valid: function() {return $scope.world.hasLoc},
 	skip: false},
 	{title: 'Name',
-	caption: 'What\'s it named?',
+	caption: 'What\'s your bubble named?',
 	view: 'name.html',
 	height: 62,
 	valid: function() {return $scope.form.worldName.$valid},
@@ -9416,7 +9419,7 @@ var firstWalk = [
 	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
 	skip: true},
 	{title: 'Picture',
-	caption: 'Upload a picture',
+	caption: 'Upload a picture for your bubble',
 	view: 'picture.html',
 	height: 194,
 	valid: function() {return true},
@@ -9428,7 +9431,7 @@ var firstWalk = [
 	valid: function() {return true},
 	skip: true},
 	{title: 'Hashtag',
-	caption: 'Enable social connections',
+	caption: 'Connect your bubble\'s social media',
 	view: 'hashtag.html',
 	height: 132,
 	valid: function() {return true},
@@ -9459,13 +9462,13 @@ var meetupWalk = [
 	skip: false
 	},
 	{title: 'Kind',
-	caption: 'What kind is it?',
+	caption: 'What kind of bubble is it?',
 	view: 'kind.html',
 	height: 220,
 	valid: function() {return typeof $scope.world.category == "string"},
 	skip: false},
 	{title: 'Hashtag',
-	caption: 'Enable social connections',
+	caption: 'Connect your bubble\'s social media',
 	view: 'hashtag.html',
 	height: 132,
 	valid: function() {return true},

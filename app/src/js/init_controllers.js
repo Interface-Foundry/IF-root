@@ -194,7 +194,10 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
                 $rootScope.userID = user._id;
               }
               //determine name to display on login (should check for name extension before adding...)
-              if (user.facebook){
+              if (user.name){
+                  $rootScope.userName = user.name;
+              }
+              else if (user.facebook){
                   $rootScope.userName = user.facebook.name;
               }
               else if (user.twitter){
