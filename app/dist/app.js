@@ -4680,7 +4680,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
               else {
                   $rootScope.userName = "Me";
               }
-
+              
+          $rootScope.avatar = user.avatar;
           $rootScope.showLogout = true;
 
           console.log($rootScope.showLogout);
