@@ -11023,6 +11023,9 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 
 function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager) {
 
+//ERROR WITH LOGIN SHOWING LOGGED IN NAME AND PIC *** TEMP 
+$route.reload();
+
 $scope.state = {};
 $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
