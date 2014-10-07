@@ -24,7 +24,10 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
                 $rootScope.userID = user._id;
               }
               //determine name to display on login (should check for name extension before adding...)
-              if (user.facebook){
+              if (user.name){
+                  $rootScope.userName = user.name;
+              }
+              else if (user.facebook){
                   $rootScope.userName = user.facebook.name;
               }
               else if (user.twitter){
@@ -101,8 +104,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
       when('/profile', {redirectTo:'/profile/me'}).
-      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController}).
-      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
