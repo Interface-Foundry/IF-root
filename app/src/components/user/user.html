@@ -1,8 +1,8 @@
 
 <nav class="subnav">
-	<select class="menu pull-left" ng-model="state.menu" ng-change="update(state.menu)" ng-init="state.menu = 'me'">
-		<option value="me">My Profile</option>
-		<option value="worlds">My Worlds</option>
+	<select class="menu pull-left" ng-model="menuLink" ng-change="go(menuLink)">
+		<option value="/profile/worlds">My Worlds</option>
+		<option value="/profile/me">My Profile</option>
 	</select>
 	<ul class="tab-group" ng-show="state.myProfile">
 		<li class="tab" ng-class="{'selected': state.profile}">

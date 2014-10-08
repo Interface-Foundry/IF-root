@@ -11,7 +11,6 @@ nav {
 
 .tab-group {
 	text-align: center;
-	
 }
 
 .tab {
@@ -53,15 +52,124 @@ nav {
 .surface {
 	width: 100%;
 	min-height: 100%;
-	padding: 8px 0px;
+	padding: 8px;
 	background: #e6e6e6;
 	overflow: auto;
 }
 
-
 .surface:before, .surface:after, .surface-sort:before, .surface-sort:after {
 	content: ' ';
 	display:table;
+}
+
+.world-sq-container {
+	padding: 0px;
+	margin: 0px;
+}
+
+.world-sq {
+	position: relative;
+	width: 144px;
+	height: 144px;
+	float: left;
+	background: #d2d2d2;
+	margin: 4px;
+	border-radius: 2px;
+	border: 1px solid #c0c0c0;
+	overflow: hidden;
+	cursor:pointer;
+}
+
+.world-sq-close {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	z-index: 10;
+	background: none;
+	border: none;
+	outline: none;
+	color: #FFF;	
+	visibility: hidden;
+	text-shadow: 0px 1px 1px rgba(0,0,0,.9);
+	line-height: 14px;
+}
+
+.world-sq:hover .world-sq-close {
+	visibility: visible;
+}
+
+.world-sq-img {
+	width: 144px;
+	height: 144px;
+}
+
+.world-sq-views {
+	position: absolute;
+	top: 3px;
+	left: 6px;
+	color: #fff;
+	font-size: 10px;
+	line-height: 1;
+	visibility: hidden;
+	text-shadow: 0px 1px 1px rgba(0,0,0,.9);
+}
+
+.world-sq:hover .world-sq-views {
+	visibility: visible;
+}
+
+.world-sq-menu {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 144px;
+	height: 104px;
+	background: #FFF;
+	transform: translateY(104px);
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	
+	z-index: 20;
+}
+
+.selected.world-sq-menu {
+	transform: translateY(0px);
+}
+
+.world-sq-menu-title {
+	position: absolute;
+	bottom: 104px;
+	width: 144px;
+	
+	background: rgba(255,255,255,1);
+	text-align: center;
+	font-size: 14px;
+	line-height: 18px;
+	border-bottom: 1px solid #e6e6e6;
+	box-sizing: border-box;
+	box-shadow: 0px -2px 2px rgba(0,0,0,.2);
+	/*
+opacity: 1;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
+*/
+}
+
+.selected .world-sq-menu-title {
+	/* background: rgba(255,255,255,0.5); */
+/* 	opacity: 0.5 */
+}
+
+.world-sq-menu-action {
+	width: 144px;
+	height: 24px;
+	text-align: center;
+	font-size: 12px;
+	line-height: 24px;
+	cursor: pointer;
+	background: #FFF;
+	&:hover {
+		background: #5c6bc0;
+		color: #FFF;
+	}
 }
 
 .sort-heading {
@@ -144,6 +252,46 @@ nav {
 .profile-contact-sort {
 	.sort();
 	max-width: 500px;
+}
+
+.profile-add-new {
+	position: relative;
+	margin: 4px;
+	width: 296px;
+	height: 64px;
+	color: #737373;
+	font-size: 16px;
+	padding: 18px 0px 0px 0px;
+	
+	text-align: center;
+	
+	border: 2px dashed #bdbdbd;
+	@media only screen and (min-width: 768px) {
+	float:left;
+	height: 144px;
+	width: 80px;
+	padding: 64px 0px 0px 0px;
+	}
+}
+
+.profile-add-new-plus {
+	position: absolute;
+	width: 36px;
+	height: 36px;
+	left: 20px;
+	top: 12px;
+	
+	border-radius: 18px;
+	line-height: 34px;
+	font-size: 20px;
+	color: #fff;
+	margin: 0 auto;
+	background: #2196f3;
+	@media only screen and (min-width: 768px) {
+		top: 24px;
+		left: 0;
+		right: 0;
+	}
 }
 
 .marble-label {

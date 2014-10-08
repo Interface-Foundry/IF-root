@@ -40,7 +40,7 @@ body
 	min-height: 53px;
 }
 
-.avatar{
+.chat-avatar {
 	border: 2px solid #ffffff;
 	box-sizing: initial;
 	box-shadow: 0 1px 3px rgba(0,0,0,0.15);

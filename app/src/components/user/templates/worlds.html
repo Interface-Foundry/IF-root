@@ -1,24 +1,30 @@
-<div class="col-xs-12 col-sm-6" ng-hide="fromMeetup && worlds.length > 0">
-<div class="well">
-<button class="btn btn-success" ng-click="newWorld()">+ Create a New Bubble</button>
-</div>
-</div>
-
-
-<ul>
-	<li class="landmark col-xs-12 col-sm-6" ng-repeat="world in worlds">
-		<div class="media card">
-			<img ng-src="{{world.avatar}}" class="avatar pull-left">
-			<div class="media-body">
-				<button type="button" class="close" ng-click="deleteWorld($index)">
-				<span aria-hidden="true">&times;</span>
-				<span class="sr-only">Close</span>
-				</button>
-				<h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4>
-				
-				<a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div><div class="text-muted btn btn-xs btn-default" ng-hide="world.source_meetup.id">Set Up Bubble</div> <br></a>
-				<a ng-href="#/w/{{world.id}}">Go to this world</a> | <a ng-href="#/edit/w/{{world.id}}">Edit</a> | {{world.views || 0}} views
-			</div>
+<ul class="world-sq-container">
+	<li class="col-xs-12" ng-show="fromMeetup">
+		<div class="meetup-well well">
+	<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
+	<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 		</div>
+	</li>
+	<li>
+	<div class="profile-add-new" ng-click="newWorld()">
+		<div class="profile-add-new-plus">+</div>
+		<span>Create New Bubble</span>
+	</div>
+	</li>
+	<li class="world-sq" ng-repeat="world in worlds" 
+		ng-click="$parent.selectedIndex=($parent.selectedIndex==$index) ? $parent.selectedIndex=null : $parent.selectedIndex = $index">
+		<img width="144" height="144" ng-src="{{world.avatar}}" class="world-sq-img">
+		<button type="button" class="world-sq-close" ng-click="deleteWorld($index)">
+			<span aria-hidden="true">&times;</span>
+			<span class="sr-only">Close</span>
+		</button>
+		<span class="world-sq-views"><span class="glyphicon glyphicon-eye-open"></span> Views: {{world.views}}</span>
+		<ul class="world-sq-menu" ng-class="{'selected': selectedIndex==$index}">
+			<li class="world-sq-menu-title">{{world.name || 'New Bubble'}}</li>
+			<li class="world-sq-menu-action" ng-click="go('/w/'+world.id)">View</li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/w/'+world.id)">Edit</li>
+			<li class="world-sq-menu-action">Admin</li>
+			<li class="world-sq-menu-action">Share</li>
+		</ul>
 	</li>
 </ul>
