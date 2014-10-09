@@ -4,7 +4,7 @@
 	<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
 	<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 		</div>
-	</li>
+	</li><div class="clearfix"></div>
 	<li>
 	<div class="profile-add-new" ng-click="newWorld()">
 		<div class="profile-add-new-plus">+</div>
@@ -23,8 +23,9 @@
 			<li class="world-sq-menu-title">{{world.name || 'New Bubble'}}</li>
 			<li class="world-sq-menu-action" ng-click="go('/w/'+world.id)">View</li>
 			<li class="world-sq-menu-action" ng-click="go('/edit/w/'+world.id)">Edit</li>
-			<li class="world-sq-menu-action">Admin</li>
-			<li class="world-sq-menu-action">Share</li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="world.source_meetup.id">Set up Meetup</li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="!world.source_meetup.id">Walkthrough</li>
+			<!--<li class="world-sq-menu-action">Share</li>-->
 		</ul>
 	</li>
 </ul>

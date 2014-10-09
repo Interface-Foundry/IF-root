@@ -125,6 +125,7 @@ nav {
 	width: 144px;
 	height: 104px;
 	background: #FFF;
+	-webkit-transform: translateY(104px);
 	transform: translateY(104px);
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	
@@ -132,6 +133,7 @@ nav {
 }
 
 .selected.world-sq-menu {
+	-webkit-transform: translateY(0px);
 	transform: translateY(0px);
 }
 
@@ -264,6 +266,7 @@ opacity: 1;
 	padding: 18px 0px 0px 0px;
 	
 	text-align: center;
+	cursor: pointer;
 	
 	border: 2px dashed #bdbdbd;
 	@media only screen and (min-width: 768px) {
