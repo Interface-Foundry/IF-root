@@ -9132,7 +9132,7 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
 
         
 
-        console.log($scope.messages);
+        //console.log($scope.messages);
 
     }
     //stops interval on route change

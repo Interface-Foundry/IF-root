@@ -1,13 +1,13 @@
 <ul class="world-sq-container">
 	<li class="col-xs-12" ng-show="fromMeetup">
 		<div class="meetup-well well">
-			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/717.gif"></span>
+			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/718.gif"></span>
 			<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
 			<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 		</div>
 	</li><div class="clearfix"></div>
 	<li>
-	<div class="profile-add-new" ng-click="newWorld()" ng-hide="fromMeetup && worlds.length > 0">
+	<div class="profile-add-new" ng-click="newWorld()">
 		<div class="profile-add-new-plus">+</div>
 		<span>Create New Bubble</span>
 	</div>
