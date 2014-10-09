@@ -104,7 +104,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/unlink/:type', {templateUrl: '_self'}).
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
-      when('/profile', {redirectTo:'/profile/me'}).
+      when('/profile', {redirectTo:'/profile/worlds'}).
       when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
       when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
       

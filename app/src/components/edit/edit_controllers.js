@@ -1,4 +1,4 @@
-function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
+function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
 console.log('--EditController--');
 
 var aperture = apertureService,
@@ -213,8 +213,9 @@ $scope.saveWorld = function() {
     	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
+    	$timeout.cancel(saveTimer);
     });
-
+	
     console.log('scope world');
     console.log($scope.world);
 
@@ -236,6 +237,7 @@ $scope.saveWorld = function() {
     db.styles.create($scope.style, function(response){
         console.log(response);
     });
+    
 }
 
 $scope.search = function() {
@@ -424,37 +426,43 @@ $scope.$on('$destroy', function (event) {
 	map.removeCircleMask();
 	map.removePlaceImage();
 	if (zoomControl.style) {
-	zoomControl.style.top = "";
-	zoomControl.style.left = "";
+		zoomControl.style.top = "";
+		zoomControl.style.left = "";
 	}
 	}
 	
 	angular.extend($rootScope, {navTitle: "Bubbl.li"});
-	
-	var len = ears.length;
-	for (var i = 0; i < len; i++) {
-		console.log(ears);
-		ears[i]();
-	}
 });
 
-ears.push(
 $scope.$watch('style.navBG_color', function(current, old) {
 	style.navBG_color = current;
-}));
+});
 
-ears.push($scope.$watch('world.name', function(current, old) {
+/*
+$scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
 	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
-}));
+});
+*/
 
-ears.push(
 $scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
 		console.log(map.getPlaceImageBounds());
 	}
-}));
+});
+
+var saveTimer = null;
+$scope.$watchCollection('world', function (newCol, oldCol) {
+	if (oldCol!=undefined) {
+		if (saveTimer) {
+			$timeout.cancel(saveTimer);
+		}
+		saveTimer = $timeout($scope.saveWorld, 5000);
+	}
+});
+
+
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

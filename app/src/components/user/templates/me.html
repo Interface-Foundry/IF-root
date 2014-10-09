@@ -48,39 +48,3 @@
 
 </div>
 </div>
-
-<div class="col-xs-12 col-sm-6" ng-show="fromMeetup">
-<div class="meetup-well well">
-	<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/717.gif"></span>
-	<span ng-show="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
-	<span ng-show="worlds.length <= 0 ">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
-</div>
-</div>
-
-<div class="col-xs-12 col-sm-6" ng-hide="fromMeetup && worlds.length > 0">
-<div class="well">
-	<span class="sort-heading indigo700" style="margin-left:16px;"> MY BUBBLES </span>
-	<button class="btn btn-success" ng-click="newWorld()">+ Create a New Bubble</button>
-</div>
-</div>
-
-
-
-<ul ng-hide="waitingforMeetup">
-	<li class="landmark col-xs-12 col-sm-6" ng-repeat="world in worlds">
-		<div class="media card">
-			<img ng-src="{{world.avatar}}" class="avatar pull-left">
-			<div class="media-body">
-				<button type="button" class="close" ng-click="deleteWorld($index)">
-				<span aria-hidden="true">&times;</span>
-				<span class="sr-only">Close</span>
-				</button>
-				<h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4>
-				
-				<a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div><div class="text-muted btn btn-xs btn-default" ng-hide="world.source_meetup.id">Set Up Bubble</div> <br></a>
-				<a ng-href="#/w/{{world.id}}">Go to this world</a> | <a ng-href="#/edit/w/{{world.id}}">Edit</a> | {{world.views || 0}} views
-			</div>
-		</div>
-	</li>
-</ul>
-

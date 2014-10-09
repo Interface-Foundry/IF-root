@@ -4742,7 +4742,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/unlink/:type', {templateUrl: '_self'}).
       // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
       
-      when('/profile', {redirectTo:'/profile/me'}).
+      when('/profile', {redirectTo:'/profile/worlds'}).
       when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
       when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
       
@@ -4962,6 +4962,23 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
+angular.module('IF-directives', [])
+.directive('ifTooltip', function($rootScope) {
+	return {
+		restrict: 'A',
+		link: function($scope, $element, attrs) {
+			console.log('linking if tooltip');
+				
+                new Drop({
+                    target: $element[0],
+                    content: 'testing 123',
+                    position: 'bottom right',
+                    openOn: 'click'
+                });
+            }	
+		}
+});
+
 //parent
 function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
@@ -6515,7 +6532,7 @@ angular.module('tidepoolsServices', ['ngResource'])
    			if (timeout) {
    			$timeout(function () {
 	   			alerts.list.splice(len-1, 1);
-   			}, 1000);
+   			}, 1500);
    			
    			}
    		}
@@ -7073,6 +7090,416 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 return worldTree;
 }
 ]);
+(function() {
+  var Evented, MIRROR_ATTACH, addClass, allDrops, clickEvents, createContext, end, extend, hasClass, name, removeClass, removeFromArray, sortAttach, tempEl, touchDevice, transitionEndEvent, transitionEndEvents, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  _ref = Tether.Utils, extend = _ref.extend, addClass = _ref.addClass, removeClass = _ref.removeClass, hasClass = _ref.hasClass, Evented = _ref.Evented;
+
+  touchDevice = 'ontouchstart' in document.documentElement;
+
+  clickEvents = ['click'];
+
+  if (touchDevice) {
+    clickEvents.push('touchstart');
+  }
+
+  transitionEndEvents = {
+    'WebkitTransition': 'webkitTransitionEnd',
+    'MozTransition': 'transitionend',
+    'OTransition': 'otransitionend',
+    'transition': 'transitionend'
+  };
+
+  transitionEndEvent = '';
+
+  for (name in transitionEndEvents) {
+    end = transitionEndEvents[name];
+    tempEl = document.createElement('p');
+    if (tempEl.style[name] !== void 0) {
+      transitionEndEvent = end;
+    }
+  }
+
+  sortAttach = function(str) {
+    var first, second, _ref1, _ref2;
+    _ref1 = str.split(' '), first = _ref1[0], second = _ref1[1];
+    if (first === 'left' || first === 'right') {
+      _ref2 = [second, first], first = _ref2[0], second = _ref2[1];
+    }
+    return [first, second].join(' ');
+  };
+
+  MIRROR_ATTACH = {
+    left: 'right',
+    right: 'left',
+    top: 'bottom',
+    bottom: 'top',
+    middle: 'middle',
+    center: 'center'
+  };
+
+  allDrops = {};
+
+  removeFromArray = function(arr, item) {
+    var index, _results;
+    _results = [];
+    while ((index = arr.indexOf(item)) !== -1) {
+      _results.push(arr.splice(index, 1));
+    }
+    return _results;
+  };
+
+  createContext = function(options) {
+    var DropInstance, defaultOptions, drop, _name;
+    if (options == null) {
+      options = {};
+    }
+    drop = function() {
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return Object(result) === result ? result : child;
+      })(DropInstance, arguments, function(){});
+    };
+    extend(drop, {
+      createContext: createContext,
+      drops: [],
+      defaults: {}
+    });
+    defaultOptions = {
+      classPrefix: 'drop',
+      defaults: {
+        position: 'bottom left',
+        openOn: 'click',
+        constrainToScrollParent: true,
+        constrainToWindow: true,
+        classes: '',
+        remove: false,
+        tetherOptions: {}
+      }
+    };
+    extend(drop, defaultOptions, options);
+    extend(drop.defaults, defaultOptions.defaults, options.defaults);
+    if (allDrops[_name = drop.classPrefix] == null) {
+      allDrops[_name] = [];
+    }
+    drop.updateBodyClasses = function() {
+      var anyOpen, _drop, _i, _len, _ref1;
+      anyOpen = false;
+      _ref1 = allDrops[drop.classPrefix];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        _drop = _ref1[_i];
+        if (!(_drop.isOpened())) {
+          continue;
+        }
+        anyOpen = true;
+        break;
+      }
+      if (anyOpen) {
+        return addClass(document.body, "" + drop.classPrefix + "-open");
+      } else {
+        return removeClass(document.body, "" + drop.classPrefix + "-open");
+      }
+    };
+    DropInstance = (function(_super) {
+      __extends(DropInstance, _super);
+
+      function DropInstance(options) {
+        this.options = options;
+        this.options = extend({}, drop.defaults, this.options);
+        this.target = this.options.target;
+        if (this.target == null) {
+          throw new Error('Drop Error: You must provide a target.');
+        }
+        if (this.options.classes) {
+          addClass(this.target, this.options.classes);
+        }
+        drop.drops.push(this);
+        allDrops[drop.classPrefix].push(this);
+        this._boundEvents = [];
+        this.setupElements();
+        this.setupEvents();
+        this.setupTether();
+      }
+
+      DropInstance.prototype._on = function(element, event, handler) {
+        this._boundEvents.push({
+          element: element,
+          event: event,
+          handler: handler
+        });
+        return element.addEventListener(event, handler);
+      };
+
+      DropInstance.prototype.setupElements = function() {
+        this.drop = document.createElement('div');
+        addClass(this.drop, drop.classPrefix);
+        if (this.options.classes) {
+          addClass(this.drop, this.options.classes);
+        }
+        this.content = document.createElement('div');
+        addClass(this.content, "" + drop.classPrefix + "-content");
+        if (typeof this.options.content === 'object') {
+          this.content.appendChild(this.options.content);
+        } else {
+          this.content.innerHTML = this.options.content;
+        }
+        return this.drop.appendChild(this.content);
+      };
+
+      DropInstance.prototype.setupTether = function() {
+        var constraints, dropAttach;
+        dropAttach = this.options.position.split(' ');
+        dropAttach[0] = MIRROR_ATTACH[dropAttach[0]];
+        dropAttach = dropAttach.join(' ');
+        constraints = [];
+        if (this.options.constrainToScrollParent) {
+          constraints.push({
+            to: 'scrollParent',
+            pin: 'top, bottom',
+            attachment: 'together none'
+          });
+        } else {
+          constraints.push({
+            to: 'scrollParent'
+          });
+        }
+        if (this.options.constrainToWindow !== false) {
+          constraints.push({
+            to: 'window',
+            attachment: 'together'
+          });
+        } else {
+          constraints.push({
+            to: 'window'
+          });
+        }
+        options = {
+          element: this.drop,
+          target: this.target,
+          attachment: sortAttach(dropAttach),
+          targetAttachment: sortAttach(this.options.position),
+          classPrefix: drop.classPrefix,
+          offset: '0 0',
+          targetOffset: '0 0',
+          enabled: false,
+          constraints: constraints
+        };
+        if (this.options.tetherOptions !== false) {
+          return this.tether = new Tether(extend({}, options, this.options.tetherOptions));
+        }
+      };
+
+      DropInstance.prototype.setupEvents = function() {
+        var clickEvent, closeHandler, events, onUs, openHandler, out, outTimeout, over, _i, _len,
+          _this = this;
+        if (!this.options.openOn) {
+          return;
+        }
+        if (this.options.openOn === 'always') {
+          setTimeout(this.open.bind(this));
+          return;
+        }
+        events = this.options.openOn.split(' ');
+        if (__indexOf.call(events, 'click') >= 0) {
+          openHandler = function(event) {
+            _this.toggle();
+            return event.preventDefault();
+          };
+          closeHandler = function(event) {
+            if (!_this.isOpened()) {
+              return;
+            }
+            if (event.target === _this.drop || _this.drop.contains(event.target)) {
+              return;
+            }
+            if (event.target === _this.target || _this.target.contains(event.target)) {
+              return;
+            }
+            return _this.close();
+          };
+          for (_i = 0, _len = clickEvents.length; _i < _len; _i++) {
+            clickEvent = clickEvents[_i];
+            this._on(this.target, clickEvent, openHandler);
+            this._on(document, clickEvent, closeHandler);
+          }
+        }
+        if (__indexOf.call(events, 'hover') >= 0) {
+          onUs = false;
+          over = function() {
+            onUs = true;
+            return _this.open();
+          };
+          outTimeout = null;
+          out = function() {
+            onUs = false;
+            if (outTimeout != null) {
+              clearTimeout(outTimeout);
+            }
+            return outTimeout = setTimeout(function() {
+              if (!onUs) {
+                _this.close();
+              }
+              return outTimeout = null;
+            }, 50);
+          };
+          this._on(this.target, 'mouseover', over);
+          this._on(this.drop, 'mouseover', over);
+          this._on(this.target, 'mouseout', out);
+          return this._on(this.drop, 'mouseout', out);
+        }
+      };
+
+      DropInstance.prototype.isOpened = function() {
+        return hasClass(this.drop, "" + drop.classPrefix + "-open");
+      };
+
+      DropInstance.prototype.toggle = function() {
+        if (this.isOpened()) {
+          return this.close();
+        } else {
+          return this.open();
+        }
+      };
+
+      DropInstance.prototype.open = function() {
+        var _ref1, _ref2,
+          _this = this;
+        if (this.isOpened()) {
+          return;
+        }
+        if (!this.drop.parentNode) {
+          document.body.appendChild(this.drop);
+        }
+        if ((_ref1 = this.tether) != null) {
+          _ref1.enable();
+        }
+        addClass(this.drop, "" + drop.classPrefix + "-open");
+        addClass(this.drop, "" + drop.classPrefix + "-open-transitionend");
+        setTimeout(function() {
+          return addClass(_this.drop, "" + drop.classPrefix + "-after-open");
+        });
+        if ((_ref2 = this.tether) != null) {
+          _ref2.position();
+        }
+        this.trigger('open');
+        return drop.updateBodyClasses();
+      };
+
+      DropInstance.prototype.close = function() {
+        var handler, _ref1,
+          _this = this;
+        if (!this.isOpened()) {
+          return;
+        }
+        removeClass(this.drop, "" + drop.classPrefix + "-open");
+        removeClass(this.drop, "" + drop.classPrefix + "-after-open");
+        this.drop.addEventListener(transitionEndEvent, handler = function() {
+          if (!hasClass(_this.drop, "" + drop.classPrefix + "-open")) {
+            removeClass(_this.drop, "" + drop.classPrefix + "-open-transitionend");
+          }
+          return _this.drop.removeEventListener(transitionEndEvent, handler);
+        });
+        this.trigger('close');
+        if ((_ref1 = this.tether) != null) {
+          _ref1.disable();
+        }
+        drop.updateBodyClasses();
+        if (this.options.remove) {
+          return this.remove();
+        }
+      };
+
+      DropInstance.prototype.remove = function() {
+        var _ref1;
+        this.close();
+        return (_ref1 = this.drop.parentNode) != null ? _ref1.removeChild(this.drop) : void 0;
+      };
+
+      DropInstance.prototype.position = function() {
+        var _ref1;
+        if (this.isOpened()) {
+          return (_ref1 = this.tether) != null ? _ref1.position() : void 0;
+        }
+      };
+
+      DropInstance.prototype.destroy = function() {
+        var element, event, handler, _i, _len, _ref1, _ref2, _ref3;
+        this.remove();
+        if ((_ref1 = this.tether) != null) {
+          _ref1.destroy();
+        }
+        _ref2 = this._boundEvents;
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          _ref3 = _ref2[_i], element = _ref3.element, event = _ref3.event, handler = _ref3.handler;
+          element.removeEventListener(event, handler);
+        }
+        this._boundEvents = [];
+        this.tether = null;
+        this.drop = null;
+        this.content = null;
+        this.target = null;
+        removeFromArray(allDrops[drop.classPrefix], this);
+        return removeFromArray(drop.drops, this);
+      };
+
+      return DropInstance;
+
+    })(Evented);
+    return drop;
+  };
+
+  window.Drop = createContext();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    return Drop.updateBodyClasses();
+  });
+
+}).call(this);
+
+(function() {
+  var DropTooltip, Tooltip, defaults;
+
+  DropTooltip = Drop.createContext();
+
+  defaults = {
+    attach: 'top center'
+  };
+
+  Tooltip = (function() {
+    function Tooltip(options) {
+      this.options = options;
+      this.$target = $(this.options.el);
+      this.createDrop();
+    }
+
+    Tooltip.prototype.createDrop = function() {
+      var _ref;
+      if (this.options.attach == null) {
+        this.options.attach = defaults.attach;
+      }
+      return this.dropTooltip = new DropTooltip({
+        target: this.$target[0],
+        className: 'drop-tooltip-theme-arrows',
+        attach: this.options.attach,
+        constrainToWindow: true,
+        constrainToScrollParent: false,
+        openOn: 'hover',
+        content: (_ref = this.options.content) != null ? _ref : this.$target.attr('data-tooltip-content')
+      });
+    };
+
+    return Tooltip;
+
+  })();
+
+  window.Tooltip = Tooltip;
+
+}).call(this);
+
 var themeDict = {
 	urban: {
 		name: 'urban',
@@ -8841,7 +9268,7 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
     }
 }
 
-function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http) {
+function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
 console.log('--EditController--');
 
 var aperture = apertureService,
@@ -9056,8 +9483,9 @@ $scope.saveWorld = function() {
     	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
     	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
+    	$timeout.cancel(saveTimer);
     });
-
+	
     console.log('scope world');
     console.log($scope.world);
 
@@ -9079,6 +9507,7 @@ $scope.saveWorld = function() {
     db.styles.create($scope.style, function(response){
         console.log(response);
     });
+    
 }
 
 $scope.search = function() {
@@ -9267,37 +9696,43 @@ $scope.$on('$destroy', function (event) {
 	map.removeCircleMask();
 	map.removePlaceImage();
 	if (zoomControl.style) {
-	zoomControl.style.top = "";
-	zoomControl.style.left = "";
+		zoomControl.style.top = "";
+		zoomControl.style.left = "";
 	}
 	}
 	
 	angular.extend($rootScope, {navTitle: "Bubbl.li"});
-	
-	var len = ears.length;
-	for (var i = 0; i < len; i++) {
-		console.log(ears);
-		ears[i]();
-	}
 });
 
-ears.push(
 $scope.$watch('style.navBG_color', function(current, old) {
 	style.navBG_color = current;
-}));
+});
 
-ears.push($scope.$watch('world.name', function(current, old) {
+/*
+$scope.$watch('world.name', function(current, old) {
 	console.log('world name watch', current);
 	angular.extend($rootScope, {navTitle: "Edit &raquo; "+current+" <a href='#/w/"+$routeParams.worldURL+"' class='preview-link' target='_blank'>Preview</a>"});
-}));
+});
+*/
 
-ears.push(
 $scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
 		console.log(map.getPlaceImageBounds());
 	}
-}));
+});
+
+var saveTimer = null;
+$scope.$watchCollection('world', function (newCol, oldCol) {
+	if (oldCol!=undefined) {
+		if (saveTimer) {
+			$timeout.cancel(saveTimer);
+		}
+		saveTimer = $timeout($scope.saveWorld, 5000);
+	}
+});
+
+
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -10697,7 +11132,9 @@ $scope.$on('$destroy', function (event) {
 		
 		$scope.worldURL = $routeParams.worldURL;
 		//initialize map with world settings
-		map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+		if ($scope.world.style) {
+		if ($scope.world.style.maps) {
+		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
 		map.setCenter($scope.world.loc.coordinates, 18);
 		map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
@@ -11127,6 +11564,8 @@ $scope.update = function(tab) {
 	$scope.state.drafts = tab == 'drafts';
 	
 	$scope.state.template = 'components/user/templates/'+tab+'.html';
+	if ($scope.state.myProfile) {$scope.menuLink = '/profile/me';}
+	if ($scope.state.myWorlds) {$scope.menuLink = '/profile/worlds';}
 	
 	console.log($scope.state);
 }
@@ -11224,7 +11663,9 @@ $scope.newWorld = function() {
 		});
 	}
 
-
+$scope.go = function(url) {
+	$location.path(url);
+}
 
 userManager.getUser().then(
 	function(response) {

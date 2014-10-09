@@ -45,6 +45,8 @@ $scope.update = function(tab) {
 	$scope.state.drafts = tab == 'drafts';
 	
 	$scope.state.template = 'components/user/templates/'+tab+'.html';
+	if ($scope.state.myProfile) {$scope.menuLink = '/profile/me';}
+	if ($scope.state.myWorlds) {$scope.menuLink = '/profile/worlds';}
 	
 	console.log($scope.state);
 }
@@ -142,7 +144,9 @@ $scope.newWorld = function() {
 		});
 	}
 
-
+$scope.go = function(url) {
+	$location.path(url);
+}
 
 userManager.getUser().then(
 	function(response) {
