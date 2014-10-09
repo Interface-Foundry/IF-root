@@ -179,24 +179,26 @@ async.whilst(
     function (callback) {
 
         fs.readdir(strings.IMAGE_SAVE_DESTINATION, function(err, files) {
-          files.forEach(function(file, index) {
-            fs.stat(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err, stat) {
-              var endTime, now;
-              if (err) {
-                return console.error(err);
-              }
-              now = new Date().getTime();
-              endTime = new Date(stat.ctime).getTime() + 1209600000; //if file is older than 2 weeks, remove
-              if (now > endTime) {
-                return rimraf(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err) {
-                  if (err) {
-                    return console.error(err);
-                  }
-                  console.log('successfully deleted');
-                });
-              }
+          if (files){
+            files.forEach(function(file, index) {
+              fs.stat(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err, stat) {
+                var endTime, now;
+                if (err) {
+                  return console.error(err);
+                }
+                now = new Date().getTime();
+                endTime = new Date(stat.ctime).getTime() + 1209600000; //if file is older than 2 weeks, remove
+                if (now > endTime) {
+                  return rimraf(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err) {
+                    if (err) {
+                      return console.error(err);
+                    }
+                    console.log('successfully deleted');
+                  });
+                }
+              });
             });
-          });
+          }
         });
 
         setTimeout(callback, 43200000); // every 12 hours check

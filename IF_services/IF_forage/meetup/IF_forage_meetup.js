@@ -107,7 +107,12 @@ function searchMeetup(tag, done) {
         function(error,response,body){
 
             var idArray=[];
-            var results=JSON.parse(body).results;
+
+		    try{
+		        var results=JSON.parse(body).results;
+		    }catch(e){
+		        console.log(e); 
+		    }
 
             if (results){
             	
@@ -131,16 +136,16 @@ function searchMeetup(tag, done) {
 
 	                            if(err){
 
-	                                console.log("Erorr Occurred");
+	                                //console.log("Erorr Occurred");
 	                                console.log(err)
 	                            }
 	                            else if(!err)
 	                            {
-	                                console.log("documents saved");
+	                                //console.log("documents saved");
 	                            }
 	                            else{
 
-	                                console.log('jajja');
+	                                //console.log('jajja');
 
 	                            }
 	                        });
@@ -398,15 +403,15 @@ function searchMeetup(tag, done) {
 
 		         					lmSchema.save(function(err,docs){
 		                                if(err){
-		                                    console.log("Erorr Occurred");
+		                                    //console.log("Erorr Occurred");
 		                                    console.log(err)
 		                                }
 		                                else if(!err)
 		                                {
-		                                    console.log("documents saved");
+		                                    //console.log("documents saved");
 		                                }
 		                                else{
-		                                    console.log('jajja')
+		                                    //console.log('jajja')
 		                                }
 		                            });
 
@@ -417,7 +422,7 @@ function searchMeetup(tag, done) {
 	                    }
 	                });
 	            }
-	            console.log(idArray);
+	            //console.log(idArray);
 
             }
 
@@ -431,6 +436,8 @@ app.post('/api/process_meetups', function (req, res) {
 
 	//var incoming = JSON.parse(req.body);
 
+    res.send('FINISHED ADDING NEW MEETUP BUBBLES');
+
     async.each(req.body.groupIDs, function(tag, callback) {
 
     	console.log(tag);
@@ -441,7 +448,7 @@ app.post('/api/process_meetups', function (req, res) {
 
     }, function(err) {
 
-       	res.send('FINISHED ADDING NEW MEETUP BUBBLES');
+       	//res.send('FINISHED ADDING NEW MEETUP BUBBLES');
 
     });
 
@@ -462,7 +469,12 @@ function searchMeetupGroups(tag, userID, done) {
         function(error,response,body){
 
             var idArray=[];
-            var results=JSON.parse(body).results;
+            
+		    try{
+		        var results=JSON.parse(body).results;
+		    }catch(e){
+		        console.log(e); 
+		    }
 
             if (results){
 	            //console.log(results)
@@ -486,16 +498,16 @@ function searchMeetupGroups(tag, userID, done) {
 
 	                            if(err){
 
-	                                console.log("Erorr Occurred");
+	                               // console.log("Erorr Occurred");
 	                                console.log(err)
 	                            }
 	                            else if(!err)
 	                            {
-	                                console.log("documents saved");
+	                                //console.log("documents saved");
 	                            }
 	                            else{
 
-	                                console.log('jajja');
+	                               // console.log('jajja');
 
 	                            }
 	                        });
@@ -758,15 +770,15 @@ function searchMeetupGroups(tag, userID, done) {
 
 		         					lmSchema.save(function(err,docs){
 		                                if(err){
-		                                    console.log("Erorr Occurred");
-		                                    console.log(err)
+		                                    //console.log("Erorr Occurred");
+		                                    console.log(err);
 		                                }
 		                                else if(!err)
 		                                {
-		                                    console.log("documents saved");
+		                                    //console.log("documents saved");
 		                                }
 		                                else{
-		                                    console.log('jajja')
+		                                    //console.log('jajja')
 		                                }
 		                            });
 
@@ -778,7 +790,7 @@ function searchMeetupGroups(tag, userID, done) {
 	                });
 	            }
         	}
-            console.log(idArray);
+            //console.log(idArray);
     });
 
     done();
@@ -792,17 +804,16 @@ function processData(i,result,callback){
     landmarks.model(false).find({"source_meetup.id":result.id.toString()}, function(err, docs) {
 
         if(err){
-            console.log("sds")
-            console.log("Error Occured: "+err);
+            //console.log("Error Occured: "+err);
         }
         else if (docs.length>0){
-            console.log("documents Found :"+result.id);
-            callback(true,result,docs)
+            //console.log("documents Found :"+result.id);
+            callback(true,result,docs);
         }
         else {
 
             callback(false,result,docs);
-            console.log('No Documents');
+            //console.log('No Documents');
         }
 
     });

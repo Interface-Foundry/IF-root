@@ -16,7 +16,7 @@
               </div>
           </div>
 
-          <form class="row row-chat" ng-submit="sendMessage()">
+          <form class="row row-chat" ng-submit="sendMessage()" ng-show="loggedIn">
               <div class="input-group">
                   <input type="text" class="form-control" ng-model="messageText" placeholder="Type your message" />
 
@@ -24,8 +24,18 @@
                       <button type="submit" class="btn btn-primary">Send</button>
                   </span>
               </div>
-
           </form>
+
+          <form class="row row-chat" ng-hide="loggedIn">
+              <div class="input-group">
+                  <input type="text" class="form-control" ng-model="messageText" placeholder="Login to " />
+
+                  <span class="input-group-btn">
+                      <button type="submit" class="btn btn-primary">Login</button>
+                  </span>
+              </div>
+          </form>
+
       </div>
 
 <!-- 

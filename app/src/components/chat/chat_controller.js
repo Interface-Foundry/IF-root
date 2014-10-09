@@ -1,4 +1,4 @@
-function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService) {
+function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval) {
   var aperture = apertureService;
   aperture.set('off');
 
@@ -6,50 +6,108 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
     //$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
     ///
 
+    $scope.loggedIn = false;
+    $scope.nickname = 'Visitor';
+
+
+    $http.get('/api/user/loggedin').success(function(user){
+
+        // Authenticated
+        if (user !== '0'){
+
+          $scope.loggedIn = true;
+
+          if (user._id){
+            $scope.userID = user._id;
+          }
+
+          //nickname
+          if (user.name){
+              $scope.nickname = user.name;
+          }
+          else if (user.facebook){
+              $scope.nickname = user.facebook.name;
+          }
+          else if (user.twitter){
+              $scope.nickname = user.twitter.displayName;
+          }
+          else if (user.meetup){
+              $scope.nickname = user.meetup.displayName;
+          }
+          else if (user.local){
+              $scope.nickname = user.local.email;
+          }
+          else {
+              $scope.nickname = "Visitor";
+          }
+          
+          //avatar
+          if (user.avatar){
+            $scope.avatar = user.avatar;
+          }
+          else {
+            $scope.avatar = 'img/icons/profile.png';
+          }
+
+        }
+
+      });
+
     var side = 'left';
 
     //Messages, client info & sending
     $scope.messages = [];
-
+    var sinceID = 'none';
 
     $scope.sendMessage = function () {
 
-        //$scope.messageText;
+        if ($scope.loggedIn){
+            var newChat = {
+                worldID: $routeParams.worldID,
+                nickname: $scope.nickname,
+                msg: $scope.messageText,
+                avatar: $scope.avatar
+            };
 
-        var newChat = {
-            worldID: $routeParams.worldID,
-            nickname: 'lel',
-            userID: 'REPLACE ME',
-            msg: $scope.messageText
-        };
+            if ($scope.messageImg){
+                newChat.img = $scope.messageImg;
+            }
 
-        if ($scope.messageImg){
-            newChat.img = $scope.messageImg;
+            db.worldchat.create(newChat, function(res) {
+                console.log(res);
+            });
+
+            $scope.messageText = "";
         }
 
+    };
 
-        db.worldchat.create(newChat, function(response) {
+    //query for latest chats
+    $interval(function() {
 
-            console.log(response);
-          
-                
+        //read for latest mongo ID, if no ID, pass special
+
+
+
+        db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID, limit:50}, function(data){
+
+            //on last array push, put mongoID into sinceID
+
+            console.log(data);
+
         });
 
 
-        // $scope.messages.push({
-        //   user: $rootScope.chatName,
-        //   text: $scope.messageText,
-        //   time: hour + ":" + minutes + ":" + seconds,
-        //   side: side,
-        //   avatar: '/img/emoji/cool.png'
-        // });
 
-        $scope.messageText = "";
-    };
+
+        console.log('asdf');
+
+
+    }, 2000);
 
 
 
-    //greater than mongoID
+
     // db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
     //         console.log('--db.landmarks.query--');
     //         console.log('data');

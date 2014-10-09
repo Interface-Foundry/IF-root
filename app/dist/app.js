@@ -6392,7 +6392,7 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.projects = $resource('api/projects/:_id', {}, actions);
             db.tweets = $resource('api/tweets/:_id', {}, actions);
             db.instagrams = $resource('api/instagrams/:_id', {}, actions);
-            db.worldchats = $resource('api/worldchats/:_id', {}, actions);
+            db.worldchat = $resource('api/worldchat/:_id', {}, actions);
             return db;
         }
     ])
@@ -8576,7 +8576,7 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService) {
+function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval) {
   var aperture = apertureService;
   aperture.set('off');
 
@@ -8584,50 +8584,108 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
     //$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
     ///
 
+    $scope.loggedIn = false;
+    $scope.nickname = 'Visitor';
+
+
+    $http.get('/api/user/loggedin').success(function(user){
+
+        // Authenticated
+        if (user !== '0'){
+
+          $scope.loggedIn = true;
+
+          if (user._id){
+            $scope.userID = user._id;
+          }
+
+          //nickname
+          if (user.name){
+              $scope.nickname = user.name;
+          }
+          else if (user.facebook){
+              $scope.nickname = user.facebook.name;
+          }
+          else if (user.twitter){
+              $scope.nickname = user.twitter.displayName;
+          }
+          else if (user.meetup){
+              $scope.nickname = user.meetup.displayName;
+          }
+          else if (user.local){
+              $scope.nickname = user.local.email;
+          }
+          else {
+              $scope.nickname = "Visitor";
+          }
+          
+          //avatar
+          if (user.avatar){
+            $scope.avatar = user.avatar;
+          }
+          else {
+            $scope.avatar = 'img/icons/profile.png';
+          }
+
+        }
+
+      });
+
     var side = 'left';
 
     //Messages, client info & sending
     $scope.messages = [];
-
+    var sinceID = 'none';
 
     $scope.sendMessage = function () {
 
-        //$scope.messageText;
+        if ($scope.loggedIn){
+            var newChat = {
+                worldID: $routeParams.worldID,
+                nickname: $scope.nickname,
+                msg: $scope.messageText,
+                avatar: $scope.avatar
+            };
 
-        var newChat = {
-            worldID: $routeParams.worldID,
-            nickname: 'lel',
-            userID: 'REPLACE ME',
-            msg: $scope.messageText
-        };
+            if ($scope.messageImg){
+                newChat.img = $scope.messageImg;
+            }
 
-        if ($scope.messageImg){
-            newChat.img = $scope.messageImg;
+            db.worldchat.create(newChat, function(res) {
+                console.log(res);
+            });
+
+            $scope.messageText = "";
         }
 
+    };
 
-        db.worldchat.create(newChat, function(response) {
+    //query for latest chats
+    $interval(function() {
 
-            console.log(response);
-          
-                
+        //read for latest mongo ID, if no ID, pass special
+
+
+
+        db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID, limit:50}, function(data){
+
+            //on last array push, put mongoID into sinceID
+
+            console.log(data);
+
         });
 
 
-        // $scope.messages.push({
-        //   user: $rootScope.chatName,
-        //   text: $scope.messageText,
-        //   time: hour + ":" + minutes + ":" + seconds,
-        //   side: side,
-        //   avatar: '/img/emoji/cool.png'
-        // });
 
-        $scope.messageText = "";
-    };
+
+        console.log('asdf');
+
+
+    }, 2000);
 
 
 
-    //greater than mongoID
+
     // db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
     //         console.log('--db.landmarks.query--');
     //         console.log('data');
@@ -11022,7 +11080,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 	}
 }
 
-function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager) {
+function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 
 angular.extend($rootScope, {loading: false});
 
@@ -11099,23 +11157,48 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 
 $scope.update($route.current.params.tab);
 
+$scope.waitingforMeetup = false; //if from meetup, hide worlds until complete 
+
 //if user login came from Meetup, then process new meetup worlds
 if ($routeParams.incoming == 'meetup'){
 	angular.extend($rootScope, {loading: true});
 	$scope.fromMeetup = true;
+	$scope.waitingforMeetup = true;
+
 	$http.post('/api/process_meetups').success(function(response){
 		angular.extend($rootScope, {loading: false});
+		checkProfileUpdates(); //now wait until meetup bubbles come in
+		// $http.get('/api/user/profile').success(function(user){
+		// 	$scope.worlds = user;		
+			
+		// });
+	}).
+	error(function(data) {
+		angular.extend($rootScope, {loading: false});
 		$http.get('/api/user/profile').success(function(user){
-			$scope.worlds = user;		
+			$scope.worlds = user;	
+			$scope.waitingforMeetup = false;	
 		});
 	});
-
+	
 }
 else {
 	$http.get('/api/user/profile').success(function(user){
 		console.log(user);
 		$scope.worlds = user;		
 	});
+}
+
+//if came from meetup, keep checking for new meetups
+function checkProfileUpdates(){
+	var checkProfile = $interval(function() {
+		$http.get('/api/user/profile').success(function(user){
+			$scope.worlds = user;	
+			$scope.waitingforMeetup = false;	
+			$interval.cancel(checkProfile);
+		});
+    }, 1500);
+
 }
 
 $scope.deleteWorld = function(i) {

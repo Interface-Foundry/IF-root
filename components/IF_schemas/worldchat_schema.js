@@ -11,7 +11,8 @@ var worldchatSchema = mongoose.Schema({
     userID: String,
     msg: String,
     img: String,
-    time: { type: Date, default: Date.now }
+    time: { type: Date, default: Date.now },
+    avatar: String
 });
 
 

@@ -1,4 +1,4 @@
-function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager) {
+function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 
 angular.extend($rootScope, {loading: false});
 
@@ -75,23 +75,48 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 
 $scope.update($route.current.params.tab);
 
+$scope.waitingforMeetup = false; //if from meetup, hide worlds until complete 
+
 //if user login came from Meetup, then process new meetup worlds
 if ($routeParams.incoming == 'meetup'){
 	angular.extend($rootScope, {loading: true});
 	$scope.fromMeetup = true;
+	$scope.waitingforMeetup = true;
+
 	$http.post('/api/process_meetups').success(function(response){
 		angular.extend($rootScope, {loading: false});
+		checkProfileUpdates(); //now wait until meetup bubbles come in
+		// $http.get('/api/user/profile').success(function(user){
+		// 	$scope.worlds = user;		
+			
+		// });
+	}).
+	error(function(data) {
+		angular.extend($rootScope, {loading: false});
 		$http.get('/api/user/profile').success(function(user){
-			$scope.worlds = user;		
+			$scope.worlds = user;	
+			$scope.waitingforMeetup = false;	
 		});
 	});
-
+	
 }
 else {
 	$http.get('/api/user/profile').success(function(user){
 		console.log(user);
 		$scope.worlds = user;		
 	});
+}
+
+//if came from meetup, keep checking for new meetups
+function checkProfileUpdates(){
+	var checkProfile = $interval(function() {
+		$http.get('/api/user/profile').success(function(user){
+			$scope.worlds = user;	
+			$scope.waitingforMeetup = false;	
+			$interval.cancel(checkProfile);
+		});
+    }, 1500);
+
 }
 
 $scope.deleteWorld = function(i) {

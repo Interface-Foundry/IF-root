@@ -57,6 +57,7 @@ var mongoose = require('mongoose'),
     projectSchema = require('./components/IF_schemas/project_schema.js'),
     User = require('./components/IF_schemas/user_schema.js'), //temp? need to integrate into passport module
     serverwidgetsSchema = require('./components/IF_schemas/serverwidgets_schema.js'),
+    worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
     monguurl = require('monguurl');
 
 mongoose.connect(configDB.url); 
@@ -532,6 +533,25 @@ app.get('/api/:collection', function(req, res) {
         }
     }
 
+    //querying worldchat
+    if (req.params.collection == 'worldchat'){
+
+        if (req.query.sinceID == 'none' || !req.query.sinceID){
+            var qw ={
+              'worldID': req.query.worldID
+            }
+        }
+        else {
+            var qw ={
+              'worldID': req.query.worldID,
+              'local.resetPasswordExpires': { $gt: Date.now() }
+
+            }
+        }
+        db.collection('worldchat').find(qw).limit(req.query.limit).sort({_id: -1}).toArray(fn(req, res));
+
+    }
+
 
 });
 
@@ -644,6 +664,29 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if (req.url == "/api/projects/create"){
         editProject(); //edit project info
+    }
+
+    if (req.url == "/api/worldchat/create"){
+
+        var wc = new worldchatSchema({
+            userID: req.user._id,
+            worldID: req.body.worldID,
+            nickname: req.body.nickname,
+            msg: req.body.msg,
+            img: req.body.img,
+            avatar: req.body.avatar
+        });
+
+        wc.save(function (err, data) {
+            if (err){
+                console.log(err);
+                res.send(err);
+            }
+            else {
+                console.log('SAVED new message');
+                res.status(200).send(['saved']);
+            }
+        });
     }
 
     //edit a world
@@ -1491,7 +1534,7 @@ app.post('/api/process_meetups', isLoggedIn, function (req, res) {
               async.forEach(ls, function (obj, done){ 
 
                   //skip if there's already an owner ID
-                  if (!Object.keys(obj.permissions.ownerID).length === 0){
+                  if (obj.permissions.ownerID.length > 1){
                     done();
                   }
                   else {
