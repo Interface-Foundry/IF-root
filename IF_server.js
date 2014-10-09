@@ -536,6 +536,8 @@ app.get('/api/:collection', function(req, res) {
     //querying worldchat
     if (req.params.collection == 'worldchat'){
 
+        console.log(req.query);
+
         if (req.query.sinceID == 'none' || !req.query.sinceID){
             var qw ={
               'worldID': req.query.worldID
@@ -544,11 +546,10 @@ app.get('/api/:collection', function(req, res) {
         else {
             var qw ={
               'worldID': req.query.worldID,
-              'local.resetPasswordExpires': { $gt: Date.now() }
-
+              '_id': { $gt: req.query.sinceID }
             }
         }
-        db.collection('worldchat').find(qw).limit(req.query.limit).sort({_id: -1}).toArray(fn(req, res));
+        db.collection('worldchats').find(qw).limit(30).sort({_id: 1}).toArray(fn(req, res));
 
     }
 

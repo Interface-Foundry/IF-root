@@ -109,16 +109,21 @@ else {
 	});
 }
 
-//if came from meetup, keep checking for new meetups
+//if came from meetup, keep checking for new meetups until route change
 function checkProfileUpdates(){
-	var checkProfile = $interval(function() {
+	$scope.stop = $interval(checkProfile, 2000);
+	function checkProfile(){
 		$http.get('/api/user/profile').success(function(user){
 			$scope.worlds = user;	
 			$scope.waitingforMeetup = false;	
-			$interval.cancel(checkProfile);
-		});
-    }, 1500);
-
+			//$interval.cancel(checkProfile);
+		});	
+	}
+	//stops interval on route change
+	var dereg = $rootScope.$on('$locationChangeSuccess', function() {
+	    $interval.cancel($scope.stop);
+	    dereg();
+  	});
 }
 
 $scope.deleteWorld = function(i) {

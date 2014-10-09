@@ -57,7 +57,6 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
 
     //Messages, client info & sending
     $scope.messages = [];
-    var sinceID = 'none';
 
     $scope.sendMessage = function () {
 
@@ -74,7 +73,7 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
             }
 
             db.worldchat.create(newChat, function(res) {
-                console.log(res);
+                //console.log(res);
             });
 
             $scope.messageText = "";
@@ -82,28 +81,79 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
 
     };
 
-    //query for latest chats
-    $interval(function() {
+    //======== query for latest chats until route change ======= //
 
-        //read for latest mongo ID, if no ID, pass special
+    $scope.stop = $interval(checkWorldChat, 2000);
+    function checkWorldChat(){
 
+        //console.log($scope.messages);
 
+        if ($scope.messages.length < 1){
+            var sinceID = 'none';
+        }
+        else {
+            var sinceID = $scope.messages[0]._id;
+        }
+            
+        $scope.messages = db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
 
-        db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID, limit:50}, function(data){
+            // var uniqueIds = {};
 
-            //on last array push, put mongoID into sinceID
+            // angular.forEach(data, function(key, value){
+            //     this.push(key.uniqueIds);
+            // }, uniqueIds);
 
-            console.log(data);
+            // console.log(uniqueIds);
+
 
         });
 
 
 
+        // $scope.messages.push({
+        //     avatar: "data:image/png;base64," + p.avatar.toBase64(),
+        //     text: p.message,
+        //     side: side
+        // });
+        // $scope.$apply();
 
-        console.log('asdf');
+        // Animate
+        $("#viewport-content").animate({
+            bottom: $("#viewport-content").height() - $("#viewport").height()
+        }, 250);
+
+        // flip the side
+        side = side == 'left' ? 'right' : 'left';
+
+        
+
+        //console.log($scope.messages);
+
+    }
+    //stops interval on route change
+    var dereg = $rootScope.$on('$locationChangeSuccess', function() {
+        $interval.cancel($scope.stop);
+        dereg();
+    });
+
+    //=========================================================//
+
+    // //query for latest chats
+    // $interval(function() {
+
+    //     //read for latest mongo ID, if no ID, pass special
 
 
-    }, 2000);
+
+
+
+
+
+
+    //     console.log('asdf');
+
+
+    // }, 2000);
 
 
 
@@ -157,25 +207,6 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
 
     //Occurs when we receive chat messages
 
-    // server.ngChatMessagesInform = function (p) {
-
-
-    //     $scope.messages.push({
-    //         avatar: "data:image/png;base64," + p.avatar.toBase64(),
-    //         text: p.message,
-    //         side: side
-    //     });
-    //     $scope.$apply();
-
-    //     // Animate
-    //     $("#viewport-content").animate({
-    //         bottom: $("#viewport-content").height() - $("#viewport").height()
-    //     }, 250);
-
-    //     // flip the side
-    //     side = side == 'left' ? 'right' : 'left';
-
-    // };
 
 
 
