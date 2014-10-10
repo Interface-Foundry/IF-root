@@ -9065,6 +9065,8 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
     $scope.messages = [];
     $scope.myMessages = [];
 
+    $scope.currentChatID = $routeParams.worldID;
+
     $scope.sendMessage = function () {
 
         if ($scope.loggedIn){
@@ -9101,87 +9103,39 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
     //to stop interval from querying after route change
     $scope.stop = $interval(checkWorldChat, 2000); 
     function checkWorldChat(){
-
-        //console.log($scope.messages);
-
-        // if ($scope.messages.length < 1){
-        // }
-        // else {
-        //     var sinceID;
-        // }
             
-        console.log(sinceID);
-
         db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
 
+            for (i = 0; i < data.length; i++) { 
 
-            console.log(data);
-           // if (data.leng){
-
-                for (i = 0; i < data.length; i++) { 
-
-                    console.log(data[i]._id);
-                    // console.log('messages ' + $scope.myMessages);
-
-                    if ($scope.myMessages.indexOf(data[i]._id) > -1){
-                        //nothing, was added locally
-                    }
-                    else {
-
-                        //console.log('asfasdfasfasdf'+data[i]._id);
-                        if (data[i]._id){
-
-                            if (i == 0){
-                                sinceID = data[i]._id;
-                            }
-                            if ($scope.nickname == data[i].nickname){
-                                data[i].side = 'right';
-                            }
-                            else {
-                                data[i].side = 'left';
-                            }
-                            //if (data)
-                            $scope.messages.push(data[i]); 
-                            
-                            console.log('since '+sinceID);
-                        }
-
-                    }
+                if ($scope.myMessages.indexOf(data[i]._id) > -1){
+                    //nothing, was added locally
                 }
+                else {
 
-                //console.log($scope.messages);
-//            }
+                    if (data[i]._id){
 
-            //var uniqueIds = {};
+                        if (i == 0){
+                            sinceID = data[i]._id;
+                        }
+                        if ($scope.nickname == data[i].nickname){
+                            data[i].side = 'right';
+                        }
+                        else {
+                            data[i].side = 'left';
+                        }
+                        $scope.messages.push(data[i]); 
+                    }
 
-            // angular.forEach(data[0], function(key, value){
-            //     this.push(key.$scope.messages);
-            // }, $scope.messages);
+                }
+            }
 
-          // console.log($scope.messages);
-
-           
         });
 
-
-
-        // $scope.messages.push({
-        //     avatar: "data:image/png;base64," + p.avatar.toBase64(),
-        //     text: p.message,
-        //     side: side
-        // });
-        // $scope.$apply();
-
-        // Animate
-        $("#viewport-content").animate({
-            bottom: $("#viewport-content").height() - $("#viewport").height()
-        }, 250);
-
-
-
-        
-
-        //console.log($scope.messages);
+        // // Animate
+        // $("#viewport-content").animate({
+        //     bottom: $("#viewport-content").height() - $("#viewport").height()
+        // }, 250);
 
     }
     //stops interval on route change

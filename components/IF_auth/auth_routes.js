@@ -87,14 +87,70 @@ module.exports = function(app, passport, landmarkSchema) {
 	// meetup --------------------------------
 
 		// send to meetup to do the authentication
-		app.get('/auth/meetup', passport.authenticate('meetup', { scope : 'email' }));
+		//app.get('/auth/meetup', passport.authenticate('meetup', { scope : 'email' }));
+
+
+		app.get('/auth/meetup', function(req, res, next) {
+
+		  console.log(req.query.redirect);
+
+		  req.session.redirect = req.query.redirect;
+		  next();
+		}, passport.authenticate('meetup'));
+
+
+		app.get('/auth/meetup/callback', passport.authenticate('meetup', {
+		  failureRedirect: '/'
+		}), function (req, res) {
+		  res.redirect(req.session.redirect || '/profile/worlds/meetup');
+		  delete req.session.redirect;
+		});
 
 		// handle the callback after meetup has authenticated the user
-		app.get('/auth/meetup/callback',
-			passport.authenticate('meetup', {
-				successRedirect : '/profile/worlds/meetup',
-				failureRedirect : '/login'
-			}));
+		// app.get('/auth/meetup/callback',
+		// 	passport.authenticate('meetup', {
+		// 		successRedirect : '/profile/worlds/meetup',
+		// 		failureRedirect : '/login'
+		// 	}));
+
+
+
+		// app.get('/auth/meetup/callback', 
+		//   passport.authenticate('meetup', { failureRedirect: '/login' }),
+		//   function(req, res) {
+
+		//   	console.log(req);
+		//     // // successful auth, user is set at req.user.  redirect as necessary.
+		//     // if (req.user.isNew) { return res.redirect('/back_again'); }
+		//     // res.redirect('/welcome');
+		//   });
+
+
+
+
+		// app.get('/auth/meetup/callback', function(req, res, next){
+		//   passport.authenticate('meetup', function(err, user, info){
+		//     // This is the default destination upon successful login.
+		//     var redirectUrl = '/profile/worlds/meetup';
+
+		//     if (err) { return next(err); }
+		//     if (!user) { return res.redirect('/'); }
+
+		//     // If we have previously stored a redirectUrl, use that, 
+		//     // otherwise, use the default.
+
+		//     console.log('redirectUrl '+req.session.redirectUrl);
+
+		//     if (req.session.redirectUrl) {
+		//       redirectUrl = req.session.redirectUrl;
+		//       req.session.redirectUrl = null;
+		//     }
+		//     req.logIn(user, function(err){
+		//       if (err) { return next(err); }
+		//     });
+		//     res.redirect(redirectUrl);
+		//   })(req, res, next);
+		// });
 
 
 	
@@ -200,3 +256,20 @@ function isLoggedIn(req, res, next) {
 	else 
 		return next();
 }
+
+
+// ensureAuthenticated = function (req, res, next) {
+//   if (req.isAuthenticated()) { return next(); }
+
+//   // If the user is not authenticated, then we will start the authentication
+//   // process.  Before we do, let's store this originally requested URL in the
+//   // session so we know where to return the user later.
+//   console.log('-------- THING');
+//   req.session.redirectUrl = req.url;
+
+//   // Resume normal authentication...
+
+//   logger.info('User is not authenticated.');
+//   req.flash("warn", "You must be logged-in to do that.");
+//   res.redirect('/');
+// }
