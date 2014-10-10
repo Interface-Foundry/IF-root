@@ -54,9 +54,11 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
       });
 
     var side = 'left';
+    var sinceID = 'none';
 
     //Messages, client info & sending
     $scope.messages = [];
+    $scope.myMessages = [];
 
     $scope.sendMessage = function () {
 
@@ -65,7 +67,8 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
                 worldID: $routeParams.worldID,
                 nickname: $scope.nickname,
                 msg: $scope.messageText,
-                avatar: $scope.avatar
+                avatar: $scope.avatar,
+
             };
 
             if ($scope.messageImg){
@@ -73,7 +76,13 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
             }
 
             db.worldchat.create(newChat, function(res) {
-                //console.log(res);
+                console.log(res[0]);
+                console.log('response id '+res[0]._id);
+                sinceID = res[0]._id;
+
+                newChat.side = 'right';
+                $scope.messages.push(newChat);
+                $scope.myMessages.push(res[0]._id);
             });
 
             $scope.messageText = "";
@@ -82,30 +91,71 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
     };
 
     //======== query for latest chats until route change ======= //
+    checkWorldChat(); //initial load
 
-    $scope.stop = $interval(checkWorldChat, 2000);
+    //to stop interval from querying after route change
+    $scope.stop = $interval(checkWorldChat, 2000); 
     function checkWorldChat(){
 
         //console.log($scope.messages);
 
-        if ($scope.messages.length < 1){
-            var sinceID = 'none';
-        }
-        else {
-            var sinceID = $scope.messages[0]._id;
-        }
+        // if ($scope.messages.length < 1){
+        // }
+        // else {
+        //     var sinceID;
+        // }
             
-        $scope.messages = db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
+        console.log(sinceID);
 
-            // var uniqueIds = {};
-
-            // angular.forEach(data, function(key, value){
-            //     this.push(key.uniqueIds);
-            // }, uniqueIds);
-
-            // console.log(uniqueIds);
+        db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
 
 
+            console.log(data);
+           // if (data.leng){
+
+                for (i = 0; i < data.length; i++) { 
+
+                    console.log(data[i]._id);
+                    // console.log('messages ' + $scope.myMessages);
+
+                    if ($scope.myMessages.indexOf(data[i]._id) > -1){
+                        //nothing, was added locally
+                    }
+                    else {
+
+                        //console.log('asfasdfasfasdf'+data[i]._id);
+                        if (data[i]._id){
+
+                            if (i == 0){
+                                sinceID = data[i]._id;
+                            }
+                            if ($scope.nickname == data[i].nickname){
+                                data[i].side = 'right';
+                            }
+                            else {
+                                data[i].side = 'left';
+                            }
+                            //if (data)
+                            $scope.messages.push(data[i]); 
+                            
+                            console.log('since '+sinceID);
+                        }
+
+                    }
+                }
+
+                //console.log($scope.messages);
+//            }
+
+            //var uniqueIds = {};
+
+            // angular.forEach(data[0], function(key, value){
+            //     this.push(key.$scope.messages);
+            // }, $scope.messages);
+
+          // console.log($scope.messages);
+
+           
         });
 
 
@@ -122,8 +172,7 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
             bottom: $("#viewport-content").height() - $("#viewport").height()
         }, 250);
 
-        // flip the side
-        side = side == 'left' ? 'right' : 'left';
+
 
         
 

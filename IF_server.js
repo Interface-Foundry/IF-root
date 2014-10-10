@@ -533,6 +533,8 @@ app.get('/api/:collection', function(req, res) {
         }
     }
 
+
+
     //querying worldchat
     if (req.params.collection == 'worldchat'){
 
@@ -540,16 +542,19 @@ app.get('/api/:collection', function(req, res) {
 
         if (req.query.sinceID == 'none' || !req.query.sinceID){
             var qw ={
-              'worldID': req.query.worldID
+              worldID: req.query.worldID
             }
         }
         else {
             var qw ={
-              'worldID': req.query.worldID,
-              '_id': { $gt: req.query.sinceID }
+              worldID: req.query.worldID,
+              _id: { $gt: mongoose.Types.ObjectId(req.query.sinceID) }
             }
         }
+        console.log(qw);
         db.collection('worldchats').find(qw).limit(30).sort({_id: 1}).toArray(fn(req, res));
+
+//        var db.col.find({_id: {$gt: {ObjectId("50911c4709913b2c643f1216")}}  });
 
     }
 
@@ -685,7 +690,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             }
             else {
                 console.log('SAVED new message');
-                res.status(200).send(['saved']);
+                res.status(200).send([data]);
             }
         });
     }

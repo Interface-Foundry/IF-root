@@ -2,6 +2,16 @@
 
 <div id="shelf" class="container-fluid navfix" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
 
+          <form class="row row-chat" ng-submit="sendMessage()" ng-show="loggedIn">
+              <div class="input-group">
+                  <input type="text" class="form-control" ng-model="messageText" placeholder="Type your message" />
+
+                  <span class="input-group-btn">
+                      <button type="submit" class="btn btn-primary">Send</button>
+                  </span>
+              </div>
+          </form>
+
 <div class="row">
 	<div class="col-xs-10 col-xs-offset-1">
 
@@ -17,15 +27,7 @@
               </div>
           </div> -->
 
-          <form class="row row-chat" ng-submit="sendMessage()" ng-show="loggedIn">
-              <div class="input-group">
-                  <input type="text" class="form-control" ng-model="messageText" placeholder="Type your message" />
 
-                  <span class="input-group-btn">
-                      <button type="submit" class="btn btn-primary">Send</button>
-                  </span>
-              </div>
-          </form>
 
           <form class="row row-chat" ng-hide="loggedIn">
               <div class="input-group">
@@ -41,11 +43,11 @@
           <div id="viewport-content">
               <div class="bubble-container" ng-repeat="m in messages">
                   <div class="chat-avatar avatar-{{m.side}}"><img src="{{m.avatar}}" /></div>
-                  <div class="bubble bubble-{{m.side}}">{{m.msg}}</div>
+                  <div class="bubble bubble-{{m.side}}"><b>{{m.nickname}}:</b> {{m.msg}}</div>
               </div>
           </div>
 
-          
+
 <!-- 
   <h3>Reactions</h3>
 
