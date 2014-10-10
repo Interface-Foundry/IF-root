@@ -11379,12 +11379,16 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
   // This object will be filled by the form
   $scope.user = {};
 
+
   // Register the login() function
   $scope.signup = function(){
     var data = {
       email: $scope.user.email,
       password: $scope.user.password
     }
+
+
+
     $http.post('/api/user/signup', data).
       success(function(user){
           if (user){
@@ -11396,17 +11400,21 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
           $scope.alerts.addAlert('danger',err);
         }
       });
-    $http.post('/api/user/signup', data).
-      success(function(user){
-          if (user){
-            $location.url('/profile');
-          }
-      }).
-      error(function(err){
-        if (err){
-          $scope.alerts.addAlert('danger',err);
-        }
-      });
+
+
+
+
+    // $http.post('/api/user/signup', data).
+    //   success(function(user){
+    //       if (user){
+    //         $location.url('/profile');
+    //       }
+    //   }).
+    //   error(function(err){
+    //     if (err){
+    //       $scope.alerts.addAlert('danger',err);
+    //     }
+    //   });
   }
 }
 

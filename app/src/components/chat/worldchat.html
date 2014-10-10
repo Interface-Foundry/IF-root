@@ -16,9 +16,9 @@
           <form class="row row-chat login-chat" ng-hide="loggedIn">
               <div class="input-group">
                   <h4>Login to send messages</h4>
-                  <a href="/auth/facebook?redirect=/chat/{{currentChatID}}" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
-                  <a href="/auth/twitter" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
-                  <a href="/auth/meetup?redirect=/chat/{{currentChatID}}" class="btn btn-meetup"><span class="fa fa-twitter"></span> Meetup</a>
+                  <a href="/auth/facebook?redirect=%2Fchat%2F{{currentChatID}}" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+                  <a href="/auth/twitter?redirect=%2Fchat%2F{{currentChatID}}" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
+                  <a href="/auth/meetup?redirect=%2Fchat%2F{{currentChatID}}" class="btn btn-meetup"><span class="fa fa-twitter"></span> Meetup</a>
                   Or: <a href="/signup" class="btn btn-default"><span class="fa fa-twitter"></span> Signup</a>
               </div>
           </form>

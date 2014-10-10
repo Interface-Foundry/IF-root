@@ -538,7 +538,7 @@ app.get('/api/:collection', function(req, res) {
     //querying worldchat
     if (req.params.collection == 'worldchat'){
 
-        console.log(req.query);
+        //console.log(req.query);
 
         if (req.query.sinceID == 'none' || !req.query.sinceID){
             var qw ={
@@ -551,7 +551,7 @@ app.get('/api/:collection', function(req, res) {
               _id: { $gt: mongoose.Types.ObjectId(req.query.sinceID) }
             }
         }
-        console.log(qw);
+       // console.log(qw);
         db.collection('worldchats').find(qw).limit(30).sort({_id: 1}).toArray(fn(req, res));
 
 //        var db.col.find({_id: {$gt: {ObjectId("50911c4709913b2c643f1216")}}  });

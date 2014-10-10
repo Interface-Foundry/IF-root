@@ -61,27 +61,56 @@ module.exports = function(app, passport, landmarkSchema) {
 
 	// facebook -------------------------------
 
-		// send to facebook to do the authentication
-		app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+		// // send to facebook to do the authentication
+		// app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
 
-		// handle the callback after facebook has authenticated the user
-		app.get('/auth/facebook/callback',
-			passport.authenticate('facebook', {
-				successRedirect : '/profile',
-				failureRedirect : '/'
-			}));
+		// // handle the callback after facebook has authenticated the user
+		// app.get('/auth/facebook/callback',
+		// 	passport.authenticate('facebook', {
+		// 		successRedirect : '/profile',
+		// 		failureRedirect : '/'
+		// 	}));
+
+
+
+		app.get('/auth/facebook', function(req, res, next) {
+		  req.session.redirect = req.query.redirect;
+		  next();
+		}, passport.authenticate('twitter', { scope : 'email' }));
+
+
+		app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+		  failureRedirect: '/login'
+		}), function (req, res) {
+		  res.redirect(req.session.redirect || '/profile');
+		  delete req.session.redirect;
+		});
 
 	// twitter --------------------------------
 
-		// send to twitter to do the authentication
-		app.get('/auth/twitter', passport.authenticate('twitter', { scope : 'email' }));
+		// // send to twitter to do the authentication
+		// app.get('/auth/twitter', passport.authenticate('twitter', { scope : 'email' }));
 
-		// handle the callback after twitter has authenticated the user
-		app.get('/auth/twitter/callback',
-			passport.authenticate('twitter', {
-				successRedirect : '/profile',
-				failureRedirect : '/'
-			}));
+		// // handle the callback after twitter has authenticated the user
+		// app.get('/auth/twitter/callback',
+		// 	passport.authenticate('twitter', {
+		// 		successRedirect : '/profile',
+		// 		failureRedirect : '/'
+		// 	}));
+
+
+		app.get('/auth/twitter', function(req, res, next) {
+		  req.session.redirect = req.query.redirect;
+		  next();
+		}, passport.authenticate('twitter', { scope : 'email' }));
+
+
+		app.get('/auth/twitter/callback', passport.authenticate('twitter', {
+		  failureRedirect: '/login'
+		}), function (req, res) {
+		  res.redirect(req.session.redirect || '/profile');
+		  delete req.session.redirect;
+		});
 
 
 	// meetup --------------------------------
@@ -91,67 +120,17 @@ module.exports = function(app, passport, landmarkSchema) {
 
 
 		app.get('/auth/meetup', function(req, res, next) {
-
-		  console.log(req.query.redirect);
-
 		  req.session.redirect = req.query.redirect;
 		  next();
-		}, passport.authenticate('meetup'));
+		}, passport.authenticate('meetup', { scope : 'email' }));
 
 
 		app.get('/auth/meetup/callback', passport.authenticate('meetup', {
-		  failureRedirect: '/'
+		  failureRedirect: '/login'
 		}), function (req, res) {
 		  res.redirect(req.session.redirect || '/profile/worlds/meetup');
 		  delete req.session.redirect;
 		});
-
-		// handle the callback after meetup has authenticated the user
-		// app.get('/auth/meetup/callback',
-		// 	passport.authenticate('meetup', {
-		// 		successRedirect : '/profile/worlds/meetup',
-		// 		failureRedirect : '/login'
-		// 	}));
-
-
-
-		// app.get('/auth/meetup/callback', 
-		//   passport.authenticate('meetup', { failureRedirect: '/login' }),
-		//   function(req, res) {
-
-		//   	console.log(req);
-		//     // // successful auth, user is set at req.user.  redirect as necessary.
-		//     // if (req.user.isNew) { return res.redirect('/back_again'); }
-		//     // res.redirect('/welcome');
-		//   });
-
-
-
-
-		// app.get('/auth/meetup/callback', function(req, res, next){
-		//   passport.authenticate('meetup', function(err, user, info){
-		//     // This is the default destination upon successful login.
-		//     var redirectUrl = '/profile/worlds/meetup';
-
-		//     if (err) { return next(err); }
-		//     if (!user) { return res.redirect('/'); }
-
-		//     // If we have previously stored a redirectUrl, use that, 
-		//     // otherwise, use the default.
-
-		//     console.log('redirectUrl '+req.session.redirectUrl);
-
-		//     if (req.session.redirectUrl) {
-		//       redirectUrl = req.session.redirectUrl;
-		//       req.session.redirectUrl = null;
-		//     }
-		//     req.logIn(user, function(err){
-		//       if (err) { return next(err); }
-		//     });
-		//     res.redirect(redirectUrl);
-		//   })(req, res, next);
-		// });
-
 
 	
 // =============================================================================
