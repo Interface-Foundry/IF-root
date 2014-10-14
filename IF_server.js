@@ -58,6 +58,7 @@ var mongoose = require('mongoose'),
     User = require('./components/IF_schemas/user_schema.js'), //temp? need to integrate into passport module
     serverwidgetsSchema = require('./components/IF_schemas/serverwidgets_schema.js'),
     worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
+    visitSchema = require('./components/IF_schemas/visit_schema.js'),
     monguurl = require('monguurl');
 
 mongoose.connect(configDB.url); 
@@ -367,7 +368,7 @@ app.get('/api/:collection', function(req, res) {
                           stringArr.push({_id: obj._id});
                           done(); 
                       }, function(err) {
-                          console.log(stringArr);
+                          //console.log(stringArr);
                           res.send(JSON.stringify(stringArr));
                       }); 
                       
@@ -404,8 +405,8 @@ app.get('/api/:collection', function(req, res) {
                          stringArr.push({_id: obj._id});
                          done(); 
                       }, function(err) {
-                         console.log(stringArr);
-                         console.log(JSON.stringify(stringArr));
+                         //console.log(stringArr);
+                         //console.log(JSON.stringify(stringArr));
                          res.send(JSON.stringify( stringArr ));
                       });
                       
@@ -434,7 +435,7 @@ app.get('/api/:collection', function(req, res) {
             //places
             if (req.query.queryType == "places"){
                 //do a location radius search here option
-                console.log(req.query.queryFilter);
+                //console.log(req.query.queryFilter);
 
                 if (req.query.queryFilter == "all"){
                     var qw = {
@@ -463,7 +464,7 @@ app.get('/api/:collection', function(req, res) {
 
                 function addSearch(req,res){
                      // console.log(req);
-                     console.log(res);
+                     //console.log(res);
                 }
             }
         }   
@@ -538,8 +539,6 @@ app.get('/api/:collection', function(req, res) {
     //querying worldchat
     if (req.params.collection == 'worldchat'){
 
-        //console.log(req.query);
-
         if (req.query.sinceID == 'none' || !req.query.sinceID){
             var qw ={
               worldID: req.query.worldID
@@ -551,13 +550,46 @@ app.get('/api/:collection', function(req, res) {
               _id: { $gt: mongoose.Types.ObjectId(req.query.sinceID) }
             }
         }
-       // console.log(qw);
         db.collection('worldchats').find(qw).limit(30).sort({_id: 1}).toArray(fn(req, res));
-
-//        var db.col.find({_id: {$gt: {ObjectId("50911c4709913b2c643f1216")}}  });
-
     }
 
+
+
+    //querying visits
+    if (req.params.collection == 'visit'){
+
+        //query for user history
+        if (req.query.option == 'userHistory'){
+          //logged in
+          if (req.user){
+            if(req.user._id){
+              var userString = req.user._id.toString();
+              var qw = {
+                userID: userString
+              }
+              console.log(qw);
+              db.collection('visits').find(qw).sort({_id: -1}).toArray(fn(req, res));
+            }
+          }
+          else {
+            res.send(403, ['need to be logged in']);
+          }
+        }
+        //query for visits to world within one hour
+        else {
+
+            var d = new Date(Date.now() - 60 * 60 * 1000);
+           // var n = d.toISOString();
+
+            var qw = {
+              timestamp: { // 1 hour ago (from now)
+                  $gt: d
+              },
+              worldID: req.query.worldID
+            }    
+            db.collection('visits').find(qw).sort({_id: -1}).toArray(fn(req, res));
+        }
+    }
 
 });
 
@@ -591,7 +623,7 @@ app.get('/api/:collection/:id', function(req, res) {
     if (req.url.indexOf("/api/worlds/") > -1){ 
 
         //return by mongo id
-        console.log(req.query.m);
+        //console.log(req.query.m);
         if (req.query.m == "true") {
 			
           db.collection('landmarks').findOne({_id:objectId(req.params.id),world:true}, function(err, data){
@@ -660,6 +692,42 @@ app.get('/api/:collection/:id', function(req, res) {
         db.collection(req.params.collection).findOne({id:req.params.id,world:false}, fn(req, res));
     }
 });
+
+
+// Save world visitor anonymously
+app.post('/api/visit/create', function(req, res) {
+
+    if (req.body.worldID){
+      var vs = new visitSchema({
+        worldID: req.body.worldID
+      });
+
+      //logged in
+      if (req.user){
+        if(req.user._id){
+          vs.userID = req.user._id;
+        }
+      }
+
+      if (req.body.userName){
+        vs.userName = req.body.userName;
+      }
+
+      vs.save(function (err, data) {
+          if (err){
+              console.log(err);
+              res.send(err);
+          }
+          else {
+              res.status(200).send([data]);
+          }
+      });
+    }
+    else {
+      res.status(200).send(['need worldID to save visit']);
+    }
+});
+
 
 // Save 
 app.post('/api/:collection/create', isLoggedIn, function(req, res) {
@@ -1197,7 +1265,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.themeFont = req.body.themeFont; // off by default
             lm.themeFontName = req.body.themeFontName; // font name
 
-            console.log(req.body.widgets);
+            //console.log(req.body.widgets);
 			
       			if (req.body.widgets) {
         			lm.widgets.twitter = req.body.widgets.twitter

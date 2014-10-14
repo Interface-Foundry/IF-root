@@ -23,9 +23,9 @@
 		<ul class="world-sq-menu" ng-class="{'selected': selectedIndex==$index}">
 			<li class="world-sq-menu-title">{{world.name || 'New Bubble'}}</li>
 			<li class="world-sq-menu-action" ng-click="go('/w/'+world.id)">View</li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="world.source_meetup.id"><b>Set up Meetup</b></li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="!world.source_meetup.id"><b>Walkthrough</b></li>
 			<li class="world-sq-menu-action" ng-click="go('/edit/w/'+world.id)">Edit</li>
-			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="world.source_meetup.id">Set up Meetup</li>
-			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="!world.source_meetup.id">Walkthrough</li>
 			<!--<li class="world-sq-menu-action">Share</li>-->
 		</ul>
 	</li>

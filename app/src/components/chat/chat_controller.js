@@ -69,7 +69,7 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
                 worldID: $routeParams.worldID,
                 nickname: $scope.nickname,
                 msg: $scope.messageText,
-                avatar: $scope.avatar,
+                avatar: $scope.avatar
 
             };
 

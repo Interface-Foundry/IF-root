@@ -6410,6 +6410,7 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.tweets = $resource('api/tweets/:_id', {}, actions);
             db.instagrams = $resource('api/instagrams/:_id', {}, actions);
             db.worldchat = $resource('api/worldchat/:_id', {}, actions);
+            db.visit = $resource('api/visit/:_id', {}, actions);
             return db;
         }
     ])
@@ -9074,7 +9075,7 @@ function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeP
                 worldID: $routeParams.worldID,
                 nickname: $scope.nickname,
                 msg: $scope.messageText,
-                avatar: $scope.avatar,
+                avatar: $scope.avatar
 
             };
 
@@ -12072,6 +12073,37 @@ World.get({id: $routeParams.worldURL}, function(data) {
 		}
 	});
 */
+	//===== VISITS =====//
+	saveVisit();
+
+	function saveVisit(){
+	    var newVisit = {
+	        worldID: 'somemongoid',
+	        userName: 'nickname'
+	    };
+
+	    db.visit.create(newVisit, function(res) {
+	    	console.log(res);
+	    });		
+	}
+
+	//query for visits within one hour
+	db.visit.query({ worldID:'somemongoid'}, function(data){
+
+		console.log('WITHIN HOUR');
+		console.log(data);
+	});
+
+	//query for visits from User
+	db.visit.query({ option:'userHistory'}, function(data){
+
+		console.log('USER');
+		console.log(data);
+	});
+
+	//==================//
+
+
 		
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		console.log('worldtree success');
