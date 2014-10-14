@@ -1735,9 +1735,9 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
           //us.addrP = req.body.addrP;         
         }
 		
-		if (req.body.addr2) {
-			us.addr2 = req.body.addr2;
-		}
+    		if (req.body.addr2) {
+    			us.addr2 = req.body.addr2;
+    		}
 
         if (req.body.bday && req.body.bdayP){
           us.bday = req.body.bday;
@@ -1754,6 +1754,11 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
 
         if (req.body.name){
           us.name = req.body.name;
+
+          //use nick as unique if no userID
+          // if (!req.body.userID){
+          //   req.body.userID = req.body.name;
+          // }
         }
 
         if (req.body.note){
@@ -1787,25 +1792,60 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
               us.social.githubP = req.body.social.githubP;
             }
         }
-		
-		if (req.body.email) {
-			us.email = req.body.email;
-		}
-		
-		if (req.body.tel) {
-			us.tel = req.body.tel;
-		}
+    		
+    		if (req.body.email) {
+    			us.email = req.body.email;
+    		}
+    		
+    		if (req.body.tel) {
+    			us.tel = req.body.tel;
+    		}
 
-		 us.save(function(err){
-                if (err){
-                  console.log(err);
-                  res.send(200, 'there was an error saving user info');
-                }
-                else {
-                  res.send(200, 'user updated'); 
-                }
+        //check for unique userID before save
+        if (req.body.userID){
+
+          //if missing userID, try to fill it in
+          if (req.body.userID == 'undefined' && req.body.name){
+            req.body.userID = req.body.name;
+          }
+          else if (req.body.userID == 'undefined'){
+            req.body.userID = 'user';
+          }
+          else {
+            //nothing
+          }
+
+          uniqueUserID(req.body.userID, function(output){
+
+            us.userID = output;
+
+            us.save(function(err){
+              if (err){
+                console.log(err);
+                res.send(200, 'there was an error saving user info');
+              }
+              else {
+                res.send(200, 'user updated'); 
+              }
+            }); 
 
           });
+
+        }
+        //or just save if no unique userID
+        else {
+          us.save(function(err){
+            if (err){
+              console.log(err);
+              res.send(200, 'there was an error saving user info');
+            }
+            else {
+              res.send(200, 'user updated'); 
+            }
+          });        
+        }
+
+
 
 
         /*async.parallel({
@@ -1973,6 +2013,40 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
 });
 
 
+function uniqueUserID(input, callback){
+
+    var uniqueIDer = urlify(input);
+    urlify(uniqueIDer, function(){
+        db.collection('users').findOne({'userID':uniqueIDer}, function(err, data){
+            if (data){
+                var uniqueNumber = 1;
+                var newUnique;
+
+                async.forever(function (next) {
+                  var uniqueNum_string = uniqueNumber.toString(); 
+                  newUnique = data.userID + uniqueNum_string;
+
+                  db.collection('users').findOne({'userID': newUnique}, function(err, data){
+
+                    if (data){
+                      uniqueNumber++;
+                      next();
+                    }
+                    else {
+                      next('unique!'); // This is where the looping is stopped
+                    }
+                  });
+                },
+                function () {
+                  callback(newUnique);
+                });
+            }
+            else {
+                callback(uniqueIDer);
+            }
+        });
+    });
+}
 
 
 // route middleware to ensure user is logged in

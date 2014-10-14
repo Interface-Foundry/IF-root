@@ -10,12 +10,10 @@ module.exports = function(app, passport, landmarkSchema) {
 	// PROFILE SECTION =========================
 	//isLoggedIn == AUTH
 	app.get('/api/user/profile', isLoggedIn, function(req, res) {
-
 		var qw = {
             'world':true,
             'permissions.ownerID': req.user._id
         };   
-
         landmarkSchema.find(qw, function(err, lm) {
         	res.send(lm);
         });

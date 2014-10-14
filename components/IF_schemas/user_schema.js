@@ -85,6 +85,7 @@ var userSchema = mongoose.Schema({
     // }],
     //tel: [Schema.Types.Mixed],
     tel: String,
+    userID: { type: String, unique: true },
     permissions: [{
         
     }]

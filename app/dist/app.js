@@ -12073,6 +12073,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 		}
 	});
 */
+
 	//===== VISITS =====//
 	saveVisit();
 

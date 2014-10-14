@@ -7,7 +7,15 @@ var MeetupStrategy = require('passport-meetup').Strategy;
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
 
+var async = require('async');
 
+var urlify = require('urlify').create({
+  addEToUmlauts:true,
+  szToSs:true,
+  spaces:"_",
+  nonPrintable:"_",
+  trim:true
+});
 
 // load the auth variables
 var configAuth = require('./auth'); // use this one for testing
@@ -91,6 +99,41 @@ module.exports = function(passport) {
     },
     function(req, email, password, done) {
 
+
+
+
+
+      // //if missing userID, try to fill it in
+      // if (req.body.userID == 'undefined' && req.body.name){
+      //   req.body.userID = req.body.name;
+      // }
+      // else if (req.body.userID == 'undefined'){
+      //   req.body.userID = 'user';
+      // }
+      // else {
+      //   //nothing
+      // }
+
+      // uniqueUserID(req.body.userID, function(output){
+
+      //   us.userID = output;
+
+      //   us.save(function(err){
+      //     if (err){
+      //       console.log(err);
+      //       res.send(200, 'there was an error saving user info');
+      //     }
+      //     else {
+      //       res.send(200, 'user updated'); 
+      //     }
+      //   }); 
+
+      // });
+
+
+
+
+
         //validate email as real address
         if (validateEmail(email)){
             if (password.length >= 6){
@@ -111,31 +154,67 @@ module.exports = function(passport) {
 
                         //  If we're logged in, we're connecting a new local account.
                         if(req.user) {
-                            var user            = req.user;
-                            user.local.email    = email;
-                            user.local.password = user.generateHash(password);
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
-                                //ADDED TO YOUR ACCOUNT
+
+                            //strip name from email//
+                            var s = email;
+                            var n = s.indexOf('@');
+                            s = s.substring(0, n != -1 ? n : s.length);
+                            //====================//
+
+                            //gen new unique userID and save
+                            uniqueUserID(s, function(output){
+
+                                var user            = req.user;
+
+                                //avoid writing over pre-exisiting userID thx
+                                if (!req.user.userID || req.user.userID == 'undefined'){
+                                    user.userID = output;
+                                }
+
+                                user.local.email    = email;
+                                user.local.password = user.generateHash(password);
+
+                                user.save(function(err) {
+                                    if (err)
+                                        throw err;
+                                    return done(null, user);
+                                    //ADDED TO YOUR ACCOUNT
+                                });
+
                             });
+
                         } 
                         //  We're not logged in, so we're creating a brand new user.
                         else {
-                            // create the user
-                            var newUser            = new User();
 
-                            newUser.local.email    = email;
-                            newUser.local.password = newUser.generateHash(password);
+                            //strip name from email//
+                            var s = email;
+                            var n = s.indexOf('@');
+                            s = s.substring(0, n != -1 ? n : s.length);
+                            //====================//
 
-                            newUser.save(function(err) {
-                                if (err)
-                                    throw err;
+                            //gen new unique userID and save
+                            uniqueUserID(s, function(output){
 
-                                return done(null, newUser);
-                                //NEW USER CREATED
+                                // create the user
+                                var newUser            = new User();
+
+                                newUser.userID = output;
+                                newUser.local.email    = email;
+                                newUser.local.password = newUser.generateHash(password);
+
+                                newUser.save(function(err) {
+                                    if (err)
+                                        throw err;
+
+                                    return done(null, newUser);
+                                    //NEW USER CREATED
+                                });
+
                             });
+
+
+
                         }
                     });
                 });
@@ -190,11 +269,40 @@ module.exports = function(passport) {
                                 user.facebook.email = profile.emails[0].value;
                             }
 
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
-                            });
+                            //add name from facebook if not exist
+                            if (!req.user.name || req.user.name == 'undefined'){
+                                user.name = profile.name.givenName + ' ' + profile.name.familyName;
+                            }
+
+                            //if no userID, gen new ID then save
+                            if (!req.user.userID || req.user.userID == 'undefined'){
+
+                                if (!profile.displayName || profile.displayName == 'undefined'){
+                                    profile.displayName = 'user'; //if displayName missing
+                                }
+
+                                //gen new unique userID and save
+                                uniqueUserID(profile.displayName, function(output){
+
+                                    user.userID = output;
+
+                                    user.save(function(err) {
+                                        if (err)
+                                            throw err;
+                                        return done(null, user);
+                                    });
+                                });
+    
+                            }
+                            //userID already exists, save
+                            else {
+                                user.save(function(err) {
+                                    if (err)
+                                        throw err;
+                                    return done(null, user);
+                                });
+                            }
+
                         }
 
                         return done(null, user); // user found, return that user
@@ -208,13 +316,25 @@ module.exports = function(passport) {
                         if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
                             newUser.facebook.email = profile.emails[0].value; 
                         }
-                        
 
-                        newUser.save(function(err) {
-                            if (err)
-                                throw err;
-                            return done(null, newUser);
+                        if (!profile.displayName){
+                            profile.displayName = 'user';
+                        }
+
+                        //gen new unique userID and save
+                        uniqueUserID(profile.displayName, function(output){
+
+                            newUser.userID = output;
+                            newUser.name = profile.name.givenName + ' ' + profile.name.familyName;
+                            
+                            newUser.save(function(err) {
+                                if (err)
+                                    throw err;
+                                return done(null, newUser);
+                            });
                         });
+
+
                     }
                 });
 
@@ -229,10 +349,28 @@ module.exports = function(passport) {
                     user.facebook.email = profile.emails[0].value;
                 }
 
-                user.save(function(err) {
-                    if (err)
-                        throw err;
-                    return done(null, user);
+                if (!profile.displayName){
+                    profile.displayName = 'user';
+                }
+
+                //gen new unique userID and save
+                uniqueUserID(profile.displayName, function(output){
+
+                    //avoid writing over pre-exisiting userID thx
+                    if (!req.user.userID || req.user.userID == 'undefined'){
+                        user.userID = output;
+                    }
+
+                    //add name from facebook if not exist
+                    if (!req.user.name || req.user.name == 'undefined'){
+                        user.name = profile.name.givenName + ' ' + profile.name.familyName;
+                    }
+
+                    user.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, user);
+                    });
                 });
 
             }
@@ -270,11 +408,29 @@ module.exports = function(passport) {
                             user.twitter.username    = profile.username;
                             user.twitter.displayName = profile.displayName;
 
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
+                            if (!profile.displayName){
+                                profile.displayName = 'user';
+                            }
+                            //gen new unique userID and save
+                            uniqueUserID(profile.displayName, function(output){
+
+                                //avoid writing over pre-exisiting userID thx
+                                if (!req.user.userID || req.user.userID == 'undefined'){
+                                    user.userID = output;
+                                }
+
+                                //add name from twitter if not exist
+                                if (!req.user.name || req.user.name == 'undefined'){
+                                    user.name = profile.displayName;
+                                }
+
+                                user.save(function(err) {
+                                    if (err)
+                                        throw err;
+                                    return done(null, user);
+                                });
                             });
+
                         }
 
                         return done(null, user); // user found, return that user
@@ -287,10 +443,22 @@ module.exports = function(passport) {
                         newUser.twitter.username    = profile.username;
                         newUser.twitter.displayName = profile.displayName;
 
-                        newUser.save(function(err) {
-                            if (err)
-                                throw err;
-                            return done(null, newUser);
+
+                        if (!profile.displayName){
+                            profile.displayName = 'user';
+                        }
+
+                        //gen new unique userID and save
+                        uniqueUserID(profile.displayName, function(output){
+
+                            newUser.userID = output;
+                            newUser.name = profile.displayName;
+                            
+                            newUser.save(function(err) {
+                                if (err)
+                                    throw err;
+                                return done(null, newUser);
+                            });
                         });
                     }
                 });
@@ -304,11 +472,30 @@ module.exports = function(passport) {
                 user.twitter.username    = profile.username;
                 user.twitter.displayName = profile.displayName;
 
-                user.save(function(err) {
-                    if (err)
-                        throw err;
-                    return done(null, user);
+                if (!profile.displayName){
+                    profile.displayName = 'user';
+                }
+
+                //gen new unique userID and save
+                uniqueUserID(profile.displayName, function(output){
+
+                    //avoid writing over pre-exisiting userID thx
+                    if (!req.user.userID || req.user.userID == 'undefined'){
+                        user.userID = output;
+                    }
+
+                    //add name from twitter if not exist
+                    if (!req.user.name || req.user.name == 'undefined'){
+                        user.name = user.displayName;
+                    }
+
+                    user.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, user);
+                    });
                 });
+
             }
 
         });
@@ -351,12 +538,29 @@ module.exports = function(passport) {
                             user.meetup.displayName = profile.displayName;
                             //user.meetup.raw         = profile._raw;
 
-                            user.save(function(err) {
-                                if (err){
-                                    throw err;
+                            if (!profile.displayName){
+                                profile.displayName = 'user';
+                            }
+                            //gen new unique userID and save
+                            uniqueUserID(profile.displayName, function(output){
+
+                                //avoid writing over pre-exisiting userID thx
+                                if (!req.user.userID || req.user.userID == 'undefined'){
+                                    user.userID = output;
                                 }
-                                return done(null, user);
+
+                                //add name from meetup if not exist
+                                if (!req.user.name || req.user.name == 'undefined'){
+                                    user.name = profile.displayName;
+                                }
+
+                                user.save(function(err) {
+                                    if (err)
+                                        throw err;
+                                    return done(null, user);
+                                });
                             });
+
                         }
                         return done(null, user); // user found, return that user
                     } else {
@@ -368,11 +572,21 @@ module.exports = function(passport) {
                         newUser.meetup.displayName = profile.displayName;
                         //newUser.meetup.raw         = profile._raw;
 
-                        newUser.save(function(err) {
-                            if (err){
-                                throw err;
-                            }
-                            return done(null, newUser);
+                        if (!profile.displayName){
+                            profile.displayName = 'user';
+                        }
+
+                        //gen new unique userID and save
+                        uniqueUserID(profile.displayName, function(output){
+
+                            newUser.userID = output;
+                            newUser.name = profile.displayName;
+                            
+                            newUser.save(function(err) {
+                                if (err)
+                                    throw err;
+                                return done(null, newUser);
+                            });
                         });
                     }
                 });
@@ -386,11 +600,28 @@ module.exports = function(passport) {
                 user.meetup.displayName = profile.displayName;
                 //user.meetup.raw         = profile._raw;
 
-                user.save(function(err) {
-                    if (err){
-                        throw err;
+                if (!profile.displayName){
+                    profile.displayName = 'user';
+                }
+
+                //gen new unique userID and save
+                uniqueUserID(profile.displayName, function(output){
+
+                    //avoid writing over pre-exisiting userID thx
+                    if (!req.user.userID || req.user.userID == 'undefined'){
+                        user.userID = output;
                     }
-                    return done(null, user);
+
+                    //add name from twitter if not exist
+                    if (!req.user.name || req.user.name == 'undefined'){
+                        user.name = user.displayName;
+                    }
+
+                    user.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, user);
+                    });
                 });
             }
 
@@ -400,5 +631,40 @@ module.exports = function(passport) {
     }));
 
 
+
+    function uniqueUserID(input, callback){
+
+        var uniqueIDer = urlify(input);
+        urlify(uniqueIDer, function(){
+            User.findOne({ 'userID' : uniqueIDer }, function(err, data){
+                if (data){
+                    var uniqueNumber = 1;
+                    var newUnique;
+
+                    async.forever(function (next) {
+                      var uniqueNum_string = uniqueNumber.toString(); 
+                      newUnique = data.userID + uniqueNum_string;
+
+                      User.findOne({ 'userID' : uniqueIDer }, function(err, data){
+
+                        if (data){
+                          uniqueNumber++;
+                          next();
+                        }
+                        else {
+                          next('unique!'); // This is where the looping is stopped
+                        }
+                      });
+                    },
+                    function () {
+                      callback(newUnique);
+                    });
+                }
+                else {
+                    callback(uniqueIDer);
+                }
+            });
+        });
+    }
 
 };
