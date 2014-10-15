@@ -1410,8 +1410,8 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
                              im.crop({
                               srcPath: newPath,
                               dstPath: newPath,
-                              width: 100,
-                              height: 100,
+                              width: 300,
+                              height: 300,
                               quality: 85,
                               gravity: "Center"
                             }, function(err, stdout, stderr){
@@ -1419,6 +1419,75 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
                                 res.send("uploads/"+current);
 
                             });                       
+                        });
+
+                        break;
+                    }
+                }
+
+            }
+
+            else {
+                console.log('Please use .jpg .png or .gif');
+                res.send(500,'Please use .jpg .png or .gif');
+            }
+        });
+});
+
+
+//upload profile pictures for worlds and landmarks and (users?)
+app.post('/api/uploadImage', isLoggedIn, function (req, res) {
+
+        var fstream;
+        req.pipe(req.busboy);
+
+        req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+
+             ////// SECURITY RISK ///////
+             ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
+             // var parseFile = JSON.stringify(req.files.files[0]);
+             // console.log(parseFile);
+             // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
+             //  magic.detectFile(parseFile, function(err, result) {
+             //      if (err){ throw err};
+             //      console.log(result);
+             //      // output on Windows with 32-bit node:
+             //      //    application/x-dosexec
+             //  });
+              ///////////////////////////
+
+            var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename; //removing file type
+            var fileType = filename.split('.').pop(); //removing file name
+
+            if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+
+                while (1) {
+
+                    var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
+                    var fileNumber_str = fileNumber.toString(); 
+                    var current = fileNumber_str + '.' + fileType;
+
+                    //checking for existing file, if unique, write to dir
+                    if (fs.existsSync("app/dist/pictures/" + current)) {
+                        continue; //if there are max # of files in the dir this will infinite loop...
+                    } 
+                    else {
+
+                        var newPath = "app/dist/pictures/" + current;
+
+                        fstream = fs.createWriteStream(newPath);
+                        file.pipe(fstream);
+                        fstream.on('close', function () {
+                            //RESIZING IMAGES
+                            im.resize({
+                              srcPath: newPath,
+                              dstPath: newPath,
+                              width: 600,
+                              quality: 0.8
+                            }, function(err, stdout, stderr){
+                                res.send("pictures/"+current);
+                            });
+
                         });
 
                         break;
@@ -1801,39 +1870,44 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
     			us.tel = req.body.tel;
     		}
 
-        //check for unique userID before save
-        if (req.body.userID){
+        //check for unique profileID before save
+        if (req.body.profileID){
 
-          //if missing userID, try to fill it in
-          if (req.body.userID == 'undefined' && req.body.name){
-            req.body.userID = req.body.name;
+          //if missing profileID, try to fill it in using name
+          if (req.body.profileID == 'undefined' && req.body.name){
+
+            uniqueProfileID(req.body.name, function(output){
+              us.profileID = output;
+              saveUser();
+            });
           }
-          else if (req.body.userID == 'undefined'){
-            req.body.userID = 'user';
+          else if (req.body.profileID == 'undefined' && us.name){
+
+            uniqueProfileID( us.name, function(output){
+              us.profileID = output;
+              saveUser();
+            });
+          }
+          else if (req.body.profileID == 'undefined'){
+            req.body.profileID = 'user';
+
+            uniqueProfileID(req.body.profileID, function(output){
+              us.profileID = output;
+              saveUser();
+            });
           }
           else {
-            //nothing
+            us.profileID = req.body.profileID;
+            saveUser();  
           }
-
-          uniqueUserID(req.body.userID, function(output){
-
-            us.userID = output;
-
-            us.save(function(err){
-              if (err){
-                console.log(err);
-                res.send(200, 'there was an error saving user info');
-              }
-              else {
-                res.send(200, 'user updated'); 
-              }
-            }); 
-
-          });
 
         }
         //or just save if no unique userID
         else {
+          saveUser();
+        }
+
+        function saveUser(){
           us.save(function(err){
             if (err){
               console.log(err);
@@ -1842,10 +1916,8 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
             else {
               res.send(200, 'user updated'); 
             }
-          });        
+          });  
         }
-
-
 
 
         /*async.parallel({
@@ -2013,20 +2085,20 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
 });
 
 
-function uniqueUserID(input, callback){
+function uniqueProfileID(input, callback){
 
     var uniqueIDer = urlify(input);
     urlify(uniqueIDer, function(){
-        db.collection('users').findOne({'userID':uniqueIDer}, function(err, data){
+        db.collection('users').findOne({'profileID':uniqueIDer}, function(err, data){
             if (data){
                 var uniqueNumber = 1;
                 var newUnique;
 
                 async.forever(function (next) {
                   var uniqueNum_string = uniqueNumber.toString(); 
-                  newUnique = data.userID + uniqueNum_string;
+                  newUnique = data.profileID + uniqueNum_string;
 
-                  db.collection('users').findOne({'userID': newUnique}, function(err, data){
+                  db.collection('users').findOne({'profileID': newUnique}, function(err, data){
 
                     if (data){
                       uniqueNumber++;
@@ -2131,38 +2203,38 @@ app.all('/*', function(req, res) {
 
 //3 Hour checkup on size of image directories, emails if over 10gb
 //from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
-async.whilst(
-    function () { return true }, 
-    function (callback) {
+// async.whilst(
+//     function () { return true }, 
+//     function (callback) {
 
-        var spawn = require('child_process').spawn,
-        size = spawn('du', ['-sh', './app/dist/img/instagram/']);
+//         var spawn = require('child_process').spawn,
+//         size = spawn('du', ['-sh', './app/dist/img/instagram/']);
 
-        size.stdout.on('data', function (data) {
+//         size.stdout.on('data', function (data) {
 
-          if (parseFloat(data.toString('utf8')) > 10000){ //size is 10gb send email warning!
+//           if (parseFloat(data.toString('utf8')) > 10000){ //size is 10gb send email warning!
       
-            var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
-            var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+//             var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
+//             var feedbackTo = 'jrbaldwin@interfacefoundry.com';
 
-            var mailOptions = {
-                to: feedbackTo,
-                from: 'IF Bubbl <mail@bubbl.li>',
-                subject: 'INSTAGRAM SIZE WARNING, exceeded 10gb',
-                text: 'help me'
-              };
-              mailerTransport.sendMail(mailOptions, function(err) {
-                console.log('warning size message sent');
-              });  
-          }
+//             var mailOptions = {
+//                 to: feedbackTo,
+//                 from: 'IF Bubbl <mail@bubbl.li>',
+//                 subject: 'INSTAGRAM SIZE WARNING, exceeded 10gb',
+//                 text: 'help me'
+//               };
+//               mailerTransport.sendMail(mailOptions, function(err) {
+//                 console.log('warning size message sent');
+//               });  
+//           }
 
-        });
+//         });
 
-        setTimeout(callback, 10800000); // every 3 hour check
-    },
-    function (err) {
-    }
-);
+//         setTimeout(callback, 10800000); // every 3 hour check
+//     },
+//     function (err) {
+//     }
+// );
 
 
 server.listen(2997, function() {

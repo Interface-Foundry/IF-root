@@ -99,41 +99,6 @@ module.exports = function(passport) {
     },
     function(req, email, password, done) {
 
-
-
-
-
-      // //if missing userID, try to fill it in
-      // if (req.body.userID == 'undefined' && req.body.name){
-      //   req.body.userID = req.body.name;
-      // }
-      // else if (req.body.userID == 'undefined'){
-      //   req.body.userID = 'user';
-      // }
-      // else {
-      //   //nothing
-      // }
-
-      // uniqueUserID(req.body.userID, function(output){
-
-      //   us.userID = output;
-
-      //   us.save(function(err){
-      //     if (err){
-      //       console.log(err);
-      //       res.send(200, 'there was an error saving user info');
-      //     }
-      //     else {
-      //       res.send(200, 'user updated'); 
-      //     }
-      //   }); 
-
-      // });
-
-
-
-
-
         //validate email as real address
         if (validateEmail(email)){
             if (password.length >= 6){
@@ -161,14 +126,14 @@ module.exports = function(passport) {
                             s = s.substring(0, n != -1 ? n : s.length);
                             //====================//
 
-                            //gen new unique userID and save
-                            uniqueUserID(s, function(output){
+                            //gen new unique profileID and save
+                            uniqueProfileID(s, function(output){
 
                                 var user            = req.user;
 
-                                //avoid writing over pre-exisiting userID thx
-                                if (!req.user.userID || req.user.userID == 'undefined'){
-                                    user.userID = output;
+                                //avoid writing over pre-exisiting profileID thx
+                                if (!req.user.profileID || req.user.profileID == 'undefined'){
+                                    user.profileID = output;
                                 }
 
                                 user.local.email    = email;
@@ -193,13 +158,13 @@ module.exports = function(passport) {
                             s = s.substring(0, n != -1 ? n : s.length);
                             //====================//
 
-                            //gen new unique userID and save
-                            uniqueUserID(s, function(output){
+                            //gen new unique profileID and save
+                            uniqueProfileID(s, function(output){
 
                                 // create the user
                                 var newUser            = new User();
 
-                                newUser.userID = output;
+                                newUser.profileID = output;
                                 newUser.local.email    = email;
                                 newUser.local.password = newUser.generateHash(password);
 
@@ -274,17 +239,17 @@ module.exports = function(passport) {
                                 user.name = profile.name.givenName + ' ' + profile.name.familyName;
                             }
 
-                            //if no userID, gen new ID then save
-                            if (!req.user.userID || req.user.userID == 'undefined'){
+                            //if no profileID, gen new ID then save
+                            if (!req.user.profileID || req.user.profileID == 'undefined'){
 
                                 if (!profile.displayName || profile.displayName == 'undefined'){
                                     profile.displayName = 'user'; //if displayName missing
                                 }
 
-                                //gen new unique userID and save
-                                uniqueUserID(profile.displayName, function(output){
+                                //gen new unique profileID and save
+                                uniqueProfileID(profile.displayName, function(output){
 
-                                    user.userID = output;
+                                    user.profileID = output;
 
                                     user.save(function(err) {
                                         if (err)
@@ -294,7 +259,7 @@ module.exports = function(passport) {
                                 });
     
                             }
-                            //userID already exists, save
+                            //profileID already exists, save
                             else {
                                 user.save(function(err) {
                                     if (err)
@@ -321,10 +286,10 @@ module.exports = function(passport) {
                             profile.displayName = 'user';
                         }
 
-                        //gen new unique userID and save
-                        uniqueUserID(profile.displayName, function(output){
+                        //gen new unique profileID and save
+                        uniqueProfileID(profile.displayName, function(output){
 
-                            newUser.userID = output;
+                            newUser.profileID = output;
                             newUser.name = profile.name.givenName + ' ' + profile.name.familyName;
                             
                             newUser.save(function(err) {
@@ -353,12 +318,12 @@ module.exports = function(passport) {
                     profile.displayName = 'user';
                 }
 
-                //gen new unique userID and save
-                uniqueUserID(profile.displayName, function(output){
+                //gen new unique profileID and save
+                uniqueProfileID(profile.displayName, function(output){
 
-                    //avoid writing over pre-exisiting userID thx
-                    if (!req.user.userID || req.user.userID == 'undefined'){
-                        user.userID = output;
+                    //avoid writing over pre-exisiting profileID thx
+                    if (!req.user.profileID || req.user.profileID == 'undefined'){
+                        user.profileID = output;
                     }
 
                     //add name from facebook if not exist
@@ -411,12 +376,12 @@ module.exports = function(passport) {
                             if (!profile.displayName){
                                 profile.displayName = 'user';
                             }
-                            //gen new unique userID and save
-                            uniqueUserID(profile.displayName, function(output){
+                            //gen new unique profileID and save
+                            uniqueProfileID(profile.displayName, function(output){
 
-                                //avoid writing over pre-exisiting userID thx
-                                if (!req.user.userID || req.user.userID == 'undefined'){
-                                    user.userID = output;
+                                //avoid writing over pre-exisiting profileID thx
+                                if (!req.user.profileID || req.user.profileID == 'undefined'){
+                                    user.profileID = output;
                                 }
 
                                 //add name from twitter if not exist
@@ -448,10 +413,10 @@ module.exports = function(passport) {
                             profile.displayName = 'user';
                         }
 
-                        //gen new unique userID and save
-                        uniqueUserID(profile.displayName, function(output){
+                        //gen new unique profileID and save
+                        uniqueProfileID(profile.displayName, function(output){
 
-                            newUser.userID = output;
+                            newUser.profileID = output;
                             newUser.name = profile.displayName;
                             
                             newUser.save(function(err) {
@@ -476,12 +441,12 @@ module.exports = function(passport) {
                     profile.displayName = 'user';
                 }
 
-                //gen new unique userID and save
-                uniqueUserID(profile.displayName, function(output){
+                //gen new unique profileID and save
+                uniqueProfileID(profile.displayName, function(output){
 
-                    //avoid writing over pre-exisiting userID thx
-                    if (!req.user.userID || req.user.userID == 'undefined'){
-                        user.userID = output;
+                    //avoid writing over pre-exisiting profileID thx
+                    if (!req.user.profileID || req.user.profileID == 'undefined'){
+                        user.profileID = output;
                     }
 
                     //add name from twitter if not exist
@@ -541,12 +506,12 @@ module.exports = function(passport) {
                             if (!profile.displayName){
                                 profile.displayName = 'user';
                             }
-                            //gen new unique userID and save
-                            uniqueUserID(profile.displayName, function(output){
+                            //gen new unique profileID and save
+                            uniqueProfileID(profile.displayName, function(output){
 
-                                //avoid writing over pre-exisiting userID thx
-                                if (!req.user.userID || req.user.userID == 'undefined'){
-                                    user.userID = output;
+                                //avoid writing over pre-exisiting profileID thx
+                                if (!req.user.profileID || req.user.profileID == 'undefined'){
+                                    user.profileID = output;
                                 }
 
                                 //add name from meetup if not exist
@@ -576,10 +541,10 @@ module.exports = function(passport) {
                             profile.displayName = 'user';
                         }
 
-                        //gen new unique userID and save
-                        uniqueUserID(profile.displayName, function(output){
+                        //gen new unique profileID and save
+                        uniqueProfileID(profile.displayName, function(output){
 
-                            newUser.userID = output;
+                            newUser.profileID = output;
                             newUser.name = profile.displayName;
                             
                             newUser.save(function(err) {
@@ -604,12 +569,12 @@ module.exports = function(passport) {
                     profile.displayName = 'user';
                 }
 
-                //gen new unique userID and save
-                uniqueUserID(profile.displayName, function(output){
+                //gen new unique profileID and save
+                uniqueProfileID(profile.displayName, function(output){
 
-                    //avoid writing over pre-exisiting userID thx
-                    if (!req.user.userID || req.user.userID == 'undefined'){
-                        user.userID = output;
+                    //avoid writing over pre-exisiting profileID thx
+                    if (!req.user.profileID || req.user.profileID == 'undefined'){
+                        user.profileID = output;
                     }
 
                     //add name from twitter if not exist
@@ -632,20 +597,20 @@ module.exports = function(passport) {
 
 
 
-    function uniqueUserID(input, callback){
+    function uniqueProfileID(input, callback){
 
         var uniqueIDer = urlify(input);
         urlify(uniqueIDer, function(){
-            User.findOne({ 'userID' : uniqueIDer }, function(err, data){
+            User.findOne({ 'profileID' : uniqueIDer }, function(err, data){
                 if (data){
                     var uniqueNumber = 1;
                     var newUnique;
 
                     async.forever(function (next) {
                       var uniqueNum_string = uniqueNumber.toString(); 
-                      newUnique = data.userID + uniqueNum_string;
+                      newUnique = data.profileID + uniqueNum_string;
 
-                      User.findOne({ 'userID' : uniqueIDer }, function(err, data){
+                      User.findOne({ 'profileID' : uniqueIDer }, function(err, data){
 
                         if (data){
                           uniqueNumber++;
