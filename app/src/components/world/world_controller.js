@@ -133,12 +133,14 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.wyzerr = true;
 		}
 
-		if ($scope.style.widgets.chat) {
-			$scope.chat = true;
+		if ($scope.style.widgets.messages) {
+			$scope.messages = true;
 
 			//angular while loop the query every 2 seconds
-			//$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
-			///
+			db.messages.query({limit:1, worldID:$routeParams.worldID}, function(data){ 
+				console.log('db.messages', data);
+				$scope.msg = data[0];
+			});
 		}
 		
 		if ($scope.style.widgets.category) {

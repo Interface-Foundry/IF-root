@@ -1,3 +1,4 @@
+
 function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree) {
 
 ////////////////////////////////////////////////////////////
@@ -6,6 +7,7 @@ function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $r
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
 
+$scope.msg = {};
 $scope.messages = [];
 $scope.localMessages = [];
 
@@ -38,7 +40,7 @@ db.messages.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(dat
 $scope.sendMsg = function (e) {
 	console.log('???');
 	if (e) {e.preventDefault()}
-	if ($scope.msg || $scope.msg.text == null || $scope.msg.img == null) {return}
+	if ($scope.msg.text == null) { return;}
 	if ($scope.loggedIn){
 	    var newChat = {
 	        worldID: $routeParams.worldID,
@@ -48,7 +50,6 @@ $scope.sendMsg = function (e) {
 	        img: $scope.msg.img,
 	        userID: $scope.userID
 	    };
-	
 	
 	    db.messages.create(newChat, function(res) {
 	        console.log(res[0]);
@@ -60,9 +61,8 @@ $scope.sendMsg = function (e) {
 	        scrollMessages();
 	    });
 		
-	    $scope.msg.text = null;
-	    $scope.msg.img = null;
-	    
+	    $scope.msg.text = "";
+	    $scope.msg.img = "";
 	}
 }
 
@@ -135,4 +135,4 @@ checkMessages();
   
 
 
-}
+} 

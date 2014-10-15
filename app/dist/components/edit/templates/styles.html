@@ -30,6 +30,20 @@
 </div>
 <label>Widgets</label> <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.widgets"></span>
 <div class="well edit-widget-well">
+	<div class="edit-widget" ng-class="{'active': style.widgets.messages}">
+	<label for="messages" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/messages.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Messages</h4>
+			<span ng-cloak>Add a chatroom to the front of your bubble.</span>
+		</div>
+		<input type="checkbox" name="messages" id="messages" ng-model="style.widgets.messages">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+
 	<div class="edit-widget" ng-class="{'active': style.widgets.twitter}">
 	<label for="twitter" class="media card">
 		<div class="pull-left">

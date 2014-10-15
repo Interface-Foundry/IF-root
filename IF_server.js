@@ -543,14 +543,28 @@ app.get('/api/:collection', function(req, res) {
             var qw ={
               worldID: req.query.worldID
             }
-        }
-        else {
+        } else {
             var qw ={
               worldID: req.query.worldID,
               _id: { $gt: mongoose.Types.ObjectId(req.query.sinceID) }
             }
         }
-        db.collection('worldchats').find(qw).limit(30).sort({_id: 1}).toArray(fn(req, res));
+		
+		if (req.query.limit == 1) {
+			db.collection('worldchats').find(qw).sort({$natural: -1}).limit(1).toArray(function(err, data) {
+			if (err) {
+				console.log(err)
+				res.send(err);
+			} else if (data) {
+				res.send(data);
+			} else {
+				res.send(500,['error']);
+			}
+			});
+		} 
+		else {
+			db.collection('worldchats').find(qw).limit(30).sort({_id: 1}).toArray(fn(req, res));
+		}
     }
 
 
@@ -1268,10 +1282,11 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             //console.log(req.body.widgets);
 			
       			if (req.body.widgets) {
-        			lm.widgets.twitter = req.body.widgets.twitter
-        			lm.widgets.instagram = req.body.widgets.instagram
-        			lm.widgets.upcoming = req.body.widgets.upcoming 
+        			lm.widgets.twitter = req.body.widgets.twitter;
+        			lm.widgets.instagram = req.body.widgets.instagram;
+        			lm.widgets.upcoming = req.body.widgets.upcoming;
         			lm.widgets.category = req.body.widgets.category;
+        			lm.widgets.messages = req.body.widgets.messages;
       			}
 			
             lm.save(function(err, style) {

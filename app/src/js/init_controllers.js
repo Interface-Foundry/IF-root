@@ -147,7 +147,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll, $window) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
@@ -251,11 +251,12 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 
     //check if logged in
     checkLoggedin($q, $timeout, $http, $location, $rootScope);
-
+	
     //search query
     $scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };
+    
 
 }
 

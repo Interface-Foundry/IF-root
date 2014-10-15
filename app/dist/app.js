@@ -6270,7 +6270,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll) {
+function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll, $window) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
@@ -6374,11 +6374,12 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 
     //check if logged in
     checkLoggedin($q, $timeout, $http, $location, $rootScope);
-
+	
     //search query
     $scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };
+    
 
 }
 
@@ -12073,6 +12074,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 
 		map.refresh();
 }
+
 function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree) {
 
 ////////////////////////////////////////////////////////////
@@ -12081,6 +12083,7 @@ function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $r
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
 
+$scope.msg = {};
 $scope.messages = [];
 $scope.localMessages = [];
 
@@ -12113,7 +12116,7 @@ db.messages.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(dat
 $scope.sendMsg = function (e) {
 	console.log('???');
 	if (e) {e.preventDefault()}
-	if ($scope.msg || $scope.msg.text == null || $scope.msg.img == null) {return}
+	if ($scope.msg.text == null) { return;}
 	if ($scope.loggedIn){
 	    var newChat = {
 	        worldID: $routeParams.worldID,
@@ -12123,7 +12126,6 @@ $scope.sendMsg = function (e) {
 	        img: $scope.msg.img,
 	        userID: $scope.userID
 	    };
-	
 	
 	    db.messages.create(newChat, function(res) {
 	        console.log(res[0]);
@@ -12135,9 +12137,8 @@ $scope.sendMsg = function (e) {
 	        scrollMessages();
 	    });
 		
-	    $scope.msg.text = null;
-	    $scope.msg.img = null;
-	    
+	    $scope.msg.text = "";
+	    $scope.msg.img = "";
 	}
 }
 
@@ -12210,7 +12211,7 @@ checkMessages();
   
 
 
-}
+} 
 function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce, worldTree, $q) {
 
 	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
@@ -12346,12 +12347,14 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.wyzerr = true;
 		}
 
-		if ($scope.style.widgets.chat) {
-			$scope.chat = true;
+		if ($scope.style.widgets.messages) {
+			$scope.messages = true;
 
 			//angular while loop the query every 2 seconds
-			//$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
-			///
+			db.messages.query({limit:1, worldID:$routeParams.worldID}, function(data){ 
+				console.log('db.messages', data);
+				$scope.msg = data[0];
+			});
 		}
 		
 		if ($scope.style.widgets.category) {
