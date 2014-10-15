@@ -1,30 +1,23 @@
 <nav class="subnav">
 	<a ng-href="#/w/{{world.id}}" class="btn btn-default backButton btn-xs">Back</a>
 </nav>
-<div class="message-surface">
-	<div class="message-room-col hidden-xs">
-	</div>
+<div class="message-surface" ng-style="{'background-color': style.bodyBG_color}" >
 	<ul class="message-list">
-		<li class="message " ng-repeat="msg in messages">
+		<li class="message" ng-repeat="msg in messages">
 			<picture class="msg-avatar" ng-if="msg.userID!=userID">
 				<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar}}" ng-cloak>
 			</picture>
-			<div class="message-content user-message-content" ng-if="msg.userID==userID" ng-style="{'background-color': style.titleBG_color}">
+			<div class="message-content">
+				<h6 class="message-heading" ng-bind="msg.nick" ng-if="msg.userID!=userID">Visitor</h6>
 				<p class="message-body" ng-bind="msg.msg"></p>
-				<div class="message-corner" ng-style="{'border-bottom': '6px solid'+style.titleBG_color}"></div>
+				<div class="message-corner" ng-if="msg.userID==userID"></div>
 			</div>
-			<div class="message-content" ng-if="msg.userID!=userID">
-				<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
-				<p class="message-body" ng-bind="msg.msg"></p>
-			</div>
-			
 		</li>
 	</ul>
-	
 </div>
 
 <div class="view-footer">
-	<textarea rows="1" placeholder="Type your message" class="message-input" ng-model="msg.text" ng-enter="sendMsg()" ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" msd-elastic></textarea>
+	<textarea rows="1" placeholder="Type your message" class="message-input" ng-model="msg.text" ng-enter="sendMsg()" msd-elastic></textarea>
 	<button type="submit" class="message-send lightblue500" ng-click="sendMsg()">Send</button>
 </div>
 

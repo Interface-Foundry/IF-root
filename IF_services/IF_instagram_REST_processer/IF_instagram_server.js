@@ -187,7 +187,7 @@ async.whilst(
                   return console.error(err);
                 }
                 now = new Date().getTime();
-                endTime = new Date(stat.ctime).getTime() + 1209600000; //if file is older than 2 weeks, remove
+                endTime = new Date(stat.ctime).getTime() + 604800000; //if file is older than 1 week, remove
                 if (now > endTime) {
                   return rimraf(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err) {
                     if (err) {
