@@ -677,7 +677,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         var wc = new worldchatSchema({
             userID: req.user._id,
             worldID: req.body.worldID,
-            nickname: req.body.nickname,
+            nick: req.body.nick,
             msg: req.body.msg,
             img: req.body.img,
             avatar: req.body.avatar

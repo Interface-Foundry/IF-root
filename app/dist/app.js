@@ -4638,7 +4638,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker', 'ui.slider'])
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
   .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -4748,6 +4748,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
+      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: MessagesController}).
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: CategoryController}).
 
@@ -4781,7 +4782,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TweetlistCtrl}).
       when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
-      when('/chat/:worldID', {templateUrl:'components/chat/worldchat.html', controller: WorldChatCtrl}).
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -4875,6 +4875,7 @@ angular.module('IF-directives', [])
 .directive('ngEnter', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
+        	console.log('ng-enter');
             if(event.which === 13) {
                 scope.$apply(function (){
                     scope.$eval(attrs.ngEnter);
@@ -4885,6 +4886,223 @@ angular.module('IF-directives', [])
         });
     };
 });
+/*
+ * angular-elastic v2.4.0
+ * (c) 2014 Monospaced http://monospaced.com
+ * License: MIT
+ */
+
+angular.module('monospaced.elastic', [])
+
+  .constant('msdElasticConfig', {
+    append: ''
+  })
+
+  .directive('msdElastic', [
+    '$timeout', '$window', 'msdElasticConfig',
+    function($timeout, $window, config) {
+      'use strict';
+
+      return {
+        require: 'ngModel',
+        restrict: 'A, C',
+        link: function(scope, element, attrs, ngModel) {
+
+          // cache a reference to the DOM element
+          var ta = element[0],
+              $ta = element;
+
+          // ensure the element is a textarea, and browser is capable
+          if (ta.nodeName !== 'TEXTAREA' || !$window.getComputedStyle) {
+            return;
+          }
+
+          // set these properties before measuring dimensions
+          $ta.css({
+            'overflow': 'hidden',
+            'overflow-y': 'hidden',
+            'word-wrap': 'break-word'
+          });
+
+          // force text reflow
+          var text = ta.value;
+          ta.value = '';
+          ta.value = text;
+
+          var append = attrs.msdElastic ? attrs.msdElastic.replace(/\\n/g, '\n') : config.append,
+              $win = angular.element($window),
+              mirrorInitStyle = 'position: absolute; top: -999px; right: auto; bottom: auto;' +
+                                'left: 0; overflow: hidden; -webkit-box-sizing: content-box;' +
+                                '-moz-box-sizing: content-box; box-sizing: content-box;' +
+                                'min-height: 0 !important; height: 0 !important; padding: 0;' +
+                                'word-wrap: break-word; border: 0;',
+              $mirror = angular.element('<textarea tabindex="-1" ' +
+                                        'style="' + mirrorInitStyle + '"/>').data('elastic', true),
+              mirror = $mirror[0],
+              taStyle = getComputedStyle(ta),
+              resize = taStyle.getPropertyValue('resize'),
+              borderBox = taStyle.getPropertyValue('box-sizing') === 'border-box' ||
+                          taStyle.getPropertyValue('-moz-box-sizing') === 'border-box' ||
+                          taStyle.getPropertyValue('-webkit-box-sizing') === 'border-box',
+              boxOuter = !borderBox ? {width: 0, height: 0} : {
+                            width:  parseInt(taStyle.getPropertyValue('border-right-width'), 10) +
+                                    parseInt(taStyle.getPropertyValue('padding-right'), 10) +
+                                    parseInt(taStyle.getPropertyValue('padding-left'), 10) +
+                                    parseInt(taStyle.getPropertyValue('border-left-width'), 10),
+                            height: parseInt(taStyle.getPropertyValue('border-top-width'), 10) +
+                                    parseInt(taStyle.getPropertyValue('padding-top'), 10) +
+                                    parseInt(taStyle.getPropertyValue('padding-bottom'), 10) +
+                                    parseInt(taStyle.getPropertyValue('border-bottom-width'), 10)
+                          },
+              minHeightValue = parseInt(taStyle.getPropertyValue('min-height'), 10),
+              heightValue = parseInt(taStyle.getPropertyValue('height'), 10),
+              minHeight = Math.max(minHeightValue, heightValue) - boxOuter.height,
+              maxHeight = parseInt(taStyle.getPropertyValue('max-height'), 10),
+              mirrored,
+              active,
+              copyStyle = ['font-family',
+                           'font-size',
+                           'font-weight',
+                           'font-style',
+                           'letter-spacing',
+                           'line-height',
+                           'text-transform',
+                           'word-spacing',
+                           'text-indent'];
+
+          // exit if elastic already applied (or is the mirror element)
+          if ($ta.data('elastic')) {
+            return;
+          }
+
+          // Opera returns max-height of -1 if not set
+          maxHeight = maxHeight && maxHeight > 0 ? maxHeight : 9e4;
+
+          // append mirror to the DOM
+          if (mirror.parentNode !== document.body) {
+            angular.element(document.body).append(mirror);
+          }
+
+          // set resize and apply elastic
+          $ta.css({
+            'resize': (resize === 'none' || resize === 'vertical') ? 'none' : 'horizontal'
+          }).data('elastic', true);
+
+          /*
+           * methods
+           */
+
+          function initMirror() {
+            var mirrorStyle = mirrorInitStyle;
+
+            mirrored = ta;
+            // copy the essential styles from the textarea to the mirror
+            taStyle = getComputedStyle(ta);
+            angular.forEach(copyStyle, function(val) {
+              mirrorStyle += val + ':' + taStyle.getPropertyValue(val) + ';';
+            });
+            mirror.setAttribute('style', mirrorStyle);
+          }
+
+          function adjust() {
+            var taHeight,
+                taComputedStyleWidth,
+                mirrorHeight,
+                width,
+                overflow;
+
+            if (mirrored !== ta) {
+              initMirror();
+            }
+
+            // active flag prevents actions in function from calling adjust again
+            if (!active) {
+              active = true;
+
+              mirror.value = ta.value + append; // optional whitespace to improve animation
+              mirror.style.overflowY = ta.style.overflowY;
+
+              taHeight = ta.style.height === '' ? 'auto' : parseInt(ta.style.height, 10);
+
+              taComputedStyleWidth = getComputedStyle(ta).getPropertyValue('width');
+
+              // ensure getComputedStyle has returned a readable 'used value' pixel width
+              if (taComputedStyleWidth.substr(taComputedStyleWidth.length - 2, 2) === 'px') {
+                // update mirror width in case the textarea width has changed
+                width = parseInt(taComputedStyleWidth, 10) - boxOuter.width;
+                mirror.style.width = width + 'px';
+              }
+
+              mirrorHeight = mirror.scrollHeight;
+
+              if (mirrorHeight > maxHeight) {
+                mirrorHeight = maxHeight;
+                overflow = 'scroll';
+              } else if (mirrorHeight < minHeight) {
+                mirrorHeight = minHeight;
+              }
+              mirrorHeight += boxOuter.height;
+
+              ta.style.overflowY = overflow || 'hidden';
+
+              if (taHeight !== mirrorHeight) {
+                ta.style.height = mirrorHeight + 'px';
+                scope.$emit('elastic:resize', $ta);
+              }
+
+              // small delay to prevent an infinite loop
+              $timeout(function() {
+                active = false;
+              }, 1);
+
+            }
+          }
+
+          function forceAdjust() {
+            active = false;
+            adjust();
+          }
+
+          /*
+           * initialise
+           */
+
+          // listen
+          if ('onpropertychange' in ta && 'oninput' in ta) {
+            // IE9
+            ta['oninput'] = ta.onkeyup = adjust;
+          } else {
+            ta['oninput'] = adjust;
+          }
+
+          $win.bind('resize', forceAdjust);
+
+          scope.$watch(function() {
+            return ngModel.$modelValue;
+          }, function(newValue) {
+            forceAdjust();
+          });
+
+          scope.$on('elastic:adjust', function() {
+            initMirror();
+            forceAdjust();
+          });
+
+          $timeout(adjust);
+
+          /*
+           * destroy
+           */
+
+          scope.$on('$destroy', function() {
+            $mirror.remove();
+            $win.unbind('resize', forceAdjust);
+          });
+        }
+      };
+    }
+  ]);
+
 angular.module('IF-directives', [])
 .directive('fitFont', function($rootScope) {
 	return {
@@ -6409,7 +6627,7 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.projects = $resource('api/projects/:_id', {}, actions);
             db.tweets = $resource('api/tweets/:_id', {}, actions);
             db.instagrams = $resource('api/instagrams/:_id', {}, actions);
-            db.worldchat = $resource('api/worldchat/:_id', {}, actions);
+            db.messages = $resource('api/worldchat/:_id', {}, actions);
             return db;
         }
     ])
@@ -9003,305 +9221,6 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval) {
-  var aperture = apertureService;
-  aperture.set('off');
-
-    //angular while loop the query every 2 seconds
-    //$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
-    ///
-
-    $scope.loggedIn = false;
-    $scope.nickname = 'Visitor';
-
-
-    $http.get('/api/user/loggedin').success(function(user){
-
-        // Authenticated
-        if (user !== '0'){
-
-          $scope.loggedIn = true;
-
-          if (user._id){
-            $scope.userID = user._id;
-          }
-
-          //nickname
-          if (user.name){
-              $scope.nickname = user.name;
-          }
-          else if (user.facebook){
-              $scope.nickname = user.facebook.name;
-          }
-          else if (user.twitter){
-              $scope.nickname = user.twitter.displayName;
-          }
-          else if (user.meetup){
-              $scope.nickname = user.meetup.displayName;
-          }
-          else if (user.local){
-              $scope.nickname = user.local.email;
-          }
-          else {
-              $scope.nickname = "Visitor";
-          }
-          
-          //avatar
-          if (user.avatar){
-            $scope.avatar = user.avatar;
-          }
-          else {
-            $scope.avatar = 'img/icons/profile.png';
-          }
-
-        }
-
-      });
-
-    var side = 'left';
-    var sinceID = 'none';
-
-    //Messages, client info & sending
-    $scope.messages = [];
-    $scope.myMessages = [];
-
-    $scope.currentChatID = $routeParams.worldID;
-
-    $scope.sendMessage = function () {
-
-        if ($scope.loggedIn){
-            var newChat = {
-                worldID: $routeParams.worldID,
-                nickname: $scope.nickname,
-                msg: $scope.messageText,
-                avatar: $scope.avatar,
-
-            };
-
-            if ($scope.messageImg){
-                newChat.img = $scope.messageImg;
-            }
-
-            db.worldchat.create(newChat, function(res) {
-                console.log(res[0]);
-                console.log('response id '+res[0]._id);
-                sinceID = res[0]._id;
-
-                newChat.side = 'right';
-                $scope.messages.push(newChat);
-                $scope.myMessages.push(res[0]._id);
-            });
-
-            $scope.messageText = "";
-        }
-
-    };
-
-    //======== query for latest chats until route change ======= //
-    checkWorldChat(); //initial load
-
-    //to stop interval from querying after route change
-    $scope.stop = $interval(checkWorldChat, 2000); 
-    function checkWorldChat(){
-            
-        db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
-
-            for (i = 0; i < data.length; i++) { 
-
-                if ($scope.myMessages.indexOf(data[i]._id) > -1){
-                    //nothing, was added locally
-                }
-                else {
-
-                    if (data[i]._id){
-
-                        if (i == 0){
-                            sinceID = data[i]._id;
-                        }
-                        if ($scope.nickname == data[i].nickname){
-                            data[i].side = 'right';
-                        }
-                        else {
-                            data[i].side = 'left';
-                        }
-                        $scope.messages.push(data[i]); 
-                    }
-
-                }
-            }
-
-        });
-
-        // // Animate
-        // $("#viewport-content").animate({
-        //     bottom: $("#viewport-content").height() - $("#viewport").height()
-        // }, 250);
-
-    }
-    //stops interval on route change
-    var dereg = $rootScope.$on('$locationChangeSuccess', function() {
-        $interval.cancel($scope.stop);
-        dereg();
-    });
-
-    //=========================================================//
-
-    // //query for latest chats
-    // $interval(function() {
-
-    //     //read for latest mongo ID, if no ID, pass special
-
-
-
-
-
-
-
-
-    //     console.log('asdf');
-
-
-    // }, 2000);
-
-
-
-
-    // db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
-    //         console.log('--db.landmarks.query--');
-    //         console.log('data');
-    //         console.log(data);
-    //     //data.shift();
-    //     $scope.landmarks = $scope.landmarks.concat(data);
-    //         console.log('$scope.landmarks');
-    //         console.log($scope.landmarks);
-        
-    //     //add markers to map
-    //     angular.forEach($scope.landmarks, function(value, key) {
-    //         //for each landmark add a marker
-    //         map.addMarker(value._id, {
-    //             lat:value.loc.coordinates[1],
-    //             lng:value.loc.coordinates[0],
-    //             draggable: true,
-    //             icon: {
-    //                 iconUrl: 'img/marker/bubble-marker-50.png',
-    //                 shadowUrl: '',
-    //                 iconSize: [25, 48],
-    //                 iconAnchor: [13, 10]
-    //             },
-    //             message:value.name
-    //         });
-    //     });
-    //     landmarksLoaded = true;
-        
-    // });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //Occurs when we receive chat messages
-
-
-
-
-
-    
-  // Socket listeners
-  // ================
-
-  // socket.on('init', function (data) {
-  //   $rootScope.chatName = data.name;
-  //   $rootScope.users = data.users;
-  // });
-
-  // //receiving messages
-  // socket.on('send:message', function (p) {
-
-  //       console.log(p);
-
-  //       $scope.messages.push({
-  //           avatar: p.avatar,
-  //           text: p.text,
-  //           side: p.side,
-  //           time: p.time,
-  //           user: p.user
-  //       });
-  //       //$scope.$apply();
-
-  //       // Animate
-  //       $("#viewport-content").animate({
-  //           bottom: $("#viewport-content").height() - $("#viewport").height()
-  //       }, 250);
-
-  //       // flip the side
-  //       side = side == 'left' ? 'right' : 'left';
-  // });
-
-
-
-
-
-
-
-
-
-
-  // socket.on('change:name', function (data) {
-  //   changeName(data.oldName, data.newName);
-  // });
-
-
-  // // Private helpers
-  // // ===============
-
-  // var changeName = function (oldName, newName) {
-  //   // rename user in list of users
-  //   var i;
-  //   for (i = 0; i < $rootScope.users.length; i++) {
-  //     if ($rootScope.users[i] === oldName) {
-  //       $rootScope.users[i] = newName;
-  //     }
-  //   }
-  // }
-
-  // // Methods published to the scope
-  // // ==============================
-
-  // $scope.changeName = function () {
-  //   socket.emit('change:name', {
-  //     name: $scope.newName
-  //   }, function (result) {
-  //     if (!result) {
-  //       alert('That name is already in use');
-  //     } else {
-  //       changeName($rootScope.chatName, $scope.newName);
-  //       $rootScope.chatName = $scope.newName;
-  //       $scope.newName = '';
-  //     }
-  //   });
-  // };
-
-
-
-    $scope.goBack = function(){
-        window.history.back();
-    }
-}
-
 function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
 console.log('--EditController--');
 
@@ -11853,6 +11772,144 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 };
 		 
 		map.refresh();
+}
+function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree) {
+
+////////////////////////////////////////////////////////////
+///////////////////////INITIALIZE///////////////////////////
+////////////////////////////////////////////////////////////
+$scope.loggedIn = false;
+$scope.nick = 'Visitor';
+
+$scope.messages = [];
+$scope.localMessages = [];
+
+$scope.currentChatID = $routeParams.worldID;
+$scope.messageList = angular.element('.message-list');
+
+var sinceID = 'none';
+
+
+function scrollMessages() {
+	$timeout(function() {
+    	$scope.messageList[0].scrollTop = $scope.messageList[0].scrollHeight;
+    },0);
+}
+
+function checkMessages(){
+db.messages.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
+    for (i = 0; i < data.length; i++) { 
+        if ($scope.localMessages.indexOf(data[i]._id) == -1) {
+            if (data[i]._id){
+				sinceID = data[i]._id;
+				$scope.messages.push(data[i]); 
+				scrollMessages();
+            }
+        }
+    }
+});
+}
+
+$scope.sendMsg = function (e) {
+	console.log('???');
+	if (e) {e.preventDefault()}
+	if ($scope.msg || $scope.msg.text == null || $scope.msg.img == null) {return}
+	if ($scope.loggedIn){
+	    var newChat = {
+	        worldID: $routeParams.worldID,
+	        nick: $scope.nick,
+	        msg: $scope.msg.text,
+	        avatar: $scope.user.avatar || 'img/icons/profile.png',
+	        img: $scope.msg.img,
+	        userID: $scope.userID
+	    };
+	
+	
+	    db.messages.create(newChat, function(res) {
+	        console.log(res[0]);
+	        console.log('response id '+res[0]._id);
+	        sinceID = res[0]._id;
+
+	        $scope.messages.push(newChat);
+	        $scope.localMessages.push(res[0]._id);
+	        scrollMessages();
+	    });
+		
+	    $scope.msg.text = null;
+	    $scope.msg.img = null;
+	    
+	}
+}
+
+$scope.goBack = function(){
+    window.history.back();
+}
+	
+	
+
+
+////////////////////////////////////////////////////////////
+///////////////////LISTENERS&INTERVALS//////////////////////
+////////////////////////////////////////////////////////////
+var checkMessagesInterval = $interval(checkMessages, 2000); 
+
+var dereg = $rootScope.$on('$locationChangeSuccess', function() {
+        $interval.cancel(checkMessagesInterval);
+        dereg();
+});
+
+
+////////////////////////////////////////////////////////////
+//////////////////////EXECUTING/////////////////////////////
+////////////////////////////////////////////////////////////
+
+worldTree.getWorld($routeParams.worldURL).then(function(data) {
+	$scope.style=data.style;
+	$scope.world=data.world;
+	console.log($scope.style);
+});
+
+$http.get('/api/user/loggedin').success(function(user){
+
+// Authenticated
+if (user !== '0'){
+	$scope.loggedIn = true;
+	if (user._id){
+    	$scope.userID = user._id;
+	}
+	//nickname
+	if (user.name){
+	  $scope.nick = user.name;
+	}
+	else if (user.facebook){
+	  $scope.nick = user.facebook.name;
+	}
+	else if (user.twitter){
+	  $scope.nick = user.twitter.displayName;
+	}
+	else if (user.meetup){
+	  $scope.nick = user.meetup.displayName;
+	}
+	else if (user.local){
+	  $scope.nick = user.local.email;
+	}
+	else {
+	  $scope.nick = "Visitor";
+	}
+}
+
+$scope.user = user;
+console.log(user._id);
+checkMessages();
+});
+
+
+
+
+
+  
+
+
 }
 function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce, worldTree, $q) {
 

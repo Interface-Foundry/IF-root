@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'once', 'angularSpectrumColorpicker', 'ui.slider'])
+var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
   .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -110,6 +110,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
+      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: MessagesController}).
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: CategoryController}).
 
@@ -143,7 +144,6 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TweetlistCtrl}).
       when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
-      when('/chat/:worldID', {templateUrl:'components/chat/worldchat.html', controller: WorldChatCtrl}).
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 

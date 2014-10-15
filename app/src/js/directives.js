@@ -23,6 +23,7 @@ angular.module('IF-directives', [])
 .directive('ngEnter', function () {
     return function (scope, element, attrs) {
         element.bind("keydown keypress", function (event) {
+        	console.log('ng-enter');
             if(event.which === 13) {
                 scope.$apply(function (){
                     scope.$eval(attrs.ngEnter);

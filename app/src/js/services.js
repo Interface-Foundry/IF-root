@@ -56,7 +56,7 @@ angular.module('tidepoolsServices', ['ngResource'])
             db.projects = $resource('api/projects/:_id', {}, actions);
             db.tweets = $resource('api/tweets/:_id', {}, actions);
             db.instagrams = $resource('api/instagrams/:_id', {}, actions);
-            db.worldchat = $resource('api/worldchat/:_id', {}, actions);
+            db.messages = $resource('api/worldchat/:_id', {}, actions);
             return db;
         }
     ])

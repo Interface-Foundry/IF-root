@@ -7,7 +7,7 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 // define the schema for our user model
 var worldchatSchema = mongoose.Schema({
     worldID: String,
-    nickname: String, //address 
+    nick: String, //address 
     userID: String,
     msg: String,
     img: String,
