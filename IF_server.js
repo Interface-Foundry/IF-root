@@ -1435,8 +1435,8 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 });
 
 
-//upload profile pictures for worlds and landmarks and (users?)
-app.post('/api/uploadImage', isLoggedIn, function (req, res) {
+//upload pictures not for avatars
+app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
         var fstream;
         req.pipe(req.busboy);
