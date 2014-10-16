@@ -1,5 +1,7 @@
 function MeetupController($scope, $window, $location, styleManager, $rootScope) {
 
+	olark('api.box.show'); //shows olark tab on this page
+
 	var style = styleManager;
 
 	style.navBG_color = "rgba(244, 81, 30, 0.8)";

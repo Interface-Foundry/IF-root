@@ -1,4 +1,5 @@
 function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureService) {	
+    olark('api.box.hide'); //hides olark tab on this page
     $rootScope.showSwitch = false;
     var aperture = apertureService
     aperture.set('off');
@@ -22,6 +23,7 @@ TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 
 
 function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
+    olark('api.box.hide'); //hides olark tab on this page
 	var aperture = apertureService;
 	aperture.set('off');
     $rootScope.showSwitch = false;  
@@ -41,6 +43,7 @@ InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
+    olark('api.box.hide'); //hides olark tab on this page
 
     $rootScope.showSwitch = false;
 
@@ -64,6 +67,8 @@ TalktagCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope
 
 
 function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
+    olark('api.box.hide'); //hides olark tab on this page
+
 
     // TURN THIS PAGE INTO RAW HTML PAGE, A LA MENU page
     shelfPan('return');
@@ -91,6 +96,8 @@ MenuCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
 function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
+    olark('api.box.hide'); //hides olark tab on this page
+
 
     shelfPan('return');
 
