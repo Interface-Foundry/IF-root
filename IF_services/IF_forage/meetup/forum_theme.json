@@ -15,7 +15,7 @@
 			"category": false,
 			"googledoc": true,
 			"checkin": true,
-			"chat": true,
+			"messages": true,
 			"mailing_list":true,
 			"icebreaker":true,
 			"photo_share":true,

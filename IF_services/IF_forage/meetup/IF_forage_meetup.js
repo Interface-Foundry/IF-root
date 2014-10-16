@@ -372,7 +372,7 @@ function searchMeetup(tag, done) {
 						            st.widgets.checkin = forumStyle.checkin;
 
 						            //Meetup tests
-						            st.widgets.chat = forumStyle.widgets.chat;
+						            st.widgets.messages = forumStyle.widgets.messages;
 						            st.widgets.mailing_list = forumStyle.widgets.mailing_list;
 						            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
 						            st.widgets.photo_share = forumStyle.widgets.photo_share;

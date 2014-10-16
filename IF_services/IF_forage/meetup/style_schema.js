@@ -39,7 +39,7 @@ module.exports = {
 			upcoming: Boolean,
 			category: Boolean,
 			googledoc: Boolean,
-			chat: Boolean,
+			messages: Boolean,
 			mailing_list:Boolean,
 			icebreaker:Boolean,
 			photo_share:Boolean,
