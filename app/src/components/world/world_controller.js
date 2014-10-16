@@ -137,7 +137,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.messages = true;
 
 			//angular while loop the query every 2 seconds
-			db.messages.query({limit:1, worldID:$routeParams.worldID}, function(data){ 
+			db.messages.query({limit:1, worldID:$routeParams.worldURL}, function(data){ 
 				console.log('db.messages', data);
 				$scope.msg = data[0];
 			});

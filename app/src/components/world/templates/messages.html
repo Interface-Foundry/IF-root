@@ -6,14 +6,16 @@
 	<div class="card description" style="background-color: #EEE;">
 		<li class="message">
 			<picture class="msg-avatar">
-				<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar}}" ng-cloak>
+				<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar || world.avatar}}" ng-cloak>
 			</picture>
 			<div class="message-content">
 				<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
-				<p class="message-body" ng-bind="msg.msg"></p>
+				<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic">
+				<p class="message-body" ng-bind="msg.msg" ng-if="msg.msg"></p>
 			</div>
 		</li>
-		<span class="pull-right">See More</span>
+		<span class="pull-left">Start messaging now!</span>
+		<span class="pull-right">Join In</span>
 		<div class="clearfix"></div>
 	</div>
 	</a>

@@ -12075,7 +12075,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		map.refresh();
 }
 
-function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree) {
+function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree, $upload) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -12091,25 +12091,33 @@ $scope.currentChatID = $routeParams.worldID;
 $scope.messageList = angular.element('.message-list');
 
 var sinceID = 'none';
+var firstScroll = true;
 
 
 function scrollMessages() {
 	$timeout(function() {
-    	$scope.messageList[0].scrollTop = $scope.messageList[0].scrollHeight;
+    	$scope.messageList.animate({scrollTop: $scope.messageList[0].scrollHeight}, 300); //JQUERY USED HERE
+    	firstScroll=false;
     },0);
 }
 
 function checkMessages(){
-db.messages.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
-    for (i = 0; i < data.length; i++) { 
-        if ($scope.localMessages.indexOf(data[i]._id) == -1) {
-            if (data[i]._id){
-				sinceID = data[i]._id;
-				$scope.messages.push(data[i]); 
-				scrollMessages();
-            }
-        }
-    }
+db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(data){
+	console.log(data);
+	if (data.length>0) {
+		for (i = 0; i < data.length; i++) { 
+		    if ($scope.localMessages.indexOf(data[i]._id) == -1) {
+		        if (data[i]._id) {
+					$scope.messages.push(data[i]);
+		        }
+		    }
+		}
+	    sinceID = data[data.length-1]._id;
+	    checkMessages();
+	}
+	else if (firstScroll==true) {
+		scrollMessages();
+	}
 });
 }
 
@@ -12119,40 +12127,52 @@ $scope.sendMsg = function (e) {
 	if ($scope.msg.text == null) { return;}
 	if ($scope.loggedIn){
 	    var newChat = {
-	        worldID: $routeParams.worldID,
+	        worldID: $routeParams.worldURL,
 	        nick: $scope.nick,
 	        msg: $scope.msg.text,
 	        avatar: $scope.user.avatar || 'img/icons/profile.png',
-	        img: $scope.msg.img,
 	        userID: $scope.userID
 	    };
-	
-	    db.messages.create(newChat, function(res) {
-	        console.log(res[0]);
-	        console.log('response id '+res[0]._id);
-	        sinceID = res[0]._id;
-
-	        $scope.messages.push(newChat);
-	        $scope.localMessages.push(res[0]._id);
-	        scrollMessages();
-	    });
 		
+		sendMsgToServer(newChat);		
 	    $scope.msg.text = "";
 	    $scope.msg.img = "";
 	}
 }
 
-$scope.goBack = function(){
-    window.history.back();
+function sendMsgToServer(msg) {
+console.log(msg);
+db.messages.create(msg, function(res) {
+	sinceID = res[0]._id;
+	
+	$scope.messages.push(msg);
+	$scope.localMessages.push(res[0]._id);
+	scrollMessages();
+});
 }
 	
-	
+$scope.onImageSelect = function($files) {
+	$scope.upload = $upload.upload({
+		url: '/api/uploadPicture',
+		file: $files[0]
+	}).success(function(data, status) {
+		sendMsgToServer({
+			worldID: $routeParams.worldURL,
+	        nick: $scope.nick,
+	        avatar: $scope.user.avatar || 'img/icons/profile.png',
+	        msg: '',
+	        pic: data,
+	        userID: $scope.userID
+		});
+		console.log(data);
+	})
+}	
 
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
 ////////////////////////////////////////////////////////////
-var checkMessagesInterval = $interval(checkMessages, 2000); 
+var checkMessagesInterval = $interval(checkMessages, 3000); 
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
         $interval.cancel(checkMessagesInterval);
@@ -12203,12 +12223,6 @@ $scope.user = user;
 console.log(user._id);
 checkMessages();
 });
-
-
-
-
-
-  
 
 
 } 
@@ -12351,7 +12365,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.messages = true;
 
 			//angular while loop the query every 2 seconds
-			db.messages.query({limit:1, worldID:$routeParams.worldID}, function(data){ 
+			db.messages.query({limit:1, worldID:$routeParams.worldURL}, function(data){ 
 				console.log('db.messages', data);
 				$scope.msg = data[0];
 			});

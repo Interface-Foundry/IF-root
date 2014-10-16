@@ -250,15 +250,16 @@ nav li input.form-control {
   z-index: 100;
   pointer-events: none;
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+
 }
 
-#view > div, #view > a {
+#view > * {
 	pointer-events: auto;
 }
 
 #shelf {
 	position:absolute;
-	height: 100%;
+	min-height: 100%;
 	width: 100%;
 	top: 0;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
@@ -634,6 +635,13 @@ left: 8px;
 
 .ng-leave.ng-leave-active {opacity:0;}
 
+
+.if-fromRight.ng-enter {
+-webkit-transform: translateX(100%);
+transform:translateX(100%);
+ -webkit-transition: 1s linear all; /* Safari/Chrome */
+ transition: 1s linear all;}
+.if-fromRight.ng-enter.ng-enter-active {transform:translateX(0%);}
 
 .add-world-group {
 	border: 4px dashed #CACACA;

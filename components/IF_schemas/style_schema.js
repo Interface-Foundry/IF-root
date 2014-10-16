@@ -35,7 +35,8 @@ var mongoose = require('mongoose');
 			twitter: Boolean,
 			instagram: Boolean,
 			upcoming: Boolean,
-			category: Boolean
+			category: Boolean,
+			messages: Boolean
 		}
 	}); 
 

@@ -19,19 +19,20 @@
 	
 <div class="container-fluid">
 <div class="row">
-
+	
 	<!--DESCRIPTION-->
 	<div ng-include="description ? 'components/world/templates/description.html' : null"></div>
 	
 	<!--category-->
 	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
 
+	<!--CHAT-->
+	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null"></div>
+
 	<!--now--> <!--upcoming-->
 	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
 
-	<!--CHAT-->
-<!-- 	<div ng-include="chat ? 'components/world/templates/chat.html' : null"></div> -->
-	<div ng-include="messages ? 'components/world/templates/messages.html' : null"></div>
+	
 	<!---meetup-->
 	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
 	

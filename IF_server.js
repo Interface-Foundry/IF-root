@@ -551,7 +551,7 @@ app.get('/api/:collection', function(req, res) {
         }
 		
 		if (req.query.limit == 1) {
-			db.collection('worldchats').find(qw).sort({$natural: -1}).limit(1).toArray(function(err, data) {
+			db.collection('worldchats').find(qw).sort({_id: -1}).limit(1).toArray(function(err, data) {
 			if (err) {
 				console.log(err)
 				res.send(err);
@@ -755,22 +755,25 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     }
 
     if (req.url == "/api/worldchat/create"){
+    
+    	console.log('image '+req.body.img);
 
         var wc = new worldchatSchema({
             userID: req.user._id,
             worldID: req.body.worldID,
             nick: req.body.nick,
             msg: req.body.msg,
-            img: req.body.img,
+            pic: req.body.pic,
             avatar: req.body.avatar
         });
-
+		console.log(wc);
         wc.save(function (err, data) {
             if (err){
                 console.log(err);
                 res.send(err);
             }
             else {
+            	console.log(data);
                 console.log('SAVED new message');
                 res.status(200).send([data]);
             }
