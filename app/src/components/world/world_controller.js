@@ -135,7 +135,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			$scope.wyzerr = true;
 		}
 
-		if ($scope.style.widgets.messages) {
+		if ($scope.style.widgets.messages==true||$scope.style.widgets.chat==true) {
 			$scope.messages = true;
 
 			//angular while loop the query every 2 seconds
