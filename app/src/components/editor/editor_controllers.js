@@ -16,6 +16,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     	);
 	
 	angular.extend($rootScope, {loading: true});
+
+	olark('api.box.show'); //shows olark tab on this page
 	
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry"; 

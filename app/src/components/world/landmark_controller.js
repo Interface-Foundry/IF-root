@@ -10,7 +10,8 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		$scope.aperture = apertureService;
 		$scope.aperture.set('half');
 		
-		
+		olark('api.box.hide'); //shows olark tab on this page
+
 		$scope.worldURL = $routeParams.worldURL;
 		$scope.landmarkURL = $routeParams.landmarkURL;
 		

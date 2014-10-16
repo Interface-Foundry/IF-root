@@ -3,6 +3,8 @@
  **********************************************************************/
 function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
+  olark('api.box.show'); //shows olark tab on this page
+
   //if already logged in
   if ($rootScope.showLogout){
     $location.url('/profile');
@@ -68,6 +70,8 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
 
 function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
+  olark('api.box.show'); //shows olark tab on this page
+
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
@@ -118,6 +122,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
 
 function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
+  olark('api.box.show'); //shows olark tab on this page
 
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
@@ -154,6 +159,8 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
 
 function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
+
+  olark('api.box.show'); //shows olark tab on this page
 
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  

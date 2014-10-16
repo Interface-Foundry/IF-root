@@ -7771,6 +7771,7 @@ var themeDict = {
 	}
 };
 function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureService) {	
+    olark('api.box.hide'); //hides olark tab on this page
     $rootScope.showSwitch = false;
     var aperture = apertureService
     aperture.set('off');
@@ -7794,6 +7795,7 @@ TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 
 
 function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
+    olark('api.box.hide'); //hides olark tab on this page
 	var aperture = apertureService;
 	aperture.set('off');
     $rootScope.showSwitch = false;  
@@ -7813,6 +7815,7 @@ InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParam
 
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
+    olark('api.box.hide'); //hides olark tab on this page
 
     $rootScope.showSwitch = false;
 
@@ -7836,6 +7839,8 @@ TalktagCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope
 
 
 function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
+    olark('api.box.hide'); //hides olark tab on this page
+
 
     // TURN THIS PAGE INTO RAW HTML PAGE, A LA MENU page
     shelfPan('return');
@@ -7863,6 +7868,8 @@ MenuCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
 function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
+    olark('api.box.hide'); //hides olark tab on this page
+
 
     shelfPan('return');
 
@@ -9535,6 +9542,8 @@ zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
 aperture.set('full');
 
+olark('api.box.show'); //shows olark tab on this page
+
 $scope.mapThemeSelect = 'arabesque';
 
 $scope.kinds = [
@@ -10019,6 +10028,8 @@ $scope.temp = {};
 var map = mapManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 
+olark('api.box.show'); //shows olark tab on this page
+
 zoomControl.style.display = 'none'; 
 
 $scope.next = function() {
@@ -10399,6 +10410,8 @@ function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leaflet
     	);
 	
 	angular.extend($rootScope, {loading: true});
+
+	olark('api.box.show'); //shows olark tab on this page
 	
 	$scope.userID = "53ab92d2ac23550e12600011";	
 	$scope.username = "interfoundry"; 
@@ -11501,6 +11514,8 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 }
 function MeetupController($scope, $window, $location, styleManager, $rootScope) {
 
+	olark('api.box.show'); //shows olark tab on this page
+
 	var style = styleManager;
 
 	style.navBG_color = "rgba(244, 81, 30, 0.8)";
@@ -11526,6 +11541,8 @@ function MeetupController($scope, $window, $location, styleManager, $rootScope) 
  * Login controller
  **********************************************************************/
 function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+
+  olark('api.box.show'); //shows olark tab on this page
 
   //if already logged in
   if ($rootScope.showLogout){
@@ -11592,6 +11609,8 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
 
 function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
+  olark('api.box.show'); //shows olark tab on this page
+
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
@@ -11642,6 +11661,7 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
 
 function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
+  olark('api.box.show'); //shows olark tab on this page
 
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
@@ -11678,6 +11698,8 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
 
 function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
+
+  olark('api.box.show'); //shows olark tab on this page
 
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
@@ -11790,6 +11812,8 @@ $scope.subnav = {
 }
 var saveTimer = null;
 var alert = alertManager;
+
+olark('api.box.show'); //shows olark tab on this page
 
 $scope.onAvatarSelect = function($files) {
 	var file = $files[0];
@@ -12022,7 +12046,8 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		$scope.aperture = apertureService;
 		$scope.aperture.set('half');
 		
-		
+		olark('api.box.hide'); //shows olark tab on this page
+
 		$scope.worldURL = $routeParams.worldURL;
 		$scope.landmarkURL = $routeParams.landmarkURL;
 		
@@ -12089,6 +12114,8 @@ $scope.localMessages = [];
 
 $scope.currentChatID = $routeParams.worldID;
 $scope.messageList = angular.element('.message-list');
+
+olark('api.box.hide'); //shows olark tab on this page
 
 var sinceID = 'none';
 var firstScroll = true;
@@ -12244,6 +12271,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	$scope.selectedIndex = 0;
 	
 	var landmarksLoaded;
+
+	olark('api.box.hide'); //hides olark tab on this page
 
   	//currently only for upcoming...
   	function setLookup() {

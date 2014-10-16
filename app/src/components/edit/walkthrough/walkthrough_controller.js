@@ -14,6 +14,8 @@ $scope.temp = {};
 var map = mapManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 
+olark('api.box.show'); //shows olark tab on this page
+
 zoomControl.style.display = 'none'; 
 
 $scope.next = function() {

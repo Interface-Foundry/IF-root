@@ -14,6 +14,8 @@ $scope.localMessages = [];
 $scope.currentChatID = $routeParams.worldID;
 $scope.messageList = angular.element('.message-list');
 
+olark('api.box.hide'); //shows olark tab on this page
+
 var sinceID = 'none';
 var firstScroll = true;
 

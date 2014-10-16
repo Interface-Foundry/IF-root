@@ -10,6 +10,8 @@ $scope.subnav = {
 var saveTimer = null;
 var alert = alertManager;
 
+olark('api.box.show'); //shows olark tab on this page
+
 $scope.onAvatarSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
