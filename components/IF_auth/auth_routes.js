@@ -74,7 +74,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.get('/auth/facebook', function(req, res, next) {
 		  req.session.redirect = req.query.redirect;
 		  next();
-		}, passport.authenticate('twitter', { scope : 'email' }));
+		}, passport.authenticate('facebook', { scope : 'email' }));
 
 
 		app.get('/auth/facebook/callback', passport.authenticate('facebook', {
