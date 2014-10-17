@@ -224,32 +224,33 @@ World.get({id: $routeParams.worldURL}, function(data) {
 */
 
 	//===== VISITS =====//
-	saveVisit();
+	
+	// saveVisit();
 
-	function saveVisit(){
-	    var newVisit = {
-	        worldID: 'somemongoid',
-	        userName: 'nickname'
-	    };
+	// function saveVisit(){
+	//     var newVisit = {
+	//         worldID: 'somemongoid',
+	//         userName: 'nickname'
+	//     };
 
-	    db.visit.create(newVisit, function(res) {
-	    	console.log(res);
-	    });		
-	}
+	//     db.visit.create(newVisit, function(res) {
+	//     	console.log(res);
+	//     });		
+	// }
 
-	//query for visits within one hour
-	db.visit.query({ worldID:'somemongoid'}, function(data){
+	// //query for visits within one hour
+	// db.visit.query({ worldID:'somemongoid'}, function(data){
 
-		console.log('WITHIN HOUR');
-		console.log(data);
-	});
+	// 	console.log('WITHIN HOUR');
+	// 	console.log(data);
+	// });
 
-	//query for visits from User
-	db.visit.query({ option:'userHistory'}, function(data){
+	// //query for visits from User
+	// db.visit.query({ option:'userHistory'}, function(data){
 
-		console.log('USER');
-		console.log(data);
-	});
+	// 	console.log('USER');
+	// 	console.log(data);
+	// });
 
 	//==================//
 

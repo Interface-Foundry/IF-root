@@ -928,33 +928,48 @@ li.active .landmark-form {
 	height: 800px;
 }
 
-.tour-page h3 {
-	font-family: 'Fabrica', sans-serif;
+.tour-header {
 	position: absolute;
-	color: white;
-	top: 44px;
-	left: 22px;
-	width: 450px;
+	top: 36px;
 	z-index: 100;
+	width:100%;
+	padding-left: 15px;
+	padding-right: 8px;
+}
+
+.tour-footer {
+	position: absolute;
+	top: 669px;
+	z-index: 100;
+	width:100%;
+	padding-left: 15px;
+	padding-right: 8px;
+}
+
+.tour-headline {
+	font-family: 'Fabrica', sans-serif;
+	color: white;
 	text-shadow: 0px 2px 2px rgba(0,0,0,.3);
 	font-size: 34px;
 	letter-spacing: 1px;
-	max-width: 100%;
 }
 
-.tour-page h4 {
+.tour-subhead {
 	font-family: 'Fabrica', sans-serif;
-	position: absolute;
-	color: white;
-	top: 96px;
-	left: 22px;
-	width: 90%;
-	z-index: 100;
+	color: white;	
 	text-shadow: 0px 2px 2px rgba(0,0,0,.4);
 	letter-spacing: 1.6px;
 	font-size:23px;
-	max-width: 100%;
 }
+
+/*.tour-floorhead {
+	font-family: 'Fabrica', sans-serif;
+	color: white;	
+	text-shadow: 0px 2px 2px rgba(0,0,0,.4);
+	letter-spacing: 1.6px;
+	font-size:23px;
+}
+*/
 
 .tour-page h5 {
 	font-family: 'Fabrica', sans-serif;
@@ -994,6 +1009,31 @@ li.active .landmark-form {
 	max-width: 100%;
 }
 
+
+@media (min-width: 1209px) {
+	.tour-footer {
+		top:693px;
+	}
+}
+
+@media (max-width: 617px) {
+	.tour-footer {
+		margin-top: -24px;
+	}
+}
+
+@media (max-width: 414px) {
+	.tour-footer {
+		margin-top: -44px;
+	}
+}
+
+.tour-icons {
+	width:65px;
+	height: 65px;
+}
+
+
 @media (max-width: 451px) {
 	.tour-page h4 {
 		font-size: 20px;
@@ -1011,6 +1051,7 @@ li.active .landmark-form {
 
 .tour-page button {
 	margin-bottom: 10px;
+	margin-top: 10px;
 }
 
 .tour-page:nth-child(odd) {
@@ -1222,7 +1263,7 @@ li.active .landmark-form {
 .tour-features {
 	font-family: 'Fabrica', sans-serif;
 	font-size: 18px;
-	padding-top: 172px;
+	padding-top: 168px;
 	max-width: 500px;
 	text-align: center;
 }
@@ -1234,6 +1275,7 @@ li.active .landmark-form {
 	border-radius: 30px;
 	background: rgba(0,0,0,0.7);
 	margin: 142px auto;
+	top:45px;
 }
 
 .tour-iphone-screen {
@@ -1282,15 +1324,16 @@ li.active .landmark-form {
 }
 
 .tour-bubblli {
-	color: #03a9f4;
+	color: #3491ff;
 	text-align: center;
 	margin: 160px 0 63px 0;
 	max-width: 600px;
+	font-weight: 200;
 	
 }
 
 .tour-credits{
-	padding-top: 187px;
+	padding-top: 296px;
 	color:gray;
 }
 
@@ -1306,6 +1349,12 @@ li.active .landmark-form {
 	height: 178px;
 	margin-right: 8px;
 	background: rgba(100,100,100,1);
+}
+
+.tour-clicklogin {
+	margin-top: -28px;
+	padding-left: 8px;
+	padding-right: 8px;
 }
 
 .tour-mini-sq-holder {
@@ -1336,11 +1385,11 @@ li.active .landmark-form {
 }
 
 .tour-last{
-	background-color: #fefefe;
+	background-color: #eceff1;
 	border-radius: 16px;
-	border: 2px solid #cecece;
+	border: 2px solid #fff;
 	height: 387px;
-	margin-top: 54px;
+	margin-top: 89px;
 	margin-left: 12%;
 	margin-right: 12%;
 
@@ -1356,6 +1405,8 @@ li.active .landmark-form {
 
 .tour-last-title{
 	margin-top: 83px;
+	padding-left: 8px;
+	padding-right: 8px;
 }
 
 .message-surface {
