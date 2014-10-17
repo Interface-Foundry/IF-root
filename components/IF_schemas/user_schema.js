@@ -9,7 +9,7 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 var userSchema = mongoose.Schema({
 
     local            : {
-        username     : { type: String, unique: true },
+        username     : String,
         email        : { type: String, unique: true },
         password     : { type: String },
         resetPasswordToken: String,
@@ -85,7 +85,7 @@ var userSchema = mongoose.Schema({
     // }],
     //tel: [Schema.Types.Mixed],
     tel: String,
-    profileID: { type: String, unique: true },
+    profileID: String,
     permissions: [{
         
     }]
