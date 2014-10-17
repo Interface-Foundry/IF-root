@@ -105,6 +105,33 @@ var dereg = $rootScope.$on('$locationChangeSuccess', function() {
         dereg();
 });
 
+var blurTimeout;
+
+//to stop interval on window blur
+function onBlur() {
+
+	//on blur, wait for a bit then cancel interval
+    var cancelInterval = function() {
+	    $interval.cancel(checkMessagesInterval);
+	    dereg();  
+    }
+
+    blurTimeout = $timeout(cancelInterval, 20000);
+	
+};
+function onFocus(){
+	$timeout.cancel(blurTimeout);
+	checkMessagesInterval = $interval(checkMessages, 3000); 
+};
+
+if (/*@cc_on!@*/false) { // check for Internet Explorer
+	document.onfocusin = onFocus;
+	document.onfocusout = onBlur;
+} else {
+	window.onfocus = onFocus;
+	window.onblur = onBlur;
+}
+
 
 ////////////////////////////////////////////////////////////
 //////////////////////EXECUTING/////////////////////////////
