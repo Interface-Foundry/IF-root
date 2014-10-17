@@ -17,7 +17,9 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 	
 	var landmarksLoaded;
 
-	olark('api.box.hide'); //hides olark tab on this page
+	if (olark){
+		olark('api.box.hide'); //hides olark tab on this page
+	}
 
   	//currently only for upcoming...
   	function setLookup() {
