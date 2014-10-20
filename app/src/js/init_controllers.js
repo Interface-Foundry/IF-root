@@ -2,7 +2,8 @@
 /* IF Controllers */
 
 //searching for bubbles
-function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager) {
+app.controller('WorldRouteCtrl', ['$location', '$scope', '$routeParams', 'db', '$rootScope', 'styleManager', 'mapManager', 
+function ($location, $scope, $routeParams, db, $rootScope, styleManager, mapManager) {
 
     var map = mapManager;
     // map.resetMap();
@@ -10,35 +11,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     angular.extend($rootScope, {loading: true});
 	  var style = styleManager;
 	  style.resetNavBG();
-	
-    $scope.aperture = apertureService;  
-    $scope.aperture.set('off');
-
+	  
 	  console.log('world routing');
-
-    //WIDGET find data and then route to correct bubble
-    // var today = new Date();
-    // var dd = today.getDate();
-    // var mm = today.getMonth()+1; //January is 0!
-
-    // var yyyy = today.getFullYear();
-    // if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
- 
-    // if (today === '10/06/2014'){
-    //     $location.path('awards');    
-    // }
-
-    // else if (today === '11/06/2014'){
-    //     $location.path('lectures');
-    // }
-
-    // else if (today === '12/06/2014'){
-    //     $location.path('show');
-    // }
-
-    // else {
-    //     $location.path('awards');
-    // }
     
     $scope.initGeo = function() {
       //--- GEO LOCK -----//
@@ -142,12 +116,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       $location.path( '/profile' );
     };
 
-}
-//WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
-
+}]);
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll, $window) {
+
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
@@ -158,7 +131,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
-	  angular.extend($rootScope, {loading: false});
+	angular.extend($rootScope, {loading: false});
 	
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
@@ -258,5 +231,5 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     };
     
 
-}
+}]);
 

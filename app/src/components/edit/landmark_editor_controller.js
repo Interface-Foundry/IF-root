@@ -1,4 +1,4 @@
-function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -309,9 +309,9 @@ $scope.$on('$destroy', function (event) {
 		//begin loading landmarks
 		loadLandmarks();
 	});
-}
+}])
 
-function LandmarkEditorItemController ($scope, db, Landmark, mapManager, $upload) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -371,4 +371,4 @@ function LandmarkEditorItemController ($scope, db, Landmark, mapManager, $upload
 		});
 	}
 	
-}
+}]);

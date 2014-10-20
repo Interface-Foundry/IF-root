@@ -4638,8 +4638,8 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices','ngSanitize','leaflet-directive','angularFileUpload', 'IF-directives', 'ngAnimate', 'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
-  .config(function($routeProvider,$locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
+  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
@@ -4705,83 +4705,61 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     //================================================
     // Add an interceptor for AJAX errors
     //================================================
-    $httpProvider.responseInterceptors.push(function($q, $location) {
-      return function(promise) {
-        return promise.then(
-          // Success: just return the response
-          function(response){
-            return response;
-          }, 
-          // Error: check the error status to get only the 401
-          function(response) {
-            if (response.status === 401)
-            	$location.url('/login');
-            return $q.reject(response);
-          }
-        );
-      }
+	$httpProvider.interceptors.push(function($q, $location) {
+    	return {
+	    	'response': function(response) {
+		    	//do something on success
+		    	return response;
+	    	},
+	    	'responseError': function(rejection) {
+		    	if (rejection.status === 401) {
+			    	$location.path('/login');
+		    	}
+		    	return $q.reject(rejection);
+	    	}	
+    	}
     });
-    //================================================
+	//================================================
 
 
     //================================================
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
-      when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
-      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
-      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).
-      when('/signup', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
-      //when('/profile', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      //when('/profile/:incoming', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
-      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
-      // when('/connect/:type', {templateUrl: '_self'}).
-      // when('/unlink/:type', {templateUrl: '_self'}).
-      // when('/nearby', {templateUrl: 'partials/nearby-world.html', controller: NearbyWorldCtrl}).
+      when('/', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
+      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+
+      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       
       when('/profile', {redirectTo:'/profile/worlds'}).
-      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
-      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: UserController, resolve: {loggedin: checkLoggedin}}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController', resolve: {loggedin: checkLoggedin}}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController', resolve: {loggedin: checkLoggedin}}).
       
-      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
-      when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
-      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: MessagesController}).
-      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
-      when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: CategoryController}).
+      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
+      when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
+      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
+      when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
 
+      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
       
-      //when('/w/:worldID/edit', {templateUrl: 'partials/world-edit.html', controller: WorldEditCtrl}). 
-      // when('/world/:bubbleId/:option', {templateUrl: 'partials/world-detail.html', controller: WorldDetailCtrl}).
+      when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 
-      when('/list/:category/:filter', {templateUrl: 'partials/list.html', controller: ListCtrl}).
-
-      //when('/w/:worldID/:pageID', {templateUrl: 'partials/menu.html', controller: MenuCtrl}).
-
-      //when('/post/:landmarkID', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
-      //when('/post/:landmarkID/:option', {templateUrl: 'partials/landmark-view.html', controller: LandmarkViewCtrl}).
-      //when('/post/:landmarkID/edit', {templateUrl: 'partials/landmark-edit.html', controller: LandmarkEditCtrl}).
-
-      when('/newworld', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
-      when('/newworld/:projectID', {templateUrl: 'components/editor/world-maker.html', controller: WorldMakerCtrl, resolve: {loggedin: checkLoggedin}}).
-      
-      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: LandmarkEditorController, resolve: {loggedin: checkLoggedin}}).
-      
-      when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
-
-	    when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: EditController, resolve: {loggedin: checkLoggedin}}).
+	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	 
-	    when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, resolve: {loggedin: checkLoggedin}}).
+	    when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
       
-      when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: MeetupController}).
+      when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
       
-      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
+      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: 'SearchController'}).
       
-      // when('/twitter/:', {templateUrl: 'partials/talk-list.html', controller: TalklistCtrl}).
-      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: TweetlistCtrl}).
-      when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: InstalistCtrl}).
+      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
+      when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: 'InstalistCtrl'}).
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -6125,7 +6103,8 @@ function shelfPan(amount,special){
 /* IF Controllers */
 
 //searching for bubbles
-function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager) {
+app.controller('WorldRouteCtrl', ['$location', '$scope', '$routeParams', 'db', '$rootScope', 'styleManager', 'mapManager', 
+function ($location, $scope, $routeParams, db, $rootScope, styleManager, mapManager) {
 
     var map = mapManager;
     // map.resetMap();
@@ -6133,35 +6112,8 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     angular.extend($rootScope, {loading: true});
 	  var style = styleManager;
 	  style.resetNavBG();
-	
-    $scope.aperture = apertureService;  
-    $scope.aperture.set('off');
-
+	  
 	  console.log('world routing');
-
-    //WIDGET find data and then route to correct bubble
-    // var today = new Date();
-    // var dd = today.getDate();
-    // var mm = today.getMonth()+1; //January is 0!
-
-    // var yyyy = today.getFullYear();
-    // if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
- 
-    // if (today === '10/06/2014'){
-    //     $location.path('awards');    
-    // }
-
-    // else if (today === '11/06/2014'){
-    //     $location.path('lectures');
-    // }
-
-    // else if (today === '12/06/2014'){
-    //     $location.path('show');
-    // }
-
-    // else {
-    //     $location.path('awards');
-    // }
     
     $scope.initGeo = function() {
       //--- GEO LOCK -----//
@@ -6265,12 +6217,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       $location.path( '/profile' );
     };
 
-}
-//WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
-
+}]);
 
 //loads everytime
-function indexIF($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http,$q, $sanitize, $anchorScroll, $window) {
+
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
@@ -6281,7 +6232,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     
     angular.extend($rootScope, {globalTitle: "Bubbl.li"});
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
-	  angular.extend($rootScope, {loading: false});
+	angular.extend($rootScope, {loading: false});
 	
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
@@ -6381,7 +6332,7 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     };
     
 
-}
+}]);
 
 
 L.AreaSelect = L.Class.extend({
@@ -9230,306 +9181,7 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-function WorldChatCtrl( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval) {
-  var aperture = apertureService;
-  aperture.set('off');
-
-    //angular while loop the query every 2 seconds
-    //$scope.chats = db.worldchats.query({limit:1, tag:$scope.world.id});
-    ///
-
-    $scope.loggedIn = false;
-    $scope.nickname = 'Visitor';
-
-
-    $http.get('/api/user/loggedin').success(function(user){
-
-        // Authenticated
-        if (user !== '0'){
-
-          $scope.loggedIn = true;
-
-          if (user._id){
-            $scope.userID = user._id;
-          }
-
-          //nickname
-          if (user.name){
-              $scope.nickname = user.name;
-          }
-          else if (user.facebook){
-              $scope.nickname = user.facebook.name;
-          }
-          else if (user.twitter){
-              $scope.nickname = user.twitter.displayName;
-          }
-          else if (user.meetup){
-              $scope.nickname = user.meetup.displayName;
-          }
-          else if (user.local){
-              $scope.nickname = user.local.email;
-          }
-          else {
-              $scope.nickname = "Visitor";
-          }
-          
-          //avatar
-          if (user.avatar){
-            $scope.avatar = user.avatar;
-          }
-          else {
-            $scope.avatar = 'img/icons/profile.png';
-          }
-
-        }
-
-      });
-
-    var side = 'left';
-    var sinceID = 'none';
-
-    //Messages, client info & sending
-    $scope.messages = [];
-    $scope.myMessages = [];
-
-    $scope.currentChatID = $routeParams.worldID;
-
-    $scope.sendMessage = function () {
-
-        if ($scope.loggedIn){
-            var newChat = {
-                worldID: $routeParams.worldID,
-                nickname: $scope.nickname,
-                msg: $scope.messageText,
-                avatar: $scope.avatar
-
-            };
-
-            if ($scope.messageImg){
-                newChat.img = $scope.messageImg;
-            }
-
-            db.worldchat.create(newChat, function(res) {
-                console.log(res[0]);
-                console.log('response id '+res[0]._id);
-                sinceID = res[0]._id;
-
-                newChat.side = 'right';
-                $scope.messages.push(newChat);
-                $scope.myMessages.push(res[0]._id);
-            });
-
-            $scope.messageText = "";
-        }
-
-    };
-
-    //======== query for latest chats until route change ======= //
-    checkWorldChat(); //initial load
-
-    //to stop interval from querying after route change
-    $scope.stop = $interval(checkWorldChat, 2000); 
-    function checkWorldChat(){
-            
-        db.worldchat.query({ worldID:$routeParams.worldID, sinceID:sinceID}, function(data){
-
-            for (i = 0; i < data.length; i++) { 
-
-                if ($scope.myMessages.indexOf(data[i]._id) > -1){
-                    //nothing, was added locally
-                }
-                else {
-
-                    if (data[i]._id){
-
-                        if (i == 0){
-                            sinceID = data[i]._id;
-                        }
-                        if ($scope.nickname == data[i].nickname){
-                            data[i].side = 'right';
-                        }
-                        else {
-                            data[i].side = 'left';
-                        }
-                        $scope.messages.push(data[i]); 
-                    }
-
-                }
-            }
-
-        });
-
-        // // Animate
-        // $("#viewport-content").animate({
-        //     bottom: $("#viewport-content").height() - $("#viewport").height()
-        // }, 250);
-
-    }
-    //stops interval on route change
-    var dereg = $rootScope.$on('$locationChangeSuccess', function() {
-        $interval.cancel($scope.stop);
-        dereg();
-    });
-
-    //=========================================================//
-
-    // //query for latest chats
-    // $interval(function() {
-
-    //     //read for latest mongo ID, if no ID, pass special
-
-
-
-
-
-
-
-
-    //     console.log('asdf');
-
-
-    // }, 2000);
-
-
-
-
-    // db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
-    //         console.log('--db.landmarks.query--');
-    //         console.log('data');
-    //         console.log(data);
-    //     //data.shift();
-    //     $scope.landmarks = $scope.landmarks.concat(data);
-    //         console.log('$scope.landmarks');
-    //         console.log($scope.landmarks);
-        
-    //     //add markers to map
-    //     angular.forEach($scope.landmarks, function(value, key) {
-    //         //for each landmark add a marker
-    //         map.addMarker(value._id, {
-    //             lat:value.loc.coordinates[1],
-    //             lng:value.loc.coordinates[0],
-    //             draggable: true,
-    //             icon: {
-    //                 iconUrl: 'img/marker/bubble-marker-50.png',
-    //                 shadowUrl: '',
-    //                 iconSize: [25, 48],
-    //                 iconAnchor: [13, 10]
-    //             },
-    //             message:value.name
-    //         });
-    //     });
-    //     landmarksLoaded = true;
-        
-    // });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //Occurs when we receive chat messages
-
-
-
-
-
-    
-  // Socket listeners
-  // ================
-
-  // socket.on('init', function (data) {
-  //   $rootScope.chatName = data.name;
-  //   $rootScope.users = data.users;
-  // });
-
-  // //receiving messages
-  // socket.on('send:message', function (p) {
-
-  //       console.log(p);
-
-  //       $scope.messages.push({
-  //           avatar: p.avatar,
-  //           text: p.text,
-  //           side: p.side,
-  //           time: p.time,
-  //           user: p.user
-  //       });
-  //       //$scope.$apply();
-
-  //       // Animate
-  //       $("#viewport-content").animate({
-  //           bottom: $("#viewport-content").height() - $("#viewport").height()
-  //       }, 250);
-
-  //       // flip the side
-  //       side = side == 'left' ? 'right' : 'left';
-  // });
-
-
-
-
-
-
-
-
-
-
-  // socket.on('change:name', function (data) {
-  //   changeName(data.oldName, data.newName);
-  // });
-
-
-  // // Private helpers
-  // // ===============
-
-  // var changeName = function (oldName, newName) {
-  //   // rename user in list of users
-  //   var i;
-  //   for (i = 0; i < $rootScope.users.length; i++) {
-  //     if ($rootScope.users[i] === oldName) {
-  //       $rootScope.users[i] = newName;
-  //     }
-  //   }
-  // }
-
-  // // Methods published to the scope
-  // // ==============================
-
-  // $scope.changeName = function () {
-  //   socket.emit('change:name', {
-  //     name: $scope.newName
-  //   }, function (result) {
-  //     if (!result) {
-  //       alert('That name is already in use');
-  //     } else {
-  //       changeName($rootScope.chatName, $scope.newName);
-  //       $rootScope.chatName = $scope.newName;
-  //       $scope.newName = '';
-  //     }
-  //   });
-  // };
-
-
-
-    $scope.goBack = function(){
-        window.history.back();
-    }
-}
-
-function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
 console.log('--EditController--');
 
 var aperture = apertureService,
@@ -10011,1124 +9663,8 @@ World.get({id: $routeParams.worldURL}, function(data) {
 })
 
 //end editcontroller
-}
-function WalkthroughController($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
-////////////////////////////////////////////////////////////
-///////////////////INITIALIZING VARIABLES///////////////////
-////////////////////////////////////////////////////////////
-$scope.global = ifGlobals;
-$scope.position = 0;
-$scope.world = {};
-$scope.world.time = {};
-$scope.world.time.start = new Date();
-$scope.world.time.end = new Date();
-$scope.world.style = {};
-$scope.world.style.maps = {};
-$scope.temp = {};
-var map = mapManager;
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-
-olark('api.box.show'); //shows olark tab on this page
-
-zoomControl.style.display = 'none'; 
-
-$scope.next = function() {
-	if ($scope.position < $scope.walk.length-1) {
-		$scope.position++; 
-		//check if new position has 'jump'
-		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
-			if ($scope.walk[$scope.position].jump()) {
-				$scope.next();
-			}
-		}
-	}
-	$scope.save();
-}
-
-$scope.prev = function() {
-	if ($scope.position > 0) {
-		$scope.position--;
-		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
-			if ($scope.walk[$scope.position].jump()) {
-				$scope.prev();
-			}
-		}
-	}
-	$scope.save();
-}
-
-$scope.slowNext = function() {
-	$timeout(function() {
-		$scope.next();
-	}, 200);
-	$scope.save();
-}
-
-$scope.pictureSelect = function($files) {
-	var file = $files[0];
-	$scope.upload = $upload.upload({
-		url: '/api/upload/',
-		file: file,
-	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
-	}).success(function(data, status, headers, config) {
-		console.log(data);
-		$scope.world.avatar = data;
-	});
-}
-
-$scope.selectMapTheme = function(name) {
-		var mapThemes = {
-			arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-			fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-			sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-			urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
-		};
-	
-		if (typeof name === 'string') {
-			$scope.mapThemeSelect = name;
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
-			
-			$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
-			
-			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
-			//	$scope.setThemeFromMap();
-			$scope.setThemeFromMap(name);
-			//}
-		}
-}
-
-$scope.setThemeFromMap = function(name) {
-switch (name) { 
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-}
-console.log($scope.style)
-
-    db.styles.create($scope.style, function(response){
-        console.log(response);
-    });
-}	
-	
-$scope.saveAndExit = function() {
-	$scope.save();
-	if ($scope.world.id) {
-		$location.path("/edit/w/"+$scope.world.id);
-	} else {
-		//console
-		console.log('no world id'); 
-	}
-}
-
-$scope.save = function() {
-	$scope.world.newStatus = false;
-	console.log($scope.world);
-	db.worlds.create($scope.world, function(response) {
-    	console.log('--db.worlds.create response--');
-    	console.log(response);
-    	$scope.world.id = response[0].id; //updating world id with server new ID
-    });
-    
-    if ($scope.style) {
-    	console.log('saving style');
-	    db.styles.create($scope.style, function(response){
-      		console.log(response);
-		});
-    }
-}
-
-var firstWalk = [
-	{title: 'Need a hand?',
-	caption: 'If you haven’t built a bubble before, we can walk you through it.',
-	height: 0,
-	view: '0.html',
-	valid: function() {return true},
-	skip: false},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Location', 
-	caption: 'Find its location',
-	view: 'location.html',
-	height: 290,
-	valid: function() {return $scope.world.hasLoc},
-	skip: false},
-	{title: 'Name',
-	caption: 'What\'s your bubble named?',
-	view: 'name.html',
-	height: 62,
-	valid: function() {return $scope.form.worldName.$valid},
-	skip: false},
-	{title: 'Time',
-	caption: 'Give it a start and end time',
-	view: 'time.html',
-	height: 88,
-	valid: function() {return $scope.form.time.$valid},
-	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
-	skip: true},
-	{title: 'Picture',
-	caption: 'Upload a picture for your bubble',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
-	},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done.html',
-	height: 200,
-	skip: false}
-];
-
-var meetupWalk = [
-	//0 intro
-	{title: 'Claim your Meetup',
-	caption: "We'll use your Meetup group to create a bubble.",
-	view:'0.html',
-	height: 0,
-	valid: function() {return true},
-	skip: false
-	},
-	//1 
-	{title: 'Confirm',
-	caption: 'Make sure this information from Meetup.com is correct',
-	view: 'meetup_confirm.html',
-	height: 300,
-	valid: function() {return true},
-	skip: false
-	},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
-	},
-	{title: 'Picture',
-	caption: 'Upload a picture',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done_meetup.html',
-	height: 200,
-	skip: false}
-];
-
-$scope.walk = firstWalk;
-
-function setUpProgress() {
-	$scope.progress = [];
-
-	var i = 0;
-	if ($scope.walk) {
-		while (i < $scope.walk.length) {
-		$scope.progress[i] = {status: ''};
-		i++;
-	}
-	}
-	
-$scope.progress[$scope.position].status = 'active';
-
-}
-
-////////////////////////////////////////////////////////////
-////////////////////////LISTENERS///////////////////////////
-////////////////////////////////////////////////////////////
-/*$scope.$on('$destroy', function (event) {
-	console.log('$destroy event', event);
-	if (event.targetScope===$scope) {
-		if (zoomControl) {
-			zoomControl.style.display = 'block';
-		}
-	}
-});*/
-
-////////////////////////////////////////////////////////////
-/////////////////////////EXECUTING//////////////////////////
-////////////////////////////////////////////////////////////
-
-console.log($routeParams._id);
-World.get({id: $routeParams._id, m: true}, function(data) {
-	if (data.err) {
-		 console.log('World not found!');
-		 console.log(data.err);
-	} else {
-		console.log(data);
-		angular.extend($scope.world, data.world);
-		angular.extend($scope.style, data.style);
-		
-		if ($scope.world.source_meetup && $scope.world.source_meetup.id) {
-			$scope.walk = meetupWalk;
-		}
-		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
-		setUpProgress();
-	}
-});
-
-}
-
-function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
-	angular.extend($scope, {tiles: tilesDict['arabesque']});
-	angular.extend($scope, {center: {lat: 42,
-									lng: -83,
-									zoom: 15}});
-	angular.extend($scope, {markers: {}});
-	
-	$scope.$watch('temp.MapActive', function(current, old) {
-		console.log('scopewatch');
-		console.log(current, old);
-		if (current==true) {
-		leafletData.getMap('locMap').then(function(map) {
-			console.log('invalidating size');
-			map.invalidateSize();
-		});
-		}
-	});
-	
-	$scope.showPosition = function(lat, lng) {
-		var tempLat = lat.valueOf(),
-			tempLng = lng.valueOf();
-		angular.extend($scope, {markers: {
-							m: {
-								lat: tempLat,
-								lng: tempLng,
-								draggable: false
-							}}});		
-		$scope.center.lat = tempLat;
-		$scope.center.lng = tempLng;
-		$scope.world.loc = { 
-			coordinates: [tempLng,tempLat]
-		}
-		
-		$scope.world.hasLoc = true;
-		$scope.$apply(function() {
-			$scope.locLoading = false;
-		});
-		leafletData.getMap('locMap').then(function(map) {
-			console.log('invalidating size');
-			map.invalidateSize();
-		});
-		console.log('showPosition done', $scope.locLoading);
-	}
-	
-	$scope.searchByAddress = function() {
-		console.log('--searchByAddress()--');
-		var geocoder = new google.maps.Geocoder();
-		if (geocoder) {
-			$scope.locLoading = true; 
-			geocoder.geocode({'address': $scope.temp.address},
-				function (results, status) {
-					if (status == google.maps.GeocoderStatus.OK) {
-
-						console.log('invalidating size');
-						//map.invalidateSize();
-						
-						console.log(results[0].geometry.location.lat());
-						$scope.showPosition(results[0].geometry.location.lat(),
-						 					results[0].geometry.location.lng());
-						 
-					} else { console.log('No results found.')}
-					
-				});
-		}
-		
-	}
-	
-	$scope.searchByLocation = function() {
-		if (navigator.geolocation) {
-			$scope.locLoading = true;
-   			navigator.geolocation.getCurrentPosition(function(position) {
-   				//position
-				$scope.showPosition(position.coords.latitude, position.coords.longitude);	
-   				
-   				}, function() {
-   				console.log('location error');
-   			}, {timeout:5000});
-   		} else {
-	   		console.log('No geolocation!');
-   		}
-   		
-	}
-
-} 
-
-function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData, leafletEvents, apertureService, $http, $timeout, $modal) {
-	var worldDetailMap = leafletData.getMap('worldDetailMap');
-	var aperture = apertureService;
-	aperture.set('off');
-	
-	angular.extend($rootScope, {apertureSize: 0});
-	angular.extend($rootScope, {apertureOn: false});
-	
-	$scope.center = {};
-	$scope.tiles = tilesDict.mapbox;
-            
-    $scope.markers = {};
-    angular.extend($scope, 
-    	{paths: {}}
-    	);
-	
-	angular.extend($rootScope, {loading: true});
-
-	olark('api.box.show'); //shows olark tab on this page
-	
-	$scope.userID = "53ab92d2ac23550e12600011";	
-	$scope.username = "interfoundry"; 
-	$scope.worldID; //mongo ID
-	//$scope.worldURL; //unique URL ID for that world
-	$scope.styleID;
-	$scope.projectID;
-	$scope.worldTag;
-
-	//init vars
-	$scope.pageIndex = 0;
-	$scope.pageClass = [];
-	$scope.pageClass[0] = 'current';
-	$scope.pageClass[1] = 'right';
-	$scope.pageClass[2] = 'right';
-	
-	$scope.mapConfirm = 'false';
-	
-    $scope.world = { 
-    	loc: {},
-        avatar: "img/tidepools/default.jpg",
-        date: {},
-        time: {},
-        landmarkCategories: []
-    };
-	
-    $scope.mapping = {};
-    $scope.styles = {};
-    $scope.project = {};
-	
-	$scope.mapThemes = [
-		{cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
-		{cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-		{cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		{cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'}
-	];
-	
-	$scope.mapping.mapThemeSelect = $scope.mapThemes[0];
-
-	$scope.mapping.type = 'cloud'; //pre-select cloud only map
-	
-	$scope.markerOptions = [
-		{name:'red'},
-		{name:'orange'},
-		{name:'yellow'},
-		{name:'green'},
-		{name:'blue'},
-		{name:'purple'}
-	];
-
-	//change categories based on "place" or "event" type select
-	$scope.categoryOptions = [
-		{name:'Conference'},
-		{name:'Meetup'},
-		{name:'Party'}
-	];
-
-	$scope.typeOptions = [
-		{name:'Place'},
-		{name:'Event'}
-	];
-	
-	$scope.mapping.markerSelect = $scope.markerOptions[0];
-	
-	$scope.bgColor = '#CCC';
-
-	$scope.showTime = false; //pre-set
-	$scope.buildLocalMap = false;
-
-
-	
-	//custom elements, eventually replace with directives
-	$('.color').spectrum({
-		clickoutFiresChange: true,
-		showInput: true
-	});
-
-	
-
-
-
-  //==== SETTING UP DATETIME INPUTS ====//
-
-  //DATE
-  $scope.today = function() {
-    $scope.world.date.start = new Date();
-    $scope.world.time.start = new Date();
-    $scope.world.time.end = new Date();
-  };
-  $scope.today();
-
-  // $scope.clear = function () {
-  //   $scope.world.date.start = null;
-  // };
-
-  $scope.open = function($event) {
-    $event.preventDefault();
-    $event.stopPropagation();
-
-    $scope.opened = true;
-  };
-
-  $scope.format = 'MMMM dd, yyyy';
-
-  //TIME
-  $scope.hstep = 1;
-  $scope.mstep = 15;
-
-  $scope.ismeridian = true;
-
-  // $scope.update = function() {
-  //   var d = new Date();
-  //   d.setHours( 14 );
-  //   d.setMinutes( 0 );
-  //   $scope.world.time.start= d;
-  // };
-
-  //===============================//
-
-
-
-	// =============  TEMPORARY  ============== //
-
-    
-
-
-	$scope.buildOut = function() {
-
-		saveStyle();
-		//saveWorld('edit');
-		$location.path('/w/'+$scope.worldURL);
-	}
-    //===================================//
-
-
-
-	angular.element('#fileupload').fileupload({
-        url: '/api/upload',
-        dataType: 'text',
-        progressall: function (e, data) {  
-
-            $('#progress .bar').css('width', '0%');
-
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
-
-            $('#uploadedpic').html('');
-            $('#preview').html('');
-            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploadedpic');
-            $('<img src="'+ data.result +'">').load(function() {
-              $(this).width(150).height(150).appendTo('#preview');
-            });
-            $scope.world.avatar = data.result;
-        }
-    });
-
-	$scope.nextPage = function () {
-		if ($scope.worldDetail.worldName.$valid) {
-		if ($scope.pageIndex<($scope.pageClass.length-1)) {
-			$scope.pageClass[$scope.pageIndex] = 'left';
-			if ($scope.pageIndex == 0){ //making new world after first page
-				
-				if (!$scope.worldID){ //new world
-					console.log("Saving new world");
-					saveWorld();
-				}
-				else { //edit created world
-					console.log("Editing created world");
-					saveWorld('edit');
-				}
-			}
-			if ($scope.pageIndex == 1){ //adding/editing world map settings
-				console.log("Adding/editing world map settings");
-				//now load theme from map
-				switch ($scope.mapping.mapThemeSelect.cloudMapName) {
-					case 'urban':
-						angular.extend($scope.styles, themeDict['urban']);
-						break;
-					case 'sunset':
-						angular.extend($scope.styles, themeDict['sunset']);
-						break;
-					case 'fairy':
-						angular.extend($scope.styles, themeDict['fairy']);
-						break;
-					case 'arabesque':
-						angular.extend($scope.styles, themeDict['arabesque']);
-						break;
-					}
-				//if user uploaded a map but didn't hit "build" button
-				if ($scope.buildLocalMap){
-					$scope.buildMap();
-				}
-				saveWorld('map');
-				}
-			if ($scope.pageIndex == 2){ //editing style.
-				console.log("Editing style");
-				saveStyle();
-			}
-			$scope.pageIndex += 1;
-			$scope.pageClass[$scope.pageIndex] = 'current';
-		}
-
-		} else {
-			window.alert("Add a name!");
-		}
-	};
-	
-	$scope.prevPage = function() {
-		if ($scope.pageIndex>0) {
-			$scope.pageClass[$scope.pageIndex] = 'right';
-			$scope.pageIndex = $scope.pageIndex - 1;
-			$scope.pageClass[$scope.pageIndex] = 'current';
-		}
-	};
-	
-	$scope.addLandmarkCategory = function() {
-		$scope.world.landmarkCategories.unshift({name:$scope.tempLandmarkCategory});
-		console.log($scope.world);
-	}
-	
-	$scope.removeLandmarkCategory = function(index) {
-		$scope.world.landmarkCategories.splice(index, 1);
-	} 
-	
-	$scope.maplocsearch = function(keypressEvent) {
-		if (keypressEvent.keyCode == 13 || keypressEvent.button == 0) {
-			console.log("enter");
-			var geocoder = new google.maps.Geocoder();
-			if (geocoder) {
-					geocoder.geocode({'address': $scope.locsearchbar},
-						function (results, status) {
-							if (status == google.maps.GeocoderStatus.OK) {
-								$scope.center.lat = results[0].geometry.location.lat();
-								$scope.center.lng = results[0].geometry.location.lng();
-								$scope.markers.m.lat = results[0].geometry.location.lat();
-								$scope.markers.m.lng = results[0].geometry.location.lng();
-								
-							} else { console.log('No results found.')}
-						});
-					}
-			}
-		};
-	
-	$scope.mapLock = function() {
-			//position is locked
-			console.log($scope.markers.m.lat);
-			console.log($scope.markers.m.lng);
-			$scope.paths = {
-				worldBounds: {
-					type: 'circle',
-					radius: 150,
-					latlngs: {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng}
-				}
-			};
-			refreshMap();	
-			};
-	
-	function refreshMap(){ 
-        leafletData.getMap('worldDetailMap').then(function(map) {
-            setTimeout(function() {map.invalidateSize();}, 400);
-        });
-    }
-
-	function showPosition(position) {
-
-            userLat = position.coords.latitude;
-            userLon = position.coords.longitude;
-
-            //map builder map view
-	       	angular.extend($scope, {
-			  center: {
-			      lat: userLat, //adding these from world editor function
-			      lng: userLon,
-			      zoom: 17
-			  },
-			  markers:{}
-			});
-
-            $scope.center = {
-                lat: userLat,
-                lng: userLon,
-                zoom: 17
-            };
-            $scope.tiles = tilesDict.mapbox;
-            
-            $scope.markers = {
-                    m: {
-                        lat: userLat,
-                        lng: userLon,
-                        message: "<p style='color:black;'>Drag to Location on map</p>",
-                        focus: true,
-                        draggable: true,
-                        icon: local_icons.yellowIcon
-                    }
-            };
-                
-            $scope.paths = {
-				worldBounds: {
-					type: 'circle',
-					radius: 150,
-					latlngs: {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng}
-				}
-			};
-			
-			//disable this for 2nd page of editor...
-			$scope.$on('leafletDirectiveMap.moveend', function(event){
-                    console.log('moveend');
-                    /*angular.extend($scope, {
-	                    paths: {
-		                    worldBounds: {
-		                    type:'circle',
-		                    radius: 150,
-			                    latlngs: {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng}
-		                    }
-	                    }
-                    });*/
-                    
-	                $scope.paths = {
-		                    worldBounds: {
-		                    type:'circle',
-		                    radius: 150,
-			                    latlngs: {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng}
-		                    }
-	                    };
-	                    
-                    refreshMap();
-                    /*$scope.paths.worldBounds.latlngs = {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng};*/
-                });
-            angular.extend($rootScope, {loading: false});
-            refreshMap();
-            
-     }
-
-	
-    function locError(){
-            console.log('no loc');
-    }
-    
-    function loadWorld(){
-		//init from world ID
-		
-    }
-    
-    function saveWorld(option){
-    	//set up json object w all attributes
-    	//update object in database
-    	
-    	//todo only update things that have changed
-
-    	//---- TIME ----//
-    	//use checkbox to select "time" option, for now sending with no time: (use time icon, make it special, like TIME ACTIVATED glow)
-
-
-    	$scope.world.hasTime = $scope.showTime; //adding datetime to world
-
-
-    	if ($scope.showTime){
-	   
-	   	    //if no end date added, use start date
-	        if (!$scope.world.date.end) {
-	            $scope.world.date.end = $scope.world.date.start;
-	        }
-
-	        $scope.world.datetext = {
-	            start: $scope.world.date.start,
-	            end: $scope.world.date.end
-	        }
-	        //---- Date String converter to avoid timezone issues...could be optimized probably -----//
-	        $scope.world.date.start = new Date($scope.world.date.start).toISOString();
-	        $scope.world.date.end = new Date($scope.world.date.end).toISOString();
-
-	        $scope.world.date.start = dateConvert($scope.world.date.start);
-	        $scope.world.date.end = dateConvert($scope.world.date.end);
-
-	        $scope.world.date.start = $scope.world.date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
-	        $scope.world.date.end = $scope.world.date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
-
-	        function dateConvert(input){
-	            var s = input;
-	            var n = s.indexOf('T');
-	            return s.substring(0, n != -1 ? n : s.length);
-	        }
-	        //-----------//
-
-	        if (!$scope.world.time.start){
-	            $scope.world.time.start = "00:00";
-	        }
-
-	        if (!$scope.world.time.end){
-	            $scope.world.time.end = "23:59";
-	        }
-
-	        $scope.world.timetext = {
-	            start: $scope.world.time.start,
-	            end: $scope.world.time.end
-	        } 
-	        //------- END TIME --------//
-	    }
-
-        //$rootScope.worldCoordinates = $scope.world.loc.coordinates; //updating to rootscope for modal process
-
-        $scope.world.userID = $scope.userID;
-
-        //edit world
-        if (option == 'edit'){
-        	$scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
-			console.log('saveWorld(edit)');
-        	$scope.world.newStatus = false; //not new
-        	$scope.world.worldID = $scope.worldID;
-	        db.worlds.create($scope.world, function(response){
-	        	console.log(response);
-	        });  
-        }
-
-        //adding/editing map theme options to world 
-        if (option == 'map'){
-        	console.log('saveWorld(map)');
-        	$scope.mapping.editMap = true; //adding/editing world map
-
-        	$scope.mapping.worldID = $scope.worldID;
-
-        	console.log($scope.mapping);
-
-        	db.worlds.create($scope.mapping, function(response){
-	        	console.log(response);
-	        });  
-
-        }
-
-        //new world
-        if (option === undefined) {
-        	console.log('saveWorld()');
-        	$scope.world.loc.coordinates = [$scope.markers.m.lng, $scope.markers.m.lat];
-        	$scope.world.newStatus = true; //new
-	        db.worlds.create($scope.world, function(response){
-	        	$scope.worldID = response[0].worldID;
-	        	$scope.projectID = response[0].projectID;
-	        	$scope.styleID = response[0].styleID;
-	        	$scope.worldURL = response[0].worldURL;
-	        	console.log($scope.worldURL);
-				console.log('new world created');
-	        });       	
-        }
-
-    
-    }
-
-    function saveStyle(){
-    	console.log('saveStyle()');
-    	$scope.styles.styleID = $scope.styleID;
-    	$scope.styles.worldID = $scope.worldID;
-    	$scope.styles.worldTag = $scope.world.hashtag;
-	    db.styles.create($scope.styles, function(response){
-        	console.log(response);
-        });
-    }
-
-    function saveProject(){
-    	console.log('saveProject()');
-    	$scope.project.projectID = $scope.projectID;
-
-	    db.projects.create($scope.project, function(response){
-        	console.log(response);
-        });  
-    }
-
-
-
-    if (navigator.geolocation) {
-       // Get the user's current position
-       navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000});
-       refreshMap();
-	}
-	
-
-
-	///////// MODAL ///////
-	$scope.myData = {
-	    link: "http://google.com",
-	    modalShown: false,
-	    hello: 'world',
-	    foo: 'bar'
-	}
-	 
-	$scope.logClose = function() {
-	   console.log('close!');
-	};
-	  
-	  
-
-	function resetModalMap(){
-		leafletData.getMap('modalMap').then(function(map) {
-			map.invalidateSize();
-			window.console.log("map reset fired");
-		});
-	}
-
-	angular.extend($scope, {
- 	  layers: {
-	      baselayers: {	
-	        osm: {
-	          name: 'OpenStreetMap',
-		      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-		      type: 'xyz'
-	        }
-	      }
-	  },
-	  markers: {}
-	});
-
-	//////// END MODAL ///////
-
-	$scope.upload_panel = true;
-	$scope.upload_bar = false;
-
-
-	function refreshMap(){ 
-        leafletData.getMap('worldDetailMap').then(function(map) {
-            setTimeout(function() {map.invalidateSize();}, 400);
-        });
-    }
-
-
-  //add uploaded image as an overlay to map
-	$scope.addOverlay = function(){
-		
-		$scope.upload_panel = false;
-		$scope.resetMap();
-		
-		
-		window.console.log("image uploaded to " + $('#preview_map').find('img').attr("src"));
-		window.console.log("image width " + $('#preview_map').find('img').width());
-		window.console.log("image height " + $('#preview_map').find('img').height());
-		
-		//setup image object to add to map
-		var imageUrl = $('#preview_map').find('img').attr("src");
-		var img_width = $('#preview_map').find('img').width();
-		var img_height = $('#preview_map').find('img').height();
-	
-	    leafletData.getMap('modalMap').then(function(map) {
-	    	window.console.log("map found");
-	    	window.console.log(map);
-				
-				$scope.areaSelect = L.areaSelect({
-				    width:img_width, 
-				    height:img_height, 
-				    keepAspectRatio:true
-				});
-				
-				$scope.areaSelect.addTo(map);
-				var bounds = $scope.areaSelect.getBounds();
-				window.console.log("area select added to map");
-				
-				//add image overlay layer
-				var image_layer = L.imageOverlay(imageUrl, bounds).addTo(map);
-				window.console.log("image overlay added to map");
-				
-				// Get a callback when the bounds change
-				$scope.areaSelect.on("change", function() {
-				    map.removeLayer(image_layer);
-				    image_layer = L.imageOverlay(imageUrl, this.getBounds()).addTo(map);
-				});
-				
-				map.on('move', function(){
-					this.removeLayer(image_layer);
-				  image_layer = L.imageOverlay(imageUrl, $scope.areaSelect.getBounds()).addTo(map);
-				});
-		});
-
-	}
-  
-  $scope.resetMap = function(){
-	  leafletData.getMap('modalMap').then(function(map) {
-			map.invalidateSize();
-			window.console.log("map reset fired");
-		});
-  }
-  
-
-	$scope.buildMap = function(){
-
-		console.log('building map: '+$scope.$parent.mapIMG);
-
-		var coordBox;
-
-		$scope.showMapBuilding = true;
-		$scope.buildLocalMap = false;
-
-		//get image geo coordinates, add to var to send
-		leafletData.getMap('modalMap').then(function(map) {
-			var bounds = $scope.areaSelect.getBounds();
-		    var southEast = bounds.getSouthEast();
-		    var northWest = bounds.getNorthWest();
-		    var southWest = bounds.getSouthWest();
-		    var northEast = bounds.getNorthEast();
-			coordBox = {
-		        worldID: $scope.worldID,
-		        nw_loc_lng: northWest.lng,
-		        nw_loc_lat: northWest.lat,
-		        sw_loc_lng: southWest.lng,
-		        sw_loc_lat: southWest.lat,
-		        ne_loc_lng: northEast.lng,
-		        ne_loc_lat: northEast.lat,
-		        se_loc_lng: southEast.lng,
-		        se_loc_lat: southEast.lat
-		    };
-
-		    console.log(coordBox);
-		      
-		    var coords_text = JSON.stringify(coordBox);
-
-		    var data = {
-		      mapIMG: $scope.mapIMG,
-		      coords: coords_text
-		    }
-		    //build map
-		    $http.post('/api/build_map', data).success(function(response){
-		        
-		    	//response = JSON.parse(response);
-		        console.log(response.style.maps.localMapOptions.maxZoom);
-
-		        $scope.showMapBuilding = false;
-		        $scope.showMapBuilt = true;
-
-		        $scope.mapping.type = 'both';
-				
-		  //       angular.extend($scope, {
-
-			 // 	  layers: {
-				//       baselayers: {	
-				//         osm: {
-	 		// 				url: 'http://107.170.180.141/maps/'+response.style.maps.localMapID+'/{z}/{x}/{y}.png',
-				// 		    option: {
-				// 			    attribution: 'IF',
-				// 			    minZoom: response.style.maps.localMapOptions.minZoom,
-				// 			    maxZoom: response.style.maps.localMapOptions.maxZoom,
-				// 			    reuseTiles: true,
-				// 			    tms:true
-				// 		    },
-				// 			  center: {
-	
-				// 			      zoom: response.style.maps.localMapOptions.maxZoom
-				// 			  },
-
-				//         }
-				//       }
-				//   }
-
-				// });
-
-				// leafletData.getMap('modalMap').then(function(map) {
-		  //           setTimeout(function() {map.invalidateSize();}, 400);
-		  //       });
-
-
-		    });
-
-		});
-
-	}
-
-
-  
-	angular.element('#fileuploadmap').fileupload({
-        url: '/api/upload_maps',
-        dataType: 'text',
-        progressall: function (e, data) {  
-
-            $('#map_progress .bar').css('width', '0%');
-
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#map_progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
-
-            $('#uploaded_map').html('');
-            $('#preview_map').html('');
-            $('<p/>').text('Saved: '+data.originalFiles[0].name).appendTo('#uploaded_map');
-            $('<img src="'+ data.result +'">').load(function() {
-              $(this).appendTo('#preview_map').after($scope.addOverlay());
-            });
-
-            $scope.hideMapOptions = true; //hide map upload buttons
-			$scope.buildLocalMap = true; 
-            $scope.$parent.mapIMG = data.result;
-        }
-	});
-
-
-
-
-}
-
-/*
-function UserCtrl($location, $scope, $routeParams, db, $rootScope) {
-	$scope.userID = "53ab92d2ac23550e12600011";	
-	$scope.username = "interfoundry";
-	
-	$scope.worlds = db.worlds.query({queryType:'all',userID:'539533e5d22c979322000001'}, function(data){
-          console.log(data);
-    });
-}*/
-
-function LandmarkEditorController($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
+}]);
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -11439,9 +9975,9 @@ $scope.$on('$destroy', function (event) {
 		//begin loading landmarks
 		loadLandmarks();
 	});
-}
+}])
 
-function LandmarkEditorItemController ($scope, db, Landmark, mapManager, $upload) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -11501,8 +10037,388 @@ function LandmarkEditorItemController ($scope, db, Landmark, mapManager, $upload
 		});
 	}
 	
+}]);
+app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
+////////////////////////////////////////////////////////////
+///////////////////INITIALIZING VARIABLES///////////////////
+////////////////////////////////////////////////////////////
+$scope.global = ifGlobals;
+$scope.position = 0;
+$scope.world = {};
+$scope.world.time = {};
+$scope.world.time.start = new Date();
+$scope.world.time.end = new Date();
+$scope.world.style = {};
+$scope.world.style.maps = {};
+$scope.temp = {};
+var map = mapManager;
+var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+
+olark('api.box.show'); //shows olark tab on this page
+
+zoomControl.style.display = 'none'; 
+
+$scope.next = function() {
+	if ($scope.position < $scope.walk.length-1) {
+		$scope.position++; 
+		//check if new position has 'jump'
+		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+			if ($scope.walk[$scope.position].jump()) {
+				$scope.next();
+			}
+		}
+	}
+	$scope.save();
 }
-function SearchController($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
+
+$scope.prev = function() {
+	if ($scope.position > 0) {
+		$scope.position--;
+		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+			if ($scope.walk[$scope.position].jump()) {
+				$scope.prev();
+			}
+		}
+	}
+	$scope.save();
+}
+
+$scope.slowNext = function() {
+	$timeout(function() {
+		$scope.next();
+	}, 200);
+	$scope.save();
+}
+
+$scope.pictureSelect = function($files) {
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file,
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+		$scope.world.avatar = data;
+	});
+}
+
+$scope.selectMapTheme = function(name) {
+		var mapThemes = {
+			arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
+			fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
+			sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
+			urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
+		};
+	
+		if (typeof name === 'string') {
+			$scope.mapThemeSelect = name;
+			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+			
+			$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
+			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+			
+			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
+			//	$scope.setThemeFromMap();
+			$scope.setThemeFromMap(name);
+			//}
+		}
+}
+
+$scope.setThemeFromMap = function(name) {
+switch (name) { 
+	case 'urban':
+		angular.extend($scope.style, themeDict['urban']);
+		break;
+	case 'sunset':
+		angular.extend($scope.style, themeDict['sunset']);
+		break;
+	case 'fairy':
+		angular.extend($scope.style, themeDict['fairy']);
+		break;
+	case 'arabesque':
+		angular.extend($scope.style, themeDict['arabesque']);
+		break;
+}
+console.log($scope.style)
+
+    db.styles.create($scope.style, function(response){
+        console.log(response);
+    });
+}	
+	
+$scope.saveAndExit = function() {
+	$scope.save();
+	if ($scope.world.id) {
+		$location.path("/edit/w/"+$scope.world.id);
+	} else {
+		//console
+		console.log('no world id'); 
+	}
+}
+
+$scope.save = function() {
+	$scope.world.newStatus = false;
+	console.log($scope.world);
+	db.worlds.create($scope.world, function(response) {
+    	console.log('--db.worlds.create response--');
+    	console.log(response);
+    	$scope.world.id = response[0].id; //updating world id with server new ID
+    });
+    
+    if ($scope.style) {
+    	console.log('saving style');
+	    db.styles.create($scope.style, function(response){
+      		console.log(response);
+		});
+    }
+}
+
+var firstWalk = [
+	{title: 'Need a hand?',
+	caption: 'If you haven’t built a bubble before, we can walk you through it.',
+	height: 0,
+	view: '0.html',
+	valid: function() {return true},
+	skip: false},
+	{title: 'Kind',
+	caption: 'What kind of bubble is it?',
+	view: 'kind.html',
+	height: 220,
+	valid: function() {return typeof $scope.world.category == "string"},
+	skip: false},
+	{title: 'Location', 
+	caption: 'Find its location',
+	view: 'location.html',
+	height: 290,
+	valid: function() {return $scope.world.hasLoc},
+	skip: false},
+	{title: 'Name',
+	caption: 'What\'s your bubble named?',
+	view: 'name.html',
+	height: 62,
+	valid: function() {return $scope.form.worldName.$valid},
+	skip: false},
+	{title: 'Time',
+	caption: 'Give it a start and end time',
+	view: 'time.html',
+	height: 88,
+	valid: function() {return $scope.form.time.$valid},
+	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
+	skip: true},
+	{title: 'Picture',
+	caption: 'Upload a picture for your bubble',
+	view: 'picture.html',
+	height: 194,
+	valid: function() {return true},
+	skip: true},
+	{title: 'Maps',
+	caption: 'Choose a map',
+	view: 'maptheme.html',
+	height: 426,
+	valid: function() {return true},
+	skip: true},
+	{title: 'Hashtag',
+	caption: 'Connect your bubble\'s social media',
+	view: 'hashtag.html',
+	height: 132,
+	valid: function() {return true},
+	skip: true,
+	},
+	{title: 'Done!',
+	caption: 'Now spread the word :)',
+	view: 'done.html',
+	height: 200,
+	skip: false}
+];
+
+var meetupWalk = [
+	//0 intro
+	{title: 'Claim your Meetup',
+	caption: "We'll use your Meetup group to create a bubble.",
+	view:'0.html',
+	height: 0,
+	valid: function() {return true},
+	skip: false
+	},
+	//1 
+	{title: 'Confirm',
+	caption: 'Make sure this information from Meetup.com is correct',
+	view: 'meetup_confirm.html',
+	height: 300,
+	valid: function() {return true},
+	skip: false
+	},
+	{title: 'Kind',
+	caption: 'What kind of bubble is it?',
+	view: 'kind.html',
+	height: 220,
+	valid: function() {return typeof $scope.world.category == "string"},
+	skip: false},
+	{title: 'Hashtag',
+	caption: 'Connect your bubble\'s social media',
+	view: 'hashtag.html',
+	height: 132,
+	valid: function() {return true},
+	skip: true,
+	},
+	{title: 'Picture',
+	caption: 'Upload a picture',
+	view: 'picture.html',
+	height: 194,
+	valid: function() {return true},
+	skip: true},
+	{title: 'Maps',
+	caption: 'Choose a map',
+	view: 'maptheme.html',
+	height: 426,
+	valid: function() {return true},
+	skip: true},
+	{title: 'Done!',
+	caption: 'Now spread the word :)',
+	view: 'done_meetup.html',
+	height: 200,
+	skip: false}
+];
+
+$scope.walk = firstWalk;
+
+function setUpProgress() {
+	$scope.progress = [];
+
+	var i = 0;
+	if ($scope.walk) {
+		while (i < $scope.walk.length) {
+		$scope.progress[i] = {status: ''};
+		i++;
+	}
+	}
+	
+$scope.progress[$scope.position].status = 'active';
+
+}
+
+////////////////////////////////////////////////////////////
+////////////////////////LISTENERS///////////////////////////
+////////////////////////////////////////////////////////////
+/*$scope.$on('$destroy', function (event) {
+	console.log('$destroy event', event);
+	if (event.targetScope===$scope) {
+		if (zoomControl) {
+			zoomControl.style.display = 'block';
+		}
+	}
+});*/
+
+////////////////////////////////////////////////////////////
+/////////////////////////EXECUTING//////////////////////////
+////////////////////////////////////////////////////////////
+
+console.log($routeParams._id);
+World.get({id: $routeParams._id, m: true}, function(data) {
+	if (data.err) {
+		 console.log('World not found!');
+		 console.log(data.err);
+	} else {
+		console.log(data);
+		angular.extend($scope.world, data.world);
+		angular.extend($scope.style, data.style);
+		
+		if ($scope.world.source_meetup && $scope.world.source_meetup.id) {
+			$scope.walk = meetupWalk;
+		}
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+		setUpProgress();
+	}
+});
+
+}]);
+
+app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'leafletData', function($scope, $rootScope, $timeout, leafletData) {
+	angular.extend($scope, {tiles: tilesDict['arabesque']});
+	angular.extend($scope, {center: {lat: 42,
+									lng: -83,
+									zoom: 15}});
+	angular.extend($scope, {markers: {}});
+	
+	$scope.$watch('temp.MapActive', function(current, old) {
+		console.log('scopewatch');
+		console.log(current, old);
+		if (current==true) {
+		leafletData.getMap('locMap').then(function(map) {
+			console.log('invalidating size');
+			map.invalidateSize();
+		});
+		}
+	});
+	
+	$scope.showPosition = function(lat, lng) {
+		var tempLat = lat.valueOf(),
+			tempLng = lng.valueOf();
+		angular.extend($scope, {markers: {
+							m: {
+								lat: tempLat,
+								lng: tempLng,
+								draggable: false
+							}}});		
+		$scope.center.lat = tempLat;
+		$scope.center.lng = tempLng;
+		$scope.world.loc = { 
+			coordinates: [tempLng,tempLat]
+		}
+		
+		$scope.world.hasLoc = true;
+		$scope.$apply(function() {
+			$scope.locLoading = false;
+		});
+		leafletData.getMap('locMap').then(function(map) {
+			console.log('invalidating size');
+			map.invalidateSize();
+		});
+		console.log('showPosition done', $scope.locLoading);
+	}
+	
+	$scope.searchByAddress = function() {
+		console.log('--searchByAddress()--');
+		var geocoder = new google.maps.Geocoder();
+		if (geocoder) {
+			$scope.locLoading = true; 
+			geocoder.geocode({'address': $scope.temp.address},
+				function (results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+
+						console.log('invalidating size');
+						//map.invalidateSize();
+						
+						console.log(results[0].geometry.location.lat());
+						$scope.showPosition(results[0].geometry.location.lat(),
+						 					results[0].geometry.location.lng());
+						 
+					} else { console.log('No results found.')}
+					
+				});
+		}
+		
+	}
+	
+	$scope.searchByLocation = function() {
+		if (navigator.geolocation) {
+			$scope.locLoading = true;
+   			navigator.geolocation.getCurrentPosition(function(position) {
+   				//position
+				$scope.showPosition(position.coords.latitude, position.coords.longitude);	
+   				
+   				}, function() {
+   				console.log('location error');
+   			}, {timeout:5000});
+   		} else {
+	   		console.log('No geolocation!');
+   		}
+   		
+	}
+
+}]);
+app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };*/    
@@ -11511,8 +10427,8 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
     // });
 
 
-}
-function MeetupController($scope, $window, $location, styleManager, $rootScope) {
+}]);
+app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
 
 	olark('api.box.show'); //shows olark tab on this page
 
@@ -11536,11 +10452,11 @@ function MeetupController($scope, $window, $location, styleManager, $rootScope) 
 	// 	$location.path('/auth/meetup');
 	// }
 
-}
+}]);
 /**********************************************************************
  * Login controller
  **********************************************************************/
-function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+app.controller('LoginCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -11605,9 +10521,10 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
       });
   };
 
-}
+}]);
 
-function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+app.controller('SignupCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', 
+function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -11655,11 +10572,9 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
     //     }
     //   });
   }
-}
+}]);
 
-
-
-function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
+app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $http, $location, apertureService, alertManager) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -11693,11 +10608,10 @@ function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
       });
   };
 
-}
+}]);
 
 
-
-function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
+app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -11735,16 +10649,16 @@ function ResetCtrl($scope, $http, $location, apertureService, alertManager, $rou
       });
   };
 
-}
+}]);
 
 
-function resolveAuth($scope, $rootScope) {
+app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootScope) {
 
   angular.extend($rootScope, {loading: true});
 
   location.reload(true);
 
-}
+}]); 
 
 
 function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
@@ -11801,7 +10715,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 	}
 }
 
-function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 
 angular.extend($rootScope, {loading: false});
 
@@ -11964,7 +10878,7 @@ userManager.getUser().then(
 	$scope.user = response;
 })
 
-}
+}]);
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
   	var style = styleManager;
@@ -12099,12 +11013,12 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 
 		map.refresh();
 }
-
-function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree, $upload) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', function ( $location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
 ////////////////////////////////////////////////////////////
+var checkMessagesTimeout;
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
 
@@ -12130,7 +11044,6 @@ function scrollMessages() {
 
 function checkMessages(){
 db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(data){
-	console.log(data);
 	if (data.length>0) {
 		for (i = 0; i < data.length; i++) { 
 		    if ($scope.localMessages.indexOf(data[i]._id) == -1) {
@@ -12141,15 +11054,19 @@ db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(dat
 		}
 	    sinceID = data[data.length-1]._id;
 	    checkMessages();
-	}
-	else if (firstScroll==true) {
+	} else {
+		if (firstScroll==true) {
 		scrollMessages();
+		}
+		checkMessagesTimeout = $timeout(checkMessages, 3000);	
 	}
+	 
 });
+
+
 }
 
 $scope.sendMsg = function (e) {
-	console.log('???');
 	if (e) {e.preventDefault()}
 	if ($scope.msg.text == null) { return;}
 	if ($scope.loggedIn){
@@ -12163,12 +11080,10 @@ $scope.sendMsg = function (e) {
 		
 		sendMsgToServer(newChat);		
 	    $scope.msg.text = "";
-	    $scope.msg.img = "";
 	}
 }
 
 function sendMsgToServer(msg) {
-console.log(msg);
 db.messages.create(msg, function(res) {
 	sinceID = res[0]._id;
 	
@@ -12191,7 +11106,7 @@ $scope.onImageSelect = function($files) {
 	        pic: data,
 	        userID: $scope.userID
 		});
-		console.log(data);
+		//console.log(data);
 	})
 }	
 
@@ -12199,12 +11114,14 @@ $scope.onImageSelect = function($files) {
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
 ////////////////////////////////////////////////////////////
-var checkMessagesInterval = $interval(checkMessages, 3000); 
 
+
+/*
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
         $interval.cancel(checkMessagesInterval);
         dereg();
 });
+*/
 
 
 ////////////////////////////////////////////////////////////
@@ -12252,8 +11169,8 @@ checkMessages();
 });
 
 
-} 
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce, worldTree, $q) {
+} ]);
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q) {
 
 	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 	zoomControl.style.top = "60px";
@@ -12518,13 +11435,4 @@ World.get({id: $routeParams.worldURL}, function(data) {
 		console.log(error);
 		//handle this better
 	});
-}
-
-
-function WorldRepeatController($scope) {
-	
-}
-
-function UpcomingController($scope) {
-	
-}
+}]);
