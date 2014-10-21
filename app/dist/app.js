@@ -11917,6 +11917,7 @@ else {
 //if came from meetup, keep checking for new meetups until route change
 function checkProfileUpdates(){
 	$scope.stop = $interval(checkProfile, 2000);
+
 	function checkProfile(){
 		$http.get('/api/user/profile').success(function(user){
 			$scope.worlds = user;	
@@ -11929,6 +11930,45 @@ function checkProfileUpdates(){
 	    $interval.cancel($scope.stop);
 	    dereg();
   	});
+
+
+
+
+	// var checkProfileInterval = $interval(checkProfile, 2100); 
+
+	// var dereg = $rootScope.$on('$locationChangeSuccess', function() {
+	//         $interval.cancel(checkProfileInterval);
+	//         dereg();
+	// });
+
+	// var blurTimeout;
+
+	// //to stop interval on window blur
+	// function onBlur() {
+
+	// 	//on blur, wait for a bit then cancel interval
+	//     var cancelInterval = function() {
+	// 	    $interval.cancel(checkProfileInterval);
+	// 	    dereg();  
+	//     }
+
+	//     blurTimeout = $timeout(cancelInterval, 5000);
+		
+	// };
+	// function onFocus(){
+	// 	$timeout.cancel(blurTimeout);
+	// 	checkProfileInterval = $interval(checkProfile, 2100); 
+	// };
+
+	// if (/*@cc_on!@*/false) { // check for Internet Explorer
+	// 	document.onfocusin = onFocus;
+	// 	document.onfocusout = onBlur;
+	// } else {
+	// 	window.onfocus = onFocus;
+	// 	window.onblur = onBlur;
+	// }
+
+
 }
 
 $scope.deleteWorld = function(i) {

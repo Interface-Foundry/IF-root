@@ -28,46 +28,54 @@ var getFileNameFromURL = function(imageURL) {
 
 var downloadImage = function(imageURL) {
 
-  //var fileName = url.parse(imageURL).pathname.split('/').pop();
-  var fileName = getFileNameFromURL(imageURL);
-
-  var writeStreamDestinaton = strings.IMAGE_SAVE_DESTINATION + fileName;
-
-  if (fs.existsSync(writeStreamDestinaton)) {
-
-    //do nothing, don't rewrite image
-  } 
+  if (url.parse(imageURL).protocol == 'https:'){
+    //don't process https
+     return;
+  }
   else {
+    var fileName = getFileNameFromURL(imageURL);
 
-    var file = fs.createWriteStream(writeStreamDestinaton);
+    var writeStreamDestinaton = strings.IMAGE_SAVE_DESTINATION + fileName;
 
-    var request = http.get(imageURL, function onImageDownload(response) {
+    if (fs.existsSync(writeStreamDestinaton)) {
 
-      response.on('data', function(data) {
-        file.write(data);
+      //do nothing, don't rewrite image
+       return;
+    } 
+    else {
+
+      var file = fs.createWriteStream(writeStreamDestinaton);
+
+      var request = http.get(imageURL, function onImageDownload(response) {
+
+        response.on('data', function(data) {
+          file.write(data);
+        });
+
+        response.on('end', function() {
+          file.end();
+
+            //RESIZING IMAGES
+            im.resize({
+              srcPath: writeStreamDestinaton,
+              dstPath: writeStreamDestinaton,
+              width: 300,
+              height: 300,
+              quality: 0.8
+            }, function(err, stdout, stderr){
+                //console.log('RESIZED IMAGE');
+            });
+
+        });
+
       });
 
-      response.on('end', function() {
-        file.end();
+       return;
 
-          //RESIZING IMAGES
-          im.resize({
-            srcPath: writeStreamDestinaton,
-            dstPath: writeStreamDestinaton,
-            width: 300,
-            height: 300,
-            quality: 0.8
-          }, function(err, stdout, stderr){
-              console.log('RESIZED IMAGE');
-          });
-
-      });
-
-    });
+    }
 
   }
 
-  return;
 }
 
 var getImagesToBeSaved = function(imageObjectImages) {
@@ -129,21 +137,21 @@ var saveImage = function(imageObject) {
         return;
       }
 
-      console.log("Instgrams following;");
-      console.log(instagrams);
+      //console.log("Instgrams following;");
+      //console.log(instagrams);
 
       if(instagrams.length > 0) {
-        console.log("Will return without saving");
+        //console.log("Will return without saving");
         return;
       }
 
       newInstagramImage.save(function(err) {
         if(err) {
-          console.log('An error occured while saving image');
+          //console.log('An error occured while saving image');
           console.log(err);
         }
         else {
-          console.log('Image saved successfully');
+          //console.log('Image saved successfully');
         }
       });
       return;
