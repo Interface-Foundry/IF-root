@@ -110,7 +110,7 @@ module.exports = {
 		},
 		source_meetup_on: Boolean,
 		source_meetup: {
-			id: { type: String, unique: true},
+			id: { type: String, index: true},
 			status: String,
 			visibility: String,
 			updated: Number,
