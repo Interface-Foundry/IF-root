@@ -7,7 +7,7 @@ monguurl = require('monguurl');
 
 	var landmarkSchema = new Schema({
 		name: String, 
-		id: { type: String, unique: true },
+		id: { type: String, unique: true, index: true },
 		world: Boolean,
 		parentID: String,
 		valid: Boolean, //are all req. items inputted
@@ -107,7 +107,7 @@ monguurl = require('monguurl');
 		// },
 		source_meetup_on: Boolean,
 		source_meetup: {
-			id: { type: String, unique: true },
+			id: { type: String, unique: true, index: true },
 			status: String,
 			visibility: String,
 			updated: Number,

@@ -10,7 +10,7 @@ module.exports = {
 
     _schema_def: {
 		name: String, 
-		id: { type: String, unique: true },
+		id: { type: String, unique: true, index: true },
 		world: Boolean,
 		parentID: String,
 		valid: Boolean, //are all req. items inputted
@@ -110,7 +110,7 @@ module.exports = {
 		},
 		source_meetup_on: Boolean,
 		source_meetup: {
-			id: { type: String, unique: true },
+			id: { type: String, unique: true, index: true },
 			status: String,
 			visibility: String,
 			updated: Number,

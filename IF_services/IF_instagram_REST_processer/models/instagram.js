@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var ObjectID = Schema.ObjectID;
 
 var instagramSchema = new Schema({
-  objectID: { type: String, unique: true },
+  objectID: { type: String, unique: true, index: true },
   user: {
     name: String,
     screen_name: String,
