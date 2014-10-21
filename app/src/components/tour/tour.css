@@ -23,7 +23,7 @@
 
 .tour-footer {
 	position: absolute;
-	top: 669px;
+	top: 725px;
 	z-index: 100;
 	width:100%;
 	padding-left: 15px;
@@ -96,7 +96,7 @@
 
 @media (min-width: 1209px) {
 	.tour-footer {
-		top:693px;
+		top:755px;
 	}
 }
 
