@@ -9,7 +9,7 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 var userSchema = mongoose.Schema({
 
     local            : {
-        email        : { type: String, unique: true },
+        email        : { type: String, index: true },
         password     : { type: String },
         resetPasswordToken: String,
         resetPasswordExpires: Date
