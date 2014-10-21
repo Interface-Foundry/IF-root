@@ -9,7 +9,7 @@ monguurl = require('monguurl');
 		name: String, 
 		id: { type: String, unique: true},
 		world: Boolean,
-		parentID: String,
+		parentID: { type: String, index: true},
 		valid: Boolean, //are all req. items inputted
 		status: String, //'draft' 'archived' 'public'
 		avatar: String,
@@ -83,7 +83,7 @@ monguurl = require('monguurl');
 			etherpad: String,	
 		},
 		permissions: {
-			ownerID: String,
+			ownerID: { type: String, index: true},
 			hidden: Boolean,
 			viewers: [String],
 			admins: [String]

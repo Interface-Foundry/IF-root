@@ -12,7 +12,7 @@ module.exports = {
 		name: String, 
 		id: { type: String, unique: true},
 		world: Boolean,
-		parentID: String,
+		parentID: { type: String, index: true},
 		valid: Boolean, //are all req. items inputted
 		archived: Boolean, //if object in archive or "live"
 		avatar: String,
@@ -86,7 +86,7 @@ module.exports = {
 			etherpad: String,	
 		},
 		permissions: {
-			ownerID: String,
+			ownerID: { type: String, index: true},
 			hidden: Boolean,
 			viewers: [String],
 			admins: [String]

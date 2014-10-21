@@ -74,8 +74,8 @@ var userSchema = mongoose.Schema({
     //     addr: String,
     //     P: Number
     // }],
-   // email: [Schema.Types.Mixed],
-   email: String,
+    // email: [Schema.Types.Mixed],
+    email: String,
     // tel: [{
     
     //     label: String,
