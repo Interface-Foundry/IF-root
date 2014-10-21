@@ -81,10 +81,10 @@ async.whilst(
 
         async.eachSeries(hashtag, function(tag, callback) {
             searchTwitter(tag, function() {
-                setTimeout(callback, 3000); // Wait before going on to the next tag
+                setTimeout(callback, 5000); // Wait before going on to the next tag
             })
         }, function(err) {
-            setTimeout(callback, 3000); // Wait before looping over the hashtags again
+            setTimeout(callback, 5000); // Wait before looping over the hashtags again
         });
     },
     function (err) {
