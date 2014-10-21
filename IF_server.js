@@ -1185,7 +1185,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 					twitter: false,
 					instagram: false,
 					upcoming: false,
-					category: false
+					category: false,
+          messages: true
 				}
             });
             
