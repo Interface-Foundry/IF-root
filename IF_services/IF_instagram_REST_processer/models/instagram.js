@@ -15,7 +15,7 @@ var instagramSchema = new Schema({
   img_url: String, // Assuming this is the low resolution
   original_url: String, // Assuming this is the original size
   local_path: [String], // There could be multiple images being saved
-  text: String,
+  text: { type: String, index: true },
   tags: [String],
   created: {
     type: Date,

@@ -20,7 +20,7 @@
 			media_type: String,
 			media_url: String
 		},
-		text: String,
+		text: { type: String, index: true },
 		hashtags:[String],
 
 		created: { type: Date, default: Date.now }
