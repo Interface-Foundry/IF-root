@@ -1,0 +1,94 @@
+<div class="profile-sort">
+<div class="profile-card">
+<span class="sort-heading indigo700">ME</span>
+	<div class="profile-card-pic" ng-file-select="onAvatarSelect($files)">
+		<img ng-src="{{user.avatar}}" ng-show="user.avatar">
+		<span class="profile-card-pic-upload">upload</span>
+	</div>
+	<div class="profile-card-body">
+		<div class="form-group">
+			<label class="marble-label">Display Name</label>
+			<input type="text" class="marble-control" placeholder="Enter your Display Name" ng-model="user.name">
+		</div>
+<!-- 		<div class="form-group">
+			<label class="marble-label">Username</label>
+			<input type="text" class="marble-control" placeholder="Enter your Username" ng-model="user.profileID">
+		</div> -->
+		<span>{{user.title}}</span>
+		<hr>
+		
+	</div>
+</div>
+</div>
+<div class="profile-contact-sort" ng-hide="fromMessages">
+<div class="profile-contact-card">
+<span class="sort-heading indigo700">CONTACT</span>
+	<form role="form">
+		<div class="form-group">
+			<label for="userEmail" class="marble-label">Email</label>
+			<input type="text" class="marble-control" ng-model="user.email" placeholder="Enter your contact email">
+			<div class="marble-privacy-bit-container hidden">
+			<select class="marble-privacy-bit">
+				<option>on card</option>
+				<option>private</option>
+			</select>
+			<span class="caret"></span>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+		<div class="form-group">
+			<label for="userAddress" class="marble-label">Address</label>
+			<input type="text" class="marble-control" ng-model="user.addr" placeholder="Street Address">
+			<input type="text" class="marble-control" ng-model="user.addr2" placeholder="City, State, ZIP">
+			<div class="clearfix"></div>
+		</div>
+		<div class="form-group">
+			<label for="userPhone" class="marble-label">Phone</label>
+			<input type="text" class="marble-control" ng-model="user.tel" placeholder="Phone">
+			<div class="clearfix"></div>
+		</div>
+		
+	</form>
+
+</div>
+
+</div>
+
+
+
+<ul class="world-sq-container" ng-hide="fromMessages">
+
+	<li class="col-xs-12" ng-show="fromMeetup">
+		<div class="meetup-well well">
+			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/718.gif"></span>
+			<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below. Click on any Meetup then click <b>Set Up Meetup</b></span>
+			<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
+		</div>
+	</li><div class="clearfix"></div>
+	<span class="indigo700">MY BUBBLES</span>
+
+	<li>
+
+	<div class="profile-add-new" ng-click="newWorld()">
+		<div class="profile-add-new-plus">+</div>
+		<span>Create New Bubble</span>
+	</div>
+	</li>
+	<li class="world-sq" ng-hide="waitingforMeetup" ng-repeat="world in worlds" 
+		ng-click="$parent.selectedIndex=($parent.selectedIndex==$index) ? $parent.selectedIndex=null : $parent.selectedIndex = $index">
+		<img width="144" height="144" ng-src="{{world.avatar}}" class="world-sq-img">
+		<button type="button" class="world-sq-close" ng-click="deleteWorld($index)">
+			<span aria-hidden="true">&times;</span>
+			<span class="sr-only">Close</span>
+		</button>
+		<span class="world-sq-views"><span class="glyphicon glyphicon-eye-open"></span> Views: {{world.views}}</span>
+		<ul class="world-sq-menu" ng-class="{'selected': selectedIndex==$index}">
+			<li class="world-sq-menu-title">{{world.name || 'New Bubble'}}</li>
+			<li class="world-sq-menu-action" ng-click="go('/w/'+world.id)">View</li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="world.source_meetup.id"><b>Set up Meetup</b></li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="!world.source_meetup.id"><b>Walkthrough</b></li>
+			<li class="world-sq-menu-action" ng-click="go('/edit/w/'+world.id)">Edit</li>
+			<!--<li class="world-sq-menu-action">Share</li>-->
+		</ul>
+	</li>
+</ul>
