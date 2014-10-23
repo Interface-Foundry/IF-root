@@ -53,8 +53,8 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 				  	icon: {
 						iconUrl: 'img/marker/bubble-marker-50.png',
 						shadowUrl: '',
-						iconSize: [25, 48],
-						iconAnchor: [13, 48]
+						iconSize: [35, 67],
+						iconAnchor: [17.5, 60]
 					},
 		  			_id: $scope.landmark._id
 		  			});

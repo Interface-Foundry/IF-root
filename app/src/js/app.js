@@ -110,7 +110,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
-      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: MessagesController}).
+      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: CategoryController}).
 
@@ -138,6 +138,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
 	    when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: WalkthroughController, resolve: {loggedin: checkLoggedin}}).
       
       when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: MeetupController}).
+      when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: WelcomeController}).
       
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: SearchController}).
       

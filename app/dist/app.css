@@ -1508,12 +1508,24 @@ li.active .landmark-form {
 	margin: 0;
 }
 
+.message-self {
+	color:#808080;
+}
+
 .message-content {
 	width: 100%;
 	background: #FFF;
 	border-radius: 10px;
 	min-height: 28px;
 	overflow: hidden;
+}
+
+.message-content-card{
+	width: 100%;
+	background: #EEE;
+	border-radius: 10px;
+	min-height: 28px;
+	overflow: hidden;	
 }
 
 .user-message-content {
@@ -1585,10 +1597,55 @@ li.active .landmark-form {
 	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
 }
 
+.nickname-info{
+	margin-top:112px;
+	width:86%;
+	height: 100px;
+	padding-left: 21px;
+	background-color: rgba(230,230,230,0.9);
+	border-radius: 3px;
+	margin-left:21px;
+}
 
+.inner-nickname{
+	padding-top: 9px;
+	color:#808080;
+}
 
+.edit-nickname{
+	float: right;
+	margin-top: -31px;
+	margin-right: 17px;
+}
 
+.subnav-chat-edit{
+	float:right;
+	padding-right: 9px;
+	margin-top:-43px;
+	font-size: 20px;
+	color:#808080;
+	cursor:pointer;
+}
 
+.subnav-chat-subhead{
+	color:#808080;
+	font-size: 11px;
+	margin-top: 3px;
+}
+
+.subnav-chat-head{
+	margin-top: 5px !important;
+}
+
+.message-body-card{
+	margin-left: 13px;
+	margin-top: 6px;
+}
+
+.message-card{
+	margin-top: 15px;
+	margin-left:2px;
+}
 .world-toolbar {
 	height: 88px;
 	width: 100%;
@@ -1882,6 +1939,20 @@ nav .nav-title {
 @media (max-width: 330px) {
 	nav .nav-title {
 		font-size: 19px;
+	}
+}
+
+@media (max-width: 565px) {
+	.world-title {
+		font-size: 19px;
+		line-height: 26px;
+	}
+}
+
+@media (max-width: 732px) {
+	.world-title {
+		font-size: 25px;
+		line-height: 26px;
 	}
 }
 

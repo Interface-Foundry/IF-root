@@ -365,8 +365,8 @@ function showPosition(position) {
 		icon: {
 			iconUrl: 'img/marker/bubble-marker-50.png',
 			shadowUrl: '',
-			iconSize: [30, 57.60],
-			iconAnchor: [15, 50],
+			iconSize: [35, 67],
+			iconAnchor: [17.5, 55],
 			popupAnchor:  [0, -40]
 		}
 	});

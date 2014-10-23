@@ -1,9 +1,9 @@
-
-function MessagesController( $location, $scope, socket, $sce, db, $rootScope, $routeParams, apertureService, $http, $interval, $timeout, worldTree, $upload) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
 ////////////////////////////////////////////////////////////
+var checkMessagesTimeout;
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
 
@@ -29,7 +29,6 @@ function scrollMessages() {
 
 function checkMessages(){
 db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(data){
-	console.log(data);
 	if (data.length>0) {
 		for (i = 0; i < data.length; i++) { 
 		    if ($scope.localMessages.indexOf(data[i]._id) == -1) {
@@ -40,15 +39,19 @@ db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(dat
 		}
 	    sinceID = data[data.length-1]._id;
 	    checkMessages();
-	}
-	else if (firstScroll==true) {
+	} else {
+		if (firstScroll==true) {
 		scrollMessages();
+		}
+		checkMessagesTimeout = $timeout(checkMessages, 3000);	
 	}
+	 
 });
+
+
 }
 
 $scope.sendMsg = function (e) {
-	console.log('???');
 	if (e) {e.preventDefault()}
 	if ($scope.msg.text == null) { return;}
 	if ($scope.loggedIn){
@@ -62,12 +65,10 @@ $scope.sendMsg = function (e) {
 		
 		sendMsgToServer(newChat);		
 	    $scope.msg.text = "";
-	    $scope.msg.img = "";
 	}
 }
 
 function sendMsgToServer(msg) {
-console.log(msg);
 db.messages.create(msg, function(res) {
 	sinceID = res[0]._id;
 	
@@ -90,7 +91,7 @@ $scope.onImageSelect = function($files) {
 	        pic: data,
 	        userID: $scope.userID
 		});
-		console.log(data);
+		//console.log(data);
 	})
 }	
 
@@ -98,39 +99,14 @@ $scope.onImageSelect = function($files) {
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
 ////////////////////////////////////////////////////////////
-var checkMessagesInterval = $interval(checkMessages, 3000); 
 
+
+/*
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
         $interval.cancel(checkMessagesInterval);
         dereg();
 });
-
-var blurTimeout;
-
-//to stop interval on window blur
-function onBlur() {
-
-	//on blur, wait for a bit then cancel interval
-    var cancelInterval = function() {
-	    $interval.cancel(checkMessagesInterval);
-	    dereg();  
-    }
-
-    blurTimeout = $timeout(cancelInterval, 20000);
-	
-};
-function onFocus(){
-	$timeout.cancel(blurTimeout);
-	checkMessagesInterval = $interval(checkMessages, 3000); 
-};
-
-if (/*@cc_on!@*/false) { // check for Internet Explorer
-	document.onfocusin = onFocus;
-	document.onfocusout = onBlur;
-} else {
-	window.onfocus = onFocus;
-	window.onblur = onBlur;
-}
+*/
 
 
 ////////////////////////////////////////////////////////////
@@ -165,7 +141,11 @@ if (user !== '0'){
 	  $scope.nick = user.meetup.displayName;
 	}
 	else if (user.local){
-	  $scope.nick = user.local.email;
+	  //strip name from email
+	  var s = user.local.email;
+	  var n = s.indexOf('@');
+	  s = s.substring(0, n != -1 ? n : s.length);
+	  $scope.nick = s;
 	}
 	else {
 	  $scope.nick = "Visitor";
@@ -178,4 +158,4 @@ checkMessages();
 });
 
 
-} 
+} ]);

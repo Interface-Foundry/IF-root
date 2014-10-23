@@ -85,6 +85,20 @@ nav .nav-title {
 	}
 }
 
+@media (max-width: 565px) {
+	.world-title {
+		font-size: 19px;
+		line-height: 26px;
+	}
+}
+
+@media (max-width: 732px) {
+	.world-title {
+		font-size: 25px;
+		line-height: 26px;
+	}
+}
+
 
 nav .nav-title small {
 	color: #0091EA;

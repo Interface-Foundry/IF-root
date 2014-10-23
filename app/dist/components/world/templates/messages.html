@@ -3,19 +3,20 @@
 </div>
 <div class="col-xs-12 landmark">
 	<a ng-href="/w/{{world.id}}/messages">
-	<div class="card description" style="background-color: #EEE;">
-		<li class="message">
+	<div class="card description" style="background-color: #FFF;">
+		<li class="message message-card">
 			<picture class="msg-avatar">
 				<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar || world.avatar}}" ng-cloak>
 			</picture>
-			<div class="message-content">
+			<div class="message-content-card">
 				<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
 				<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic">
-				<p class="message-body" ng-bind="msg.msg || 'Start messaging with others here now!'" ng-if="!msg.pic">Start messaging now!</p>
+				<p class="message-body message-body-card" ng-bind="msg.msg || 'Start messaging with others here now!'" ng-if="!msg.pic">Start messaging now!</p>
 			</div>
 		</li>
-		<span class="pull-right"><button >Join In and Chat</button></span>
+		<span class="pull-right"><button class="btn btn-info"><span class="glyphicon glyphicon-user"></span> Chat</button></span>
 		<div class="clearfix"></div>
 	</div>
 	</a>
 </div>
+

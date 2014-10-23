@@ -205,7 +205,7 @@ if ($scope.landmark.hasTime) {
 					icon: {
 						iconUrl: 'img/marker/bubble-marker-50.png',
 						shadowUrl: '',
-						iconSize: [25, 48],
+						iconSize: [35, 67],
 						iconAnchor: [13, 10]
 					},
 					message:value.name

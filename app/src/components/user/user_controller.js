@@ -27,7 +27,6 @@ $scope.onAvatarSelect = function($files) {
 	});
 }
 
-
 function saveUser() {
 	if ($scope.user) {
 		userManager.saveUser($scope.user);
@@ -104,6 +103,9 @@ if ($routeParams.incoming == 'meetup'){
 	});
 	
 }
+else if ($routeParams.incoming == 'messages'){
+	$scope.fromMessages = true;
+}
 else {
 	$http.get('/api/user/profile').success(function(user){
 		console.log(user);
@@ -127,44 +129,6 @@ function checkProfileUpdates(){
 	    $interval.cancel($scope.stop);
 	    dereg();
   	});
-
-
-
-
-	// var checkProfileInterval = $interval(checkProfile, 2100); 
-
-	// var dereg = $rootScope.$on('$locationChangeSuccess', function() {
-	//         $interval.cancel(checkProfileInterval);
-	//         dereg();
-	// });
-
-	// var blurTimeout;
-
-	// //to stop interval on window blur
-	// function onBlur() {
-
-	// 	//on blur, wait for a bit then cancel interval
-	//     var cancelInterval = function() {
-	// 	    $interval.cancel(checkProfileInterval);
-	// 	    dereg();  
-	//     }
-
-	//     blurTimeout = $timeout(cancelInterval, 5000);
-		
-	// };
-	// function onFocus(){
-	// 	$timeout.cancel(blurTimeout);
-	// 	checkProfileInterval = $interval(checkProfile, 2100); 
-	// };
-
-	// if (/*@cc_on!@*/false) { // check for Internet Explorer
-	// 	document.onfocusin = onFocus;
-	// 	document.onfocusout = onBlur;
-	// } else {
-	// 	window.onfocus = onFocus;
-	// 	window.onblur = onBlur;
-	// }
-
 
 }
 
@@ -193,6 +157,11 @@ $scope.newWorld = function() {
 
 $scope.go = function(url) {
 	$location.path(url);
+}
+
+$scope.goBack = function() {
+	console.log('asdf');
+  window.history.back();
 }
 
 userManager.getUser().then(
