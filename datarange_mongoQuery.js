@@ -18,8 +18,6 @@ db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
 
 
-
-
 function objectIdWithTimestamp(timestamp)
 {
     // Convert string date to Date object (otherwise assume timestamp is a date)
@@ -36,17 +34,10 @@ function objectIdWithTimestamp(timestamp)
     return constructedObjectId
 }
 
-
-// items.find({
-//     created_at: {
-//         $gte: ISODate("2010-04-29T00:00:00.000Z"),
-//         $lt: ISODate("2010-05-01T00:00:00.000Z")
-//     }
-// })
 var qw = {
     '_id': {
-        $gte: objectIdWithTimestamp('2014/09/01'),
-        $lt: objectIdWithTimestamp('2014/10/02')
+        $gte: objectIdWithTimestamp('2014/10/01'),
+        $lt: objectIdWithTimestamp('2014/10/24')
     }
 };   
 
@@ -55,4 +46,3 @@ landmarkSchema.find(qw,function(err, data) {
   console.log(data.length);
 });
 
-//landmarkSchema.find({ _id: { $gt: objectIdWithTimestamp('1980/05/25') } });
