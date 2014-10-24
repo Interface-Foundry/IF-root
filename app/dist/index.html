@@ -82,7 +82,10 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  		<button class="drawer-toggle pull-left" ng-click="drawerOn = !drawerOn">
 	  			<img width="13px" height="16px" class="handle pull-left" src="/img/icons/drawer.png">
   			</button>
-	  		<a href="/"><span class="nav-title pull-left vertical-middle" ng-bind-html="navTitle"></span></a>  		
+
+  			<span ng-click="drawerOn = !drawerOn" class="pull-left vertical-middle" ><img style="width:29px; margin-right:-7px;" src="/img/IF/bubblli_logo.svg"></span>
+
+	  		<span class="nav-title pull-left vertical-middle" ng-bind-html="navTitle"></span>		
 	  		<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
 	  			<li class="search-icon nav-item">
 	  					<a href="" class="no-u" ng-click="">

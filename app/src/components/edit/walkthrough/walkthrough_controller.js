@@ -18,6 +18,9 @@ olark('api.box.show'); //shows olark tab on this page
 
 zoomControl.style.display = 'none'; 
 
+$scope.world.name = "bubble"; //make sure there's a default world name
+map.setCenter([-83,42], 15, $scope.aperture.state); //setting to blue coast on load so arrows show up on background
+
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
 		$scope.position++; 
@@ -108,8 +111,9 @@ console.log($scope.style)
 }	
 	
 $scope.saveAndExit = function() {
-
+console.log('asdf121342313');
 	if (!$scope.world.name){
+		console.log('asdf');
 		$scope.world.name = "bubble";
 	}
 

@@ -5,7 +5,6 @@
 function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager) {
 
     var map = mapManager;
-    // map.resetMap();
 
     angular.extend($rootScope, {loading: true});
 	  var style = styleManager;
@@ -15,30 +14,6 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     $scope.aperture.set('off');
 
 	  console.log('world routing');
-
-    //WIDGET find data and then route to correct bubble
-    // var today = new Date();
-    // var dd = today.getDate();
-    // var mm = today.getMonth()+1; //January is 0!
-
-    // var yyyy = today.getFullYear();
-    // if(dd<10){dd='0'+dd} if(mm<10){mm='0'+mm} var today = dd+'/'+mm+'/'+yyyy;
- 
-    // if (today === '10/06/2014'){
-    //     $location.path('awards');    
-    // }
-
-    // else if (today === '11/06/2014'){
-    //     $location.path('lectures');
-    // }
-
-    // else if (today === '12/06/2014'){
-    //     $location.path('show');
-    // }
-
-    // else {
-    //     $location.path('awards');
-    // }
     
     $scope.initGeo = function() {
       //--- GEO LOCK -----//
@@ -63,21 +38,12 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
           console.log('no geo');
           alert('Your browser does not support geolocation :(');
       }
-
-      //--------------//     
     }
 
-
-    //initial loc bubble query
     $scope.initGeo();
 
-   
     function noLoc(){
-  
-
       console.log('no loc');  
-
-
       $scope.showNoLoc = true;
       angular.extend($rootScope, {loading: false});
       $scope.$apply();
@@ -94,27 +60,16 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
             if (data[0].liveAndInside[0] != null) {
                 if (data[0].liveAndInside[0].id){
 
-                    //-------- DISABLE AFTER DEMO ------//
-                    //$location.path('/w/StartFast_Demo_Day_2014');
-
-                    ///-------- ENABLE AFTER DEMO ------//
                     $location.path('w/'+data[0].liveAndInside[0].id); 
                 }
                 else {
-                    //-------- DISABLE AFTER DEMO ------//
-                    //$location.path('/w/StartFast_Demo_Day_2014');
-
-                    ///-------- ENABLE AFTER DEMO ------//
+   
                     console.log('world has no id');
                     noWorlds(lat,lon);
                 }
             }
             else {
 
-                //-------- DISABLE AFTER DEMO ------//
-                //$location.path('/w/StartFast_Demo_Day_2014');
-
-                //-------- ENABLE AFTER DEMO ------//
                 console.log('not inside any worlds');
                 noWorlds(lat,lon); //not inside any worlds
 
@@ -124,18 +79,39 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
     function noWorlds(lat,lon){
 
+      map.setCenter([lon, lat], 14, $scope.aperture.state);
 
-     //-------- DISABLE AFTER DEMO ------//
-      // angular.extend($rootScope, {loading: false});
-      // $location.path('/w/Startfast_Demo_Day'); 
-
-      map.setCenter([lon, lat], 18, $scope.aperture.state);
-
-
-      //-------- ENABLE AFTER DEMO ------//
         console.log('no worlds');  
         $scope.showCreateNew = true;
         angular.extend($rootScope, {loading: false});
+
+        //add markers to map
+
+
+        angular.forEach($rootScope.nearbyBubbles, function(landmark) {
+         
+          if (landmark.lat && landmark.lng){
+
+                map.addMarker(landmark._id, {
+                  lat:landmark.lat,
+                  lng:landmark.lng,
+                  draggable:false,
+                  message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
+                  icon: {
+                    iconUrl: 'img/marker/bubble-marker-50.png',
+                    shadowUrl: '',
+                    iconSize: [35, 67],
+                    iconAnchor: [13, 10]
+                  }
+                });  
+
+               
+
+          }
+          
+
+        });
+
     }
 
     $scope.addWorld = function (){
@@ -143,7 +119,6 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
     };
 
 }
-//WorldRouteCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope','apertureService'];
 
 
 //loads everytime
@@ -160,9 +135,6 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
 	  angular.extend($rootScope, {loading: false});
 	
-	/*$scope.$on('$viewContentLoaded', function() {
-		document.getElementById("wrap").scrollTop = 0
-	});*/
 	  
 	$scope.search = function() {
 		if ($scope.searchOn == true) {

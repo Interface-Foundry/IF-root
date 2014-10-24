@@ -93,8 +93,11 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
 					iconSize: [35, 67],
-					iconAnchor: [17.5, 60]
-				}
+					iconAnchor: [17.5, 60],
+					popupAnchor:[0,-30]
+				},
+				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
+
 			});
 		} else {
 			console.error('No center found! Error!');
@@ -194,23 +197,20 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	
   	function initLandmarks(landmarks) {
 	  	angular.forEach($scope.landmarks, function(landmark) {
-					map.addMarker(landmark._id, {
-						lat:landmark.loc.coordinates[1],
-						lng:landmark.loc.coordinates[0],
-						draggable:false,
-						message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-						icon: {
-			  				/*iconUrl: 'img/marker/red-marker-100.png',
-			  				iconSize: [100,100],
-			  				iconAnchor: [50, 100],
-			  				shadowUrl: '',
-			  				shadowRetinaUrl: '',
-			  				shadowSize: [0,0],
-			  				popupAnchor: [0, -80]*/
-		  				},
-						_id: landmark._id
-					});
-				});
+			map.addMarker(landmark._id, {
+				lat:landmark.loc.coordinates[1],
+				lng:landmark.loc.coordinates[0],
+				draggable:false,
+				message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+	            icon: {
+	              iconUrl: 'img/marker/bubble-marker-50.png',
+	              shadowUrl: '',
+	              iconSize: [35, 67],
+	              iconAnchor: [13, 10]
+	            },
+				_id: landmark._id
+			});
+		});
   	}
 
 	/*
