@@ -36,8 +36,8 @@ function objectIdWithTimestamp(timestamp)
 
 var qw = {
     '_id': {
-        $gte: objectIdWithTimestamp('2014/10/13'),
-        $lt: objectIdWithTimestamp('2014/10/18')
+        $gte: objectIdWithTimestamp('2014/10/19'),
+        $lt: objectIdWithTimestamp('2014/10/24')
     }
 };   
 
