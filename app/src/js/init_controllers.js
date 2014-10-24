@@ -79,7 +79,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
     function noWorlds(lat,lon){
 
-      map.setCenter([lon, lat], 14, $scope.aperture.state);
+        map.setCenter([lon, lat + 0.012], 14, $scope.aperture.state);
 
         console.log('no worlds');  
         $scope.showCreateNew = true;

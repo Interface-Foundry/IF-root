@@ -95,7 +95,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).
-      when('/signup', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
+      when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
       //when('/profile', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       //when('/profile/:incoming', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).

@@ -111,15 +111,27 @@ console.log($scope.style)
 }	
 	
 $scope.saveAndExit = function() {
-console.log('asdf121342313');
+
+	//prevent bug
 	if (!$scope.world.name){
-		console.log('asdf');
 		$scope.world.name = "bubble";
 	}
 
 	$scope.save();
 	if ($scope.world.id) {
+
+		// console.log('corrd');
+		// console.log($scope.world);
+		// so it goes to the right map area on exit
+		// if ($scope.world.loc){
+		// 	if($scope.world.loc.coordinates){
+		// 		console.log('asfasdf');
+		// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
+		// 	}
+		// }
+
 		$location.path("/edit/w/"+$scope.world.id);
+		map.refresh();
 	} else {
 		//console
 		console.log('no world id'); 

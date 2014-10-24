@@ -160,7 +160,6 @@ $scope.go = function(url) {
 }
 
 $scope.goBack = function() {
-	console.log('asdf');
   window.history.back();
 }
 

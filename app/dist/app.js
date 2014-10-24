@@ -4733,7 +4733,7 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).
-      when('/signup', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
+      when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: SignupCtrl}).
       //when('/profile', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       //when('/profile/:incoming', {templateUrl: 'components/user/profile.html', controller: ProfileCtrl, resolve: {loggedin: checkLoggedin}}).
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: resolveAuth}).
@@ -6203,7 +6203,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
     function noWorlds(lat,lon){
 
-      map.setCenter([lon, lat], 14, $scope.aperture.state);
+        map.setCenter([lon, lat + 0.012], 14, $scope.aperture.state);
 
         console.log('no worlds');  
         $scope.showCreateNew = true;
@@ -9857,6 +9857,7 @@ function showPosition(position) {
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
 	
+	console.log(userLng);
 	map.setCenter([userLng, userLat], 17, 'editor');
  
 	map.removeAllMarkers();
@@ -10098,15 +10099,27 @@ console.log($scope.style)
 }	
 	
 $scope.saveAndExit = function() {
-console.log('asdf121342313');
+
+	//prevent bug
 	if (!$scope.world.name){
-		console.log('asdf');
 		$scope.world.name = "bubble";
 	}
 
 	$scope.save();
 	if ($scope.world.id) {
+
+		// console.log('corrd');
+		// console.log($scope.world);
+		// so it goes to the right map area on exit
+		// if ($scope.world.loc){
+		// 	if($scope.world.loc.coordinates){
+		// 		console.log('asfasdf');
+		// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
+		// 	}
+		// }
+
 		$location.path("/edit/w/"+$scope.world.id);
+		map.refresh();
 	} else {
 		//console
 		console.log('no world id'); 
@@ -11583,14 +11596,6 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
       });
   };
 
-
-
-  //FIRE function on click
-  //---> http.post(/auth/meetup)
-
-
-
-
   // Register the login() function
   $scope.login = function(){
 
@@ -11614,7 +11619,7 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
 
 }
 
-function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager, $routeParams) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -11625,20 +11630,30 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
   // This object will be filled by the form
   $scope.user = {};
 
+  if ($routeParams.incoming == 'messages'){
+    $scope.showMessages = true;
+  }
 
   // Register the login() function
   $scope.signup = function(){
+
     var data = {
       email: $scope.user.email,
       password: $scope.user.password
     }
 
-
-
     $http.post('/api/user/signup', data).
       success(function(user){
           if (user){
-            $location.url('/profile');
+
+              //if incoming from chat sign up, then go back to chat
+              if ($routeParams.incoming == 'messages'){
+                window.history.back();
+              }
+              //otherwise go to profile
+              else {
+                $location.url('/profile');
+              } 
           }
       }).
       error(function(err){
@@ -11646,21 +11661,10 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
           $scope.alerts.addAlert('danger',err);
         }
       });
+  }
 
-
-
-
-    // $http.post('/api/user/signup', data).
-    //   success(function(user){
-    //       if (user){
-    //         $location.url('/profile');
-    //       }
-    //   }).
-    //   error(function(err){
-    //     if (err){
-    //       $scope.alerts.addAlert('danger',err);
-    //     }
-    //   });
+  $scope.goBack = function() {
+    window.history.back();
   }
 }
 
@@ -11970,7 +11974,6 @@ $scope.go = function(url) {
 }
 
 $scope.goBack = function() {
-	console.log('asdf');
   window.history.back();
 }
 
@@ -12273,6 +12276,55 @@ $scope.user = user;
 console.log(user._id);
 checkMessages();
 });
+
+
+
+
+
+	//================================================
+    // Check if the user is connected
+    //================================================
+    function checkLogin(){
+
+	      // Make an AJAX call to check if the user is logged in
+	      $http.get('/api/user/loggedin').success(function(user){
+
+	        // Authenticated
+	        if (user !== '0'){
+
+	              if (user._id){
+	                $rootScope.userID = user._id;
+	              }
+	              //determine name to display on login (should check for name extension before adding...)
+	              if (user.name){
+	                  $rootScope.userName = user.name;
+	              }
+	              else if (user.facebook){
+	                  $rootScope.userName = user.facebook.displayName;
+	              }
+	              else if (user.twitter){
+	                  $rootScope.userName = user.twitter.displayName;
+	              }
+	              else if (user.meetup){
+	                  $rootScope.userName = user.meetup.displayName;
+	              }
+	              else if (user.local){
+	                  $rootScope.userName = user.local.email;
+	              }
+	              else {
+	                  $rootScope.userName = "Me";
+	              }
+	             
+	          $rootScope.avatar = user.avatar;
+	          $rootScope.showLogout = true;
+	        }
+
+	      });
+    }
+
+checkLogin();
+
+
 
 
 } ]);

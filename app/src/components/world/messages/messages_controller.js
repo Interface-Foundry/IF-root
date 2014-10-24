@@ -158,4 +158,53 @@ checkMessages();
 });
 
 
+
+
+
+	//================================================
+    // Check if the user is connected
+    //================================================
+    function checkLogin(){
+
+	      // Make an AJAX call to check if the user is logged in
+	      $http.get('/api/user/loggedin').success(function(user){
+
+	        // Authenticated
+	        if (user !== '0'){
+
+	              if (user._id){
+	                $rootScope.userID = user._id;
+	              }
+	              //determine name to display on login (should check for name extension before adding...)
+	              if (user.name){
+	                  $rootScope.userName = user.name;
+	              }
+	              else if (user.facebook){
+	                  $rootScope.userName = user.facebook.displayName;
+	              }
+	              else if (user.twitter){
+	                  $rootScope.userName = user.twitter.displayName;
+	              }
+	              else if (user.meetup){
+	                  $rootScope.userName = user.meetup.displayName;
+	              }
+	              else if (user.local){
+	                  $rootScope.userName = user.local.email;
+	              }
+	              else {
+	                  $rootScope.userName = "Me";
+	              }
+	             
+	          $rootScope.avatar = user.avatar;
+	          $rootScope.showLogout = true;
+	        }
+
+	      });
+    }
+
+checkLogin();
+
+
+
+
 } ]);

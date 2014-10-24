@@ -37,14 +37,6 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
       });
   };
 
-
-
-  //FIRE function on click
-  //---> http.post(/auth/meetup)
-
-
-
-
   // Register the login() function
   $scope.login = function(){
 
@@ -68,7 +60,7 @@ function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertM
 
 }
 
-function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
+function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager, $routeParams) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -79,20 +71,30 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
   // This object will be filled by the form
   $scope.user = {};
 
+  if ($routeParams.incoming == 'messages'){
+    $scope.showMessages = true;
+  }
 
   // Register the login() function
   $scope.signup = function(){
+
     var data = {
       email: $scope.user.email,
       password: $scope.user.password
     }
 
-
-
     $http.post('/api/user/signup', data).
       success(function(user){
           if (user){
-            $location.url('/profile');
+
+              //if incoming from chat sign up, then go back to chat
+              if ($routeParams.incoming == 'messages'){
+                window.history.back();
+              }
+              //otherwise go to profile
+              else {
+                $location.url('/profile');
+              } 
           }
       }).
       error(function(err){
@@ -100,21 +102,10 @@ function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alert
           $scope.alerts.addAlert('danger',err);
         }
       });
+  }
 
-
-
-
-    // $http.post('/api/user/signup', data).
-    //   success(function(user){
-    //       if (user){
-    //         $location.url('/profile');
-    //       }
-    //   }).
-    //   error(function(err){
-    //     if (err){
-    //       $scope.alerts.addAlert('danger',err);
-    //     }
-    //   });
+  $scope.goBack = function() {
+    window.history.back();
   }
 }
 

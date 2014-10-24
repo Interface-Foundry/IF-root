@@ -13,7 +13,7 @@
 	<div class="message-room-col hidden-xs">
 		<div class="nickname-info">
 			<h4 class="inner-nickname">You're chatting as</h4>
-			<p><img style="border-radius:50%;" width="50" height="50" ng-src="{{user.avatar}}">  {{nick}}</p>
+			<p><img style="border-radius:50%;" width="50" height="50" ng-src="{{user.avatar}}" src="/img/icons/profile.png">  {{nick}}</p>
 			<a href="/profile/worlds/messages">
 				<button type="button" class="lightblue500 btn btn-default btn-xs edit-nickname"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
 			</a>
@@ -57,6 +57,6 @@
           <a ng-href="/auth/facebook?redirect=%2Fw%2F{{world.id}}%2Fmessages" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
           <a ng-href="/auth/twitter?redirect=%2Fw%2F{{world.id}}%2Fmessages" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
           <a ng-href="/auth/meetup?redirect=%2Fw%2F{{world.id}}%2Fmessages" class="btn btn-meetup"><span class="fa fa-twitter"></span> Meetup</a>
-          Or: <a ng-href="/signup?redirect=%2Fw%2F{{world.id}}%2Fmessages" class="btn btn-default"><span class="fa fa-twitter"></span> Signup</a>
+          Or: <a ng-href="/signup/messages" class="btn btn-default"><span class="fa fa-twitter"></span> Signup</a>
       </div>
 </div>

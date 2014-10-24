@@ -146,6 +146,7 @@ nav li input.form-control {
 	-webkit-box-shadow: 0px 1px 1px rgba(0,0,0,0.5);
 }
 
+
 .nav-user {
 	color: white;
 	text-shadow: 0px 1px 0px rgba(0,0,0,0.5);
@@ -155,6 +156,21 @@ nav li input.form-control {
 .nav-user:hover, .nav-user:focus {
 	text-decoration: none;
 	color: #eeeeee;
+}
+
+.nav-signup {
+	color: #5C68C7;
+	box-shadow: 0px 1px 0px rgba(0,0,0,0.5);
+	padding: 3px 6px;
+	border: 1px #cecece solid; 
+	border-radius: 2px;
+	background-color: #fff;
+	font-size: 14px;
+}
+
+.nav-signup:hover, .nav-signup:focus {
+	text-decoration: none;
+	background-color: #cecece;
 }
 
 .navbar-right {

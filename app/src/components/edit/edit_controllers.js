@@ -353,6 +353,7 @@ function showPosition(position) {
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
 	
+	console.log(userLng);
 	map.setCenter([userLng, userLat], 17, 'editor');
  
 	map.removeAllMarkers();
