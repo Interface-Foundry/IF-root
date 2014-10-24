@@ -13,7 +13,7 @@
 	</ul> -->
 	<ul class="tab-group" ng-show="state.myWorlds">
 		
-		<span ng-click="goBack()" style="cursor:pointer;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
+		<span ng-click="goBack()" ng-show="fromMessages" style="cursor:pointer;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
 		
 		<li class="tab" ng-class="{'selected': state.public}">
 			<a href="#/profile/worlds" class="tab-link" ng-hide="fromMessages">My Profile & Bubbles</a>

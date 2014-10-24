@@ -10123,6 +10123,11 @@ console.log($scope.style)
 }	
 	
 $scope.saveAndExit = function() {
+
+	if (!$scope.world.name){
+		$scope.world.name = "bubble";
+	}
+
 	$scope.save();
 	if ($scope.world.id) {
 		$location.path("/edit/w/"+$scope.world.id);
