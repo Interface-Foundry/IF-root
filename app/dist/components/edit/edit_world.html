@@ -1,12 +1,17 @@
 <div class="edit-aperture">
 <ul class="edit-toolbar" ng-class="{'tuck': view=='styles'}">
 <li class="input-group">
-		<input type="text" class="form-control" ng-model="searchText" ng-enter="search()">
+
+		<input type="text" class="form-control" ng-model="searchText" placeholder="Search for a location" ng-enter="search()">
 		<span class="input-group-btn">
 			<button class="btn btn-search" type="button" ng-click="search()">
 				<span class="glyphicon glyphicon-search"></span>
 			</button>
+			<a ng-href="#/edit/w/{{world.id}}/landmarks" target="_blank"><button class="btn btn-default"><span class="glyphicon glyphicon-pushpin"></span></button></a>
+			<a ng-href="#/w/{{world.id}}" target="_blank"><button class="btn btn-default"><span class="glyphicon glyphicon-eye-open"></span></button></a>
+
 		</span>
+
 </li>
 </ul>
 

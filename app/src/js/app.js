@@ -90,8 +90,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
+      when('/', {templateUrl: 'components/nearby/route.html', controller: WorldRouteCtrl}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: NearbyCtrl}).
       when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).

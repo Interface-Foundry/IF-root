@@ -104,6 +104,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			                <li ng-repeat="bubble in altBubbles">
 			                <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
 			                </li>
+			                <a href="/"><button class="btn btn-primary btn-sm" ><span class="glyphicon glyphicon-refresh"></span> Refresh</button></a>
+			                <a href="/nearby"><button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-map-marker"></span> Nearby </button></a>
 			            </ul>
 			            
 			          </span>
@@ -117,7 +119,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			   		</a>
 			   		<ul class="dropdown-menu">
 				   		<li><a role="menuitem" tabindex="-1" ng-href="/profile">Profile</a></li>
-				   		<li><a ng-href="profile">+ New Bubble</a></li>
+				   		<li><a ng-click="newWorld()">+ New Bubble</a></li>
 				   		<li><a href="" ng-click="feedbackOn=true">Report Issue</a></li>
 				   		<li><a href="" ng-click="logout()">Logout</a></li>
 				   	</ul>

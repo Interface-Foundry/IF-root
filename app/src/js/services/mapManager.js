@@ -13,11 +13,11 @@ var mapManager = {
 	layers: {
 		baselayers: {
 			baseMap: {
-			name: "Sunset",
-			url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
-			type: 'xyz',
-			top: true,
-			maxZoom: 25
+				name: "Urban",
+				url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+				type: 'xyz',
+				top: true,
+				maxZoom: 25
 			}
 		},
 		overlays: {}

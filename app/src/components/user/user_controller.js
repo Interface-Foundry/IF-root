@@ -1,7 +1,7 @@
 function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 
 angular.extend($rootScope, {loading: false});
-
+$scope.fromMessages = false;
 $scope.state = {};
 $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
@@ -145,15 +145,15 @@ $scope.deleteWorld = function(i) {
   	}
 
 $scope.newWorld = function() {
-		console.log('newWorld()');
-		$scope.world = {};
-		$scope.world.newStatus = true; //new
-		db.worlds.create($scope.world, function(response){
-			console.log('##Create##');
-			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0].worldID);
-		});
-	}
+	console.log('newWorld()');
+	$scope.world = {};
+	$scope.world.newStatus = true; //new
+	db.worlds.create($scope.world, function(response){
+		console.log('##Create##');
+		console.log('response', response);
+		$location.path('/edit/walkthrough/'+response[0].worldID);
+	});
+}
 
 $scope.go = function(url) {
 	$location.path(url);

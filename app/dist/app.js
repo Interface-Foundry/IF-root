@@ -4728,8 +4728,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: WorldRouteCtrl}).
+      when('/', {templateUrl: 'components/nearby/route.html', controller: WorldRouteCtrl}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: NearbyCtrl}).
       when('/login', {templateUrl: 'components/user/login.html', controller: LoginCtrl}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: ForgotCtrl}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: ResetCtrl}).
@@ -6126,20 +6126,22 @@ function shelfPan(amount,special){
 /* IF Controllers */
 
 //searching for bubbles
-function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager) {
+function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager, alertManager) {
 
     var map = mapManager;
 
     angular.extend($rootScope, {loading: true});
 	  var style = styleManager;
 	  style.resetNavBG();
+
+    var alert = alertManager;
 	
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
 
 	  console.log('world routing');
     
-    $scope.initGeo = function() {
+    $rootScope.initGeo = function() {
       //--- GEO LOCK -----//
 
       if (navigator.geolocation) {
@@ -6164,7 +6166,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       }
     }
 
-    $scope.initGeo();
+    $rootScope.initGeo();
 
     function noLoc(){
       console.log('no loc');  
@@ -6185,6 +6187,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
                 if (data[0].liveAndInside[0].id){
 
                     $location.path('w/'+data[0].liveAndInside[0].id); 
+                    alert.addAlert('success', 'You found a bubble! Explore it below', true);
                 }
                 else {
    
@@ -6196,6 +6199,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
                 console.log('not inside any worlds');
                 noWorlds(lat,lon); //not inside any worlds
+                alert.addAlert('info', 'No Bubbles here, but there are some nearby!', true);
 
             }
         });
@@ -6270,6 +6274,18 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 			$scope.searchOn = true;
 		}
 	}  
+
+
+  $rootScope.newWorld = function() {
+    console.log('newWorld()');
+    $scope.world = {};
+    $scope.world.newStatus = true; //new
+    db.worlds.create($scope.world, function(response){
+      console.log('##Create##');
+      console.log('response', response);
+      $location.path('/edit/walkthrough/'+response[0].worldID);
+    });
+  }
 	  
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
     //================================================
@@ -6356,6 +6372,116 @@ function indexIF($location, $scope, db, leafletData, $rootScope, apertureService
 
 }
 
+
+
+
+
+//searching for bubbles
+function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager, alertManager) {
+
+    var map = mapManager;
+
+    angular.extend($rootScope, {loading: true});
+    var style = styleManager;
+    style.resetNavBG();
+
+    var alert = alertManager;
+  
+    $scope.aperture = apertureService;  
+    $scope.aperture.set('off');
+
+    console.log('world routing');
+    
+    $rootScope.initGeo = function() {
+      //--- GEO LOCK -----//
+
+      if (navigator.geolocation) {
+
+        function showPosition(position) {
+            var userLat = position.coords.latitude;
+            var userLon = position.coords.longitude;
+            findWorlds(userLat, userLon); 
+        }
+
+        function locError(){
+            console.log('error finding loc');
+            //geo error
+            noLoc();
+        }
+
+        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
+
+      } else {
+          console.log('no geo');
+          alert('Your browser does not support geolocation :(');
+      }
+    }
+
+    $rootScope.initGeo();
+
+    function noLoc(){
+      console.log('no loc');  
+      $scope.showNoLoc = true;
+      angular.extend($rootScope, {loading: false});
+      $scope.$apply();
+    }
+
+    function findWorlds(lat,lon){   
+     
+     console.log('findWorlds');
+        $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
+
+            $rootScope.altBubbles = data[0].liveAndInside;
+            $rootScope.nearbyBubbles = data[0].live;
+
+            noWorlds(lat,lon); //not inside any worlds
+            alert.addAlert('success', 'Explore bubbles around you', true);
+
+        });
+    }
+
+    function noWorlds(lat,lon){
+
+        map.setCenter([lon, lat], 14, $scope.aperture.state);
+
+        console.log('no worlds');  
+        $scope.showCreateNew = true;
+        angular.extend($rootScope, {loading: false});
+
+        //add markers to map
+
+
+        angular.forEach($rootScope.nearbyBubbles, function(landmark) {
+         
+          if (landmark.lat && landmark.lng){
+
+                map.addMarker(landmark._id, {
+                  lat:landmark.lat,
+                  lng:landmark.lng,
+                  draggable:false,
+                  message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
+                  icon: {
+                    iconUrl: 'img/marker/bubble-marker-50.png',
+                    shadowUrl: '',
+                    iconSize: [35, 67],
+                    iconAnchor: [13, 10]
+                  }
+                });  
+
+               
+
+          }
+          
+
+        });
+
+    }
+
+    $scope.addWorld = function (){
+      $location.path( '/profile' );
+    };
+
+}
 
 L.AreaSelect = L.Class.extend({
     includes: L.Mixin.Events,
@@ -6798,11 +6924,11 @@ var mapManager = {
 	layers: {
 		baselayers: {
 			baseMap: {
-			name: "Sunset",
-			url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6f6j6e/{z}/{x}/{y}.png',
-			type: 'xyz',
-			top: true,
-			maxZoom: 25
+				name: "Urban",
+				url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+				type: 'xyz',
+				top: true,
+				maxZoom: 25
 			}
 		},
 		overlays: {}
@@ -11200,6 +11326,8 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 					iconAnchor: [13, 10]
 				},
 				draggable:true,
+				message:'Drag to location on map',
+				focus:true
 			});
 			
 			//$scope.selectItem(0)
@@ -11815,7 +11943,7 @@ function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Land
 function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 
 angular.extend($rootScope, {loading: false});
-
+$scope.fromMessages = false;
 $scope.state = {};
 $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
@@ -11959,15 +12087,15 @@ $scope.deleteWorld = function(i) {
   	}
 
 $scope.newWorld = function() {
-		console.log('newWorld()');
-		$scope.world = {};
-		$scope.world.newStatus = true; //new
-		db.worlds.create($scope.world, function(response){
-			console.log('##Create##');
-			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0].worldID);
-		});
-	}
+	console.log('newWorld()');
+	$scope.world = {};
+	$scope.world.newStatus = true; //new
+	db.worlds.create($scope.world, function(response){
+		console.log('##Create##');
+		console.log('response', response);
+		$location.path('/edit/walkthrough/'+response[0].worldID);
+	});
+}
 
 $scope.go = function(url) {
 	$location.path(url);
@@ -12171,6 +12299,7 @@ db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(dat
 
 }
 
+
 $scope.sendMsg = function (e) {
 	if (e) {e.preventDefault()}
 	if ($scope.msg.text == null) { return;}
@@ -12215,6 +12344,34 @@ $scope.onImageSelect = function($files) {
 	})
 }	
 
+//add welcome message 
+function welcomeMessage(){
+	
+
+	//calculating size of window to place welcome chat on feed (adding shadow bots to fill blank space)
+	var shadowNum = 7.5 * window.innerHeight / 520;
+
+	//measure height of window, find ratio proportion
+	for (i = 0; i < shadowNum; i++) { 
+    	var hiddenChat = {
+	    	hidden: true,
+	    	nick: 'shadowBot'+i
+		};
+		$scope.messages.push(hiddenChat);
+	}
+
+	var newChat = {
+	    worldID: $routeParams.worldURL,
+	    nick: 'BubblyBot',
+	    msg: 'Hey there, this is a Bubble chat created just for '+$scope.world.name+'. Chat, share pictures & leave notes with others here!',
+	    avatar: $scope.world.avatar || 'img/icons/profile.png',
+	    userID: 'chatbot'
+	};
+	$scope.messages.push(newChat);
+
+
+}
+
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
@@ -12236,7 +12393,8 @@ var dereg = $rootScope.$on('$locationChangeSuccess', function() {
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
 	$scope.world=data.world;
-	console.log($scope.style);
+	welcomeMessage(); //add bot message 
+	console.log($scope.world);
 });
 
 $http.get('/api/user/loggedin').success(function(user){

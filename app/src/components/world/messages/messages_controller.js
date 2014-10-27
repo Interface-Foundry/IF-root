@@ -51,6 +51,7 @@ db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(dat
 
 }
 
+
 $scope.sendMsg = function (e) {
 	if (e) {e.preventDefault()}
 	if ($scope.msg.text == null) { return;}
@@ -95,6 +96,34 @@ $scope.onImageSelect = function($files) {
 	})
 }	
 
+//add welcome message 
+function welcomeMessage(){
+	
+
+	//calculating size of window to place welcome chat on feed (adding shadow bots to fill blank space)
+	var shadowNum = 7.5 * window.innerHeight / 520;
+
+	//measure height of window, find ratio proportion
+	for (i = 0; i < shadowNum; i++) { 
+    	var hiddenChat = {
+	    	hidden: true,
+	    	nick: 'shadowBot'+i
+		};
+		$scope.messages.push(hiddenChat);
+	}
+
+	var newChat = {
+	    worldID: $routeParams.worldURL,
+	    nick: 'BubblyBot',
+	    msg: 'Hey there, this is a Bubble chat created just for '+$scope.world.name+'. Chat, share pictures & leave notes with others here!',
+	    avatar: $scope.world.avatar || 'img/icons/profile.png',
+	    userID: 'chatbot'
+	};
+	$scope.messages.push(newChat);
+
+
+}
+
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
@@ -116,7 +145,8 @@ var dereg = $rootScope.$on('$locationChangeSuccess', function() {
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
 	$scope.world=data.world;
-	console.log($scope.style);
+	welcomeMessage(); //add bot message 
+	console.log($scope.world);
 });
 
 $http.get('/api/user/loggedin').success(function(user){

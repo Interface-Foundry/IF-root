@@ -75,6 +75,8 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 					iconAnchor: [13, 10]
 				},
 				draggable:true,
+				message:'Drag to location on map',
+				focus:true
 			});
 			
 			//$scope.selectItem(0)

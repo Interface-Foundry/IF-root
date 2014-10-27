@@ -2,8 +2,10 @@
 	
 	<div class="row">
 		<div class="col-xs-12 col-sm-10 col-sm-offset-1">
-			<h3><a ng-href="/#/">Home</a></h3>
-			<h3><a ng-href="/#/profile">+ Add New World</a></h3>
+			<h3><a ng-href="/"><span class="glyphicon glyphicon-refresh"></span> Find Bubbles</a></h3>
+			<h3><a ng-href="/nearby"> Nearby</a></h3>
+			<a href="/welcome"><h3>What is Bubbl.li?</h3></a>
+			<h3><a ng-click="newWorld()">+ New Bubble</a></h3>
 			<hr>
 			<h4>Nearby Bubbles</h4> 
 			<li ng-repeat="bubble in nearbyBubbles">
@@ -24,7 +26,7 @@
 				<input type="text" name="b_ac66b7064177bb1b23c6cc522_aea15b72e4" tabindex="-1" value="">
 				</div>
 		    </form>
-			<h4>Bubbl.li Beta v0.3 (Illya)</h4>
+			<h4>Bubbl.li Beta v0.7 (Illya)</h4>
 			<h4>Powered By</h4>
 			<a href="http://interfacefoundry.com"><img class="img-responsive" src="img/IF/IF_horizontal.png"></a>
 		</div>

@@ -21,7 +21,7 @@
 		</div>
 	</div>
 	<ul class="message-list">
-		<li class="if-animate message" ng-repeat="msg in messages">
+		<li class="if-animate message" ng-repeat="msg in messages" ng-class="{ 'message-hidden' : msg.hidden }">
 			<picture class="msg-avatar" ng-if="msg.userID!=userID">
 				<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar}}" ng-cloak>
 			</picture>
@@ -32,7 +32,6 @@
 				<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic" >
 				<p class="message-body" ng-bind="msg.msg" ng-if="msg.msg"></p>
 			</div>
-
 			<div class="message-content" ng-if="msg.userID!=userID">
 				<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
 				<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic">
@@ -41,7 +40,7 @@
 		</li>
 	</ul>
 
-	<div class="view-footer" ng-show="loggedIn" ng-cloak>
+	<div class="view-footer" ng-cloak>
 		<textarea rows="1" placeholder="Type your message" class="message-input" ng-model="msg.text" ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" msd-elastic autofocus></textarea>
 		<button type="button" class="message-send lightblue500" ng-click="sendMsg()">Send</button>
 		<div class="message-photo" ng-file-select="onImageSelect($files)" data-accept="image/*"></div>
