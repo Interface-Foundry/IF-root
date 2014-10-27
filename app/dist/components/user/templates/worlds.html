@@ -1,4 +1,4 @@
-<div class="profile-sort">
+<div class="profile-sort" ng-hide="waitingforMeetup">
 <div class="profile-card">
 <span class="sort-heading indigo700">ME</span>
 	<div class="profile-card-pic" ng-file-select="onAvatarSelect($files)">
@@ -20,7 +20,7 @@
 	</div>
 </div>
 </div>
-<div class="profile-contact-sort" ng-hide="fromMessages">
+<div class="profile-contact-sort" ng-hide="fromMessages || waitingforMeetup">
 <div class="profile-contact-card">
 <span class="sort-heading indigo700">CONTACT</span>
 	<form role="form">
@@ -65,11 +65,11 @@
 			<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 		</div>
 	</li><div class="clearfix"></div>
-	<span class="indigo700">MY BUBBLES</span>
+	<span ng-hide="waitingforMeetup" class="indigo700">MY BUBBLES</span>
 
 	<li>
 
-	<div class="profile-add-new" ng-click="newWorld()">
+	<div class="profile-add-new" ng-click="newWorld()" ng-hide="waitingforMeetup">
 		<div class="profile-add-new-plus">+</div>
 		<span>Create New Bubble</span>
 	</div>
