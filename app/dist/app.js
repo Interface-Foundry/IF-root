@@ -6390,6 +6390,9 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
 
+    olark('api.box.hide'); //shows olark tab on this page
+
+
     console.log('world routing');
     
     $rootScope.initGeo = function() {
