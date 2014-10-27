@@ -19,7 +19,7 @@ olark('api.box.show'); //shows olark tab on this page
 zoomControl.style.display = 'none'; 
 
 $scope.world.name = "bubble"; //make sure there's a default world name
-map.setCenter([-83,42], 15, $scope.aperture.state); //setting to blue coast on load so arrows show up on background
+map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {

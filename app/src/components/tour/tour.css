@@ -483,25 +483,46 @@
 }
 
 .tour-panel{
+	width: 80%;
 	background-color: rgba(236, 239, 241,0.7);
 	border-radius: 12px;
 	border: 2px solid #999999;
 	margin-top: 89px;
-	margin-left: 12%;
-	margin-right: 12%;
+	max-width: 750px;
 	height: 355px;
 	position: absolute;
 	z-index: 1000;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	transform: translateX(-50%);
 }
 
 .tour-more{
-	margin-top: 71px;
 	margin-bottom: -24px;
-	margin-top: 78px;
+	margin-top: 30px;
 }
 
 .tour-last-title{
-	margin-top: 83px;
+	margin-top: 55px;
 	padding-left: 8px;
 	padding-right: 8px;
+	margin-bottom: 41px;
+}
+
+
+
+@media (max-width: 548px) {
+	.second-card-title{
+		margin-top: 44px !important;
+		font-size: 20px !important;
+		line-height: 35px !important;
+	}
+}
+
+@media (max-width: 430px) {
+	.second-card-title{
+		margin-top: 32px !important;
+		font-size: 18px !important;
+		line-height: 29px !important;
+	}
 }
