@@ -11641,7 +11641,7 @@ function SearchController($location, $scope, db, $rootScope, apertureService, ma
 }
 function MeetupController($scope, $window, $location, styleManager, $rootScope) {
 
-	olark('api.box.show'); //shows olark tab on this page
+	// olark('api.box.show'); //shows olark tab on this page
 
 	var style = styleManager;
 
@@ -11666,7 +11666,7 @@ function MeetupController($scope, $window, $location, styleManager, $rootScope) 
 }
 function WelcomeController($scope, $window, $location, styleManager, $rootScope) {
 
-	olark('api.box.show'); //shows olark tab on this page
+	// olark('api.box.show'); //shows olark tab on this page
 
 	var style = styleManager;
 
