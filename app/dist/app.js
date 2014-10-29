@@ -11670,7 +11670,7 @@ function WelcomeController($scope, $window, $location, styleManager, $rootScope)
 
 	var style = styleManager;
 
-	style.navBG_color = "rgba(244, 81, 30, 0.8)";
+	style.navBG_color = "rgba(173, 212, 224, 0.8)";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
