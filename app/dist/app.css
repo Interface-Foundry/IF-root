@@ -1725,13 +1725,12 @@ text-align: center;
 	height: 33px;
 	padding-left: 21px;
 
-	background-color: rgba(255,253,147,0.9);
+	background-color: rgba(255,253,147,0.79);
 	border-radius: 3px;
 	margin-left:21px;
 	margin-top: 5px;
 	position: absolute;
 }
-
 
 .world-toolbar {
 	height: 88px;

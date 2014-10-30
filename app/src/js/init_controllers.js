@@ -31,7 +31,14 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
         function locError(){
             console.log('error finding loc');
             //geo error
-            noLoc();
+
+            //SPOOKY TEST OFF
+            //noLoc();
+
+            //SPOOKY TEST ON
+            $location.path('w/Spooky_Park_Chat/messages');
+            alert.addAlert('success', 'You found a Halloween park chat!', true);
+            //END SPOOKY TEST
         }
 
         navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
@@ -57,40 +64,92 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       // var lat = 40.7356;
       // var lon =  -73.9906;
      
-     console.log('findWorlds');
+        console.log('findWorlds');
+
         $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
 
             $rootScope.altBubbles = data[0].liveAndInside;
             $rootScope.nearbyBubbles = data[0].live;
 
-            if (data[0].liveAndInside[0] != null) {
-                if (data[0].liveAndInside[0].id){
+            //BEGIN SPOOKY TEST
+            for (var i=0; i <= data[0].liveAndInside.length; i++) {
 
-                    //spooky test on
-                    if(data[0].liveAndInside[0].id == "Spooky_Park_Chat"){
+                if (data[0].liveAndInside[i] != null) {
+                  if (data[0].liveAndInside[i].id == "Spooky_Park_Chat") {
                       $location.path('w/'+data[0].liveAndInside[0].id+'/messages');
                       alert.addAlert('success', 'You found a Halloween park chat!', true);
+                      break;
+                  }
+                }
 
+                console.log('i '+i);
+                console.log('data '+data[0].liveAndInside.length);
+
+               if (i == data[0].liveAndInside.length){
+                executeRest();
+               } 
+              
+            }
+
+            function executeRest(){
+
+                if (data[0].liveAndInside[0] != null) {
+                    if (data[0].liveAndInside[0].id){
+
+                        //spooky test on
+                        if(data[0].liveAndInside[0].id == "Spooky_Park_Chat"){
+                          $location.path('w/'+data[0].liveAndInside[0].id+'/messages');
+                          alert.addAlert('success', 'You found a Halloween park chat!', true);
+                        }
+                        //spooky test off
+                        else {
+                          $location.path('w/'+data[0].liveAndInside[0].id); 
+                          alert.addAlert('success', 'You found a bubble! Explore it below', true);
+                        }
                     }
-                    //spooky test off
                     else {
-                      $location.path('w/'+data[0].liveAndInside[0].id); 
-                      alert.addAlert('success', 'You found a bubble! Explore it below', true);
+                        console.log('world has no id');
+                        noWorlds(lat,lon);
                     }
                 }
                 else {
-   
-                    console.log('world has no id');
-                    noWorlds(lat,lon);
+                    console.log('not inside any worlds');
+                    noWorlds(lat,lon); //not inside any worlds
+                    alert.addAlert('info', 'No Bubbles here, but there are some nearby!', true);
                 }
-            }
-            else {
-
-                console.log('not inside any worlds');
-                noWorlds(lat,lon); //not inside any worlds
-                alert.addAlert('info', 'No Bubbles here, but there are some nearby!', true);
 
             }
+            //END SPOOKY TEST
+
+            // TEMP DISABLED FOR SPOOKY
+            // if (data[0].liveAndInside[0] != null) {
+            //     if (data[0].liveAndInside[0].id){
+
+            //         //spooky test on
+            //         if(data[0].liveAndInside[0].id == "Spooky_Park_Chat"){
+            //           $location.path('w/'+data[0].liveAndInside[0].id+'/messages');
+            //           alert.addAlert('success', 'You found a Halloween park chat!', true);
+
+            //         }
+            //         //spooky test off
+            //         else {
+            //           $location.path('w/'+data[0].liveAndInside[0].id); 
+            //           alert.addAlert('success', 'You found a bubble! Explore it below', true);
+            //         }
+            //     }
+            //     else {
+   
+            //         console.log('world has no id');
+            //         noWorlds(lat,lon);
+            //     }
+            // }
+            // else {
+
+            //     console.log('not inside any worlds');
+            //     noWorlds(lat,lon); //not inside any worlds
+            //     alert.addAlert('info', 'No Bubbles here, but there are some nearby!', true);
+
+            // }
         });
     }
 

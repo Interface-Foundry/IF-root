@@ -230,6 +230,11 @@ checkMessages();
 		//hide edit glyph
 		//$('.subnav-chat-edit').css('visibility', 'hidden');
 
+		//hide top bar
+		$('.main-nav').css('visibility', 'hidden');
+
+		// $('.msg-avatar:after').css('border-bottom', '6px solid #8f8bc3 !important');
+
 
 		//resetting to normal after test if route change
 		$rootScope.$on('$locationChangeSuccess', function() {
