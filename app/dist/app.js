@@ -6200,7 +6200,7 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
 
                 if (data[0].liveAndInside[i] != null) {
                   if (data[0].liveAndInside[i].id == "Spooky_Park_Chat") {
-                      $location.path('w/'+data[0].liveAndInside[0].id+'/messages');
+                      $location.path('w/Spooky_Park_Chat/messages');
                       alert.addAlert('success', 'You found a Halloween park chat!', true);
                       break;
                   }
