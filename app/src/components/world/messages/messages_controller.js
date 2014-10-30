@@ -1,4 +1,4 @@
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -7,13 +7,23 @@ var checkMessagesTimeout;
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
 
+//spooky test
+$scope.showSpookytest = false;
+$scope.showSpookytestloggedin = false;
+
 $scope.msg = {};
 $scope.messages = [];
 $scope.localMessages = [];
 
 $scope.currentChatID = $routeParams.worldID;
-$scope.messageList = angular.element('.message-list');
+$scope.currentChatURL = $routeParams.worldURL;
 
+$scope.messageList = angular.element('.message-list');
+ 
+angular.extend($rootScope, {loading: false});
+
+
+var style = styleManager;
 olark('api.box.hide'); //shows olark tab on this page
 
 var sinceID = 'none';
@@ -22,7 +32,7 @@ var firstScroll = true;
 
 function scrollMessages() {
 	$timeout(function() {
-    	$scope.messageList.animate({scrollTop: $scope.messageList[0].scrollHeight}, 300); //JQUERY USED HERE
+    	$scope.messageList.animate({scrollTop: $scope.messageList[0].scrollHeight * 2}, 300); //JQUERY USED HERE
     	firstScroll=false;
     },0);
 }
@@ -56,13 +66,30 @@ $scope.sendMsg = function (e) {
 	if (e) {e.preventDefault()}
 	if ($scope.msg.text == null) { return;}
 	if ($scope.loggedIn){
-	    var newChat = {
-	        worldID: $routeParams.worldURL,
-	        nick: $scope.nick,
-	        msg: $scope.msg.text,
-	        avatar: $scope.user.avatar || 'img/icons/profile.png',
-	        userID: $scope.userID
-	    };
+
+
+		//spooky test
+		if ($scope.showSpookytest){
+		    var newChat = {
+		        worldID: $routeParams.worldURL,
+		        nick: $scope.nick,
+		        msg: $scope.msg.text,
+		        avatar: $scope.user.avatar || '/img/halloween/bat.gif',
+		        userID: $scope.userID
+		    };
+		}
+
+		//not spooky test
+		else {
+		    var newChat = {
+		        worldID: $routeParams.worldURL,
+		        nick: $scope.nick,
+		        msg: $scope.msg.text,
+		        avatar: $scope.user.avatar || 'img/icons/profile.png',
+		        userID: $scope.userID
+		    };	
+		}
+
 		
 		sendMsgToServer(newChat);		
 	    $scope.msg.text = "";
@@ -188,6 +215,29 @@ checkMessages();
 });
 
 
+	//////
+	//HALLOWEEN THEME TEST
+
+	if ($routeParams.worldURL == "Spooky_Park_Chat"){
+
+		style.navBG_color = "rgba(255, 167, 0, 0.94)";
+
+		$scope.showSpookytest = true;
+
+		//hide top bar
+		$('.main-nav').css('visibility', 'hidden');
+
+		//hide edit glyph
+		//$('.subnav-chat-edit').css('visibility', 'hidden');
+
+
+		//resetting to normal after test if route change
+		$rootScope.$on('$locationChangeSuccess', function() {
+		    $('.main-nav').css('visibility', 'visible'); //reshow top bar
+		});
+
+	}
+
 
 
 
@@ -227,6 +277,13 @@ checkMessages();
 	             
 	          $rootScope.avatar = user.avatar;
 	          $rootScope.showLogout = true;
+
+	          	//SPOOKY TEST
+	          	if ($routeParams.worldURL == "Spooky_Park_Chat"){
+	          		$scope.showSpookytestloggedin = true;
+	          	}	
+	          	////
+
 	        }
 
 	      });

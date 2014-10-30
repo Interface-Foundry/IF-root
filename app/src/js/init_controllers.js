@@ -51,7 +51,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
       $scope.$apply();
     }
 
-    function findWorlds(lat,lon){   
+    function findWorlds(lat,lon){  
+
+      //union square coordinates
+      // var lat = 40.7356;
+      // var lon =  -73.9906;
      
      console.log('findWorlds');
         $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
@@ -62,8 +66,17 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
             if (data[0].liveAndInside[0] != null) {
                 if (data[0].liveAndInside[0].id){
 
-                    $location.path('w/'+data[0].liveAndInside[0].id); 
-                    alert.addAlert('success', 'You found a bubble! Explore it below', true);
+                    //spooky test on
+                    if(data[0].liveAndInside[0].id == "Spooky_Park_Chat"){
+                      $location.path('w/'+data[0].liveAndInside[0].id+'/messages');
+                      alert.addAlert('success', 'You found a Halloween park chat!', true);
+
+                    }
+                    //spooky test off
+                    else {
+                      $location.path('w/'+data[0].liveAndInside[0].id); 
+                      alert.addAlert('success', 'You found a bubble! Explore it below', true);
+                    }
                 }
                 else {
    

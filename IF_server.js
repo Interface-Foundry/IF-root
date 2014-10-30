@@ -1695,10 +1695,24 @@ app.post('/api/process_meetups', isLoggedIn, function (req, res) {
               async.forEach(ls, function (obj, done){ 
 
                   //skip if there's already an owner ID
-                  if (obj.permissions.ownerID.length > 1){
-                    done();
+                  if (obj.permissions){
+                    if (obj.permissions.ownerID){
+                      if (obj.permissions.ownerID.length > 1){
+                        done();
+                      }    
+                      else {
+                        updateOwnerID();
+                      }             
+                    }
+                    else {
+                      updateOwnerID();
+                    }
                   }
                   else {
+                    updateOwnerID();
+                  }
+
+                  function updateOwnerID(){
                     obj.permissions.ownerID = req.user._id;
                     console.log('update=');
                     obj.save(function (err, data) {
@@ -1708,7 +1722,7 @@ app.post('/api/process_meetups', isLoggedIn, function (req, res) {
                             console.log('Updated Owner on world');
                         }
                     });  
-                    done();              
+                    done();  
                   }
 
               }, function(err) {
