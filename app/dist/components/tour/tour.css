@@ -14,7 +14,7 @@
 
 .tour-header {
 	position: absolute;
-	top: 36px;
+	top: 56px;
 	z-index: 100;
 	width:100%;
 	padding-left: 15px;
@@ -23,7 +23,7 @@
 
 .tour-footer {
 	position: absolute;
-	top: 725px;
+	top: 705px;
 	z-index: 100;
 	width:100%;
 	padding-left: 15px;
@@ -472,7 +472,6 @@
 .tour-last{
 	background-color: rgba(236, 239, 241,0.7);
 	border-radius: 12px;
-	border: 2px solid #999999;
 	height: 387px;
 	margin-top: 89px;
 	margin-left: 12%;
@@ -486,13 +485,14 @@
 	width: 80%;
 	background-color: rgba(236, 239, 241,0.7);
 	border-radius: 12px;
-	border: 2px solid #999999;
 	margin-top: 89px;
 	max-width: 750px;
 	height: 355px;
 	position: absolute;
 	z-index: 1000;
 	left: 50%;
+	padding-left: 10px;
+	padding-right: 10px;
 	-webkit-transform: translateX(-50%);
 	transform: translateX(-50%);
 }
@@ -506,10 +506,13 @@
 	margin-top: 55px;
 	padding-left: 8px;
 	padding-right: 8px;
+	padding-top: 20px;
 	margin-bottom: 41px;
 }
 
-
+li.tour-page.meetupsplash {
+text-align: center;
+}
 
 @media (max-width: 548px) {
 	.second-card-title{
