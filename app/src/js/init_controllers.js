@@ -33,11 +33,11 @@ function WorldRouteCtrl($location, $scope, $routeParams, db, $rootScope, apertur
             //geo error
 
             //SPOOKY TEST OFF
-            //noLoc();
+            noLoc();
 
             //SPOOKY TEST ON
-            $location.path('w/Spooky_Park_Chat/messages');
-            alert.addAlert('success', 'You found a Halloween park chat!', true);
+            //$location.path('w/Spooky_Park_Chat/messages');
+            //alert.addAlert('success', 'You found a Halloween park chat!', true);
             //END SPOOKY TEST
         }
 
