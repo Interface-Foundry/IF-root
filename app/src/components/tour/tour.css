@@ -348,10 +348,11 @@
 .tour-features {
 	font-family: 'Fabrica', sans-serif;
 	font-size: 18px;
-	padding-top: 168px;
+	padding-top: 100px;
 	max-width: 500px;
 	text-align: center;
 }
+
 
 .tour-iphone {
 	position: relative;
@@ -360,7 +361,7 @@
 	border-radius: 30px;
 	background: rgba(0,0,0,0.7);
 	margin: 142px auto;
-	top:45px;
+	top:30px;
 }
 
 .tour-iphone-screen {
@@ -395,6 +396,20 @@
 	line-height: 1;
 	padding: 8px;
 	background: rgba(61,90,254,1);
+}
+
+.built-w-bubbli-sample {
+	text-align: center;
+}
+
+a.thumbnail {
+	background-color: transparent;
+	border: none;
+	border-radius: 40;
+}
+
+img.center-block {
+	border-radius: 10px;
 }
 
 .btn-meetup {
@@ -472,8 +487,8 @@
 .tour-last{
 	background-color: rgba(236, 239, 241,0.7);
 	border-radius: 12px;
-	height: 387px;
-	margin-top: 89px;
+	height: 410px;
+	margin-top: 180px;
 	margin-left: 12%;
 	margin-right: 12%;
 
@@ -497,6 +512,19 @@
 	transform: translateX(-50%);
 }
 
+img.tour-logo {
+	position: relative;
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top:20px;
+}
+
+h6.second-card-title {
+	font-size:22px; 
+	text-align: center;
+}
+
 .tour-more{
 	margin-bottom: -24px;
 	margin-top: 30px;
@@ -512,6 +540,12 @@
 
 li.tour-page.meetupsplash {
 text-align: center;
+}
+
+@media (max-width: 768px) {
+	.second-card-title{
+		margin-top: 50px !important;
+	}
 }
 
 @media (max-width: 548px) {
@@ -530,4 +564,37 @@ text-align: center;
 	}
 }
 
+
+@media (min-width: 768px) {
+	.col-sm-6{
+		width: 46%;
+	}
+}
+
+@media (max-width: 768px) {
+	.tour-more{
+		margin-top: 64px;
+	}
+	.tour-last-title{
+		margin-top: 64px;
+
+	}
+	.tour-page h7{
+		top:690px;
+	}
+}
+
+@media (max-width: 509px) {
+	.tour-last-title{
+		margin-top: 42px;
+
+	}
+}
+
+@media (max-width: 441px) {
+	.tour-last-title{
+		margin-top: 29px;
+
+	}
+}
 
