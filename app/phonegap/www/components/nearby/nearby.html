@@ -1,0 +1,27 @@
+<div class="container-fluid navfix defaultBG">
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2 col-xs-12 text-center">
+
+			<span ng-show="showNoLoc">
+				<h4>Sorry, we need your location before entering bubbl.li</h4>
+				
+				<h5>
+					We know privacy is important, so we understand :)
+					<br>
+			    	You can re-enable Location Sharing in your browser settings
+				</h5>
+				<img ng-if="showNoLoc" width="250" ng-src="/img/IF/failfairy.png"/>
+				<br><br>
+			</span>		
+
+			<span ng-show="showCreateNew">
+				<h4>NO WORLDS NEAR YOU :(</h4>
+				<button class="btn btn-success" ng-click="addWorld()"><span class="glyphicon glyphicon-plus"></span> Create New World</button>
+				<br><br>
+				<button class="btn btn-default" ng-click="initGeo()">Refresh</button>
+				<br><br>
+			</span>
+		
+		</div>
+	</div>
+</div>

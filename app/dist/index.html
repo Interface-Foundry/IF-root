@@ -24,7 +24,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   -->
 
 
-<html lang="en" ng-app="IF" ng-controller="indexIF">
+<html lang="en" ng-controller="indexIF">
 
 <head>
   <meta charset="utf-8">
@@ -42,8 +42,9 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   
 	<link rel="stylesheet" href="app.css">
 	
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-animate.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.min.js"></script>
@@ -61,10 +62,10 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 </head>
 <body>
-  <div id="wrap">
-  		<div class="drawer-handle" ng-show="drawerOn" ng-style="{'background-color': style.navBG_color}" ng-click="drawerOn = !drawerOn"> 
-  			<img width="10px" height="16px" class="handle toolbar-item show" src="/img/icons/drawer.png">
-  		</div>
+	<div id="wrap" ng-class="{'drawer': drawerOn}">
+		<button class="drawer-tab" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0" ng-click="drawerOn = !drawerOn">
+			<img width="10px" height="16px" class="handle toolbar-item show" src="img/icons/drawer.png">
+  		</button>
   		<ul id="alerts" class="container">
 	  		<li ng-repeat="alert in alerts.list" class="alert if-animate" ng-class="alert.class" role="alert">
 	  			<button ng-click="alerts.closeAlert($index)" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -76,23 +77,19 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   			<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button> <button type="button" class="close" ng-click="feedbackOn=!feedbackOn"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
   		</div>
   		<nav role="navigation" 
-  			class="main-nav"
-  			ng-class="{'drawer': drawerOn}" 
+  			class="main-nav" 
   			ng-style="{'background-color': style.navBG_color}">
-	  		<button class="drawer-toggle pull-left" ng-click="drawerOn = !drawerOn">
-	  			<img width="13px" height="16px" class="handle pull-left" src="/img/icons/drawer.png">
-  			</button>
-	  		<a href="/"><span class="nav-title pull-left vertical-middle" ng-bind-html="navTitle"></span></a>  		
+	  		<a href="/"><span class="nav-title">Bubbl.li</span></a>  		
 	  		<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
 	  			<li class="search-icon nav-item">
-	  					<a href="" class="no-u" ng-click="">
-	  						<img class="nav-icon" src="/img/icons/zoom.png">
+	  					<a href="" class="no-u">
+	  						<img class="nav-icon" src="img/icons/zoom.png">
 	  					</a>
 	  			</li>
 	  			<li class="nav-item">
 			          <span class="dropdown">
 			            <a data-toggle="dropdown" href="" class="dropdown-toggle no-u">
-			                <img class="nav-icon" src="/img/icons/compass.png">
+			                <img class="nav-icon" src="img/icons/compass.png">
 			                <span ng-show="altBubbles" class="compass badge">{{altBubbles.length}}</span>
 			            </a>
 			            <ul class="dropdown-menu">
@@ -105,20 +102,9 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 			            
 			          </span>
 	  			</li>
-	  			<li class="nav-item"><!-- USER DROPDOWN -->
-		  		<a ng-show="!showLogout" ng-href="login" class="vertical-middle nav-user no-u">Login</a>		  		
-			  	<span class="dropdown" ng-show="showLogout">
-		   		  	<a href="" data-toggle="dropdown" class="nav-user dropdown-toggle no-u">
-		   		  		<img class="nav-avatar" ng-src="{{avatar}}" src="/img/icons/profile.png">
-			   		   	<span ng-bind="userName | userName" class="no-u hidden-xs">Profile</span> <span class="caret"></span> 
-			   		</a>
-			   		<ul class="dropdown-menu">
-				   		<li><a role="menuitem" tabindex="-1" ng-href="/profile">Profile</a></li>
-				   		<li><a ng-href="profile">+ New Bubble</a></li>
-				   		<li><a href="" ng-click="feedbackOn=true">Report Issue</a></li>
-				   		<li><a href="" ng-click="logout()">Logout</a></li>
-				   	</ul>
-		  		</span>
+	  			<li class="nav-item">
+	  				<div class="user-chip" user-chip>
+	  				</div>
 	  			</li>
 	  		</ul>
 	  		<div class="search">
@@ -128,18 +114,22 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   		<div id="scrim" ng-class="{'loading': loading}">
 	  		<span class="glyphicon glyphicon-refresh"></span>
 	  	</div>
-	  	<section id="drawer" ng-class="{'drawer': drawerOn}" ng-include="'/components/drawer/drawer.html'">
-		</section>
-
-		<div id="main" ng-class="{'drawer': drawerOn}">
+	  	<div class="drawer-bg" ng-click="drawerOn = !drawerOn">
+	  		<section id="drawer" ng-include="'components/drawer/drawer.html'" 
+		  		ng-class="{'nearbyFound': nearbyBubbles}"></section>
+	  	</div>
+		<div id="main">
          <section id="aperture" ng-class="[aperture.state]">
 			  <leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers">
               </leaflet>
 		</section>
-
+		
          <section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>
 		 </section>
 		 </div>
+  </div>
+  <div class="dialog-bg" ng-if="dialog.show" ng-click="dialog.close($event)">
+	  <div ng-include="dialog.template" class="dialog"></div>
   </div>
 
 <script>

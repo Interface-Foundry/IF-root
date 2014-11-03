@@ -1,5 +1,20 @@
 'use strict';
 
+//@ifdef PHONEGAP
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
+//@endif
+
+//@ifdef WEB
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+});
+//@endif
+
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
   // $httpProvider.defaults.useXDomain = true;
@@ -8,60 +23,13 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     //================================================
     // Check if the user is connected
     //================================================
-    var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
-
-      // Initialize a new promise
-      var deferred = $q.defer();
-
-      // Make an AJAX call to check if the user is logged in
-      $http.get('/api/user/loggedin').success(function(user){
 
 
-        // Authenticated
-        if (user !== '0'){
+    var checkLoggedin = function(userManager) {
+	    return userManager.checkLogin();
+    }
 
-              if (user._id){
-                $rootScope.userID = user._id;
-              }
-              //determine name to display on login (should check for name extension before adding...)
-              if (user.name){
-                  $rootScope.userName = user.name;
-              }
-              else if (user.facebook){
-                  $rootScope.userName = user.facebook.name;
-              }
-              else if (user.twitter){
-                  $rootScope.userName = user.twitter.displayName;
-              }
-              else if (user.meetup){
-                  $rootScope.userName = user.meetup.displayName;
-              }
-              else if (user.local){
-                  $rootScope.userName = user.local.email;
-              }
-              else {
-                  $rootScope.userName = "Me";
-              }
-              
-          $rootScope.avatar = user.avatar;
-          $rootScope.showLogout = true;
 
-          console.log($rootScope.showLogout);
-          
-          $timeout(deferred.resolve, 0);
-        }
-
-        // Not Authenticated
-        else {
-          $rootScope.showLogout = false;
-          $rootScope.message = 'You need to log in.';
-          $timeout(function(){deferred.reject();}, 0);
-          $location.url('/login');
-        }
-      });
-
-      return deferred.promise;
-    };
     //================================================
     
     //================================================
@@ -69,6 +37,9 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     //================================================
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
+    		'request': function(request) {
+	    		return request;
+    		},
 	    	'response': function(response) {
 		    	//do something on success
 		    	return response;
@@ -88,7 +59,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -125,12 +96,14 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/'}); 
+      otherwise({redirectTo: '/'});
       
-      // use the HTML5 History API
-      $locationProvider.html5Mode(true);
+      //@ifdef WEB
+      $locationProvider.html5Mode({
+      	enabled: true,
+      });
+      //@endif
       
-      //animation
 
 	angular.extend($tooltipProvider.defaults, {
   		animation: 'am-fade',
@@ -139,15 +112,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
   	});
 
 })
- .run(function($rootScope, $http, $location){
-    $rootScope.message = '';
-
-    // Logout function is available in any pages
-    $rootScope.logout = function(){
-      $rootScope.message = 'Logged out.';
-      $http.get('/api/user/logout');
-      $rootScope.showLogout = false;
-      $location.url('/');
-    };
-  });
+.run(function($rootScope, $http, $location, userManager){
+	userManager.checkLogin();
+});
 

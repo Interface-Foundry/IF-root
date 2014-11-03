@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.if.bubblli" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Bubbl.li</name>
+    <description>
+        Internet of Places.
+    </description>
+    <author email="hello@interfacefoundry.com" href="http://interfacefoundry.com">
+        Interface Foundry
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+</widget>

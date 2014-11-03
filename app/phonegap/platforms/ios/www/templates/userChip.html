@@ -1,0 +1,21 @@
+<div ng-switch="userManager.loginStatus">
+	<div ng-switch-when="true">
+		<img class="user-chip-img" ng-src="{{user.avatar}}">
+		<span class="user-chip-label auth" ng-bind="user.displayName">Me</span>
+		<ul class="nav-user-menu" ng-show="userMenu">
+			<li class="nav-user-menu-title">
+				<img class="nav-user-menu-img" ng-src="{{user.avatar}}"><span ng-bind="user.displayName"></span></li>
+			<li class="nav-user-menu-item" id="profile">My Profile</li>
+			<li class="nav-user-menu-item" id="bubbles">My Bubbles</li>
+			<li class="nav-user-menu-divider"></li>
+			<li class="nav-user-menu-item">History</li>
+			<li class="nav-user-menu-item">Contacts</li>
+			<li class="nav-user-menu-divider"></li>
+			<li class="nav-user-menu-item" id="feedback">Send Feedback</li>
+			<li class="nav-user-menu-item" id="logout">Logout</li>
+		</ul>
+	</div>
+	<div ng-switch-default>
+		<span class="user-chip-label" id="login">Login</span>
+	</div>
+</div>

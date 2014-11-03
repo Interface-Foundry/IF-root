@@ -1,11 +1,29 @@
 module.exports = {
-	options: {
-		context: {
-			DEV: true
+	phonegap: {
+		files: {
+			'phonegap/www/app.css': 'dist/app.css',
+			'phonegap/www/app.js': 'dist/app.js',
+			'phonegap/www/lib.js': 'dist/lib.js',
+			'phonegap/www/index.html': 'src/index.html'
+		},
+		options: {
+			context: {
+				PHONEGAP: true
+			}
 		}
 	},
-	html: {
-		src: 'src/index.html',
-		dest: 'dist/index.html'
+	dist: {
+		files: {
+		'dist/app.css': 'dist/app.css',
+		'dist/app.js': 'dist/app.js',
+		'dist/lib.js': 'dist/lib.js',
+		'dist/index.html': 'src/index.html'
+		},
+		options: {
+			inline: true,
+			context: {
+				WEB: true
+			}
+		}
 	}
 }

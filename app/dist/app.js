@@ -4638,6 +4638,9 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+});
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
   // $httpProvider.defaults.useXDomain = true;
@@ -4646,60 +4649,13 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     //================================================
     // Check if the user is connected
     //================================================
-    var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
-
-      // Initialize a new promise
-      var deferred = $q.defer();
-
-      // Make an AJAX call to check if the user is logged in
-      $http.get('/api/user/loggedin').success(function(user){
 
 
-        // Authenticated
-        if (user !== '0'){
+    var checkLoggedin = function(userManager) {
+	    return userManager.checkLogin();
+    }
 
-              if (user._id){
-                $rootScope.userID = user._id;
-              }
-              //determine name to display on login (should check for name extension before adding...)
-              if (user.name){
-                  $rootScope.userName = user.name;
-              }
-              else if (user.facebook){
-                  $rootScope.userName = user.facebook.name;
-              }
-              else if (user.twitter){
-                  $rootScope.userName = user.twitter.displayName;
-              }
-              else if (user.meetup){
-                  $rootScope.userName = user.meetup.displayName;
-              }
-              else if (user.local){
-                  $rootScope.userName = user.local.email;
-              }
-              else {
-                  $rootScope.userName = "Me";
-              }
-              
-          $rootScope.avatar = user.avatar;
-          $rootScope.showLogout = true;
 
-          console.log($rootScope.showLogout);
-          
-          $timeout(deferred.resolve, 0);
-        }
-
-        // Not Authenticated
-        else {
-          $rootScope.showLogout = false;
-          $rootScope.message = 'You need to log in.';
-          $timeout(function(){deferred.reject();}, 0);
-          $location.url('/login');
-        }
-      });
-
-      return deferred.promise;
-    };
     //================================================
     
     //================================================
@@ -4707,6 +4663,9 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     //================================================
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
+    		'request': function(request) {
+	    		return request;
+    		},
 	    	'response': function(response) {
 		    	//do something on success
 		    	return response;
@@ -4726,7 +4685,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -4763,12 +4722,12 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/'}); 
+      otherwise({redirectTo: '/'});
       
-      // use the HTML5 History API
-      $locationProvider.html5Mode(true);
+      $locationProvider.html5Mode({
+      	enabled: true,
+      });
       
-      //animation
 
 	angular.extend($tooltipProvider.defaults, {
   		animation: 'am-fade',
@@ -4777,17 +4736,9 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
   	});
 
 })
- .run(function($rootScope, $http, $location){
-    $rootScope.message = '';
-
-    // Logout function is available in any pages
-    $rootScope.logout = function(){
-      $rootScope.message = 'Logged out.';
-      $http.get('/api/user/logout');
-      $rootScope.showLogout = false;
-      $location.url('/');
-    };
-  });
+.run(function($rootScope, $http, $location, userManager){
+	userManager.checkLogin();
+});
 
 
 _ = {};
@@ -5175,6 +5126,37 @@ angular.module('IF-directives', [])
 		}
 });
 
+angular.module('IF-directives', [])
+.directive('userChip', function($rootScope, userManager, dialogs, $location) {
+	return {
+		restrict: 'A',
+		scope: true,
+		link: function($scope, $element, attrs) {
+			$scope.openMenu = function($event) {
+				if (userManager.loginStatus) {
+					console.log('click1');
+					$scope.userMenu = true;
+					$event.stopPropagation();
+					$(document).on('touchstart click', function(e) {
+						$scope.userMenu = false;
+						$scope.$digest();
+						console.log('touchstart click');
+						$(document).off('touchstart click');
+					})
+				} else {
+					dialogs.showDialog('authDialog.html');
+				}
+			}
+			
+			$scope.closeMenu = function($event) {
+				$scope.userMenu = false;
+				$event.stopPropagation();
+			}
+		},
+		templateUrl: 'templates/userChip.html'
+	}
+		
+});
 //parent
 function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
@@ -6106,127 +6088,98 @@ function shelfPan(amount,special){
 app.controller('WorldRouteCtrl', ['$location', '$scope', '$routeParams', 'db', '$rootScope', 'styleManager', 'mapManager', 
 function ($location, $scope, $routeParams, db, $rootScope, styleManager, mapManager) {
 
-    var map = mapManager;
-    // map.resetMap();
+var map = mapManager;
+// map.resetMap();
 
-    angular.extend($rootScope, {loading: true});
-	  var style = styleManager;
-	  style.resetNavBG();
-	  
-	  console.log('world routing');
+angular.extend($rootScope, {loading: true});
+var style = styleManager;
+style.resetNavBG();
+
+console.log('world routing');
     
-    $scope.initGeo = function() {
+$scope.initGeo = function() {
+
       //--- GEO LOCK -----//
 
-      if (navigator.geolocation) {
+if (navigator.geolocation) {
+	console.log('geolocation');
+	function showPosition(position) {
+		var userLat = position.coords.latitude;
+		var userLon = position.coords.longitude;
+		findWorlds(userLat, userLon); 
+	}
 
-        function showPosition(position) {
-            var userLat = position.coords.latitude;
-            var userLon = position.coords.longitude;
-            findWorlds(userLat, userLon); 
-        }
+	function locError(){
+		console.log('error finding loc');
+		//geo error
+		noLoc();
+	}
+	
+	navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
 
-        function locError(){
-            console.log('error finding loc');
-            //geo error
-            noLoc();
-        }
-
-        navigator.geolocation.getCurrentPosition(showPosition, locError, {timeout:15000, enableHighAccuracy : true});
-
-      } else {
-          console.log('no geo');
-          alert('Your browser does not support geolocation :(');
-      }
+} else {
+	console.log('no geo');
+	alert('Your browser does not support geolocation :(');
+}
 
       //--------------//     
-    }
+}
 
+//initial loc bubble query
+$scope.initGeo();
 
-    //initial loc bubble query
-    $scope.initGeo();
+function noLoc() {
+  console.log('no loc');  
+  $scope.showNoLoc = true;
+  angular.extend($rootScope, {loading: false});
+  $scope.$apply();
+}
 
-   
-    function noLoc(){
-  
-
-      console.log('no loc');  
-
-
-      $scope.showNoLoc = true;
-      angular.extend($rootScope, {loading: false});
-      $scope.$apply();
-    }
-
-    function findWorlds(lat,lon){   
+function findWorlds(lat,lon){   
      
-     console.log('findWorlds');
-        $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
+console.log('findWorlds');
+$scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
+	$rootScope.altBubbles = data[0].liveAndInside;
+	$rootScope.nearbyBubbles = data[0].live;
 
-            $rootScope.altBubbles = data[0].liveAndInside;
-            $rootScope.nearbyBubbles = data[0].live;
+	if (data[0].liveAndInside[0] != null) {
+		if (data[0].liveAndInside[0].id){
+			$location.path('w/'+data[0].liveAndInside[0].id); 
+		} else {
+			console.log('world has no id');
+	        noWorlds(lat,lon);
+		}
+	} else {
+		console.log('not inside any worlds');
+		noWorlds(lat,lon); //not inside any worlds
+	}
+});
+}
 
-            if (data[0].liveAndInside[0] != null) {
-                if (data[0].liveAndInside[0].id){
-
-                    //-------- DISABLE AFTER DEMO ------//
-                    //$location.path('/w/StartFast_Demo_Day_2014');
-
-                    ///-------- ENABLE AFTER DEMO ------//
-                    $location.path('w/'+data[0].liveAndInside[0].id); 
-                }
-                else {
-                    //-------- DISABLE AFTER DEMO ------//
-                    //$location.path('/w/StartFast_Demo_Day_2014');
-
-                    ///-------- ENABLE AFTER DEMO ------//
-                    console.log('world has no id');
-                    noWorlds(lat,lon);
-                }
-            }
-            else {
-
-                //-------- DISABLE AFTER DEMO ------//
-                //$location.path('/w/StartFast_Demo_Day_2014');
-
-                //-------- ENABLE AFTER DEMO ------//
-                console.log('not inside any worlds');
-                noWorlds(lat,lon); //not inside any worlds
-
-            }
-        });
+function noWorlds(lat,lon){
+	map.setCenter([lon, lat], 18, $scope.aperture.state);
+		console.log('no worlds');  
+		$scope.showCreateNew = true;
+		angular.extend($rootScope, {loading: false});
     }
 
-    function noWorlds(lat,lon){
-
-
-     //-------- DISABLE AFTER DEMO ------//
-      // angular.extend($rootScope, {loading: false});
-      // $location.path('/w/Startfast_Demo_Day'); 
-
-      map.setCenter([lon, lat], 18, $scope.aperture.state);
-
-
-      //-------- ENABLE AFTER DEMO ------//
-        console.log('no worlds');  
-        $scope.showCreateNew = true;
-        angular.extend($rootScope, {loading: false});
-    }
-
-    $scope.addWorld = function (){
-      $location.path( '/profile' );
-    };
+$scope.addWorld = function (){
+  $location.path( '/profile' );
+};
 
 }]);
 
 //loads everytime
 
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
     $scope.alerts = alertManager;
+    $scope.userManager = userManager;
+    
+    $scope.dialog = dialogs;
     $rootScope.messages = [];
     //$rootScope.loadMeetup = false;
     
@@ -6237,71 +6190,59 @@ app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootSco
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
 	});*/
-	  
-	$scope.search = function() {
-		if ($scope.searchOn == true) {
-			//call search
-			console.log('searching');
-			$location.path('/search/'+$scope.searchText);
-			$scope.searchOn = false;
-		} else {
-			$scope.searchOn = true;
-		}
-	}  
+	
+$scope.search = function() {
+	if ($scope.searchOn == true) {
+		//call search
+		console.log('searching');
+		$location.path('/search/'+$scope.searchText);
+		$scope.searchOn = false;
+	} else {
+		$scope.searchOn = true;
+	}
+} 
+
+	
+$scope.go = function(path) {
+	$location.path(path);
+};
+	
+$scope.logout = function() {
+      $http.get('/api/user/logout');
+      userManager.loginStatus = false;
+      //$location.url('/');
+};
 	  
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
     //================================================
     // Check if the user is connected
     //================================================
+/*
     var checkLoggedin = function($q, $timeout, $http, $location, $rootScope){
-
       //============== Refresh page to show Login auth =====//
       // Initialize a new promise
       var deferred = $q.defer();
-
-      // Make an AJAX call to check if the user is logged in
-      $http.get('/api/user/loggedin').success(function(user){
-
-        // Authenticated
-        if (user !== '0'){
-              if (user._id){
-                $rootScope.userID = user._id;
-              }
-              //determine name to display on login (should check for name extension before adding...)
-              if (user.name){
-                  $rootScope.userName = user.name;
-              }
-              else if (user.facebook){
-                  $rootScope.userName = user.facebook.name;
-              }
-              else if (user.twitter){
-                  $rootScope.userName = user.twitter.displayName;
-              }
-              else if (user.meetup){
-                  $rootScope.userName = user.meetup.displayName;
-              }
-              else if (user.local){
-                  $rootScope.userName = user.local.email;             
-              }
-              else {
-                  $rootScope.userName = "Me";
-              }
-              
-          $rootScope.avatar = user.avatar;
-          $rootScope.showLogout = true;          
-          $timeout(deferred.resolve, 0);
-        }
-
-        // Not Authenticated
-        else {
-          $rootScope.showLogout = false;
-          $rootScope.message = 'You need to log in.';
-          $timeout(function(){deferred.reject();}, 0);
-        }
-      });
+      
+	  userManager.getUser().then(function(user) {
+		  $scope.loginStatus = true;
+		  $scope.user = user;
+		  if (user._id){
+			  $rootScope.userID = user._id;
+		  }
+		  $timeout(deferred.resolve, 0);
+	  }, function(reason) {
+		  console.log(reason);
+		  $scope.loginStatus = false;
+		  $timeout(function(){deferred.reject();}, 0);
+	  });
+	  
+	  userManager.getDisplayName().then(function(displayName) {
+		  $scope.user.displayName = displayName;
+	  });
 
       return deferred.promise;
-    };
+};
+*/
     //================================================//
 
     $scope.sendFeedback = function(){
@@ -6324,13 +6265,25 @@ app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootSco
     };
 
     //check if logged in
-    checkLoggedin($q, $timeout, $http, $location, $rootScope);
-	
+    //checkLoggedin($q, $timeout, $http, $location, $rootScope);
+
     //search query
     $scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };
     
+$scope.getNearby = function($event) {
+	$scope.nearbyLoading = true;
+	worldTree.getNearby().then(function(data) {
+		$scope.altBubbles = data.liveAndInside;
+		$scope.nearbyBubbles = data.live;
+		$scope.nearbyLoading = false;
+	}, function(reason) {
+		console.log('getNearby error');
+		$scope.nearbyLoading = false;
+	})
+	$event.stopPropagation();
+}
 
 }]);
 
@@ -6739,6 +6692,72 @@ angular.module('tidepoolsServices', ['ngResource'])
 	    }
 	  };
 	});
+angular.module('tidepoolsServices')
+	.factory('dialogs', ['$rootScope', '$compile', 
+function($rootScope, $compile) {
+var dialogs = {
+	dialogTemplate: null
+}
+
+dialogs.showDialog = function(name) {
+	dialogs.template = "templates/"+name;
+	dialogs.show = true;
+}
+
+dialogs.close = function($event) {
+	console.log($event);
+	if($event.target.className.indexOf('dialog-bg')>-1){ 
+		dialogs.show = false;
+	}
+}
+
+return dialogs;
+}]);
+angular.module('tidepoolsServices')
+    .factory('geoService', [ '$q', 
+    	function($q) {
+
+var geoService = {
+	location: {
+		//lat,
+		//lng
+		//timestamp  
+	}
+}	
+ 
+geoService.getLocation = function(maxAge) {
+	var deferred = $q.defer();
+
+	if (navigator.geolocation) {
+		console.log('geo: using navigator');
+		
+		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+			geolocationError, 
+			{timeout:15000, enableHighAccuracy : true});
+	
+		function geolocationSuccess(position) {
+			geoService.location.lat = position.coords.latitude;
+			geoService.location.lng = position.coords.longitude;
+			geoService.location.timestamp = Date.now();
+			deferred.resolve({
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			})
+		}
+
+		function geolocationError(){
+			deferred.reject();
+		}
+	} else {
+		//browser update message
+		deferred.reject();
+	}
+	
+	return deferred.promise;
+}
+
+return geoService;
+}]);
 'use strict';
 
 angular.module('tidepoolsServices')
@@ -6813,36 +6832,36 @@ mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	
 	switch (state) {
 		case 'aperture-half':
-			setCenterWithAperture(latlng, z, 0, .5)
+			mapManager.setCenterWithAperture(latlng, z, 0, .5)
 			break;
 		case 'aperture-third': 
-			setCenterWithAperture(latlng, z, 0, .35);
+			mapManager.setCenterWithAperture(latlng, z, 0, .35);
 			break;
 		case 'editor':
-			setCenterWithAperture(latlng, z, -.2,0);
+			mapManager.setCenterWithAperture(latlng, z, -.2,0);
 			break;
 		default:
 			angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
 			mapManager.refresh();
 	}
 	
-	
-	function setCenterWithAperture(latlng, z, xpart, ypart) {
-		console.log('setCenterWithAperture');
-			var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-			w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-			targetPt, targetLatLng;
-			
-		leafletData.getMap().then(function(map) {
-				targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
-				console.log(targetPt);
-				targetLatLng = map.unproject(targetPt, z);
-				console.log(targetLatLng);
-				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
-				console.log(mapManager.center);
-				mapManager.refresh();
-		});
-	}
+}
+
+mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
+	console.log('setCenterWithAperture');
+	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
+		targetPt, targetLatLng;
+		
+	leafletData.getMap().then(function(map) {
+			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
+			console.log(targetPt);
+			targetLatLng = map.unproject(targetPt, z);
+			console.log(targetLatLng);
+			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+			console.log(mapManager.center);
+			mapManager.refresh();
+	});
 }
 
 mapManager.apertureUpdate = function(state) {
@@ -7165,23 +7184,36 @@ return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', 
-    	function($rootScope, $http, $resource, $q) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location',
+    	function($rootScope, $http, $resource, $q, $location) {
     	
 var userManager = {
-	userRes: $resource('/api/updateuser', {})
+	userRes: $resource('/api/updateuser', {}),
+	loginStatus: false,
+	login: {}
 }
+
 
 userManager.getUser = function() {
 	var deferred = $q.defer();
-	
+	console.log('user', userManager._user);
 	var user = userManager._user;
 	if (user) {
 		deferred.resolve(user);
 	} else {
-		$http.get('/api/user/loggedin').success(function(user){
-			userManager._user = user;
-			deferred.resolve(user);
+		$http.get('http://localhost:2997/api/user/loggedin').
+		success(function(user){
+			if (user!=='0') {
+				$rootScope.user = user; 
+				userManager._user = user;
+				deferred.resolve(user);
+			} else {
+				deferred.reject(0);
+			}
+		}).
+		error(function(data, status, header, config) {
+			//failure
+			deferred.reject(data);
 		});
 	}
 	return deferred.promise;
@@ -7193,12 +7225,95 @@ userManager.saveUser = function(user) {
 	});
 }
 
+userManager.getDisplayName = function() {
+	var deferred = $q.defer();
+	
+	var displayName = userManager._displayName;
+	if (displayName) {
+		deferred.resolve(displayName);
+	} else {
+		userManager.getUser().then(function(user) {
+			if (user.name) {displayName = user.name}
+			else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
+			else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
+			else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
+			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
+			else { displayName = "Me"; console.log("how did this happen???");}
+			
+			displayName = displayName.substring(0, displayName.indexOf(" "));
+			
+			userManager._displayName = displayName;
+			deferred.resolve(displayName);
+		}, function(reason) {
+			deferred.reject(reason);
+		});
+	}
+	
+	return deferred.promise;
+}
+
+userManager.checkLogin = function(){
+      var deferred = $q.defer();
+	  userManager.getUser().then(function(user) {
+	  	console.log('getting user');
+		  userManager.loginStatus = true;
+		  $rootScope.user = user;
+		  if (user._id){
+			  $rootScope.userID = user._id;
+			  userManager._user = user;
+		  }
+		  deferred.resolve(0);
+		  //$rootScope.$digest();
+	  }, function(reason) {
+		  console.log(reason);
+		  userManager.loginStatus = false;
+		  deferred.reject(0);
+		  //$rootScope.$digest();
+	  });
+	  
+	  userManager.getDisplayName().then(function(displayName) {
+		  $rootScope.user.displayName = displayName;
+	  });
+	  
+      return deferred.promise;
+};
+
+userManager.logout = function() {
+	$http.get('http://localhost:2997/api/user/logout');
+	userManager.loginStatus = false;
+	$location.path('/');
+}
+
+userManager.login.login = function() {
+	console.log('login');
+    var data = {
+      email: userManager.login.email,
+      password: userManager.login.password
+    }
+    
+	$http.post('http://localhost:2997/api/user/login', data).
+	success(function(user){
+		if (user) {
+			userManager.checkLogin();
+		}
+	}).
+	error(function(err){
+		if (err){
+			$scope.alerts.addAlert('danger',err);
+		}
+	});
+}
+
+userManager.signup = function() {
+	
+}
+
 
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db',
-	function($cacheFactory, $q, World, db) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
+	function($cacheFactory, $q, World, db, geoService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -7257,6 +7372,25 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 	
 	return deferred.promise;
 }
+
+worldTree.getNearby = function() {
+	var deferred = $q.defer();
+	
+	geoService.getLocation().then(function(location) {
+		db.worlds.query({localTime: new Date(), 
+			userCoordinate: [location.lng, location.lat]},
+			function(data) {
+				deferred.resolve(data[0]);
+				//live
+				//liveAndInside
+			});
+	}, function(reason) {
+		deferred.reject();
+	})
+	
+	return deferred.promise;
+}
+
 
 return worldTree;
 }
@@ -7628,6 +7762,517 @@ return worldTree;
   document.addEventListener('DOMContentLoaded', function() {
     return Drop.updateBodyClasses();
   });
+
+}).call(this);
+
+(function() {
+  var DOWN, ENTER, ESCAPE, Evented, SPACE, Select, UP, addClass, clickEvent, extend, getBounds, getFocusedSelect, hasClass, isRepeatedChar, lastCharacter, removeClass, searchText, searchTextTimeout, touchDevice, useNative, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  _ref = Tether.Utils, extend = _ref.extend, addClass = _ref.addClass, removeClass = _ref.removeClass, hasClass = _ref.hasClass, getBounds = _ref.getBounds, Evented = _ref.Evented;
+
+  ENTER = 13;
+
+  ESCAPE = 27;
+
+  SPACE = 32;
+
+  UP = 38;
+
+  DOWN = 40;
+
+  touchDevice = 'ontouchstart' in document.documentElement;
+
+  clickEvent = touchDevice ? 'touchstart' : 'click';
+
+  useNative = function() {
+    return touchDevice && (innerWidth <= 640 || innerHeight <= 640);
+  };
+
+  isRepeatedChar = function(str) {
+    return Array.prototype.reduce.call(str, function(a, b) {
+      if (a === b) {
+        return b;
+      } else {
+        return false;
+      }
+    });
+  };
+
+  getFocusedSelect = function() {
+    var _ref1;
+    return (_ref1 = document.querySelector('.select-target-focused')) != null ? _ref1.selectInstance : void 0;
+  };
+
+  searchText = '';
+
+  searchTextTimeout = void 0;
+
+  lastCharacter = void 0;
+
+  document.addEventListener('keypress', function(e) {
+    var options, repeatedOptions, select, selected;
+    if (!(select = getFocusedSelect())) {
+      return;
+    }
+    if (e.charCode === 0) {
+      return;
+    }
+    if (e.keyCode === SPACE) {
+      e.preventDefault();
+    }
+    clearTimeout(searchTextTimeout);
+    searchTextTimeout = setTimeout(function() {
+      return searchText = '';
+    }, 500);
+    searchText += String.fromCharCode(e.charCode);
+    options = select.findOptionsByPrefix(searchText);
+    if (options.length === 1) {
+      select.selectOption(options[0]);
+      return;
+    }
+    if (searchText.length > 1 && isRepeatedChar(searchText)) {
+      repeatedOptions = select.findOptionsByPrefix(searchText[0]);
+      if (repeatedOptions.length) {
+        selected = repeatedOptions.indexOf(select.getChosen());
+        selected += 1;
+        selected = selected % repeatedOptions.length;
+        select.selectOption(repeatedOptions[selected]);
+        return;
+      }
+    }
+    if (options.length) {
+      select.selectOption(options[0]);
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    var select, _ref1, _ref2;
+    if (!(select = getFocusedSelect())) {
+      return;
+    }
+    if ((_ref1 = e.keyCode) === UP || _ref1 === DOWN || _ref1 === ESCAPE) {
+      e.preventDefault();
+    }
+    if (select.isOpen()) {
+      switch (e.keyCode) {
+        case UP:
+        case DOWN:
+          return select.moveHighlight(e.keyCode);
+        case ENTER:
+          return select.selectHighlightedOption();
+        case ESCAPE:
+          select.close();
+          return select.target.focus();
+      }
+    } else {
+      if ((_ref2 = e.keyCode) === UP || _ref2 === DOWN || _ref2 === SPACE) {
+        return select.open();
+      }
+    }
+  });
+
+  Select = (function(_super) {
+    __extends(Select, _super);
+
+    Select.defaults = {
+      alignToHighlighed: 'auto',
+      className: 'select-theme-default'
+    };
+
+    function Select(options) {
+      this.options = options;
+      this.update = __bind(this.update, this);
+      this.options = extend({}, Select.defaults, this.options);
+      this.select = this.options.el;
+      if (this.select.selectInstance != null) {
+        throw new Error("This element has already been turned into a Select");
+      }
+      this.setupTarget();
+      this.renderTarget();
+      this.setupDrop();
+      this.renderDrop();
+      this.setupSelect();
+      this.setupTether();
+      this.bindClick();
+      this.bindMutationEvents();
+      this.value = this.select.value;
+    }
+
+    Select.prototype.useNative = function() {
+      return this.options.useNative === true || (useNative() && this.options.useNative !== false);
+    };
+
+    Select.prototype.setupTarget = function() {
+      var tabIndex,
+        _this = this;
+      this.target = document.createElement('a');
+      this.target.href = 'javascript:;';
+      addClass(this.target, 'select-target');
+      tabIndex = this.select.getAttribute('tabindex') || 0;
+      this.target.setAttribute('tabindex', tabIndex);
+      if (this.options.className) {
+        addClass(this.target, this.options.className);
+      }
+      this.target.selectInstance = this;
+      this.target.addEventListener('click', function() {
+        if (!_this.isOpen()) {
+          return _this.target.focus();
+        } else {
+          return _this.target.blur();
+        }
+      });
+      this.target.addEventListener('focus', function() {
+        return addClass(_this.target, 'select-target-focused');
+      });
+      this.target.addEventListener('blur', function(e) {
+        if (_this.isOpen()) {
+          if (e.relatedTarget && !_this.drop.contains(e.relatedTarget)) {
+            _this.close();
+          }
+        }
+        return removeClass(_this.target, 'select-target-focused');
+      });
+      return this.select.parentNode.insertBefore(this.target, this.select.nextSibling);
+    };
+
+    Select.prototype.setupDrop = function() {
+      var _this = this;
+      this.drop = document.createElement('div');
+      addClass(this.drop, 'select');
+      if (this.options.className) {
+        addClass(this.drop, this.options.className);
+      }
+      document.body.appendChild(this.drop);
+      this.drop.addEventListener('click', function(e) {
+        if (hasClass(e.target, 'select-option')) {
+          return _this.pickOption(e.target);
+        }
+      });
+      this.drop.addEventListener('mousemove', function(e) {
+        if (hasClass(e.target, 'select-option')) {
+          return _this.highlightOption(e.target);
+        }
+      });
+      this.content = document.createElement('div');
+      addClass(this.content, 'select-content');
+      return this.drop.appendChild(this.content);
+    };
+
+    Select.prototype.open = function() {
+      var positionSelectStyle, selectedOption,
+        _this = this;
+      addClass(this.target, 'select-open');
+      if (this.useNative()) {
+        this.select.style.display = 'block';
+        setTimeout(function() {
+          var event;
+          event = document.createEvent("MouseEvents");
+          event.initEvent("mousedown", true, true);
+          return _this.select.dispatchEvent(event);
+        });
+        return;
+      }
+      addClass(this.drop, 'select-open');
+      setTimeout(function() {
+        return _this.tether.enable();
+      });
+      selectedOption = this.drop.querySelector('.select-option-selected');
+      if (!selectedOption) {
+        return;
+      }
+      this.highlightOption(selectedOption);
+      this.scrollDropContentToOption(selectedOption);
+      positionSelectStyle = function() {
+        var dropBounds, offset, optionBounds;
+        if (hasClass(_this.drop, 'tether-abutted-left') || hasClass(_this.drop, 'tether-abutted-bottom')) {
+          dropBounds = getBounds(_this.drop);
+          optionBounds = getBounds(selectedOption);
+          offset = dropBounds.top - (optionBounds.top + optionBounds.height);
+          return _this.drop.style.top = (parseFloat(_this.drop.style.top) || 0) + offset + 'px';
+        }
+      };
+      if (this.options.alignToHighlighted === 'always' || (this.options.alignToHighlighted === 'auto' && this.content.scrollHeight <= this.content.clientHeight)) {
+        setTimeout(positionSelectStyle);
+      }
+      return this.trigger('open');
+    };
+
+    Select.prototype.close = function() {
+      removeClass(this.target, 'select-open');
+      if (this.useNative()) {
+        this.select.style.display = 'none';
+        return;
+      }
+      this.tether.disable();
+      removeClass(this.drop, 'select-open');
+      return this.trigger('close');
+    };
+
+    Select.prototype.toggle = function() {
+      if (this.isOpen()) {
+        return this.close();
+      } else {
+        return this.open();
+      }
+    };
+
+    Select.prototype.isOpen = function() {
+      return hasClass(this.drop, 'select-open');
+    };
+
+    Select.prototype.bindClick = function() {
+      var _this = this;
+      this.target.addEventListener(clickEvent, function(e) {
+        e.preventDefault();
+        return _this.toggle();
+      });
+      return document.addEventListener(clickEvent, function(event) {
+        if (!_this.isOpen()) {
+          return;
+        }
+        if (event.target === _this.drop || _this.drop.contains(event.target)) {
+          return;
+        }
+        if (event.target === _this.target || _this.target.contains(event.target)) {
+          return;
+        }
+        return _this.close();
+      });
+    };
+
+    Select.prototype.setupTether = function() {
+      return this.tether = new Tether({
+        element: this.drop,
+        target: this.target,
+        attachment: 'top left',
+        targetAttachment: 'bottom left',
+        classPrefix: 'select',
+        constraints: [
+          {
+            to: 'window',
+            attachment: 'together'
+          }
+        ]
+      });
+    };
+
+    Select.prototype.renderTarget = function() {
+      var option, _i, _len, _ref1;
+      this.target.innerHTML = '';
+      _ref1 = this.select.querySelectorAll('option');
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        option = _ref1[_i];
+        if (option.selected) {
+          this.target.innerHTML = option.innerHTML;
+          break;
+        }
+      }
+      return this.target.appendChild(document.createElement('b'));
+    };
+
+    Select.prototype.renderDrop = function() {
+      var el, option, optionList, _i, _len, _ref1;
+      optionList = document.createElement('ul');
+      addClass(optionList, 'select-options');
+      _ref1 = this.select.querySelectorAll('option');
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        el = _ref1[_i];
+        option = document.createElement('li');
+        addClass(option, 'select-option');
+        option.setAttribute('data-value', el.value);
+        option.innerHTML = el.innerHTML;
+        if (el.selected) {
+          addClass(option, 'select-option-selected');
+        }
+        optionList.appendChild(option);
+      }
+      this.content.innerHTML = '';
+      return this.content.appendChild(optionList);
+    };
+
+    Select.prototype.update = function() {
+      this.renderDrop();
+      return this.renderTarget();
+    };
+
+    Select.prototype.setupSelect = function() {
+      this.select.selectInstance = this;
+      addClass(this.select, 'select-select');
+      return this.select.addEventListener('change', this.update);
+    };
+
+    Select.prototype.bindMutationEvents = function() {
+      if (window.MutationObserver != null) {
+        this.observer = new MutationObserver(this.update);
+        return this.observer.observe(this.select, {
+          childList: true,
+          attributes: true,
+          characterData: true,
+          subtree: true
+        });
+      } else {
+        return this.select.addEventListener('DOMSubtreeModified', this.update);
+      }
+    };
+
+    Select.prototype.findOptionsByPrefix = function(text) {
+      var options;
+      options = this.drop.querySelectorAll('.select-option');
+      text = text.toLowerCase();
+      return Array.prototype.filter.call(options, function(option) {
+        return option.innerHTML.toLowerCase().substr(0, text.length) === text;
+      });
+    };
+
+    Select.prototype.findOptionsByValue = function(val) {
+      var options;
+      options = this.drop.querySelectorAll('.select-option');
+      return Array.prototype.filter.call(options, function(option) {
+        return option.getAttribute('data-value') === val;
+      });
+    };
+
+    Select.prototype.getChosen = function() {
+      if (this.isOpen()) {
+        return this.drop.querySelector('.select-option-highlight');
+      } else {
+        return this.drop.querySelector('.select-option-selected');
+      }
+    };
+
+    Select.prototype.selectOption = function(option) {
+      if (this.isOpen()) {
+        this.highlightOption(option);
+        return this.scrollDropContentToOption(option);
+      } else {
+        return this.pickOption(option, false);
+      }
+    };
+
+    Select.prototype.resetSelection = function() {
+      return this.selectOption(this.drop.querySelector('.select-option'));
+    };
+
+    Select.prototype.highlightOption = function(option) {
+      var highlighted;
+      highlighted = this.drop.querySelector('.select-option-highlight');
+      if (highlighted != null) {
+        removeClass(highlighted, 'select-option-highlight');
+      }
+      addClass(option, 'select-option-highlight');
+      return this.trigger('highlight', {
+        option: option
+      });
+    };
+
+    Select.prototype.moveHighlight = function(directionKeyCode) {
+      var highlighted, highlightedIndex, newHighlight, options;
+      if (!(highlighted = this.drop.querySelector('.select-option-highlight'))) {
+        this.highlightOption(this.drop.querySelector('.select-option'));
+        return;
+      }
+      options = this.drop.querySelectorAll('.select-option');
+      highlightedIndex = Array.prototype.indexOf.call(options, highlighted);
+      if (!(highlightedIndex >= 0)) {
+        return;
+      }
+      if (directionKeyCode === UP) {
+        highlightedIndex -= 1;
+      } else {
+        highlightedIndex += 1;
+      }
+      if (highlightedIndex < 0 || highlightedIndex >= options.length) {
+        return;
+      }
+      newHighlight = options[highlightedIndex];
+      this.highlightOption(newHighlight);
+      return this.scrollDropContentToOption(newHighlight);
+    };
+
+    Select.prototype.scrollDropContentToOption = function(option) {
+      var contentBounds, optionBounds;
+      if (this.content.scrollHeight > this.content.clientHeight) {
+        contentBounds = getBounds(this.content);
+        optionBounds = getBounds(option);
+        return this.content.scrollTop = optionBounds.top - (contentBounds.top - this.content.scrollTop);
+      }
+    };
+
+    Select.prototype.selectHighlightedOption = function() {
+      return this.pickOption(this.drop.querySelector('.select-option-highlight'));
+    };
+
+    Select.prototype.pickOption = function(option, close) {
+      var _this = this;
+      if (close == null) {
+        close = true;
+      }
+      this.value = this.select.value = option.getAttribute('data-value');
+      this.triggerChange();
+      if (close) {
+        return setTimeout(function() {
+          _this.close();
+          return _this.target.focus();
+        });
+      }
+    };
+
+    Select.prototype.triggerChange = function() {
+      var event;
+      event = document.createEvent("HTMLEvents");
+      event.initEvent("change", true, false);
+      this.select.dispatchEvent(event);
+      return this.trigger('change', {
+        value: this.select.value
+      });
+    };
+
+    Select.prototype.change = function(val) {
+      var options;
+      options = this.findOptionsByValue(val);
+      if (!options.length) {
+        throw new Error("Select Error: An option with the value \"" + val + "\" doesn't exist");
+      }
+      return this.pickOption(options[0], false);
+    };
+
+    return Select;
+
+  })(Evented);
+
+  Select.init = function(options) {
+    var el, _i, _len, _ref1, _results;
+    if (options == null) {
+      options = {};
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        return Select.init(options);
+      });
+      return;
+    }
+    if (options.selector == null) {
+      options.selector = 'select';
+    }
+    _ref1 = document.querySelectorAll(options.selector);
+    _results = [];
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      el = _ref1[_i];
+      if (!el.selectInstance) {
+        _results.push(new Select(extend({
+          el: el
+        }, options)));
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
+  window.Select = Select;
 
 }).call(this);
 
@@ -10418,6 +11063,9 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 	}
 
 }]);
+app.controller('HomeController', ['$scope', function ($scope) {
+
+}]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
@@ -10660,60 +11308,6 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 
 }]); 
 
-
-function ProfileCtrl($scope, $rootScope, $http, $location, apertureService, Landmark, db, $routeParams) {
-
-	angular.extend($rootScope, {loading: false});
-	$scope.aperture = apertureService;  
-	$scope.aperture.set('off');
-
-	// This object will be filled by the form
-	$scope.user = {};
-	
-	$scope.worlds = [];
-
-	$scope.deleteWorld = function(i) {
-	var deleteConfirm = confirm("Are you sure you want to delete this?");
-	if (deleteConfirm) {
-		Landmark.del({_id: $scope.worlds[i]._id}, function(data) {
-		//$location.path('/');
-		console.log('##Delete##');
-		console.log(data);
-		$scope.worlds.splice(i, 1); //Removes from local array
-	  });
-	  }
-  	}
-
-	$scope.newWorld = function() {
-		console.log('newWorld()');
-		$scope.world = {};
-		$scope.world.newStatus = true; //new
-		db.worlds.create($scope.world, function(response){
-			console.log('##Create##');
-			console.log('response', response);
-			$location.path('/edit/walkthrough/'+response[0].worldID);
-		});
-	}
-
-	//if user login came from Meetup, then process new meetup worlds
-	if ($routeParams.incoming == 'meetup'){
-		angular.extend($rootScope, {loading: true});
-		$scope.fromMeetup = true;
-		$http.post('/api/process_meetups').success(function(response){
-			angular.extend($rootScope, {loading: false});
-			$http.get('/api/user/profile').success(function(user){
-				$scope.worlds = user;		
-			});
-		});
-
-	}
-	else {
-		$http.get('/api/user/profile').success(function(user){
-			console.log(user);
-			$scope.worlds = user;		
-		});
-	}
-}
 
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 

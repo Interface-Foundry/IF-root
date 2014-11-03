@@ -1,0 +1,99 @@
+<div class="row">
+	<a href="" ng-click="setThemeFromMap()" class="col-xs-12">Use theme defaults from <em ng-bind="world.style.maps.cloudMapName">...</em></a>
+
+<div class="col-xs-12 col-md-6">
+	<br>
+	<div class="form-group">
+		<label>Navigator Background</label>
+		<spectrum-colorpicker ng-model="style.navBG_color" options="{showAlpha:true, showInput: true}" format="'rgb'"></spectrum-colorpicker>
+	</div>
+	<div class="form-group">
+		<label>Body Background</label>
+		<spectrum-colorpicker ng-model="style.bodyBG_color" format="'rgb'" options="{showInput: true}"></spectrum-colorpicker>
+	</div>
+	<div class="form-group">
+		<label>Title Background</label>
+		<spectrum-colorpicker ng-model="style.titleBG_color" format="'rgb'" options="{showInput: true}"></spectrum-colorpicker>
+	</div>
+</div>
+<div class="col-xs-12 col-md-6">
+	<br>
+	<div class="form-group">
+		<label>Landmark Title Color</label>
+		<spectrum-colorpicker ng-model="style.landmarkTitle_color" format="'rgb'" options="{showInput: true}"></spectrum-colorpicker>
+	</div>
+	<div class="form-group">
+		<label>Category Title Color</label>
+		<spectrum-colorpicker ng-model="style.categoryTitle_color" format="'rgb'" options="{showInput: true}"></spectrum-colorpicker>
+	</div>
+</div>
+</div>
+<label>Widgets</label> <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.widgets"></span>
+<div class="well edit-widget-well">
+	<div class="edit-widget" ng-class="{'active': style.widgets.messages}">
+	<label for="messages" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/messages.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Messages</h4>
+			<span ng-cloak>Add a chatroom to the front of your bubble.</span>
+		</div>
+		<input type="checkbox" name="messages" id="messages" ng-model="style.widgets.messages">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+
+	<div class="edit-widget" ng-class="{'active': style.widgets.twitter}">
+	<label for="twitter" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/twitter.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Twitter <small ng-cloak>{{world.hashtag}}</small></h4>
+			<span ng-cloak>Shows relevant tweets on your front page.</span>
+		</div>
+		<input type="checkbox" name="twitter" id="twitter" ng-model="style.widgets.twitter">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.instagram}">
+	<label for="instagram" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/instagram.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Instagram <small ng-cloak>{{world.hashtag}}</small></h4>
+			<span ng-cloak>Shows relevant instagram posts on your front page.</span>
+		</div>
+		<input type="checkbox" name="instagram" id="instagram" ng-model="style.widgets.instagram">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.upcoming}">
+	<label for="upcoming" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/upcoming.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Upcoming</h4>
+			<span ng-cloak>Organizes landmarks by time and shows current events.</span>
+		</div>
+		<input type="checkbox" name="upcoming" id="upcoming" ng-model="style.widgets.upcoming">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.category}">
+	<label for="category" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/category.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Category</h4>
+			<span ng-cloak>Adds a category switcher to your front page.</span>
+		</div>
+		<input type="checkbox" name="category" id="category" ng-model="style.widgets.category">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
+</div>

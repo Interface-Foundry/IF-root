@@ -1,0 +1,25 @@
+<div class="user-chip-wrap" ng-switch="userManager.loginStatus" ng-click="openMenu($event)">
+	<div ng-switch-when="true">
+		<img class="user-chip-img" ng-src="{{user.avatar}}">
+		<span class="user-chip-label auth" ng-bind="user.displayName">Me</span>
+		<ul class="nav-user-menu" ng-show="userMenu">
+			<li class="nav-user-menu-title">
+				<img class="nav-user-menu-img" ng-src="{{user.avatar}}"><span ng-bind="user.displayName"></span>
+			</li>
+			<li class="nav-user-menu-divider"></li>
+			<li class="nav-user-menu-item" ng-click="go('/profile/me'); closeMenu($event)">My Profile</li>
+			<li class="nav-user-menu-item" ng-click="go('/profile/'); closeMenu($event)">My Bubbles</li>
+			<li class="nav-user-menu-divider"></li>
+			<!--
+<li class="nav-user-menu-item">History</li>
+			<li class="nav-user-menu-item">Contacts</li>
+			<li class="nav-user-menu-divider"></li>
+-->
+			<li class="nav-user-menu-item" id="feedback">Send Feedback</li>
+			<li class="nav-user-menu-item" ng-click="logout(); $event.stopPropagation()">Logout</li>
+		</ul>
+	</div>
+	<div ng-switch-default>
+		<span class="user-chip-label" id="login">Login</span>
+	</div>
+</div>

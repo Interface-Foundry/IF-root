@@ -1,0 +1,101 @@
+<!-- <a href="#/w/{{worldURL}}" class="back btn btn-default btn-sm"><span class="glyphicon glyphicon-chevron-left"></span> Back</a> -->
+<div class="edit-view">
+<ul class="edit-nav">
+	<li class="active">
+		<span>Landmarks</span>
+	</li>
+	<li class="edit-landmark-navback">
+		<a ng-href="#/w/{{world.id}}" class="btn btn-link">Go to {{world.name}}</a>
+		<a ng-href="#/edit/w/{{world.id}}" class="btn btn-link">Edit {{world.name}}</a>
+	</li>
+</ul>
+<div class="edit-container edit-bg">
+
+<div class="container-fluid">
+<div class="form-group">
+<button class="btn btn-success" ng-click="addLandmark()"><b>+</b> Add Point of Interest or Schedule item</button>
+
+
+</div>
+<ul class="row">
+	<div class="col-xs-12">
+	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="panel panel-default" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()">
+		<div class="panel-heading" ng-click="selectLandmark()">
+		<span class="panel-title" ng-cloak>{{landmark.name}} 
+			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			<button type="button" class="btn btn-primary btn-sm" ng-click="saveLandmark()">Save</button>
+			</span>
+		</div>
+		<div ng-form class='panel-body' ng-show="$index === selectedIndex">
+		<div class="form-group">
+			
+			<div class="media">
+				<div class="media-object edit-landmark-avatar">
+				<img ng-src='{{landmark.avatar}}' class="img-responsive" ng-cloak/>
+				
+				</div>
+				<div class="media-body">
+					<div class="form-group">
+						<label>Name</label> <input type="text" ng-model="landmark.name" class="form-control"/>
+						</div>
+				</div>
+			</div>
+			<button class="btn btn-info btn-sm" ng-file-select="onUploadAvatar($files)">+ Upload Pic</button>
+
+		</div>
+		<div class="form-group">
+		<label>Summary</label> <input type="text" ng-model="landmark.summary" class="form-control"/>
+		</div>
+		<div class="form-group">
+		<label>Description</label> <textarea ng-model="landmark.description" class="form-control"/>
+		</div>
+		<div class="form-group">
+			<label>Category</label> 
+			<select class="form-control" ng-model="landmark.category" ng-options="category.name as category.name for category in world.landmarkCategories"></select>
+		</div>
+	
+		<button class="btn btn-info btn-sm" ng-click="setStartTime()" ng-hide="landmark.time.start">Add a Start Time</button>
+<div ng-show="landmark.time.start">
+	<div class="form-group form-inline">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> Start Time <span class="glyphicon glyphicon-info-sign info"></span></label>
+		
+		<button type="button" class="close" ng-click="landmark.time.start = null">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close </span>
+		</button><br>
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.start" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.start" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+	<button class="btn btn-info btn-sm" ng-click="setEndTime()" ng-hide="landmark.time.end">Add End Time</button>
+	<div class="form-group form-inline" ng-show="landmark.time.end">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time <span class="glyphicon glyphicon-info-sign info"></span></label>
+		
+		<button type="button" class="close" ng-click="landmark.time.end = null">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+		</button><br> 
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.end" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.end" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+			</div>
+
+		</div>
+	</div>
+	</li>
+</ul>
+
+</div>
+</div>
+</div>
