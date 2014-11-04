@@ -402,14 +402,21 @@
 	text-align: center;
 }
 
-a.thumbnail {
-	background-color: transparent;
-	border: none;
+
+.tour-thumbnail{
+	background-color: transparent !important;
+	border: none !important;
 	border-radius: 40;
+	cursor:pointer;
 }
 
-img.center-block {
-	border-radius: 10px;
+.tour-circle-img {
+	cursor:pointer;
+	border-radius: 50%;
+}
+
+.tour-circle-img:hover {
+	opacity:0.7;
 }
 
 .btn-meetup {
@@ -433,7 +440,7 @@ img.center-block {
 }
 
 .tour-credits{
-	padding-top: 296px;
+	padding-top: 275px;
 	color:gray;
 }
 
@@ -488,7 +495,6 @@ img.center-block {
 	background-color: rgba(236, 239, 241,0.7);
 	border-radius: 12px;
 	height: 410px;
-	margin-top: 180px;
 	margin-left: 12%;
 	margin-right: 12%;
 
@@ -517,7 +523,7 @@ img.tour-logo {
 	display: block;
 	margin-right: auto;
 	margin-left: auto;
-	margin-top:20px;
+	margin-top:40px;
 }
 
 h6.second-card-title {
@@ -564,7 +570,7 @@ text-align: center;
 	}
 }
 
-/*
+
 @media (min-width: 768px) {
 	.col-sm-6{
 		width: 46%;
@@ -598,4 +604,3 @@ text-align: center;
 	}
 }
 
-*/
