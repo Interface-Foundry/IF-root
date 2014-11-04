@@ -1480,7 +1480,7 @@ text-align: center;
 	}
 }
 
-
+/*
 @media (min-width: 768px) {
 	.col-sm-6{
 		width: 46%;
@@ -1513,6 +1513,11 @@ text-align: center;
 
 	}
 }
+<<<<<<< Updated upstream
+=======
+
+*/
+>>>>>>> Stashed changes
 .message-surface {
 	position: absolute;
 	top: 0px;
