@@ -15,7 +15,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
   interfacefoundry.com <3 <3 <3 
 
-  v0.3 Illya 
+  v0.6 Illya 
 */
 
 var fs = require('fs');
@@ -1124,6 +1124,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     if (req.body.category){
                         lm.category = req.body.category;
                     }
+
                     if (req.body.landmarkCategories){
 	                    lm.landmarkCategories = req.body.landmarkCategories;
                     }
@@ -1174,19 +1175,20 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             var st = new styleSchema({
                 name: inputName,
                 bodyBG_color: "#eceff1",  
-				titleBG_color: "#ff7043", 
-				navBG_color: "rgba(244,81,30,.8)",  
-	
-				landmarkTitle_color: "#455a64", // RGB Hex
-				categoryTitle_color: "#ff5722", // RGB Hex
-		
-				widgets: {
-					twitter: false,
-					instagram: false,
-					upcoming: false,
-					category: false,
-          messages: true
-				}
+        				titleBG_color: "#ff7043", 
+        				navBG_color: "rgba(244,81,30,.8)",  
+        	
+        				landmarkTitle_color: "#455a64", // RGB Hex
+        				categoryTitle_color: "#ff5722", // RGB Hex
+        		
+        				widgets: {
+        					twitter: false,
+        					instagram: false,
+        					upcoming: false,
+        					category: false,
+                  messages: true,
+                  presents: false
+        				}
             });
             
             saveIt(function (res) {
@@ -1290,6 +1292,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         			lm.widgets.upcoming = req.body.widgets.upcoming;
         			lm.widgets.category = req.body.widgets.category;
         			lm.widgets.messages = req.body.widgets.messages;
+              lm.widgets.presents = req.body.widgets.presents;
       			}
 			
             lm.save(function(err, style) {
@@ -1582,45 +1585,54 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 //map send to tile server to build 
 app.post('/api/build_map', isLoggedIn, function (req, res) {
 
-    //this entire area hurts my eyes, i can't even D:
-    var map_text = JSON.stringify(req.body.coords); 
-    map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
+  if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
+    
+      //this entire area hurts my eyes, i can't even D:
+      var map_text = JSON.stringify(req.body.coords); 
+      map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
 
-    // after file saved locally, send to IF-Tiler server
-    var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
-      if (err) {
-          //deleting temp map upload
-          if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
-              //delete temp file
-              fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
-                if (err) throw err;
-                console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
-              });              
-          }
-          else {
-              console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
-          }
-        return console.error('upload failed:', err);
-      }
-      else {
-        console.log('Upload successful! Server responded with:', body);
-        worldMapTileUpdate(req, res, body, req.mapBuild);
-          //deleting temp map upload
-          if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
-              //delete temp file
-              fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
-                if (err) throw err;
-                console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
-              });
-          }
-          else {
-              console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
-          }
-       }
-    });
-    var form = r.form();
-    form.append('my_buffer', new Buffer([1, 2, 3]));
-    form.append(map_text, fs.createReadStream(__dirname + '/app/dist/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
+      // after file saved locally, send to IF-Tiler server
+      var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
+        if (err) {
+            //deleting temp map upload
+            if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
+                //delete temp file
+                fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
+                  if (err) throw err;
+                  console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
+                });              
+            }
+            else {
+                console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
+            }
+          return console.error('upload failed:', err);
+        }
+        else {
+          console.log('Upload successful! Server responded with:', body);
+          worldMapTileUpdate(req, res, body, req.mapBuild);
+            //deleting temp map upload
+            if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
+                //delete temp file
+                fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
+                  if (err) throw err;
+                  console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
+                });
+            }
+            else {
+                console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
+            }
+         }
+      });
+      
+      
+        var form = r.form();
+        form.append('my_buffer', new Buffer([1, 2, 3]));
+        form.append(map_text, fs.createReadStream(__dirname + '/app/dist/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
+    }
+    else {
+      console.log('map image doesnt exist');
+    }
+
 });
 
 

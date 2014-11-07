@@ -47,7 +47,7 @@
 					<span class="glyphicon glyphicon-picture"></span>
 					<label>Upload</label>
 				</button>
-				<img ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
+				<img width="150" ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
 			</div>
 		</div>
 	</div>
@@ -60,19 +60,39 @@
 			</div>
 		</div>
 		<div class="form-group">
+
 			<label>Landmark Categories <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.landmarkcategories"></span></label> 
-			<div class="input-group">
-				<input type="text" name="temp.LandmarkCategory" ng-model="temp.LandmarkCategory"  class="form-control">
-				<span class="input-group-btn">
-					<button class="btn btn-default" type="button" ng-click="addLandmarkCategory()">Add</button>
-				</span>
-			</div>
-			<ul>
-				<li ng-repeat="landmarkCategory in world.landmarkCategories" class="clearfix">
-					{{landmarkCategory.name}} 
-					<button type="button" class="close" ng-click="removeLandmarkCategory($index)"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				</li>
-			</ul>
+
+			<label>Enable</label> <input type="checkbox" ng-model="temp.showLandmarks"/>
+
+			 <div class="form-group" ng-show="temp.showLandmarks">
+				<div class="form-group">
+					<div class="well world-icon">
+						<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
+							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+						</button>
+						<button class="btn btn-default" ng-file-select="onLandmarkCategoryIconSelect($files)" ng-hide="uploadFinishedLandmark">
+							<span class="glyphicon glyphicon-picture" ></span>
+						</button>
+						<img width="80" ng-show="uploadFinishedLandmark" ng-src="{{temp.LandmarkCatAvatar}}"> 
+					</div>
+				</div>	
+
+				<div class="input-group">
+
+					<input type="text" name="temp.LandmarkCategory" ng-model="temp.LandmarkCategory"  class="form-control">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button" ng-click="addLandmarkCategory()">Add</button>
+					</span>
+				</div>
+				<ul>
+					<li ng-repeat="landmarkCategory in world.landmarkCategories" class="clearfix">
+						{{landmarkCategory.name}} <span ng-show="landmarkCategory.avatar"><img width="30" src="{{landmarkCategory.avatar}}"></span> 
+						<button type="button" class="close" ng-click="removeLandmarkCategory($index)"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					</li>
+				</ul>
+			  </div>
+
 		</div>
 	</div>
 </div>

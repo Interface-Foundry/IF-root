@@ -32,7 +32,9 @@
 	<!--now--> <!--upcoming-->
 	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
 
-	
+	<!---yelp-->
+	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null"></div>
+
 	<!---meetup-->
 	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
 	

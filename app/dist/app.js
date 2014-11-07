@@ -7003,10 +7003,12 @@ var mapManager = {
 				url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
 				type: 'xyz',
 				top: true,
-				maxZoom: 25
+				maxZoom: 23,
+    			maxNativeZoom: 23
 			}
 		},
-		overlays: {}
+		overlays: {
+		}
 	},
 	paths: {/*
 worldBounds: {
@@ -7262,7 +7264,7 @@ mapManager.setBaseLayer = function(layerURL) {
 		layerParams: {},
 		layerOptions: {
 			minZoom: 1,
-			maxZoom: 19
+			maxZoom: 23
 		}
 	};	
 }
@@ -7277,9 +7279,9 @@ mapManager.setBaseLayerFromID = function(ID) {
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
 	var newOverlay = {};
-	if (localMapOptions.maxZoom>19) {
-		localMapOptions.maxZoom = 19;
-	}
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
 	localMapOptions.zIndex = 10;
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
@@ -9786,6 +9788,20 @@ $scope.onWorldIconSelect = function($files) {
 	});
 }
 
+$scope.onLandmarkCategoryIconSelect = function($files) {
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file,
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+		$scope.temp.LandmarkCatAvatar = data;
+		$scope.uploadFinishedLandmark = true;
+	});
+}
+
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
@@ -9840,10 +9856,19 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 
 $scope.addLandmarkCategory = function() {
+
 	if ($scope.temp) {
-	console.log($scope.temp.LandmarkCategory);
-	$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory});
-	console.log($scope.world);
+
+		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar});
+
+		// console.log('----- TEST')
+		// console.log($scope.world.landmarkCategories);
+
+		console.log($scope.world);
+		delete $scope.temp.LandmarkCatAvatar;
+		delete $scope.temp.LandmarkCategory;
+		$scope.uploadFinishedLandmark = false;
+		console.log($scope.temp.LandmarkCatAvatar);
 	}
 }
 
@@ -11439,6 +11464,13 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			console.log('Problem finding marker, save failed');
 			return false;}
 		$scope.landmarks[i].loc.coordinates = [tempMarker.lng, tempMarker.lat];
+
+		// if($scope.landmarks[i].hiddenPresent == true){
+		// 	$scope.landmarks[i].category.hiddenPresent = true;
+		// }
+		// else{
+		// 	$scope.landmarks[i].category.hiddenPresent = false;
+		// }
 		
 		/*
 if ($scope.landmark.hasTime) {
@@ -12291,6 +12323,19 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 				$scope.world = data.world;
 				$scope.style = data.style;
 				style.navBG_color = $scope.style.navBG_color;
+
+				if ($scope.style.presents){
+					// show present card --> "you collected!"
+					// with link to share it on group chat ---> click to share, says in green notice: message was shared CLICK to see it
+
+					// read landmark category for landmark
+
+					//COLLECTING
+					//$scope.landmark.category PUSH
+					//$scope.landmark.category_avatar
+					//$scope.landmark.category
+					///------> send both of these to server ---> save to user 
+				}
 			}
 		});
 		

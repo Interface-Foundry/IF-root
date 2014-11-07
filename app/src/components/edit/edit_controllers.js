@@ -80,6 +80,20 @@ $scope.onWorldIconSelect = function($files) {
 	});
 }
 
+$scope.onLandmarkCategoryIconSelect = function($files) {
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file,
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+		$scope.temp.LandmarkCatAvatar = data;
+		$scope.uploadFinishedLandmark = true;
+	});
+}
+
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
@@ -134,10 +148,19 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 
 $scope.addLandmarkCategory = function() {
+
 	if ($scope.temp) {
-	console.log($scope.temp.LandmarkCategory);
-	$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory});
-	console.log($scope.world);
+
+		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar});
+
+		// console.log('----- TEST')
+		// console.log($scope.world.landmarkCategories);
+
+		console.log($scope.world);
+		delete $scope.temp.LandmarkCatAvatar;
+		delete $scope.temp.LandmarkCategory;
+		$scope.uploadFinishedLandmark = false;
+		console.log($scope.temp.LandmarkCatAvatar);
 	}
 }
 

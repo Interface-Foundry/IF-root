@@ -17,10 +17,12 @@ var mapManager = {
 				url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
 				type: 'xyz',
 				top: true,
-				maxZoom: 25
+				maxZoom: 23,
+    			maxNativeZoom: 23
 			}
 		},
-		overlays: {}
+		overlays: {
+		}
 	},
 	paths: {/*
 worldBounds: {
@@ -276,7 +278,7 @@ mapManager.setBaseLayer = function(layerURL) {
 		layerParams: {},
 		layerOptions: {
 			minZoom: 1,
-			maxZoom: 19
+			maxZoom: 23
 		}
 	};	
 }
@@ -291,9 +293,9 @@ mapManager.setBaseLayerFromID = function(ID) {
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
 	var newOverlay = {};
-	if (localMapOptions.maxZoom>19) {
-		localMapOptions.maxZoom = 19;
-	}
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
 	localMapOptions.zIndex = 10;
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,

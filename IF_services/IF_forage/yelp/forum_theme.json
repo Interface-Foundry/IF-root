@@ -1,0 +1,26 @@
+{
+	"name": "forum",
+
+	"bodyBG_color": "#eceff1",  
+	"titleBG_color": "#ff7043", 
+	"navBG_color": "rgba(244,81,30,.80)",
+	
+	"landmarkTitle_color": "#455a64", 
+	"categoryTitle_color": "#ff5722", 
+		
+		"widgets": {
+			"twitter": false,
+			"instagram": false,
+			"upcoming": false,
+			"category": false,
+			"googledoc": true,
+			"checkin": true,
+			"messages": true,
+			"mailing_list":false,
+			"icebreaker":true,
+			"photo_share":true,
+			"stickers":true
+		}
+} 
+
+

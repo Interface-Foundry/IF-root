@@ -32,6 +32,19 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 				$scope.world = data.world;
 				$scope.style = data.style;
 				style.navBG_color = $scope.style.navBG_color;
+
+				if ($scope.style.presents){
+					// show present card --> "you collected!"
+					// with link to share it on group chat ---> click to share, says in green notice: message was shared CLICK to see it
+
+					// read landmark category for landmark
+
+					//COLLECTING
+					//$scope.landmark.category PUSH
+					//$scope.landmark.category_avatar
+					//$scope.landmark.category
+					///------> send both of these to server ---> save to user 
+				}
 			}
 		});
 		

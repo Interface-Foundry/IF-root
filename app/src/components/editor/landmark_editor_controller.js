@@ -112,6 +112,13 @@ function LandmarkEditorController($scope, $rootScope, $location, $route, $routeP
 			console.log('Problem finding marker, save failed');
 			return false;}
 		$scope.landmarks[i].loc.coordinates = [tempMarker.lng, tempMarker.lat];
+
+		// if($scope.landmarks[i].hiddenPresent == true){
+		// 	$scope.landmarks[i].category.hiddenPresent = true;
+		// }
+		// else{
+		// 	$scope.landmarks[i].category.hiddenPresent = false;
+		// }
 		
 		/*
 if ($scope.landmark.hasTime) {

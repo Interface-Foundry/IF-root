@@ -35,9 +35,14 @@ module.exports = {
 		description: String, //full HTML?
 		type: String, //event, place
 		subType: { type: [String], index: true }, // type of event/place	
-		category: String, //category of type
+		category: { //only for landmarks (world:false)
+			name: String, 
+			avatar: String,
+			hiddenPresent: Boolean
+		},
 		landmarkCategories: [{
-			name: String 
+			name: String,
+			avatar: String 
 		}],
 		style: {
 			styleID: String, //link to landmark's style
@@ -147,13 +152,34 @@ module.exports = {
 				group_lon: Number
 			}
 		},
+		source_yelp: {
+			id: { type: String, index: true},
+			is_closed: String,
+			is_claimed: String,
+			url: String,
+			mobile_url: String,
+			phone: String,
+			display_phone: String,
+			rating: Schema.Types.Mixed,
+			snippet_image_url: String,
+			deals:Schema.Types.Mixed,
+			locationInfo:Schema.Types.Mixed,
+			categories:Schema.Types.Mixed
+		},
 		widgets: {
 			twitter: Boolean,
 			instagram: Boolean,
 			upcoming: Boolean,
 			category: Boolean,
 			googledoc: Boolean,
-			checkin: Boolean
+			checkin: Boolean,
+			presents: Boolean
+		},
+		presents: {
+			final_kind: String,
+			final_name: String,
+			final_avatar: String,
+			final_count: Number
 		},
 		tags: [String] //search tags
     },

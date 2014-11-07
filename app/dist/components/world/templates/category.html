@@ -4,6 +4,7 @@
 		 <!--assuming 6 categories for now-->
 			<div class="col-xs-3" ng-repeat="landmarkCategory in world.landmarkCategories" ng-class="{'selected-category': landmarkCategory.name == category}">
 				<div class="col-xs-12 card" ng-style="{'background-color': style.cardBG_color}">
+					<img class="text-center" width="67" src="{{landmarkCategory.avatar}}">
 					<a class="text-center" ng-href="#/w/{{worldURL}}/category/{{landmarkCategory.name}}">{{landmarkCategory.name}}</a>
 				</div>
 			</div>

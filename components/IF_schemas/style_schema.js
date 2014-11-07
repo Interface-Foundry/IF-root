@@ -36,7 +36,8 @@ var mongoose = require('mongoose');
 			instagram: Boolean,
 			upcoming: Boolean,
 			category: Boolean,
-			messages: Boolean
+			messages: Boolean,
+			presents: Boolean
 		}
 	}); 
 
