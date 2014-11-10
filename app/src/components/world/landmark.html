@@ -1,6 +1,8 @@
 <a href="#/w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
 <div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+
 	<div class="row">
+
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full')">
@@ -15,6 +17,10 @@
 			</div>
 		</div>
 	</div>
+
+<!--PRESENTS-->
+	<div ng-include="temp.showPresentCard==true ? 'components/world/templates/presents.html' : null"></div>
+	
 	<div class="row">
 		<div class="col-xs-12 landmark">
 			<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">

@@ -25,6 +25,9 @@
 
 	<!--DESCRIPTION-->
 	<div ng-include="description ? 'components/world/templates/description.html' : null"></div>
+
+	<!--PRESENTS-->
+	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null"></div>
 	
 	<!--category-->
 	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	

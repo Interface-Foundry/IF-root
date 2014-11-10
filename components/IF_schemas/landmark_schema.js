@@ -39,7 +39,8 @@ monguurl = require('monguurl');
 		},
 		landmarkCategories: [{
 			name: String,
-			avatar: String  
+			avatar: String,
+			present: Boolean  
 		}],
 		style: {
 			styleID: String, //link to landmark's style

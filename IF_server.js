@@ -1914,6 +1914,10 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
     			us.tel = req.body.tel;
     		}
 
+        if (req.body.presents) {
+          us.presents = req.body.presents;
+        }
+
         //check for unique profileID before save
         if (req.body.profileID){
 

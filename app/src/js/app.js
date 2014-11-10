@@ -111,7 +111,8 @@ var app = angular.module('IF', ['ngRoute','tidepoolsFilters','tidepoolsServices'
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: WorldController}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: WorldController}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
-      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
+      when('/w/:worldURL/:landmarkURL/', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
+      when('/w/:worldURL/:landmarkURL/:incoming', {templateUrl: 'components/world/landmark.html', controller: LandmarkController}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: CategoryController}).
 
       

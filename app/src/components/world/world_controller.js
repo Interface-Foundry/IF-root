@@ -1,4 +1,4 @@
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, socket, $sce, worldTree, $q) {
+function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, socket, $sce, worldTree, $q, $http) {
 
 	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 	zoomControl.style.top = "60px";
@@ -10,6 +10,8 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
   	$scope.worldURL = $routeParams.worldURL;  
     $scope.aperture = apertureService;	
     $scope.aperture.set('third');
+
+    $scope.collectedPresents = [];
 	
     angular.extend($rootScope, {loading: false});
 	
@@ -139,7 +141,66 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			console.log('wyzerr');
 			$scope.wyzerr = true;
 		}
+		if ($scope.style.widgets.presents && $scope.world.landmarkCategories) {
 
+			// $scope.presents = true;
+			// $scope.showInitialPresent = true;
+			// $scope.presentCollected = false;
+			// $scope.presentAlreadyCollected = false;
+
+			$scope.temp = {
+				showInitialPresent: true,
+				presentCollected: false,
+				presentAlreadyCollected: false,
+				presents: true
+			}
+
+			$http.get('/api/user/loggedin').success(function(user){
+				if (user !== '0'){
+					userManager.getUser().then(
+						function(response) {
+
+						$scope.user = response;
+
+						//showing collected presents in this world
+						if ($scope.user.presents.collected){
+							for(var i = 0; i < $scope.user.presents.collected.length; i++) {
+							    if ($scope.user.presents.collected[i].worldID == $scope.world._id){
+									$scope.collectedPresents.push($scope.user.presents.collected[i].categoryname);
+							    }
+							}
+							checkFinalState();
+						}
+
+						//to see if user reached world collect goal for final present
+						function checkFinalState(){
+
+							var numPresents = $scope.world.landmarkCategories.filter(function(x){return x.present == true}).length;
+							var numCollected = $scope.user.presents.collected.filter(function(x){return x.worldID == $scope.world._id}).length;
+
+							//are # of present user collected in the world == to number of presents available in the world?
+							if (numPresents == numCollected){
+								console.log('final state!');
+								$scope.temp.finalPresent = true;
+								$scope.temp.showInitialPresent = false;
+								$scope.temp.presentCollected = false;
+								$scope.temp.presentAlreadyCollected = false;
+							}
+							else{
+								$scope.presentsLeft = numPresents - numCollected;
+								console.log('presents left '+ $scope.presentsLeft);
+							}
+						}	
+					});
+
+				}
+				else {
+					$scope.temp.signupCollect = true;
+				}
+			});
+
+
+		}
 		if ($scope.style.widgets.messages==true||$scope.style.widgets.chat==true) {
 			$scope.messages = true;
 
