@@ -88,14 +88,14 @@ $scope.addWorld = function (){
 
 //loads everytime
 
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
     $scope.alerts = alertManager;
     $scope.userManager = userManager;
-    
+
     $scope.dialog = dialogs;
     $rootScope.messages = [];
     //$rootScope.loadMeetup = false;
@@ -104,10 +104,27 @@ app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootSco
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
 	angular.extend($rootScope, {loading: false});
 	
+	if (beaconManager.supported == true) {
+		beaconManager.startListening();
+	}
+
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
 	});*/
 	
+$scope.$on('$locationChangeStart', function($event, newState, oldState) {
+	console.log($event, newState, oldState);
+});
+
+
+//@IFDEF PHONEGAP
+$scope.hash = '#';
+//@ENDIF
+
+//@IFDEF WEB
+$scope.hash = '';
+//@ENDIF
+
 $scope.search = function() {
 	if ($scope.searchOn == true) {
 		//call search
@@ -197,6 +214,7 @@ $scope.getNearby = function($event) {
 		$scope.nearbyLoading = false;
 	}, function(reason) {
 		console.log('getNearby error');
+		console.log(reason);
 		$scope.nearbyLoading = false;
 	})
 	$event.stopPropagation();

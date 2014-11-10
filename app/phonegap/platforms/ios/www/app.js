@@ -4645,7 +4645,7 @@ function onDeviceReady() {
 	});
 }
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
-  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
+  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
@@ -4667,6 +4667,9 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
+	    			if (request.server) {
+		    			request.url = 'https://bubbl.li' + request.url; 
+	    			}
 	    		return request;
     		},
 	    	'response': function(response) {
@@ -4688,7 +4691,8 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     // Define all the routes
     //================================================
   $routeProvider.
-      when('/', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -4727,8 +4731,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 
       otherwise({redirectTo: '/'});
       
-      
-
+	  
 	angular.extend($tooltipProvider.defaults, {
   		animation: 'am-fade',
   		placement: 'right',
@@ -4738,7 +4741,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 })
 .run(function($rootScope, $http, $location, userManager){
 	userManager.checkLogin();
-
+	navigator.splashscreen.hide();
 });
 
 
@@ -5090,6 +5093,25 @@ angular.module('IF-directives', [])
 	}
 });
 
+app.directive('ifHref', function() {
+	return {
+		restrict: 'A',
+		priority: 99, 
+		link: function($scope, $element, $attr) {
+			console.log('linking if-href');
+			$attr.$observe('ifHref', function(value) {
+				if (!value) {
+					$attr.$set('href', null);
+				return;
+				}
+			
+			$attr.$set('href', value);
+			
+			});
+				
+		}
+	}
+});
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
 	return {
@@ -5131,49 +5153,22 @@ angular.module('IF-directives', [])
 .directive('userChip', function($rootScope, userManager, dialogs, $location) {
 	return {
 		restrict: 'A',
+		scope: true,
 		link: function($scope, $element, attrs) {
-		
-$element.on('click', function($event) {
-	console.log(userManager.loginStatus);
-	console.log($event.target.id);
-	switch ($event.target.id) {
-		case 'logout': 
-			userManager.logout();
-			$scope.userMenu = false;
-			$event.stopPropagation();
-			break;
-		case 'profile':
-			$location.path('#/profile/me');
-			$scope.userMenu = false;
-			$event.stopPropagation();
-			break;
-		case 'bubbles':
-			$location.path('#/profile/worlds');
-			$scope.userMenu = false;
-			$event.stopPropagation();
-			break;
-		default: //click on user chip
-			switch (userManager.loginStatus) {
-				case true:
+			$scope.openMenu = function($event) {
+				if (userManager.loginStatus && $scope.userMenu !== true) {
+					console.log('click1');
 					$scope.userMenu = true;
-					$scope.$digest();
 					$event.stopPropagation();
-					break;
-				case false:
-					console.log('showLogin');
-					dialogs.showDialog('authDialog.html')
-					break;
+					$('html').on('click', function(e) {
+						$scope.userMenu = false;
+						console.log('click');
+						$('body').off('click');
+					})
+				} else if (!userManager.loginStatus) {
+					dialogs.showDialog('authDialog.html');
+				}
 			}
-			
-			angular.element(document).on('click', function() {
-				$scope.userMenu = false;
-				$scope.$digest();
-				angular.element(document).off('click');
-			});
-
-	}
-})
-
 		},
 		templateUrl: 'templates/userChip.html'
 	}
@@ -6116,7 +6111,7 @@ var map = mapManager;
 angular.extend($rootScope, {loading: true});
 var style = styleManager;
 style.resetNavBG();
-	  
+
 console.log('world routing');
     
 $scope.initGeo = function() {
@@ -6150,7 +6145,7 @@ if (navigator.geolocation) {
 //initial loc bubble query
 $scope.initGeo();
 
-function noLoc(){
+function noLoc() {
   console.log('no loc');  
   $scope.showNoLoc = true;
   angular.extend($rootScope, {loading: false});
@@ -6163,7 +6158,7 @@ console.log('findWorlds');
 $scope.worlds = db.worlds.query({ localTime: new Date(), userCoordinate:[lon,lat]}, function(data){
 	$rootScope.altBubbles = data[0].liveAndInside;
 	$rootScope.nearbyBubbles = data[0].live;
-	
+
 	if (data[0].liveAndInside[0] != null) {
 		if (data[0].liveAndInside[0].id){
 			$location.path('w/'+data[0].liveAndInside[0].id); 
@@ -6193,14 +6188,14 @@ $scope.addWorld = function (){
 
 //loads everytime
 
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
     $scope.alerts = alertManager;
     $scope.userManager = userManager;
-    
+
     $scope.dialog = dialogs;
     $rootScope.messages = [];
     //$rootScope.loadMeetup = false;
@@ -6209,26 +6204,40 @@ app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootSco
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
 	angular.extend($rootScope, {loading: false});
 	
+	if (beaconManager.supported == true) {
+		beaconManager.startListening();
+	}
+
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
 	});*/
 	
-	$scope.search = function() {
-		if ($scope.searchOn == true) {
-			//call search
-			console.log('searching');
-			$location.path('/search/'+$scope.searchText);
-			$scope.searchOn = false;
-		} else {
-			$scope.searchOn = true;
-		}
-	} 
+$scope.$on('$locationChangeStart', function($event, newState, oldState) {
+	console.log($event, newState, oldState);
+});
+
+
+$scope.hash = '#';
+$scope.search = function() {
+	if ($scope.searchOn == true) {
+		//call search
+		console.log('searching');
+		$location.path('/search/'+$scope.searchText);
+		$scope.searchOn = false;
+	} else {
+		$scope.searchOn = true;
+	}
+} 
+
+	
+$scope.go = function(path) {
+	$location.path(path);
+};
 	
 $scope.logout = function() {
-      $rootScope.message = 'Logged out.';
       $http.get('/api/user/logout');
       userManager.loginStatus = false;
-      $location.url('/');
+      //$location.url('/');
 };
 	  
     // /!\ /!\ Change this to call to function in app.js instead /!\ /!\
@@ -6290,8 +6299,19 @@ $scope.logout = function() {
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
     };
     
-    
-    
+$scope.getNearby = function($event) {
+	$scope.nearbyLoading = true;
+	worldTree.getNearby().then(function(data) {
+		$scope.altBubbles = data.liveAndInside;
+		$scope.nearbyBubbles = data.live;
+		$scope.nearbyLoading = false;
+	}, function(reason) {
+		console.log('getNearby error');
+		console.log(reason);
+		$scope.nearbyLoading = false;
+	})
+	$event.stopPropagation();
+}
 
 }]);
 
@@ -6493,13 +6513,13 @@ angular.module('tidepoolsServices', ['ngResource'])
 	.factory('Landmark', ['$resource', '$http',
         function($resource, $http) {
 			var actions = {
-                'count': {method:'PUT', params:{_id: 'count'}},                           
-                'distinct': {method:'PUT', params:{_id: 'distinct'}},      
-                'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
-                'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
-                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
-                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false}
+                'count': {method:'PUT', params:{_id: 'count'}, server: true},                           
+                'distinct': {method:'PUT', params:{_id: 'distinct'}, server: true},      
+                'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
+                'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
+                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
+                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true}
             }
             res = $resource('/api/landmarks/:_id:id', {}, actions);
             return res;
@@ -6509,13 +6529,13 @@ angular.module('tidepoolsServices', ['ngResource'])
     .factory('World', ['$resource', '$http', 'leafletData', 
         function($resource, $http, leafletData) {
             var actions = {
-                'count': {method:'PUT', params:{_id: 'count'}},                           
-                'distinct': {method:'PUT', params:{_id: 'distinct'}},      
-                'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
-                'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
-                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
-                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true}
+                'count': {method:'PUT', params:{_id: 'count'}, server: true},                           
+                'distinct': {method:'PUT', params:{_id: 'distinct'}, server: true},      
+                'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
+                'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
+                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
+                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true}
             }
             res = $resource('/api/worlds/:_id:id', {}, actions);
             return res;
@@ -6524,14 +6544,15 @@ angular.module('tidepoolsServices', ['ngResource'])
     .factory('db', ['$resource', '$http',    
         function($resource, $http) {
     		var actions = {
-                    'count': {method:'PUT', params:{_id: 'count'}},                           
-                    'distinct': {method:'PUT', params:{_id: 'distinct'}},      
-                    'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
-                    'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
-                    'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
-                    'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
-                    'create':  {method:'POST', params:{_id: 'create'}, isArray:true},
-                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true}
+                    'count': {method:'PUT', params:{_id: 'count', server: true}},                           
+                    'distinct': {method:'PUT', params:{_id: 'distinct', server: true}},      
+                    'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
+                    'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
+                    'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
+                    'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
+                    'create':  {method:'POST', params:{_id: 'create'}, isArray:true, server: true},
+                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true, server: true},
+                    'query':  {method:'GET', isArray:true, server: true},
                 }
             var db = {};
             db.worlds = $resource('/api/worlds/:_id', {}, actions);
@@ -6638,43 +6659,7 @@ angular.module('tidepoolsServices', ['ngResource'])
     // });
 
 	//handling alerts
-   .factory('alertManager', ['$timeout', function ($timeout) {
-   		var alerts = {
-   			'list':[]
-   		};
 
-   		alerts.addAlert = function(alertType, alertMsg, timeout) {
-   			alerts.list = []; //clear alerts automatically for now to show onerror
-   			var alertClass;
-   			switch (alertType) {
-	   			case 'success':
-	   				alertClass = 'alert-success';
-	   				break;
-	   			case 'info':
-	   				alertClass = 'alert-info';
-	   				break;
-	   			case 'warning':
-	   				alertClass = 'alert-warning';
-	   				break;
-	   			case 'danger': 
-	   				alertClass = 'alert-danger';
-	   				break;
-   			}
-   			var len = alerts.list.push({class: alertClass, msg: alertMsg});
-   			if (timeout) {
-   			$timeout(function () {
-	   			alerts.list.splice(len-1, 1);
-   			}, 1500);
-   			
-   			}
-   		}
-
-   		alerts.closeAlert = function(index) {
-   			alerts.list.splice(index, 1);
-   		}
-
-   		return alerts;
-   }])
 
    //socket connection
 	.factory('socket', function ($rootScope) {
@@ -6700,6 +6685,148 @@ angular.module('tidepoolsServices', ['ngResource'])
 	    }
 	  };
 	});
+app.factory('alertManager', ['$timeout', function ($timeout) {
+   		var alerts = {
+   			'list':[ 
+	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
+	   			{msg: 'test', id: 'test2', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
+	   			{msg: 'test', id: 'test3', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
+   			]
+   		};
+
+   		alerts.addAlert = function(alertType, alertMsg, timeout) {
+   			var alertClass;
+   			switch (alertType) {
+	   			case 'success':
+	   				alertClass = 'alert-success';
+	   				break;
+	   			case 'info':
+	   				alertClass = 'alert-info';
+	   				break;
+	   			case 'warning':
+	   				alertClass = 'alert-warning';
+	   				break;
+	   			case 'danger': 
+	   				alertClass = 'alert-danger';
+	   				break;
+   			}
+   			var len = alerts.list.push(
+ {class: alertClass, msg: alertMsg, id: alertMsg});
+   			if (timeout) {
+   			$timeout(function () {
+	   			alerts.list.splice(len-1, 1);
+   			}, 1500);
+   			
+   			}
+   		}
+
+   		alerts.closeAlert = function(index) {
+   			alerts.list.splice(index, 1);
+   		}
+   		
+   		alerts.notify = function(alert) {
+	   		alerts.list.push(alert); 
+   		}
+
+   		return alerts;
+   }])
+'use strict';
+
+angular.module('tidepoolsServices')
+    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout',
+    	function(alertManager, $interval, $timeout) {
+	    	
+var alerts = alertManager;
+
+var beaconManager = {
+	updateInterval: 5000, //ms
+	beacons: {},
+	sessionBeacons: {},
+	supported: true
+}
+
+beaconManager.startListening = function () {
+	// start looking for beacons
+
+	window.EstimoteBeacons.startRangingBeaconsInRegion(function () {
+    //every now and then get the list of beacons in range
+    $interval(function () {
+        	window.EstimoteBeacons.getBeacons(function (data) {
+            	//do something cool with the list of beacons
+            	beaconManager.updateBeacons(data);
+				console.log(data);
+        }, 0, false);
+    }, beaconManager.updateInterval);
+});
+}
+
+beaconManager.updateBeacons = function(newBeacons) {
+	angular.forEach(newBeacons, function(beacon) {
+		var longID = getLongID(beacon);
+		if (beaconManager.sessionBeacons[longID]) {
+			console.log('already seen');
+			//already seen 
+		} else if (beacon) {
+			//add it to session beacon
+			
+			//check distance
+			
+			//do something once
+			beaconManager.beaconAlert(beacon);
+			beaconManager.sessionBeacons[longID] = beacon;
+		}
+	});
+/*
+	var tempMap = {}, addedBeacons = [], removedBeacons = [];
+	for (var i = 0, len = newBeacons.length; i < len; i++) {
+		var temp = getLongID(newBeacons[i]);
+		tempMap[temp] = newBeacons[i];
+	}
+	//REMOVE OLD BEACONS THAT ARE NO LONGER IN RANGE
+	angular.forEach(beaconManager.beacons, function(beacon, longId) {
+		if (Object.keys(tempMap).indexOf(longId) == -1) {
+			removedBeacons.push(beacon);
+		}
+	});
+	
+	//ADD NEW BEACONS;
+	angular.forEach(tempMap, function(beacon, longId) {
+		if (Object.keys(beaconManager).indexOf(longId) == -1) {
+			//not found in old beacon set
+			addedBeacons.push(beacon);
+		}
+	});
+	
+	console.log('Beacons added:', addedBeacons);
+	console.log('Beacons removed:', removedBeacons);
+	
+	beaconManager.beacons = tempMap;
+*/
+}
+
+beaconManager.beaconAlert = function(beacon) {
+	console.log('beaconAlert');
+	
+	$timeout(function() {
+		alerts.notify({
+			msg: 'Found a new landmark! Visit it now',
+			href: 'profile'
+		});
+	});
+}
+
+beaconManager.beaconLookup = function(longID) {
+	return beaconData[longID]; 
+}
+
+function getLongID(beacon) {
+	return beacon.proximityUUID+beacon.major;
+}
+
+
+return beaconManager;
+
+}]);
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {
@@ -6713,13 +6840,65 @@ dialogs.showDialog = function(name) {
 }
 
 dialogs.close = function($event) {
-	console.log($event);
 	if($event.target.className.indexOf('dialog-bg')>-1){ 
 		dialogs.show = false;
 	}
 }
 
 return dialogs;
+}]);
+angular.module('tidepoolsServices')
+    .factory('geoService', [ '$q', 
+    	function($q) {
+
+var geoService = {
+	location: {
+		//lat,
+		//lng
+		//timestamp  
+	}
+}	
+ 
+geoService.getLocation = function(maxAge) {
+	var deferred = $q.defer();
+
+	if (navigator.geolocation) {
+		console.log('geo: using navigator');
+		
+		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+			geolocationError, 
+			{timeout:15000, enableHighAccuracy : true});
+	
+		function geolocationSuccess(position) {
+			geoService.location.lat = position.coords.latitude;
+			geoService.location.lng = position.coords.longitude;
+			geoService.location.timestamp = Date.now();
+			deferred.resolve({
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			})
+		}
+
+		function geolocationError(error){
+			if (error.code == 1) {
+				//PERMISSIONS DENIED
+				navigator.notification.alert(
+					'Please enable Location Services for Bubbl.li', 
+					function() {/*send to settings app eventually*/}, 
+					'Location Error',
+					'OK');
+			}
+			deferred.reject(error);
+		}
+	} else {
+		//browser update message
+		deferred.reject('navigator.geolocation undefined');
+	}
+	
+	return deferred.promise;
+}
+
+return geoService;
 }]);
 'use strict';
 
@@ -7129,7 +7308,7 @@ angular.module('tidepoolsServices')
 	.factory('styleManager', [
 		function() {
 var styleManager = {
-	navBG_color: 'rgba(92,107,191,0.96)' 
+	navBG_color: 'rgba(62, 82, 181, 0.96)' 
 	//---local settings---
 	/*bodyBG_color: '#FFF',
 	titleBG_color,
@@ -7140,18 +7319,18 @@ var styleManager = {
 }
 
 styleManager.resetNavBG = function() {
-	styleManager.navBG_color = 'rgba(0,188,212,0.96)';
+	styleManager.navBG_color = 'rgba(62, 82, 181, 0.96)';
 }
 
 return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location',
-    	function($rootScope, $http, $resource, $q, $location) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs) {
     	
 var userManager = {
-	userRes: $resource('/api/updateuser', {}),
+	userRes: $resource('https://bubbl.li/api/updateuser'),
 	loginStatus: false,
 	login: {}
 }
@@ -7164,7 +7343,7 @@ userManager.getUser = function() {
 	if (user) {
 		deferred.resolve(user);
 	} else {
-		$http.get('http://localhost:2997/api/user/loggedin').
+		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user!=='0') {
 				$rootScope.user = user; 
@@ -7242,7 +7421,7 @@ userManager.checkLogin = function(){
 };
 
 userManager.logout = function() {
-	$http.get('http://localhost:2997/api/user/logout');
+	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
 }
@@ -7254,7 +7433,7 @@ userManager.login.login = function() {
       password: userManager.login.password
     }
     
-	$http.post('http://localhost:2997/api/user/login', data).
+	$http.post('/api/user/login', data, {server: true}).
 	success(function(user){
 		if (user) {
 			userManager.checkLogin();
@@ -7265,6 +7444,8 @@ userManager.login.login = function() {
 			$scope.alerts.addAlert('danger',err);
 		}
 	});
+	
+	dialogs.show = false;
 }
 
 userManager.signup = function() {
@@ -7275,8 +7456,8 @@ userManager.signup = function() {
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db',
-	function($cacheFactory, $q, World, db) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
+	function($cacheFactory, $q, World, db, geoService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -7335,6 +7516,25 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 	
 	return deferred.promise;
 }
+
+worldTree.getNearby = function() {
+	var deferred = $q.defer();
+	
+	geoService.getLocation().then(function(location) {
+		db.worlds.query({localTime: new Date(), 
+			userCoordinate: [location.lng, location.lat]},
+			function(data) {
+				deferred.resolve(data[0]);
+				//live
+				//liveAndInside
+			});
+	}, function(reason) {
+		deferred.reject(reason);
+	})
+	
+	return deferred.promise;
+}
+
 
 return worldTree;
 }

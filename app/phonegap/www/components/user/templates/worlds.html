@@ -5,28 +5,31 @@
 			<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below:</span>
 			<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 		</div>
-	</li><div class="clearfix"></div>
+	</li>
+	<div class="clearfix"></div>
 	<li>
 	<div class="profile-add-new" ng-click="newWorld()">
 		<div class="profile-add-new-plus">+</div>
 		<span>Create New Bubble</span>
 	</div>
 	</li>
-	<li class="world-sq" ng-repeat="world in ::worlds" 
-		ng-click="$parent.selectedIndex=($parent.selectedIndex==$index) ? $parent.selectedIndex=null : $parent.selectedIndex = $index">
-		<img width="144" height="144" ng-src="{{::world.avatar}}" class="world-sq-img">
-		<button type="button" class="world-sq-close" ng-click="deleteWorld($index)">
-			<span aria-hidden="true">&times;</span>
-			<span class="sr-only">Close</span>
-		</button>
-		<span class="world-sq-views"><span class="glyphicon glyphicon-eye-open"></span> Views: {{::world.views}}</span>
-		<ul class="world-sq-menu" ng-class="{'selected': selectedIndex==$index}">
-			<li class="world-sq-menu-title">{{::world.name || 'New Bubble'}}</li>
-			<li class="world-sq-menu-action" ng-click="go('/w/'+world.id)">View</li>
-			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="world.source_meetup.id"><b>Set up Meetup</b></li>
-			<li class="world-sq-menu-action" ng-click="go('/edit/walkthrough/'+world._id)" ng-if="!world.source_meetup.id"><b>Walkthrough</b></li>
-			<li class="world-sq-menu-action" ng-click="go('/edit/w/'+world.id)">Edit</li>
-			<!--<li class="world-sq-menu-action">Share</li>-->
-		</ul>
+	<li>
+	<ul class="bubble-list">
+		<li class="bubble-list-item" ng-repeat="world in ::worlds track by world._id" ng-click="$parent.selected = world" ng-class="{'selected': selected == world}">
+			<span>{{::world.name}}</span>
+		</li>
+	</ul>
 	</li>
 </ul>
+<div class="bubble-inspector" ng-class="{'selected': selected}">
+	<div class="bubble-inspector-wrap">
+	<header class="bubble-inspector-header">
+		<a ng-href="/w/{{selected.id}}" class="bubble-inspector-title">{{selected.name}}</a>
+	</header>
+	<img class="bubble-inspector-avatar" ng-src="{{selected.avatar}}">
+	<div class="bubble-inspector-info">
+		<a class="bubble-inspector-btn" style="float:left;" ng-href="/w/{{selected.id}}">View</a>
+		<a class="bubble-inspector-btn" style="float:right;" ng-href="/edit/w/{{selected.id}}">Edit</a>
+	</div>
+	</div>
+</div>

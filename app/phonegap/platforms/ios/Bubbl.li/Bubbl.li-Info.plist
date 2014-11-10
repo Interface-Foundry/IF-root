@@ -79,5 +79,15 @@
     </array>
     <key>CFBundleShortVersionString</key>
     <string>0.0.1</string>
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleBlackOpaque</string>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string></string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Bubbl.li needs your location to find nearby bubbles.</string>
+    <key>NSLocationUsageDescription</key>
+    <string>Bubbl.li needs your location to find nearby bubbles.</string>
   </dict>
 </plist>

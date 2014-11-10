@@ -35,6 +35,9 @@ body {
 
 .navfix {
 	padding-top: 40px;
+	/* @IFDEF PHONEGAP */
+	padding-top: 55px;
+	/* @ENDIF */
 }
 
 /* *NAV* Navigation Bar */
@@ -46,7 +49,7 @@ nav.main-nav {
   height: 40px;
   margin: 0;
   padding: 0;
-  background-color: rgba(92,107,191,0.96);
+  background-color: rgba(62, 82, 181, 0.96);
   	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	
@@ -54,6 +57,11 @@ nav.main-nav {
 	-webkit-backface-visibility: hidden;
 	
 	z-index: 4;
+	
+	/* @IFDEF PHONEGAP */
+	height: 55px;
+	padding-top: 15px;
+	/* @ENDIF */
 }
 
 nav .logo {
@@ -68,7 +76,7 @@ nav .logo {
 	color: #FFF;
 	font-size: 22px;
 	line-height: 40px;
-	font-weight: 400;
+	font-weight: 500;
 }
 
 @media (min-width: 360px) {
@@ -140,15 +148,21 @@ nav li input.form-control {
 	margin: 0px 4px 0px 0px;
 }
 
-.compass.badge {
+.compass {
+	position: relative;
+	display: block;
+	width: 40px;
+	height: 40px;
+}
+
+.compass-badge.badge {
 	position: absolute;
-	bottom:-10px;
+	bottom:-2px;
 	right:-2px;
 	z-index: 100;
 	
 	background: #0091EA;
 }
-
 
 #scrim {
 	position: fixed;
@@ -279,14 +293,7 @@ nav li input.form-control {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
-#alerts {
-	position: absolute;
-	top: 48px;
-	left: 0px;
-	width: 100%;
-	z-index: 200;
-}
-
+/*
 #alerts > li {
 	-webkit-transition: 0.5s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
@@ -300,6 +307,7 @@ nav li input.form-control {
 #alerts > li.ng-enter.ng-enter-active {
 	transform: translateY(0px);
 }
+*/
 
 .container{
   /* max-width: 384px; */
@@ -390,10 +398,10 @@ li {
 	
 	-webkit-transition: 0.35s linear all;
 	transition: 0.35s linear all;
-}
-
-.drawer-tab img {
-
+	
+	/* @IFDEF PHONEGAP */
+	top: 15px;
+	/* @ENDIF */
 }
 
 /* SLIDE UP SLIDE DOWN */

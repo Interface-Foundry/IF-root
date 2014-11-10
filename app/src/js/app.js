@@ -16,7 +16,7 @@ angular.element(document).ready(function() {
 //@endif
 
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
-  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
+  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
@@ -38,6 +38,13 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
+	    			//@IFDEF PHONEGAP
+	    			if (request.server) {
+		    			request.url = 'https://bubbl.li' + request.url; 
+	    			}
+	    			//@ENDIF
+	    			
+	    			
 	    		return request;
     		},
 	    	'response': function(response) {
@@ -60,6 +67,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     //================================================
   $routeProvider.
       when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -98,13 +106,12 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 
       otherwise({redirectTo: '/'});
       
-      //@ifdef WEB
+      //@IFDEF WEB
       $locationProvider.html5Mode({
-      	enabled: true,
+      	enabled: true
       });
-      //@endif
-      
-
+	  //@ENDIF
+	  
 	angular.extend($tooltipProvider.defaults, {
   		animation: 'am-fade',
   		placement: 'right',
@@ -114,5 +121,8 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 })
 .run(function($rootScope, $http, $location, userManager){
 	userManager.checkLogin();
+	//@IFDEF PHONEGAP
+	navigator.splashscreen.hide();
+	//@ENDIF
 });
 

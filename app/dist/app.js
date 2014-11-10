@@ -4642,7 +4642,7 @@ angular.element(document).ready(function() {
 	angular.bootstrap(document, ['IF']);
 });
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
-  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider) {
+  .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
 	console.log(reg);
@@ -4664,6 +4664,8 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
+	    			
+	    			
 	    		return request;
     		},
 	    	'response': function(response) {
@@ -4686,6 +4688,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
     //================================================
   $routeProvider.
       when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -4725,10 +4728,9 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
       otherwise({redirectTo: '/'});
       
       $locationProvider.html5Mode({
-      	enabled: true,
+      	enabled: true
       });
-      
-
+	  
 	angular.extend($tooltipProvider.defaults, {
   		animation: 'am-fade',
   		placement: 'right',
@@ -5089,6 +5091,29 @@ angular.module('IF-directives', [])
 	}
 });
 
+app.directive('ifHref', function() {
+	return {
+		restrict: 'A',
+		priority: 99, 
+		link: function($scope, $element, $attr) {
+			console.log('linking if-href');
+			$attr.$observe('ifHref', function(value) {
+				if (!value) {
+					$attr.$set('href', null);
+				return;
+				}
+			
+			var firstHash = value.indexOf('#');
+			if (firstHash > -1) {
+				value = value.slice(0, firstHash) + value.slice(firstHash+1);
+			}
+			$attr.$set('href', value);
+			
+			});
+				
+		}
+	}
+});
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
 	return {
@@ -5133,24 +5158,18 @@ angular.module('IF-directives', [])
 		scope: true,
 		link: function($scope, $element, attrs) {
 			$scope.openMenu = function($event) {
-				if (userManager.loginStatus) {
+				if (userManager.loginStatus && $scope.userMenu !== true) {
 					console.log('click1');
 					$scope.userMenu = true;
 					$event.stopPropagation();
-					$(document).on('touchstart click', function(e) {
+					$('html').on('click', function(e) {
 						$scope.userMenu = false;
-						$scope.$digest();
-						console.log('touchstart click');
-						$(document).off('touchstart click');
+						console.log('click');
+						$('body').off('click');
 					})
-				} else {
+				} else if (!userManager.loginStatus) {
 					dialogs.showDialog('authDialog.html');
 				}
-			}
-			
-			$scope.closeMenu = function($event) {
-				$scope.userMenu = false;
-				$event.stopPropagation();
 			}
 		},
 		templateUrl: 'templates/userChip.html'
@@ -6171,14 +6190,14 @@ $scope.addWorld = function (){
 
 //loads everytime
 
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
 	console.log('init controller-indexIF');
     $scope.aperture = apertureService;
     $scope.map = mapManager;
     $scope.style = styleManager;
     $scope.alerts = alertManager;
     $scope.userManager = userManager;
-    
+
     $scope.dialog = dialogs;
     $rootScope.messages = [];
     //$rootScope.loadMeetup = false;
@@ -6187,10 +6206,20 @@ app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootSco
     angular.extend($rootScope, {navTitle: "Bubbl.li"})
 	angular.extend($rootScope, {loading: false});
 	
+	if (beaconManager.supported == true) {
+		beaconManager.startListening();
+	}
+
 	/*$scope.$on('$viewContentLoaded', function() {
 		document.getElementById("wrap").scrollTop = 0
 	});*/
 	
+$scope.$on('$locationChangeStart', function($event, newState, oldState) {
+	console.log($event, newState, oldState);
+});
+
+
+$scope.hash = '';
 $scope.search = function() {
 	if ($scope.searchOn == true) {
 		//call search
@@ -6280,6 +6309,7 @@ $scope.getNearby = function($event) {
 		$scope.nearbyLoading = false;
 	}, function(reason) {
 		console.log('getNearby error');
+		console.log(reason);
 		$scope.nearbyLoading = false;
 	})
 	$event.stopPropagation();
@@ -6485,13 +6515,13 @@ angular.module('tidepoolsServices', ['ngResource'])
 	.factory('Landmark', ['$resource', '$http',
         function($resource, $http) {
 			var actions = {
-                'count': {method:'PUT', params:{_id: 'count'}},                           
-                'distinct': {method:'PUT', params:{_id: 'distinct'}},      
-                'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
-                'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
-                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
-                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false}
+                'count': {method:'PUT', params:{_id: 'count'}, server: true},                           
+                'distinct': {method:'PUT', params:{_id: 'distinct'}, server: true},      
+                'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
+                'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
+                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
+                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true}
             }
             res = $resource('/api/landmarks/:_id:id', {}, actions);
             return res;
@@ -6501,13 +6531,13 @@ angular.module('tidepoolsServices', ['ngResource'])
     .factory('World', ['$resource', '$http', 'leafletData', 
         function($resource, $http, leafletData) {
             var actions = {
-                'count': {method:'PUT', params:{_id: 'count'}},                           
-                'distinct': {method:'PUT', params:{_id: 'distinct'}},      
-                'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
-                'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
-                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
-                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true}
+                'count': {method:'PUT', params:{_id: 'count'}, server: true},                           
+                'distinct': {method:'PUT', params:{_id: 'distinct'}, server: true},      
+                'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
+                'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
+                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
+                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true}
             }
             res = $resource('/api/worlds/:_id:id', {}, actions);
             return res;
@@ -6516,14 +6546,15 @@ angular.module('tidepoolsServices', ['ngResource'])
     .factory('db', ['$resource', '$http',    
         function($resource, $http) {
     		var actions = {
-                    'count': {method:'PUT', params:{_id: 'count'}},                           
-                    'distinct': {method:'PUT', params:{_id: 'distinct'}},      
-                    'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
-                    'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
-                    'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
-                    'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
-                    'create':  {method:'POST', params:{_id: 'create'}, isArray:true},
-                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true}
+                    'count': {method:'PUT', params:{_id: 'count', server: true}},                           
+                    'distinct': {method:'PUT', params:{_id: 'distinct', server: true}},      
+                    'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
+                    'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
+                    'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
+                    'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
+                    'create':  {method:'POST', params:{_id: 'create'}, isArray:true, server: true},
+                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true, server: true},
+                    'query':  {method:'GET', isArray:true, server: true},
                 }
             var db = {};
             db.worlds = $resource('/api/worlds/:_id', {}, actions);
@@ -6630,43 +6661,7 @@ angular.module('tidepoolsServices', ['ngResource'])
     // });
 
 	//handling alerts
-   .factory('alertManager', ['$timeout', function ($timeout) {
-   		var alerts = {
-   			'list':[]
-   		};
 
-   		alerts.addAlert = function(alertType, alertMsg, timeout) {
-   			alerts.list = []; //clear alerts automatically for now to show onerror
-   			var alertClass;
-   			switch (alertType) {
-	   			case 'success':
-	   				alertClass = 'alert-success';
-	   				break;
-	   			case 'info':
-	   				alertClass = 'alert-info';
-	   				break;
-	   			case 'warning':
-	   				alertClass = 'alert-warning';
-	   				break;
-	   			case 'danger': 
-	   				alertClass = 'alert-danger';
-	   				break;
-   			}
-   			var len = alerts.list.push({class: alertClass, msg: alertMsg});
-   			if (timeout) {
-   			$timeout(function () {
-	   			alerts.list.splice(len-1, 1);
-   			}, 1500);
-   			
-   			}
-   		}
-
-   		alerts.closeAlert = function(index) {
-   			alerts.list.splice(index, 1);
-   		}
-
-   		return alerts;
-   }])
 
    //socket connection
 	.factory('socket', function ($rootScope) {
@@ -6692,6 +6687,63 @@ angular.module('tidepoolsServices', ['ngResource'])
 	    }
 	  };
 	});
+app.factory('alertManager', ['$timeout', function ($timeout) {
+   		var alerts = {
+   			'list':[ 
+	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
+	   			{msg: 'test', id: 'test2', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
+	   			{msg: 'test', id: 'test3', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
+   			]
+   		};
+
+   		alerts.addAlert = function(alertType, alertMsg, timeout) {
+   			var alertClass;
+   			switch (alertType) {
+	   			case 'success':
+	   				alertClass = 'alert-success';
+	   				break;
+	   			case 'info':
+	   				alertClass = 'alert-info';
+	   				break;
+	   			case 'warning':
+	   				alertClass = 'alert-warning';
+	   				break;
+	   			case 'danger': 
+	   				alertClass = 'alert-danger';
+	   				break;
+   			}
+   			var len = alerts.list.push(
+ {class: alertClass, msg: alertMsg, id: alertMsg});
+   			if (timeout) {
+   			$timeout(function () {
+	   			alerts.list.splice(len-1, 1);
+   			}, 1500);
+   			
+   			}
+   		}
+
+   		alerts.closeAlert = function(index) {
+   			alerts.list.splice(index, 1);
+   		}
+   		
+   		alerts.notify = function(alert) {
+	   		alerts.list.push(alert); 
+   		}
+
+   		return alerts;
+   }])
+'use strict';
+
+angular.module('tidepoolsServices')
+    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout',
+    	function(alertManager, $interval, $timeout) {
+var beaconManager = {
+	supported: false
+}
+
+return beaconManager;
+	    	
+}]);
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {
@@ -6705,7 +6757,6 @@ dialogs.showDialog = function(name) {
 }
 
 dialogs.close = function($event) {
-	console.log($event);
 	if($event.target.className.indexOf('dialog-bg')>-1){ 
 		dialogs.show = false;
 	}
@@ -6745,12 +6796,12 @@ geoService.getLocation = function(maxAge) {
 			})
 		}
 
-		function geolocationError(){
-			deferred.reject();
+		function geolocationError(error){
+			deferred.reject(error);
 		}
 	} else {
 		//browser update message
-		deferred.reject();
+		deferred.reject('navigator.geolocation undefined');
 	}
 	
 	return deferred.promise;
@@ -7166,7 +7217,7 @@ angular.module('tidepoolsServices')
 	.factory('styleManager', [
 		function() {
 var styleManager = {
-	navBG_color: 'rgba(92,107,191,0.96)' 
+	navBG_color: 'rgba(62, 82, 181, 0.96)' 
 	//---local settings---
 	/*bodyBG_color: '#FFF',
 	titleBG_color,
@@ -7177,18 +7228,18 @@ var styleManager = {
 }
 
 styleManager.resetNavBG = function() {
-	styleManager.navBG_color = 'rgba(0,188,212,0.96)';
+	styleManager.navBG_color = 'rgba(62, 82, 181, 0.96)';
 }
 
 return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location',
-    	function($rootScope, $http, $resource, $q, $location) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs) {
     	
 var userManager = {
-	userRes: $resource('/api/updateuser', {}),
+	userRes: $resource('/api/updateuser'),
 	loginStatus: false,
 	login: {}
 }
@@ -7201,7 +7252,7 @@ userManager.getUser = function() {
 	if (user) {
 		deferred.resolve(user);
 	} else {
-		$http.get('http://localhost:2997/api/user/loggedin').
+		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user!=='0') {
 				$rootScope.user = user; 
@@ -7279,7 +7330,7 @@ userManager.checkLogin = function(){
 };
 
 userManager.logout = function() {
-	$http.get('http://localhost:2997/api/user/logout');
+	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
 }
@@ -7291,7 +7342,7 @@ userManager.login.login = function() {
       password: userManager.login.password
     }
     
-	$http.post('http://localhost:2997/api/user/login', data).
+	$http.post('/api/user/login', data, {server: true}).
 	success(function(user){
 		if (user) {
 			userManager.checkLogin();
@@ -7302,6 +7353,8 @@ userManager.login.login = function() {
 			$scope.alerts.addAlert('danger',err);
 		}
 	});
+	
+	dialogs.show = false;
 }
 
 userManager.signup = function() {
@@ -7385,7 +7438,7 @@ worldTree.getNearby = function() {
 				//liveAndInside
 			});
 	}, function(reason) {
-		deferred.reject();
+		deferred.reject(reason);
 	})
 	
 	return deferred.promise;

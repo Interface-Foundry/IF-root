@@ -72,7 +72,7 @@ worldTree.getNearby = function() {
 				//liveAndInside
 			});
 	}, function(reason) {
-		deferred.reject();
+		deferred.reject(reason);
 	})
 	
 	return deferred.promise;

@@ -1,9 +1,14 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location',
-    	function($rootScope, $http, $resource, $q, $location) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs) {
     	
 var userManager = {
-	userRes: $resource('/api/updateuser', {}),
+	//@IFDEF WEB
+	userRes: $resource('/api/updateuser'),
+	//@ENDIF
+	//@IFDEF PHONEGAP
+	userRes: $resource('https://bubbl.li/api/updateuser'),
+	//@ENDIF
 	loginStatus: false,
 	login: {}
 }
@@ -16,7 +21,7 @@ userManager.getUser = function() {
 	if (user) {
 		deferred.resolve(user);
 	} else {
-		$http.get('http://localhost:2997/api/user/loggedin').
+		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user!=='0') {
 				$rootScope.user = user; 
@@ -94,7 +99,7 @@ userManager.checkLogin = function(){
 };
 
 userManager.logout = function() {
-	$http.get('http://localhost:2997/api/user/logout');
+	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
 }
@@ -106,7 +111,7 @@ userManager.login.login = function() {
       password: userManager.login.password
     }
     
-	$http.post('http://localhost:2997/api/user/login', data).
+	$http.post('/api/user/login', data, {server: true}).
 	success(function(user){
 		if (user) {
 			userManager.checkLogin();
@@ -117,6 +122,8 @@ userManager.login.login = function() {
 			$scope.alerts.addAlert('danger',err);
 		}
 	});
+	
+	dialogs.show = false;
 }
 
 userManager.signup = function() {

@@ -9,4 +9,19 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    
+    <feature name="EstimoteBeacons">
+    	<param name="ios-package" value="EstimoteBeacons" />
+    	<param name="onload" value="true" />
+	</feature>
+	
+	<preference name="UIWebViewBounce" value="false" />
+	<preference name="EnableLocation" value="true" />
+	
+	<preference name="DisallowOverscroll" value="true" />
+	<preference name="webviewbounce" value="false" />
+	
+	<preference name="AutoHideSplashScreen" value="false" />
+	
+	<plugin name="Geolocation" value="CDVLocation" />
 </widget>

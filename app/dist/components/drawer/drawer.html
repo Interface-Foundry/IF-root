@@ -1,12 +1,12 @@
 <header class="drawer-header">
 	<label class="drawer-label">Navigation</label>
-	<a ng-href="/#/" class="drawer-link">
+	<a if-href="#home" class="drawer-link">
 		<span class="drawer-link-icon glyphicon glyphicon-home"></span> Home
 	</a>
-	<a ng-href="/#/profile" class="drawer-link">
+	<a if-href="#profile" class="drawer-link">
 		<span class="drawer-link-icon glyphicon glyphicon-user"></span> Profile
 	</a>
-	<a ng-href="/#/profile" class="drawer-link">
+	<a if-href="#profile" class="drawer-link">
 		<span class="drawer-link-icon glyphicon glyphicon-plus"></span> New Bubble
 	</a>
 	<label class="nearby-list-label" ng-click="getNearby($event)">

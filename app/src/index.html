@@ -50,13 +50,13 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-animate.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-resource.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-route.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-sanitize.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-touch.min.js"></script> 
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular-messages.min.js"></script> 
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-animate.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-resource.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-route.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-sanitize.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-touch.min.js"></script> 
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.1/angular-messages.min.js"></script> 
 	
 	<script async="" src="//www.google-analytics.com/analytics.js"></script>
 	
@@ -64,48 +64,63 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 	<script src="lib.js"></script>
 	<script src="app.js"></script>
-
 </head>
 <body>
 	<div id="wrap" ng-class="{'drawer': drawerOn}">
-		<button class="drawer-tab" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0" ng-click="drawerOn = !drawerOn">
-			<img width="10px" height="16px" class="handle toolbar-item show" src="img/icons/drawer.png">
-  		</button>
-  		<ul id="alerts" class="container">
-	  		<li ng-repeat="alert in alerts.list" class="alert if-animate" ng-class="alert.class" role="alert">
-	  			<button ng-click="alerts.closeAlert($index)" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-	  			<span ng-bind-html="alert.msg"></span> 
-	  		</li>
-  		</ul>
+
+<button class="drawer-tab" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0" ng-click="drawerOn = !drawerOn">
+	<img width="10px" height="16px" class="handle toolbar-item show" src="img/icons/drawer.png">
+</button>
+
+<div class="drawer-bg" ng-click="drawerOn = !drawerOn">
+	<section id="drawer" ng-include="'components/drawer/drawer.html'" 
+	ng-class="{'nearbyFound': nearbyBubbles}"></section>
+</div>
+  		
+  		
+<ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
+	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
+		<a if-href="{{::alert.href}}" class="alert-link">
+			<span ng-bind-html="alert.msg"></span> {{alert}}
+		</a>
+		<button ng-click="alerts.closeAlert($index)" class="alert-close"><img src="img/icons/ic_clear_grey600_24dp.png" width="24px" height="24px"></button>
+	</li>
+</ul>
   		<div class="feedbackWindow" ng-show="feedbackOn">
   			<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
   			<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button> <button type="button" class="close" ng-click="feedbackOn=!feedbackOn"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
   		</div>
+  		
+  		
   		<nav role="navigation" 
   			class="main-nav" 
   			ng-style="{'background-color': style.navBG_color}">
 	  		<a href="/"><span class="nav-title">Bubbl.li</span></a>  		
 	  		<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
-	  			<li class="search-icon nav-item">
+	  			<!--
+<li class="search-icon nav-item">
 	  					<a href="" class="no-u">
 	  						<img class="nav-icon" src="img/icons/zoom.png">
 	  					</a>
 	  			</li>
+-->
 	  			<li class="nav-item">
-			          <span class="dropdown">
-			            <a data-toggle="dropdown" href="" class="dropdown-toggle no-u">
+			          <!-- <span class="dropdown"> -->
+			            <a ng-click="compassOverlay=!compassOverlay" href="" class="compass no-u">
 			                <img class="nav-icon" src="img/icons/compass.png">
-			                <span ng-show="altBubbles" class="compass badge">{{altBubbles.length}}</span>
+			                <span ng-show="alerts.list.length>0" class="compass-badge badge" ng-cloak>{{alerts.list.length}}</span>
 			            </a>
-			            <ul class="dropdown-menu">
+			            <!--
+<ul class="dropdown-menu">
 			            	<li ng-show="!altBubbles"><a ng-href="/#/">Find Other Bubbles</a></li>
 			                <li ng-hide="!altBubbles" class="dropdown-header">Other Bubbles</li> 
 			                <li ng-repeat="bubble in altBubbles">
 			                <a ng-href="/#/w/{{ bubble.id }}">{{ bubble.id }}</a>
 			                </li>
 			            </ul>
+-->
 			            
-			          </span>
+			          <!-- </span> -->
 	  			</li>
 	  			<li class="nav-item">
 	  				<div class="user-chip" user-chip>
@@ -119,10 +134,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   		<div id="scrim" ng-class="{'loading': loading}">
 	  		<span class="glyphicon glyphicon-refresh"></span>
 	  	</div>
-	  	<div class="drawer-bg" ng-click="drawerOn = !drawerOn">
-	  		<section id="drawer" ng-include="'components/drawer/drawer.html'" 
-		  		ng-class="{'nearbyFound': nearbyBubbles}"></section>
-	  	</div>
+
 		<div id="main">
          <section id="aperture" ng-class="[aperture.state]">
 			  <leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers">

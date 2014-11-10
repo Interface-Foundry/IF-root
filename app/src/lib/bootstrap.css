@@ -4425,6 +4425,7 @@ a.thumbnail.active {
   padding: 9px;
   color: #333;
 }
+/*
 .alert {
   padding: 15px;
   margin-bottom: 20px;
@@ -4498,6 +4499,7 @@ a.thumbnail.active {
 .alert-danger .alert-link {
   color: #843534;
 }
+*/
 @-webkit-keyframes progress-bar-stripes {
   from {
     background-position: 40px 0;

@@ -30,12 +30,22 @@ geoService.getLocation = function(maxAge) {
 			})
 		}
 
-		function geolocationError(){
-			deferred.reject();
+		function geolocationError(error){
+			//@IFDEF PHONEGAP
+			if (error.code == 1) {
+				//PERMISSIONS DENIED
+				navigator.notification.alert(
+					'Please enable Location Services for Bubbl.li', 
+					function() {/*send to settings app eventually*/}, 
+					'Location Error',
+					'OK');
+			}
+			//@ENDIF
+			deferred.reject(error);
 		}
 	} else {
 		//browser update message
-		deferred.reject();
+		deferred.reject('navigator.geolocation undefined');
 	}
 	
 	return deferred.promise;
