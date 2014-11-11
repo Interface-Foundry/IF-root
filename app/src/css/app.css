@@ -14,6 +14,7 @@ body {
    height: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
+  
 }
 
 @font-face {
@@ -34,6 +35,9 @@ body {
 
 .navfix {
 	padding-top: 40px;
+	/* @IFDEF PHONEGAP */
+	padding-top: 55px;
+	/* @ENDIF */
 }
 
 /* *NAV* Navigation Bar */
@@ -45,17 +49,19 @@ nav.main-nav {
   height: 40px;
   margin: 0;
   padding: 0;
-  background-color: rgba(92,107,191,0.96);
-  -webkit-transition: opacity 0 0, -webkit-transform 0.4s;
-  -moz-transition:    opacity 0 0, -moz-transform 0.4s;
-  -ms-transition:     opacity 0 0, -ms-transform 0.4s;
-  -o-transition:      opacity 0 0, -o-transform 0.4s;
-  transition:         opacity 0 0, transform 0.4s;
+  background-color: rgba(62, 82, 181, 0.96);
+  	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	
 	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
 	
-	z-index: 500;
+	z-index: 4;
+	
+/* @IFDEF PHONEGAP */
+	height: 55px;
+	padding-top: 15px;
+/* @ENDIF */
 }
 
 nav .logo {
@@ -65,23 +71,23 @@ nav .logo {
 	margin: 2px;
 }
 
-nav .nav-title {
-	padding-left: 4px;
-	color: white;
-	font-size: 30px;
-	font-weight: 400;
-	text-shadow: 0px 1px rgba(0,0,0,0.5);
+.nav-title {
+	display: block;
+	float: left;
+	padding-left: 56px;
+	color: #FFF;
+	font-size: 22px;
+	line-height: 40px;
+	font-weight: 500;
 }
 
-@media (max-width: 360px) {
-	nav .nav-title {
-		font-size: 25px;
-	}
+.nav-title:hover, .nav-title:active {
+	color: #FFF !important;
 }
 
-@media (max-width: 330px) {
+@media (min-width: 360px) {
 	nav .nav-title {
-		font-size: 19px;
+		font-size: 30px;
 	}
 }
 
@@ -175,18 +181,24 @@ nav li input.form-control {
 
 .navbar-right {
 	float: right; 
-	margin: 0px 8px 0px 0px;
+	margin: 0px 4px 0px 0px;
 }
 
-.compass.badge {
+.compass {
+	position: relative;
+	display: block;
+	width: 40px;
+	height: 40px;
+}
+
+.compass-badge.badge {
 	position: absolute;
-	bottom:-10px;
+	bottom:-2px;
 	right:-2px;
 	z-index: 100;
 	
 	background: #0091EA;
 }
-
 
 #scrim {
 	position: fixed;
@@ -221,29 +233,50 @@ nav li input.form-control {
 	100% {-webkit-transform: rotate(360deg);}
 }
 
+@keyframes spin {
+	0% {transform: rotate(0deg);}
+	100% {transform: rotate(360deg);}
+}
+
 /* *DRAWER* Drawer */
 
+.drawer-bg {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,.0);
+	pointer-events: none;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	z-index: 6;
+}
+
+.drawer .drawer-bg {
+	background: rgba(0,0,0,.3);
+	pointer-events: auto;
+}
+
 #drawer {
-	position:absolute;
+	position: fixed;
 	top: 0;
-	left: -66%;
-	width: 66%;
-	min-height: 100%;
+	left: -280px;
+	width: 280px;
+	height: 100%;
 	
 	background: #FFF;
 	/*border-right: 1px solid #ccc;*/
 	opacity: 1;
 	
-	-webkit-transition: opacity 0 0, -webkit-transform 0.4s;
-	-moz-transition:    opacity 0 0, -moz-transform 0.4s;
-	-ms-transition:     opacity 0 0, -ms-transform 0.4s;
-	-o-transition:      opacity 0 0, -o-transform 0.4s;
-	transition:         opacity 0 0, transform 0.4s;
-	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
-
-	z-index: 1000;
+	
+	overflow: hidden;
+	z-index: 5;
 }
 
 #main {
@@ -254,8 +287,9 @@ nav li input.form-control {
   width: 100%;
   /*background: #f6f6f6;*/
   
-  -webkit-transition: opacity 0 0, -webkit-transform 0.4s; -moz-transition: opacity 0 0, -moz-transform 0.4s; -ms-transition:     opacity 0 0, -ms-transform 0.4s; -o-transition: opacity 0 0, -o-transform 0.4s; transition: opacity 0 0, transform 0.4s;
-  
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) -webkit-transform;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) transform;
+  	z-index: 0;
 }
 
 #aperture {
@@ -295,14 +329,7 @@ nav li input.form-control {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
-#alerts {
-	position: absolute;
-	top: 48px;
-	left: 0px;
-	width: 100%;
-	z-index: 200;
-}
-
+/*
 #alerts > li {
 	-webkit-transition: 0.5s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
@@ -316,6 +343,7 @@ nav li input.form-control {
 #alerts > li.ng-enter.ng-enter-active {
 	transform: translateY(0px);
 }
+*/
 
 .container{
   /* max-width: 384px; */
@@ -359,59 +387,57 @@ li {
 }
 
 /* UX */
-#drawer.drawer {
-	-ms-transform:  translateX(100%); -webkit-transform: translateX(100%); -moz-transform: translateX(100%); 
+.drawer #drawer {
+	-ms-transform:  translateX(100%); -webkit-transform: translateX(100%); -moz-transform: translateX(100%);
 	transform: translateX(100%);
 	opacity: 1;
 	/*-webkit-perspective: 1000;*/
+	box-shadow: 0px 0px 19px 10px rgba(0,0,0,.3), 0px 0px 6px 2px rgba(0,0,0,.2);
 	-webkit-backface-visibility: hidden;
 }
 
-body.drawer #main, #main.drawer {
-	-webkit-transform: translateX(66%);
-	-moz-transform: translateX(66%);
-	-ms-transform: translateX(66%);
-	-o-transform: translateX(66%);
-	transform: translateX(66%);
+/*
+.drawer #main {
+	-webkit-transform: translateX(280px);
+	-moz-transform: translateX(280px);
+	-ms-transform: translateX(280px);
+	transform: translateX(280px);
 	
 	-webkit-backface-visibility: hidden;
 }
 
-body.drawer nav, nav.drawer {
-	-webkit-transform: translateX(66%);
-	-moz-transform: translateX(66%);
-	-ms-transform: translateX(66%);
-	-o-transform: translateX(66%);
-	transform: translateX(66%);
+.drawer nav {
+	-webkit-transform: translateX(280px);
+	-moz-transform: translateX(280px);
+	-ms-transform: translateX(280px);
+	-o-transform: translateX(280px);
+	transform: translateX(280px);
 	
 	-webkit-backface-visibility: hidden;
 	padding: 0;
 }
+*/
 
-.drawer-handle {
+.drawer-tab {
 	position: fixed;
 	top: 0px;
-	left: -10px;
-	width: 34px;
-	height: 40px;
-	z-index: 2000;
-	background-color: rgba(0,0,0,0.30);
-	border-radius: 10px;
-	padding: 12px 8px;
-}
-
-.drawer-handle img {
-	position: relative;
-	left: 10px;
-}
-
-.drawer-toggle {
+	left: 0px;
+	width: 32px;
+	height: 32px;
+	z-index: 100;
 	outline: none;
 	border: none;
+	border-radius: 20px;
+	padding: 8px 11px;
+	margin: 4px;
 	background: none;
-	width: 26px;
-	height: 40px;
-	padding: 12px 8px;
+	
+	-webkit-transition: 0.35s linear all;
+	transition: 0.35s linear all;
+	
+	/* @IFDEF PHONEGAP */
+	top: 15px;
+	/* @ENDIF */
 }
 
 /* SLIDE UP SLIDE DOWN */
@@ -484,19 +510,6 @@ body.drawer nav, nav.drawer {
 	-o-transform: translateY(-50%);
 }
 
-.drawer .drawer-bar {
-	position: absolute;
-	height: 100%;
-	width: 4px;
-	top: 0px;
-	right: 0px;
-	
-	background-color: white;
-	
-	z-index: 2000;
-	box-shadow: 0px 0px 4px rgba(0,0,0,0.50);
-}
-
 /* MAINTENENCE / BUGFIX / FIXES */
 
 main {display:block;}
@@ -522,6 +535,9 @@ ul {
 
 }
 
+.nomargin {
+	margin: 0px;
+}
 
 /* Socket Chat */
 

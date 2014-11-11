@@ -1,0 +1,22 @@
+<div class="col-xs-6 instagram widget_margin">
+    <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
+
+        <h4>#{{world.resources.hashtag}}</h4>
+
+    	<div class="landmark">
+    	<div class="card last" ng-style="{'background-color': style.cardBG_color}">
+        <a class-"instagram" ng-href="#/instagram/{{world.resources.hashtag}}">
+            <img class="img-responsive instagram" ng-src="img/instagram/{{instagrams[0].local_path[0]}}" 
+            									ng-show="instagrams[0].local_path[0]">
+			<img class="img-responsive instagram" src="img/widgets/placeholder.png" ng-hide="instagrams[0].local_path[0]">
+            <span class="watermark typcn typcn-social-instagram"></span>
+		</a>
+    	</div>
+		<a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
+            <div class="footer">
+	            @{{instagrams[0].user.screen_name}}
+	            <span class="typcn typcn-export pull-right"></span>
+            </div>
+        </a>
+		</div>
+</div>

@@ -1,0 +1,43 @@
+<div class="row">
+	<div class="col-xs-12 col-sm-6">
+		<label>Arabesque</label>
+		<div class="edit-map-card"
+			ng-class="{selected: mapThemeSelect == 'arabesque'}">
+		<img src="/img/mapbox/arabesque_small.png" class="img-responsive"
+				ng-click="selectMapTheme('arabesque')">
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<label>Fairy</label>
+		<div class="edit-map-card"
+			ng-class="{selected: mapThemeSelect == 'fairy'}">
+		<img src="/img/mapbox/fairy_small.png" class="img-responsive"
+				ng-click="selectMapTheme('fairy')">
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<label>Sunset</label>
+		<div class="edit-map-card"
+			ng-class="{selected: mapThemeSelect == 'sunset'}">
+		<img src="/img/mapbox/sunset_small.png" class="img-responsive"
+				ng-click="selectMapTheme('sunset')">
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<label>Urban</label>
+		<div class="edit-map-card"
+			ng-class="{selected: mapThemeSelect == 'urban'}">
+		<img src="/img/mapbox/urban_small.png" class="img-responsive"
+				ng-click="selectMapTheme('urban')">
+		</div>
+	</div>
+</div>
+
+<label>Upload your own Map <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.local_map"></span></label> <br>
+
+<button class="btn btn-info" ng-file-select="onLocalMapSelect($files)" ng-hide="mapImage">+ Add a Local Map</button>
+<div ng-show="mapImage">
+<em>New Local Map</em>  <button type="button" class="close" ng-click="removePlaceImage()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+<input type="range" min="0.006" max="5" step="0.006" value="1" ng-model="temp.scale"><br>
+<button class="btn btn-warning" ng-click="buildLocalMap()">Build Local Map</button>
+</div>

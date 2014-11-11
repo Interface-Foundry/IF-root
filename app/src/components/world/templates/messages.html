@@ -1,22 +1,25 @@
-<div class="col-xs-12">
-	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Messages</h4>
-</div>
-<div class="col-xs-12 landmark">
-	<a ng-href="/w/{{world.id}}/messages">
-	<div class="card description" style="background-color: #FFF;">
-		<li class="message message-card">
-			<picture class="msg-avatar">
-				<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar || world.avatar}}" ng-cloak>
-			</picture>
-			<div class="message-content-card">
-				<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
-				<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic">
-				<p class="message-body message-body-card" ng-bind="msg.msg || 'Start messaging with others here now!'" ng-if="!msg.pic">Start messaging now!</p>
-			</div>
-		</li>
-		<span class="pull-left"><button class="btn btn-info"><span class="glyphicon glyphicon-user"></span> Chat Now</button></span>
-		<div class="clearfix"></div>
-	</div>
-	</a>
-</div>
-
+<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img style="display:block;" src="img/icons/textsms_16.png" width="16" height="16"></div>
+	Messages
+</header>
+<article class="marble-page-content">
+<a if-href="#w/{{world.id}}/messages">
+	<li class="message">
+		<picture class="msg-avatar">
+			<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar || world.avatar}}" ng-cloak>
+		</picture>
+		<div class="message-content">
+			<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
+			<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic">
+			<p class="message-body" 
+				ng-style="{'background': style.titleBG_color}"
+				style="color: #FFF !important;"
+				ng-bind="msg.msg || 'Start messaging now!'" ng-if="!msg.pic">
+					Start messaging now!
+			</p>
+		</div>
+	</li>
+	<span class="pull-right">Join In</span>
+	<div class="clearfix"></div>
+</a>
+</article>

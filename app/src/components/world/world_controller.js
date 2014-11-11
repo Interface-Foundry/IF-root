@@ -1,4 +1,4 @@
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, socket, $sce, worldTree, $q, $http) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q) {
 
 	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 	zoomControl.style.top = "60px";
@@ -327,13 +327,4 @@ World.get({id: $routeParams.worldURL}, function(data) {
 		console.log(error);
 		//handle this better
 	});
-}
-
-
-function WorldRepeatController($scope) {
-	
-}
-
-function UpcomingController($scope) {
-	
-}
+}]);

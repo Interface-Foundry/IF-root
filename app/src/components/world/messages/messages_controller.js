@@ -214,7 +214,6 @@ console.log(user._id);
 checkMessages();
 });
 
-
 	//////
 	//HALLOWEEN THEME TEST
 
@@ -295,8 +294,4 @@ checkMessages();
     }
 
 checkLogin();
-
-
-
-
 } ]);

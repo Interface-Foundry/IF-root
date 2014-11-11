@@ -1,4 +1,4 @@
-function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
 
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -169,4 +169,4 @@ userManager.getUser().then(
 	$scope.user = response;
 })
 
-}
+}]);
