@@ -18,7 +18,8 @@ var beaconManager = {
 	updateInterval: 5000, //ms
 	beacons: {},
 	sessionBeacons: {},
-	supported: true
+	supported: true,
+	alertDistance: 10
 }
 
 beaconManager.startListening = function () {
@@ -42,7 +43,7 @@ beaconManager.updateBeacons = function(newBeacons) {
 		if (beaconManager.sessionBeacons[longID]) {
 			console.log('already seen');
 			//already seen 
-		} else if (beacon) {
+		} else if (beacon.distance < beaconManager.alertDistance) {
 			//add it to session beacon
 			
 			//check distance
@@ -82,23 +83,21 @@ beaconManager.updateBeacons = function(newBeacons) {
 
 beaconManager.beaconAlert = function(beacon) {
 	console.log('beaconAlert');
+	var data = beaconData.fromBeacon(beacon);
 	
 	$timeout(function() {
 		alerts.notify({
-			msg: 'Found a new landmark! Visit it now',
-			href: 'profile'
+			title: data.title,
+			msg: "You found a beacon, visit it!",
+			href: data.href,
+			id: getLongID(beacon)
 		});
 	});
-}
-
-beaconManager.beaconLookup = function(beacon) {
-	return beaconData.getBeacon(beacon);
 }
 
 function getLongID(beacon) {
 	return beacon.proximityUUID+beacon.major;
 }
-
 
 return beaconManager;
 
@@ -112,22 +111,22 @@ var beaconData = {
 	beaconTree: {
 		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
 			'28040': {
-				name: 'Main Room A'
+				title: 'Main Room A'
 			},
 			'28041': {
-				name: 'Main Room B'
+				title: 'Main Room B'
 			},
 			'28042': {
-				name: 'Workshop Room A'
+				title: 'Workshop Room A'
 			},
 			'28043': {
-				name: 'Workshop Room B'
+				title: 'Workshop Room B'
 			}
 		}
 	}
 }
 
-beaconData.getBeacon = function(beacon) {
+beaconData.fromBeacon = function(beacon) {
 	return beaconData.beaconTree[beacon.proximityUUID][beacon.major];
 }
 

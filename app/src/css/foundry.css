@@ -541,6 +541,8 @@ a.bubble-inspector-btn:hover {
   border: none;
   background: none;
   color: #FFF;
+  text-align: center;
+  line-height: 40px;
 }
 .bottom-right {
   position: absolute;

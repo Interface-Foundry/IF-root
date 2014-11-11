@@ -1,20 +1,5 @@
 'use strict';
 
-//@ifdef PHONEGAP
-document.addEventListener('deviceready', onDeviceReady, true);
-function onDeviceReady() {
-	angular.element(document).ready(function() {
-		angular.bootstrap(document, ['IF']);
-	});
-}
-//@endif
-
-//@ifdef WEB
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-});
-//@endif
-
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
@@ -129,4 +114,20 @@ angular.extend($tooltipProvider.defaults, {
 	navigator.splashscreen.hide();
 	//@ENDIF
 });
+
+//@ifdef PHONEGAP
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
+//@endif
+
+//@ifdef WEB
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+
+});
+//@endif
 

@@ -1,4 +1,5 @@
-function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http) {
+app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 
+function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http) {
 
 		var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 		zoomControl.style.top = "100px";
@@ -29,8 +30,8 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		World.get({id: $routeParams.worldURL}, function(data) {
 			console.log(data)
 			if (data.err) {
-				$log.error(data.err);
-				$location.path('/#/');
+				console.log.error(data.err);
+				$location.path('/home');
 			} else {
 				$scope.world = data.world;
 				$scope.style = data.style;
@@ -59,7 +60,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 						// $scope.presentCollected = false;
 						// $scope.presentAlreadyCollected = false;
 
-						$http.get('/api/user/loggedin').success(function(user){
+						$http.get('api/user/loggedin', {server: true}).success(function(user){
 							if (user !== '0'){
 								userManager.getUser().then(
 									function(response) {
@@ -272,4 +273,4 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 };
 		 
 		map.refresh();
-}
+}]);

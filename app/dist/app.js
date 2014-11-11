@@ -4638,9 +4638,6 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-});
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
@@ -4746,7 +4743,10 @@ angular.extend($tooltipProvider.defaults, {
 	
 });
 
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
 
+});
 _ = {};
 
 _.debounce = function(func, wait, immediate) {
@@ -6814,9 +6814,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
-	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
-	   			{msg: 'test', id: 'test2', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
-	   			{msg: 'test', id: 'test3', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
+	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
    			]
    		};
 
@@ -6876,22 +6874,22 @@ var beaconData = {
 	beaconTree: {
 		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
 			'28040': {
-				name: 'Main Room A'
+				title: 'Main Room A'
 			},
 			'28041': {
-				name: 'Main Room B'
+				title: 'Main Room B'
 			},
 			'28042': {
-				name: 'Workshop Room A'
+				title: 'Workshop Room A'
 			},
 			'28043': {
-				name: 'Workshop Room B'
+				title: 'Workshop Room B'
 			}
 		}
 	}
 }
 
-beaconData.getBeacon = function(beacon) {
+beaconData.fromBeacon = function(beacon) {
 	return beaconData.beaconTree[beacon.proximityUUID][beacon.major];
 }
 
@@ -11853,7 +11851,8 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	});
  	   
 }
-function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http) {
+app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 
+function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http) {
 
 		var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 		zoomControl.style.top = "100px";
@@ -11884,8 +11883,8 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		World.get({id: $routeParams.worldURL}, function(data) {
 			console.log(data)
 			if (data.err) {
-				$log.error(data.err);
-				$location.path('/#/');
+				console.log.error(data.err);
+				$location.path('/home');
 			} else {
 				$scope.world = data.world;
 				$scope.style = data.style;
@@ -11914,7 +11913,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 						// $scope.presentCollected = false;
 						// $scope.presentAlreadyCollected = false;
 
-						$http.get('/api/user/loggedin').success(function(user){
+						$http.get('api/user/loggedin', {server: true}).success(function(user){
 							if (user !== '0'){
 								userManager.getUser().then(
 									function(response) {
@@ -12127,7 +12126,7 @@ function LandmarkController( World, Landmark, db, $routeParams, $scope, $locatio
 		 };
 		 
 		map.refresh();
-}
+}]);
 app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager) {
 
 ////////////////////////////////////////////////////////////
@@ -12425,59 +12424,59 @@ checkMessages();
 
 checkLogin();
 } ]);
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http) {
 
-	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-	zoomControl.style.top = "60px";
-	zoomControl.style.left = "1%";
-	zoomControl.style.display = 'none';
-    var map = mapManager;
-    	map.resetMap();
-  	var style = styleManager;
-  	$scope.worldURL = $routeParams.worldURL;  
-    $scope.aperture = apertureService;	
-    $scope.aperture.set('third');
+var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+zoomControl.style.top = "60px";
+zoomControl.style.left = "1%";
+zoomControl.style.display = 'none';
+var map = mapManager;
+	map.resetMap();
+	var style = styleManager;
+	$scope.worldURL = $routeParams.worldURL;  
+$scope.aperture = apertureService;	
+$scope.aperture.set('third');
 
-    $scope.collectedPresents = [];
-	
-    angular.extend($rootScope, {loading: false});
-	
-	$scope.selectedIndex = 0;
-	
-	var landmarksLoaded;
+$scope.collectedPresents = [];
 
-	if (olark){
-		olark('api.box.hide'); //hides olark tab on this page
+angular.extend($rootScope, {loading: false});
+	
+$scope.selectedIndex = 0;
+	
+var landmarksLoaded;
+
+if (olark){
+	olark('api.box.hide'); //hides olark tab on this page
+}
+
+	//currently only for upcoming...
+function setLookup() {
+	$scope.lookup = {}; 
+	
+	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+  	$scope.lookup[$scope.landmarks[i]._id] = i;
 	}
+	console.log($scope.lookup);
+}
+  	
+  	
+function reorderById (idArray) {
+	console.log('reorderById');
+	
+	$scope.upcoming = [];
+	for (var i = 0, len = idArray.length; i<len; i++) {
+	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1)[0];
+	}
+	
+	console.log($scope.upcoming);
+}
 
-  	//currently only for upcoming...
-  	function setLookup() {
-	  	$scope.lookup = {}; 
-	  	
-	  	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		  	$scope.lookup[$scope.landmarks[i]._id] = i;
-	  	}
-	  	console.log($scope.lookup);
-  	}
   	
-  	
-  	function reorderById (idArray) {
-  		console.log('reorderById');
-	  	
-	  	$scope.upcoming = [];
-	  	for (var i = 0, len = idArray.length; i<len; i++) {
-		  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1)[0];
-	  	}
-	  	
-	  	console.log($scope.upcoming);
-  	}
-  	
-  	
-  	$scope.zoomOn = function() {
+$scope.zoomOn = function() {
 	  	zoomControl.style.display = "block";
-  	}
+}
   	
-  	$scope.loadWorld = function(data) {
+$scope.loadWorld = function(data) {
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
@@ -12582,7 +12581,7 @@ app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$lo
 				presents: true
 			}
 
-			$http.get('/api/user/loggedin').success(function(user){
+			$http.get('/api/user/loggedin', {server: true}).success(function(user){
 				if (user !== '0'){
 					userManager.getUser().then(
 						function(response) {

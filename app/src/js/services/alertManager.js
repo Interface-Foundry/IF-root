@@ -1,9 +1,7 @@
 app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
-	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
-	   			{msg: 'test', id: 'test2', href: '#w/A_really_long_title_that_destroys_yourus_formatting'},
-	   			{msg: 'test', id: 'test3', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
+	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
    			]
    		};
 
