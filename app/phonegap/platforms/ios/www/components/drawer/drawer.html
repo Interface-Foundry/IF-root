@@ -1,6 +1,6 @@
 <header class="drawer-header">
 	<label class="drawer-label">Navigation</label>
-	<a href="#home" class="drawer-link">
+	<a if-href="#home" class="drawer-link">
 		<span class="drawer-link-icon glyphicon glyphicon-home"></span> Home
 	</a>
 	<a if-href="#profile" class="drawer-link">
@@ -16,7 +16,7 @@
 </header>
 <ul class="nearby-list">
 	<li ng-repeat="bubble in nearbyBubbles track by bubble._id" class="nearby-list-item if-animate">
-		<a class="nearby-list-item-link" ng-href="/w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
+		<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
 	</li>
 </ul>
 <footer class="drawer-footer center-text">Powered by Interface Foundry</footer>

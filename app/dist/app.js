@@ -5114,6 +5114,25 @@ app.directive('ifHref', function() {
 		}
 	}
 });
+app.directive('ifSrc', function() {
+	return {
+		restrict: 'A',
+		priority: 99, 
+		link: function($scope, $element, $attr) {
+			$attr.$observe('ifSrc', function(value) {
+				if (!value) {
+					$attr.$set('src', null);
+				return;
+				}
+			
+				
+				$attr.$set('src', value);
+			
+			});
+				
+		}
+	}
+});
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
 	return {
@@ -5164,8 +5183,9 @@ angular.module('IF-directives', [])
 					$event.stopPropagation();
 					$('html').on('click', function(e) {
 						$scope.userMenu = false;
+						$scope.$digest();
 						console.log('click');
-						$('body').off('click');
+						$('html').off('click');
 					})
 				} else if (!userManager.loginStatus) {
 					dialogs.showDialog('authDialog.html');
@@ -6537,7 +6557,8 @@ angular.module('tidepoolsServices', ['ngResource'])
                 'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
                 'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
                 'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true}
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true},
+                'get': {method: 'GET', server: true}
             }
             res = $resource('/api/worlds/:_id:id', {}, actions);
             return res;
@@ -6558,13 +6579,13 @@ angular.module('tidepoolsServices', ['ngResource'])
                 }
             var db = {};
             db.worlds = $resource('/api/worlds/:_id', {}, actions);
-            db.landmarks = $resource('api/landmarks/:_id:id', {}, actions);
-            db.styles = $resource('api/styles/:_id', {}, actions);
-            db.projects = $resource('api/projects/:_id', {}, actions);
-            db.tweets = $resource('api/tweets/:_id', {}, actions);
-            db.instagrams = $resource('api/instagrams/:_id', {}, actions);
-            db.messages = $resource('api/worldchat/:_id', {}, actions);
-            db.visit = $resource('api/visit/:_id', {}, actions);
+            db.landmarks = $resource('/api/landmarks/:_id:id', {}, actions);
+            db.styles = $resource('/api/styles/:_id', {}, actions);
+            db.projects = $resource('/api/projects/:_id', {}, actions);
+            db.tweets = $resource('/api/tweets/:_id', {}, actions);
+            db.instagrams = $resource('/api/instagrams/:_id', {}, actions);
+            db.messages = $resource('/api/worldchat/:_id', {}, actions);
+            db.visit = $resource('/api/visit/:_id', {}, actions);
             return db;
         }
     ])
@@ -6744,6 +6765,37 @@ var beaconManager = {
 return beaconManager;
 	    	
 }]);
+
+angular.module('tidepoolsServices')
+    .factory('beaconData', [ 
+    	function() {
+var beaconData = {
+	beaconTree: {
+		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
+			'28040': {
+				name: 'Main Room A'
+			},
+			'28041': {
+				name: 'Main Room B'
+			},
+			'28042': {
+				name: 'Workshop Room A'
+			},
+			'28043': {
+				name: 'Workshop Room B'
+			}
+		}
+	}
+}
+
+beaconData.getBeacon = function(beacon) {
+	return beaconData.beaconTree[beacon.proximityUUID][beacon.major];
+}
+
+return beaconData;
+
+}]);
+
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {

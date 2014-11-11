@@ -31,7 +31,8 @@ angular.module('tidepoolsServices', ['ngResource'])
                 'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
                 'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
                 'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true}
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true},
+                'get': {method: 'GET', server: true}
             }
             res = $resource('/api/worlds/:_id:id', {}, actions);
             return res;
@@ -52,13 +53,13 @@ angular.module('tidepoolsServices', ['ngResource'])
                 }
             var db = {};
             db.worlds = $resource('/api/worlds/:_id', {}, actions);
-            db.landmarks = $resource('api/landmarks/:_id:id', {}, actions);
-            db.styles = $resource('api/styles/:_id', {}, actions);
-            db.projects = $resource('api/projects/:_id', {}, actions);
-            db.tweets = $resource('api/tweets/:_id', {}, actions);
-            db.instagrams = $resource('api/instagrams/:_id', {}, actions);
-            db.messages = $resource('api/worldchat/:_id', {}, actions);
-            db.visit = $resource('api/visit/:_id', {}, actions);
+            db.landmarks = $resource('/api/landmarks/:_id:id', {}, actions);
+            db.styles = $resource('/api/styles/:_id', {}, actions);
+            db.projects = $resource('/api/projects/:_id', {}, actions);
+            db.tweets = $resource('/api/tweets/:_id', {}, actions);
+            db.instagrams = $resource('/api/instagrams/:_id', {}, actions);
+            db.messages = $resource('/api/worldchat/:_id', {}, actions);
+            db.visit = $resource('/api/visit/:_id', {}, actions);
             return db;
         }
     ])

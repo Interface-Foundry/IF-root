@@ -1,0 +1,17 @@
+<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
+	<img class="marble-page-header-icon">
+	Explore
+</header>
+<article class="">
+	<div class="explore-media clearfix" ng-repeat="landmark in landmarks track by landmark._id" if-href="#w/{{world.id}}/{{landmark.id}}">
+		<img ng-src="{{landmark.avatar}}" class="media-object">
+		<div class="explore-media-body">
+		<h3 class="explore-media-heading">{{landmark.name}}</h3>
+			{{landmark.time.start | date: 'shortTime'}}
+			{{landmark.summary || "Summary text is really great and cool. Here is quite a lot of it. It's really great to have a lot of text as a placeholder. I love it."}}
+		</div>
+		<div class="bottom-right">
+		<button href="" class="marble-btn" style="float: right;" ng-style="{'background': style.titleBG_color}">More Info</button>
+		</div>
+	</div>
+</article>

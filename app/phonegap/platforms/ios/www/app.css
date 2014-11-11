@@ -1734,6 +1734,27 @@ h6 {
 	color: #FFF;
 }
 
+.explore-media {
+	position: relative;
+	width: 100%;
+	padding: 0px 8px 56px 8px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid #EEE;
+}
+
+.explore-media-body {
+	padding: 0px 8px;
+	overflow: hidden;
+	zoom: 1;
+}
+
+.explore-media-heading {
+	color: #777;
+	margin: 0px;
+	font-size: 24px;
+	line-height: 1;
+}
+
 ul.agenda {
 width: 260px;
 }
@@ -1898,15 +1919,21 @@ nav li input.form-control {
 	margin: 0px 4px 0px 0px;
 }
 
-.compass.badge {
+.compass {
+	position: relative;
+	display: block;
+	width: 40px;
+	height: 40px;
+}
+
+.compass-badge.badge {
 	position: absolute;
-	bottom:-10px;
+	bottom:-2px;
 	right:-2px;
 	z-index: 100;
 	
 	background: #0091EA;
 }
-
 
 #scrim {
 	position: fixed;
@@ -2037,6 +2064,7 @@ nav li input.form-control {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
+/*
 #alerts > li {
 	-webkit-transition: 0.5s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
@@ -2050,6 +2078,7 @@ nav li input.form-control {
 #alerts > li.ng-enter.ng-enter-active {
 	transform: translateY(0px);
 }
+*/
 
 .container{
   /* max-width: 384px; */
@@ -2907,6 +2936,57 @@ a.bubble-inspector-btn:hover {
   bottom: 7px;
   pointer-events: none;
 }
+.marble-page {
+  width: 100%;
+  min-height: 120px;
+  height: auto;
+  margin: 12px auto;
+  background: #FFF;
+  border-radius: 3px;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+@media only screen and (min-width: 480px) {
+  .marble-page {
+    width: 456px;
+  }
+}
+@media only screen and (min-width: 768px) {
+  .marble-page {
+    width: 600px;
+  }
+}
+.marble-page-header {
+  width: 100%;
+  height: 56px;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 56px;
+}
+.marble-page-header-icon {
+  width: 24px;
+  height: 24px;
+  margin: 16px;
+  padding: 4px;
+  float: left;
+  border-radius: 12px;
+  background: #eee;
+}
+.marble-page-content {
+  padding: 8px;
+}
+.marble-btn {
+  min-width: 112px;
+  height: 40px;
+  border: none;
+  background: none;
+  color: #FFF;
+}
+.bottom-right {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+}
 /*
 .user-chip {
 	position: relative;
@@ -3092,6 +3172,12 @@ input.auth-input {
   width: 100%;
   height: 0;
   z-index: 124;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+}
+.alert-container.tuck {
+  top: 0px;
+  -webkit-transform: translateY(-112px);
+  transform: translateY(-112px);
 }
 li.alert {
   display: block;
@@ -3116,8 +3202,15 @@ li.alert {
     width: 600px;
   }
 }
-li.alert:hover,
-a.alert:active {
+.alert-link:hover,
+.alert-link:active {
+  color: #777;
+}
+.alert-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 72px;
   color: #777;
 }
 .alert-close {
@@ -6610,12 +6703,15 @@ input[type="button"].btn-block {
 .fade.in {
   opacity: 1;
 }
+
 .collapse {
   display: none;
 }
+
 .collapse.in {
   display: block;
 }
+
 .collapsing {
   position: relative;
   height: 0;
@@ -6623,11 +6719,11 @@ input[type="button"].btn-block {
   -webkit-transition: height .35s ease;
           transition: height .35s ease;
 }
+
 @font-face {
   font-family: 'Glyphicons Halflings';
-
-  src: url('../fonts/glyphicons-halflings-regular.eot');
-  src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('fonts/glyphicons-halflings-regular.eot');
+  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;

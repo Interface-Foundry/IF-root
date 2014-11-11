@@ -11,8 +11,9 @@ angular.module('IF-directives', [])
 					$event.stopPropagation();
 					$('html').on('click', function(e) {
 						$scope.userMenu = false;
+						$scope.$digest();
 						console.log('click');
-						$('body').off('click');
+						$('html').off('click');
 					})
 				} else if (!userManager.loginStatus) {
 					dialogs.showDialog('authDialog.html');

@@ -91,8 +91,8 @@ beaconManager.beaconAlert = function(beacon) {
 	});
 }
 
-beaconManager.beaconLookup = function(longID) {
-	return beaconData[longID]; 
+beaconManager.beaconLookup = function(beacon) {
+	return beaconData.getBeacon(beacon);
 }
 
 function getLongID(beacon) {
@@ -103,4 +103,34 @@ function getLongID(beacon) {
 return beaconManager;
 
 //@ENDIF
+}]);
+
+angular.module('tidepoolsServices')
+    .factory('beaconData', [ 
+    	function() {
+var beaconData = {
+	beaconTree: {
+		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
+			'28040': {
+				name: 'Main Room A'
+			},
+			'28041': {
+				name: 'Main Room B'
+			},
+			'28042': {
+				name: 'Workshop Room A'
+			},
+			'28043': {
+				name: 'Workshop Room B'
+			}
+		}
+	}
+}
+
+beaconData.getBeacon = function(beacon) {
+	return beaconData.beaconTree[beacon.proximityUUID][beacon.major];
+}
+
+return beaconData;
+
 }]);
