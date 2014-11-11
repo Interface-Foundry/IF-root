@@ -5100,7 +5100,6 @@ app.directive('ifHref', function() {
 		restrict: 'A',
 		priority: 99, 
 		link: function($scope, $element, $attr) {
-			console.log('linking if-href');
 			$attr.$observe('ifHref', function(value) {
 				if (!value) {
 					$attr.$set('href', null);
@@ -6857,8 +6856,8 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout',
-    	function(alertManager, $interval, $timeout) {
+    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
+    	function(alertManager, $interval, $timeout, beaconData) {
 var beaconManager = {
 	supported: false
 }
@@ -12465,7 +12464,7 @@ function reorderById (idArray) {
 	
 	$scope.upcoming = [];
 	for (var i = 0, len = idArray.length; i<len; i++) {
-	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1)[0];
+	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, {})[0];
 	}
 	
 	console.log($scope.upcoming);
@@ -12655,7 +12654,7 @@ $scope.loadWorld = function(data) {
 			
 			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:upcoming');
-				console.log(data);
+				console.log('upcoming data', data);
 				//console.log(angular.fromJson(data[0]));
 				reorderById(data);
 			}); 

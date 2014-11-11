@@ -3,7 +3,6 @@ app.directive('ifHref', function() {
 		restrict: 'A',
 		priority: 99, 
 		link: function($scope, $element, $attr) {
-			console.log('linking if-href');
 			$attr.$observe('ifHref', function(value) {
 				if (!value) {
 					$attr.$set('href', null);

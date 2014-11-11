@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout',
-    	function(alertManager, $interval, $timeout) {
+    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
+    	function(alertManager, $interval, $timeout, beaconData) {
 //@IFDEF WEB
 var beaconManager = {
 	supported: false
@@ -41,7 +41,7 @@ beaconManager.updateBeacons = function(newBeacons) {
 	angular.forEach(newBeacons, function(beacon) {
 		var longID = getLongID(beacon);
 		if (beaconManager.sessionBeacons[longID]) {
-			console.log('already seen');
+			console.log('already seen', beacon);
 			//already seen 
 		} else if (beacon.distance < beaconManager.alertDistance) {
 			//add it to session beacon
@@ -82,7 +82,7 @@ beaconManager.updateBeacons = function(newBeacons) {
 }
 
 beaconManager.beaconAlert = function(beacon) {
-	console.log('beaconAlert');
+	console.log('beaconAlert', beacon);
 	var data = beaconData.fromBeacon(beacon);
 	
 	$timeout(function() {

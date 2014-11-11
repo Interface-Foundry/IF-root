@@ -14,7 +14,6 @@ body {
    height: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
-  
 }
 
 @font-face {
@@ -31,6 +30,7 @@ body {
   margin:0;
   /*width:384px;*/ 
   max-width:100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .navfix {
@@ -55,9 +55,9 @@ nav.main-nav {
 	
 	/*-webkit-perspective: 1000;*/
 	-webkit-backface-visibility: hidden;
-	
 	z-index: 4;
 	
+	-webkit-transform: translate3d(0, 0, 0);
 /* @IFDEF PHONEGAP */
 	height: 55px;
 	padding-top: 15px;
@@ -327,6 +327,7 @@ nav li input.form-control {
 	width: 100%;
 	top: 0;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	-webkit-overflow-scrolling: touch;
 }
 
 /*
