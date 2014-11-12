@@ -66,8 +66,8 @@ $routeProvider.
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       
       when('/profile', {redirectTo:'/profile/worlds'}).
-      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController', resolve: {loggedin: checkLoggedin}}).
-      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController', resolve: {loggedin: checkLoggedin}}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).

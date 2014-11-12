@@ -1,6 +1,6 @@
-<nav class="subnav-fixed navfix">
-	<select class="menu pull-left" ng-model="menuLink" ng-change="go(menuLink)">
-		<option value="/profile/worlds">My Worlds ⌄</option>
+<nav class="subnav">
+<!-- 	<select class="menu pull-left" ng-model="menuLink" ng-change="go(menuLink)">
+		<option value="/profile/worlds">My Bubbles ⌄</option>
 		<option value="/profile/me">My Profile ⌄</option>
 	</select>
 	<ul class="tab-group" ng-show="state.myProfile">
@@ -10,10 +10,15 @@
 			<a href="#/profile/contacts" class="tab-link ">Contacts</a></li>
 		<li class="tab hidden" ng-class="{'selected': state.history}">
 			<a href="#/profile/history" class="tab-link">History</a></li>
-	</ul>
+	</ul> -->
 	<ul class="tab-group" ng-show="state.myWorlds">
+		
+		<span ng-click="goBack()" ng-show="fromMessages" style="cursor:pointer;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
+		
 		<li class="tab" ng-class="{'selected': state.public}">
-			<a href="#/profile/worlds" class="tab-link">Public</a></li>
+			<a href="#/profile/worlds" class="tab-link" ng-hide="fromMessages">My Profile & Bubbles</a>
+			<a class="tab-link" ng-show="fromMessages">Edit your Display Name & Picture</a>
+		</li>
 		<li class="hidden">Drafts</li>
 		<li class="hidden">Filter</li>
 	</ul>

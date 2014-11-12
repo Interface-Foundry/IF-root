@@ -38,7 +38,7 @@ beaconManager.updateBeacons = function(newBeacons) {
 	angular.forEach(newBeacons, function(beacon) {
 		var longID = getLongID(beacon);
 		if (beaconManager.sessionBeacons[longID]) {
-			console.log('already seen');
+			//console.log('already seen', beacon);
 			//already seen 
 		} else if (beacon.distance < beaconManager.alertDistance) {
 			//add it to session beacon
@@ -77,13 +77,13 @@ beaconManager.updateBeacons = function(newBeacons) {
 }
 
 beaconManager.beaconAlert = function(beacon) {
-	console.log('beaconAlert', beacon);
+	//console.log('beaconAlert', beacon);
 	var data = beaconData.fromBeacon(beacon);
 	
 	$timeout(function() {
 		alerts.notify({
 			title: data.title,
-			msg: "You found a beacon, visit it!",
+			msg: "You found a beacon, visit it <strong>here</strong>!",
 			href: data.href,
 			id: getLongID(beacon)
 		});
@@ -116,6 +116,10 @@ var beaconData = {
 			},
 			'28043': {
 				title: 'Workshop Room B'
+			},
+			'14163': { //test only
+				title: 'Main Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Body/'
 			}
 		},
 		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {

@@ -10,7 +10,8 @@ var userManager = {
 	userRes: $resource('https://bubbl.li/api/updateuser'),
 	//@ENDIF
 	loginStatus: false,
-	login: {}
+	login: {},
+	signup: {}
 }
 
 
@@ -23,7 +24,7 @@ userManager.getUser = function() {
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
-			if (user!=='0') {
+			if (user && user!=0) {
 				$rootScope.user = user; 
 				userManager._user = user;
 				deferred.resolve(user);
@@ -126,8 +127,23 @@ userManager.login.login = function() {
 	dialogs.show = false;
 }
 
-userManager.signup = function() {
-	
+userManager.signup.signup = function() {
+    var data = {
+      email: userManager.signup.email,
+      password: userManager.signup.password
+    }
+
+    $http.post('/api/user/signup', data, {server: true})
+    .success(function(user) {
+	  if (user){
+		  $location.path('/profile');
+		}
+	})
+	.error(function(err){
+	if (err) {
+          $scope.alerts.addAlert('danger',err, true);
+	}
+	});
 }
 
 

@@ -30,8 +30,6 @@ function setLookup() {
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
   	$scope.lookup[$scope.landmarks[i]._id] = i;
 	}
-	
-	console.log($scope.lookup);
 }
   	
   	
@@ -45,13 +43,12 @@ function reorderById (idArray) {
 	}
 	
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		if ($scope.landmarks[i] == 0) {
+		if ($scope.landmarks[i] == 0 || $scope.landmarks[i].category && $scope.landmarks[i].category.hiddenPresent == true) {
 			$scope.landmarks.splice(i, 1);
 			i--;
 		}
 	}
-	
-	console.log($scope.upcoming);
+
 }
 
   	
