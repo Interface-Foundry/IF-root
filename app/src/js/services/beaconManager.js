@@ -26,7 +26,7 @@ beaconManager.startListening = function () {
 	// start looking for beacons
 
 	window.EstimoteBeacons.startRangingBeaconsInRegion(
-		{},
+		{uuid: 'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D'},
 	function (result) {
 		console.log(result.beacons);
     }, function(error) {
