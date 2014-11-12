@@ -6245,9 +6245,9 @@ angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 angular.extend($rootScope, {navTitle: "Bubbl.li"})
 angular.extend($rootScope, {loading: false});
 	
-/*$scope.$on('$viewContentLoaded', function() {
-	document.getElementById("wrap").scrollTop = 0
-});*/
+$scope.$on('$viewContentLoaded', function() {
+	document.getElementById("wrap").scrollTop = 0;
+});
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -6643,7 +6643,8 @@ angular.module('tidepoolsServices', ['ngResource'])
                 'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
                 'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
                 'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true}
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true},
+                'get': {method: 'GET', server: true}
             }
             res = $resource('/api/landmarks/:_id:id', {}, actions);
             return res;
@@ -6883,6 +6884,11 @@ var beaconData = {
 			},
 			'28043': {
 				title: 'Workshop Room B'
+			}
+		},
+		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
+			'62861': {
+				title: "Ross's Random Beacon"
 			}
 		}
 	}
@@ -12100,7 +12106,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 		
 		function goToMark() {
 			
-			map.setCenter($scope.landmark.loc.coordinates, 20); 
+			map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
 		  	var markers = map.markers;
 		  	angular.forEach(markers, function(marker) {
 		  		console.log(marker);
@@ -12214,7 +12220,7 @@ $scope.sendMsg = function (e) {
 		        nick: $scope.nick,
 		        msg: $scope.msg.text,
 		        avatar: $scope.user.avatar || 'img/icons/profile.png',
-		        userID: $scope.userID
+		        userID: $scope.userID,
 		    };	
 		}
 
@@ -12228,6 +12234,7 @@ function sendMsgToServer(msg) {
 db.messages.create(msg, function(res) {
 	sinceID = res[0]._id;
 	
+	msg._id = res[0]._id;
 	$scope.messages.push(msg);
 	$scope.localMessages.push(res[0]._id);
 	scrollMessages();
@@ -12262,7 +12269,8 @@ function welcomeMessage(){
 	for (i = 0; i < shadowNum; i++) { 
     	var hiddenChat = {
 	    	hidden: true,
-	    	nick: 'shadowBot'+i
+	    	nick: 'shadowBot'+i,
+	    	_id: 'hiddenChat'+i
 		};
 		$scope.messages.push(hiddenChat);
 	}
@@ -12304,7 +12312,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log($scope.world);
 });
 
-$http.get('/api/user/loggedin').success(function(user){
+$http.get('/api/user/loggedin', {server: true}).success(function(user){
 
 // Authenticated
 if (user !== '0'){
@@ -12379,7 +12387,7 @@ checkMessages();
     function checkLogin(){
 
 	      // Make an AJAX call to check if the user is logged in
-	      $http.get('/api/user/loggedin').success(function(user){
+	      $http.get('/api/user/loggedin', {server: true}).success(function(user){
 
 	        // Authenticated
 	        if (user !== '0'){
@@ -12455,16 +12463,25 @@ function setLookup() {
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
   	$scope.lookup[$scope.landmarks[i]._id] = i;
 	}
+	
 	console.log($scope.lookup);
 }
   	
   	
 function reorderById (idArray) {
 	console.log('reorderById');
-	
+	var tempLandmarks = angular.copy($scope.landmarks);
 	$scope.upcoming = [];
+	
 	for (var i = 0, len = idArray.length; i<len; i++) {
-	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, {})[0];
+	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, 0)[0];
+	}
+	
+	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+		if ($scope.landmarks[i] == 0) {
+			$scope.landmarks.splice(i, 1);
+			i--;
+		}
 	}
 	
 	console.log($scope.upcoming);

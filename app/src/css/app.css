@@ -624,7 +624,7 @@ clear: both;
 .back {
 z-index: 100;
 position: fixed;
-top: 42px;
+top: 56px;
 left: 8px;
 }
 

@@ -544,6 +544,10 @@ a.bubble-inspector-btn:hover {
   text-align: center;
   line-height: 40px;
 }
+.marble-btn:hover,
+.marble-btn:active {
+  color: #FFF;
+}
 .bottom-right {
   position: absolute;
   right: 0px;
@@ -774,6 +778,10 @@ li.alert {
   width: 100%;
   height: 72px;
   color: #777;
+}
+.alert-title {
+  margin-top: 0px;
+  margin-bottom: 4px;
 }
 .alert-close {
   position: absolute;

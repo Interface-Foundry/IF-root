@@ -126,9 +126,9 @@ if (beaconManager.supported == true) {
 }
 //@ENDIF
 
-/*$scope.$on('$viewContentLoaded', function() {
-	document.getElementById("wrap").scrollTop = 0
-});*/
+$scope.$on('$viewContentLoaded', function() {
+	document.getElementById("wrap").scrollTop = 0;
+});
 
 $scope.newWorld = function() {
     console.log('newWorld()');

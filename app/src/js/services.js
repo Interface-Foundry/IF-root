@@ -15,7 +15,8 @@ angular.module('tidepoolsServices', ['ngResource'])
                 'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
                 'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
                 'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true}
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true},
+                'get': {method: 'GET', server: true}
             }
             res = $resource('/api/landmarks/:_id:id', {}, actions);
             return res;

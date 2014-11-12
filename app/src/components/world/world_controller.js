@@ -30,16 +30,25 @@ function setLookup() {
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
   	$scope.lookup[$scope.landmarks[i]._id] = i;
 	}
+	
 	console.log($scope.lookup);
 }
   	
   	
 function reorderById (idArray) {
 	console.log('reorderById');
-	
+	var tempLandmarks = angular.copy($scope.landmarks);
 	$scope.upcoming = [];
+	
 	for (var i = 0, len = idArray.length; i<len; i++) {
-	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, {})[0];
+	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, 0)[0];
+	}
+	
+	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+		if ($scope.landmarks[i] == 0) {
+			$scope.landmarks.splice(i, 1);
+			i--;
+		}
 	}
 	
 	console.log($scope.upcoming);

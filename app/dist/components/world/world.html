@@ -27,17 +27,8 @@
 	<!--MESSAGES-->
 	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
 
-	<!--DESCRIPTION-->
-	<div ng-include="description ? 'components/world/templates/description.html' : null"></div>
-
 	<!--PRESENTS-->
 	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null"></div>
-
-	<!--category-->
-	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
-
-	<!--now--> <!--upcoming-->
-	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
 
 	<!---yelp-->
 	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null"></div>
@@ -45,6 +36,11 @@
 	<!---meetup-->
 	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
 	
+	<!--TWITTER-->
+	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page"></div>
+	
+	<!--INSTAGRAM-->
+	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null" class="marble-page"></div>
 
 	<!--explore-->
 	<!--
@@ -71,11 +67,7 @@
 	</ul>
 -->
 	
-	<!--TWITTER-->
-	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null"></div>
 	
-	<!--INSTAGRAM-->
-	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null"></div>
 
 	<!--CLAIM WORLD-->
 	<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
@@ -87,8 +79,8 @@
 	<div class="col-xs-12"><div style="height:200px;"></div></div>
 
 <div ng-show="showEdit">
-	<a class="btn btn-default" ng-href="#/edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest and Schedules</a>
-<a class="btn btn-default" ng-href="#/edit/w/{{worldURL}}">Edit your Bubble</a>
+	<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest and Schedules</a>
+<a class="btn btn-default" if-href="#edit/w/{{worldURL}}">Edit your Bubble</a>
 </div>
 <br><br>
 </div>

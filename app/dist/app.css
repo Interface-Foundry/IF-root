@@ -2040,6 +2040,16 @@ background: -o-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -ms-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
+
+.hashtag-header {
+	width: 100%;
+	background-color: #eee;
+	height: 40px;
+	padding: 0px 8px;
+	line-height: 40px;
+	font-size: 16px;
+	color: #777;
+}
 /* app css stylesheet */
 
 /* 
@@ -2656,7 +2666,7 @@ clear: both;
 .back {
 z-index: 100;
 position: fixed;
-top: 42px;
+top: 56px;
 left: 8px;
 }
 
@@ -3290,6 +3300,10 @@ a.bubble-inspector-btn:hover {
   text-align: center;
   line-height: 40px;
 }
+.marble-btn:hover,
+.marble-btn:active {
+  color: #FFF;
+}
 .bottom-right {
   position: absolute;
   right: 0px;
@@ -3520,6 +3534,10 @@ li.alert {
   width: 100%;
   height: 72px;
   color: #777;
+}
+.alert-title {
+  margin-top: 0px;
+  margin-bottom: 4px;
 }
 .alert-close {
   position: absolute;

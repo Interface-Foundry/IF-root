@@ -3,7 +3,7 @@
 <div class="col-xs-12">
 <br><br>
 <h1>Reset Password</h1>
-	<form ng-submit="sendForgot()">
+<form ng-submit="sendForgot()">
 	  <p>
 	    <label class="control-label">Email you signed up with</label>
 	    <br>
@@ -12,10 +12,7 @@
 	  <p>
 	    <button type="submit" class="btn btn-primary">Reset Password</button>
 	  </p>
-
-	  <alert ng-repeat="alert in alerts.list" type="{{alert.type}}" close="alerts.closeAlert($index)">{{alert.msg}}</alert>
-
-	</form>
+</form>
 </div>
 </div>
 </div>

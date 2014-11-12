@@ -122,6 +122,11 @@ var beaconData = {
 			'28043': {
 				title: 'Workshop Room B'
 			}
+		},
+		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
+			'62861': {
+				title: "Ross's Random Beacon"
+			}
 		}
 	}
 }

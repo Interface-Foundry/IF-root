@@ -60,10 +60,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<script src="lib.js"></script>
 	<script src="app.js"></script>
 </head>
-<body>
-	<div id="wrap" ng-class="{'drawer': drawerOn}">
-
-<button class="drawer-tab" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0" ng-click="drawerOn = !drawerOn">
+<body ng-class="{'drawer': drawerOn}">
+	<button class="drawer-tab" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0" ng-click="drawerOn = !drawerOn">
 	<img width="10px" height="16px" class="handle toolbar-item show" src="img/icons/drawer.png">
 </button>
 
@@ -76,7 +74,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
 	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
 		<a if-href="{{::alert.href}}" class="alert-link">
-			<h5>{{alert.title}}</h5>
+			<h5 class="alert-title">{{alert.title}}</h5>
 			<span ng-bind-html="alert.msg"></span> {{alert}}
 		</a>
 		<button ng-click="alerts.closeAlert($index)" class="alert-close">
@@ -84,13 +82,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 		</button>
 	</li>
 </ul>
-  		<div class="feedbackWindow" ng-show="feedback.on">
-  			<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
-  			<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button> 			<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-  		</div>
-  		
-  		
-  		<nav role="navigation" 
+
+<nav role="navigation" 
   			class="main-nav" 
   			ng-style="{'background-color': style.navBG_color}">
   			
@@ -135,9 +128,19 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	  		<input type="text" class="form-control input-sm" placeholder="..." ng-model="searchText" ng-show="searchOn" ng-enter="search()">
 	  		</div>
 	  </nav>
+	  
+	  <div class="feedbackWindow" ng-show="feedback.on">
+  			<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
+  			<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button> 			<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+  		</div>
+
+
   		<div id="scrim" ng-class="{'loading': loading}">
 	  		<span class="glyphicon glyphicon-refresh"></span>
 	  	</div>
+
+
+	<div id="wrap" >
 
 		<div id="main">
          <section id="aperture" ng-class="[aperture.state]">

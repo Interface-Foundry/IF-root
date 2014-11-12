@@ -228,3 +228,13 @@ background: -o-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -ms-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
+
+.hashtag-header {
+	width: 100%;
+	background-color: #eee;
+	height: 40px;
+	padding: 0px 8px;
+	line-height: 40px;
+	font-size: 16px;
+	color: #777;
+}

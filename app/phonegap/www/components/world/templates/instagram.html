@@ -1,22 +1,17 @@
-<div class="col-xs-6 instagram widget_margin">
-    <h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Instagram</h4>
-
-        <h4>#{{world.resources.hashtag}}</h4>
-
-    	<div class="landmark">
-    	<div class="card last" ng-style="{'background-color': style.cardBG_color}">
-        <a class-"instagram" ng-href="#/instagram/{{world.resources.hashtag}}">
-            <img class="img-responsive instagram" ng-src="img/instagram/{{instagrams[0].local_path[0]}}" 
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/instagram_16.png" width="16px" height="16px" style="display: block;"></div>
+	Instagram
+</header>
+<article>
+	<header class="hashtag-header">#{{world.resources.hashtag}}</header>
+<img class="img-responsive instagram" ng-src="img/instagram/{{instagrams[0].local_path[0]}}" 
             									ng-show="instagrams[0].local_path[0]">
-			<img class="img-responsive instagram" src="img/widgets/placeholder.png" ng-hide="instagrams[0].local_path[0]">
+<p ng-hide="instagrams[0].local_path[0]">No one has instagrammed yet! Post an instagram hashtagged #{{world.resources.hashtag}} and it will appear here.</p>
             <span class="watermark typcn typcn-social-instagram"></span>
-		</a>
-    	</div>
-		<a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
-            <div class="footer">
-	            @{{instagrams[0].user.screen_name}}
-	            <span class="typcn typcn-export pull-right"></span>
-            </div>
-        </a>
-		</div>
-</div>
+<a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
+	<div class="footer">
+		@{{instagrams[0].user.screen_name}}
+		<span class="typcn typcn-export pull-right"></span>
+	</div>
+</a>
+</article>

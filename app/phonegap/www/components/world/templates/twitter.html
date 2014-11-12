@@ -1,21 +1,14 @@
-<div class="col-xs-6 twitter">
-	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Twitter</h4>
-
-        <h4>#{{world.resources.hashtag}}</h4>
-
-        <div class="card last" ng-style="{'background-color': style.cardBG_color}">
-
-        <a ng-href="#/twitter/{{world.resources.hashtag}}">
-
-          <div class="more">
-          <p class="twitter">{{tweets[0].text}}</p>
-          <img class="img-responsive instagram" style="padding-top:2px;" src="img/widgets/placeholder-t.png" ng-hide="tweets[0].tweetID_str"> 
-          <span class="watermark typcn typcn-social-twitter"></span>
-          </div>
-        </a>
-        <a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
-        
-        <div class="footer show-footer">@{{tweets[0].user.name}} <span class="typcn typcn-export pull-right"><span></div>
-        </a>
-        </div>
- </div>
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/twitter_16.png" width="16px" height="16px" style="display: block;"></div>
+	Twitter
+</header>
+<article>
+	<header class="hashtag-header">#{{world.resources.hashtag}}</header>
+	<a if-href="#/twitter/{{world.resources.hashtag}}">
+		<p class="twitter">{{tweets[0].text || 'No one has tweeted yet! Tweet at #'+world.resources.hashtag+' to start the conversation.'}}</p>
+		<span class="watermark typcn typcn-social-twitter"></span>
+	</a>
+	<a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
+	<div class="footer show-footer">@{{tweets[0].user.name}} <span class="typcn typcn-export pull-right"><span></div>
+	</a>
+ </article>

@@ -1,37 +1,39 @@
 <div ng-if="upcoming">
-<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
-	<img class="marble-page-header-icon" src="img/icons/time_16.png">
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/time_16.png" width="16px" height="16px" style="display: block;"></div>
 	Upcoming
 </header>
 <article>
 	<div class="explore-media clearfix" ng-repeat="landmark in upcoming">
-		<img ng-src="{{::landmark.avatar}}" class="media-object">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
 		<div class="explore-media-body">
 		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
 		<h6>{{::landmark.time.start | date: 'shortTime'}}</h6>
 		{{::landmark.summary}}
 		</div>
 		<div class="bottom-right">
-		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="{'background': style.titleBG_color}">More Info</a>
+		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
 		</div>
 	</div>
 	
 </article>
 </div>
-<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
-	<img class="marble-page-header-icon" src="img/icons/map_16.png">
+<div ng-if="landmarks.length>0">
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/map_16.png" width="16px" height="16px" style="display: block;"></div>
 	Explore
 </header>
 <article class="">
 	<div class="explore-media clearfix" ng-repeat="landmark in landmarks">
-		<img ng-src="{{::landmark.avatar}}" class="media-object">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
 		<div class="explore-media-body">
-		<h3 class="explore-media-heading">{{landmark.name}}</h3>
+		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
 		<h6>{{::landmark.time.start | date: 'shortTime'}}</h6>
 		{{::landmark.summary}}
 		</div>
 		<div class="bottom-right">
-		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="{'background': style.titleBG_color}">More Info</a>
+		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
 		</div>
 	</div>
 </article>
+</div>

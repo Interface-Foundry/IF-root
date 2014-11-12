@@ -248,7 +248,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 		
 		function goToMark() {
 			
-			map.setCenter($scope.landmark.loc.coordinates, 20); 
+			map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
 		  	var markers = map.markers;
 		  	angular.forEach(markers, function(marker) {
 		  		console.log(marker);

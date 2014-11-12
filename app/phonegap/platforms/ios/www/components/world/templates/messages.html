@@ -6,11 +6,11 @@
 <a if-href="#w/{{world.id}}/messages">
 	<li class="message">
 		<picture class="msg-avatar">
-			<img width="32" height="32" class="small-avatar" ng-src="{{msg.avatar || world.avatar}}" ng-cloak>
+			<img width="32" height="32" class="small-avatar" if-src="{{msg.avatar || world.avatar}}" ng-cloak>
 		</picture>
 		<div class="message-content">
 			<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
-			<img class="img-responsive" ng-src="{{msg.pic}}" ng-if="msg.pic">
+			<img class="img-responsive" if-src="{{::msg.pic}}" ng-if="msg.pic">
 			<p class="message-body" 
 				ng-style="{'background': style.titleBG_color}"
 				style="color: #FFF !important;"
@@ -19,7 +19,7 @@
 			</p>
 		</div>
 	</li>
-	<span class="pull-right">Join In</span>
 	<div class="clearfix"></div>
 </a>
 </article>
+<a if-href="#w/{{world.id}}/messages" class="marble-btn" style="float: right;" ng-style="{'background': style.titleBG_color}">Join In</a>
