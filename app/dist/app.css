@@ -1707,7 +1707,7 @@ text-align: center;
 	z-index: 1000;
 	background-color: #fff;
 	width: 100%;
-	height:89px;
+	min-height:89px;
 	padding: 0px 16px 16px 16px;
 	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
 }
@@ -2842,6 +2842,10 @@ span.subnav-back-chevron {
   padding: 8px;
   background: #e6e6e6;
   overflow: auto;
+}
+.surface.landmark-surface {
+  padding: 0;
+  overflow: visible;
 }
 .surface:before,
 .surface:after,

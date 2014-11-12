@@ -4,8 +4,10 @@
 </header>
 <article>
 	<header class="hashtag-header">#{{world.resources.hashtag}}</header>
-<img class="img-responsive instagram" ng-src="img/instagram/{{instagrams[0].local_path[0]}}" 
+<a if-href="#instagram/{{world.resources.hashtag}}">
+<img class="img-responsive instagram" if-src="img/instagram/{{instagrams[0].local_path[0]}}" 
             									ng-show="instagrams[0].local_path[0]">
+</a>
 <p ng-hide="instagrams[0].local_path[0]">No one has instagrammed yet! Post an instagram hashtagged #{{world.resources.hashtag}} and it will appear here.</p>
             <span class="watermark typcn typcn-social-instagram"></span>
 <a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">

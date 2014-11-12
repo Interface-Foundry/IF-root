@@ -19,28 +19,28 @@
 		
 <div class="surface" ng-style="{'background-color': style.bodyBG_color}">
 	<!--DESCRIPTION-->
-	<div ng-include="::description ? 'components/world/templates/description.html' : null" class="marble-page"></div>
+	<div ng-include="description ? 'components/world/templates/description.html' : null" class="marble-page"></div>
 	
 	<!--LANDMARKS-->
-	<div ng-include="::landmarks ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
+	<div ng-include="landmarks ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
 	
 	<!--MESSAGES-->
-	<div ng-include="::messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
+	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
 
 	<!--PRESENTS-->
-	<div ng-include="::temp.presents==true ? 'components/world/templates/presents.html' : null"></div>
+	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null"></div>
 
 	<!---yelp-->
-	<div ng-include="::world.source_yelp.id ? 'components/world/templates/yelp.html' : null"></div>
+	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null"></div>
 
 	<!---meetup-->
-	<div ng-include="::world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
+	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
 	
 	<!--TWITTER-->
-	<div ng-include="::twitter ? 'components/world/templates/twitter.html' : null" class="marble-page"></div>
+	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page"></div>
 	
 	<!--INSTAGRAM-->
-	<div ng-include="::instagram ? 'components/world/templates/instagram.html' : null" class="marble-page"></div>
+	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null" class="marble-page"></div>
 
 	<!--explore-->
 	<!--

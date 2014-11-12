@@ -5,7 +5,7 @@
 </header>
 <article>
 	<div class="explore-media clearfix" ng-repeat="landmark in upcoming">
-		<img ng-src="{{::landmark.avatar}}" class="media-object">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
 		<div class="explore-media-body">
 		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
 		<h6>{{::landmark.time.start | date: 'shortTime'}}</h6>

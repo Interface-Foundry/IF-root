@@ -87,6 +87,10 @@ span.subnav-back-chevron {
   background: #e6e6e6;
   overflow: auto;
 }
+.surface.landmark-surface {
+  padding: 0;
+  overflow: visible;
+}
 .surface:before,
 .surface:after,
 .surface-sort:before,

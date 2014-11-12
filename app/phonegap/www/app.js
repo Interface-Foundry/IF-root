@@ -10267,7 +10267,8 @@ $scope.selectMapTheme = function(name) {
 		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
 		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
 		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
+		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
+		mimis: {cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55'}
 	};
 	if (typeof name === 'string') {
 		$scope.mapThemeSelect = name;
