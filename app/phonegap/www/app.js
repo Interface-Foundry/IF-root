@@ -7671,8 +7671,8 @@ userManager.signup.signup = function() {
 	})
 	.error(function(err){
 	if (err) {
-			dialogs.show = false;
-          alertManager.addAlert('danger',err, true);
+		dialogs.show = false;
+        alertManager.addAlert('danger',err, true);
           
 	}
 	});
