@@ -135,8 +135,7 @@ userManager.signup.signup = function() {
 
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
-	  if (user){
-		}
+		userManager.checkLogin();
 	})
 	.error(function(err){
 	if (err) {
