@@ -6872,7 +6872,7 @@ angular.module('tidepoolsServices')
     	function() {
 var beaconData = {
 	beaconTree: {
-		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
+		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
 			'28040': {
 				title: 'Main Room A'
 			},
@@ -6902,6 +6902,30 @@ return beaconData;
 
 }]);
 
+
+//// Main Room A 
+// Bot part: Body
+// Major: 28040
+// Minors: 27664, 27665, 27666, 27667
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Body/
+
+//// Main Room B
+// Bot part: Antenna
+// Major: 28041
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Antenna/
+
+//// Workshop Room A
+// Bot part: Legs
+// Major: 28042
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Legs/
+
+//// Workshop Room B
+// Bot part: Arms
+// Major: 28043
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Arms/
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {

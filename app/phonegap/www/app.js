@@ -6870,7 +6870,7 @@ var beaconManager = {
 	beacons: {},
 	sessionBeacons: {},
 	supported: true,
-	alertDistance: 10
+	alertDistance: 25
 }
 
 beaconManager.startListening = function () {
@@ -6879,7 +6879,7 @@ beaconManager.startListening = function () {
 	window.EstimoteBeacons.startRangingBeaconsInRegion(
 		{uuid: 'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D'},
 	function (result) {
-		console.log(result.beacons);
+		beaconManager.updateBeacons(result.beacons);
     }, function(error) {
 	    console.log(error);
 	});
@@ -6889,16 +6889,14 @@ beaconManager.updateBeacons = function(newBeacons) {
 	angular.forEach(newBeacons, function(beacon) {
 		var longID = getLongID(beacon);
 		if (beaconManager.sessionBeacons[longID]) {
-			console.log('already seen', beacon);
+			console.log('already seen');
 			//already seen 
 		} else if (beacon.distance < beaconManager.alertDistance) {
 			//add it to session beacon
-			
-			//check distance
+			beaconManager.sessionBeacons[longID] = beacon;
 			
 			//do something once
 			beaconManager.beaconAlert(beacon);
-			beaconManager.sessionBeacons[longID] = beacon;
 		}
 	});
 /*
@@ -6944,7 +6942,7 @@ beaconManager.beaconAlert = function(beacon) {
 }
 
 function getLongID(beacon) {
-	return beacon.proximityUUID+beacon.major;
+	return beacon.proximityUUID+beacon.major+beacon.minor;
 }
 
 return beaconManager;
@@ -6956,7 +6954,7 @@ angular.module('tidepoolsServices')
     	function() {
 var beaconData = {
 	beaconTree: {
-		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
+		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
 			'28040': {
 				title: 'Main Room A'
 			},
@@ -6986,6 +6984,30 @@ return beaconData;
 
 }]);
 
+
+//// Main Room A 
+// Bot part: Body
+// Major: 28040
+// Minors: 27664, 27665, 27666, 27667
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Body/
+
+//// Main Room B
+// Bot part: Antenna
+// Major: 28041
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Antenna/
+
+//// Workshop Room A
+// Bot part: Legs
+// Major: 28042
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Legs/
+
+//// Workshop Room B
+// Bot part: Arms
+// Major: 28043
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Arms/
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {
