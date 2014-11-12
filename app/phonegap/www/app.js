@@ -6955,16 +6955,20 @@ var beaconData = {
 	beaconTree: {
 		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
 			'28040': {
-				title: 'Main Room A'
+				title: 'Main Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Body'
 			},
 			'28041': {
-				title: 'Main Room B'
+				title: 'Main Room B',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Antenna'
 			},
 			'28042': {
-				title: 'Workshop Room A'
+				title: 'Workshop Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Legs/'
 			},
 			'28043': {
-				title: 'Workshop Room B'
+				title: 'Workshop Room B',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Arms/'
 			},
 			'14163': { //test only
 				title: 'Main Room A',
@@ -7661,7 +7665,6 @@ userManager.signup.signup = function() {
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
 	  if (user){
-		  $location.path('/profile');
 		}
 	})
 	.error(function(err){

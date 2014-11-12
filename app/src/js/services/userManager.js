@@ -136,7 +136,6 @@ userManager.signup.signup = function() {
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
 	  if (user){
-		  $location.path('/profile');
 		}
 	})
 	.error(function(err){
