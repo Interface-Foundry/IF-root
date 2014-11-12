@@ -3,7 +3,21 @@
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full')">
-			<div class="media">
+								
+				<img class="world-avatar" if-src="{{::landmark.avatar}}">
+				<div class="world-toolbar">
+					<div class="world-title" fit-font>
+						<span style="color: #FFF;">{{landmark.name}}</span>
+					</div>
+					<div class="world-footer">
+				<!--	{{world.timetext.timestart | date : 'shortTime'}}
+						{{world.timetext.timeend | date: 'shortTime'}} -->
+						<span>{{::landmark.time.start | date: "MMM d h:mm a"}}</span>
+						<span ng-show="landmark.time.end">to {{landmark.time.end | date: "MMM d h:mm a"}}</span>
+					</div>
+				</div>					
+			<!--
+<div class="media">
 							<img class="media-object avatar" ng-click="aperture.toggle('half')" if-src="{{landmark.avatar}}">
 				<div class="media-body">
 					<h2 class="media-heading" style="color: #FFF;" fit-font>{{landmark.name}}
@@ -11,6 +25,7 @@
 					</h2>
 				</div>
 			</div>
+-->
 	</div>
 
 <!--PRESENTS-->
