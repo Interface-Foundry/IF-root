@@ -1,156 +1,474 @@
-cordova.define("pl.makingwaves.estimotebeacons.EstimoteBeacons", function(require, exports, module) { var exec = require('cordova/exec');
+cordova.define("pl.makingwaves.estimotebeacons.EstimoteBeacons", function(require, exports, module) { 
+var exec = cordova.require('cordova/exec');
 
 /**
  * Helpers
  */
-function isString(value) {
-    return (typeof value == 'string' || value instanceof String);
+function isString(value)
+{
+	return (typeof value == 'string' || value instanceof String);
 }
 
-function isInt(value) {
-    return !isNaN(parseInt(value, 10)) && (parseFloat(value, 10) == parseInt(value, 10));
+function isInt(value)
+{
+	return !isNaN(parseInt(value, 10)) && (parseFloat(value, 10) == parseInt(value, 10));
+}
+
+function checkExecParamsRegionSuccessError(region, success, error)
+{
+	var caller = checkExecParamsRegionSuccessError.caller.name
+
+	if (typeof region != "object") {
+		console.error("Error: region parameter is not an object in: " + caller);
+		return false;
+	}
+
+	if (typeof success != "function") {
+		console.error("Error: success parameter is not a function in: " + caller);
+		return false;
+	}
+
+	if (typeof error != "function") {
+		console.error("Error: error parameter is not a function in: " + caller);
+		return false;
+	}
+
+	return true;
+}
+
+function checkExecParamsSuccessError(success, error)
+{
+	var caller = checkExecParamsSuccessError.caller.name
+
+	if (typeof success != "function") {
+		console.error("Error: success parameter is not a function in: " + caller);
+		return false;
+	}
+
+	if (typeof error != "function") {
+		console.error("Error: error parameter is not a function in: " + caller);
+		return false;
+	}
+
+	return true;
+}
+
+function checkExecParamsRegion(region)
+{
+	var caller = checkExecParamsRegion.caller.name
+
+	if (typeof region != "object") {
+		console.error("Error: region parameter is not an object in: " + caller);
+		return false;
+	}
+
+	return true;
 }
 
 /**
- * Constructor
+ * Function object that holds other functions.
  */
-function EstimoteBeacons() {
+function EstimoteBeacons()
+{
 }
 
-EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion failure: success callback parameter must be a function");
-        return;
-    }
+/**
+ * Beacon colours.
+ */
+EstimoteBeacons.prototype.BeaconColorUnknown = 0;
+EstimoteBeacons.prototype.BeaconColorMint = 1;
+EstimoteBeacons.prototype.BeaconColorIce = 2;
+EstimoteBeacons.prototype.BeaconColorBlueberry = 3;
+EstimoteBeacons.prototype.BeaconColorWhite = 4;
+EstimoteBeacons.prototype.BeaconColorTransparent = 5;
 
-    exec(successCallback,
-        function () {
-        },
-        "EstimoteBeacons",
-        "startEstimoteBeaconsDiscoveryForRegion",
-        []
-    );
+/**
+ * Region states.
+ */
+EstimoteBeacons.prototype.RegionStateUnknown = "unknown";
+EstimoteBeacons.prototype.RegionStateOutside = "outside";
+EstimoteBeacons.prototype.RegionStateInside = "inside";
+
+/**
+ * Print an object. Use for debugging. Example calls:
+ *   EstimoteBeacons.printObject(obj);
+ *   EstimoteBeacons.printObject(obj, console.log);
+ */
+EstimoteBeacons.prototype.printObject = function(obj, printFun)
+{
+	if (!printFun) { printFun = console.log; }
+	function print(obj, level)
+	{
+		var indent = new Array(level + 1).join("  ");
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				var value = obj[prop];
+				if (typeof value == "object") {
+					printFun(indent + prop + ":");
+					print(value, level + 1);
+				}
+				else {
+					printFun(indent + prop + ": " + value);
+				}
+			}
+		}
+	}
+	print(obj, 0);
 };
 
-EstimoteBeacons.prototype.stopEstimoteBeaconsDiscoveryForRegion = function (successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.stopEstimoteBeaconsDiscoveryForRegion failure: success callback parameter must be a function");
-        return;
-    }
+/**
+ * Ask the user for permission to use location services
+ * while the app is in the foreground.
+ * You need to call this function or requestAlwaysAuthorization
+ * on iOS 8+.
+ * Does nothing on other platforms.
+ *
+ * @param success Function called on success (optional).
+ * @param error Function called on error (optional).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example:
+ *   EstimoteBeacons.requestWhenInUseAuthorization()
+ *
+ * More information:
+ *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ */
+EstimoteBeacons.prototype.requestWhenInUseAuthorization = function (success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"requestWhenInUseAuthorization",
+		[]
+	);
 
-    exec(successCallback,
-        function () {
-        },
-        "EstimoteBeacons",
-        "stopEstimoteBeaconsDiscoveryForRegion",
-        []
-    );
+	return true;
 };
 
-EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.startRangingBeaconsInRegion failure: success callback parameter must be a function");
-        return;
-    }
+/**
+ * Ask the user for permission to use location services
+ * whenever the app is running.
+ * You need to call this function or requestWhenInUseAuthorization
+ * on iOS 8+.
+ * Does nothing on other platforms.
+ *
+ * @param success Function called on success (optional).
+ * @param error Function called on error (optional).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example:
+ *   EstimoteBeacons.requestAlwaysAuthorization()
+ *
+ * More information:
+ *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ */
+EstimoteBeacons.prototype.requestAlwaysAuthorization = function (success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"requestAlwaysAuthorization",
+		[]
+	);
 
-    exec(successCallback,
-        function () {
-        },
-        "EstimoteBeacons",
-        "startRangingBeaconsInRegion",
-        []
-    );
+	return true;
 };
 
-EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (successCallback) {
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.stopRangingBeaconsInRegion failure: success callback parameter must be a function");
-        return;
-    }
+/**
+ * Get the current location authorization status.
+ * Implemented on iOS 8+.
+ * Does nothing on other platforms.
+ *
+ * @param success Function called on success (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * success callback format:
+ *   success(result)
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example:
+ *   EstimoteBeacons.authorizationStatus(
+ *     function(result) {
+ *       console.log('Location authorization status: ' + result) },
+ *     function(errorMessage) {
+ *       console.log('Error: ' + errorMessage) }
+ *   )
+ *
+ * More information:
+ *   https://community.estimote.com/hc/en-us/articles/203393036-Estimote-SDK-and-iOS-8-Location-Services
+ */
+EstimoteBeacons.prototype.authorizationStatus = function (success, error)
+{
+	if (!checkExecParamsSuccessError(success, error)) {
+		return false;
+	}
 
-    exec(successCallback,
-        function () {
-        },
-        "EstimoteBeacons",
-        "stopRangingBeaconsInRegion",
-        []
-    );
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"authorizationStatus",
+		[]
+	);
+
+	return true;
 };
 
-EstimoteBeacons.prototype.startMonitoringForRegion = function (id, majorOrCallback, minorOrCallback, successCallback, errorCallback, notifyEntryStateOnDisplay) {
-    var major = (typeof majorOrCallback === 'function') ? null : majorOrCallback;
-    var minor = (typeof minorOrCallback === 'function') ? null : minorOrCallback;
-    successCallback = (typeof majorOrCallback === 'function') ? majorOrCallback : successCallback;
-    errorCallback = (typeof minorOrCallback === 'function') ? minorOrCallback : errorCallback;
-    var notify = (notifyEntryStateOnDisplay === true) ? true : false;
+/**
+ * Start scanning for beacons using CoreBluetooth.
+ *
+ * @param region Dictionary with region properties (mandatory).
+ * @param success Function called when beacons are detected (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * region format:
+ *   {
+ *     uuid: string,
+ *     identifier: string,
+ *     major: number,
+ *     minor: number,
+ *   }
+ *
+ * success callback format:
+ *   success(beaconInfo)
+ *
+ * beaconInfo format:
+ *   {
+ *     region: region,
+ *     beacons: array of beacon
+ *   }
+ *
+ * beacon format:
+ *   {
+ *     // See documented properties at:
+ *     // http://estimote.github.io/iOS-SDK/Classes/ESTBeacon.html
+ *   }
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that prints all discovered beacons and properties:
+ *   EstimoteBeacons.startEstimoteBeaconsDiscoveryForRegion(
+ *     {}, // Empty region matches all beacons.
+ *     function(result) {
+ *       console.log('*** Beacons discovered ***')
+ *       EstimoteBeacons.printObject(result) },
+ *     function(errorMessage) {
+ *       console.log('Discovery error: ' + errorMessage) }
+ *   )
+ */
+EstimoteBeacons.prototype.startEstimoteBeaconsDiscoveryForRegion = function (region, success, error)
+{
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
 
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"startEstimoteBeaconsDiscoveryForRegion",
+		[region]
+	);
 
-    if (major !== null && !isInt(major)) {
-        console.error("EstimoteBeacons.startMonitoringForRegion failure: major must be a valid integer");
-        return;
-    }
-
-    if (minor !== null && !isInt(minor)) {
-        console.error("EstimoteBeacons.startMonitoringForRegion failure: minor must be a valid integer");
-        return;
-    }
-
-    if(!isString(id)) {
-        console.error("EstimoteBeacons.startMonitoringForRegion failure: id must be a string");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.startMonitoringForRegion failure: success callback parameter must be a function");
-        return;
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.startMonitoringForRegion failure: error callback parameter is not a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "startMonitoringForRegion",
-        [id, major, minor, notify]
-    );
+	return true;
 };
 
-EstimoteBeacons.prototype.stopMonitoringForRegion = function (id, successCallback, errorCallback) {
-    if (errorCallback === null) {
-        errorCallback = function () {
-        }
-    }
+/**
+ * Stop CoreBluetooth scan.
+ *
+ * @param success Function called when beacons are detected (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops discovery:
+ *   EstimoteBeacons.stopEstimoteBeaconDiscovery()
+ */
+EstimoteBeacons.prototype.stopEstimoteBeaconDiscovery = function (success, error)
+{
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"stopEstimoteBeaconDiscovery",
+		[]
+	);
 
-    if(!isString(id)) {
-        console.error("EstimoteBeacons.stopMonitoringForRegion failure: id must be a string");
-        return;
-    }
-
-    if (typeof errorCallback !== "function") {
-        console.error("EstimoteBeacons.stopMonitoringForRegion failure: error callback parameter is not a function");
-        return;
-    }
-
-    if (typeof successCallback !== "function") {
-        console.error("EstimoteBeacons.stopMonitoringForRegion failure: success callback parameter must be a function");
-        return;
-    }
-
-    exec(successCallback,
-        errorCallback,
-        "EstimoteBeacons",
-        "stopMonitoringForRegion",
-        [id]
-    );
+	return true;
 };
 
+/**
+ * Start ranging beacons using CoreLocation.
+ *
+ * @param region Dictionary with region properties (mandatory).
+ * @param success Function called when beacons are ranged (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * See function startEstimoteBeaconsDiscoveryForRegion for region format.
+ *
+ * success callback format:
+ *   success(beaconInfo)
+ *
+ * See function startEstimoteBeaconsDiscoveryForRegion for beaconInfo format.
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that prints all beacons and properties:
+ *   EstimoteBeacons.startRangingBeaconsInRegion(
+ *     {}, // Empty region matches all beacons.
+ *     function(result) {
+ *       console.log('*** Beacons ranged ***')
+ *       EstimoteBeacons.printObject(result) },
+ *     function(errorMessage) {
+ *       console.log('Ranging error: ' + errorMessage) }
+ *   )
+ */
+EstimoteBeacons.prototype.startRangingBeaconsInRegion = function (region, success, error)
+{
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"startRangingBeaconsInRegion",
+		[region]
+	);
+
+	return true;
+};
+
+/**
+ * Stop ranging beacons using CoreLocation.
+ *
+ * @param region Dictionary with region properties (mandatory).
+ * @param success Function called when ranging is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops ranging:
+ *   EstimoteBeacons.stopRangingBeaconsInRegion({})
+ */
+EstimoteBeacons.prototype.stopRangingBeaconsInRegion = function (region, success, error)
+{
+	if (!checkExecParamsRegion(region)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"stopRangingBeaconsInRegion",
+		[region]
+	);
+
+	return true;
+};
+
+/**
+ * Start monitoring beacons using CoreLocation.
+ *
+ * @param region Dictionary with region properties (mandatory).
+ * @param success Function called when beacons are enter/exit the region (mandatory).
+ * @param error Function called on error (mandatory).
+ *
+ * See function startEstimoteBeaconsDiscoveryForRegion for region format.
+ *
+ * success callback format:
+ *   success(regionState)
+ *
+ * regionState format:
+ *   {
+ *     uuid: string,
+ *     identifier: string,
+ *     major: number,
+ *     minor: number,
+ *     state: string ['outside'|'inside'|'unknown']
+ *   }
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that prints regionState properties:
+ *   EstimoteBeacons.startMonitoringForRegion(
+ *     {}, // Empty region matches all beacons.
+ *     function(result) {
+ *       console.log('*** Region state ***')
+ *       EstimoteBeacons.printObject(result) },
+ *     function(errorMessage) {
+ *       console.log('Monitoring error: ' + errorMessage) }
+ *   )
+ */
+EstimoteBeacons.prototype.startMonitoringForRegion = function (region, success, error)
+{
+	if (!checkExecParamsRegionSuccessError(region, success, error)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"startMonitoringForRegion",
+		[region]
+	);
+
+	return true;
+};
+
+/**
+ * Stop monitoring beacons using CoreLocation.
+ *
+ * @param region Dictionary with region properties (mandatory).
+ * @param success Function called when monitoring is stopped (non-mandatory).
+ * @param error Function called on error (non-mandatory).
+ *
+ * success callback format:
+ *   success()
+ *
+ * error callback format:
+ *   error(errorMessage)
+ *
+ * Example that stops monitoring:
+ *   EstimoteBeacons.stopMonitoringForRegion({})
+ */
+EstimoteBeacons.prototype.stopMonitoringForRegion = function (region, success, error)
+{
+	if (!checkExecParamsRegion(region)) {
+		return false;
+	}
+
+	exec(success,
+		error,
+		"EstimoteBeacons",
+		"stopMonitoringForRegion",
+		[region]
+	);
+
+	return true;
+};
+
+/*
 EstimoteBeacons.prototype.getBeaconByIdx = function (idx, successCallback, errorCallback) {
     if (errorCallback === null) {
         errorCallback = function () {
@@ -476,7 +794,9 @@ EstimoteBeacons.prototype.stopVirtualBeacon = function(successCallback) {
         []
     );
 };
+*/
 
 var estimoteBeacons = new EstimoteBeacons();
 module.exports = estimoteBeacons;
+
 });

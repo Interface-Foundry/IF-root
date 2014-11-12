@@ -2850,7 +2850,7 @@ span.subnav-back-chevron {
   overflow: auto;
 }
 .surface.landmark-surface {
-  padding: none;
+  padding: 0;
   overflow: visible;
 }
 .surface:before,

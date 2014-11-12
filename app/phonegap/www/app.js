@@ -6876,16 +6876,13 @@ var beaconManager = {
 beaconManager.startListening = function () {
 	// start looking for beacons
 
-	window.EstimoteBeacons.startRangingBeaconsInRegion(function () {
-    //every now and then get the list of beacons in range
-    $interval(function () {
-        	window.EstimoteBeacons.getBeacons(function (data) {
-            	//do something cool with the list of beacons
-            	beaconManager.updateBeacons(data);
-				console.log(data);
-        }, 0, false);
-    }, beaconManager.updateInterval);
-});
+	window.EstimoteBeacons.startRangingBeaconsInRegion(
+		{},
+	function (result) {
+		console.log(result.beacons);
+    }, function(error) {
+	    console.log(error);
+	});
 }
 
 beaconManager.updateBeacons = function(newBeacons) {
@@ -6959,7 +6956,7 @@ angular.module('tidepoolsServices')
     	function() {
 var beaconData = {
 	beaconTree: {
-		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
+		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
 			'28040': {
 				title: 'Main Room A'
 			},
@@ -11447,8 +11444,12 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 }]);
 
-app.controller('HomeController', ['$scope', function ($scope) {
-
+app.controller('HomeController', ['$scope', 'worldTree', function ($scope, worldTree) {
+	worldTree.getNearby().then(function(data) {
+		console.log(data);
+	$scope.homeBubble = data.liveAndInside[0];
+	$scope.nearbyBubbles = data.live;	
+	});
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
