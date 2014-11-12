@@ -1,18 +1,20 @@
-<nav class="subnav">
-	
-</nav>
-<div class="surface">
+<div class="surface" style="padding-top: 56px;">
 <div class="marble-page">
 	<header class="marble-page-header">
 	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
 	You're At
 	</header>
 <article class="marble-page-content">
-		<a if-href="#w/{{homeBubble.id}}" class="homeBubble"> 
+	<a if-href="#w/{{homeBubble.id}}" class="homeBubble"> 
 		<span ng-if="!homeBubble">Loading Nearest Bubble...</span>
-		<img if-src="{{homeBubble.avatar || 'img/tidepools/default.png'}}" class="img-responsive" ng-cloak>
+		<div class="media">
+		<img if-src="{{homeBubble.avatar || 'img/tidepools/default.png'}}" class="media-object" ng-cloak>
+		<div class="media-body">
+			<h4>{{homeBubble.name}}</h4>
+		</div>
 	</a>
 </article>
+	<a if-href="#w/{{::homeBubble.id}}" class="marble-btn bottom-right blue500-bg">Visit</a>
 </div>
 
 
@@ -22,11 +24,15 @@
 	Recommended
 	</header>
 <article class="marble-page-content">
+	<a if-href="#w/Creative_Technologies_2014">
 	<div class="media">
+	
 	<img src="img/icons/ct_icon.png" class="media-object">
 	<div class="media-body">
-		<h4>Creative Technologies</h4>
+		<h4>Creative Technologies 2014</h4>
 	</div> 
+	</a>
+	<a if-href="#w/Creative_Technologies_2014" class="marble-btn bottom-right blue500-bg">Visit</a>
 </article>
 </div>
 	

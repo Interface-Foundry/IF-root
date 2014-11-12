@@ -73,9 +73,9 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
   		
 <ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
 	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
-		<a if-href="{{::alert.href}}" class="alert-link">
+		<a if-href="#{{::alert.href}}" ng-click="$parent.compassOverlay = false" class="alert-link">
 			<h5 class="alert-title">{{alert.title}}</h5>
-			<span ng-bind-html="alert.msg"></span> {{alert}}
+			<span ng-bind-html="alert.msg"></span>
 		</a>
 		<button ng-click="alerts.closeAlert($index)" class="alert-close">
 			<img src="img/icons/ic_clear_grey600_24dp.png" width="24px" height="24px">

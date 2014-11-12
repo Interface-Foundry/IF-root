@@ -157,7 +157,7 @@ $scope.go = function(path) {
 }
 	
 $scope.logout = function() {
-      $http.get('/api/user/logout');
+      $http.get('/api/user/logout', {server:true});
       userManager.loginStatus = false;
       //$location.url('/');
 }

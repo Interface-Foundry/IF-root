@@ -10,15 +10,15 @@
 </nav>
 <div class="surface">
 <div ng-switch="state">
-	<form ng-submit="" ng-switch-when="signup">
+	<form ng-submit="userManager.signup.signup()" ng-switch-when="signup">
 		<h3 style="margin: 0px 0px 20px 0px;">Sign Up For Bubbl.li!</h3>
 		<hr class="nomargin">
 		<input name="email" type="email" 
-			placeholder="Email" class="auth-input" ng-model="signup.email" required />
+			placeholder="Email" class="auth-input" ng-model="userManager.signup.email" required />
 		<input name="password" type="password"
-			 placeholder="P@ssw*rd" class="auth-input" ng-model="signup.password">
+			 placeholder="Password" class="auth-input" ng-model="userManager.signup.password">
 		<input name="password2" type="password"
-			 placeholder="One More Time" class="auth-input" ng-model="signup.password2">
+			 placeholder="One More Time" class="auth-input" ng-model="userManager.signup.password2">
 		<button type="submit" class="auth-submit">Sign Up</button>
 		<div class="text-center">or</div>
 		
@@ -43,7 +43,7 @@
 		<input name="email" type="email" 
 			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />
 		<input name="password" type="password" 
-			placeholder="P@ssw*rd" class="auth-input" ng-model="userManager.login.password">
+			placeholder="Password" class="auth-input" ng-model="userManager.login.password">
 		<button type="submit" class="auth-submit">Log In</button>
 		<a if-href="#forgot">Forgot your password?</a>
 		

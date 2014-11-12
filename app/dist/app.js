@@ -4699,8 +4699,8 @@ $routeProvider.
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       
       when('/profile', {redirectTo:'/profile/worlds'}).
-      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController', resolve: {loggedin: checkLoggedin}}).
-      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController', resolve: {loggedin: checkLoggedin}}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
@@ -6276,7 +6276,7 @@ $scope.go = function(path) {
 }
 	
 $scope.logout = function() {
-      $http.get('/api/user/logout');
+      $http.get('/api/user/logout', {server:true});
       userManager.loginStatus = false;
       //$location.url('/');
 }
@@ -6814,7 +6814,7 @@ angular.module('tidepoolsServices', ['ngResource'])
 app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
-	   			{msg: 'test', id: 'test', href: '#w/A_really_long_title_that_destroys_yourus_formatting'}
+	   			{msg: 'Try Bubbl.li on iOS to get access to iBeacons and more! <strong>Click here</strong>!', id: 'testflightapp', href: 'http://tflig.ht/1GMotOP'}
    			]
    		};
 
@@ -6884,6 +6884,10 @@ var beaconData = {
 			},
 			'28043': {
 				title: 'Workshop Room B'
+			},
+			'14163': { //test only
+				title: 'Main Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Body/'
 			}
 		},
 		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
@@ -7442,7 +7446,8 @@ angular.module('tidepoolsServices')
 var userManager = {
 	userRes: $resource('/api/updateuser'),
 	loginStatus: false,
-	login: {}
+	login: {},
+	signup: {}
 }
 
 
@@ -7455,7 +7460,7 @@ userManager.getUser = function() {
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
-			if (user!=='0') {
+			if (user && user!=0) {
 				$rootScope.user = user; 
 				userManager._user = user;
 				deferred.resolve(user);
@@ -7558,8 +7563,23 @@ userManager.login.login = function() {
 	dialogs.show = false;
 }
 
-userManager.signup = function() {
-	
+userManager.signup.signup = function() {
+    var data = {
+      email: userManager.signup.email,
+      password: userManager.signup.password
+    }
+
+    $http.post('/api/user/signup', data, {server: true})
+    .success(function(user) {
+	  if (user){
+		  $location.path('/profile');
+		}
+	})
+	.error(function(err){
+	if (err) {
+          $scope.alerts.addAlert('danger',err, true);
+	}
+	});
 }
 
 
@@ -11644,7 +11664,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 
 
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
-
+	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
 $scope.state = {};
@@ -11752,7 +11772,7 @@ else if ($routeParams.incoming == 'messages'){
 	$scope.fromMessages = true;
 }
 else {
-	$http.get('/api/user/profile').success(function(user){
+	$http.get('/api/user/profile', {server: true}).success(function(user){
 		console.log(user);
 		$scope.worlds = user;		
 	});
@@ -11810,8 +11830,12 @@ $scope.goBack = function() {
 
 userManager.getUser().then(
 	function(response) {
-	console.log(response);
+	console.log('response', response);
 	$scope.user = response;
+}, function(reason) {
+	console.log('reason', reason);
+	$location.path('/');
+	alert.addAlert('warning', "You're not logged in!", true);
 })
 
 }]);
@@ -12492,8 +12516,6 @@ function setLookup() {
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
   	$scope.lookup[$scope.landmarks[i]._id] = i;
 	}
-	
-	console.log($scope.lookup);
 }
   	
   	
@@ -12507,13 +12529,12 @@ function reorderById (idArray) {
 	}
 	
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		if ($scope.landmarks[i] == 0) {
+		if ($scope.landmarks[i] == 0 || $scope.landmarks[i].category && $scope.landmarks[i].category.hiddenPresent == true) {
 			$scope.landmarks.splice(i, 1);
 			i--;
 		}
 	}
-	
-	console.log($scope.upcoming);
+
 }
 
   	
