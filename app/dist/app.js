@@ -7444,8 +7444,8 @@ return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
     	
 var userManager = {
 	userRes: $resource('/api/updateuser'),
@@ -7575,11 +7575,16 @@ userManager.signup.signup = function() {
 
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
+	    dialogs.show = false;
 		userManager.checkLogin();
+		alertManager.addAlert('success', "You're logged in!", true);
+		
 	})
 	.error(function(err){
 	if (err) {
-          $scope.alerts.addAlert('danger',err, true);
+			dialogs.show = false;
+          alertManager.addAlert('danger',err, true);
+          
 	}
 	});
 }
