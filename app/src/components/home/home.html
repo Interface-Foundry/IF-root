@@ -19,20 +19,8 @@
 </div>
 -->
 
-<div class="marble-page" ng-if="homeBubbles.length>0">
-	<header class="marble-page-header">
-	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-	You're At
-	</header>
-	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-repeat="bubble in homeBubbles track by bubble._id" class="nearby-list-item if-animate">
-			<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
-		</li>
-	</ul>
-</div>	
 
-
-<div class="marble-page" style="padding-bottom: 56px;">
+<div class="marble-page">
 	<header class="marble-page-header">
 	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
 	Recommended
@@ -43,7 +31,7 @@
 	
 	<img src="img/icons/ct_icon.png" class="media-object">
 	<div class="media-body">
-		<h4>Creative Technologies <br>2014</h4>
+		<h4>Creative Technologies 2014</h4>
 	</div> 
 	</a>
 	<a if-href="#w/Creative_Technologies_2014" class="marble-btn bottom-right blue500-bg">Visit</a>
@@ -51,7 +39,7 @@
 </div>
 	
 	
-<div class="marble-page" ng-if="nearbyBubbles.length>0">
+<div class="marble-page">
 	<header class="marble-page-header">
 	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
 	Nearby

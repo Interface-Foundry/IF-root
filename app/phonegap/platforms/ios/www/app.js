@@ -7533,8 +7533,8 @@ return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs) {
     	
 var userManager = {
 	userRes: $resource('https://bubbl.li/api/updateuser'),
@@ -7664,16 +7664,12 @@ userManager.signup.signup = function() {
 
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
-	    dialogs.show = false;
-		userManager.checkLogin();
-		alertManager.addAlert('success', "You're logged in!", true);
-		
+	  if (user){
+		}
 	})
 	.error(function(err){
 	if (err) {
-		dialogs.show = false;
-        alertManager.addAlert('danger',err, true);
-          
+          $scope.alerts.addAlert('danger',err, true);
 	}
 	});
 }
@@ -8736,7 +8732,7 @@ var themeDict = {
 		categoryTitle_color: '#F48FB1'
 	}
 };
-app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
+function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureService) {	
     olark('api.box.hide'); //hides olark tab on this page
     $rootScope.showSwitch = false;
     var aperture = apertureService
@@ -8755,9 +8751,12 @@ app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
     $scope.goBack = function(){
         window.history.back();
     }
-}]);
+}
+TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
 
-app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function( $location, $scope, db, $rootScope,$routeParams, apertureService) {
+
+
+function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
     olark('api.box.hide'); //hides olark tab on this page
 	var aperture = apertureService;
 	aperture.set('off');
@@ -8772,7 +8771,10 @@ app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
     $scope.goBack = function(){
         window.history.back();
     }
-}]);
+}
+InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
+
+
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
     olark('api.box.hide'); //hides olark tab on this page
@@ -11489,7 +11491,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 app.controller('HomeController', ['$scope', 'worldTree', function ($scope, worldTree) {
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	$scope.homeBubbles = data.liveAndInside;
+	$scope.homeBubble = data.liveAndInside[0];
 	$scope.nearbyBubbles = data.live;	
 	});
 }]);
@@ -12061,7 +12063,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 						// $scope.presentCollected = false;
 						// $scope.presentAlreadyCollected = false;
 
-						$http.get('/api/user/loggedin', {server: true}).success(function(user){
+						$http.get('api/user/loggedin', {server: true}).success(function(user){
 							if (user !== '0'){
 								userManager.getUser().then(
 									function(response) {
@@ -12574,7 +12576,7 @@ checkMessages();
 
 checkLogin();
 } ]);
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";

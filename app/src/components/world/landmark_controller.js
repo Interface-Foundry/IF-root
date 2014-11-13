@@ -60,7 +60,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 						// $scope.presentCollected = false;
 						// $scope.presentAlreadyCollected = false;
 
-						$http.get('/api/user/loggedin', {server: true}).success(function(user){
+						$http.get('api/user/loggedin', {server: true}).success(function(user){
 							if (user !== '0'){
 								userManager.getUser().then(
 									function(response) {

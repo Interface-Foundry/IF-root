@@ -1,4 +1,4 @@
-app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
+function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureService) {	
     olark('api.box.hide'); //hides olark tab on this page
     $rootScope.showSwitch = false;
     var aperture = apertureService
@@ -17,9 +17,12 @@ app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
     $scope.goBack = function(){
         window.history.back();
     }
-}]);
+}
+TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
 
-app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function( $location, $scope, db, $rootScope,$routeParams, apertureService) {
+
+
+function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
     olark('api.box.hide'); //hides olark tab on this page
 	var aperture = apertureService;
 	aperture.set('off');
@@ -34,7 +37,10 @@ app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
     $scope.goBack = function(){
         window.history.back();
     }
-}]);
+}
+InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
+
+
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
     olark('api.box.hide'); //hides olark tab on this page
