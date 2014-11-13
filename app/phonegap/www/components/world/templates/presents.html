@@ -45,13 +45,13 @@
 
 <span ng-show="temp.showInitialPresent">
 <p style="float:right; width:130px; clear: both;">Help rebuild our friend BubblBot by collecting bot parts around the NERD center</p>
-<small style="float:right; width:130px; display: block; clear: both;">Explore different rooms in the NERD center to find parts</small>
+<small style="float:right; width:130px; display: block; clear: both;">Explore different iBeacon-enabled rooms in the NERD center to find parts</small>
 </span>
 
-<p ng-show="temp.signupCollect" style="float:right; width:130px; clear: both;">SIGN UP TO COLLECT PARTS</p>
 <span ng-show="temp.finalPresent" style="position:relative; float:right; width:163px;">
 	<p style="float:right;">Thanks for building me {{userName || ''}}!</p>
 </span>
 
 </li>
 </div>
+<a ng-click="dialog.showDialog('authDialog.html')" class="marble-btn bottom-right" ng-style="::{'background': style.titleBG_color}" ng-hide="user">Sign Up</a>

@@ -1,30 +1,39 @@
 <a if-href="#w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
 <div id="shelf" class="landmark-surface surface" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
-	<div class="row">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full')">
-			<div class="media">
-				<div class="pull-left vertical-middle">
+								
+				<img class="world-avatar" if-src="{{::landmark.avatar}}">
+				<div class="world-toolbar">
+					<div class="world-title" fit-font>
+						<span style="color: #FFF;">{{landmark.name}}</span>
+					</div>
+					<div class="world-footer">
+				<!--	{{world.timetext.timestart | date : 'shortTime'}}
+						{{world.timetext.timeend | date: 'shortTime'}} -->
+						<span>{{::landmark.time.start | date: "MMM d h:mm a"}}</span>
+						<span ng-show="landmark.time.end">to {{landmark.time.end | date: "MMM d h:mm a"}}</span>
+					</div>
+				</div>					
+			<!--
+<div class="media">
 							<img class="media-object avatar" ng-click="aperture.toggle('half')" if-src="{{landmark.avatar}}">
-						</div>
-				<div class="media-body vertical-middle">
-					<h2 class="media-heading" style="color: #FFF;">{{landmark.name}}
+				<div class="media-body">
+					<h2 class="media-heading" style="color: #FFF;" fit-font>{{landmark.name}}
 						<h6 style="color: #FFF;" class="pull-right">{{landmark.time.start | date: 'shortTime'}}</h6>
 					</h2>
 				</div>
 			</div>
-		</div>
+-->
 	</div>
 
 <!--PRESENTS-->
-	<div ng-include="temp.showPresentCard==true ? 'components/world/templates/presents.html' : null"></div>
+	<div ng-include="temp.showPresentCard==true ? 'components/world/templates/presents.html' : null" class="marble-page"></div>
 	
-	<div class="row">
 		<div class="col-xs-12 landmark">
 			<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">
 				<div ng-bind-html="landmark.description"></div>
 			</div>
 		</div>
-	</div>
 </div>

@@ -20,7 +20,6 @@
 		<input name="password2" type="password"
 			 placeholder="Reenter Password" class="auth-input" ng-model="userManager.signup.password2">
 		<button type="submit" class="auth-submit">Sign Up</button>
-		<!-- @ifdef WEB -->
 		<div class="text-center">or</div>
 		
 		<div class="btn-group btn-group-justified">
@@ -37,8 +36,6 @@
 		    	<img src="img/icons/meetup-16.png" width="16px" height="16px"> Meetup</button>
 		  </div>
 		</div>
-		<!-- @endif -->
-		
 		
 	</form>
 	<form ng-submit="userManager.login.login()" ng-switch-when="login">
@@ -48,7 +45,6 @@
 			placeholder="Password" class="auth-input" ng-model="userManager.login.password">
 		<button type="submit" class="auth-submit">Log In</button>
 		<a if-href="#forgot">Forgot your password?</a>
-		<!--@ifdef WEB -->
 		<div class="text-center">or</div>
 		
 		<div class="btn-group btn-group-justified">
@@ -65,7 +61,6 @@
 		    	<img src="img/icons/meetup-16.png" width="16px" height="16px"> Meetup</button>
 		  </div>
 		</div>
-		<!-- @endif -->
 	</form>
 </div>
 </div>

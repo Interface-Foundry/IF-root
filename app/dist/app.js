@@ -6814,7 +6814,9 @@ angular.module('tidepoolsServices', ['ngResource'])
 app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
-	   			{msg: 'Try Bubbl.li on iOS to get access to iBeacons and more! <strong>Click here</strong>!', id: 'testflightapp', href: 'http://tflig.ht/1GMotOP'}
+	   			{msg: 'Try Bubbl.li on iOS to get access to iBeacons and more! <strong>Click here</strong>!',
+		   		 id: 'testflightapp', 
+		   		href: 'http://www.testflightapp.com/install/510bcfeae73662b1f4aac538c350bbbb-MTQwNTg1Njk/'}
    			]
    		};
 
@@ -7444,8 +7446,8 @@ return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
     	
 var userManager = {
 	userRes: $resource('/api/updateuser'),
@@ -7575,12 +7577,16 @@ userManager.signup.signup = function() {
 
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
-	  if (user){
-		}
+	    dialogs.show = false;
+		userManager.checkLogin();
+		alertManager.addAlert('success', "You're logged in!", true);
+		
 	})
 	.error(function(err){
 	if (err) {
-          $scope.alerts.addAlert('danger',err, true);
+		dialogs.show = false;
+        alertManager.addAlert('danger',err, true);
+          
 	}
 	});
 }
@@ -8643,7 +8649,7 @@ var themeDict = {
 		categoryTitle_color: '#F48FB1'
 	}
 };
-function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureService) {	
+app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
     olark('api.box.hide'); //hides olark tab on this page
     $rootScope.showSwitch = false;
     var aperture = apertureService
@@ -8662,12 +8668,9 @@ function TweetlistCtrl( $location, $scope, db, $rootScope,$routeParams,apertureS
     $scope.goBack = function(){
         window.history.back();
     }
-}
-TweetlistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
+}]);
 
-
-
-function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, apertureService) {
+app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function( $location, $scope, db, $rootScope,$routeParams, apertureService) {
     olark('api.box.hide'); //hides olark tab on this page
 	var aperture = apertureService;
 	aperture.set('off');
@@ -8682,10 +8685,7 @@ function InstalistCtrl( $location, $scope, db, $rootScope,$routeParams, aperture
     $scope.goBack = function(){
         window.history.back();
     }
-}
-InstalistCtrl.$inject = [ '$location', '$scope', 'db', '$rootScope','$routeParams', 'apertureService'];
-
-
+}]);
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
     olark('api.box.hide'); //hides olark tab on this page
@@ -11402,7 +11402,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 app.controller('HomeController', ['$scope', 'worldTree', function ($scope, worldTree) {
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	$scope.homeBubble = data.liveAndInside[0];
+	$scope.homeBubbles = data.liveAndInside;
 	$scope.nearbyBubbles = data.live;	
 	});
 }]);
@@ -11974,7 +11974,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 						// $scope.presentCollected = false;
 						// $scope.presentAlreadyCollected = false;
 
-						$http.get('api/user/loggedin', {server: true}).success(function(user){
+						$http.get('/api/user/loggedin', {server: true}).success(function(user){
 							if (user !== '0'){
 								userManager.getUser().then(
 									function(response) {
@@ -12487,7 +12487,7 @@ checkMessages();
 
 checkLogin();
 } ]);
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";

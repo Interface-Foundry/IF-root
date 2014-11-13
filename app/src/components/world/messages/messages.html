@@ -37,7 +37,7 @@
 
 
 	<!-- hidden on spooky test -->
-	<a href="/profile/worlds/messages" class="visible-xs hidden-sm hidden-md hidden-lg">
+	<a if-href="#profile/worlds/messages" class="visible-xs hidden-sm hidden-md hidden-lg">
 		<span class="glyphicon glyphicon-pencil subnav-chat-edit" ng-hide="showSpookytest" ></span>
 	</a>
 
@@ -51,8 +51,8 @@
 	<div class="message-room-col hidden-xs">
 		<div class="nickname-info">
 			<h4 class="inner-nickname">You're chatting as</h4>
-			<p><img style="border-radius:50%;" width="50" height="50" if-src="{{::user.avatar}}" src="/img/icons/profile.png">  {{nick}}</p>
-			<a href="/profile/worlds/messages">
+			<p><img style="border-radius:50%;" width="50" height="50" if-src="{{::user.avatar || 'img/icons/profile.png'}}" src="/img/icons/profile.png">  {{nick}}</p>
+			<a if-href="#profile/me/messages">
 				<button type="button" class="lightblue500 btn btn-default btn-xs edit-nickname"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
 			</a>
 
@@ -61,7 +61,7 @@
 	<ul class="message-list">
 		<li class="if-animate message" ng-repeat="msg in messages track by msg._id" ng-class="{ 'message-hidden' : msg.hidden }">
 			<picture class="msg-avatar" ng-if="msg.userID!=userID">
-				<img width="32" height="32" class="small-avatar" if-src="{{::msg.avatar}}" ng-cloak>
+				<img width="32px" height="32px" class="small-avatar" if-src="{{::msg.avatar || 'img/icons/profile.png'}}" ng-cloak>
 			</picture>
 
 			<div class="message-content user-message-content" ng-if="msg.userID==userID" ng-style="{'background-color': style.titleBG_color}">
@@ -104,9 +104,10 @@
 <div class="login-chat" ng-hide="loggedIn" ng-cloak>
       <div class="input-group">
           <h4>Social login to send messages</h4>
+          <!-- @IFDEF WEB -->
           <a if-href="#auth/facebook?redirect=%2Fw%2F{{world.id}}%2Fmessages" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
           <a if-href="#auth/twitter?redirect=%2Fw%2F{{world.id}}%2Fmessages" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
           <a if-href="#auth/meetup?redirect=%2Fw%2F{{world.id}}%2Fmessages" ng-hide="showSpookytest" class="btn btn-meetup"><span class="fa fa-twitter"></span> Meetup</a>
-          Or: <a ng-href="/signup/messages" class="btn btn-default"><span class="fa fa-twitter"></span> Signup</a>
+          Or:<!-- @ENDIF --> <a ng-href="/signup/messages" class="btn btn-default"><span class="fa fa-twitter"></span> Signup</a>
       </div>
 </div>
