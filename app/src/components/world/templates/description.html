@@ -1,7 +1,22 @@
-<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
-	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-	Details
-</header>
-<article class="marble-page-content">
-	{{world.description}}	
-</article>
+<div class="col-xs-12">
+	<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Description</h4>
+</div>
+<div class="col-xs-12 landmark">
+	<div class="card description" ng-style="{'background-color': style.cardBG_color}">
+		<div ng-switch on="descriptionType">
+<!-- 		    <div ng-switch-when="description && description!=0">
+		        <div ng-bind-html="world.description"></div>
+		    </div>
+		   	<div ng-switch-when="summary">
+		        <span>{{world.summary}}</span>
+		    </div> -->
+		    {{world.summary}}
+		    <div ng-show="description && description!=='0'">
+		        <div ng-bind-html="world.description"></div>
+		    </div>
+		   	<div ng-show="summary">
+		        <span>{{world.summary}}</span>
+		    </div>
+
+	</div>
+</div>

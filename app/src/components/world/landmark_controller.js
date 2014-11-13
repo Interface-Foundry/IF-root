@@ -1,5 +1,4 @@
-app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 
-function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http) {
+function LandmarkController( World, Landmark, db, $routeParams, $scope, $location, $log, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http) {
 
 		var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 		zoomControl.style.top = "100px";
@@ -30,8 +29,8 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 		World.get({id: $routeParams.worldURL}, function(data) {
 			console.log(data)
 			if (data.err) {
-				console.log.error(data.err);
-				$location.path('/home');
+				$log.error(data.err);
+				$location.path('/#/');
 			} else {
 				$scope.world = data.world;
 				$scope.style = data.style;
@@ -60,7 +59,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 						// $scope.presentCollected = false;
 						// $scope.presentAlreadyCollected = false;
 
-						$http.get('api/user/loggedin', {server: true}).success(function(user){
+						$http.get('/api/user/loggedin').success(function(user){
 							if (user !== '0'){
 								userManager.getUser().then(
 									function(response) {
@@ -248,7 +247,7 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 		
 		function goToMark() {
 			
-			map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
+			map.setCenter($scope.landmark.loc.coordinates, 20); 
 		  	var markers = map.markers;
 		  	angular.forEach(markers, function(marker) {
 		  		console.log(marker);
@@ -273,4 +272,4 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 		 };
 		 
 		map.refresh();
-}]);
+}

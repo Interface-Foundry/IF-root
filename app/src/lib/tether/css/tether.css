@@ -6,6 +6,5 @@
 .tether-element {
   position: absolute;
   display: none; }
-
-.tether-element.tether-open {
+  .tether-element.tether-open {
     display: block; }

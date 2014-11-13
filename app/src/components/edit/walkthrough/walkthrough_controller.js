@@ -1,4 +1,4 @@
-app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
+function WalkthroughController($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -313,9 +313,9 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 	}
 });
 
-}]);
+}
 
-app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'leafletData', function($scope, $rootScope, $timeout, leafletData) {
+function WalkLocationController ($scope, $rootScope, $timeout, leafletData) {
 	angular.extend($scope, {tiles: tilesDict['arabesque']});
 	angular.extend($scope, {center: {lat: 42,
 									lng: -83,
@@ -398,4 +398,4 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
    		
 	}
 
-}]);
+} 

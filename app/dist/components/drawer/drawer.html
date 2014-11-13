@@ -1,27 +1,5 @@
-<header class="drawer-header">
-	<label class="drawer-label">Navigation</label>
-	<a if-href="#home" class="drawer-link">
-		<span class="drawer-link-icon glyphicon glyphicon-home"></span> Home
-	</a>
-	<a if-href="#profile" class="drawer-link">
-		<span class="drawer-link-icon glyphicon glyphicon-user"></span> Profile
-	</a>
-	<a if-href="#profile" class="drawer-link">
-		<span class="drawer-link-icon glyphicon glyphicon-plus"></span> New Bubble
-	</a>
-	<label class="nearby-list-label" ng-click="getNearby($event)">
-		Nearby
-		<span class="nearby-list-icon glyphicon glyphicon-refresh" ng-class="{'loading': nearbyLoading}"></span>
-	</label>
-</header>
-<ul class="nearby-list">
-	<li ng-repeat="bubble in nearbyBubbles track by bubble._id" class="nearby-list-item if-animate">
-		<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
-	</li>
-</ul>
-<footer class="drawer-footer center-text">Powered by Interface Foundry</footer>
-
-<!--
+<div class="container-fluid">
+	
 	<div class="row">
 		<div class="col-xs-12 col-sm-10 col-sm-offset-1">
 			<h3><a ng-href="/"><span class="glyphicon glyphicon-refresh"></span> Find Bubbles</a></h3>
@@ -44,8 +22,7 @@
 					</span>
 				</div>
 				<!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-				<!--
-<div class="hidden">
+				<div class="hidden">
 				<input type="text" name="b_ac66b7064177bb1b23c6cc522_aea15b72e4" tabindex="-1" value="">
 				</div>
 		    </form>
@@ -54,5 +31,5 @@
 			<a href="http://interfacefoundry.com"><img class="img-responsive" src="img/IF/IF_horizontal.png"></a>
 		</div>
 	</div>
+<div class="drawer-bar"></div>
 </div>
--->

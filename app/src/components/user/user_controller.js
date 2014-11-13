@@ -1,5 +1,5 @@
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
-	
+function UserController($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
+
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
 $scope.state = {};
@@ -107,7 +107,7 @@ else if ($routeParams.incoming == 'messages'){
 	$scope.fromMessages = true;
 }
 else {
-	$http.get('/api/user/profile', {server: true}).success(function(user){
+	$http.get('/api/user/profile').success(function(user){
 		console.log(user);
 		$scope.worlds = user;		
 	});
@@ -165,12 +165,8 @@ $scope.goBack = function() {
 
 userManager.getUser().then(
 	function(response) {
-	console.log('response', response);
+	console.log(response);
 	$scope.user = response;
-}, function(reason) {
-	console.log('reason', reason);
-	$location.path('/');
-	alert.addAlert('warning', "You're not logged in!", true);
 })
 
-}]);
+}

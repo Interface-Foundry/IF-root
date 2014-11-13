@@ -64,23 +64,7 @@ mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 			angular.extend(mapManager.center, {lat: latlng[1], lng: latlng[0], zoom: z});
 			mapManager.refresh();
 	}
-}
-
-mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
-	console.log('setCenterWithAperture');
-	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-		targetPt, targetLatLng;
-		
-	leafletData.getMap().then(function(map) {
-			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
-			console.log(targetPt);
-			targetLatLng = map.unproject(targetPt, z);
-			console.log(targetLatLng);
-			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
-			console.log(mapManager.center);
-			mapManager.refresh();
-	});
+	
 }
 
 mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {

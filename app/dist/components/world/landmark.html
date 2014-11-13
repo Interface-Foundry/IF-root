@@ -1,17 +1,18 @@
-<a if-href="#w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
-<div id="shelf" class="landmark-surface surface" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+<a href="#/w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
+<div id="shelf" class="container-fluid" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+
 	<div class="row">
+
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full')">
 			<div class="media">
 				<div class="pull-left vertical-middle">
-							<img class="media-object avatar" ng-click="aperture.toggle('half')" if-src="{{landmark.avatar}}">
+							<img class="media-object avatar" ng-click="aperture.toggle('half')" ng-src="{{landmark.avatar}}">
 						</div>
 				<div class="media-body vertical-middle">
-					<h2 class="media-heading" style="color: #FFF;">{{landmark.name}}
-						<h6 style="color: #FFF;" class="pull-right">{{landmark.time.start | date: 'shortTime'}}</h6>
-					</h2>
+					<h2 class="media-heading" ng-style="{color: style.worldTitle_color}">{{landmark.name}} <h6 ng-style="{color: style.worldTitle_color}" class="pull-right">{{landmark.timetext.timestart}}</h6></h2>
+					<p ng-cloak ng-style="{color: style.worldTitle_color}">{{landmark.summary}}</p>
 				</div>
 			</div>
 		</div>

@@ -1,7 +1,7 @@
 /**********************************************************************
  * Login controller
  **********************************************************************/
-app.controller('LoginCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
+function LoginCtrl($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -20,7 +20,7 @@ app.controller('LoginCtrl', ['$scope', '$rootScope', '$http', '$location', 'aper
 
 
   //fire socialLogin
-$scope.socialLogin = function(type){
+  $scope.socialLogin = function(type){
 
     console.log(type);
 
@@ -58,10 +58,9 @@ $scope.socialLogin = function(type){
       });
   };
 
-}]);
+}
 
-app.controller('SignupCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', 
-function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
+function SignupCtrl($scope, $rootScope, $http, $location, apertureService, alertManager, $routeParams) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -108,9 +107,11 @@ function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
   $scope.goBack = function() {
     window.history.back();
   }
-}]);
+}
 
-app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $http, $location, apertureService, alertManager) {
+
+
+function ForgotCtrl($scope, $http, $location, apertureService, alertManager) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -144,10 +145,11 @@ app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService',
       });
   };
 
-}]);
+}
 
 
-app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
+
+function ResetCtrl($scope, $http, $location, apertureService, alertManager, $routeParams) {
 
   olark('api.box.show'); //shows olark tab on this page
 
@@ -185,14 +187,14 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
       });
   };
 
-}]);
+}
 
 
-app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootScope) {
+function resolveAuth($scope, $rootScope) {
 
   angular.extend($rootScope, {loading: true});
 
   location.reload(true);
 
-}]); 
+}
 

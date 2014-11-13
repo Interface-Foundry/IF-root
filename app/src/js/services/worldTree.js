@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
-	function($cacheFactory, $q, World, db, geoService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db',
+	function($cacheFactory, $q, World, db) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -59,25 +59,6 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 	
 	return deferred.promise;
 }
-
-worldTree.getNearby = function() {
-	var deferred = $q.defer();
-	
-	geoService.getLocation().then(function(location) {
-		db.worlds.query({localTime: new Date(), 
-			userCoordinate: [location.lng, location.lat]},
-			function(data) {
-				deferred.resolve(data[0]);
-				//live
-				//liveAndInside
-			});
-	}, function(reason) {
-		deferred.reject(reason);
-	})
-	
-	return deferred.promise;
-}
-
 
 return worldTree;
 }

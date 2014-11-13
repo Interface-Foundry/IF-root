@@ -189,27 +189,6 @@ h6 {
 	color: #FFF;
 }
 
-.explore-media {
-	position: relative;
-	width: 100%;
-	padding: 0px 8px 56px 8px;
-	margin-bottom: 20px;
-	border-bottom: 1px solid #EEE;
-}
-
-.explore-media-body {
-	padding: 0px 8px;
-	overflow: hidden;
-	zoom: 1;
-}
-
-.explore-media-heading {
-	color: #777;
-	margin: 0px;
-	font-size: 24px;
-	line-height: 1;
-}
-
 ul.agenda {
 width: 260px;
 }
@@ -227,14 +206,4 @@ background: -webkit-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -o-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: -ms-linear-gradient(left,  #abd362 0%,#43c2e9 100%);
 background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
-}
-
-.hashtag-header {
-	width: 100%;
-	background-color: #eee;
-	height: 40px;
-	padding: 0px 8px;
-	line-height: 40px;
-	font-size: 16px;
-	color: #777;
 }

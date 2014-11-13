@@ -9,14 +9,13 @@ angular.module('tidepoolsServices', ['ngResource'])
 	.factory('Landmark', ['$resource', '$http',
         function($resource, $http) {
 			var actions = {
-                'count': {method:'PUT', params:{_id: 'count'}, server: true},                           
-                'distinct': {method:'PUT', params:{_id: 'distinct'}, server: true},      
-                'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
-                'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
-                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
-                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false, server: true},
-                'get': {method: 'GET', server: true}
+                'count': {method:'PUT', params:{_id: 'count'}},                           
+                'distinct': {method:'PUT', params:{_id: 'distinct'}},      
+                'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
+                'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
+                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
+                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:false}
             }
             res = $resource('/api/landmarks/:_id:id', {}, actions);
             return res;
@@ -26,14 +25,13 @@ angular.module('tidepoolsServices', ['ngResource'])
     .factory('World', ['$resource', '$http', 'leafletData', 
         function($resource, $http, leafletData) {
             var actions = {
-                'count': {method:'PUT', params:{_id: 'count'}, server: true},                           
-                'distinct': {method:'PUT', params:{_id: 'distinct'}, server: true},      
-                'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
-                'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
-                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
-                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true, server: true},
-                'get': {method: 'GET', server: true}
+                'count': {method:'PUT', params:{_id: 'count'}},                           
+                'distinct': {method:'PUT', params:{_id: 'distinct'}},      
+                'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
+                'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
+                'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
+                'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
+                'del': {method:'DELETE', params:{_id: 'del'}, isArray:true}
             }
             res = $resource('/api/worlds/:_id:id', {}, actions);
             return res;
@@ -42,25 +40,24 @@ angular.module('tidepoolsServices', ['ngResource'])
     .factory('db', ['$resource', '$http',    
         function($resource, $http) {
     		var actions = {
-                    'count': {method:'PUT', params:{_id: 'count', server: true}},                           
-                    'distinct': {method:'PUT', params:{_id: 'distinct', server: true}},      
-                    'find': {method:'PUT', params:{_id: 'find'}, isArray:true, server: true},              
-                    'group': {method:'PUT', params:{_id: 'group'}, isArray:true, server: true},            
-                    'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true, server: true},  
-                    'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true, server: true},
-                    'create':  {method:'POST', params:{_id: 'create'}, isArray:true, server: true},
-                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true, server: true},
-                    'query':  {method:'GET', isArray:true, server: true},
+                    'count': {method:'PUT', params:{_id: 'count'}},                           
+                    'distinct': {method:'PUT', params:{_id: 'distinct'}},      
+                    'find': {method:'PUT', params:{_id: 'find'}, isArray:true},              
+                    'group': {method:'PUT', params:{_id: 'group'}, isArray:true},            
+                    'mapReduce': {method:'PUT', params:{_id: 'mapReduce'}, isArray:true},  
+                    'aggregate': {method:'PUT', params:{_id: 'aggregate'}, isArray:true},
+                    'create':  {method:'POST', params:{_id: 'create'}, isArray:true},
+                    'locsearch':  {method:'GET', params:{_id: 'locsearch'}, isArray:true}
                 }
             var db = {};
             db.worlds = $resource('/api/worlds/:_id', {}, actions);
-            db.landmarks = $resource('/api/landmarks/:_id:id', {}, actions);
-            db.styles = $resource('/api/styles/:_id', {}, actions);
-            db.projects = $resource('/api/projects/:_id', {}, actions);
-            db.tweets = $resource('/api/tweets/:_id', {}, actions);
-            db.instagrams = $resource('/api/instagrams/:_id', {}, actions);
-            db.messages = $resource('/api/worldchat/:_id', {}, actions);
-            db.visit = $resource('/api/visit/:_id', {}, actions);
+            db.landmarks = $resource('api/landmarks/:_id:id', {}, actions);
+            db.styles = $resource('api/styles/:_id', {}, actions);
+            db.projects = $resource('api/projects/:_id', {}, actions);
+            db.tweets = $resource('api/tweets/:_id', {}, actions);
+            db.instagrams = $resource('api/instagrams/:_id', {}, actions);
+            db.messages = $resource('api/worldchat/:_id', {}, actions);
+            db.visit = $resource('api/visit/:_id', {}, actions);
             return db;
         }
     ])
@@ -157,7 +154,43 @@ angular.module('tidepoolsServices', ['ngResource'])
     // });
 
 	//handling alerts
+   .factory('alertManager', ['$timeout', function ($timeout) {
+   		var alerts = {
+   			'list':[]
+   		};
 
+   		alerts.addAlert = function(alertType, alertMsg, timeout) {
+   			alerts.list = []; //clear alerts automatically for now to show onerror
+   			var alertClass;
+   			switch (alertType) {
+	   			case 'success':
+	   				alertClass = 'alert-success';
+	   				break;
+	   			case 'info':
+	   				alertClass = 'alert-info';
+	   				break;
+	   			case 'warning':
+	   				alertClass = 'alert-warning';
+	   				break;
+	   			case 'danger': 
+	   				alertClass = 'alert-danger';
+	   				break;
+   			}
+   			var len = alerts.list.push({class: alertClass, msg: alertMsg});
+   			if (timeout) {
+   			$timeout(function () {
+	   			alerts.list.splice(len-1, 1);
+   			}, 1500);
+   			
+   			}
+   		}
+
+   		alerts.closeAlert = function(index) {
+   			alerts.list.splice(index, 1);
+   		}
+
+   		return alerts;
+   }])
 
    //socket connection
 	.factory('socket', function ($rootScope) {

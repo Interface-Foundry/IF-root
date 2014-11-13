@@ -1,11 +1,11 @@
 module.exports = function(grunt) {
 	return {
 		"default": [
+			'preprocess',
 			'less',
 			'concat',
-			'copy',
-			'preprocess',
-			'uglify'
+			'uglify',
+			'copy'
 		]
 	}
 }

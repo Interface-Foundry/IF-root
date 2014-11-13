@@ -1,4 +1,4 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
+function EditController($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
 console.log('--EditController--');
 
 var aperture = apertureService,
@@ -114,8 +114,7 @@ $scope.selectMapTheme = function(name) {
 		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
 		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
 		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
-		mimis: {cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55'}
+		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
 	};
 	if (typeof name === 'string') {
 		$scope.mapThemeSelect = name;
@@ -506,4 +505,4 @@ World.get({id: $routeParams.worldURL}, function(data) {
 })
 
 //end editcontroller
-}]);
+}
