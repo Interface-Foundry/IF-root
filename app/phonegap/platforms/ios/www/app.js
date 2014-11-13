@@ -7533,8 +7533,8 @@ return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs) {
     	
 var userManager = {
 	userRes: $resource('https://bubbl.li/api/updateuser'),
@@ -7664,16 +7664,11 @@ userManager.signup.signup = function() {
 
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
-	    dialogs.show = false;
 		userManager.checkLogin();
-		alertManager.addAlert('success', "You're logged in!", true);
-		
 	})
 	.error(function(err){
 	if (err) {
-		dialogs.show = false;
-        alertManager.addAlert('danger',err, true);
-          
+          $scope.alerts.addAlert('danger',err, true);
 	}
 	});
 }
@@ -11489,7 +11484,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 app.controller('HomeController', ['$scope', 'worldTree', function ($scope, worldTree) {
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	$scope.homeBubbles = data.liveAndInside;
+	$scope.homeBubble = data.liveAndInside[0];
 	$scope.nearbyBubbles = data.live;	
 	});
 }]);
