@@ -6814,7 +6814,9 @@ angular.module('tidepoolsServices', ['ngResource'])
 app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
-	   			{msg: 'Try Bubbl.li on iOS to get access to iBeacons and more! <strong>Click here</strong>!', id: 'testflightapp', href: 'http://tflig.ht/1GMotOP'}
+	   			{msg: 'Try Bubbl.li on iOS to get access to iBeacons and more! <strong>Click here</strong>!',
+		   		 id: 'testflightapp', 
+		   		href: 'http://www.testflightapp.com/install/510bcfeae73662b1f4aac538c350bbbb-MTQwNTg1Njk/'}
    			]
    		};
 
@@ -7444,8 +7446,8 @@ return styleManager;
 		}
 	]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
     	
 var userManager = {
 	userRes: $resource('/api/updateuser'),
@@ -7575,11 +7577,16 @@ userManager.signup.signup = function() {
 
     $http.post('/api/user/signup', data, {server: true})
     .success(function(user) {
+	    dialogs.show = false;
 		userManager.checkLogin();
+		alertManager.addAlert('success', "You're logged in!", true);
+		
 	})
 	.error(function(err){
 	if (err) {
-          $scope.alerts.addAlert('danger',err, true);
+		dialogs.show = false;
+        alertManager.addAlert('danger',err, true);
+          
 	}
 	});
 }
@@ -11395,7 +11402,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 app.controller('HomeController', ['$scope', 'worldTree', function ($scope, worldTree) {
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	$scope.homeBubble = data.liveAndInside[0];
+	$scope.homeBubbles = data.liveAndInside;
 	$scope.nearbyBubbles = data.live;	
 	});
 }]);
