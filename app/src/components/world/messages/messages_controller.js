@@ -86,7 +86,7 @@ $scope.sendMsg = function (e) {
 		        nick: $scope.nick,
 		        msg: $scope.msg.text,
 		        avatar: $scope.user.avatar || 'img/icons/profile.png',
-		        userID: $scope.userID
+		        userID: $scope.userID,
 		    };	
 		}
 
@@ -100,6 +100,7 @@ function sendMsgToServer(msg) {
 db.messages.create(msg, function(res) {
 	sinceID = res[0]._id;
 	
+	msg._id = res[0]._id;
 	$scope.messages.push(msg);
 	$scope.localMessages.push(res[0]._id);
 	scrollMessages();
@@ -134,7 +135,8 @@ function welcomeMessage(){
 	for (i = 0; i < shadowNum; i++) { 
     	var hiddenChat = {
 	    	hidden: true,
-	    	nick: 'shadowBot'+i
+	    	nick: 'shadowBot'+i,
+	    	_id: 'hiddenChat'+i
 		};
 		$scope.messages.push(hiddenChat);
 	}
@@ -176,7 +178,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log($scope.world);
 });
 
-$http.get('/api/user/loggedin').success(function(user){
+$http.get('/api/user/loggedin', {server: true}).success(function(user){
 
 // Authenticated
 if (user !== '0'){
@@ -213,7 +215,6 @@ $scope.user = user;
 console.log(user._id);
 checkMessages();
 });
-
 
 	//////
 	//HALLOWEEN THEME TEST
@@ -252,7 +253,7 @@ checkMessages();
     function checkLogin(){
 
 	      // Make an AJAX call to check if the user is logged in
-	      $http.get('/api/user/loggedin').success(function(user){
+	      $http.get('/api/user/loggedin', {server: true}).success(function(user){
 
 	        // Authenticated
 	        if (user !== '0'){
@@ -295,8 +296,4 @@ checkMessages();
     }
 
 checkLogin();
-
-
-
-
 } ]);

@@ -1,56 +1,62 @@
-function WorldController( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, socket, $sce, worldTree, $q, $http) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http) {
 
-	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-	zoomControl.style.top = "60px";
-	zoomControl.style.left = "1%";
-	zoomControl.style.display = 'none';
-    var map = mapManager;
-    	map.resetMap();
-  	var style = styleManager;
-  	$scope.worldURL = $routeParams.worldURL;  
-    $scope.aperture = apertureService;	
-    $scope.aperture.set('third');
+var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+zoomControl.style.top = "60px";
+zoomControl.style.left = "1%";
+zoomControl.style.display = 'none';
+var map = mapManager;
+	map.resetMap();
+	var style = styleManager;
+	$scope.worldURL = $routeParams.worldURL;  
+$scope.aperture = apertureService;	
+$scope.aperture.set('third');
 
-    $scope.collectedPresents = [];
-	
-    angular.extend($rootScope, {loading: false});
-	
-	$scope.selectedIndex = 0;
-	
-	var landmarksLoaded;
+$scope.collectedPresents = [];
 
-	if (olark){
-		olark('api.box.hide'); //hides olark tab on this page
+angular.extend($rootScope, {loading: false});
+	
+$scope.selectedIndex = 0;
+	
+var landmarksLoaded;
+
+if (olark){
+	olark('api.box.hide'); //hides olark tab on this page
+}
+
+	//currently only for upcoming...
+function setLookup() {
+	$scope.lookup = {}; 
+	
+	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+  	$scope.lookup[$scope.landmarks[i]._id] = i;
+	}
+}
+  	
+  	
+function reorderById (idArray) {
+	console.log('reorderById');
+	var tempLandmarks = angular.copy($scope.landmarks);
+	$scope.upcoming = [];
+	
+	for (var i = 0, len = idArray.length; i<len; i++) {
+	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, 0)[0];
+	}
+	
+	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+		if ($scope.landmarks[i] == 0 || $scope.landmarks[i].category && $scope.landmarks[i].category.hiddenPresent == true) {
+			$scope.landmarks.splice(i, 1);
+			i--;
+		}
 	}
 
-  	//currently only for upcoming...
-  	function setLookup() {
-	  	$scope.lookup = {}; 
-	  	
-	  	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		  	$scope.lookup[$scope.landmarks[i]._id] = i;
-	  	}
-	  	console.log($scope.lookup);
-  	}
+}
+
   	
-  	
-  	function reorderById (idArray) {
-  		console.log('reorderById');
-	  	
-	  	$scope.upcoming = [];
-	  	for (var i = 0, len = idArray.length; i<len; i++) {
-		  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1)[0];
-	  	}
-	  	
-	  	console.log($scope.upcoming);
-  	}
-  	
-  	
-  	$scope.zoomOn = function() {
+$scope.zoomOn = function() {
 	  	zoomControl.style.display = "block";
-  	}
+}
   	
-  	$scope.loadWorld = function(data) {
+$scope.loadWorld = function(data) {
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
@@ -155,7 +161,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 				presents: true
 			}
 
-			$http.get('/api/user/loggedin').success(function(user){
+			$http.get('/api/user/loggedin', {server: true}).success(function(user){
 				if (user !== '0'){
 					userManager.getUser().then(
 						function(response) {
@@ -229,7 +235,7 @@ function WorldController( World, db, $routeParams, $scope, $location, leafletDat
 			
 			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:upcoming');
-				console.log(data);
+				console.log('upcoming data', data);
 				//console.log(angular.fromJson(data[0]));
 				reorderById(data);
 			}); 
@@ -327,13 +333,4 @@ World.get({id: $routeParams.worldURL}, function(data) {
 		console.log(error);
 		//handle this better
 	});
-}
-
-
-function WorldRepeatController($scope) {
-	
-}
-
-function UpcomingController($scope) {
-	
-}
+}]);

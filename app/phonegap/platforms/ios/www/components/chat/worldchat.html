@@ -1,0 +1,37 @@
+<a ng-href="#/w/{{world.id}}" class="btn btn-default backButton btn-xs">Back</a>
+
+<div id="shelf" class="container-fluid navfix" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+
+          <form class="row row-chat" ng-submit="sendMessage()" ng-show="loggedIn">
+              <div class="input-group">
+                  <input type="text" class="form-control" ng-model="messageText" placeholder="Type your message" />
+
+                  <span class="input-group-btn">
+                      <button type="submit" class="btn btn-primary">Send</button>
+                  </span>
+              </div>
+          </form>
+
+
+          <form class="row row-chat login-chat" ng-hide="loggedIn">
+              <div class="input-group">
+                  <h4>Login to send messages</h4>
+                  <a href="/auth/facebook?redirect=%2Fchat%2F{{currentChatID}}" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+                  <a href="/auth/twitter?redirect=%2Fchat%2F{{currentChatID}}" class="btn btn-info"><span class="fa fa-twitter"></span> Twitter</a>
+                  <a href="/auth/meetup?redirect=%2Fchat%2F{{currentChatID}}" class="btn btn-meetup"><span class="fa fa-twitter"></span> Meetup</a>
+                  Or: <a href="/signup" class="btn btn-default"><span class="fa fa-twitter"></span> Signup</a>
+              </div>
+          </form>
+
+<div class="row">
+	<div class="col-xs-10 col-xs-offset-1">
+    
+          <div id="viewport-content">
+              <div class="bubble-container" ng-repeat="m in messages">
+                  <div class="chat-avatar avatar-{{m.side}}"><img src="{{m.avatar}}" /></div>
+                  <div class="bubble bubble-{{m.side}}"><b>{{m.nickname}}:</b> {{m.msg}}</div>
+              </div>
+          </div>
+	</div>
+</div>
+</div>

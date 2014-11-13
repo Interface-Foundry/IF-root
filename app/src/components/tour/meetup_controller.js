@@ -1,4 +1,4 @@
-function MeetupController($scope, $window, $location, styleManager, $rootScope) {
+app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
 
 	// olark('api.box.show'); //shows olark tab on this page
 
@@ -22,4 +22,4 @@ function MeetupController($scope, $window, $location, styleManager, $rootScope) 
 	// 	$location.path('/auth/meetup');
 	// }
 
-}
+}]);

@@ -1,39 +1,34 @@
 <div class="aperture-pop" ng-click="aperture.set('full'); zoomOn()" ng-show="aperture.state=='aperture-third'"></div>
-<div id="shelf" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+<div id="shelf" ng-class="[aperture.state]">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
-							ng-style="{'background-color': style.titleBG_color}" 
+							ng-style="::{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full'); zoomOn()">
-				<img class="world-avatar" ng-src="{{world.avatar}}">
+				<img class="world-avatar" if-src="{{::world.avatar}}">
 				<div class="world-toolbar">
 					<div class="world-title" fit-font>
-						<span ng-style="{color: style.worldTitle_color||'#FFF'}">{{world.name}}</span>
+						<span style="color: #FFF;">{{world.name}}</span>
 					</div>
 					<div class="world-footer">
-				<!-- 		{{world.timetext.timestart | date : 'shortTime'}}
+				<!--	{{world.timetext.timestart | date : 'shortTime'}}
 						{{world.timetext.timeend | date: 'shortTime'}} -->
-						<span>{{world.time.start | date: "MMM d h:mm a"}}</span>
+						<span>{{::world.time.start | date: "MMM d h:mm a"}}</span>
 						<span ng-show="world.time.end">to {{world.time.end | date: "MMM d h:mm a"}}</span>
 					</div>
 				</div>
 		</div>
+		
+<div class="surface" ng-style="{'background-color': style.bodyBG_color}">
+	<!--DESCRIPTION-->
+	<div ng-include="description ? 'components/world/templates/description.html' : null" class="marble-page"></div>
 	
-<div class="container-fluid">
-<div class="row">
+	<!--LANDMARKS-->
+	<div ng-include="landmarks ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
 	
 	<!--MESSAGES-->
-	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null"></div>
-
-	<!--DESCRIPTION-->
-	<div ng-include="description ? 'components/world/templates/description.html' : null"></div>
+	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
 
 	<!--PRESENTS-->
-	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null"></div>
-	
-	<!--category-->
-	<div ng-include="category ? 'components/world/templates/category.html' : null"></div>	
-
-	<!--now--> <!--upcoming-->
-	<div ng-include="upcoming ? 'components/world/templates/upcoming.html' : null"></div>
+	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null" class="marble-page"></div>
 
 	<!---yelp-->
 	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null"></div>
@@ -41,15 +36,20 @@
 	<!---meetup-->
 	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null"></div>
 	
+	<!--TWITTER-->
+	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page"></div>
+	
+	<!--INSTAGRAM-->
+	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null" class="marble-page"></div>
 
 	<!--explore-->
-	<ul ng-style="{'background-color': style.bodyBG_color}"
+	<!--
+<ul ng-style="{'background-color': style.bodyBG_color}"
 		class="clearfix" ng-show="landmarks">
 		<div class="col-xs-12 widget_margin">
 			<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
 		</div>
 		<li ng-repeat="landmark in landmarks" 
-			ng-controller="WorldRepeatController"
 			class="col-sm-6 col-xs-12 landmark">
 			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
 				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
@@ -65,12 +65,9 @@
 			</a>
 		</li>
 	</ul>
+-->
 	
-	<!--TWITTER-->
-	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null"></div>
 	
-	<!--INSTAGRAM-->
-	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null"></div>
 
 	<!--CLAIM WORLD-->
 	<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
@@ -80,9 +77,10 @@
 	</div>
 
 	<div class="col-xs-12"><div style="height:200px;"></div></div>
+
+<div ng-show="showEdit">
+	<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest and Schedules</a>
+<a class="btn btn-default" if-href="#edit/w/{{worldURL}}">Edit your Bubble</a>
 </div>
-<div ng-show="showEdit"><a class="btn btn-default" ng-href="#/edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest and Schedules</a>
-<a class="btn btn-default" ng-href="#/edit/w/{{worldURL}}">Edit your Bubble</a></div>
 <br><br>
-</div>
 </div>
