@@ -3324,6 +3324,7 @@ a.bubble-inspector-btn:hover {
   background: none;
   font-size: 18px;
   font-weight: 500;
+  cursor: pointer;
 }
 .bottom-right {
   position: absolute;

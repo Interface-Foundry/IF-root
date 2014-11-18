@@ -7554,20 +7554,24 @@ userManager.login.login = function() {
 	$http.post('/api/user/login', data, {server: true}).
 	success(function(user){
 		if (user) {
+			console.log('success', user);
 			userManager.checkLogin();
 		}
+		userManager.login.error = false;
+		dialogs.show = false;
 	}).
 	error(function(err){
-		if (err){
-			$scope.alerts.addAlert('danger',err);
+		if (err) {
+			console.log('failure', err);
 		}
+		userManager.login.error = true;
 	});
 	
-	dialogs.show = false;
+	
 }
 
 userManager.signup.signup = function() {
-    var data = {
+	var data = {
       email: userManager.signup.email,
       password: userManager.signup.password
     }
@@ -7577,13 +7581,12 @@ userManager.signup.signup = function() {
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		
+		userManager.signup.error = undefined;	
 	})
 	.error(function(err){
 	if (err) {
-		dialogs.show = false;
-        alertManager.addAlert('danger',err, true);
-          
+		userManager.signup.error = "Error signing up!";
+        alertManager.addAlert('danger',err, true);   
 	}
 	});
 }

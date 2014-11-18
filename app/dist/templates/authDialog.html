@@ -10,16 +10,30 @@
 </nav>
 <div class="surface">
 <div ng-switch="state">
-	<form ng-submit="userManager.signup.signup()" ng-switch-when="signup">
+	<form name="signupForm" ng-submit="userManager.signup.signup()" ng-switch-when="signup">
 		<h3 style="margin: 0px 0px 20px 0px;">Sign Up For Bubbl.li!</h3>
 		<hr class="nomargin">
 		<input name="email" type="email" 
-			placeholder="Email" class="auth-input" ng-model="userManager.signup.email" required />
+			placeholder="Email" class="auth-input" ng-model="userManager.signup.email" required>
+		<div ng-messages="signupForm.email.$error" ng-if="signupForm.email.$dirty">
+			<div ng-message="required">Email is required.</div>
+			<div ng-message="email">This needs to be an email.</div>	
+		</div>
 		<input name="password" type="password"
-			 placeholder="Password" class="auth-input" ng-model="userManager.signup.password">
+			 placeholder="Password" class="auth-input" ng-model="userManager.signup.password" required>
+		<div ng-messages="signupForm.password.$error" ng-if="signupForm.password.$dirty">
+			<div ng-message="required">Password is required.</div>
+		</div>		 
 		<input name="password2" type="password"
-			 placeholder="Reenter Password" class="auth-input" ng-model="userManager.signup.password2">
+			 placeholder="Reenter Password" class="auth-input" ng-model="userManager.signup.password2" required>
+		<div ng-messages="signupForm.password.$error" ng-if="signupForm.password.$dirty">
+			<div ng-message="required">Password is required.</div>
+		</div>
 		<button type="submit" class="auth-submit">Sign Up</button>
+		<div ng-if="userManager.signup.error">
+			{{userManager.signup.error}}
+		</div>
+		
 		<div class="text-center">or</div>
 		
 		<div class="btn-group btn-group-justified">
@@ -38,12 +52,24 @@
 		</div>
 		
 	</form>
-	<form ng-submit="userManager.login.login()" ng-switch-when="login">
+	<form ng-submit="userManager.login.login()" name="loginForm" ng-switch-when="login">
 		<input name="email" type="email" 
 			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />
+		<div ng-messages="loginForm.email.$error" ng-if="loginForm.email.$dirty">
+			<div ng-message="required">Email is required.</div>
+			<div ng-message="email">This needs to be an email.</div>	
+		</div>
+		
 		<input name="password" type="password" 
-			placeholder="Password" class="auth-input" ng-model="userManager.login.password">
+			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
+		<div ng-messages="loginForm.password.$error" ng-if="loginForm.password.$dirty">
+			<div ng-message="required">Password is required.</div>
+		</div>	
+			
 		<button type="submit" class="auth-submit">Log In</button>
+		<div ng-if="userManager.login.error">
+			Login failed!
+		</div>
 		<a if-href="#forgot">Forgot your password?</a>
 		<div class="text-center">or</div>
 		

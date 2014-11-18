@@ -22,7 +22,7 @@
 	<div ng-include="description ? 'components/world/templates/description.html' : null" class="marble-page"></div>
 	
 	<!--LANDMARKS-->
-	<div ng-include="landmarks ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
+	<div ng-include="landmarks.length>0 ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
 	
 	<!--MESSAGES-->
 	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
