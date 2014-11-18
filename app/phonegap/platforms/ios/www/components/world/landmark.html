@@ -1,5 +1,6 @@
 <a if-href="#w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
-<div id="shelf" class="landmark-surface surface" ng-style="{'background-color': style.bodyBG_color}" ng-class="[aperture.state]">
+<div id="shelf" ng-class="[aperture.state]">
+	<div class="landmark-surface surface" ng-style="{'background-color': style.bodyBG_color}">
 		<div id='top-shelf' ng-class="[aperture.navfix, aperture.state]" 
 							ng-style="{'background-color': style.titleBG_color}" 
 							ng-click="aperture.toggle('full')">
@@ -29,11 +30,13 @@
 	</div>
 
 <!--PRESENTS-->
-	<div ng-include="temp.showPresentCard==true ? 'components/world/templates/presents.html' : null" class="marble-page"></div>
+	<div ng-include="temp.showPresentCard==true ? 'components/world/templates/presents.html' : null" class="marble-page">
+	</div>
 	
-		<div class="col-xs-12 landmark">
-			<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">
-				<div ng-bind-html="landmark.description"></div>
-			</div>
+	<div class="col-xs-12 landmark">
+		<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">
+			<div ng-bind-html="landmark.description || landmark.summary"></div>
 		</div>
+	</div>
+</div>
 </div>

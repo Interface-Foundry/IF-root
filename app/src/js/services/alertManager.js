@@ -2,9 +2,6 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
 	   			//@IFDEF WEB
-	   			{msg: 'Try Bubbl.li on iOS to get access to iBeacons and more! <strong>Click here</strong>!',
-		   		 id: 'testflightapp', 
-		   		href: 'http://www.testflightapp.com/install/510bcfeae73662b1f4aac538c350bbbb-MTQwNTg1Njk/'}
 	   			//@ENDIF
    			]
    		};

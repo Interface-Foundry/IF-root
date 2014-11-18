@@ -60,6 +60,44 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 	return deferred.promise;
 }
 
+worldTree.getLandmark = function(_id, landmarkId) {
+	var deferred = $q.defer(), result;
+	
+	worldTree.getLandmarks(_id).then(function(landmarks) {
+		result = landmarks.find(function(landmark, index, landmarks) {
+			return landmark.id === landmarkId;
+		});
+		
+		if (result) {
+			deferred.resolve(result);
+		} else {
+			deferred.reject('Landmark not found');
+		}
+	});	
+
+	return deferred.promise;
+}
+
+worldTree.getUpcoming = function(_id) {
+	var userTime = new Date(), data = {}, deferred = $q.defer();
+	
+	db.landmarks.query({queryFilter:'upcoming', parentID: _id, userTime: userTime}, function(uResult){
+		data.upcomingIDs = uResult;
+		
+		db.landmarks.query({queryFilter:'now', parentID: _id, userTime: userTime}, function(nResult){
+		console.log('queryFilter:now');
+			data.nowID = nResult[0];
+			deferred.resolve(data);
+		}, function(reason) {
+			deferred.reject(reason);
+		}); 
+	}, function(reason) {
+		deferred.reject(reason); 
+	});
+	
+	return deferred.promise;
+}
+
 worldTree.getNearby = function() {
 	var deferred = $q.defer();
 	

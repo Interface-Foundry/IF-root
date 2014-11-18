@@ -11,6 +11,10 @@ var map = mapManager;
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
 
+$scope.world = {};
+$scope.landmarks = [];
+$scope.lookup = {};
+
 $scope.collectedPresents = [];
 
 angular.extend($rootScope, {loading: false});
@@ -24,13 +28,7 @@ if (olark){
 }
 
 	//currently only for upcoming...
-function setLookup() {
-	$scope.lookup = {}; 
-	
-	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-  	$scope.lookup[$scope.landmarks[i]._id] = i;
-	}
-}
+
   	
   	
 function reorderById (idArray) {
@@ -43,7 +41,7 @@ function reorderById (idArray) {
 	}
 	
 	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		if ($scope.landmarks[i] == 0 || $scope.landmarks[i].category && $scope.landmarks[i].category.hiddenPresent == true) {
+		if ($scope.landmarks[i] == 0) {
 			$scope.landmarks.splice(i, 1);
 			i--;
 		}
@@ -134,26 +132,16 @@ $scope.loadWorld = function(data) {
 		$scope.loadLandmarks();
   	}
   	
-  	function loadWidgets() {
-		console.log($scope.world);
-		if ($scope.style.widgets) {
-		if ($scope.style.widgets.twitter) {
+function loadWidgets() {
+	console.log($scope.world);
+	if ($scope.style.widgets) {
+		if ($scope.style.widgets.twitter == true) {
 			$scope.twitter = true;
 		}
-		if ($scope.style.widgets.instagram) {
+		if ($scope.style.widgets.instagram == true) {
 			$scope.instagram = true;
 		}
-		if ($scope.world.id == "StartFast_Demo_Day_2014") {
-			console.log('wyzerr');
-			$scope.wyzerr = true;
-		}
 		if ($scope.style.widgets.presents && $scope.world.landmarkCategories) {
-
-			// $scope.presents = true;
-			// $scope.showInitialPresent = true;
-			// $scope.presentCollected = false;
-			// $scope.presentAlreadyCollected = false;
-
 			$scope.temp = {
 				showInitialPresent: true,
 				presentCollected: false,
@@ -246,91 +234,59 @@ $scope.loadWorld = function(data) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
 	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
 	   }
-	     	 
+
 	}
 
-  	$scope.loadLandmarks = function(data) {
-  		console.log('--loadLandmarks--');
-  		//STATE: EXPLORE
-	  	db.landmarks.query({queryFilter:'all', parentID: $scope.world._id}, function(data) { 
-	  		console.log(data);
-	  		$scope.landmarks = data;
-	  		console.log($scope.landmarks);
-	  		setLookup();
-	  		loadWidgets(); //load widget data
-	  		initLandmarks($scope.landmarks);
-	  	});
-  	}
+$scope.loadLandmarks = function(data) {
+	console.log('--loadLandmarks--');
+	//STATE: EXPLORE
+  	db.landmarks.query({queryFilter:'all', parentID: $scope.world._id}, function(data) { 
+  		console.log(data);
+  		
+  		initLandmarks(data);
+  		loadWidgets(); //load widget data
+  	});
+ }
   	
-  	function initLandmarks(landmarks) {
-	  	angular.forEach($scope.landmarks, function(landmark) {
-			map.addMarker(landmark._id, {
-				lat:landmark.loc.coordinates[1],
-				lng:landmark.loc.coordinates[0],
-				draggable:false,
-				message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-	            icon: {
-	              iconUrl: 'img/marker/bubble-marker-50.png',
-	              shadowUrl: '',
-	              iconSize: [35, 67],
-	              iconAnchor: [13, 10]
-	            },
-				_id: landmark._id
-			});
+function initLandmarks(landmarks) {
+  	angular.forEach(landmarks, function(landmark, index, landmarks) {
+	  	if (landmark.category && landmark.category.hiddenPresent === true) {
+		  	//dont include
+	  	} else {
+		map.addMarker(landmark._id, {
+			lat:landmark.loc.coordinates[1],
+			lng:landmark.loc.coordinates[0],
+			draggable:false,
+			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+            icon: {
+              iconUrl: 'img/marker/bubble-marker-50.png',
+              shadowUrl: '',
+              iconSize: [35, 67],
+              iconAnchor: [13, 10]
+            },
+			_id: landmark._id
 		});
-  	}
-
-	/*
-World.get({id: $routeParams.worldURL}, function(data) {
-		 if (data.err) {
-		 	console.log('Data error! Returning to root!');
-		 	console.log(data.err);
-		 	$location.path('/#/');
-		 } else {
-			$scope.loadWorld(data); 
+		$scope.landmarks.push(landmark);
+		$scope.lookup[landmark._id] = index;
 		}
 	});
-*/
-
-	//===== VISITS =====//
+}
+  	
+function setLookup() {
+	$scope.lookup = {}; 
+	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
+		$scope.lookup[$scope.landmarks[i]._id] = i;
+	}
+}
 	
-	// saveVisit();
-
-	// function saveVisit(){
-	//     var newVisit = {
-	//         worldID: 'somemongoid',
-	//         userName: 'nickname'
-	//     };
-
-	//     db.visit.create(newVisit, function(res) {
-	//     	console.log(res);
-	//     });		
-	// }
-
-	// //query for visits within one hour
-	// db.visit.query({ worldID:'somemongoid'}, function(data){
-
-	// 	console.log('WITHIN HOUR');
-	// 	console.log(data);
-	// });
-
-	// //query for visits from User
-	// db.visit.query({ option:'userHistory'}, function(data){
-
-	// 	console.log('USER');
-	// 	console.log(data);
-	// });
-
-	//==================//
-
-
 		
-	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		console.log('worldtree success');
-		console.log(data);
-		$scope.loadWorld(data);
-	}, function(error) {
-		console.log(error);
-		//handle this better
-	});
+worldTree.getWorld($routeParams.worldURL).then(function(data) {
+	console.log('worldtree success');
+	console.log(data);
+	$scope.loadWorld(data);
+}, function(error) {
+	console.log(error);
+	//handle this better
+});
+
 }]);
