@@ -7887,7 +7887,7 @@ L.Popup = L.Layer.extend({
 
 		if (this.options.closeButton) {
 			var closeButton = this._closeButton = L.DomUtil.create('a', prefix + '-close-button', container);
-			closeButton.href = '#close';
+			closeButton.href = '';
 			closeButton.innerHTML = '&#215;';
 
 			L.DomEvent.on(closeButton, 'click', this._onCloseButtonClick, this);

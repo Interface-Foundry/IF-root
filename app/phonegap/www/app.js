@@ -969,20 +969,51 @@ angular.module("leaflet-directive", []).directive('leaflet', ["$q", "leafletData
                 genDispatchMapEvent = leafletEvents.genDispatchMapEvent,
                 mapEvents = leafletEvents.getAvailableMapEvents();
 
-            // Set width and height if they are defined
-            if (isDefined(attrs.width)) {
+            // Set width and height utility functions
+            function updateWidth() {
                 if (isNaN(attrs.width)) {
                     element.css('width', attrs.width);
                 } else {
                     element.css('width', attrs.width + 'px');
                 }
             }
-            if (isDefined(attrs.height)) {
+
+            function updateHeight() {
                 if (isNaN(attrs.height)) {
                     element.css('height', attrs.height);
                 } else {
                     element.css('height', attrs.height + 'px');
                 }
+            }
+
+            // If the width attribute defined update css
+            // Then watch if bound property changes and update css
+            if (isDefined(attrs.width)) {
+                updateWidth();
+
+                scope.$watch(
+                    function () {
+                        return element[0].getAttribute('width');
+                    },
+                    function () {
+                        updateWidth();
+                        map.invalidateSize();
+                    });
+            }
+
+            // If the height attribute defined update css
+            // Then watch if bound property changes and update css
+            if (isDefined(attrs.height)) {
+                updateHeight();
+
+                scope.$watch(
+                    function () {
+                        return element[0].getAttribute('height');
+                    },
+                    function () {
+                        updateHeight();
+                        map.invalidateSize();
+                    });
             }
 
             // Create the Leaflet Map Object with the options
@@ -1035,10 +1066,15 @@ angular.module("leaflet-directive", []).directive('leaflet', ["$q", "leafletData
             });
 
             scope.$on('$destroy', function () {
-                leafletData.getMap().then(function(map) {
-                    map.remove();
-                });
+                map.remove();
                 leafletData.unresolveMap(attrs.id);
+            });
+
+            //Handle request to invalidate the map size
+	        //Up scope using $scope.$emit('invalidateSize')
+	        //Down scope using $scope.$broadcast('invalidateSize')
+            scope.$on('invalidateSize', function() {
+                map.invalidateSize();
             });
         }
     };
@@ -1386,6 +1422,18 @@ angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", 
                     var resetStyleOnMouseout = geojson.resetStyleOnMouseout,
                         onEachFeature = geojson.onEachFeature;
 
+
+                    geojson.options = {
+                        style: geojson.style,
+                        filter: geojson.filter,
+                        onEachFeature: onEachFeature,
+                        pointToLayer: geojson.pointToLayer
+                    };
+
+                    leafletGeoJSON = L.geoJson(geojson.data, geojson.options);
+                    leafletData.setGeoJSON(leafletGeoJSON, attrs.id);
+                    leafletGeoJSON.addTo(map);
+
                     if (!onEachFeature) {
                         onEachFeature = function(feature, layer) {
                             if (leafletHelpers.LabelPlugin.isLoaded() && isDefined(geojson.label)) {
@@ -1417,38 +1465,25 @@ angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", 
                             });
                         };
                     }
-
-                    geojson.options = {
-                        style: geojson.style,
-                        filter: geojson.filter,
-                        onEachFeature: onEachFeature,
-                        pointToLayer: geojson.pointToLayer
-                    };
-
-                    leafletGeoJSON = L.geoJson(geojson.data, geojson.options);
-                    leafletData.setGeoJSON(leafletGeoJSON, attrs.id);
-                    leafletGeoJSON.addTo(map);
-                });
+                }, true);
             });
         }
     };
 }]);
 
 angular.module("leaflet-directive").directive('layers', ["$log", "$q", "leafletData", "leafletHelpers", "leafletLayerHelpers", "leafletControlHelpers", function ($log, $q, leafletData, leafletHelpers, leafletLayerHelpers, leafletControlHelpers) {
-    var _leafletLayers;
-
     return {
         restrict: "A",
         scope: false,
         replace: false,
         require: 'leaflet',
-        controller: function () {
-            _leafletLayers = $q.defer();
-            this.getLayers = function() {
-                return _leafletLayers.promise;
+        controller: ["$scope", function ($scope) {
+            $scope._leafletLayers = $q.defer();
+            this.getLayers = function () {
+                return $scope._leafletLayers.promise;
             };
-        },
-        link: function(scope, element, attrs, controller) {
+        }],
+        link: function(scope, element, attrs, controller){
             var isDefined = leafletHelpers.isDefined,
                 leafletLayers = {},
                 leafletScope  = controller.getLeafletScope(),
@@ -1466,7 +1501,7 @@ angular.module("leaflet-directive").directive('layers', ["$log", "$q", "leafletD
                 }
 
                 // We have baselayers to add to the map
-                _leafletLayers.resolve(leafletLayers);
+                scope._leafletLayers.resolve(leafletLayers);
                 leafletData.setLayers(leafletLayers, attrs.id);
 
                 leafletLayers.baselayers = {};
@@ -2117,7 +2152,9 @@ angular.module("leaflet-directive").directive('maxbounds', ["$log", "leafletMapD
                     ];
 
                     map.setMaxBounds(bounds);
-                    map.fitBounds(bounds);
+                    if (!attrs.center) {
+                            map.fitBounds(bounds);
+                        }
                 });
             });
         }
@@ -2651,6 +2688,10 @@ angular.module("leaflet-directive").factory('leafletMapDefaults', ["$q", "leafle
                     newDefaults.crs = userDefaults.crs;
                 } else if (isDefined(L.CRS[userDefaults.crs])) {
                     newDefaults.crs = L.CRS[userDefaults.crs];
+                }
+
+                if (isDefined(userDefaults.center)) {
+                    angular.copy(userDefaults.center, newDefaults.center);
                 }
 
                 if (isDefined(userDefaults.tileLayerOptions)) {
@@ -3603,12 +3644,16 @@ angular.module("leaflet-directive").factory('leafletPathsHelpers', ["$rootScope"
         return latlngs.filter(function(latlng) {
             return isValidPoint(latlng);
         }).map(function (latlng) {
-            return new L.LatLng(latlng.lat, latlng.lng);
+            return _convertToLeafletLatLng(latlng);
         });
     }
 
     function _convertToLeafletLatLng(latlng) {
-        return new L.LatLng(latlng.lat, latlng.lng);
+        if (isArray(latlng)) {
+            return new L.LatLng(latlng[0], latlng[1]);
+        } else {
+            return new L.LatLng(latlng.lat, latlng.lng);
+        }
     }
 
     function _convertToLeafletMultiLatLngs(paths) {
@@ -3879,7 +3924,7 @@ angular.module("leaflet-directive").factory('leafletBoundsHelpers', ["$log", "le
     };
 }]);
 
-angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScope", "leafletHelpers", "$log", function ($rootScope, leafletHelpers, $log) {
+angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScope", "leafletHelpers", "$log", "$compile", function ($rootScope, leafletHelpers, $log, $compile) {
 
     var isDefined = leafletHelpers.isDefined,
         MarkerClusterPlugin = leafletHelpers.MarkerClusterPlugin,
@@ -4027,6 +4072,8 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
 
         listenMarkerEvents: function(marker, markerData, leafletScope) {
             marker.on("popupopen", function(/* event */) {
+                //the marker may have angular templates to compile
+                $compile(marker.getPopup()._contentNode)($rootScope);
                 safeApply(leafletScope, function() {
                     markerData.focus = true;
                 });
@@ -4039,7 +4086,7 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
         },
 
         addMarkerWatcher: function(marker, name, leafletScope, layers, map) {
-            var clearWatch = leafletScope.$watch("markers."+name, function(markerData, oldMarkerData) {
+            var clearWatch = leafletScope.$watch("markers[\""+name+"\"]", function(markerData, oldMarkerData) {
                 if (!isDefined(markerData)) {
                     _deleteMarker(marker, map, layers);
                     clearWatch();
@@ -4232,6 +4279,9 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                             layers.overlays[markerData.layer].removeLayer(marker);
                             marker.setLatLng([markerData.lat, markerData.lng]);
                             layers.overlays[markerData.layer].addLayer(marker);
+                        } else if (isObject(markerData.icon) && isObject(oldMarkerData.icon) && !angular.equals(markerData.icon, oldMarkerData.icon)) {
+                            layers.overlays[markerData.layer].removeLayer(marker);
+                            layers.overlays[markerData.layer].addLayer(marker);
                         }
                     }
                 } else if (markerLatLng.lat !== markerData.lat || markerLatLng.lng !== markerData.lng) {
@@ -4336,8 +4386,13 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
         },
 
         isValidPoint: function(point) {
-            return angular.isDefined(point) && angular.isNumber(point.lat) &&
-                   angular.isNumber(point.lng);
+            if (!angular.isDefined(point)) {
+                return false;
+            }
+            if (angular.isArray(point)) {
+                return point.length === 2 && angular.isNumber(point[0]) && angular.isNumber(point[1]);
+            }
+            return angular.isNumber(point.lat) && angular.isNumber(point.lng);
         },
 
         isSameCenterOnMap: function(centerModel, map) {
@@ -6138,8 +6193,8 @@ style.resetNavBG();
 
 	var alert = alertManager;
 	
-    $scope.aperture = apertureService;  
-    $scope.aperture.set('off');
+$scope.aperture = apertureService;  
+$scope.aperture.set('off');
     
 $scope.initGeo = function() {
 
@@ -7158,13 +7213,13 @@ worldBounds: {
 
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	console.log('--mapManager--');
-	console.log('--setCenter--');
+	console.log('--setCenter--', latlng, z, state);
 	mapManager._actualCenter = latlng;
 	mapManager._z = z;
 	
 	switch (state) {
 		case 'aperture-half':
-			mapManager.setCenterWithAperture(latlng, z, 0, .5)
+			mapManager.setCenterWithAperture(latlng, z, 0, .25)
 			break;
 		case 'aperture-third': 
 			mapManager.setCenterWithAperture(latlng, z, 0, .35);
@@ -7179,11 +7234,12 @@ mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 }
 
 mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
-	console.log('setCenterWithAperture');
+	console.log('setCenterWithAperture', latlng, z, xpart, ypart);
 	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
 		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
 		targetPt, targetLatLng;
-		
+	console.log(h,w);	
+	
 	leafletData.getMap().then(function(map) {
 			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
 			console.log(targetPt);
@@ -7194,24 +7250,6 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 			mapManager.refresh();
 	});
 }
-
-mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
-	console.log('setCenterWithAperture');
-	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-		targetPt, targetLatLng;
-		
-	leafletData.getMap().then(function(map) {
-			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
-			console.log(targetPt);
-			targetLatLng = map.unproject(targetPt, z);
-			console.log(targetLatLng);
-			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
-			console.log(mapManager.center);
-			mapManager.refresh();
-	});
-}
-
 
 mapManager.apertureUpdate = function(state) {
 	if (mapManager._actualCenter && mapManager._z) {
@@ -12051,15 +12089,15 @@ console.log('--Landmark Controller--');
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-$scope.aperture = apertureService;
-$scope.aperture.set('half');
+//$scope.aperture = apertureService;
+var aperture = apertureService;
 
 olark('api.box.hide'); //shows olark tab on this page
 
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
 	
-	$scope.collectedPresents = [];
+$scope.collectedPresents = [];
 
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
@@ -12194,6 +12232,7 @@ console.log($scope.landmark.category);
 
 function goToMark() {
 	map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
+	aperture.set('half');
   	var markers = map.markers;
   	angular.forEach(markers, function(marker) {
   		console.log(marker);
@@ -12779,7 +12818,7 @@ function initLandmarks(landmarks) {
 			lat:landmark.loc.coordinates[1],
 			lng:landmark.loc.coordinates[0],
 			draggable:false,
-			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+			message:'<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
             icon: {
               iconUrl: 'img/marker/bubble-marker-50.png',
               shadowUrl: '',

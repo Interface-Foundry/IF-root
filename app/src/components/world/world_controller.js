@@ -257,7 +257,7 @@ function initLandmarks(landmarks) {
 			lat:landmark.loc.coordinates[1],
 			lng:landmark.loc.coordinates[0],
 			draggable:false,
-			message:'<a href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+			message:'<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
             icon: {
               iconUrl: 'img/marker/bubble-marker-50.png',
               shadowUrl: '',

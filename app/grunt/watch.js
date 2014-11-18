@@ -1,6 +1,6 @@
 module.exports = {
 	files: ['src/**/*'],
-	tasks: ['newer:preprocess', 'newer:less', 'newer:concat', 'newer:uglify', 'newer:copy'],
+	tasks: ['newer:less', 'newer:concat', 'newer:uglify', 'newer:copy', 'newer:preprocess'],
 	options: {
 		
 	}

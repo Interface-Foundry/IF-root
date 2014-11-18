@@ -13,8 +13,8 @@ style.resetNavBG();
 
 	var alert = alertManager;
 	
-    $scope.aperture = apertureService;  
-    $scope.aperture.set('off');
+$scope.aperture = apertureService;  
+$scope.aperture.set('off');
     
 $scope.initGeo = function() {
 

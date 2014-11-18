@@ -9,15 +9,15 @@ console.log('--Landmark Controller--');
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-$scope.aperture = apertureService;
-$scope.aperture.set('half');
+//$scope.aperture = apertureService;
+var aperture = apertureService;
 
 olark('api.box.hide'); //shows olark tab on this page
 
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
 	
-	$scope.collectedPresents = [];
+$scope.collectedPresents = [];
 
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
@@ -152,6 +152,7 @@ console.log($scope.landmark.category);
 
 function goToMark() {
 	map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
+	aperture.set('half');
   	var markers = map.markers;
   	angular.forEach(markers, function(marker) {
   		console.log(marker);
