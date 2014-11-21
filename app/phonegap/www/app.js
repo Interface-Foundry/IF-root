@@ -4707,7 +4707,6 @@ var checkLoggedin = function(userManager) {
     return userManager.checkLogin();
 }
 
-
     //================================================
     
     //================================================
@@ -4719,8 +4718,6 @@ var checkLoggedin = function(userManager) {
 	    			if (request.server) {
 		    			request.url = 'https://bubbl.li' + request.url; 
 	    			}
-	    			
-	    			
 	    		return request;
     		},
 	    	'response': function(response) {
@@ -6284,110 +6281,6 @@ function noLoc() {
 }]);
 
 
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
-console.log('init controller-indexIF');
-$scope.aperture = apertureService;
-$scope.map = mapManager;
-$scope.style = styleManager;
-$scope.alerts = alertManager;
-$scope.userManager = userManager;
-
-$scope.dialog = dialogs;
-$rootScope.messages = [];
-    //$rootScope.loadMeetup = false;
-    
-angular.extend($rootScope, {globalTitle: "Bubbl.li"});
-angular.extend($rootScope, {navTitle: "Bubbl.li"})
-angular.extend($rootScope, {loading: false});
-	
-if (beaconManager.supported == true) {
-	beaconManager.startListening();
-}
-$scope.$on('$viewContentLoaded', function() {
-	document.getElementById("wrap").scrollTop = 0;
-});
-
-$scope.newWorld = function() {
-    console.log('newWorld()');
-    $scope.world = {};
-    $scope.world.newStatus = true; //new
-    db.worlds.create($scope.world, function(response){
-      console.log('##Create##');
-      console.log('response', response);
-      $location.path('/edit/walkthrough/'+response[0].worldID);
-    });
-}
-
-$scope.search = function() {
-	if ($scope.searchOn == true) {
-		//call search
-		console.log('searching');
-		$location.path('/search/'+$scope.searchText);
-		$scope.searchOn = false;
-	} else {
-		$scope.searchOn = true;
-	}
-}
-	
-$scope.go = function(path) {
-	$location.path(path);
-}
-	
-$scope.logout = function() {
-      $http.get('/api/user/logout', {server:true});
-      userManager.loginStatus = false;
-      //$location.url('/');
-}
-
-$scope.sendFeedback = function(){
-
-    var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
-    }
-
-    $http.post('feedback', data).
-      success(function(data){
-        console.log('feedback sent');
-        alert('Feedback sent, thanks!');
-
-      }).
-      error(function(err){
-        console.log('there was a problem');
-    });
-    
-    if ($scope.feedback) {
-        $scope.feedback.on = false;
-    } else {
-        $scope.feedback = {
-	        on: false
-        }
-    }
-};
-
-/*
-$scope.sessionSearch = function() { 
-    $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
-};
-*/
-    
-$scope.getNearby = function($event) {
-	$scope.nearbyLoading = true;
-	worldTree.getNearby().then(function(data) {
-		$scope.altBubbles = data.liveAndInside;
-		$scope.nearbyBubbles = data.live;
-		$scope.nearbyLoading = false;
-	}, function(reason) {
-		console.log('getNearby error');
-		console.log(reason);
-		$scope.nearbyLoading = false;
-	})
-	$event.stopPropagation();
-}
-}]);
-
-
-
-
 //searching for bubbles
 function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureService, styleManager, mapManager, alertManager) {
 
@@ -6401,9 +6294,6 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
   
     $scope.aperture = apertureService;  
     $scope.aperture.set('off');
-
-    olark('api.box.hide'); //shows olark tab on this page
-
 
     console.log('world routing');
     
@@ -6916,91 +6806,12 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 angular.module('tidepoolsServices')
     .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
     	function(alertManager, $interval, $timeout, beaconData) {
-	    	
-var alerts = alertManager;
-
 var beaconManager = {
-	updateInterval: 5000, //ms
-	beacons: {},
-	sessionBeacons: {},
-	supported: true,
-	alertDistance: 25
-}
-
-beaconManager.startListening = function () {
-	// start looking for beacons
-
-	window.EstimoteBeacons.startRangingBeaconsInRegion(
-		{uuid: 'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D'},
-	function (result) {
-		beaconManager.updateBeacons(result.beacons);
-    }, function(error) {
-	    console.log(error);
-	});
-}
-
-beaconManager.updateBeacons = function(newBeacons) {
-	angular.forEach(newBeacons, function(beacon) {
-		var longID = getLongID(beacon);
-		if (beaconManager.sessionBeacons[longID]) {
-			//console.log('already seen', beacon);
-			//already seen 
-		} else if (beacon.distance < beaconManager.alertDistance) {
-			//add it to session beacon
-			beaconManager.sessionBeacons[longID] = beacon;
-			
-			//do something once
-			beaconManager.beaconAlert(beacon);
-		}
-	});
-/*
-	var tempMap = {}, addedBeacons = [], removedBeacons = [];
-	for (var i = 0, len = newBeacons.length; i < len; i++) {
-		var temp = getLongID(newBeacons[i]);
-		tempMap[temp] = newBeacons[i];
-	}
-	//REMOVE OLD BEACONS THAT ARE NO LONGER IN RANGE
-	angular.forEach(beaconManager.beacons, function(beacon, longId) {
-		if (Object.keys(tempMap).indexOf(longId) == -1) {
-			removedBeacons.push(beacon);
-		}
-	});
-	
-	//ADD NEW BEACONS;
-	angular.forEach(tempMap, function(beacon, longId) {
-		if (Object.keys(beaconManager).indexOf(longId) == -1) {
-			//not found in old beacon set
-			addedBeacons.push(beacon);
-		}
-	});
-	
-	console.log('Beacons added:', addedBeacons);
-	console.log('Beacons removed:', removedBeacons);
-	
-	beaconManager.beacons = tempMap;
-*/
-}
-
-beaconManager.beaconAlert = function(beacon) {
-	//console.log('beaconAlert', beacon);
-	var data = beaconData.fromBeacon(beacon);
-	
-	$timeout(function() {
-		alerts.notify({
-			title: data.title,
-			msg: "You found a beacon, visit it <strong>here</strong>!",
-			href: data.href,
-			id: getLongID(beacon)
-		});
-	});
-}
-
-function getLongID(beacon) {
-	return beacon.proximityUUID+beacon.major+beacon.minor;
+	supported: false
 }
 
 return beaconManager;
-
+	    	
 }]);
 
 angular.module('tidepoolsServices')
@@ -7592,7 +7403,6 @@ userManager.getUser = function() {
 		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user && user!=0) {
-				$rootScope.user = user; 
 				userManager._user = user;
 				deferred.resolve(user);
 			} else {
@@ -7626,11 +7436,14 @@ userManager.getDisplayName = function() {
 			else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
 			else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
 			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
-			else { displayName = "Me"; console.log("how did this happen???");}
+			else {displayName = "Me"; console.log("how did this happen???");}
 			
-			displayName = displayName.substring(0, displayName.indexOf(" "));
+			var _displayName = displayName.substring(0, displayName.indexOf(" "));
 			
-			userManager._displayName = displayName;
+			userManager._displayName = _displayName;
+			
+			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');
+			
 			deferred.resolve(displayName);
 		}, function(reason) {
 			deferred.reject(reason);
@@ -7844,927 +7657,6 @@ worldTree.getNearby = function() {
 return worldTree;
 }
 ]);
-(function() {
-  var Evented, MIRROR_ATTACH, addClass, allDrops, clickEvents, createContext, end, extend, hasClass, name, removeClass, removeFromArray, sortAttach, tempEl, touchDevice, transitionEndEvent, transitionEndEvents, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  _ref = Tether.Utils, extend = _ref.extend, addClass = _ref.addClass, removeClass = _ref.removeClass, hasClass = _ref.hasClass, Evented = _ref.Evented;
-
-  touchDevice = 'ontouchstart' in document.documentElement;
-
-  clickEvents = ['click'];
-
-  if (touchDevice) {
-    clickEvents.push('touchstart');
-  }
-
-  transitionEndEvents = {
-    'WebkitTransition': 'webkitTransitionEnd',
-    'MozTransition': 'transitionend',
-    'OTransition': 'otransitionend',
-    'transition': 'transitionend'
-  };
-
-  transitionEndEvent = '';
-
-  for (name in transitionEndEvents) {
-    end = transitionEndEvents[name];
-    tempEl = document.createElement('p');
-    if (tempEl.style[name] !== void 0) {
-      transitionEndEvent = end;
-    }
-  }
-
-  sortAttach = function(str) {
-    var first, second, _ref1, _ref2;
-    _ref1 = str.split(' '), first = _ref1[0], second = _ref1[1];
-    if (first === 'left' || first === 'right') {
-      _ref2 = [second, first], first = _ref2[0], second = _ref2[1];
-    }
-    return [first, second].join(' ');
-  };
-
-  MIRROR_ATTACH = {
-    left: 'right',
-    right: 'left',
-    top: 'bottom',
-    bottom: 'top',
-    middle: 'middle',
-    center: 'center'
-  };
-
-  allDrops = {};
-
-  removeFromArray = function(arr, item) {
-    var index, _results;
-    _results = [];
-    while ((index = arr.indexOf(item)) !== -1) {
-      _results.push(arr.splice(index, 1));
-    }
-    return _results;
-  };
-
-  createContext = function(options) {
-    var DropInstance, defaultOptions, drop, _name;
-    if (options == null) {
-      options = {};
-    }
-    drop = function() {
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return Object(result) === result ? result : child;
-      })(DropInstance, arguments, function(){});
-    };
-    extend(drop, {
-      createContext: createContext,
-      drops: [],
-      defaults: {}
-    });
-    defaultOptions = {
-      classPrefix: 'drop',
-      defaults: {
-        position: 'bottom left',
-        openOn: 'click',
-        constrainToScrollParent: true,
-        constrainToWindow: true,
-        classes: '',
-        remove: false,
-        tetherOptions: {}
-      }
-    };
-    extend(drop, defaultOptions, options);
-    extend(drop.defaults, defaultOptions.defaults, options.defaults);
-    if (allDrops[_name = drop.classPrefix] == null) {
-      allDrops[_name] = [];
-    }
-    drop.updateBodyClasses = function() {
-      var anyOpen, _drop, _i, _len, _ref1;
-      anyOpen = false;
-      _ref1 = allDrops[drop.classPrefix];
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        _drop = _ref1[_i];
-        if (!(_drop.isOpened())) {
-          continue;
-        }
-        anyOpen = true;
-        break;
-      }
-      if (anyOpen) {
-        return addClass(document.body, "" + drop.classPrefix + "-open");
-      } else {
-        return removeClass(document.body, "" + drop.classPrefix + "-open");
-      }
-    };
-    DropInstance = (function(_super) {
-      __extends(DropInstance, _super);
-
-      function DropInstance(options) {
-        this.options = options;
-        this.options = extend({}, drop.defaults, this.options);
-        this.target = this.options.target;
-        if (this.target == null) {
-          throw new Error('Drop Error: You must provide a target.');
-        }
-        if (this.options.classes) {
-          addClass(this.target, this.options.classes);
-        }
-        drop.drops.push(this);
-        allDrops[drop.classPrefix].push(this);
-        this._boundEvents = [];
-        this.setupElements();
-        this.setupEvents();
-        this.setupTether();
-      }
-
-      DropInstance.prototype._on = function(element, event, handler) {
-        this._boundEvents.push({
-          element: element,
-          event: event,
-          handler: handler
-        });
-        return element.addEventListener(event, handler);
-      };
-
-      DropInstance.prototype.setupElements = function() {
-        this.drop = document.createElement('div');
-        addClass(this.drop, drop.classPrefix);
-        if (this.options.classes) {
-          addClass(this.drop, this.options.classes);
-        }
-        this.content = document.createElement('div');
-        addClass(this.content, "" + drop.classPrefix + "-content");
-        if (typeof this.options.content === 'object') {
-          this.content.appendChild(this.options.content);
-        } else {
-          this.content.innerHTML = this.options.content;
-        }
-        return this.drop.appendChild(this.content);
-      };
-
-      DropInstance.prototype.setupTether = function() {
-        var constraints, dropAttach;
-        dropAttach = this.options.position.split(' ');
-        dropAttach[0] = MIRROR_ATTACH[dropAttach[0]];
-        dropAttach = dropAttach.join(' ');
-        constraints = [];
-        if (this.options.constrainToScrollParent) {
-          constraints.push({
-            to: 'scrollParent',
-            pin: 'top, bottom',
-            attachment: 'together none'
-          });
-        } else {
-          constraints.push({
-            to: 'scrollParent'
-          });
-        }
-        if (this.options.constrainToWindow !== false) {
-          constraints.push({
-            to: 'window',
-            attachment: 'together'
-          });
-        } else {
-          constraints.push({
-            to: 'window'
-          });
-        }
-        options = {
-          element: this.drop,
-          target: this.target,
-          attachment: sortAttach(dropAttach),
-          targetAttachment: sortAttach(this.options.position),
-          classPrefix: drop.classPrefix,
-          offset: '0 0',
-          targetOffset: '0 0',
-          enabled: false,
-          constraints: constraints
-        };
-        if (this.options.tetherOptions !== false) {
-          return this.tether = new Tether(extend({}, options, this.options.tetherOptions));
-        }
-      };
-
-      DropInstance.prototype.setupEvents = function() {
-        var clickEvent, closeHandler, events, onUs, openHandler, out, outTimeout, over, _i, _len,
-          _this = this;
-        if (!this.options.openOn) {
-          return;
-        }
-        if (this.options.openOn === 'always') {
-          setTimeout(this.open.bind(this));
-          return;
-        }
-        events = this.options.openOn.split(' ');
-        if (__indexOf.call(events, 'click') >= 0) {
-          openHandler = function(event) {
-            _this.toggle();
-            return event.preventDefault();
-          };
-          closeHandler = function(event) {
-            if (!_this.isOpened()) {
-              return;
-            }
-            if (event.target === _this.drop || _this.drop.contains(event.target)) {
-              return;
-            }
-            if (event.target === _this.target || _this.target.contains(event.target)) {
-              return;
-            }
-            return _this.close();
-          };
-          for (_i = 0, _len = clickEvents.length; _i < _len; _i++) {
-            clickEvent = clickEvents[_i];
-            this._on(this.target, clickEvent, openHandler);
-            this._on(document, clickEvent, closeHandler);
-          }
-        }
-        if (__indexOf.call(events, 'hover') >= 0) {
-          onUs = false;
-          over = function() {
-            onUs = true;
-            return _this.open();
-          };
-          outTimeout = null;
-          out = function() {
-            onUs = false;
-            if (outTimeout != null) {
-              clearTimeout(outTimeout);
-            }
-            return outTimeout = setTimeout(function() {
-              if (!onUs) {
-                _this.close();
-              }
-              return outTimeout = null;
-            }, 50);
-          };
-          this._on(this.target, 'mouseover', over);
-          this._on(this.drop, 'mouseover', over);
-          this._on(this.target, 'mouseout', out);
-          return this._on(this.drop, 'mouseout', out);
-        }
-      };
-
-      DropInstance.prototype.isOpened = function() {
-        return hasClass(this.drop, "" + drop.classPrefix + "-open");
-      };
-
-      DropInstance.prototype.toggle = function() {
-        if (this.isOpened()) {
-          return this.close();
-        } else {
-          return this.open();
-        }
-      };
-
-      DropInstance.prototype.open = function() {
-        var _ref1, _ref2,
-          _this = this;
-        if (this.isOpened()) {
-          return;
-        }
-        if (!this.drop.parentNode) {
-          document.body.appendChild(this.drop);
-        }
-        if ((_ref1 = this.tether) != null) {
-          _ref1.enable();
-        }
-        addClass(this.drop, "" + drop.classPrefix + "-open");
-        addClass(this.drop, "" + drop.classPrefix + "-open-transitionend");
-        setTimeout(function() {
-          return addClass(_this.drop, "" + drop.classPrefix + "-after-open");
-        });
-        if ((_ref2 = this.tether) != null) {
-          _ref2.position();
-        }
-        this.trigger('open');
-        return drop.updateBodyClasses();
-      };
-
-      DropInstance.prototype.close = function() {
-        var handler, _ref1,
-          _this = this;
-        if (!this.isOpened()) {
-          return;
-        }
-        removeClass(this.drop, "" + drop.classPrefix + "-open");
-        removeClass(this.drop, "" + drop.classPrefix + "-after-open");
-        this.drop.addEventListener(transitionEndEvent, handler = function() {
-          if (!hasClass(_this.drop, "" + drop.classPrefix + "-open")) {
-            removeClass(_this.drop, "" + drop.classPrefix + "-open-transitionend");
-          }
-          return _this.drop.removeEventListener(transitionEndEvent, handler);
-        });
-        this.trigger('close');
-        if ((_ref1 = this.tether) != null) {
-          _ref1.disable();
-        }
-        drop.updateBodyClasses();
-        if (this.options.remove) {
-          return this.remove();
-        }
-      };
-
-      DropInstance.prototype.remove = function() {
-        var _ref1;
-        this.close();
-        return (_ref1 = this.drop.parentNode) != null ? _ref1.removeChild(this.drop) : void 0;
-      };
-
-      DropInstance.prototype.position = function() {
-        var _ref1;
-        if (this.isOpened()) {
-          return (_ref1 = this.tether) != null ? _ref1.position() : void 0;
-        }
-      };
-
-      DropInstance.prototype.destroy = function() {
-        var element, event, handler, _i, _len, _ref1, _ref2, _ref3;
-        this.remove();
-        if ((_ref1 = this.tether) != null) {
-          _ref1.destroy();
-        }
-        _ref2 = this._boundEvents;
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          _ref3 = _ref2[_i], element = _ref3.element, event = _ref3.event, handler = _ref3.handler;
-          element.removeEventListener(event, handler);
-        }
-        this._boundEvents = [];
-        this.tether = null;
-        this.drop = null;
-        this.content = null;
-        this.target = null;
-        removeFromArray(allDrops[drop.classPrefix], this);
-        return removeFromArray(drop.drops, this);
-      };
-
-      return DropInstance;
-
-    })(Evented);
-    return drop;
-  };
-
-  window.Drop = createContext();
-
-  document.addEventListener('DOMContentLoaded', function() {
-    return Drop.updateBodyClasses();
-  });
-
-}).call(this);
-
-(function() {
-  var DOWN, ENTER, ESCAPE, Evented, SPACE, Select, UP, addClass, clickEvent, extend, getBounds, getFocusedSelect, hasClass, isRepeatedChar, lastCharacter, removeClass, searchText, searchTextTimeout, touchDevice, useNative, _ref,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  _ref = Tether.Utils, extend = _ref.extend, addClass = _ref.addClass, removeClass = _ref.removeClass, hasClass = _ref.hasClass, getBounds = _ref.getBounds, Evented = _ref.Evented;
-
-  ENTER = 13;
-
-  ESCAPE = 27;
-
-  SPACE = 32;
-
-  UP = 38;
-
-  DOWN = 40;
-
-  touchDevice = 'ontouchstart' in document.documentElement;
-
-  clickEvent = touchDevice ? 'touchstart' : 'click';
-
-  useNative = function() {
-    return touchDevice && (innerWidth <= 640 || innerHeight <= 640);
-  };
-
-  isRepeatedChar = function(str) {
-    return Array.prototype.reduce.call(str, function(a, b) {
-      if (a === b) {
-        return b;
-      } else {
-        return false;
-      }
-    });
-  };
-
-  getFocusedSelect = function() {
-    var _ref1;
-    return (_ref1 = document.querySelector('.select-target-focused')) != null ? _ref1.selectInstance : void 0;
-  };
-
-  searchText = '';
-
-  searchTextTimeout = void 0;
-
-  lastCharacter = void 0;
-
-  document.addEventListener('keypress', function(e) {
-    var options, repeatedOptions, select, selected;
-    if (!(select = getFocusedSelect())) {
-      return;
-    }
-    if (e.charCode === 0) {
-      return;
-    }
-    if (e.keyCode === SPACE) {
-      e.preventDefault();
-    }
-    clearTimeout(searchTextTimeout);
-    searchTextTimeout = setTimeout(function() {
-      return searchText = '';
-    }, 500);
-    searchText += String.fromCharCode(e.charCode);
-    options = select.findOptionsByPrefix(searchText);
-    if (options.length === 1) {
-      select.selectOption(options[0]);
-      return;
-    }
-    if (searchText.length > 1 && isRepeatedChar(searchText)) {
-      repeatedOptions = select.findOptionsByPrefix(searchText[0]);
-      if (repeatedOptions.length) {
-        selected = repeatedOptions.indexOf(select.getChosen());
-        selected += 1;
-        selected = selected % repeatedOptions.length;
-        select.selectOption(repeatedOptions[selected]);
-        return;
-      }
-    }
-    if (options.length) {
-      select.selectOption(options[0]);
-    }
-  });
-
-  document.addEventListener('keydown', function(e) {
-    var select, _ref1, _ref2;
-    if (!(select = getFocusedSelect())) {
-      return;
-    }
-    if ((_ref1 = e.keyCode) === UP || _ref1 === DOWN || _ref1 === ESCAPE) {
-      e.preventDefault();
-    }
-    if (select.isOpen()) {
-      switch (e.keyCode) {
-        case UP:
-        case DOWN:
-          return select.moveHighlight(e.keyCode);
-        case ENTER:
-          return select.selectHighlightedOption();
-        case ESCAPE:
-          select.close();
-          return select.target.focus();
-      }
-    } else {
-      if ((_ref2 = e.keyCode) === UP || _ref2 === DOWN || _ref2 === SPACE) {
-        return select.open();
-      }
-    }
-  });
-
-  Select = (function(_super) {
-    __extends(Select, _super);
-
-    Select.defaults = {
-      alignToHighlighed: 'auto',
-      className: 'select-theme-default'
-    };
-
-    function Select(options) {
-      this.options = options;
-      this.update = __bind(this.update, this);
-      this.options = extend({}, Select.defaults, this.options);
-      this.select = this.options.el;
-      if (this.select.selectInstance != null) {
-        throw new Error("This element has already been turned into a Select");
-      }
-      this.setupTarget();
-      this.renderTarget();
-      this.setupDrop();
-      this.renderDrop();
-      this.setupSelect();
-      this.setupTether();
-      this.bindClick();
-      this.bindMutationEvents();
-      this.value = this.select.value;
-    }
-
-    Select.prototype.useNative = function() {
-      return this.options.useNative === true || (useNative() && this.options.useNative !== false);
-    };
-
-    Select.prototype.setupTarget = function() {
-      var tabIndex,
-        _this = this;
-      this.target = document.createElement('a');
-      this.target.href = 'javascript:;';
-      addClass(this.target, 'select-target');
-      tabIndex = this.select.getAttribute('tabindex') || 0;
-      this.target.setAttribute('tabindex', tabIndex);
-      if (this.options.className) {
-        addClass(this.target, this.options.className);
-      }
-      this.target.selectInstance = this;
-      this.target.addEventListener('click', function() {
-        if (!_this.isOpen()) {
-          return _this.target.focus();
-        } else {
-          return _this.target.blur();
-        }
-      });
-      this.target.addEventListener('focus', function() {
-        return addClass(_this.target, 'select-target-focused');
-      });
-      this.target.addEventListener('blur', function(e) {
-        if (_this.isOpen()) {
-          if (e.relatedTarget && !_this.drop.contains(e.relatedTarget)) {
-            _this.close();
-          }
-        }
-        return removeClass(_this.target, 'select-target-focused');
-      });
-      return this.select.parentNode.insertBefore(this.target, this.select.nextSibling);
-    };
-
-    Select.prototype.setupDrop = function() {
-      var _this = this;
-      this.drop = document.createElement('div');
-      addClass(this.drop, 'select');
-      if (this.options.className) {
-        addClass(this.drop, this.options.className);
-      }
-      document.body.appendChild(this.drop);
-      this.drop.addEventListener('click', function(e) {
-        if (hasClass(e.target, 'select-option')) {
-          return _this.pickOption(e.target);
-        }
-      });
-      this.drop.addEventListener('mousemove', function(e) {
-        if (hasClass(e.target, 'select-option')) {
-          return _this.highlightOption(e.target);
-        }
-      });
-      this.content = document.createElement('div');
-      addClass(this.content, 'select-content');
-      return this.drop.appendChild(this.content);
-    };
-
-    Select.prototype.open = function() {
-      var positionSelectStyle, selectedOption,
-        _this = this;
-      addClass(this.target, 'select-open');
-      if (this.useNative()) {
-        this.select.style.display = 'block';
-        setTimeout(function() {
-          var event;
-          event = document.createEvent("MouseEvents");
-          event.initEvent("mousedown", true, true);
-          return _this.select.dispatchEvent(event);
-        });
-        return;
-      }
-      addClass(this.drop, 'select-open');
-      setTimeout(function() {
-        return _this.tether.enable();
-      });
-      selectedOption = this.drop.querySelector('.select-option-selected');
-      if (!selectedOption) {
-        return;
-      }
-      this.highlightOption(selectedOption);
-      this.scrollDropContentToOption(selectedOption);
-      positionSelectStyle = function() {
-        var dropBounds, offset, optionBounds;
-        if (hasClass(_this.drop, 'tether-abutted-left') || hasClass(_this.drop, 'tether-abutted-bottom')) {
-          dropBounds = getBounds(_this.drop);
-          optionBounds = getBounds(selectedOption);
-          offset = dropBounds.top - (optionBounds.top + optionBounds.height);
-          return _this.drop.style.top = (parseFloat(_this.drop.style.top) || 0) + offset + 'px';
-        }
-      };
-      if (this.options.alignToHighlighted === 'always' || (this.options.alignToHighlighted === 'auto' && this.content.scrollHeight <= this.content.clientHeight)) {
-        setTimeout(positionSelectStyle);
-      }
-      return this.trigger('open');
-    };
-
-    Select.prototype.close = function() {
-      removeClass(this.target, 'select-open');
-      if (this.useNative()) {
-        this.select.style.display = 'none';
-        return;
-      }
-      this.tether.disable();
-      removeClass(this.drop, 'select-open');
-      return this.trigger('close');
-    };
-
-    Select.prototype.toggle = function() {
-      if (this.isOpen()) {
-        return this.close();
-      } else {
-        return this.open();
-      }
-    };
-
-    Select.prototype.isOpen = function() {
-      return hasClass(this.drop, 'select-open');
-    };
-
-    Select.prototype.bindClick = function() {
-      var _this = this;
-      this.target.addEventListener(clickEvent, function(e) {
-        e.preventDefault();
-        return _this.toggle();
-      });
-      return document.addEventListener(clickEvent, function(event) {
-        if (!_this.isOpen()) {
-          return;
-        }
-        if (event.target === _this.drop || _this.drop.contains(event.target)) {
-          return;
-        }
-        if (event.target === _this.target || _this.target.contains(event.target)) {
-          return;
-        }
-        return _this.close();
-      });
-    };
-
-    Select.prototype.setupTether = function() {
-      return this.tether = new Tether({
-        element: this.drop,
-        target: this.target,
-        attachment: 'top left',
-        targetAttachment: 'bottom left',
-        classPrefix: 'select',
-        constraints: [
-          {
-            to: 'window',
-            attachment: 'together'
-          }
-        ]
-      });
-    };
-
-    Select.prototype.renderTarget = function() {
-      var option, _i, _len, _ref1;
-      this.target.innerHTML = '';
-      _ref1 = this.select.querySelectorAll('option');
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        option = _ref1[_i];
-        if (option.selected) {
-          this.target.innerHTML = option.innerHTML;
-          break;
-        }
-      }
-      return this.target.appendChild(document.createElement('b'));
-    };
-
-    Select.prototype.renderDrop = function() {
-      var el, option, optionList, _i, _len, _ref1;
-      optionList = document.createElement('ul');
-      addClass(optionList, 'select-options');
-      _ref1 = this.select.querySelectorAll('option');
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        el = _ref1[_i];
-        option = document.createElement('li');
-        addClass(option, 'select-option');
-        option.setAttribute('data-value', el.value);
-        option.innerHTML = el.innerHTML;
-        if (el.selected) {
-          addClass(option, 'select-option-selected');
-        }
-        optionList.appendChild(option);
-      }
-      this.content.innerHTML = '';
-      return this.content.appendChild(optionList);
-    };
-
-    Select.prototype.update = function() {
-      this.renderDrop();
-      return this.renderTarget();
-    };
-
-    Select.prototype.setupSelect = function() {
-      this.select.selectInstance = this;
-      addClass(this.select, 'select-select');
-      return this.select.addEventListener('change', this.update);
-    };
-
-    Select.prototype.bindMutationEvents = function() {
-      if (window.MutationObserver != null) {
-        this.observer = new MutationObserver(this.update);
-        return this.observer.observe(this.select, {
-          childList: true,
-          attributes: true,
-          characterData: true,
-          subtree: true
-        });
-      } else {
-        return this.select.addEventListener('DOMSubtreeModified', this.update);
-      }
-    };
-
-    Select.prototype.findOptionsByPrefix = function(text) {
-      var options;
-      options = this.drop.querySelectorAll('.select-option');
-      text = text.toLowerCase();
-      return Array.prototype.filter.call(options, function(option) {
-        return option.innerHTML.toLowerCase().substr(0, text.length) === text;
-      });
-    };
-
-    Select.prototype.findOptionsByValue = function(val) {
-      var options;
-      options = this.drop.querySelectorAll('.select-option');
-      return Array.prototype.filter.call(options, function(option) {
-        return option.getAttribute('data-value') === val;
-      });
-    };
-
-    Select.prototype.getChosen = function() {
-      if (this.isOpen()) {
-        return this.drop.querySelector('.select-option-highlight');
-      } else {
-        return this.drop.querySelector('.select-option-selected');
-      }
-    };
-
-    Select.prototype.selectOption = function(option) {
-      if (this.isOpen()) {
-        this.highlightOption(option);
-        return this.scrollDropContentToOption(option);
-      } else {
-        return this.pickOption(option, false);
-      }
-    };
-
-    Select.prototype.resetSelection = function() {
-      return this.selectOption(this.drop.querySelector('.select-option'));
-    };
-
-    Select.prototype.highlightOption = function(option) {
-      var highlighted;
-      highlighted = this.drop.querySelector('.select-option-highlight');
-      if (highlighted != null) {
-        removeClass(highlighted, 'select-option-highlight');
-      }
-      addClass(option, 'select-option-highlight');
-      return this.trigger('highlight', {
-        option: option
-      });
-    };
-
-    Select.prototype.moveHighlight = function(directionKeyCode) {
-      var highlighted, highlightedIndex, newHighlight, options;
-      if (!(highlighted = this.drop.querySelector('.select-option-highlight'))) {
-        this.highlightOption(this.drop.querySelector('.select-option'));
-        return;
-      }
-      options = this.drop.querySelectorAll('.select-option');
-      highlightedIndex = Array.prototype.indexOf.call(options, highlighted);
-      if (!(highlightedIndex >= 0)) {
-        return;
-      }
-      if (directionKeyCode === UP) {
-        highlightedIndex -= 1;
-      } else {
-        highlightedIndex += 1;
-      }
-      if (highlightedIndex < 0 || highlightedIndex >= options.length) {
-        return;
-      }
-      newHighlight = options[highlightedIndex];
-      this.highlightOption(newHighlight);
-      return this.scrollDropContentToOption(newHighlight);
-    };
-
-    Select.prototype.scrollDropContentToOption = function(option) {
-      var contentBounds, optionBounds;
-      if (this.content.scrollHeight > this.content.clientHeight) {
-        contentBounds = getBounds(this.content);
-        optionBounds = getBounds(option);
-        return this.content.scrollTop = optionBounds.top - (contentBounds.top - this.content.scrollTop);
-      }
-    };
-
-    Select.prototype.selectHighlightedOption = function() {
-      return this.pickOption(this.drop.querySelector('.select-option-highlight'));
-    };
-
-    Select.prototype.pickOption = function(option, close) {
-      var _this = this;
-      if (close == null) {
-        close = true;
-      }
-      this.value = this.select.value = option.getAttribute('data-value');
-      this.triggerChange();
-      if (close) {
-        return setTimeout(function() {
-          _this.close();
-          return _this.target.focus();
-        });
-      }
-    };
-
-    Select.prototype.triggerChange = function() {
-      var event;
-      event = document.createEvent("HTMLEvents");
-      event.initEvent("change", true, false);
-      this.select.dispatchEvent(event);
-      return this.trigger('change', {
-        value: this.select.value
-      });
-    };
-
-    Select.prototype.change = function(val) {
-      var options;
-      options = this.findOptionsByValue(val);
-      if (!options.length) {
-        throw new Error("Select Error: An option with the value \"" + val + "\" doesn't exist");
-      }
-      return this.pickOption(options[0], false);
-    };
-
-    return Select;
-
-  })(Evented);
-
-  Select.init = function(options) {
-    var el, _i, _len, _ref1, _results;
-    if (options == null) {
-      options = {};
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        return Select.init(options);
-      });
-      return;
-    }
-    if (options.selector == null) {
-      options.selector = 'select';
-    }
-    _ref1 = document.querySelectorAll(options.selector);
-    _results = [];
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      el = _ref1[_i];
-      if (!el.selectInstance) {
-        _results.push(new Select(extend({
-          el: el
-        }, options)));
-      } else {
-        _results.push(void 0);
-      }
-    }
-    return _results;
-  };
-
-  window.Select = Select;
-
-}).call(this);
-
-(function() {
-  var DropTooltip, Tooltip, defaults;
-
-  DropTooltip = Drop.createContext();
-
-  defaults = {
-    attach: 'top center'
-  };
-
-  Tooltip = (function() {
-    function Tooltip(options) {
-      this.options = options;
-      this.$target = $(this.options.el);
-      this.createDrop();
-    }
-
-    Tooltip.prototype.createDrop = function() {
-      var _ref;
-      if (this.options.attach == null) {
-        this.options.attach = defaults.attach;
-      }
-      return this.dropTooltip = new DropTooltip({
-        target: this.$target[0],
-        className: 'drop-tooltip-theme-arrows',
-        attach: this.options.attach,
-        constrainToWindow: true,
-        constrainToScrollParent: false,
-        openOn: 'hover',
-        content: (_ref = this.options.content) != null ? _ref : this.$target.attr('data-tooltip-content')
-      });
-    };
-
-    return Tooltip;
-
-  })();
-
-  window.Tooltip = Tooltip;
-
-}).call(this);
-
 var themeDict = {
 	urban: {
 		name: 'urban',
@@ -8816,8 +7708,8 @@ var themeDict = {
 	}
 };
 app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
-    olark('api.box.hide'); //hides olark tab on this page
-    $rootScope.showSwitch = false;
+	
+	$rootScope.showSwitch = false;
     var aperture = apertureService
     aperture.set('off');
     //query tweets
@@ -8837,7 +7729,7 @@ app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
 }]);
 
 app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function( $location, $scope, db, $rootScope,$routeParams, apertureService) {
-    olark('api.box.hide'); //hides olark tab on this page
+
 	var aperture = apertureService;
 	aperture.set('off');
     $rootScope.showSwitch = false;  
@@ -8854,7 +7746,6 @@ app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
 }]);
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
-    olark('api.box.hide'); //hides olark tab on this page
 
     $rootScope.showSwitch = false;
 
@@ -8878,8 +7769,6 @@ TalktagCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope
 
 
 function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
-    olark('api.box.hide'); //hides olark tab on this page
-
 
     // TURN THIS PAGE INTO RAW HTML PAGE, A LA MENU page
     shelfPan('return');
@@ -8907,9 +7796,7 @@ MenuCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
 function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
-    olark('api.box.hide'); //hides olark tab on this page
-
-
+	
     shelfPan('return');
 
     window.scrollTo(0, 0);
@@ -10282,8 +9169,6 @@ zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
 aperture.set('full');
 
-olark('api.box.show'); //shows olark tab on this page
-
 $scope.mapThemeSelect = 'arabesque';
 
 $scope.kinds = [
@@ -11179,8 +10064,6 @@ $scope.temp = {};
 var map = mapManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 
-olark('api.box.show'); //shows olark tab on this page
-
 zoomControl.style.display = 'none'; 
 
 $scope.world.name = "bubble"; //make sure there's a default world name
@@ -11572,6 +10455,103 @@ app.controller('HomeController', ['$scope', 'worldTree', function ($scope, world
 	$scope.nearbyBubbles = data.live;	
 	});
 }]);
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
+console.log('init controller-indexIF');
+$scope.aperture = apertureService;
+$scope.map = mapManager;
+$scope.style = styleManager;
+$scope.alerts = alertManager;
+$scope.userManager = userManager;
+
+$scope.dialog = dialogs;
+$rootScope.messages = [];
+    //$rootScope.loadMeetup = false;
+    
+angular.extend($rootScope, {globalTitle: "Bubbl.li"});
+angular.extend($rootScope, {navTitle: "Bubbl.li"})
+angular.extend($rootScope, {loading: false});
+	
+$scope.$on('$viewContentLoaded', function() {
+	document.getElementById("wrap").scrollTop = 0;
+});
+
+$scope.newWorld = function() {
+    console.log('newWorld()');
+    $scope.world = {};
+    $scope.world.newStatus = true; //new
+    db.worlds.create($scope.world, function(response){
+      console.log('##Create##');
+      console.log('response', response);
+      $location.path('/edit/walkthrough/'+response[0].worldID);
+    });
+}
+
+$scope.search = function() {
+	if ($scope.searchOn == true) {
+		//call search
+		console.log('searching');
+		$location.path('/search/'+$scope.searchText);
+		$scope.searchOn = false;
+	} else {
+		$scope.searchOn = true;
+	}
+}
+	
+$scope.go = function(path) {
+	$location.path(path);
+}
+	
+$scope.logout = function() {
+      $http.get('/api/user/logout', {server:true});
+      userManager.loginStatus = false;
+      //$location.url('/');
+}
+
+$scope.sendFeedback = function(){
+
+    var data = {
+      emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
+    }
+
+    $http.post('feedback', data).
+      success(function(data){
+        console.log('feedback sent');
+        alert('Feedback sent, thanks!');
+
+      }).
+      error(function(err){
+        console.log('there was a problem');
+    });
+    
+    if ($scope.feedback) {
+        $scope.feedback.on = false;
+    } else {
+        $scope.feedback = {
+	        on: false
+        }
+    }
+};
+
+/*
+$scope.sessionSearch = function() { 
+    $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
+};
+*/
+    
+$scope.getNearby = function($event) {
+	$scope.nearbyLoading = true;
+	worldTree.getNearby().then(function(data) {
+		$scope.altBubbles = data.liveAndInside;
+		$scope.nearbyBubbles = data.live;
+		$scope.nearbyLoading = false;
+	}, function(reason) {
+		console.log('getNearby error');
+		console.log(reason);
+		$scope.nearbyLoading = false;
+	})
+	$event.stopPropagation();
+}
+}]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
@@ -11584,7 +10564,6 @@ app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', '
 }]);
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
 
-	// olark('api.box.show'); //shows olark tab on this page
 
 	var style = styleManager;
 
@@ -11609,9 +10588,6 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 }]);
 
 function WelcomeController($scope, $window, $location, styleManager, $rootScope) {
-
-	// olark('api.box.show'); //shows olark tab on this page
-
 	var style = styleManager;
 
 	style.navBG_color = "rgba(173, 212, 224, 0.8)";
@@ -11637,9 +10613,7 @@ function WelcomeController($scope, $window, $location, styleManager, $rootScope)
  * Login controller
  **********************************************************************/
 app.controller('LoginCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
-
-  olark('api.box.show'); //shows olark tab on this page
-
+	
   //if already logged in
   if ($rootScope.showLogout){
     $location.url('/profile');
@@ -11697,9 +10671,6 @@ $scope.socialLogin = function(type){
 
 app.controller('SignupCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', 
 function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
-
-  olark('api.box.show'); //shows olark tab on this page
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
@@ -11747,8 +10718,6 @@ function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
 app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $http, $location, apertureService, alertManager) {
 
-  olark('api.box.show'); //shows olark tab on this page
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
 
@@ -11783,9 +10752,6 @@ app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService',
 
 
 app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
-
-  olark('api.box.show'); //shows olark tab on this page
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
 
@@ -11843,8 +10809,6 @@ $scope.subnav = {
 }
 var saveTimer = null;
 var alert = alertManager;
-
-olark('api.box.show'); //shows olark tab on this page
 
 $scope.onAvatarSelect = function($files) {
 	var file = $files[0];
@@ -11977,6 +10941,27 @@ $scope.deleteWorld = function(i) {
 	  });
 	  }
   	}
+  
+$scope.deleteBubble = function(_id) {
+	var deleteConfirm = confirm("Are you sure you want to delete this?");
+	if (deleteConfirm) {
+		Landmark.del({_id: _id}, function(data) {
+		//$location.path('/');
+		console.log('##Delete##');
+		console.log(data);
+		var removeIndex = $scope.worlds.findIndex(function(element, index, array) {
+			if (element._id == _id) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+		if (removeIndex != -1) {
+			$scope.worlds.splice(removeIndex, 1);
+		}
+	  });
+	 }
+}
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
@@ -12091,8 +11076,6 @@ var style = styleManager;
 var alerts = alertManager;
 //$scope.aperture = apertureService;
 var aperture = apertureService;
-
-olark('api.box.hide'); //shows olark tab on this page
 
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
@@ -12286,7 +11269,6 @@ angular.extend($rootScope, {loading: false});
 
 
 var style = styleManager;
-olark('api.box.hide'); //shows olark tab on this page
 
 var sinceID = 'none';
 var firstScroll = true;
@@ -12577,24 +11559,17 @@ $scope.landmarks = [];
 $scope.lookup = {};
 
 $scope.collectedPresents = [];
-
-angular.extend($rootScope, {loading: false});
 	
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
 
-if (olark){
-	olark('api.box.hide'); //hides olark tab on this page
-}
-
-	//currently only for upcoming...
+//currently only for upcoming...
 
   	
   	
 function reorderById (idArray) {
 	console.log('reorderById');
-	var tempLandmarks = angular.copy($scope.landmarks);
 	$scope.upcoming = [];
 	
 	for (var i = 0, len = idArray.length; i<len; i++) {
@@ -12607,7 +11582,7 @@ function reorderById (idArray) {
 			i--;
 		}
 	}
-
+	console.log($scope.landmarks, $scope.upcoming);
 }
 
   	

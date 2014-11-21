@@ -16,24 +16,17 @@ $scope.landmarks = [];
 $scope.lookup = {};
 
 $scope.collectedPresents = [];
-
-angular.extend($rootScope, {loading: false});
 	
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
 
-if (olark){
-	olark('api.box.hide'); //hides olark tab on this page
-}
-
-	//currently only for upcoming...
+//currently only for upcoming...
 
   	
   	
 function reorderById (idArray) {
 	console.log('reorderById');
-	var tempLandmarks = angular.copy($scope.landmarks);
 	$scope.upcoming = [];
 	
 	for (var i = 0, len = idArray.length; i<len; i++) {
@@ -46,7 +39,7 @@ function reorderById (idArray) {
 			i--;
 		}
 	}
-
+	console.log($scope.landmarks, $scope.upcoming);
 }
 
   	

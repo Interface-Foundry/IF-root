@@ -2,9 +2,7 @@
  * Login controller
  **********************************************************************/
 app.controller('LoginCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
-
-  olark('api.box.show'); //shows olark tab on this page
-
+	
   //if already logged in
   if ($rootScope.showLogout){
     $location.url('/profile');
@@ -62,9 +60,6 @@ $scope.socialLogin = function(type){
 
 app.controller('SignupCtrl', ['$scope', '$rootScope', '$http', '$location', 'apertureService', 'alertManager', 
 function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
-
-  olark('api.box.show'); //shows olark tab on this page
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
   $scope.aperture.set('off');
@@ -112,8 +107,6 @@ function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
 
 app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', function ($scope, $http, $location, apertureService, alertManager) {
 
-  olark('api.box.show'); //shows olark tab on this page
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
 
@@ -148,9 +141,6 @@ app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService',
 
 
 app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
-
-  olark('api.box.show'); //shows olark tab on this page
-
   $scope.alerts = alertManager;
   $scope.aperture = apertureService;  
 

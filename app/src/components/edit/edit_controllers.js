@@ -11,8 +11,6 @@ zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
 aperture.set('full');
 
-olark('api.box.show'); //shows olark tab on this page
-
 $scope.mapThemeSelect = 'arabesque';
 
 $scope.kinds = [

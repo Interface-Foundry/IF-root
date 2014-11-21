@@ -58,7 +58,7 @@
 
 <ul class="world-sq-container" ng-hide="fromMessages">
 
-	<li class="col-xs-12" ng-show="fromMeetup">
+	<li class="col-xs-12" ng-if="fromMeetup">
 		<div class="meetup-well well">
 			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/718.gif"></span>
 			<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below. Click on any Meetup then click <b>Set Up Meetup</b></span>
@@ -86,11 +86,18 @@
 	<div class="bubble-inspector-wrap">
 	<header class="bubble-inspector-header">
 		<a if-href="#w/{{selected.id}}" class="bubble-inspector-title">{{selected.name}}</a>
+		<button class="bubble-inspector-close" ng-click="selected = undefined">x</button>
 	</header>
 	<img class="bubble-inspector-avatar" if-src="{{selected.avatar}}">
 	<div class="bubble-inspector-info">
 		<a class="bubble-inspector-btn" style="float:left;" if-href="#w/{{selected.id}}">View</a>
 		<a class="bubble-inspector-btn" style="float:right;" if-href="#edit/w/{{selected.id}}">Edit</a>
+		<div class="bubble-inspector-info-data">
+			<div><label>Views: {{selected.views}}</label></div>
+			<div><label>Summary</label></div>
+			<p>{{selected.summary || 'No summary'}}</p>
+		</div>
+		<button class="bubble-inspector-btn-delete" ng-click="deleteBubble(selected._id); selected = undefined">Delete</button> 
 	</div>
 	</div>
 </div>

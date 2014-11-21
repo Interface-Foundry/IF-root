@@ -31,6 +31,7 @@ body {
   /*width:384px;*/ 
   max-width:100%;
   -webkit-overflow-scrolling: touch;
+  z-index: 0;
 }
 
 .navfix {

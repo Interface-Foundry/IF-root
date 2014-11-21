@@ -1,6 +1,6 @@
 app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
-    olark('api.box.hide'); //hides olark tab on this page
-    $rootScope.showSwitch = false;
+	
+	$rootScope.showSwitch = false;
     var aperture = apertureService
     aperture.set('off');
     //query tweets
@@ -20,7 +20,7 @@ app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
 }]);
 
 app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function( $location, $scope, db, $rootScope,$routeParams, apertureService) {
-    olark('api.box.hide'); //hides olark tab on this page
+
 	var aperture = apertureService;
 	aperture.set('off');
     $rootScope.showSwitch = false;  
@@ -37,7 +37,6 @@ app.controller('InstalistCtrl', ['$location', '$scope', 'db', '$rootScope', '$ro
 }]);
 
 function TalktagCtrl( $location, $scope, $routeParams, db, $rootScope) {
-    olark('api.box.hide'); //hides olark tab on this page
 
     $rootScope.showSwitch = false;
 
@@ -61,8 +60,6 @@ TalktagCtrl.$inject = [ '$location', '$scope', '$routeParams', 'db', '$rootScope
 
 
 function MenuCtrl( $location, $scope, db, $routeParams, $rootScope) {
-    olark('api.box.hide'); //hides olark tab on this page
-
 
     // TURN THIS PAGE INTO RAW HTML PAGE, A LA MENU page
     shelfPan('return');
@@ -90,9 +87,7 @@ MenuCtrl.$inject = [ '$location', '$scope', 'db', '$routeParams', '$rootScope'];
 
 
 function ListCtrl( $location, $scope, db, $routeParams, $rootScope) {
-    olark('api.box.hide'); //hides olark tab on this page
-
-
+	
     shelfPan('return');
 
     window.scrollTo(0, 0);

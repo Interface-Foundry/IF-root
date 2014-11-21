@@ -18,6 +18,10 @@ nav {
 	margin-top: 40px;
 }
 
+.subnavfix {
+	
+}
+
 .subnav-header {
 	display: block;
 	font-size: 20px;
@@ -91,6 +95,10 @@ span.subnav-back-chevron {
 	padding: 8px;
 	background: #e6e6e6;
 	overflow: auto;
+}
+
+.surface.profile-surface {
+	padding-top: 96px;
 }
 
 .surface.landmark-surface {
@@ -427,6 +435,18 @@ opacity: 1;
 	transform: translate3d(-248px,0px,0px);
 }
 
+.bubble-inspector-close {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	width: 48px;
+	height: 48px;
+	background: url('img/icons/ic_clear_white_24dp.png') 16px 8px e('/') 24px 24px no-repeat;
+	color: transparent;
+	border: none;
+	outline: none;
+}
+
 .bubble-inspector-wrap {
 	position: relative;
 	width: 100%;
@@ -479,8 +499,13 @@ a.bubble-inspector-title {
 	z-index: 5;
 }
 
+.bubble-inspector-info-data {
+	min-height: 200px; 
+	padding: 8px; 
+}
 
-a.bubble-inspector-btn {
+
+.bubble-inspector-btn, a.bubble-inspector-btn {
 	display: block;
 	float: left;
 	
@@ -498,6 +523,12 @@ a.bubble-inspector-btn {
 	&:hover {
 		color: #FFF;
 	}
+}
+
+.bubble-inspector-btn-delete {
+	.bubble-inspector-btn;
+	background: #F44336;	
+	width: 100%;
 }
 
 .marble-label {
@@ -663,36 +694,68 @@ a.bubble-inspector-btn {
 .user-chip-wrap {
 	width: 100%;
 	height: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
-	.user-chip {
+
+.user-chip {
+	width: 56px;
+	height: 32px;
+	margin: 4px 0px 0px 4px;
+	border-radius: 3px;
+	box-shadow: 0px 1px 1px rgba(0,0,0,.2);
+	background: #FFF;
+	cursor: pointer;
+	
+	text-align: center;
+	color: #777;
+	font-weight: 600;
+	
+	@media only screen and (min-width: 480px) {
+		min-width: 56px;
 		width: auto;
-		height: 32px;
-		margin: 4px 0px 0px 4px;
-		border-radius: 3px;
-		box-shadow: 0px 1px 1px rgba(0,0,0,.2);
-		background: #FFF;
-		cursor: pointer;
+		max-width: 120px;
+		text-align: left;
+		font-weight: 400;
 	}
+}
 	
-	.user-chip-label, .user-chip-label.auth {
-		display: inline;
-		line-height: 32px;
-		font-size: 14px;
-		margin: 0px 8px;
-	}
+.user-chip-label, .user-chip-label.auth {
+	display: block;
+	float: left;
+	line-height: 32px;
+	font-size: 14px;
+	margin: 0px 8px;
+}
 	
-	.user-chip-label.auth {
-		margin: 0px 8px 0px 0px;
-	}
+@media only screen and (min-width: 480px) {
+.user-chip-label.auth {
+	margin: 0px 8px 0px 0px;
+}
+}	
 	
-	.user-chip-img {
-		height: 24px;
-		width: 24px;
-		border-radius: 12px;
-		margin: 4px;
-		
-	}
+.user-chip-img {
+	display: block;
+	float: left;
+	height: 24px;
+	width: 24px;
+	border-radius: 12px;
+	margin: 4px;
+}
 /* } */
+
+@media only screen and (max-width: 480px) {	
+.show-480 {
+	display: none !important;
+}
+}
+
+@media only screen and (min-width: 480px) {	
+	.hide-480 {
+		display: none !important;
+	}
+}
 
 .nav-user-menu {
 	position: absolute;
@@ -705,6 +768,9 @@ a.bubble-inspector-btn {
 	.noselect;
 	overflow: hidden;
 	z-index: 101;
+	text-align: left;
+	font-weight: 400;
+	color: #333;
 }
 
 .nav-user-menu-img {
@@ -801,6 +867,9 @@ input.auth-input {
 	padding: 0;
 	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
 }
+
+
+
 
 ///SOCIAL
 

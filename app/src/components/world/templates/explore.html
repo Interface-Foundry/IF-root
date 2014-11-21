@@ -23,7 +23,7 @@
 	Upcoming
 </header>
 <article ng-init="foldSize = 3">
-	<div class="explore-media clearfix" ng-repeat="landmark in upcoming | limitTo: foldSize" ng-click="go('w/'+world.id+'/'+landmark.id)">
+	<div class="explore-media clearfix" ng-repeat="landmark in upcoming | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
 		<img if-src="{{::landmark.avatar}}" class="media-object">
 		<div class="explore-media-body">
 		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
@@ -46,7 +46,7 @@
 	Explore
 </header>
 <article ng-init="foldSize = 3">
-	<div class="explore-media clearfix" ng-repeat="landmark in landmarks | limitTo: foldSize" ng-click="go('w/'+world.id+'/'+landmark.id)">
+	<div class="explore-media clearfix" ng-repeat="landmark in landmarks | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
 		<img if-src="{{::landmark.avatar}}" class="media-object">
 		<div class="explore-media-body">
 		<h3 class="explore-media-heading">{{::landmark.name}}</h3>

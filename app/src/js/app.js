@@ -14,7 +14,6 @@ var checkLoggedin = function(userManager) {
     return userManager.checkLogin();
 }
 
-
     //================================================
     
     //================================================
@@ -28,8 +27,7 @@ var checkLoggedin = function(userManager) {
 		    			request.url = 'https://bubbl.li' + request.url; 
 	    			}
 	    			//@ENDIF
-	    			
-	    			
+
 	    		return request;
     		},
 	    	'response': function(response) {

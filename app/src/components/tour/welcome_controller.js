@@ -1,7 +1,4 @@
 function WelcomeController($scope, $window, $location, styleManager, $rootScope) {
-
-	// olark('api.box.show'); //shows olark tab on this page
-
 	var style = styleManager;
 
 	style.navBG_color = "rgba(173, 212, 224, 0.8)";

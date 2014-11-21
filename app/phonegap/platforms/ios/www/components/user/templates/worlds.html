@@ -58,7 +58,7 @@
 
 <ul class="world-sq-container" ng-hide="fromMessages">
 
-	<li class="col-xs-12" ng-show="fromMeetup">
+	<li class="col-xs-12" ng-if="fromMeetup">
 		<div class="meetup-well well">
 			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/718.gif"></span>
 			<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below. Click on any Meetup then click <b>Set Up Meetup</b></span>

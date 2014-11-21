@@ -12,8 +12,6 @@ var alerts = alertManager;
 //$scope.aperture = apertureService;
 var aperture = apertureService;
 
-olark('api.box.hide'); //shows olark tab on this page
-
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
 	

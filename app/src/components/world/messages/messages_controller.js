@@ -24,7 +24,6 @@ angular.extend($rootScope, {loading: false});
 
 
 var style = styleManager;
-olark('api.box.hide'); //shows olark tab on this page
 
 var sinceID = 'none';
 var firstScroll = true;

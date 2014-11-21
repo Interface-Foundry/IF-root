@@ -10,8 +10,6 @@ $scope.subnav = {
 var saveTimer = null;
 var alert = alertManager;
 
-olark('api.box.show'); //shows olark tab on this page
-
 $scope.onAvatarSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
@@ -143,6 +141,27 @@ $scope.deleteWorld = function(i) {
 	  });
 	  }
   	}
+  
+$scope.deleteBubble = function(_id) {
+	var deleteConfirm = confirm("Are you sure you want to delete this?");
+	if (deleteConfirm) {
+		Landmark.del({_id: _id}, function(data) {
+		//$location.path('/');
+		console.log('##Delete##');
+		console.log(data);
+		var removeIndex = $scope.worlds.findIndex(function(element, index, array) {
+			if (element._id == _id) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+		if (removeIndex != -1) {
+			$scope.worlds.splice(removeIndex, 1);
+		}
+	  });
+	 }
+}
 
 $scope.newWorld = function() {
 	console.log('newWorld()');

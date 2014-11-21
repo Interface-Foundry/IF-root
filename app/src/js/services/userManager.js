@@ -25,7 +25,6 @@ userManager.getUser = function() {
 		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user && user!=0) {
-				$rootScope.user = user; 
 				userManager._user = user;
 				deferred.resolve(user);
 			} else {
@@ -59,11 +58,14 @@ userManager.getDisplayName = function() {
 			else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
 			else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
 			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
-			else { displayName = "Me"; console.log("how did this happen???");}
+			else {displayName = "Me"; console.log("how did this happen???");}
 			
-			displayName = displayName.substring(0, displayName.indexOf(" "));
+			var _displayName = displayName.substring(0, displayName.indexOf(" "));
 			
-			userManager._displayName = displayName;
+			userManager._displayName = _displayName;
+			
+			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');
+			
 			deferred.resolve(displayName);
 		}, function(reason) {
 			deferred.reject(reason);

@@ -3,7 +3,7 @@
 angular.module('tidepoolsServices')
     .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
     	function(alertManager, $interval, $timeout, beaconData) {
-//@IFDEF WEB
+//@IFNDEF IBEACON
 var beaconManager = {
 	supported: false
 }
@@ -11,7 +11,7 @@ var beaconManager = {
 return beaconManager;
 //@ENDIF
 	    	
-//@IFDEF PHONEGAP
+//@IFDEF IBEACON
 var alerts = alertManager;
 
 var beaconManager = {
