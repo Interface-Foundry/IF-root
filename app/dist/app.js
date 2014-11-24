@@ -6954,14 +6954,14 @@ angular.module('tidepoolsServices')
 function() {
 var ifGlobals = {
 	kinds: {
-		Convention: {name: 'Convention', hasTime: true, img: 'convention.png'},
-		Event: {name: 'Event', hasTime: true, img: 'event.png'},
-		Neighborhood: {name: 'Neighborhood', hasTime: false, img: 'neighborhood.png'},
-		Venue: {name: 'Venue', hasTime: false, img: 'venue.png'},
-		Park: {name: 'Park', hasTime: false, img: 'park.png'},
-		Retail: {name: 'Retail', hasTime: false, img: 'retail.png'},
-		Campus: {name: 'Campus', hasTime: false, img: 'campus.png'},
-		Home: {name: 'Home', hasTime: false, img: 'home.png'},
+		Convention: {name: 'Convention', hasTime: true, img: 'convention.png', icon: 'convention.svg'},
+		Event: {name: 'Event', hasTime: true, img: 'event.png', icon: 'event.svg'},
+		Neighborhood: {name: 'Neighborhood', hasTime: false, img: 'neighborhood.png', icon: 'neighborhood.svg'},
+		Venue: {name: 'Venue', hasTime: false, img: 'venue.png', icon: 'venue.svg'},
+		Park: {name: 'Park', hasTime: false, img: 'park.png', icon: 'park.svg'},
+		Retail: {name: 'Retail', hasTime: false, img: 'retail.png', icon: 'retail.svg'},
+		Campus: {name: 'Campus', hasTime: false, img: 'campus.png', icon: 'campus.svg'},
+		Home: {name: 'Home', hasTime: false, img: 'home.png', icon: 'home.svg'},
 		Other: {name: 'Other', hasTime: false, img: 'other.png'}
 	}
 }
@@ -10790,7 +10790,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 }]); 
 
 
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -10799,6 +10799,9 @@ $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
+
+$scope.kinds = ifGlobals.kinds;
+
 var saveTimer = null;
 var alert = alertManager;
 

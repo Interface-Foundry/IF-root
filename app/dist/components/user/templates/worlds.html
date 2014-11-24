@@ -69,14 +69,15 @@
 
 	<li>
 
-	<div class="profile-add-new" ng-click="newWorld()" ng-hide="waitingforMeetup">
+	<button class="profile-add-new" ng-click="newWorld()" ng-hide="waitingforMeetup">
 		<div class="profile-add-new-plus">+</div>
 		<span>Create New Bubble</span>
-	</div>
+	</button>
 	</li>
 	<li>
 	<ul class="bubble-list">
 		<li class="bubble-list-item" ng-repeat="world in ::worlds track by world._id" ng-click="$parent.selected = world" ng-class="{'selected': selected == world}">
+			<img if-src="img/icons/kind/{{::kinds[world.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 			<span>{{::world.name}}</span>
 		</li>
 	</ul>

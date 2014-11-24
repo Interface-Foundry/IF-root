@@ -1,4 +1,4 @@
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -7,6 +7,9 @@ $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
+
+$scope.kinds = ifGlobals.kinds;
+
 var saveTimer = null;
 var alert = alertManager;
 
