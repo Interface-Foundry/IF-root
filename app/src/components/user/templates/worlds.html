@@ -75,11 +75,33 @@
 	</div>
 	</li>
 	<li>
-	<ul class="bubble-list">
-		<li class="bubble-list-item" ng-repeat="world in ::worlds track by world._id" ng-click="$parent.selected = world" ng-class="{'selected': selected == world}">
-			<span>{{::world.name}}</span>
-		</li>
-	</ul>
+	<span ng-show="eventTimes.length">
+		<h4>Event Worlds</h4>
+		<ul class="bubble-list">
+			<span ng-repeat="timecat in ::eventTimes">
+				<h4>{{timecat.fuzzyHeader}}</h4>
+				<!-- <p>In the past? {{timecat.fuzzyPast}}</p> -->
+				<li class="bubble-list-item" ng-repeat="world in ::timecat.fuzzyEvents track by world._id" ng-click="$parent.selected = world" ng-class="{'selected': selected == world}">
+					<img width="50" style="margin-left:-61px; margin-top:-8px; border-radius:20px;" ng-src="{{::world.avatar}}">
+					<b><span>{{::world.name}}</span></b>
+					<span>{{::world.time.start}}</span>
+				</li>
+			</span>
+		</ul>
+	</span>
+
+	<span ng-show="staticWorlds.length">
+		<h4>Static Worlds</h4>
+		<ul class="bubble-list">
+			<li class="bubble-list-item" ng-repeat="world in ::staticWorlds track by world._id" ng-click="$parent.selected = world" ng-class="{'selected': selected == world}">
+							
+				<img width="50" style="margin-left:-61px; margin-top:-8px; border-radius:20px;" ng-src="{{::world.avatar}}">
+				<b><span>{{::world.name}}</span></b>
+				<span>{{::world.time.start}}</span>
+			</li>
+		</ul>
+	</span>
+
 	</li>
 </ul>
 <div class="bubble-inspector" ng-class="{'selected': selected}">
@@ -101,3 +123,7 @@
 	</div>
 	</div>
 </div>
+
+
+
+
