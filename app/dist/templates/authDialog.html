@@ -34,6 +34,7 @@
 			{{userManager.signup.error}}
 		</div>
 		
+		<!-- @ifdef WEB -->
 		<div class="text-center">or</div>
 		
 		<div class="btn-group btn-group-justified">
@@ -50,6 +51,7 @@
 		    	<img src="img/icons/meetup-16.png" width="16px" height="16px"> Meetup</button>
 		  </div>
 		</div>
+		<!-- @endif -->
 		
 	</form>
 	<form ng-submit="userManager.login.login()" name="loginForm" ng-switch-when="login">
@@ -71,6 +73,7 @@
 			Login failed!
 		</div>
 		<a if-href="#forgot">Forgot your password?</a>
+		<!--@ifdef WEB -->
 		<div class="text-center">or</div>
 		
 		<div class="btn-group btn-group-justified">
@@ -87,6 +90,7 @@
 		    	<img src="img/icons/meetup-16.png" width="16px" height="16px"> Meetup</button>
 		  </div>
 		</div>
+		<!-- @endif -->
 	</form>
 </div>
 </div>
