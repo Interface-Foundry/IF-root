@@ -1309,7 +1309,6 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                       res.send(200, [style]);
                     }
                     
-
                     //if parameters from world passed to style, then add to serverwidget object
                     if (req.body.world_id && req.body.hashtag){
                         manageServerWidgets(req.body.world_id, req.body.hashtag, lm.widgets); //add/remove server tags
