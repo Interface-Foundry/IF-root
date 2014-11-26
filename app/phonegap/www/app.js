@@ -4715,9 +4715,6 @@ var checkLoggedin = function(userManager) {
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
-	    			if (request.server) {
-		    			request.url = 'https://bubbl.li' + request.url; 
-	    			}
 	    		return request;
     		},
 	    	'response': function(response) {
@@ -4781,6 +4778,9 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
+$locationProvider.html5Mode({
+	enabled: true
+});
 	  
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
@@ -4793,15 +4793,12 @@ angular.extend($tooltipProvider.defaults, {
 	
 	userManager.checkLogin();
 	
-	navigator.splashscreen.hide();
 });
 
-document.addEventListener('deviceready', onDeviceReady, true);
-function onDeviceReady() {
-	angular.element(document).ready(function() {
-		angular.bootstrap(document, ['IF']);
-	});
-}
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+
+});
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -5450,6 +5447,10 @@ app.directive('ifHref', function() {
 				return;
 				}
 			
+			var firstHash = value.indexOf('#');
+			if (firstHash > -1) {
+				value = value.slice(0, firstHash) + value.slice(firstHash+1);
+			}
 			$attr.$set('href', value);
 			
 			});
@@ -5468,7 +5469,6 @@ app.directive('ifSrc', function() {
 				return;
 				}
 			
-				value = 'https://bubbl.li/'+value;
 				
 				$attr.$set('src', value);
 			
@@ -16484,14 +16484,6 @@ geoService.getLocation = function(maxAge) {
 		}
 
 		function geolocationError(error){
-			if (error.code == 1) {
-				//PERMISSIONS DENIED
-				navigator.notification.alert(
-					'Please enable Location Services for Bubbl.li', 
-					function() {/*send to settings app eventually*/}, 
-					'Location Error',
-					'OK');
-			}
 			deferred.reject(error);
 		}
 	} else {
@@ -16943,21 +16935,26 @@ userGrouping.groupByTime = function (bubbles) {
 	var groups = {
 		places: {
 			label: 'Places',
-			bubbles:[],
-			order: 9
+			bubbles: [],
+			order: 10
 		},
 		today: {
 			label: 'Today',
 			bubbles:[],
-			order: 5
+			order: 6
 		},
 		thisWeek: {
 			label: 'This Week',
 			bubbles: [],
-			order: 4
+			order: 5
 		},
 		thisMonth: {
 			label: 'This Month',
+			bubbles: [],
+			order: 4
+		},
+		nextMonths: {
+			label: 'Next Few Months',
 			bubbles: [],
 			order: 3
 		},
@@ -16974,17 +16971,17 @@ userGrouping.groupByTime = function (bubbles) {
 		lastWeek: {
 			label: 'Last Week',
 			bubbles: [],
-			order: 6
+			order: 7
 		},
 		lastMonth: {
 			label: 'Last Month',
 			bubbles: [],
-			order: 7
+			order: 8
 		},
 		past: {
 			label: 'Past',
 			bubbles: [],
-			order: 8
+			order: 9
 		}
 	}, group, bubble, now = moment();
 
@@ -17006,6 +17003,8 @@ userGrouping.groupByTime = function (bubbles) {
 				groups.thisWeek.bubbles.push(bubble);
 			} else if (startTime.isSame(now, 'month')) {
 				groups.thisMonth.bubbles.push(bubble);
+			} else if (startTime.isBefore(now.add(3, 'months'))) {
+				groups.nextMonths.bubbles.push(bubble);
 			} else if (startTime.isSame(now, 'year')) {
 				groups.thisYear.bubbles.push(bubble);
 			} else {
@@ -17068,7 +17067,7 @@ angular.module('tidepoolsServices')
     	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
     	
 var userManager = {
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -17120,8 +17119,13 @@ userManager.getDisplayName = function() {
 			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
 			else {displayName = "Me"; console.log("how did this happen???");}
 			
-			var _displayName = displayName.substring(0, displayName.indexOf(" "));
-			
+			var i = displayName.indexOf(" ");
+			if (i > -1) {
+				var _displayName = displayName.substring(0, i);
+			} else {
+				var _displayName = displayName;
+			}
+
 			userManager._displayName = _displayName;
 			
 			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');
@@ -19878,6 +19882,16 @@ $scope.save = function() {
     });
     
     if ($scope.style) {
+	    
+	    if ($scope.world.resources){
+    		if ($scope.world.resources.hashtag){
+    			$scope.style.hashtag = $scope.world.resources.hashtag;
+    		}
+    	}
+		if ($scope.world._id){
+    		$scope.style.world_id = $scope.world._id;
+    	}
+	    
     	console.log('saving style');
 	    db.styles.create($scope.style, function(response){
       		console.log(response);
@@ -20130,11 +20144,13 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 }]);
 
-app.controller('HomeController', ['$scope', 'worldTree', function ($scope, worldTree) {
+app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', function ($scope, worldTree, styleManager) {
+	styleManager.resetNavBG();
+	
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
 	$scope.homeBubbles = data.liveAndInside;
-	$scope.nearbyBubbles = data.live;	
+	$scope.nearbyBubbles = data.live;
 	});
 }]);
 app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {

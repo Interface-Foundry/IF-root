@@ -10,21 +10,26 @@ userGrouping.groupByTime = function (bubbles) {
 	var groups = {
 		places: {
 			label: 'Places',
-			bubbles:[],
-			order: 9
+			bubbles: [],
+			order: 10
 		},
 		today: {
 			label: 'Today',
 			bubbles:[],
-			order: 5
+			order: 6
 		},
 		thisWeek: {
 			label: 'This Week',
 			bubbles: [],
-			order: 4
+			order: 5
 		},
 		thisMonth: {
 			label: 'This Month',
+			bubbles: [],
+			order: 4
+		},
+		nextMonths: {
+			label: 'Next Few Months',
 			bubbles: [],
 			order: 3
 		},
@@ -41,17 +46,17 @@ userGrouping.groupByTime = function (bubbles) {
 		lastWeek: {
 			label: 'Last Week',
 			bubbles: [],
-			order: 6
+			order: 7
 		},
 		lastMonth: {
 			label: 'Last Month',
 			bubbles: [],
-			order: 7
+			order: 8
 		},
 		past: {
 			label: 'Past',
 			bubbles: [],
-			order: 8
+			order: 9
 		}
 	}, group, bubble, now = moment();
 
@@ -73,6 +78,8 @@ userGrouping.groupByTime = function (bubbles) {
 				groups.thisWeek.bubbles.push(bubble);
 			} else if (startTime.isSame(now, 'month')) {
 				groups.thisMonth.bubbles.push(bubble);
+			} else if (startTime.isBefore(now.add(3, 'months'))) {
+				groups.nextMonths.bubbles.push(bubble);
 			} else if (startTime.isSame(now, 'year')) {
 				groups.thisYear.bubbles.push(bubble);
 			} else {

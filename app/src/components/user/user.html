@@ -4,6 +4,8 @@
 		<option value="/profile/me">My Profile ⌄</option>
 	</select>
 	<ul class="tab-group" ng-show="state.myProfile">
+				<span ng-click="goBack()" ng-show="fromMessages" style="cursor:pointer;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
+
 		<li class="tab" ng-class="{'selected': state.profile}">
 			<a href="#/profile/me" class="tab-link">Profile</a></li>
 		<li class="tab hidden" ng-class="{'selected': state.contacts}">
@@ -21,7 +23,10 @@
 		</li>
 		<li class="hidden">Drafts</li>
 		<li class="hidden">Filter</li>
-		<li class="tab" ng-class="{'selected':calendarActive}" ng-click="showCalendar()">Calendar</li>
+		<li class="img-tab" ng-click="showCalendar()">
+			<img src="img/icons/calendar-on.png" width="48" height="48" ng-if="calendarActive">
+			<img src="img/icons/calendar-off.png" width="48" height="48" ng-if="!calendarActive">
+		</li>
 	</ul>
 	
 </nav>

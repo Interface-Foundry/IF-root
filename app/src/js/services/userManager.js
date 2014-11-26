@@ -60,8 +60,13 @@ userManager.getDisplayName = function() {
 			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
 			else {displayName = "Me"; console.log("how did this happen???");}
 			
-			var _displayName = displayName.substring(0, displayName.indexOf(" "));
-			
+			var i = displayName.indexOf(" ");
+			if (i > -1) {
+				var _displayName = displayName.substring(0, i);
+			} else {
+				var _displayName = displayName;
+			}
+
 			userManager._displayName = _displayName;
 			
 			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');

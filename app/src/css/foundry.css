@@ -59,6 +59,11 @@ span.subnav-back-chevron {
   -webkit-font-smoothing: antialiased;
   cursor: pointer;
 }
+.img-tab {
+  display: inline-block;
+  height: 48px;
+  cursor: pointer;
+}
 .tab-link {
   color: inherit;
 }
@@ -337,12 +342,11 @@ opacity: 1;
   height: 40px;
   top: 16px;
   left: 16px;
-  text-align: center;
   border-radius: 20px;
   line-height: 40px;
   font-size: 20px;
   color: #fff;
-  background: #2196f3;
+  background: #2196f3 url('img/icons/ic_add_white_48dp.png') center / 24px 24px no-repeat;
 }
 .bubble-list {
   margin: 0px -8px;
@@ -396,6 +400,11 @@ opacity: 1;
 .bubble-list-item.selected {
   background: #2962ff;
   color: #FFF;
+}
+.bubble-date {
+  position: absolute;
+  left: 96px;
+  bottom: 8px;
 }
 .bubble-inspector {
   position: fixed;
@@ -688,7 +697,6 @@ a.bubble-inspector-btn:hover {
 .user-chip-label,
 .user-chip-label.auth {
   display: block;
-  float: left;
   line-height: 32px;
   font-size: 14px;
   margin: 0px 8px;
@@ -696,6 +704,7 @@ a.bubble-inspector-btn:hover {
 @media only screen and (min-width: 480px) {
   .user-chip-label.auth {
     margin: 0px 8px 0px 0px;
+    float: left;
   }
 }
 .user-chip-img {
