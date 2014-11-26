@@ -1,4 +1,4 @@
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -7,6 +7,10 @@ $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
+
+
+$scope.kinds = ifGlobals.kinds;
+
 var saveTimer = null;
 var alert = alertManager;
 
@@ -48,6 +52,38 @@ $scope.update = function(tab) {
 	if ($scope.state.myWorlds) {$scope.menuLink = '/profile/worlds';}
 	
 	console.log($scope.state);
+}
+
+
+$scope.inspect = function(bubble) {
+	if (bubble) {
+		$scope.selected = bubble;
+	} else {
+		$scope.selected = false;
+	}
+}
+
+$scope.inspectEvent = function(calEvent) {
+	console.log('test');
+	$scope.inspect(calEvent.bubble);
+}
+
+$scope.showCalendar = function() {
+	if ($scope.calendarActive) {
+		$scope.calendarActive = false;
+	} else if ($scope.calendarLoaded) {
+		$scope.calendarActive = true;
+	} else {
+		$scope.calendar = {events: userGrouping.groupForCalendar($scope.bubbles)}
+		$scope.calendarLoaded = true;
+		$scope.calendarActive = true;
+	}	
+}
+
+
+$scope.calConfig = {
+	// 	height: 360,
+		eventClick: $scope.inspectEvent
 }
 
 ////////////////////////////////////////////////////////////
@@ -109,14 +145,17 @@ else {
 	$http.get('/api/user/profile', {server: true}).success(function(user){
 		console.log(user);
 		
-		//$scope.worlds = user;	
+		//$scope.worlds = user;
+		$scope.groups = userGrouping.groupByTime(user);
+		console.log($scope.groups);
+		
+		$scope.bubbles = user;
 
-
-
-		sortWorlds(user);
+		//sortWorlds(user);
 	});
 }
 
+/*
 function sortWorlds(user,incoming){
 
 
@@ -216,6 +255,7 @@ function sortWorlds(user,incoming){
 	
 
 }
+*/
 
 //if came from meetup, keep checking for new meetups until route change
 function checkProfileUpdates(){
@@ -299,17 +339,9 @@ $scope.deleteBubble = function(_id) {
 		//$location.path('/');
 		console.log('##Delete##');
 		console.log(data);
-		var removeIndex = $scope.worlds.findIndex(function(element, index, array) {
-			if (element._id == _id) {
-				return true;
-			} else {
-				return false;
-			}
+		
+		$route.reload();
 		});
-		if (removeIndex != -1) {
-			$scope.worlds.splice(removeIndex, 1);
-		}
-	  });
 	 }
 }
 
