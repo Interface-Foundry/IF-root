@@ -34,7 +34,13 @@
 	</header>
 	
 	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-if="!homeBubbles" class="text-center">Loading...</li>
+		<li ng-if="!homeBubbles" class="text-center">
+		<div class="loading-spinner">
+			<div class="lspin1"></div>
+			<div class="lspin2"></div>
+		</div>
+		<span class="lightblue500">Loading...</span>
+		</li>
 		<li ng-repeat="bubble in homeBubbles track by bubble._id" 
 			ng-if="homeBubbles.length>0"
 			class="nearby-list-item if-animate">
@@ -69,7 +75,13 @@
 	Nearby
 	</header>
 	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-if="!nearbyBubbles" class="text-center">Loading...</li>
+		<li ng-if="!nearbyBubbles" class="text-center">
+					<div class="loading-spinner">
+			<div class="lspin1"></div>
+			<div class="lspin2"></div>
+		</div>
+		<span class="lightblue500">Loading...</span>
+		</li>
 		<li ng-repeat="bubble in nearbyBubbles track by bubble._id"
 			ng-if="nearbyBubbles.length>0"
 			class="nearby-list-item if-animate">
