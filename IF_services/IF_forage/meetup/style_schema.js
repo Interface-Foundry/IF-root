@@ -44,7 +44,8 @@ module.exports = {
 			icebreaker:Boolean,
 			photo_share:Boolean,
 			stickers:Boolean,
-			presents:Boolean
+			presents:Boolean,
+			streetview: Boolean
 		}
     },
 

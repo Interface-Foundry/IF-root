@@ -134,6 +134,55 @@ function loadWidgets() {
 		if ($scope.style.widgets.instagram == true) {
 			$scope.instagram = true;
 		}
+		if ($scope.style.widgets.streetview == true) {
+
+			//var mapAPI = '&key=AIzaSyDbEMuXZS67cFLAaTtmrKjFNlrdNm1H-KE';
+			var mapAPI = '';
+
+			$scope.streetview = true;
+
+			if($scope.world.source_meetup){
+				if($scope.world.source_meetup.venue){
+					if(!$scope.world.source_meetup.venue.address_1){
+
+						var venueArr = [];
+
+						typeof $scope.world.source_meetup.venue.address_1 && venueArr.push($scope.world.source_meetup.venue.address_1);
+						typeof $scope.world.source_meetup.venue.address_2 && venueArr.push($scope.world.source_meetup.venue.address_2);
+						typeof $scope.world.source_meetup.venue.city && venueArr.push($scope.world.source_meetup.venue.city);
+						typeof $scope.world.source_meetup.venue.state && venueArr.push($scope.world.source_meetup.venue.state);
+						typeof $scope.world.source_meetup.venue.zip && venueArr.push($scope.world.source_meetup.venue.zip);
+						typeof $scope.world.source_meetup.venue.country && venueArr.push($scope.world.source_meetup.venue.country);
+
+						venueArr = venueArr.join("+").replace(/ /g,"+");
+						$scope.streetviewLoc = venueArr + mapAPI;
+
+					}
+					else{
+						coordsURL();
+					}
+				}
+				else{
+					coordsURL();
+				}
+			}
+			else {
+				coordsURL();
+			}
+
+			function coordsURL(){
+				if ($scope.world.loc){
+					if ($scope.world.loc.coordinates){
+						if ($scope.world.loc.coordinates.length){
+							$scope.streetviewLoc = $scope.world.loc.coordinates[1]+','+$scope.world.loc.coordinates[0] + mapAPI;
+
+						}
+						
+					}
+				}
+			}
+
+		}
 		if ($scope.style.widgets.presents && $scope.world.landmarkCategories) {
 			$scope.temp = {
 				showInitialPresent: true,

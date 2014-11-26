@@ -174,7 +174,8 @@ module.exports = {
 			category: Boolean,
 			googledoc: Boolean,
 			checkin: Boolean,
-			presents: Boolean
+			presents: Boolean,
+			streetview: Boolean
 		},
 		presents: {
 			final_kind: String,

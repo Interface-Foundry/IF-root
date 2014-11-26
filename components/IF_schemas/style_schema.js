@@ -37,7 +37,8 @@ var mongoose = require('mongoose');
 			upcoming: Boolean,
 			category: Boolean,
 			messages: Boolean,
-			presents: Boolean
+			presents: Boolean,
+			streetview: Boolean
 		}
 	}); 
 

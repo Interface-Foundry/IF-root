@@ -1187,7 +1187,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         					upcoming: false,
         					category: false,
                   messages: true,
-                  presents: false
+                  presents: false,
+                  streetview: false
         				}
             });
             
@@ -1293,6 +1294,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         			lm.widgets.category = req.body.widgets.category;
         			lm.widgets.messages = req.body.widgets.messages;
               lm.widgets.presents = req.body.widgets.presents;
+              lm.widgets.streetview = req.body.widgets.streetview;
       			}
 			
             lm.save(function(err, style) {
