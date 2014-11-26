@@ -46,8 +46,8 @@
 			<div><label>Views: {{selected.views}}</label></div>
 			<div><label>Summary</label></div>
 			<p>{{selected.summary || 'No summary'}}</p>
-			<div ng-if="selected.time.start"><label>Date: {{selected.time.start | date: 'short'}}</label></div>
-			<div ng-if="selected.time.end"><label>Ends: {{selected.time.end | date: 'short'}}</label></div>
+			<div ng-if="selected.time.start"><label>Starts on {{selected.time.start | date: 'short'}}</label></div>
+			<div ng-if="selected.time.end"><label>Ends {{selected.time.end | date: 'short'}}</label></div>
 		</div>
 		<button class="bubble-inspector-btn-delete" ng-click="deleteBubble(selected._id); selected = undefined">Delete</button> 
 	</div>

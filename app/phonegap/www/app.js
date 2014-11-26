@@ -19890,6 +19890,16 @@ $scope.save = function() {
     });
     
     if ($scope.style) {
+	    
+	    if ($scope.world.resources){
+    		if ($scope.world.resources.hashtag){
+    			$scope.style.hashtag = $scope.world.resources.hashtag;
+    		}
+    	}
+		if ($scope.world._id){
+    		$scope.style.world_id = $scope.world._id;
+    	}
+	    
     	console.log('saving style');
 	    db.styles.create($scope.style, function(response){
       		console.log(response);
