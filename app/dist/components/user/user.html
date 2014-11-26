@@ -21,7 +21,10 @@
 		</li>
 		<li class="hidden">Drafts</li>
 		<li class="hidden">Filter</li>
-		<li class="tab" ng-class="{'selected':calendarActive}" ng-click="showCalendar()">Calendar</li>
+		<li class="img-tab" ng-click="showCalendar()">
+			<img src="img/icons/calendar-on.png" width="48" height="48" ng-if="calendarActive">
+			<img src="img/icons/calendar-off.png" width="48" height="48" ng-if="!calendarActive">
+		</li>
 	</ul>
 	
 </nav>

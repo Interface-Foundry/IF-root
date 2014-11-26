@@ -9,7 +9,7 @@
 	<div class="clearfix"></div>
 
 	<button class="profile-add-new" ng-click="newWorld()" ng-hide="waitingforMeetup">
-		<div class="profile-add-new-plus">+</div>
+		<div class="profile-add-new-plus"></div>
 		<span>Create New Bubble</span>
 	</button>
 	
@@ -17,7 +17,7 @@
 	<header class="bubble-group-label">{{group.label}}</header>
 	<ul class="bubble-list">
 	<li class="bubble-list-item" ng-repeat="bubble in ::group.bubbles track by bubble._id" 
-		ng-click="inspect(bubble)" 
+		ng-click="inspect(bubble)"
 		ng-class="{'selected': selected == bubble}">
 		<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 		<span>{{::bubble.name}}</span>
@@ -46,6 +46,8 @@
 			<div><label>Views: {{selected.views}}</label></div>
 			<div><label>Summary</label></div>
 			<p>{{selected.summary || 'No summary'}}</p>
+			<div ng-if="selected.time.start"><label>Date: {{selected.time.start | date: 'short'}}</label></div>
+			<div ng-if="selected.time.end"><label>Ends: {{selected.time.end | date: 'short'}}</label></div>
 		</div>
 		<button class="bubble-inspector-btn-delete" ng-click="deleteBubble(selected._id); selected = undefined">Delete</button> 
 	</div>
