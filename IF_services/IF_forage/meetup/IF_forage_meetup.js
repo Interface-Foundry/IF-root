@@ -371,12 +371,13 @@ function searchMeetup(tag, done) {
 						            st.widgets.googledoc = forumStyle.googledoc;
 						            st.widgets.checkin = forumStyle.checkin;
 
-						            //Meetup tests
+						            //Meetup tests  
 						            st.widgets.messages = forumStyle.widgets.messages;
 						            st.widgets.mailing_list = forumStyle.widgets.mailing_list;
 						            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
 						            st.widgets.photo_share = forumStyle.widgets.photo_share;
 						            st.widgets.stickers = forumStyle.widgets.stickers;
+						            st.widgets.streetview = forumStyle.widgets.streetview;
 
 						            
 						            function saveIt(callback){
@@ -739,12 +740,12 @@ function searchMeetupGroups(tag, userID, done) {
 						            st.widgets.checkin = forumStyle.widgets.checkin;
 
 						            //Meetup tests
-						            st.widgets.chat = forumStyle.widgets.chat;
+						            st.widgets.messages = forumStyle.widgets.messages;
 						            st.widgets.mailing_list = forumStyle.widgets.mailing_list;
 						            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
 						            st.widgets.photo_share = forumStyle.widgets.photo_share;
 						            st.widgets.stickers = forumStyle.widgets.stickers;
-
+						            st.widgets.streetview = forumStyle.widgets.streetview;
 						            
 						            function saveIt(callback){
 						            	

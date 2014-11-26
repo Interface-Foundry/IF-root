@@ -20273,7 +20273,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 
 	var style = styleManager;
 
-	style.navBG_color = "rgba(173, 212, 224, 0.8)";
+	//style.navBG_color = "#FFFAB4";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -20296,7 +20296,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
 	var style = styleManager;
 
-	style.navBG_color = "rgba(173, 212, 224, 0.8)";
+	//style.navBG_color = "#FFFAB4";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -21574,7 +21574,7 @@ function loadWidgets() {
 
 			if($scope.world.source_meetup){
 				if($scope.world.source_meetup.venue){
-					if(!$scope.world.source_meetup.venue.address_1){
+					if($scope.world.source_meetup.venue.address_1){
 
 						var venueArr = [];
 
@@ -21587,7 +21587,6 @@ function loadWidgets() {
 
 						venueArr = venueArr.join("+").replace(/ /g,"+");
 						$scope.streetviewLoc = venueArr + mapAPI;
-
 					}
 					else{
 						coordsURL();

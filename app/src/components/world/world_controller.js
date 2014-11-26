@@ -143,7 +143,7 @@ function loadWidgets() {
 
 			if($scope.world.source_meetup){
 				if($scope.world.source_meetup.venue){
-					if(!$scope.world.source_meetup.venue.address_1){
+					if($scope.world.source_meetup.venue.address_1){
 
 						var venueArr = [];
 
@@ -156,7 +156,6 @@ function loadWidgets() {
 
 						venueArr = venueArr.join("+").replace(/ /g,"+");
 						$scope.streetviewLoc = venueArr + mapAPI;
-
 					}
 					else{
 						coordsURL();
