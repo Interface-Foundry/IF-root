@@ -1,35 +1,42 @@
-<ul class="world-sq-container" ng-hide="fromMessages">
-
-	<li class="col-xs-12" ng-if="fromMeetup">
+<div class="surface profile-surface">
+	<div class="col-xs-12" ng-if="fromMeetup">
 		<div class="meetup-well well">
 			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/718.gif"></span>
 			<span ng-if="worlds.length > 0">We found your Meetups! Start customizing them below. Click on any Meetup then click <b>Set Up Meetup</b></span>
 			<span ng-if="worlds.length <= 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
 		</div>
-	</li><div class="clearfix"></div>
-	<span ng-hide="waitingforMeetup" class="indigo700">MY BUBBLES</span>
-
-	<li>
+	</div>
+	<div class="clearfix"></div>
 
 	<button class="profile-add-new" ng-click="newWorld()" ng-hide="waitingforMeetup">
 		<div class="profile-add-new-plus">+</div>
 		<span>Create New Bubble</span>
 	</button>
-	</li>
-	<li>
+	
+<div class="bubble-group" ng-repeat="group in ::groups track by group.order">
+	<header class="bubble-group-label">{{group.label}}</header>
 	<ul class="bubble-list">
-		<li class="bubble-list-item" ng-repeat="world in ::worlds track by world._id" ng-click="$parent.selected = world" ng-class="{'selected': selected == world}">
-			<img if-src="img/icons/kind/{{::kinds[world.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
-			<span>{{::world.name}}</span>
-		</li>
-	</ul>
+	<li class="bubble-list-item" ng-repeat="bubble in ::group.bubbles track by bubble._id" 
+		ng-click="inspect(bubble)" 
+		ng-class="{'selected': selected == bubble}">
+		<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+		<span>{{::bubble.name}}</span>
 	</li>
-</ul>
+	</ul>
+</div>
+
+</div>
+
+<div class="calendar-view if-animate" ng-class="{'active': calendarActive}" ng-if="calendarLoaded">
+	<div ui-calendar="calConfig" ng-model="calendar"></div>
+	<button class="bubble-inspector-close" ng-click="calendarActive = false">x</button>
+</div>
+
 <div class="bubble-inspector" ng-class="{'selected': selected}">
 	<div class="bubble-inspector-wrap">
 	<header class="bubble-inspector-header">
 		<a if-href="#w/{{selected.id}}" class="bubble-inspector-title">{{selected.name}}</a>
-		<button class="bubble-inspector-close" ng-click="selected = undefined">x</button>
+		<button class="bubble-inspector-close" ng-click="inspect()">x</button>
 	</header>
 	<img class="bubble-inspector-avatar" if-src="{{selected.avatar}}">
 	<div class="bubble-inspector-info">

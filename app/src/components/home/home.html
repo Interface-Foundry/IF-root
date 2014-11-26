@@ -1,4 +1,12 @@
-<div class="surface" style="padding-top: 56px;">
+<header class="home-header">
+	<a if-href="#welcome" class="home-header-bar">
+	<h4>Explore your world in a whole new way</h4>
+	<div class="lightblue500"> Learn More</div>
+	</a>
+</header>
+
+<div class="surface">
+
 <!--
 <div class="marble-page">
 	<header class="marble-page-header">
@@ -19,13 +27,17 @@
 </div>
 -->
 
-<div class="marble-page" ng-if="homeBubbles.length>0">
+<div class="marble-page">
 	<header class="marble-page-header">
 	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
 	You're At
 	</header>
+	
 	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-repeat="bubble in homeBubbles track by bubble._id" class="nearby-list-item if-animate">
+		<li ng-if="!homeBubbles" class="text-center">Loading...</li>
+		<li ng-repeat="bubble in homeBubbles track by bubble._id" 
+			ng-if="homeBubbles.length>0"
+			class="nearby-list-item if-animate">
 			<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
 		</li>
 	</ul>
@@ -51,13 +63,16 @@
 </div>
 	
 	
-<div class="marble-page" ng-if="nearbyBubbles.length>0">
+<div class="marble-page">
 	<header class="marble-page-header">
 	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
 	Nearby
 	</header>
 	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-repeat="bubble in nearbyBubbles track by bubble._id" class="nearby-list-item if-animate">
+		<li ng-if="!nearbyBubbles" class="text-center">Loading...</li>
+		<li ng-repeat="bubble in nearbyBubbles track by bubble._id"
+			ng-if="nearbyBubbles.length>0"
+			class="nearby-list-item if-animate">
 			<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
 		</li>
 	</ul>

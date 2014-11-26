@@ -1,4 +1,4 @@
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -7,6 +7,7 @@ $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
+
 
 $scope.kinds = ifGlobals.kinds;
 
@@ -53,6 +54,38 @@ $scope.update = function(tab) {
 	console.log($scope.state);
 }
 
+
+$scope.inspect = function(bubble) {
+	if (bubble) {
+		$scope.selected = bubble;
+	} else {
+		$scope.selected = false;
+	}
+}
+
+$scope.inspectEvent = function(calEvent) {
+	console.log('test');
+	$scope.inspect(calEvent.bubble);
+}
+
+$scope.showCalendar = function() {
+	if ($scope.calendarActive) {
+		$scope.calendarActive = false;
+	} else if ($scope.calendarLoaded) {
+		$scope.calendarActive = true;
+	} else {
+		$scope.calendar = {events: userGrouping.groupForCalendar($scope.bubbles)}
+		$scope.calendarLoaded = true;
+		$scope.calendarActive = true;
+	}	
+}
+
+
+$scope.calConfig = {
+	// 	height: 360,
+		eventClick: $scope.inspectEvent
+}
+
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -76,6 +109,7 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
+
 
 $scope.update($route.current.params.tab);
 
@@ -110,9 +144,118 @@ else if ($routeParams.incoming == 'messages'){
 else {
 	$http.get('/api/user/profile', {server: true}).success(function(user){
 		console.log(user);
-		$scope.worlds = user;		
+		
+		//$scope.worlds = user;
+		$scope.groups = userGrouping.groupByTime(user);
+		console.log($scope.groups);
+		
+		$scope.bubbles = user;
+
+		//sortWorlds(user);
 	});
 }
+
+/*
+function sortWorlds(user,incoming){
+
+
+	switch(incoming) {
+	    case 'meetup':
+
+	        console.log('meetup');
+	        break;
+
+	    default:
+
+	    	var eventBubbles = [];
+	    	var eventBubblesFuzzy = [];
+	    	var staticBubbles = [];
+	    	var tempFuzzyTime;
+
+	    	for (i = 0; i < user.length; i++) { 
+	    		if(user[i].time.start){
+	    			eventBubbles.push(user[i]);
+	    		}
+	    		else {
+	    			staticBubbles.push(user[i]);
+	    		}
+	    	}
+
+	    	if (eventBubbles.length > -1){
+		    	//sort events descending
+		    	eventBubbles.sort(function(a, b){
+				    var d1 = new Date(a.time.start);
+				    var d2 = new Date(b.time.start);
+				    return d2-d1; // d2-d1 for ascending order
+				});
+			}
+
+			if (staticBubbles.length > -1){
+		    	//sort events descending
+		    	staticBubbles.sort(function(a, b){
+				    var d1 = new Date(a.time.created);
+				    var d2 = new Date(b.time.created);
+				    return d2-d1; // d2-d1 for ascending order
+				});
+			}
+
+	    	for (i = 0; i < eventBubbles.length; i++) {
+
+    			var MM = new Date(eventBubbles[i].time.start).getUTCMonth() + 1;
+    			MM = MM.toString();
+    			if (MM < 10){
+    				MM = "0" + MM;
+    			}
+    			var DD = new Date(eventBubbles[i].time.start).getUTCDate();
+    			DD = DD.toString();
+    			if (DD < 10){
+    				DD = "0" + DD;
+    			}
+    			var YY = new Date(eventBubbles[i].time.start).getUTCFullYear(); //get year of bubble event
+
+    			var fuzzyTime = fuzzyTimeFormat(DD,MM,YY);
+
+    			//new fuzzy group
+    			if (tempFuzzyTime !== fuzzyTime){
+
+	    			//get yesterday-ish date to display stuff sort of in future but a little past too
+	    			var currentDate = new Date();
+	    			currentDate.setDate(currentDate.getDate() - 1);
+
+	    			//is date in the past-ish?
+	    			if(new Date(eventBubbles[i].time.start) < currentDate){
+						var fuzzyPast = true;
+					}
+					else{
+						var fuzzyPast = false;
+					}
+
+    				var fuzzCat = {
+    					fuzzyHeader: fuzzyTime,
+    					fuzzyEvents: [eventBubbles[i]],
+    					fuzzyPast: fuzzyPast
+    				};
+
+    				eventBubblesFuzzy.push(fuzzCat);
+    				tempFuzzyTime = fuzzyTime;
+    			}
+    			//same fuzzy group
+    			else {
+    				eventBubblesFuzzy.filter(function ( obj ) {
+					    if(obj.fuzzyHeader === fuzzyTime){
+					    	obj.fuzzyEvents.push(eventBubbles[i]);
+					    }
+					})[0];
+    			}
+
+	    	}
+	    	$scope.eventTimes = eventBubblesFuzzy;
+	    	$scope.staticWorlds = staticBubbles;
+	}
+	
+
+}
+*/
 
 //if came from meetup, keep checking for new meetups until route change
 function checkProfileUpdates(){
@@ -133,6 +276,50 @@ function checkProfileUpdates(){
 
 }
 
+//showing "pretty" aka fuzzy time style dates
+function fuzzyTimeFormat(DD,MM,YY) {
+	//Fuzzy Time *~ - - - - ~ - - - ~ - - - ~ - - 
+	//=========================================//
+	/*
+	 * JavaScript Pretty Date
+	 * Copyright (c) 2011 John Resig (ejohn.org)
+	 * Licensed under the MIT and GPL licenses.
+	 */
+	 //original code was modified
+
+	// Takes an ISO time and returns a string representing how
+	// long ago the date represents.
+	function prettyDate(MMDDYY){
+		var date = new Date((MMDDYY || "").replace(/-/g,"/").replace(/[TZ]/g," ")),
+			diff = (((new Date()).getTime() - date.getTime()) / 1000),
+			day_diff = Math.floor(diff / 86400);
+		if ( isNaN(day_diff) )
+			return;	
+		return day_diff == 0 && (
+				diff < 60 && "just now" ||
+				diff < 120 && "1 minute ago" ||
+				//diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+				diff < 7200 && "1 hour ago" ||
+				diff < 86400 && "Today") ||
+			day_diff == -1 && "Tomorrow" ||
+			day_diff == 1 && "Yesterday" ||	
+			//future
+			(day_diff > -7 && day_diff < -1) && day_diff + " days from now" ||  
+			day_diff == -7 && "Next Week" ||  
+			(day_diff > -14 && day_diff < -7) && "Next Week" ||
+			(day_diff > -31 && day_diff < -14) && day_diff && Math.ceil( day_diff / -4 ) + " weeks from now" ||
+			day_diff < -31 && Math.ceil( day_diff / -12) + " months from now" ||
+			//past
+			(day_diff < 7 && day_diff > 1) && day_diff + " days ago" ||
+			day_diff == 7 && "Last Week" ||  
+			(day_diff < 31 && day_diff > 7) && Math.ceil( day_diff / 7 ) + " weeks ago" ||
+			day_diff > 31 && day_diff && Math.ceil( day_diff / 12 ) + " months ago";
+	}
+	//=========================================//
+    return prettyDate(MM+'-'+DD+'-'+YY).toString().replace('-','');
+}
+
+
 $scope.deleteWorld = function(i) {
 	var deleteConfirm = confirm("Are you sure you want to delete this?");
 	if (deleteConfirm) {
@@ -152,17 +339,9 @@ $scope.deleteBubble = function(_id) {
 		//$location.path('/');
 		console.log('##Delete##');
 		console.log(data);
-		var removeIndex = $scope.worlds.findIndex(function(element, index, array) {
-			if (element._id == _id) {
-				return true;
-			} else {
-				return false;
-			}
+		
+		$route.reload();
 		});
-		if (removeIndex != -1) {
-			$scope.worlds.splice(removeIndex, 1);
-		}
-	  });
 	 }
 }
 
