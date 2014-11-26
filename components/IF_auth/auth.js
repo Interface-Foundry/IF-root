@@ -16,17 +16,17 @@ module.exports = {
 	},
 
 	// //production
-	// 'meetupAuth' : {
-	// 	'consumerKey' 		: 'aoovuf60qkmeot5ed3jk4au0pt',
-	// 	'consumerSecret' 	: 'llbldc45u0d4nfabqqmpl4s28q',
-	// 	'callbackURL' 		: 'https://bubbl.li/auth/meetup/callback'
-	// }
+	'meetupAuth' : {
+		'consumerKey' 		: 'aoovuf60qkmeot5ed3jk4au0pt',
+		'consumerSecret' 	: 'llbldc45u0d4nfabqqmpl4s28q',
+		'callbackURL' 		: 'https://bubbl.li/auth/meetup/callback'
+	}
 
 	//development
-	'meetupAuth' : {
-		'consumerKey' 		: 'vim0att4d71oa1qjhe1mq1t1dl',
-		'consumerSecret' 	: '6qc9nn459v9bbhuui2ceeiqi4e',
-		'callbackURL' 		: 'http://localhost:2997/auth/meetup/callback'
-	}
+	// 'meetupAuth' : {
+	// 	'consumerKey' 		: 'vim0att4d71oa1qjhe1mq1t1dl',
+	// 	'consumerSecret' 	: '6qc9nn459v9bbhuui2ceeiqi4e',
+	// 	'callbackURL' 		: 'http://localhost:2997/auth/meetup/callback'
+	// }
 
 };

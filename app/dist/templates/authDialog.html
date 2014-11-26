@@ -1,17 +1,17 @@
 <nav class="subnav">
 <ul class="tab-group" ng-init="state = 'signup'">
 		<li class="tab" ng-class="{'selected': state == 'signup'}" ng-click="state = 'signup'">
-			<a class="tab-link">Sign Up</a>
+			<a class="tab-link"><b>Sign up</b></a>
 		</li>
 		<li class="tab" ng-class="{'selected': state == 'login'}" ng-click="state = 'login'">
-			<a class="tab-link">Log in</a>
+			<a class="tab-link"><b>Log in</b></a>
 		</li>
 </ul>
 </nav>
 <div class="surface">
 <div ng-switch="state">
 	<form name="signupForm" ng-submit="userManager.signup.signup()" ng-switch-when="signup">
-		<h3 style="margin: 0px 0px 20px 0px;">Sign Up For Bubbl.li!</h3>
+		<h4 style="margin: 0px 0px 20px 0px;">Sign up For Bubbl.li!</h4>
 		<hr class="nomargin">
 		<input name="email" type="email" 
 			placeholder="Email" class="auth-input" ng-model="userManager.signup.email" required>
