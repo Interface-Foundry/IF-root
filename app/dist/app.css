@@ -2348,7 +2348,7 @@ nav li input.form-control {
 #aperture {
   overflow: hidden;
   
-  position:fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -2357,7 +2357,7 @@ nav li input.form-control {
   /* color: white; */
  
 
-  z-index: 100;
+  z-index: 10;
 }
 
 #view {
