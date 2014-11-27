@@ -691,41 +691,7 @@ a.bubble-inspector-title {
 
 ///USER CHIP
 
-/*
-.user-chip {
-	position: relative;
-	width: 40px;
-	height: 24px;
-	margin: 8px 0px 0px 4px;
-	background: #FFF;
-	border-radius: 17px;
-	cursor: pointer;
-	text-align: center;
-}
 
-.user-chip-img {
-	float: left;
-	width: 34px;
-	height: 34px;
-	border-radius: 17px;
-	background: #FFF;
-}
-
-.user-chip-label {
-	font-size: 11px;
-	line-height: 24px;
-	font-weight: 500;
-	color: #737373;
-}
-
-.user-chip-label.auth {
-	display: none;
-}
-*/
-/*
-
-@media only screen and (min-width: 480px) {
-*/
 
 .user-chip-wrap {
 	width: 100%;
@@ -736,7 +702,7 @@ a.bubble-inspector-title {
 }
 
 .user-chip {
-	width: 56px;
+	min-width: 56px;
 	height: 32px;
 	margin: 4px 0px 0px 4px;
 	border-radius: 3px;
@@ -1069,6 +1035,13 @@ margin-bottom: 4px;
 	@media only screen and (min-width: 600px) {
 		width: 600px;
 		margin: 0px auto;
+	}
+}
+
+.home-header-bar > h4 {
+	font-size: 16px;
+	@media only screen and (min-width: 480px) {
+		font-size: 18px;
 	}
 }
 

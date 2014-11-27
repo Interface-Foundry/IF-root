@@ -96,6 +96,19 @@
 	</label>
 	<span class="icon glyphicon glyphicon-ok-circle"></span>
 	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.streetview}">
+	<label for="streetview" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/streetview.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Street View</h4>
+			<span ng-cloak>Displays the Google Street View for your bubble's location.</span>
+		</div>
+		<input type="checkbox" name="streetview" id="streetview" ng-model="style.widgets.streetview">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
 	<div class="edit-widget" ng-class="{'active': style.widgets.presents}">
 	<label for="presents" class="media card">
 		<div class="pull-left">

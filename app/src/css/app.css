@@ -314,12 +314,14 @@ nav li input.form-control {
   width: 100%;
   z-index: 100;
   pointer-events: none;
+  touch-action: none; 
   -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 
 }
 
 #view > * {
 	pointer-events: auto;
+	touch-action: auto;
 }
 
 #shelf {
