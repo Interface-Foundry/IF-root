@@ -117,12 +117,10 @@ $scope.waitingforMeetup = false; //if from meetup, hide worlds until complete
 
 //if user login came from Meetup, then process new meetup worlds
 if ($routeParams.incoming == 'meetup'){
-	angular.extend($rootScope, {loading: true});
 	$scope.fromMeetup = true;
 	$scope.waitingforMeetup = true;
 
 	$http.post('/api/process_meetups').success(function(response){
-		angular.extend($rootScope, {loading: false});
 		checkProfileUpdates(); //now wait until meetup bubbles come in
 		// $http.get('/api/user/profile').success(function(user){
 		// 	$scope.worlds = user;		
@@ -263,10 +261,13 @@ function checkProfileUpdates(){
 
 	function checkProfile(){
 		$http.get('/api/user/profile').success(function(user){
-			$scope.worlds = user;	
+		$scope.groups = userGrouping.groupByTime(user);
+		console.log($scope.groups);
+		
+		$scope.bubbles = user;
 			$scope.waitingforMeetup = false;	
 			//$interval.cancel(checkProfile);
-		});	
+		});
 	}
 	//stops interval on route change
 	var dereg = $rootScope.$on('$locationChangeSuccess', function() {
