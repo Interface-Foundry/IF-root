@@ -185,7 +185,7 @@ function searchYelp(tag, done) {
 
 	                        if(typeof business.description=='undefined')
 	                        {
-	                            lmSchema.description=0;
+	                            //lmSchema.description=0;
 	                        }
 	                        else{
 	                            lmSchema.description=business.description;
@@ -463,7 +463,7 @@ function searchYelp(tag, done) {
 
                         if(typeof business.description=='undefined')
                         {
-                            docs[0].description=0;
+                            //docs[0].description=0;
                         }
                         else{
                             docs[0].description=business.description;
