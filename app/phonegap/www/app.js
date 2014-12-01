@@ -21568,8 +21568,8 @@ function loadWidgets() {
 		}
 		if ($scope.style.widgets.streetview == true) {
 
-			//var mapAPI = '&key=AIzaSyDbEMuXZS67cFLAaTtmrKjFNlrdNm1H-KE';
-			var mapAPI = '';
+			var mapAPI = '&key=AIzaSyDbEMuXZS67cFLAaTtmrKjFNlrdNm1H-KE';
+			//var mapAPI = '';
 
 			$scope.streetview = true;
 
