@@ -30,11 +30,11 @@
 	<!--PRESENTS-->
 	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null" class="marble-page"></div>
 
-	<!---yelp-->
-	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
-
 	<!---streetview -->
 	<div ng-include="streetview==true ? 'components/world/templates/streetview.html' : null" class="marble-page"></div>
+
+	<!---yelp-->
+	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
 
 	<!---meetup-->
 	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null" class="marble-page"></div>

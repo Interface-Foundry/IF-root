@@ -21,8 +21,6 @@
 	font-weight: 500;
 	line-height: 40px;
 	
-	height: 55px;
-	padding-top: 15px;
 }
 
 .drawer-link {
@@ -2097,7 +2095,6 @@ body {
 
 .navfix {
 	padding-top: 40px;
-	padding-top: 55px;
 }
 
 /* *NAV* Navigation Bar */
@@ -2118,8 +2115,6 @@ nav.main-nav {
 	z-index: 4;
 	
 	-webkit-transform: translate3d(0, 0, 0);
-	height: 55px;
-	padding-top: 15px;
 }
 
 nav .logo {
@@ -2496,7 +2491,6 @@ li {
 	-webkit-transition: 0.35s linear all;
 	transition: 0.35s linear all;
 	
-	top: 15px;
 }
 
 /* SLIDE UP SLIDE DOWN */
@@ -7343,8 +7337,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('fonts/glyphicons-halflings-regular.eot');
-  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('/fonts/glyphicons-halflings-regular.eot');
+  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;

@@ -396,6 +396,7 @@ function searchYelp(tag, done) {
 					            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
 					            st.widgets.photo_share = forumStyle.widgets.photo_share;
 					            st.widgets.stickers = forumStyle.widgets.stickers;
+					            st.widgets.streetview = forumStyle.widgets.streetview;
 
 					            
 					            function saveIt(callback){
