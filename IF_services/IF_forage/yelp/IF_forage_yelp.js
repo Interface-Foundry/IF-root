@@ -41,11 +41,11 @@ var yelp = require("yelp").createClient({
     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
 });
 
-// var zipLow = 1001;
-// var zipHigh = 99950;
+var zipLow = 1001;
+var zipHigh = 99950;
 
-var zipLow = 10010;
-var zipHigh = 10011;
+// var zipLow = 10010;
+// var zipHigh = 10011;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
@@ -145,7 +145,7 @@ function searchYelp(tag, done) {
 
                     if(!found){	
 
-                    	console.log('-------------------- doc new, creating!! =------------');
+                    	//console.log('-------------------- doc new, creating!! =------------');
 
                         var lmSchema = new landmarks.model(true);
 
@@ -165,16 +165,24 @@ function searchYelp(tag, done) {
                         	lmSchema.style.maps.cloudMapID = cloudMapID;
                         	lmSchema.style.maps.cloudMapName = cloudMapName;
                         	lmSchema.views = 0;       
-                    	
+
+	                        lmSchema.source_yelp={};
+	                        lmSchema.source_yelp.rating={};
+
                         	if(typeof business.image_url=='undefined'){
                         		lmSchema.avatar = 'img/IF/yelp_default.jpg';
                         	}
                         	else {
-                        		lmSchema.avatar = business.image_url;
+								
+								lmSchema.avatar = business.image_url;
+								
+                        		//small image? go for big!
+                        		if( business.image_url.indexOf('ms.jpg') >= 0){
+                        			lmSchema.source_yelp.business_image = business.image_url.replace("ms.jpg", "l.jpg");
+								}
+                        		
                         	}
 
-	                        lmSchema.source_yelp={};
-	                        lmSchema.source_yelp.rating={};
 	                        if(typeof business.name=='undefined')
 	                        {
 	                            lmSchema.name=0;
@@ -185,7 +193,7 @@ function searchYelp(tag, done) {
 
 	                        if(typeof business.description=='undefined')
 	                        {
-	                            lmSchema.description=0;
+	                            //lmSchema.description=0;
 	                        }
 	                        else{
 	                            lmSchema.description=business.description;
@@ -396,6 +404,7 @@ function searchYelp(tag, done) {
 					            st.widgets.icebreaker = forumStyle.widgets.icebreaker;
 					            st.widgets.photo_share = forumStyle.widgets.photo_share;
 					            st.widgets.stickers = forumStyle.widgets.stickers;
+					            st.widgets.streetview = forumStyle.widgets.streetview;
 
 					            
 					            function saveIt(callback){
@@ -442,7 +451,7 @@ function searchYelp(tag, done) {
                     }
                     else{
 
-                    	console.log('-------------------- doc found, updating!! =------------');
+                    	//console.log('-------------------- doc found, updating!! =------------');
 
                     	docs[0].world = true;
                     	docs[0].valid = true;
@@ -462,7 +471,7 @@ function searchYelp(tag, done) {
 
                         if(typeof business.description=='undefined')
                         {
-                            docs[0].description=0;
+                            //docs[0].description=0;
                         }
                         else{
                             docs[0].description=business.description;
@@ -481,7 +490,14 @@ function searchYelp(tag, done) {
                     		docs[0].avatar = 'img/IF/yelp_default.jpg';
                     	}
                     	else {
+
+
                     		docs[0].avatar = business.image_url;
+
+                    		//small image? go for big!
+                    		if( business.image_url.indexOf('ms.jpg') >= 0){
+                    			docs[0].source_yelp.business_image = business.image_url.replace("ms.jpg", "l.jpg");
+							}
                     	}
                         	
 
@@ -657,11 +673,11 @@ function searchYelp(tag, done) {
                             }
                             else if(!err)
                             {
-                                console.log("documents saved");
+                                //console.log("documents saved");
                             }
                             else{
 
-                                console.log('jajja')
+                                //console.log('jajja')
 
                             }
                         });
@@ -734,16 +750,16 @@ function getLatLong(business,callback){
     	var results = 'fakeLoc';
         landmarks.model(false).find({"source_yelp.id":business.id.toString()}, function(err, docs) {
             if(err){
-                console.log("sds")
+                console.log("error")
                 console.log("Error Occured: "+err);
             }
             else if (docs.length>0){
-                console.log("documents Found :"+business.id);
+                //console.log("documents Found :"+business.id);
                 callback(true,business,results,docs)
             }
             else {
                 callback(false,business,results,docs);
-                console.log('No Documents');
+                //console.log('No Documents');
             }
         });	
 
@@ -773,6 +789,6 @@ function processData(i,result,callback){
 
 
 //server port 
-app.listen(3134, 'localhost', function() {
-    console.log("3134 ~ ~");
+app.listen(3137, 'localhost', function() {
+    console.log("3137 ~ ~");
 });

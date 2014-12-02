@@ -165,6 +165,35 @@ function loadWidgets() {
 					coordsURL();
 				}
 			}
+			else if($scope.world.source_yelp){
+				if($scope.world.source_yelp.locationInfo){
+					if($scope.world.source_yelp.locationInfo){
+						if($scope.world.source_yelp.locationInfo.address){
+
+							var venueArr = [];
+
+							typeof $scope.world.source_yelp.locationInfo.address && venueArr.push($scope.world.source_yelp.locationInfo.address);
+							typeof $scope.world.source_yelp.locationInfo.city && venueArr.push($scope.world.source_yelp.locationInfo.city);
+							typeof $scope.world.source_yelp.locationInfo.state_code && venueArr.push($scope.world.source_yelp.locationInfo.state_code);
+							typeof $scope.world.source_yelp.locationInfo.postal_code && venueArr.push($scope.world.source_yelp.locationInfo.postal_code);
+							typeof $scope.world.source_yelp.locationInfo.country_code && venueArr.push($scope.world.source_yelp.locationInfo.country_code);
+
+							venueArr = venueArr.join("+").replace(/ /g,"+");
+							$scope.streetviewLoc = venueArr + mapAPI;
+
+						}
+						else {
+							coordsURL();
+						}
+					}
+					else{
+						coordsURL();
+					}
+				}
+				else{
+					coordsURL();
+				}
+			}
 			else {
 				coordsURL();
 			}

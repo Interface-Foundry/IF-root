@@ -4715,6 +4715,9 @@ var checkLoggedin = function(userManager) {
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
+	    			if (request.server) {
+		    			request.url = 'https://bubbl.li' + request.url; 
+	    			}
 	    		return request;
     		},
 	    	'response': function(response) {
@@ -4778,9 +4781,6 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
-$locationProvider.html5Mode({
-	enabled: true
-});
 	  
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
@@ -4793,12 +4793,15 @@ angular.extend($tooltipProvider.defaults, {
 	
 	userManager.checkLogin();
 	
+	navigator.splashscreen.hide();
 });
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-
-});
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -5503,10 +5506,6 @@ app.directive('ifHref', function() {
 				return;
 				}
 			
-			var firstHash = value.indexOf('#');
-			if (firstHash > -1) {
-				value = value.slice(0, firstHash) + value.slice(firstHash+1);
-			}
 			$attr.$set('href', value);
 			
 			});
@@ -5525,6 +5524,7 @@ app.directive('ifSrc', function() {
 				return;
 				}
 			
+				value = 'https://bubbl.li/'+value;
 				
 				$attr.$set('src', value);
 			
@@ -16536,6 +16536,14 @@ geoService.getLocation = function(maxAge) {
 		}
 
 		function geolocationError(error){
+			if (error.code == 1) {
+				//PERMISSIONS DENIED
+				navigator.notification.alert(
+					'Please enable Location Services for Bubbl.li', 
+					function() {/*send to settings app eventually*/}, 
+					'Location Error',
+					'OK');
+			}
 			deferred.reject(error);
 		}
 		
@@ -17124,7 +17132,7 @@ angular.module('tidepoolsServices')
     	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
     	
 var userManager = {
-	userRes: $resource('/api/updateuser'),
+	userRes: $resource('https://bubbl.li/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -21637,6 +21645,35 @@ function loadWidgets() {
 
 						venueArr = venueArr.join("+").replace(/ /g,"+");
 						$scope.streetviewLoc = venueArr + mapAPI;
+					}
+					else{
+						coordsURL();
+					}
+				}
+				else{
+					coordsURL();
+				}
+			}
+			else if($scope.world.source_yelp){
+				if($scope.world.source_yelp.locationInfo){
+					if($scope.world.source_yelp.locationInfo){
+						if($scope.world.source_yelp.locationInfo.address){
+
+							var venueArr = [];
+
+							typeof $scope.world.source_yelp.locationInfo.address && venueArr.push($scope.world.source_yelp.locationInfo.address);
+							typeof $scope.world.source_yelp.locationInfo.city && venueArr.push($scope.world.source_yelp.locationInfo.city);
+							typeof $scope.world.source_yelp.locationInfo.state_code && venueArr.push($scope.world.source_yelp.locationInfo.state_code);
+							typeof $scope.world.source_yelp.locationInfo.postal_code && venueArr.push($scope.world.source_yelp.locationInfo.postal_code);
+							typeof $scope.world.source_yelp.locationInfo.country_code && venueArr.push($scope.world.source_yelp.locationInfo.country_code);
+
+							venueArr = venueArr.join("+").replace(/ /g,"+");
+							$scope.streetviewLoc = venueArr + mapAPI;
+
+						}
+						else {
+							coordsURL();
+						}
 					}
 					else{
 						coordsURL();

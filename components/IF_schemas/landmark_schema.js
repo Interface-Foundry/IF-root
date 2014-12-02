@@ -162,7 +162,8 @@ monguurl = require('monguurl');
 			snippet_image_url: String,
 			deals:Schema.Types.Mixed,
 			locationInfo:Schema.Types.Mixed,
-			categories:Schema.Types.Mixed
+			categories:Schema.Types.Mixed,
+			business_image: String
 		},
 		widgets: {
 			twitter: Boolean,

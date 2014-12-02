@@ -19,7 +19,8 @@
 			"mailing_list":false,
 			"icebreaker":true,
 			"photo_share":true,
-			"stickers":true
+			"stickers":true,
+			"streetview":true
 		}
 } 
 
