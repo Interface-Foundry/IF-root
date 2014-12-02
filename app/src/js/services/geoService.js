@@ -15,11 +15,7 @@ geoService.getLocation = function(maxAge) {
 
 	if (navigator.geolocation) {
 		console.log('geo: using navigator');
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError, 
-			{timeout:15000, enableHighAccuracy : true});
-	
+			
 		function geolocationSuccess(position) {
 			geoService.location.lat = position.coords.latitude;
 			geoService.location.lng = position.coords.longitude;
@@ -43,6 +39,11 @@ geoService.getLocation = function(maxAge) {
 			//@ENDIF
 			deferred.reject(error);
 		}
+		
+			navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+			geolocationError, 
+			{timeout:15000, enableHighAccuracy : true});
+
 	} else {
 		//browser update message
 		deferred.reject('navigator.geolocation undefined');

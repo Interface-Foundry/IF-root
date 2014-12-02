@@ -1,23 +1,24 @@
-<div class="surface profile-surface">
-<div class="profile-sort">
-<div class="profile-card">
-<span class="sort-heading indigo700">YOU</span>
-	<div class="profile-card-pic" ng-file-select="onAvatarSelect($files)">
-		<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar">
-		<span class="profile-card-pic-upload">upload</span>
-	</div>
-	<div class="profile-card-body">
-		<div class="form-group">
-			<label class="marble-label">Name</label>
-			<input type="text" class="marble-control" placeholder="Enter your Name" ng-model="user.name">
+<div class="wrap">
+	<div class="surface profile-surface">
+		<div class="profile-sort">
+		<div class="profile-card">
+			<span class="sort-heading indigo700">YOU</span>
+				<div class="profile-card-pic" ng-file-select="onAvatarSelect($files)">
+					<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar">
+					<span class="profile-card-pic-upload">upload</span>
+				</div>
+			<div class="profile-card-body">
+				<div class="form-group">
+					<label class="marble-label">Name</label>
+					<input type="text" class="marble-control" placeholder="Enter your Name" ng-model="user.name">
+				</div>
+				<span>{{user.title}}</span>
+				<hr>
+				
+			</div>
 		</div>
-		<span>{{user.title}}</span>
-		<hr>
-		
-	</div>
-</div>
-</div>
-<div class="profile-contact-sort">
+		</div>
+		<div class="profile-contact-sort">
 <div class="profile-contact-card">
 <span class="sort-heading indigo700">CONTACT</span>
 	<form role="form">
@@ -49,4 +50,5 @@
 
 </div>
 </div>
+	</div>
 </div>

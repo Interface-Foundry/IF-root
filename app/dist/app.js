@@ -4693,7 +4693,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic', 'ui.calendar'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -5162,6 +5162,39 @@ angular.module('IF-directives', [])
         });
     };
 });
+app.directive('compassButton', function(worldTree) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			
+			scope.compassOn = function($event, val) {
+				console.log('compassOn');
+				if (val!=undefined) {scope.compassState = val}
+				
+				if ($event) {
+					console.log('compassOn:event');
+
+					$event.stopPropagation();
+					$('html').on('click', function(e) {
+						console.log('compassOn:html click');
+
+						scope.compassState = false;
+						scope.$digest();
+						$('html').off('click');
+					})
+				}
+			}
+			
+			console.log('linking compass button');
+			worldTree.getNearby().then(function(data) {
+				console.log('compassButton', data);
+				scope.nearbyBubbles = data.live;
+			}, function(reason) {console.log(reason)});
+		},
+		templateUrl: 'templates/compassButton.html'
+	}
+});
 /*
  * angular-elastic v2.4.0
  * (c) 2014 Monospaced http://monospaced.com
@@ -5379,29 +5412,53 @@ angular.module('monospaced.elastic', [])
     }
   ]);
 
-angular.module('IF-directives', [])
-.directive('fitFont', function($rootScope) {
+app.directive('fitFont', function($rootScope) {
 	return {
 		restrict: 'A',
+		scope: true,
 		link: function($scope, $element, attrs) {
+			console.log('link', $element);
 			var fontSize = parseInt($element.css('font-size'));
 			var domElement = $element[0];
 			var ears = []; //listeners
 			
+			//FUNCTIONS
+			
 			function hasOverflow(e) {
 				if (e.offsetHeight < e.scrollHeight || e.offsetWidth < e.scrollWidth) {
 					return true;
-					} else {
+				} else {
 					return false;
 				}
 			}
 			
-			function resolveOverflow() {
+			function shrinkFont() {
+				console.log('shrinkFont', hasOverflow(domElement), fontSize);
 				while (hasOverflow(domElement) && fontSize > 12) {
 					fontSize--;
 					$element.css('font-size', fontSize+'px');
-				} 
+				}
 			}
+			
+			function growFont() {
+				console.log('growFont', hasOverflow(domElement), fontSize);
+
+				while(!hasOverflow(domElement) && fontSize < 40) {
+					fontSize++;
+					$element.css('font-size', fontSize+'px');
+				}
+				shrinkFont();
+			}
+			
+			function updateAfterChange(newWidth, oldWidth) {
+				if (newWidth < oldWidth) {
+					shrinkFont();
+				} else {
+					growFont();
+				}
+			}
+			
+			//LISTENERS
 			
 			ears.push(
 			$scope.$watch( //watch for resizes
@@ -5410,28 +5467,27 @@ angular.module('IF-directives', [])
 				}, 
 				function (newWidth, oldWidth) {
 					if (newWidth != oldWidth ) {
-					if (newWidth < oldWidth) {
-							resolveOverflow();
-						} else {
-							do {
-								fontSize++;
-								$element.css('font-size', fontSize+'px');
-							} while(hasOverflow(domElement)==false);
-							resolveOverflow();
-						}			
+						updateAfterChange(newWidth, oldWidth);
 					}
-			}))
-			
+			}));
+	
+			//Watch for changes to contents
 			ears.push(
-			$scope.$watch('world.name', function(value) {
-				resolveOverflow();
-			}))
-			
-		/*$scope.$on("$destroy", function() {
+			$scope.$watch(
+				function() {
+					return domElement.innerText;
+				},
+				function (newText, oldText) {
+					growFont();
+				})
+			)
+	
+			$scope.$on("$destroy", function() {
 				for (var i = 0, len = ears.length; i < len; i++) {
-					ears[i].pop()();
+					ears[i]();
 				}
-			});*/
+			});
+			
 		}
 	}
 });
@@ -16468,11 +16524,7 @@ geoService.getLocation = function(maxAge) {
 
 	if (navigator.geolocation) {
 		console.log('geo: using navigator');
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError, 
-			{timeout:15000, enableHighAccuracy : true});
-	
+			
 		function geolocationSuccess(position) {
 			geoService.location.lat = position.coords.latitude;
 			geoService.location.lng = position.coords.longitude;
@@ -16486,6 +16538,11 @@ geoService.getLocation = function(maxAge) {
 		function geolocationError(error){
 			deferred.reject(error);
 		}
+		
+			navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+			geolocationError, 
+			{timeout:15000, enableHighAccuracy : true});
+
 	} else {
 		//browser update message
 		deferred.reject('navigator.geolocation undefined');
@@ -20170,7 +20227,7 @@ angular.extend($rootScope, {navTitle: "Bubbl.li"})
 angular.extend($rootScope, {loading: false});
 	
 $scope.$on('$viewContentLoaded', function() {
-	document.getElementById("wrap").scrollTop = 0;
+// 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
 $scope.newWorld = function() {

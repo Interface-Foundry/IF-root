@@ -1,3 +1,85 @@
+#drawer {
+	position: fixed;
+	top: 0;
+	left: -280px;
+	width: 280px;
+	height: 100%;
+	
+	background: #FFF;
+	/*border-right: 1px solid #ccc;*/
+	opacity: 1;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	/*-webkit-perspective: 1000;*/
+	-webkit-backface-visibility: hidden;
+	
+	overflow: hidden;
+	z-index: 1002;
+}
+
+
+
+.drawer #drawer {
+	-ms-transform:  translateX(100%); -webkit-transform: translateX(100%); -moz-transform: translateX(100%);
+	transform: translateX(100%);
+	opacity: 1;
+	/*-webkit-perspective: 1000;*/
+	box-shadow: 0px 0px 19px 10px rgba(0,0,0,.3), 0px 0px 6px 2px rgba(0,0,0,.2);
+	-webkit-backface-visibility: hidden;
+}
+
+.drawer-bg {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,.0);
+	pointer-events: none;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	z-index: 1001;
+}
+
+.drawer .drawer-bg {
+	background: rgba(0,0,0,.3);
+	pointer-events: auto;
+}
+
+
+.drawer-tab {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 48px;
+	height: 48px;
+	outline: none;
+	border: none;
+	padding: 0px;
+	margin: 0px;
+	background: none;
+	
+	/* @IFDEF PHONEGAP */
+	top: 15px;
+	/* @ENDIF */
+	z-index: 1010;
+}
+
+.drawer-icon {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	border-radius: 16px;
+	width: 32px;
+	height: 32px;
+	
+	background: url('img/icons/drawer.png') center / 10px 16px no-repeat;
+	-webkit-transition: 0.35s linear all;
+	transition: 0.35s linear all;
+}
+
 .drawer-header {
 	position: absolute;
 	top: 0px;

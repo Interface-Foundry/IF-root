@@ -21,7 +21,7 @@ if (beaconManager.supported == true) {
 //@ENDIF
 
 $scope.$on('$viewContentLoaded', function() {
-	document.getElementById("wrap").scrollTop = 0;
+// 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
 $scope.newWorld = function() {
