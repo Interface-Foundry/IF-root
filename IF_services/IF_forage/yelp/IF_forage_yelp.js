@@ -165,7 +165,10 @@ function searchYelp(tag, done) {
                         	lmSchema.style.maps.cloudMapID = cloudMapID;
                         	lmSchema.style.maps.cloudMapName = cloudMapName;
                         	lmSchema.views = 0;       
-                    	
+
+	                        lmSchema.source_yelp={};
+	                        lmSchema.source_yelp.rating={};
+
                         	if(typeof business.image_url=='undefined'){
                         		lmSchema.avatar = 'img/IF/yelp_default.jpg';
                         	}
@@ -180,8 +183,6 @@ function searchYelp(tag, done) {
                         		
                         	}
 
-	                        lmSchema.source_yelp={};
-	                        lmSchema.source_yelp.rating={};
 	                        if(typeof business.name=='undefined')
 	                        {
 	                            lmSchema.name=0;
