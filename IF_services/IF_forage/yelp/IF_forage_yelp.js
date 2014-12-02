@@ -758,7 +758,7 @@ function getLatLong(business,callback){
             }
             else {
                 callback(false,business,results,docs);
-                console.log('No Documents');
+                //console.log('No Documents');
             }
         });	
 
