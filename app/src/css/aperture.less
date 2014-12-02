@@ -38,7 +38,7 @@
 }
 
 #shelf.aperture-off {
-	transform: translateY(108); /*TODO toolbar height + nav height*/
+	transform: translateY(108px); /*TODO toolbar height + nav height*/
 	-webkit-transform: translateY(108px);
 	-moz-transform: translateY(108px);
 	-ms-transform: translateY(108px);
@@ -54,6 +54,10 @@
 	-o-transform: translateY(50%);
 }
 
+.aperture-half .shelf-surface {
+	height: 50%;
+}
+
 #shelf.aperture-full {
 	transform: translateY(100%) translateZ(0px);
 	-webkit-transform: translateY(100%) translateZ(0px);
@@ -66,6 +70,10 @@
 #shelf.aperture-third {
 	transform: translateY(35%) translateZ(0px);
 	-webkit-transform: translateY(35%) translateZ(0px);
+}
+
+.aperture-third .shelf-surface {
+	height: 65%;
 }
 
 .aperture-pop { /*only shown on aperture pop*/

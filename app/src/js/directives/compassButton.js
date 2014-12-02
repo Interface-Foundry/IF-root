@@ -27,7 +27,6 @@ app.directive('compassButton', function(worldTree) {
 				console.log('compassButton', data);
 				scope.nearbyBubbles = data.live;
 			}, function(reason) {console.log(reason)});
-		},
-		templateUrl: 'templates/compassButton.html'
+		}
 	}
 });
