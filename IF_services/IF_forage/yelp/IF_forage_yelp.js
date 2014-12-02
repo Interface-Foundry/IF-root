@@ -672,11 +672,11 @@ function searchYelp(tag, done) {
                             }
                             else if(!err)
                             {
-                                console.log("documents saved");
+                                //console.log("documents saved");
                             }
                             else{
 
-                                console.log('jajja')
+                                //console.log('jajja')
 
                             }
                         });
@@ -749,11 +749,11 @@ function getLatLong(business,callback){
     	var results = 'fakeLoc';
         landmarks.model(false).find({"source_yelp.id":business.id.toString()}, function(err, docs) {
             if(err){
-                console.log("sds")
+                console.log("error")
                 console.log("Error Occured: "+err);
             }
             else if (docs.length>0){
-                console.log("documents Found :"+business.id);
+                //console.log("documents Found :"+business.id);
                 callback(true,business,results,docs)
             }
             else {
