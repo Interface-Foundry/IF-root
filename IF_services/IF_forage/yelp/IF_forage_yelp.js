@@ -41,11 +41,11 @@ var yelp = require("yelp").createClient({
     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
 });
 
-// var zipLow = 1001;
-// var zipHigh = 99950;
+var zipLow = 1001;
+var zipHigh = 99950;
 
-var zipLow = 10010;
-var zipHigh = 10011;
+// var zipLow = 10010;
+// var zipHigh = 10011;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
@@ -145,7 +145,7 @@ function searchYelp(tag, done) {
 
                     if(!found){	
 
-                    	console.log('-------------------- doc new, creating!! =------------');
+                    	//console.log('-------------------- doc new, creating!! =------------');
 
                         var lmSchema = new landmarks.model(true);
 
@@ -170,7 +170,14 @@ function searchYelp(tag, done) {
                         		lmSchema.avatar = 'img/IF/yelp_default.jpg';
                         	}
                         	else {
-                        		lmSchema.avatar = business.image_url;
+								
+								lmSchema.avatar = business.image_url;
+								
+                        		//small image? go for big!
+                        		if( business.image_url.indexOf('ms.jpg') >= 0){
+                        			lmSchema.source_yelp.business_image = business.image_url.replace("ms.jpg", "l.jpg");
+								}
+                        		
                         	}
 
 	                        lmSchema.source_yelp={};
@@ -443,7 +450,7 @@ function searchYelp(tag, done) {
                     }
                     else{
 
-                    	console.log('-------------------- doc found, updating!! =------------');
+                    	//console.log('-------------------- doc found, updating!! =------------');
 
                     	docs[0].world = true;
                     	docs[0].valid = true;
@@ -482,7 +489,14 @@ function searchYelp(tag, done) {
                     		docs[0].avatar = 'img/IF/yelp_default.jpg';
                     	}
                     	else {
+
+
                     		docs[0].avatar = business.image_url;
+
+                    		//small image? go for big!
+                    		if( business.image_url.indexOf('ms.jpg') >= 0){
+                    			docs[0].source_yelp.business_image = business.image_url.replace("ms.jpg", "l.jpg");
+							}
                     	}
                         	
 

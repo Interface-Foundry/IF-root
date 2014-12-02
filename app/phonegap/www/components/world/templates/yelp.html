@@ -1,26 +1,36 @@
 <header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
-	<div class="marble-page-header-icon"><img style="display:block;" src="img/icons/textsms_16.png" width="16" height="16"></div>
-	Yelp
+	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
+	More Info
 </header>
 <article class="marble-page-content">
 	<div style="width:100%; height:40px;">
-		<p><b>From </b><a target="_blank" href="{{world.source_yelp.url}}"><img width="50" style="margin-top:-1px;" src="/img/cards/yelp_logo.png"></a></p>
+		<p><b>From </b><a target="_blank" href="{{world.source_yelp.url}}"><img width="50" style="margin-top:-1px;" src="/img/cards/yelp_logo.png"> Yelp.com</a></p>
 	</div>
-	<p ng-show="world.source_yelp.display_phone">
-		<b>Phone: </b><br> 
-		{{world.source_yelp.display_phone}}
+	<img class="img-responsive" ng-src="{{world.source_yelp.business_image}}">
+
+	<blockquote ng-show="world.summary">{{world.summary}}</blockquote>
+
+	<p ng-show="world.source_yelp.rating.rating_img_url">
+		<b>Rating </b><br>
+		<img src="{{world.source_yelp.rating.rating_img_url}}"><br>
+		{{world.source_yelp.rating.review_count}} reviews
+
 	</p>
+
+	<p ng-show="world.source_yelp.categories">
+		<b>Cuisine </b><br>
+		<span ng-repeat="category in world.source_yelp.categories">{{category[0]}}<br></span>
+	</p>
+
 	<p ng-show="world.source_yelp.locationInfo.display_address">
-		<b>Address: </b><br>
+		<b>Location </b><br>
 		<span ng-show="world.source_yelp.locationInfo.display_address">{{world.source_yelp.locationInfo.display_address[0]}}<br>{{world.source_yelp.locationInfo.display_address[2]}}</span><br>
 		<span ng-show="world.source_yelp.locationInfo.cross_streets">Between {{world.source_yelp.locationInfo.cross_streets}} in {{world.source_yelp.locationInfo.display_address[1]}}</span>
 	</p>
-	<p ng-show="world.source_yelp.categories">
-		<b>Category: </b><br>
-		<span ng-repeat="category in world.source_yelp.categories">{{category[0]}}<br></span>
+
+	<p ng-show="world.source_yelp.display_phone">
+		<b>Phone </b><br> 
+		{{world.source_yelp.display_phone}}
 	</p>
-	<p ng-show="world.source_yelp.rating.rating_img_url">
-		<b>Rating: </b><br>
-		<img src="{{world.source_yelp.rating.rating_img_url}}">
-	</p>
+
 </article>
