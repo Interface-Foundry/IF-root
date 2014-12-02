@@ -4,6 +4,8 @@ var express = require('express'), app = module.exports.app = express();
 var logger = require('morgan');
 var async = require('async');
 
+var fs = require('fs');
+
 app.use(logger('dev'));
 
 var bodyParser = require('body-parser');

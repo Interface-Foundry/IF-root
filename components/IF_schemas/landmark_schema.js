@@ -163,7 +163,8 @@ monguurl = require('monguurl');
 			deals:Schema.Types.Mixed,
 			locationInfo:Schema.Types.Mixed,
 			categories:Schema.Types.Mixed,
-			business_image: String
+			business_image: String,
+			rating_image: String
 		},
 		widgets: {
 			twitter: Boolean,
