@@ -5,6 +5,9 @@ var logger = require('morgan');
 var async = require('async');
 
 var fs = require('fs');
+var http = require('http');
+
+var im = require("imagemagick");
 
 app.use(logger('dev'));
 
@@ -43,11 +46,11 @@ var yelp = require("yelp").createClient({
     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
 });
 
-var zipLow = 1001;
-var zipHigh = 99950;
+// var zipLow = 1001;
+// var zipHigh = 99950;
 
-// var zipLow = 10010;
-// var zipHigh = 10011;
+var zipLow = 92867;
+var zipHigh = 92868;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
@@ -171,19 +174,33 @@ function searchYelp(tag, done) {
 	                        lmSchema.source_yelp={};
 	                        lmSchema.source_yelp.rating={};
 
-                        	if(typeof business.image_url=='undefined'){
-                        		lmSchema.avatar = 'img/IF/yelp_default.jpg';
-                        	}
-                        	else {
+        //                 	if(typeof business.image_url=='undefined'){
+        //                 		lmSchema.avatar = 'img/IF/yelp_default.jpg';
+        //                 	}
+        //                 	else {
 								
-								lmSchema.avatar = business.image_url;
+								// lmSchema.avatar = business.image_url;
 								
-                        		//small image? go for big!
-                        		if( business.image_url.indexOf('ms.jpg') >= 0){
-                        			lmSchema.source_yelp.business_image = business.image_url.replace("ms.jpg", "l.jpg");
-								}
+        //                 		//small image? go for big!
+        //                 		if( business.image_url.indexOf('ms.jpg') >= 0){
+        //                 			lmSchema.source_yelp.business_image = business.image_url.replace("ms.jpg", "l.jpg");
+								// }
+
+
+								// var download = function(uri, filename, callback){
+								//   request.head(uri, function(err, res, body){
+								//     console.log('content-type:', res.headers['content-type']);
+								//     console.log('content-length:', res.headers['content-length']);
+
+								//     request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+								//   });
+								// };
+
+								// download('https://www.google.com/images/srpr/logo3w.png', 'google.png', function(){
+								//   console.log('done');
+								// });
                         		
-                        	}
+        //                 	}
 
 	                        if(typeof business.name=='undefined')
 	                        {
@@ -331,7 +348,6 @@ function searchYelp(tag, done) {
 	                        }
 
 
-
 	                        if(typeof business.review_count=='undefined')
 	                        {
 	                            lmSchema.source_yelp.rating.review_count="";
@@ -359,6 +375,10 @@ function searchYelp(tag, done) {
 	                        }
 	                        else{
 	                            lmSchema.source_yelp.rating.rating_img_url=business.rating_img_url;
+
+	                           	//saving local ver of img rating
+	                           	lmSchema.source_yelp.rating_image = 'img/yelp/ratings/' + business.rating_img_url.substr(business.rating_img_url.lastIndexOf('/') + 1);                         
+
 	                        }
 	                        if(typeof business.rating_img_url_small=='undefined')
 	                        {
@@ -426,24 +446,132 @@ function searchYelp(tag, done) {
 					        }
 
 					        function saveNewLandmark(styleRes){
-					        	
-					        	if (styleRes !== undefined){ //if new styleID created for world
-                        			lmSchema.style.styleID = styleRes;
-                    			}
 
-	         					lmSchema.save(function(err,docs){
-	                                if(err){
-	                                    //console.log("Erorr Occurred");
-	                                    console.log(err)
-	                                }
-	                                else if(!err)
-	                                {
-	                                    //console.log("documents saved");
-	                                }
-	                                else{
-	                                    //console.log('jajja')
-	                                }
-	                            });
+					   //      	business_image_l: String,
+								// business_image_sm: String,
+
+
+								//save avatar = large image
+								//large image
+
+								//sm
+
+								//pulling in yelp images and saving
+
+	                        	if(typeof business.image_url == 'undefined'){
+	                        		lmSchema.avatar = 'img/IF/yelp_default.jpg';
+	                        		doneLandmarkSave();
+	                        	}
+	                        	else {
+
+	                        		lmSchema.business_image_sm = business.image_url; //save image sm direct yelp URL as small avatar
+
+									//lmSchema.avatar = business.image_url;
+									
+	                        		//small image? go for big!
+	                        		if( business.image_url.indexOf('ms.jpg') >= 0){
+
+
+	                        			//lmSchema.source_yelp.business_image_sm = business.image_url.replace("ms.jpg", "l.jpg");
+
+	                        			//http://s3-media2.fl.yelpcdn.com/bphoto/6GFH8nKg5yZ6ABEUXNHXJg/ms.jpg
+
+			// business_image_l: String,
+			// business_image_sm: String,
+
+	         //                			var file = fs.createWriteStream('../../app/dist/img/yelp/images/'+lmSchema.id+'.jpg');
+										// var request = http.get(business.image_url.replace("ms.jpg", "l.jpg"), function(response) {
+										//   response.pipe(file);
+										// });
+										
+
+										var downloadImg = function(url, dest, cb) {
+										  var file = fs.createWriteStream(dest);
+										  var request = http.get(url, function(response) {
+										    response.pipe(file);
+										    file.on('finish', function() {
+										      file.close(cb);  // close() is async, call cb after close completes.
+										    });
+										  }).on('error', function(err) { // Handle errors
+										    fs.unlink(dest); // Delete the file async. (But we don't check the result)
+										    if (cb) cb(err.message);
+										  });
+										};
+
+
+										downloadImg(business.image_url.replace("ms.jpg", "l.jpg"),'../../../app/dist/img/yelp/images/'+lmSchema.id+'.jpg', function(err){
+											if (err){console.log(err)}
+											else{
+
+												lmSchema.source_yelp.business_image_l = 'img/yelp/images/'+lmSchema.id+'.jpg';
+
+
+								                im.resize({
+												  srcPath: '../../../app/dist/img/yelp/images/'+lmSchema.id+'.jpg',
+												  dstPath: '../../../app/dist/img/yelp/images/'+lmSchema.id+'-sm.jpg',
+							                      strip : false,
+							                      width : 300,
+							                      height : "300^",
+							                      customArgs: [ 
+							                         "-gravity", "center"
+							                        ,"-extent", "300x300"
+							                      ]
+												}, function(err, stdout, stderr){
+												  if (err) throw err;
+
+												  	console.log('meow');
+
+													lmSchema.avatar = '../../../app/dist/img/yelp/images/'+lmSchema.id+'-sm.jpg';
+
+													//doneLandmarkSave();
+												});
+
+
+
+
+											}
+											
+										});	
+
+									}
+									else{
+										lmSchema.avatar = 'img/IF/yelp_default.jpg';
+										doneLandmarkSave();
+									}
+
+
+									//for update, check if exists in dir. if yes, check MD5 hash. if different,re-download image
+	                        		
+	                        	}
+
+
+
+	                        	function doneLandmarkSave(){
+		   
+						        	if (styleRes !== undefined){ //if new styleID created for world
+	                        			lmSchema.style.styleID = styleRes;
+	                    			}
+
+		         					lmSchema.save(function(err,docs){
+		                                if(err){
+		                                    //console.log("Erorr Occurred");
+		                                    console.log(err)
+		                                }
+		                                else if(!err)
+		                                {
+		                                    //console.log("documents saved");
+		                                }
+		                                else{
+		                                    //console.log('jajja')
+		                                }
+		                            });
+
+	                        	}
+
+
+
+
+
 
 					        }
 
@@ -649,6 +777,10 @@ function searchYelp(tag, done) {
                         }
                         else{
                             docs[0].source_yelp.rating.rating_img_url=business.rating_img_url;
+
+                           	//saving local ver of img rating
+                           	lm.source_yelp.rating_image = 'img/yelp/ratings/' + business.rating_img_url.substr(business.rating_img_url.lastIndexOf('/') + 1);
+
                         }
                         if(typeof business.rating_img_url_small=='undefined')
                         {
