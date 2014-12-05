@@ -6,7 +6,6 @@ module.exports = function(grunt) {
 			'copy',
 			'preprocess',
 			'uglify',
-			'angular_architecture_graph'
 		]
 	}
 }

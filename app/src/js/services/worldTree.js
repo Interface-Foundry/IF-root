@@ -102,7 +102,8 @@ worldTree.getNearby = function() {
 	var deferred = $q.defer();
 	var now = Date.now();
 	
-	if (worldTree._nearby && worldTree._nearby.timestamp+60000 < now) {
+	console.log(worldTree._nearby);
+	if (worldTree._nearby && worldTree._nearby.timestamp+30000 > now) 	{
 		deferred.resolve(worldTree._nearby);
 	} else {
 	geoService.getLocation().then(function(location) {

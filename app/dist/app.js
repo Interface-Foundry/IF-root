@@ -17667,7 +17667,8 @@ worldTree.getNearby = function() {
 	var deferred = $q.defer();
 	var now = Date.now();
 	
-	if (worldTree._nearby && worldTree._nearby.timestamp+60000 < now) {
+	console.log(worldTree._nearby);
+	if (worldTree._nearby && worldTree._nearby.timestamp+30000 > now) 	{
 		deferred.resolve(worldTree._nearby);
 	} else {
 	geoService.getLocation().then(function(location) {
@@ -20496,8 +20497,9 @@ app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', functio
 	
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	  $scope.homeBubbles = data['150m'];
-  	$scope.nearbyBubbles = data['2.5km'];
+		$scope.homeBubbles = data['150m'];
+		$scope.nearbyBubbles = data['2.5km'];
+
 	});
 }]);
 app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
