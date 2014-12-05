@@ -176,7 +176,7 @@ app.post('/forgot', function (req, res, next) {
           }
         },
         function(token, user, done) {
-            if (req.  ers.host){
+            if (req.headers.host){
               var mailOptions = {
                 to: user.local.email,
                 from: 'IF Bubbl <mail@bubbl.li>',
