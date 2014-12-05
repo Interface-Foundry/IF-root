@@ -20494,7 +20494,6 @@ app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', functio
 	styleManager.resetNavBG();
 	
 	worldTree.getNearby().then(function(data) {
-		console.log(data);
 		$scope.$evalAsync(function($scope) {
 			$scope.homeBubbles = data['150m'];
 			$scope.nearbyBubbles = data['2.5km'];
