@@ -90,8 +90,8 @@ $scope.sessionSearch = function() {
 $scope.getNearby = function($event) {
 	$scope.nearbyLoading = true;
 	worldTree.getNearby().then(function(data) {
-		$scope.altBubbles = data.liveAndInside;
-		$scope.nearbyBubbles = data.live;
+    $scope.altBubbles = data['150m'];
+    $scope.nearbyBubbles = data['2.5km'];
 		$scope.nearbyLoading = false;
 	}, function(reason) {
 		console.log('getNearby error');

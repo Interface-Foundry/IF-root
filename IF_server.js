@@ -45,10 +45,7 @@ var session      = require('express-session');
 var bodyParser = require('body-parser');
 
 //--- BUBBLE ROUTING ----//
-var integers = require('./components/IF_bubbleroutes/constants/integers');
-var strings = require('./components/IF_bubbleroutes/constants/strings');
-var bubble = require('./components/IF_bubbleroutes/handlers/bubble');
-
+var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
@@ -324,7 +321,8 @@ app.get('/api/:collection', function(req, res) {
 
     //route to world
     if (req.params.collection == 'worlds'){
-        bubble.listBubbles(req,res);
+
+     worlds_query(req.query.userCoordinate[0], req.query.userCoordinate[1], req.query.localTime,res);
     }
 
     //querying landmark collection (events, places, etc)
