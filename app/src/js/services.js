@@ -98,28 +98,36 @@ angular.module('tidepoolsServices', ['ngResource'])
 			aperture.set = function(state) {
 				switch (state) {
 					case 'off':
-						aperture.off = true;
-						aperture.state = 'aperture-off';
-						aperture.navfix = 'navfix';
-						map.apertureUpdate('aperture-off');
+						if (aperture.state!='aperture-off') {
+							aperture.off = true;
+							aperture.state = 'aperture-off';
+							aperture.navfix = 'navfix';
+							map.apertureUpdate('aperture-off');
+						}
 						break;
 					case 'third': 
-						aperture.off = false;
-						aperture.state = 'aperture-third';
-						aperture.navfix = '';
-						map.apertureUpdate('aperture-third');
+						if (aperture.state!='aperture-third') {
+							aperture.off = false;
+							aperture.state = 'aperture-third';
+							aperture.navfix = '';
+							map.apertureUpdate('aperture-third');
+						}
 						break;
 					case 'half':
-						aperture.off = false;
-						aperture.state = 'aperture-half';
-						aperture.navfix = '';
-						map.apertureUpdate('aperture-half');
+						if (aperture.state!='aperture-half') {
+							aperture.off = false;
+							aperture.state = 'aperture-half';
+							aperture.navfix = '';
+							map.apertureUpdate('aperture-half');
+						}
 						break;
 					case 'full':
-						aperture.off = false;
-						aperture.state = 'aperture-full';
-						aperture.navfix = '';
-						map.apertureUpdate('aperture-full');
+						if (aperture.state!='aperture-full') {
+							aperture.off = false;
+							aperture.state = 'aperture-full';
+							aperture.navfix = '';
+							map.apertureUpdate('aperture-full');
+						}
 						break;
 				}
 				}

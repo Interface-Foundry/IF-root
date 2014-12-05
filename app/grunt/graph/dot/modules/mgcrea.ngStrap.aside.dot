@@ -1,0 +1,65 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.aside"[label="mgcrea.ngStrap.aside", color=1]
+
+    
+      "mgcrea.ngStrap.modal"[label="mgcrea.ngStrap.modal", color=1]
+      "mgcrea.ngStrap.modal" -> "mgcrea.ngStrap.aside"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$aside"[label="$aside", fillcolor=2]
+      "mgcrea.ngStrap.aside" -> "$aside"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsAside"[label="bsAside", color=3]
+      "mgcrea.ngStrap.aside" -> "bsAside"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$aside"[label="$aside"]
+        "$aside" -> "bsAside"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

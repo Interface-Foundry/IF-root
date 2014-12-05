@@ -1,0 +1,54 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.helpers.parseOptions"[label="mgcrea.ngStrap.helpers.parseOptions", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+      "$parseOptions"[label="$parseOptions", fillcolor=2]
+      "mgcrea.ngStrap.helpers.parseOptions" -> "$parseOptions"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

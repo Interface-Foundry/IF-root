@@ -1,0 +1,94 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.carousel"[label="ui.bootstrap.carousel", color=1]
+
+    
+      "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+      "ui.bootstrap.transition" -> "ui.bootstrap.carousel"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "CarouselController"[label="CarouselController", color=4]
+      "ui.bootstrap.carousel" -> "CarouselController"
+    
+      "CarouselController"[label="CarouselController", color=4]
+      "ui.bootstrap.carousel" -> "CarouselController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "carousel"[label="carousel", color=3]
+      "ui.bootstrap.carousel" -> "carousel"
+    
+      "slide"[label="slide", color=3]
+      "ui.bootstrap.carousel" -> "slide"
+    
+      "carousel"[label="carousel", color=3]
+      "ui.bootstrap.carousel" -> "carousel"
+    
+      "slide"[label="slide", color=3]
+      "ui.bootstrap.carousel" -> "slide"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "CarouselController"
+      
+        "$transition"[label="$transition"]
+        "$transition" -> "CarouselController"
+      
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "CarouselController"
+      
+        "$transition"[label="$transition"]
+        "$transition" -> "CarouselController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

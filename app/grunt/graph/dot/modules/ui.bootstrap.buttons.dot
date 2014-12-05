@@ -1,0 +1,83 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.buttons"[label="ui.bootstrap.buttons", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "ButtonsController"[label="ButtonsController", color=4]
+      "ui.bootstrap.buttons" -> "ButtonsController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "btnRadio"[label="btnRadio", color=3]
+      "ui.bootstrap.buttons" -> "btnRadio"
+    
+      "btnCheckbox"[label="btnCheckbox", color=3]
+      "ui.bootstrap.buttons" -> "btnCheckbox"
+    
+      "btnRadio"[label="btnRadio", color=3]
+      "ui.bootstrap.buttons" -> "btnRadio"
+    
+      "btnCheckbox"[label="btnCheckbox", color=3]
+      "ui.bootstrap.buttons" -> "btnCheckbox"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+        "buttonConfig"[label="buttonConfig"]
+        "buttonConfig" -> "btnRadio"
+      
+    
+      
+        "buttonConfig"[label="buttonConfig"]
+        "buttonConfig" -> "btnCheckbox"
+      
+    
+      
+    
+      
+    
+
+
+    
+      
+        "buttonConfig"[label="buttonConfig"]
+        "buttonConfig" -> "ButtonsController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

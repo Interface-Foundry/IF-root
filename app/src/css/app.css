@@ -10,10 +10,15 @@ html {
 }
 
 body {
-  margin: 0;
-   height: 100%;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
 }
 
 @font-face {
@@ -112,6 +117,7 @@ nav ul {
 .nav-icon {
 	width: 40px;
 	height: 40px;
+	cursor: pointer;
 }
 
 .nav-avatar {
@@ -380,7 +386,7 @@ left: 8px;
 }
 
 .datepicker {
-	z-index: 100 !important;
+	z-index: 1030 !important;
 }
 
 .defaultBG {

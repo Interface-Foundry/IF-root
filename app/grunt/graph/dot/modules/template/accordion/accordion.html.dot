@@ -1,0 +1,49 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "template/accordion/accordion.html"[label="template/accordion/accordion.html", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

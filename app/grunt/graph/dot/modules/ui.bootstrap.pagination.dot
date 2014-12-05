@@ -1,0 +1,84 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.pagination"[label="ui.bootstrap.pagination", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "PaginationController"[label="PaginationController", color=4]
+      "ui.bootstrap.pagination" -> "PaginationController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "pagination"[label="pagination", color=3]
+      "ui.bootstrap.pagination" -> "pagination"
+    
+      "pagination"[label="pagination", color=3]
+      "ui.bootstrap.pagination" -> "pagination"
+    
+      "pager"[label="pager", color=3]
+      "ui.bootstrap.pagination" -> "pager"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+        "paginationConfig"[label="paginationConfig"]
+        "paginationConfig" -> "pagination"
+      
+    
+      
+        "paginationConfig"[label="paginationConfig"]
+        "paginationConfig" -> "pagination"
+      
+    
+      
+        "pagerConfig"[label="pagerConfig"]
+        "pagerConfig" -> "pager"
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "PaginationController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "PaginationController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

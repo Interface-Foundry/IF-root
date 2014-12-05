@@ -4693,7 +4693,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'monospaced.elastic', 'ui.calendar'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -5165,6 +5165,85 @@ angular.module('IF-directives', [])
         });
     };
 });
+app.directive('bubbleBody', function(apertureService) {
+	return {
+		restrict: 'A',
+		scope: true,
+		link: function(scope, element, attrs) {
+			var st;
+			
+			scope.$on('$destroy', function() {
+				element.off('mousewheel');
+			});
+		}
+	}
+});
+app.directive('compassButton', function(worldTree, $templateRequest, $compile, userManager, $timeout) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			var compassMenu;
+			
+			function positionCompassMenu() {
+				if (scope.compassState == true) {
+					var offset = element.offset();
+					var topOffset = 19;
+					
+					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
+					compassMenu.offset(newOffset);
+				}
+			}
+			
+			$templateRequest('templates/compassButton.html').then(function(template) {
+				$compile(template)(scope, function(clonedElement) {
+					compassMenu = $(clonedElement).appendTo(document.body);
+					
+					positionCompassMenu();
+														
+					scope.$watch(function () {
+						return userManager._displayName;
+					}, function(newVal, oldVal) {
+						positionCompassMenu();
+					
+					});
+					
+					$(window).resize(
+						_.debounce(positionCompassMenu, 200)
+					);
+				})
+			});			
+			
+			scope.compassOn = function($event, val) {
+				console.log('compassOn');
+				if (val!=undefined) {scope.compassState = val}
+				if (val==true) {
+					$timeout(positionCompassMenu, 0);
+				}
+				
+				if ($event) {
+					console.log('compassOn:event');
+
+					$event.stopPropagation();
+					$(document.body).on('click', function(e) {
+						console.log('compassOn:html click');
+
+						scope.compassState = false;
+						scope.$digest();
+						$(document.body).off('click');
+					})
+				}
+				
+			}
+			
+			console.log('linking compass button');
+			worldTree.getNearby().then(function(data) {
+				console.log('compassButton', data);
+				scope.nearbyBubbles = data.live;
+			}, function(reason) {console.log(reason)});
+		}
+	}
+});
 /*
  * angular-elastic v2.4.0
  * (c) 2014 Monospaced http://monospaced.com
@@ -5382,29 +5461,53 @@ angular.module('monospaced.elastic', [])
     }
   ]);
 
-angular.module('IF-directives', [])
-.directive('fitFont', function($rootScope) {
+app.directive('fitFont', function($rootScope) {
 	return {
 		restrict: 'A',
+		scope: true,
 		link: function($scope, $element, attrs) {
+			console.log('link', $element);
 			var fontSize = parseInt($element.css('font-size'));
 			var domElement = $element[0];
 			var ears = []; //listeners
 			
+			//FUNCTIONS
+			
 			function hasOverflow(e) {
 				if (e.offsetHeight < e.scrollHeight || e.offsetWidth < e.scrollWidth) {
 					return true;
-					} else {
+				} else {
 					return false;
 				}
 			}
 			
-			function resolveOverflow() {
+			function shrinkFont() {
+				console.log('shrinkFont', hasOverflow(domElement), fontSize);
 				while (hasOverflow(domElement) && fontSize > 12) {
 					fontSize--;
 					$element.css('font-size', fontSize+'px');
-				} 
+				}
 			}
+			
+			function growFont() {
+				console.log('growFont', hasOverflow(domElement), fontSize);
+
+				while(!hasOverflow(domElement) && fontSize < 40) {
+					fontSize++;
+					$element.css('font-size', fontSize+'px');
+				}
+				shrinkFont();
+			}
+			
+			function updateAfterChange(newWidth, oldWidth) {
+				if (newWidth < oldWidth) {
+					shrinkFont();
+				} else {
+					growFont();
+				}
+			}
+			
+			//LISTENERS
 			
 			ears.push(
 			$scope.$watch( //watch for resizes
@@ -5413,28 +5516,27 @@ angular.module('IF-directives', [])
 				}, 
 				function (newWidth, oldWidth) {
 					if (newWidth != oldWidth ) {
-					if (newWidth < oldWidth) {
-							resolveOverflow();
-						} else {
-							do {
-								fontSize++;
-								$element.css('font-size', fontSize+'px');
-							} while(hasOverflow(domElement)==false);
-							resolveOverflow();
-						}			
+						updateAfterChange(newWidth, oldWidth);
 					}
-			}))
-			
+			}));
+	
+			//Watch for changes to contents
 			ears.push(
-			$scope.$watch('world.name', function(value) {
-				resolveOverflow();
-			}))
-			
-		/*$scope.$on("$destroy", function() {
+			$scope.$watch(
+				function() {
+					return domElement.innerText;
+				},
+				function (newText, oldText) {
+					growFont();
+				})
+			)
+	
+			$scope.$on("$destroy", function() {
 				for (var i = 0, len = ears.length; i < len; i++) {
-					ears[i].pop()();
+					ears[i]();
 				}
-			});*/
+			});
+			
 		}
 	}
 });
@@ -15938,6 +16040,228 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
 
 }
 
+/*!
+ * jQuery Mousewheel 3.1.12
+ *
+ * Copyright 2014 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ */
+
+(function (factory) {
+    if ( typeof define === 'function' && define.amd ) {
+        // AMD. Register as an anonymous module.
+        define(['jquery'], factory);
+    } else if (typeof exports === 'object') {
+        // Node/CommonJS style for Browserify
+        module.exports = factory;
+    } else {
+        // Browser globals
+        factory(jQuery);
+    }
+}(function ($) {
+
+    var toFix  = ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'],
+        toBind = ( 'onwheel' in document || document.documentMode >= 9 ) ?
+                    ['wheel'] : ['mousewheel', 'DomMouseScroll', 'MozMousePixelScroll'],
+        slice  = Array.prototype.slice,
+        nullLowestDeltaTimeout, lowestDelta;
+
+    if ( $.event.fixHooks ) {
+        for ( var i = toFix.length; i; ) {
+            $.event.fixHooks[ toFix[--i] ] = $.event.mouseHooks;
+        }
+    }
+
+    var special = $.event.special.mousewheel = {
+        version: '3.1.12',
+
+        setup: function() {
+            if ( this.addEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.addEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = handler;
+            }
+            // Store the line height and page height for this particular element
+            $.data(this, 'mousewheel-line-height', special.getLineHeight(this));
+            $.data(this, 'mousewheel-page-height', special.getPageHeight(this));
+        },
+
+        teardown: function() {
+            if ( this.removeEventListener ) {
+                for ( var i = toBind.length; i; ) {
+                    this.removeEventListener( toBind[--i], handler, false );
+                }
+            } else {
+                this.onmousewheel = null;
+            }
+            // Clean up the data we added to the element
+            $.removeData(this, 'mousewheel-line-height');
+            $.removeData(this, 'mousewheel-page-height');
+        },
+
+        getLineHeight: function(elem) {
+            var $elem = $(elem),
+                $parent = $elem['offsetParent' in $.fn ? 'offsetParent' : 'parent']();
+            if (!$parent.length) {
+                $parent = $('body');
+            }
+            return parseInt($parent.css('fontSize'), 10) || parseInt($elem.css('fontSize'), 10) || 16;
+        },
+
+        getPageHeight: function(elem) {
+            return $(elem).height();
+        },
+
+        settings: {
+            adjustOldDeltas: true, // see shouldAdjustOldDeltas() below
+            normalizeOffset: true  // calls getBoundingClientRect for each event
+        }
+    };
+
+    $.fn.extend({
+        mousewheel: function(fn) {
+            return fn ? this.bind('mousewheel', fn) : this.trigger('mousewheel');
+        },
+
+        unmousewheel: function(fn) {
+            return this.unbind('mousewheel', fn);
+        }
+    });
+
+
+    function handler(event) {
+        var orgEvent   = event || window.event,
+            args       = slice.call(arguments, 1),
+            delta      = 0,
+            deltaX     = 0,
+            deltaY     = 0,
+            absDelta   = 0,
+            offsetX    = 0,
+            offsetY    = 0;
+        event = $.event.fix(orgEvent);
+        event.type = 'mousewheel';
+
+        // Old school scrollwheel delta
+        if ( 'detail'      in orgEvent ) { deltaY = orgEvent.detail * -1;      }
+        if ( 'wheelDelta'  in orgEvent ) { deltaY = orgEvent.wheelDelta;       }
+        if ( 'wheelDeltaY' in orgEvent ) { deltaY = orgEvent.wheelDeltaY;      }
+        if ( 'wheelDeltaX' in orgEvent ) { deltaX = orgEvent.wheelDeltaX * -1; }
+
+        // Firefox < 17 horizontal scrolling related to DOMMouseScroll event
+        if ( 'axis' in orgEvent && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
+            deltaX = deltaY * -1;
+            deltaY = 0;
+        }
+
+        // Set delta to be deltaY or deltaX if deltaY is 0 for backwards compatabilitiy
+        delta = deltaY === 0 ? deltaX : deltaY;
+
+        // New school wheel delta (wheel event)
+        if ( 'deltaY' in orgEvent ) {
+            deltaY = orgEvent.deltaY * -1;
+            delta  = deltaY;
+        }
+        if ( 'deltaX' in orgEvent ) {
+            deltaX = orgEvent.deltaX;
+            if ( deltaY === 0 ) { delta  = deltaX * -1; }
+        }
+
+        // No change actually happened, no reason to go any further
+        if ( deltaY === 0 && deltaX === 0 ) { return; }
+
+        // Need to convert lines and pages to pixels if we aren't already in pixels
+        // There are three delta modes:
+        //   * deltaMode 0 is by pixels, nothing to do
+        //   * deltaMode 1 is by lines
+        //   * deltaMode 2 is by pages
+        if ( orgEvent.deltaMode === 1 ) {
+            var lineHeight = $.data(this, 'mousewheel-line-height');
+            delta  *= lineHeight;
+            deltaY *= lineHeight;
+            deltaX *= lineHeight;
+        } else if ( orgEvent.deltaMode === 2 ) {
+            var pageHeight = $.data(this, 'mousewheel-page-height');
+            delta  *= pageHeight;
+            deltaY *= pageHeight;
+            deltaX *= pageHeight;
+        }
+
+        // Store lowest absolute delta to normalize the delta values
+        absDelta = Math.max( Math.abs(deltaY), Math.abs(deltaX) );
+
+        if ( !lowestDelta || absDelta < lowestDelta ) {
+            lowestDelta = absDelta;
+
+            // Adjust older deltas if necessary
+            if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
+                lowestDelta /= 40;
+            }
+        }
+
+        // Adjust older deltas if necessary
+        if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
+            // Divide all the things by 40!
+            delta  /= 40;
+            deltaX /= 40;
+            deltaY /= 40;
+        }
+
+        // Get a whole, normalized value for the deltas
+        delta  = Math[ delta  >= 1 ? 'floor' : 'ceil' ](delta  / lowestDelta);
+        deltaX = Math[ deltaX >= 1 ? 'floor' : 'ceil' ](deltaX / lowestDelta);
+        deltaY = Math[ deltaY >= 1 ? 'floor' : 'ceil' ](deltaY / lowestDelta);
+
+        // Normalise offsetX and offsetY properties
+        if ( special.settings.normalizeOffset && this.getBoundingClientRect ) {
+            var boundingRect = this.getBoundingClientRect();
+            offsetX = event.clientX - boundingRect.left;
+            offsetY = event.clientY - boundingRect.top;
+        }
+
+        // Add information to the event object
+        event.deltaX = deltaX;
+        event.deltaY = deltaY;
+        event.deltaFactor = lowestDelta;
+        event.offsetX = offsetX;
+        event.offsetY = offsetY;
+        // Go ahead and set deltaMode to 0 since we converted to pixels
+        // Although this is a little odd since we overwrite the deltaX/Y
+        // properties with normalized deltas.
+        event.deltaMode = 0;
+
+        // Add event and delta to the front of the arguments
+        args.unshift(event, delta, deltaX, deltaY);
+
+        // Clearout lowestDelta after sometime to better
+        // handle multiple device types that give different
+        // a different lowestDelta
+        // Ex: trackpad = 3 and mouse wheel = 120
+        if (nullLowestDeltaTimeout) { clearTimeout(nullLowestDeltaTimeout); }
+        nullLowestDeltaTimeout = setTimeout(nullLowestDelta, 200);
+
+        return ($.event.dispatch || $.event.handle).apply(this, args);
+    }
+
+    function nullLowestDelta() {
+        lowestDelta = null;
+    }
+
+    function shouldAdjustOldDeltas(orgEvent, absDelta) {
+        // If this is an older event and the delta is divisable by 120,
+        // then we are assuming that the browser is treating this as an
+        // older mouse wheel event and that we should divide the deltas
+        // by 40 to try and get a more usable deltaFactor.
+        // Side note, this actually impacts the reported scroll distance
+        // in older browsers and can cause scrolling to be slower than native.
+        // Turn this off by setting $.event.special.mousewheel.settings.adjustOldDeltas to false.
+        return special.settings.adjustOldDeltas && orgEvent.type === 'mousewheel' && absDelta % 120 === 0;
+    }
+
+}));
+
 L.AreaSelect = L.Class.extend({
     includes: L.Mixin.Events,
     
@@ -16224,28 +16548,36 @@ angular.module('tidepoolsServices', ['ngResource'])
 			aperture.set = function(state) {
 				switch (state) {
 					case 'off':
-						aperture.off = true;
-						aperture.state = 'aperture-off';
-						aperture.navfix = 'navfix';
-						map.apertureUpdate('aperture-off');
+						if (aperture.state!='aperture-off') {
+							aperture.off = true;
+							aperture.state = 'aperture-off';
+							aperture.navfix = 'navfix';
+							map.apertureUpdate('aperture-off');
+						}
 						break;
 					case 'third': 
-						aperture.off = false;
-						aperture.state = 'aperture-third';
-						aperture.navfix = '';
-						map.apertureUpdate('aperture-third');
+						if (aperture.state!='aperture-third') {
+							aperture.off = false;
+							aperture.state = 'aperture-third';
+							aperture.navfix = '';
+							map.apertureUpdate('aperture-third');
+						}
 						break;
 					case 'half':
-						aperture.off = false;
-						aperture.state = 'aperture-half';
-						aperture.navfix = '';
-						map.apertureUpdate('aperture-half');
+						if (aperture.state!='aperture-half') {
+							aperture.off = false;
+							aperture.state = 'aperture-half';
+							aperture.navfix = '';
+							map.apertureUpdate('aperture-half');
+						}
 						break;
 					case 'full':
-						aperture.off = false;
-						aperture.state = 'aperture-full';
-						aperture.navfix = '';
-						map.apertureUpdate('aperture-full');
+						if (aperture.state!='aperture-full') {
+							aperture.off = false;
+							aperture.state = 'aperture-full';
+							aperture.navfix = '';
+							map.apertureUpdate('aperture-full');
+						}
 						break;
 				}
 				}
@@ -16468,11 +16800,7 @@ geoService.getLocation = function(maxAge) {
 
 	if (navigator.geolocation) {
 		console.log('geo: using navigator');
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError, 
-			{timeout:15000, enableHighAccuracy : true});
-	
+			
 		function geolocationSuccess(position) {
 			geoService.location.lat = position.coords.latitude;
 			geoService.location.lng = position.coords.longitude;
@@ -16494,6 +16822,11 @@ geoService.getLocation = function(maxAge) {
 			}
 			deferred.reject(error);
 		}
+		
+			navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+			geolocationError, 
+			{timeout:15000, enableHighAccuracy : true});
+
 	} else {
 		//browser update message
 		deferred.reject('navigator.geolocation undefined');
@@ -17092,6 +17425,7 @@ userManager.getUser = function() {
 		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user && user!=0) {
+				console.log(user);
 				userManager._user = user;
 				deferred.resolve(user);
 			} else {
@@ -17331,11 +17665,17 @@ worldTree.getUpcoming = function(_id) {
 
 worldTree.getNearby = function() {
 	var deferred = $q.defer();
+	var now = Date.now();
 	
+	if (worldTree._nearby && worldTree._nearby.timestamp+60000 < now) {
+		deferred.resolve(worldTree._nearby);
+	} else {
 	geoService.getLocation().then(function(location) {
 		db.worlds.query({localTime: new Date(), 
 			userCoordinate: [location.lng, location.lat]},
 			function(data) {
+				worldTree._nearby = data[0];
+				worldTree._nearby.timestamp = now;
 				deferred.resolve(data[0]);
 				//live
 				//liveAndInside
@@ -17343,6 +17683,7 @@ worldTree.getNearby = function() {
 	}, function(reason) {
 		deferred.reject(reason);
 	})
+	}
 	
 	return deferred.promise;
 }
@@ -20178,7 +20519,7 @@ angular.extend($rootScope, {navTitle: "Bubbl.li"})
 angular.extend($rootScope, {loading: false});
 	
 $scope.$on('$viewContentLoaded', function() {
-	document.getElementById("wrap").scrollTop = 0;
+// 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
 $scope.newWorld = function() {
@@ -21588,6 +21929,35 @@ function loadWidgets() {
 
 						venueArr = venueArr.join("+").replace(/ /g,"+");
 						$scope.streetviewLoc = venueArr + mapAPI;
+					}
+					else{
+						coordsURL();
+					}
+				}
+				else{
+					coordsURL();
+				}
+			}
+			else if($scope.world.source_yelp){
+				if($scope.world.source_yelp.locationInfo){
+					if($scope.world.source_yelp.locationInfo){
+						if($scope.world.source_yelp.locationInfo.address){
+
+							var venueArr = [];
+
+							typeof $scope.world.source_yelp.locationInfo.address && venueArr.push($scope.world.source_yelp.locationInfo.address);
+							typeof $scope.world.source_yelp.locationInfo.city && venueArr.push($scope.world.source_yelp.locationInfo.city);
+							typeof $scope.world.source_yelp.locationInfo.state_code && venueArr.push($scope.world.source_yelp.locationInfo.state_code);
+							typeof $scope.world.source_yelp.locationInfo.postal_code && venueArr.push($scope.world.source_yelp.locationInfo.postal_code);
+							typeof $scope.world.source_yelp.locationInfo.country_code && venueArr.push($scope.world.source_yelp.locationInfo.country_code);
+
+							venueArr = venueArr.join("+").replace(/ /g,"+");
+							$scope.streetviewLoc = venueArr + mapAPI;
+
+						}
+						else {
+							coordsURL();
+						}
 					}
 					else{
 						coordsURL();

@@ -25,6 +25,7 @@ userManager.getUser = function() {
 		$http.get('/api/user/loggedin', {server: true}).
 		success(function(user){
 			if (user && user!=0) {
+				console.log(user);
 				userManager._user = user;
 				deferred.resolve(user);
 			} else {
@@ -91,16 +92,14 @@ userManager.checkLogin = function(){
 			  userManager._user = user;
 		  }
 		  deferred.resolve(0);
-		  //$rootScope.$digest();
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
-		  //$rootScope.$digest();
 	  });
 	  
 	  userManager.getDisplayName().then(function(displayName) {
-		  $rootScope.user.displayName = displayName;
+	  	$rootScope.user.displayName = displayName;
 	  });
 	  
       return deferred.promise;

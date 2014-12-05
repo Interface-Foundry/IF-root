@@ -1,0 +1,123 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.datepicker"[label="ui.bootstrap.datepicker", color=1]
+
+    
+      "ui.bootstrap.dateparser"[label="ui.bootstrap.dateparser", color=1]
+      "ui.bootstrap.dateparser" -> "ui.bootstrap.datepicker"
+    
+      "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+      "ui.bootstrap.position" -> "ui.bootstrap.datepicker"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "DatepickerController"[label="DatepickerController", color=4]
+      "ui.bootstrap.datepicker" -> "DatepickerController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "datepicker"[label="datepicker", color=3]
+      "ui.bootstrap.datepicker" -> "datepicker"
+    
+      "daypicker"[label="daypicker", color=3]
+      "ui.bootstrap.datepicker" -> "daypicker"
+    
+      "monthpicker"[label="monthpicker", color=3]
+      "ui.bootstrap.datepicker" -> "monthpicker"
+    
+      "yearpicker"[label="yearpicker", color=3]
+      "ui.bootstrap.datepicker" -> "yearpicker"
+    
+      "datepickerPopup"[label="datepickerPopup", color=3]
+      "ui.bootstrap.datepicker" -> "datepickerPopup"
+    
+      "datepickerPopupWrap"[label="datepickerPopupWrap", color=3]
+      "ui.bootstrap.datepicker" -> "datepickerPopupWrap"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "daypicker"
+      
+    
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "monthpicker"
+      
+    
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "yearpicker"
+      
+    
+      
+        "$position"[label="$position"]
+        "$position" -> "datepickerPopup"
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "datepickerPopup"
+      
+        "dateParser"[label="dateParser"]
+        "dateParser" -> "datepickerPopup"
+      
+        "datepickerPopupConfig"[label="datepickerPopupConfig"]
+        "datepickerPopupConfig" -> "datepickerPopup"
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "DatepickerController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "DatepickerController"
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "DatepickerController"
+      
+        "datepickerConfig"[label="datepickerConfig"]
+        "datepickerConfig" -> "DatepickerController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

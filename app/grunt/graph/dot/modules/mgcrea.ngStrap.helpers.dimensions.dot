@@ -1,0 +1,59 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.helpers.dimensions"[label="mgcrea.ngStrap.helpers.dimensions", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+      "dimensions"[label="dimensions", color=6]
+      "mgcrea.ngStrap.helpers.dimensions" -> "dimensions"
+    
+      "dimensions"[label="dimensions", color=6]
+      "mgcrea.ngStrap.helpers.dimensions" -> "dimensions"
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+      
+    
+      
+    
+
+    
+
+
+}

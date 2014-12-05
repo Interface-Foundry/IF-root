@@ -604,7 +604,6 @@ a.bubble-inspector-title {
 	
 	text-align: center;
 	color: #777;
-	font-weight: 600;
 	
 	@media only screen and (min-width: 480px) {
 		min-width: 56px;
@@ -620,6 +619,12 @@ a.bubble-inspector-title {
 	line-height: 32px;
 	font-size: 14px;
 	margin: 0px 8px;
+}
+
+@media only screen and (max-width: 480px) {
+.user-chip-label.auth {
+	font-weight: 600;
+}
 }
 	
 @media only screen and (min-width: 480px) {
@@ -703,12 +708,16 @@ a.bubble-inspector-title {
 
 .compassDropdown {
 	position: absolute;
-	top: 4px;
-	right: 4px;
+	top: 0px;
+	right: 0px;
 	width: 240px;
 	background: #FFF;
 	box-shadow: 0px 2px 2px rgba(0,0,0,.2), 0px 6px 6px rgba(0,0,0,.2); 
 	z-index: 1015;
+	@media only screen and (min-width: 600px) {
+		width: 320px;
+	}
+
 }
 
 .compassDropdown.ng-hide-remove {
@@ -763,7 +772,7 @@ a.bubble-inspector-title {
 }
 
 
-.noselect { 
+.noselect {
    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -781,7 +790,7 @@ a.bubble-inspector-title {
 	width: 100%;
 	height: 100%;
 	background: rgba(0,0,0,.5);
-	z-index: 300;
+	z-index: 10000;
 }
 
 .dialog {
@@ -802,8 +811,15 @@ a.bubble-inspector-title {
 
 //AUTH
 
+.auth-title {
+	text-align: center;
+	color: #777;
+	margin-bottom: 14px;
+}
+
 input.auth-input {
 	width: 100%;
+	height: 32px;
 	margin-bottom: 4px;
 	border: none;
 	background: #FFF;
@@ -813,7 +829,7 @@ input.auth-input {
 
 .auth-submit {
 	width: 100%;
-	margin-bottom: 4px;
+	margin: 4px 0px;
 	border: none;
 	background: #3F51B5;
 	color: #FFF;
@@ -824,6 +840,11 @@ input.auth-input {
 	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
 }
 
+.auth-create {
+	.auth-submit();
+	background: #2196f3;
+	margin: 20px 0px 16px 0px;
+}
 
 
 
@@ -856,7 +877,7 @@ input.auth-input {
 	left: 0px;
 	width: 100%;
 	height: 0;
-	z-index: 1002;
+	z-index: 10010;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 

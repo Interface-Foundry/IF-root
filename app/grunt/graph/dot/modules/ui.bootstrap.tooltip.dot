@@ -1,0 +1,117 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.tooltip"[label="ui.bootstrap.tooltip", color=1]
+
+    
+      "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+      "ui.bootstrap.position" -> "ui.bootstrap.tooltip"
+    
+      "ui.bootstrap.bindHtml"[label="ui.bootstrap.bindHtml", color=1]
+      "ui.bootstrap.bindHtml" -> "ui.bootstrap.tooltip"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$tooltip"[label="$tooltip", fillcolor=2]
+      "ui.bootstrap.tooltip" -> "$tooltip"
+    
+      "$tooltip"[label="$tooltip", fillcolor=2]
+      "ui.bootstrap.tooltip" -> "$tooltip"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "tooltipPopup"[label="tooltipPopup", color=3]
+      "ui.bootstrap.tooltip" -> "tooltipPopup"
+    
+      "tooltip"[label="tooltip", color=3]
+      "ui.bootstrap.tooltip" -> "tooltip"
+    
+      "tooltipHtmlUnsafePopup"[label="tooltipHtmlUnsafePopup", color=3]
+      "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafePopup"
+    
+      "tooltipHtmlUnsafe"[label="tooltipHtmlUnsafe", color=3]
+      "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafe"
+    
+      "tooltipPopup"[label="tooltipPopup", color=3]
+      "ui.bootstrap.tooltip" -> "tooltipPopup"
+    
+      "tooltip"[label="tooltip", color=3]
+      "ui.bootstrap.tooltip" -> "tooltip"
+    
+      "tooltipHtmlUnsafePopup"[label="tooltipHtmlUnsafePopup", color=3]
+      "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafePopup"
+    
+      "tooltipHtmlUnsafe"[label="tooltipHtmlUnsafe", color=3]
+      "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafe"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+      
+    
+
+    
+      
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "tooltip"
+      
+    
+      
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "tooltipHtmlUnsafe"
+      
+    
+      
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "tooltip"
+      
+    
+      
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "tooltipHtmlUnsafe"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

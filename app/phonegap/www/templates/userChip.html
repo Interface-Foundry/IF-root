@@ -10,8 +10,8 @@
 				<span ng-bind="user.displayInitials"></span>
 			</li>
 			<li class="nav-user-menu-divider"></li>
-			<li class="nav-user-menu-item" ng-click="go('/profile/')">My Profile</li>
-			<li class="nav-user-menu-item" ng-click="go('/profile/')">My Bubbles</li>
+			<li class="nav-user-menu-item" ng-click="go('/profile/me')">My Profile</li>
+			<li class="nav-user-menu-item" ng-click="go('/profile/worlds')">My Bubbles</li>
 			<li class="nav-user-menu-divider"></li>
 			<!--
 <li class="nav-user-menu-item">History</li>
@@ -23,6 +23,6 @@
 		</ul>
 	</div>
 	<div class="user-chip-wrap" ng-switch-default>
-		<span class="user-chip-label" id="login">Signup</span>
+		<span class="user-chip-label" id="login">Sign In</span>
 	</div>
 </div>

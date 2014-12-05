@@ -1,0 +1,94 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.modal"[label="ui.bootstrap.modal", color=1]
+
+    
+      "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+      "ui.bootstrap.transition" -> "ui.bootstrap.modal"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$modal"[label="$modal", fillcolor=2]
+      "ui.bootstrap.modal" -> "$modal"
+    
+
+
+    
+
+    
+
+    
+      "$$stackedMap"[label="$$stackedMap", color=6]
+      "ui.bootstrap.modal" -> "$$stackedMap"
+    
+      "$modalStack"[label="$modalStack", color=6]
+      "ui.bootstrap.modal" -> "$modalStack"
+    
+
+    node[shape="cds"]
+    
+
+    
+      "modal"[label="modal", color=3]
+      "ui.bootstrap.modal" -> "modal"
+    
+      "modalBackdrop"[label="modalBackdrop", color=3]
+      "ui.bootstrap.modal" -> "modalBackdrop"
+    
+      "modalWindow"[label="modalWindow", color=3]
+      "ui.bootstrap.modal" -> "modalWindow"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$dialog"[label="$dialog"]
+        "$dialog" -> "modal"
+      
+    
+      
+    
+      
+        "$modalStack"[label="$modalStack"]
+        "$modalStack" -> "modalWindow"
+      
+    
+
+
+    
+
+    
+
+    
+      
+    
+      
+        "$transition"[label="$transition"]
+        "$transition" -> "$modalStack"
+      
+        "$$stackedMap"[label="$$stackedMap"]
+        "$$stackedMap" -> "$modalStack"
+      
+    
+
+    
+
+
+}

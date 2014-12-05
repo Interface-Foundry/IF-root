@@ -1,0 +1,6502 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+    node[shape="component"]
+    
+      "leaflet-directive"[label="leaflet-directive", color=1]
+    
+      "IF"[label="IF", color=1]
+    
+      "ui.calendar"[label="ui.calendar", color=1]
+    
+      "IF-directives"[label="IF-directives", color=1]
+    
+      "monospaced.elastic"[label="monospaced.elastic", color=1]
+    
+      "tidepoolsFilters"[label="tidepoolsFilters", color=1]
+    
+      "tidepoolsServices"[label="tidepoolsServices", color=1]
+    
+      "mgcrea.ngStrap"[label="mgcrea.ngStrap", color=1]
+    
+      "mgcrea.ngStrap.affix"[label="mgcrea.ngStrap.affix", color=1]
+    
+      "mgcrea.ngStrap.alert"[label="mgcrea.ngStrap.alert", color=1]
+    
+      "mgcrea.ngStrap.aside"[label="mgcrea.ngStrap.aside", color=1]
+    
+      "mgcrea.ngStrap.button"[label="mgcrea.ngStrap.button", color=1]
+    
+      "mgcrea.ngStrap.datepicker"[label="mgcrea.ngStrap.datepicker", color=1]
+    
+      "mgcrea.ngStrap.dropdown"[label="mgcrea.ngStrap.dropdown", color=1]
+    
+      "mgcrea.ngStrap.helpers.dateParser"[label="mgcrea.ngStrap.helpers.dateParser", color=1]
+    
+      "mgcrea.ngStrap.helpers.debounce"[label="mgcrea.ngStrap.helpers.debounce", color=1]
+    
+      "mgcrea.ngStrap.helpers.dimensions"[label="mgcrea.ngStrap.helpers.dimensions", color=1]
+    
+      "mgcrea.ngStrap.helpers.parseOptions"[label="mgcrea.ngStrap.helpers.parseOptions", color=1]
+    
+      "mgcrea.ngStrap.modal"[label="mgcrea.ngStrap.modal", color=1]
+    
+      "mgcrea.ngStrap.popover"[label="mgcrea.ngStrap.popover", color=1]
+    
+      "mgcrea.ngStrap.select"[label="mgcrea.ngStrap.select", color=1]
+    
+      "mgcrea.ngStrap.tab"[label="mgcrea.ngStrap.tab", color=1]
+    
+      "mgcrea.ngStrap.timepicker"[label="mgcrea.ngStrap.timepicker", color=1]
+    
+      "mgcrea.ngStrap.typeahead"[label="mgcrea.ngStrap.typeahead", color=1]
+    
+      "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+    
+      "ui.bootstrap"[label="ui.bootstrap", color=1]
+    
+      "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+    
+      "ui.bootstrap.collapse"[label="ui.bootstrap.collapse", color=1]
+    
+      "ui.bootstrap.accordion"[label="ui.bootstrap.accordion", color=1]
+    
+      "ui.bootstrap.alert"[label="ui.bootstrap.alert", color=1]
+    
+      "ui.bootstrap.buttons"[label="ui.bootstrap.buttons", color=1]
+    
+      "ui.bootstrap.carousel"[label="ui.bootstrap.carousel", color=1]
+    
+      "ui.bootstrap.dialog"[label="ui.bootstrap.dialog", color=1]
+    
+      "ui.bootstrap.dropdownToggle"[label="ui.bootstrap.dropdownToggle", color=1]
+    
+      "ui.bootstrap.modal"[label="ui.bootstrap.modal", color=1]
+    
+      "ui.bootstrap.pagination"[label="ui.bootstrap.pagination", color=1]
+    
+      "ui.bootstrap.position"[label="ui.bootstrap.position", color=1]
+    
+      "ui.bootstrap.tooltip"[label="ui.bootstrap.tooltip", color=1]
+    
+      "ui.bootstrap.popover"[label="ui.bootstrap.popover", color=1]
+    
+      "ui.bootstrap.progressbar"[label="ui.bootstrap.progressbar", color=1]
+    
+      "ui.bootstrap.rating"[label="ui.bootstrap.rating", color=1]
+    
+      "ui.bootstrap.tabs"[label="ui.bootstrap.tabs", color=1]
+    
+      "ui.bootstrap.typeahead"[label="ui.bootstrap.typeahead", color=1]
+    
+      "ui.bootstrap.tpls"[label="ui.bootstrap.tpls", color=1]
+    
+      "ui.bootstrap.bindHtml"[label="ui.bootstrap.bindHtml", color=1]
+    
+      "ui.bootstrap.dateparser"[label="ui.bootstrap.dateparser", color=1]
+    
+      "ui.bootstrap.datepicker"[label="ui.bootstrap.datepicker", color=1]
+    
+      "ui.bootstrap.dropdown"[label="ui.bootstrap.dropdown", color=1]
+    
+      "ui.bootstrap.timepicker"[label="ui.bootstrap.timepicker", color=1]
+    
+      "template/accordion/accordion-group.html"[label="template/accordion/accordion-group.html", color=1]
+    
+      "template/accordion/accordion.html"[label="template/accordion/accordion.html", color=1]
+    
+      "template/alert/alert.html"[label="template/alert/alert.html", color=1]
+    
+      "template/carousel/carousel.html"[label="template/carousel/carousel.html", color=1]
+    
+      "template/carousel/slide.html"[label="template/carousel/slide.html", color=1]
+    
+      "template/datepicker/datepicker.html"[label="template/datepicker/datepicker.html", color=1]
+    
+      "template/datepicker/day.html"[label="template/datepicker/day.html", color=1]
+    
+      "template/datepicker/month.html"[label="template/datepicker/month.html", color=1]
+    
+      "template/datepicker/popup.html"[label="template/datepicker/popup.html", color=1]
+    
+      "template/datepicker/year.html"[label="template/datepicker/year.html", color=1]
+    
+      "template/modal/backdrop.html"[label="template/modal/backdrop.html", color=1]
+    
+      "template/modal/window.html"[label="template/modal/window.html", color=1]
+    
+      "template/pagination/pager.html"[label="template/pagination/pager.html", color=1]
+    
+      "template/pagination/pagination.html"[label="template/pagination/pagination.html", color=1]
+    
+      "template/tooltip/tooltip-html-unsafe-popup.html"[label="template/tooltip/tooltip-html-unsafe-popup.html", color=1]
+    
+      "template/tooltip/tooltip-popup.html"[label="template/tooltip/tooltip-popup.html", color=1]
+    
+      "template/popover/popover.html"[label="template/popover/popover.html", color=1]
+    
+      "template/progressbar/bar.html"[label="template/progressbar/bar.html", color=1]
+    
+      "template/progressbar/progress.html"[label="template/progressbar/progress.html", color=1]
+    
+      "template/progressbar/progressbar.html"[label="template/progressbar/progressbar.html", color=1]
+    
+      "template/rating/rating.html"[label="template/rating/rating.html", color=1]
+    
+      "template/tabs/tab.html"[label="template/tabs/tab.html", color=1]
+    
+      "template/tabs/tabset-titles.html"[label="template/tabs/tabset-titles.html", color=1]
+    
+      "template/tabs/tabset.html"[label="template/tabs/tabset.html", color=1]
+    
+      "template/timepicker/timepicker.html"[label="template/timepicker/timepicker.html", color=1]
+    
+      "template/typeahead/typeahead-match.html"[label="template/typeahead/typeahead-match.html", color=1]
+    
+      "template/typeahead/typeahead-popup.html"[label="template/typeahead/typeahead-popup.html", color=1]
+    
+      "infinite-scroll"[label="infinite-scroll", color=1]
+    
+      "ngModal"[label="ngModal", color=1]
+    
+
+    
+      
+    
+      
+        "IF" -> "ngRoute"
+      
+        "IF" -> "ngSanitize"
+      
+        "IF" -> "ngAnimate"
+      
+        "IF" -> "ngTouch"
+      
+        "IF" -> "ngMessages"
+      
+        "IF" -> "tidepoolsFilters"
+      
+        "IF" -> "tidepoolsServices"
+      
+        "IF" -> "leaflet-directive"
+      
+        "IF" -> "angularFileUpload"
+      
+        "IF" -> "IF-directives"
+      
+        "IF" -> "mgcrea.ngStrap"
+      
+        "IF" -> "angularSpectrumColorpicker"
+      
+        "IF" -> "ui.slider"
+      
+        "IF" -> "swipe"
+      
+        "IF" -> "monospaced.elastic"
+      
+        "IF" -> "ui.calendar"
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        "tidepoolsServices" -> "ngResource"
+      
+    
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.modal"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.aside"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.alert"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.button"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.select"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.datepicker"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.timepicker"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.navbar"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.tooltip"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.popover"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.dropdown"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.typeahead"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.scrollspy"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.affix"
+      
+        "mgcrea.ngStrap" -> "mgcrea.ngStrap.tab"
+      
+    
+      
+        "mgcrea.ngStrap.affix" -> "mgcrea.ngStrap.helpers.dimensions"
+      
+        "mgcrea.ngStrap.affix" -> "mgcrea.ngStrap.helpers.debounce"
+      
+    
+      
+        "mgcrea.ngStrap.alert" -> "mgcrea.ngStrap.modal"
+      
+    
+      
+        "mgcrea.ngStrap.aside" -> "mgcrea.ngStrap.modal"
+      
+    
+      
+    
+      
+        "mgcrea.ngStrap.datepicker" -> "mgcrea.ngStrap.helpers.dateParser"
+      
+        "mgcrea.ngStrap.datepicker" -> "mgcrea.ngStrap.tooltip"
+      
+    
+      
+        "mgcrea.ngStrap.dropdown" -> "mgcrea.ngStrap.tooltip"
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        "mgcrea.ngStrap.popover" -> "mgcrea.ngStrap.tooltip"
+      
+    
+      
+    
+      
+    
+      
+        "mgcrea.ngStrap.timepicker" -> "mgcrea.ngStrap.helpers.dateParser"
+      
+        "mgcrea.ngStrap.timepicker" -> "mgcrea.ngStrap.tooltip"
+      
+    
+      
+    
+      
+        "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.helpers.dimensions"
+      
+    
+      
+        "ui.bootstrap" -> "ui.bootstrap.tpls"
+      
+        "ui.bootstrap" -> "ui.bootstrap.transition"
+      
+        "ui.bootstrap" -> "ui.bootstrap.collapse"
+      
+        "ui.bootstrap" -> "ui.bootstrap.accordion"
+      
+        "ui.bootstrap" -> "ui.bootstrap.alert"
+      
+        "ui.bootstrap" -> "ui.bootstrap.bindHtml"
+      
+        "ui.bootstrap" -> "ui.bootstrap.buttons"
+      
+        "ui.bootstrap" -> "ui.bootstrap.carousel"
+      
+        "ui.bootstrap" -> "ui.bootstrap.dateparser"
+      
+        "ui.bootstrap" -> "ui.bootstrap.position"
+      
+        "ui.bootstrap" -> "ui.bootstrap.datepicker"
+      
+        "ui.bootstrap" -> "ui.bootstrap.dropdown"
+      
+        "ui.bootstrap" -> "ui.bootstrap.modal"
+      
+        "ui.bootstrap" -> "ui.bootstrap.pagination"
+      
+        "ui.bootstrap" -> "ui.bootstrap.tooltip"
+      
+        "ui.bootstrap" -> "ui.bootstrap.popover"
+      
+        "ui.bootstrap" -> "ui.bootstrap.progressbar"
+      
+        "ui.bootstrap" -> "ui.bootstrap.rating"
+      
+        "ui.bootstrap" -> "ui.bootstrap.tabs"
+      
+        "ui.bootstrap" -> "ui.bootstrap.timepicker"
+      
+        "ui.bootstrap" -> "ui.bootstrap.typeahead"
+      
+    
+      
+    
+      
+        "ui.bootstrap.collapse" -> "ui.bootstrap.transition"
+      
+    
+      
+        "ui.bootstrap.accordion" -> "ui.bootstrap.collapse"
+      
+    
+      
+    
+      
+    
+      
+        "ui.bootstrap.carousel" -> "ui.bootstrap.transition"
+      
+    
+      
+        "ui.bootstrap.dialog" -> "ui.bootstrap.transition"
+      
+    
+      
+    
+      
+        "ui.bootstrap.modal" -> "ui.bootstrap.transition"
+      
+    
+      
+    
+      
+    
+      
+        "ui.bootstrap.tooltip" -> "ui.bootstrap.position"
+      
+        "ui.bootstrap.tooltip" -> "ui.bootstrap.bindHtml"
+      
+    
+      
+        "ui.bootstrap.popover" -> "ui.bootstrap.tooltip"
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        "ui.bootstrap.typeahead" -> "ui.bootstrap.position"
+      
+        "ui.bootstrap.typeahead" -> "ui.bootstrap.bindHtml"
+      
+    
+      
+        "ui.bootstrap.tpls" -> "template/accordion/accordion-group.html"
+      
+        "ui.bootstrap.tpls" -> "template/accordion/accordion.html"
+      
+        "ui.bootstrap.tpls" -> "template/alert/alert.html"
+      
+        "ui.bootstrap.tpls" -> "template/carousel/carousel.html"
+      
+        "ui.bootstrap.tpls" -> "template/carousel/slide.html"
+      
+        "ui.bootstrap.tpls" -> "template/datepicker/datepicker.html"
+      
+        "ui.bootstrap.tpls" -> "template/datepicker/day.html"
+      
+        "ui.bootstrap.tpls" -> "template/datepicker/month.html"
+      
+        "ui.bootstrap.tpls" -> "template/datepicker/popup.html"
+      
+        "ui.bootstrap.tpls" -> "template/datepicker/year.html"
+      
+        "ui.bootstrap.tpls" -> "template/modal/backdrop.html"
+      
+        "ui.bootstrap.tpls" -> "template/modal/window.html"
+      
+        "ui.bootstrap.tpls" -> "template/pagination/pager.html"
+      
+        "ui.bootstrap.tpls" -> "template/pagination/pagination.html"
+      
+        "ui.bootstrap.tpls" -> "template/tooltip/tooltip-html-unsafe-popup.html"
+      
+        "ui.bootstrap.tpls" -> "template/tooltip/tooltip-popup.html"
+      
+        "ui.bootstrap.tpls" -> "template/popover/popover.html"
+      
+        "ui.bootstrap.tpls" -> "template/progressbar/bar.html"
+      
+        "ui.bootstrap.tpls" -> "template/progressbar/progress.html"
+      
+        "ui.bootstrap.tpls" -> "template/progressbar/progressbar.html"
+      
+        "ui.bootstrap.tpls" -> "template/rating/rating.html"
+      
+        "ui.bootstrap.tpls" -> "template/tabs/tab.html"
+      
+        "ui.bootstrap.tpls" -> "template/tabs/tabset.html"
+      
+        "ui.bootstrap.tpls" -> "template/timepicker/timepicker.html"
+      
+        "ui.bootstrap.tpls" -> "template/typeahead/typeahead-match.html"
+      
+        "ui.bootstrap.tpls" -> "template/typeahead/typeahead-popup.html"
+      
+    
+      
+    
+      
+    
+      
+        "ui.bootstrap.datepicker" -> "ui.bootstrap.dateparser"
+      
+        "ui.bootstrap.datepicker" -> "ui.bootstrap.position"
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+    node[shape="ellipse"]
+
+
+    
+      
+
+      
+
+      
+        "leafletData"[label="leafletData", color=5]
+      
+
+      
+        "leafletMapDefaults"[label="leafletMapDefaults", color=6]
+      
+        "leafletEvents"[label="leafletEvents", color=6]
+      
+        "leafletLayerHelpers"[label="leafletLayerHelpers", color=6]
+      
+        "leafletControlHelpers"[label="leafletControlHelpers", color=6]
+      
+        "leafletLegendHelpers"[label="leafletLegendHelpers", color=6]
+      
+        "leafletPathsHelpers"[label="leafletPathsHelpers", color=6]
+      
+        "leafletBoundsHelpers"[label="leafletBoundsHelpers", color=6]
+      
+        "leafletMarkersHelpers"[label="leafletMarkersHelpers", color=6]
+      
+        "leafletHelpers"[label="leafletHelpers", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "leaflet"[label="leaflet", color=3]
+      
+        "center"[label="center", color=3]
+      
+        "tiles"[label="tiles", color=3]
+      
+        "legend"[label="legend", color=3]
+      
+        "geojson"[label="geojson", color=3]
+      
+        "layers"[label="layers", color=3]
+      
+        "bounds"[label="bounds", color=3]
+      
+        "markers"[label="markers", color=3]
+      
+        "paths"[label="paths", color=3]
+      
+        "controls"[label="controls", color=3]
+      
+        "eventBroadcast"[label="eventBroadcast", color=3]
+      
+        "maxbounds"[label="maxbounds", color=3]
+      
+        "decorations"[label="decorations", color=3]
+      
+        "layercontrol"[label="layercontrol", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "leaflet-directive" -> "leaflet"
+      
+        "leaflet-directive" -> "center"
+      
+        "leaflet-directive" -> "tiles"
+      
+        "leaflet-directive" -> "legend"
+      
+        "leaflet-directive" -> "geojson"
+      
+        "leaflet-directive" -> "layers"
+      
+        "leaflet-directive" -> "bounds"
+      
+        "leaflet-directive" -> "markers"
+      
+        "leaflet-directive" -> "paths"
+      
+        "leaflet-directive" -> "controls"
+      
+        "leaflet-directive" -> "eventBroadcast"
+      
+        "leaflet-directive" -> "maxbounds"
+      
+        "leaflet-directive" -> "decorations"
+      
+        "leaflet-directive" -> "layercontrol"
+      
+
+      
+
+      
+        "leaflet-directive" -> "leafletData"
+      
+
+      
+        "leaflet-directive" -> "leafletMapDefaults"
+      
+        "leaflet-directive" -> "leafletEvents"
+      
+        "leaflet-directive" -> "leafletLayerHelpers"
+      
+        "leaflet-directive" -> "leafletControlHelpers"
+      
+        "leaflet-directive" -> "leafletLegendHelpers"
+      
+        "leaflet-directive" -> "leafletPathsHelpers"
+      
+        "leaflet-directive" -> "leafletBoundsHelpers"
+      
+        "leaflet-directive" -> "leafletMarkersHelpers"
+      
+        "leaflet-directive" -> "leafletHelpers"
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "leaflet"
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "leaflet"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leaflet"
+        
+          "leafletEvents"[label="leafletEvents"]
+          "leafletEvents" -> "leaflet"
+        
+      
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "center"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "center"
+        
+          "leafletBoundsHelpers"[label="leafletBoundsHelpers"]
+          "leafletBoundsHelpers" -> "center"
+        
+          "leafletEvents"[label="leafletEvents"]
+          "leafletEvents" -> "center"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "tiles"
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "tiles"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "tiles"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "legend"
+        
+          "leafletLegendHelpers"[label="leafletLegendHelpers"]
+          "leafletLegendHelpers" -> "legend"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "geojson"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "geojson"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "layers"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "layers"
+        
+          "leafletLayerHelpers"[label="leafletLayerHelpers"]
+          "leafletLayerHelpers" -> "layers"
+        
+          "leafletControlHelpers"[label="leafletControlHelpers"]
+          "leafletControlHelpers" -> "layers"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "bounds"
+        
+          "leafletBoundsHelpers"[label="leafletBoundsHelpers"]
+          "leafletBoundsHelpers" -> "bounds"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "markers"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "markers"
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "markers"
+        
+          "leafletMarkersHelpers"[label="leafletMarkersHelpers"]
+          "leafletMarkersHelpers" -> "markers"
+        
+          "leafletEvents"[label="leafletEvents"]
+          "leafletEvents" -> "markers"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "paths"
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "paths"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "paths"
+        
+          "leafletPathsHelpers"[label="leafletPathsHelpers"]
+          "leafletPathsHelpers" -> "paths"
+        
+          "leafletEvents"[label="leafletEvents"]
+          "leafletEvents" -> "paths"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "controls"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "eventBroadcast"
+        
+          "leafletEvents"[label="leafletEvents"]
+          "leafletEvents" -> "eventBroadcast"
+        
+      
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "maxbounds"
+        
+          "leafletBoundsHelpers"[label="leafletBoundsHelpers"]
+          "leafletBoundsHelpers" -> "maxbounds"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "decorations"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "layercontrol"
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "layercontrol"
+        
+      
+
+      
+
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletData"
+        
+      
+
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletMapDefaults"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletEvents"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletLayerHelpers"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletControlHelpers"
+        
+          "leafletMapDefaults"[label="leafletMapDefaults"]
+          "leafletMapDefaults" -> "leafletControlHelpers"
+        
+      
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletPathsHelpers"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletBoundsHelpers"
+        
+      
+        
+          "leafletHelpers"[label="leafletHelpers"]
+          "leafletHelpers" -> "leafletMarkersHelpers"
+        
+      
+        
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "uiCalendarCtrl"[label="uiCalendarCtrl", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "uiCalendar"[label="uiCalendar", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.calendar" -> "uiCalendar"
+      
+
+      
+        "ui.calendar" -> "uiCalendarCtrl"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "uiCalendarConfig"[label="uiCalendarConfig"]
+          "uiCalendarConfig" -> "uiCalendar"
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "uiCalendarCtrl"
+        
+          "$locale"[label="$locale"]
+          "$locale" -> "uiCalendarCtrl"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "myPostRepeatDirective"[label="myPostRepeatDirective", color=3]
+      
+        "ngEnter"[label="ngEnter", color=3]
+      
+        "ifTooltip"[label="ifTooltip", color=3]
+      
+        "userChip"[label="userChip", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "IF-directives" -> "myPostRepeatDirective"
+      
+        "IF-directives" -> "ngEnter"
+      
+        "IF-directives" -> "ifTooltip"
+      
+        "IF-directives" -> "userChip"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+      
+        
+      
+        
+          "userManager"[label="userManager"]
+          "userManager" -> "userChip"
+        
+          "dialogs"[label="dialogs"]
+          "dialogs" -> "userChip"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "msdElastic"[label="msdElastic", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "monospaced.elastic" -> "msdElastic"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "msdElasticConfig"[label="msdElasticConfig"]
+          "msdElasticConfig" -> "msdElastic"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+        "hashtag"[label="hashtag", color=7]
+      
+        "youtubestrip"[label="youtubestrip", color=7]
+      
+        "url"[label="url", color=7]
+      
+        "unsafe"[label="unsafe", color=7]
+      
+        "httpsify"[label="httpsify", color=7]
+      
+        "userName"[label="userName", color=7]
+      
+        "datetime"[label="datetime", color=7]
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        "tidepoolsFilters" -> "hashtag"
+      
+        "tidepoolsFilters" -> "youtubestrip"
+      
+        "tidepoolsFilters" -> "url"
+      
+        "tidepoolsFilters" -> "unsafe"
+      
+        "tidepoolsFilters" -> "httpsify"
+      
+        "tidepoolsFilters" -> "userName"
+      
+        "tidepoolsFilters" -> "datetime"
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+    
+      
+
+      
+
+      
+
+      
+        "Landmark"[label="Landmark", color=6]
+      
+        "World"[label="World", color=6]
+      
+        "db"[label="db", color=6]
+      
+        "apertureService"[label="apertureService", color=6]
+      
+        "socket"[label="socket", color=6]
+      
+        "beaconManager"[label="beaconManager", color=6]
+      
+        "beaconData"[label="beaconData", color=6]
+      
+        "dialogs"[label="dialogs", color=6]
+      
+        "ifGlobals"[label="ifGlobals", color=6]
+      
+        "mapManager"[label="mapManager", color=6]
+      
+        "styleManager"[label="styleManager", color=6]
+      
+        "userGrouping"[label="userGrouping", color=6]
+      
+        "worldTree"[label="worldTree", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+        "tidepoolsServices" -> "Landmark"
+      
+        "tidepoolsServices" -> "World"
+      
+        "tidepoolsServices" -> "db"
+      
+        "tidepoolsServices" -> "apertureService"
+      
+        "tidepoolsServices" -> "socket"
+      
+        "tidepoolsServices" -> "beaconManager"
+      
+        "tidepoolsServices" -> "beaconData"
+      
+        "tidepoolsServices" -> "dialogs"
+      
+        "tidepoolsServices" -> "ifGlobals"
+      
+        "tidepoolsServices" -> "mapManager"
+      
+        "tidepoolsServices" -> "styleManager"
+      
+        "tidepoolsServices" -> "userGrouping"
+      
+        "tidepoolsServices" -> "worldTree"
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+        
+          "$resource"[label="$resource"]
+          "$resource" -> "Landmark"
+        
+      
+        
+          "$resource"[label="$resource"]
+          "$resource" -> "World"
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "World"
+        
+      
+        
+          "$resource"[label="$resource"]
+          "$resource" -> "db"
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "apertureService"
+        
+          "mapManager"[label="mapManager"]
+          "mapManager" -> "apertureService"
+        
+      
+        
+      
+        
+          "alertManager"[label="alertManager"]
+          "alertManager" -> "beaconManager"
+        
+          "beaconData"[label="beaconData"]
+          "beaconData" -> "beaconManager"
+        
+      
+        
+      
+        
+      
+        
+      
+        
+          "leafletData"[label="leafletData"]
+          "leafletData" -> "mapManager"
+        
+      
+        
+      
+        
+      
+        
+          "World"[label="World"]
+          "World" -> "worldTree"
+        
+          "db"[label="db"]
+          "db" -> "worldTree"
+        
+          "geoService"[label="geoService"]
+          "geoService" -> "worldTree"
+        
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$affix"[label="$affix", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsAffix"[label="bsAffix", color=3]
+      
+        "bsAffixTarget"[label="bsAffixTarget", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.affix" -> "$affix"
+      
+
+      
+        "mgcrea.ngStrap.affix" -> "bsAffix"
+      
+        "mgcrea.ngStrap.affix" -> "bsAffixTarget"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$affix"[label="$affix"]
+          "$affix" -> "bsAffix"
+        
+      
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$alert"[label="$alert", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsAlert"[label="bsAlert", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.alert" -> "$alert"
+      
+
+      
+        "mgcrea.ngStrap.alert" -> "bsAlert"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$alert"[label="$alert"]
+          "$alert" -> "bsAlert"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$aside"[label="$aside", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsAside"[label="bsAside", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.aside" -> "$aside"
+      
+
+      
+        "mgcrea.ngStrap.aside" -> "bsAside"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$aside"[label="$aside"]
+          "$aside" -> "bsAside"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$button"[label="$button", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsCheckboxGroup"[label="bsCheckboxGroup", color=3]
+      
+        "bsCheckbox"[label="bsCheckbox", color=3]
+      
+        "bsRadioGroup"[label="bsRadioGroup", color=3]
+      
+        "bsRadio"[label="bsRadio", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.button" -> "$button"
+      
+
+      
+        "mgcrea.ngStrap.button" -> "bsCheckboxGroup"
+      
+        "mgcrea.ngStrap.button" -> "bsCheckbox"
+      
+        "mgcrea.ngStrap.button" -> "bsRadioGroup"
+      
+        "mgcrea.ngStrap.button" -> "bsRadio"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+      
+        
+          "$button"[label="$button"]
+          "$button" -> "bsCheckbox"
+        
+          "$$rAF"[label="$$rAF"]
+          "$$rAF" -> "bsCheckbox"
+        
+      
+        
+      
+        
+          "$button"[label="$button"]
+          "$button" -> "bsRadio"
+        
+          "$$rAF"[label="$$rAF"]
+          "$$rAF" -> "bsRadio"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$datepicker"[label="$datepicker", color=2]
+      
+        "datepickerViews"[label="datepickerViews", color=2]
+      
+        "$datepicker"[label="$datepicker", color=2]
+      
+        "datepickerViews"[label="datepickerViews", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsDatepicker"[label="bsDatepicker", color=3]
+      
+        "bsDatepicker"[label="bsDatepicker", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.datepicker" -> "$datepicker"
+      
+        "mgcrea.ngStrap.datepicker" -> "datepickerViews"
+      
+        "mgcrea.ngStrap.datepicker" -> "$datepicker"
+      
+        "mgcrea.ngStrap.datepicker" -> "datepickerViews"
+      
+
+      
+        "mgcrea.ngStrap.datepicker" -> "bsDatepicker"
+      
+        "mgcrea.ngStrap.datepicker" -> "bsDatepicker"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+        
+          "$locale"[label="$locale"]
+          "$locale" -> "bsDatepicker"
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "bsDatepicker"
+        
+          "$datepicker"[label="$datepicker"]
+          "$datepicker" -> "bsDatepicker"
+        
+          "$dateParser"[label="$dateParser"]
+          "$dateParser" -> "bsDatepicker"
+        
+      
+        
+          "$locale"[label="$locale"]
+          "$locale" -> "bsDatepicker"
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "bsDatepicker"
+        
+          "$datepicker"[label="$datepicker"]
+          "$datepicker" -> "bsDatepicker"
+        
+          "$dateParser"[label="$dateParser"]
+          "$dateParser" -> "bsDatepicker"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$dropdown"[label="$dropdown", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsDropdown"[label="bsDropdown", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.dropdown" -> "$dropdown"
+      
+
+      
+        "mgcrea.ngStrap.dropdown" -> "bsDropdown"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$dropdown"[label="$dropdown"]
+          "$dropdown" -> "bsDropdown"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$dateParser"[label="$dateParser", color=2]
+      
+        "$dateParser"[label="$dateParser", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.helpers.dateParser" -> "$dateParser"
+      
+        "mgcrea.ngStrap.helpers.dateParser" -> "$dateParser"
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+          "$localeProvider"[label="$localeProvider"]
+          "$localeProvider" -> "$dateParser"
+        
+      
+        
+          "$localeProvider"[label="$localeProvider"]
+          "$localeProvider" -> "$dateParser"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+        "dimensions"[label="dimensions", color=6]
+      
+        "dimensions"[label="dimensions", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+        "mgcrea.ngStrap.helpers.dimensions" -> "dimensions"
+      
+        "mgcrea.ngStrap.helpers.dimensions" -> "dimensions"
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+        
+      
+        
+      
+
+      
+
+    
+      
+        "$parseOptions"[label="$parseOptions", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.helpers.parseOptions" -> "$parseOptions"
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$popover"[label="$popover", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsPopover"[label="bsPopover", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.popover" -> "$popover"
+      
+
+      
+        "mgcrea.ngStrap.popover" -> "bsPopover"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$popover"[label="$popover"]
+          "$popover" -> "bsPopover"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$timepicker"[label="$timepicker", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsTimepicker"[label="bsTimepicker", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.timepicker" -> "$timepicker"
+      
+
+      
+        "mgcrea.ngStrap.timepicker" -> "bsTimepicker"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$locale"[label="$locale"]
+          "$locale" -> "bsTimepicker"
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "bsTimepicker"
+        
+          "$timepicker"[label="$timepicker"]
+          "$timepicker" -> "bsTimepicker"
+        
+          "$dateParser"[label="$dateParser"]
+          "$dateParser" -> "bsTimepicker"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$tooltip"[label="$tooltip", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bsTooltip"[label="bsTooltip", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "mgcrea.ngStrap.tooltip" -> "$tooltip"
+      
+
+      
+        "mgcrea.ngStrap.tooltip" -> "bsTooltip"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "bsTooltip"
+        
+          "$$rAF"[label="$$rAF"]
+          "$$rAF" -> "bsTooltip"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+        "$transition"[label="$transition", color=6]
+      
+        "$transition"[label="$transition", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+        "ui.bootstrap.transition" -> "$transition"
+      
+        "ui.bootstrap.transition" -> "$transition"
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+        
+      
+        
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "collapse"[label="collapse", color=3]
+      
+        "collapse"[label="collapse", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.collapse" -> "collapse"
+      
+        "ui.bootstrap.collapse" -> "collapse"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "collapse"
+        
+      
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "collapse"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "AccordionController"[label="AccordionController", color=4]
+      
+        "AccordionController"[label="AccordionController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "accordion"[label="accordion", color=3]
+      
+        "accordionGroup"[label="accordionGroup", color=3]
+      
+        "accordionHeading"[label="accordionHeading", color=3]
+      
+        "accordionTransclude"[label="accordionTransclude", color=3]
+      
+        "accordion"[label="accordion", color=3]
+      
+        "accordionGroup"[label="accordionGroup", color=3]
+      
+        "accordionHeading"[label="accordionHeading", color=3]
+      
+        "accordionTransclude"[label="accordionTransclude", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.accordion" -> "accordion"
+      
+        "ui.bootstrap.accordion" -> "accordionGroup"
+      
+        "ui.bootstrap.accordion" -> "accordionHeading"
+      
+        "ui.bootstrap.accordion" -> "accordionTransclude"
+      
+        "ui.bootstrap.accordion" -> "accordion"
+      
+        "ui.bootstrap.accordion" -> "accordionGroup"
+      
+        "ui.bootstrap.accordion" -> "accordionHeading"
+      
+        "ui.bootstrap.accordion" -> "accordionTransclude"
+      
+
+      
+        "ui.bootstrap.accordion" -> "AccordionController"
+      
+        "ui.bootstrap.accordion" -> "AccordionController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "accordionGroup"
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "AccordionController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "AccordionController"
+        
+          "accordionConfig"[label="accordionConfig"]
+          "accordionConfig" -> "AccordionController"
+        
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "AccordionController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "AccordionController"
+        
+          "accordionConfig"[label="accordionConfig"]
+          "accordionConfig" -> "AccordionController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "AlertController"[label="AlertController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "alert"[label="alert", color=3]
+      
+        "alert"[label="alert", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.alert" -> "alert"
+      
+        "ui.bootstrap.alert" -> "alert"
+      
+
+      
+        "ui.bootstrap.alert" -> "AlertController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "AlertController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "AlertController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "ButtonsController"[label="ButtonsController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "btnRadio"[label="btnRadio", color=3]
+      
+        "btnCheckbox"[label="btnCheckbox", color=3]
+      
+        "btnRadio"[label="btnRadio", color=3]
+      
+        "btnCheckbox"[label="btnCheckbox", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.buttons" -> "btnRadio"
+      
+        "ui.bootstrap.buttons" -> "btnCheckbox"
+      
+        "ui.bootstrap.buttons" -> "btnRadio"
+      
+        "ui.bootstrap.buttons" -> "btnCheckbox"
+      
+
+      
+        "ui.bootstrap.buttons" -> "ButtonsController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "buttonConfig"[label="buttonConfig"]
+          "buttonConfig" -> "btnRadio"
+        
+      
+        
+          "buttonConfig"[label="buttonConfig"]
+          "buttonConfig" -> "btnCheckbox"
+        
+      
+        
+      
+        
+      
+
+      
+        
+          "buttonConfig"[label="buttonConfig"]
+          "buttonConfig" -> "ButtonsController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "CarouselController"[label="CarouselController", color=4]
+      
+        "CarouselController"[label="CarouselController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "carousel"[label="carousel", color=3]
+      
+        "slide"[label="slide", color=3]
+      
+        "carousel"[label="carousel", color=3]
+      
+        "slide"[label="slide", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.carousel" -> "carousel"
+      
+        "ui.bootstrap.carousel" -> "slide"
+      
+        "ui.bootstrap.carousel" -> "carousel"
+      
+        "ui.bootstrap.carousel" -> "slide"
+      
+
+      
+        "ui.bootstrap.carousel" -> "CarouselController"
+      
+        "ui.bootstrap.carousel" -> "CarouselController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "CarouselController"
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "CarouselController"
+        
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "CarouselController"
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "CarouselController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$dialog"[label="$dialog", color=2]
+      
+
+      
+        "MessageBoxController"[label="MessageBoxController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "ui.bootstrap.dialog" -> "$dialog"
+      
+
+      
+
+      
+        "ui.bootstrap.dialog" -> "MessageBoxController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "MessageBoxController"
+        
+          "dialog"[label="dialog"]
+          "dialog" -> "MessageBoxController"
+        
+          "model"[label="model"]
+          "model" -> "MessageBoxController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "dropdownToggle"[label="dropdownToggle", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.dropdownToggle" -> "dropdownToggle"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "$modal"[label="$modal", color=2]
+      
+
+      
+
+      
+
+      
+        "$$stackedMap"[label="$$stackedMap", color=6]
+      
+        "$modalStack"[label="$modalStack", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "modal"[label="modal", color=3]
+      
+        "modalBackdrop"[label="modalBackdrop", color=3]
+      
+        "modalWindow"[label="modalWindow", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "ui.bootstrap.modal" -> "$modal"
+      
+
+      
+        "ui.bootstrap.modal" -> "modal"
+      
+        "ui.bootstrap.modal" -> "modalBackdrop"
+      
+        "ui.bootstrap.modal" -> "modalWindow"
+      
+
+      
+
+      
+
+      
+        "ui.bootstrap.modal" -> "$$stackedMap"
+      
+        "ui.bootstrap.modal" -> "$modalStack"
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "$dialog"[label="$dialog"]
+          "$dialog" -> "modal"
+        
+      
+        
+      
+        
+          "$modalStack"[label="$modalStack"]
+          "$modalStack" -> "modalWindow"
+        
+      
+
+      
+
+      
+
+      
+        
+      
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "$modalStack"
+        
+          "$$stackedMap"[label="$$stackedMap"]
+          "$$stackedMap" -> "$modalStack"
+        
+      
+
+      
+
+    
+      
+
+      
+        "PaginationController"[label="PaginationController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "pagination"[label="pagination", color=3]
+      
+        "pagination"[label="pagination", color=3]
+      
+        "pager"[label="pager", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.pagination" -> "pagination"
+      
+        "ui.bootstrap.pagination" -> "pagination"
+      
+        "ui.bootstrap.pagination" -> "pager"
+      
+
+      
+        "ui.bootstrap.pagination" -> "PaginationController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "paginationConfig"[label="paginationConfig"]
+          "paginationConfig" -> "pagination"
+        
+      
+        
+          "paginationConfig"[label="paginationConfig"]
+          "paginationConfig" -> "pagination"
+        
+      
+        
+          "pagerConfig"[label="pagerConfig"]
+          "pagerConfig" -> "pager"
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "PaginationController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "PaginationController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+        "$position"[label="$position", color=6]
+      
+        "$position"[label="$position", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+        "ui.bootstrap.position" -> "$position"
+      
+        "ui.bootstrap.position" -> "$position"
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+        
+      
+        
+      
+
+      
+
+    
+      
+        "$tooltip"[label="$tooltip", color=2]
+      
+        "$tooltip"[label="$tooltip", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "tooltipPopup"[label="tooltipPopup", color=3]
+      
+        "tooltip"[label="tooltip", color=3]
+      
+        "tooltipHtmlUnsafePopup"[label="tooltipHtmlUnsafePopup", color=3]
+      
+        "tooltipHtmlUnsafe"[label="tooltipHtmlUnsafe", color=3]
+      
+        "tooltipPopup"[label="tooltipPopup", color=3]
+      
+        "tooltip"[label="tooltip", color=3]
+      
+        "tooltipHtmlUnsafePopup"[label="tooltipHtmlUnsafePopup", color=3]
+      
+        "tooltipHtmlUnsafe"[label="tooltipHtmlUnsafe", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "ui.bootstrap.tooltip" -> "$tooltip"
+      
+        "ui.bootstrap.tooltip" -> "$tooltip"
+      
+
+      
+        "ui.bootstrap.tooltip" -> "tooltipPopup"
+      
+        "ui.bootstrap.tooltip" -> "tooltip"
+      
+        "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafePopup"
+      
+        "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafe"
+      
+        "ui.bootstrap.tooltip" -> "tooltipPopup"
+      
+        "ui.bootstrap.tooltip" -> "tooltip"
+      
+        "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafePopup"
+      
+        "ui.bootstrap.tooltip" -> "tooltipHtmlUnsafe"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+        
+      
+
+      
+        
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "tooltip"
+        
+      
+        
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "tooltipHtmlUnsafe"
+        
+      
+        
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "tooltip"
+        
+      
+        
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "tooltipHtmlUnsafe"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "popoverPopup"[label="popoverPopup", color=3]
+      
+        "popover"[label="popover", color=3]
+      
+        "popoverPopup"[label="popoverPopup", color=3]
+      
+        "popover"[label="popover", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.popover" -> "popoverPopup"
+      
+        "ui.bootstrap.popover" -> "popover"
+      
+        "ui.bootstrap.popover" -> "popoverPopup"
+      
+        "ui.bootstrap.popover" -> "popover"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "popover"
+        
+      
+        
+      
+        
+          "$tooltip"[label="$tooltip"]
+          "$tooltip" -> "popover"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "ProgressBarController"[label="ProgressBarController", color=4]
+      
+        "ProgressController"[label="ProgressController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "progress"[label="progress", color=3]
+      
+        "progressbar"[label="progressbar", color=3]
+      
+        "progress"[label="progress", color=3]
+      
+        "bar"[label="bar", color=3]
+      
+        "progressbar"[label="progressbar", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.progressbar" -> "progress"
+      
+        "ui.bootstrap.progressbar" -> "progressbar"
+      
+        "ui.bootstrap.progressbar" -> "progress"
+      
+        "ui.bootstrap.progressbar" -> "bar"
+      
+        "ui.bootstrap.progressbar" -> "progressbar"
+      
+
+      
+        "ui.bootstrap.progressbar" -> "ProgressBarController"
+      
+        "ui.bootstrap.progressbar" -> "ProgressController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+          "$transition"[label="$transition"]
+          "$transition" -> "progressbar"
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "ProgressBarController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "ProgressBarController"
+        
+          "progressConfig"[label="progressConfig"]
+          "progressConfig" -> "ProgressBarController"
+        
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "ProgressController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "ProgressController"
+        
+          "progressConfig"[label="progressConfig"]
+          "progressConfig" -> "ProgressController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "RatingController"[label="RatingController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "rating"[label="rating", color=3]
+      
+        "rating"[label="rating", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.rating" -> "rating"
+      
+        "ui.bootstrap.rating" -> "rating"
+      
+
+      
+        "ui.bootstrap.rating" -> "RatingController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "ratingConfig"[label="ratingConfig"]
+          "ratingConfig" -> "rating"
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "RatingController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "RatingController"
+        
+          "ratingConfig"[label="ratingConfig"]
+          "ratingConfig" -> "RatingController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "TabsController"[label="TabsController", color=4]
+      
+        "TabsetController"[label="TabsetController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "tabs"[label="tabs", color=3]
+      
+        "pane"[label="pane", color=3]
+      
+        "tabset"[label="tabset", color=3]
+      
+        "tab"[label="tab", color=3]
+      
+        "tabHeadingTransclude"[label="tabHeadingTransclude", color=3]
+      
+        "tabContentTransclude"[label="tabContentTransclude", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.tabs" -> "tabs"
+      
+        "ui.bootstrap.tabs" -> "pane"
+      
+        "ui.bootstrap.tabs" -> "tabset"
+      
+        "ui.bootstrap.tabs" -> "tab"
+      
+        "ui.bootstrap.tabs" -> "tabHeadingTransclude"
+      
+        "ui.bootstrap.tabs" -> "tabContentTransclude"
+      
+
+      
+        "ui.bootstrap.tabs" -> "TabsController"
+      
+        "ui.bootstrap.tabs" -> "TabsetController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "TabsController"
+        
+          "$element"[label="$element"]
+          "$element" -> "TabsController"
+        
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "TabsetController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+        "typeaheadParser"[label="typeaheadParser", color=6]
+      
+        "typeaheadParser"[label="typeaheadParser", color=6]
+      
+
+
+      node[shape="cds"]
+
+      
+        "typeaheadHighlight"[label="typeaheadHighlight", color=7]
+      
+        "typeaheadHighlight"[label="typeaheadHighlight", color=7]
+      
+
+      
+        "typeahead"[label="typeahead", color=3]
+      
+        "typeaheadPopup"[label="typeaheadPopup", color=3]
+      
+        "typeahead"[label="typeahead", color=3]
+      
+        "typeaheadPopup"[label="typeaheadPopup", color=3]
+      
+        "typeaheadMatch"[label="typeaheadMatch", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.typeahead" -> "typeahead"
+      
+        "ui.bootstrap.typeahead" -> "typeaheadPopup"
+      
+        "ui.bootstrap.typeahead" -> "typeahead"
+      
+        "ui.bootstrap.typeahead" -> "typeaheadPopup"
+      
+        "ui.bootstrap.typeahead" -> "typeaheadMatch"
+      
+
+      
+
+      
+
+      
+        "ui.bootstrap.typeahead" -> "typeaheadParser"
+      
+        "ui.bootstrap.typeahead" -> "typeaheadParser"
+      
+
+      
+        "ui.bootstrap.typeahead" -> "typeaheadHighlight"
+      
+        "ui.bootstrap.typeahead" -> "typeaheadHighlight"
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+          "$position"[label="$position"]
+          "$position" -> "typeahead"
+        
+          "typeaheadParser"[label="typeaheadParser"]
+          "typeaheadParser" -> "typeahead"
+        
+      
+        
+      
+        
+          "$position"[label="$position"]
+          "$position" -> "typeahead"
+        
+          "typeaheadParser"[label="typeaheadParser"]
+          "typeaheadParser" -> "typeahead"
+        
+      
+        
+      
+        
+      
+
+      
+
+      
+
+      
+        
+      
+        
+      
+
+      
+        
+      
+        
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "bindHtmlUnsafe"[label="bindHtmlUnsafe", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.bindHtml" -> "bindHtmlUnsafe"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+        "dateParser"[label="dateParser", color=5]
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+        "ui.bootstrap.dateparser" -> "dateParser"
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+        
+          "$locale"[label="$locale"]
+          "$locale" -> "dateParser"
+        
+          "orderByFilter"[label="orderByFilter"]
+          "orderByFilter" -> "dateParser"
+        
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "DatepickerController"[label="DatepickerController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "datepicker"[label="datepicker", color=3]
+      
+        "daypicker"[label="daypicker", color=3]
+      
+        "monthpicker"[label="monthpicker", color=3]
+      
+        "yearpicker"[label="yearpicker", color=3]
+      
+        "datepickerPopup"[label="datepickerPopup", color=3]
+      
+        "datepickerPopupWrap"[label="datepickerPopupWrap", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.datepicker" -> "datepicker"
+      
+        "ui.bootstrap.datepicker" -> "daypicker"
+      
+        "ui.bootstrap.datepicker" -> "monthpicker"
+      
+        "ui.bootstrap.datepicker" -> "yearpicker"
+      
+        "ui.bootstrap.datepicker" -> "datepickerPopup"
+      
+        "ui.bootstrap.datepicker" -> "datepickerPopupWrap"
+      
+
+      
+        "ui.bootstrap.datepicker" -> "DatepickerController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "daypicker"
+        
+      
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "monthpicker"
+        
+      
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "yearpicker"
+        
+      
+        
+          "$position"[label="$position"]
+          "$position" -> "datepickerPopup"
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "datepickerPopup"
+        
+          "dateParser"[label="dateParser"]
+          "dateParser" -> "datepickerPopup"
+        
+          "datepickerPopupConfig"[label="datepickerPopupConfig"]
+          "datepickerPopupConfig" -> "datepickerPopup"
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "DatepickerController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "DatepickerController"
+        
+          "dateFilter"[label="dateFilter"]
+          "dateFilter" -> "DatepickerController"
+        
+          "datepickerConfig"[label="datepickerConfig"]
+          "datepickerConfig" -> "DatepickerController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "DropdownController"[label="DropdownController", color=4]
+      
+
+      
+        "dropdownService"[label="dropdownService", color=5]
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "dropdown"[label="dropdown", color=3]
+      
+        "dropdownToggle"[label="dropdownToggle", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.dropdown" -> "dropdown"
+      
+        "ui.bootstrap.dropdown" -> "dropdownToggle"
+      
+
+      
+        "ui.bootstrap.dropdown" -> "DropdownController"
+      
+
+      
+        "ui.bootstrap.dropdown" -> "dropdownService"
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "DropdownController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "DropdownController"
+        
+          "dropdownConfig"[label="dropdownConfig"]
+          "dropdownConfig" -> "DropdownController"
+        
+          "dropdownService"[label="dropdownService"]
+          "dropdownService" -> "DropdownController"
+        
+      
+
+      
+        
+      
+
+      
+
+      
+
+    
+      
+
+      
+        "TimepickerController"[label="TimepickerController", color=4]
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "timepicker"[label="timepicker", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "ui.bootstrap.timepicker" -> "timepicker"
+      
+
+      
+        "ui.bootstrap.timepicker" -> "TimepickerController"
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+
+      
+        
+          "$scope"[label="$scope"]
+          "$scope" -> "TimepickerController"
+        
+          "$attrs"[label="$attrs"]
+          "$attrs" -> "TimepickerController"
+        
+          "$locale"[label="$locale"]
+          "$locale" -> "TimepickerController"
+        
+          "timepickerConfig"[label="timepickerConfig"]
+          "timepickerConfig" -> "TimepickerController"
+        
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "infiniteScroll"[label="infiniteScroll", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+
+      
+        "infinite-scroll" -> "infiniteScroll"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+
+      
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+      
+        "ngModalDefaults"[label="ngModalDefaults", color=2]
+      
+
+      
+
+      
+
+      
+
+
+      node[shape="cds"]
+
+      
+
+      
+        "modalDialog"[label="modalDialog", color=3]
+      
+
+
+
+
+
+      node[shape="ellipse"]
+      
+        "ngModal" -> "ngModalDefaults"
+      
+
+      
+        "ngModal" -> "modalDialog"
+      
+
+      
+
+      
+
+      
+
+      
+
+
+
+
+
+
+
+
+
+
+
+      node[shape="ellipse",style="filled", color=8]
+      
+        
+      
+
+      
+        
+          "ngModalDefaults"[label="ngModalDefaults"]
+          "ngModalDefaults" -> "modalDialog"
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+    
+}

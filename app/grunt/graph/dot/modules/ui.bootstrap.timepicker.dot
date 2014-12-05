@@ -1,0 +1,71 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.timepicker"[label="ui.bootstrap.timepicker", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "TimepickerController"[label="TimepickerController", color=4]
+      "ui.bootstrap.timepicker" -> "TimepickerController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "timepicker"[label="timepicker", color=3]
+      "ui.bootstrap.timepicker" -> "timepicker"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "TimepickerController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "TimepickerController"
+      
+        "$locale"[label="$locale"]
+        "$locale" -> "TimepickerController"
+      
+        "timepickerConfig"[label="timepickerConfig"]
+        "timepickerConfig" -> "TimepickerController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

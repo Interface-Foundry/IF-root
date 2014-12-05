@@ -1,0 +1,77 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.timepicker"[label="mgcrea.ngStrap.timepicker", color=1]
+
+    
+      "mgcrea.ngStrap.helpers.dateParser"[label="mgcrea.ngStrap.helpers.dateParser", color=1]
+      "mgcrea.ngStrap.helpers.dateParser" -> "mgcrea.ngStrap.timepicker"
+    
+      "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.timepicker"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$timepicker"[label="$timepicker", fillcolor=2]
+      "mgcrea.ngStrap.timepicker" -> "$timepicker"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsTimepicker"[label="bsTimepicker", color=3]
+      "mgcrea.ngStrap.timepicker" -> "bsTimepicker"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$locale"[label="$locale"]
+        "$locale" -> "bsTimepicker"
+      
+        "dateFilter"[label="dateFilter"]
+        "dateFilter" -> "bsTimepicker"
+      
+        "$timepicker"[label="$timepicker"]
+        "$timepicker" -> "bsTimepicker"
+      
+        "$dateParser"[label="$dateParser"]
+        "$dateParser" -> "bsTimepicker"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

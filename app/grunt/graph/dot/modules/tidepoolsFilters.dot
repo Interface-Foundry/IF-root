@@ -1,0 +1,84 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "tidepoolsFilters"[label="tidepoolsFilters", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+      "hashtag"[label="hashtag", color=7]
+      "tidepoolsFilters" -> "hashtag"
+    
+      "youtubestrip"[label="youtubestrip", color=7]
+      "tidepoolsFilters" -> "youtubestrip"
+    
+      "url"[label="url", color=7]
+      "tidepoolsFilters" -> "url"
+    
+      "unsafe"[label="unsafe", color=7]
+      "tidepoolsFilters" -> "unsafe"
+    
+      "httpsify"[label="httpsify", color=7]
+      "tidepoolsFilters" -> "httpsify"
+    
+      "userName"[label="userName", color=7]
+      "tidepoolsFilters" -> "userName"
+    
+      "datetime"[label="datetime", color=7]
+      "tidepoolsFilters" -> "datetime"
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+
+}

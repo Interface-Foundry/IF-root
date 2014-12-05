@@ -1412,11 +1412,18 @@ text-align: center;
 	bottom: 0px;
 	width: 100%;
 	max-width: 600px;
-	max-height: 100%;
+	height: 100%;
 	float: right;
 	overflow: auto;
 	padding: 8px 8px 32px 8px;
 	z-index: 0;
+}
+
+.message-list:before {
+	content: ' ';
+	display: block;
+	height: 75%;
+	
 }
 
 .view-footer {
@@ -1501,13 +1508,21 @@ text-align: center;
 	overflow: hidden;	
 }
 
-.user-message-content {
+.message-self .message-content {
 	color: #FFF;
 }
 
-.message-content p {
+.message-body {
 	margin: 0;
 	padding: 4px 8px;
+}
+
+.message-body:empty {
+	padding: 0px;
+}
+
+.message-self .msg-avatar {
+	display: none;
 }
 
 .msg-avatar {
@@ -1533,7 +1548,12 @@ text-align: center;
 	z-index: -1;
 }
 
+.message-self .message-corner {
+	display: block;
+}
+
 .message-corner {
+	display: none;
 	position: absolute;
 	bottom: 6px;
 	right: -6px;
@@ -1613,15 +1633,6 @@ text-align: center;
 	margin-right: 56px !important;
 }
 
-.message-body-card{
-	margin-left: 13px;
-	margin-top: 6px;
-}
-
-.message-card{
-	margin-top: 15px;
-	margin-left:2px;
-}
 
 .message-hidden{
      visibility: hidden;
@@ -1630,45 +1641,6 @@ text-align: center;
 .message-logged-out-footer{
 	opacity: 0.4;
 }
-
-/* SPOOKY chat test */
-.spooky-subnav{
-	background-color:#00195d !important;
-}
-
-.spooky-chatbox{
-	background-color:#8f8bc3 !important;
-}
-
-.spooky-text{
-	color:#00195d !important;
-}
-
-.spooky-hide{
-	visibility: hidden !important;
-}
-
-.spooky-top-pattern{
-	background-image: url('../img/halloween/toppattern.jpg') !important;
-	background-repeat: repeat-x;
-	width: 100%;
-	height: 44px;
-	position: absolute;
-}
-
-
-.spooky-nickname-info{
-	width:77%;
-	height: 33px;
-	padding-left: 21px;
-
-	background-color: rgba(255,253,147,0.79);
-	border-radius: 3px;
-	margin-left:21px;
-	margin-top: 5px;
-	position: absolute;
-}
-
 .world-toolbar {
 	height: 68px;
 	width: 100%;
@@ -1923,10 +1895,15 @@ html {
 }
 
 body {
-  margin: 0;
-   height: 100%;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	overflow: hidden;
 }
 
 @font-face {
@@ -2018,6 +1995,7 @@ nav ul {
 .nav-icon {
 	width: 40px;
 	height: 40px;
+	cursor: pointer;
 }
 
 .nav-avatar {
@@ -2286,7 +2264,7 @@ left: 8px;
 }
 
 .datepicker {
-	z-index: 100 !important;
+	z-index: 1030 !important;
 }
 
 .defaultBG {
@@ -2403,6 +2381,10 @@ transform:translateX(100%);
   -moz-transform: translateY(50%);
   -ms-transform: translateY(50%);
   -o-transform: translateY(50%);
+}
+.shelf-surface {
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) height;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) height;
 }
 .aperture-half .shelf-surface {
   height: 50%;
@@ -3184,7 +3166,6 @@ a.bubble-inspector-btn:hover {
   cursor: pointer;
   text-align: center;
   color: #777;
-  font-weight: 600;
 }
 @media only screen and (min-width: 480px) {
   .user-chip {
@@ -3200,6 +3181,11 @@ a.bubble-inspector-btn:hover {
   line-height: 32px;
   font-size: 14px;
   margin: 0px 8px;
+}
+@media only screen and (max-width: 480px) {
+  .user-chip-label.auth {
+    font-weight: 600;
+  }
 }
 @media only screen and (min-width: 480px) {
   .user-chip-label.auth {
@@ -3277,12 +3263,17 @@ a.bubble-inspector-btn:hover {
 }
 .compassDropdown {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0px;
+  right: 0px;
   width: 240px;
   background: #FFF;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2);
   z-index: 1015;
+}
+@media only screen and (min-width: 600px) {
+  .compassDropdown {
+    width: 320px;
+  }
 }
 .compassDropdown.ng-hide-remove {
   opacity: 0;
@@ -3342,7 +3333,7 @@ a.bubble-inspector-btn:hover {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 300;
+  z-index: 10000;
 }
 .dialog {
   position: absolute;
@@ -3358,8 +3349,14 @@ a.bubble-inspector-btn:hover {
 .divider {
   margin: 0;
 }
+.auth-title {
+  text-align: center;
+  color: #777;
+  margin-bottom: 14px;
+}
 input.auth-input {
   width: 100%;
+  height: 32px;
   margin-bottom: 4px;
   border: none;
   background: #FFF;
@@ -3368,7 +3365,7 @@ input.auth-input {
 }
 .auth-submit {
   width: 100%;
-  margin-bottom: 4px;
+  margin: 4px 0px;
   border: none;
   background: #3F51B5;
   color: #FFF;
@@ -3377,6 +3374,20 @@ input.auth-input {
   line-height: 32px;
   padding: 0;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+}
+.auth-create {
+  width: 100%;
+  margin: 4px 0px;
+  border: none;
+  background: #3F51B5;
+  color: #FFF;
+  border-radius: 2px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+  background: #2196f3;
+  margin: 20px 0px 16px 0px;
 }
 .btn.fb-btn {
   background-color: #FFF;
@@ -3400,7 +3411,7 @@ input.auth-input {
   left: 0px;
   width: 100%;
   height: 0;
-  z-index: 1002;
+  z-index: 10010;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
 .alert-container.tuck {

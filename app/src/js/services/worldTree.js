@@ -100,11 +100,17 @@ worldTree.getUpcoming = function(_id) {
 
 worldTree.getNearby = function() {
 	var deferred = $q.defer();
+	var now = Date.now();
 	
+	if (worldTree._nearby && worldTree._nearby.timestamp+60000 < now) {
+		deferred.resolve(worldTree._nearby);
+	} else {
 	geoService.getLocation().then(function(location) {
 		db.worlds.query({localTime: new Date(), 
 			userCoordinate: [location.lng, location.lat]},
 			function(data) {
+				worldTree._nearby = data[0];
+				worldTree._nearby.timestamp = now;
 				deferred.resolve(data[0]);
 				//live
 				//liveAndInside
@@ -112,6 +118,7 @@ worldTree.getNearby = function() {
 	}, function(reason) {
 		deferred.reject(reason);
 	})
+	}
 	
 	return deferred.promise;
 }

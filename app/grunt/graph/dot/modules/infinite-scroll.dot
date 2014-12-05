@@ -1,0 +1,54 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "infinite-scroll"[label="infinite-scroll", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "infiniteScroll"[label="infiniteScroll", color=3]
+      "infinite-scroll" -> "infiniteScroll"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

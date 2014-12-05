@@ -1,0 +1,59 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.transition"[label="ui.bootstrap.transition", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+      "$transition"[label="$transition", color=6]
+      "ui.bootstrap.transition" -> "$transition"
+    
+      "$transition"[label="$transition", color=6]
+      "ui.bootstrap.transition" -> "$transition"
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+      
+    
+      
+    
+
+    
+
+
+}

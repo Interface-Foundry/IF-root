@@ -1,43 +1,39 @@
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager',  function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
 ////////////////////////////////////////////////////////////
 var checkMessagesTimeout;
+var alerts = alertManager;
+var style = styleManager;
+var aperture = apertureService; 
+aperture.set('off');
+
+var messageList = $('.message-list');
+
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
-
-//spooky test
-$scope.showSpookytest = false;
-$scope.showSpookytestloggedin = false;
 
 $scope.msg = {};
 $scope.messages = [];
 $scope.localMessages = [];
 
-$scope.currentChatID = $routeParams.worldID;
-$scope.currentChatURL = $routeParams.worldURL;
-
-$scope.messageList = angular.element('.message-list');
- 
-angular.extend($rootScope, {loading: false});
-
-
-var style = styleManager;
-
 var sinceID = 'none';
 var firstScroll = true;
 
-
-function scrollMessages() {
+function scrollToBottom() {
 	$timeout(function() {
-    	$scope.messageList.animate({scrollTop: $scope.messageList[0].scrollHeight * 2}, 300); //JQUERY USED HERE
-    	firstScroll=false;
-    },0);
+		messageList.animate({scrollTop: messageList[0].scrollHeight * 2}, 300); //JQUERY USED HERE
+	},0);
+	firstScroll = false;
 }
 
-function checkMessages(){
+function checkMessages() {
+	var doScroll = firstScroll;
 db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(data){
+	if (messageList[0].scrollHeight - messageList.scrollTop() - messageList.outerHeight() < 50) {
+		doScroll = true;
+	}
 	if (data.length>0) {
 		for (i = 0; i < data.length; i++) { 
 		    if ($scope.localMessages.indexOf(data[i]._id) == -1) {
@@ -49,50 +45,13 @@ db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(dat
 	    sinceID = data[data.length-1]._id;
 	    checkMessages();
 	} else {
-		if (firstScroll==true) {
-		scrollMessages();
-		}
 		checkMessagesTimeout = $timeout(checkMessages, 3000);	
+	}
+	if (doScroll) {
+		scrollToBottom();
 	}
 	 
 });
-
-
-}
-
-
-$scope.sendMsg = function (e) {
-	if (e) {e.preventDefault()}
-	if ($scope.msg.text == null) { return;}
-	if ($scope.loggedIn){
-
-
-		//spooky test
-		if ($scope.showSpookytest){
-		    var newChat = {
-		        worldID: $routeParams.worldURL,
-		        nick: $scope.nick,
-		        msg: $scope.msg.text,
-		        avatar: $scope.user.avatar || '/img/halloween/bat.gif',
-		        userID: $scope.userID
-		    };
-		}
-
-		//not spooky test
-		else {
-		    var newChat = {
-		        worldID: $routeParams.worldURL,
-		        nick: $scope.nick,
-		        msg: $scope.msg.text,
-		        avatar: $scope.user.avatar || 'img/icons/profile.png',
-		        userID: $scope.userID,
-		    };	
-		}
-
-		
-		sendMsgToServer(newChat);		
-	    $scope.msg.text = "";
-	}
 }
 
 function sendMsgToServer(msg) {
@@ -102,8 +61,29 @@ db.messages.create(msg, function(res) {
 	msg._id = res[0]._id;
 	$scope.messages.push(msg);
 	$scope.localMessages.push(res[0]._id);
-	scrollMessages();
+	scrollToBottom();
 });
+}
+
+$scope.sendMsg = function (e) {
+	if (e) {e.preventDefault()}
+	if ($scope.msg.text == null) {return;}
+	if (userManager.loginStatus) {
+		var newChat = {
+		    worldID: $routeParams.worldURL,
+			nick: $scope.nick,
+			msg: $scope.msg.text,
+			avatar: $scope.user.avatar || 'img/icons/profile.png',
+		    userID: $scope.userID,
+		};
+		
+		sendMsgToServer(newChat);		
+	    $scope.msg.text = "";
+	}
+}
+
+$scope.alert = function (msg) {
+	alerts.addAlert('warning', msg, true);
 }
 	
 $scope.onImageSelect = function($files) {
@@ -126,20 +106,6 @@ $scope.onImageSelect = function($files) {
 //add welcome message 
 function welcomeMessage(){
 	
-
-	//calculating size of window to place welcome chat on feed (adding shadow bots to fill blank space)
-	var shadowNum = 7.5 * window.innerHeight / 520;
-
-	//measure height of window, find ratio proportion
-	for (i = 0; i < shadowNum; i++) { 
-    	var hiddenChat = {
-	    	hidden: true,
-	    	nick: 'shadowBot'+i,
-	    	_id: 'hiddenChat'+i
-		};
-		$scope.messages.push(hiddenChat);
-	}
-
 	var newChat = {
 	    worldID: $routeParams.worldURL,
 	    nick: 'BubblyBot',
@@ -148,8 +114,6 @@ function welcomeMessage(){
 	    userID: 'chatbot'
 	};
 	$scope.messages.push(newChat);
-
-
 }
 
 
@@ -158,13 +122,11 @@ function welcomeMessage(){
 ////////////////////////////////////////////////////////////
 
 
-/*
+
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
-        $interval.cancel(checkMessagesInterval);
+        $timeout.cancel(checkMessagesTimeout);
         dereg();
 });
-*/
-
 
 ////////////////////////////////////////////////////////////
 //////////////////////EXECUTING/////////////////////////////
@@ -173,126 +135,18 @@ var dereg = $rootScope.$on('$locationChangeSuccess', function() {
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
 	$scope.world=data.world;
-	welcomeMessage(); //add bot message 
-	console.log($scope.world);
+	welcomeMessage();
 });
 
-$http.get('/api/user/loggedin', {server: true}).success(function(user){
+userManager.checkLogin().then(function(user) {
+	$scope.user = user;
+	userManager.getDisplayName().then(function(displayName) {
+		$scope.nick = displayName;	
+	});
+}, function(reason) {
+	dialogs.showDialog('messageAuthDialog.html');
+});
 
-// Authenticated
-if (user !== '0'){
-	$scope.loggedIn = true;
-	if (user._id){
-    	$scope.userID = user._id;
-	}
-	//nickname
-	if (user.name){
-	  $scope.nick = user.name;
-	}
-	else if (user.facebook){
-	  $scope.nick = user.facebook.name;
-	}
-	else if (user.twitter){
-	  $scope.nick = user.twitter.displayName;
-	}
-	else if (user.meetup){
-	  $scope.nick = user.meetup.displayName;
-	}
-	else if (user.local){
-	  //strip name from email
-	  var s = user.local.email;
-	  var n = s.indexOf('@');
-	  s = s.substring(0, n != -1 ? n : s.length);
-	  $scope.nick = s;
-	}
-	else {
-	  $scope.nick = "Visitor";
-	}
-}
-
-$scope.user = user;
-console.log(user._id);
 checkMessages();
-});
 
-	//////
-	//HALLOWEEN THEME TEST
-
-	if ($routeParams.worldURL == "Spooky_Park_Chat"){
-
-		style.navBG_color = "rgba(255, 167, 0, 0.94)";
-
-		$scope.showSpookytest = true;
-
-		//hide top bar
-		$('.main-nav').css('visibility', 'hidden');
-
-		//hide edit glyph
-		//$('.subnav-chat-edit').css('visibility', 'hidden');
-
-		//hide top bar
-		$('.main-nav').css('visibility', 'hidden');
-
-		// $('.msg-avatar:after').css('border-bottom', '6px solid #8f8bc3 !important');
-
-
-		//resetting to normal after test if route change
-		$rootScope.$on('$locationChangeSuccess', function() {
-		    $('.main-nav').css('visibility', 'visible'); //reshow top bar
-		});
-
-	}
-
-
-
-
-	//================================================
-    // Check if the user is connected
-    //================================================
-    function checkLogin(){
-
-	      // Make an AJAX call to check if the user is logged in
-	      $http.get('/api/user/loggedin', {server: true}).success(function(user){
-
-	        // Authenticated
-	        if (user !== '0'){
-
-	              if (user._id){
-	                $rootScope.userID = user._id;
-	              }
-	              //determine name to display on login (should check for name extension before adding...)
-	              if (user.name){
-	                  $rootScope.userName = user.name;
-	              }
-	              else if (user.facebook){
-	                  $rootScope.userName = user.facebook.displayName;
-	              }
-	              else if (user.twitter){
-	                  $rootScope.userName = user.twitter.displayName;
-	              }
-	              else if (user.meetup){
-	                  $rootScope.userName = user.meetup.displayName;
-	              }
-	              else if (user.local){
-	                  $rootScope.userName = user.local.email;
-	              }
-	              else {
-	                  $rootScope.userName = "Me";
-	              }
-	             
-	          $rootScope.avatar = user.avatar;
-	          $rootScope.showLogout = true;
-
-	          	//SPOOKY TEST
-	          	if ($routeParams.worldURL == "Spooky_Park_Chat"){
-	          		$scope.showSpookytestloggedin = true;
-	          	}	
-	          	////
-
-	        }
-
-	      });
-    }
-
-checkLogin();
 } ]);

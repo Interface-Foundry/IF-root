@@ -1,0 +1,65 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.popover"[label="mgcrea.ngStrap.popover", color=1]
+
+    
+      "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+      "mgcrea.ngStrap.tooltip" -> "mgcrea.ngStrap.popover"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$popover"[label="$popover", fillcolor=2]
+      "mgcrea.ngStrap.popover" -> "$popover"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsPopover"[label="bsPopover", color=3]
+      "mgcrea.ngStrap.popover" -> "bsPopover"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$popover"[label="$popover"]
+        "$popover" -> "bsPopover"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

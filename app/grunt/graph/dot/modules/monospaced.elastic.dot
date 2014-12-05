@@ -1,0 +1,57 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "monospaced.elastic"[label="monospaced.elastic", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "msdElastic"[label="msdElastic", color=3]
+      "monospaced.elastic" -> "msdElastic"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+        "msdElasticConfig"[label="msdElasticConfig"]
+        "msdElasticConfig" -> "msdElastic"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

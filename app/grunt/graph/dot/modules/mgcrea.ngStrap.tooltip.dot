@@ -1,0 +1,68 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "mgcrea.ngStrap.tooltip"[label="mgcrea.ngStrap.tooltip", color=1]
+
+    
+      "mgcrea.ngStrap.helpers.dimensions"[label="mgcrea.ngStrap.helpers.dimensions", color=1]
+      "mgcrea.ngStrap.helpers.dimensions" -> "mgcrea.ngStrap.tooltip"
+    
+
+
+    node[shape="ellipse"]
+    
+      "$tooltip"[label="$tooltip", fillcolor=2]
+      "mgcrea.ngStrap.tooltip" -> "$tooltip"
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "bsTooltip"[label="bsTooltip", color=3]
+      "mgcrea.ngStrap.tooltip" -> "bsTooltip"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+      
+    
+
+    
+      
+        "$tooltip"[label="$tooltip"]
+        "$tooltip" -> "bsTooltip"
+      
+        "$$rAF"[label="$$rAF"]
+        "$$rAF" -> "bsTooltip"
+      
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}

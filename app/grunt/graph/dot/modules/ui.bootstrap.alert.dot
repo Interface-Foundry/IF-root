@@ -1,0 +1,70 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.alert"[label="ui.bootstrap.alert", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "AlertController"[label="AlertController", color=4]
+      "ui.bootstrap.alert" -> "AlertController"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "alert"[label="alert", color=3]
+      "ui.bootstrap.alert" -> "alert"
+    
+      "alert"[label="alert", color=3]
+      "ui.bootstrap.alert" -> "alert"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "AlertController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "AlertController"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

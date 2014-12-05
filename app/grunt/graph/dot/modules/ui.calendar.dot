@@ -1,0 +1,68 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.calendar"[label="ui.calendar", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "uiCalendarCtrl"[label="uiCalendarCtrl", color=4]
+      "ui.calendar" -> "uiCalendarCtrl"
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "uiCalendar"[label="uiCalendar", color=3]
+      "ui.calendar" -> "uiCalendar"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+        "uiCalendarConfig"[label="uiCalendarConfig"]
+        "uiCalendarConfig" -> "uiCalendar"
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "uiCalendarCtrl"
+      
+        "$locale"[label="$locale"]
+        "$locale" -> "uiCalendarCtrl"
+      
+    
+
+    
+
+    
+
+    
+
+
+}

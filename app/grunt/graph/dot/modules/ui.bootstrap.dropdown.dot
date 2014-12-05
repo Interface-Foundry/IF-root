@@ -1,0 +1,81 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.dropdown"[label="ui.bootstrap.dropdown", color=1]
+
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+      "DropdownController"[label="DropdownController", color=4]
+      "ui.bootstrap.dropdown" -> "DropdownController"
+    
+
+    
+      "dropdownService"[label="dropdownService", color=5]
+      "ui.bootstrap.dropdown" -> "dropdownService"
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+      "dropdown"[label="dropdown", color=3]
+      "ui.bootstrap.dropdown" -> "dropdown"
+    
+      "dropdownToggle"[label="dropdownToggle", color=3]
+      "ui.bootstrap.dropdown" -> "dropdownToggle"
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+      
+    
+      
+    
+
+
+    
+      
+        "$scope"[label="$scope"]
+        "$scope" -> "DropdownController"
+      
+        "$attrs"[label="$attrs"]
+        "$attrs" -> "DropdownController"
+      
+        "dropdownConfig"[label="dropdownConfig"]
+        "dropdownConfig" -> "DropdownController"
+      
+        "dropdownService"[label="dropdownService"]
+        "dropdownService" -> "DropdownController"
+      
+    
+
+    
+      
+    
+
+    
+
+    
+
+
+}

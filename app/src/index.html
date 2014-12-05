@@ -27,20 +27,20 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <html lang="en" ng-controller="indexIF">
 
 <head>
-  <meta charset="utf-8">
-  <!-- @ifdef WEB -->
-  <base href="/">
-  <!-- @endif -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <title ng-bind="globalTitle">Bubbl.li</title>
-  <meta name="description" content="powered by Interface Foundry">
+	<meta charset="utf-8">
+	<!-- @ifdef WEB -->
+	<base href="/">
+	<!-- @endif -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+	<title ng-bind="globalTitle">Bubbl.li</title>
+	<meta name="description" content="powered by Interface Foundry">
 
-  <meta property="og:title" content="Bubbl.li" />
-  <meta property="og:url" content="http://bubbl.li" />
-  <meta property="og:description" content="powered by Interface Foundry" />
-  <meta property="og:image" content="http://interfacefoundry.com/img/IF/IF_box_250_250.png" />
-  <meta property="og:site_name" content="IF Bubbl.li"/>
-  <meta property="og:type" content="website" /> 
+	<meta property="og:title" content="Bubbl.li" />
+	<meta property="og:url" content="http://bubbl.li" />
+	<meta property="og:description" content="powered by Interface Foundry" />
+	<meta property="og:image" content="http://interfacefoundry.com/img/IF/IF_box_250_250.png" />
+	<meta property="og:site_name" content="IF Bubbl.li"/>
+	<meta property="og:type" content="website" /> 
   
 	<link rel="stylesheet" href="app.css">
 		
@@ -65,6 +65,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<script src="lib.js"></script>
 	<script src="app.js"></script>
 </head>
+
 <body ng-class="{'drawer': drawerOn}">
 	
 	<button class="drawer-tab" ng-click="drawerOn = !drawerOn">
@@ -100,7 +101,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
 	  	<li class="nav-item" compass-button>
 	  		<img class="nav-icon" src="img/icons/compass.png" ng-click="compassOn($event, true)">
-	  		<span ng-show="alerts.list.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span>
+	  		<span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span>
 	  	</li>
 	  	<li class="nav-item">
 	  		<div class="user-chip" user-chip>

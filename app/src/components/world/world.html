@@ -11,10 +11,10 @@
 		</div>
 	</div>
 
-<div class="shelf-surface wrap">
+<div class="shelf-surface wrap" bubble-body>
 	<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
 	<!--DESCRIPTION-->
-	<div ng-include="world.description ? 'components/world/templates/description.html' : null" class="marble-page"></div>
+	<div ng-include="'components/world/templates/description.html' : null" class="marble-page"></div>
 
 	<!---yelp-->
 	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
@@ -74,7 +74,7 @@
 		<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
 	</div>
 
-	<div class="col-xs-12"><div style="height:20;"></div></div>
+	<div class="col-xs-12"><div style="height:300px;"></div></div>
 
 <div ng-show="showEdit">
 	<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest and Schedules</a>

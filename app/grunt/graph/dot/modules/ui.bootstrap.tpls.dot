@@ -1,0 +1,127 @@
+digraph dependencies {
+  node[shape="component",style="filled",colorscheme=paired12]
+
+
+    node[shape="component"]
+    "ui.bootstrap.tpls"[label="ui.bootstrap.tpls", color=1]
+
+    
+      "template/accordion/accordion-group.html"[label="template/accordion/accordion-group.html", color=1]
+      "template/accordion/accordion-group.html" -> "ui.bootstrap.tpls"
+    
+      "template/accordion/accordion.html"[label="template/accordion/accordion.html", color=1]
+      "template/accordion/accordion.html" -> "ui.bootstrap.tpls"
+    
+      "template/alert/alert.html"[label="template/alert/alert.html", color=1]
+      "template/alert/alert.html" -> "ui.bootstrap.tpls"
+    
+      "template/carousel/carousel.html"[label="template/carousel/carousel.html", color=1]
+      "template/carousel/carousel.html" -> "ui.bootstrap.tpls"
+    
+      "template/carousel/slide.html"[label="template/carousel/slide.html", color=1]
+      "template/carousel/slide.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/datepicker.html"[label="template/datepicker/datepicker.html", color=1]
+      "template/datepicker/datepicker.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/day.html"[label="template/datepicker/day.html", color=1]
+      "template/datepicker/day.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/month.html"[label="template/datepicker/month.html", color=1]
+      "template/datepicker/month.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/popup.html"[label="template/datepicker/popup.html", color=1]
+      "template/datepicker/popup.html" -> "ui.bootstrap.tpls"
+    
+      "template/datepicker/year.html"[label="template/datepicker/year.html", color=1]
+      "template/datepicker/year.html" -> "ui.bootstrap.tpls"
+    
+      "template/modal/backdrop.html"[label="template/modal/backdrop.html", color=1]
+      "template/modal/backdrop.html" -> "ui.bootstrap.tpls"
+    
+      "template/modal/window.html"[label="template/modal/window.html", color=1]
+      "template/modal/window.html" -> "ui.bootstrap.tpls"
+    
+      "template/pagination/pager.html"[label="template/pagination/pager.html", color=1]
+      "template/pagination/pager.html" -> "ui.bootstrap.tpls"
+    
+      "template/pagination/pagination.html"[label="template/pagination/pagination.html", color=1]
+      "template/pagination/pagination.html" -> "ui.bootstrap.tpls"
+    
+      "template/tooltip/tooltip-html-unsafe-popup.html"[label="template/tooltip/tooltip-html-unsafe-popup.html", color=1]
+      "template/tooltip/tooltip-html-unsafe-popup.html" -> "ui.bootstrap.tpls"
+    
+      "template/tooltip/tooltip-popup.html"[label="template/tooltip/tooltip-popup.html", color=1]
+      "template/tooltip/tooltip-popup.html" -> "ui.bootstrap.tpls"
+    
+      "template/popover/popover.html"[label="template/popover/popover.html", color=1]
+      "template/popover/popover.html" -> "ui.bootstrap.tpls"
+    
+      "template/progressbar/bar.html"[label="template/progressbar/bar.html", color=1]
+      "template/progressbar/bar.html" -> "ui.bootstrap.tpls"
+    
+      "template/progressbar/progress.html"[label="template/progressbar/progress.html", color=1]
+      "template/progressbar/progress.html" -> "ui.bootstrap.tpls"
+    
+      "template/progressbar/progressbar.html"[label="template/progressbar/progressbar.html", color=1]
+      "template/progressbar/progressbar.html" -> "ui.bootstrap.tpls"
+    
+      "template/rating/rating.html"[label="template/rating/rating.html", color=1]
+      "template/rating/rating.html" -> "ui.bootstrap.tpls"
+    
+      "template/tabs/tab.html"[label="template/tabs/tab.html", color=1]
+      "template/tabs/tab.html" -> "ui.bootstrap.tpls"
+    
+      "template/tabs/tabset.html"[label="template/tabs/tabset.html", color=1]
+      "template/tabs/tabset.html" -> "ui.bootstrap.tpls"
+    
+      "template/timepicker/timepicker.html"[label="template/timepicker/timepicker.html", color=1]
+      "template/timepicker/timepicker.html" -> "ui.bootstrap.tpls"
+    
+      "template/typeahead/typeahead-match.html"[label="template/typeahead/typeahead-match.html", color=1]
+      "template/typeahead/typeahead-match.html" -> "ui.bootstrap.tpls"
+    
+      "template/typeahead/typeahead-popup.html"[label="template/typeahead/typeahead-popup.html", color=1]
+      "template/typeahead/typeahead-popup.html" -> "ui.bootstrap.tpls"
+    
+
+
+    node[shape="ellipse"]
+    
+
+
+    
+
+    
+
+    
+
+    node[shape="cds"]
+    
+
+    
+
+
+
+
+
+
+
+
+
+    node[shape="ellipse",style="filled", color=9]
+    
+
+    
+
+
+    
+
+    
+
+    
+
+    
+
+
+}
