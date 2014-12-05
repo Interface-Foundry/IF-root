@@ -45,9 +45,9 @@ var session      = require('express-session');
 var bodyParser = require('body-parser');
 
 //--- BUBBLE ROUTING ----//
-var integers = require('./components/IF_bubbleroutes/constants/integers');
-var strings = require('./components/IF_bubbleroutes/constants/strings');
-var bubble = require('./components/IF_bubbleroutes/handlers/bubble');
+// var integers = require('./components/IF_bubbleroutes/constants/integers');
+// var strings = require('./components/IF_bubbleroutes/constants/strings');
+// var bubble = require('./components/IF_bubbleroutes/handlers/bubble');
 
 
 //----MONGOOOSE & SCHEMAS----//
@@ -324,8 +324,62 @@ app.get('/api/:collection', function(req, res) {
 
     //route to world
     if (req.params.collection == 'worlds'){
-        bubble.listBubbles(req,res);
-    }
+
+      //===================by April, replacing IF_bubbleroutes directory//
+
+      var _ = require('underscore');
+
+      landmarkSchema.aggregate(
+        [{ "$geoNear": {
+          "near": {
+            "type": "Point",
+            "coordinates": [parseFloat(req.query.userCoordinate[0]), parseFloat(req.query.userCoordinate[1])]
+          },
+          "distanceField": "distance",
+          "maxDistance": 2500,
+          "spherical": true,
+          "query": { "loc.type": "Point" }
+        } },
+        { "$match" : { "world": true } },
+        { "$sort": { "distance": -1 } 
+      }],
+      function(err,data) {
+        var four_groups = _.groupBy(data, function(world){
+
+          if (world.distance <= 150) {
+            if ( (!world.time.end && !world.time.start)  //If there's no start or end time bubble is always live.
+              || ( (new Date(world.time.start) + 604800000) > new Date(req.query.localTime)) //If there's a start but no end time, default end is start time plus a week. 604800000 milliseconds is a week
+              || (new Date(world.time.end) > new Date(req.query.localTime)) ) {
+              return '150m';
+            }
+            else { 
+              return '150mPast'; 
+            }
+          }
+          else if ( (!world.time.end && !world.time.start)  //Same as above. If there's no start or end time bubble is always live.
+              || (new Date(world.time.start) + 604800000 > new Date(req.query.localTime)) //If there's a start but no end time, default end is start time plus a week. 604800000 milliseconds is a week
+              || (new Date(world.time.end) > new Date(req.query.localTime)) ) {
+              return '2.5km';
+          }
+          else { 
+            return '2.5kmPast';
+          }
+        });
+for(var key in four_groups) {
+  four_groups[key] = _.sortBy(four_groups[key], function(world) {
+
+            //console.log("World name: " + world.name + "\n Distance: "+ world.distance);
+            // console.log("Hours until start: " + (new Date(world.time.start) - new Date(req.query.localTime))/3600000); 
+            // console.log("Weight in sort: " + (world.distance/3 + (new Date(world.time.start) - new Date(req.query.localTime))/3600000) + "\n");
+
+                    return -(world.distance + Math.pow( (new Date(world.time.start) - new Date(req.query.localTime))/3600000), 2); //time interval is in milliseconds
+                  });
+      };
+       res.send([four_groups]);
+
+});
+
+}
 
     //querying landmark collection (events, places, etc)
     if (req.params.collection == 'landmarks'){
