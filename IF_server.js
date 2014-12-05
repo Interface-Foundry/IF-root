@@ -45,9 +45,9 @@ var session      = require('express-session');
 var bodyParser = require('body-parser');
 
 //--- BUBBLE ROUTING ----//
-// var integers = require('./components/IF_bubbleroutes/constants/integers');
-// var strings = require('./components/IF_bubbleroutes/constants/strings');
-// var bubble = require('./components/IF_bubbleroutes/handlers/bubble');
+var integers = require('./components/IF_bubbleroutes/constants/integers');
+var strings = require('./components/IF_bubbleroutes/constants/strings');
+var bubble = require('./components/IF_bubbleroutes/handlers/bubble');
 
 
 //----MONGOOOSE & SCHEMAS----//
@@ -176,7 +176,7 @@ app.post('/forgot', function (req, res, next) {
           }
         },
         function(token, user, done) {
-            if (req.headers.host){
+            if (req.  ers.host){
               var mailOptions = {
                 to: user.local.email,
                 from: 'IF Bubbl <mail@bubbl.li>',
