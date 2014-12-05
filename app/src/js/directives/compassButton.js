@@ -25,7 +25,7 @@ app.directive('compassButton', function(worldTree) {
 			console.log('linking compass button');
 			worldTree.getNearby().then(function(data) {
 				console.log('compassButton', data);
-				scope.nearbyBubbles = data.live;
+				scope.nearbyBubbles = data['150m'];
 			}, function(reason) {console.log(reason)});
 		}
 	}

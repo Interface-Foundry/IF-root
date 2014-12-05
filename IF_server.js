@@ -45,10 +45,7 @@ var session      = require('express-session');
 var bodyParser = require('body-parser');
 
 //--- BUBBLE ROUTING ----//
-var integers = require('./components/IF_bubbleroutes/constants/integers');
-var strings = require('./components/IF_bubbleroutes/constants/strings');
-var bubble = require('./components/IF_bubbleroutes/handlers/bubble');
-
+//See code below for api query for 'worlds'
 
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),

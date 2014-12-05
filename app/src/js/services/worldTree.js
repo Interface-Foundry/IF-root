@@ -106,8 +106,6 @@ worldTree.getNearby = function() {
 			userCoordinate: [location.lng, location.lat]},
 			function(data) {
 				deferred.resolve(data[0]);
-				//live
-				//liveAndInside
 			});
 	}, function(reason) {
 		deferred.reject(reason);
