@@ -476,8 +476,8 @@ function searchYelp(tag, done) {
 
 	                        			//http://s3-media2.fl.yelpcdn.com/bphoto/6GFH8nKg5yZ6ABEUXNHXJg/ms.jpg
 
-			// business_image_l: String,
-			// business_image_sm: String,
+										// business_image_l: String,
+										// business_image_sm: String,
 
 	         //                			var file = fs.createWriteStream('../../app/dist/img/yelp/images/'+lmSchema.id+'.jpg');
 										// var request = http.get(business.image_url.replace("ms.jpg", "l.jpg"), function(response) {
@@ -505,7 +505,6 @@ function searchYelp(tag, done) {
 
 												lmSchema.source_yelp.business_image_l = 'img/yelp/images/'+lmSchema.id+'.jpg';
 
-
 								                im.resize({
 												  srcPath: '../../../app/dist/img/yelp/images/'+lmSchema.id+'.jpg',
 												  dstPath: '../../../app/dist/img/yelp/images/'+lmSchema.id+'-sm.jpg',
@@ -519,15 +518,12 @@ function searchYelp(tag, done) {
 												}, function(err, stdout, stderr){
 												  if (err) throw err;
 
-												  	console.log('meow');
+												  	//console.log('meow');
 
 													lmSchema.avatar = '../../../app/dist/img/yelp/images/'+lmSchema.id+'-sm.jpg';
 
-													//doneLandmarkSave();
+													doneLandmarkSave();
 												});
-
-
-
 
 											}
 											
