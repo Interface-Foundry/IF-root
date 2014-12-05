@@ -3,7 +3,7 @@ app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', functio
 	
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	$scope.homeBubbles = data.liveAndInside;
-	$scope.nearbyBubbles = data.live;
+	  $scope.homeBubbles = data['150m'];
+  	$scope.nearbyBubbles = data['2.5km'];
 	});
 }]);

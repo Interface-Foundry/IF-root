@@ -112,8 +112,6 @@ worldTree.getNearby = function() {
 				worldTree._nearby = data[0];
 				worldTree._nearby.timestamp = now;
 				deferred.resolve(data[0]);
-				//live
-				//liveAndInside
 			});
 	}, function(reason) {
 		deferred.reject(reason);
