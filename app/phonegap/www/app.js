@@ -20495,9 +20495,10 @@ app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', functio
 	
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-		$scope.homeBubbles = data['150m'];
-		$scope.nearbyBubbles = data['2.5km'];
-
+		$scope.$evalAsync(function($scope) {
+			$scope.homeBubbles = data['150m'];
+			$scope.nearbyBubbles = data['2.5km'];
+		});
 	});
 }]);
 app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
