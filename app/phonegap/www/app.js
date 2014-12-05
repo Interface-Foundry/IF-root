@@ -5192,7 +5192,7 @@ app.directive('compassButton', function(worldTree) {
 			console.log('linking compass button');
 			worldTree.getNearby().then(function(data) {
 				console.log('compassButton', data);
-				scope.nearbyBubbles = data.live;
+				scope.nearbyBubbles = data['150m'];
 			}, function(reason) {console.log(reason)});
 		}
 	}
@@ -17393,8 +17393,6 @@ worldTree.getNearby = function() {
 			userCoordinate: [location.lng, location.lat]},
 			function(data) {
 				deferred.resolve(data[0]);
-				//live
-				//liveAndInside
 			});
 	}, function(reason) {
 		deferred.reject(reason);
@@ -20213,8 +20211,8 @@ app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', functio
 	
 	worldTree.getNearby().then(function(data) {
 		console.log(data);
-	$scope.homeBubbles = data.liveAndInside;
-	$scope.nearbyBubbles = data.live;
+	  $scope.homeBubbles = data['150m'];
+  	$scope.nearbyBubbles = data['2.5km'];
 	});
 }]);
 app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
@@ -20303,8 +20301,8 @@ $scope.sessionSearch = function() {
 $scope.getNearby = function($event) {
 	$scope.nearbyLoading = true;
 	worldTree.getNearby().then(function(data) {
-		$scope.altBubbles = data.liveAndInside;
-		$scope.nearbyBubbles = data.live;
+    $scope.altBubbles = data['150m'];
+    $scope.nearbyBubbles = data['2.5km'];
 		$scope.nearbyLoading = false;
 	}, function(reason) {
 		console.log('getNearby error');
