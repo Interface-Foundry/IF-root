@@ -139,7 +139,9 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 });
 
 userManager.checkLogin().then(function(user) {
-	$scope.user = user;
+	userManager.getUser().then(function(user) {
+		$scope.user = user;
+	});
 	userManager.getDisplayName().then(function(displayName) {
 		$scope.nick = displayName;	
 	});
