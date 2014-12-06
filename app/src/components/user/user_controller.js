@@ -362,7 +362,7 @@ $scope.go = function(url) {
 }
 
 $scope.goBack = function() {
-  window.history.back();
+	window.history.back();
 }
 
 userManager.getUser().then(
