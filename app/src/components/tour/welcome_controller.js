@@ -1,7 +1,7 @@
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
 	var style = styleManager;
 
-	//style.navBG_color = "#FFFAB4";
+	style.navBG_color = "#3d66ca";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
