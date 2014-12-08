@@ -9,11 +9,11 @@
 
 	<p ng-show="world.source_yelp.rating.rating_img_url_large">
 		<b>Rating </b><br>
-		<img src="{{world.source_yelp.rating.rating_img_url}}"><br>
+		<img src="{{world.source_yelp.rating_image}}"><br>
 		{{world.source_yelp.rating.review_count}} reviews
 	</p>
 
-	<img class="img-responsive" ng-src="{{world.source_yelp.business_image}}">
+	<img class="img-responsive" ng-src="{{world.source_yelp.business_image_l}}">
 
 	<blockquote ng-show="world.summary">{{world.summary}}</blockquote>
 
