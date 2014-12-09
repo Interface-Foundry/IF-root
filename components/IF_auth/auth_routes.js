@@ -44,32 +44,12 @@ module.exports = function(app, passport, landmarkSchema) {
 		}); 
 
 		// process the login form
-		app.post('/api/user/login', passport.authenticate('local-login', {
-			successRedirect : '/profile', // redirect to the secure profile section
-			failureRedirect : '/login', // redirect back to the signup page if there is an error
-			failureFlash : true // allow flash messages
-		}));
+		app.post('/api/user/login', passport.authenticate('local-login', {}));
 
 		// process the signup form
-		app.post('/api/user/signup', passport.authenticate('local-signup', {
-			successRedirect : '/profile', // redirect to the secure profile section
-			failureRedirect : '/signup', // redirect back to the signup page if there is an error
-			failureFlash : true // allow flash messages
-		}));
+		app.post('/api/user/signup', passport.authenticate('local-signup', {}));
 
 	// facebook -------------------------------
-
-		// // send to facebook to do the authentication
-		// app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
-
-		// // handle the callback after facebook has authenticated the user
-		// app.get('/auth/facebook/callback',
-		// 	passport.authenticate('facebook', {
-		// 		successRedirect : '/profile',
-		// 		failureRedirect : '/'
-		// 	}));
-
-
 
 		app.get('/auth/facebook', function(req, res, next) {
 		  req.session.redirect = req.query.redirect;
@@ -85,17 +65,6 @@ module.exports = function(app, passport, landmarkSchema) {
 		});
 
 	// twitter --------------------------------
-
-		// // send to twitter to do the authentication
-		// app.get('/auth/twitter', passport.authenticate('twitter', { scope : 'email' }));
-
-		// // handle the callback after twitter has authenticated the user
-		// app.get('/auth/twitter/callback',
-		// 	passport.authenticate('twitter', {
-		// 		successRedirect : '/profile',
-		// 		failureRedirect : '/'
-		// 	}));
-
 
 		app.get('/auth/twitter', function(req, res, next) {
 		  req.session.redirect = req.query.redirect;
