@@ -1,5 +1,7 @@
 <div class="wrap">
 <ul class="tour">
+
+<!-- 
 	<li class="tour-page meetupsplash">
 		<header class="tour-header" style="background-color:rgba(160,203,161,0.8);">
 			<h3 class="tour-headline">Bubbl.li brings communities closer</h3>
@@ -12,21 +14,31 @@
 			<h4 class="tour-subhead">Enhance &amp; personalize your Meetup experience. Exchange information, break the ice, and more!</h4>
 		</header>
 	</li>
-	<li class="tour-page">
+ -->
 
-		<div class="tour-panel">
-			<img width="60px" class="tour-logo hidden-xs" src="img/tour/logo.svg">	
-			<br>
-			<h6 class="second-card-title">
-				Your guests can explore their world in a whole new way. 
-				<br>
-				With cool GPS features and custom maps, guests can get relevant information and locate other communities around them.</h6>
+
+	<li class="tour-page meetupsplash">
+		<div class="tour-panel container-fluid">
+			<h1>Bubbl.li brings communities closer</h1>
+			<h4>It's an easier way of coming together during your next event. Enhance &amp; personalize your Meetup experience. Exchange information, break the ice, and more!</h4>
+			<a href="/auth/meetup"><button class="btn btn-lg btn-meetup">Social login with Meetup</button></a>
+
+		</div>
+	</li>
+
+
+	<li class="tour-page">
+		<div class="tour-panel panel-2 container-fluid">
+			<h1>Your guests can explore their world in a whole new way</h1>
+			<h4>With cool GPS features and custom maps, guests can get relevant information and locate other communities around them.</h4>
+		</div>
+		<div class="container-fluid">
+			<div class="tour-iphone">
+				<div class="tour-iphone-screen"><video autoplay loop="loop"><source src="/img/tour/meetup_demo.mp4" type="video/mp4"><source src="/img/tour/meetup_demo.webm" type="video/webm">Your browser does not support video</video></div>
+			</div>
 		</div>
 
-		<div class="tour-container">
 			<img width="1600px" height="800px" class="tour-img" src="img/tour/72nd-1600.png">
-			<!--<img width="768px" height="800px" class="tour-img" src="img/tour/72nd-768.png" ng-class="{'tour-srcset-on': viewW > 320}">
-			<img width="320px" height="800px" class="tour-img tour-srcset-on" src="img/tour/72nd-320.png">-->
 			<div ng-class="{'radar-gray': scroll > 830}">
 				<div class="radar radar1">
 					<div class="radar-inner"></div>
@@ -39,7 +51,7 @@
 				<div class="radar3">
 					<div class="tour-title-corner"></div>
 					<div class="tour-title">
-						<span>Your Meetup</span>
+						<span>Your Event</span>
 					</div>
 					
 					<div class="radar radar3a">
@@ -63,60 +75,53 @@
 					<div class="radar-inner"></div>
 					<div class="radar-outer"></div>
 				</div>
-				<div class="radar radar8">
-					<div class="radar-inner"></div>
-					<div class="radar-outer"></div>
-				</div>
 				<div class="radar radar9">
 					<div class="radar-inner"></div>
 					<div class="radar-outer"></div>
 				</div>
 			</div>
-		</div>
 	</li>
 
-		<li class="tour-page">
+	<li class="tour-page">
 		<div class="container-fluid">
 			<div class="row">
-				<div class="hidden-xs col-sm-4 col-sm-offset-1 col-md-4 col-lg-4 col-lg-offset-1">
-					<div class="tour-iphone hidden-xs">
-						<div class="tour-iphone-screen"><video autoplay loop="loop"><source src="/img/tour/meetup_demo.mp4" type="video/mp4"><source src="/img/tour/meetup_demo.webm" type="video/webm">Your browser does not support video</video></div>
-					</div>
-				</div>
-				<div class="col-xs-12 col-sm-6 col-md-7 col-lg-6">
+				<div class="col-xs-12 col-sm-8 col-sm-offset-2">
 					<div class="tour-features center-block">
-						<h6>Make every Meetup personal, using features such as Maps and Widgets</h6>
+						<h1>Make every Meetup personal, using features such as Maps and Widgets</h1>
+						<br>
 						<img class="center-block tour-icons" src="img/tour/exchange.svg">
-						<p>Easily exchange contacts to stay in touch</p>
+						<h4>Easily exchange contacts to stay in touch</h4>
 						<img class="center-block tour-icons" src="img/tour/photoshare.svg">
-						<p>Drop images into the group for easy sharing during Meetups</p>
+						<h4>Drop images into the group for easy sharing during Meetups</h4>
 						<img class="center-block tour-icons" src="img/tour/shy.svg">
-						<p>Feeling shy? Use our Icebreaker chat widget to start conversations &amp; coordinate plans</p>
+						<h4>Feeling shy? Use our Icebreaker chat widget to start conversations &amp; coordinate plans</h4>
 						<img class="center-block tour-icons" src="img/tour/lock.svg">
-						<p>Bubbles keep your community safe and secure</p>
+						<h4>Bubbles keep your community safe and secure</h4>
 					</div>			
 				</div>
 			</div>
 		</div>	
 	</li>
 
-		<li class="tour-page">
+
+
+	<li class="tour-page small-tour-page">
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-xs-12">
 					<div class="tour-features center-block">
-						<h6>Built with Bubbl.li</h6>
-						<p>Bubbles used by thousands through our platform</p>
+						<h1>Built with Bubbl.li</h1>
+						<h4>Bubbles used by thousands through our platform</h4>
 					</div>
 				</div>
 			</div>
 			<br>
 			<div class="row">
 				<div class="col-xs-4" style="cursor:pointer;">
-					<a href="https://bubbl.li/w/Monthly_Farmer_s_Market_Meetup" target="_blank" class="tour-thumbnail thumbnail">
+					<a href="https://bubbl.li/w/Creative_Technologies_2014" target="_blank" class="tour-thumbnail thumbnail">
 						<img width="180" class="center-block tour-circle-img" src="img/tour/builtwithbubbli01.jpg">
 					</a>
-					<p class="built-w-bubbli-sample">Farmer's Market Meetup</p>
+					<p class="built-w-bubbli-sample">Creative Technologies 2014</p>
 				</div>
 				<div class="col-xs-4" style="cursor:pointer;">
 					<a href="http://aicp.bubbl.li/#/lectures" target="_blank" class="tour-thumbnail thumbnail">
@@ -125,39 +130,38 @@
 					<p class="built-w-bubbli-sample">2014 AICP Conference</p>
 				</div>
 				<div class="col-xs-4" style="cursor:pointer;">
-					<a href="https://bubbl.li/w/Spooky_Park_Chat/messages" target="_blank" class="tour-thumbnail thumbnail">
-						<img width="180" class="center-block tour-circle-img" src="img/tour/builtwithbubbli03.jpg">
+					<a href="https://bubbl.li/w/Monthly_Farmer_s_Market_Meetup" target="_blank" class="tour-thumbnail thumbnail">
+						<img width="180" class="center-block tour-circle-img" src="img/tour/builtwithbubbli04.jpg">
 					</a>
-					<p class="built-w-bubbli-sample">Halloween Park Chat</p>
+					<p class="built-w-bubbli-sample">Farmer's Market Meetup</p>
 				</div>
 			</div>
 		</div>
 	</li>
 
+
 	<li class="tour-page">
-		<div class="container-fluid">
-			<div class="tour-last">
-				<h1 class="tour-bubblli center-block tour-last-title"><img width="250" style="max-width:100%;" src="/img/IF/bubblli_logo_blue.svg">
-				<br>
-				<small>Use Bubbl.li at your next Meetup to help bring everyone together and get the conversation going!</small></h1>
-				<em class="center-block text-center tour-clicklogin">Click to social login in or import your existing Meetups</em>
-				<a href="/auth/meetup"><button class="btn btn-lg btn-meetup center-block">Social login with Meetup</button></a>
-				<br>
-				<em class="center-block text-center">No Meetup Account?</em>
-				<a href="/signup/new"><button class="btn btn-default center-block">More Sign in Options</button></a>
-			<p class="center-block text-center"><strong>Questions?</strong> Email us at <a href="mailto:hello@interfacefoundry.com">hello@interfacefoundry.com</a>
+		<div class="tour-panel container-fluid">
+			<img src="img/tour/bubblli_logo.svg">
+			<br>
+			<h4>Use Bubbl.li at your next Meetup to help bring everyone together and get the conversation going!</h4>
+			<br><br>
+			<em class="center-block text-center tour-clicklogin">Click to social login in or import your existing Meetups</em>
+
+			<a href="/auth/meetup"><button class="btn btn-lg btn-meetup center-block">Social login with Meetup</button></a>
+			<br>
+			<em class="center-block text-center">No Meetup Account?</em>
+			<button ng-click="openSignup()" class="btn btn-default center-block">More Sign in Options</button>
+			<p><strong>Questions?</strong> Email us at <a href="mailto:hello@interfacefoundry.com">hello@interfacefoundry.com</a>
 		</div>
-
-		<div class="tour-credits" style="text-align:center;">
-
+		<div class="tour-credits">
 			<b>Bubbl.li</b> is a product of 
 			<br>
 			<a href="http://interfacefoundry.com"><img width="20" src="http://localhost:2997/img/IF/IF_mark.svg" style="padding-right:3px;">Interface Foundry PBC</a>
-
-		</div>
-
 		</div>
 	</li>
+
+
 </ul>
 
 

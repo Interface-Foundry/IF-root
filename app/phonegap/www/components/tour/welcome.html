@@ -4,7 +4,7 @@
 		<div class="tour-panel container-fluid">
 			<h1>Bubbl.li brings communities closer</h1>
 			<h4>It's an easier way of coming together during your next event. Enhance &amp; personalize your event's experience. Exchange information, break the ice, and more!</h4>
-			<a href="/signup/new"><button class="btn btn-lg btn-primary btn-signup-tour">Sign Up</button></a>
+			<button ng-click="openSignup()" class="btn btn-lg btn-primary btn-signup-tour">Sign Up</button>
 		</div>
 	</li>
 
@@ -123,9 +123,8 @@
 			<img src="img/tour/bubblli_logo.svg">
 			<br>
 			<h4>Use Bubbl.li at your next event to help bring everyone together and get the conversation going!</h4>
-			<a href="/signup/new"><button class="btn btn-lg btn-primary btn-signup-tour center-block">Sign Up</button></a>
-			<em>Or</em>
-			<a href="/nearby"><button class="btn btn-default center-block">Explore Around You</button></a>
+			<button ng-click="openSignup()" class="btn btn-lg btn-primary btn-signup-tour center-block">Sign Up</button>
+
 			<p><strong>Questions?</strong> Email us at <a href="mailto:hello@interfacefoundry.com">hello@interfacefoundry.com</a>
 		</div>
 		<div class="tour-credits">
