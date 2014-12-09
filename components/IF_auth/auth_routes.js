@@ -51,6 +51,18 @@ module.exports = function(app, passport, landmarkSchema) {
 
 		});
 
+
+		// app.post('/api/user/login', function(req, res, next) {
+		//  passport.authenticate('local-login', function(err, user, info) {
+		//    if (err) { return next(err); }
+		//    else {
+		//    	res.send(req.user);
+		//    }
+		   
+		//  })(req, res, next);
+		// });
+
+
 		// process the signup form
 		app.post('/api/user/signup', passport.authenticate('local-signup', {
 
