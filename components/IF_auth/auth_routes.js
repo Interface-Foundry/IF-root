@@ -148,6 +148,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 	// facebook -------------------------------
 
+
 		// send to facebook to do the authentication
 		app.get('/connect/facebook', passport.authorize('facebook', { scope : 'email' }));
 
