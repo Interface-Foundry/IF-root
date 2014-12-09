@@ -871,6 +871,10 @@ text-align: center;
 	top: 10%;
 }
 
+.panel-3 {
+	top: 100px;
+}
+
 .tour-iphone {
 	position: absolute;
 	width: 228px;
