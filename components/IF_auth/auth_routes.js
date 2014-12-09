@@ -40,14 +40,23 @@ module.exports = function(app, passport, landmarkSchema) {
 		// route to test if the user is logged in or not 
 		app.get('/api/user/loggedin', function(req, res) { 
 
-			res.send(req.isAuthenticated() ? req.user : '0'); 
+			res.send(req.isAuthenticated() ? req.user : 500); 
 		}); 
 
 		// process the login form
-		app.post('/api/user/login', passport.authenticate('local-login', {}));
+		app.post('/api/user/login', passport.authenticate('local-login', {
+
+		}), function(req,res){
+			res.send(req.user);
+
+		});
 
 		// process the signup form
-		app.post('/api/user/signup', passport.authenticate('local-signup', {}));
+		app.post('/api/user/signup', passport.authenticate('local-signup', {
+
+		}), function(req,res){
+			res.send(req.user);
+		});
 
 	// facebook -------------------------------
 
