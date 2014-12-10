@@ -45,10 +45,10 @@ module.exports = function(app, passport, landmarkSchema) {
 
 		// process the login form
 		app.post('/api/user/login', passport.authenticate('local-login', {
-
-		}), function(req,res){
-			res.send(req.user);
-
+			successRedirect: '/',
+			failureRedirect: '/'}),
+		function(req,res){
+			
 		});
 
 
