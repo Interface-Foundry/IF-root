@@ -19253,7 +19253,7 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'socket', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, socket) {
 console.log('--EditController--');
 
 var aperture = apertureService,
@@ -19346,6 +19346,10 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 		$scope.uploadFinishedLandmark = true;
 	});
 }
+
+socket.on('uploadstatus', function (data) {
+   console.log(data);
+ });
 
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
@@ -20672,12 +20676,12 @@ app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', '
 
 
 }]);
-app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
+app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
 	var style = styleManager;
 
-	//style.navBG_color = "#FFFAB4";
+	style.navBG_color = "#3d66ca";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -20690,17 +20694,20 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 		$scope.$apply();
 		}, 20));
 
-
+	$scope.openSignup = function(){
+		dialogs.showDialog('authDialog.html');
+	}
+	
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
 	// }
 
 }]);
 
-app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', function ($scope, $window, $location, styleManager, $rootScope) {
+app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 	var style = styleManager;
 
-	//style.navBG_color = "#FFFAB4";
+	style.navBG_color = "#3d66ca";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -20713,7 +20720,9 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		$scope.$apply();
 		}, 20));
 
-
+	$scope.openSignup = function(){
+		dialogs.showDialog('authDialog.html');
+	}
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
 	// }
@@ -20908,7 +20917,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 }]); 
 
 
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', 'socket', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping, socket) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -21015,6 +21024,11 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 		saveTimer = $timeout(saveUser, 1000);
 	}
 });
+
+
+  socket.on('uploadstatus', function (data) {
+    console.log(data);
+  });
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////

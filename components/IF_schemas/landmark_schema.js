@@ -165,6 +165,7 @@ monguurl = require('monguurl');
 			categories:Schema.Types.Mixed,
 			business_image_l: String,
 			business_image_sm: String,
+			business_image_md5: String,
 			rating_image: String
 		},
 		widgets: {

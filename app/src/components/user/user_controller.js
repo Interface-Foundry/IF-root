@@ -1,4 +1,4 @@
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', 'socket', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping, socket) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -105,6 +105,11 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 		saveTimer = $timeout(saveUser, 1000);
 	}
 });
+
+
+  socket.on('uploadstatus', function (data) {
+    console.log(data);
+  });
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
