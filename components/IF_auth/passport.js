@@ -49,7 +49,7 @@ module.exports = function(passport) {
             if (password.length >= 6){
                 //ADD PASSWORD VALIDATE HERE
                 // asynchronous
-                process.nextTick(function() {
+                //process.nextTick(function() {
                     User.findOne({ 'local.email' :  email }, function(err, user) {
                         // if there are any errors, return the error
                         if (err)
@@ -67,7 +67,7 @@ module.exports = function(passport) {
                         else
                             return done(null, user);
                     });
-                });
+               // });
             }
             else {
                 return done('Password needs to be at least 6 characters');  
