@@ -2914,8 +2914,11 @@ a.bubble-inspector-btn:hover {
   display: block;
   line-height: 32px;
   font-size: 14px;
-  margin: 0px 11px 0px 0px;
+  margin: 0px 11px 0px 4px;
   float: left;
+}
+.user-chip-label.auth {
+  margin: 0px 11px 0px 0px;
 }
 .user-chip-img {
   display: block;

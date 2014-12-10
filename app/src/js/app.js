@@ -116,11 +116,10 @@ angular.extend($tooltipProvider.defaults, {
 	
 //@IFDEF KEYCHAIN
 lockerManager.getCredentials().then(function(credentials) {
-	console.log('credentials', credentials);
-	userManager.signin(credentials.username, credentials.password).then(function(user) {
-		console.log('credential signin success', user)
-		//$scope.user = user;
-		userManager.checkLogin();
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(user) {
+		$scope.user = user;
+		});
 	}, function (reason) {
 		console.log('credential signin error', reason)
 	});

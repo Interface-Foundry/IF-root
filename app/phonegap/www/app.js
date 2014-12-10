@@ -4796,11 +4796,10 @@ angular.extend($tooltipProvider.defaults, {
 	navigator.splashscreen.hide();
 	
 lockerManager.getCredentials().then(function(credentials) {
-	console.log('credentials', credentials);
-	userManager.signin(credentials.username, credentials.password).then(function(user) {
-		console.log('credential signin success', user)
-		//$scope.user = user;
-		userManager.checkLogin();
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(user) {
+		$scope.user = user;
+		});
 	}, function (reason) {
 		console.log('credential signin error', reason)
 	});
@@ -17605,15 +17604,7 @@ userManager.signin = function(username, password) {
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
-			userManager._user = data;
-			userManager.getDisplayName();
 			deferred.resolve(data);
-			
-			$http.get('/api/user/loggedin', {server: true}).
-				success(function(user){
-					console.log('loggedin');
-				});
-			
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
@@ -20711,21 +20702,6 @@ $scope.getNearby = function($event) {
 	})
 	$event.stopPropagation();
 }
-
-/*
-lockerManager.getCredentials().then(function(credentials) {
-	console.log('credentials', credentials);
-	userManager.signin(credentials.username, credentials.password).then(function(user) {
-		console.log('credential signin success', user)
-		//$scope.user = user;
-		userManager.checkLogin();
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
-}, function(err) {
-	console.log('credential error', error); 
-});
-*/
 
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){

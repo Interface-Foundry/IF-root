@@ -118,15 +118,7 @@ userManager.signin = function(username, password) {
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
-			userManager._user = data;
-			userManager.getDisplayName();
 			deferred.resolve(data);
-			
-			$http.get('/api/user/loggedin', {server: true}).
-				success(function(user){
-					console.log('loggedin');
-				});
-			
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
