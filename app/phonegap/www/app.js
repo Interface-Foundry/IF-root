@@ -4715,6 +4715,9 @@ var checkLoggedin = function(userManager) {
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
+	    			if (request.server) {
+		    			request.url = 'https://bubbl.li' + request.url; 
+	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4778,9 +4781,6 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
-$locationProvider.html5Mode({
-	enabled: true
-});
 	  
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
@@ -4791,12 +4791,10 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
-	userManager.checkLogin();
 	
 	
+	navigator.splashscreen.hide();
 	
-<<<<<<< HEAD
-=======
 lockerManager.getCredentials().then(function(credentials) {
 userManager.signin(credentials.username, credentials.password).then(function(success) {
 		userManager.checkLogin().then(function(user) {
@@ -4808,13 +4806,14 @@ userManager.signin(credentials.username, credentials.password).then(function(suc
 }, function(err) {
 	console.log('credential error', error); 
 });
->>>>>>> FETCH_HEAD
 });
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-
-});
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -5184,15 +5183,6 @@ app.directive('bubbleBody', function(apertureService) {
 		scope: true,
 		link: function(scope, element, attrs) {
 			var st;
-			element.on('mousewheel', function(event) {
-				st = element.scrollTop()
-				if (st == 0 && event.deltaY*event.deltaFactor > 30) {
-					apertureService.set('third');
-				}
-				if (st == 0 && event.deltaY < 0) {
-					apertureService.set('off');
-				}
-			});
 			
 			scope.$on('$destroy', function() {
 				element.off('mousewheel');
@@ -5210,7 +5200,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 4;
+					var topOffset = 19;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5574,10 +5564,6 @@ app.directive('ifHref', function() {
 				return;
 				}
 			
-			var firstHash = value.indexOf('#');
-			if (firstHash > -1) {
-				value = value.slice(0, firstHash) + value.slice(firstHash+1);
-			}
 			$attr.$set('href', value);
 			
 			});
@@ -5596,6 +5582,7 @@ app.directive('ifSrc', function() {
 				return;
 				}
 			
+				value = 'https://bubbl.li/'+value;
 				
 				$attr.$set('src', value);
 			
@@ -16764,6 +16751,14 @@ geoService.getLocation = function(maxAge) {
 		}
 
 		function geolocationError(error){
+			if (error.code == 1) {
+				//PERMISSIONS DENIED
+				navigator.notification.alert(
+					'Please enable Location Services for Bubbl.li', 
+					function() {/*send to settings app eventually*/}, 
+					'Location Error',
+					'OK');
+			}
 			
 			geoService.resolveQueue({err: error.code});
 		}
@@ -17284,8 +17279,48 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: false
+	supported: true,
+	keychain: new Keychain()
 }
+
+lockerManager.getCredentials = function() {
+	var username = $q.defer(), password = $q.defer();
+	
+	lockerManager.keychain.getForKey(function(value) {
+		username.resolve(value);
+	}, function(error) {
+		username.reject(error);
+	}, 'username', 'Bubbl.li');
+
+	lockerManager.keychain.getForKey(function(value) {
+		password.resolve(value);
+	}, function(error) {
+		password.reject(error)
+	}, 'password', 'Bubbl.li');
+	
+	return $q.all({username: username.promise, password: password.promise});
+}
+
+lockerManager.saveCredentials = function(username, password) {
+	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
+	
+	lockerManager.keychain.setForKey(function(success) {
+		usernameSuccess.resolve(success);
+	}, function(error) {
+		usernameSuccess.reject(error);
+	},
+	'username', 'Bubbl.li', username);
+	
+	lockerManager.keychain.setForKey(function(success) {
+		passwordSuccess.resolve(success);
+	}, function(error) {
+		passwordSuccess.reject(error);
+	},
+	'password', 'Bubbl.li', password);
+	
+	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
 	 
 return lockerManager;
 	   
@@ -17460,7 +17495,7 @@ angular.module('tidepoolsServices')
 var alerts = alertManager;
    
 var userManager = {
-	userRes: $resource('/api/updateuser'),
+	userRes: $resource('https://bubbl.li/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -17596,7 +17631,7 @@ userManager.login.login = function() {
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.show = false;
+		dialogs.showDialog('keychainDialog.html');
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -20668,12 +20703,6 @@ $scope.getNearby = function($event) {
 	$event.stopPropagation();
 }
 
-<<<<<<< HEAD
-/*
-*/
-
-=======
->>>>>>> FETCH_HEAD
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
