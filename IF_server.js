@@ -2189,8 +2189,9 @@ function uniqueProfileID(input, callback){
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     console.log(req.user);
-    if (!req.isAuthenticated()){} 
+    if (!req.isAuthenticated()){ 
         res.send(401);  //send unauthorized 
+    }
     else{ 
         return next();
     }
