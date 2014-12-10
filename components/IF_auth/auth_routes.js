@@ -220,10 +220,15 @@ module.exports = function(app, passport, landmarkSchema) {
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
 
-	if (!req.isAuthenticated()) 
-		res.send(401);  //send unauthorized 
-	else 
+	console.log(req.user);
+	if (!req.isAuthenticated()){
+		res.send(401);  //send unauthorized
+	}
+		 
+	else{
 		return next();
+	}
+		
 }
 
 
