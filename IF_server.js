@@ -1390,7 +1390,12 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         var fstream;
         req.pipe(req.busboy);
 
+        console.log(req.headers['content-length']);
+
+
         req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+
+
 
              ////// SECURITY RISK ///////
              ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
@@ -1404,6 +1409,11 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
              //      //    application/x-dosexec
              //  });
               ///////////////////////////
+
+
+             file.on('data', function(data) {
+                 console.log('File [' + fieldname +'] got ' + data.length + ' bytes');
+             });
 
             var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename; //removing file type
             var fileType = filename.split('.').pop(); //removing file name
