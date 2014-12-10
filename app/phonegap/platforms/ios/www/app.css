@@ -788,103 +788,51 @@ ul.walkthrough-grid > li > label {
 	height: 800px;
 }
 
-.tour-header {
+.small-tour-page {
+	height: 400px;
+}
+
+.tour-panel{
+	background-color: rgba(255,2255,255,0.9);
+	top: 30%;
+	width: 100%;
+	border-radius: 12px;
+	max-width: 750px;
 	position: absolute;
-	top: 30px;
-	z-index: 100;
-	width:100%;
-	padding-left: 15px;
-	padding-right: 8px;
+	z-index: 1000;
+	left: 50%;
+	padding: 15px 20px !important;
+	-webkit-transform: translate3d(-50%, 0, 0);
+	transform: translate3d(-50%, 0, 0);
 }
 
-.tour-footer {
-	position: absolute;
-	top: 758px;
-	z-index: 100;
-	width:100%;
-	padding-left: 15px;
-	padding-right: 8px;
+.tour-features {
+	font-size: 18px;
+	padding-top: 100px;
+	padding-right: 20px !important;
+	padding-left: 20px !important;
+	max-width: 500px;
+	text-align: center;
 }
 
-.tour-headline {
-	font-family: 'Fabrica', sans-serif;
-	color: #26288b;	
-	font-size: 30px;
-	letter-spacing: 1px;
+.tour li {
+text-align: center;
 }
 
-.tour-subhead {
-	font-family: 'Fabrica', sans-serif;
-	color: #26288b;	
-	
-	letter-spacing: 1px;
-	font-size:20px;
+.btn-signup-tour {
+	background-color: #3d66ca !important;
+	border-color: #3d66ca !important;
 }
 
-/*.tour-floorhead {
-	font-family: 'Fabrica', sans-serif;
-	color: white;	
-	text-shadow: 0px 2px 2px rgba(0,0,0,.4);
-	letter-spacing: 1.6px;
-	font-size:23px;
-}
-*/
-
-.tour-page h5 {
-	font-family: 'Fabrica', sans-serif;
-	position: absolute;
-	color: white;
-	top: 44px;
-	left: 22px;
-	width: 90%;
-	z-index: 100;
-	text-shadow: 0px 2px 2px rgba(0,0,0,.4);
-	letter-spacing: 1.6px;
-	font-size:26px;
-	max-width: 100%;
-	line-height: 35px;
+.tour-page h1 {
+	margin-top: 0;
+	font-size: 22px;
 }
 
-.tour-page h6 {
-	font-family: 'Fabrica', sans-serif;
-	color: black;
-	z-index: 100;
-	letter-spacing: 1.6px;
-	font-size:26px;
-	line-height: 35px;
-}
-
-.tour-page h7 {
-	font-family: 'Fabrica', sans-serif;
-	position: absolute;
-	color: white;
-	top: 716px;
-	left: 22px;
-	width: 90%;
-	z-index: 100;
-	text-shadow: 0px 2px 2px rgba(0,0,0,.4);
-	letter-spacing: 1.6px;
-	font-size:23px;
-	max-width: 100%;
-}
-
-
-@media (min-width: 1209px) {
-	.tour-footer {
-		top:758px;
-	}
-}
-
-@media (max-width: 617px) {
-	.tour-footer {
-		margin-top: -24px;
-	}
-}
-
-@media (max-width: 414px) {
-	.tour-footer {
-		margin-top: -44px;
-	}
+.tour-page h4 {
+	font-size:16px;
+	font-weight: 400;
+	line-height: 1.4;
 }
 
 .tour-icons {
@@ -892,20 +840,8 @@ ul.walkthrough-grid > li > label {
 	height: 65px;
 }
 
-
-@media (max-width: 451px) {
-	.tour-page h4 {
-		font-size: 20px;
-	}
-}
-
-@media (max-width: 350px) {
-	.tour-page h3 {
-		font-size: 29px;
-	}
-	.tour-page h4 {
-		font-size: 21px;
-	}
+.tour-page a {
+	color: #3d66ca;
 }
 
 .tour-page button {
@@ -913,24 +849,14 @@ ul.walkthrough-grid > li > label {
 	margin-top: 10px;
 }
 
-.tour-page:nth-child(odd) {
-	/*background-color: rgba(255,255,255,0);*/
-}
-
-.tour-page:nth-child(even) {
-	/*background-color: rgba(255,255,255,0.15);*/
-}
-
-.tour-img {
+.tour-credits {
 	position: absolute;
-	left: 50%;
-	-webkit-transform: translateX(-50%);
-	transform: translateX(-50%);
-	
-	opacity: 0.88;
+	bottom: 20px;
+	width: 100%;
+}
 
-	/*-webkit-transition: 1.2s cubic-bezier(.5,.1,0,1) opacity;
-	transition: 1.2s cubic-bezier(.5,.1,0,1) opacity;*/
+.tour-credits a{
+	color:#545454;
 }
 
 .tour-page.meetupsplash {
@@ -939,16 +865,80 @@ ul.walkthrough-grid > li > label {
 	background-position: center;
 }
 
-.tour-srcset-on {
-	opacity: 1;
+.panel-2 {
+	top: 10%;
 }
 
-.tour-container {
-	width: 768px;
-	position: relative;
-	left: 50%;
-	margin-left: -384px;
+.panel-3 {
+	top: 100px;
 }
+
+.tour-iphone {
+	position: absolute;
+	width: 228px;
+	height: 424px;
+	border-radius: 30px;
+	background: rgba(0,0,0,0.7);
+	top:38%;
+	left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%);
+	z-index: 10;
+}
+
+.tour-iphone-screen {
+	position: relative;
+	width: 228px;
+	height: 328px;
+	top: 42px;
+	background: rgba(0,0,0,1);
+}
+
+.tour-thumbnail{
+	background-color: transparent !important;
+	border: none !important;
+	border-radius: 40;
+	cursor:pointer;
+}
+
+.tour-circle-img {
+	cursor:pointer;
+	border-radius: 50%;
+}
+
+.tour-circle-img:hover {
+	opacity:0.7;
+}
+
+
+/* ONLY IN USE FOR MEETUP HTML */
+
+.btn-meetup {
+	color: #FFF;
+	background: #e53935;
+	border: 1px solid #98251d;
+}
+
+.btn.btn-meetup:hover, .btn.btn-meetup:focus, .btn.btn-meetup:focus:hover {
+	color: #FFF;
+	background: #f37d75;
+}
+
+.tour-bubblli {
+	color: #3491ff;
+	text-align: center;
+	margin: 160px 0 63px 0;
+	max-width: 600px;
+	font-weight: 200;	
+}
+
+.tour-clicklogin {
+	margin-top: -28px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+/* RADARS */
 
 .radar1 {
 	position: absolute;
@@ -1021,7 +1011,6 @@ ul.walkthrough-grid > li > label {
 	left: 50%;
 	margin-left:-32px;
 	top:520px;
-	
 }
 
 .radar-gray .radar3 {
@@ -1039,34 +1028,10 @@ ul.walkthrough-grid > li > label {
 	border: 2px solid #1668DA;
 }
 
-.tour-title {
-	padding: 8px;
-	font-size: 24px;
-	line-height: 1;
-	color: rgba(0,0,0,0);
-	background: rgba(255,255,255,0);
-	-webkit-transition: .5s cubic-bezier(.5,.1,0,1) all;
-	transition: .5s cubic-bezier(.5,.1,0,1) all;
-	transform: translate3d(0,0,0);
-}
-
-.tour-title-corner {
-	position: absolute;
-	right: 10px;
-	bottom: -6px;
-	width: 16px;
-	height: 16px;
-	background: none;
-	transform: rotate(45deg);
-	-webkit-transition: .5s cubic-bezier(.5,.1,0,1) all;
-	transition: .5s cubic-bezier(.5,.1,0,1) all;
-}
-
 .radar-gray .tour-title-corner {
 	background: #FFF;
 	box-shadow: 0px 1px 1px rgba(0,0,0,.3);
 }
-
 
 .radar-gray .tour-title {
 	color: rgba(0,0,0,1);
@@ -1120,262 +1085,23 @@ ul.walkthrough-grid > li > label {
 	top:776px;
 }
 
-.tour-features {
-	font-family: 'Fabrica', sans-serif;
-	font-size: 18px;
-	padding-top: 100px;
-	max-width: 500px;
-	text-align: center;
-}
+/* MEDIA QUERIES */
 
 
-.tour-iphone {
-	position: relative;
-	width: 228px;
-	height: 424px;
-	border-radius: 30px;
-	background: rgba(0,0,0,0.7);
-	margin: 142px auto;
-	top:30px;
-}
 
-.tour-iphone-screen {
-	position: relative;
-	width: 228px;
-	height: 328px;
-	top: 42px;
-	background: rgba(0,0,0,1);
-
-}
-
-.tour-world-sq {
-	position: relative;
-	width: 288px;
-	height: 288px;
-	margin: 20px auto;
-	box-shadow: 0px 3px 3px rgba(0,0,0,0.2);
-}
-
-.tour-world-img {
-	width: 288px;
-	height: 288px;
-}
-
-.tour-world-sq-title {
-	position: absolute;
-	bottom: 0;
-	width: 288px;
-	height: 48px;
-	color: #FFF;
-	font-size: 32px;
-	line-height: 1;
-	padding: 8px;
-	background: rgba(61,90,254,1);
-}
-
-.built-w-bubbli-sample {
-	text-align: center;
-}
-
-
-.tour-thumbnail{
-	background-color: transparent !important;
-	border: none !important;
-	border-radius: 40;
-	cursor:pointer;
-}
-
-.tour-circle-img {
-	cursor:pointer;
-	border-radius: 50%;
-}
-
-.tour-circle-img:hover {
-	opacity:0.7;
-}
-
-.btn-meetup {
-	color: #FFF;
-	background: #e53935;
-	border: 1px solid #98251d;
-}
-
-.btn.btn-meetup:hover, .btn.btn-meetup:focus, .btn.btn-meetup:focus:hover {
-	color: #FFF;
-	background: #f37d75;
-}
-
-.tour-bubblli {
-	color: #3491ff;
-	text-align: center;
-	margin: 160px 0 63px 0;
-	max-width: 600px;
-	font-weight: 200;
-	
-}
-
-.tour-credits{
-	padding-top: 275px;
-	color:gray;
-}
-
-.tour-credits a{
-	color:#545454;
-}
-
-.tour-min-sq {
-	position: relative;
-	display:block;
-	float: left;
-	width: 178px;
-	height: 178px;
-	margin-right: 8px;
-	background: rgba(100,100,100,1);
-}
-
-.tour-clicklogin {
-	margin-top: -28px;
-	padding-left: 8px;
-	padding-right: 8px;
-}
-
-.tour-mini-sq-holder {
-	width: 744px;
-	height: 178px;
-	margin: 0 auto;
-}
-
-.tour-min-sq-title {
-	position: absolute;
-	bottom: 0;
-	width: 178px;
-	height: 32px;
-	padding: 4px;
-	font-size: 21px;
-	line-height: 1;
-	color: #FFF;
-	background: #2196f3;
-}
-
-.tour-take {
-	margin-top: 12px;
-	display: block;
-	color: #3f51b5;
-	font-size: 20px;
-	width: 744px;
-	margin: 0 auto;
-}
-
-.tour-last{
-	background-color: rgba(236, 239, 241,0.7);
-	border-radius: 12px;
-	height: 410px;
-	margin-left: 12%;
-	margin-right: 12%;
-
-/*	width: 100%;
-	height: 100%;*/
-}
-
-.tour-panel{
-	width: 80%;
-	background-color: rgba(236, 239, 241,0.7);
-	border-radius: 12px;
-	margin-top: 89px;
-	max-width: 750px;
-	height: 355px;
-	position: absolute;
-	z-index: 1000;
-	left: 50%;
-	padding-left: 10px;
-	padding-right: 10px;
-	-webkit-transform: translateX(-50%);
-	transform: translateX(-50%);
-}
-
-img.tour-logo {
-	position: relative;
-	display: block;
-	margin-right: auto;
-	margin-left: auto;
-	margin-top:40px;
-}
-
-h6.second-card-title {
-	font-size:22px; 
-	text-align: center;
-}
-
-.tour-more{
-	margin-bottom: -24px;
-	margin-top: 30px;
-}
-
-.tour-last-title{
-	margin-top: 55px;
-	padding-left: 8px;
-	padding-right: 8px;
-	padding-top: 20px;
-	margin-bottom: 41px;
-}
-
-li.tour-page.meetupsplash {
-text-align: center;
-}
-
-@media (max-width: 768px) {
-	.second-card-title{
-		margin-top: 50px !important;
+@media (min-width: 416px) {
+	.tour-panel {
+		width: 80%;
 	}
 }
-
-@media (max-width: 548px) {
-	.second-card-title{
-		margin-top: 44px !important;
-		font-size: 20px !important;
-		line-height: 35px !important;
-	}
-}
-
-@media (max-width: 430px) {
-	.second-card-title{
-		margin-top: 32px !important;
-		font-size: 18px !important;
-		line-height: 29px !important;
-	}
-}
-
 
 @media (min-width: 768px) {
-	.col-sm-6{
-		width: 46%;
+	.tour-page h1 {
+		font-size: 30px;
 	}
-}
 
-@media (max-width: 768px) {
-	.tour-more{
-		margin-top: 64px;
-	}
-	.tour-last-title{
-		margin-top: 64px;
-
-	}
-	.tour-page h7{
-		top:690px;
-	}
-}
-
-@media (max-width: 509px) {
-	.tour-last-title{
-		margin-top: 42px;
-
-	}
-}
-
-@media (max-width: 441px) {
-	.tour-last-title{
-		margin-top: 29px;
-
+	.tour-page h4 {
+		font-size: 20px;
 	}
 }
 
@@ -3194,8 +2920,11 @@ a.bubble-inspector-btn:hover {
   display: block;
   line-height: 32px;
   font-size: 14px;
-  margin: 0px 11px 0px 0px;
+  margin: 0px 11px 0px 4px;
   float: left;
+}
+.user-chip-label.auth {
+  margin: 0px 11px 0px 0px;
 }
 .user-chip-img {
   display: block;

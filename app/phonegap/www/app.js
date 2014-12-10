@@ -4795,6 +4795,20 @@ angular.extend($tooltipProvider.defaults, {
 	
 	
 	
+<<<<<<< HEAD
+=======
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(user) {
+		$scope.user = user;
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+>>>>>>> FETCH_HEAD
 });
 
 angular.element(document).ready(function() {
@@ -17555,15 +17569,7 @@ userManager.signin = function(username, password) {
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
-			userManager._user = data;
-			userManager.getDisplayName();
 			deferred.resolve(data);
-			
-			$http.get('/api/user/loggedin', {server: true}).
-				success(function(user){
-					console.log('loggedin');
-				});
-			
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
@@ -20662,9 +20668,12 @@ $scope.getNearby = function($event) {
 	$event.stopPropagation();
 }
 
+<<<<<<< HEAD
 /*
 */
 
+=======
+>>>>>>> FETCH_HEAD
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
