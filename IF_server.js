@@ -315,6 +315,18 @@ var fn = function (req, res) {
 
 
 // Query
+
+// PROFILE SECTION =========================
+app.get('/api/user/profile', isLoggedIn, function(req, res) {
+  var qw = {
+        'world':true,
+        'permissions.ownerID': req.user._id
+      };   
+      landmarkSchema.find(qw, function(err, lm) {
+         res.send(lm);
+      });
+});
+
 app.get('/api/:collection', function(req, res) { 
 
     var item, sort = {};
@@ -2185,26 +2197,15 @@ function uniqueProfileID(input, callback){
     });
 }
 
-  // PROFILE SECTION =========================
-  //isLoggedIn == AUTH
-  app.get('/api/user/profile', isLoggedIn, function(req, res) {
-    var qw = {
-            'world':true,
-            'permissions.ownerID': req.user._id
-        };   
-        landmarkSchema.find(qw, function(err, lm) {
-          res.send(lm);
-        });
 
-  });
 
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     //console.log(req.user);
-    console.log(req.cookies);
-    console.log(req.user);
-  
+    // console.log(req.cookies);
+    // console.log(req.user);
+
     if (!req.isAuthenticated()){ 
         res.send(401);  //send unauthorized 
     }
