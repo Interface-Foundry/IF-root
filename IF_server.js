@@ -1425,7 +1425,15 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
                         var newPath = "app/dist/uploads/" + current;
 
                         fstream = fs.createWriteStream(newPath);
-                        file.pipe(fstream);
+                        var count = 0; 
+                        var totalSize = req.headers['content-length'];
+                        file.on('data', function(data) {
+                          count += data.length;
+                          var percentUploaded = Math.floor(count/totalSize * 100);
+                          console.log("Uploaded " + percentUploaded + "%");
+                          io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
+                        }).pipe(fstream);
+
                         fstream.on('close', function () {
                              im.crop({
                               srcPath: newPath,
