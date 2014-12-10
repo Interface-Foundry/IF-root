@@ -4715,7 +4715,7 @@ var checkLoggedin = function(userManager) {
 	$httpProvider.interceptors.push(function($q, $location) {
     	return {
     		'request': function(request) {
-	    		return request;
+				return request;
     		},
 	    	'response': function(response) {
 		    	//do something on success
@@ -4789,9 +4789,11 @@ angular.extend($tooltipProvider.defaults, {
 });
 
 })
-.run(function($rootScope, $http, $location, userManager){
+.run(function($rootScope, $http, $location, userManager, lockerManager){
 	
 	userManager.checkLogin();
+	
+	
 	
 });
 
@@ -5169,14 +5171,13 @@ app.directive('bubbleBody', function(apertureService) {
 		link: function(scope, element, attrs) {
 			var st;
 			element.on('mousewheel', function(event) {
-				console.log(event);
-					st = element.scrollTop()
-				    if (st == 0 && event.deltaY*event.deltaFactor > 40) {
-					    apertureService.set('third');
-				    }
-				    if (st == 0 && event.deltaY < 0) {
-					    apertureService.set('off');
-				    }
+				st = element.scrollTop()
+				if (st == 0 && event.deltaY*event.deltaFactor > 30) {
+					apertureService.set('third');
+				}
+				if (st == 0 && event.deltaY < 0) {
+					apertureService.set('off');
+				}
 			});
 			
 			scope.$on('$destroy', function() {
@@ -16693,86 +16694,6 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 
    		return alerts;
    }])
-'use strict';
-
-angular.module('tidepoolsServices')
-    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
-    	function(alertManager, $interval, $timeout, beaconData) {
-var beaconManager = {
-	supported: false
-}
-
-return beaconManager;
-	    	
-}]);
-
-angular.module('tidepoolsServices')
-    .factory('beaconData', [ 
-    	function() {
-var beaconData = {
-	beaconTree: {
-		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
-			'28040': {
-				title: 'Main Room A',
-				href: 'w/Creative_Technologies_2014/BubblBot_s_Body'
-			},
-			'28041': {
-				title: 'Main Room B',
-				href: 'w/Creative_Technologies_2014/BubblBot_s_Antenna'
-			},
-			'28042': {
-				title: 'Workshop Room A',
-				href: 'w/Creative_Technologies_2014/BubblBot_s_Legs/'
-			},
-			'28043': {
-				title: 'Workshop Room B',
-				href: 'w/Creative_Technologies_2014/BubblBot_s_Arms/'
-			},
-			'14163': { //test only
-				title: 'Main Room A',
-				href: 'w/Creative_Technologies_2014/BubblBot_s_Body/'
-			}
-		},
-		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
-			'62861': {
-				title: "Ross's Random Beacon"
-			}
-		}
-	}
-}
-
-beaconData.fromBeacon = function(beacon) {
-	return beaconData.beaconTree[beacon.proximityUUID][beacon.major];
-}
-
-return beaconData;
-
-}]);
-
-
-//// Main Room A 
-// Bot part: Body
-// Major: 28040
-// Minors: 27664, 27665, 27666, 27667
-// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Body/
-
-//// Main Room B
-// Bot part: Antenna
-// Major: 28041
-// Minors: 1000, 1001, 1002
-// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Antenna/
-
-//// Workshop Room A
-// Bot part: Legs
-// Major: 28042
-// Minors: 1000, 1001, 1002
-// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Legs/
-
-//// Workshop Room B
-// Bot part: Arms
-// Major: 28043
-// Minors: 1000, 1001, 1002
-// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Arms/
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {
@@ -16794,47 +16715,67 @@ dialogs.close = function($event) {
 return dialogs;
 }]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 
-    	function($q) {
+    .factory('geoService', [ '$q', 'alertManager',
+    	function($q, alertManager) {
 
 var geoService = {
 	location: {
 		//lat,
 		//lng
 		//timestamp  
-	}
+	},
+	inProgress: false,
+	requestQueue: [] 
 }	
  
 geoService.getLocation = function(maxAge) {
 	var deferred = $q.defer();
+	
+	geoService.requestQueue.push(deferred);
 
-	if (navigator.geolocation) {
+	if (geoService.inProgress) {
+		// inprog
+	} else if (navigator.geolocation) {
+		geoService.inProgress = true;
 		console.log('geo: using navigator');
-			
+		
 		function geolocationSuccess(position) {
 			geoService.location.lat = position.coords.latitude;
 			geoService.location.lng = position.coords.longitude;
 			geoService.location.timestamp = Date.now();
-			deferred.resolve({
+			geoService.resolveQueue({
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			})
 		}
 
 		function geolocationError(error){
-			deferred.reject(error);
+			
+			geoService.resolveQueue({err: error.code});
 		}
 		
-			navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
 			geolocationError, 
 			{timeout:15000, enableHighAccuracy : true});
 
 	} else {
 		//browser update message
-		deferred.reject('navigator.geolocation undefined');
+		alerts.addAlert('warning', 'Your browser does not support location services.')
 	}
 	
 	return deferred.promise;
+}
+
+geoService.resolveQueue = function (position) {
+	while (geoService.requestQueue.length > 0) {
+		var request = geoService.requestQueue.pop();
+		if (position.err) {
+			request.reject(position.err);
+		} else {
+			request.resolve(position);
+		}
+	}
+	geoService.inProgress = false;
 }
 
 return geoService;
@@ -16934,7 +16875,7 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
 		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
 		targetPt, targetLatLng;
-	console.log(h,w);	
+	console.log(h,w);
 	
 	leafletData.getMap().then(function(map) {
 			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
@@ -17201,9 +17142,11 @@ mapManager.setCircleMaskState = function(state) {
 }
 
 mapManager.removeCircleMask = function() {
+	var layer = mapManager.circleMaskLayer;
 	if (mapManager.circleMaskLayer) {
+		console.log('removeCircleMask');
 		leafletData.getMap().then(function(map) {
-			map.removeLayer(mapManager.circleMaskLayer);
+			map.removeLayer(layer);
 		});
 	} else {
 		console.log('No circle mask layer.');
@@ -17242,6 +17185,98 @@ mapManager.getPlaceImageBounds = function() {
 
 return mapManager;
     }]);
+'use strict';
+
+angular.module('tidepoolsServices')
+    .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
+    	function(alertManager, $interval, $timeout, beaconData) {
+var beaconManager = {
+	supported: false
+}
+
+return beaconManager;
+	    	
+}]);
+
+angular.module('tidepoolsServices')
+    .factory('beaconData', [ 
+    	function() {
+var beaconData = {
+	beaconTree: {
+		'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D': {
+			'28040': {
+				title: 'Main Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Body'
+			},
+			'28041': {
+				title: 'Main Room B',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Antenna'
+			},
+			'28042': {
+				title: 'Workshop Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Legs/'
+			},
+			'28043': {
+				title: 'Workshop Room B',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Arms/'
+			},
+			'14163': { //test only
+				title: 'Main Room A',
+				href: 'w/Creative_Technologies_2014/BubblBot_s_Body/'
+			}
+		},
+		'B9407F30-F5F8-466E-AFF9-25556B57FE6D': {
+			'62861': {
+				title: "Ross's Random Beacon"
+			}
+		}
+	}
+}
+
+beaconData.fromBeacon = function(beacon) {
+	return beaconData.beaconTree[beacon.proximityUUID][beacon.major];
+}
+
+return beaconData;
+
+}]);
+
+
+//// Main Room A 
+// Bot part: Body
+// Major: 28040
+// Minors: 27664, 27665, 27666, 27667
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Body/
+
+//// Main Room B
+// Bot part: Antenna
+// Major: 28041
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Antenna/
+
+//// Workshop Room A
+// Bot part: Legs
+// Major: 28042
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Legs/
+
+//// Workshop Room B
+// Bot part: Arms
+// Major: 28043
+// Minors: 1000, 1001, 1002
+// https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Arms/
+'use strict';
+
+angular.module('tidepoolsServices')
+    .factory('lockerManager', ['$q', function($q) {
+var lockerManager = {
+	supported: false
+}
+	 
+return lockerManager;
+	   
+}
+])
 'use strict';
 
 angular.module('tidepoolsServices')
@@ -17406,9 +17441,10 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
-    	
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager) {
+var alerts = alertManager;
+   
 var userManager = {
 	userRes: $resource('/api/updateuser'),
 	loginStatus: false,
@@ -17485,6 +17521,7 @@ userManager.getDisplayName = function() {
 
 userManager.checkLogin = function(){
       var deferred = $q.defer();
+      
 	  userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
@@ -17507,10 +17544,40 @@ userManager.checkLogin = function(){
       return deferred.promise;
 };
 
+userManager.signin = function(username, password) {
+	console.log('signin');
+	var deferred = $q.defer();
+	var data = {
+		email: username,
+		password: password
+	}
+	 
+	$http.post('/api/user/login', data, {server: true})
+		.success(function(data) {
+			userManager.loginStatus = true;
+			userManager._user = data;
+			userManager.getDisplayName();
+			deferred.resolve(data);
+			
+			$http.get('/api/user/loggedin', {server: true}).
+				success(function(user){
+					console.log('loggedin');
+				});
+			
+		})
+		.error(function(data, status, headers, config) {
+			console.error(data, status, headers, config);
+			deferred.reject(data); 
+		})
+	
+	return deferred.promise;
+}
+
 userManager.logout = function() {
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
+	alerts.addAlert('success', "You're signed out!", true);
 }
 
 userManager.login.login = function() {
@@ -17519,24 +17586,17 @@ userManager.login.login = function() {
       email: userManager.login.email,
       password: userManager.login.password
     }
-    
-	$http.post('/api/user/login', data, {server: true}).
-	success(function(user){
-		if (user) {
-			console.log('success', user);
-			userManager.checkLogin();
-		}
+    userManager.signin(data.email, data.password).then(function(success) {
+		userManager.checkLogin();
+		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 		dialogs.show = false;
-	}).
-	error(function(err){
+	}, function (err) {
 		if (err) {
 			console.log('failure', err);
 		}
 		userManager.login.error = true;
 	});
-	
-	
 }
 
 userManager.signup.signup = function() {
@@ -17560,6 +17620,9 @@ userManager.signup.signup = function() {
 	});
 }
 
+userManager.saveToKeychain = function() {
+	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+}
 
 return userManager;
 }]);
@@ -20502,7 +20565,7 @@ app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', functio
 		});
 	});
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -20511,13 +20574,9 @@ $scope.alerts = alertManager;
 $scope.userManager = userManager;
 
 $scope.dialog = dialogs;
-$rootScope.messages = [];
-    //$rootScope.loadMeetup = false;
     
 angular.extend($rootScope, {globalTitle: "Bubbl.li"});
-angular.extend($rootScope, {navTitle: "Bubbl.li"})
-angular.extend($rootScope, {loading: false});
-	
+
 $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
@@ -20598,6 +20657,10 @@ $scope.getNearby = function($event) {
 	})
 	$event.stopPropagation();
 }
+
+/*
+*/
+
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
@@ -21613,14 +21676,12 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	welcomeMessage();
 });
 
-userManager.checkLogin().then(function(user) {
-	userManager.getUser().then(function(user) {
+userManager.getUser().then(function(user) {
 		$scope.user = user;
-	});
 	userManager.getDisplayName().then(function(displayName) {
 		$scope.nick = displayName;	
 	});
-}, function(reason) {
+	}, function(reason) {
 	dialogs.showDialog('messageAuthDialog.html');
 });
 

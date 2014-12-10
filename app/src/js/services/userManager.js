@@ -1,7 +1,8 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager) {
-    	
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager) {
+var alerts = alertManager;
+   
 var userManager = {
 	//@IFDEF WEB
 	userRes: $resource('/api/updateuser'),
@@ -83,6 +84,7 @@ userManager.getDisplayName = function() {
 
 userManager.checkLogin = function(){
       var deferred = $q.defer();
+      
 	  userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
@@ -105,10 +107,40 @@ userManager.checkLogin = function(){
       return deferred.promise;
 };
 
+userManager.signin = function(username, password) {
+	console.log('signin');
+	var deferred = $q.defer();
+	var data = {
+		email: username,
+		password: password
+	}
+	 
+	$http.post('/api/user/login', data, {server: true})
+		.success(function(data) {
+			userManager.loginStatus = true;
+			userManager._user = data;
+			userManager.getDisplayName();
+			deferred.resolve(data);
+			
+			$http.get('/api/user/loggedin', {server: true}).
+				success(function(user){
+					console.log('loggedin');
+				});
+			
+		})
+		.error(function(data, status, headers, config) {
+			console.error(data, status, headers, config);
+			deferred.reject(data); 
+		})
+	
+	return deferred.promise;
+}
+
 userManager.logout = function() {
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
+	alerts.addAlert('success', "You're signed out!", true);
 }
 
 userManager.login.login = function() {
@@ -117,24 +149,22 @@ userManager.login.login = function() {
       email: userManager.login.email,
       password: userManager.login.password
     }
-    
-	$http.post('/api/user/login', data, {server: true}).
-	success(function(user){
-		if (user) {
-			console.log('success', user);
-			userManager.checkLogin();
-		}
+    userManager.signin(data.email, data.password).then(function(success) {
+		userManager.checkLogin();
+		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
+		//@IFDEF WEB
 		dialogs.show = false;
-	}).
-	error(function(err){
+		//@ENDIF
+		//@IFDEF KEYCHAIN
+		dialogs.showDialog('keychainDialog.html');
+		//@ENDIF
+	}, function (err) {
 		if (err) {
 			console.log('failure', err);
 		}
 		userManager.login.error = true;
 	});
-	
-	
 }
 
 userManager.signup.signup = function() {
@@ -158,6 +188,9 @@ userManager.signup.signup = function() {
 	});
 }
 
+userManager.saveToKeychain = function() {
+	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+}
 
 return userManager;
 }]);

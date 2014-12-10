@@ -42,6 +42,7 @@ L.IFCircleMask = L.Layer.extend({
 	},
 	
 	onRemove: function (map) {
+		console.log('onremove');
 		map.getPanes().mapPane.removeChild(this._el);
 		map.off('viewreset', this._reset, this);
 		map.off('resize', this._reset, this);

@@ -48,6 +48,13 @@ module.exports = [
         "clobbers": [
             "navigator.geolocation"
         ]
+    },
+    {
+        "file": "plugins/com.shazron.cordova.plugin.keychainutil/www/keychain.js",
+        "id": "com.shazron.cordova.plugin.keychainutil.Keychain",
+        "clobbers": [
+            "window.Keychain"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -56,7 +63,8 @@ module.exports.metadata =
     "pl.makingwaves.estimotebeacons": "0.3.0",
     "org.apache.cordova.dialogs": "0.2.10",
     "org.apache.cordova.splashscreen": "0.3.4",
-    "org.apache.cordova.geolocation": "0.3.10"
+    "org.apache.cordova.geolocation": "0.3.10",
+    "com.shazron.cordova.plugin.keychainutil": "2.0.0"
 }
 // BOTTOM OF METADATA
 });

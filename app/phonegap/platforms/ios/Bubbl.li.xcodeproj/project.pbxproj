@@ -10,6 +10,7 @@
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1F766FE113BBADB100FB74C0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1F766FDC13BBADB100FB74C0 /* Localizable.strings */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		2EEF78E57E08494CBA9757C2 /* CDVKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5809A40535184D30A60E27B9 /* CDVKeychain.m */; };
 		301BF552109A68D80062928A /* libCordova.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 301BF535109A57CC0062928A /* libCordova.a */; };
 		302D95F114D2391D003F00A1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 302D95EF14D2391D003F00A1 /* MainViewController.m */; };
 		302D95F214D2391D003F00A1 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 302D95F014D2391D003F00A1 /* MainViewController.xib */; };
@@ -25,6 +26,7 @@
 		308D05391370CCF300D202BF /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 308D05301370CCF300D202BF /* icon@2x.png */; };
 		30A0434814DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434314DC770100060A13 /* Localizable.strings */; };
 		30FC414916E50CA1004E6F35 /* icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30FC414816E50CA1004E6F35 /* icon-72@2x.png */; };
+		4A7DA880DA5A4C5ABF7A4449 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F504F390E114A28B0C3653B /* Security.framework */; };
 		5B1594DD16A7569C00FEF299 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */; };
 		714249CC32D0437DA6CD28A5 /* CDVNotification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E30E2A5394F2451484A46356 /* CDVNotification.bundle */; };
 		7E7966DE1810823500FA85AD /* icon-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D41810823500FA85AD /* icon-40.png */; };
@@ -37,6 +39,7 @@
 		7E7966E51810823500FA85AD /* icon-76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DB1810823500FA85AD /* icon-76@2x.png */; };
 		7E7966E61810823500FA85AD /* icon-small.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DC1810823500FA85AD /* icon-small.png */; };
 		7E7966E71810823500FA85AD /* icon-small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DD1810823500FA85AD /* icon-small@2x.png */; };
+		93A4F476C39349E595491E96 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 76B5788E71204B928F675DAB /* SFHFKeychainUtils.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		C2A67B6715F04608AB5F9E80 /* libEstimoteSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4EBB575D0A014A5D822F9ACB /* libEstimoteSDK.a */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
 		E005AA021A131A8100B9F7D1 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C87A26D86EF44D54836AFA8F /* CoreBluetooth.framework */; };
@@ -68,6 +71,7 @@
 /* Begin PBXFileReference section */
 		07F49C4A1ACB4A4982CAA4E2 /* ESTBeaconRegion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconRegion.h; path = pl.makingwaves.estimotebeacons/ESTBeaconRegion.h; sourceTree = "<group>"; };
 		0E468174FFD64B8F885FAE5E /* CoreLocation.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		0F504F390E114A28B0C3653B /* Security.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		1ABE650E0E0E4D68864312AF /* CDVNotification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVNotification.m; path = org.apache.cordova.dialogs/CDVNotification.m; sourceTree = "<group>"; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -98,9 +102,11 @@
 		3F3108E840964D0BA01D3BD6 /* CDVNotification.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = CDVNotification.bundle; sourceTree = "<group>"; };
 		427E66F6F0C1412AA11D897D /* ESTBeaconFirmwareInfoVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconFirmwareInfoVO.h; path = pl.makingwaves.estimotebeacons/ESTBeaconFirmwareInfoVO.h; sourceTree = "<group>"; };
 		4EBB575D0A014A5D822F9ACB /* libEstimoteSDK.a */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = archive.ar; name = libEstimoteSDK.a; path = Bubbl.li/Plugins/pl.makingwaves.estimotebeacons/libEstimoteSDK.a; sourceTree = "<group>"; };
+		5809A40535184D30A60E27B9 /* CDVKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVKeychain.m; path = com.shazron.cordova.plugin.keychainutil/CDVKeychain.m; sourceTree = "<group>"; };
 		5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		697ADC21C5474BD89BCAEE7B /* CDVLocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVLocation.m; path = org.apache.cordova.geolocation/CDVLocation.m; sourceTree = "<group>"; };
 		6E44B679182948C1B7DE338E /* EstimoteBeacons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EstimoteBeacons.h; path = pl.makingwaves.estimotebeacons/EstimoteBeacons.h; sourceTree = "<group>"; };
+		76B5788E71204B928F675DAB /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFHFKeychainUtils.m; path = com.shazron.cordova.plugin.keychainutil/SFHFKeychainUtils.m; sourceTree = "<group>"; };
 		7E7966D41810823500FA85AD /* icon-40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-40.png"; sourceTree = "<group>"; };
 		7E7966D51810823500FA85AD /* icon-40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-40@2x.png"; sourceTree = "<group>"; };
 		7E7966D61810823500FA85AD /* icon-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-50.png"; sourceTree = "<group>"; };
@@ -117,6 +123,8 @@
 		8D8BB16A837B497FA0D414F3 /* ESTBeaconManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconManager.h; path = pl.makingwaves.estimotebeacons/ESTBeaconManager.h; sourceTree = "<group>"; };
 		98DBAD006FB942BE87F94E02 /* SystemConfiguration.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		9DE2F374E88F4F3C951C4063 /* CDVSplashScreen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVSplashScreen.m; path = org.apache.cordova.splashscreen/CDVSplashScreen.m; sourceTree = "<group>"; };
+		A260C20BEEA543CBA16A358B /* SFHFKeychainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SFHFKeychainUtils.h; path = com.shazron.cordova.plugin.keychainutil/SFHFKeychainUtils.h; sourceTree = "<group>"; };
+		B483D9BD4DEA4D808656D3E5 /* CDVKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVKeychain.h; path = com.shazron.cordova.plugin.keychainutil/CDVKeychain.h; sourceTree = "<group>"; };
 		B65D51E6923E4803BC8607F1 /* CDVLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVLocation.h; path = org.apache.cordova.geolocation/CDVLocation.h; sourceTree = "<group>"; };
 		BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EstimoteBeacons.m; path = pl.makingwaves.estimotebeacons/EstimoteBeacons.m; sourceTree = "<group>"; };
 		C7731784E9DB41E0B86B0DFE /* ESTBeaconVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconVO.h; path = pl.makingwaves.estimotebeacons/ESTBeaconVO.h; sourceTree = "<group>"; };
@@ -146,6 +154,7 @@
 				301BF552109A68D80062928A /* libCordova.a in Frameworks */,
 				288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */,
 				C2A67B6715F04608AB5F9E80 /* libEstimoteSDK.a in Frameworks */,
+				4A7DA880DA5A4C5ABF7A4449 /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +254,7 @@
 				98DBAD006FB942BE87F94E02 /* SystemConfiguration.framework */,
 				8CE1113D916F4ACC9E81E05C /* AudioToolbox.framework */,
 				4EBB575D0A014A5D822F9ACB /* libEstimoteSDK.a */,
+				0F504F390E114A28B0C3653B /* Security.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -275,6 +285,10 @@
 				EE39824E3C4546DBBC84AE97 /* ESTBeaconFirmwareVO.h */,
 				C7731784E9DB41E0B86B0DFE /* ESTBeaconVO.h */,
 				6E44B679182948C1B7DE338E /* EstimoteBeacons.h */,
+				5809A40535184D30A60E27B9 /* CDVKeychain.m */,
+				76B5788E71204B928F675DAB /* SFHFKeychainUtils.m */,
+				B483D9BD4DEA4D808656D3E5 /* CDVKeychain.h */,
+				A260C20BEEA543CBA16A358B /* SFHFKeychainUtils.h */,
 			);
 			name = Plugins;
 			path = Bubbl.li/Plugins;
@@ -479,6 +493,8 @@
 				E0F9E0CA1A13204C00DD0B6B /* CDVLocation.m in Sources */,
 				E0F9E0CB1A13204E00DD0B6B /* CDVNotification.m in Sources */,
 				E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */,
+				2EEF78E57E08494CBA9757C2 /* CDVKeychain.m in Sources */,
+				93A4F476C39349E595491E96 /* SFHFKeychainUtils.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

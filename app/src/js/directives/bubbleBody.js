@@ -6,14 +6,13 @@ app.directive('bubbleBody', function(apertureService) {
 			var st;
 			//@IFDEF WEB
 			element.on('mousewheel', function(event) {
-				console.log(event);
-					st = element.scrollTop()
-				    if (st == 0 && event.deltaY*event.deltaFactor > 40) {
-					    apertureService.set('third');
-				    }
-				    if (st == 0 && event.deltaY < 0) {
-					    apertureService.set('off');
-				    }
+				st = element.scrollTop()
+				if (st == 0 && event.deltaY*event.deltaFactor > 30) {
+					apertureService.set('third');
+				}
+				if (st == 0 && event.deltaY < 0) {
+					apertureService.set('off');
+				}
 			});
 			//@ENDIF
 			

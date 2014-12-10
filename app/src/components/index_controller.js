@@ -1,4 +1,4 @@
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -7,18 +7,8 @@ $scope.alerts = alertManager;
 $scope.userManager = userManager;
 
 $scope.dialog = dialogs;
-$rootScope.messages = [];
-    //$rootScope.loadMeetup = false;
     
 angular.extend($rootScope, {globalTitle: "Bubbl.li"});
-angular.extend($rootScope, {navTitle: "Bubbl.li"})
-angular.extend($rootScope, {loading: false});
-	
-//@IFDEF IBEACON
-if (beaconManager.supported == true) {
-	beaconManager.startListening();
-}
-//@ENDIF
 
 $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
@@ -100,4 +90,28 @@ $scope.getNearby = function($event) {
 	})
 	$event.stopPropagation();
 }
+
+//@IFDEF IBEACON
+if (beaconManager.supported == true) {
+	beaconManager.startListening();
+}
+//@ENDIF
+
+/*
+//@IFDEF KEYCHAIN
+lockerManager.getCredentials().then(function(credentials) {
+	console.log('credentials', credentials);
+	userManager.signin(credentials.username, credentials.password).then(function(user) {
+		console.log('credential signin success', user)
+		//$scope.user = user;
+		userManager.checkLogin();
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+//@ENDIF
+*/
+
 }]);

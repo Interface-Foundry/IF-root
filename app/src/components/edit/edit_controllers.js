@@ -1,4 +1,4 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'socket', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, socket) {
 console.log('--EditController--');
 
 var aperture = apertureService,
@@ -91,6 +91,10 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 		$scope.uploadFinishedLandmark = true;
 	});
 }
+
+socket.on('uploadstatus', function (data) {
+   console.log(data);
+ });
 
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];

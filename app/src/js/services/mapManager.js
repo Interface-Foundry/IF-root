@@ -71,7 +71,7 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
 		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
 		targetPt, targetLatLng;
-	console.log(h,w);	
+	console.log(h,w);
 	
 	leafletData.getMap().then(function(map) {
 			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
@@ -338,9 +338,11 @@ mapManager.setCircleMaskState = function(state) {
 }
 
 mapManager.removeCircleMask = function() {
+	var layer = mapManager.circleMaskLayer;
 	if (mapManager.circleMaskLayer) {
+		console.log('removeCircleMask');
 		leafletData.getMap().then(function(map) {
-			map.removeLayer(mapManager.circleMaskLayer);
+			map.removeLayer(layer);
 		});
 	} else {
 		console.log('No circle mask layer.');

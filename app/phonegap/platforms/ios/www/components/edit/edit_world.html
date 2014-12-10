@@ -7,8 +7,8 @@
 			<button class="btn btn-search" type="button" ng-click="search()">
 				<span class="glyphicon glyphicon-search"></span>
 			</button>
-			<a ng-href="#/edit/w/{{world.id}}/landmarks" target="_blank"><button class="btn btn-default"><span class="glyphicon glyphicon-pushpin"></span></button></a>
-			<a ng-href="#/w/{{world.id}}" target="_blank"><button class="btn btn-default"><span class="glyphicon glyphicon-eye-open"></span></button></a>
+			<a if-href="#edit/w/{{world.id}}/landmarks" target="_blank"><button class="btn btn-default"><span class="glyphicon glyphicon-pushpin"></span></button></a>
+			<a if-href="#w/{{world.id}}" target="_blank"><button class="btn btn-default"><span class="glyphicon glyphicon-eye-open"></span></button></a>
 
 		</span>
 
@@ -60,8 +60,8 @@
 				<button class="btn btn-publish btn-save" ng-click="saveWorld()">save</button>-->
 			</li>
 		</ul>
-<div class="edit-container ">
-<div class="container-fluid edit-bg">
+<div class="edit-container edit-bg">
+<div class="container-fluid ">
 	<div class="row">
 		<div class="col-xs-12" ng-form>
 			<div ng-switch on="view">

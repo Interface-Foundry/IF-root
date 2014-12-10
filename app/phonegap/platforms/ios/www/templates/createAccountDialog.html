@@ -1,23 +1,5 @@
 <div class="surface">
-<div ng-switch="state" ng-init="state='login'">
-	
-	<form ng-submit="userManager.login.login()" name="loginForm" ng-switch-when="login">
-		<h4 class="auth-title">Bubbl.li</h4>
-		<input name="email" type="email" 
-			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />		
-		<input name="password" type="password" 
-			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
-		
-		<button type="submit" class="auth-submit">Log In</button>
-		<div ng-if="userManager.login.error">
-			Login failed!
-		</div>
-		<a if-href="#forgot">Forgot your password?</a>
-		
-		<button type="button" class="auth-create" ng-click="$parent.state='signup'">Create Account</button>
-		
-	</form>
-	<form name="signupForm" ng-submit="userManager.signup.signup()" ng-switch-when="signup">
+<form name="signupForm" ng-submit="userManager.signup.signup()">
 		<h4 class="auth-title">Join Bubbl.li!</h4>
 		<hr class="nomargin">
 		<input name="email" type="email" 
@@ -41,8 +23,25 @@
 			{{userManager.signup.error}}
 		</div>
 		
+		<!-- @ifdef WEB -->
+		<div class="text-center" style="margin:4px 0px;">or</div>
 		
-		<a ng-click="$parent.state = 'login'" href="" style="display:block; margin: 20px 0px 14px 0px;">Not what you're looking for? Sign in here</a>
+		<div class="btn-group btn-group-justified" style="margin-bottom:20px;">
+		  <div class="btn-group">
+		    <button type="button" class="btn fb-btn" ng-click="go('auth/facebook')">
+		    	<img src="img/icons/facebook-16.png" width="16px" height="16px"> Facebook</button>
+		  </div>
+		  <div class="btn-group">
+		    <button type="button" class="btn twitter-btn" ng-click="go('auth/twitter')">
+		    	<img src="img/icons/twitter-16.png" width="16px" height="16px"> Twitter</button>
+		  </div>
+		  <div class="btn-group">
+		    <button type="button" class="btn meetup-btn" ng-click="go('auth/meetup')">
+		    	<img src="img/icons/meetup-16.png" width="16px" height="16px"> Meetup</button>
+		  </div>
+		</div>
+		<!-- @endif -->
+		
+		<a ng-click="dialog.showDialog('authDialog.html')" href="" style="display:block; margin: 20px 0px 14px 0px;">Not what you're looking for? Sign in here</a>
 	</form>
-</div>
 </div>

@@ -10,7 +10,8 @@ module.exports = {
 		options: {
 			inline: true,
 			context: {
-				PHONEGAP: true
+				PHONEGAP: true,
+				KEYCHAIN: true
 			}
 		}
 	},

@@ -5,7 +5,7 @@
 	width: 40%;
 	
 	margin-top: 40px;
-	overflow-x: hidden;
+	overflow: hidden;
 }
 
 div.edit-aperture {
@@ -96,14 +96,12 @@ ul.edit-toolbar {
 	bottom: 0px;
 	width: 100%;
 	
-	overflow: visible;
-	
+	overflow: auto;
 }
 
 .edit-bg {
 	padding-top: 16px; 
 	background: rgba(255,255,255,0.8);
-	min-height: 100%;
 }
 
 .world-icon {

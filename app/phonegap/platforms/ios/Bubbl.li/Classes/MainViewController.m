@@ -103,6 +103,9 @@
 
 - (void)webViewDidFinishLoad:(UIWebView*)theWebView
 {
+    NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+    [cookieStorage setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyAlways];
+
     // Black base color for background matches the native apps
     theWebView.backgroundColor = [UIColor blackColor];
 

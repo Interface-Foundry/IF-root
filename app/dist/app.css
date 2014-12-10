@@ -5,7 +5,7 @@
 	width: 40%;
 	
 	margin-top: 40px;
-	overflow-x: hidden;
+	overflow: hidden;
 }
 
 div.edit-aperture {
@@ -96,14 +96,12 @@ ul.edit-toolbar {
 	bottom: 0px;
 	width: 100%;
 	
-	overflow: visible;
-	
+	overflow: auto;
 }
 
 .edit-bg {
 	padding-top: 16px; 
 	background: rgba(255,255,255,0.8);
-	min-height: 100%;
 }
 
 .world-icon {
@@ -2467,7 +2465,7 @@ transform:translateX(100%);
   pointer-events: auto;
 }
 .drawer-tab {
-  position: absolute;
+  position: fixed;
   top: 0px;
   left: 0px;
   width: 48px;
@@ -3156,7 +3154,8 @@ a.bubble-inspector-btn:hover {
   white-space: nowrap;
 }
 .user-chip {
-  min-width: 56px;
+  position: relative;
+  min-width: 48px;
   height: 32px;
   margin: 4px 0px 0px 4px;
   border-radius: 3px;
@@ -3165,6 +3164,16 @@ a.bubble-inspector-btn:hover {
   cursor: pointer;
   text-align: center;
   color: #777;
+}
+.user-chip:before {
+  content: ' ';
+  position: absolute;
+  display: block;
+  top: 16px;
+  right: 3px;
+  border-top: 3px solid #999;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
 }
 @media only screen and (min-width: 480px) {
   .user-chip {
@@ -3179,26 +3188,21 @@ a.bubble-inspector-btn:hover {
   display: block;
   line-height: 32px;
   font-size: 14px;
-  margin: 0px 8px;
-}
-@media only screen and (max-width: 480px) {
-  .user-chip-label.auth {
-    font-weight: 600;
-  }
-}
-@media only screen and (min-width: 480px) {
-  .user-chip-label.auth {
-    margin: 0px 8px 0px 0px;
-    float: left;
-  }
+  margin: 0px 11px 0px 0px;
+  float: left;
 }
 .user-chip-img {
   display: block;
-  float: left;
   height: 24px;
   width: 24px;
   border-radius: 12px;
-  margin: 4px;
+  margin: 4px auto;
+}
+@media only screen and (min-width: 480px) {
+  .user-chip-img {
+    float: left;
+    margin: 4px;
+  }
 }
 /* } */
 @media only screen and (max-width: 480px) {
@@ -3213,8 +3217,8 @@ a.bubble-inspector-btn:hover {
 }
 .nav-user-menu {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0px;
+  right: 0px;
   width: 192px;
   background: rgba(255, 255, 255, 0.98);
   border-radius: 3px;

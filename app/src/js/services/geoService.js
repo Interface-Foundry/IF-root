@@ -1,26 +1,33 @@
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 
-    	function($q) {
+    .factory('geoService', [ '$q', 'alertManager',
+    	function($q, alertManager) {
 
 var geoService = {
 	location: {
 		//lat,
 		//lng
 		//timestamp  
-	}
+	},
+	inProgress: false,
+	requestQueue: [] 
 }	
  
 geoService.getLocation = function(maxAge) {
 	var deferred = $q.defer();
+	
+	geoService.requestQueue.push(deferred);
 
-	if (navigator.geolocation) {
+	if (geoService.inProgress) {
+		// inprog
+	} else if (navigator.geolocation) {
+		geoService.inProgress = true;
 		console.log('geo: using navigator');
-			
+		
 		function geolocationSuccess(position) {
 			geoService.location.lat = position.coords.latitude;
 			geoService.location.lng = position.coords.longitude;
 			geoService.location.timestamp = Date.now();
-			deferred.resolve({
+			geoService.resolveQueue({
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			})
@@ -37,19 +44,32 @@ geoService.getLocation = function(maxAge) {
 					'OK');
 			}
 			//@ENDIF
-			deferred.reject(error);
+			
+			geoService.resolveQueue({err: error.code});
 		}
 		
-			navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
 			geolocationError, 
 			{timeout:15000, enableHighAccuracy : true});
 
 	} else {
 		//browser update message
-		deferred.reject('navigator.geolocation undefined');
+		alerts.addAlert('warning', 'Your browser does not support location services.')
 	}
 	
 	return deferred.promise;
+}
+
+geoService.resolveQueue = function (position) {
+	while (geoService.requestQueue.length > 0) {
+		var request = geoService.requestQueue.pop();
+		if (position.err) {
+			request.reject(position.err);
+		} else {
+			request.resolve(position);
+		}
+	}
+	geoService.inProgress = false;
 }
 
 return geoService;

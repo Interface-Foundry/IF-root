@@ -5,12 +5,11 @@
 		<span>Landmarks</span>
 	</li>
 	<li class="edit-landmark-navback">
-		<a ng-href="#/w/{{world.id}}" class="btn btn-link">Go to {{world.name}}</a>
-		<a ng-href="#/edit/w/{{world.id}}" class="btn btn-link">Edit {{world.name}}</a>
+		<a if-href="#w/{{world.id}}" class="btn btn-link">Go to {{world.name}}</a>
+		<a if-href="#edit/w/{{world.id}}" class="btn btn-link">Edit {{world.name}}</a>
 	</li>
 </ul>
 <div class="edit-container edit-bg">
-
 <div class="container-fluid">
 <div class="form-group">
 <button class="btn btn-success" ng-click="addLandmark()"><b>+</b> Add Point of Interest or Schedule item</button>
