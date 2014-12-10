@@ -67,7 +67,7 @@ module.exports = function(passport) {
                         else
                             return done(null, user);
                     });
-               // });
+                //});
             }
             else {
                 return done('Password needs to be at least 6 characters');  

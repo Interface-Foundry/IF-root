@@ -7,18 +7,7 @@ module.exports = function(app, passport, landmarkSchema) {
 	// 	res.render('index.ejs');
 	// });
 
-	// PROFILE SECTION =========================
-	//isLoggedIn == AUTH
-	app.get('/api/user/profile', isLoggedIn, function(req, res) {
-		var qw = {
-            'world':true,
-            'permissions.ownerID': req.user._id
-        };   
-        landmarkSchema.find(qw, function(err, lm) {
-        	res.send(lm);
-        });
 
-	});
 
 	// LOGOUT ==============================
 	app.get('/api/user/logout', function(req, res) {
@@ -220,6 +209,7 @@ module.exports = function(app, passport, landmarkSchema) {
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
 
+	console.log(req.cookies);
 	console.log(req.user);
 	if (!req.isAuthenticated()){
 		res.send(401);  //send unauthorized
