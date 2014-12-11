@@ -18,5 +18,11 @@ var ifGlobals = {
 	}
 }
 
+ifGlobals.getBasicHeader = function() {
+	var string = ifGlobals.username+":"+ifGlobals.password;
+	var encodedString = window.btoa(string);
+	return "Basic "+encodedString;
+}
+
 return ifGlobals;
 }]);

@@ -496,33 +496,43 @@ function searchYelp(tag, done) {
 
 														    fs.readFile('tempuploads/'+lmSchema.id+'.jpg', function(err, fileData) {
 
-																//creating MD5 hash of image to check it later for updates
-																lmSchema.source_yelp.business_image_md5 = crypto.createHash('md5').update(fileData).digest("hex");
+														    	if (err){
 
-																//uploading big image to AWS
-														        s3.putObject({ Bucket: awsBucket, Key: lmSchema.id+'.jpg', Body: fileData, ACL:'public-read'}, function(err, data) {
-														            
-														            //add as big image
-														            lmSchema.source_yelp.business_image_l = 'https://s3.amazonaws.com/'+awsBucket+'/'+lmSchema.id+'.jpg';
+														    		console.log(err);
 
-														            //delete temp big image
-														            fs.unlink('tempuploads/'+lmSchema.id+'.jpg');
+														    	}
+														    	else {
 
-														            //uploading small image to AWS
-																	fs.readFile('tempuploads/'+lmSchema.id+'-sm.jpg', function(err, fileData) {
-																        s3.putObject({ Bucket: "if.forage.yelp.images", Key: lmSchema.id+'-sm.jpg', Body: fileData, ACL:'public-read' }, function(err, data) {
-																           
-																           //add as small image
-																           lmSchema.avatar = 'https://s3.amazonaws.com/'+awsBucket+'/'+lmSchema.id+'-sm.jpg';
+																	//creating MD5 hash of image to check it later for updates
+																	//lmSchema.source_yelp.business_image_md5 = crypto.createHash('md5').update(fileData).digest("hex");
 
-																           fs.unlink('tempuploads/'+lmSchema.id+'-sm.jpg');
+																	//uploading big image to AWS
+															        s3.putObject({ Bucket: awsBucket, Key: lmSchema.id+'.jpg', Body: fileData, ACL:'public-read'}, function(err, data) {
+															            
+															            //add as big image
+															            lmSchema.source_yelp.business_image_l = 'https://s3.amazonaws.com/'+awsBucket+'/'+lmSchema.id+'.jpg';
 
-																           //done, now save 
-																           doneLandmarkSave();
-																        });
-																    });	
+															            //delete temp big image
+															            fs.unlink('tempuploads/'+lmSchema.id+'.jpg');
 
-														        });
+															            //uploading small image to AWS
+																		fs.readFile('tempuploads/'+lmSchema.id+'-sm.jpg', function(err, fileData) {
+																	        s3.putObject({ Bucket: "if.forage.yelp.images", Key: lmSchema.id+'-sm.jpg', Body: fileData, ACL:'public-read' }, function(err, data) {
+																	           
+																	           //add as small image
+																	           lmSchema.avatar = 'https://s3.amazonaws.com/'+awsBucket+'/'+lmSchema.id+'-sm.jpg';
+
+																	           fs.unlink('tempuploads/'+lmSchema.id+'-sm.jpg');
+
+																	           //done, now save 
+																	           doneLandmarkSave();
+																	        });
+																	    });	
+
+															        });
+														    	}
+
+
 														    });
 														}
 
@@ -823,34 +833,44 @@ function searchYelp(tag, done) {
 
 												    fs.readFile('tempuploads/'+docs[0].id+'.jpg', function(err, fileData) {
 
+												    	if (err){
+												    		console.log(err);
+												    	}
+												    	else {
+
+															//creating MD5 hash of image to check it later for updates
+															//docs[0].source_yelp.business_image_md5 = crypto.createHash('md5').update(fileData).digest("hex");
+
+															//uploading big image to AWS
+													        s3.putObject({ Bucket: awsBucket, Key: docs[0].id+'.jpg', Body: fileData, ACL:'public-read'}, function(err, data) {
+													            
+													            //add as big image
+													            docs[0].source_yelp.business_image_l = 'https://s3.amazonaws.com/'+awsBucket+'/'+docs[0].id+'.jpg';
+
+													            //delete temp big image
+													            fs.unlink('tempuploads/'+docs[0].id+'.jpg');
+
+													            //uploading small image to AWS
+																fs.readFile('tempuploads/'+docs[0].id+'-sm.jpg', function(err, fileData) {
+															        s3.putObject({ Bucket: "if.forage.yelp.images", Key: docs[0].id+'-sm.jpg', Body: fileData, ACL:'public-read' }, function(err, data) {
+															           
+															           //add as small image
+															           docs[0].avatar = 'https://s3.amazonaws.com/'+awsBucket+'/'+docs[0].id+'-sm.jpg';
+
+															           fs.unlink('tempuploads/'+docs[0].id+'-sm.jpg');
+
+															           //done, now update 
+															           updateLandmark();
+															        });
+															    });	
+
+													        });
+
+
+												    	}
+
 		
-														//creating MD5 hash of image to check it later for updates
-														docs[0].source_yelp.business_image_md5 = crypto.createHash('md5').update(fileData).digest("hex");
 
-														//uploading big image to AWS
-												        s3.putObject({ Bucket: awsBucket, Key: docs[0].id+'.jpg', Body: fileData, ACL:'public-read'}, function(err, data) {
-												            
-												            //add as big image
-												            docs[0].source_yelp.business_image_l = 'https://s3.amazonaws.com/'+awsBucket+'/'+docs[0].id+'.jpg';
-
-												            //delete temp big image
-												            fs.unlink('tempuploads/'+docs[0].id+'.jpg');
-
-												            //uploading small image to AWS
-															fs.readFile('tempuploads/'+docs[0].id+'-sm.jpg', function(err, fileData) {
-														        s3.putObject({ Bucket: "if.forage.yelp.images", Key: docs[0].id+'-sm.jpg', Body: fileData, ACL:'public-read' }, function(err, data) {
-														           
-														           //add as small image
-														           docs[0].avatar = 'https://s3.amazonaws.com/'+awsBucket+'/'+docs[0].id+'-sm.jpg';
-
-														           fs.unlink('tempuploads/'+docs[0].id+'-sm.jpg');
-
-														           //done, now update 
-														           updateLandmark();
-														        });
-														    });	
-
-												        });
 												    });
 											    }
 
@@ -1003,6 +1023,10 @@ function processData(i,result,callback){
 }
 
 
+app.use(function(err, req, res, next){
+  console.error(err.stack);
+  //res.status(500).send('Something broke!');
+});
 
 //server port 
 app.listen(3137, 'localhost', function() {

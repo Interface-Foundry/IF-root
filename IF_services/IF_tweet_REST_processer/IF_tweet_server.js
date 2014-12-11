@@ -61,9 +61,9 @@ setInterval(function(){
             if( err ) {
               // One of the iterations produced an error.
               // All processing will now stop.
-              console.log('A file failed to process');
+              //console.log('A file failed to process');
             } else {
-              console.log('All files have been processed successfully');
+              //console.log('All files have been processed successfully');
 
                 removeHashtags();
             }
@@ -97,13 +97,13 @@ function searchTwitter(tag, done) {
     T.get('search/tweets', { q: '#'+tag, count: 50 }, function(err, data, response) {
 
         if (err){
-            console.log(err);
+            //console.log(err);
         }
         else {
             async.each(data.statuses, function( tweet, callback) {
               saveTweet(tweet);
             }, function(err){
-                console.log(err);    
+                //console.log(err);    
             });                
         }
         done(); 
@@ -190,10 +190,10 @@ function saveTweet(tweet){
     }
   
     lm.save(function (err, landmark) {
-        if (err) 
-            console.log(err);
-        else
-            console.log(".");
+        // if (err) 
+        //     //console.log(err);
+        // else
+        //     console.log(".");
     });
 }
 
@@ -223,7 +223,7 @@ function fillTwitterFalseArray(worldTag){
 //this function removes the hashtags from active hashtag array 
 function removeHashtags(){
 
-    console.log('asdf');
+   // console.log('asdf');
     for(var i=0;i<twitterFalseTags.length;i++)
     {
         if(twitterFalseTags[i].count>1){

@@ -4712,7 +4712,7 @@ var checkLoggedin = function(userManager) {
     //================================================
     // Add an interceptor for AJAX errors
     //================================================
-	$httpProvider.interceptors.push(function($q, $location) {
+	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
 				return request;
@@ -16801,6 +16801,12 @@ var ifGlobals = {
 	}
 }
 
+ifGlobals.getBasicHeader = function() {
+	var string = ifGlobals.username+":"+ifGlobals.password;
+	var encodedString = window.btoa(string);
+	return "Basic "+encodedString;
+}
+
 return ifGlobals;
 }]);
 'use strict';
@@ -17442,8 +17448,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals) {
 var alerts = alertManager;
    
 var userManager = {
@@ -17550,7 +17556,7 @@ userManager.signin = function(username, password) {
 		email: username,
 		password: password
 	}
-	 
+	
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
@@ -17560,6 +17566,7 @@ userManager.signin = function(username, password) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	
 	
 	return deferred.promise;
 }

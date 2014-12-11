@@ -3,6 +3,7 @@ var LocalStrategy    = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 var MeetupStrategy = require('passport-meetup').Strategy;
+var BasicStrategy = require('passport-http').BasicStrategy;
 
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
@@ -23,7 +24,7 @@ module.exports = function(passport) {
 
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
-        done(null, user.id);
+        done(null, user._id);
     });
 
     // used to deserialize the user
@@ -47,27 +48,28 @@ module.exports = function(passport) {
         //validate email as real address
         if (validateEmail(email)){
             if (password.length >= 6){
-                //ADD PASSWORD VALIDATE HERE
-                // asynchronous
-                process.nextTick(function() {
+
+                //process.nextTick(function() {
                     User.findOne({ 'local.email' :  email }, function(err, user) {
                         // if there are any errors, return the error
-                        if (err)
+                        if (err){
                             return done(err);
-
-                        // if no user is found, return the message
-                        if (!user)
-                            // return;
+                        }
+                            
+                        if (!user){
+                           return done('Incorrect username or password'); 
+                        }
+                            
+                        if (!user.validPassword(password)){
                             return done('Incorrect username or password');
-
-                        if (!user.validPassword(password))
-                            return done('Incorrect username or password');
-
-                        // all is well, return user
-                        else
+                        }
+                            
+                        else{
                             return done(null, user);
+                        }
+                            
                     });
-                });
+                //});
             }
             else {
                 return done('Password needs to be at least 6 characters');  
@@ -155,6 +157,20 @@ module.exports = function(passport) {
         var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     } 
+
+	passport.use('local-basic', new BasicStrategy({},
+		function(email, password, done) {
+			User.findOne({ 'local.email' :  email }, function(err, user) {
+				if (user && user.validPassword(password)) {
+					return done(null, user);
+				} else if (err) {
+					return done(err);
+				} else {
+					return done(null, false);
+				}
+			});
+		}
+	));
 
 
     // =========================================================================

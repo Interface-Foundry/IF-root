@@ -19,12 +19,16 @@ var checkLoggedin = function(userManager) {
     //================================================
     // Add an interceptor for AJAX errors
     //================================================
-	$httpProvider.interceptors.push(function($q, $location) {
+	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
 	    			//@IFDEF PHONEGAP
 	    			if (request.server) {
-		    			request.url = 'https://bubbl.li' + request.url; 
+		    			request.url = 'https://bubbl.li' + request.url;
+		    			if (ifGlobals.username&&ifGlobals.password) {
+						request.headers['Authorization'] = ifGlobals.getBasicHeader();
+						console.log(request);
+						}
 	    			}
 	    			//@ENDIF
 				return request;
@@ -119,8 +123,8 @@ angular.extend($tooltipProvider.defaults, {
 lockerManager.getCredentials().then(function(credentials) {
 userManager.signin(credentials.username, credentials.password).then(function(success) {
 		userManager.checkLogin().then(function(success) {
-		$location.path('/');	
-			});
+			console.log(success);
+		});
 	}, function (reason) {
 		console.log('credential signin error', reason)
 	});

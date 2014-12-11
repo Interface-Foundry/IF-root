@@ -41,10 +41,10 @@ var twitterFalseTags=[]; //via tahir
 
 var processTagMediaRecent = function(err, data, limit) {
 
-  console.log('Downloading new images');
+  //console.log('Downloading new images');
 
   if(err) {
-    console.log(err);
+    //console.log(err);
     return;
   }
 
@@ -91,9 +91,9 @@ setInterval(function(){
             if( err ) {
               // One of the iterations produced an error.
               // All processing will now stop.
-              console.log('A file failed to process');
+              //console.log('A file failed to process');
             } else {
-              console.log('All files have been processed successfully');
+              //console.log('All files have been processed successfully');
 
                 removeHashtags();
             }
@@ -156,7 +156,7 @@ function fillTwitterFalseArray(worldTag){
 //this function removes the hashtags from active hashtag array 
 function removeHashtags(){
 
-    console.log('asdf');
+    //console.log('asdf');
     for(var i=0;i<twitterFalseTags.length;i++)
     {
         if(twitterFalseTags[i].count>1){
@@ -193,7 +193,7 @@ async.whilst(
                     if (err) {
                       return console.error(err);
                     }
-                    console.log('successfully deleted');
+                    //console.log('successfully deleted');
                   });
                 }
               });

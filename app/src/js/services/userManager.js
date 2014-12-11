@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals) {
 var alerts = alertManager;
    
 var userManager = {
@@ -112,7 +112,8 @@ userManager.signin = function(username, password) {
 		email: username,
 		password: password
 	}
-	 
+	
+	//@IFDEF WEB
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
@@ -122,6 +123,23 @@ userManager.signin = function(username, password) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	//@ENDIF
+	
+	//@IFDEF PHONEGAP
+	ifGlobals.username = username;
+	ifGlobals.password = password;
+	$http.post('/api/user/login-basic', data, {server: true})
+		.success(function(data) {
+			userManager.loginStatus = true;
+			ifGlobals.loginStatus = true;
+			
+			deferred.resolve(data);
+		})
+		.error(function(data, status, headers, config) {
+			console.error(data, status, headers, config);
+			deferred.reject(data); 
+		})
+	//@ENDIF
 	
 	return deferred.promise;
 }
