@@ -29,8 +29,8 @@ module.exports = function(app, passport, landmarkSchema) {
 		// route to test if the user is logged in or not 
 		app.get('/api/user/loggedin', function(req, res) { 
 
-			console.log('--------- /API/USER/LOGGEDIN -------------');
-			console.log(req);
+			// console.log('--------- /API/USER/LOGGEDIN -------------');
+			// console.log(req);
 
 			res.send(req.isAuthenticated() ? req.user : 500); 
 		}); 
@@ -68,8 +68,8 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.post('/api/user/login', passport.authenticate('local-login', {
 
 		}), function(req,res){
-			console.log('--------- /API/USER/LOGIN -------------');
-			console.log(req);
+			// console.log('--------- /API/USER/LOGIN -------------');
+			// console.log(req);
 			res.send(req.user);
 		});
 

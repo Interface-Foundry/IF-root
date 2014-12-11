@@ -106,8 +106,8 @@ var express = require('express'),
     // passport to express requires
     app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
     app.use(passport.initialize());
-    app.use(passport.session()); // persistent login sessions
-    app.use(flash()); // use connect-flash for flash messages stored in session
+    app.use(passport.session({cookie: { maxAge : 3600000 }})); // persistent login sessions
+    //app.use(flash()); // use connect-flash for flash messages stored in session
 
 //===================//
 
@@ -318,8 +318,8 @@ var fn = function (req, res) {
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
       
-    console.log('--------- /API/USER/PROFILE -------------');
-    console.log(req);
+    //console.log('--------- /API/USER/PROFILE -------------');
+    //console.log(req);
 
   var qw = {
         'world':true,
@@ -466,7 +466,6 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         var fstream;
         req.pipe(req.busboy);
 
-        console.log(req.headers['content-length']);
 
 
         req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
@@ -2293,8 +2292,8 @@ app.all('/*', function(req, res) {
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
 
-    console.log('--------- ISLOGGEDIN() -------------');
-    console.log(req);
+    // console.log('--------- ISLOGGEDIN() -------------');
+    // console.log(req);
 
     if (!req.isAuthenticated()){ 
         res.send(401);  //send unauthorized 
