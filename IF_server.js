@@ -328,7 +328,7 @@ app.get('/api/user/loggedin', function(req, res) {
 
 
 // PROFILE SECTION =========================
-app.get('/api/user/profile', isLoggedIn, function(req, res) {
+app.get('/api/user/profile', function(req, res) {
 
   // console.log(req);
 
@@ -354,6 +354,8 @@ function isLoggedIn(req, res, next) {
 
     // console.log('--------- ISLOGGEDIN() -------------');
     // console.log(req);
+
+    console.log(req.sessionStore);
 
     if (!req.isAuthenticated()){ 
         res.sendStatus(401);  //send unauthorized 
