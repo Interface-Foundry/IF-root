@@ -37,16 +37,55 @@ module.exports = function(app, passport, landmarkSchema) {
 		}); 
 
 		// process the login form
-		app.post('/api/user/login', passport.authenticate('local-login', {
-			successRedirect: '/',
-			failureRedirect: '/'}),
-		function(req,res){
+		// app.post('/api/user/login', passport.authenticate('local-login', {
+		// 	successRedirect: '/',
+		// 	failureRedirect: '/'}),
+		// function(req,res){
 			
+		// 	console.log('--------- /API/USER/LOGIN -------------');
+		// 	console.log(req.cookies);
+		// 	console.log(req.user);
+		// });
+
+
+
+		// app.post('/api/user/login', function(req, res, next) {
+		//  passport.authenticate('local-login', function(err, user, info) {
+		//    if (err) { return next(err); }
+		//    // if (!user) { return res.send(401); }
+		//    // req.logIn(user, function(err) {
+		//    //   if (err) { return next(err); }
+		//    //   return res.send(user);
+		//    // });
+		// 	 else {
+		// 	 	res.send(req.user);
+		// 	 }
+		   
+		//  })(req, res, next);
+		// });
+
+
+		// process the signup form
+		app.post('/api/user/login', passport.authenticate('local-login', {
+
+		}), function(req,res){
 			console.log('--------- /API/USER/LOGIN -------------');
 			console.log(req.cookies);
 			console.log(req.user);
+			res.send(req.user);
 		});
 
+
+
+
+		// app.post('/api/user/login', 
+		//   passport.authenticate('local-login', { }),
+		//   function(req, res) {
+		// 	    console.log('--------- /API/USER/LOGIN -------------');
+		// 		console.log(req.cookies);
+		// 		console.log(req.user);
+		// 		res.send(req.user);
+		//   });
 
 		// app.post('/api/user/login', function(req, res, next) {
 		//  passport.authenticate('local-login', function(err, user, info) {
