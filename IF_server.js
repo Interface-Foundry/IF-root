@@ -316,6 +316,12 @@ var fn = function (req, res) {
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
+
+      
+    console.log('--------- /API/USER/PROFILE -------------');
+    console.log(req.cookies);
+    console.log(req.user);
+
   var qw = {
         'world':true,
         'permissions.ownerID': req.user._id
@@ -2287,6 +2293,10 @@ app.all('/*', function(req, res) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
+
+    console.log('--------- ISLOGGEDIN() -------------');
+    console.log(req.cookies);
+    console.log(req.user);
 
     if (!req.isAuthenticated()){ 
         res.send(401);  //send unauthorized 

@@ -29,6 +29,10 @@ module.exports = function(app, passport, landmarkSchema) {
 		// route to test if the user is logged in or not 
 		app.get('/api/user/loggedin', function(req, res) { 
 
+			console.log('--------- /API/USER/LOGGEDIN -------------');
+			console.log(req.cookies);
+			console.log(req.user);
+
 			res.send(req.isAuthenticated() ? req.user : 500); 
 		}); 
 
@@ -38,6 +42,9 @@ module.exports = function(app, passport, landmarkSchema) {
 			failureRedirect: '/'}),
 		function(req,res){
 			
+			console.log('--------- /API/USER/LOGIN -------------');
+			console.log(req.cookies);
+			console.log(req.user);
 		});
 
 
