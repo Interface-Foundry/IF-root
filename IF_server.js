@@ -331,8 +331,16 @@ app.get('/api/user/loggedin', function(req, res) {
 app.get('/api/user/profile', function(req, res) {
 
   // console.log(req);
-
+  console.log('---------- before ---------------');
   console.log(req.sessionStore);
+
+  req.session.reload(function(err) {
+    // session updated
+    
+    console.log('---------- after ---------------');
+
+    console.log(req.sessionStore);
+  })
 
   // console.log(req.sessionStore);
 
