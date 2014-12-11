@@ -30,8 +30,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.get('/api/user/loggedin', function(req, res) { 
 
 			console.log('--------- /API/USER/LOGGEDIN -------------');
-			console.log(req.cookies);
-			console.log(req.user);
+			console.log(req);
 
 			res.send(req.isAuthenticated() ? req.user : 500); 
 		}); 
@@ -70,8 +69,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 		}), function(req,res){
 			console.log('--------- /API/USER/LOGIN -------------');
-			console.log(req.cookies);
-			console.log(req.user);
+			console.log(req);
 			res.send(req.user);
 		});
 

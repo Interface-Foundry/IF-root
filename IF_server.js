@@ -319,8 +319,7 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
       
     console.log('--------- /API/USER/PROFILE -------------');
-    console.log(req.cookies);
-    console.log(req.user);
+    console.log(req);
 
   var qw = {
         'world':true,
@@ -2295,8 +2294,7 @@ app.all('/*', function(req, res) {
 function isLoggedIn(req, res, next) {
 
     console.log('--------- ISLOGGEDIN() -------------');
-    console.log(req.cookies);
-    console.log(req.user);
+    console.log(req);
 
     if (!req.isAuthenticated()){ 
         res.send(401);  //send unauthorized 
