@@ -88,6 +88,7 @@ var express = require('express'),
     var io = require('socket.io').listen(server); // Hook Socket.io into Express
 
 
+    app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
 
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
@@ -111,7 +112,6 @@ var express = require('express'),
     app.use(passport.session()); // persistent login sessions
     //app.use(flash()); // use connect-flash for flash messages stored in session
 
-    app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
 
 //===================//
 
@@ -808,7 +808,7 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
             else {
                 console.log(landmark);
                 console.log('success');
-                res.send(200,landmark);
+                res.status(200).send(landmark);
             }
         });
       }
@@ -970,11 +970,11 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
       User.findById(req.user._id, function(err, us) {
       if (err){
         console.log(err);
-        res.send(200, 'there was an error');
+        res.status(200).send('there was an error');
       }
       else if(!us){
         console.log('user not found');
-        res.send(200, 'user not found');
+        res.status(200).send('user not found');
       }
       else {  
 
@@ -1094,10 +1094,10 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
           us.save(function(err){
             if (err){
               console.log(err);
-              res.send(200, 'there was an error saving user info');
+              res.status(200).send('there was an error saving user info');
             }
             else {
-              res.send(200, 'user updated'); 
+              res.status(200).send('user updated'); 
             }
           });  
         }
@@ -1643,12 +1643,12 @@ app.get('/api/:collection/:id', function(req, res) {
                     console.log(err);
                   }
                   if(style) {
-                      console.log(style);
+                      //console.log(style);
                       var resWorldStyle = {
                           "world" : data,
                           "style" : style
                       };
-                      res.send(200, resWorldStyle);
+                      res.status(200).send(resWorldStyle);
                   }
               }); 
 
@@ -1965,7 +1965,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         else {
                             console.log(landmark);
                             console.log('success');
-                            res.send(200,[landmark]);
+                            res.status(200).send([landmark]);
 
                             //update serverwidget object for world
                             if (req.body.world_id && req.body.hashtag){
@@ -2092,13 +2092,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                                 saveProject(landmark._id, styleRes, req.user._id, function(projectRes){
                                     
                                 var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
-                                    res.send(200,idArray);
+                                    res.status(200).send(idArray);
                                 });
                             }
 
                             //landmark created
                             else {
-                                res.send(200,[{"_id":landmark._id}]);
+                                res.status(200).send([{"_id":landmark._id}]);
                             }
                         }
                     });
@@ -2181,7 +2181,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         console.log('error');
                     }
                     else {
-                        console.log(style);
+                        //console.log(style);
                         console.log('success');
                     }
                 });
@@ -2238,11 +2238,11 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     console.log('error');
                 }
                 else {
-                    console.log(style);
+                    //console.log(style);
                     console.log('success');
 
                     if(res){
-                      res.send(200, [style]);
+                      res.status(200).send([style]);
                     }
                     
                     //if parameters from world passed to style, then add to serverwidget object
