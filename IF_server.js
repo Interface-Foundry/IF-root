@@ -44,6 +44,8 @@ var cookieParser = require('cookie-parser');
 var session      = require('express-session');
 var bodyParser = require('body-parser');
 
+var methodOverride = require('method-override');
+
 //--- BUBBLE ROUTING ----//
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 
@@ -93,22 +95,22 @@ var express = require('express'),
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
     app.use(morgan('dev')); // log every request to the console
-    app.use(cookieParser('rachelwantstomakecakebutneedseggs')); // read cookies (needed for auth)
+    app.use(cookieParser()); // read cookies (needed for auth)
 
     app.use(bodyParser.urlencoded({
-      extended: true
+      extended: false
     })); // get information from html forms
 
     app.use(bodyParser.json({
       extended: true
     })); // get information from html forms
 
+    app.use(methodOverride('X-HTTP-Method-Override'));
+
     // passport to express requires
    // app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
 
-    app.use(session({secret: 'rachelwantstomakecakebutneedseggs', 
-                 saveUninitialized: true,
-                 resave: true}));
+    app.use(session({secret: 'rachelwantstomakecakebutneedseggs', saveUninitialized: true, resave: true }));
 
     app.use(passport.initialize());
     app.use(passport.session()); // persistent login sessions
