@@ -69,10 +69,6 @@ http.globalAgent.maxSockets = 100;
 var util  = require('util');
 //----//
 
-
-// passport config
-require('./components/IF_auth/passport')(passport); 
-
 //socket.io init
 var socket = require('./components/IF_chat/socket.js');
 
@@ -97,7 +93,7 @@ var express = require('express'),
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
     app.use(morgan('dev')); // log every request to the console
-    app.use(cookieParser('rachelwantstomakecakebutneedseggs' )); // read cookies (needed for auth)
+    app.use(cookieParser('rachelwantstomakecakebutneedseggs')); // read cookies (needed for auth)
 
     app.use(bodyParser.urlencoded({
       extended: true
@@ -114,6 +110,10 @@ var express = require('express'),
     app.use(flash()); // use connect-flash for flash messages stored in session
 
 //===================//
+
+
+// passport config
+require('./components/IF_auth/passport')(passport); 
 
 //-------------------------------------//
 //---- Sending Feedback via Email -----//
