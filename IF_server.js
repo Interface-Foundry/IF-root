@@ -44,8 +44,6 @@ var cookieParser = require('cookie-parser');
 var session      = require('express-session');
 var bodyParser = require('body-parser');
 
-var methodOverride = require('method-override');
-
 //--- BUBBLE ROUTING ----//
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 
@@ -95,17 +93,15 @@ var express = require('express'),
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
     app.use(morgan('dev')); // log every request to the console
-    app.use(cookieParser()); // read cookies (needed for auth)
+    app.use(cookieParser('rachelwantstomakecakebutneedseggs')); // read cookies (needed for auth)
 
     app.use(bodyParser.urlencoded({
-      extended: false
+      extended: true
     })); // get information from html forms
 
     app.use(bodyParser.json({
       extended: true
     })); // get information from html forms
-
-    app.use(methodOverride('X-HTTP-Method-Override'));
 
     // passport to express requires
    // app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
@@ -318,24 +314,22 @@ var fn = function (req, res) {
 /* Routes */
 
 
-    // route to test if the user is logged in or not 
-    app.get('/api/user/loggedin', function(req, res) { 
+// route to test if the user is logged in or not 
+app.get('/api/user/loggedin', function(req, res) { 
 
-      if (req.isAuthenticated()){
-        res.send(req.user);
-      }
-      else {
-        res.sendStatus(500);
-      }
-    }); 
+  if (req.isAuthenticated()){
+    res.send(req.user);
+  }
+  else {
+    res.sendStatus(500);
+  }
+}); 
 
 
 // PROFILE SECTION =========================
-app.get('/api/user/profile', isLoggedIn, function(req, res) {
+app.get('/api/user/profile', function(req, res) {
 
-      
-    //console.log('--------- /API/USER/PROFILE -------------');
-    //console.log(req);
+  console.log(req);
 
   var qw = {
         'world':true,
@@ -345,6 +339,23 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
          res.send(lm);
       });
 });
+
+
+
+
+// route middleware to ensure user is logged in
+function isLoggedIn(req, res, next) {
+
+    // console.log('--------- ISLOGGEDIN() -------------');
+    // console.log(req);
+
+    if (!req.isAuthenticated()){ 
+        res.sendStatus(401);  //send unauthorized 
+    }
+    else{ 
+        return next();
+    }
+}
 
 
 // Query
@@ -2305,19 +2316,6 @@ app.all('/*', function(req, res) {
 
 
 
-// route middleware to ensure user is logged in
-function isLoggedIn(req, res, next) {
-
-    // console.log('--------- ISLOGGEDIN() -------------');
-    // console.log(req);
-
-    if (!req.isAuthenticated()){ 
-        res.sendStatus(401);  //send unauthorized 
-    }
-    else{ 
-        return next();
-    }
-}
 
 //3 Hour checkup on size of image directories, emails if over 10gb
 //from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
