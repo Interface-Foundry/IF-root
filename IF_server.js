@@ -87,7 +87,6 @@ var express = require('express'),
     var server = http.createServer(app);
     var io = require('socket.io').listen(server); // Hook Socket.io into Express
 
-    app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
 
 
     //===== PASSPORT TO EXPRESS=====//
@@ -111,6 +110,8 @@ var express = require('express'),
     app.use(passport.initialize());
     app.use(passport.session()); // persistent login sessions
     //app.use(flash()); // use connect-flash for flash messages stored in session
+
+    app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
 
 //===================//
 
@@ -327,9 +328,14 @@ app.get('/api/user/loggedin', function(req, res) {
 
 
 // PROFILE SECTION =========================
-app.get('/api/user/profile', function(req, res) {
+app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
-  console.log(req);
+  // console.log(req);
+
+  console.log(req.sessionStore);
+
+  // console.log(req.sessionStore);
+
 
   var qw = {
         'world':true,
