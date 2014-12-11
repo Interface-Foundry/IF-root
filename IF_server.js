@@ -316,16 +316,7 @@ var fn = function (req, res) {
 
 // Query
 
-// PROFILE SECTION =========================
-app.get('/api/user/profile', isLoggedIn, function(req, res) {
-  var qw = {
-        'world':true,
-        'permissions.ownerID': req.user._id
-      };   
-      landmarkSchema.find(qw, function(err, lm) {
-         res.send(lm);
-      });
-});
+
 
 
 // Search
@@ -1253,22 +1244,6 @@ function uniqueProfileID(input, callback){
     });
 }
 
-
-
-
-// route middleware to ensure user is logged in
-function isLoggedIn(req, res, next) {
-    //console.log(req.user);
-    // console.log(req.cookies);
-    // console.log(req.user);
-
-    if (!req.isAuthenticated()){ 
-        res.send(401);  //send unauthorized 
-    }
-    else{ 
-        return next();
-    }
-}
 
 
 
@@ -2294,6 +2269,32 @@ app.all('/*', function(req, res) {
 
 });
 
+
+// PROFILE SECTION =========================
+app.get('/api/user/profile', isLoggedIn, function(req, res) {
+  var qw = {
+        'world':true,
+        'permissions.ownerID': req.user._id
+      };   
+      landmarkSchema.find(qw, function(err, lm) {
+         res.send(lm);
+      });
+});
+
+
+// route middleware to ensure user is logged in
+function isLoggedIn(req, res, next) {
+    //console.log(req.user);
+    // console.log(req.cookies);
+    // console.log(req.user);
+
+    if (!req.isAuthenticated()){ 
+        res.send(401);  //send unauthorized 
+    }
+    else{ 
+        return next();
+    }
+}
 
 //3 Hour checkup on size of image directories, emails if over 10gb
 //from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
