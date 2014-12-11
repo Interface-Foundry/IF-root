@@ -18,11 +18,21 @@ nav {
 .subnav-fixed {
 	.subnav(); 
 	position: absolute;
+	/* @ifdef WEB */
 	margin-top: 40px;
+	/* @endif */
+	/* @ifdef */
+	margin-top: 56px;
+	/* @endif */
 }
 
 .subnavfix {
-	
+	/* @ifdef WEB */
+	padding-top: 96px !important;
+	/* @endif */
+	/* @ifdef PHONEGAP */
+	padding-top: 112px !important;
+	/* @endif */ 
 }
 
 .subnav-header {
@@ -113,7 +123,6 @@ span.subnav-back-chevron {
 }
 
 .surface.profile-surface {
-	padding-top: 96px;
 }
 
 .surface.landmark-surface {

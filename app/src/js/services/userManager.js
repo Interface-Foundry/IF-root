@@ -100,9 +100,7 @@ userManager.checkLogin = function(){
 		  deferred.reject(0);
 	  });
 	  
-	  userManager.getDisplayName().then(function(displayName) {
-	  	$rootScope.user.displayName = displayName;
-	  });
+	  userManager.getDisplayName();
 	  
       return deferred.promise;
 };

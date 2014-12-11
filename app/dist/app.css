@@ -2360,6 +2360,9 @@ nav {
   position: absolute;
   margin-top: 40px;
 }
+.subnavfix {
+  padding-top: 96px !important;
+}
 .subnav-header {
   display: block;
   font-size: 20px;
@@ -2435,9 +2438,6 @@ span.subnav-back-chevron {
 .shelf-surface {
   position: absolute;
   top: 0px;
-}
-.surface.profile-surface {
-  padding-top: 96px;
 }
 .surface.landmark-surface {
   padding: 0;

@@ -64,6 +64,7 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <access origin="https://bubbl.li" />
     <preference name="UIWebViewBounce" value="false" />
     <preference name="EnableLocation" value="true" />
     <preference name="DisallowOverscroll" value="true" />

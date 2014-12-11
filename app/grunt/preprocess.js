@@ -20,7 +20,7 @@ module.exports = {
 		'dist/app.css': 'dist/app.css',
 		'dist/app.js': 'dist/app.js',
 		'dist/lib.js': 'dist/lib.js',
-		'dist/index.html': 'src/index.html',
+		'dist/index.html': 'dist/index.html',
 		'dist/templates/authDialog.html': 'dist/templates/authDialog.html'
 		},
 		options: {

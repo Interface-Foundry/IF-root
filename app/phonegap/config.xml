@@ -9,6 +9,7 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <access origin="https://bubbl.li" />
     
     <feature name="EstimoteBeacons">
     	<param name="ios-package" value="EstimoteBeacons" />

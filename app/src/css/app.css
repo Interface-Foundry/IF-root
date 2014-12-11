@@ -41,7 +41,7 @@ body {
 .navfix {
 	padding-top: 40px;
 	/* @IFDEF PHONEGAP */
-	padding-top: 55px;
+	padding-top: 56px;
 	/* @ENDIF */
 }
 
@@ -64,8 +64,8 @@ nav.main-nav {
 	
 	-webkit-transform: translate3d(0, 0, 0);
 /* @IFDEF PHONEGAP */
-	height: 55px;
-	padding-top: 15px;
+	height: 56px;
+	padding-top: 16px;
 /* @ENDIF */
 }
 

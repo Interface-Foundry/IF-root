@@ -4729,6 +4729,7 @@ var checkLoggedin = function(userManager) {
 	    	}	
     	}
     });
+    
 	//================================================
 
 
@@ -17537,9 +17538,7 @@ userManager.checkLogin = function(){
 		  deferred.reject(0);
 	  });
 	  
-	  userManager.getDisplayName().then(function(displayName) {
-	  	$rootScope.user.displayName = displayName;
-	  });
+	  userManager.getDisplayName();
 	  
       return deferred.promise;
 };
@@ -20906,7 +20905,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 }]); 
 
 
-app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', 'socket', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping, socket) {
+app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 	
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
@@ -21014,11 +21013,6 @@ $scope.$watchCollection('user', function (newCol, oldCol) {
 	}
 });
 
-
-  socket.on('uploadstatus', function (data) {
-    console.log(data);
-  });
-
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -21042,7 +21036,7 @@ if ($routeParams.incoming == 'meetup'){
 	}).
 	error(function(data) {
 		angular.extend($rootScope, {loading: false});
-		$http.get('/api/user/profile').success(function(user){
+		$http.get('/api/user/profile', {server: true}).success(function(user){
 			$scope.worlds = user;	
 			$scope.waitingforMeetup = false;	
 		});
@@ -21173,7 +21167,7 @@ function checkProfileUpdates(){
 	$scope.stop = $interval(checkProfile, 2000);
 
 	function checkProfile(){
-		$http.get('/api/user/profile').success(function(user){
+		$http.get('/api/user/profile', {server: true}).success(function(user){
 		$scope.groups = userGrouping.groupByTime(user);
 		console.log($scope.groups);
 		
