@@ -32,7 +32,14 @@ module.exports = function(app, passport, landmarkSchema) {
 			// console.log('--------- /API/USER/LOGGEDIN -------------');
 			// console.log(req);
 
-			res.send(req.isAuthenticated() ? req.user : 500); 
+			if (req.isAuthenticated()){
+				res.send(req.user);
+			}
+			else {
+				res.sendStatus(500);
+			}
+
+			//res.sendStatus(req.isAuthenticated() ? req.user : 500); 
 		}); 
 
 		// process the login form

@@ -104,9 +104,14 @@ var express = require('express'),
     })); // get information from html forms
 
     // passport to express requires
-    app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
+   // app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
+
+    app.use(session({secret: 'rachelwantstomakecakebutneedseggs', 
+                 saveUninitialized: true,
+                 resave: true}));
+
     app.use(passport.initialize());
-    app.use(passport.session({cookie: { maxAge : 3600000 }})); // persistent login sessions
+    app.use(passport.session()); // persistent login sessions
     //app.use(flash()); // use connect-flash for flash messages stored in session
 
 //===================//
@@ -2263,7 +2268,7 @@ app.all('/*', function(req, res) {
 
   //if file path, then add file to end
   if (req.url.indexOf('.') != -1 ){
-    res.sendfile(req.url, { root: __dirname + '/app/dist' },  function (err) {
+    res.sendFile(req.url, { root: __dirname + '/app/dist' },  function (err) {
 	   if (err) {
 	      	console.log(err);
 	      	res.status(err.status).end();
@@ -2280,7 +2285,7 @@ app.all('/*', function(req, res) {
   }*/
 
   else {
-    res.sendfile('index.html', { root: __dirname + '/app/dist' });
+    res.sendFile('index.html', { root: __dirname + '/app/dist' });
   }
 
 });
@@ -2296,7 +2301,7 @@ function isLoggedIn(req, res, next) {
     // console.log(req);
 
     if (!req.isAuthenticated()){ 
-        res.send(401);  //send unauthorized 
+        res.sendStatus(401);  //send unauthorized 
     }
     else{ 
         return next();
