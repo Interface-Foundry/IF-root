@@ -120,6 +120,19 @@ var express = require('express'),
 // passport config
 require('./components/IF_auth/passport')(passport); 
 
+//LIMITING UPLOADS TO 10MB 
+app.use(connectBusboy({
+  limits: {
+    fileSize: 1024 * 1024 * 10 // 10MB
+  }
+}));
+
+// Socket.io Communication
+io.sockets.on('connection', socket);
+
+// passport routes ======================================================================
+require('./components/IF_auth/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
+
 //-------------------------------------//
 //---- Sending Feedback via Email -----//
 //-------------------------------------//
@@ -270,23 +283,7 @@ app.post('/reset/:token', function(req, res) {
 //========  END MAIL RESET  ==========//
 //====================================//
 
-//LIMITING UPLOADS TO 10MB 
-app.use(connectBusboy({
-  limits: {
-    fileSize: 1024 * 1024 * 10 // 10MB
-  }
-}));
 
-// Socket.io Communication
-io.sockets.on('connection', socket);
-
-// io.set('transports', [                     // enable all transports (optional if you want flashsocket)
-//     'websocket'
-//   , 'jsonp-polling'
-// ]);
-
-// passport routes ======================================================================
-require('./components/IF_auth/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 
 /* Helpers */
 
@@ -317,6 +314,18 @@ var fn = function (req, res) {
 };
 
 /* Routes */
+
+
+    // route to test if the user is logged in or not 
+    app.get('/api/user/loggedin', function(req, res) { 
+
+      if (req.isAuthenticated()){
+        res.send(req.user);
+      }
+      else {
+        res.sendStatus(500);
+      }
+    }); 
 
 
 // PROFILE SECTION =========================
