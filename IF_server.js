@@ -47,6 +47,7 @@ var AWS = require('aws-sdk');
 
 //--- BUBBLE ROUTING ----//
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
+var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
 
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
@@ -1295,8 +1296,12 @@ function uniqueProfileID(input, callback){
     });
 }
 
+//Route that picks a random bubble nearby
+app.get('/api/find/random', function(req, res){
 
+  random_bubble(req.query.userCoordinate[0], req.query.userCoordinate[1], req.query.localTime, res);
 
+});
 
 
 //queries
