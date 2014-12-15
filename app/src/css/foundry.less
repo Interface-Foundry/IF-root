@@ -1,5 +1,6 @@
 @import 'aperture.less';
 @import 'drawer.less';
+@import '../components/home/home.less';
 
 nav {
 	pointer-events: auto;
@@ -335,6 +336,58 @@ span.subnav-back-chevron {
 	background: #ccc;
 }
 
+.bubble-list-item-go {
+	width: 80px;
+	height: 100%;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	background: #2196f3;
+	color: #FFF;
+	line-height: 72px;
+	text-align: center;
+	z-index: 10;
+	
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+.bubble-list-item-go.ng-hide-remove {
+	-webkit-transform: translate3d(100%,0,0);
+	transform: translate3d(100%,0,0);
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+
+}
+
+.bubble-list-item-go.ng-hide-remove-active {
+	-webkit-transform: translate3d(0%,0,0);
+	transform: translate3d(0%,0,0);
+}
+
+.bubble-list-item-go.ng-hide-add {
+	-webkit-transform: translate3d(0%,0,0);
+	transform: translate3d(0%,0,0);
+		transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+
+}
+
+.bubble-list-item-go.ng-hide-add-active {
+	-webkit-transform: translate3d(100%,0,0);
+	transform: translate3d(100%,0,0);
+}
+
+
+.bubble-list-item-link {
+	display: block;
+	width: 100%;
+	height: 72px;
+}
+
+.bubble-list-item-time {
+	color: #CCC;
+	font-size: 75%;
+}
+
+
 .bubble-list-item.selected {
 	background: #2962ff;
 	color: #FFF;
@@ -466,6 +519,13 @@ a.bubble-inspector-title {
 	.bubble-inspector-btn;
 	background: #F44336;	
 	width: 100%;
+}
+
+.bubble-inspector-btn-walkthrough {
+	.bubble-inspector-btn;
+	width: 100%;
+	background: #2196f3;
+	margin-top: 4px;
 }
 
 .marble-label {
@@ -1005,45 +1065,6 @@ margin-bottom: 4px;
 	
 }
 
-///HOME
-
-.home-header {
-	position: relative;
-	height: 288px;
-	width: 100%;
-	background: center top / cover url('img/hero.jpg');
-}
-
-.home-header-bar {
-	position: absolute;
-	bottom: 0px;
-	left: 0px;
-	width: 100%;
-	height: 56px;
-	padding: 8px;
-	background-color: rgba(62, 82, 181, 0.96);
-	color: #FFF;
-}
-
-.home-header-bar > h4, .home-header-bar > div {
-	margin: 0;
-	@media only screen and (min-width: 600px) {
-		width: 600px;
-		margin: 0px auto;
-	}
-}
-
-.home-header-bar > h4 {
-	font-size: 16px;
-	@media only screen and (min-width: 480px) {
-		font-size: 18px;
-	}
-}
-
-.home-header-bar:hover, .home-header-bar:active {
-	color: #FFF;
-}
-
 ///COLORS
 .indigo700 {
 	color: #303f9f;
@@ -1056,7 +1077,6 @@ margin-bottom: 4px;
 .blue500-bg {
 	background: #2196f3;
 }
-
 
 ///LOADING
 

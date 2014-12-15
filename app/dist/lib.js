@@ -7758,7 +7758,7 @@ L.Popup = L.Layer.extend({
 		// autoPanPaddingTopLeft: <Point>,
 		// autoPanPaddingBottomRight: <Point>,
 
-		closeButton: true,
+		closeButton: false,
 		// keepInView: false,
 		// className: '',
 		zoomAnimation: true

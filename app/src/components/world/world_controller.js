@@ -91,9 +91,9 @@ $scope.loadWorld = function(data) {
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17.5, 60],
-					popupAnchor:[0,-30]
+					iconSize: [35, 67], 
+					iconAnchor: [17, 67],
+					popupAnchor:[0, -40]
 				},
 				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
@@ -332,7 +332,9 @@ function initLandmarks(landmarks) {
               iconUrl: 'img/marker/bubble-marker-50.png',
               shadowUrl: '',
               iconSize: [35, 67],
-              iconAnchor: [13, 10]
+              iconAnchor: [17, 67],
+              popupAnchor: [0, -40]
+              
             },
 			_id: landmark._id
 		});

@@ -4716,7 +4716,7 @@ var checkLoggedin = function(userManager) {
     	return {
     		'request': function(request) {
 	    			if (request.server) {
-		    			request.url = 'http://10.0.1.3:2997' + request.url;
+		    			request.url = 'https://bubbl.li' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 						request.headers['Authorization'] = ifGlobals.getBasicHeader();
 						console.log(request);
@@ -16817,7 +16817,6 @@ var ifGlobals = {
 ifGlobals.getBasicHeader = function() {
 	var string = ifGlobals.username+":"+ifGlobals.password;
 	var encodedString = window.btoa(string);
-	console.log(string, encodedString);
 	return "Basic "+encodedString;
 }
 
@@ -16906,6 +16905,21 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
 			console.log(mapManager.center);
 			mapManager.refresh();
+	});
+}
+
+mapManager.setCenterWithFixedAperture = function(latlng, z, xOffset, yOffset) {
+	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), targetPt, targetLatLng, dX, dY;
+
+	if (xOffset) { dX = w/2 - xOffset/2;} else {dX = 0}
+	if (yOffset) { dY = h/2 - yOffset/2 - 30;} else {dY = -30}
+
+	leafletData.getMap().then(function(map) {
+		targetPt = map.project([latlng[1], latlng[0]], z).add([dX, dY]);
+		targetLatLng = map.unproject(targetPt, z);
+		angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+		mapManager.refresh();
 	});
 }
 
@@ -20615,15 +20629,81 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 }]);
 
-app.controller('HomeController', ['$scope', 'worldTree', 'styleManager', function ($scope, worldTree, styleManager) {
-	styleManager.resetNavBG();
-	
-	worldTree.getNearby().then(function(data) {
-		$scope.$evalAsync(function($scope) {
-			$scope.homeBubbles = data['150m'];
-			$scope.nearbyBubbles = data['2.5km'];
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
+var map = mapManager, style = styleManager;
+
+style.resetNavBG();
+
+$scope.loadState = 'loading';
+$scope.kinds = ifGlobals.kinds;
+
+$scope.select = function(bubble) {
+	if ($scope.selected == bubble) {
+		$location.path('w/'+bubble.id);
+	} else {
+	$scope.selected = bubble;
+	$scope.map.on = true;
+	//map.setMarkerFocus(bubble._id);
+	map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
+	}
+}
+
+function initMarkers() {
+	var bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
+	console.log(bubbles);
+	bubbles.forEach(function(bubble, index, bubbles) {
+		if (bubble) {
+		map.addMarker(bubble._id, {
+			lat:bubble.loc.coordinates[1],
+			lng:bubble.loc.coordinates[0],
+			draggable: false,
+			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
+			enable: 'leafletDirectiveMarker.click',
+			icon: {
+				iconUrl: 'img/marker/bubble-marker-50.png',
+				shadowUrl: '',
+				iconSize: [35, 67],
+				iconAnchor: [17, 67],
+				popupAnchor: [0, -30]
+			},
+			_id: bubble._id	
 		});
+		}
 	});
+	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
+}
+
+//LISTENERS//
+
+$scope.$watch('map.on', function(newVal, oldVal) {
+	switch (newVal) {
+		case true:
+			style.navBG_color = 'rgba(245, 67, 54, 0.96)';
+		break;
+		case false:
+			style.resetNavBG();
+		break;
+	}
+})
+
+$rootScope.$on('leafletDirectiveMarker.click', function(event) {
+	console.log(event);
+});
+
+//INIT
+
+worldTree.getNearby().then(function(data) {
+	$scope.$evalAsync(function($scope) {
+		$scope.homeBubbles = data['150m'];
+		$scope.nearbyBubbles = data['2.5km'];
+		$scope.loadState = 'success';
+		initMarkers();
+	});
+}, function(reason) {
+	//failure
+	$scope.loadState = 'failure';
+});
+
 }]);
 app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager) {
 console.log('init controller-indexIF');
@@ -21843,9 +21923,9 @@ $scope.loadWorld = function(data) {
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17.5, 60],
-					popupAnchor:[0,-30]
+					iconSize: [35, 67], 
+					iconAnchor: [17, 67],
+					popupAnchor:[0, -40]
 				},
 				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
@@ -22084,7 +22164,9 @@ function initLandmarks(landmarks) {
               iconUrl: 'img/marker/bubble-marker-50.png',
               shadowUrl: '',
               iconSize: [35, 67],
-              iconAnchor: [13, 10]
+              iconAnchor: [17, 67],
+              popupAnchor: [0, -40]
+              
             },
 			_id: landmark._id
 		});

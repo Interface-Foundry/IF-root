@@ -1,41 +1,36 @@
-<div class="wrap">
+<div class="home" ng-class="{'mapOn': map.on}">
 <header class="home-header">
+	<div class="home-background"></div>
 	<a if-href="#welcome" class="home-header-bar">
-	<h4>Explore your world in a whole new way</h4>
-	<div class="lightblue500"> Learn More</div>
-	</a>
-</header>
-
-<div class="surface">
-
-<!--
-<div class="marble-page">
-	<header class="marble-page-header">
-	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-	You're At
-	</header>
-<article class="marble-page-content">
-	<a if-href="#w/{{homeBubble.id}}" class="homeBubble"> 
-		<span ng-if="!homeBubble">Loading Nearest Bubble...</span>
-		<div class="media">
-		<img if-src="{{homeBubble.avatar || 'img/tidepools/default.png'}}" class="media-object" ng-cloak>
-		<div class="media-body">
-			<h4>{{homeBubble.name}}</h4>
+		<div class="home-header-content">
+			<h4>Explore your world in a whole new way</h4>
+			<div class="lightblue500"> Learn More</div>
 		</div>
 	</a>
-</article>
-	<a if-href="#w/{{::homeBubble.id}}" class="marble-btn bottom-right blue500-bg">Visit</a>
-</div>
--->
+	<div class="home-nearby-bar">
+		<div class="home-header-content">
+			<h4>Nearby</h4>
+		</div>
+	</div>
+	<div class="home-header-position">
+		<div class="home-header-content">
+			<button class="home-map-button" ng-click="map.on=!map.on"></button>
+		</div>
+	</div>
+</header>
 
-<div class="marble-page">
+
+<div class="wrap">
+	<div class="surface">
+		<div class="marble-page">
 	<header class="marble-page-header">
 	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-	You're At
+	Nearby
 	</header>
 	
-	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-if="!homeBubbles" class="text-center">
+	<ul class="nearby-list" 
+			style="padding-top:0px;">
+		<li ng-if="loadState=='loading'" class="text-center">
 		<div class="loading-spinner">
 			<div class="lspin1"></div>
 			<div class="lspin2"></div>
@@ -43,51 +38,25 @@
 		<span class="lightblue500">Loading...</span>
 		</li>
 		<li ng-repeat="bubble in homeBubbles track by bubble._id" 
-			ng-if="homeBubbles.length>0"
-			class="nearby-list-item if-animate">
-			<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
+			ng-if="loadState=='success' && homeBubbles.length>0"
+			ng-click="select(bubble)"
+			class="bubble-list-item if-animate">
+			<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+			<a class="bubble-list-item-link"  href="">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
+			<div class="bubble-list-item-go if-animate" ng-show="selected==bubble">
+				Go
+			</div>
+		</li>
+		<li ng-if="loadState=='success'&& !(homeBubbles.length > 0)" class="text-center"> 
+			No bubbles found. <a if-href="/profile/worlds">Create a new one?</a>
+		</li>
+		<li ng-if="loadState=='failure'" class="text-center">
+			Server connection lost
 		</li>
 	</ul>
-</div>	
-
-
-<div class="marble-page" style="padding-bottom: 56px;">
-	<header class="marble-page-header">
-	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-	Recommended
-	</header>
-<article class="marble-page-content">
-	<a if-href="#w/Creative_Technologies_2014">
-	<div class="media">
-	
-	<img src="img/icons/ct_icon.png" class="media-object">
-	<div class="media-body">
-		<h4>Creative Technologies <br>2014</h4>
-	</div> 
-	</a>
-	<a if-href="#w/Creative_Technologies_2014" class="marble-btn bottom-right blue500-bg">Visit</a>
-</article>
-</div>
-	
-	
-<div class="marble-page">
-	<header class="marble-page-header">
-	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-	Nearby
-	</header>
-	<ul class="nearby-list" style="padding-top:0px;">
-		<li ng-if="!nearbyBubbles" class="text-center">
-					<div class="loading-spinner">
-			<div class="lspin1"></div>
-			<div class="lspin2"></div>
 		</div>
-		<span class="lightblue500">Loading...</span>
-		</li>
-		<li ng-repeat="bubble in nearbyBubbles track by bubble._id"
-			ng-if="nearbyBubbles.length>0"
-			class="nearby-list-item if-animate">
-			<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
-		</li>
-	</ul>
-</div>
+
+	</div>
+
+	</div>
 </div>

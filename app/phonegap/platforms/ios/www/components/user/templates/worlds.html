@@ -43,8 +43,9 @@
 	<div class="bubble-inspector-info">
 		<a class="bubble-inspector-btn" style="float:left;" if-href="#w/{{selected.id}}">View</a>
 		<a class="bubble-inspector-btn" style="float:right;" if-href="#edit/w/{{selected.id}}">Edit</a>
+		<a class="bubble-inspector-btn-walkthrough" if-href="#edit/walkthrough/{{selected._id}}">Walkthrough</a>
 		<div class="bubble-inspector-info-data">
-			<div><label>Views: {{selected.views}}</label></div>
+			<div><label>Views: {{selected.views}}</label>
 			<div><label>Summary</label></div>
 			<p>{{selected.summary || 'No summary'}}</p>
 			<div ng-if="selected.time.start"><label>Starts on {{selected.time.start | date: 'short'}}</label></div>

@@ -84,6 +84,21 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 	});
 }
 
+mapManager.setCenterWithFixedAperture = function(latlng, z, xOffset, yOffset) {
+	var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), targetPt, targetLatLng, dX, dY;
+
+	if (xOffset) { dX = w/2 - xOffset/2;} else {dX = 0}
+	if (yOffset) { dY = h/2 - yOffset/2 - 30;} else {dY = -30}
+
+	leafletData.getMap().then(function(map) {
+		targetPt = map.project([latlng[1], latlng[0]], z).add([dX, dY]);
+		targetLatLng = map.unproject(targetPt, z);
+		angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+		mapManager.refresh();
+	});
+}
+
 mapManager.apertureUpdate = function(state) {
 	if (mapManager._actualCenter && mapManager._z) {
 		mapManager.setCenter(mapManager._actualCenter, mapManager._z, state);
