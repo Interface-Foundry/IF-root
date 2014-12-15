@@ -20686,8 +20686,15 @@ $scope.$watch('map.on', function(newVal, oldVal) {
 	}
 })
 
-$rootScope.$on('leafletDirectiveMarker.click', function(event) {
-	console.log(event);
+$rootScope.$on('leafletDirectiveMarker.click', function(event, args) {
+	var bubble = $scope.bubbles.find(function(element, index, array) {
+		if (element._id==args.markerName) {
+			return true;
+		} else { 
+			return false;
+		}
+	});
+	$scope.select(bubble);
 });
 
 //INIT
@@ -20696,6 +20703,9 @@ worldTree.getNearby().then(function(data) {
 	$scope.$evalAsync(function($scope) {
 		$scope.homeBubbles = data['150m'];
 		$scope.nearbyBubbles = data['2.5km'];
+		
+		$scope.bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
+		
 		$scope.loadState = 'success';
 		initMarkers();
 	});
