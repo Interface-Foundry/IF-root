@@ -22,7 +22,7 @@ nav {
 	/* @ifdef WEB */
 	margin-top: 40px;
 	/* @endif */
-	/* @ifdef */
+	/* @ifdef PHONEGAP */
 	margin-top: 56px;
 	/* @endif */
 }
@@ -1108,3 +1108,38 @@ margin-bottom: 4px;
 }
 
 
+.action-button {
+	position: fixed;
+	width: 56px;
+	height: 56px;
+	border-radius: 28px;
+	border: none;
+	outline: none;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+
+	box-shadow: 0px 2px 2px rgba(0,0,0,.2), 0px 6px 6px rgba(0,0,0,.2);
+	z-index: 10000;
+}
+
+.world-action-button {
+	right: 8px;
+	bottom: 8px;
+	background: url('img/icons/text_sms_white_24dp.png') center e('/') 24px 24px no-repeat;
+}
+
+.world-action-button.aperture-full {
+	-webkit-transform: translate3D(200%, 0px, 0);
+	transform: translate3D(200%, 0, 0);
+}
+
+.back-action-button {
+	left: 8px;
+	bottom: 8px;
+	background: url('img/icons/ic_arrow_back_24px.png') center e('/') 24px 24px no-repeat #FFF;
+}
+
+.back-action-button:active {
+	background: url('img/icons/ic_arrow_back_24px.png') center e('/') 24px 24px no-repeat #CCC;
+}

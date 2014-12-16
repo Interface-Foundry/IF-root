@@ -2,6 +2,7 @@ app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTre
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
+map.resetMap();
 
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
@@ -12,14 +13,13 @@ $scope.select = function(bubble) {
 	} else {
 	$scope.selected = bubble;
 	$scope.map.on = true;
-	//map.setMarkerFocus(bubble._id);
+	map.setMarkerFocus(bubble._id);
 	map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
 	}
 }
 
 function initMarkers() {
-	var bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
-	console.log(bubbles);
+	var bubbles = $scope.bubbles;
 	bubbles.forEach(function(bubble, index, bubbles) {
 		if (bubble) {
 		map.addMarker(bubble._id, {
@@ -70,16 +70,25 @@ $rootScope.$on('leafletDirectiveMarker.click', function(event, args) {
 
 worldTree.getNearby().then(function(data) {
 	$scope.$evalAsync(function($scope) {
-		$scope.homeBubbles = data['150m'];
-		$scope.nearbyBubbles = data['2.5km'];
+		$scope.homeBubbles = data['150m'] || [];
+		$scope.nearbyBubbles = data['2.5km'] || [];
 		
-		$scope.bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
+		if ($scope.nearbyBubbles.length>0 && $scope.homeBubbles.length>0) {
+			$scope.bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
+		} else if ($scope.nearbyBubbles.length>0) {
+			$scope.bubbles = $scope.nearbyBubbles;
+		} else if ($scope.homeBubbles.length>0) {
+			$scope.bubbles = $scope.homeBubbles;
+		} else {
+			$scope.bubbles = [];
+		}
 		
 		$scope.loadState = 'success';
 		initMarkers();
 	});
 }, function(reason) {
 	//failure
+	console.log(reason);
 	$scope.loadState = 'failure';
 });
 

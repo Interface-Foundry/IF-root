@@ -40,6 +40,10 @@ $scope.go = function(path) {
 	$location.path(path);
 }
 	
+$scope.goBack = function() {
+	$window.history.back();
+}
+
 $scope.logout = function() {
       $http.get('/api/user/logout', {server:true});
       userManager.loginStatus = false;

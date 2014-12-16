@@ -74,12 +74,16 @@
 		<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
 	</div>
 
-	<div class="col-xs-12"><div style="height:300px;"></div></div>
 
 <div ng-show="showEdit">
-	<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest and Schedules</a>
+	<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest</a>
 <a class="btn btn-default" if-href="#edit/w/{{worldURL}}">Edit your Bubble</a>
 </div>
-<br><br>
+	<div class="col-xs-12"><div style="height:300px;"></div></div>
 </div>
 </div>
+
+</div>
+<a if-href="#w/{{world.id}}/messages" class="action-button world-action-button" 
+ng-class="[aperture.state]"
+ng-style="::{'background-color': style.titleBG_color}"></a>

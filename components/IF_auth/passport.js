@@ -57,14 +57,14 @@ module.exports = function(passport) {
                         }
                             
                         if (!user){
-                           return done('Incorrect username or password'); 
+                           return done('Incorrect username or password');
                         }
                             
                         if (!user.validPassword(password)){
                             return done('Incorrect username or password');
                         }
                             
-                        else{
+                        else {
                             return done(null, user);
                         }
                             

@@ -55,6 +55,39 @@
 		</li>
 	</ul>
 		</div>
+				<div class="marble-page">
+	<header class="marble-page-header">
+	<div class="marble-page-header-icon"><img src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
+	Around Me
+	</header>
+	
+	<ul class="nearby-list" 
+			style="padding-top:0px;">
+		<li ng-if="loadState=='loading'" class="text-center">
+		<div class="loading-spinner">
+			<div class="lspin1"></div>
+			<div class="lspin2"></div>
+		</div>
+		<span class="lightblue500">Loading...</span>
+		</li>
+		<li ng-repeat="bubble in nearbyBubbles track by bubble._id" 
+			ng-if="loadState=='success' && homeBubbles.length>0"
+			ng-click="select(bubble)"
+			class="bubble-list-item if-animate">
+			<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+			<a class="bubble-list-item-link"  href="">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
+			<div class="bubble-list-item-go if-animate" ng-show="selected==bubble">
+				Go
+			</div>
+		</li>
+		<li ng-if="loadState=='success'&& !(nearbyBubbles.length > 0)" class="text-center"> 
+			No bubbles found. <a if-href="/profile/worlds">Create a new one?</a>
+		</li>
+		<li ng-if="loadState=='failure'" class="text-center">
+			Server connection lost
+		</li>
+	</ul>
+		</div>
 
 	</div>
 
