@@ -697,10 +697,11 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                     file.pipe(fstream);
                     fstream.on('close', function() {
 
-                      var buffer = readChunk.sync(tempPath, 0, 262);
+                      var buffer = readChunk.sync("app/dist/temp_map_uploads/" + current, 0, 262);
 
                       if (fileTypeProcess(buffer) == false){
-                        fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+                        fs.unlink("app/dist/temp_map_uploads/" + current); //Need to add an alert if there are several attempts to upload bad files here
+                        res.send(500);
                       }
                       else {   
                         res.send("temp_map_uploads/"+current);
