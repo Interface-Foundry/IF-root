@@ -121,15 +121,20 @@ var express = require('express'),
 //===================//
 
 
+
+
 // passport config
 require('./components/IF_auth/passport')(passport); 
 
-//LIMITING UPLOADS TO 10MB 
+//LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy({
+  highWaterMark: 10 * 1024 * 1024,
   limits: {
-    fileSize: 1024 * 1024 * 10 // 10MB
+    fileSize: 1024 * 1024 * 10 // 
   }
 }));
+
+
 
 // Socket.io Communication
 io.sockets.on('connection', socket);
@@ -518,6 +523,10 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
   req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
       if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+        if (req.headers['content-length'] > 10000000){
+         res.send(500, "Filesize too large.");
+        }
+        else {
 
         var stuff_to_hash = filename + (new Date().toString());
         var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
@@ -554,7 +563,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
           gravity: "Center"
         }, function(err, stdout, stderr){
 
-          fs.readFile("app/dist/temp_avatar_uploads/" + current, function(err, fileData) {
+          fs.readFile(tempPath, function(err, fileData) {
 
             var s3 = new AWS.S3(); 
 
@@ -563,7 +572,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
                 console.log(err);   
               else {    
                 res.send("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
-              fs.unlink("app/dist/temp_avatar_uploads/" + current); 
+              fs.unlink(tempPath); 
             }
             });
           });
@@ -572,11 +581,15 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         }                    
        });
       }
-      else {
-        console.log('Please use .jpg .png or .gif');
-        res.send(500,'Please use .jpg .png or .gif');
       }
+      else {
+        res.send(500,'Please use .jpg .png or .gif');
+      
+      
+}
     });
+
+
 });
 
 //upload pictures not for avatars
@@ -588,6 +601,10 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
   req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
     if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+      if (req.headers['content-length'] > 10000000){
+        res.send(500, "Filesize too large.");
+      }
+      else {
 
       var stuff_to_hash = filename + (new Date().toString());
       var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
@@ -621,7 +638,7 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
                       quality: 0.8
                     }, function(err, stdout, stderr){
 
-                      fs.readFile("app/dist/temp_general_uploads/" + current, function(err, fileData) {
+                      fs.readFile(tempPath, function(err, fileData) {
 
                         var s3 = new AWS.S3(); 
                         s3.putObject({ Bucket: 'if-server-general-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
@@ -630,7 +647,7 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
                             console.log(err);
                           else {    
                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                            fs.unlink("app/dist/temp_general_uploads/" + current);
+                            fs.unlink(tempPath);
                           }
                         });
                       });
@@ -638,9 +655,10 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
                   }
                 });
 }
+}
 else {
-  console.log('Please use .jpg .png or .gif');
   res.send(500,'Please use .jpg .png or .gif');
+
 }
 });
 });
@@ -655,7 +673,10 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
-
+      if (req.headers['content-length'] > 25000000){
+        res.send(500, "Filesize too large.");
+      }
+      else {
         if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/jpeg') {
 
             while (1) {
@@ -693,6 +714,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
             console.log('Please use .jpg or .png');
             res.send(500,'Please use .jpg or .png');
         }
+      }
     });
 });
 
