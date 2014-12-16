@@ -1,5 +1,10 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'socket', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, socket) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
 console.log('--EditController--');
+//@IFDEF PHONEGAP
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//@ENDIF
+
 
 var aperture = apertureService,
 	ears = [],

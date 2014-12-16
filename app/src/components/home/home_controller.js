@@ -4,17 +4,21 @@ var map = mapManager, style = styleManager;
 style.resetNavBG();
 map.resetMap();
 
+$scope.temp = {};
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 
 $scope.select = function(bubble) {
-	if ($scope.selected == bubble) {
-		$location.path('w/'+bubble.id);
+	if ($scope.temp.mapOn) {
+		if ($scope.selected==bubble) {
+			// already selected
+		} else {
+			$scope.selected = bubble;
+			map.setMarkerFocus(bubble._id);
+			map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
+		}
 	} else {
-	$scope.selected = bubble;
-	$scope.map.on = true;
-	map.setMarkerFocus(bubble._id);
-	map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
+		$location.path('w/'+bubble.id);
 	}
 }
 
@@ -44,7 +48,7 @@ function initMarkers() {
 
 //LISTENERS//
 
-$scope.$watch('map.on', function(newVal, oldVal) {
+$scope.$watch('temp.mapOn', function(newVal, oldVal) {
 	switch (newVal) {
 		case true:
 			style.navBG_color = 'rgba(245, 67, 54, 0.96)';

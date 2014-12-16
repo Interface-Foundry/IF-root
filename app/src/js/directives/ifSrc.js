@@ -10,7 +10,9 @@ app.directive('ifSrc', function() {
 				}
 			
 				//@IFDEF PHONEGAP
-				value = 'https://bubbl.li/'+value;
+				if (value.indexOf('http')<0) {
+					value = 'https://bubbl.li/'+value;
+				}
 				//@ENDIF	
 				
 				$attr.$set('src', value);

@@ -13,6 +13,7 @@ var messageList = $('.message-list');
 
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
+$rootScope.hideBack = true;
 
 $scope.msg = {};
 $scope.messages = [];
@@ -124,8 +125,9 @@ function welcomeMessage(){
 
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
-        $timeout.cancel(checkMessagesTimeout);
-        dereg();
+    $timeout.cancel(checkMessagesTimeout);
+	$rootScope.hideBack = false;
+    dereg();
 });
 
 ////////////////////////////////////////////////////////////

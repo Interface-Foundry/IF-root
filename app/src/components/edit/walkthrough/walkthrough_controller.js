@@ -1,4 +1,9 @@
-app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
+app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+//@IFDEF PHONEGAP
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//@ENDIF
+	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////

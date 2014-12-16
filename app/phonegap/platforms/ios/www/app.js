@@ -5587,7 +5587,9 @@ app.directive('ifSrc', function() {
 				return;
 				}
 			
-				value = 'https://bubbl.li/'+value;
+				if (value.indexOf('http')<0) {
+					value = 'https://bubbl.li/'+value;
+				}
 				
 				$attr.$set('src', value);
 			
@@ -19323,9 +19325,10 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'socket', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, socket) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
 console.log('--EditController--');
-
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 var aperture = apertureService,
 	ears = [],
 	map = mapManager,
@@ -19835,7 +19838,9 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20219,7 +20224,10 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	
 }]);
 
-app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db) {
+app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -20635,17 +20643,21 @@ var map = mapManager, style = styleManager;
 style.resetNavBG();
 map.resetMap();
 
+$scope.temp = {};
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 
 $scope.select = function(bubble) {
-	if ($scope.selected == bubble) {
-		$location.path('w/'+bubble.id);
+	if ($scope.temp.mapOn) {
+		if ($scope.selected==bubble) {
+			// already selected
+		} else {
+			$scope.selected = bubble;
+			map.setMarkerFocus(bubble._id);
+			map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
+		}
 	} else {
-	$scope.selected = bubble;
-	$scope.map.on = true;
-	map.setMarkerFocus(bubble._id);
-	map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
+		$location.path('w/'+bubble.id);
 	}
 }
 
@@ -20675,7 +20687,7 @@ function initMarkers() {
 
 //LISTENERS//
 
-$scope.$watch('map.on', function(newVal, oldVal) {
+$scope.$watch('temp.mapOn', function(newVal, oldVal) {
 	switch (newVal) {
 		case true:
 			style.navBG_color = 'rgba(245, 67, 54, 0.96)';
@@ -21436,10 +21448,6 @@ $scope.go = function(url) {
 	$location.path(url);
 }
 
-$scope.goBack = function() {
-	window.history.back();
-}
-
 userManager.getUser().then(
 	function(response) {
 	console.log('response', response);
@@ -21716,6 +21724,7 @@ var messageList = $('.message-list');
 
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
+$rootScope.hideBack = true;
 
 $scope.msg = {};
 $scope.messages = [];
@@ -21827,8 +21836,9 @@ function welcomeMessage(){
 
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
-        $timeout.cancel(checkMessagesTimeout);
-        dereg();
+    $timeout.cancel(checkMessagesTimeout);
+	$rootScope.hideBack = false;
+    dereg();
 });
 
 ////////////////////////////////////////////////////////////

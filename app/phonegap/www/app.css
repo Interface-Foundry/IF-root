@@ -3482,7 +3482,7 @@ li.alert {
   bottom: 8px;
   background: url('img/icons/text_sms_white_24dp.png') center / 24px 24px no-repeat;
 }
-.world-action-button.aperture-full {
+.aperture-full .world-action-button {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
 }
@@ -3493,6 +3493,23 @@ li.alert {
 }
 .back-action-button:active {
   background: url('img/icons/ic_arrow_back_24px.png') center / 24px 24px no-repeat #cccccc;
+}
+.back-action-button.ng-hide-add {
+  -webkit-transform: translate3D(0%, 0px, 0);
+  transform: translate3D(0%, 0, 0);
+}
+.back-action-button.ng-hide-add-active,
+.aperture-full .back-action-button {
+  -webkit-transform: translate3D(-200%, 0px, 0);
+  transform: translate3D(-200%, 0, 0);
+}
+.back-action-button.ng-hide-remove {
+  -webkit-transform: translate3D(-200%, 0px, 0);
+  transform: translate3D(-200%, 0, 0);
+}
+.back-action-button.ng-hide-remove-active {
+  -webkit-transform: translate3D(0%, 0px, 0);
+  transform: translate3D(0%, 0, 0);
 }
 
 .leaflet-areaselect-shade {

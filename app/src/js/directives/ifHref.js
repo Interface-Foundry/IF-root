@@ -14,7 +14,7 @@ app.directive('ifHref', function() {
 			if (firstHash > -1) {
 				value = value.slice(0, firstHash) + value.slice(firstHash+1);
 			}
-			//@ENDIF	
+			//@ENDIF
 			$attr.$set('href', value);
 			
 			});

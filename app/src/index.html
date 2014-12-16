@@ -66,7 +66,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<script src="app.js"></script>
 </head>
 
-<body ng-class="{'drawer': drawerOn}">
+<body ng-class="[aperture.state, drawerOn&&'drawer']">
 	
 	<button class="drawer-tab" ng-click="drawerOn = !drawerOn">
 		<div class="drawer-icon" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0"></div>

@@ -361,10 +361,6 @@ $scope.go = function(url) {
 	$location.path(url);
 }
 
-$scope.goBack = function() {
-	window.history.back();
-}
-
 userManager.getUser().then(
 	function(response) {
 	console.log('response', response);

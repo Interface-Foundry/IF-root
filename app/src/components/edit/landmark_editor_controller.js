@@ -1,4 +1,10 @@
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+//@IFDEF PHONEGAP
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//@ENDIF	
+
+
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
