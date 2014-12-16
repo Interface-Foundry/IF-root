@@ -579,7 +579,6 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
     });
 });
 
-
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
@@ -654,19 +653,6 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     req.pipe(req.busboy);
     req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
-       ////// SECURITY RISK ///////
-       ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
-       // var parseFile = JSON.stringify(req.files.files[0]);
-       // console.log(parseFile);
-       // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
-       //  magic.detectFile(parseFile, function(err, result) {
-       //      if (err){ throw err};
-       //      console.log(result);
-       //      // output on Windows with 32-bit node:
-       //      //    application/x-dosexec
-       //  });
-        ///////////////////////////
-
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
 
@@ -689,8 +675,16 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                     fstream = fs.createWriteStream(newPath);
                     file.pipe(fstream);
                     fstream.on('close', function() {
+
+                      var buffer = readChunk.sync(tempPath, 0, 262);
+
+                      if (fileTypeProcess(buffer) == false){
+                        fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+                      }
+                      else {   
                         res.send("temp_map_uploads/"+current);
-                    }); 
+                    }
+                  }); 
                     break;
                 }
             }
