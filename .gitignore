@@ -52,3 +52,7 @@ Thumbs.db
 #####
 
 IF_server.js
+
+*.xcuserstate
+
+*.xcuserstate
