@@ -54,6 +54,7 @@ var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
 
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
+    stickerSchema = require('./components/IF_schemas/sticker_schema.js'),
     landmarkSchema = require('./components/IF_schemas/landmark_schema.js'),
     styleSchema = require('./components/IF_schemas/style_schema.js'),
     projectSchema = require('./components/IF_schemas/project_schema.js'),
@@ -1686,9 +1687,10 @@ app.get('/api/:collection/:id', function(req, res) {
 
 
 // Save 
-app.post('/api/:collection/create', isLoggedIn, function(req, res) {
+app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 2nd argument
 
     if (req.url == "/api/styles/create"){
+    
         editStyle(); //edit style
     }
 
@@ -1721,6 +1723,55 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             }
         });
     }
+
+    if (req.url == "/api/stickers/create"){
+
+      console.log("I want to save a new sticker");
+      console.log("------REQUEST is", req);
+      var sticker = new stickerSchema({
+        name: req.body.name,
+        loc: { type: {type: String }, coordinates: []},
+        message: req.body.message,
+        stickerKind: req.body.stickerKind,
+        stickerAction: req.body.stickerAction,
+        href: req.body.href,
+        // stats: {
+        //   alive: Boolean,
+        //   age: Number,
+        //   important: Boolean,
+        //   clicks: Number
+        // },
+      //  stickerID: req.body.stickerID, //or should this be mongo ObjectID
+        //ownerID: req.user._id,
+        //ownerName: req.user.name,
+       // worldID: { type: String, index: true}, //i don't know how this will come in req.body
+        //worldID: req.worldID,
+        // iconInfo: {
+        //   iconUrl: String,
+        //   iconRetinaUrl: String,
+        //   iconSize: [],
+        //   iconAnchor: [],
+        //   popupAnchor: [],
+        //   iconOrientation: Number        
+        // }
+        iconInfo: req.body.iconInfo //does this save all nested docs above?
+        
+
+      });
+      sticker.save(function(err,data){
+
+        if (err){
+          console.log(err);
+          res.send(err);
+        }
+        else {
+          console.log(data);
+          console.log('SAVED your sticker');
+          res.status(200).send([data]);
+        }
+      })
+    }
+
 
     //edit a world
     if (req.url == "/api/worlds/create"){
