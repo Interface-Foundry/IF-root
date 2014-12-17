@@ -20651,6 +20651,7 @@ $scope.select = function(bubble) {
 	if ($scope.temp.mapOn) {
 		if ($scope.selected==bubble) {
 			// already selected
+			$location.path('w/'+bubble.id);
 		} else {
 			$scope.selected = bubble;
 			map.setMarkerFocus(bubble._id);
