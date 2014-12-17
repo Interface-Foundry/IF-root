@@ -44,6 +44,9 @@ var cookieParser = require('cookie-parser');
 var session      = require('express-session');
 var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');  
+var readChunk = require('read-chunk'); 
+var fileTypeProcess = require('file-type');
+
 
 //--- BUBBLE ROUTING ----//
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
@@ -118,15 +121,20 @@ var express = require('express'),
 //===================//
 
 
+
+
 // passport config
 require('./components/IF_auth/passport')(passport); 
 
-//LIMITING UPLOADS TO 10MB 
+//LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy({
+  highWaterMark: 10 * 1024 * 1024,
   limits: {
-    fileSize: 1024 * 1024 * 10 // 10MB
+    fileSize: 1024 * 1024 * 10 // 
   }
 }));
+
+
 
 // Socket.io Communication
 io.sockets.on('connection', socket);
@@ -514,20 +522,11 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 
   req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
-     ////// SECURITY RISK ///////
-     ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
-     // var parseFile = JSON.stringify(req.files.files[0]);
-     // console.log(parseFile);
-     // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
-     //  magic.detectFile(parseFile, function(err, result) {
-     //      if (err){ throw err};
-     //      console.log(result);
-     //      // output on Windows with 32-bit node:
-     //      //    application/x-dosexec
-     //  });
-      ///////////////////////////
-
       if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+        if (req.headers['content-length'] > 10000000){
+         res.send(500, "Filesize too large.");
+        }
+        else {
 
         var stuff_to_hash = filename + (new Date().toString());
         var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
@@ -548,6 +547,13 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         }).pipe(fstream);
 
         fstream.on('close', function () {
+
+        var buffer = readChunk.sync(tempPath, 0, 262);
+
+        if (fileTypeProcess(buffer) == false){
+          fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+        }
+        else {   
          im.crop({
           srcPath: tempPath, 
           dstPath: tempPath,
@@ -557,7 +563,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
           gravity: "Center"
         }, function(err, stdout, stderr){
 
-          fs.readFile("app/dist/temp_avatar_uploads/" + current, function(err, fileData) {
+          fs.readFile(tempPath, function(err, fileData) {
 
             var s3 = new AWS.S3(); 
 
@@ -566,20 +572,25 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
                 console.log(err);   
               else {    
                 res.send("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
-              fs.unlink("app/dist/temp_avatar_uploads/" + current); 
+              fs.unlink(tempPath); 
             }
             });
           });
-        });                       
+        
+        });   
+        }                    
        });
       }
-      else {
-        console.log('Please use .jpg .png or .gif');
-        res.send(500,'Please use .jpg .png or .gif');
       }
+      else {
+        res.send(500,'Please use .jpg .png or .gif');
+      
+      
+}
     });
-});
 
+
+});
 
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
@@ -589,66 +600,65 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
   req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
-             ////// SECURITY RISK ///////
-             ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
-             // var parseFile = JSON.stringify(req.files.files[0]);
-             // console.log(parseFile);
-             // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
-             //  magic.detectFile(parseFile, function(err, result) {
-             //      if (err){ throw err};
-             //      console.log(result);
-             //      // output on Windows with 32-bit node:
-             //      //    application/x-dosexec
-             //  });
-              ///////////////////////////
+    if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+      if (req.headers['content-length'] > 10000000){
+        res.send(500, "Filesize too large.");
+      }
+      else {
 
-              if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+      var stuff_to_hash = filename + (new Date().toString());
+      var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
+      var fileType = filename.split('.').pop(); 
+      var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
+      var current = object_key + "." + fileType;
+      var tempPath = "app/dist/temp_general_uploads/" + current;
+      var awsKey = date_in_path + current;
+      fstream = fs.createWriteStream(tempPath);
+      var count = 0; 
+      var totalSize = req.headers['content-length'];
 
-                var stuff_to_hash = filename + (new Date().toString());
-                var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
-                var fileType = filename.split('.').pop(); 
-                var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
-                var current = object_key + "." + fileType;
-                var tempPath = "app/dist/temp_general_uploads/" + current;
-                var awsKey = date_in_path + current;
-                fstream = fs.createWriteStream(tempPath);
-                var count = 0; 
-                var totalSize = req.headers['content-length'];
+      file.on('data', function(data) {
+        count += data.length;
+        var percentUploaded = Math.floor(count/totalSize * 100);
+        io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
+      }).pipe(fstream);
 
-                file.on('data', function(data) {
-                  count += data.length;
-                  var percentUploaded = Math.floor(count/totalSize * 100);
-                  io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
-                }).pipe(fstream);
+      fstream.on('close', function () {
 
-                fstream.on('close', function () {
-                            //RESIZING IMAGES
-                            im.resize({
-                              srcPath: tempPath,
-                              dstPath: tempPath,
-                              width: 600,
-                              quality: 0.8
-                            }, function(err, stdout, stderr){
+        var buffer = readChunk.sync(tempPath, 0, 262);
 
-                              fs.readFile("app/dist/temp_general_uploads/" + current, function(err, fileData) {
+        if (fileTypeProcess(buffer) == false){
+                    fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+                  }
+                  else {  
+                    im.resize({
+                      srcPath: tempPath,
+                      dstPath: tempPath,
+                      width: 600,
+                      quality: 0.8
+                    }, function(err, stdout, stderr){
 
-                                var s3 = new AWS.S3(); 
-                                s3.putObject({ Bucket: 'if-server-general-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
+                      fs.readFile(tempPath, function(err, fileData) {
 
-                                  if (err) 
-                                    console.log(err);
-                                  else {    
-                                    res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                                  fs.unlink("app/dist/temp_general_uploads/" + current);
-                                }
-                                });
-                              });
-                            });
-});
+                        var s3 = new AWS.S3(); 
+                        s3.putObject({ Bucket: 'if-server-general-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
+
+                          if (err) 
+                            console.log(err);
+                          else {    
+                            res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                            fs.unlink(tempPath);
+                          }
+                        });
+                      });
+                    });
+                  }
+                });
+}
 }
 else {
-  console.log('Please use .jpg .png or .gif');
   res.send(500,'Please use .jpg .png or .gif');
+
 }
 });
 });
@@ -661,22 +671,12 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     req.pipe(req.busboy);
     req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
-       ////// SECURITY RISK ///////
-       ///////// ------------------> enable mmmagic to check MIME type of incoming data ////////
-       // var parseFile = JSON.stringify(req.files.files[0]);
-       // console.log(parseFile);
-       // var magic = new Magic(mmm.MAGIC_MIME_TYPE);
-       //  magic.detectFile(parseFile, function(err, result) {
-       //      if (err){ throw err};
-       //      console.log(result);
-       //      // output on Windows with 32-bit node:
-       //      //    application/x-dosexec
-       //  });
-        ///////////////////////////
-
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
-
+      if (req.headers['content-length'] > 25000000){
+        res.send(500, "Filesize too large.");
+      }
+      else {
         if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/jpeg') {
 
             while (1) {
@@ -696,8 +696,17 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                     fstream = fs.createWriteStream(newPath);
                     file.pipe(fstream);
                     fstream.on('close', function() {
+
+                      var buffer = readChunk.sync("app/dist/temp_map_uploads/" + current, 0, 262);
+
+                      if (fileTypeProcess(buffer) == false){
+                        fs.unlink("app/dist/temp_map_uploads/" + current); //Need to add an alert if there are several attempts to upload bad files here
+                        res.send(500);
+                      }
+                      else {   
                         res.send("temp_map_uploads/"+current);
-                    }); 
+                    }
+                  }); 
                     break;
                 }
             }
@@ -706,6 +715,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
             console.log('Please use .jpg or .png');
             res.send(500,'Please use .jpg or .png');
         }
+      }
     });
 });
 
