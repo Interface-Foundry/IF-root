@@ -1471,34 +1471,6 @@ app.get('/api/:collection', function(req, res) {
 
       db.collection('stickers').find({worldID: req.query.worldID}).toArray(fn(req, res)); 
 
-    //  {_id: objectId(req.params.id)} This is from the sticker read
-    
-    //     if (req.query.tag){ //hashtag filtering
-    //         //has limit
-    //         if (req.query.limit){
-    //           var Twlimit = parseInt(req.query.limit);
-    //           var qw = {
-    //              'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
-    //           };
-    //           db.collection('tweets').find(qw).limit(Twlimit).sort({_id: -1}).toArray(fn(req, res));
-    //         }
-    //         //no limit
-    //         else {
-    //           var qw = {
-    //              'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
-    //           };
-    //           db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));            
-    //         }
-    //     }
-    //     else {
-    //         if (req.query.limit){ //limited tweet query
-    //             limit = parseInt(req.query.limit);
-    //             db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));
-    //         }
-    //         else {
-    //             db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
-    //         }
-    //     }
     }
 
 
@@ -1728,9 +1700,8 @@ app.get('/api/worlds/:id', function(req, res) {
 });
 
 
-
 // Save 
-app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 2nd argument
+app.post('/api/:collection/create', isLoggedIn, function(req, res) { 
 
     if (req.url == "/api/styles/create"){
     
@@ -1768,14 +1739,14 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
     }
 
     if ((req.url == "/api/stickers/create")
-     // && req.body.worldID
-      //&& req.user._id
+     && req.body.worldID
+      && req.user._id
       && req.body.name) {
 
       var sticker = new stickerSchema({
         name: req.body.name,
-        //ownerID: req.user._id,
-       // worldID: req.body.worldID
+        ownerID: req.user._id,
+       worldID: req.body.worldID
       });
 
       if (req.body.loc){
@@ -1810,9 +1781,9 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
       if (req.body.stickerID){
         sticker.stickerID = req.body.stickerID;
       }
-      // if (req.user.name) {
-      //   sticker.ownerName = req.user.name;
-      // }
+      if (req.user.name) {
+        sticker.ownerName = req.user.name;
+      }
       if (req.body.iconInfo){
         if (req.body.iconInfo.iconUrl){
           sticker.iconInfo.iconUrl = req.body.iconInfo.iconUrl;
