@@ -1468,6 +1468,40 @@ app.get('/api/:collection', function(req, res) {
         }   
     }
 
+////sticker query
+    if (req.params.collection == 'stickers'){
+
+      db.collection('stickers').find({worldID: req.query.worldID}).toArray(fn(req, res)); 
+
+    //  {_id: objectId(req.params.id)} This is from the sticker read
+    //     if (req.query.tag){ //hashtag filtering
+    //         //has limit
+    //         if (req.query.limit){
+    //           var Twlimit = parseInt(req.query.limit);
+    //           var qw = {
+    //              'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+    //           };
+    //           db.collection('tweets').find(qw).limit(Twlimit).sort({_id: -1}).toArray(fn(req, res));
+    //         }
+    //         //no limit
+    //         else {
+    //           var qw = {
+    //              'text' : {$regex : ".*"+req.query.tag+".*", $options: 'i'}
+    //           };
+    //           db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));            
+    //         }
+    //     }
+    //     else {
+    //         if (req.query.limit){ //limited tweet query
+    //             limit = parseInt(req.query.limit);
+    //             db.collection(req.params.collection).find(qw).limit(limit).sort({_id: -1}).toArray(fn(req, res));
+    //         }
+    //         else {
+    //             db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));
+    //         }
+    //     }
+    }
+
 
     //querying tweets (social media and internal comments too, eventually)
     if (req.params.collection == 'tweets'){
@@ -1744,7 +1778,7 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
         message: req.body.message,
         stickerKind: req.body.stickerKind,
         stickerAction: req.body.stickerAction,
-        href: req.body.href
+        href: req.body.href,
         // stats: {
         //   alive: Boolean,
         //   age: Number,
@@ -1754,7 +1788,7 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
       //  stickerID: req.body.stickerID, //or should this be mongo ObjectID
         //ownerID: req.user._id,
         //ownerName: req.user.name,
-       // worldID: { type: String, index: true}, //i don't know how this will come in req.body
+       worldID: { type: String, index: true} 
         //worldID: req.worldID,
         // iconInfo: {
         //   iconUrl: String,
