@@ -8,8 +8,8 @@ var stickerSchema = new Schema({
 	loc: { type: {type: String }, coordinates: []},
 	time: { type: Date, default: Date.now },
 	message: String,
-	stickerKind: String,
-	stickerAction: String,
+	stickerKind: String, //map based
+	stickerAction: String, //open map and pan to it.
 	href: String,
 	stats: {
 		alive: Boolean,
@@ -17,7 +17,7 @@ var stickerSchema = new Schema({
 		important: Boolean,
 		clicks: Number
 	},
-	stickerID: String,
+	stickerID: String, //placeholder for url-friendly sticker id, different from unique id
 	ownerID: { type: String, index: true},
 	ownerName: String,
 	worldID: { type: String, index: true},

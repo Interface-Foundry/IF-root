@@ -1604,17 +1604,31 @@ app.get('/api/:collection', function(req, res) {
     }
 
 });
+// rewrite it specifying collectoin to look in
+
+//Read Stickers
+app.get('/api/stickers/:id', function(req,res){
+
+  db.collection('stickers').findOne({_id: objectId(req.params.id)}, function(err,data){
+
+    if (data){
+      ///what do to here
+      console.log(data);
+      res.send([data]);
+    }
+    else {
+      console.log('540 : Sticker doesn not exist.');
+      console.log(err);
+      res.send({err: '540: Sticker does not exist.'});
+    }
+  })
+
+});
 
 
+// Read World
+app.get('/api/worlds/:id', function(req, res) {
 
-
-// Read 
-app.get('/api/:collection/:id', function(req, res) {
-    //Return a world
-    if (req.url.indexOf("/api/worlds/") > -1){ 
-
-        //return by mongo id
-        //console.log(req.query.m);
         if (req.query.m == "true") {
       
           db.collection('landmarks').findOne({_id:objectId(req.params.id),world:true}, function(err, data){
@@ -1677,11 +1691,7 @@ app.get('/api/:collection/:id', function(req, res) {
           }
 
         }
-    }
-    //Return a landmark
-    else {
-        db.collection(req.params.collection).findOne({id:req.params.id,world:false}, fn(req, res));
-    }
+
 });
 
 
@@ -1734,7 +1744,7 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
         message: req.body.message,
         stickerKind: req.body.stickerKind,
         stickerAction: req.body.stickerAction,
-        href: req.body.href,
+        href: req.body.href
         // stats: {
         //   alive: Boolean,
         //   age: Number,
@@ -1754,7 +1764,6 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
         //   popupAnchor: [],
         //   iconOrientation: Number        
         // }
-        iconInfo: req.body.iconInfo //does this save all nested docs above?
         
 
       });
