@@ -1267,8 +1267,6 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
   else {
     console.log('unauthorized user');
   }
-
-
 });
 
 
@@ -1768,48 +1766,81 @@ app.post('/api/:collection/create', function(req, res) { //took out isLoggedIn, 
         });
     }
 
-    if (req.url == "/api/stickers/create"){
+    if ((req.url == "/api/stickers/create")
+     // && req.body.worldID
+      //&& req.user._id
+      && req.body.name) {
 
-      console.log("I want to save a new sticker");
-      console.log("------REQUEST is", req);
       var sticker = new stickerSchema({
         name: req.body.name,
-        loc: { type: {type: String }, coordinates: []},
-        message: req.body.message,
-        stickerKind: req.body.stickerKind,
-        stickerAction: req.body.stickerAction,
-        href: req.body.href,
-        // stats: {
-        //   alive: Boolean,
-        //   age: Number,
-        //   important: Boolean,
-        //   clicks: Number
-        // },
-      //  stickerID: req.body.stickerID, //or should this be mongo ObjectID
         //ownerID: req.user._id,
-        //ownerName: req.user.name,
-       worldID: { type: String, index: true} 
-        //worldID: req.worldID,
-        // iconInfo: {
-        //   iconUrl: String,
-        //   iconRetinaUrl: String,
-        //   iconSize: [],
-        //   iconAnchor: [],
-        //   popupAnchor: [],
-        //   iconOrientation: Number        
-        // }
-        
-
+       // worldID: req.body.worldID
       });
+
+      if (req.body.loc){
+        sticker.loc = {type: 'Point',
+                          coordinates: [req.body.loc.coordinates[0],
+                            req.body.loc.coordinates[1]]}
+      }
+      if (req.body.message){
+        sticker.message = req.body.message;
+      }
+      if (req.body.stickerKind){
+        sticker.stickerKind = req.body.stickerKind;
+      }
+      if (req.body.stickerAction){
+        sticker.stickerAction = req.body.stickerAction;
+      }
+      if (req.body.href){
+        sticker.href = req.body.href;
+      }
+      if (req.body.stats){
+        sticker.stats.alive = true; //should it start true? 
+        if (req.body.stats.age){
+          sticker.stats.age = req.body.stats.age;
+        }
+        if (req.body.stats.important){
+          sticker.stats.important = req.body.stats.important;
+        }
+        if (req.body.stats.clicks){
+          sticker = req.body.stats.clicks; // or should it start at zero?
+        }
+      }
+      if (req.body.stickerID){
+        sticker.stickerID = req.body.stickerID;
+      }
+      // if (req.user.name) {
+      //   sticker.ownerName = req.user.name;
+      // }
+      if (req.body.iconInfo){
+        if (req.body.iconInfo.iconUrl){
+          sticker.iconInfo.iconUrl = req.body.iconInfo.iconUrl;
+        }
+        if (req.body.iconInfo.iconRetinaUrl){
+          sticker.iconInfo.iconRetinaUrl = req.body.iconInfo.iconRetinaUrl;
+        }
+        if (req.body.iconInfo.iconSize){
+          sticker.iconInfo.iconSize = req.body.iconInfo.iconSize;
+        }
+        if (req.body.iconInfo.iconAnchor) {
+          sticker.iconInfo.iconAnchor = req.body.iconInfo.iconAnchor;
+        }
+        if (req.body.iconInfo.popupAnchor){
+          sticker.iconInfo.iconAnchor = req.body.iconInfo.popupAnchor;
+        }
+        if (req.body.iconInfo.iconOrientation) {
+          sticker.iconInfo.iconOrientation = req.body.iconInfo.iconOrientation;
+        }
+      }
+
       sticker.save(function(err,data){
 
         if (err){
+          console.log(data);
           console.log(err);
           res.send(err);
         }
         else {
-          console.log(data);
-          console.log('SAVED your sticker');
           res.status(200).send([data]);
         }
       })
