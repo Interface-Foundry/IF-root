@@ -54,6 +54,7 @@ var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
 
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
+    stickerSchema = require('./components/IF_schemas/sticker_schema.js'),
     landmarkSchema = require('./components/IF_schemas/landmark_schema.js'),
     styleSchema = require('./components/IF_schemas/style_schema.js'),
     projectSchema = require('./components/IF_schemas/project_schema.js'),
@@ -1266,8 +1267,6 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
   else {
     console.log('unauthorized user');
   }
-
-
 });
 
 
@@ -1467,6 +1466,13 @@ app.get('/api/:collection', function(req, res) {
         }   
     }
 
+////sticker query
+    if (req.params.collection == 'stickers'){
+
+      db.collection('stickers').find({worldID: req.query.worldID}).toArray(fn(req, res)); 
+
+    }
+
 
     //querying tweets (social media and internal comments too, eventually)
     if (req.params.collection == 'tweets'){
@@ -1603,17 +1609,31 @@ app.get('/api/:collection', function(req, res) {
     }
 
 });
+// rewrite it specifying collectoin to look in
+
+//Read Stickers
+app.get('/api/stickers/:id', function(req,res){
+
+  db.collection('stickers').findOne({_id: objectId(req.params.id)}, function(err,data){
+
+    if (data){
+      ///what do to here
+      console.log(data);
+      res.send([data]);
+    }
+    else {
+      console.log('540 : Sticker doesn not exist.');
+      console.log(err);
+      res.send({err: '540: Sticker does not exist.'});
+    }
+  })
+
+});
 
 
+// Read World
+app.get('/api/worlds/:id', function(req, res) {
 
-
-// Read 
-app.get('/api/:collection/:id', function(req, res) {
-    //Return a world
-    if (req.url.indexOf("/api/worlds/") > -1){ 
-
-        //return by mongo id
-        //console.log(req.query.m);
         if (req.query.m == "true") {
       
           db.collection('landmarks').findOne({_id:objectId(req.params.id),world:true}, function(err, data){
@@ -1676,19 +1696,15 @@ app.get('/api/:collection/:id', function(req, res) {
           }
 
         }
-    }
-    //Return a landmark
-    else {
-        db.collection(req.params.collection).findOne({id:req.params.id,world:false}, fn(req, res));
-    }
+
 });
 
 
-
 // Save 
-app.post('/api/:collection/create', isLoggedIn, function(req, res) {
+app.post('/api/:collection/create', isLoggedIn, function(req, res) { 
 
     if (req.url == "/api/styles/create"){
+    
         editStyle(); //edit style
     }
 
@@ -1721,6 +1737,87 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             }
         });
     }
+
+    if ((req.url == "/api/stickers/create")
+     && req.body.worldID
+      && req.user._id
+      && req.body.name) {
+
+      var sticker = new stickerSchema({
+        name: req.body.name,
+        ownerID: req.user._id,
+       worldID: req.body.worldID
+      });
+
+      if (req.body.loc){
+        sticker.loc = {type: 'Point',
+                          coordinates: [req.body.loc.coordinates[0],
+                            req.body.loc.coordinates[1]]}
+      }
+      if (req.body.message){
+        sticker.message = req.body.message;
+      }
+      if (req.body.stickerKind){
+        sticker.stickerKind = req.body.stickerKind;
+      }
+      if (req.body.stickerAction){
+        sticker.stickerAction = req.body.stickerAction;
+      }
+      if (req.body.href){
+        sticker.href = req.body.href;
+      }
+      if (req.body.stats){
+        sticker.stats.alive = true; //should it start true? 
+        if (req.body.stats.age){
+          sticker.stats.age = req.body.stats.age;
+        }
+        if (req.body.stats.important){
+          sticker.stats.important = req.body.stats.important;
+        }
+        if (req.body.stats.clicks){
+          sticker = req.body.stats.clicks; // or should it start at zero?
+        }
+      }
+      if (req.body.stickerID){
+        sticker.stickerID = req.body.stickerID;
+      }
+      if (req.user.name) {
+        sticker.ownerName = req.user.name;
+      }
+      if (req.body.iconInfo){
+        if (req.body.iconInfo.iconUrl){
+          sticker.iconInfo.iconUrl = req.body.iconInfo.iconUrl;
+        }
+        if (req.body.iconInfo.iconRetinaUrl){
+          sticker.iconInfo.iconRetinaUrl = req.body.iconInfo.iconRetinaUrl;
+        }
+        if (req.body.iconInfo.iconSize){
+          sticker.iconInfo.iconSize = req.body.iconInfo.iconSize;
+        }
+        if (req.body.iconInfo.iconAnchor) {
+          sticker.iconInfo.iconAnchor = req.body.iconInfo.iconAnchor;
+        }
+        if (req.body.iconInfo.popupAnchor){
+          sticker.iconInfo.iconAnchor = req.body.iconInfo.popupAnchor;
+        }
+        if (req.body.iconInfo.iconOrientation) {
+          sticker.iconInfo.iconOrientation = req.body.iconInfo.iconOrientation;
+        }
+      }
+
+      sticker.save(function(err,data){
+
+        if (err){
+          console.log(data);
+          console.log(err);
+          res.send(err);
+        }
+        else {
+          res.status(200).send([data]);
+        }
+      })
+    }
+
 
     //edit a world
     if (req.url == "/api/worlds/create"){
