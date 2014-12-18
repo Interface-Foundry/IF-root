@@ -1472,6 +1472,7 @@ app.get('/api/:collection', function(req, res) {
       db.collection('stickers').find({worldID: req.query.worldID}).toArray(fn(req, res)); 
 
     //  {_id: objectId(req.params.id)} This is from the sticker read
+    
     //     if (req.query.tag){ //hashtag filtering
     //         //has limit
     //         if (req.query.limit){
