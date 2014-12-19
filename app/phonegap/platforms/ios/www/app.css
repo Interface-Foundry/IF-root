@@ -1106,6 +1106,18 @@ text-align: center;
 }
 
 
+.aperture-full .message-shelf {
+	-webkit-transform: translate3d(0,100%,0);
+	transform: translate3d(0,100%,0);
+}
+
+.message-shelf {
+	width: 100%;
+	height: 100%;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
 .message-surface {
 	position: absolute;
 	top: 0px;
@@ -1154,19 +1166,50 @@ text-align: center;
 	width: 100%;
 	max-width: 560px;
 	right: 0px;
-	bottom: 8px;
-	padding: 0px 8px;
+	bottom: 0px;
 	z-index: 20;
+	background: #FFF;
+	border-top: 1px solid #CCC; 
+	-webkit-transform: translate3D(0, 144px, 0);
+	transform: translate3D(0, 144px, 0);
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+
+}
+
+.aperture-full .view-footer {
+	-webkit-transform: translate3D(0, 0px, 0);
+	transform: translate3D(0, 0px, 0);
+}
+
+.msg-action-bar {
+	width: 100%; 
+	height: 48px;
+}
+
+.msg-action-bar-item {
+	min-width: 48px;
+	height: 48px;
+	padding: 12px;
+	border: none;
+	outline: none;
+	background: none;
+}
+
+.sticker-bay {
+	width: 100%;
+	height: 144px;	
+	background: #FFF;
+	overflow: auto;
 }
 
 .message-input {
 	width: 100%;
 	resize: none;
 	min-height: 16px;
-	padding: 4px 46px 4px 36px;
+	padding: 4px 12px;
 	border: 0;
-	border-radius: 10px;
-	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
 	outline: none;
 	-webkit-appearance: none;
 	overflow: hidden;
@@ -1174,22 +1217,17 @@ text-align: center;
 }
 
 .message-send {
-	position: absolute;
-	width:48px;
-	height: 48px;
-	right: 10px;
-	bottom: -10px;
+	height: 24px;
+	
 	border: none;
 	background: none;
 	outline: none;
 }
 
 .message-photo {
-	position: absolute;
+	position: relative;
 	width: 48px;
 	height: 48px;
-	top: -11px;
-	left: 2px;
 	bottom: 0px;
 	border: none;
 	background: 50% 50% / 26px 21px no-repeat url('img/icons/camera-tiny-light.png') transparent;
@@ -1363,6 +1401,59 @@ text-align: center;
 
 .message-logged-out-footer{
 	opacity: 0.4;
+}
+
+.stickers {
+	width: 100%;
+	min-height: 100%;
+	padding: 4px;
+}
+
+.sticker {
+	float: left;
+	width: 100px;
+	height: 100px;
+	margin: 2px;
+}
+
+.sticker.selected {
+	background: #03a9f4;
+}
+
+.sticker-img {
+	width: 100px;
+	height: 100px;
+}
+
+.floating-sticker {
+	z-index: 10000;
+	position: absolute;
+	width: 10px;
+	height: 10px;
+}
+
+.sticker-crosshair {
+	position: absolute;
+	pointer-events: none !important;
+}
+
+.sticker-done-button {
+	right: 8px;
+	bottom: 220px;
+	display: block;
+	
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+.aperture-full .sticker-done-button, .sticker-done-button.ng-hide-remove, .sticker-done-button.ng-hide-add-active {
+	-webkit-transform: translate3d(80px, 0, 0);
+	transform: translate3d(80px, 0, 0);
+}
+
+.sticker-done-button, .sticker-done-button.ng-hide-remove-active, .sticker-done-button.ng-hide-add {
+	-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
 }
 .world-toolbar {
 	height: 68px;
@@ -3466,7 +3557,7 @@ li.alert {
   animation-delay: -1s;
 }
 .action-button {
-  position: fixed;
+  position: absolute;
   width: 56px;
   height: 56px;
   border-radius: 28px;
