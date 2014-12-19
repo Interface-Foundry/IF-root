@@ -5618,6 +5618,130 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
+app.directive('stickers', function(apertureService) {
+	return {
+		restrict: 'A',
+		scope: true,
+		link: function(scope, element, attrs) {
+			var touch,
+				action,
+				diffX,
+				diffY,
+				endX,
+				endY,
+				scroll,
+				drag,
+				dragTimer,
+				startX,
+				startY;
+				
+			function getCoord(e, c) {
+				return /touch/.test(e.type) ? (e.originalEvent || e).changedTouches[0]['page' + c] : e['page' + c];
+			}
+ 
+			//EVENT HANDLERS
+			function onStart(ev) {
+				startX = getCoord(ev, 'X');
+				startY = getCoord(ev, 'Y');
+				diffX = 0;
+				diffY = 0;
+				
+				dragTimer = setTimeout(function () {
+					drag = true;
+				}, 200);
+			}
+			
+			function onMove(ev) {
+				endX = getCoord(ev, 'X');
+				endY = getCoord(ev, 'Y');
+				diffX = endX - startX;
+				diffY = endY - startY;
+				
+				
+				if (!drag) {
+					if (Math.abs(diffY) > 10) {
+						scroll = true;
+						//android 4.0 touchend issue here
+						//trigger touchend
+					} /*else if (Math.abs(diffX) > 7) { //swipe
+						swipe = true
+					}*/
+				}
+				
+				if (drag) {
+					ev.preventDefault(); //kill page scrolling
+					//handle dragging
+					console.log('dragging starts');
+					stickerElement.style.top = endY + 'px';
+					stickerElement.style.left = endX + 'px';
+				}
+				
+				if (Math.abs(diffX) > 5 || Math.abs(diffY) > 5) {
+					//kill drag timer when you've started moving.
+					clearTimeout(dragTimer)
+				}
+			}
+						
+			function onEnd(ev) {
+				if (drag) {
+					//handle drag end
+					console.log('drag end');
+					console.log(endX, endY);
+				} else if (!scroll & Math.abs(diffX) < 5 && Math.abs(diffY) < 5) {
+					if (ev.type === 'touchend') {
+						ev.preventDefault(); //phantom clicks?
+					}
+					//handle tap
+					console.log('tap');
+				}
+				
+				swipe = false;
+				drag = false;
+				scroll = false;
+				
+				clearTimeout(dragTimer);
+			}
+			
+			
+			//INIT DOM
+			var stickerElement = document.createElement('div');
+			stickerElement.className = "floating-sticker";
+			document.body.appendChild(stickerElement);
+			
+			
+			//INIT LISTENERS
+			element.on('touchstart', onStart)
+			.on('touchmove', onMove)
+			.on('touchend', onEnd);
+			
+			
+		}
+	}
+});
+app.directive('stickerCrosshair', ['$window', function($window) {
+	return {
+		restrict: 'A',
+		scope: true,
+		link: function(scope, element, attrs) {
+			function positionCrosshair() {
+				var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+				w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
+				wOffset = 50,
+				hOffset = 100,
+				left = w/2 - wOffset,
+				top = (h-220-40)/2+40 - hOffset;
+				
+				element[0].style.left = left + 'px';
+				element[0].style.top = top + 'px';
+			}
+			
+			$(window).on('resize', positionCrosshair);
+			positionCrosshair();
+			
+		 
+		}
+	}
+}]);
 angular.module('IF-directives', [])
 .directive('ifTooltip', function($rootScope) {
 	return {
@@ -16813,6 +16937,14 @@ var ifGlobals = {
 		Campus: {name: 'Campus', hasTime: false, img: 'campus.png', icon: 'campus.svg'},
 		Home: {name: 'Home', hasTime: false, img: 'home.png', icon: 'home.svg'},
 		Other: {name: 'Other', hasTime: false, img: 'other.png'}
+	},
+	stickers: {
+		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png'},
+		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png'},
+		Food: {name: 'Food', img: 'img/stickers/food.png'},
+		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png'},
+		Interesting: {name: 'interesting', img: 'img/stickers/interesting.png'},
+		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png'}
 	}
 }
 
@@ -21710,7 +21842,7 @@ function goToMark() {
 		 
 		
 }]);
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager',  function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData',  function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -21718,7 +21850,8 @@ app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$roo
 var checkMessagesTimeout;
 var alerts = alertManager;
 var style = styleManager;
-var aperture = apertureService; 
+var aperture = apertureService;
+var map = mapManager;
 aperture.set('off');
 
 var messageList = $('.message-list');
@@ -21730,6 +21863,7 @@ $rootScope.hideBack = true;
 $scope.msg = {};
 $scope.messages = [];
 $scope.localMessages = [];
+$scope.stickers = ifGlobals.stickers;
 
 var sinceID = 'none';
 var firstScroll = true;
@@ -21816,6 +21950,52 @@ $scope.onImageSelect = function($files) {
 	})
 }	
 
+$scope.showStickers = function() {
+	aperture.set('full');
+}
+
+$scope.select = function(sticker) {
+	$scope.selected = sticker;
+}
+
+$scope.pinSticker = function() {
+	var sticker = $scope.selected,
+		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
+		left = w/2,
+		top = (h-220-40)/2+40;
+	leafletData.getMap().then(function(map) {
+		var latlng = map.containerPointToLatLng([left, top]);	
+		mapManager.addMarker('c', {
+				lat: latlng.lat,
+				lng: latlng.lng,
+				icon: {
+					iconUrl: sticker.img,
+					shadowUrl: '',
+					iconSize: [100, 100], 
+					iconAnchor: [50, 100],
+					popupAnchor: [0, -80]
+				},
+				message: 'Testing'
+		});
+		
+	})
+	
+	sendMsgToServer({
+		worldID: $routeParams.worldURL,
+		nick: $scope.nick,
+	    avatar: $scope.user.avatar || 'img/icons/profile.png',
+	    msg: 'Sticker posted',
+		userID: $scope.userID,
+		sticker: {
+			img: sticker.img,
+		}
+	});
+	
+	$scope.selected = undefined;
+	aperture.set('off');
+}
+
 //add welcome message 
 function welcomeMessage(){
 	
@@ -21827,6 +22007,48 @@ function welcomeMessage(){
 	    userID: 'chatbot'
 	};
 	$scope.messages.push(newChat);
+}
+
+function loadWorld() {
+	if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
+			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], 18, $scope.aperture.state);
+			console.log('setcenter');
+			map.addMarker('c', {
+				lat: $scope.world.loc.coordinates[1],
+				lng: $scope.world.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [35, 67], 
+					iconAnchor: [17, 67],
+					popupAnchor:[0, -40]
+				},
+				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
+
+			});
+		} else {
+			console.error('No center found! Error!');
+		}
+		
+		if ($scope.world.style.hasOwnProperty('maps')) {
+			if ($scope.world.style.maps.localMapID) {
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
+			}
+			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			}
+		
+			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
+			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+			} else {
+				console.warn('No base layer found! Defaulting to forum.');
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+			}
+		}
 }
 
 
@@ -21848,7 +22070,11 @@ var dereg = $rootScope.$on('$locationChangeSuccess', function() {
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
+		style.navBG_color = $scope.style.navBG_color;
+
 	$scope.world=data.world;
+
+	loadWorld();
 	welcomeMessage();
 });
 

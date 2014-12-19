@@ -1415,7 +1415,7 @@ li.alert {
   animation-delay: -1s;
 }
 .action-button {
-  position: fixed;
+  position: absolute;
   width: 56px;
   height: 56px;
   border-radius: 28px;
