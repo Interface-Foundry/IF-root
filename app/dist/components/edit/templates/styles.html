@@ -109,6 +109,19 @@
 	</label>
 	<span class="icon glyphicon glyphicon-ok-circle"></span>
 	</div>
+	<div class="edit-widget" ng-class="{'active': style.widgets.nearby}">
+	<label for="nearby" class="media card">
+		<div class="pull-left">
+			<img class="media-object" src="/img/widgets/nearby.png">
+		</div>
+		<div class="media-body">
+			<h4 class="media-heading">Nearby Bubbles</h4>
+			<span ng-cloak>Shows nearby and recommended bubbles to current bubble</span>
+		</div>
+		<input type="checkbox" name="nearby" id="nearby" ng-model="style.widgets.nearby">
+	</label>
+	<span class="icon glyphicon glyphicon-ok-circle"></span>
+	</div>
 	<div class="edit-widget" ng-class="{'active': style.widgets.presents}">
 	<label for="presents" class="media card">
 		<div class="pull-left">

@@ -20,7 +20,8 @@
 			"icebreaker":true,
 			"photo_share":true,
 			"stickers":true,
-			"streetview":true
+			"streetview":true,
+			"nearby":true
 		}
 } 
 

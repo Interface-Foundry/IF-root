@@ -2228,7 +2228,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                   category: false,
                   messages: true,
                   presents: false,
-                  streetview: false
+                  streetview: false,
+                  nearby:true
                 }
             });
             
@@ -2335,6 +2336,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
               lm.widgets.messages = req.body.widgets.messages;
               lm.widgets.presents = req.body.widgets.presents;
               lm.widgets.streetview = req.body.widgets.streetview;
+              lm.widgets.nearby = req.body.widgets.nearby;
             }
       
             lm.save(function(err, style) {

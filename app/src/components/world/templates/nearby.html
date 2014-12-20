@@ -1,0 +1,31 @@
+<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/view_nearby_16.png" style="display: block;" width="16px" height="16px"></div>
+	Explore Nearby
+</header>
+<article class="marble-page-content">
+
+	<li ng-if="loadState=='loading'" class="text-center">
+		<div class="loading-spinner">
+			<div class="lspin1"></div>
+			<div class="lspin2"></div>
+		</div>
+		<span class="lightblue500">Loading...</span>
+	</li>
+
+	<ul ng-if="loadState=='success' && nearbyBubbles.length>0">
+		<li class="col-xs-4" ng-repeat="bubble in nearbyBubbles">
+			<a ng-href="/w/{{bubble.id}}"><img class="img-responsive nearby-widget-avatar text-center" ng-src="{{bubble.avatar}}"></a>
+			<h6 class="text-center">{{bubble.name}}</h6>
+		</li>
+	</ul>
+
+	<li ng-if="loadState=='success'&& !(nearbyBubbles.length > 0)" class="text-center"> 
+		No bubbles found. <a if-href="/profile/worlds">Create a new one?</a>
+	</li>
+	<li ng-if="loadState=='failure'" class="text-center">
+		Server connection lost
+	</li>
+
+</article>
+
+<a ng-click="findRandom()" class="marble-btn" style="float: right; cursor:pointer;" ng-style="{'background': style.titleBG_color}">❋ Random</a>

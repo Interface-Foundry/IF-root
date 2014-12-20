@@ -21799,7 +21799,7 @@ userManager.getUser().then(function(user) {
 checkMessages();
 
 } ]);
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager','geoService', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, geoService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -21935,6 +21935,7 @@ function loadWidgets() {
 		if ($scope.style.widgets.instagram == true) {
 			$scope.instagram = true;
 		}
+
 		if ($scope.style.widgets.streetview == true) {
 
 			var mapAPI = '&key=AIzaSyDbEMuXZS67cFLAaTtmrKjFNlrdNm1H-KE';
@@ -22104,6 +22105,70 @@ function loadWidgets() {
 	   if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
 	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	   }
+
+	   if ($scope.style.widgets.nearby == true) {
+	      $scope.nearby = true;
+	      $scope.loadState = 'loading';
+
+	      worldTree.getNearby().then(function(data){
+
+	      	if(!data){
+	      		$scope.loadState = 'failure';
+	      	}
+
+	      	if(data['150m'].length > 0 || data['2.5km'].length > 0){
+
+	      		//probably a better way to do this =_=
+	      		if (data['150m'].length > 0 && data['2.5km'].length > 0){
+					$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
+	      		}
+	      		else if (data['150m'].length > 0 && data['2.5km'].length < 0){
+	      			$scope.nearbyBubbles = data['150m'];
+	      		}
+	      		else if (data['150m'].length < 0 && data['2.5km'].length > 0){
+	      			$scope.nearbyBubbles = data['2.5km'];
+	      		}
+
+	      		//remove bubble you're inside
+	      		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
+				    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
+				        $scope.nearbyBubbles.splice(i, 1);
+				    }
+				}
+
+				//only 3 bubbles
+				if ($scope.nearbyBubbles.length > 3){
+					$scope.nearbyBubbles.length = 3;
+				}
+		
+	      	}
+
+	      	$scope.loadState = 'success';
+
+	      	
+	      });
+
+	      $scope.findRandom = function(){
+	      	  $scope.loadState = 'loading';
+		      geoService.getLocation().then(function(coords){
+		      	  $http.get('/api/find/random', {params: {userCoordinate: [coords.lng,coords.lat], localTime:new Date()}, server:true}).success(function(data){		
+						if(data.length > 0){
+							if (data[0].id){
+								$location.path("/w/"+data[0].id);
+							}
+						}
+						else {
+							$scope.loadState = 'success';
+						}
+		      	  });
+		      });
+	      }
+	     
+
+
+
+
 	   }
 
 	}
