@@ -22194,6 +22194,9 @@ function loadWidgets() {
 	      		else if (data['150m'].length < 0 && data['2.5km'].length > 0){
 	      			$scope.nearbyBubbles = data['2.5km'];
 	      		}
+	      		else {
+	      			$scope.loadState = 'failure';
+	      		}
 
 	      		//remove bubble you're inside
 	      		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
