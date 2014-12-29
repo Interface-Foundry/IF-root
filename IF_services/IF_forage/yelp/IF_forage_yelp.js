@@ -619,6 +619,169 @@ function searchYelp(tag, done) {
 		                	
 
 								//if document is already save in db then update it
+
+
+function getGooglePlaceID(name, address, googleAPI){
+	// var queryTerms = (name + "+" + address).replace(/,/g, "").replace(/\s/g, "+");
+	// var queryURL="https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTerms + "&key=" + googleAPI;
+	console.log(queryURL);
+
+	request({uri: queryURL, json:true}, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			
+			//if there are more than one result, i.e. iterate through and see which one has the same coordinates. 
+			//Test case many results, top one wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
+			//Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
+			//console.log(body.results);
+
+			if (body.results.length >= 1) {
+				//loop through them and pick the one that matches the coordinates
+				for (i = 0; i < body.results.length; i++) { 
+				    if (body.results[i].formatted_address.indexOf(", United States") > 0) {
+				    	var googleZip = body.results[i].formatted_address.replace(/, United States/g, "").substr(-5, 5);
+				    	if (googleZip == "93003") { 
+
+				    		var lmSchema = new landmarks.model(true);
+				    		//In the real script change this to :
+				    		// if (googleZip == docs[0].source_yelp.locationInfo.postal_code){
+				    		var placeID = body.results[i].place_id;
+				    		// 	docs[0].source_google.placeID = body.results[i].place_id;
+								// 	console.log(name, "   _id:  ", docs[i]._id, "  place_id:", body.results[i].place_id); 
+
+								lmSchema.source_google.placeID = body.results[i].place_id;
+
+								function addGoogleDetails(placeID, googleAPI){
+									var queryURL = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+									console.log(queryURL);
+
+									request({uri: queryURL, json:true}, function (error, response, body) {
+										if (!error && response.statusCode == 200) {
+
+											var docs = []; // 
+											docs[0] = []; 
+											docs[0].source_google = [];
+										  docs[0].source_google.placeID = placeID;
+										  docs[0].source_google.icon = body.result.icon;
+										  // docs[0].source_google.opening_hours = body.result.opening_hours;										  
+															if (typeof body.result.opening_hours=='undefined')
+			                        {
+			                            docs[0].source_google.opening_hours="";
+			                        }
+			                        else{
+			                            docs[0].source_google.opening_hours=business.url;
+			                        }	
+										  //docs[0].source_google.weekday_text = body.result.weekday_text;
+															if (typeof body.result.weekday_text=='undefined')
+			                        {
+			                            docs[0].source_google.weekday_text="";
+			                        }
+			                        else{
+			                            docs[0].source_google.weekday_text=body.result.weekday_text;
+			                        }	
+//										  docs[0].source_google.international_phone_number = body.result.international_phone_number;
+										  			 if (typeof body.result.international_phone_number=='undefined')
+			                        {
+			                            docs[0].source_google.international_phone_number="";
+			                        }
+			                        else{
+			                            docs[0].source_google.international_phone_number=body.result.international_phone_number;
+			                        }	
+										  docs[0].source_google.price_level = body.result.price_level;
+										 // docs[0].source_google.reviews = body.result.reviews;
+										  				if (typeof body.result.reviews=='undefined')
+			                        {
+			                            docs[0].source_google.reviews="";
+			                        }
+			                        else{
+			                            docs[0].source_google.reviews=body.result.reviews;
+			                        }	
+										  docs[0].source_google.url = body.result.url;
+										 // docs[0].source_google.website = body.result.website;
+										 					if (typeof body.result.website=='undefined')
+			                        {
+			                            docs[0].source_google.website="";
+			                        }
+			                        else{
+			                            docs[0].source_google.website=body.result.website;
+			                        }	
+										  docs[0].source_google.types = body.result.types;
+										  docs[0].source_google.utc_offset = body.result.utc_offset;
+										  docs[0].source_google.vicinity = body.result.vicinity;
+
+		console.log("DOCS[0] ", docs[0]);
+
+
+										}
+									});
+								}
+								var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c' //Monday afternoon
+
+
+								addGoogleDetails(body.results[i].place_id, googleAPI);
+
+
+
+
+
+
+								break;
+				    	}
+				    }
+				}
+			}
+			else {
+				console.log("NO RESULTS");
+			}
+
+		}
+	});
+}
+	
+
+
+		                        // function updateLandmark(){
+			                       //  docs[0].save(function(err,docs){
+
+			                       //      if(err){
+
+			                       //          console.log("Erorr Occurred");
+			                       //          console.log(err)
+			                       //      }
+			                       //      else if(!err)
+			                       //      {
+			                       //          //console.log("documents saved");
+			                       //      }
+			                       //      else{
+
+			                       //          //console.log('jajja')
+
+			                       //      }
+			                       //  });
+		                        // }
+
+
+
+
+// }
+// 		//}
+// 	});
+// }
+var queryURL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephens+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
+
+
+// var cityAndZip = docs[0].source_yelp.locationInfo.display_address[docs[0].source_yelp.locationInfo.display_address.length - 1];
+// var streetAddress = docs[0].source_yelp.locationInfo.display_address[0];
+getGooglePlaceID(queryURL);
+
+
+
+
+
+
+
+
+
+
 		                        if(typeof business.name=='undefined')
 		                        {
 		                            docs[0].name=0;
