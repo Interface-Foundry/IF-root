@@ -45,7 +45,8 @@ module.exports = {
 			photo_share:Boolean,
 			stickers:Boolean,
 			presents:Boolean,
-			streetview: Boolean
+			streetview: Boolean,
+			nearby: Boolean
 		}
     },
 

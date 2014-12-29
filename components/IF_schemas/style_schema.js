@@ -38,7 +38,8 @@ var mongoose = require('mongoose');
 			category: Boolean,
 			messages: Boolean,
 			presents: Boolean,
-			streetview: Boolean
+			streetview: Boolean,
+			nearby: Boolean
 		}
 	}); 
 

@@ -1100,4 +1100,13 @@ function processData(i,result,callback){
 //server port 
 app.listen(3137, 'localhost', function() {
     console.log("3137 ~ ~");
+}).on('error', function(err){
+	console.log('on error handler');
+	console.log(err);
+});
+
+
+process.on('uncaughtException', function(err) {
+	console.log('process.on handler');
+    console.log(err);
 });
