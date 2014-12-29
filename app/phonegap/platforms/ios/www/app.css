@@ -1129,6 +1129,27 @@ text-align: center;
 	color: #FFF;
 }
 
+.message-nav-map {
+	position: absolute;
+	width: 48px;
+	height: 48px;
+	right: 0px;
+	top: 40px;
+	border: none;
+	outline: none;
+	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") transparent;
+	z-index: 10;
+	border-radius: 24px;
+	background-clip: padding-box;
+	box-sizing: border-box;
+	border: 4px solid transparent;
+}
+
+.aperture-full .message-nav-map {
+	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,.4);
+	background-clip: padding-box;
+}
+
 .message-surface {
 	position: absolute;
 	top: 0px;
@@ -1158,11 +1179,10 @@ text-align: center;
 	position: relative;
 	bottom: 0px;
 	width: 100%;
-	max-width: 600px;
 	height: 100%;
 	float: right;
 	overflow: auto;
-	padding: 8px 8px 32px 8px;
+	padding: 8px 8px 0px 8px;
 	z-index: 0;
 	margin: 0;
 }
@@ -1176,7 +1196,6 @@ text-align: center;
 .view-footer {
 	position: absolute;
 	width: 100%;
-	max-width: 560px;
 	right: 0px;
 	bottom: 0px;
 	z-index: 20;
@@ -1190,7 +1209,7 @@ text-align: center;
 
 }
 
-.aperture-full .view-footer {
+.view-footer.editing {
 	-webkit-transform: translate3D(0, 0px, 0);
 	transform: translate3D(0, 0px, 0);
 }
@@ -1252,6 +1271,7 @@ text-align: center;
 	margin: 8px 0px 24px 0px;
 	transition: 0.2s ease-in all;
 	max-width: 560px;
+	clear:both;
 }
 
 .message-heading {
@@ -1263,6 +1283,8 @@ text-align: center;
 
 .message-self {
 	color:#808080;
+	float: right;
+	clear: both;
 }
 
 .message-content {
@@ -1287,7 +1309,7 @@ text-align: center;
 
 .message-body {
 	margin: 0;
-	padding: 4px 8px;
+	padding: 4px 12px;
 }
 
 .message-body:empty {
@@ -1341,9 +1363,9 @@ text-align: center;
 
 .message-room-col {
 	position: absolute;
-	top: 0px;
+	top: 88px;
 	left: 0px;
-	right: 620px;
+	right: 600px;
 	bottom: 0px;
 	background: #FFF;
 }
@@ -1463,6 +1485,8 @@ text-align: center;
 	
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	
+	background: center / 24px 24px no-repeat url("img/icons/ic_check_white_24px.png") #4caf50;
 }
 
 .sticker-done-button.ng-hide-remove, .sticker-done-button.ng-hide-add.ng-hide-add-active {
@@ -1489,6 +1513,15 @@ text-align: center;
 	margin: 0 auto;
 }
 
+.message-sticker-link {
+	position: absolute;
+	right: 8px;
+	top: 8px;
+	width: 24px;
+	height: 24px;
+	opacity: .7;
+}
+
 .message-sticker .message-corner {
 	border-bottom-color: #FFF !important;
 }
@@ -1496,6 +1529,18 @@ text-align: center;
 .message-sticker message-content, .message-self.message-sticker .message-content {
 	background: #FFF !important;
 	color: #777; 
+}
+
+.stickerOffset {
+	position: relative;
+	top: -100px;
+	left: -50px;
+}
+
+.crosshairOffset {
+	position: absolute;
+	top: -16px;
+	left: -16px;
 }
 .world-toolbar {
 	height: 68px;
@@ -2194,6 +2239,13 @@ transform:translateX(100%);
 	background-color: rgba(255,255,255,0.75);
 }
 
+.nearby-widget-avatar{
+	border-radius: 50%; 
+	overflow: hidden;
+	width:80px;
+	margin: 0 auto;
+}
+
 
 
 #aperture {
@@ -2636,6 +2688,11 @@ nav {
   height: 48px;
   margin: 0px;
   text-align: center;
+}
+.subnav-item {
+  display: block;
+  height: 48px;
+  min-width: 48px;
 }
 .subnav-back {
   width: 48px;
@@ -3643,6 +3700,10 @@ li.alert {
 .back-action-button.ng-hide-remove-active {
   -webkit-transform: translate3D(0%, 0px, 0);
   transform: translate3D(0%, 0, 0);
+}
+/*map stuff*/
+.fadeMarkers .leaflet-marker-icon {
+  opacity: .5;
 }
 
 .leaflet-areaselect-shade {
