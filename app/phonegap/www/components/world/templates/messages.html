@@ -11,6 +11,11 @@
 		<div class="message-content">
 			<h6 class="message-heading" ng-bind="msg.nick">Visitor</h6>
 			<img class="img-responsive" if-src="{{::msg.pic}}" ng-if="msg.pic">
+			<div class="message-sticker-background" ng-if="::msg.sticker">
+				<img class="message-sticker-img" if-src="{{::msg.sticker.img}}">
+				<img class="message-sticker-link" src="img/icons/ic_map_48px.svg">
+			</div>
+
 			<p class="message-body" 
 				ng-style="{'background': style.titleBG_color}"
 				style="color: #FFF !important;"

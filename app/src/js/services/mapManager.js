@@ -2,13 +2,13 @@
 
 angular.module('tidepoolsServices')
     .factory('mapManager', ['leafletData', '$rootScope', 
-    	function(leafletData, $rootScope) {
+		function(leafletData, $rootScope) {
 var mapManager = {
 	center: {
 		lat: 42,
 		lng: -83,
 		zoom: 14
-		},
+	},
 	markers: {},
 	layers: {
 		baselayers: {
@@ -393,6 +393,21 @@ mapManager.getPlaceImageBounds = function() {
 	}
 }
 
+mapManager.fadeMarkers = function(bool) {
+	leafletData.getMap().then(function(map) {
+		var container = map.getContainer();
+		if (bool===true) {
+			container.classList.add('fadeMarkers');
+			console.log(container.classList);
+		} else {
+			container.classList.remove('fadeMarkers')
+		}
+	})
+}
+
+mapManager.hasMarker = function(key) {
+	return mapManager.markers.hasOwnProperty(key);
+}
 
 return mapManager;
     }]);

@@ -4730,7 +4730,7 @@ var checkLoggedin = function(userManager) {
 	    	},
 	    	'responseError': function(rejection) {
 		    	if (rejection.status === 401) {
-			    	$location.path('/login');
+			    	//$location.path('/login');
 		    	}
 		    	return $q.reject(rejection);
 	    	}	
@@ -5726,8 +5726,8 @@ app.directive('stickerCrosshair', ['$window', function($window) {
 			function positionCrosshair() {
 				var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
 				w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
-				wOffset = 50,
-				hOffset = 100,
+				wOffset = 0,//50,
+				hOffset = 0,//100,
 				left = w/2 - wOffset,
 				top = (h-220-40)/2+40 - hOffset;
 				
@@ -16939,12 +16939,18 @@ var ifGlobals = {
 		Other: {name: 'Other', hasTime: false, img: 'other.png'}
 	},
 	stickers: {
-		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png'},
-		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png'},
-		Food: {name: 'Food', img: 'img/stickers/food.png'},
-		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png'},
-		Interesting: {name: 'interesting', img: 'img/stickers/interesting.png'},
-		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png'}
+		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png', iconInfo: {
+			iconUrl: 'img/stickers/favorite.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png', iconInfo: {
+			iconUrl: 'img/stickers/fixthis.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		Food: {name: 'Food', img: 'img/stickers/food.png', iconInfo: {
+			iconUrl: 'img/stickers/food.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png', iconInfo: {
+			iconUrl: 'img/stickers/im_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		Interesting: {name: 'Interesting', img: 'img/stickers/interesting.png', iconInfo: {
+			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
+			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
 	}
 }
 
@@ -16960,13 +16966,13 @@ return ifGlobals;
 
 angular.module('tidepoolsServices')
     .factory('mapManager', ['leafletData', '$rootScope', 
-    	function(leafletData, $rootScope) {
+		function(leafletData, $rootScope) {
 var mapManager = {
 	center: {
 		lat: 42,
 		lng: -83,
 		zoom: 14
-		},
+	},
 	markers: {},
 	layers: {
 		baselayers: {
@@ -17351,6 +17357,21 @@ mapManager.getPlaceImageBounds = function() {
 	}
 }
 
+mapManager.fadeMarkers = function(bool) {
+	leafletData.getMap().then(function(map) {
+		var container = map.getContainer();
+		if (bool===true) {
+			container.classList.add('fadeMarkers');
+			console.log(container.classList);
+		} else {
+			container.classList.remove('fadeMarkers')
+		}
+	})
+}
+
+mapManager.hasMarker = function(key) {
+	return mapManager.markers.hasOwnProperty(key);
+}
 
 return mapManager;
     }]);
@@ -17486,6 +17507,62 @@ return lockerManager;
 	   
 }
 ])
+app.factory('stickerManager', ['$http', '$q', function($http, $q) {
+var stickerManager = {
+	
+}
+
+stickerManager.postSticker = function(sticker) {
+	var deferred = $q.defer();
+	console.log(sticker);
+	$http.post('/api/stickers/create', sticker, {server: true})
+		.success(function(success) {
+			console.log(success);
+			deferred.resolve(success);
+		})
+		.error(function(error) {
+			console.log(error)
+			deferred.reject(error);
+		})
+
+	return deferred.promise;
+}
+
+stickerManager.getStickers = function(stickerReq) {
+	var deferred = $q.defer();
+	console.log(stickerReq);
+	$http.get('/api/stickers/', {params: {'worldID': stickerReq._id}, server: true})
+		.success(function(result) {
+			console.log(result);
+			deferred.resolve(result);
+		})
+		.error(function(error) {
+			console.log(error);
+			deferred.reject(error);
+		})		
+	return deferred.promise;
+}
+
+stickerManager.getSticker = function(_id) {
+	var deferred = $q.defer();
+	$http.get('/api/stickers/'+_id, {server: true})
+		.success(function(result) {
+			console.log(result);
+			deferred.resolve(result);
+		})
+		.error(function(error) {
+			console.log(error);
+			deferred.reject(error);
+		})
+	return deferred.promise;
+}
+
+//loc: Objectcoordinates: Array[2]0: -73.989127278327961: 40.74133129511772
+// Array[2]0: -73.989127278327961: 40.74133129511772
+
+
+return stickerManager;
+}]);
 'use strict';
 
 angular.module('tidepoolsServices')
@@ -21842,7 +21919,7 @@ function goToMark() {
 		 
 		
 }]);
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData',  function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData', 'stickerManager', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData, stickerManager) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -21864,6 +21941,7 @@ $scope.msg = {};
 $scope.messages = [];
 $scope.localMessages = [];
 $scope.stickers = ifGlobals.stickers;
+$scope.editing = false;
 
 var sinceID = 'none';
 var firstScroll = true;
@@ -21872,7 +21950,10 @@ function scrollToBottom() {
 	$timeout(function() {
 		messageList.animate({scrollTop: messageList[0].scrollHeight * 2}, 300); //JQUERY USED HERE
 	},0);
-	firstScroll = false;
+	if (firstScroll==true) {
+		firstScroll = false;
+		profileEditMessage();
+	}
 }
 
 function checkMessages() {
@@ -21893,9 +21974,9 @@ db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(dat
 	    checkMessages();
 	} else {
 		checkMessagesTimeout = $timeout(checkMessages, 3000);	
-	}
 	if (doScroll) {
 		scrollToBottom();
+	}
 	}
 	 
 });
@@ -21912,7 +21993,18 @@ db.messages.create(msg, function(res) {
 });
 }
 
+$scope.toggleMap = function() {
+	if ($scope.editing) {
+		$scope.editing = false;
+	}
+	aperture.toggle('full');
+}
+
 $scope.sendMsg = function (e) {
+	if ($scope.editing) {
+		$scope.pinSticker();
+		return;
+	}
 	if (e) {e.preventDefault()}
 	if ($scope.msg.text == null) {return;}
 	if (userManager.loginStatus) {
@@ -21951,6 +22043,7 @@ $scope.onImageSelect = function($files) {
 }	
 
 $scope.showStickers = function() {
+	$scope.editing = true;
 	aperture.set('full');
 }
 
@@ -21958,15 +22051,54 @@ $scope.select = function(sticker) {
 	$scope.selected = sticker;
 }
 
+$scope.messageLink = function(message) {
+	console.log(message);
+	if (message.sticker) {
+		aperture.set('full');
+		stickerManager.getSticker(message.sticker._id).then(function(sticker) {
+			console.log('getSticker', sticker);
+			map.setCenter(sticker.loc.coordinates, 18, $scope.aperture.state);
+			if (map.hasMarker(sticker._id)) {
+				map.setMarkerFocus(sticker._id);
+			} else {
+				map.addMarker(success._id, {
+					lat: latlng.lat,
+					lng: latlng.lng,
+					icon: {
+						iconUrl: sticker.img,
+						shadowUrl: '',
+						iconSize: [100, 100], 
+						iconAnchor: [50, 100],
+						popupAnchor: [0, -80]
+					},
+					message: sticker.message 
+				});
+			}
+		})
+	} else if (message.href) {
+		$location.path(message.href);
+	}
+}
+
 $scope.pinSticker = function() {
-	var sticker = $scope.selected,
+	//getStickerLoc//
+	var sticker = angular.copy($scope.selected),
 		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
 		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
 		left = w/2,
 		top = (h-220-40)/2+40;
 	leafletData.getMap().then(function(map) {
-		var latlng = map.containerPointToLatLng([left, top]);	
-		mapManager.addMarker('c', {
+		var latlng = map.containerPointToLatLng([left, top]);
+		sticker.loc = {
+			coordinates: [latlng.lng, latlng.lat]
+		}
+	//end getStickerLoc//
+		sticker.time = Date.now();
+		sticker.worldID = $scope.world._id;
+		sticker.message = $scope.msg.text || sticker.name;
+		
+		stickerManager.postSticker(sticker).then(function(success) {
+			mapManager.addMarker(success._id, {
 				lat: latlng.lat,
 				lng: latlng.lng,
 				icon: {
@@ -21976,36 +22108,59 @@ $scope.pinSticker = function() {
 					iconAnchor: [50, 100],
 					popupAnchor: [0, -80]
 				},
-				message: 'Testing'
-		});
-		
+				message: sticker.message 
+			});
+			
+			console.log(success);
+			$timeout(function() {
+				sendMsgToServer({
+				worldID: $routeParams.worldURL,
+				nick: $scope.nick,
+				avatar: $scope.user.avatar || 'img/icons/profile.png',
+				msg: $scope.msg.text || sticker.name,
+				userID: $scope.userID,
+				sticker: {
+					img: sticker.img,
+					_id: success._id
+				}
+				});
+				$scope.msg.text = "";
+			}, 500);
+
+		}, function(error) {
+			console.log(error);
+			//handle error
+		})
 	})
 	
-	sendMsgToServer({
-		worldID: $routeParams.worldURL,
-		nick: $scope.nick,
-	    avatar: $scope.user.avatar || 'img/icons/profile.png',
-	    msg: 'Sticker posted',
-		userID: $scope.userID,
-		sticker: {
-			img: sticker.img,
-		}
-	});
-	
 	$scope.selected = undefined;
+	$scope.editing = false;
 	aperture.set('off');
 }
 
 //add welcome message 
 function welcomeMessage(){
-	
 	var newChat = {
 	    worldID: $routeParams.worldURL,
 	    nick: 'BubblyBot',
 	    msg: 'Hey there, this is a Bubble chat created just for '+$scope.world.name+'. Chat, share pictures & leave notes with others here!',
 	    avatar: $scope.world.avatar || 'img/icons/profile.png',
-	    userID: 'chatbot'
+	    userID: 'chatbot',
+	    _id: 'welcomeMessage'
 	};
+	$scope.messages.push(newChat);
+}
+
+function profileEditMessage() {
+	var newChat = {
+		worldID: $routeParams.worldURL,
+		nick: 'BubblyBot',
+		msg: 'You are currently using the name '+ $scope.nick + '. Click here to edit it.',
+		avatar: $scope.world.avatar || 'img/icons/profile.png',
+		userID: 'chatbot',
+		_id: 'profileEditMessage',
+		href: 'profile/me'
+	}
 	$scope.messages.push(newChat);
 }
 
@@ -22051,6 +22206,30 @@ function loadWorld() {
 		}
 }
 
+function loadStickers() {
+	console.log('loadStickers');
+	stickerManager.getStickers({_id: $scope.world._id}).then(function(stickers) {
+		console.log(stickers);
+		addStickersToMap(stickers);
+	})
+}
+
+function addStickersToMap(stickers) {
+	stickers.forEach(function(sticker, index, stickers) {
+		map.addMarker(sticker._id, {
+				lat: sticker.loc.coordinates[1],
+				lng: sticker.loc.coordinates[0],
+				icon: {
+					iconUrl: sticker.iconInfo.iconUrl,
+					iconSize: sticker.iconInfo.iconSize, 
+					iconAnchor: sticker.iconInfo.iconAnchor,
+					popupAnchor: sticker.iconInfo.popupAnchor
+				},
+				message: sticker.message,
+		});
+	})
+}
+
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
@@ -22064,6 +22243,17 @@ var dereg = $rootScope.$on('$locationChangeSuccess', function() {
     dereg();
 });
 
+$scope.$watch('editing', function(newBool, oldBool) {
+	if (newBool===true) {
+		//editing
+		console.log('editing true');
+		map.fadeMarkers(true);
+	} else if (newBool===false) {
+		//not editing
+		map.fadeMarkers(false);
+	}
+})
+
 ////////////////////////////////////////////////////////////
 //////////////////////EXECUTING/////////////////////////////
 ////////////////////////////////////////////////////////////
@@ -22076,6 +22266,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 	loadWorld();
 	welcomeMessage();
+	loadStickers();
+	checkMessages();
 });
 
 userManager.getUser().then(function(user) {
@@ -22087,10 +22279,9 @@ userManager.getUser().then(function(user) {
 	dialogs.showDialog('messageAuthDialog.html');
 });
 
-checkMessages();
 
 } ]);
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";

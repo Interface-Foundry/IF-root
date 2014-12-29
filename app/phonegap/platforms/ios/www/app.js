@@ -16939,12 +16939,18 @@ var ifGlobals = {
 		Other: {name: 'Other', hasTime: false, img: 'other.png'}
 	},
 	stickers: {
-		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png'},
-		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png'},
-		Food: {name: 'Food', img: 'img/stickers/food.png'},
-		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png'},
-		Interesting: {name: 'interesting', img: 'img/stickers/interesting.png'},
-		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png'}
+		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png', iconInfo: {
+			iconUrl: 'img/stickers/favorite.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png', iconInfo: {
+			iconUrl: 'img/stickers/fixthis.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		Food: {name: 'Food', img: 'img/stickers/food.png', iconInfo: {
+			iconUrl: 'img/stickers/food.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png', iconInfo: {
+			iconUrl: 'img/stickers/im_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		Interesting: {name: 'interesting', img: 'img/stickers/interesting.png', iconInfo: {
+			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
+			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
 	}
 }
 
@@ -17486,6 +17492,48 @@ return lockerManager;
 	   
 }
 ])
+app.factory('stickerManager', ['$http', '$q', function($http, $q) {
+var stickerManager = {
+	
+}
+
+stickerManager.postSticker = function(sticker) {
+	var deferred = $q.defer();
+	console.log(sticker);
+	$http.post('/api/stickers/create', sticker, {server: true})
+		.success(function(success) {
+			console.log(success);
+			deferred.resolve(success);
+		})
+		.error(function(error) {
+			console.log(error)
+			deferred.reject(error);
+		})
+
+	return deferred.promise;
+}
+
+stickerManager.getStickers = function(stickerReq) {
+	var deferred = $q.defer();
+	console.log(stickerReq);
+	$http.get('/api/stickers/', {params: {'worldID': stickerReq._id}, server: true})
+		.success(function(result) {
+			console.log(result);
+			deferred.resolve(result);
+		})
+		.error(function(error) {
+			console.log(error);
+			deferred.reject(error);
+		})		
+	return deferred.promise;
+}
+
+//loc: Objectcoordinates: Array[2]0: -73.989127278327961: 40.74133129511772
+// Array[2]0: -73.989127278327961: 40.74133129511772
+
+
+return stickerManager;
+}]);
 'use strict';
 
 angular.module('tidepoolsServices')
@@ -21842,7 +21890,7 @@ function goToMark() {
 		 
 		
 }]);
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData',  function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData', 'stickerManager',  function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData, stickerManager) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -21958,7 +22006,6 @@ $scope.select = function(sticker) {
 	$scope.selected = sticker;
 }
 
-
 $scope.pinSticker = function() {
 	var sticker = $scope.selected,
 		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
@@ -21966,7 +22013,15 @@ $scope.pinSticker = function() {
 		left = w/2,
 		top = (h-220-40)/2+40;
 	leafletData.getMap().then(function(map) {
-		var latlng = map.containerPointToLatLng([left, top]);	
+		var latlng = map.containerPointToLatLng([left, top]);
+		sticker.loc = {
+			coordinates: [latlng.lng, latlng.lat]
+		}
+		sticker.time = Date.now();
+		sticker.worldID = $scope.world._id;
+		
+		stickerManager.postSticker(sticker)
+		
 		mapManager.addMarker('c', {
 				lat: latlng.lat,
 				lng: latlng.lng,
@@ -21974,13 +22029,27 @@ $scope.pinSticker = function() {
 					iconUrl: sticker.img,
 					shadowUrl: '',
 					iconSize: [100, 100], 
-					iconAnchor: [50, 100]
-				}
+					iconAnchor: [50, 100],
+					popupAnchor: [0, -80]
+				},
+				message: 'Testing'
 		});
 		
 	})
 	
+	sendMsgToServer({
+		worldID: $routeParams.worldURL,
+		nick: $scope.nick,
+	    avatar: $scope.user.avatar || 'img/icons/profile.png',
+	    msg: 'Sticker posted',
+		userID: $scope.userID,
+		sticker: {
+			img: sticker.img,
+		}
+	});
 	
+	$scope.selected = undefined;
+	aperture.set('off');
 }
 
 //add welcome message 
@@ -22038,6 +22107,31 @@ function loadWorld() {
 		}
 }
 
+function loadStickers() {
+	console.log('loadStickers');
+	stickerManager.getStickers({_id: $scope.world._id}).then(function(stickers) {
+		console.log(stickers);
+		addStickersToMap(stickers);
+	})
+}
+
+function addStickersToMap(stickers) {
+	stickers.forEach(function(sticker, index, stickers) {
+		map.addMarker(sticker._id, {
+				lat: sticker.loc.coordinates[1],
+				lng: sticker.loc.coordinates[0],
+				icon: {
+					iconUrl: sticker.iconInfo.iconUrl,
+					iconSize: sticker.iconInfo.iconSize, 
+					iconAnchor: sticker.iconInfo.iconAnchor,
+					popupAnchor: sticker.iconInfo.popupAnchor
+				},
+				message: sticker.message,
+		});
+	})
+}
+
+
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
@@ -22063,6 +22157,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 	loadWorld();
 	welcomeMessage();
+	loadStickers();
 });
 
 userManager.getUser().then(function(user) {

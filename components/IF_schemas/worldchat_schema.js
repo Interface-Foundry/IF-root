@@ -11,10 +11,12 @@ var worldchatSchema = mongoose.Schema({
     userID: String,
     msg: String,
     pic: String,
+    href: String,
     time: { type: Date, default: Date.now },
     avatar: String,
     sticker: {
-	    img: String
+	    img: String,
+	    _id: String
     }
 });
 

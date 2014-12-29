@@ -1619,7 +1619,7 @@ app.get('/api/stickers/:id', function(req,res){
     if (data){
       ///what do to here
       console.log(data);
-      res.send([data]);
+      res.send(data);
     }
     else {
       console.log('540 : Sticker doesn not exist.');
@@ -1722,8 +1722,17 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             nick: req.body.nick,
             msg: req.body.msg,
             pic: req.body.pic,
+            href: req.body.href,
             avatar: req.body.avatar
-        });
+       	});
+       	
+       	if (req.body.sticker) {
+	       	wc.sticker = {
+		       img: req.body.sticker.img,
+		       _id: req.body.sticker._id
+	       	}
+       	}
+       	
     console.log(wc);
         wc.save(function (err, data) {
             if (err){
@@ -1739,7 +1748,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     }
 
     if ((req.url == "/api/stickers/create")
-     && req.body.worldID
+      && req.body.worldID
       && req.user._id
       && req.body.name) {
 
@@ -1798,7 +1807,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
           sticker.iconInfo.iconAnchor = req.body.iconInfo.iconAnchor;
         }
         if (req.body.iconInfo.popupAnchor){
-          sticker.iconInfo.iconAnchor = req.body.iconInfo.popupAnchor;
+          sticker.iconInfo.popupAnchor = req.body.iconInfo.popupAnchor;
         }
         if (req.body.iconInfo.iconOrientation) {
           sticker.iconInfo.iconOrientation = req.body.iconInfo.iconOrientation;
@@ -1806,14 +1815,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
       }
 
       sticker.save(function(err,data){
-
-        if (err){
+        if (err) {
           console.log(data);
           console.log(err);
           res.send(err);
         }
         else {
-          res.status(200).send([data]);
+          res.status(200).send(data);
         }
       })
     }

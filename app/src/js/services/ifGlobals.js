@@ -17,12 +17,18 @@ var ifGlobals = {
 		Other: {name: 'Other', hasTime: false, img: 'other.png'}
 	},
 	stickers: {
-		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png'},
-		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png'},
-		Food: {name: 'Food', img: 'img/stickers/food.png'},
-		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png'},
-		Interesting: {name: 'interesting', img: 'img/stickers/interesting.png'},
-		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png'}
+		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png', iconInfo: {
+			iconUrl: 'img/stickers/favorite.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png', iconInfo: {
+			iconUrl: 'img/stickers/fixthis.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		Food: {name: 'Food', img: 'img/stickers/food.png', iconInfo: {
+			iconUrl: 'img/stickers/food.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png', iconInfo: {
+			iconUrl: 'img/stickers/im_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		Interesting: {name: 'Interesting', img: 'img/stickers/interesting.png', iconInfo: {
+			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
+		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
+			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
 	}
 }
 

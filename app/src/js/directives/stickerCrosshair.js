@@ -6,8 +6,8 @@ app.directive('stickerCrosshair', ['$window', function($window) {
 			function positionCrosshair() {
 				var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
 				w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
-				wOffset = 50,
-				hOffset = 100,
+				wOffset = 0,//50,
+				hOffset = 0,//100,
 				left = w/2 - wOffset,
 				top = (h-220-40)/2+40 - hOffset;
 				

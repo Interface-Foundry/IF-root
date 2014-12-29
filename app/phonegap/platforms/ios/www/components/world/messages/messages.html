@@ -1,5 +1,5 @@
-<div class="message-shelf">
-	<nav class="message-nav">
+<div class="message-shelf" ng-style="::{'background-color': style.bodyBG_color}">
+	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
 		<a href="" ng-click="goBack()" style="height:48px; width: 48px; position: absolute; left: 0px;">
 			<span class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
 		</a>
@@ -9,8 +9,8 @@
 		</a>
 	</nav>
 
-	<div class="message-surface">
-		<div class="message-room-col hidden-xs">
+
+	<div class="message-room-col hidden-xs">
 			<div class="nickname-info">
 				<h4 class="inner-nickname">You're chatting as</h4>
 				<p><img style="border-radius:50%;" width="50" height="50" if-src="{{user.avatar || 'img/icons/profile.png'}}" src="/img/icons/profile.png">{{nick}}			</p>
@@ -19,18 +19,23 @@
 				</a>
 	
 			</div>
-		</div>
+	</div>
+	
+	<div class="wrap">
 		<ul class="message-list">
-			<li class="if-animate message" ng-repeat="msg in messages track by msg._id" ng-class="::{'message-self': msg.userID==userID}">
+			<li class="if-animate message" ng-repeat="msg in messages track by msg._id" ng-class="::{'message-self': msg.userID==userID, 'message-sticker': msg.sticker}">
 				<picture class="msg-avatar">
 					<img width="32px" height="32px" class="small-avatar" if-src="{{::msg.avatar || 'img/icons/profile.png'}}" ng-cloak>
 				</picture>
-				<div class="message-content" ng-style="::{'background-color': msg.userID==userID ? style.titleBG_color : 'FFF'}">
+				<div class="message-content" ng-style="::{'background-color': msg.userID==userID&&!msg.sticker ? style.titleBG_color : 'FFF'}">
 					<div class="message-corner" 
-						ng-style="::{'border-bottom': '6px solid '+style.titleBG_color}"></div>
+						ng-style="::{'border-bottom': '6px solid ' + style.titleBG_color}"></div>
 					<h6 class="message-heading message-self" ng-bind="::msg.nick">Visitor</h6>
 					<img class="img-responsive" if-src="{{::msg.pic}}">
-					<div class="message-body" ng-bind="::msg.msg" ></div>
+					<div class="message-sticker-background" ng-if="::msg.sticker">
+						<img class="message-sticker-img" if-src="{{::msg.sticker.img}}">
+					</div>
+					<div class="message-body" ng-bind="::msg.msg"></div>
 				</div>
 			</li>
 		</ul>
@@ -71,4 +76,4 @@
 	<img ng-src="{{selected.img}}">
 </div>
 
-<button class="action-button sticker-done-button" ng-click="pinSticker()" ng-show="selected"></button>
+<button class="action-button sticker-done-button if-animate" ng-click="pinSticker()" ng-show="selected"></button>

@@ -1116,6 +1116,17 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	padding: 88px 0px 76px 0px;
+}
+
+.message-nav {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 48px;
+	margin-top: 56px;
+	color: #FFF;
 }
 
 .message-surface {
@@ -1125,7 +1136,7 @@ text-align: center;
 	width: 100%;
 	height: 100%;
 	background: rgba(230,230,230,0.9);
-	padding: 88px 0px 0px 0px;
+	padding: 88px 0px 76px 0px;
 	overflow: hidden;
 	z-index: -10;
 }
@@ -1153,6 +1164,7 @@ text-align: center;
 	overflow: auto;
 	padding: 8px 8px 32px 8px;
 	z-index: 0;
+	margin: 0;
 }
 
 .message-list:before {
@@ -1433,6 +1445,13 @@ text-align: center;
 }
 
 .sticker-crosshair {
+	display: none;
+	position: absolute;
+	pointer-events: none !important;
+}
+
+.aperture-full .sticker-crosshair {
+	display: block;
 	position: absolute;
 	pointer-events: none !important;
 }
@@ -1446,14 +1465,37 @@ text-align: center;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
-.aperture-full .sticker-done-button, .sticker-done-button.ng-hide-remove, .sticker-done-button.ng-hide-add-active {
+.sticker-done-button.ng-hide-remove, .sticker-done-button.ng-hide-add.ng-hide-add-active {
 	-webkit-transform: translate3d(80px, 0, 0);
 	transform: translate3d(80px, 0, 0);
 }
 
-.sticker-done-button, .sticker-done-button.ng-hide-remove-active, .sticker-done-button.ng-hide-add {
+.sticker-done-button, .sticker-done-button.ng-hide-remove.ng-hide-remove-active, .sticker-done-button.ng-hide-add {
 	-webkit-transform: translate3d(0, 0, 0);
 	transform: translate3d(0, 0, 0);
+}
+
+
+.message-sticker-background {
+	width: 100%;
+	height: 100px;
+	background: url('img/stickers/bg.png') center / cover;
+}
+
+.message-sticker-img {
+	display: block;
+	width: 100px;
+	height: 100px;
+	margin: 0 auto;
+}
+
+.message-sticker .message-corner {
+	border-bottom-color: #FFF !important;
+}
+
+.message-sticker message-content, .message-self.message-sticker .message-content {
+	background: #FFF !important;
+	color: #777; 
 }
 .world-toolbar {
 	height: 68px;
