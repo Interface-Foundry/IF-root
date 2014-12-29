@@ -58,6 +58,9 @@ var yelp = require("yelp").createClient({
 	token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
 });
 
+//April Google Creds:
+var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
+
 /*
 	CREATED FILE FOR AWS KEYS:
 
@@ -85,6 +88,27 @@ var zipHigh = 99950;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
+
+function updateLandmark(){
+  docs[0].save(function(err,docs){
+
+      if(err){
+
+          console.log("Erorr Occurred");
+          console.log(err)
+      }
+      else if(!err)
+      {
+          console.log("documents saved");
+      }
+      else{
+
+          console.log('jajja')
+
+      }
+  });
+}
+
 
 //search meetup in loops
 async.whilst(
@@ -627,20 +651,19 @@ function searchYelp(tag, done) {
 
 								//if document is already save in db then update it
 
-var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c'
+//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c'
 
 function getGooglePlaceID(name, address, googleAPI){
-	// var queryTerms = (name + "+" + address).replace(/,/g, "").replace(/\s/g, "+");
-	// var queryURL="https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTerms + "&key=" + googleAPI;
-	console.log(queryURL);
+	var queryTermsToGetPlaceID = (name + "+" + address).replace(/,/g, "").replace(/\s/g, "+");
+	var queryURLToGetPlaceID ="https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTerms + "&key=" + googleAPI;
+	console.log(queryURLToGetPlaceID);
 
-	request({uri: queryURL, json:true}, function (error, response, body) {
+	request({uri: queryURLToGetPlaceID, json:true}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			
-			//if there are more than one result, i.e. iterate through and see which one has the same coordinates. 
+			//In case of more than one result, looping through to pick the one with the same zip code. 
 			//Test case many results, top one wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
 			//Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
-			//console.log(body.results);
 
 			if (body.results.length >= 1) {
 				//loop through them and pick the one that matches the coordinates
@@ -655,11 +678,11 @@ function getGooglePlaceID(name, address, googleAPI){
 								docs[0].source_google.placeID = body.results[i].place_id;
 
 								function addGoogleDetails(placeID, googleAPI){
-									var queryURL = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+									var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
 									
 									console.log(queryURL);
 
-									request({uri: queryURL, json:true}, function (error, response, body) {
+									request({uri: queryURLToGetDetails, json:true}, function (error, response, body) {
 										if (!error && response.statusCode == 200) {
 
 											docs[0].source_google = [];
@@ -762,9 +785,8 @@ function getGooglePlaceID(name, address, googleAPI){
 // 		//}
 // 	});
 // }
-// var queryURL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephens+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
 
-getGooglePlaceID(queryURL);
+getGooglePlaceID(docs[0].name, docs[0].source_yelp.locationInfo.address + " " + docs[0].source_yelp.locationInfo.postal_code, googleAPI);
 
 		                        if(typeof business.name=='undefined')
 		                        {
@@ -1101,25 +1123,25 @@ getGooglePlaceID(queryURL);
 
 
 
-		                        function updateLandmark(){
-			                        docs[0].save(function(err,docs){
+		                        // function updateLandmark(){
+			                       //  docs[0].save(function(err,docs){
 
-			                            if(err){
+			                       //      if(err){
 
-			                                console.log("Erorr Occurred");
-			                                console.log(err)
-			                            }
-			                            else if(!err)
-			                            {
-			                                console.log("documents saved");
-			                            }
-			                            else{
+			                       //          console.log("Erorr Occurred");
+			                       //          console.log(err)
+			                       //      }
+			                       //      else if(!err)
+			                       //      {
+			                       //          console.log("documents saved");
+			                       //      }
+			                       //      else{
 
-			                                console.log('jajja')
+			                       //          console.log('jajja')
 
-			                            }
-			                        });
-		                        }
+			                       //      }
+			                       //  });
+		                        // }
 
 
 
