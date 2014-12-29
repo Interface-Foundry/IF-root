@@ -651,7 +651,7 @@ function getGooglePlaceID(name, address, googleAPI){
 
 				    		var placeID = body.results[i].place_id;
 								console.log(name, "   _id:  ", docs[i]._id, "  place_id:", placeID); 
-
+								docs[0].source_google_on = true;
 								docs[0].source_google.placeID = body.results[i].place_id;
 
 								function addGoogleDetails(placeID, googleAPI){
@@ -681,7 +681,7 @@ function getGooglePlaceID(name, address, googleAPI){
 			                        else{
 			                            docs[0].source_google.weekday_text=body.result.weekday_text;
 			                        }	
-//										  docs[0].source_google.international_phone_number = body.result.international_phone_number;
+										 // docs[0].source_google.international_phone_number = body.result.international_phone_number;
 										  			 if (typeof body.result.international_phone_number=='undefined')
 			                        {
 			                            docs[0].source_google.international_phone_number="";
@@ -711,17 +711,17 @@ function getGooglePlaceID(name, address, googleAPI){
 										  docs[0].source_google.utc_offset = body.result.utc_offset;
 										  docs[0].source_google.vicinity = body.result.vicinity;
 
-		console.log("DOCS[0] ", docs[0]);
+											console.log("DOCS[0] ", docs[0]);
 
 
 										}
 									});
 								}
-								//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c' //Monday afternoon
+								//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c' //Monday afternoon moved it up
 
 
 								addGoogleDetails(body.results[i].place_id, googleAPI);
-
+								updateLandmark();
 
 								break;
 				    	}
@@ -736,25 +736,25 @@ function getGooglePlaceID(name, address, googleAPI){
 	});
 }
 	
-		                        function updateLandmark(){
-			                        docs[0].save(function(err,docs){
+		                        // function updateLandmark(){
+			                       //  docs[0].save(function(err,docs){
 
-			                            if(err){
+			                       //      if(err){
 
-			                                console.log("Erorr Occurred");
-			                                console.log(err)
-			                            }
-			                            else if(!err)
-			                            {
-			                                //console.log("documents saved");
-			                            }
-			                            else{
+			                       //          console.log("Erorr Occurred");
+			                       //          console.log(err)
+			                       //      }
+			                       //      else if(!err)
+			                       //      {
+			                       //          //console.log("documents saved");
+			                       //      }
+			                       //      else{
 
-			                                //console.log('jajja')
+			                       //          //console.log('jajja')
 
-			                            }
-			                        });
-		                        }
+			                       //      }
+			                       //  });
+		                        // }
 
 
 
@@ -1111,11 +1111,11 @@ getGooglePlaceID(queryURL);
 			                            }
 			                            else if(!err)
 			                            {
-			                                //console.log("documents saved");
+			                                console.log("documents saved");
 			                            }
 			                            else{
 
-			                                //console.log('jajja')
+			                                console.log('jajja')
 
 			                            }
 			                        });
