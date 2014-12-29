@@ -42,14 +42,21 @@ var forumStyle = require('./forum_theme.json');
 
 var cloudMapName = 'forum';
 var cloudMapID ='interfacefoundry.jh58g2al';
+//JR Yelp Creds
+// var yelp = require("yelp").createClient({
+//     consumer_key: "dyjR4bZkmcD_CpOTYx2Ekg",
+//     consumer_secret: "Coq5UbKKXYWmPy3TZf9hmNODirg",
+//     token: "_dDYbpK4qdeV3BWlm6ShoQdKUnz1IwCO",
+//     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
+// });
 
+//April Yelp Creds:
 var yelp = require("yelp").createClient({
-    consumer_key: "dyjR4bZkmcD_CpOTYx2Ekg",
-    consumer_secret: "Coq5UbKKXYWmPy3TZf9hmNODirg",
-    token: "_dDYbpK4qdeV3BWlm6ShoQdKUnz1IwCO",
-    token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
+	consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
+	consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
+	token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
+	token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
 });
-
 
 /*
 	CREATED FILE FOR AWS KEYS:
@@ -620,6 +627,7 @@ function searchYelp(tag, done) {
 
 								//if document is already save in db then update it
 
+var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c'
 
 function getGooglePlaceID(name, address, googleAPI){
 	// var queryTerms = (name + "+" + address).replace(/,/g, "").replace(/\s/g, "+");
@@ -639,26 +647,21 @@ function getGooglePlaceID(name, address, googleAPI){
 				for (i = 0; i < body.results.length; i++) { 
 				    if (body.results[i].formatted_address.indexOf(", United States") > 0) {
 				    	var googleZip = body.results[i].formatted_address.replace(/, United States/g, "").substr(-5, 5);
-				    	if (googleZip == "93003") { 
+				    	if (googleZip == docs[0].source_yelp.locationInfo.postal_code){
 
-				    		var lmSchema = new landmarks.model(true);
-				    		//In the real script change this to :
-				    		// if (googleZip == docs[0].source_yelp.locationInfo.postal_code){
 				    		var placeID = body.results[i].place_id;
-				    		// 	docs[0].source_google.placeID = body.results[i].place_id;
-								// 	console.log(name, "   _id:  ", docs[i]._id, "  place_id:", body.results[i].place_id); 
+								console.log(name, "   _id:  ", docs[i]._id, "  place_id:", placeID); 
 
-								lmSchema.source_google.placeID = body.results[i].place_id;
+								docs[0].source_google.placeID = body.results[i].place_id;
 
 								function addGoogleDetails(placeID, googleAPI){
 									var queryURL = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+									
 									console.log(queryURL);
 
 									request({uri: queryURL, json:true}, function (error, response, body) {
 										if (!error && response.statusCode == 200) {
 
-											var docs = []; // 
-											docs[0] = []; 
 											docs[0].source_google = [];
 										  docs[0].source_google.placeID = placeID;
 										  docs[0].source_google.icon = body.result.icon;
@@ -714,14 +717,10 @@ function getGooglePlaceID(name, address, googleAPI){
 										}
 									});
 								}
-								var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c' //Monday afternoon
+								//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c' //Monday afternoon
 
 
 								addGoogleDetails(body.results[i].place_id, googleAPI);
-
-
-
-
 
 
 								break;
@@ -737,28 +736,25 @@ function getGooglePlaceID(name, address, googleAPI){
 	});
 }
 	
+		                        function updateLandmark(){
+			                        docs[0].save(function(err,docs){
 
+			                            if(err){
 
-		                        // function updateLandmark(){
-			                       //  docs[0].save(function(err,docs){
+			                                console.log("Erorr Occurred");
+			                                console.log(err)
+			                            }
+			                            else if(!err)
+			                            {
+			                                //console.log("documents saved");
+			                            }
+			                            else{
 
-			                       //      if(err){
+			                                //console.log('jajja')
 
-			                       //          console.log("Erorr Occurred");
-			                       //          console.log(err)
-			                       //      }
-			                       //      else if(!err)
-			                       //      {
-			                       //          //console.log("documents saved");
-			                       //      }
-			                       //      else{
-
-			                       //          //console.log('jajja')
-
-			                       //      }
-			                       //  });
-		                        // }
-
+			                            }
+			                        });
+		                        }
 
 
 
@@ -766,21 +762,9 @@ function getGooglePlaceID(name, address, googleAPI){
 // 		//}
 // 	});
 // }
-var queryURL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephens+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
+// var queryURL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephens+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
 
-
-// var cityAndZip = docs[0].source_yelp.locationInfo.display_address[docs[0].source_yelp.locationInfo.display_address.length - 1];
-// var streetAddress = docs[0].source_yelp.locationInfo.display_address[0];
 getGooglePlaceID(queryURL);
-
-
-
-
-
-
-
-
-
 
 		                        if(typeof business.name=='undefined')
 		                        {
