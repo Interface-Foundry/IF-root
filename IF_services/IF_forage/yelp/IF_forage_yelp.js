@@ -92,26 +92,6 @@ var zipHigh = 99950;
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
 
-function updateLandmark(){
-  docs[0].save(function(err,docs){
-
-      if(err){
-
-          console.log("Erorr Occurred");
-          console.log(err)
-      }
-      else if(!err)
-      {
-          console.log("documents saved");
-      }
-      else{
-
-          console.log('jajja')
-
-      }
-  });
-}
-
 
 //search meetup in loops
 async.whilst(
@@ -655,158 +635,6 @@ function searchYelp(tag, done) {
 
 								//if document is already save in db then update it
 
-
-function getGooglePlaceID(name, address, googleAPI){
-	var queryTermsToGetPlaceID = (name + "+" + address).replace(/,/g, "").replace(/\s/g, "+");
-	var queryURLToGetPlaceID ="https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
-	console.log(queryURLToGetPlaceID);
-
-	request({uri: queryURLToGetPlaceID, json:true}, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
-
-			//In case of more than one result, loop through to pick the one with the same zip code. 
-			//Test case many results, highest one is wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
-			//Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
-
-			if (body.results.length >= 1) {
-				//loop through them and pick the one that matches the coordinates
-				for (i = 0; i < body.results.length; i++) { 
-				    if (body.results[i].formatted_address.indexOf(", United States") > 0) {
-				    	var googleZip = body.results[i].formatted_address.replace(/, United States/g, "").substr(-5, 5);
-				    	if (googleZip == docs[0].source_yelp.locationInfo.postal_code){
-
-				    		var placeID = body.results[i].place_id;
-								console.log(name, "   _id:  ", docs[i]._id, "  place_id:", placeID); 
-								docs[0].source_google_on = true;
-
-								docs[0].source_google.placeID = body.results[i].place_id;
-
-								function addGoogleDetails(placeID, googleAPI){
-									var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
-									
-									console.log(queryURLToGetDetails);
-
-									request({uri: queryURLToGetDetails, json:true}, function (error, response, body) {
-										if (!error && response.statusCode == 200) {
-											console.log("Hello World");
-										  docs[0].source_google.placeID = placeID;
-										  docs[0].source_google.icon = body.result.icon;
-										  // docs[0].source_google.opening_hours = body.result.opening_hours;										  
-															if (typeof body.result.opening_hours=='undefined')
-			                        {
-			                            docs[0].source_google.opening_hours="";
-			                        }
-			                        else{
-			                            docs[0].source_google.opening_hours=business.url;
-			                        }	
-										  //docs[0].source_google.weekday_text = body.result.weekday_text;
-															if (typeof body.result.weekday_text=='undefined')
-			                        {
-			                            docs[0].source_google.weekday_text="";
-			                        }
-			                        else{
-			                            docs[0].source_google.weekday_text=body.result.weekday_text;
-			                        }	
-										 // docs[0].source_google.international_phone_number = body.result.international_phone_number;
-										  			 if (typeof body.result.international_phone_number=='undefined')
-			                        {
-			                            docs[0].source_google.international_phone_number="";
-			                        }
-			                        else{
-			                            docs[0].source_google.international_phone_number=body.result.international_phone_number;
-			                        }	
-										  docs[0].source_google.price_level = body.result.price_level;
-										 // docs[0].source_google.reviews = body.result.reviews;
-										  				if (typeof body.result.reviews=='undefined')
-			                        {
-			                            docs[0].source_google.reviews="";
-			                        }
-			                        else{
-			                            docs[0].source_google.reviews=body.result.reviews;
-			                        }	
-										  docs[0].source_google.url = body.result.url;
-										 // docs[0].source_google.website = body.result.website;
-										 					if (typeof body.result.website=='undefined')
-			                        {
-			                            docs[0].source_google.website="";
-			                        }
-			                        else{
-			                            docs[0].source_google.website=body.result.website;
-			                        }	
-										  docs[0].source_google.types = body.result.types;
-										  docs[0].source_google.utc_offset = body.result.utc_offset;
-										  docs[0].source_google.vicinity = body.result.vicinity;
-
-		                        function updateLandmark(){
-		                        	console.log("hello world TWO");
-			                        docs[0].save(function(err,docs){
-
-			                            if(err){
-
-			                                console.log("Erorr Occurred");
-			                                console.log(err)
-			                            }
-			                            else if(!err)
-			                            {
-			                                console.log("documents saved");
-			                            }
-			                            else{
-
-			                                console.log('jajja')
-
-			                            }
-			                        });
-		                        }
-
-									updateLandmark();
-
-										}
-									});
-								}
-
-
-								addGoogleDetails(body.results[i].place_id, googleAPI);
-
-
-								break;
-				    	}
-				    }
-				}
-			}
-			else {
-				console.log("NO RESULTS");
-			}
-
-		}
-	});
-}
-		                        // function updateLandmark(){
-			                       //  docs[0].save(function(err,docs){
-
-			                       //      if(err){
-
-			                       //          console.log("Erorr Occurred");
-			                       //          console.log(err)
-			                       //      }
-			                       //      else if(!err)
-			                       //      {
-			                       //          //console.log("documents saved");
-			                       //      }
-			                       //      else{
-
-			                       //          //console.log('jajja')
-
-			                       //      }
-			                       //  });
-		                        // }
-
-// }
-// 		//}
-// 	});
-// }
-
-getGooglePlaceID(docs[0].name, docs[0].source_yelp.locationInfo.address + " " + docs[0].source_yelp.locationInfo.postal_code, googleAPI);
-
 		                        if(typeof business.name=='undefined')
 		                        {
 		                            docs[0].name=0;
@@ -1142,25 +970,25 @@ getGooglePlaceID(docs[0].name, docs[0].source_yelp.locationInfo.address + " " + 
 
 
 
-		                        // function updateLandmark(){
-			                       //  docs[0].save(function(err,docs){
+		                        function updateLandmark(){
+			                        docs[0].save(function(err,docs){
 
-			                       //      if(err){
+			                            if(err){
 
-			                       //          console.log("Erorr Occurred");
-			                       //          console.log(err)
-			                       //      }
-			                       //      else if(!err)
-			                       //      {
-			                       //          console.log("documents saved");
-			                       //      }
-			                       //      else{
+			                                console.log("Erorr Occurred");
+			                                console.log(err)
+			                            }
+			                            else if(!err)
+			                            {
+			                                //console.log("documents saved");
+			                            }
+			                            else{
 
-			                       //          console.log('jajja')
+			                               // console.log('jajja')
 
-			                       //      }
-			                       //  });
-		                        // }
+			                            }
+			                        });
+		                        }
 
 
 
@@ -1193,7 +1021,7 @@ getGooglePlaceID(docs[0].name, docs[0].source_yelp.locationInfo.address + " " + 
 
 
 
-function getLatLong(business,callback){
+function getLatLong(business,callback){ //Function should be called lookInMongoDB
 
     // var adress=business.location.address;
 
