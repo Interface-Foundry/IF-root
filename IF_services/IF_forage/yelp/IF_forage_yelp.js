@@ -11,8 +11,6 @@ var im = require("imagemagick");
 var crypto = require('crypto');
 var AWS = require('aws-sdk'); 
 
-
-
 app.use(logger('dev'));
 
 var bodyParser = require('body-parser');
