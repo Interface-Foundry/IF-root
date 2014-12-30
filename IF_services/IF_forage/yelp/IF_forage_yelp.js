@@ -59,7 +59,10 @@ var yelp = require("yelp").createClient({
 });
 
 //April Google Creds:
-var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
+//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
+
+//JR Google Creds:
+var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 /*
 	CREATED FILE FOR AWS KEYS:
@@ -452,6 +455,7 @@ function searchYelp(tag, done) {
 							            st.widgets.photo_share = forumStyle.widgets.photo_share;
 							            st.widgets.stickers = forumStyle.widgets.stickers;
 							            st.widgets.streetview = forumStyle.widgets.streetview;
+							            st.widgets.nearby = forumStyle.widgets.nearby; //Added by April
 
 							            
 							            function saveIt(callback){
@@ -651,18 +655,17 @@ function searchYelp(tag, done) {
 
 								//if document is already save in db then update it
 
-//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c'
 
 function getGooglePlaceID(name, address, googleAPI){
 	var queryTermsToGetPlaceID = (name + "+" + address).replace(/,/g, "").replace(/\s/g, "+");
-	var queryURLToGetPlaceID ="https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTerms + "&key=" + googleAPI;
+	var queryURLToGetPlaceID ="https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
 	console.log(queryURLToGetPlaceID);
 
 	request({uri: queryURLToGetPlaceID, json:true}, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
-			
-			//In case of more than one result, looping through to pick the one with the same zip code. 
-			//Test case many results, top one wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
+
+			//In case of more than one result, loop through to pick the one with the same zip code. 
+			//Test case many results, highest one is wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
 			//Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
 
 			if (body.results.length >= 1) {
@@ -675,17 +678,17 @@ function getGooglePlaceID(name, address, googleAPI){
 				    		var placeID = body.results[i].place_id;
 								console.log(name, "   _id:  ", docs[i]._id, "  place_id:", placeID); 
 								docs[0].source_google_on = true;
+
 								docs[0].source_google.placeID = body.results[i].place_id;
 
 								function addGoogleDetails(placeID, googleAPI){
 									var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
 									
-									console.log(queryURL);
+									console.log(queryURLToGetDetails);
 
 									request({uri: queryURLToGetDetails, json:true}, function (error, response, body) {
 										if (!error && response.statusCode == 200) {
-
-											docs[0].source_google = [];
+											console.log("Hello World");
 										  docs[0].source_google.placeID = placeID;
 										  docs[0].source_google.icon = body.result.icon;
 										  // docs[0].source_google.opening_hours = body.result.opening_hours;										  
@@ -734,17 +737,36 @@ function getGooglePlaceID(name, address, googleAPI){
 										  docs[0].source_google.utc_offset = body.result.utc_offset;
 										  docs[0].source_google.vicinity = body.result.vicinity;
 
-											console.log("DOCS[0] ", docs[0]);
+		                        function updateLandmark(){
+		                        	console.log("hello world TWO");
+			                        docs[0].save(function(err,docs){
 
+			                            if(err){
+
+			                                console.log("Erorr Occurred");
+			                                console.log(err)
+			                            }
+			                            else if(!err)
+			                            {
+			                                console.log("documents saved");
+			                            }
+			                            else{
+
+			                                console.log('jajja')
+
+			                            }
+			                        });
+		                        }
+
+									updateLandmark();
 
 										}
 									});
 								}
-								//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c' //Monday afternoon moved it up
 
 
 								addGoogleDetails(body.results[i].place_id, googleAPI);
-								updateLandmark();
+
 
 								break;
 				    	}
@@ -758,7 +780,6 @@ function getGooglePlaceID(name, address, googleAPI){
 		}
 	});
 }
-	
 		                        // function updateLandmark(){
 			                       //  docs[0].save(function(err,docs){
 
@@ -778,8 +799,6 @@ function getGooglePlaceID(name, address, googleAPI){
 			                       //      }
 			                       //  });
 		                        // }
-
-
 
 // }
 // 		//}
