@@ -47,12 +47,13 @@ var cloudMapID = 'interfacefoundry.jh58g2al';
 // });
 
 //April Yelp Creds:
-var yelp = require("yelp").createClient({
-    consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
-    consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
-    token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
-    token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
-});
+var yelp = require("yelp")
+    .createClient({
+        consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
+        consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
+        token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
+        token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
+    });
 
 //April Google Creds:
 //var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
@@ -70,20 +71,25 @@ findLatestYelpRecord();
 
 function findLatestYelpRecord() {
 
-    landmarks.model(false).find().exists('source_yelp.id').sort("-_id").limit(1).exec(function(err, docs) {
-        if (err) {
-            console.log("Error Occured: ", err);
-        } else if (docs.length > 0) {
-            // console.log("Oldest of 20 is ", docs[19].name, docs[19]._id);
-            // console.log("Youngest of 20 is ", doc.name, doc._id);
-            //console.log("doc", doc);
-            console.log("docs[0].name, _id", docs[0].name, docs[0]._id);
-            var docZero = docs[0];
-            getGooglePlaceID(docZero);
-        } else {
-            console.log('No Documents');
-        }
-    });
+    landmarks.model(false)
+        .find()
+        .exists('source_yelp.id')
+        .sort("-_id")
+        .limit(1)
+        .exec(function(err, docs) {
+            if (err) {
+                console.log("Error Occured: ", err);
+            } else if (docs.length > 0) {
+                // console.log("Oldest of 20 is ", docs[19].name, docs[19]._id);
+                // console.log("Youngest of 20 is ", doc.name, doc._id);
+                //console.log("doc", doc);
+                console.log("docs[0].name, _id", docs[0].name, docs[0]._id);
+                var docZero = docs[0];
+                getGooglePlaceID(docZero);
+            } else {
+                console.log('No Documents');
+            }
+        });
 }
 
 
@@ -92,7 +98,9 @@ function getGooglePlaceID(doc) {
     var name = doc.name;
     var address = doc.source_yelp.locationInfo.address;
     var zip = doc.source_yelp.locationInfo.postal_code;
-    var queryTermsToGetPlaceID = (name + "+" + address + "+" + zip).replace(/,/g, "").replace(/\s/g, "+");
+    var queryTermsToGetPlaceID = (name + "+" + address + "+" + zip)
+        .replace(/,/g, "")
+        .replace(/\s/g, "+");
     var queryURLToGetPlaceID = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
     console.log(queryURLToGetPlaceID);
 
@@ -115,7 +123,8 @@ function getGooglePlaceID(doc) {
 
                     if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
 
-                        var googleZip = body.results[i].formatted_address.replace(/, United States/g, "").substr(-5, 5);
+                        var googleZip = body.results[i].formatted_address.replace(/, United States/g, "")
+                            .substr(-5, 5);
                         if (googleZip == zip) {
 
                             var placeID = body.results[i].place_id;
@@ -138,7 +147,7 @@ function getGooglePlaceID(doc) {
 
                                         doc.source_google.placeID = placeID;
                                         doc.source_google.icon = body.result.icon;
-                                        // doc.source_google.opening_hours = body.result.opening_hours;										  
+                                        // doc.source_google.opening_hours = body.result.opening_hours;                                       
                                         if (typeof body.result.opening_hours == 'undefined') {
                                             doc.source_google.opening_hours = "";
                                         } else {
@@ -186,7 +195,7 @@ function getGooglePlaceID(doc) {
                                                     console.log("documents saved");
                                                 } else {
 
-                                                    console.log('jajja')
+                                                    console.log('jajja');
 
                                                 }
                                             });
@@ -202,12 +211,18 @@ function getGooglePlaceID(doc) {
 
                             break;
                         }
+                    } 
+                    else {
+                        console.log('no matching results')
                     }
                 }
-            } else {
-                console.log("NO RESULTS");
+            } 
+            else {
+                console.log("no matching results2")
             }
-
+        } 
+        else {
+            console.log("NO RESULTS");
         }
     });
 }
