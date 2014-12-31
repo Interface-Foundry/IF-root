@@ -61,16 +61,28 @@ var yelp = require("yelp")
 //JR Google Creds:
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
+countYelpRecords();
 
-//start with the youngest from mongo.  DONE
-//get and save info from google. DONE
-//
-//later start with a batch of 20 from mongo. //Loop through that batch, for each getting and saving info from google. //can I update 20 at a time in the database? bc it may reduce pressure on the server.
+function countYelpRecords(){
 
-findLatestYelpRecord();
+    landmarks.model(false)
+        .find()
+        .exists('source_yelp.id')
+        .exec(function(err, docs) {
+            if (err) {
+                console.log("Error Occured: ", err);
+            } else if (docs.length > 0) {
+                var sizeOfDb = docs.length;
+                console.log(sizeOfDb);
+                findLatestYelpRecord(sizeOfDb);
+            } else {
+                console.log('No Documents');
+            }
+        });
+}
 
-function findLatestYelpRecord() {
-
+function findLatestYelpRecord(sizeOfDb) {
+    console.log("findLatestYelpRecord", sizeOfDb);
     landmarks.model(false)
         .find()
         .exists('source_yelp.id')
@@ -78,23 +90,67 @@ function findLatestYelpRecord() {
         .limit(1)
         .exec(function(err, docs) {
             if (err) {
-                console.log("Error Occured: ", err);
+                console.log("Error Occured in findLatestYelpRecord: ", err);
             } else if (docs.length > 0) {
-                // console.log("Oldest of 20 is ", docs[19].name, docs[19]._id);
-                // console.log("Youngest of 20 is ", doc.name, doc._id);
-                //console.log("doc", doc);
-                console.log("docs[0].name, _id", docs[0].name, docs[0]._id);
+                console.log("docsZero.name, date", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
-                getGooglePlaceID(docZero);
+                loopThroughYelpRecords(docZero, 3);
             } else {
-                console.log('No Documents');
+                console.log('No Documents found in findLatestYelpRecord');
             }
         });
+}
+
+function loopThroughYelpRecords(doc, sizeOfDb){
+    console.log("about to loop ThroughYelpRecords", doc.name, sizeOfDb);
+
+
+    for (i = 0; i < sizeOfDb; i++){
+        // var j = i; 
+
+    var currentID = doc._id;
+
+    landmarks.model(false)
+        .find()
+        .exists('source_yelp.id')
+        .where("_id")
+        .lt(currentID)
+        .sort("-id")
+        .limit(1)
+        .exec(function(err, docs) {
+            if (err) {
+                console.log("Error Occured in loopThroughYelpRecords: ", err);
+            } 
+            else if (docs.length > 0) {
+                (function (docs){ //when incrementing the ID, must wrap within a new function to establish new scope
+                console.log(docs[0].name, docs[0].time.created);
+                //getGooglePlaceID(docs[0]);
+
+
+                // if (j == sizeOfDb.length ){
+                //     //countYelpRecords();
+                // }
+                
+                })(docs);
+                var currentID = docs[0]._id;
+            } 
+            else {
+                setTimeout(function(){console.log('No Documents found in loopThroughYelpRecords')}, 3000);
+                //currentID = docs[0]._id;
+                console.log("currentID no docs", currentID);
+                // if (j == sizeOfDb.length ){
+                //     countYelpRecords();
+
+                // }
+            }
+        });
+    }
 }
 
 
 
 function getGooglePlaceID(doc) {
+    console.log("getGooglePlaceID", doc.name);
     var name = doc.name;
     var address = doc.source_yelp.locationInfo.address;
     var zip = doc.source_yelp.locationInfo.postal_code;
@@ -130,11 +186,10 @@ function getGooglePlaceID(doc) {
                             var placeID = body.results[i].place_id;
                             console.log(name, "   _id:  ", doc._id, "  place_id:", placeID); //here it is!
 
-                            doc.source_google_on = true;
-
                             doc.source_google.placeID = body.results[i].place_id;
 
                             function addGoogleDetails(placeID) {
+                                console.log("addGoogleDetails", placeID);
                                 var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
 
                                 console.log(queryURLToGetDetails);
@@ -184,7 +239,7 @@ function getGooglePlaceID(doc) {
                                         doc.source_google.vicinity = body.result.vicinity;
 
                                         function updateLandmark() {
-
+                                            console.log("UPDATING LANDMARK");
                                             doc.save(function(err, docs) {
 
                                                 if (err) {
@@ -202,27 +257,28 @@ function getGooglePlaceID(doc) {
                                         }
 
                                         updateLandmark();
+                                        console.log("already updated landmark");
 
                                     }
                                 });
                             }
 
                             addGoogleDetails(body.results[i].place_id, googleAPI);
+                            console.log("Already added Google Details");
 
-                            break;
                         }
                     } 
                     else {
-                        console.log('no matching results')
+                        setTimeout(function(){console.log('no results w same zip code')}, 10000);
                     }
                 }
             } 
             else {
-                console.log("no matching results2")
+                console.log("no matching results")
             }
         } 
         else {
-            console.log("NO RESULTS");
+            console.log("no results");
         }
     });
 }

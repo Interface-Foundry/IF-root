@@ -171,7 +171,6 @@ module.exports = {
 			business_image_md5: String,
 			rating_image: String
 		},
-		source_google_on: Boolean,
 		source_google: {
 			placeID: String,
 			icon: String,
