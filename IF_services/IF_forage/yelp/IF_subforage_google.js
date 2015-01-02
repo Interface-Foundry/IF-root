@@ -60,6 +60,7 @@ var yelp = require("yelp")
 
 //JR Google Creds:
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
+var startLoopTime = new Date();
 
 countYelpRecords();
 
@@ -133,13 +134,15 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
                             console.log("in exec callback of mongo query ", docs[0].name);
                             getGooglePlaceID(docs[0]);
                             repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
-                        }, 1000);
+                        }, 2000);
                     }
                 });            
          })();
     }
     else {
-        console.log("Done with all Yelp records in database.")
+        var endLoopTime = new Date();
+        console.log("Done with all Yelp records in database. Records (i): ", i, (endLoopTime - startLoopTime)/1000, "seconds");
+
     }
 
 }
@@ -170,7 +173,7 @@ function getGooglePlaceID(doc) {
 
 
                 for (i = 0; i < body.results.length; i++) {
-                    console.log("looping through Google results in query for placeID of", name);
+                    console.log("looping through Google results in query for placeID of", name, "in zip:", zip);
 
                     if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
 
