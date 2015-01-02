@@ -94,7 +94,7 @@ function findLatestYelpRecord(sizeOfDb) {
             } else if (docs.length > 0) {
                 console.log("docsZero.name, date", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
-                repeaterThroughYelpRecords(0, docZero, 10);
+                repeaterThroughYelpRecords(0, docZero, 20);
             } else {
                 console.log('No Documents found in findLatestYelpRecord');
             }
@@ -107,90 +107,91 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
 
     console.log('in first line of repeater', doc.name);
 
-        if (i < sizeOfDb){
-            console.log(i, " about to query: ", doc.name, doc.id, doc.time.created);
+    if (i < sizeOfDb){
 
-            (function(){
-                landmarks.model(false)
-                    .find()
-                    .exists('source_yelp.id')
-                    .where("_id")
-                    .lt(doc)
-                    .sort("-id")
-                    .limit(1)
-                    .exec(function(err, docs) {
-                        if (err) {
-                            console.log(err);
-                        }
-                        else if (docs > 1){
-                            console.log("docs > 1");
-                        }
-                        else if (docs < 1){
-                            console.log("docs < 1");
-                            console.log('DOCS', docs);
-                            repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
-                        }
-                        else {
-                            
-                            console.log("in exec of mongo query ", docs[0].name);
-                            getGooglePlaceID(docs[0]);
-                            repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
-                        }
-                    });            
-            })();
+        console.log(i, " about to query: ", doc.name, doc.id, doc.time.created);
+
+        (function(){
+            landmarks.model(false)
+                .find()
+                .exists('source_yelp.id')
+                .where("_id")
+                .lt(doc._id)
+                .sort("id")
+                .limit(1)
+                .exec(function(err, docs) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    else if (docs > 1){
+                        console.log("docs > 1");
+                    }
+                    else if (docs < 1){
+                        console.log("docs < 1");
+                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                    }
+                    else {
+                        
+                        console.log("in exec callback of mongo query ", docs[0].name);
+                        getGooglePlaceID(docs[0]);
+                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                    }
+                });            
+         })();
     }
+    //need an "else find latest Yelp Record" to loop back to beginning of file here
 }
 
 
 
-function loopThroughYelpRecords(doc, sizeOfDb){
-    console.log("about to loop ThroughYelpRecords", doc.name, sizeOfDb);
+// function loopThroughYelpRecords(doc, sizeOfDb){
+//     console.log("about to loop ThroughYelpRecords", doc.name, sizeOfDb);
 
-    var currentID = doc._id;
+//     var currentID = doc._id;
 
-    for (i = 0; i < sizeOfDb; i++){
-        // var j = i; 
-        console.log('weird',currentID);
-        console.log("current id first ", currentID);
+//     for (i = 0; i < sizeOfDb; i++){
+//         // var j = i; 
+//         console.log('weird',currentID);
+//         console.log("current id first ", currentID);
 
-    landmarks.model(false)
-        .find()
-        .exists('source_yelp.id')
-        .where("_id")
-        .lt(currentID)
-        .sort("-id")
-        .limit(1)
-        .exec(function(err, docs) {
-            if (err) {
-                console.log("Error Occured in loopThroughYelpRecords: ", err);
-            } 
-            else if (docs.length > 0) {
-                //(function (docs){ //when incrementing the ID, must wrap within a new function to establish new scope
-                console.log(docs[0].name, docs[0].time.created);
-                //getGooglePlaceID(docs[0]);
+//     landmarks.model(false)
+//         .find()
+//         .exists('source_yelp.id')
+//         .where("_id")
+//         .lt(currentID)
+//         .sort("-id")
+//         .limit(1)
+//         .exec(function(err, docs) {
+//             if (err) {
+//                 console.log("Error Occured in loopThroughYelpRecords: ", err);
+//             } 
+//             else if (docs.length > 0) {
+//                 //(function (docs){ //when incrementing the ID, must wrap within a new function to establish new scope
+//                 console.log(docs[0].name, docs[0].time.created);
+//                 //getGooglePlaceID(docs[0]);
 
 
-                // if (j == sizeOfDb.length ){
-                //     //countYelpRecords();
-                // }
+//                 // if (j == sizeOfDb.length ){
+//                 //     //countYelpRecords();
+//                 // }
                 
-                //})(docs);
-                console.log("current id", currentID);
-                console.log("docs[0].id", docs[0]._id);
-                currentID = docs[0]._id;
-            } 
-            else {
-                setTimeout(function(){console.log('No Documents found in loopThroughYelpRecords')}, 3000);
-                //currentID = docs[0]._id;
-                console.log("currentID no docs", currentID);
-                // if (j == sizeOfDb.length ){
-                //     countYelpRecords();
+//                 //})(docs);
+//                 console.log("current id", currentID);
+//                 console.log("docs[0].id", docs[0]._id);
+//                 currentID = docs[0]._id;
+//             } 
+//             else {
+//                 setTimeout(function(){console.log('No Documents found in loopThroughYelpRecords')}, 3000);
+//                 //currentID = docs[0]._id;
+//                 console.log("currentID no docs", currentID);
+//                 // if (j == sizeOfDb.length ){
+//                 //     countYelpRecords();
 
-                // }
-            }
-        });
-    }
-}
+//                 // }
+//             }
+//         });
+//     }
+// }
 
 
 
