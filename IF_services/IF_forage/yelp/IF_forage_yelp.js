@@ -41,20 +41,20 @@ var forumStyle = require('./forum_theme.json');
 var cloudMapName = 'forum';
 var cloudMapID ='interfacefoundry.jh58g2al';
 //JR Yelp Creds
-// var yelp = require("yelp").createClient({
-//     consumer_key: "dyjR4bZkmcD_CpOTYx2Ekg",
-//     consumer_secret: "Coq5UbKKXYWmPy3TZf9hmNODirg",
-//     token: "_dDYbpK4qdeV3BWlm6ShoQdKUnz1IwCO",
-//     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
-// });
+var yelp = require("yelp").createClient({
+    consumer_key: "dyjR4bZkmcD_CpOTYx2Ekg",
+    consumer_secret: "Coq5UbKKXYWmPy3TZf9hmNODirg",
+    token: "_dDYbpK4qdeV3BWlm6ShoQdKUnz1IwCO",
+    token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
+});
 
 //April Yelp Creds:
-var yelp = require("yelp").createClient({
-	consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
-	consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
-	token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
-	token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
-});
+// var yelp = require("yelp").createClient({
+// 	consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
+// 	consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
+// 	token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
+// 	token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
+// });
 
 //April Google Creds:
 //var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
@@ -81,11 +81,9 @@ var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 */
 
 var awsBucket = "if.forage.yelp.images";
-// var zipLow = 1001;
-// var zipHigh = 99950;
+var zipLow = 1001;
+var zipHigh = 99950;
 
- var zipLow = 93003;
- var zipHigh = 93004;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
