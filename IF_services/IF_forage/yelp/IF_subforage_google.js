@@ -141,7 +141,6 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
     else {
         var endLoopTime = new Date();
         console.log("Done with all Yelp records in database. Records (i): ", i, (endLoopTime - startLoopTime)/1000, "seconds"); //Google allows 100,000 queries per day. Each loop/doc involves two google queries
-
     }
 
 }
@@ -212,8 +211,6 @@ function addGoogleDetails(placeID, name, doc) {
 
         if (!error && response.statusCode == 200) {
 
-            console.log("does this match?", doc.name, doc.zip, body.result.formatted_address);
-            
             doc.source_google.placeID = placeID;
             doc.source_google.icon = body.result.icon;
             // doc.source_google.opening_hours = body.result.opening_hours;                                       
@@ -249,6 +246,7 @@ function addGoogleDetails(placeID, name, doc) {
                 doc.source_google.website = body.result.website;
             }
             doc.source_google.types = body.result.types;
+            doc.type = body.result.types[0];
             doc.source_google.utc_offset = body.result.utc_offset;
             doc.source_google.vicinity = body.result.vicinity;
 
