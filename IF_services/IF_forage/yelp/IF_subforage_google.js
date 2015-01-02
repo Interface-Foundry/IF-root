@@ -139,7 +139,7 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
          })();
     }
     else {
-        console.log("Done with all yelp records in database.")
+        console.log("Done with all Yelp records in database.")
     }
 
 }
@@ -183,82 +183,7 @@ function getGooglePlaceID(doc) {
 
                             doc.source_google.placeID = body.results[i].place_id;
 
-                            function addGoogleDetails(placeID) {
-                                console.log("getting Google details for ", name, "  ", placeID);
-                                var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
-
-                                console.log(queryURLToGetDetails);
-
-                                request({
-                                    uri: queryURLToGetDetails,
-                                    json: true
-                                }, function(error, response, body) {
-
-                                    if (!error && response.statusCode == 200) {
-                                        console.log("google details search response for ", name, ":  ", 200);
-                                        doc.source_google.placeID = placeID;
-                                        doc.source_google.icon = body.result.icon;
-                                        // doc.source_google.opening_hours = body.result.opening_hours;                                       
-                                        if (typeof body.result.opening_hours == 'undefined') {
-                                            doc.source_google.opening_hours = "";
-                                        } else {
-                                            doc.source_google.opening_hours = '';
-                                        }
-                                        //doc.source_google.weekday_text = body.result.weekday_text;
-                                        if (typeof body.result.weekday_text == 'undefined') {
-                                            doc.source_google.weekday_text = "";
-                                        } else {
-                                            doc.source_google.weekday_text = body.result.weekday_text;
-                                        }
-                                        // doc.source_google.international_phone_number = body.result.international_phone_number;
-                                        if (typeof body.result.international_phone_number == 'undefined') {
-                                            doc.source_google.international_phone_number = "";
-                                        } else {
-                                            doc.source_google.international_phone_number = body.result.international_phone_number;
-                                        }
-                                        doc.source_google.price_level = body.result.price_level;
-                                        // doc.source_google.reviews = body.result.reviews;
-                                        if (typeof body.result.reviews == 'undefined') {
-                                            doc.source_google.reviews = "";
-                                        } else {
-                                            doc.source_google.reviews = body.result.reviews;
-                                        }
-                                        doc.source_google.url = body.result.url;
-                                        // doc.source_google.website = body.result.website;
-                                        if (typeof body.result.website == 'undefined') {
-                                            doc.source_google.website = "";
-                                        } else {
-                                            doc.source_google.website = body.result.website;
-                                        }
-                                        doc.source_google.types = body.result.types;
-                                        doc.source_google.utc_offset = body.result.utc_offset;
-                                        doc.source_google.vicinity = body.result.vicinity;
-
-                                        function updateLandmark() {
-                                            console.log("UPDATING LANDMARK");
-                                            doc.save(function(err, docs) {
-
-                                                if (err) {
-
-                                                    console.log("Erorr Occurred");
-                                                    console.log(err)
-                                                } else if (!err) {
-                                                    console.log("documents saved");
-                                                } else {
-
-                                                    console.log('jajja');
-
-                                                }
-                                            });
-                                        }
-
-                                        updateLandmark();
-
-                                    }
-                                });
-                            }
-
-                            addGoogleDetails(body.results[i].place_id, googleAPI);
+                            addGoogleDetails(body.results[i].place_id, body.results[i].name, doc);
 
                         }
                     } 
@@ -273,6 +198,78 @@ function getGooglePlaceID(doc) {
         } 
         else {
             console.log("no results");
+        }
+    });
+}
+
+function addGoogleDetails(placeID, name, doc) {
+    console.log("getting Google details for", name, "  ", placeID);
+    var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+
+    console.log(queryURLToGetDetails);
+
+    request({
+        uri: queryURLToGetDetails,
+        json: true
+    }, function(error, response, body) {
+
+        if (!error && response.statusCode == 200) {
+            console.log("google details search response for ", name, ":  ", 200);
+            doc.source_google.placeID = placeID;
+            doc.source_google.icon = body.result.icon;
+            // doc.source_google.opening_hours = body.result.opening_hours;                                       
+            if (typeof body.result.opening_hours == 'undefined') {
+                doc.source_google.opening_hours = "";
+            } else {
+                doc.source_google.opening_hours = '';
+            }
+            //doc.source_google.weekday_text = body.result.weekday_text;
+            if (typeof body.result.weekday_text == 'undefined') {
+                doc.source_google.weekday_text = "";
+            } else {
+                doc.source_google.weekday_text = body.result.weekday_text;
+            }
+            // doc.source_google.international_phone_number = body.result.international_phone_number;
+            if (typeof body.result.international_phone_number == 'undefined') {
+                doc.source_google.international_phone_number = "";
+            } else {
+                doc.source_google.international_phone_number = body.result.international_phone_number;
+            }
+            doc.source_google.price_level = body.result.price_level;
+            // doc.source_google.reviews = body.result.reviews;
+            if (typeof body.result.reviews == 'undefined') {
+                doc.source_google.reviews = "";
+            } else {
+                doc.source_google.reviews = body.result.reviews;
+            }
+            doc.source_google.url = body.result.url;
+            // doc.source_google.website = body.result.website;
+            if (typeof body.result.website == 'undefined') {
+                doc.source_google.website = "";
+            } else {
+                doc.source_google.website = body.result.website;
+            }
+            doc.source_google.types = body.result.types;
+            doc.source_google.utc_offset = body.result.utc_offset;
+            doc.source_google.vicinity = body.result.vicinity;
+
+            updateLandmark(doc);
+
+        }
+    });
+}
+
+
+function updateLandmark(doc) {
+    console.log("Updating landmark");
+    doc.save(function(err, docs) {
+
+        if (err) {
+            console.log(err)
+        } else if (!err) {
+            console.log("Landmark updated");
+        } else {
+            console.log('jajja');
         }
     });
 }
