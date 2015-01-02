@@ -641,6 +641,7 @@ function searchYelp(tag, done) {
 		                            docs[0].name=business.name;
 		                        }
 
+
 		                        if(typeof business.description=='undefined')
 		                        {
 		                            //docs[0].description=0;
