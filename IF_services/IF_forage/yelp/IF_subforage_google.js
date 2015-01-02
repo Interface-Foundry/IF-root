@@ -94,7 +94,7 @@ function findLatestYelpRecord(sizeOfDb) {
             } else if (docs.length > 0) {
                 console.log("docsZero.name, date", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
-                repeaterThroughYelpRecords(0, docZero, 5);
+                repeaterThroughYelpRecords(0, docZero, 10);
             } else {
                 console.log('No Documents found in findLatestYelpRecord');
             }
@@ -105,9 +105,10 @@ function findLatestYelpRecord(sizeOfDb) {
 
 function repeaterThroughYelpRecords(i, doc, sizeOfDb){
 
+    console.log('in first line of repeater', doc.name);
 
         if (i < sizeOfDb){
-            console.log("looping ThroughYelpRecords recursively", i, doc.name, sizeOfDb);
+            console.log(i, " about to query: ", doc.name, doc.id, doc.time.created);
 
             (function(){
                 landmarks.model(false)
@@ -118,11 +119,25 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
                     .sort("-id")
                     .limit(1)
                     .exec(function(err, docs) {
-  
-                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                        if (err) {
+                            console.log(err);
+                        }
+                        else if (docs > 1){
+                            console.log("docs > 1");
+                        }
+                        else if (docs < 1){
+                            console.log("docs < 1");
+                            console.log('DOCS', docs);
+                            repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                        }
+                        else {
+                            
+                            console.log("in exec of mongo query ", docs[0].name);
+                            getGooglePlaceID(docs[0]);
+                            repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                        }
                     });            
             })();
-
     }
 }
 
@@ -181,134 +196,134 @@ function loopThroughYelpRecords(doc, sizeOfDb){
 
 function getGooglePlaceID(doc) {
     console.log("getGooglePlaceID", doc.name);
-    var name = doc.name;
-    var address = doc.source_yelp.locationInfo.address;
-    var zip = doc.source_yelp.locationInfo.postal_code;
-    var queryTermsToGetPlaceID = (name + "+" + address + "+" + zip)
-        .replace(/,/g, "")
-        .replace(/\s/g, "+");
-    var queryURLToGetPlaceID = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
-    console.log(queryURLToGetPlaceID);
+    // var name = doc.name;
+    // var address = doc.source_yelp.locationInfo.address;
+    // var zip = doc.source_yelp.locationInfo.postal_code;
+    // var queryTermsToGetPlaceID = (name + "+" + address + "+" + zip)
+    //     .replace(/,/g, "")
+    //     .replace(/\s/g, "+");
+    // var queryURLToGetPlaceID = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
+    // console.log(queryURLToGetPlaceID);
 
 
-    request({
-        uri: queryURLToGetPlaceID,
-        json: true
-    }, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
+    // request({
+    //     uri: queryURLToGetPlaceID,
+    //     json: true
+    // }, function(error, response, body) {
+    //     if (!error && response.statusCode == 200) {
 
-            //In case of more than one result, loop through to pick the one with the same zip code. 
-            //Test case many results, highest one is wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
-            //Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
+    //         //In case of more than one result, loop through to pick the one with the same zip code. 
+    //         //Test case many results, highest one is wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
+    //         //Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
 
-            if (body.results.length >= 1) { //loop through them and pick the one that matches the coordinates
+    //         if (body.results.length >= 1) { //loop through them and pick the one that matches the coordinates
 
 
-                for (i = 0; i < body.results.length; i++) {
-                    console.log("looping through results in text search for placeID");
+    //             for (i = 0; i < body.results.length; i++) {
+    //                 console.log("looping through results in text search for placeID");
 
-                    if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
+    //                 if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
 
-                        var googleZip = body.results[i].formatted_address.replace(/, United States/g, "")
-                            .substr(-5, 5);
-                        if (googleZip == zip) {
+    //                     var googleZip = body.results[i].formatted_address.replace(/, United States/g, "")
+    //                         .substr(-5, 5);
+    //                     if (googleZip == zip) {
 
-                            var placeID = body.results[i].place_id;
-                            console.log(name, "   _id:  ", doc._id, "  place_id:", placeID); //here it is!
+    //                         var placeID = body.results[i].place_id;
+    //                         console.log(name, "   _id:  ", doc._id, "  place_id:", placeID); //here it is!
 
-                            doc.source_google.placeID = body.results[i].place_id;
+    //                         doc.source_google.placeID = body.results[i].place_id;
 
-                            function addGoogleDetails(placeID) {
-                                console.log("addGoogleDetails", placeID);
-                                var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+    //                         function addGoogleDetails(placeID) {
+    //                             console.log("addGoogleDetails", placeID);
+    //                             var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
 
-                                console.log(queryURLToGetDetails);
+    //                             console.log(queryURLToGetDetails);
 
-                                request({
-                                    uri: queryURLToGetDetails,
-                                    json: true
-                                }, function(error, response, body) {
-                                    if (!error && response.statusCode == 200) {
+    //                             request({
+    //                                 uri: queryURLToGetDetails,
+    //                                 json: true
+    //                             }, function(error, response, body) {
+    //                                 if (!error && response.statusCode == 200) {
 
-                                        doc.source_google.placeID = placeID;
-                                        doc.source_google.icon = body.result.icon;
-                                        // doc.source_google.opening_hours = body.result.opening_hours;                                       
-                                        if (typeof body.result.opening_hours == 'undefined') {
-                                            doc.source_google.opening_hours = "";
-                                        } else {
-                                            doc.source_google.opening_hours = '';
-                                        }
-                                        //doc.source_google.weekday_text = body.result.weekday_text;
-                                        if (typeof body.result.weekday_text == 'undefined') {
-                                            doc.source_google.weekday_text = "";
-                                        } else {
-                                            doc.source_google.weekday_text = body.result.weekday_text;
-                                        }
-                                        // doc.source_google.international_phone_number = body.result.international_phone_number;
-                                        if (typeof body.result.international_phone_number == 'undefined') {
-                                            doc.source_google.international_phone_number = "";
-                                        } else {
-                                            doc.source_google.international_phone_number = body.result.international_phone_number;
-                                        }
-                                        doc.source_google.price_level = body.result.price_level;
-                                        // doc.source_google.reviews = body.result.reviews;
-                                        if (typeof body.result.reviews == 'undefined') {
-                                            doc.source_google.reviews = "";
-                                        } else {
-                                            doc.source_google.reviews = body.result.reviews;
-                                        }
-                                        doc.source_google.url = body.result.url;
-                                        // doc.source_google.website = body.result.website;
-                                        if (typeof body.result.website == 'undefined') {
-                                            doc.source_google.website = "";
-                                        } else {
-                                            doc.source_google.website = body.result.website;
-                                        }
-                                        doc.source_google.types = body.result.types;
-                                        doc.source_google.utc_offset = body.result.utc_offset;
-                                        doc.source_google.vicinity = body.result.vicinity;
+    //                                     doc.source_google.placeID = placeID;
+    //                                     doc.source_google.icon = body.result.icon;
+    //                                     // doc.source_google.opening_hours = body.result.opening_hours;                                       
+    //                                     if (typeof body.result.opening_hours == 'undefined') {
+    //                                         doc.source_google.opening_hours = "";
+    //                                     } else {
+    //                                         doc.source_google.opening_hours = '';
+    //                                     }
+    //                                     //doc.source_google.weekday_text = body.result.weekday_text;
+    //                                     if (typeof body.result.weekday_text == 'undefined') {
+    //                                         doc.source_google.weekday_text = "";
+    //                                     } else {
+    //                                         doc.source_google.weekday_text = body.result.weekday_text;
+    //                                     }
+    //                                     // doc.source_google.international_phone_number = body.result.international_phone_number;
+    //                                     if (typeof body.result.international_phone_number == 'undefined') {
+    //                                         doc.source_google.international_phone_number = "";
+    //                                     } else {
+    //                                         doc.source_google.international_phone_number = body.result.international_phone_number;
+    //                                     }
+    //                                     doc.source_google.price_level = body.result.price_level;
+    //                                     // doc.source_google.reviews = body.result.reviews;
+    //                                     if (typeof body.result.reviews == 'undefined') {
+    //                                         doc.source_google.reviews = "";
+    //                                     } else {
+    //                                         doc.source_google.reviews = body.result.reviews;
+    //                                     }
+    //                                     doc.source_google.url = body.result.url;
+    //                                     // doc.source_google.website = body.result.website;
+    //                                     if (typeof body.result.website == 'undefined') {
+    //                                         doc.source_google.website = "";
+    //                                     } else {
+    //                                         doc.source_google.website = body.result.website;
+    //                                     }
+    //                                     doc.source_google.types = body.result.types;
+    //                                     doc.source_google.utc_offset = body.result.utc_offset;
+    //                                     doc.source_google.vicinity = body.result.vicinity;
 
-                                        function updateLandmark() {
-                                            console.log("UPDATING LANDMARK");
-                                            doc.save(function(err, docs) {
+    //                                     function updateLandmark() {
+    //                                         console.log("UPDATING LANDMARK");
+    //                                         doc.save(function(err, docs) {
 
-                                                if (err) {
+    //                                             if (err) {
 
-                                                    console.log("Erorr Occurred");
-                                                    console.log(err)
-                                                } else if (!err) {
-                                                    console.log("documents saved");
-                                                } else {
+    //                                                 console.log("Erorr Occurred");
+    //                                                 console.log(err)
+    //                                             } else if (!err) {
+    //                                                 console.log("documents saved");
+    //                                             } else {
 
-                                                    console.log('jajja');
+    //                                                 console.log('jajja');
 
-                                                }
-                                            });
-                                        }
+    //                                             }
+    //                                         });
+    //                                     }
 
-                                        updateLandmark();
-                                        console.log("already updated landmark");
+    //                                     updateLandmark();
+    //                                     console.log("already updated landmark");
 
-                                    }
-                                });
-                            }
+    //                                 }
+    //                             });
+    //                         }
 
-                            addGoogleDetails(body.results[i].place_id, googleAPI);
-                            console.log("Already added Google Details");
+    //                         addGoogleDetails(body.results[i].place_id, googleAPI);
+    //                         console.log("Already added Google Details");
 
-                        }
-                    } 
-                    else {
-                        setTimeout(function(){console.log('no results w same zip code')}, 10000);
-                    }
-                }
-            } 
-            else {
-                console.log("no matching results")
-            }
-        } 
-        else {
-            console.log("no results");
-        }
-    });
+    //                     }
+    //                 } 
+    //                 else {
+    //                     setTimeout(function(){console.log('no results w same zip code')}, 10000);
+    //                 }
+    //             }
+    //         } 
+    //         else {
+    //             console.log("no matching results")
+    //         }
+    //     } 
+    //     else {
+    //         console.log("no results");
+    //     }
+    // });
 }
