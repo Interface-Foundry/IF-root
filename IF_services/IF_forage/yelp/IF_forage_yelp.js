@@ -84,8 +84,8 @@ var awsBucket = "if.forage.yelp.images";
 // var zipLow = 1001;
 // var zipHigh = 99950;
 
- var zipLow = 92867;
- var zipHigh = 92868;
+ var zipLow = 93003;
+ var zipHigh = 93004;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating

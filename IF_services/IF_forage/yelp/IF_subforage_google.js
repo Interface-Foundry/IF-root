@@ -126,12 +126,11 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
                         console.log("docs > 1");
                     }
                     else if (docs < 1){
-                        console.log("docs < 1");
-                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                        console.log("docs < 1"); //this should only happen after the loop finishes
+                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb); 
                     }
                     else {
                         setTimeout(function(){
-                            console.log("in exec callback of mongo query ", docs[0].name);
                             getGooglePlaceID(docs[0]);
                             repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
                         }, 2000);
@@ -141,14 +140,14 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
     }
     else {
         var endLoopTime = new Date();
-        console.log("Done with all Yelp records in database. Records (i): ", i, (endLoopTime - startLoopTime)/1000, "seconds");
+        console.log("Done with all Yelp records in database. Records (i): ", i, (endLoopTime - startLoopTime)/1000, "seconds"); //Google allows 100,000 queries per day. Each loop/doc involves two google queries
 
     }
 
 }
 
 function getGooglePlaceID(doc) {
-    console.log("Getting Google PlaceID for: ", doc.name);
+
     var name = doc.name;
     var address = doc.source_yelp.locationInfo.address;
     var zip = doc.source_yelp.locationInfo.postal_code;
@@ -156,13 +155,13 @@ function getGooglePlaceID(doc) {
         .replace(/,/g, "")
         .replace(/\s/g, "+");
     var queryURLToGetPlaceID = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
-    console.log("google placeID query: ", queryURLToGetPlaceID);
-
 
     request({
         uri: queryURLToGetPlaceID,
         json: true
     }, function(error, response, body) {
+        console.log("Queried Google PlaceID for: ", doc.name, queryURLToGetPlaceID);
+
         if (!error && response.statusCode == 200) {
 
             //In case of more than one result, loop through to pick the one with the same zip code. 
@@ -171,9 +170,8 @@ function getGooglePlaceID(doc) {
 
             if (body.results.length >= 1) { //loop through them and pick the one that matches the coordinates
 
-
                 for (i = 0; i < body.results.length; i++) {
-                    console.log("looping through Google results in query for placeID of", name, "in zip:", zip);
+                    console.log("Looking for placeID match for", name, address, zip);
 
                     if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
 
@@ -182,7 +180,7 @@ function getGooglePlaceID(doc) {
                         if (googleZip == zip) {
 
                             var placeID = body.results[i].place_id;
-                            console.log("found placeID of ", name, "   _id:  ", doc._id, "  place_id:", placeID); 
+                            console.log("Matching placeID of", name, "is", placeID, " \n_id:  ", doc._id); 
 
                             doc.source_google.placeID = body.results[i].place_id;
 
@@ -190,9 +188,6 @@ function getGooglePlaceID(doc) {
 
                         }
                     } 
-                    else {
-                        console.log('no results w same zip code');
-                    }
                 }
             } 
             else {
@@ -206,18 +201,19 @@ function getGooglePlaceID(doc) {
 }
 
 function addGoogleDetails(placeID, name, doc) {
-    console.log("getting Google details for", name, "  ", placeID);
-    var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
 
-    console.log(queryURLToGetDetails);
+    var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
 
     request({
         uri: queryURLToGetDetails,
         json: true
     }, function(error, response, body) {
+        console.log("Queried Google details for", name, queryURLToGetDetails);
 
         if (!error && response.statusCode == 200) {
-            console.log("google details search response for ", name, ":  ", 200);
+
+            console.log("does this match?", doc.name, doc.zip, body.result.formatted_address);
+            
             doc.source_google.placeID = placeID;
             doc.source_google.icon = body.result.icon;
             // doc.source_google.opening_hours = body.result.opening_hours;                                       
@@ -264,13 +260,13 @@ function addGoogleDetails(placeID, name, doc) {
 
 
 function updateLandmark(doc) {
-    console.log("Updating landmark");
+
     doc.save(function(err, docs) {
 
         if (err) {
             console.log(err)
         } else if (!err) {
-            console.log("Landmark updated");
+            console.log("Updated landmark for", doc.name);      
         } else {
             console.log('jajja');
         }
