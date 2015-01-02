@@ -94,21 +94,49 @@ function findLatestYelpRecord(sizeOfDb) {
             } else if (docs.length > 0) {
                 console.log("docsZero.name, date", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
-                loopThroughYelpRecords(docZero, 3);
+                repeaterThroughYelpRecords(0, docZero, 5);
             } else {
                 console.log('No Documents found in findLatestYelpRecord');
             }
         });
 }
 
+
+
+function repeaterThroughYelpRecords(i, doc, sizeOfDb){
+
+
+        if (i < sizeOfDb){
+            console.log("looping ThroughYelpRecords recursively", i, doc.name, sizeOfDb);
+
+            (function(){
+                landmarks.model(false)
+                    .find()
+                    .exists('source_yelp.id')
+                    .where("_id")
+                    .lt(doc)
+                    .sort("-id")
+                    .limit(1)
+                    .exec(function(err, docs) {
+  
+                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                    });            
+            })();
+
+    }
+}
+
+
+
 function loopThroughYelpRecords(doc, sizeOfDb){
     console.log("about to loop ThroughYelpRecords", doc.name, sizeOfDb);
 
+    var currentID = doc._id;
 
     for (i = 0; i < sizeOfDb; i++){
         // var j = i; 
-
-    var currentID = doc._id;
+        console.log('weird',currentID);
+        console.log("current id first ", currentID);
 
     landmarks.model(false)
         .find()
@@ -122,7 +150,7 @@ function loopThroughYelpRecords(doc, sizeOfDb){
                 console.log("Error Occured in loopThroughYelpRecords: ", err);
             } 
             else if (docs.length > 0) {
-                (function (docs){ //when incrementing the ID, must wrap within a new function to establish new scope
+                //(function (docs){ //when incrementing the ID, must wrap within a new function to establish new scope
                 console.log(docs[0].name, docs[0].time.created);
                 //getGooglePlaceID(docs[0]);
 
@@ -131,8 +159,10 @@ function loopThroughYelpRecords(doc, sizeOfDb){
                 //     //countYelpRecords();
                 // }
                 
-                })(docs);
-                var currentID = docs[0]._id;
+                //})(docs);
+                console.log("current id", currentID);
+                console.log("docs[0].id", docs[0]._id);
+                currentID = docs[0]._id;
             } 
             else {
                 setTimeout(function(){console.log('No Documents found in loopThroughYelpRecords')}, 3000);
@@ -175,7 +205,7 @@ function getGooglePlaceID(doc) {
 
 
                 for (i = 0; i < body.results.length; i++) {
-                    console.log("looping");
+                    console.log("looping through results in text search for placeID");
 
                     if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
 
