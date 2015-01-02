@@ -105,9 +105,11 @@ function findLatestYelpRecord(sizeOfDb) {
 
 function repeaterThroughYelpRecords(i, doc, sizeOfDb){
 
+
+
     if (i < sizeOfDb){
 
-        console.log(i, " about to query: ", doc.name, doc.id, doc.time.created);
+        console.log(i, " about to query: ", doc.name, doc._id, doc.time.created);
 
         (function(){
             landmarks.model(false)
@@ -126,7 +128,7 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
                     }
                     else if (docs < 1){
                         console.log("docs < 1");
-                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+//                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
                     }
                     else {
                         
