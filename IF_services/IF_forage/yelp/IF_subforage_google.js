@@ -105,8 +105,6 @@ function findLatestYelpRecord(sizeOfDb) {
 
 function repeaterThroughYelpRecords(i, doc, sizeOfDb){
 
-    console.log('in first line of repeater', doc.name);
-
     if (i < sizeOfDb){
 
         console.log(i, " about to query: ", doc.name, doc.id, doc.time.created);

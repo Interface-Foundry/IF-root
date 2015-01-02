@@ -68,7 +68,7 @@ module.exports = {
 		},
 		hasTime: Boolean,
 		time: {
-			created: { type: Date, default: Date.now },
+			created: { type: Date, default: Date.now, index: true },
 			start: { type: Date},
 			end: { type: Date},
 			timezone: String
