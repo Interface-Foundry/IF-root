@@ -80,7 +80,7 @@ var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 */
 
-var awsBucket = "if.forage.yelp.images";
+var awsBucket = "if-forage-yelp-images";
 var zipLow = 1001;
 var zipHigh = 99950;
 
