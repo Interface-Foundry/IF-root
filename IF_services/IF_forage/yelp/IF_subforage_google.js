@@ -131,7 +131,7 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
                     }
                     else {
                         setTimeout(function(){
-                            getGooglePlaceID(docs[0]);
+                            queryGooglePlaceID(docs[0]);
                             repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
                         }, 2000);
                     }
@@ -145,59 +145,60 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
 
 }
 
-function getGooglePlaceID(doc) {
+function queryGooglePlaceID(doc) {
 
     var name = doc.name;
     var address = doc.source_yelp.locationInfo.address;
-    var zip = doc.source_yelp.locationInfo.postal_code;
-    var queryTermsToGetPlaceID = (name + "+" + address + "+" + zip)
+    var yelpZip = doc.source_yelp.locationInfo.postal_code;
+    var queryTermsToGetPlaceID = (name + "+" + address + "+" + yelpZip)
         .replace(/,/g, "")
         .replace(/\s/g, "+");
     var queryURLToGetPlaceID = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" + queryTermsToGetPlaceID + "&key=" + googleAPI;
-
+    
     request({
         uri: queryURLToGetPlaceID,
         json: true
     }, function(error, response, body) {
         console.log("Queried Google PlaceID for: ", doc.name, queryURLToGetPlaceID);
 
-        if (!error && response.statusCode == 200) {
+        var resultsValid = ((!error && response.statusCode == 200) && (body.results.length >= 1));
 
-            //In case of more than one result, loop through to pick the one with the same zip code. 
-            //Test case many results, highest one is wrong: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Stephen%27s+Market+&+Grill+2632+E+Main+St+Ventura+CA+93003&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
-            //Test case no results: https://maps.googleapis.com/maps/api/place/textsearch/json?query=Ten+Ren+5817+8th+Ave+Borough+Park+2011220&key=AIzaSyCVZdZM6rmhP6WwOfhAZqlOSLGcOhXlkjo
-
-            if (body.results.length >= 1) { //loop through them and pick the one that matches the coordinates
-
-                for (i = 0; i < body.results.length; i++) {
-                    console.log("Looking for placeID match for", name, address, zip);
-
-                    if (body.results[i].formatted_address.indexOf(", United States") > 0) { //If it has " United States" in the address
-
-                        var googleZip = body.results[i].formatted_address.replace(/, United States/g, "").substr(-5, 5);
-
-                        if (googleZip == zip) {
-
-                            var placeID = body.results[i].place_id;
-                            console.log("Matching placeID of", name, "is", placeID, " \n_id:  ", doc._id); 
-
-                            doc.source_google.placeID = body.results[i].place_id;
-
-                            addGoogleDetails(body.results[i].place_id, body.results[i].name, doc);
-
-                        }
-                    } 
-                }
-            } 
-            else {
-                console.log("no matching results")
-            }
+        if (resultsValid) {
+            findMatchingResult(name, yelpZip, address, body.results, doc);
         } 
         else {
-            console.log("no results");
+            console.log("no valid results returned from queryGooglePlaceID for", name, address, yelpZip);
         }
     });
 }
+
+function findMatchingResult(name, yelpZip, address, bodyresults, doc){
+
+    console.log("Looking for placeID match for", name, address, yelpZip); 
+    
+    for (i = 0; i < bodyresults.length; i++) {
+        
+        var inTheUS = (bodyresults[i].formatted_address.indexOf(", United States") > 0);
+        
+        if (inTheUS){
+            var googleZip = bodyresults[i].formatted_address.replace(/, United States/g, "").substr(-5, 5);
+        }
+
+        if (inTheUS && (googleZip == yelpZip)) {
+
+            (function(doc, bodyresult){
+
+                console.log("Matching placeID of", name, "is", bodyresult.place_id, " \n_id:  ", doc._id); 
+
+                addGoogleDetails(bodyresult.place_id, bodyresult.name, doc); 
+
+            })(doc, bodyresults[i]);
+
+        }
+    } 
+}
+
+
 
 function addGoogleDetails(placeID, name, doc) {
 
@@ -210,7 +211,6 @@ function addGoogleDetails(placeID, name, doc) {
         console.log("Queried Google details for", name, queryURLToGetDetails);
 
         if (!error && response.statusCode == 200) {
-
             doc.source_google.placeID = placeID;
             doc.source_google.icon = body.result.icon;
             // doc.source_google.opening_hours = body.result.opening_hours;                                       
