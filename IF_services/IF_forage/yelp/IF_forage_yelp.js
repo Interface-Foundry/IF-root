@@ -11,6 +11,8 @@ var im = require("imagemagick");
 var crypto = require('crypto');
 var AWS = require('aws-sdk'); 
 
+
+
 app.use(logger('dev'));
 
 var bodyParser = require('body-parser');
@@ -40,7 +42,7 @@ var forumStyle = require('./forum_theme.json');
 
 var cloudMapName = 'forum';
 var cloudMapID ='interfacefoundry.jh58g2al';
-//JR Yelp Creds
+
 var yelp = require("yelp").createClient({
     consumer_key: "dyjR4bZkmcD_CpOTYx2Ekg",
     consumer_secret: "Coq5UbKKXYWmPy3TZf9hmNODirg",
@@ -48,19 +50,6 @@ var yelp = require("yelp").createClient({
     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
 });
 
-//April Yelp Creds:
-// var yelp = require("yelp").createClient({
-// 	consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
-// 	consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
-// 	token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
-// 	token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
-// });
-
-//April Google Creds:
-//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
-
-//JR Google Creds:
-var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 /*
 	CREATED FILE FOR AWS KEYS:
@@ -80,14 +69,15 @@ var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 */
 
-var awsBucket = "if-forage-yelp-images";
+var awsBucket = "if.forage.yelp.images";
 var zipLow = 1001;
 var zipHigh = 99950;
 
+ // var zipLow = 92867;
+ // var zipHigh = 92868;
 
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
-
 
 //search meetup in loops
 async.whilst(
@@ -431,7 +421,6 @@ function searchYelp(tag, done) {
 							            st.widgets.photo_share = forumStyle.widgets.photo_share;
 							            st.widgets.stickers = forumStyle.widgets.stickers;
 							            st.widgets.streetview = forumStyle.widgets.streetview;
-							            st.widgets.nearby = forumStyle.widgets.nearby; //Added by April
 
 							            
 							            function saveIt(callback){
@@ -630,7 +619,6 @@ function searchYelp(tag, done) {
 		                	
 
 								//if document is already save in db then update it
-
 		                        if(typeof business.name=='undefined')
 		                        {
 		                            docs[0].name=0;
@@ -638,7 +626,6 @@ function searchYelp(tag, done) {
 		                        else{
 		                            docs[0].name=business.name;
 		                        }
-
 
 		                        if(typeof business.description=='undefined')
 		                        {
@@ -981,7 +968,7 @@ function searchYelp(tag, done) {
 			                            }
 			                            else{
 
-			                               // console.log('jajja')
+			                                //console.log('jajja')
 
 			                            }
 			                        });
@@ -1018,7 +1005,7 @@ function searchYelp(tag, done) {
 
 
 
-function getLatLong(business,callback){ //Function should be called lookInMongoDB
+function getLatLong(business,callback){
 
     // var adress=business.location.address;
 
