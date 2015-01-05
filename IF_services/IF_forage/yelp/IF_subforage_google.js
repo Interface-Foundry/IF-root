@@ -163,9 +163,9 @@ function queryGooglePlaceID(doc) {
         var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
 
         if (resultsValid) { 
-           //(function(name, yelpZip, address, body.results, doc){
-                findMatchingResult(name, yelpZip, address, body.results, doc);                
-           // })(name, yelpZip, address, body.results, doc);
+           (function(name, yelpZip, address, bodyresults, doc){
+                findMatchingResult(name, yelpZip, address, bodyresults, doc);                
+           })(name, yelpZip, address, body.results, doc);
 
         } 
         else {
