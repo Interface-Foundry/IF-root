@@ -43,7 +43,7 @@ module.exports = {
 		landmarkCategories: [{
 			name: String,
 			avatar: String,
-			present: Boolean 
+			present: Boolean  
 		}],
 		style: {
 			styleID: String, //link to landmark's style
@@ -170,6 +170,20 @@ module.exports = {
 			business_image_sm: String,
 			business_image_md5: String,
 			rating_image: String
+		},
+		source_google: {
+			placeID: String,
+			icon: String,
+			opening_hours: [Schema.Types.Mixed],
+			weekday_text: [String],
+			international_phone_number: String,
+			price_level: Number,
+			reviews: [Schema.Types.Mixed],
+			url: String, //google's key is just url
+			website: String,
+			types: [String],
+			utc_offset: Number,
+			vicinity: String
 		},
 		widgets: {
 			twitter: Boolean,
