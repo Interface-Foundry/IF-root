@@ -46,6 +46,7 @@ var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');  
 var readChunk = require('read-chunk'); 
 var fileTypeProcess = require('file-type');
+var multer  = require('multer');
 
 
 //--- BUBBLE ROUTING ----//
@@ -93,8 +94,19 @@ var express = require('express'),
     var server = http.createServer(app);
     var io = require('socket.io').listen(server); // Hook Socket.io into Express
 
-
     app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
+
+    app.use(multer({
+      dest: './app/dist/temp_avatar_uploads/',
+      limits: {
+        fileSize: 10000000
+      },
+
+      onFileSizeLimit: function (file) {   
+        console.log('Failed: ', file.originalname)
+        fs.unlink('./' + file.path) // delete the partially written file
+      }
+    }));
 
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
@@ -529,6 +541,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         }
         else {
 
+
         var stuff_to_hash = filename + (new Date().toString());
         var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
         var fileType = filename.split('.').pop(); 
@@ -540,6 +553,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         fstream = fs.createWriteStream(tempPath);
         var count = 0; 
         var totalSize = req.headers['content-length'];
+
 
         file.on('data', function(data) {
           count += data.length;
