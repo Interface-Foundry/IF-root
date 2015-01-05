@@ -95,7 +95,9 @@ function findLatestYelpRecord(sizeOfDb) {
             } else if (docs.length > 0) {
                 console.log("Newest yelp record and time created", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
-                repeaterThroughYelpRecords(0, docZero, sizeOfDb);
+                (function(0, docZero, sizeOfDb){
+                    repeaterThroughYelpRecords(0, docZero, sizeOfDb);
+                    })(0, docZero, sizeOfDb);
             } else {
                 console.log('No Documents found in findLatestYelpRecord');
             }
@@ -255,7 +257,9 @@ function addGoogleDetails(placeID, name, doc) {
             doc.source_google.utc_offset = body.result.utc_offset;
             doc.source_google.vicinity = body.result.vicinity;
 
-            updateLandmark(doc);
+            (function(doc){
+                updateLandmark(doc);
+            })(doc);
 
         }
     });
