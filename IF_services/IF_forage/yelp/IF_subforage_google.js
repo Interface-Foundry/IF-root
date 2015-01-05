@@ -95,8 +95,8 @@ function findLatestYelpRecord(sizeOfDb) {
             } else if (docs.length > 0) {
                 console.log("Newest yelp record and time created", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
-                (function(0, docZero, sizeOfDb){
-                    repeaterThroughYelpRecords(0, docZero, sizeOfDb);
+                (function(counter, docZero, sizeOfDb){
+                    repeaterThroughYelpRecords(counter, docZero, sizeOfDb);
                     })(0, docZero, sizeOfDb);
             } else {
                 console.log('No Documents found in findLatestYelpRecord');
