@@ -160,12 +160,10 @@ function queryGooglePlaceID(doc) {
         json: true
     }, function(error, response, body) {
         console.log("Queried Google PlaceID for: ", doc.name, queryURLToGetPlaceID);
-        console.log("response", response);
-        console.log("body", body);
         var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
 
         if (resultsValid) { 
-           // (function(name, yelpZip, address, body.results, doc){
+           //(function(name, yelpZip, address, body.results, doc){
                 findMatchingResult(name, yelpZip, address, body.results, doc);                
            // })(name, yelpZip, address, body.results, doc);
 
