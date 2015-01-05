@@ -160,11 +160,14 @@ function queryGooglePlaceID(doc) {
         json: true
     }, function(error, response, body) {
         console.log("Queried Google PlaceID for: ", doc.name, queryURLToGetPlaceID);
-
+        console.log("body.results", body.results);
         var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
 
         if (resultsValid) { 
-            findMatchingResult(name, yelpZip, address, body.results, doc);
+           // (function(name, yelpZip, address, body.results, doc){
+                findMatchingResult(name, yelpZip, address, body.results, doc);                
+           // })(name, yelpZip, address, body.results, doc);
+
         } 
         else {
             console.log("no valid results returned from queryGooglePlaceID for", name, address, yelpZip);
