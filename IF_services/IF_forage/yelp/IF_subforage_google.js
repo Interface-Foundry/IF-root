@@ -161,9 +161,9 @@ function queryGooglePlaceID(doc) {
     }, function(error, response, body) {
         console.log("Queried Google PlaceID for: ", doc.name, queryURLToGetPlaceID);
 
-        var resultsValid = ((!error && response.statusCode == 200) && (body.results.length >= 1));
+        var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
 
-        if (resultsValid) {
+        if (resultsValid) { 
             findMatchingResult(name, yelpZip, address, body.results, doc);
         } 
         else {
@@ -194,6 +194,9 @@ function findMatchingResult(name, yelpZip, address, bodyresults, doc){
 
             })(doc, bodyresults[i]);
 
+        }
+        else {
+            console.log("this one doesnt match");
         }
     } 
 }
