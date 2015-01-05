@@ -100,6 +100,11 @@ var express = require('express'),
       dest: './app/dist/temp_avatar_uploads/',
       limits: {
         fileSize: 10000000
+      },
+
+      onFileSizeLimit: function (file) {   
+        console.log('Failed: ', file.originalname)
+        fs.unlink('./' + file.path) // delete the partially written file
       }
     }));
 
@@ -549,11 +554,6 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         var count = 0; 
         var totalSize = req.headers['content-length'];
 
-
-// onFileSizeLimit: function (file) {
-//   console.log('Failed: ', file.originalname)
-//   fs.unlink('./' + file.path) // delete the partially written file
-// }
 
         file.on('data', function(data) {
           count += data.length;
