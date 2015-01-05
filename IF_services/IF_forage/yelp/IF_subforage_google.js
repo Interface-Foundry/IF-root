@@ -160,7 +160,8 @@ function queryGooglePlaceID(doc) {
         json: true
     }, function(error, response, body) {
         console.log("Queried Google PlaceID for: ", doc.name, queryURLToGetPlaceID);
-        console.log("body.results", body.results);
+        console.log("response", response);
+        console.log("body", body);
         var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
 
         if (resultsValid) { 
