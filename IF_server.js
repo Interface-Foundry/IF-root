@@ -541,6 +541,15 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         var count = 0; 
         var totalSize = req.headers['content-length'];
 
+
+// onFileSizeLimit: function (file) {
+//   console.log('Failed: ', file.originalname)
+//   fs.unlink('./' + file.path) // delete the partially written file
+// }
+
+// onFilesLimit: function () {
+//   console.log('Crossed file limit!')
+// }
         file.on('data', function(data) {
           count += data.length;
           var percentUploaded = Math.floor(count/totalSize * 100);
