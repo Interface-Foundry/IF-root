@@ -537,7 +537,7 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 
       if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
         if (req.headers['content-length'] > 10000000){
-         res.send(500, "Filesize too large.");
+         console.log("Filesize too large.");
         }
         else {
 
@@ -617,7 +617,7 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
     if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
       if (req.headers['content-length'] > 10000000){
-        res.send(500, "Filesize too large.");
+        console.log("Filesize too large.");
       }
       else {
 
@@ -689,7 +689,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
       if (req.headers['content-length'] > 25000000){
-        res.send(500, "Filesize too large.");
+        console.log("Filesize too large.");
       }
       else {
         if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/jpeg') {
