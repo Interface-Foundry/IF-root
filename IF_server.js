@@ -46,7 +46,7 @@ var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');  
 var readChunk = require('read-chunk'); 
 var fileTypeProcess = require('file-type');
-var multer  = require('multer');
+// var multer  = require('multer');
 
 
 //--- BUBBLE ROUTING ----//
@@ -96,17 +96,17 @@ var express = require('express'),
 
     app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
 
-    app.use(multer({
-      dest: './app/dist/temp_avatar_uploads/',
-      limits: {
-        fileSize: 10000000
-      },
+    // app.use(multer({
+    //   dest: './app/dist/temp_avatar_uploads/',
+    //   limits: {
+    //     fileSize: 10000000
+    //   },
 
-      onFileSizeLimit: function (file) {   
-        console.log('Failed: ', file.originalname)
-        fs.unlink('./' + file.path) // delete the partially written file
-      }
-    }));
+    //   onFileSizeLimit: function (file) {   
+    //     console.log('Failed: ', file.originalname)
+    //     fs.unlink('./' + file.path) // delete the partially written file
+    //   }
+    // }));
 
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
