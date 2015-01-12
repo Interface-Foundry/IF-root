@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -22,9 +22,6 @@ $scope.selectedIndex = 0;
 var landmarksLoaded;
 
 //currently only for upcoming...
-
-  	
-  	
 function reorderById (idArray) {
 	console.log('reorderById');
 	$scope.upcoming = [];
@@ -282,10 +279,10 @@ function loadWidgets() {
 			$scope.category = true;
 		}
 		
-	  	if ($scope.style.widgets.upcoming) {
-	  		$scope.upcoming = true;
-	  		var userTime = new Date();
-	  		db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
+		if ($scope.style.widgets.upcoming) {
+			$scope.upcoming = true;
+			var userTime = new Date();
+			db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:now');
 				console.log(data);
 				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];
