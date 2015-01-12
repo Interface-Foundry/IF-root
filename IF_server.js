@@ -2497,36 +2497,36 @@ app.all('/*', function(req, res) {
 //     }
 // );
 
-function generate_xml_sitemap(){
-    var root_path = 'http://www.bubbl.li/';
-    var priority = 0.5;
-    var freq = 'monthly';
+// function generate_xml_sitemap(){
+//     var root_path = 'http://www.bubbl.li/';
+//     var priority = 0.5;
+//     var freq = 'monthly';
 
-  landmarkSchema.find({}, {'id':1}, function (err, docs) {
-    if (err) {
-      console.log("Error Occured: ", err);
-    } else { 
+//   landmarkSchema.find({}, {'id':1}, function (err, docs) {
+//     if (err) {
+//       console.log("Error Occured: ", err);
+//     } else { 
 
-      var xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-      for (var i in docs) {
-        xml += '<url>';
-        xml += '<loc>'+ root_path + '/w/' + docs[i].id + '</loc>';
-        xml += '<changefreq>'+ freq +'</changefreq>';
-        xml += '<priority>'+ priority +'</priority>';
-        xml += '</url>';
-        i++;
-      }
-      xml += '</urlset>';
-      console.log(xml);
-      return xml;
-    }
-    });
-}
+//       var xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+//       for (var i in docs) {
+//         xml += '<url>';
+//         xml += '<loc>'+ root_path + '/w/' + docs[i].id + '</loc>';
+//         xml += '<changefreq>'+ freq +'</changefreq>';
+//         xml += '<priority>'+ priority +'</priority>';
+//         xml += '</url>';
+//         i++;
+//       }
+//       xml += '</urlset>';
+//       console.log(xml);
+//       return xml;
+//     }
+//     });
+// }
 
-app.get('/sitemap.xml', function(req, res) {
-    res.header('Content-Type', 'text/xml');
-    res.send(generate_xml_sitemap());     
-})
+// app.get('/sitemap.xml', function(req, res) {
+//     res.header('Content-Type', 'text/xml');
+//     res.send(generate_xml_sitemap());     
+// })
 
 server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
