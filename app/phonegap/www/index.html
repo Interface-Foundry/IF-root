@@ -46,12 +46,13 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 		
 	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
+
 	<script src="lib.js"></script>
 	<script src="app.js"></script>
 </head>
 
-<body ng-class="[aperture.state, drawerOn&&'drawer']" ng-click="closeOverlays()">
-
+<body ng-class="[aperture.state, drawerOn&&'drawer']">
+	
 <button class="drawer-tab" ng-click="drawerOn = !drawerOn">
 	<div class="drawer-icon" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0"></div>
 </button>
@@ -105,7 +106,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 </div>
 
 <section id="aperture" ng-class="[aperture.state]">
-	<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers"></leaflet>
+	<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" 			layers="map.layers"></leaflet>
 </section>
 	
 <section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>

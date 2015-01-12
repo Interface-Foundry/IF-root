@@ -96,14 +96,14 @@ $scope.sendMsg = function (e) {
 		};
 		
 		sendMsgToServer(newChat);		
-		$scope.msg.text = "";
+	    $scope.msg.text = "";
 	}
 }
 
 $scope.alert = function (msg) {
 	alerts.addAlert('warning', msg, true);
 }
-
+	
 $scope.onImageSelect = function($files) {
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',

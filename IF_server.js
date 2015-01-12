@@ -46,7 +46,6 @@ var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');  
 var readChunk = require('read-chunk'); 
 var fileTypeProcess = require('file-type');
-var multer  = require('multer');
 
 
 //--- BUBBLE ROUTING ----//
@@ -94,19 +93,8 @@ var express = require('express'),
     var server = http.createServer(app);
     var io = require('socket.io').listen(server); // Hook Socket.io into Express
 
+
     app.use(express.static(__dirname + '/app/dist', { maxAge: oneDay }));
-
-    app.use(multer({
-      dest: './app/dist/temp_avatar_uploads/',
-      limits: {
-        fileSize: 10000000
-      },
-
-      onFileSizeLimit: function (file) {   
-        console.log('Failed: ', file.originalname)
-        fs.unlink('./' + file.path) // delete the partially written file
-      }
-    }));
 
     //===== PASSPORT TO EXPRESS=====//
     // set up express app
@@ -537,10 +525,9 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 
       if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
         if (req.headers['content-length'] > 10000000){
-         console.log("Filesize too large.");
+         res.send(500, "Filesize too large.");
         }
         else {
-
 
         var stuff_to_hash = filename + (new Date().toString());
         var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
@@ -554,12 +541,10 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         var count = 0; 
         var totalSize = req.headers['content-length'];
 
-
         file.on('data', function(data) {
           count += data.length;
           var percentUploaded = Math.floor(count/totalSize * 100);
-          //res.write("Uploaded:" + parseInt(percentUploaded));
-          //io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
+          io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
         }).pipe(fstream);
 
         fstream.on('close', function () {
@@ -618,7 +603,7 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
     if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
       if (req.headers['content-length'] > 10000000){
-        console.log("Filesize too large.");
+        res.send(500, "Filesize too large.");
       }
       else {
 
@@ -690,7 +675,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
         var fileType = filename.split('.').pop();
       if (req.headers['content-length'] > 25000000){
-        console.log("Filesize too large.");
+        res.send(500, "Filesize too large.");
       }
       else {
         if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/jpeg') {
@@ -2497,37 +2482,13 @@ app.all('/*', function(req, res) {
 //     }
 // );
 
-// function generate_xml_sitemap(){
-//     var root_path = 'http://www.bubbl.li/';
-//     var priority = 0.5;
-//     var freq = 'monthly';
-
-//   landmarkSchema.find({}, {'id':1}, function (err, docs) {
-//     if (err) {
-//       console.log("Error Occured: ", err);
-//     } else { 
-
-//       var xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-//       for (var i in docs) {
-//         xml += '<url>';
-//         xml += '<loc>'+ root_path + '/w/' + docs[i].id + '</loc>';
-//         xml += '<changefreq>'+ freq +'</changefreq>';
-//         xml += '<priority>'+ priority +'</priority>';
-//         xml += '</url>';
-//         i++;
-//       }
-//       xml += '</urlset>';
-//       console.log(xml);
-//       return xml;
-//     }
-//     });
-// }
-
-// app.get('/sitemap.xml', function(req, res) {
-//     res.header('Content-Type', 'text/xml');
-//     res.send(generate_xml_sitemap());     
-// })
 
 server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });
+
+
+
+
+
+
