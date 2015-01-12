@@ -18,6 +18,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 				deferred.resolve({world: world, style: style});
 				console.log('world & style in cache!');
 			} else {
+				console.log('missing style');
 				askServer();
 			}
 	} else {
@@ -99,13 +100,20 @@ worldTree.getUpcoming = function(_id) {
 }
 
 worldTree.getNearby = function() {
-	var deferred = $q.defer();
-	var now = Date.now();
 	
-	console.log(worldTree._nearby);
-	if (worldTree._nearby && worldTree._nearby.timestamp+30000 > now) 	{
+	//current nearby format
+	//{150m: [worlds],
+	// 150mPast: [worlds],
+	// 2.5k: [worlds],
+	// 2.5kPast: [worlds]}
+	
+	var deferred = $q.defer();
+	var now = Date.now() / 1000;
+
+	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
+		console.log('nearbies not cached');
 	geoService.getLocation().then(function(location) {
 		db.worlds.query({localTime: new Date(), 
 			userCoordinate: [location.lng, location.lat]},
@@ -113,6 +121,9 @@ worldTree.getNearby = function() {
 				worldTree._nearby = data[0];
 				worldTree._nearby.timestamp = now;
 				deferred.resolve(data[0]);
+				
+				worldTree.cacheWorlds(data[0]['150m']);
+				worldTree.cacheWorlds(data[0]['2.5km']);
 			});
 	}, function(reason) {
 		deferred.reject(reason);
@@ -122,6 +133,12 @@ worldTree.getNearby = function() {
 	return deferred.promise;
 }
 
+worldTree.cacheWorlds = function(worlds) {
+	if (!worlds) {return}
+	worlds.forEach(function(world) {
+		worldTree.worldCache.put(world.id, world);
+	});
+}
 
 return worldTree;
 }

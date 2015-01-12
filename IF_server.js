@@ -558,7 +558,8 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
         file.on('data', function(data) {
           count += data.length;
           var percentUploaded = Math.floor(count/totalSize * 100);
-          io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
+          //res.write("Uploaded:" + parseInt(percentUploaded));
+          //io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
         }).pipe(fstream);
 
         fstream.on('close', function () {
