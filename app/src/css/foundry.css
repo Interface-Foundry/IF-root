@@ -1205,6 +1205,10 @@ a.bubble-inspector-btn:hover {
   -ms-user-select: none;
   user-select: none;
 }
+.closeDialog {
+  float: right;
+  margin-top: -45px;
+}
 .dialog-bg {
   position: absolute;
   top: 0px;
