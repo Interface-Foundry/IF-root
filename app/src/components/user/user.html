@@ -1,10 +1,22 @@
 <nav class="subnav-fixed">
 	<span ng-click="goBack()" ng-show="fromMessages" style="cursor:pointer;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
 
-	<select class="menu pull-left" ng-model="menuLink" ng-change="go(menuLink)">
+	<!-- <select class="menu pull-left" ng-model="menuLink" ng-change="go(menuLink)">
 		<option value="/profile/worlds">My Bubbles ⌄</option>
 		<option value="/profile/me">My Profile ⌄</option>
-	</select>
+	</select> -->
+
+	<div dropdown>
+		<span class="user-chip-label user-chip"> {{ selected || 'dropdown ⌄'}} </span>
+
+		<ul class="nav-user-menu pull-left" style="display: none">
+			<li class="nav-user-menu-item" ng-click="go('/profile/me'); selected='My Profile ⌄';">My Profile</li>
+			<li class="nav-user-menu-item" ng-click="go('/profile/worlds'); selected='My Bubbles ⌄';">My Bubbles</li>
+		</ul>
+	</div>
+
+	
+
 	<ul class="tab-group" ng-show="state.myProfile">
 
 		<li class="tab" ng-class="{'selected': state.profile}">
