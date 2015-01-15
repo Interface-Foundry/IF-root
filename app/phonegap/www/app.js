@@ -20970,6 +20970,7 @@ $scope.map = mapManager;
 $scope.style = styleManager;
 $scope.alerts = alertManager;
 $scope.userManager = userManager;
+$scope.url = $location.absUrl();
 
 $scope.dialog = dialogs;
     
