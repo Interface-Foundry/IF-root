@@ -3310,6 +3310,11 @@ a.bubble-inspector-btn:hover {
     margin: 4px;
   }
 }
+.user-map-img {
+  display: inline;
+  position: relative;
+  top: -8px;
+}
 /* } */
 @media only screen and (max-width: 480px) {
   .show-480 {
