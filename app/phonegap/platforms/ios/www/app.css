@@ -3316,6 +3316,18 @@ a.bubble-inspector-btn:hover {
     margin: 4px;
   }
 }
+.user-map-img {
+  display: inline;
+  position: relative;
+  top: 0px;
+  right: 4px;
+}
+@media only screen and (min-width: 480px) {
+  .user-map-img {
+    top: -8px;
+    right: 0px;
+  }
+}
 /* } */
 @media only screen and (max-width: 480px) {
   .show-480 {
