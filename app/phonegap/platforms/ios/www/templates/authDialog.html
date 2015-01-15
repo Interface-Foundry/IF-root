@@ -1,6 +1,6 @@
 <div class="surface">
 	<form ng-submit="userManager.login.login()" name="loginForm">
-		<h4 class="auth-title">Bubbl.li</h4>
+		<h4 class="auth-title">Bubbl.liii</h4>
 		<input name="email" type="email" 
 			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />		
 		<input name="password" type="password" 
@@ -10,7 +10,9 @@
 		<div ng-if="userManager.login.error">
 			Login failed!
 		</div>
-		<a if-href="#forgot">Forgot your password?</a>
+		<!-- <a if-href="#forgot">Forgot your password?</a> -->
+		<a ng-click="dialog.showDialog('forgotDialog.html')" href="">Forgot your password?</a>
+
 		
 		<button type="button" class="auth-create" ng-click="dialog.showDialog('createAccountDialog.html')">Create Account</button>
 		
