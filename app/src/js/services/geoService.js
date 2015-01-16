@@ -33,7 +33,7 @@ geoService.getLocation = function(maxAge) {
 			})
 		}
 
-		function geolocationError(error){
+		function geolocationError(error) {
 			//@IFDEF PHONEGAP
 			if (error.code == 1) {
 				//PERMISSIONS DENIED
@@ -49,8 +49,7 @@ geoService.getLocation = function(maxAge) {
 		}
 		
 		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError, 
-			{timeout:15000, enableHighAccuracy : true});
+			geolocationError);
 
 	} else {
 		//browser update message

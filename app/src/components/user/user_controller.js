@@ -1,5 +1,5 @@
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
-	
+
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
 $scope.state = {};
@@ -7,27 +7,37 @@ $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
-
+$scope.files = {
+	avatar: undefined
+};
 
 $scope.kinds = ifGlobals.kinds;
 
 var saveTimer = null;
 var alert = alertManager;
 
-$scope.onAvatarSelect = function($files) {
-	var file = $files[0];
+$scope.$watch('files.avatar', function(newValue, oldValue) {
+	console.log(newValue, oldValue);
+	if (newValue===undefined) {
+		return;
+	}
+	console.log($scope.files);
+	var file = newValue[0];
 	$scope.upload = $upload.upload({
-		url: '/api/upload/',
-		file: file,
+		url: '/api/upload',
+		method: 'POST',
+		file: file
 	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		console.log('progress');
+		console.log(e);
+		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
 		$scope.uploadFinished = true;
 	});
-}
+});
 
 function saveUser() {
 	if ($scope.user) {
@@ -348,6 +358,12 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
+	
+	//@IFDEF PHONEGAP
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
+	//@ENDIF
+	
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){

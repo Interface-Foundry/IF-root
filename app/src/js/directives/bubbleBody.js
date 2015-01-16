@@ -3,21 +3,21 @@ app.directive('bubbleBody', function(apertureService) {
 		restrict: 'A',
 		scope: true,
 		link: function(scope, element, attrs) {
-			var st;
-			//@IFDEF WEB
-			element.on('mousewheel', function(event) {
-				st = element.scrollTop()
-				if (st == 0 && event.deltaY*event.deltaFactor > 30) {
+			
+			var handleScroll = _.throttle(function() {
+				var st = element.scrollTop();
+				
+				if (st === 0 && apertureService.state != 'aperture-third') {
 					apertureService.set('third');
-				}
-				if (st == 0 && event.deltaY < 0) {
+				} else if (apertureService.state != 'aperture-off') {
 					apertureService.set('off');
 				}
-			});
-			//@ENDIF
+			}, 100);
+			
+			element.on('scroll', handleScroll);
 			
 			scope.$on('$destroy', function() {
-				element.off('mousewheel');
+				element.off('scroll');
 			});
 		}
 	}

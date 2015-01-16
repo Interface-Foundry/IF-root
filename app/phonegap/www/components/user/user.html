@@ -8,11 +8,11 @@
 	<ul class="tab-group" ng-show="state.myProfile">
 
 		<li class="tab" ng-class="{'selected': state.profile}">
-			<a href="#/profile/me" class="tab-link">Profile</a></li>
+			<a if-href="#profile/me" class="tab-link">Profile</a></li>
 		<li class="tab hidden" ng-class="{'selected': state.contacts}">
-			<a href="#/profile/contacts" class="tab-link">Contacts</a></li>
+			<a if-href="#profile/contacts" class="tab-link">Contacts</a></li>
 		<li class="tab hidden" ng-class="{'selected': state.history}">
-			<a href="#/profile/history" class="tab-link">History</a></li>
+			<a if-href="#profile/history" class="tab-link">History</a></li>
 	</ul>
 	<ul class="tab-group" ng-show="state.myWorlds">
 		

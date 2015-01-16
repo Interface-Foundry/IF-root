@@ -45,10 +45,11 @@
 </div>
 
 <div class="view-footer" ng-class="{'message-logged-out-footer': !userManager.loginStatus, 'editing': editing}" ng-cloak>
+	<div class="uploading-progress" ng-show="uploading" ng-style="{'width': uploadhProgress+'%'}"></div>
 		<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input" ng-model="msg.text" ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" msd-elastic autofocus></textarea>
 		
 	<div class="msg-action-bar">
-		<button class="msg-action-bar-item pull-left">
+		<button class="msg-action-bar-item pull-left" ng-file-select ng-file-change="onImageSelect($files)" accept="image/*">
 			<!--<div class="message-photo" ng-file-select="onImageSelect($files)" data-accept="image/*"></div>-->
 			<img src="img/icons/msg/ic_photo_camera_24px.png" width="24" height="24">
 		</button>
@@ -60,7 +61,6 @@
 			<span class="message-send" ng-class="{'lightblue500': userManager.loginStatus}">Send</span>
 		</button>
 	</div>
-	
 	
 	<div class="sticker-bay">
 		<ul class="stickers">
