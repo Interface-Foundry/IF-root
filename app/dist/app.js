@@ -20905,7 +20905,6 @@ $scope.map = mapManager;
 $scope.style = styleManager;
 $scope.alerts = alertManager;
 $scope.userManager = userManager;
-$scope.url = $location.absUrl();
 
 $scope.dialog = dialogs;
     
@@ -20995,6 +20994,31 @@ $scope.getNearby = function($event) {
 	})
 	$event.stopPropagation();
 }
+
+$scope.share = function(platform) {
+  var link;
+  var height = 450;
+  var width = 560;
+  //center popup on screen
+  var left = (screen.width - width)/2;
+  var top = (screen.height - height)/2;
+  
+  if (platform == 'facebook') {
+    link = 'https://www.facebook.com/dialog/share?'+
+    'app_id=559490587493744'+
+    '&display=popup'+
+    '&href='+ encodeURIComponent('https://bubbl.li'+$location.path()) +
+    '&redirect_uri='+ encodeURIComponent('https://bubbl.li/');
+  }
+  else if (platform == 'twitter') {
+    link = 'https://twitter.com/intent/tweet?url=URL';
+  }
+  window.open(
+    link,
+    'Bubbl.li',
+    'height=450,width=558,top='+top+',left='+left+'scrollbars'
+  );
+};
 
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
