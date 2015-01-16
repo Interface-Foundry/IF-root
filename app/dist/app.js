@@ -21820,7 +21820,7 @@ $scope.pinSticker = function() {
 					iconAnchor: [50, 100],
 					popupAnchor: [0, -80]
 				},
-				message: sticker.message 
+				message: '<img class="user-chip-img user-map-img" src="' + getAvatar() + '"/>' + '<strong>' + $scope.nick + '</strong>' + ': ' + sticker.message
 			});
 			
 			console.log(success);
@@ -21848,6 +21848,10 @@ $scope.pinSticker = function() {
 	$scope.selected = undefined;
 	$scope.editing = false;
 	aperture.set('off');
+}
+
+function getAvatar() {
+	return $scope.user.avatar || 'img/icons/profile.png';
 }
 
 //add welcome message 

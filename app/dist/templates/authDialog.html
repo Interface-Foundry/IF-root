@@ -26,7 +26,9 @@
 		<div ng-if="userManager.login.error">
 			Login failed!
 		</div>
-		<a if-href="#forgot">Forgot your password?</a>
+		<!-- <a if-href="#forgot">Forgot your password?</a> -->
+		<a ng-click="dialog.showDialog('forgotDialog.html')" href="">Forgot your password?</a>
+
 		
 		<button type="button" class="auth-create" ng-click="dialog.showDialog('createAccountDialog.html')">Create Account</button>
 		
