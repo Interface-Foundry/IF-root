@@ -113,7 +113,7 @@ var express = require('express'),
     app.use(morgan('dev')); // log every request to the console
     app.use(cookieParser('rachelwantstomakecakebutneedseggs')); // read cookies (needed for auth)
 
-    app.use(bodyParser.urlencoded({
+   app.use(bodyParser.urlencoded({
       extended: true
     })); // get information from html forms
 
@@ -529,65 +529,62 @@ function manageServerWidgets(id, tag, widgets){
 
 //upload profile pictures for worlds and landmarks and (users?)
 app.post('/api/upload', isLoggedIn, function (req, res) {
+	var fstream;
+	req.pipe(req.busboy);
 
-  var fstream;
-  req.pipe(req.busboy);
+	req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+		if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+        	if (req.headers['content-length'] > 10000000){
+				console.log("Filesize too large.");
+        	} else {
+			
+				var stuff_to_hash = filename + (new Date().toString());
+				var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
+				var fileType = filename.split('.').pop(); 
+				var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
+				var current = object_key + "." + fileType;
+				var tempPath = "app/dist/temp_avatar_uploads/" + current;
+				var awsKey = date_in_path + current;
+	
+				fstream = fs.createWriteStream(tempPath);
+				var count = 0;
+				var totalSize = req.headers['content-length'];
 
-  req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+				file.on('data', function(data) {
+					count += data.length;
+					var percentUploaded = Math.floor(count/totalSize * 100);
+					console.log(percentUploaded);
+					//res.write(parseInt(percentUploaded));
+					//io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
+				})
+				
+				file.pipe(fstream);
 
-      if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
-        if (req.headers['content-length'] > 10000000){
-         console.log("Filesize too large.");
-        }
-        else {
+				fstream.on('close', function () {
+					var buffer = readChunk.sync(tempPath, 0, 262);
 
+					if (fileTypeProcess(buffer) == false){
+						fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+					} else {   
+				im.crop({
+				srcPath: tempPath, 
+				dstPath: tempPath,
+				width: 300,
+				height: 300,
+				quality: 85,
+				gravity: "Center"
+        		}, function(err, stdout, stderr){
 
-        var stuff_to_hash = filename + (new Date().toString());
-        var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
-        var fileType = filename.split('.').pop(); 
-        var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
-        var current = object_key + "." + fileType;
-        var tempPath = "app/dist/temp_avatar_uploads/" + current;
-        var awsKey = date_in_path + current;
+				fs.readFile(tempPath, function(err, fileData) {
 
-        fstream = fs.createWriteStream(tempPath);
-        var count = 0; 
-        var totalSize = req.headers['content-length'];
+				var s3 = new AWS.S3(); 
 
-
-        file.on('data', function(data) {
-          count += data.length;
-          var percentUploaded = Math.floor(count/totalSize * 100);
-          //res.write("Uploaded:" + parseInt(percentUploaded));
-          //io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
-        }).pipe(fstream);
-
-        fstream.on('close', function () {
-
-        var buffer = readChunk.sync(tempPath, 0, 262);
-
-        if (fileTypeProcess(buffer) == false){
-          fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
-        }
-        else {   
-         im.crop({
-          srcPath: tempPath, 
-          dstPath: tempPath,
-          width: 300,
-          height: 300,
-          quality: 85,
-          gravity: "Center"
-        }, function(err, stdout, stderr){
-
-          fs.readFile(tempPath, function(err, fileData) {
-
-            var s3 = new AWS.S3(); 
-
-            s3.putObject({ Bucket: 'if-server-avatar-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
-              if (err)       
+				s3.putObject({ Bucket: 'if-server-avatar-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
+              if (err) {
                 console.log(err);   
-              else {    
-                res.send("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
+              } else {
+                res.write("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
+                res.end();
               fs.unlink(tempPath); 
             }
             });

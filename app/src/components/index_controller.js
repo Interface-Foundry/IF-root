@@ -10,9 +10,19 @@ $scope.dialog = dialogs;
     
 angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 
+$rootScope.hideBack = true;
+
 $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
+
+// @IFDEF PHONEGAP
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	$rootScope.hideBack = false;
+	deregFirstShow();
+}))
+// @ENDIF
+
 
 $scope.newWorld = function() {
     console.log('newWorld()');

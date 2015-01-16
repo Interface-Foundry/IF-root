@@ -60,7 +60,6 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<section id="drawer" ng-include="'components/drawer/drawer.html'" 
 	ng-class="{'nearbyFound': nearbyBubbles}"></section>
 </div>
-
 <ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
 	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
 		<a if-href="#{{::alert.href}}" ng-click="$parent.compassOverlay = false" class="alert-link">

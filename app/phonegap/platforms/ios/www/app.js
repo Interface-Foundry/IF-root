@@ -5108,44 +5108,6 @@ angular.module('ui.calendar', [])
       }
     };
 }]);
-_ = {};
-
-_.debounce = function(func, wait, immediate) {
-    var timeout, args, context, timestamp, result;
-
-    var later = function() {
-      var last = _.now() - timestamp;
-
-      if (last < wait && last >= 0) {
-        timeout = setTimeout(later, wait - last);
-      } else {
-        timeout = null;
-        if (!immediate) {
-          result = func.apply(context, args);
-          if (!timeout) context = args = null;
-        }
-      }
-    };
-
-    return function() {
-      context = this;
-      args = arguments;
-      timestamp = _.now();
-      var callNow = immediate && !timeout;
-      if (!timeout) timeout = setTimeout(later, wait);
-      if (callNow) {
-        result = func.apply(context, args);
-        context = args = null;
-      }
-
-      return result;
-    };
-  };
-
-
-_.now = Date.now || function() {
-    return new Date().getTime();
- };
 'use strict';
 
 /* Directives */
@@ -5187,10 +5149,21 @@ app.directive('bubbleBody', function(apertureService) {
 		restrict: 'A',
 		scope: true,
 		link: function(scope, element, attrs) {
-			var st;
+			
+			var handleScroll = _.throttle(function() {
+				var st = element.scrollTop();
+				
+				if (st === 0 && apertureService.state != 'aperture-third') {
+					apertureService.set('third');
+				} else if (apertureService.state != 'aperture-off') {
+					apertureService.set('off');
+				}
+			}, 100);
+			
+			element.on('scroll', handleScroll);
 			
 			scope.$on('$destroy', function() {
-				element.off('mousewheel');
+				element.off('scroll');
 			});
 		}
 	}
@@ -16183,228 +16156,6 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
 
 }
 
-/*!
- * jQuery Mousewheel 3.1.12
- *
- * Copyright 2014 jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- */
-
-(function (factory) {
-    if ( typeof define === 'function' && define.amd ) {
-        // AMD. Register as an anonymous module.
-        define(['jquery'], factory);
-    } else if (typeof exports === 'object') {
-        // Node/CommonJS style for Browserify
-        module.exports = factory;
-    } else {
-        // Browser globals
-        factory(jQuery);
-    }
-}(function ($) {
-
-    var toFix  = ['wheel', 'mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'],
-        toBind = ( 'onwheel' in document || document.documentMode >= 9 ) ?
-                    ['wheel'] : ['mousewheel', 'DomMouseScroll', 'MozMousePixelScroll'],
-        slice  = Array.prototype.slice,
-        nullLowestDeltaTimeout, lowestDelta;
-
-    if ( $.event.fixHooks ) {
-        for ( var i = toFix.length; i; ) {
-            $.event.fixHooks[ toFix[--i] ] = $.event.mouseHooks;
-        }
-    }
-
-    var special = $.event.special.mousewheel = {
-        version: '3.1.12',
-
-        setup: function() {
-            if ( this.addEventListener ) {
-                for ( var i = toBind.length; i; ) {
-                    this.addEventListener( toBind[--i], handler, false );
-                }
-            } else {
-                this.onmousewheel = handler;
-            }
-            // Store the line height and page height for this particular element
-            $.data(this, 'mousewheel-line-height', special.getLineHeight(this));
-            $.data(this, 'mousewheel-page-height', special.getPageHeight(this));
-        },
-
-        teardown: function() {
-            if ( this.removeEventListener ) {
-                for ( var i = toBind.length; i; ) {
-                    this.removeEventListener( toBind[--i], handler, false );
-                }
-            } else {
-                this.onmousewheel = null;
-            }
-            // Clean up the data we added to the element
-            $.removeData(this, 'mousewheel-line-height');
-            $.removeData(this, 'mousewheel-page-height');
-        },
-
-        getLineHeight: function(elem) {
-            var $elem = $(elem),
-                $parent = $elem['offsetParent' in $.fn ? 'offsetParent' : 'parent']();
-            if (!$parent.length) {
-                $parent = $('body');
-            }
-            return parseInt($parent.css('fontSize'), 10) || parseInt($elem.css('fontSize'), 10) || 16;
-        },
-
-        getPageHeight: function(elem) {
-            return $(elem).height();
-        },
-
-        settings: {
-            adjustOldDeltas: true, // see shouldAdjustOldDeltas() below
-            normalizeOffset: true  // calls getBoundingClientRect for each event
-        }
-    };
-
-    $.fn.extend({
-        mousewheel: function(fn) {
-            return fn ? this.bind('mousewheel', fn) : this.trigger('mousewheel');
-        },
-
-        unmousewheel: function(fn) {
-            return this.unbind('mousewheel', fn);
-        }
-    });
-
-
-    function handler(event) {
-        var orgEvent   = event || window.event,
-            args       = slice.call(arguments, 1),
-            delta      = 0,
-            deltaX     = 0,
-            deltaY     = 0,
-            absDelta   = 0,
-            offsetX    = 0,
-            offsetY    = 0;
-        event = $.event.fix(orgEvent);
-        event.type = 'mousewheel';
-
-        // Old school scrollwheel delta
-        if ( 'detail'      in orgEvent ) { deltaY = orgEvent.detail * -1;      }
-        if ( 'wheelDelta'  in orgEvent ) { deltaY = orgEvent.wheelDelta;       }
-        if ( 'wheelDeltaY' in orgEvent ) { deltaY = orgEvent.wheelDeltaY;      }
-        if ( 'wheelDeltaX' in orgEvent ) { deltaX = orgEvent.wheelDeltaX * -1; }
-
-        // Firefox < 17 horizontal scrolling related to DOMMouseScroll event
-        if ( 'axis' in orgEvent && orgEvent.axis === orgEvent.HORIZONTAL_AXIS ) {
-            deltaX = deltaY * -1;
-            deltaY = 0;
-        }
-
-        // Set delta to be deltaY or deltaX if deltaY is 0 for backwards compatabilitiy
-        delta = deltaY === 0 ? deltaX : deltaY;
-
-        // New school wheel delta (wheel event)
-        if ( 'deltaY' in orgEvent ) {
-            deltaY = orgEvent.deltaY * -1;
-            delta  = deltaY;
-        }
-        if ( 'deltaX' in orgEvent ) {
-            deltaX = orgEvent.deltaX;
-            if ( deltaY === 0 ) { delta  = deltaX * -1; }
-        }
-
-        // No change actually happened, no reason to go any further
-        if ( deltaY === 0 && deltaX === 0 ) { return; }
-
-        // Need to convert lines and pages to pixels if we aren't already in pixels
-        // There are three delta modes:
-        //   * deltaMode 0 is by pixels, nothing to do
-        //   * deltaMode 1 is by lines
-        //   * deltaMode 2 is by pages
-        if ( orgEvent.deltaMode === 1 ) {
-            var lineHeight = $.data(this, 'mousewheel-line-height');
-            delta  *= lineHeight;
-            deltaY *= lineHeight;
-            deltaX *= lineHeight;
-        } else if ( orgEvent.deltaMode === 2 ) {
-            var pageHeight = $.data(this, 'mousewheel-page-height');
-            delta  *= pageHeight;
-            deltaY *= pageHeight;
-            deltaX *= pageHeight;
-        }
-
-        // Store lowest absolute delta to normalize the delta values
-        absDelta = Math.max( Math.abs(deltaY), Math.abs(deltaX) );
-
-        if ( !lowestDelta || absDelta < lowestDelta ) {
-            lowestDelta = absDelta;
-
-            // Adjust older deltas if necessary
-            if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
-                lowestDelta /= 40;
-            }
-        }
-
-        // Adjust older deltas if necessary
-        if ( shouldAdjustOldDeltas(orgEvent, absDelta) ) {
-            // Divide all the things by 40!
-            delta  /= 40;
-            deltaX /= 40;
-            deltaY /= 40;
-        }
-
-        // Get a whole, normalized value for the deltas
-        delta  = Math[ delta  >= 1 ? 'floor' : 'ceil' ](delta  / lowestDelta);
-        deltaX = Math[ deltaX >= 1 ? 'floor' : 'ceil' ](deltaX / lowestDelta);
-        deltaY = Math[ deltaY >= 1 ? 'floor' : 'ceil' ](deltaY / lowestDelta);
-
-        // Normalise offsetX and offsetY properties
-        if ( special.settings.normalizeOffset && this.getBoundingClientRect ) {
-            var boundingRect = this.getBoundingClientRect();
-            offsetX = event.clientX - boundingRect.left;
-            offsetY = event.clientY - boundingRect.top;
-        }
-
-        // Add information to the event object
-        event.deltaX = deltaX;
-        event.deltaY = deltaY;
-        event.deltaFactor = lowestDelta;
-        event.offsetX = offsetX;
-        event.offsetY = offsetY;
-        // Go ahead and set deltaMode to 0 since we converted to pixels
-        // Although this is a little odd since we overwrite the deltaX/Y
-        // properties with normalized deltas.
-        event.deltaMode = 0;
-
-        // Add event and delta to the front of the arguments
-        args.unshift(event, delta, deltaX, deltaY);
-
-        // Clearout lowestDelta after sometime to better
-        // handle multiple device types that give different
-        // a different lowestDelta
-        // Ex: trackpad = 3 and mouse wheel = 120
-        if (nullLowestDeltaTimeout) { clearTimeout(nullLowestDeltaTimeout); }
-        nullLowestDeltaTimeout = setTimeout(nullLowestDelta, 200);
-
-        return ($.event.dispatch || $.event.handle).apply(this, args);
-    }
-
-    function nullLowestDelta() {
-        lowestDelta = null;
-    }
-
-    function shouldAdjustOldDeltas(orgEvent, absDelta) {
-        // If this is an older event and the delta is divisable by 120,
-        // then we are assuming that the browser is treating this as an
-        // older mouse wheel event and that we should divide the deltas
-        // by 40 to try and get a more usable deltaFactor.
-        // Side note, this actually impacts the reported scroll distance
-        // in older browsers and can cause scrolling to be slower than native.
-        // Turn this off by setting $.event.special.mousewheel.settings.adjustOldDeltas to false.
-        return special.settings.adjustOldDeltas && orgEvent.type === 'mousewheel' && absDelta % 120 === 0;
-    }
-
-}));
-
 L.AreaSelect = L.Class.extend({
     includes: L.Mixin.Events,
     
@@ -16881,7 +16632,7 @@ geoService.getLocation = function(maxAge) {
 			})
 		}
 
-		function geolocationError(error){
+		function geolocationError(error) {
 			if (error.code == 1) {
 				//PERMISSIONS DENIED
 				navigator.notification.alert(
@@ -16895,8 +16646,7 @@ geoService.getLocation = function(maxAge) {
 		}
 		
 		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError, 
-			{timeout:15000, enableHighAccuracy : true});
+			geolocationError);
 
 	} else {
 		//browser update message
@@ -17927,6 +17677,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 				deferred.resolve({world: world, style: style});
 				console.log('world & style in cache!');
 			} else {
+				console.log('missing style');
 				askServer();
 			}
 	} else {
@@ -18008,13 +17759,20 @@ worldTree.getUpcoming = function(_id) {
 }
 
 worldTree.getNearby = function() {
-	var deferred = $q.defer();
-	var now = Date.now();
 	
-	console.log(worldTree._nearby);
-	if (worldTree._nearby && worldTree._nearby.timestamp+30000 > now) 	{
+	//current nearby format
+	//{150m: [worlds],
+	// 150mPast: [worlds],
+	// 2.5k: [worlds],
+	// 2.5kPast: [worlds]}
+	
+	var deferred = $q.defer();
+	var now = Date.now() / 1000;
+
+	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
+		console.log('nearbies not cached');
 	geoService.getLocation().then(function(location) {
 		db.worlds.query({localTime: new Date(), 
 			userCoordinate: [location.lng, location.lat]},
@@ -18022,6 +17780,9 @@ worldTree.getNearby = function() {
 				worldTree._nearby = data[0];
 				worldTree._nearby.timestamp = now;
 				deferred.resolve(data[0]);
+				
+				worldTree.cacheWorlds(data[0]['150m']);
+				worldTree.cacheWorlds(data[0]['2.5km']);
 			});
 	}, function(reason) {
 		deferred.reject(reason);
@@ -18031,6 +17792,12 @@ worldTree.getNearby = function() {
 	return deferred.promise;
 }
 
+worldTree.cacheWorlds = function(worlds) {
+	if (!worlds) {return}
+	worlds.forEach(function(world) {
+		worldTree.worldCache.put(world.id, world);
+	});
+}
 
 return worldTree;
 }
@@ -20958,10 +20725,16 @@ $scope.dialog = dialogs;
     
 angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 
+$rootScope.hideBack = true;
+
 $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	$rootScope.hideBack = false;
+	deregFirstShow();
+}))
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -21296,7 +21069,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 
 
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
-	
+
 angular.extend($rootScope, {loading: false});
 $scope.fromMessages = false;
 $scope.state = {};
@@ -21304,27 +21077,37 @@ $scope.subnav = {
 	profile: ['me', 'contacts', 'history'],
 	worlds: ['worlds', 'drafts', 'filter']
 }
-
+$scope.files = {
+	avatar: undefined
+};
 
 $scope.kinds = ifGlobals.kinds;
 
 var saveTimer = null;
 var alert = alertManager;
 
-$scope.onAvatarSelect = function($files) {
-	var file = $files[0];
+$scope.$watch('files.avatar', function(newValue, oldValue) {
+	console.log(newValue, oldValue);
+	if (newValue===undefined) {
+		return;
+	}
+	console.log($scope.files);
+	var file = newValue[0];
 	$scope.upload = $upload.upload({
-		url: '/api/upload/',
-		file: file,
+		url: '/api/upload',
+		method: 'POST',
+		file: file
 	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		console.log('progress');
+		console.log(e);
+		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
 		$scope.uploadFinished = true;
 	});
-}
+});
 
 function saveUser() {
 	if ($scope.user) {
@@ -21645,6 +21428,10 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
+	
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
+	
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){
@@ -22017,18 +21804,22 @@ $scope.sendMsg = function (e) {
 		};
 		
 		sendMsgToServer(newChat);		
-	    $scope.msg.text = "";
+		$scope.msg.text = "";
 	}
 }
 
 $scope.alert = function (msg) {
 	alerts.addAlert('warning', msg, true);
 }
-	
+
 $scope.onImageSelect = function($files) {
+	$scope.uploading = true;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
 		file: $files[0]
+	}).progress(function(e) {
+		console.log(e);
+		$scope.uploadProgress = parseInt(100.0 * e.loaded / e.total);
 	}).success(function(data, status) {
 		sendMsgToServer({
 			worldID: $routeParams.worldURL,
@@ -22038,6 +21829,7 @@ $scope.onImageSelect = function($files) {
 	        pic: data,
 	        userID: $scope.userID
 		});
+		$scope.uploading = false;
 		//console.log(data);
 	})
 }	
@@ -22281,7 +22073,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function ( World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -22305,9 +22097,6 @@ $scope.selectedIndex = 0;
 var landmarksLoaded;
 
 //currently only for upcoming...
-
-  	
-  	
 function reorderById (idArray) {
 	console.log('reorderById');
 	$scope.upcoming = [];
@@ -22565,10 +22354,10 @@ function loadWidgets() {
 			$scope.category = true;
 		}
 		
-	  	if ($scope.style.widgets.upcoming) {
-	  		$scope.upcoming = true;
-	  		var userTime = new Date();
-	  		db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
+		if ($scope.style.widgets.upcoming) {
+			$scope.upcoming = true;
+			var userTime = new Date();
+			db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:now');
 				console.log(data);
 				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];

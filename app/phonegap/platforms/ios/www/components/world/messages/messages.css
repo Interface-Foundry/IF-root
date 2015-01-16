@@ -34,7 +34,7 @@
 	top: 40px;
 	border: none;
 	outline: none;
-	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") transparent;
+	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
 	z-index: 10;
 	border-radius: 24px;
 	background-clip: padding-box;
@@ -43,8 +43,12 @@
 }
 
 .aperture-full .message-nav-map {
+	margin-right: -48px;
+	right: 100%;
 	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,.4);
 	background-clip: padding-box;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .message-surface {
@@ -97,13 +101,14 @@
 	bottom: 0px;
 	z-index: 20;
 	background: #FFF;
-	border-top: 1px solid #CCC; 
+
+	-webkit-box-shadow: 0px -2px 8px rgba(0,0,0,.2);
+	box-shadow: 0px -2px 8px rgba(0,0,0,.2);
 	-webkit-transform: translate3D(0, 144px, 0);
 	transform: translate3D(0, 144px, 0);
 	
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-
 }
 
 .view-footer.editing {
@@ -438,4 +443,9 @@
 	position: absolute;
 	top: -16px;
 	left: -16px;
+}
+
+.uploading-progress {
+	height: 2px;
+	background: #03a9f4;
 }

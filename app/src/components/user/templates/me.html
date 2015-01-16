@@ -3,7 +3,9 @@
 		<div class="profile-sort">
 		<div class="profile-card">
 			<span class="sort-heading indigo700">YOU</span>
-				<div class="profile-card-pic" ng-file-select="onAvatarSelect($files)">
+				<div class="profile-card-pic" ng-file-select 
+						accept="image/*" ng-capture="'camera'" 
+						ng-model="files.avatar">
 					<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar">
 					<span class="profile-card-pic-upload">upload</span>
 				</div>

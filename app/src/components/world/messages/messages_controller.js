@@ -105,9 +105,13 @@ $scope.alert = function (msg) {
 }
 
 $scope.onImageSelect = function($files) {
+	$scope.uploading = true;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
 		file: $files[0]
+	}).progress(function(e) {
+		console.log(e);
+		$scope.uploadProgress = parseInt(100.0 * e.loaded / e.total);
 	}).success(function(data, status) {
 		sendMsgToServer({
 			worldID: $routeParams.worldURL,
@@ -117,6 +121,7 @@ $scope.onImageSelect = function($files) {
 	        pic: data,
 	        userID: $scope.userID
 		});
+		$scope.uploading = false;
 		//console.log(data);
 	})
 }	
