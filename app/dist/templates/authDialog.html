@@ -1,7 +1,9 @@
 <div class="surface">
 	<form ng-submit="userManager.login.login()" name="loginForm">
 		<h4 class="auth-title">Bubbl.li</h4>
-		<img class="closeDialog nav-icon" src="img/icons/compass.png" ng-click="dialog.close($event)">
+		<div class="closeWrapper closeElement" ng-click="dialog.close($event)">
+			<img class="closeImg closeElement nav-icon" src="img/icons/ic_clear_black_24dp.png">
+		</div>
 		<input name="email" type="email" 
 			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />		
 		<input name="password" type="password" 
