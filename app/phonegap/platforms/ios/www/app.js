@@ -16590,7 +16590,7 @@ dialogs.showDialog = function(name) {
 }
 
 dialogs.close = function($event) {
-	if($event.target.className.indexOf('dialog-bg')>-1){ 
+	if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
 		dialogs.show = false;
 	}
 }
