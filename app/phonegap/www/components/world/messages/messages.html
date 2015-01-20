@@ -23,6 +23,8 @@
 -->
 	
 	<div class="wrap">
+		<message-view class="message-list"></message-view>
+<!--
 		<ul class="message-list">
 			<li class="if-animate message " ng-repeat="msg in messages track by msg._id" ng-class="::{'message-self': msg.userID==userID, 'message-sticker': msg.sticker}" ng-click="messageLink(msg)">
 				<picture class="msg-avatar">
@@ -41,12 +43,17 @@
 				</div>
 			</li>
 		</ul>
+-->
 	</div>
 </div>
 
 <div class="view-footer" ng-class="{'message-logged-out-footer': !userManager.loginStatus, 'editing': editing}" ng-cloak>
 	<div class="uploading-progress" ng-show="uploading" ng-style="{'width': uploadhProgress+'%'}"></div>
-		<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input" ng-model="msg.text" ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" msd-elastic autofocus></textarea>
+		<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input" 
+		ng-model="msg.text" 
+		ng-class="{'textarea-highlight': stickerChange}"
+		ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" 
+		msd-elastic autofocus></textarea>
 		
 	<div class="msg-action-bar">
 		<button class="msg-action-bar-item pull-left" ng-file-select ng-file-change="onImageSelect($files)" accept="image/*">
@@ -66,7 +73,7 @@
 		<ul class="stickers">
 			<li class="sticker" 
 				ng-repeat="sticker in stickers" 
-				ng-click="select(sticker)"
+				ng-click="selectSticker(sticker)"
 				ng-class="{selected: selected === sticker}">
 				<img class="sticker-img" ng-src="{{sticker.img}}">
 			</li>
