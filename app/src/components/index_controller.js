@@ -105,6 +105,27 @@ $scope.getNearby = function($event) {
 	$event.stopPropagation();
 }
 
+$scope.share = function(platform) {
+  var link;
+  var height = 450;
+  var width = 560;
+  //center popup on screen
+  var left = (screen.width - width)/2;
+  var top = (screen.height - height)/2;
+  
+  if (platform == 'facebook') {
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+  }
+  else if (platform == 'twitter') {
+    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+  }
+  window.open(
+    link,
+    'Bubbl.li',
+    'height=450,width=558,top='+top+',left='+left+'scrollbars'
+  );
+};
+
 //@IFDEF IBEACON
 if (beaconManager.supported == true) {
 	beaconManager.startListening();
