@@ -20,7 +20,7 @@ var stickerSchema = new Schema({
 	stickerID: String, //placeholder for url-friendly sticker id, different from unique id
 	ownerID: { type: String, index: true},
 	ownerName: String,
-	worldID: { type: String, index: true},
+	roomID: { type: String, index: true}, //objectID for parent room
 	iconInfo: {
 		iconUrl: String,
 		iconRetinaUrl: String,

@@ -5571,6 +5571,67 @@ app.directive('ifSrc', function() {
 		}
 	}
 });
+app.directive('messageView', function() {
+	return {
+restrict: 'E',
+link: function(scope, element, attrs) {
+	
+	scope.$watchCollection('messages', function (newCollection, oldCollection, scope) {
+		m.render(element[0], newCollection.map(messageTemplate));
+	})
+	
+	function messageTemplate(message) {
+		return m('li.message',
+			{key:message._id,
+			class: message.userID===scope.userID ? 'message-self' : '',
+			onclick: function(e) {scope.messageLink(message)}},
+			[
+				m('picture.message-avatar',
+					m('img.small-avatar', {src:message.avatar || 'img/icons/profile.png'})),
+				m('h6.message-heading', message.nick || 'Visitor'),
+				messageContent(message)
+			]);
+	}
+	
+	function messageContent(message) {
+		var content,
+			kind = message.kind || 'text';
+		switch (kind) {
+			case 'text':
+				content = m('.message-body', message.msg);
+				break;
+			case 'pic': 
+				content = [
+					m('img.img-responsive', {src:message.pic}),
+					m('.message-body')
+				];
+				break;
+			case 'sticker': 
+				content = 	[m('.message-sticker-background', [
+								m('img.message-sticker-img', {src: message.sticker.img}),
+								m('img.message-sticker-link', {src: 'img/icons/ic_map_48px.svg'})
+							]),
+							m('.message-body', message.msg)]
+				break;
+			case 'editUser': 
+				content = [
+					m('.message-body', message.msg),
+					m('hr.divider'),
+					m('img.msg-chip-img', {src: scope.user.avatar}),
+					m('.msg-chip-label', scope.nick),
+					m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'})
+				];
+				break;
+		}
+
+		return m('.message-content', content);
+	}
+
+
+	
+}
+	}
+}); 
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
 	return {
@@ -21766,10 +21827,11 @@ function scrollToBottom() {
 
 function checkMessages() {
 	var doScroll = firstScroll;
-db.messages.query({worldID:$routeParams.worldURL, sinceID:sinceID}, function(data){
+db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
 	if (messageList[0].scrollHeight - messageList.scrollTop() - messageList.outerHeight() < 50) {
 		doScroll = true;
 	}
+
 	if (data.length>0) {
 		for (i = 0; i < data.length; i++) { 
 		    if ($scope.localMessages.indexOf(data[i]._id) == -1) {
@@ -21817,7 +21879,7 @@ $scope.sendMsg = function (e) {
 	if ($scope.msg.text == null) {return;}
 	if (userManager.loginStatus) {
 		var newChat = {
-		    worldID: $routeParams.worldURL,
+		    roomID: $scope.world._id,
 			nick: $scope.nick,
 			msg: $scope.msg.text,
 			avatar: $scope.user.avatar || 'img/icons/profile.png',
@@ -21842,13 +21904,15 @@ $scope.onImageSelect = function($files) {
 		console.log(e);
 		$scope.uploadProgress = parseInt(100.0 * e.loaded / e.total);
 	}).success(function(data, status) {
+		console.log(data);
 		sendMsgToServer({
-			worldID: $routeParams.worldURL,
+			roomID: $scope.world._id,
+			userID: $scope.userID,
 	        nick: $scope.nick,
 	        avatar: $scope.user.avatar || 'img/icons/profile.png',
 	        msg: '',
 	        pic: data,
-	        userID: $scope.userID
+	        kind: 'pic'
 		});
 		$scope.uploading = false;
 		//console.log(data);
@@ -21860,8 +21924,13 @@ $scope.showStickers = function() {
 	aperture.set('full');
 }
 
-$scope.select = function(sticker) {
+$scope.selectSticker = function(sticker) {
 	$scope.selected = sticker;
+	$scope.stickerChange = true;
+	$scope.msg.text = sticker.name;
+	$timeout(function() {
+		$scope.stickerChange = false
+	}, 500);
 }
 
 $scope.messageLink = function(message) {
@@ -21874,18 +21943,7 @@ $scope.messageLink = function(message) {
 			if (map.hasMarker(sticker._id)) {
 				map.setMarkerFocus(sticker._id);
 			} else {
-				map.addMarker(success._id, {
-					lat: latlng.lat,
-					lng: latlng.lng,
-					icon: {
-						iconUrl: sticker.img,
-						shadowUrl: '',
-						iconSize: [100, 100], 
-						iconAnchor: [50, 100],
-						popupAnchor: [0, -80]
-					},
-					message: sticker.message 
-				});
+				addStickerToMap(sticker);
 			}
 		})
 	} else if (message.href) {
@@ -21907,35 +21965,24 @@ $scope.pinSticker = function() {
 		}
 	//end getStickerLoc//
 		sticker.time = Date.now();
-		sticker.worldID = $scope.world._id;
+		sticker.roomID = $scope.world._id;
 		sticker.message = $scope.msg.text || sticker.name;
 		
 		stickerManager.postSticker(sticker).then(function(success) {
-			mapManager.addMarker(success._id, {
-				lat: latlng.lat,
-				lng: latlng.lng,
-				icon: {
-					iconUrl: sticker.img,
-					shadowUrl: '',
-					iconSize: [100, 100], 
-					iconAnchor: [50, 100],
-					popupAnchor: [0, -80]
-				},
-				message: '<img class="user-chip-img user-map-img" src="' + getAvatar() + '"/>' + '<strong>' + $scope.nick + '</strong>' + ': ' + sticker.message
-			});
-			
+			addStickerToMap(success)			
 			console.log(success);
 			$timeout(function() {
 				sendMsgToServer({
-				worldID: $routeParams.worldURL,
+				roomID: $scope.world._id,
+				userID: $scope.userID,
 				nick: $scope.nick,
 				avatar: $scope.user.avatar || 'img/icons/profile.png',
 				msg: $scope.msg.text || sticker.name,
-				userID: $scope.userID,
 				sticker: {
 					img: sticker.img,
 					_id: success._id
-				}
+				},
+				kind: 'sticker'
 				});
 				$scope.msg.text = "";
 			}, 500);
@@ -21956,12 +22003,12 @@ function getAvatar() {
 }
 
 //add welcome message 
-function welcomeMessage(){
+function welcomeMessage() {
 	var newChat = {
-	    worldID: $routeParams.worldURL,
+	    roomID: $scope.world._id,
 	    nick: 'BubblyBot',
 	    msg: 'Hey there, this is a Bubble chat created just for '+$scope.world.name+'. Chat, share pictures & leave notes with others here!',
-	    avatar: $scope.world.avatar || 'img/icons/profile.png',
+	    avatar: $scope.world.avatar || 'img/tidepools/default.png',
 	    userID: 'chatbot',
 	    _id: 'welcomeMessage'
 	};
@@ -21970,10 +22017,11 @@ function welcomeMessage(){
 
 function profileEditMessage() {
 	var newChat = {
-		worldID: $routeParams.worldURL,
+		roomID: $scope.world._id,
 		nick: 'BubblyBot',
+		kind: 'editUser',
 		msg: 'You are currently using the name '+ $scope.nick + '. Click here to edit it.',
-		avatar: $scope.world.avatar || 'img/icons/profile.png',
+		avatar: $scope.world.avatar || 'img/tidepools/default.png',
 		userID: 'chatbot',
 		_id: 'profileEditMessage',
 		href: 'profile/me'
@@ -22033,20 +22081,24 @@ function loadStickers() {
 
 function addStickersToMap(stickers) {
 	stickers.forEach(function(sticker, index, stickers) {
-		map.addMarker(sticker._id, {
-				lat: sticker.loc.coordinates[1],
-				lng: sticker.loc.coordinates[0],
-				icon: {
-					iconUrl: sticker.iconInfo.iconUrl,
-					iconSize: sticker.iconInfo.iconSize, 
-					iconAnchor: sticker.iconInfo.iconAnchor,
-					popupAnchor: sticker.iconInfo.popupAnchor
-				},
-				message: sticker.message,
-		});
+		addStickerToMap(sticker);
 	})
 }
 
+function addStickerToMap(sticker) {
+	mapManager.addMarker(sticker._id, {
+		lat: sticker.loc.coordinates[1],
+		lng: sticker.loc.coordinates[0],
+		icon: {
+			iconUrl: sticker.iconInfo.iconUrl,
+			shadowUrl: '',
+			iconSize: [100, 100], 
+			iconAnchor: [50, 100],
+			popupAnchor: [0, -80]
+		},
+		message: '<img class="user-chip-img user-map-img" src="' + sticker.avatar + '"/>' + '<strong>' + sticker.ownerName + '</strong>' + ': ' + sticker.message
+	});
+}
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////

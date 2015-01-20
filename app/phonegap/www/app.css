@@ -1246,11 +1246,14 @@ text-align: center;
 	resize: none;
 	min-height: 16px;
 	padding: 4px 12px;
+	background: #FFF;
 	border: 0;
 	outline: none;
 	-webkit-appearance: none;
 	overflow: hidden;
 	display: block;
+	-webkit-transition: 0.2s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 }
 
 .message-send {
@@ -1273,7 +1276,7 @@ text-align: center;
 .message {
 	position: relative;
 	width: 100%;
-	padding-left: 40px;
+	padding: 0px 0px 0px 40px;
 	margin: 8px 0px 24px 0px;
 	transition: 0.2s ease-in all;
 	max-width: 560px;
@@ -1282,18 +1285,20 @@ text-align: center;
 
 .message-heading {
 	position: absolute;
-	left: 40px;
 	top: -14px;
 	margin: 0;
+	color: #808080;
 }
 
-.message-self {
-	color:#808080;
+.message.message-self {
+	padding: 0px 40px 0px 0px;
+	margin: 8px 0px 24px 0px;
 	float: right;
 	clear: both;
 }
 
 .message-content {
+	position: relative;
 	width: 100%;
 	background: #FFF;
 	border-radius: 10px;
@@ -1309,10 +1314,6 @@ text-align: center;
 	overflow: hidden;	
 }
 
-.message-self .message-content {
-	color: #FFF;
-}
-
 .message-body {
 	margin: 0;
 	padding: 4px 12px;
@@ -1322,11 +1323,7 @@ text-align: center;
 	padding: 0px;
 }
 
-.message-self .msg-avatar {
-	display: none;
-}
-
-.msg-avatar {
+.message-avatar {
 	position: absolute;
 	left: 0px;
 	bottom: 0px;
@@ -1335,7 +1332,7 @@ text-align: center;
 	border-radius: 16px;
 }
 
-.msg-avatar:after {
+.message-avatar:after {
 	content:' ';
 	position: absolute;
 	right: -14px;
@@ -1347,6 +1344,16 @@ text-align: center;
 	
 	border-bottom: 6px solid #fff;
 	z-index: -1;
+}
+
+.message-self .message-avatar {
+	left: auto;
+	right: 0px;
+}
+
+.message-self .message-avatar:after {
+	left: -14px;
+	right: auto;
 }
 
 .message-self .message-corner {
@@ -1495,7 +1502,7 @@ text-align: center;
 	background: center / 24px 24px no-repeat url("img/icons/ic_check_white_24px.png") #4caf50;
 }
 
-.sticker-done-button.ng-hide-remove, .sticker-done-button.ng-hide-add.ng-hide-add-active {
+.sticker-done-button.ng-hide-remove, .sticker-done-button.ng-hide-add.ng-hide-add-active, .aperture-off .sticker-done-button {
 	-webkit-transform: translate3d(80px, 0, 0);
 	transform: translate3d(80px, 0, 0);
 }
@@ -1552,6 +1559,34 @@ text-align: center;
 .uploading-progress {
 	height: 2px;
 	background: #03a9f4;
+}
+
+.textarea-highlight {
+	background: #03a9f4;
+}
+
+.msg-chip-img {
+	float: left;
+	margin: 4px;
+	height: 24px;
+	width: 24px; 
+	border-radius: 12px;
+}
+
+.msg-chip-label {
+	display: block;
+	line-height: 32px;
+	font-size: 14px;
+	margin: 0px 11px 0px 4px;
+	float: left;
+}
+
+.msg-chip-edit {
+	display: block;
+	float: left;
+	height: 24px;
+	width: 24px;
+	margin: 4px;
 }
 .world-toolbar {
 	height: 68px;

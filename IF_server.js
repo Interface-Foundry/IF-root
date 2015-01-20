@@ -1555,12 +1555,12 @@ app.get('/api/:collection', function(req, res) {
     if (req.params.collection == 'worldchat'){
 
         if (req.query.sinceID == 'none' || !req.query.sinceID){
-            var qw ={
-              worldID: req.query.worldID
+            var qw = {
+              roomID: req.query.roomID
             }
         } else {
-            var qw ={
-              worldID: req.query.worldID,
+            var qw = {
+              roomID: req.query.roomID,
               _id: { $gt: mongoose.Types.ObjectId(req.query.sinceID) }
             }
         }
@@ -1568,7 +1568,7 @@ app.get('/api/:collection', function(req, res) {
     if (req.query.limit == 1) {
       db.collection('worldchats').find(qw).sort({_id: -1}).limit(1).toArray(function(err, data) {
       if (err) {
-        console.log(err)
+	  console.log(err)
         res.send(err);
       } else if (data) {
         res.send(data);
@@ -1730,8 +1730,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         var wc = new worldchatSchema({
             userID: req.user._id,
-            worldID: req.body.worldID,
+            roomID: req.body.roomID,
             nick: req.body.nick,
+            kind: req.body.kind,
             msg: req.body.msg,
             pic: req.body.pic,
             href: req.body.href,
@@ -1760,14 +1761,14 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     }
 
     if ((req.url == "/api/stickers/create")
-      && req.body.worldID
+      && req.body.roomID
       && req.user._id
       && req.body.name) {
 
       var sticker = new stickerSchema({
         name: req.body.name,
         ownerID: req.user._id,
-       worldID: req.body.worldID
+       roomID: req.body.roomID
       });
 
       if (req.body.loc){
