@@ -3464,6 +3464,20 @@ a.bubble-inspector-btn:hover {
   -ms-user-select: none;
   user-select: none;
 }
+.closeImg {
+  position: relative;
+  left: 12px;
+  top: 12px;
+  height: 24px;
+  width: 24px;
+}
+.closeWrapper {
+  cursor: pointer;
+  float: right;
+  height: 48px;
+  width: 48px;
+  margin-top: -48px;
+}
 .dialog-bg {
   position: absolute;
   top: 0px;
