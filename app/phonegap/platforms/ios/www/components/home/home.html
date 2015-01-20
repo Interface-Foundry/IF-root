@@ -48,10 +48,21 @@
 			</div>
 		</li>
 		<li ng-if="loadState=='success'&& !(homeBubbles.length > 0)" class="text-center"> 
-			No bubbles found. <a if-href="/profile/worlds">Create a new one?</a>
+			No bubbles found. <a if-href="#profile/worlds">Create a new one?</a>
 		</li>
 		<li ng-if="loadState=='failure'" class="text-center">
-			Server connection lost
+			<!-- Server connection lost -->
+			<span>
+				<h4>Sorry, we need your location before entering bubbl.li</h4>
+				
+				<h5>
+					We know privacy is important, so we understand :)
+					<br>
+			    	You can re-enable Location Sharing in your browser settings
+				</h5>
+				<img width="160" ng-src="img/IF/failfairy.png"/>
+				<br><br>
+			</span>
 		</li>
 	</ul>
 		</div>
@@ -81,10 +92,21 @@
 			</div>
 		</li>
 		<li ng-if="loadState=='success'&& !(nearbyBubbles.length > 0)" class="text-center"> 
-			No bubbles found. <a if-href="/profile/worlds">Create a new one?</a>
+			No bubbles found. <a if-href="#profile/worlds">Create a new one?</a>
 		</li>
 		<li ng-if="loadState=='failure'" class="text-center">
-			Server connection lost
+			<!-- Server connection lost -->
+			<span>
+				<h4>Sorry, we need your location before entering bubbl.li</h4>
+				
+				<h5>
+					We know privacy is important, so we understand :)
+					<br>
+			    	You can re-enable Location Sharing in your browser settings
+				</h5>
+				<img width="160" ng-src="img/IF/failfairy.png"/>
+				<br><br>
+			</span>
 		</li>
 	</ul>
 		</div>
