@@ -104,14 +104,10 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/dialog/share?'+
-    'app_id=559490587493744'+
-    '&display=popup'+
-    '&href='+ encodeURIComponent('https://bubbl.li'+$location.path()) +
-    '&redirect_uri='+ encodeURIComponent('https://bubbl.li/');
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=URL';
+    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
   }
   window.open(
     link,
