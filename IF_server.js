@@ -382,7 +382,6 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     if (!req.isAuthenticated()){ 
-	    console.log(req);
 	    passport.authenticate('local-basic', function(err, user, info) {
 		    if (err) {
 			    res.sendStatus(401);
@@ -395,7 +394,7 @@ function isLoggedIn(req, res, next) {
 		    }
 	    })(req, res, next)
     } else { 
-        return next();
+       return next();
     }
 }
 
@@ -2447,17 +2446,11 @@ app.all('/*', function(req, res) {
 	   		console.log('Sent:', req.url);
 	   }
 	  });
+  } else if (req.url.indexOf('api') >-1) {
+	  return next();
+  } else {
+	res.sendFile('index.html', { root: __dirname + '/app/dist' });
   }
-
-  /*else if (endsWith(req.url,'/0')){
-    console.log('dont send back, but who cares');
-    res.status(404).send({err: '/0'});
-  }*/
-
-  else {
-    res.sendFile('index.html', { root: __dirname + '/app/dist' });
-  }
-
 });
 
 
