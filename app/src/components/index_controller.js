@@ -17,10 +17,12 @@ $scope.$on('$viewContentLoaded', function() {
 });
 
 // @IFDEF PHONEGAP
+/*
 var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
+*/
 // @ENDIF
 
 
@@ -131,6 +133,21 @@ if (beaconManager.supported == true) {
 	beaconManager.startListening();
 }
 //@ENDIF
+
+//@IFDEF KEYCHAIN
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+//@ENDIF
+
 
 
 }]);

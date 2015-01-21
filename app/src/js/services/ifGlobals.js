@@ -2,7 +2,6 @@
 
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
-	
 function() {
 var ifGlobals = {
 	kinds: {

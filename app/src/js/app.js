@@ -24,10 +24,10 @@ var checkLoggedin = function(userManager) {
     		'request': function(request) {
 	    			//@IFDEF PHONEGAP
 	    			if (request.server) {
-		    			request.url = 'https://bubbl.li' + request.url;
+		    			request.url = 'http://bubbl.li' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
-							console.log(request);
+							//console.log(request);
 						}
 	    			}
 	    			//@ENDIF
@@ -120,6 +120,7 @@ angular.extend($tooltipProvider.defaults, {
 	//@ENDIF
 	
 //@IFDEF KEYCHAIN
+/*
 lockerManager.getCredentials().then(function(credentials) {
 userManager.signin(credentials.username, credentials.password).then(function(success) {
 		userManager.checkLogin().then(function(success) {
@@ -131,6 +132,7 @@ userManager.signin(credentials.username, credentials.password).then(function(suc
 }, function(err) {
 	console.log('credential error', error); 
 });
+*/
 //@ENDIF
 
 });

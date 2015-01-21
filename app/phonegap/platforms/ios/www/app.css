@@ -1117,7 +1117,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	padding: 88px 0px 76px 0px;
+	padding: 104px 0px 76px 0px;
 }
 
 .message-nav {
@@ -3703,6 +3703,12 @@ li.alert {
 }
 .blue500-bg {
   background: #2196f3;
+}
+.gray-e6e6e6 {
+  background: #e6e6e6;
+}
+.surface.bg-clear {
+  background: none;
 }
 .loading-spinner {
   position: relative;

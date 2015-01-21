@@ -1421,6 +1421,12 @@ li.alert {
 .blue500-bg {
   background: #2196f3;
 }
+.gray-e6e6e6 {
+  background: #e6e6e6;
+}
+.surface.bg-clear {
+  background: none;
+}
 .loading-spinner {
   position: relative;
   margin: 20px auto;

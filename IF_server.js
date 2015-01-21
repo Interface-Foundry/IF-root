@@ -389,7 +389,17 @@ function isLoggedIn(req, res, next) {
 
     if (!req.isAuthenticated()){ 
 	    console.log(req);
-        res.sendStatus(401);  //send unauthorized 
+	    passport.authenticate('local-basic', function(err, user, info) {
+		    if (err) {
+			    res.sendStatus(401);
+		    }
+		    if (!user) {
+			    res.sendStatus(401);
+		    }
+		    if (user) {
+			    return next();
+		    }
+	    })(req, res, next)
     }
     else{ 
         return next();

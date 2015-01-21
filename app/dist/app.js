@@ -5571,7 +5571,7 @@ link: function(scope, element, attrs) {
 			onclick: function(e) {scope.messageLink(message)}},
 			[
 				m('picture.message-avatar',
-					m('img.small-avatar', {src:message.avatar || 'img/icons/profile.png'})),
+					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
 				messageContent(message)
 			]);
@@ -5591,7 +5591,7 @@ link: function(scope, element, attrs) {
 				];
 				break;
 			case 'sticker': 
-				content = 	[m('.message-sticker-background', [
+				content =	[m('.message-sticker-background', [
 								m('img.message-sticker-img', {src: message.sticker.img}),
 								m('img.message-sticker-link', {src: 'img/icons/ic_map_48px.svg'})
 							]),
@@ -5601,7 +5601,7 @@ link: function(scope, element, attrs) {
 				content = [
 					m('.message-body', message.msg),
 					m('hr.divider'),
-					m('img.msg-chip-img', {src: scope.user.avatar}),
+					m('img.msg-chip-img', {src: bubUrl(scope.user.avatar)}),
 					m('.msg-chip-label', scope.nick),
 					m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'})
 				];
@@ -5611,7 +5611,13 @@ link: function(scope, element, attrs) {
 		return m('.message-content', content);
 	}
 
-
+	function bubUrl(string) {
+		if (string.indexOf('http') > -1) {
+			return string;
+		} else {
+			return 'https://bubbl.li/'+string;
+		}
+	}
 	
 }
 	}
@@ -16711,7 +16717,6 @@ return geoService;
 
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
-	
 function() {
 var ifGlobals = {
 	kinds: {
@@ -21779,7 +21784,7 @@ $http.post('/api/worldchat/create', msg, {server: true})
 		sinceID = success[0]._id;
 		msg._id = success[0]._id;
 		$scope.messages.push(msg);
-		$scope.localMessages.push(res[0]._id);
+		$scope.localMessages.push(success[0]._id);
 		scrollToBottom();
 	})
 	.error(function(error) {

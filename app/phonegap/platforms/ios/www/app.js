@@ -4716,10 +4716,10 @@ var checkLoggedin = function(userManager) {
     	return {
     		'request': function(request) {
 	    			if (request.server) {
-		    			request.url = 'https://bubbl.li' + request.url;
+		    			request.url = 'http://192.168.1.9:2997' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
-							console.log(request);
+							//console.log(request);
 						}
 	    			}
 				return request;
@@ -4800,6 +4800,7 @@ angular.extend($tooltipProvider.defaults, {
 	
 	navigator.splashscreen.hide();
 	
+/*
 lockerManager.getCredentials().then(function(credentials) {
 userManager.signin(credentials.username, credentials.password).then(function(success) {
 		userManager.checkLogin().then(function(success) {
@@ -4811,6 +4812,7 @@ userManager.signin(credentials.username, credentials.password).then(function(suc
 }, function(err) {
 	console.log('credential error', error); 
 });
+*/
 });
 
 document.addEventListener('deviceready', onDeviceReady, true);
@@ -5587,7 +5589,7 @@ link: function(scope, element, attrs) {
 			onclick: function(e) {scope.messageLink(message)}},
 			[
 				m('picture.message-avatar',
-					m('img.small-avatar', {src:message.avatar || 'img/icons/profile.png'})),
+					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
 				messageContent(message)
 			]);
@@ -5607,7 +5609,7 @@ link: function(scope, element, attrs) {
 				];
 				break;
 			case 'sticker': 
-				content = 	[m('.message-sticker-background', [
+				content =	[m('.message-sticker-background', [
 								m('img.message-sticker-img', {src: message.sticker.img}),
 								m('img.message-sticker-link', {src: 'img/icons/ic_map_48px.svg'})
 							]),
@@ -5617,7 +5619,7 @@ link: function(scope, element, attrs) {
 				content = [
 					m('.message-body', message.msg),
 					m('hr.divider'),
-					m('img.msg-chip-img', {src: scope.user.avatar}),
+					m('img.msg-chip-img', {src: bubUrl(scope.user.avatar)}),
 					m('.msg-chip-label', scope.nick),
 					m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'})
 				];
@@ -5627,7 +5629,13 @@ link: function(scope, element, attrs) {
 		return m('.message-content', content);
 	}
 
-
+	function bubUrl(string) {
+		if (string.indexOf('http') > -1) {
+			return string;
+		} else {
+			return 'https://bubbl.li/'+string;
+		}
+	}
 	
 }
 	}
@@ -16735,7 +16743,6 @@ return geoService;
 
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
-	
 function() {
 var ifGlobals = {
 	kinds: {
@@ -20793,10 +20800,12 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
+/*
 var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
+*/
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -20899,6 +20908,17 @@ $scope.share = function(platform) {
   );
 };
 
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
@@ -21859,7 +21879,7 @@ $http.post('/api/worldchat/create', msg, {server: true})
 		sinceID = success[0]._id;
 		msg._id = success[0]._id;
 		$scope.messages.push(msg);
-		$scope.localMessages.push(res[0]._id);
+		$scope.localMessages.push(success[0]._id);
 		scrollToBottom();
 	})
 	.error(function(error) {

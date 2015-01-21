@@ -68,7 +68,7 @@ $http.post('/api/worldchat/create', msg, {server: true})
 		sinceID = success[0]._id;
 		msg._id = success[0]._id;
 		$scope.messages.push(msg);
-		$scope.localMessages.push(res[0]._id);
+		$scope.localMessages.push(success[0]._id);
 		scrollToBottom();
 	})
 	.error(function(error) {
