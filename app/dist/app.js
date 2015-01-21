@@ -16687,7 +16687,6 @@ geoService.getLocation = function(maxAge) {
 		}
 
 		function geolocationError(error) {
-			
 			geoService.resolveQueue({err: error.code});
 		}
 		

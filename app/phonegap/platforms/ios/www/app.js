@@ -16705,17 +16705,6 @@ geoService.getLocation = function(maxAge) {
 		}
 
 		function geolocationError(error) {
-			if (error.code == 1) {
-				//PERMISSIONS DENIED
-				/*
-navigator.notification.alert(
-					'Please enable Location Services for Bubbl.li', 
-					function() {/*send to settings app eventually*/}, 
-					//'Location Error',
-					//'OK');
-
-			}
-			
 			geoService.resolveQueue({err: error.code});
 		}
 		
