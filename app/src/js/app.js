@@ -24,7 +24,7 @@ var checkLoggedin = function(userManager) {
     		'request': function(request) {
 	    			//@IFDEF PHONEGAP
 	    			if (request.server) {
-		    			request.url = 'http://bubbl.li' + request.url;
+		    			request.url = 'https://bubbl.li' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);

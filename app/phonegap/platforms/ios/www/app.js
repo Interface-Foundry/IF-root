@@ -4716,7 +4716,7 @@ var checkLoggedin = function(userManager) {
     	return {
     		'request': function(request) {
 	    			if (request.server) {
-		    			request.url = 'http://bubbl.li' + request.url;
+		    			request.url = 'https://bubbl.li' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
