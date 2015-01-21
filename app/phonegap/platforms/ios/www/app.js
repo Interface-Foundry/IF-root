@@ -22438,7 +22438,7 @@ function loadWidgets() {
 			$scope.messages = true;
 
 			//angular while loop the query every 2 seconds
-			db.messages.query({limit:1, worldID:$routeParams.worldURL}, function(data){ 
+			db.messages.query({limit:1, roomID:$scope.world._id}, function(data){ 
 				console.log('db.messages', data);
 				if (data.length>0) {
 					$scope.msg = data[0];
