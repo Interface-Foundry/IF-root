@@ -158,6 +158,7 @@ userManager.login.login = function() {
       password: userManager.login.password
     }
     userManager.signin(data.email, data.password).then(function(success) {
+	    console.log(success);
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;

@@ -54,7 +54,7 @@
               <icon src="res/ios/icon-50@2x.png" width="100" height="100" />
               
     <!-- images are determined by width and height. The following are supported -->
-    <splash src="res/ios/568h@2x~iphone.png" width="640" height="1136"/>
+    <splash src="res/ios/Default-568h@2x~iphone.png" width="640" height="1136"/>
 	<splash src="res/ios/Default-667h.png" width="750" height="1334"/>
        
     <splash src="res/ios/Default-736h.png" width="1242" height="2208"/>

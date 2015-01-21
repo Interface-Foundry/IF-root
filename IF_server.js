@@ -340,7 +340,6 @@ var fn = function (req, res) {
 
 // route to test if the user is logged in or not 
 app.get('/api/user/loggedin', function(req, res) { 
-
   if (req.isAuthenticated()){
     res.send(req.user);
   }
@@ -389,6 +388,7 @@ function isLoggedIn(req, res, next) {
    // console.log(req.sessionStore);
 
     if (!req.isAuthenticated()){ 
+	    console.log(req);
         res.sendStatus(401);  //send unauthorized 
     }
     else{ 
@@ -1724,7 +1724,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         editProject(); //edit project info
     }
 
-    if (req.url == "/api/worldchat/create"){
+    if (req.url == "/api/worldchat/create") {
     
       console.log('image '+req.body.img);
 
@@ -1806,6 +1806,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
       if (req.user.name) {
         sticker.ownerName = req.user.name;
       }
+      sticker.avatar = req.body.avatar;
+      
       if (req.body.iconInfo){
         if (req.body.iconInfo.iconUrl){
           sticker.iconInfo.iconUrl = req.body.iconInfo.iconUrl;

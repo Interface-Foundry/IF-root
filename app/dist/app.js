@@ -17611,6 +17611,7 @@ userManager.login.login = function() {
       password: userManager.login.password
     }
     userManager.signin(data.email, data.password).then(function(success) {
+	    console.log(success);
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
@@ -21773,14 +21774,17 @@ db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
 }
 
 function sendMsgToServer(msg) {
-db.messages.create(msg, function(res) {
-	sinceID = res[0]._id;
-	
-	msg._id = res[0]._id;
-	$scope.messages.push(msg);
-	$scope.localMessages.push(res[0]._id);
-	scrollToBottom();
-});
+$http.post('/api/worldchat/create', msg, {server: true})
+	.success(function(success) {
+		sinceID = success[0]._id;
+		msg._id = success[0]._id;
+		$scope.messages.push(msg);
+		$scope.localMessages.push(res[0]._id);
+		scrollToBottom();
+	})
+	.error(function(error) {
+		//HANDLE
+	})
 }
 
 $scope.toggleMap = function() {
@@ -21887,10 +21891,11 @@ $scope.pinSticker = function() {
 		sticker.time = Date.now();
 		sticker.roomID = $scope.world._id;
 		sticker.message = $scope.msg.text || sticker.name;
+		sticker.avatar = $scope.user.avatar;
 		
 		stickerManager.postSticker(sticker).then(function(success) {
 			addStickerToMap(success)			
-			console.log(success);
+
 			$timeout(function() {
 				sendMsgToServer({
 				roomID: $scope.world._id,

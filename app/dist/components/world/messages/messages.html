@@ -53,7 +53,7 @@
 		ng-model="msg.text" 
 		ng-class="{'textarea-highlight': stickerChange}"
 		ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" 
-		msd-elastic autofocus></textarea>
+		msd-elastic></textarea>
 		
 	<div class="msg-action-bar">
 		<button class="msg-action-bar-item pull-left" ng-file-select ng-file-change="onImageSelect($files)" accept="image/*">
