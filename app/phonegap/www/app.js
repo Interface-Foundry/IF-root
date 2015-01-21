@@ -22115,7 +22115,7 @@ function addStickerToMap(sticker) {
 			iconAnchor: [50, 100],
 			popupAnchor: [0, -80]
 		},
-		message: '<img class="user-chip-img user-map-img" src="' + sticker.avatar + '"/>' + '<strong>' + sticker.ownerName + '</strong>' + ': ' + sticker.message
+		message: '<div class="avatarWrapper"><img class="user-chip-img user-map-img" src="' + getAvatar() + '"/>' + '<strong>' + $scope.nick + '</strong></div>' + '<p class="user-map-text">' + sticker.message + '</p>'
 	});
 }
 

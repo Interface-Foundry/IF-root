@@ -726,14 +726,25 @@ a.bubble-inspector-title {
 }
 
 .user-map-img {
-	display: inline;
+	display: inline-block;
+	float: none;
 	position: relative;
 	top: 0px;
 	right: 4px;
 	@media only screen and (min-width: 480px) {
-		top: -8px;
-		right: 0px;
+		top: -2px;
+		right: 4px;
 	}
+}
+
+.leaflet-popup-content p.user-map-text {
+	text-align: center;
+	margin: 0;
+	max-width: 220px;
+}
+
+.avatarWrapper {
+	text-align: center;
 }
 
 
