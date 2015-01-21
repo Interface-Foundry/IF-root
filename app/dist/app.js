@@ -16832,7 +16832,7 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 	console.log(h,w);
 	
 	leafletData.getMap().then(function(map) {
-			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart]);
+			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart-(68/2)]); // where 68px is the height of #top-shelf
 			console.log(targetPt);
 			targetLatLng = map.unproject(targetPt, z);
 			console.log(targetLatLng);
