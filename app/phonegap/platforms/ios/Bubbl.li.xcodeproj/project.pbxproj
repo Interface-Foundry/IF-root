@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
@@ -28,7 +29,6 @@
 		30FC414916E50CA1004E6F35 /* icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30FC414816E50CA1004E6F35 /* icon-72@2x.png */; };
 		4A7DA880DA5A4C5ABF7A4449 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F504F390E114A28B0C3653B /* Security.framework */; };
 		5B1594DD16A7569C00FEF299 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */; };
-		714249CC32D0437DA6CD28A5 /* CDVNotification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E30E2A5394F2451484A46356 /* CDVNotification.bundle */; };
 		7E7966DE1810823500FA85AD /* icon-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D41810823500FA85AD /* icon-40.png */; };
 		7E7966DF1810823500FA85AD /* icon-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D51810823500FA85AD /* icon-40@2x.png */; };
 		7E7966E01810823500FA85AD /* icon-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D61810823500FA85AD /* icon-50.png */; };
@@ -45,9 +45,7 @@
 		E005AA021A131A8100B9F7D1 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C87A26D86EF44D54836AFA8F /* CoreBluetooth.framework */; };
 		E005AA041A131A8E00B9F7D1 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98DBAD006FB942BE87F94E02 /* SystemConfiguration.framework */; };
 		E0F9E0CA1A13204C00DD0B6B /* CDVLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 697ADC21C5474BD89BCAEE7B /* CDVLocation.m */; };
-		E0F9E0CB1A13204E00DD0B6B /* CDVNotification.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ABE650E0E0E4D68864312AF /* CDVNotification.m */; };
 		E0F9E0CC1A13205000DD0B6B /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DE2F374E88F4F3C951C4063 /* CDVSplashScreen.m */; };
-		E0F9E0CD1A13209900DD0B6B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8CE1113D916F4ACC9E81E05C /* AudioToolbox.framework */; };
 		E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */ = {isa = PBXBuildFile; fileRef = BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */; };
 /* End PBXBuildFile section */
 
@@ -146,7 +144,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E0F9E0CD1A13209900DD0B6B /* AudioToolbox.framework in Frameworks */,
 				E005AA041A131A8E00B9F7D1 /* SystemConfiguration.framework in Frameworks */,
 				E005AA021A131A8100B9F7D1 /* CoreBluetooth.framework in Frameworks */,
 				305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */,
@@ -457,7 +454,6 @@
 				7E7966E11810823500FA85AD /* icon-50@2x.png in Resources */,
 				7E7966E51810823500FA85AD /* icon-76@2x.png in Resources */,
 				30FC414916E50CA1004E6F35 /* icon-72@2x.png in Resources */,
-				714249CC32D0437DA6CD28A5 /* CDVNotification.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,7 +487,6 @@
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
 				E0F9E0CC1A13205000DD0B6B /* CDVSplashScreen.m in Sources */,
 				E0F9E0CA1A13204C00DD0B6B /* CDVLocation.m in Sources */,
-				E0F9E0CB1A13204E00DD0B6B /* CDVNotification.m in Sources */,
 				E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */,
 				2EEF78E57E08494CBA9757C2 /* CDVKeychain.m in Sources */,
 				93A4F476C39349E595491E96 /* SFHFKeychainUtils.m in Sources */,

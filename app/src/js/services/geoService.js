@@ -37,11 +37,13 @@ geoService.getLocation = function(maxAge) {
 			//@IFDEF PHONEGAP
 			if (error.code == 1) {
 				//PERMISSIONS DENIED
-				navigator.notification.alert(
+				/*
+navigator.notification.alert(
 					'Please enable Location Services for Bubbl.li', 
 					function() {/*send to settings app eventually*/}, 
-					'Location Error',
-					'OK');
+					//'Location Error',
+					//'OK');
+
 			}
 			//@ENDIF
 			

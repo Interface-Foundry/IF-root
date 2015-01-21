@@ -4716,7 +4716,7 @@ var checkLoggedin = function(userManager) {
     	return {
     		'request': function(request) {
 	    			if (request.server) {
-		    			request.url = 'http://192.168.1.9:2997' + request.url;
+		    			request.url = 'http://bubbl.li' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5630,6 +5630,9 @@ link: function(scope, element, attrs) {
 	}
 
 	function bubUrl(string) {
+		if (string === undefined) {
+			return '';	
+		}
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {
@@ -16704,11 +16707,13 @@ geoService.getLocation = function(maxAge) {
 		function geolocationError(error) {
 			if (error.code == 1) {
 				//PERMISSIONS DENIED
-				navigator.notification.alert(
+				/*
+navigator.notification.alert(
 					'Please enable Location Services for Bubbl.li', 
 					function() {/*send to settings app eventually*/}, 
-					'Location Error',
-					'OK');
+					//'Location Error',
+					//'OK');
+
 			}
 			
 			geoService.resolveQueue({err: error.code});

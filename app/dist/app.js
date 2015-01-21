@@ -5612,6 +5612,9 @@ link: function(scope, element, attrs) {
 	}
 
 	function bubUrl(string) {
+		if (string === undefined) {
+			return '';	
+		}
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {

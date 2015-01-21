@@ -25,12 +25,7 @@
                             "count": 1
                         }
                     ],
-                    "AudioToolbox.framework": [
-                        {
-                            "xml": "true",
-                            "count": 1
-                        }
-                    ],
+                    "AudioToolbox.framework": [],
                     "CoreGraphics.framework": [
                         {
                             "xml": "false",
@@ -50,10 +45,6 @@
                     "/*": [
                         {
                             "xml": "<feature name=\"EstimoteBeacons\"><param name=\"ios-package\" value=\"EstimoteBeacons\" /></feature>",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"Notification\"><param name=\"ios-package\" value=\"CDVNotification\" /></feature>",
                             "count": 1
                         },
                         {
@@ -87,9 +78,6 @@
     },
     "installed_plugins": {
         "pl.makingwaves.estimotebeacons": {
-            "PACKAGE_NAME": "com.if.bubblli"
-        },
-        "org.apache.cordova.dialogs": {
             "PACKAGE_NAME": "com.if.bubblli"
         },
         "org.apache.cordova.splashscreen": {
