@@ -381,12 +381,6 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-
-    // console.log('--------- ISLOGGEDIN() -------------');
-    // console.log(req);
-
-   // console.log(req.sessionStore);
-
     if (!req.isAuthenticated()){ 
 	    console.log(req);
 	    passport.authenticate('local-basic', function(err, user, info) {
@@ -400,8 +394,7 @@ function isLoggedIn(req, res, next) {
 			    return next();
 		    }
 	    })(req, res, next)
-    }
-    else{ 
+    } else { 
         return next();
     }
 }
