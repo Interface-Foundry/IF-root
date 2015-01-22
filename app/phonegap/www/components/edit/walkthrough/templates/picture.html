@@ -6,7 +6,8 @@
 	<div class="preview-img-well"
 		ng-hide="world.avatar"
 		ng-file-drop="pictureSelect($files)"
-		ng-file-select="pictureSelect($files)">
+		ng-file-select
+		ng-file-change="pictureSelect($files)">
 		<p class="vertical-middle">
 			Upload<br>
 			an<br>
