@@ -78,7 +78,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.post('/api/user/login-basic', passport.authenticate('local-basic', {}), 
 		function(req, res) {
 			res.status(200).send(req.user);
-		})
+		});
 
 
 		// app.post('/api/user/login', 

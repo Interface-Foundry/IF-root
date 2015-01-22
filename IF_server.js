@@ -382,17 +382,17 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     if (!req.isAuthenticated()){ 
-	    passport.authenticate('local-basic', function(err, user, info) {
-		    if (err) {
-			    res.sendStatus(401);
-		    }
-		    if (!user) {
-			    res.sendStatus(401);
-		    }
-		    if (user) {
-			    return next();
-		    }
-	    })(req, res, next)
+      passport.authenticate('local-basic', function(err, user, info) {
+        if (err) {
+          res.sendStatus(401);
+        }
+        if (!user) {
+          res.sendStatus(401);
+        }
+        if (user) {
+          return next();
+        }
+      })(req, res, next)
     } else { 
        return next();
     }
@@ -531,57 +531,57 @@ function manageServerWidgets(id, tag, widgets){
 
 //upload profile pictures for worlds and landmarks and (users?)
 app.post('/api/upload', isLoggedIn, function (req, res) {
-	var fstream;
-	req.pipe(req.busboy);
+  var fstream;
+  req.pipe(req.busboy);
 
-	req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
-		if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
-        	if (req.headers['content-length'] > 10000000){
-				console.log("Filesize too large.");
-        	} else {
-			
-				var stuff_to_hash = filename + (new Date().toString());
-				var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
-				var fileType = filename.split('.').pop(); 
-				var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
-				var current = object_key + "." + fileType;
-				var tempPath = "app/dist/temp_avatar_uploads/" + current;
-				var awsKey = date_in_path + current;
-	
-				fstream = fs.createWriteStream(tempPath);
-				var count = 0;
-				var totalSize = req.headers['content-length'];
+  req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+    if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
+          if (req.headers['content-length'] > 10000000){
+        console.log("Filesize too large.");
+          } else {
+      
+        var stuff_to_hash = filename + (new Date().toString());
+        var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex'); 
+        var fileType = filename.split('.').pop(); 
+        var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
+        var current = object_key + "." + fileType;
+        var tempPath = "app/dist/temp_avatar_uploads/" + current;
+        var awsKey = date_in_path + current;
+  
+        fstream = fs.createWriteStream(tempPath);
+        var count = 0;
+        var totalSize = req.headers['content-length'];
 
-				file.on('data', function(data) {
-					count += data.length;
-					var percentUploaded = Math.floor(count/totalSize * 100);
-					console.log(percentUploaded);
-					//res.write(parseInt(percentUploaded));
-					//io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
-				})
-				
-				file.pipe(fstream);
+        file.on('data', function(data) {
+          count += data.length;
+          var percentUploaded = Math.floor(count/totalSize * 100);
+          console.log(percentUploaded);
+          //res.write(parseInt(percentUploaded));
+          //io.emit('uploadstatus',{ message: "Uploaded " + percentUploaded + "%"} );
+        })
+        
+        file.pipe(fstream);
 
-				fstream.on('close', function () {
-					var buffer = readChunk.sync(tempPath, 0, 262);
+        fstream.on('close', function () {
+          var buffer = readChunk.sync(tempPath, 0, 262);
 
-					if (fileTypeProcess(buffer) == false){
-						fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
-					} else {   
-				im.crop({
-				srcPath: tempPath, 
-				dstPath: tempPath,
-				width: 300,
-				height: 300,
-				quality: 85,
-				gravity: "Center"
-        		}, function(err, stdout, stderr){
+          if (fileTypeProcess(buffer) == false){
+            fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+          } else {   
+        im.crop({
+        srcPath: tempPath, 
+        dstPath: tempPath,
+        width: 300,
+        height: 300,
+        quality: 85,
+        gravity: "Center"
+            }, function(err, stdout, stderr){
 
-				fs.readFile(tempPath, function(err, fileData) {
+        fs.readFile(tempPath, function(err, fileData) {
 
-				var s3 = new AWS.S3(); 
+        var s3 = new AWS.S3(); 
 
-				s3.putObject({ Bucket: 'if-server-avatar-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
+        s3.putObject({ Bucket: 'if-server-avatar-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
               if (err) {
                 console.log(err);   
               } else {
@@ -1000,10 +1000,10 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
           us.addr = req.body.addr;
           //us.addrP = req.body.addrP;         
         }
-		
-    		if (req.body.addr2) {
-    			us.addr2 = req.body.addr2;
-    		}
+    
+        if (req.body.addr2) {
+          us.addr2 = req.body.addr2;
+        }
 
         if (req.body.bday && req.body.bdayP){
           us.bday = req.body.bday;
@@ -1058,14 +1058,14 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
               us.social.githubP = req.body.social.githubP;
             }
         }
-    		
-    		if (req.body.email) {
-    			us.email = req.body.email;
-    		}
-    		
-    		if (req.body.tel) {
-    			us.tel = req.body.tel;
-    		}
+        
+        if (req.body.email) {
+          us.email = req.body.email;
+        }
+        
+        if (req.body.tel) {
+          us.tel = req.body.tel;
+        }
 
         if (req.body.presents) {
           us.presents = req.body.presents;
@@ -1570,7 +1570,7 @@ app.get('/api/:collection', function(req, res) {
     if (req.query.limit == 1) {
       db.collection('worldchats').find(qw).sort({_id: -1}).limit(1).toArray(function(err, data) {
       if (err) {
-	  console.log(err)
+    console.log(err)
         res.send(err);
       } else if (data) {
         res.send(data);
@@ -1739,15 +1739,15 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             pic: req.body.pic,
             href: req.body.href,
             avatar: req.body.avatar
-       	});
-       	
-       	if (req.body.sticker) {
-	       	wc.sticker = {
-		       img: req.body.sticker.img,
-		       _id: req.body.sticker._id
-	       	}
-       	}
-       	
+        });
+        
+        if (req.body.sticker) {
+          wc.sticker = {
+           img: req.body.sticker.img,
+           _id: req.body.sticker._id
+          }
+        }
+        
     console.log(wc);
         wc.save(function (err, data) {
             if (err){
@@ -2438,18 +2438,18 @@ app.all('/*', function(req, res, next) {
   //if file path, then add file to end
   if (req.url.indexOf('.') != -1 ){
     res.sendFile(req.url, { root: __dirname + '/app/dist' },  function (err) {
-	   if (err) {
-	      	console.log(err);
-	      	res.status(err.status).end();
-	   }
-	   else {
-	   		console.log('Sent:', req.url);
-	   }
-	  });
+     if (err) {
+          console.log(err);
+          res.status(err.status).end();
+     }
+     else {
+        console.log('Sent:', req.url);
+     }
+    });
   } else if (req.url.indexOf('api') >-1) {
-	  return next();
+    return next();
   } else {
-	res.sendFile('index.html', { root: __dirname + '/app/dist' });
+  res.sendFile('index.html', { root: __dirname + '/app/dist' });
   }
 });
 
