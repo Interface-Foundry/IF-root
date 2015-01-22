@@ -1117,7 +1117,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	padding: 104px 0px 76px 0px;
+	padding: 88px 0px 76px 0px;
 }
 
 .message-nav {
@@ -1126,7 +1126,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	margin-top: 56px;
+	margin-top: 40px;
 	color: #FFF;
 }
 
@@ -1136,7 +1136,6 @@ text-align: center;
 	height: 48px;
 	right: 0px;
 	top: 40px;
-	top: 56px;
 	border: none;
 	outline: none;
 	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
@@ -1873,7 +1872,6 @@ body {
 
 .navfix {
 	padding-top: 40px;
-	padding-top: 56px;
 }
 
 /* *NAV* Navigation Bar */
@@ -1894,8 +1892,6 @@ nav.main-nav {
 	z-index: 1000;
 	
 	-webkit-transform: translate3d(0, 0, 0);
-	height: 56px;
-	padding-top: 16px;
 }
 
 nav .logo {
@@ -2436,7 +2432,6 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
-  top: 15px;
   z-index: 1010;
 }
 .drawer-icon {
@@ -2469,8 +2464,6 @@ transform:translateX(100%);
   font-size: 20px;
   font-weight: 500;
   line-height: 40px;
-  height: 55px;
-  padding-top: 15px;
 }
 .drawer-link {
   position: relative;
@@ -2723,10 +2716,10 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  margin-top: 56px;
+  margin-top: 40px;
 }
 .subnavfix {
-  padding-top: 112px !important;
+  padding-top: 96px !important;
 }
 .subnav-header {
   display: block;
@@ -7380,8 +7373,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('fonts/glyphicons-halflings-regular.eot');
-  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('/fonts/glyphicons-halflings-regular.eot');
+  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;
