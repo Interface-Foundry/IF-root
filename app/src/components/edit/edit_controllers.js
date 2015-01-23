@@ -108,6 +108,8 @@ $scope.onLocalMapSelect = function($files) {
 		file: file
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		if (!$scope.temp) {$scope.temp = {}}
+		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.mapImage = data;

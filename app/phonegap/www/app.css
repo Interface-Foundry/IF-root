@@ -602,7 +602,7 @@ ul.walkthrough-grid > li > label {
 }
 
 .walkthrough-progress > div {
-	width: 50%;
+	width: 0%;
 	height: 2px;
 	background-color: #3f51b5;
 }
@@ -1128,6 +1128,7 @@ text-align: center;
 	height: 48px;
 	margin-top: 56px;
 	color: #FFF;
+	z-index: 10;
 }
 
 .message-nav-map {
@@ -1148,8 +1149,6 @@ text-align: center;
 }
 
 .aperture-full .message-nav-map {
-	margin-right: -48px;
-	right: 100%;
 	background: center / 24px 24px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
@@ -1830,6 +1829,10 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 	line-height: 40px;
 	font-size: 16px;
 	color: #777;
+}
+
+.schedule-wrap {
+	padding-top: 104px;
 }
 /* app css stylesheet */
 

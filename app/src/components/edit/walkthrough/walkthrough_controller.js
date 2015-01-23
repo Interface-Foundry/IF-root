@@ -63,6 +63,7 @@ $scope.pictureSelect = function($files) {
 		file: file,
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		$scope.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.world.avatar = data;

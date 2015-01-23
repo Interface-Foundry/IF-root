@@ -29,7 +29,7 @@ link: function(scope, element, attrs) {
 				break;
 			case 'pic': 
 				content = [
-					m('img.img-responsive', {src:message.pic}),
+					m('img.img-responsive', {src:message.pic, onload: imageLoad}),
 					m('.message-body')
 				];
 				break;
@@ -63,6 +63,10 @@ link: function(scope, element, attrs) {
 		} else {
 			return 'https://bubbl.li/'+string;
 		}
+	}
+	
+	function imageLoad() {
+		element[0].scrollTop = element[0].scrollTop + this.offsetHeight;
 	}
 	
 }

@@ -44,6 +44,7 @@ userManager.getUser = function() {
 userManager.saveUser = function(user) {
 	userManager.userRes.save(user, function() {
 		console.log('saveUser() succeeded');
+		userManager._user = user;
 	});
 }
 

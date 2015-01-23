@@ -43,7 +43,7 @@
 <div ng-if="landmarks.length>0">
 <header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 	<div class="marble-page-header-icon"><img src="img/icons/map_16.png" width="16px" height="16px" style="display: block;"></div>
-	Explore
+	Explore <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;">See Full Schedule</a>
 </header>
 <article ng-init="foldSize = 3">
 	<div class="explore-media clearfix" ng-repeat="landmark in landmarks | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">

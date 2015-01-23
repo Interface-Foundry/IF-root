@@ -38,7 +38,7 @@ userGrouping.groupByTime = function (bubbles) {
 			bubbles: [],
 			order: 2
 		},
-		future: { 
+		future: {
 			label: 'Future',
 			bubbles: [],
 			order: 1

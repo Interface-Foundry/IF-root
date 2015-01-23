@@ -53,7 +53,7 @@ db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
 	    sinceID = data[data.length-1]._id;
 	    checkMessages();
 	} else {
-		checkMessagesTimeout = $timeout(checkMessages, 3000);	
+		checkMessagesTimeout = $timeout(checkMessages, 3000);
 	if (doScroll) {
 		scrollToBottom();
 	}

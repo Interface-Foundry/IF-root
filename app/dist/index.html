@@ -90,8 +90,10 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	</a>
 
 	<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
-		<li class="nav-item" compass-button>
+		<li class="nav-item">
 			<img class="nav-icon" src="img/icons/share.png" ng-click="dialog.showDialog('shareDialog.html')">
+		</li>
+		<li class="nav-item" compass-button>
 			<img class="nav-icon" src="img/icons/compass.png" ng-click="compassOn($event, true)">
 			<span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span>
 		</li>

@@ -240,3 +240,12 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 	font-size: 16px;
 	color: #777;
 }
+
+.schedule-wrap {
+	/*@IFDEF WEB*/
+	padding-top: 88px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	padding-top: 104px;
+	/*@ENDIF*/
+}

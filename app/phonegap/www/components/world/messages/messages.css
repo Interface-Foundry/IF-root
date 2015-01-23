@@ -29,6 +29,7 @@
 	margin-top: 56px;
 	/*@ENDIF*/
 	color: #FFF;
+	z-index: 10;
 }
 
 .message-nav-map {
@@ -51,8 +52,6 @@
 }
 
 .aperture-full .message-nav-map {
-	margin-right: -48px;
-	right: 100%;
 	background: center / 24px 24px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;

@@ -4757,11 +4757,12 @@ $routeProvider.
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/schedule.html', controller: 'ScheduleController'}).
+
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
-
       
-      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
+      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
       when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
@@ -5586,7 +5587,7 @@ link: function(scope, element, attrs) {
 				break;
 			case 'pic': 
 				content = [
-					m('img.img-responsive', {src:message.pic}),
+					m('img.img-responsive', {src:message.pic, onload: imageLoad}),
 					m('.message-body')
 				];
 				break;
@@ -5620,6 +5621,10 @@ link: function(scope, element, attrs) {
 		} else {
 			return 'https://bubbl.li/'+string;
 		}
+	}
+	
+	function imageLoad() {
+		element[0].scrollTop = element[0].scrollTop + this.offsetHeight;
 	}
 	
 }
@@ -17381,7 +17386,7 @@ userGrouping.groupByTime = function (bubbles) {
 			bubbles: [],
 			order: 2
 		},
-		future: { 
+		future: {
 			label: 'Future',
 			bubbles: [],
 			order: 1
@@ -17521,6 +17526,7 @@ userManager.getUser = function() {
 userManager.saveUser = function(user) {
 	userManager.userRes.save(user, function() {
 		console.log('saveUser() succeeded');
+		userManager._user = user;
 	});
 }
 
@@ -19406,6 +19412,8 @@ $scope.onLocalMapSelect = function($files) {
 		file: file
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		if (!$scope.temp) {$scope.temp = {}}
+		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.mapImage = data;
@@ -19994,6 +20002,7 @@ if ($scope.landmark.hasTime) {
 	
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
+		if ($scope.selectedIndex != i) {
 		//$scope.saveItem($scope.selectedIndex);//save previous landmark
 		console.log('Continue w select');
 		$scope.selectedIndex = i; //change landmarks
@@ -20002,9 +20011,8 @@ if ($scope.landmark.hasTime) {
 		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 		map.setMarkerFocus($scope.landmarks[i]._id);
 		console.log('Complete select');
+		}
 	}
-		
-	
 	
 	function loadLandmarks() {
 		console.log('--loadLandmarks--');
@@ -20075,6 +20083,10 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 });
+
+$scope.onUploadAvatar = function ($files, $event) {
+	console.log('parent is grabbing it', $files, $event);
+}
 
 
 ////////////////////////////////////////////////////////////
@@ -20195,6 +20207,11 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		});
 	}
 	
+	$scope.$watch('avatarFiles', function(newFiles, oldFiles) {
+		console.log(newFiles, oldFiles);
+	});
+		
+	
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
@@ -20258,6 +20275,7 @@ $scope.pictureSelect = function($files) {
 		file: file,
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		$scope.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.world.avatar = data;
@@ -21771,7 +21789,7 @@ db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
 	    sinceID = data[data.length-1]._id;
 	    checkMessages();
 	} else {
-		checkMessagesTimeout = $timeout(checkMessages, 3000);	
+		checkMessagesTimeout = $timeout(checkMessages, 3000);
 	if (doScroll) {
 		scrollToBottom();
 	}
@@ -22082,6 +22100,83 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', function($scope, worldTree, $routeParams, styleManager) {
+	$scope.schedule = [];
+	var timeMap = {
+		'Upcoming': 0,
+		'This Year': 1,
+		'Next Month': 2,
+		'This Month': 3,
+		'Next Week': 4,
+		'This Week': 5,
+		'Tomorrow': 6,
+		'Today': 7,
+		'Yesterday': 8,
+		'Last Week': 9,
+		'Last Month': 10,
+		'Last Year': 11,
+		'Past': 12,
+		'Places': 13
+	}
+	
+	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+		$scope.world = data.world;
+		$scope.style = data.style;
+		styleManager.navBG_color = $scope.style.navBG_color;
+
+		return $scope.world._id;
+	}).then(function(_id) {return worldTree.getLandmarks(_id)})
+	.then(function(landmarks) {
+		var sortedSchedule = [];
+		var schedule = _.groupBy(landmarks, function(landmark) {			
+			if (!landmark.time.start) {return 'Places'}
+			
+			var t = moment(landmark.time.start),
+				now = moment();
+			
+			if (t.isSame(now, 'day')) {
+				return 'Today'
+			} else if (t.isAfter(now)) {
+				if (t.isSame(now.add(1, 'day'),  'day')) {
+					return 'Tomorrow';
+				} else if (t.isSame(now, 'week')) {
+					return 'This Week';
+				} else if (t.isBefore(now.add(2, 'week'))) {
+					return 'Next Week';
+				} else if (t.isSame(now, 'month')) {
+					return 'This Month';	
+				} else if (t.isBefore(now.add(2, 'month'))) {
+					return 'Next Month'; 
+				} else if (t.isSame(now, 'year')) {
+					return 'This Year';
+				} else {
+					return 'Upcoming';
+				}
+			} else if (t.isBefore(now)) {
+				if (t.isAfter(now.subtract(2, 'day'))) {
+					return 'Yesterday';
+				} else if (t.isAfter(now.subtract(1, 'week'))) {
+					return 'Last Week';
+				} else if (t.isAfter(now.subtract(1, 'month'))) {
+					return 'Last Month';
+				} else if (t.isAfter(now.subtract(1, 'year'))) {
+					return 'Last Year';
+				} else {
+					return 'Past';
+				}
+			}	
+		});
+		console.log(schedule);
+		_.each(schedule, function(value, key, list) {
+			sortedSchedule[timeMap[key]] = {title: key, landmarks: value}
+		})
+	
+		$scope.schedule = _.compact(sortedSchedule);
+		console.log($scope.schedule);
+	})
+
+	
+}])
 app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];

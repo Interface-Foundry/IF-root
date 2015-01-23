@@ -11,15 +11,18 @@
 </ul>
 <div class="edit-container edit-bg">
 <div class="container-fluid">
+	
 <div class="form-group">
 <button class="btn btn-success" ng-click="addLandmark()"><b>+</b> Add Point of Interest or Schedule item</button>
-
-
 </div>
 <ul class="row">
 	<div class="col-xs-12">
-	<li ng-repeat="landmark in landmarks track by landmark._id" ng-controller="LandmarkEditorItemController" class="panel panel-default" ng-class="{active: $index === selectedIndex}" ng-click="selectLandmark()">
-		<div class="panel-heading" ng-click="selectLandmark()">
+	<li ng-repeat="landmark in landmarks track by landmark._id" 
+		ng-controller="LandmarkEditorItemController" 
+		class="panel panel-default" 
+		ng-class="{active: $index === selectedIndex}"
+		ng-click="selectLandmark()">
+		<div class="panel-heading">
 		<span class="panel-title" ng-cloak>{{landmark.name}} 
 			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 			<button type="button" class="btn btn-primary btn-sm" ng-click="saveLandmark()">Save</button>
@@ -39,7 +42,7 @@
 						</div>
 				</div>
 			</div>
-			<button class="btn btn-info btn-sm" ng-file-select ng-file-change="onUploadAvatar($files)">+ Upload Pic</button>
+			<button class="btn btn-info btn-sm" ng-file-select ng-model="avatarFiles" ng-file-change="onUploadAvatar($files)" stopPropagation="true">+ Upload Pic</button>
 
 		</div>
 		<div class="form-group">
@@ -89,10 +92,8 @@
 
 
 			</div>
-
-		</div>
-	</div>
 	</li>
+	</div>
 </ul>
 
 </div>

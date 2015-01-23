@@ -185,6 +185,7 @@ if ($scope.landmark.hasTime) {
 	
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
+		if ($scope.selectedIndex != i) {
 		//$scope.saveItem($scope.selectedIndex);//save previous landmark
 		console.log('Continue w select');
 		$scope.selectedIndex = i; //change landmarks
@@ -193,9 +194,8 @@ if ($scope.landmark.hasTime) {
 		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 		map.setMarkerFocus($scope.landmarks[i]._id);
 		console.log('Complete select');
+		}
 	}
-		
-	
 	
 	function loadLandmarks() {
 		console.log('--loadLandmarks--');
@@ -266,6 +266,10 @@ $scope.$on('$destroy', function (event) {
 	}
 	}
 });
+
+$scope.onUploadAvatar = function ($files, $event) {
+	console.log('parent is grabbing it', $files, $event);
+}
 
 
 ////////////////////////////////////////////////////////////
@@ -385,5 +389,10 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.uploadFinished = true;
 		});
 	}
+	
+	$scope.$watch('avatarFiles', function(newFiles, oldFiles) {
+		console.log(newFiles, oldFiles);
+	});
+		
 	
 }]);

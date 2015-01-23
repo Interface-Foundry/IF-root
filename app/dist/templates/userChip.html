@@ -1,6 +1,6 @@
 <div class="user-chip-wrap" ng-switch="userManager.loginStatus" ng-click="openMenu($event)">
 	<div class="user-chip-wrap" ng-switch-when="true">
-		<img class="user-chip-img" if-src="{{user.avatar || 'img/icons/profile.png'}}">
+		<img class="user-chip-img" if-src="{{userManager._user.avatar || 'img/icons/profile.png'}}">
 		<span class="user-chip-label auth show-480" ng-bind="userManager._displayName">Me</span>
 		<ul class="nav-user-menu" ng-show="userMenu">
 			<li class="nav-user-menu-title">

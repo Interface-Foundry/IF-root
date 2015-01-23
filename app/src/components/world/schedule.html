@@ -1,0 +1,25 @@
+<div class="wrap" ng-style="::{'background-color': style.bodyBG_color}">
+	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
+		<a href="" ng-click="goBack()" style="height:48px; width: 48px; position: absolute; left: 0px;">
+			<span style="color:#FFF;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
+		</a>
+		<h4 class="subnav-header">Schedule</h4>
+	</nav>
+	
+	<div class="schedule-wrap wrap">
+		<div class="surface bg-clear">
+				<div ng-repeat="group in schedule track by group.title" class="bubble-group">
+					<header class="bubble-group-label">{{group.title}}</header>
+					<ul class="bubble-list">
+						<li ng-repeat="landmark in group.landmarks" class="bubble-list-item">
+							<a class="bubble-list-item-link" if-href="#w/{{world.id}}/{{landmark.id}}">
+								<img if-src="{{landmark.avatar || 'img/tidepools/default.png'}}" class="bubble-list-item-img">
+								<span>{{landmark.name}}</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+		</div>
+	</div>
+	
+</div>
