@@ -2886,6 +2886,14 @@ span.subnav-back-chevron {
     width: 160px;
   }
 }
+.btn.circle-pic {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+}
+.img-responsive.circle-pic {
+  border-radius: 50%;
+}
 .profile-card-pic {
   width: 96px;
   height: 96px;
