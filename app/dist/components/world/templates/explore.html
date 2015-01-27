@@ -1,7 +1,7 @@
 <div ng-if="now">
 <header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 	<div class="marble-page-header-icon"><img src="img/icons/time_16.png" width="16px" height="16px" style="display: block;"></div>
-	Now
+	Now <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;" ng-show="upcoming">See Full Schedule</a>
 </header>
 <article>
 	<div class="explore-media clearfix" ng-click="go('w/'+world.id+'/'+now.id)">
@@ -20,7 +20,7 @@
 <div ng-if="upcoming.length>0">
 <header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 	<div class="marble-page-header-icon"><img src="img/icons/time_16.png" width="16px" height="16px" style="display: block;"></div>
-	Upcoming
+	Upcoming <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;" ng-show="upcoming">See Full Schedule</a>
 </header>
 <article ng-init="foldSize = 3">
 	<div class="explore-media clearfix" ng-repeat="landmark in upcoming | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
@@ -40,10 +40,10 @@
 	
 </article>
 </div>
-<div ng-if="landmarks.length>0">
+<div ng-if="landmarks.length>0 && !upcoming">
 <header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 	<div class="marble-page-header-icon"><img src="img/icons/map_16.png" width="16px" height="16px" style="display: block;"></div>
-	Explore <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;">See Full Schedule</a>
+	Explore <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;" ng-hide="upcoming">See Full Schedule</a>
 </header>
 <article ng-init="foldSize = 3">
 	<div class="explore-media clearfix" ng-repeat="landmark in landmarks | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
