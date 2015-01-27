@@ -338,7 +338,7 @@ mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 150, state);
 	leafletData.getMap().then(function(map) {
 	map.addLayer(mapManager.circleMaskLayer);
-	$rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+	mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
 		mapManager.circleMaskLayer._draw();
 	});
 	});
@@ -352,12 +352,19 @@ mapManager.setCircleMaskState = function(state) {
 	}
 }
 
+mapManager.setCircleMaskMarker = function(key) {
+	if (mapManager.circleMaskLayer) {
+		mapManager.circleMaskLayer._setMarker(mapManager.markers[key]);
+	}
+}
+
 mapManager.removeCircleMask = function() {
 	var layer = mapManager.circleMaskLayer;
 	if (mapManager.circleMaskLayer) {
 		console.log('removeCircleMask');
 		leafletData.getMap().then(function(map) {
 			map.removeLayer(layer);
+			mapManager._cMLdereg();
 		});
 	} else {
 		console.log('No circle mask layer.');

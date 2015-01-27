@@ -77,8 +77,9 @@ $window.history.back();
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [25, 48],
-					iconAnchor: [13, 10]
+					iconSize: [50, 95],
+					iconAnchor: [25, 100],
+					popupAnchor: [0, -50]
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -213,7 +214,9 @@ if ($scope.landmark.hasTime) {
 			//add markers to map
 			angular.forEach($scope.landmarks, function(value, key) {
 				//for each landmark add a marker
-				map.addMarker(value._id, {
+				addLandmarkMarker(value);
+				/*
+map.addMarker(value._id, {
 					lat:value.loc.coordinates[1],
 					lng:value.loc.coordinates[0],
 					draggable: true,
@@ -225,10 +228,28 @@ if ($scope.landmark.hasTime) {
 					},
 					message:value.name
 				});
+*/
 			});
 			landmarksLoaded = true;
 			
 		});
+	}
+	
+	function addLandmarkMarker(landmark) {
+		map.addMarker(landmark._id, {
+				lat:landmark.loc.coordinates[1],
+				lng:landmark.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [35, 67],
+					iconAnchor: [17.5, 60],
+					popupAnchor: [0, -40]
+				},
+				draggable:true,
+				message:landmark.name || 'Drag to location on map',
+				focus:true
+			});
 	}
 	
 	function landmarkDefaults() {
@@ -240,7 +261,8 @@ if ($scope.landmark.hasTime) {
 			newStatus: true,
 			parentID: 0,
 			loc: {type:'Point', coordinates:[-74.0059,40.7127]}, 
-			avatar: "img/tidepools/default.jpg"
+			avatar: "img/tidepools/default.jpg",
+			time: {}
 		};
 		if (worldLoaded) {
 			defaults.parentID = $scope.world._id;
@@ -292,13 +314,14 @@ $scope.onUploadAvatar = function ($files, $event) {
 		if ($scope.world.style.maps) {
 		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
 		map.setCenter($scope.world.loc.coordinates, 18);
-		map.addMarker('m', {
+		
+map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
 			lng: $scope.world.loc.coordinates[0],
 			focus: false,
 			draggable: false,
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: '',
 				shadowUrl: '',
 				iconSize: [0,0],
 				shadowSize: [0,0],
@@ -306,6 +329,7 @@ $scope.onUploadAvatar = function ($files, $event) {
 				shadowAnchor: [0,0]
 			}
 		});
+
 		map.removeCircleMask();
 		map.addCircleMaskToMarker('m', 150, 'mask');
 		

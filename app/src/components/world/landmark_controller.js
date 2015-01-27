@@ -167,7 +167,8 @@ function goToMark() {
 				iconUrl: 'img/marker/bubble-marker-50.png',
 				shadowUrl: '',
 				iconSize: [35, 67],
-				iconAnchor: [17.5, 60]
+				iconAnchor: [17.5, 60],
+				popupAnchor: [0, -40]
 			},
   			_id: $scope.landmark._id
   			});

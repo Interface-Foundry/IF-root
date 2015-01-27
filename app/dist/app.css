@@ -2974,6 +2974,55 @@ span.subnav-back-chevron {
     margin: 0px auto;
   }
 }
+.bubble-supergroup {
+  margin-bottom: 16px;
+}
+.bubble-supergroup.closed .bubble-list-item {
+  height: 10px;
+}
+.bubble-supergroup.closed .bubble-group {
+  display: none;
+}
+.bubble-supergroup-label {
+  position: relative;
+  display: block;
+  text-align: left;
+  color: #666;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 32px;
+  margin: 8px 0px;
+  padding: 0px 0px 0px 48px;
+  background: none;
+  border: none;
+  outline: none;
+}
+@media only screen and (min-width: 600px) {
+  .bubble-supergroup-label {
+    width: 600px;
+    margin: 8px auto;
+  }
+}
+.bubble-supergroup-label:before {
+  content: ' ';
+  position: absolute;
+  top: 4px;
+  left: 12px;
+  width: 24px;
+  background: url('img/icons/ic_arrow_drop_down_grey600_24dp.png') center;
+  height: 24px;
+}
+.closed .bubble-supergroup-label:before {
+  content: ' ';
+  position: absolute;
+  top: 4px;
+  left: 12px;
+  width: 24px;
+  background: url('img/icons/ic_arrow_drop_down_grey600_24dp.png') center;
+  height: 24px;
+  -webkit-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
 .bubble-list-item {
   position: relative;
   width: 100%;

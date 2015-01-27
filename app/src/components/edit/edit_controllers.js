@@ -30,6 +30,12 @@ $scope.kinds = [
 	{name: 'Neighborhood'}
 ];
 
+function tempID() {
+	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
+}
+
+var markerID = tempID();
+
 $scope.temp = {
 	scale: 1
 }
@@ -230,7 +236,7 @@ $scope.saveWorld = function() {
 	//$scope.world.worldID = $scope.worldID;
 	$scope.world.hasLoc = true;
 	console.log($scope.world);
-	tempMarker = map.getMarker('m');
+	tempMarker = map.getMarker(markerID);
 	$scope.world.loc.coordinates[0] = tempMarker.lng;
 	$scope.world.loc.coordinates[1] = tempMarker.lat;
 	
@@ -390,8 +396,10 @@ function showPosition(position) {
 	console.log(userLng);
 	map.setCenter([userLng, userLat], 17, 'editor');
  
+	markerID = tempID();
+ 
 	map.removeAllMarkers();
-	map.addMarker('m', {
+	map.addMarker(markerID, {
 		lat: userLat,
 		lng: userLng,
 		message: "<p style='color:black;'>Drag to World's Location</p>",
@@ -420,25 +428,11 @@ function showPosition(position) {
 		break;
 	}
 	
-	map.removeCircleMask();
-	map.addCircleMaskToMarker('m', 150, state);
-
-/*
-map.addPath('worldBounds', {
-		type: 'circle',
-		radius: 150,
-		latlngs: {lat:userLat,
-					lng:userLng}
-	});
-*/
-			
-			//disable this for 2nd page of editor...
-		//	$scope.$on('leafletDirectiveMap.drag', function(event){
-            //        console.log('moveend');
-                    /*$scope.paths.worldBounds.latlngs = {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng};*/
-          //  });
-            
+	if (map.circleMaskLayer) {
+		map.setCircleMaskMarker(markerID)		
+	} else {
+		map.addCircleMaskToMarker(markerID, 150, state);     
+	}
 }
 
 function locError(){

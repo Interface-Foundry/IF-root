@@ -36,9 +36,7 @@ L.IFCircleMask = L.Layer.extend({
 			}, this);		
 		}
 		
-		map.on('move', function() {
-			this._reset();
-		}, this);		
+		map.on('move', this._reset, this);		
 	},
 	
 	onRemove: function (map) {
@@ -46,7 +44,7 @@ L.IFCircleMask = L.Layer.extend({
 		map.getPanes().mapPane.removeChild(this._el);
 		map.off('viewreset', this._reset, this);
 		map.off('resize', this._reset, this);
-		delete this._marker;
+		map.off('move', this._reset, this);
 		//remove
 	},
 	
@@ -102,6 +100,11 @@ L.IFCircleMask = L.Layer.extend({
 		this.state = state;
 		if (this.state == 'cover') {this._el.style.zIndex = 10;}
 		else {this._el.style.zIndex = 5;}
+		this._reset();
+	},
+	
+	_setMarker: function(marker) {
+		this._marker = marker;
 		this._reset();
 	}
 });
