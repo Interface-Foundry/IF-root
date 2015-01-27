@@ -4693,7 +4693,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -5872,23 +5872,6 @@ app.directive('stickerCrosshair', ['$window', function($window) {
 		}
 	}
 }]);
-app.directive('tinyEditor', function() {
-	return {
-		restrict: 'E',
-		link: function(scope, element, attrs) {
-			var d = (new Date().getTime() + Math.random()*16).toString(16);
-			console.log(d);
-			console.log(element);
-			element[0].id = d;
-			
-			new TINY.editor.edit('editor', {
-				id:d, 
-				controls:['bold', 'italic', 'underline', 'strikethrough', '|', 'subscript', 'superscript', '|', 'orderedlist', 'unorderedlist', '|' ,'outdent' ,'indent', '|', 'leftalign', 'centeralign', 'rightalign', 'blockjustify', '|', 'unformat', '|', 'undo', 'redo', 'n', 'font', 'size', 'style', '|', 'image', 'hr', 'link', 'unlink', '|', 'print']
-			})	
-		
-		}
-	}
-});
 angular.module('IF-directives', [])
 .directive('ifTooltip', function($rootScope) {
 	return {
@@ -20254,7 +20237,7 @@ map.addMarker('m', {
 			focus: false,
 			draggable: false,
 			icon: {
-				iconUrl: '',
+				iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
 				shadowUrl: '',
 				iconSize: [0,0],
 				shadowSize: [0,0],
@@ -20299,7 +20282,9 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.saveItem($scope.$index);
 	}
 	
-	$scope.selectLandmark = function() {
+	$scope.selectLandmark = function($event) {
+		$event.stopPropagation();
+		$event.preventDefault();
 		$scope.$parent.selectItem($scope.$index);
 	}
 	

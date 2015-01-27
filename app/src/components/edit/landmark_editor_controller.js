@@ -321,7 +321,7 @@ map.addMarker('m', {
 			focus: false,
 			draggable: false,
 			icon: {
-				iconUrl: '',
+				iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
 				shadowUrl: '',
 				iconSize: [0,0],
 				shadowSize: [0,0],
@@ -366,7 +366,9 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.saveItem($scope.$index);
 	}
 	
-	$scope.selectLandmark = function() {
+	$scope.selectLandmark = function($event) {
+		$event.stopPropagation();
+		$event.preventDefault();
 		$scope.$parent.selectItem($scope.$index);
 	}
 	
