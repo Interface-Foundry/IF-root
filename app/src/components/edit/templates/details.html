@@ -47,7 +47,7 @@
 					<span class="glyphicon glyphicon-picture"></span>
 					<label>Upload</label>
 				</button>
-				<img width="150" ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
+				<img width="150" class="circle-pic" ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
 			</div>
 		</div>
 	</div>
@@ -75,7 +75,7 @@
 						<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onLandmarkCategoryIconSelect($files)" ng-hide="uploadFinishedLandmark">
 							<span class="glyphicon glyphicon-picture" ></span>
 						</button>
-						<img width="80" ng-show="uploadFinishedLandmark" ng-src="{{temp.LandmarkCatAvatar}}"> 
+						<img width="80" class="circle-pic" ng-show="uploadFinishedLandmark" ng-src="{{temp.LandmarkCatAvatar}}"> 
 					</div>
 				</div>	
 
