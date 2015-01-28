@@ -48,7 +48,7 @@
 </div>
 
 <div class="view-footer" ng-class="{'message-logged-out-footer': !userManager.loginStatus, 'editing': editing}" ng-cloak>
-	<div class="uploading-progress" ng-show="uploading" ng-style="{'width': uploadhProgress+'%'}"></div>
+	<div class="uploading-progress if-animate" ng-show="uploading" ng-style="{'width': uploadProgress+'%'}"></div>
 		<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input" 
 		ng-model="msg.text" 
 		ng-class="{'textarea-highlight': stickerChange}"

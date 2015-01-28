@@ -1557,8 +1557,11 @@ text-align: center;
 }
 
 .uploading-progress {
+	width: 0%;
 	height: 2px;
 	background: #03a9f4;
+	-webkit-transition: 0.4s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.4s cubic-bezier(.5,.1,0,1) all;
 }
 
 .textarea-highlight {

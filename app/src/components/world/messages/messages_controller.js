@@ -110,6 +110,7 @@ $scope.alert = function (msg) {
 
 $scope.onImageSelect = function($files) {
 	$scope.uploading = true;
+	$scope.uploadProgress = 0;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
 		file: $files[0]
