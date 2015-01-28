@@ -1559,8 +1559,8 @@ text-align: center;
 	width: 0%;
 	height: 2px;
 	background: #03a9f4;
-	-webkit-transition: 0.4s cubic-bezier(.5,.1,0,1) all;
-	transition: 0.4s cubic-bezier(.5,.1,0,1) all;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .textarea-highlight {
@@ -2968,6 +2968,30 @@ span.subnav-back-chevron {
   font-size: 20px;
   color: #fff;
   background: #2196f3 url('img/icons/ic_add_white_48dp.png') center / 24px 24px no-repeat;
+}
+.progress-circle {
+  position: absolute;
+}
+.semi-circle-left {
+  width: 100%;
+  height: 100%;
+  border: 2px solid #03a9f4;
+  border-radius: 50%;
+  position: absolute;
+  -moz-transition: transform 1s ease;
+  -webkit-transition: -webkit-transform 1s ease;
+  -o-transition: transform 1s ease;
+  transition: transform 1s ease;
+}
+.spinLeft {
+  -ms-transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+.spinLeftLong {
+  -ms-transform: rotate(360deg);
+  -webkit-transform: rotate(360deg);
+  transform: rotate(360deg);
 }
 .bubble-list {
   margin: 0px -8px;

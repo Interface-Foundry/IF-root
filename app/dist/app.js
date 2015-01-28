@@ -5630,6 +5630,44 @@ link: function(scope, element, attrs) {
 }
 	}
 }); 
+app.directive('progressCircle', function() {
+	return {
+		restrict: 'EA',
+		scope: {
+			top: '=',
+			left: '=',
+			fullWidth: '=',
+			spinLeft: '=',
+			spinLeftLong: '='
+		},
+		templateUrl: 'templates/progressCircle.html',
+		controller: function($scope) {
+			$scope.style = function() {
+				return {
+					'top': $scope.top + 'px',
+					'left': $scope.left + 'px',
+					'width': $scope.fullWidth + 'px',
+					'height': $scope.fullWidth + 'px',
+					'clip': getClip($scope.spinLeft, $scope.spinLeftLong, $scope.fullWidth)
+				};
+			};
+
+			$scope.styleClip = {
+				'clip': 'rect(0px,' + $scope.fullWidth/2 + 'px,' + $scope.fullWidth + 'px,' + '0px)'
+			};
+
+			var getClip = function(spinLeft, spinLeftLong, fullWidth) {
+				var clipNone = 'rect(auto, auto, auto, auto)';
+				var clipAll = 'rect(0px, 0px, 0px, 0px)';
+				var clipLeft = 'rect(0px,' + fullWidth + 'px,' + fullWidth + 'px,' + (fullWidth/2) + 'px)';
+
+				if (spinLeft && spinLeftLong) return clipNone;
+				else if (!spinLeft && !spinLeftLong) return clipAll;
+				else return clipLeft; // default
+			}
+		}
+	};
+});
 //angular.module('IF-directives', [])
 app.directive('ryFocus', function($rootScope, $timeout) {
 	return {
@@ -21238,6 +21276,9 @@ $scope.files = {
 
 $scope.kinds = ifGlobals.kinds;
 
+$scope.spinLeft = false;
+$scope.spinLeftLong = false;
+
 var saveTimer = null;
 var alert = alertManager;
 
@@ -21256,11 +21297,18 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 		console.log('progress');
 		console.log(e);
 		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		$scope.spinLeft = true;
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
 		$scope.uploadFinished = true;
+
+		$scope.spinLeftLong = true;
+		$timeout(function() {
+			$scope.spinLeft = false;
+			$scope.spinLeftLong = false;
+		}, 1000);		
 	});
 });
 
