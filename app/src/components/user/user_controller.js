@@ -13,6 +13,9 @@ $scope.files = {
 
 $scope.kinds = ifGlobals.kinds;
 
+$scope.spinLeft = false;
+$scope.spinLeftLong = false;
+
 var saveTimer = null;
 var alert = alertManager;
 
@@ -31,11 +34,18 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 		console.log('progress');
 		console.log(e);
 		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		$scope.spinLeft = true;
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
 		$scope.uploadFinished = true;
+
+		$scope.spinLeftLong = true;
+		$timeout(function() {
+			$scope.spinLeft = false;
+			$scope.spinLeftLong = false;
+		}, 1000);		
 	});
 });
 
