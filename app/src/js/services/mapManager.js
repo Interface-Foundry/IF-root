@@ -335,7 +335,7 @@ mapManager.removeOverlays = function() {
 
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
-	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 150, state);
+	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 120, state);
 	leafletData.getMap().then(function(map) {
 	map.addLayer(mapManager.circleMaskLayer);
 	mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
