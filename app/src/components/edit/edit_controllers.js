@@ -119,7 +119,7 @@ $scope.onLocalMapSelect = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.mapImage = data;
-		map.placeImage('m', data);
+		map.placeImage(markerID, data);
 	})
 }
 
