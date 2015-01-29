@@ -73,7 +73,10 @@ $routeProvider.
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
-	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/schedule.html', controller: 'ScheduleController'}).
+	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
+	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
+	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
+
 
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
@@ -90,7 +93,6 @@ $routeProvider.
       when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: 'SearchController'}).
       
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
-      when('/instagram/:hashTag', {templateUrl: 'partials/insta-list.html', controller: 'InstalistCtrl'}).
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -101,7 +103,7 @@ $locationProvider.html5Mode({
 	enabled: true
 });
 //@ENDIF
-	  
+
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',

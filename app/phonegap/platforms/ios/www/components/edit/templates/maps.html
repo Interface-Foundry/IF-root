@@ -36,7 +36,10 @@
 
 <label>Upload your own Map <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.local_map"></span></label> <br>
 
-<button class="btn btn-info" ng-file-select="onLocalMapSelect($files)" ng-hide="mapImage">+ Add a Local Map</button>
+<button class="btn btn-info" ng-file-select ng-file-change="onLocalMapSelect($files)" ng-hide="mapImage">+ Add a Local Map</button>
+<div class="walkthrough-progress" ng-hide="mapImage" 
+	<div ng-style="{'width': temp.picProgress}"></div>
+</div>
 <div ng-show="mapImage">
 <em>New Local Map</em>  <button type="button" class="close" ng-click="removePlaceImage()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 <input type="range" min="0.006" max="5" step="0.006" value="1" ng-model="temp.scale"><br>

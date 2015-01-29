@@ -43,11 +43,11 @@
 				<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
 					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 				</button>
-				<button class="btn btn-default" ng-file-select="onWorldIconSelect($files)" ng-hide="uploadFinished">
+				<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onWorldIconSelect($files)" ng-hide="uploadFinished">
 					<span class="glyphicon glyphicon-picture"></span>
 					<label>Upload</label>
 				</button>
-				<img width="150" ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
+				<img width="150" class="circle-pic" ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
 			</div>
 		</div>
 	</div>
@@ -72,10 +72,10 @@
 						<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
 							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 						</button>
-						<button class="btn btn-default" ng-file-select="onLandmarkCategoryIconSelect($files)" ng-hide="uploadFinishedLandmark">
+						<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onLandmarkCategoryIconSelect($files)" ng-hide="uploadFinishedLandmark">
 							<span class="glyphicon glyphicon-picture" ></span>
 						</button>
-						<img width="80" ng-show="uploadFinishedLandmark" ng-src="{{temp.LandmarkCatAvatar}}"> 
+						<img width="80" class="circle-pic" ng-show="uploadFinishedLandmark" ng-src="{{temp.LandmarkCatAvatar}}"> 
 					</div>
 				</div>	
 

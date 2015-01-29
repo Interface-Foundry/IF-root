@@ -1559,8 +1559,8 @@ text-align: center;
 	width: 0%;
 	height: 2px;
 	background: #03a9f4;
-	-webkit-transition: 0.4s cubic-bezier(.5,.1,0,1) all;
-	transition: 0.4s cubic-bezier(.5,.1,0,1) all;
+	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
 
 .textarea-highlight {
@@ -1589,6 +1589,58 @@ text-align: center;
 	height: 24px;
 	width: 24px;
 	margin: 4px;
+}
+.instagram-wrap {
+	padding-top: 104px;
+	max-width: 456px;
+}
+
+.instagram {
+	width: 100%;
+	font-size: 16px;
+	color: #6A7178;
+}
+
+.instagram img {
+	width: 100%;
+	height: auto;
+	background: #CCC;
+}
+
+.instagram footer {
+	min-height: 20px;
+	padding: 8px;
+	word-wrap: break-word;
+	color: #777;
+}
+
+.instagram footer:hover {
+	color: #777;
+}
+
+.instagram footer h4 {
+	margin: 0;
+}
+.twitter-avatar {
+	height: 32px;
+	width: 32px;
+}
+
+.tweet.marble-page {
+	min-height: auto;
+}
+
+.tweet footer {
+	padding: 8px;
+	word-wrap: break-word;
+}
+
+.tweet {
+	color: #777;
+}
+
+.twitter-wrap {
+	padding-top: 104px;
 }
 .world-toolbar {
 	height: 68px;
@@ -1706,13 +1758,6 @@ text-align: center;
 }
 
 .twitter {
-	padding: 4px;
-	width: 100%;
-	font-size: 16px;
-	color: #6A7178;
-}
-
-.instagram {
 	padding: 4px;
 	width: 100%;
 	font-size: 16px;

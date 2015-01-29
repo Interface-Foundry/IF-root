@@ -202,12 +202,12 @@ if ($scope.landmark.hasTime) {
 		console.log('--loadLandmarks--');
 		//$scope.queryType = "all";
 		//$scope.queryFilter = "all";
-		db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
+		db.landmarks.get({parentID: $scope.world._id}, function(data){
 				console.log('--db.landmarks.query--');
 				console.log('data');
 				console.log(data);
 			//data.shift();
-			$scope.landmarks = $scope.landmarks.concat(data);
+			$scope.landmarks = $scope.landmarks.concat(data.landmarks);
 				console.log('$scope.landmarks');
 				console.log($scope.landmarks);
 			

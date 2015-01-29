@@ -17,12 +17,10 @@ $scope.$on('$viewContentLoaded', function() {
 });
 
 // @IFDEF PHONEGAP
-/*
 var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-*/
 // @ENDIF
 
 

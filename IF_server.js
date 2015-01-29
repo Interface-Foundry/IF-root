@@ -46,6 +46,7 @@ var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');  
 var readChunk = require('read-chunk'); 
 var fileTypeProcess = require('file-type');
+var _ = require('underscore');
 // var multer  = require('multer');
 
 
@@ -1339,18 +1340,22 @@ app.get('/api/:collection', function(req, res) {
     }
 
     //querying landmark collection (events, places, etc)
-    if (req.params.collection == 'landmarks'){
-
-        //if has parentID parameter (world landmark query)
-        if (req.query.parentID && req.query.queryFilter){
+    if (req.params.collection == 'landmarks' && req.query.parentID) {
+		landmarkSchema.find({parentID: req.query.parentID, world:false}).sort({'time.start': 1}).exec(function(err, data) {
+			if (err) {
+				res.send({err: 'No Results'});
+			} else {
+				res.send({landmarks: data});	
+			}
+		})
             //filtering landmarks
-            switch (req.query.queryFilter) {
+            /*switch (req.query.queryFilter) {
               //show all landmarks inside parent world
               case 'all':
                 var qw = {
                     parentID:req.query.parentID,
                     world:false //only landmarks
-                };   
+                };
                 db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));     
                 break;
               //return live landmarks inside parent world
@@ -1368,7 +1373,7 @@ app.get('/api/:collection', function(req, res) {
                     world:false,
                     'time.start': {$lt: currentTime},
                     'time.end': {$gt: currentTime}
-                };   
+                };
 
                 landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
 
@@ -1436,12 +1441,12 @@ app.get('/api/:collection', function(req, res) {
                 db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));   
 
                 break;
-            }
-
-        }
-
+            }*/
+			
+			
+    }
         //not a landmark query
-        else {
+		else {
             //places
             if (req.query.queryType == "places"){
                 //do a location radius search here option
@@ -1477,8 +1482,8 @@ app.get('/api/:collection', function(req, res) {
                      //console.log(res);
                 }
             }
-        }   
-    }
+		}   
+    
 
 ////sticker query
     if (req.params.collection == 'stickers'){

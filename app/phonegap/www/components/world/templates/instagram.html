@@ -1,19 +1,19 @@
 <header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 	<div class="marble-page-header-icon"><img src="img/icons/instagram_16.png" width="16px" height="16px" style="display: block;"></div>
-	Instagram
+	Instagram #{{world.resources.hashtag}}
 </header>
 <article>
-	<header class="hashtag-header">#{{world.resources.hashtag}}</header>
-<a if-href="#instagram/{{world.resources.hashtag}}">
-<img class="img-responsive instagram" if-src="img/instagram/{{instagrams[0].local_path[0]}}" 
-            									ng-show="instagrams[0].local_path[0]">
-</a>
-<p ng-hide="instagrams[0].local_path[0]">No one has instagrammed yet! Post an instagram hashtagged #{{world.resources.hashtag}} and it will appear here.</p>
-            <span class="watermark typcn typcn-social-instagram"></span>
-<a ng-href="http://instagram.com/{{instagrams[0].user.screen_name}}" target="_blank">
-	<div class="footer">
-		@{{instagrams[0].user.screen_name}}
-		<span class="typcn typcn-export pull-right"></span>
+<li class="instagram">
+	<a if-href="#w/{{world.id}}/instagram" target="_blank">
+		<img ng-if="instagrams[0]" if-src="{{instagrams[0].local_path[0]}}">
+		<footer ng-if="instagrams[0]"><h4>{{instagram.user.name}}</h4> {{instagram.text}}</footer>
+		<footer ng-if="!instagrams[0]">No one has instagrammed yet! Post an instagram hashtagged #{{world.resources.hashtag}} and it will appear here.</footer>
+	<hr class="divider">
+	<div class="fold-btn" ng-style="{color: style.titleBG_color}">
+		See More
 	</div>
-</a>
+	</a>
+</li>
+	
+
 </article>

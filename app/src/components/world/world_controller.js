@@ -22,6 +22,7 @@ $scope.selectedIndex = 0;
 var landmarksLoaded;
 
 //currently only for upcoming...
+/*
 function reorderById (idArray) {
 	console.log('reorderById');
 	$scope.upcoming = [];
@@ -38,6 +39,7 @@ function reorderById (idArray) {
 	}
 	console.log($scope.landmarks, $scope.upcoming);
 }
+*/
 
   	
 $scope.zoomOn = function() {
@@ -129,7 +131,8 @@ function loadWidgets() {
 			$scope.twitter = true;
 		}
 		if ($scope.style.widgets.instagram == true) {
-			$scope.instagram = true;
+	  		$scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	  		$scope.instagram = true;
 		}
 
 		if ($scope.style.widgets.streetview == true) {
@@ -280,9 +283,8 @@ function loadWidgets() {
 		}
 		
 		if ($scope.style.widgets.upcoming) {
-			$scope.upcoming = true;
-			var userTime = new Date();
-			db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
+			/*
+db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:now');
 				console.log(data);
 				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];
@@ -295,12 +297,12 @@ function loadWidgets() {
 				//console.log(angular.fromJson(data[0]));
 				reorderById(data);
 			}); 
+*/
 		}
 		}
 		
 	   if ($scope.world.resources) {
 		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	    $scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
 	   }
 
 	   if ($scope.style.widgets.nearby == true) {
@@ -375,48 +377,60 @@ function loadWidgets() {
 $scope.loadLandmarks = function(data) {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
-  	db.landmarks.query({queryFilter:'all', parentID: $scope.world._id}, function(data) { 
-  		console.log(data);
+  	db.landmarks.get({parentID: $scope.world._id}, function(data) { 
+  		console.log('landmarks', data);
   		
   		initLandmarks(data);
   		loadWidgets(); //load widget data
   	});
  }
   	
-function initLandmarks(landmarks) {
-  	angular.forEach(landmarks, function(landmark, index, landmarks) {
-	  	if (landmark.category && landmark.category.hiddenPresent === true) {
+function initLandmarks(data) {
+	var now = moment();
+	var groups = _.groupBy(data.landmarks, function(landmark) {
+		if (landmark.time.start) {
+			var startTime = moment(landmark.time.start); 
+			var endTime = moment(landmark.time.end) || moment(startTime).add(1, 'hour');
+		if (now.isAfter(startTime) && now.isBefore(endTime)) {
+			return 'Now';
+		} else if (now.isBefore(startTime)) {
+			return 'Upcoming';
+		} else if (now.isAfter(startTime)) {
+			return 'Past';
+		}
+		} else {
+			return 'Places';
+		}
+	})
+	console.log(groups);
+	$scope.places = groups['Places'];
+	$scope.upcoming = groups['Upcoming'];
+	$scope.past = groups['Past'];
+	$scope.now = groups['Now'];
+	$scope.landmarks = data.landmarks;
+	
+	angular.forEach($scope.landmarks, function(landmark, index, landmarks) {
+		if (landmark.category && landmark.category.hiddenPresent === true) {
 		  	//dont include
-	  	} else {
+		} else {
 		map.addMarker(landmark._id, {
 			lat:landmark.loc.coordinates[1],
 			lng:landmark.loc.coordinates[0],
-			draggable:false,
-			message:'<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+			draggable: false,
+			message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
             icon: {
-              iconUrl: 'img/marker/bubble-marker-50.png',
-              shadowUrl: '',
-              iconSize: [35, 67],
-              iconAnchor: [17, 67],
-              popupAnchor: [0, -40]
-              
+            	iconUrl: 'img/marker/bubble-marker-50.png',
+				shadowUrl: '',
+				iconSize: [35, 67],
+				iconAnchor: [17, 67],
+				popupAnchor: [0, -40] 
             },
 			_id: landmark._id
 		});
-		$scope.landmarks.push(landmark);
-		$scope.lookup[landmark._id] = index;
 		}
 	});
 }
-  	
-function setLookup() {
-	$scope.lookup = {}; 
-	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		$scope.lookup[$scope.landmarks[i]._id] = i;
-	}
-}
-	
-		
+
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);

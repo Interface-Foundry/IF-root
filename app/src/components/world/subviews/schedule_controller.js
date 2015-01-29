@@ -24,7 +24,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 
 		return $scope.world._id;
 	}).then(function(_id) {return worldTree.getLandmarks(_id)})
-	.then(function(landmarks) {		
+	.then(function(landmarks) {
 		var now = moment();
 		var schedule = [];
 		var superGroups = {
@@ -114,7 +114,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			if (!landmark.time.start) {return 'Places'}
 			
 			t = moment(landmark.time.start);
-			
+
 			if (t.isSame(now, 'day')) {
 				return 'Today';
 			} else if (t.isAfter(now)) {

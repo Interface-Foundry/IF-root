@@ -1,14 +1,21 @@
 <header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 	<div class="marble-page-header-icon"><img src="img/icons/twitter_16.png" width="16px" height="16px" style="display: block;"></div>
-	Twitter
+	Twitter #{{world.resources.hashtag}}
 </header>
 <article>
-	<header class="hashtag-header">#{{world.resources.hashtag}}</header>
-	<a if-href="#twitter/{{world.resources.hashtag}}">
-		<p class="twitter">{{tweets[0].text || 'No one has tweeted yet! Tweet at #'+world.resources.hashtag+' to start the conversation.'}}</p>
-		<span class="watermark typcn typcn-social-twitter"></span>
-	</a>
-	<a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
-	<div class="footer show-footer">@{{tweets[0].user.name}} <span class="typcn typcn-export pull-right"><span></div>
+	<a if-href="#w/{{world.id}}/twitter">
+		<li ng-init="tweet = tweets[0]" class="tweet">
+				<div ng-if="tweet.user.name">
+					<img if-src="{{tweet.user.profile_image_url}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong>
+					<hr class="divider">
+				</div>
+					<img if-src="{{tweet.media.media_url}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
+					<footer>{{tweet.text || 'No one has tweeted yet! Tweet at #'+world.resources.hashtag+' to start the conversation.'}}</footer>
+					<hr class="divider">
+					<div class="fold-btn" ng-style="{color: style.titleBG_color}">
+						See More
+					</div>
+
+		</li>
 	</a>
  </article>

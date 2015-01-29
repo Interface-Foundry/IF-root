@@ -4693,7 +4693,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -4764,11 +4764,12 @@ $routeProvider.
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/schedule.html', controller: 'ScheduleController'}).
+
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
-
       
-      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/editor/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
+      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
       when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
@@ -5604,7 +5605,7 @@ link: function(scope, element, attrs) {
 				break;
 			case 'pic': 
 				content = [
-					m('img.img-responsive', {src:message.pic}),
+					m('img.img-responsive', {src:message.pic, onload: imageLoad}),
 					m('.message-body')
 				];
 				break;
@@ -5640,6 +5641,10 @@ link: function(scope, element, attrs) {
 		}
 	}
 	
+	function imageLoad() {
+		element[0].scrollTop = element[0].scrollTop + this.offsetHeight;
+	}
+	
 }
 	}
 }); 
@@ -5663,6 +5668,97 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
+app.directive('scheduleView', function() {
+	return {
+restrict: 'E',
+link: function(scope, element, attrs) {
+	
+	scope.$watchCollection('schedule', function (newCollection, oldCollection, scope) {
+		viewRender(newCollection);
+	})
+	
+	var cache;
+	
+	function viewRender(newCollection) {
+		if (newCollection) {
+			m.render(element[0], scheduleTree(newCollection));	
+			cache = newCollection;
+		} else if (cache) {
+			m.render(element[0], scheduleTree(cache));
+		}
+		
+	}
+	
+	
+	
+	//schedule form is
+	//{supergroup: [{group: []}, 
+	//				{group: []}],
+	//	supergroup...}
+	
+	
+	//schedule tree form is
+	//supergroup: (collapsed/uncollapsed) (future/today/past)
+	//---ul.group (last year/this week/etc)
+	//------li.item (landmark)
+	
+	function scheduleTree(schedule) {
+		var scheduleTree = _.map(schedule, superGroupTemplate);
+		return scheduleTree;
+	}
+	
+	function superGroupTemplate(superGroup) {
+		//{'title': [{group}, {group}]}
+		var pair = _.pairs(superGroup)[0],
+			title = pair[0],
+			groups = pair[1];		
+		if (_.isEmpty(groups)) {
+			return;
+		} else {
+			return m('section.bubble-supergroup', 
+				{className: toggle[title] ? "closed" : ""},
+				[m('button.bubble-supergroup-label', 
+				{onclick: toggleSuperGroup.bind(undefined, title)},
+				 title)].concat( 
+				_.map(groups, groupTemplate)));
+		}
+	}
+	
+	var toggle = {'Upcoming': true, 'Places': true, 'Previous': true};
+	
+	function toggleSuperGroup(title) {
+		toggle[title] = !toggle[title];	
+		console.log(toggle, title);
+		viewRender();
+	}
+	
+	
+	function groupTemplate(group) {
+		//{'title': [landmarks...]}
+		var pair = _.pairs(group)[0],
+			title = pair[0],
+			landmarks = pair[1];
+		
+		return m('div.bubble-group', [
+			m('header.bubble-group-label', title),
+			m('ul.bubble-list', _.map(landmarks, landmarkTemplate))
+			]);
+	}
+	
+	function landmarkTemplate(landmark) {
+		return m('li.bubble-list-item', 
+			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)},
+				[m('img.bubble-list-item-img', {src: landmark.avatar}),
+				m('span', landmark.name)
+			]));
+	}
+	
+	function ifURL(url) {
+		return url;
+	}
+}
+	}
+}); 
 app.directive('stickers', function(apertureService) {
 	return {
 		restrict: 'A',
@@ -17114,7 +17210,7 @@ mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 150, state);
 	leafletData.getMap().then(function(map) {
 	map.addLayer(mapManager.circleMaskLayer);
-	$rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+	mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
 		mapManager.circleMaskLayer._draw();
 	});
 	});
@@ -17128,12 +17224,19 @@ mapManager.setCircleMaskState = function(state) {
 	}
 }
 
+mapManager.setCircleMaskMarker = function(key) {
+	if (mapManager.circleMaskLayer) {
+		mapManager.circleMaskLayer._setMarker(mapManager.markers[key]);
+	}
+}
+
 mapManager.removeCircleMask = function() {
 	var layer = mapManager.circleMaskLayer;
 	if (mapManager.circleMaskLayer) {
 		console.log('removeCircleMask');
 		leafletData.getMap().then(function(map) {
 			map.removeLayer(layer);
+			mapManager._cMLdereg();
 		});
 	} else {
 		console.log('No circle mask layer.');
@@ -17439,7 +17542,7 @@ userGrouping.groupByTime = function (bubbles) {
 			bubbles: [],
 			order: 2
 		},
-		future: { 
+		future: {
 			label: 'Future',
 			bubbles: [],
 			order: 1
@@ -17579,6 +17682,7 @@ userManager.getUser = function() {
 userManager.saveUser = function(user) {
 	userManager.userRes.save(user, function() {
 		console.log('saveUser() succeeded');
+		userManager._user = user;
 	});
 }
 
@@ -17770,12 +17874,12 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
 	} else {
-		db.landmarks.query({queryFilter:'all', parentID: _id}, function(data) {
+		db.landmarks.get({ parentID: _id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
 			} else {
-				worldTree.landmarkCache.put(_id, data);
-				deferred.resolve(data);
+				worldTree.landmarkCache.put(_id, data.landmarks);
+				deferred.resolve(data.landmarks);
 			}
 		});
 	}
@@ -19392,6 +19496,12 @@ $scope.kinds = [
 	{name: 'Neighborhood'}
 ];
 
+function tempID() {
+	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
+}
+
+var markerID = tempID();
+
 $scope.temp = {
 	scale: 1
 }
@@ -19470,6 +19580,8 @@ $scope.onLocalMapSelect = function($files) {
 		file: file
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		if (!$scope.temp) {$scope.temp = {}}
+		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.mapImage = data;
@@ -19590,7 +19702,7 @@ $scope.saveWorld = function() {
 	//$scope.world.worldID = $scope.worldID;
 	$scope.world.hasLoc = true;
 	console.log($scope.world);
-	tempMarker = map.getMarker('m');
+	tempMarker = map.getMarker(markerID);
 	$scope.world.loc.coordinates[0] = tempMarker.lng;
 	$scope.world.loc.coordinates[1] = tempMarker.lat;
 	
@@ -19750,8 +19862,10 @@ function showPosition(position) {
 	console.log(userLng);
 	map.setCenter([userLng, userLat], 17, 'editor');
  
+	markerID = tempID();
+ 
 	map.removeAllMarkers();
-	map.addMarker('m', {
+	map.addMarker(markerID, {
 		lat: userLat,
 		lng: userLng,
 		message: "<p style='color:black;'>Drag to World's Location</p>",
@@ -19780,25 +19894,11 @@ function showPosition(position) {
 		break;
 	}
 	
-	map.removeCircleMask();
-	map.addCircleMaskToMarker('m', 150, state);
-
-/*
-map.addPath('worldBounds', {
-		type: 'circle',
-		radius: 150,
-		latlngs: {lat:userLat,
-					lng:userLng}
-	});
-*/
-			
-			//disable this for 2nd page of editor...
-		//	$scope.$on('leafletDirectiveMap.drag', function(event){
-            //        console.log('moveend');
-                    /*$scope.paths.worldBounds.latlngs = {lat:$scope.markers.m.lat,
-							lng:$scope.markers.m.lng};*/
-          //  });
-            
+	if (map.circleMaskLayer) {
+		map.setCircleMaskMarker(markerID)		
+	} else {
+		map.addCircleMaskToMarker(markerID, 150, state);     
+	}
 }
 
 function locError(){
@@ -19952,8 +20052,9 @@ $window.history.back();
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [25, 48],
-					iconAnchor: [13, 10]
+					iconSize: [50, 95],
+					iconAnchor: [25, 100],
+					popupAnchor: [0, -50]
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -20060,6 +20161,7 @@ if ($scope.landmark.hasTime) {
 	
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
+		if ($scope.selectedIndex != i) {
 		//$scope.saveItem($scope.selectedIndex);//save previous landmark
 		console.log('Continue w select');
 		$scope.selectedIndex = i; //change landmarks
@@ -20068,27 +20170,28 @@ if ($scope.landmark.hasTime) {
 		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 		map.setMarkerFocus($scope.landmarks[i]._id);
 		console.log('Complete select');
+		}
 	}
-		
-	
 	
 	function loadLandmarks() {
 		console.log('--loadLandmarks--');
 		//$scope.queryType = "all";
 		//$scope.queryFilter = "all";
-		db.landmarks.query({ queryType:'all', queryFilter:'all', parentID: $scope.world._id}, function(data){
+		db.landmarks.get({parentID: $scope.world._id}, function(data){
 				console.log('--db.landmarks.query--');
 				console.log('data');
 				console.log(data);
 			//data.shift();
-			$scope.landmarks = $scope.landmarks.concat(data);
+			$scope.landmarks = $scope.landmarks.concat(data.landmarks);
 				console.log('$scope.landmarks');
 				console.log($scope.landmarks);
 			
 			//add markers to map
 			angular.forEach($scope.landmarks, function(value, key) {
 				//for each landmark add a marker
-				map.addMarker(value._id, {
+				addLandmarkMarker(value);
+				/*
+map.addMarker(value._id, {
 					lat:value.loc.coordinates[1],
 					lng:value.loc.coordinates[0],
 					draggable: true,
@@ -20100,10 +20203,28 @@ if ($scope.landmark.hasTime) {
 					},
 					message:value.name
 				});
+*/
 			});
 			landmarksLoaded = true;
 			
 		});
+	}
+	
+	function addLandmarkMarker(landmark) {
+		map.addMarker(landmark._id, {
+				lat:landmark.loc.coordinates[1],
+				lng:landmark.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [35, 67],
+					iconAnchor: [17.5, 60],
+					popupAnchor: [0, -40]
+				},
+				draggable:true,
+				message:landmark.name || 'Drag to location on map',
+				focus:true
+			});
 	}
 	
 	function landmarkDefaults() {
@@ -20115,7 +20236,8 @@ if ($scope.landmark.hasTime) {
 			newStatus: true,
 			parentID: 0,
 			loc: {type:'Point', coordinates:[-74.0059,40.7127]}, 
-			avatar: "img/tidepools/default.jpg"
+			avatar: "img/tidepools/default.jpg",
+			time: {}
 		};
 		if (worldLoaded) {
 			defaults.parentID = $scope.world._id;
@@ -20142,6 +20264,10 @@ $scope.$on('$destroy', function (event) {
 	}
 });
 
+$scope.onUploadAvatar = function ($files, $event) {
+	console.log('parent is grabbing it', $files, $event);
+}
+
 
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
@@ -20163,13 +20289,14 @@ $scope.$on('$destroy', function (event) {
 		if ($scope.world.style.maps) {
 		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
 		map.setCenter($scope.world.loc.coordinates, 18);
-		map.addMarker('m', {
+		
+map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
 			lng: $scope.world.loc.coordinates[0],
 			focus: false,
 			draggable: false,
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
 				shadowUrl: '',
 				iconSize: [0,0],
 				shadowSize: [0,0],
@@ -20177,6 +20304,7 @@ $scope.$on('$destroy', function (event) {
 				shadowAnchor: [0,0]
 			}
 		});
+
 		map.removeCircleMask();
 		map.addCircleMaskToMarker('m', 150, 'mask');
 		
@@ -20213,7 +20341,9 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.saveItem($scope.$index);
 	}
 	
-	$scope.selectLandmark = function() {
+	$scope.selectLandmark = function($event) {
+		$event.stopPropagation();
+		$event.preventDefault();
 		$scope.$parent.selectItem($scope.$index);
 	}
 	
@@ -20260,6 +20390,11 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.uploadFinished = true;
 		});
 	}
+	
+	$scope.$watch('avatarFiles', function(newFiles, oldFiles) {
+		console.log(newFiles, oldFiles);
+	});
+		
 	
 }]);
 
@@ -20326,6 +20461,7 @@ $scope.pictureSelect = function($files) {
 		file: file,
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		$scope.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.world.avatar = data;
@@ -20794,12 +20930,10 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
-/*
 var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-*/
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -21792,7 +21926,8 @@ function goToMark() {
 				iconUrl: 'img/marker/bubble-marker-50.png',
 				shadowUrl: '',
 				iconSize: [35, 67],
-				iconAnchor: [17.5, 60]
+				iconAnchor: [17.5, 60],
+				popupAnchor: [0, -40]
 			},
   			_id: $scope.landmark._id
   			});
@@ -21858,7 +21993,7 @@ db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
 	    sinceID = data[data.length-1]._id;
 	    checkMessages();
 	} else {
-		checkMessagesTimeout = $timeout(checkMessages, 3000);	
+		checkMessagesTimeout = $timeout(checkMessages, 3000);
 	if (doScroll) {
 		scrollToBottom();
 	}
@@ -21915,6 +22050,7 @@ $scope.alert = function (msg) {
 
 $scope.onImageSelect = function($files) {
 	$scope.uploading = true;
+	$scope.uploadProgress = 0;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
 		file: $files[0]
@@ -22169,6 +22305,180 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', function($scope, worldTree, $routeParams, styleManager) {
+	$scope.schedule = [];
+	var timeMap = {
+		'Upcoming': 0,
+		'This Year': 1,
+		'Next Month': 2,
+		'This Month': 3,
+		'Next Week': 4,
+		'This Week': 5,
+		'Tomorrow': 6,
+		'Today': 7,
+		'Yesterday': 8,
+		'Last Week': 9,
+		'Last Month': 10,
+		'Last Year': 11,
+		'Past': 12,
+		'Places': 13
+	}
+	
+	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+		$scope.world = data.world;
+		$scope.style = data.style;
+		styleManager.navBG_color = $scope.style.navBG_color;
+
+		return $scope.world._id;
+	}).then(function(_id) {return worldTree.getLandmarks(_id)})
+	.then(function(landmarks) {
+		var now = moment();
+		var schedule = [];
+		var superGroups = {
+			'Upcoming': {},
+			'Today': {},
+			'Previous': {},
+			'Places': {}
+		}
+		
+		var groupOrderMap = {
+			'Upcoming': 0,
+			'This Year': 1,
+			'Next Month': 2,
+			'This Month': 3,
+			'Next Week': 4,
+			'This Week': 5,
+			'Tomorrow': 6,
+			'Today': 7,
+			'Yesterday': 8,
+			'Last Week': 9,
+			'Last Month': 10,
+			'Last Year': 11,
+			'Past': 12,
+			'Places': 13
+		}
+
+		
+		 /* [{'Upcoming': []},
+						{'Today': []},
+						{'Previous': []},
+						{'Places': []}];
+		/*	schedule = [{'Upcoming': [{'Tomorrow': Bubbles},
+									...]
+						},
+						...] */
+		
+		_.each(landmarks, function(landmark, index, list) {
+			var superGroup = getSuperGroup(landmark);
+			var group = getGroup(landmark, superGroup);
+			
+			if (superGroups[superGroup][group]) {
+				superGroups[superGroup][group].push(landmark);
+			} else {
+				superGroups[superGroup][group] = [landmark];
+			}
+		});
+
+
+		//current structure {'upcoming': {'group': [],}}
+		//first 									^ sort these
+		//then							^to array 
+		//then 				^to array
+		
+		var temp = _.each(superGroups, function(superGroup, superGroupKey, list) {
+			if (superGroupKey!=="Places") {
+			_.each(superGroup, function(group, groupKey, list) {
+				list[groupKey] = _.sortBy(group, function(landmark) {
+					moment(landmark.time.start).unix()
+				});
+			})
+			}
+			
+			list[superGroupKey] = _.sortBy(
+				_.map(superGroup, function(group, groupKey) {
+					var temp = {};
+					temp[groupKey]=group;
+					return temp;
+				}), function (group, index, list) {
+					var key = _.keys(group)[0];
+					return groupOrderMap[key];
+				})
+		});
+		
+		console.log(temp);
+		
+		$scope.schedule = [
+			{'Upcoming': superGroups['Upcoming']},
+			{'Today': superGroups['Today']},
+			{'Places': superGroups['Places']},
+			{'Previous': superGroups['Previous']}
+		];
+		
+		console.log(schedule);
+			
+		function getSuperGroup(landmark) {
+			var t;
+			if (!landmark.time.start) {return 'Places'}
+			
+			t = moment(landmark.time.start);
+
+			if (t.isSame(now, 'day')) {
+				return 'Today';
+			} else if (t.isAfter(now)) {
+				return 'Upcoming';
+			} else {
+				return 'Previous';
+			}
+		}
+		
+		function getGroup(landmark, superGroup) {
+			var t;
+			switch (superGroup) {
+				case 'Upcoming': 
+					t = moment(landmark.time.start);
+					if (t.isSame(moment().add(1, 'day'),  'day')) {
+						return 'Tomorrow';
+					} else if (t.isSame(now, 'week')) {
+						return 'This Week';
+					} else if (t.isBefore(moment().add(2, 'week'))) {
+						return 'Next Week';
+					} else if (t.isSame(now, 'month')) {
+						return 'This Month';	
+					} else if (t.isBefore(moment().add(2, 'month'))) {
+						return 'Next Month'; 
+					} else if (t.isSame(now, 'year')) {
+						return 'This Year';
+					} else {
+						return 'Upcoming';
+					}
+					break;
+				case 'Today':
+					return 'Today';
+					break;
+				case 'Previous':
+					t = moment(landmark.time.start);
+					if (t.isAfter(moment().subtract(2, 'day'))) {
+						return 'Yesterday';
+					} else if (t.isAfter(moment().subtract(1, 'week'))) {
+						return 'Last Week';
+					} else if (t.isAfter(moment().subtract(1, 'month'))) {
+						return 'Last Month';
+					} else if (t.isAfter(moment().subtract(1, 'year'))) {
+						return 'Last Year';
+					} else {
+						return 'Past';
+					}	
+					break;
+				case 'Places':
+					return 'Places';
+					break;
+			}
+		}
+		
+	})
+
+	
+}])
 app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
@@ -22193,6 +22503,7 @@ $scope.selectedIndex = 0;
 var landmarksLoaded;
 
 //currently only for upcoming...
+/*
 function reorderById (idArray) {
 	console.log('reorderById');
 	$scope.upcoming = [];
@@ -22209,6 +22520,7 @@ function reorderById (idArray) {
 	}
 	console.log($scope.landmarks, $scope.upcoming);
 }
+*/
 
   	
 $scope.zoomOn = function() {
@@ -22451,9 +22763,8 @@ function loadWidgets() {
 		}
 		
 		if ($scope.style.widgets.upcoming) {
-			$scope.upcoming = true;
-			var userTime = new Date();
-			db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
+			/*
+db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
 				console.log('queryFilter:now');
 				console.log(data);
 				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];
@@ -22466,6 +22777,7 @@ function loadWidgets() {
 				//console.log(angular.fromJson(data[0]));
 				reorderById(data);
 			}); 
+*/
 		}
 		}
 		
@@ -22546,48 +22858,60 @@ function loadWidgets() {
 $scope.loadLandmarks = function(data) {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
-  	db.landmarks.query({queryFilter:'all', parentID: $scope.world._id}, function(data) { 
-  		console.log(data);
+  	db.landmarks.get({parentID: $scope.world._id}, function(data) { 
+  		console.log('landmarks', data);
   		
   		initLandmarks(data);
   		loadWidgets(); //load widget data
   	});
  }
   	
-function initLandmarks(landmarks) {
-  	angular.forEach(landmarks, function(landmark, index, landmarks) {
-	  	if (landmark.category && landmark.category.hiddenPresent === true) {
+function initLandmarks(data) {
+	var now = moment();
+	var groups = _.groupBy(data.landmarks, function(landmark) {
+		if (landmark.time.start) {
+			var startTime = moment(landmark.time.start); 
+			var endTime = moment(landmark.time.end) || moment(startTime).add(1, 'hour');
+		if (now.isAfter(startTime) && now.isBefore(endTime)) {
+			return 'Now';
+		} else if (now.isBefore(startTime)) {
+			return 'Upcoming';
+		} else if (now.isAfter(startTime)) {
+			return 'Past';
+		}
+		} else {
+			return 'Places';
+		}
+	})
+	console.log(groups);
+	$scope.places = groups['Places'];
+	$scope.upcoming = groups['Upcoming'];
+	$scope.past = groups['Past'];
+	$scope.now = groups['Now'];
+	$scope.landmarks = data.landmarks;
+	
+	angular.forEach($scope.landmarks, function(landmark, index, landmarks) {
+		if (landmark.category && landmark.category.hiddenPresent === true) {
 		  	//dont include
-	  	} else {
+		} else {
 		map.addMarker(landmark._id, {
 			lat:landmark.loc.coordinates[1],
 			lng:landmark.loc.coordinates[0],
-			draggable:false,
-			message:'<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+			draggable: false,
+			message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
             icon: {
-              iconUrl: 'img/marker/bubble-marker-50.png',
-              shadowUrl: '',
-              iconSize: [35, 67],
-              iconAnchor: [17, 67],
-              popupAnchor: [0, -40]
-              
+            	iconUrl: 'img/marker/bubble-marker-50.png',
+				shadowUrl: '',
+				iconSize: [35, 67],
+				iconAnchor: [17, 67],
+				popupAnchor: [0, -40] 
             },
 			_id: landmark._id
 		});
-		$scope.landmarks.push(landmark);
-		$scope.lookup[landmark._id] = index;
 		}
 	});
 }
-  	
-function setLookup() {
-	$scope.lookup = {}; 
-	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		$scope.lookup[$scope.landmarks[i]._id] = i;
-	}
-}
-	
-		
+
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);

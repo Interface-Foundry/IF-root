@@ -5,8 +5,6 @@ link: function(scope, element, attrs) {
 	
 	scope.$watchCollection('schedule', function (newCollection, oldCollection, scope) {
 		viewRender(newCollection);
-		
-		console.log('rerender');
 	})
 	
 	var cache;
@@ -63,7 +61,6 @@ link: function(scope, element, attrs) {
 		console.log(toggle, title);
 		viewRender();
 	}
-	
 	
 	
 	function groupTemplate(group) {

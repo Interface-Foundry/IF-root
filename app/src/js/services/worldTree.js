@@ -48,12 +48,12 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
 	} else {
-		db.landmarks.query({queryFilter:'all', parentID: _id}, function(data) {
+		db.landmarks.get({ parentID: _id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
 			} else {
-				worldTree.landmarkCache.put(_id, data);
-				deferred.resolve(data);
+				worldTree.landmarkCache.put(_id, data.landmarks);
+				deferred.resolve(data.landmarks);
 			}
 		});
 	}
