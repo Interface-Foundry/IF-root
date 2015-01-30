@@ -1792,6 +1792,17 @@ h6 {
 	min-height: 0;
 }
 
+.toolbar-category-widget {
+	position: absolute;
+	bottom: 68px;
+	width:100%;
+}
+
+.toolbar-category-widget .marble-page {
+	width: 100%;
+	margin: 0;
+}
+
 .category-widget button {
 	min-height: 48px;
 	border-left: 1px solid #ccc;
@@ -3161,6 +3172,20 @@ span.subnav-back-chevron {
 }
 .bubble-list-item:last-child {
   border-bottom: none;
+}
+.bubble-list-item-label {
+  position: absolute;
+  line-height: 16px;
+  top: 18px;
+}
+.bubble-list-item-detail {
+  position: absolute;
+  line-height: 13px;
+  font-size: 13px;
+  bottom: 18px;
+}
+.bubble-list-item-detail span {
+  padding-right: 20px;
 }
 .bubble-list-item-img {
   display: block;

@@ -394,7 +394,11 @@ function initLandmarks(data) {
 		if (now.isAfter(startTime) && now.isBefore(endTime)) {
 			return 'Now';
 		} else if (now.isBefore(startTime)) {
-			return 'Upcoming';
+			if (now.isSame(startTime, 'day')) {
+				return 'Today';
+			} else {
+				return 'Upcoming';
+			}
 		} else if (now.isAfter(startTime)) {
 			return 'Past';
 		}
@@ -403,32 +407,25 @@ function initLandmarks(data) {
 		}
 	})
 	console.log(groups);
-	$scope.places = groups['Places'];
-	$scope.upcoming = groups['Upcoming'];
-	$scope.past = groups['Past'];
-	$scope.now = groups['Now'];
-	$scope.landmarks = data.landmarks;
-	
-	angular.forEach($scope.landmarks, function(landmark, index, landmarks) {
-		if (landmark.category && landmark.category.hiddenPresent === true) {
-		  	//dont include
-		} else {
-		map.addMarker(landmark._id, {
-			lat:landmark.loc.coordinates[1],
-			lng:landmark.loc.coordinates[0],
-			draggable: false,
-			message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-            icon: {
-            	iconUrl: 'img/marker/bubble-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor: [0, -40] 
-            },
-			_id: landmark._id
-		});
-		}
-	});
+	$scope.places = groups['Places'] || [];
+	$scope.upcoming = _.compact([].concat(groups['Upcoming'], groups['Today']));
+	$scope.past = groups['Past'] || []; 
+	$scope.now = groups['Now'] || [];
+	$scope.landmarks = data.landmarks || [];
+	$scope.today = groups['Today'] || [];
+	console.log($scope.upcoming);
+		
+	if ($scope.now.length > 0) {
+		var tempMarkers = [].concat($scope.places, $scope.now);
+	} else if ($scope.today.length > 0) {
+		var tempMarkers = [].concat($scope.places, $scope.today);
+	} else {
+		var tempMarkers = [].concat($scope.places);
+	}
+	//markers should contain now + places, if length of now is 0, 
+	// upcoming today + places
+
+	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 }
 
 function markerFromLandmark(landmark) {

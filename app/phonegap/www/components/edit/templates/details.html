@@ -37,14 +37,14 @@
 		<div class="form-group">
 			<label>World Picture <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.world_icon"></span></label>
 			<div class="well world-icon">
-				<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
+				<button type="button" class="close" ng-show="uploadFinished || world.avatar" ng-click="setUploadFinished(false, 'world')">
 					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 				</button>
-				<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onWorldIconSelect($files)" ng-hide="uploadFinished">
+				<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onWorldIconSelect($files)" ng-hide="uploadFinished || world.avatar">
 					<span class="glyphicon glyphicon-picture"></span>
 					<label>Upload</label>
 				</button>
-				<img width="150" class="circle-pic" ng-show="uploadFinished" ng-src="{{world.avatar}}"> 
+				<img width="150" class="circle-pic" ng-show="uploadFinished || world.avatar" ng-src="{{world.avatar}}"> 
 			</div>
 		</div>
 	</div>
@@ -66,7 +66,7 @@
 			 <div class="form-group" ng-show="temp.showLandmarks">	
 				<div class="form-group">
 					<div class="well world-icon">
-						<button type="button" class="close" ng-show="uploadFinished" ng-click="uploadFinished = false">
+						<button type="button" class="close" ng-show="uploadFinishedLandmark" ng-click="setUploadFinished(false, 'landmark')">
 							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 						</button>
 						<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onLandmarkCategoryIconSelect($files)" ng-hide="uploadFinishedLandmark">

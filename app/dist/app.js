@@ -16878,6 +16878,17 @@ mapManager.addMarker = function(key, marker, safe) {
 	return true;
 }
 
+mapManager.addMarkers = function(markers) {
+	if (_.isArray(markers)) {
+		angular.extend(mapManager.markers, _.indexBy(markers, function(marker) {
+			return marker._id;
+		}))
+	} else {
+		angular.extend(mapManager.markers, markers);
+	}
+}
+
+
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
 	if (mapManager.markers.hasOwnProperty(key)) {
@@ -19401,6 +19412,27 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 		$scope.uploadFinishedLandmark = true;
 	});
 }
+
+$scope.setUploadFinished = function(bool, type) {
+	if (type == 'world') {
+		if (bool) {
+			$scope.uploadFinished = true;
+		}
+		else {
+			$scope.uploadFinished = false;
+			$scope.world.avatar = null;
+		}
+	}
+	if (type == 'landmark') {
+		if (bool) {
+			$scope.uploadFinishedLandmark = true;
+		}
+		else {
+			$scope.uploadFinishedLandmark = false;
+			$scope.temp.LandmarkCatAvatar = null;
+		}
+	}
+};
 
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
@@ -22240,8 +22272,6 @@ link: function(scope, element, attrs) {
 		
 	}
 	
-	
-	
 	//schedule form is
 	//{supergroup: [{group: []}, 
 	//				{group: []}],
@@ -22300,8 +22330,17 @@ link: function(scope, element, attrs) {
 		return m('li.bubble-list-item', 
 			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)},
 				[m('img.bubble-list-item-img', {src: landmark.avatar}),
-				m('span', landmark.name)
+				m('span.bubble-list-item-label', landmark.name),
+				m('footer.bubble-list-item-detail', landmarkDetail(landmark))
 			]));
+	}
+	
+	function landmarkDetail(landmark) {
+		return [
+			m('span', landmark.time.start && ('Starts ' + moment(landmark.time.start).format('ddd, MMM Do, hA'))),
+			m('span', landmark.time.end && ('Ends ' + moment(landmark.time.end).format("ddd, MMM Do, hA"))),
+			m('span', landmark.category)
+		]
 	}
 	
 	function ifURL(url) {
@@ -22552,7 +22591,8 @@ return {
 		}
 		
 		function emitCategory(landmarkCategoryName) {
-			return function () {
+			return function (event) {
+				event.stopPropagation();
 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
 			}
 		}
@@ -22955,7 +22995,11 @@ function initLandmarks(data) {
 		if (now.isAfter(startTime) && now.isBefore(endTime)) {
 			return 'Now';
 		} else if (now.isBefore(startTime)) {
-			return 'Upcoming';
+			if (now.isSame(startTime, 'day')) {
+				return 'Today';
+			} else {
+				return 'Upcoming';
+			}
 		} else if (now.isAfter(startTime)) {
 			return 'Past';
 		}
@@ -22964,32 +23008,25 @@ function initLandmarks(data) {
 		}
 	})
 	console.log(groups);
-	$scope.places = groups['Places'];
-	$scope.upcoming = groups['Upcoming'];
-	$scope.past = groups['Past'];
-	$scope.now = groups['Now'];
-	$scope.landmarks = data.landmarks;
-	
-	angular.forEach($scope.landmarks, function(landmark, index, landmarks) {
-		if (landmark.category && landmark.category.hiddenPresent === true) {
-		  	//dont include
-		} else {
-		map.addMarker(landmark._id, {
-			lat:landmark.loc.coordinates[1],
-			lng:landmark.loc.coordinates[0],
-			draggable: false,
-			message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-            icon: {
-            	iconUrl: 'img/marker/bubble-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor: [0, -40] 
-            },
-			_id: landmark._id
-		});
-		}
-	});
+	$scope.places = groups['Places'] || [];
+	$scope.upcoming = _.compact([].concat(groups['Upcoming'], groups['Today']));
+	$scope.past = groups['Past'] || []; 
+	$scope.now = groups['Now'] || [];
+	$scope.landmarks = data.landmarks || [];
+	$scope.today = groups['Today'] || [];
+	console.log($scope.upcoming);
+		
+	if ($scope.now.length > 0) {
+		var tempMarkers = [].concat($scope.places, $scope.now);
+	} else if ($scope.today.length > 0) {
+		var tempMarkers = [].concat($scope.places, $scope.today);
+	} else {
+		var tempMarkers = [].concat($scope.places);
+	}
+	//markers should contain now + places, if length of now is 0, 
+	// upcoming today + places
+
+	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 }
 
 function markerFromLandmark(landmark) {

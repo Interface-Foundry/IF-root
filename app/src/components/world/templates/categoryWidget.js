@@ -17,7 +17,8 @@ return {
 		}
 		
 		function emitCategory(landmarkCategoryName) {
-			return function () {
+			return function (event) {
+				event.stopPropagation();
 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
 			}
 		}

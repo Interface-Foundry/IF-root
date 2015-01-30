@@ -150,6 +150,17 @@ mapManager.addMarker = function(key, marker, safe) {
 	return true;
 }
 
+mapManager.addMarkers = function(markers) {
+	if (_.isArray(markers)) {
+		angular.extend(mapManager.markers, _.indexBy(markers, function(marker) {
+			return marker._id;
+		}))
+	} else {
+		angular.extend(mapManager.markers, markers);
+	}
+}
+
+
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
 	if (mapManager.markers.hasOwnProperty(key)) {

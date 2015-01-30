@@ -19,8 +19,6 @@ link: function(scope, element, attrs) {
 		
 	}
 	
-	
-	
 	//schedule form is
 	//{supergroup: [{group: []}, 
 	//				{group: []}],
@@ -79,8 +77,17 @@ link: function(scope, element, attrs) {
 		return m('li.bubble-list-item', 
 			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)},
 				[m('img.bubble-list-item-img', {src: landmark.avatar}),
-				m('span', landmark.name)
+				m('span.bubble-list-item-label', landmark.name),
+				m('footer.bubble-list-item-detail', landmarkDetail(landmark))
 			]));
+	}
+	
+	function landmarkDetail(landmark) {
+		return [
+			m('span', landmark.time.start && ('Starts ' + moment(landmark.time.start).format('ddd, MMM Do, hA'))),
+			m('span', landmark.time.end && ('Ends ' + moment(landmark.time.end).format("ddd, MMM Do, hA"))),
+			m('span', landmark.category)
+		]
 	}
 	
 	function ifURL(url) {
