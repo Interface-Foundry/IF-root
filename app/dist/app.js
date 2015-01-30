@@ -17116,7 +17116,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
-		url: 'http://107.170.180.141/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
 		opacity: 0.8,
