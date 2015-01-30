@@ -431,6 +431,41 @@ function initLandmarks(data) {
 	});
 }
 
+function markerFromLandmark(landmark) {
+	return {
+		lat:landmark.loc.coordinates[1],
+		lng:landmark.loc.coordinates[0],
+		draggable:false,
+		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		icon: {
+			iconUrl: 'img/marker/bubble-marker-50.png',
+			shadowUrl: '',
+			iconSize: [35, 67],
+			iconAnchor: [17, 67],
+			popupAnchor: [0, -40] 
+		},
+		_id: landmark._id
+	}
+}
+
+
+$scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
+	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);
+	console.log(markers);
+	if (markers.length>0) {
+		map.setCenterFromMarkers(markers);
+		map.setMarkers(markers);
+		$scope.aperture.set('full');
+	} else {
+		//handle no landmarks in category
+	}
+	
+	function testCategory (landmark, index, landmarks) {
+		return landmark.category === landmarkCategoryName;
+	}
+})
+
+
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);

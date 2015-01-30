@@ -1788,6 +1788,32 @@ h6 {
 	width: 100%;
 }
 
+.category-widget.marble-page {
+	min-height: 0;
+}
+
+.category-widget button {
+	min-height: 48px;
+	border-left: 1px solid #ccc;
+	border-right: none;
+	border-bottom: none;
+	border-top: none;
+	background: #FFF;
+	vertical-align: middle;
+	font-size: 10px;
+}
+
+@media only screen and (min-width: 600px) {
+	.category-widget button {
+		font-size: 14px;
+	}
+}
+
+
+.category-widget button:first-child {
+	border-left: none;
+}
+
 .selected-category {
 	background: #f1f1f1;
 }

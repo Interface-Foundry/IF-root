@@ -105,6 +105,19 @@ mapManager.apertureUpdate = function(state) {
 	}
 }
 
+mapManager.setCenterFromMarkers = function(markers) {
+	leafletData.getMap().then(function(map) {
+		map.fitBounds(
+			L.latLngBounds(markers.map(latLngFromMarker)),
+			{maxZoom: 20}
+		)
+	});
+	
+	function latLngFromMarker(marker) {
+		return [marker.lat, marker.lng];
+	}
+}
+
 mapManager.resetMap = function() {
 	mapManager.removeAllMarkers();
 	mapManager.removeAllPaths();
@@ -164,6 +177,16 @@ mapManager.removeMarker = function(key) {
 mapManager.removeAllMarkers = function() {
 	console.log('--removeAllMarkers--');
 	mapManager.markers = {};
+}
+
+mapManager.setMarkers = function(markers) {
+	if (_.isArray(markers)) {
+		mapManager.markers = _.indexBy(markers, function(marker) {
+			return marker._id;
+		})
+	} else {
+		mapManager.markers = markers;
+	}
 }
 
 mapManager.setMarkerMessage = function(key, msg) {
@@ -314,7 +337,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
-		url: 'http://107.170.180.141/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
 		opacity: 0.8,

@@ -1,4 +1,4 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'socket', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, socket) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
 console.log('--EditController--');
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -102,10 +102,6 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 		$scope.uploadFinishedLandmark = true;
 	});
 }
-
-socket.on('uploadstatus', function (data) {
-   console.log(data);
- });
 
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
