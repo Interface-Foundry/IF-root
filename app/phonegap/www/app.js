@@ -19521,6 +19521,27 @@ socket.on('uploadstatus', function (data) {
    console.log(data);
  });
 
+$scope.setUploadFinished = function(bool, type) {
+	if (type == 'world') {
+		if (bool) {
+			$scope.uploadFinished = true;
+		}
+		else {
+			$scope.uploadFinished = false;
+			$scope.world.avatar = null;
+		}
+	}
+	if (type == 'landmark') {
+		if (bool) {
+			$scope.uploadFinishedLandmark = true;
+		}
+		else {
+			$scope.uploadFinishedLandmark = false;
+			$scope.temp.LandmarkCatAvatar = null;
+		}
+	}
+};
+
 $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
