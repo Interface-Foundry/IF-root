@@ -20224,8 +20224,8 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	}
 	
 	$scope.selectLandmark = function($event) {
-		$event.stopPropagation();
-		$event.preventDefault();
+		// $event.stopPropagation();
+		// $event.preventDefault();
 		$scope.$parent.selectItem($scope.$index);
 	}
 	
