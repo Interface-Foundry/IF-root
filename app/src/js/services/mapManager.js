@@ -105,6 +105,19 @@ mapManager.apertureUpdate = function(state) {
 	}
 }
 
+mapManager.setCenterFromMarkers = function(markers) {
+	leafletData.getMap().then(function(map) {
+		map.fitBounds(
+			L.latLngBounds(markers.map(latLngFromMarker)),
+			{maxZoom: 20}
+		)
+	});
+	
+	function latLngFromMarker(marker) {
+		return [marker.lat, marker.lng];
+	}
+}
+
 mapManager.resetMap = function() {
 	mapManager.removeAllMarkers();
 	mapManager.removeAllPaths();
@@ -137,6 +150,17 @@ mapManager.addMarker = function(key, marker, safe) {
 	return true;
 }
 
+mapManager.addMarkers = function(markers) {
+	if (_.isArray(markers)) {
+		angular.extend(mapManager.markers, _.indexBy(markers, function(marker) {
+			return marker._id;
+		}))
+	} else {
+		angular.extend(mapManager.markers, markers);
+	}
+}
+
+
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
 	if (mapManager.markers.hasOwnProperty(key)) {
@@ -164,6 +188,16 @@ mapManager.removeMarker = function(key) {
 mapManager.removeAllMarkers = function() {
 	console.log('--removeAllMarkers--');
 	mapManager.markers = {};
+}
+
+mapManager.setMarkers = function(markers) {
+	if (_.isArray(markers)) {
+		mapManager.markers = _.indexBy(markers, function(marker) {
+			return marker._id;
+		})
+	} else {
+		mapManager.markers = markers;
+	}
 }
 
 mapManager.setMarkerMessage = function(key, msg) {

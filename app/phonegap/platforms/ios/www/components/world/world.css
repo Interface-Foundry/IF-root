@@ -120,13 +120,6 @@
 	color: #6A7178;
 }
 
-.instagram {
-	padding: 4px;
-	width: 100%;
-	font-size: 16px;
-	color: #6A7178;
-}
-
 .card.last {
 	border-radius:4px 4px 0px 0px;
 }
@@ -148,6 +141,32 @@ h6 {
 	padding-top: 10px;
 	height: 40px;
 	width: 100%;
+}
+
+.category-widget.marble-page {
+	min-height: 0;
+}
+
+.category-widget button {
+	min-height: 48px;
+	border-left: 1px solid #ccc;
+	border-right: none;
+	border-bottom: none;
+	border-top: none;
+	background: #FFF;
+	vertical-align: middle;
+	font-size: 10px;
+}
+
+@media only screen and (min-width: 600px) {
+	.category-widget button {
+		font-size: 14px;
+	}
+}
+
+
+.category-widget button:first-child {
+	border-left: none;
 }
 
 .selected-category {

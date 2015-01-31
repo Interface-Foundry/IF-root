@@ -1591,6 +1591,58 @@ text-align: center;
 	width: 24px;
 	margin: 4px;
 }
+.instagram-wrap {
+	padding-top: 104px;
+	max-width: 456px;
+}
+
+.instagram {
+	width: 100%;
+	font-size: 16px;
+	color: #6A7178;
+}
+
+.instagram img {
+	width: 100%;
+	height: auto;
+	background: #CCC;
+}
+
+.instagram footer {
+	min-height: 20px;
+	padding: 8px;
+	word-wrap: break-word;
+	color: #777;
+}
+
+.instagram footer:hover {
+	color: #777;
+}
+
+.instagram footer h4 {
+	margin: 0;
+}
+.twitter-avatar {
+	height: 32px;
+	width: 32px;
+}
+
+.tweet.marble-page {
+	min-height: auto;
+}
+
+.tweet footer {
+	padding: 8px;
+	word-wrap: break-word;
+}
+
+.tweet {
+	color: #777;
+}
+
+.twitter-wrap {
+	padding-top: 104px;
+}
 .world-toolbar {
 	height: 68px;
 	width: 100%;
@@ -1713,13 +1765,6 @@ text-align: center;
 	color: #6A7178;
 }
 
-.instagram {
-	padding: 4px;
-	width: 100%;
-	font-size: 16px;
-	color: #6A7178;
-}
-
 .card.last {
 	border-radius:4px 4px 0px 0px;
 }
@@ -1741,6 +1786,32 @@ h6 {
 	padding-top: 10px;
 	height: 40px;
 	width: 100%;
+}
+
+.category-widget.marble-page {
+	min-height: 0;
+}
+
+.category-widget button {
+	min-height: 48px;
+	border-left: 1px solid #ccc;
+	border-right: none;
+	border-bottom: none;
+	border-top: none;
+	background: #FFF;
+	vertical-align: middle;
+	font-size: 10px;
+}
+
+@media only screen and (min-width: 600px) {
+	.category-widget button {
+		font-size: 14px;
+	}
+}
+
+
+.category-widget button:first-child {
+	border-left: none;
 }
 
 .selected-category {
@@ -2975,6 +3046,30 @@ span.subnav-back-chevron {
   font-size: 20px;
   color: #fff;
   background: #2196f3 url('img/icons/ic_add_white_48dp.png') center / 24px 24px no-repeat;
+}
+.progress-circle {
+  position: absolute;
+}
+.semi-circle-left {
+  width: 100%;
+  height: 100%;
+  border: 2px solid #03a9f4;
+  border-radius: 50%;
+  position: absolute;
+  -moz-transition: transform 1s ease;
+  -webkit-transition: -webkit-transform 1s ease;
+  -o-transition: transform 1s ease;
+  transition: transform 1s ease;
+}
+.spinLeft {
+  -ms-transform: rotate(180deg);
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+.spinLeftLong {
+  -ms-transform: rotate(360deg);
+  -webkit-transform: rotate(360deg);
+  transform: rotate(360deg);
 }
 .bubble-list {
   margin: 0px -8px;

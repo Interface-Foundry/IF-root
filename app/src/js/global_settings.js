@@ -43,7 +43,7 @@ var local_icons = {
     }
 }
 
-//http://107.170.180.141/maps/53c4a0ab0ee5d8ccfa68a034_warped.vrt/{z}/{x}/{y}.png < extension for tile server
+//https://bubbl.io/maps/53c4a0ab0ee5d8ccfa68a034_warped.vrt/{z}/{x}/{y}.png < extension for tile server
 
 var tilesDict = {
     openstreetmap: {
