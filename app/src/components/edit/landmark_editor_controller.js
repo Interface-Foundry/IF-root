@@ -400,6 +400,13 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.landmark.time.end = timeEnd.toISO8601String();
 	
 	}
+
+	$scope.setLocation = function(){
+		//check if there are floor numbers registered, default to 0
+		//populate dropdown with registered floors
+		$scope.$parent.landmark.loc_info.floor_num = 0;
+
+	}
 	
 	$scope.onUploadAvatar = function($files) {
 		console.log('uploadAvatar');

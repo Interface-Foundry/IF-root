@@ -24,6 +24,13 @@ module.exports = {
 	    	coordinates: []
 	  	},
 	  	loc_nickname: String,
+	  	loc_info: {
+	  		loc_nickname: String,
+	  		floor_num: Number,
+	  		floor_name: String,
+	  		room_id: String,
+	  		room_name: String
+	  	},
 	  	// loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
 	  	// 	name: String,
 	  	// 	type: {
