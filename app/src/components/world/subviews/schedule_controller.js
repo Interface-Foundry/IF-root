@@ -1,4 +1,4 @@
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', function($scope, worldTree, $routeParams, styleManager) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', function($scope, worldTree, $routeParams, styleManager, $window) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -17,6 +17,34 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		'Places': 13
 	}
 	
+	$scope.showCalendar = function() {
+		if ($scope.calendarActive) {
+			$scope.calendarActive = false;
+		} else {
+			$scope.calendarActive = true;
+			handleWindowResize();
+		}
+	}
+
+
+	$scope.calConfig = {
+		height: 360,
+		// eventClick: $scope.inspectEvent
+		defaultView: 'agendaWeek'
+	}
+
+	var handleWindowResize = _.throttle(function(e) {
+		$scope.calConfig.height = windowEl.height()-116;
+		if (windowEl.width() < 600) {
+			$scope.calConfig.defaultView = 'agendaDay';
+		} else {
+			$scope.calConfig.defaultView = 'agendaWeek';
+		}
+	}, 100)
+
+var windowEl = $($window);
+windowEl.on('resize', handleWindowResize);
+	
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
@@ -25,6 +53,29 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		return $scope.world._id;
 	}).then(function(_id) {return worldTree.getLandmarks(_id)})
 	.then(function(landmarks) {
+		$scope.landmarks = landmarks;
+		
+		setUpCalendar(landmarks);
+		setUpSchedule(landmarks);
+	});
+	
+	function setUpCalendar(landmarks) {
+		$scope.calendar = {
+			events: landmarks.filter(function(landmark) {return landmark.time.start})
+						.map(function(landmark) {
+							return {
+								id: landmark._id,
+								title: landmark.name,
+								start: moment(landmark.time.start),
+								end: moment(landmark.time.end),
+								landmark: landmark
+							}
+						})
+		}
+		console.log($scope.calendar.events);
+	}
+	
+	function setUpSchedule(landmarks) {	
 		var now = moment();
 		var schedule = [];
 		var superGroups = {
@@ -50,8 +101,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			'Past': 12,
 			'Places': 13
 		}
-
-		
+			
 		 /* [{'Upcoming': []},
 						{'Today': []},
 						{'Previous': []},
@@ -71,8 +121,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 				superGroups[superGroup][group] = [landmark];
 			}
 		});
-
-
+		
 		//current structure {'upcoming': {'group': [],}}
 		//first 									^ sort these
 		//then							^to array 
@@ -97,18 +146,14 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 					return groupOrderMap[key];
 				})
 		});
-		
-		console.log(temp);
-		
+				
 		$scope.schedule = [
 			{'Upcoming': superGroups['Upcoming']},
 			{'Today': superGroups['Today']},
 			{'Places': superGroups['Places']},
 			{'Previous': superGroups['Previous']}
 		];
-		
-		console.log(schedule);
-			
+					
 		function getSuperGroup(landmark) {
 			var t;
 			if (!landmark.time.start) {return 'Places'}
@@ -168,7 +213,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			}
 		}
 		
-	})
+	}
 
 	
 }])

@@ -4,25 +4,17 @@
 			<span style="color:#FFF;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
 		</a>
 		<h4 class="subnav-header">Schedule</h4>
+		<li class="img-tab" style="position: absolute; top: 0px; right: 0px;" ng-click="showCalendar()">
+			<img src="img/icons/calendar-on.png" width="32" height="32" ng-if="calendarActive">
+			<img src="img/icons/calendar-off-fff.png" width="32" height="32" ng-if="!calendarActive">
+		</li>
 	</nav>
 	
 	<div class="schedule-wrap wrap">
 		<schedule-view></schedule-view>
-<!--
-		<div class="surface bg-clear">
-				<div ng-repeat="group in schedule track by group.title" class="bubble-group">
-					<header class="bubble-group-label">{{group.title}}</header>
-					<ul class="bubble-list">
-						<li ng-repeat="landmark in group.landmarks" class="bubble-list-item">
-							<a class="bubble-list-item-link" if-href="#w/{{world.id}}/{{landmark.id}}">
-								<img if-src="{{landmark.avatar || 'img/tidepools/default.png'}}" class="bubble-list-item-img">
-								<span>{{landmark.name}}</span>
-							</a>
-						</li>
-					</ul>
-				</div>
-		</div>
--->
-	</div>
-	
+	</div>	
+</div>
+<div class="calendar-view if-animate" ng-class="{'active': calendarActive}" ng-if="calendar">
+		<div ui-calendar="calConfig" ng-model="calendar"></div>
+		<button class="bubble-inspector-close" ng-click="calendarActive = false">x</button>
 </div>

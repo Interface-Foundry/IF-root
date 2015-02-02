@@ -16715,6 +16715,14 @@ var ifGlobals = {
 			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
 		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
 			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
+	},
+	mapThemes: {
+		arabesque: {name: 'Arabesque', cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb', img: 'img/mapbox/arabesque_small.png'},
+		fairy: {name: 'Fairy', cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b', img: 'img/mapbox/fairy_small.png'},
+		sunset: {name: 'Sunset', cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e', img: 'img/mapbox/sunset_small.png'},
+		urban: {name: 'Urban', cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn', img: 'img/mapbox/urban_small.png'},
+		haze: {name: 'Haze', cloudMapName:'purple haze', cloudMapID:'interfacefoundry.ig1oichl', img: 'img/mapbox/haze_small.png'},
+		mimis: {name: 'Mimis', cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55', img: 'img/mapbox/mimis_small.png'}
 	}
 }
 
@@ -17849,6 +17857,18 @@ var themeDict = {
 		worldTitle_color: '#FFF',
 		landmarkTitle_color: '#FF4081',
 		categoryTitle_color: '#F48FB1'
+	},
+	haze: {
+		name: 'haze',
+		
+		bodyBG_color: '#000830',
+		cardBG_color: '#FFFFFF',
+		titleBG_color: '#2c22cf',
+		navBG_color: '#2c22cf',
+		
+		worldTitle_color: '#FFF',
+		landmarkTitle_color: '#6ff4ff',
+		categoryTitle_color: '#6ff4ff'
 	}
 };
 app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
@@ -19300,7 +19320,7 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
 console.log('--EditController--');
 var aperture = apertureService,
 	ears = [],
@@ -19325,6 +19345,8 @@ $scope.kinds = [
 	{name: 'Home'},
 	{name: 'Neighborhood'}
 ];
+
+$scope.mapThemes = ifGlobals.mapThemes;
 
 function tempID() {
 	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
@@ -19436,27 +19458,18 @@ $scope.onLocalMapSelect = function($files) {
 	})
 }
 
-$scope.selectMapTheme = function(name) {
-	console.log('--selectMapTheme--', name);
-	var mapThemes = {
-		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
-		mimis: {cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55'}
-	};
+$scope.selectMapTheme = function(key) {
 	if (typeof name === 'string') {
-		$scope.mapThemeSelect = name;
-		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		$scope.mapThemeSelect = key;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.mapThemes[key].cloudMapID+'/{z}/{x}/{y}.png');
 		
-		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		$scope.world.style.maps.cloudMapName = $scope.mapThemes[key].cloudMapName;
+		$scope.world.style.maps.cloudMapID = $scope.mapThemes[key].cloudMapID;
 		
 		if ($scope.style.hasOwnProperty('navBG_color')==false) {
 			$scope.setThemeFromMap();
 		}
 	}
-	
 }
 
 $scope.setThemeFromMap = function() {
@@ -19472,6 +19485,9 @@ switch ($scope.world.style.maps.cloudMapName) {
 		break;
 	case 'arabesque':
 		angular.extend($scope.style, themeDict['arabesque']);
+		break;
+	case 'haze': 
+		angular.extend($scope.style, themeDict['haze']);
 		break;
 }
 }
@@ -22454,7 +22470,7 @@ link: function(scope, element, attrs) {
 }
 	}
 }); 
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', function($scope, worldTree, $routeParams, styleManager) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', function($scope, worldTree, $routeParams, styleManager, $window) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -22473,6 +22489,34 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		'Places': 13
 	}
 	
+	$scope.showCalendar = function() {
+		if ($scope.calendarActive) {
+			$scope.calendarActive = false;
+		} else {
+			$scope.calendarActive = true;
+			handleWindowResize();
+		}
+	}
+
+
+	$scope.calConfig = {
+		height: 360,
+		// eventClick: $scope.inspectEvent
+		defaultView: 'agendaWeek'
+	}
+
+	var handleWindowResize = _.throttle(function(e) {
+		$scope.calConfig.height = windowEl.height()-116;
+		if (windowEl.width() < 600) {
+			$scope.calConfig.defaultView = 'agendaDay';
+		} else {
+			$scope.calConfig.defaultView = 'agendaWeek';
+		}
+	}, 100)
+
+var windowEl = $($window);
+windowEl.on('resize', handleWindowResize);
+	
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
@@ -22481,6 +22525,29 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		return $scope.world._id;
 	}).then(function(_id) {return worldTree.getLandmarks(_id)})
 	.then(function(landmarks) {
+		$scope.landmarks = landmarks;
+		
+		setUpCalendar(landmarks);
+		setUpSchedule(landmarks);
+	});
+	
+	function setUpCalendar(landmarks) {
+		$scope.calendar = {
+			events: landmarks.filter(function(landmark) {return landmark.time.start})
+						.map(function(landmark) {
+							return {
+								id: landmark._id,
+								title: landmark.name,
+								start: moment(landmark.time.start),
+								end: moment(landmark.time.end),
+								landmark: landmark
+							}
+						})
+		}
+		console.log($scope.calendar.events);
+	}
+	
+	function setUpSchedule(landmarks) {	
 		var now = moment();
 		var schedule = [];
 		var superGroups = {
@@ -22506,8 +22573,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			'Past': 12,
 			'Places': 13
 		}
-
-		
+			
 		 /* [{'Upcoming': []},
 						{'Today': []},
 						{'Previous': []},
@@ -22527,8 +22593,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 				superGroups[superGroup][group] = [landmark];
 			}
 		});
-
-
+		
 		//current structure {'upcoming': {'group': [],}}
 		//first 									^ sort these
 		//then							^to array 
@@ -22553,18 +22618,14 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 					return groupOrderMap[key];
 				})
 		});
-		
-		console.log(temp);
-		
+				
 		$scope.schedule = [
 			{'Upcoming': superGroups['Upcoming']},
 			{'Today': superGroups['Today']},
 			{'Places': superGroups['Places']},
 			{'Previous': superGroups['Previous']}
 		];
-		
-		console.log(schedule);
-			
+					
 		function getSuperGroup(landmark) {
 			var t;
 			if (!landmark.time.start) {return 'Places'}
@@ -22624,7 +22685,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			}
 		}
 		
-	})
+	}
 
 	
 }])

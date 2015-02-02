@@ -1,4 +1,4 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
 console.log('--EditController--');
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -29,6 +29,8 @@ $scope.kinds = [
 	{name: 'Home'},
 	{name: 'Neighborhood'}
 ];
+
+$scope.mapThemes = ifGlobals.mapThemes;
 
 function tempID() {
 	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
@@ -140,27 +142,18 @@ $scope.onLocalMapSelect = function($files) {
 	})
 }
 
-$scope.selectMapTheme = function(name) {
-	console.log('--selectMapTheme--', name);
-	var mapThemes = {
-		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
-		mimis: {cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55'}
-	};
+$scope.selectMapTheme = function(key) {
 	if (typeof name === 'string') {
-		$scope.mapThemeSelect = name;
-		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		$scope.mapThemeSelect = key;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.mapThemes[key].cloudMapID+'/{z}/{x}/{y}.png');
 		
-		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		$scope.world.style.maps.cloudMapName = $scope.mapThemes[key].cloudMapName;
+		$scope.world.style.maps.cloudMapID = $scope.mapThemes[key].cloudMapID;
 		
 		if ($scope.style.hasOwnProperty('navBG_color')==false) {
 			$scope.setThemeFromMap();
 		}
 	}
-	
 }
 
 $scope.setThemeFromMap = function() {
@@ -176,6 +169,9 @@ switch ($scope.world.style.maps.cloudMapName) {
 		break;
 	case 'arabesque':
 		angular.extend($scope.style, themeDict['arabesque']);
+		break;
+	case 'haze': 
+		angular.extend($scope.style, themeDict['haze']);
 		break;
 }
 }

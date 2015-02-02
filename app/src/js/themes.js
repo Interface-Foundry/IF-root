@@ -46,5 +46,17 @@ var themeDict = {
 		worldTitle_color: '#FFF',
 		landmarkTitle_color: '#FF4081',
 		categoryTitle_color: '#F48FB1'
+	},
+	haze: {
+		name: 'haze',
+		
+		bodyBG_color: '#000830',
+		cardBG_color: '#FFFFFF',
+		titleBG_color: '#2c22cf',
+		navBG_color: '#2c22cf',
+		
+		worldTitle_color: '#FFF',
+		landmarkTitle_color: '#6ff4ff',
+		categoryTitle_color: '#6ff4ff'
 	}
 };
