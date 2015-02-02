@@ -27,7 +27,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 					positionCompassMenu();
 														
 					scope.$watch(function () {
-						return userManager._displayName;
+						return userManager.getDisplayName();
 					}, function(newVal, oldVal) {
 						positionCompassMenu();
 					

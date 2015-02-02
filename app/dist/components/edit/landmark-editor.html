@@ -16,7 +16,7 @@
 <button class="btn btn-success" ng-click="addLandmark()"><b>+</b> Add Point of Interest or Schedule item</button>
 </div>
 <ul class="row">
-	<div class="col-xs-12">
+	<div class="col-xs-12 col-sm-10">
 	<li ng-repeat="landmark in landmarks track by landmark._id" 
 		ng-controller="LandmarkEditorItemController" 
 		class="panel panel-default" 
@@ -25,10 +25,9 @@
 		<div class="panel-heading">
 		<span class="panel-title" ng-cloak>{{landmark.name}} 
 			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-			<button type="button" class="btn btn-primary btn-sm" ng-click="saveLandmark()">Save</button>
 			</span>
 		</div>
-		<div ng-form class='panel-body' ng-show="$index === selectedIndex">
+<div ng-form class='panel-body' ng-show="$index === selectedIndex">
 		<div class="form-group">
 			
 			<div class="media">
@@ -87,12 +86,46 @@
 		</div>
 	</div>
 </div>
+	
+	<br><br>
+
+	<div class="form-group">
+		<button class="btn btn-info btn-sm" ng-click="setLocation()" ng-hide="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">Add Location Details</button>
+	</div>
 
 
+	<div ng-show="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">
+		<div class="form-group form-inline">
+			
+			<button type="button" class="close" ng-click="clearLoc()">
+				<span aria-hidden="true">&times;</span><span class="sr-only">Close </span>
+			</button><br>
+
+			<div class="form-group">
 
 
+				<label>Floor Number</label>
+				<br>
+				<button type="button" class="btn btn-default" data-html="1" ng-model="landmark.loc_info.floor_num" ng-options="floor.val as floor.label for floor in floors" bs-select>
+				  Action <span class="caret"></span>
+				</button>
 
 			</div>
+
+			<div class="form-group" style="margin-left:10px;">
+				<label>Room Number</label>
+				<br>
+				<input type="text" size="10" class="form-control" ng-model="landmark.loc_info.room_name" data-autoclose="1" placeholder="ex. 5A" placement="top-left" maxlength="5">
+			</div>
+
+		</div>
+	</div>
+
+	<button type="button" class="btn btn-primary btn-lg" ng-click="saveLandmark()">Save</button>
+
+
+</div>
+
 	</li>
 	</div>
 </ul>

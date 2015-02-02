@@ -14,15 +14,17 @@
 
 <div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
 	<div class="surface bg-clear">
-		<div class="marble-page" ng-if="category">
+	
+	<!--DESCRIPTION-->
+	<div ng-include="'components/world/templates/description.html'" class="marble-page"></div>
+
+	<div class="marble-page" ng-if="category">
 			<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 			<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
 			Categories
 			</header>
 			<category-widget></category-widget>
-		</div>
-	<!--DESCRIPTION-->
-	<div ng-include="'components/world/templates/description.html'" class="marble-page"></div>
+	</div>
 
 	<!---yelp-->
 	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>

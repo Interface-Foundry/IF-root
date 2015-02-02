@@ -4,7 +4,7 @@
 </header>
 <article>
 <li class="instagram">
-	<a if-href="#w/{{world.id}}/instagram" target="_blank">
+	<a if-href="#w/{{world.id}}/instagram">
 		<img ng-if="instagrams[0]" if-src="img/instagram/{{instagrams[0].local_path[0]}}">
 		<footer ng-if="instagrams[0]"><h4>{{instagram.user.name}}</h4> {{instagram.text}}</footer>
 		<footer ng-if="!instagrams[0]">No one has instagrammed yet! Post an instagram hashtagged #{{world.resources.hashtag}} and it will appear here.</footer>

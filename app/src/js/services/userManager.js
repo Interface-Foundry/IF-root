@@ -18,7 +18,7 @@ var userManager = {
 
 userManager.getUser = function() {
 	var deferred = $q.defer();
-	console.log('user', userManager._user);
+
 	var user = userManager._user;
 	if (user) {
 		deferred.resolve(user);
@@ -49,38 +49,26 @@ userManager.saveUser = function(user) {
 }
 
 userManager.getDisplayName = function() {
-	var deferred = $q.defer();
-	
-	var displayName = userManager._displayName;
-	if (displayName) {
-		deferred.resolve(displayName);
+	if (userManager._user) {
+		var user = userManager._user;	
+		if (user.name) {displayName = user.name}
+		else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
+		else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
+		else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
+		else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
+		else {displayName = "Me"; console.log("how did this happen???");}
+			
+		var i = displayName.indexOf(" ");
+		if (i > -1) {
+			var _displayName = displayName.substring(0, i);
+		} else {
+			var _displayName = displayName;
+		}
+		
+		return _displayName;
 	} else {
-		userManager.getUser().then(function(user) {
-			if (user.name) {displayName = user.name}
-			else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
-			else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
-			else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
-			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
-			else {displayName = "Me"; console.log("how did this happen???");}
-			
-			var i = displayName.indexOf(" ");
-			if (i > -1) {
-				var _displayName = displayName.substring(0, i);
-			} else {
-				var _displayName = displayName;
-			}
-
-			userManager._displayName = _displayName;
-			
-			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');
-			
-			deferred.resolve(displayName);
-		}, function(reason) {
-			deferred.reject(reason);
-		});
+		return undefined;
 	}
-	
-	return deferred.promise;
 }
 
 userManager.checkLogin = function(){
@@ -100,9 +88,7 @@ userManager.checkLogin = function(){
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
 	  });
-	  
-	  userManager.getDisplayName();
-	  
+	  	  
       return deferred.promise;
 };
 

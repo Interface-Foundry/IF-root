@@ -5177,7 +5177,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 					positionCompassMenu();
 														
 					scope.$watch(function () {
-						return userManager._displayName;
+						return userManager.getDisplayName();
 					}, function(newVal, oldVal) {
 						positionCompassMenu();
 					
@@ -17506,7 +17506,7 @@ var userManager = {
 
 userManager.getUser = function() {
 	var deferred = $q.defer();
-	console.log('user', userManager._user);
+
 	var user = userManager._user;
 	if (user) {
 		deferred.resolve(user);
@@ -17537,38 +17537,26 @@ userManager.saveUser = function(user) {
 }
 
 userManager.getDisplayName = function() {
-	var deferred = $q.defer();
-	
-	var displayName = userManager._displayName;
-	if (displayName) {
-		deferred.resolve(displayName);
+	if (userManager._user) {
+		var user = userManager._user;	
+		if (user.name) {displayName = user.name}
+		else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
+		else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
+		else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
+		else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
+		else {displayName = "Me"; console.log("how did this happen???");}
+			
+		var i = displayName.indexOf(" ");
+		if (i > -1) {
+			var _displayName = displayName.substring(0, i);
+		} else {
+			var _displayName = displayName;
+		}
+		
+		return _displayName;
 	} else {
-		userManager.getUser().then(function(user) {
-			if (user.name) {displayName = user.name}
-			else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
-			else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
-			else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
-			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
-			else {displayName = "Me"; console.log("how did this happen???");}
-			
-			var i = displayName.indexOf(" ");
-			if (i > -1) {
-				var _displayName = displayName.substring(0, i);
-			} else {
-				var _displayName = displayName;
-			}
-
-			userManager._displayName = _displayName;
-			
-			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');
-			
-			deferred.resolve(displayName);
-		}, function(reason) {
-			deferred.reject(reason);
-		});
+		return undefined;
 	}
-	
-	return deferred.promise;
 }
 
 userManager.checkLogin = function(){
@@ -17588,9 +17576,7 @@ userManager.checkLogin = function(){
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
 	  });
-	  
-	  userManager.getDisplayName();
-	  
+	  	  
       return deferred.promise;
 };
 
@@ -19717,7 +19703,7 @@ function showPosition(position) {
 	userLng = position.coords.longitude;
 	
 	console.log(userLng);
-	map.setCenter([userLng, userLat], 17, 'editor');
+	map.setCenter([userLng, userLat], 18, 'editor');
  
 	markerID = tempID();
  
@@ -19725,7 +19711,7 @@ function showPosition(position) {
 	map.addMarker(markerID, {
 		lat: userLat,
 		lng: userLng,
-		message: "<p style='color:black;'>Drag to World's Location</p>",
+		message: "<p style='color:black;'>Drag to Bubble Location</p>",
 		focus: true,
 		draggable: true,
 		icon: {
@@ -19754,13 +19740,87 @@ function showPosition(position) {
 	if (map.circleMaskLayer) {
 		map.setCircleMaskMarker(markerID)		
 	} else {
-		map.addCircleMaskToMarker(markerID, 150, state);     
+		map.addCircleMaskToMarker(markerID, 100, state);     
 	}
 }
 
 function locError(){
         console.log('no loc');
 }
+
+
+
+
+
+	// //---- Adding Local Maps -----//
+
+	// $scope.addLandmarkCategory = function() {
+
+	// 	if ($scope.temp) {
+
+	// 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
+
+	// 		// console.log('----- TEST')
+	// 		// console.log($scope.world.landmarkCategories);
+
+	// 		console.log($scope.world);
+	// 		delete $scope.temp.LandmarkCatAvatar;
+	// 		delete $scope.temp.LandmarkCategory;
+	// 		$scope.temp.landmarkPresent = false;
+	// 		$scope.uploadFinishedLandmark = false;
+	// 		console.log($scope.temp.LandmarkCatAvatar);
+	// 	}
+	// }
+
+	// $scope.removeLandmarkCategory = function(index) {
+	// 	$scope.world.landmarkCategories.splice(index, 1);
+	// }
+
+
+
+	// $scope.newMap = function(){
+
+	// 	//check if there are floor numbers registered, default to 0
+	// 	//populate dropdown with registered floors
+
+	// 	//if loc_info already exists, add 1
+	// 	if ($scope.landmark.loc_info){		
+	// 		if ($scope.landmark.loc_info.floor_num == null){
+	// 			$scope.landmark.loc_info.floor_num = 1;
+	// 		}
+	// 	}
+
+	// 	addLocInfo();
+	// }
+
+	// //if loc info, then load floor numbers / room names
+	// if ($scope.$parent.landmark.loc_info){
+	// 	addLocInfo();
+	// }
+
+	// function addLocInfo() {
+
+	// 	//read landmark floor array, cp to $scope
+
+	// 	$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"}];  
+
+	// 	//IF no loc_info, then floor_num = 0
+	// 	if (!$scope.$parent.landmark.loc_info){
+	// 		$scope.$parent.landmark.loc_info = {
+	// 			floor_num: 1
+	// 		};  		
+	// 	}
+	// }
+	// //onclick hide location details
+	// $scope.clearMap = function(){
+
+	// 	//console.log('asdfasdfasdf');
+	// 	//delete $scope.$parent.landmark.loc_info;
+
+	// 	$scope.landmark.loc_info.floor_num = null;
+	// 	$scope.landmark.loc_info.room_name = null;
+	// }
+	// //--------------------------//
 
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
@@ -20228,6 +20288,52 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.landmark.time.end = timeEnd.toISO8601String();
 	
 	}
+
+	//---- LOCATION DETAILS -----//
+	$scope.setLocation = function(){
+
+		//check if there are floor numbers registered, default to 0
+		//populate dropdown with registered floors
+
+		//if loc_info already exists, add 1
+		if ($scope.$parent.landmark.loc_info){		
+			if ($scope.$parent.landmark.loc_info.floor_num == null){
+				$scope.$parent.landmark.loc_info.floor_num = 1;
+			}
+		}
+
+		addLocInfo();
+	}
+
+	//if loc info, then load floor numbers / room names
+	if ($scope.$parent.landmark.loc_info){
+		addLocInfo();
+	}
+
+	function addLocInfo() {
+
+		//read landmark floor array, cp to $scope
+
+		$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"}];  
+
+		//IF no loc_info, then floor_num = 0
+		if (!$scope.$parent.landmark.loc_info){
+			$scope.$parent.landmark.loc_info = {
+				floor_num: 1
+			};  		
+		}
+	}
+	//onclick hide location details
+	$scope.clearLoc = function(){
+
+		//console.log('asdfasdfasdf');
+		//delete $scope.$parent.landmark.loc_info;
+
+		$scope.$parent.landmark.loc_info.floor_num = null;
+		$scope.$parent.landmark.loc_info.room_name = null;
+	}
+	//--------------------------//
+
 	
 	$scope.onUploadAvatar = function($files) {
 		console.log('uploadAvatar');
@@ -21752,13 +21858,14 @@ console.log($scope.landmark.category);
 		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
+	map.setCenter($scope.landmark.loc.coordinates, 17, 'aperture-half'); 
 	aperture.set('half');
-  	var markers = map.markers;
-  	angular.forEach(markers, function(marker) {
-  		console.log(marker);
-	  	map.removeMarker(marker._id);
-  	});
+  	// var markers = map.markers;
+  	// angular.forEach(markers, function(marker) {
+  	// 	console.log(marker);
+	  // 	map.removeMarker(marker._id);
+  	// });
+	map.removeAllMarkers();
   	
 
   	map.addMarker($scope.landmark._id, {
@@ -22097,7 +22204,7 @@ function profileEditMessage() {
 		avatar: $scope.world.avatar || 'img/tidepools/default.png',
 		userID: 'chatbot',
 		_id: 'profileEditMessage',
-		href: 'profile/me'
+		href: 'profile/me/messages'
 	}
 	$scope.messages.push(newChat);
 }
@@ -22214,9 +22321,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 userManager.getUser().then(function(user) {
 		$scope.user = user;
-	userManager.getDisplayName().then(function(displayName) {
-		$scope.nick = displayName;	
-	});
+		$scope.nick = userManager.getDisplayName();	
 	}, function(reason) {
 	dialogs.showDialog('messageAuthDialog.html');
 });
@@ -22621,7 +22726,7 @@ return {
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";

@@ -398,6 +398,52 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.landmark.time.end = timeEnd.toISO8601String();
 	
 	}
+
+	//---- LOCATION DETAILS -----//
+	$scope.setLocation = function(){
+
+		//check if there are floor numbers registered, default to 0
+		//populate dropdown with registered floors
+
+		//if loc_info already exists, add 1
+		if ($scope.$parent.landmark.loc_info){		
+			if ($scope.$parent.landmark.loc_info.floor_num == null){
+				$scope.$parent.landmark.loc_info.floor_num = 1;
+			}
+		}
+
+		addLocInfo();
+	}
+
+	//if loc info, then load floor numbers / room names
+	if ($scope.$parent.landmark.loc_info){
+		addLocInfo();
+	}
+
+	function addLocInfo() {
+
+		//read landmark floor array, cp to $scope
+
+		$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"}];  
+
+		//IF no loc_info, then floor_num = 0
+		if (!$scope.$parent.landmark.loc_info){
+			$scope.$parent.landmark.loc_info = {
+				floor_num: 1
+			};  		
+		}
+	}
+	//onclick hide location details
+	$scope.clearLoc = function(){
+
+		//console.log('asdfasdfasdf');
+		//delete $scope.$parent.landmark.loc_info;
+
+		$scope.$parent.landmark.loc_info.floor_num = null;
+		$scope.$parent.landmark.loc_info.room_name = null;
+	}
+	//--------------------------//
+
 	
 	$scope.onUploadAvatar = function($files) {
 		console.log('uploadAvatar');

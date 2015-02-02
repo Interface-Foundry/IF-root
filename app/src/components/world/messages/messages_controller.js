@@ -239,7 +239,7 @@ function profileEditMessage() {
 		avatar: $scope.world.avatar || 'img/tidepools/default.png',
 		userID: 'chatbot',
 		_id: 'profileEditMessage',
-		href: 'profile/me'
+		href: 'profile/me/messages'
 	}
 	$scope.messages.push(newChat);
 }
@@ -356,9 +356,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 userManager.getUser().then(function(user) {
 		$scope.user = user;
-	userManager.getDisplayName().then(function(displayName) {
-		$scope.nick = displayName;	
-	});
+		$scope.nick = userManager.getDisplayName();	
 	}, function(reason) {
 	dialogs.showDialog('messageAuthDialog.html');
 });
