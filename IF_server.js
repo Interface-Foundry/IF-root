@@ -2091,6 +2091,23 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     }
                   }
 
+
+                  //adding map location info
+                  if (req.body.hasOwnProperty('loc_info')) {
+
+                    if (req.body.loc_info.hasOwnProperty('floor_num')) {
+
+                        lm.loc_info.floor_num = req.body.loc_info.floor_num;
+                    }
+
+                    if(req.body.loc_info.hasOwnProperty('room_name')){
+
+                        lm.loc_info.room_name = req.body.loc_info.room_name;
+                    }
+
+                  }
+
+
                     lm.save(function(err, landmark) {
                         if (err){
                           console.log(err);
@@ -2215,6 +2232,20 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         lm.time.end = req.body.time.end || null;
                         lm.hasTime = true;
                     }
+
+
+                    //adding map location info
+                    if (req.body.hasOwnProperty('loc_info')) {
+
+                      if (req.body.loc_info.hasOwnProperty('floor_num')) {
+                          lm.loc_info.floor_num = req.body.loc_info.floor_num || null;
+                      }
+
+                      if(req.body.loc_info.hasOwnProperty('room_name')){
+                          lm.loc_info.room_name = req.body.loc_info.room_name || null;
+                      }
+                    }
+
 
                     lm.save(function (err, landmark) {
                         if (err)
