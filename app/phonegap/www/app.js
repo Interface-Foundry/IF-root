@@ -4715,6 +4715,13 @@ var checkLoggedin = function(userManager) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
+	    			if (request.server) {
+		    			request.url = 'https://bubbl.li' + request.url;
+		    			if (ifGlobals.username&&ifGlobals.password) {
+							request.headers['Authorization'] = ifGlobals.getBasicHeader();
+							//console.log(request);
+						}
+	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4782,9 +4789,6 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
-$locationProvider.html5Mode({
-	enabled: true
-});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4794,16 +4798,31 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
-	userManager.checkLogin();
 	
 	
+	navigator.splashscreen.hide();
 	
+/*
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+*/
 });
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-
-});
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -5163,7 +5182,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 4;
+					var topOffset = 19;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5527,10 +5546,6 @@ app.directive('ifHref', function() {
 				return;
 				}
 			
-			var firstHash = value.indexOf('#');
-			if (firstHash > -1) {
-				value = value.slice(0, firstHash) + value.slice(firstHash+1);
-			}
 			$attr.$set('href', value);
 			
 			});
@@ -5549,6 +5564,9 @@ app.directive('ifSrc', function() {
 				return;
 				}
 			
+				if (value.indexOf('http')<0) {
+					value = 'https://bubbl.li/'+value;
+				}
 				
 				$attr.$set('src', value);
 			
@@ -17265,8 +17283,48 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: false
+	supported: true,
+	keychain: new Keychain()
 }
+
+lockerManager.getCredentials = function() {
+	var username = $q.defer(), password = $q.defer();
+	
+	lockerManager.keychain.getForKey(function(value) {
+		username.resolve(value);
+	}, function(error) {
+		username.reject(error);
+	}, 'username', 'Bubbl.li');
+
+	lockerManager.keychain.getForKey(function(value) {
+		password.resolve(value);
+	}, function(error) {
+		password.reject(error)
+	}, 'password', 'Bubbl.li');
+	
+	return $q.all({username: username.promise, password: password.promise});
+}
+
+lockerManager.saveCredentials = function(username, password) {
+	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
+	
+	lockerManager.keychain.setForKey(function(success) {
+		usernameSuccess.resolve(success);
+	}, function(error) {
+		usernameSuccess.reject(error);
+	},
+	'username', 'Bubbl.li', username);
+	
+	lockerManager.keychain.setForKey(function(success) {
+		passwordSuccess.resolve(success);
+	}, function(error) {
+		passwordSuccess.reject(error);
+	},
+	'password', 'Bubbl.li', password);
+	
+	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
 	 
 return lockerManager;
 	   
@@ -17497,7 +17555,7 @@ angular.module('tidepoolsServices')
 var alerts = alertManager;
    
 var userManager = {
-	userRes: $resource('/api/updateuser'),
+	userRes: $resource('https://bubbl.li/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -17602,16 +17660,20 @@ userManager.signin = function(username, password) {
 		password: password
 	}
 	
-	$http.post('/api/user/login', data, {server: true})
+	
+	ifGlobals.username = username;
+	ifGlobals.password = password;
+	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			ifGlobals.loginStatus = true;
+			
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
-	
 	
 	return deferred.promise;
 }
@@ -17634,7 +17696,7 @@ userManager.login.login = function() {
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.show = false;
+		dialogs.showDialog('keychainDialog.html');
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -19316,6 +19378,8 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
 console.log('--EditController--');
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 var aperture = apertureService,
 	ears = [],
 	map = mapManager,
@@ -19913,6 +19977,8 @@ World.get({id: $routeParams.worldURL}, function(data) {
 }]);
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20376,6 +20442,8 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20905,6 +20973,10 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	$rootScope.hideBack = false;
+	deregFirstShow();
+}))
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -21007,6 +21079,17 @@ $scope.share = function(platform) {
   );
 };
 
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
 }]);
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
@@ -21630,6 +21713,8 @@ $scope.deleteBubble = function(_id) {
 $scope.newWorld = function() {
 	console.log('newWorld()');
 	
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
 	
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
@@ -21876,13 +21961,14 @@ console.log($scope.landmark.category);
 		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
+	map.setCenter($scope.landmark.loc.coordinates, 17, 'aperture-half'); 
 	aperture.set('half');
-  	var markers = map.markers;
-  	angular.forEach(markers, function(marker) {
-  		console.log(marker);
-	  	map.removeMarker(marker._id);
-  	});
+  	// var markers = map.markers;
+  	// angular.forEach(markers, function(marker) {
+  	// 	console.log(marker);
+	  // 	map.removeMarker(marker._id);
+  	// });
+	map.removeAllMarkers();
   	
 
   	map.addMarker($scope.landmark._id, {
@@ -22464,10 +22550,6 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
-		var firstHash = url.indexOf('#');
-		if (firstHash > -1) {
-			return url.slice(0, firstHash) + url.slice(firstHash+1);
-		} else {return url}
 		return url;
 	}
 }
