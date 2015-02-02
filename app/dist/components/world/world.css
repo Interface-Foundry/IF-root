@@ -143,10 +143,6 @@ h6 {
 	width: 100%;
 }
 
-.category-widget.marble-page {
-	min-height: 0;
-}
-
 .toolbar-category-widget {
 	position: absolute;
 	bottom: 68px;
@@ -158,26 +154,40 @@ h6 {
 	margin: 0;
 }
 
-.category-widget button {
-	min-height: 48px;
-	border-left: 1px solid #ccc;
-	border-right: none;
-	border-bottom: none;
-	border-top: none;
+.category-widget {
+	display: table;
+	table-layout: fixed;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.category-btn-group {
+	display:table;
+	width: 100%;
+	margin-top: -1px;
+}
+
+.category-widget .category-btn {
+	display:table-cell;
+	height: 100%;
+	height: 60px;	
+	border: 1px solid #ccc;
+	border-collapse: collapse;
 	background: #FFF;
 	vertical-align: middle;
-	font-size: 10px;
+	font-size: 14px;
+	text-align: center;
 }
 
-@media only screen and (min-width: 600px) {
-	.category-widget button {
-		font-size: 14px;
-	}
+.category-btn-img {
+	width: 24px;
+	height: 24px;
+	border-radius: 12px;
+	margin: 4px;	
 }
 
-
-.category-widget button:first-child {
-	border-left: none;
+.category-widget .category-btn.selected-category {
+	background: #eee;
 }
 
 .selected-category {

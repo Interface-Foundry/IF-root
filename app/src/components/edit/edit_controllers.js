@@ -181,20 +181,16 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 
 $scope.addLandmarkCategory = function() {
-
 	if ($scope.temp) {
 
 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
 
 		// console.log('----- TEST')
 		// console.log($scope.world.landmarkCategories);
-
-		console.log($scope.world);
 		delete $scope.temp.LandmarkCatAvatar;
 		delete $scope.temp.LandmarkCategory;
 		$scope.temp.landmarkPresent = false;
 		$scope.uploadFinishedLandmark = false;
-		console.log($scope.temp.LandmarkCatAvatar);
 	}
 }
 

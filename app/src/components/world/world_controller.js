@@ -453,6 +453,7 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 		map.setCenterFromMarkers(markers);
 		map.setMarkers(markers);
 		$scope.aperture.set('full');
+		$scope.selectedCategory = landmarkCategoryName;
 	} else {
 		//handle no landmarks in category
 	}

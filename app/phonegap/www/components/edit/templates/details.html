@@ -60,10 +60,10 @@
 
 			<label>Landmark Categories <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.landmarkcategories"></span></label> 
 
-			<label>Enable</label> <input type="checkbox" ng-model="temp.showLandmarks"/>
+			<label>Enable</label> <input type="checkbox" ng-model="temp.showLandmarks" ng-hide="world.landmarkCategories.length === 0"/>
 
 
-			 <div class="form-group" ng-show="temp.showLandmarks">	
+			 <div class="form-group" ng-show="temp.showLandmarks || world.landmarkCategories.length > 0">	
 				<div class="form-group">
 					<div class="well world-icon">
 						<button type="button" class="close" ng-show="uploadFinishedLandmark" ng-click="setUploadFinished(false, 'landmark')">
