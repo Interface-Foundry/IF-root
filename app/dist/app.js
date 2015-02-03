@@ -20225,7 +20225,7 @@ $scope.onUploadAvatar = function ($files, $event) {
 		if ($scope.world.style) {
 		if ($scope.world.style.maps) {
 		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
-		map.setCenter($scope.world.loc.coordinates, 18);
+		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
 		
 map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
