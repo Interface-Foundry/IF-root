@@ -16966,6 +16966,44 @@ mapManager.setMarkerFocus = function(key) {
 	}
 }
 
+mapManager.setMarkerSelected = function(key) {
+	console.log('--setMarkerSelected()--');
+	
+	// reset all marker images to default
+	angular.forEach(mapManager.markers, function(marker) {
+		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+	});
+
+	// set new image for selected marker
+	if (mapManager.markers.hasOwnProperty(key)) {
+		console.log('setting marker as selected');
+		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		return true;
+	} else {
+		console.log('Key not found in markers');
+		return false;
+	}
+};
+
+mapManager.bringMarkerToFront = function(key) {
+	console.log('--bringMarkerToFront--');
+
+	// reset all z-indices to 0
+	angular.forEach(mapManager.markers, function(marker) {
+		marker.zIndexOffset = 0;
+	});
+
+	// set z-index for selected marker
+	if (mapManager.markers.hasOwnProperty(key)) {
+		console.log('setting z-index offset');
+		mapManager.markers[key].zIndexOffset = 1000;
+		return true;
+	} else {
+		console.log('Key not found in markers');
+		return false;
+	}
+};
+
 /* addPath
 Key: Name of path to be added
 Path: Object representing path in leafletjs style
@@ -20099,14 +20137,16 @@ if ($scope.landmark.hasTime) {
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
 		if ($scope.selectedIndex != i) {
-		//$scope.saveItem($scope.selectedIndex);//save previous landmark
-		console.log('Continue w select');
-		$scope.selectedIndex = i; //change landmarks
-		map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
-		console.log($scope.landmarks[i].name);
-		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
-		map.setMarkerFocus($scope.landmarks[i]._id);
-		console.log('Complete select');
+			//$scope.saveItem($scope.selectedIndex);//save previous landmark
+			console.log('Continue w select');
+			$scope.selectedIndex = i; //change landmarks
+			map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
+			console.log($scope.landmarks[i].name);
+			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
+			map.bringMarkerToFront($scope.landmarks[i]._id);
+			map.setMarkerSelected($scope.landmarks[i]._id);
+			map.setMarkerFocus($scope.landmarks[i]._id);
+			console.log('Complete select');
 		}
 	}
 	

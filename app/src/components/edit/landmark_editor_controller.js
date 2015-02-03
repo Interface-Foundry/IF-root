@@ -187,14 +187,16 @@ if ($scope.landmark.hasTime) {
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
 		if ($scope.selectedIndex != i) {
-		//$scope.saveItem($scope.selectedIndex);//save previous landmark
-		console.log('Continue w select');
-		$scope.selectedIndex = i; //change landmarks
-		map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
-		console.log($scope.landmarks[i].name);
-		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
-		map.setMarkerFocus($scope.landmarks[i]._id);
-		console.log('Complete select');
+			//$scope.saveItem($scope.selectedIndex);//save previous landmark
+			console.log('Continue w select');
+			$scope.selectedIndex = i; //change landmarks
+			map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
+			console.log($scope.landmarks[i].name);
+			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
+			map.bringMarkerToFront($scope.landmarks[i]._id);
+			map.setMarkerSelected($scope.landmarks[i]._id);
+			map.setMarkerFocus($scope.landmarks[i]._id);
+			console.log('Complete select');
 		}
 	}
 	
