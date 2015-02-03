@@ -21973,7 +21973,7 @@ console.log($scope.landmark.category);
 		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 17, 'aperture-half'); 
+	map.setCenter($scope.landmark.loc.coordinates, 19, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
