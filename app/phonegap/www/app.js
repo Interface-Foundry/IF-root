@@ -22014,7 +22014,7 @@ console.log($scope.landmark.category);
 		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 19, 'aperture-half'); 
+	map.setCenter($scope.landmark.loc.coordinates, 18, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
@@ -23015,7 +23015,7 @@ $scope.loadWorld = function(data) {
 			}
 		}
 		
-		var zoomLevel = 19;
+		var zoomLevel = 18;
 		
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
