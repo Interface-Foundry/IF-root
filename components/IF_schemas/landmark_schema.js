@@ -94,6 +94,7 @@ monguurl = require('monguurl');
 			video: String,
 			extraURL: String,
 			etherpad: String,	
+			external_calendar: String
 		},
 		permissions: {
 			ownerID: { type: String, index: true},
