@@ -19611,6 +19611,13 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
+		if ($scope.world.style.maps.localMapID) {
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
+		}
+
+		
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
@@ -20285,7 +20292,7 @@ $scope.onUploadAvatar = function ($files, $event) {
 		if ($scope.world.style) {
 		if ($scope.world.style.maps) {
 		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
-		map.setCenter($scope.world.loc.coordinates, 18);
+		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
 		
 map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
