@@ -241,8 +241,7 @@ $scope.loadWorld = function(data) {
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
-		}
-		
+		}		
 }
 
 $scope.saveWorld = function() {

@@ -1,4 +1,4 @@
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', function($scope, worldTree, $routeParams, styleManager, $window) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', function($scope, worldTree, $routeParams, styleManager, $window, $location) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -25,11 +25,15 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			handleWindowResize();
 		}
 	}
+	
+	$scope.inspectLandmark = function(calEvent) {
+		$location.path('w/'+$scope.world.id+'/'+calEvent.landmark.id)
+	}
 
 
 	$scope.calConfig = {
 		height: 360,
-		// eventClick: $scope.inspectEvent
+		eventClick: $scope.inspectLandmark,
 		defaultView: 'agendaWeek'
 	}
 

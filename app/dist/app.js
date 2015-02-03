@@ -19547,11 +19547,17 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
+		if ($scope.world.style.maps.localMapID) {
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
+		}
+
+		
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
-		}
-		
+		}		
 }
 
 $scope.saveWorld = function() {
@@ -22478,7 +22484,7 @@ link: function(scope, element, attrs) {
 }
 	}
 }); 
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', function($scope, worldTree, $routeParams, styleManager, $window) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', function($scope, worldTree, $routeParams, styleManager, $window, $location) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -22505,11 +22511,15 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			handleWindowResize();
 		}
 	}
+	
+	$scope.inspectLandmark = function(calEvent) {
+		$location.path('w/'+$scope.world.id+'/'+calEvent.landmark.id)
+	}
 
 
 	$scope.calConfig = {
 		height: 360,
-		// eventClick: $scope.inspectEvent
+		eventClick: $scope.inspectLandmark,
 		defaultView: 'agendaWeek'
 	}
 
