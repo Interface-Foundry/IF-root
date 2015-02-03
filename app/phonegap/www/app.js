@@ -22546,17 +22546,28 @@ link: function(scope, element, attrs) {
 		return m('li.bubble-list-item', 
 			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)},
 				[m('img.bubble-list-item-img', {src: landmark.avatar}),
-				m('span.bubble-list-item-label', landmark.name),
-				m('footer.bubble-list-item-detail', landmarkDetail(landmark))
+				m('span.bubble-list-item-label', [landmark.name, m('small', landmark.category)]),
+				m('footer.bubble-list-item-detail', landmarkDetail(landmark)),
+				m('footer.bubble-list-item-room-info', landmarkRoomDetail(landmark))
 			]));
 	}
 	
 	function landmarkDetail(landmark) {
 		return [
 			m('span', landmark.time.start && ('Starts ' + moment(landmark.time.start).format('ddd, MMM Do, hA'))),
-			m('span', landmark.time.end && ('Ends ' + moment(landmark.time.end).format("ddd, MMM Do, hA"))),
-			m('span', landmark.category)
+			m('span', landmark.time.end && ('Ends ' + moment(landmark.time.end).format("ddd, MMM Do, hA")))
 		]
+	}
+	
+	function landmarkRoomDetail(landmark) {
+		if (landmark.loc_info) {
+			return [
+				m('span', 'Floor: '+landmark.loc_info.floor_num),
+				m('span', 'Room: '+landmark.loc_info.room_name)
+			]
+		} else {
+			return []
+		}
 	}
 	
 	function ifURL(url) {

@@ -801,13 +801,26 @@ span.subnav-back-chevron {
 .bubble-list-item-label {
   position: absolute;
   line-height: 16px;
-  top: 18px;
+  top: 14px;
+}
+.bubble-list-item-label small {
+  padding-left: 12px;
 }
 .bubble-list-item-detail {
   position: absolute;
   line-height: 13px;
   font-size: 13px;
-  bottom: 18px;
+  bottom: 22px;
+}
+.bubble-list-item-room-info {
+  position: absolute;
+  line-height: 13px;
+  font-size: 13px;
+  bottom: 8px;
+  color: #AAA;
+}
+.bubble-list-item-room-info span {
+  padding-right: 20px;
 }
 .bubble-list-item-detail span {
   padding-right: 20px;
