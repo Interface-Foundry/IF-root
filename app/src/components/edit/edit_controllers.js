@@ -231,6 +231,13 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
+		if ($scope.world.style.maps.localMapID) {
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
+		}
+
+		
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
