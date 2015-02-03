@@ -341,9 +341,17 @@ map.addMarker('m', {
 		//map.setTiles($scope.world.style.maps.cloudMapName);
 		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 		
-		if ($scope.world.style.maps.type == "local" || $scope.world.style.maps.type == "both") {
-			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
+		if ($scope.world.style.maps.localMapID) {
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
 		}
+		if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+			zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+		}
+
+		
+		
 		map.refresh();
 		
 		//world is finished loading

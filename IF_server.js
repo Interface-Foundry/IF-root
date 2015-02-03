@@ -1868,7 +1868,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     }
 
     //adding/editing map to world
-    function worldMapEdit(){ 
+    function worldMapEdit(){
    
          landmarkSchema.findById(req.body.worldID, function(err, lm) {
           if (!lm){
@@ -2056,41 +2056,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                       lm.style = req.body.style;
                     }
           
-                  if (req.body.hasOwnProperty('time')) {
-                    if (req.body.time.hasOwnProperty('start')) {
-            
-                        /*lm.timetext.datestart = req.body.timetext.datestart;
-                        lm.timetext.dateend = req.body.timetext.dateend;
-                        lm.timetext.timestart = req.body.timetext.timestart;
-                        lm.timetext.timeend = req.body.timetext.timeend;
-
-                        //------ Combining Date and Time values -----//
-                        var timeStart = req.body.timetext.timestart;
-                        var timeEnd = req.body.timetext.timeend;
-
-                        var dateStart = new Date(req.body.timetext.datestart).toDateString();
-                        var dateEnd = new Date(req.body.timetext.dateend).toDateString();
-
-                        var datetimeStart = new Date(dateStart+' '+timeStart);
-                        var datetimeEnd = new Date(dateEnd+' '+timeEnd);
-                        //----------//
-            
-                        lm.time.start = datetimeStart;
-                        lm.time.end = datetimeEnd;*/
-                        if (req.body.time.start){
-                          lm.time.start = req.body.time.start;
-                          
-                          if (req.body.time.hasOwnProperty('end')) {
-                            lm.time.end = req.body.time.end;
-                          } else {
-                            lm.time.end = lm.time.start;
-                          }
-                        }
-                        
-                        //if no end time, match start time
-                    }
-                  }
-
+				if (req.body.hasOwnProperty('time')) {
+					lm.time.start = req.body.time.start;
+					lm.time.end = req.body.time.end;
+				}
 
                   //adding map location info
                   if (req.body.hasOwnProperty('loc_info')) {
