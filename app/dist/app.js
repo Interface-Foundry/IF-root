@@ -22702,7 +22702,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 		$scope.style = data.style;
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
 	})
 
 
