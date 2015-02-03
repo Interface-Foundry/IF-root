@@ -65,10 +65,10 @@
 			<span aria-hidden="true">&times;</span><span class="sr-only">Close </span>
 		</button><br>
 		<div class="form-group">
-			<input type="text" size="10" class="form-control" ng-model="landmark.time.start" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.start" ng-change="landmark.time.start=landmark.time.start.toISO8601String()" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
 		</div>
 		<div class="form-group">
-			<input type="text" size="8" class="form-control" ng-model="landmark.time.start" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.start" ng-change="landmark.time.start=landmark.time.start.toISO8601String()" minute-step="1" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
 		</div>
 	</div>
 	<button class="btn btn-info btn-sm" ng-click="setEndTime()" ng-hide="landmark.time.end">Add End Time</button>
@@ -79,10 +79,10 @@
 			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 		</button><br> 
 		<div class="form-group">
-			<input type="text" size="10" class="form-control" ng-model="landmark.time.end" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.end" ng-change="landmark.time.end=landmark.time.end.toISO8601String()" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
 		</div>
 		<div class="form-group">
-			<input type="text" size="8" class="form-control" ng-model="landmark.time.end" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.end" ng-change="landmark.time.end=landmark.time.end.toISO8601String()" minute-step="1" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
 		</div>
 	</div>
 </div>
