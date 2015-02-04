@@ -47,7 +47,7 @@ link: function(scope, element, attrs) {
 				{className: toggle[title] ? "closed" : ""},
 				[m('button.bubble-supergroup-label', 
 				{onclick: toggleSuperGroup.bind(undefined, title)},
-				 title)].concat( 
+				 title)].concat(
 				_.map(groups, groupTemplate)));
 		}
 	}
