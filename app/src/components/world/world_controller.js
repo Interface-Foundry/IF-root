@@ -79,7 +79,7 @@ $scope.loadWorld = function(data) {
 			}
 		}
 		
-		var zoomLevel = 19;
+		var zoomLevel = 18;
 		
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
