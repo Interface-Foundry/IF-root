@@ -16984,6 +16984,44 @@ mapManager.setMarkerFocus = function(key) {
 	}
 }
 
+mapManager.setMarkerSelected = function(key) {
+	console.log('--setMarkerSelected()--');
+	
+	// reset all marker images to default
+	angular.forEach(mapManager.markers, function(marker) {
+		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+	});
+
+	// set new image for selected marker
+	if (mapManager.markers.hasOwnProperty(key)) {
+		console.log('setting marker as selected');
+		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		return true;
+	} else {
+		console.log('Key not found in markers');
+		return false;
+	}
+};
+
+mapManager.bringMarkerToFront = function(key) {
+	console.log('--bringMarkerToFront--');
+
+	// reset all z-indices to 0
+	angular.forEach(mapManager.markers, function(marker) {
+		marker.zIndexOffset = 0;
+	});
+
+	// set z-index for selected marker
+	if (mapManager.markers.hasOwnProperty(key)) {
+		console.log('setting z-index offset');
+		mapManager.markers[key].zIndexOffset = 1000;
+		return true;
+	} else {
+		console.log('Key not found in markers');
+		return false;
+	}
+};
+
 /* addPath
 Key: Name of path to be added
 Path: Object representing path in leafletjs style
@@ -20165,14 +20203,16 @@ if ($scope.landmark.hasTime) {
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
 		if ($scope.selectedIndex != i) {
-		//$scope.saveItem($scope.selectedIndex);//save previous landmark
-		console.log('Continue w select');
-		$scope.selectedIndex = i; //change landmarks
-		map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
-		console.log($scope.landmarks[i].name);
-		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
-		map.setMarkerFocus($scope.landmarks[i]._id);
-		console.log('Complete select');
+			//$scope.saveItem($scope.selectedIndex);//save previous landmark
+			console.log('Continue w select');
+			$scope.selectedIndex = i; //change landmarks
+			map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
+			console.log($scope.landmarks[i].name);
+			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
+			map.bringMarkerToFront($scope.landmarks[i]._id);
+			map.setMarkerSelected($scope.landmarks[i]._id);
+			map.setMarkerFocus($scope.landmarks[i]._id);
+			console.log('Complete select');
 		}
 	}
 	
@@ -20292,6 +20332,7 @@ $scope.onUploadAvatar = function ($files, $event) {
 		if ($scope.world.style.maps) {
 		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
 		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
+		map.removeAllMarkers();
 		
 map.addMarker('m', {
 			lat: $scope.world.loc.coordinates[1],
@@ -21973,7 +22014,7 @@ console.log($scope.landmark.category);
 		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 17, 'aperture-half'); 
+	map.setCenter($scope.landmark.loc.coordinates, 19, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
@@ -22516,7 +22557,7 @@ link: function(scope, element, attrs) {
 				{className: toggle[title] ? "closed" : ""},
 				[m('button.bubble-supergroup-label', 
 				{onclick: toggleSuperGroup.bind(undefined, title)},
-				 title)].concat( 
+				 title)].concat(
 				_.map(groups, groupTemplate)));
 		}
 	}
@@ -22654,7 +22695,7 @@ windowEl.on('resize', handleWindowResize);
 							}
 						})
 		}
-		console.log($scope.calendar.events);
+		//console.log($scope.calendar.events);
 	}
 	
 	function setUpSchedule(landmarks) {	
@@ -22662,6 +22703,7 @@ windowEl.on('resize', handleWindowResize);
 		var schedule = [];
 		var superGroups = {
 			'Upcoming': {},
+			'This Week': {},
 			'Today': {},
 			'Previous': {},
 			'Places': {}
@@ -22669,21 +22711,26 @@ windowEl.on('resize', handleWindowResize);
 		
 		var groupOrderMap = {
 			'Upcoming': 0,
-			'This Year': 1,
-			'Next Month': 2,
-			'This Month': 3,
-			'Next Week': 4,
-			'This Week': 5,
-			'Tomorrow': 6,
-			'Today': 7,
-			'Yesterday': 8,
-			'Last Week': 9,
-			'Last Month': 10,
-			'Last Year': 11,
-			'Past': 12,
-			'Places': 13
+			'This Year': 10,
+			'Next Month': 20,
+			'This Month': 30,
+			'Next Week': 40,
+			'This Week': 50,
+			'6': 55,
+			'5': 56,
+			'4': 57,
+			'3': 58,
+			'2': 59,
+			'1': 60,
+			'Today': 70,
+			'Yesterday': 80,
+			'Last Week': 90,
+			'Last Month': 100,
+			'Last Year': 110,
+			'Past': 120,
+			'Places': 130
 		}
-			
+		
 		 /* [{'Upcoming': []},
 						{'Today': []},
 						{'Previous': []},
@@ -22693,7 +22740,7 @@ windowEl.on('resize', handleWindowResize);
 						},
 						...] */
 		
-		_.each(landmarks, function(landmark, index, list) {
+		_.each(landmarks, function(landmark, index, landmarks) {
 			var superGroup = getSuperGroup(landmark);
 			var group = getGroup(landmark, superGroup);
 			
@@ -22709,32 +22756,52 @@ windowEl.on('resize', handleWindowResize);
 		//then							^to array 
 		//then 				^to array
 		
-		var temp = _.each(superGroups, function(superGroup, superGroupKey, list) {
+
+		_.each(superGroups, function(superGroup, superGroupKey, superGroups) {
 			if (superGroupKey!=="Places") {
-			_.each(superGroup, function(group, groupKey, list) {
-				list[groupKey] = _.sortBy(group, function(landmark) {
+			_.each(superGroup, function(group, groupKey, superGroup) {
+				superGroup[groupKey] = _.sortBy(group, function(landmark) {
 					moment(landmark.time.start).unix()
 				});
 			})
 			}
 			
-			list[superGroupKey] = _.sortBy(
-				_.map(superGroup, function(group, groupKey) {
-					var temp = {};
-					temp[groupKey]=group;
-					return temp;
-				}), function (group, index, list) {
-					var key = _.keys(group)[0];
-					return groupOrderMap[key];
+			superGroups[superGroupKey] = 
+				_.sortBy(
+					_.map(superGroup, function(group, groupKey) {
+						var temp = {};
+						temp[groupKey]=group;
+						return temp;
+					}), function (group, index, list) {
+						var key = _.keys(group)[0];
+						return groupOrderMap[key];
 				})
-		});
+		})
+		
+		console.log('thisweek', superGroups['This Week']);
+		
+if (superGroups['This Week'].length > 0) {
+			superGroups['This Week'] = _.map(superGroups['This Week'], function(group, index, superGroup) {
+				var pair = _.pairs(group)[0], //["key", value]
+					title = getThisWeekString(pair[0]),
+					group = pair[1],
+					thisWeek = {};
+				thisWeek[title] = group;
+				console.log(thisWeek);
+				return thisWeek;
+			})
+		}
+
 				
 		$scope.schedule = [
 			{'Upcoming': superGroups['Upcoming']},
+			{'This Week': superGroups['This Week']},
 			{'Today': superGroups['Today']},
 			{'Places': superGroups['Places']},
 			{'Previous': superGroups['Previous']}
 		];
+		
+		console.log($scope.schedule);
 					
 		function getSuperGroup(landmark) {
 			var t;
@@ -22742,25 +22809,44 @@ windowEl.on('resize', handleWindowResize);
 			
 			t = moment(landmark.time.start);
 
-			if (t.isSame(now, 'day')) {
-				return 'Today';
-			} else if (t.isAfter(now)) {
-				return 'Upcoming';
-			} else {
+			if (t.isBefore(now)) {
 				return 'Previous';
+			} else if (t.isSame(now, 'day')) {
+				return 'Today';
+			} else if (t.isBefore(moment().add(7, 'days'))) {
+				return 'This Week';
+			} else {
+				return 'Upcoming'
 			}
 		}
 		
 		function getGroup(landmark, superGroup) {
 			var t;
 			switch (superGroup) {
+				case 'This Week':
+					t = moment(landmark.time.start);
+					if (t.isSame(now)) {
+						return 0;
+					} else if (t.isSame(moment().add(1, 'day'), 'day')) {
+						return 1;
+					} else if (t.isSame(moment().add(2, 'day'), 'day')) {
+						return 2;
+					} else if (t.isSame(moment().add(3, 'day'), 'day')) {
+						return 3;
+					} else if (t.isSame(moment().add(4, 'day'), 'day')) {
+						return 4;
+					} else if (t.isSame(moment().add(5, 'day'), 'day')) {
+						return 5;
+					} else if (t.isSame(moment().add(6, 'day'), 'day')) {
+						return 6;
+					}
+					break;
+				case 'Today': 
+					return 'Today';
+					break;
 				case 'Upcoming': 
 					t = moment(landmark.time.start);
-					if (t.isSame(moment().add(1, 'day'),  'day')) {
-						return 'Tomorrow';
-					} else if (t.isSame(now, 'week')) {
-						return 'This Week';
-					} else if (t.isBefore(moment().add(2, 'week'))) {
+					if (t.isBefore(moment().add(2, 'week'))) {
 						return 'Next Week';
 					} else if (t.isSame(now, 'month')) {
 						return 'This Month';	
@@ -22771,9 +22857,6 @@ windowEl.on('resize', handleWindowResize);
 					} else {
 						return 'Upcoming';
 					}
-					break;
-				case 'Today':
-					return 'Today';
 					break;
 				case 'Previous':
 					t = moment(landmark.time.start);
@@ -22795,6 +22878,21 @@ windowEl.on('resize', handleWindowResize);
 			}
 		}
 		
+		function getThisWeekString(key) {
+			if (key == 1) {
+				return 'Tomorrow';
+			} else if (key == 2) {
+				return moment().add(2, 'day').format('dddd, MMMM Do');
+			} else if (key == 3) {
+				return moment().add(3, 'day').format('dddd, MMMM Do');
+			} else if (key == 4) {
+				return moment().add(4, 'day').format('dddd, MMMM Do');
+			} else if (key == 5) {
+				return moment().add(5, 'day').format('dddd, MMMM Do');
+			} else if (key == 6) {
+				return moment().add(6, 'day').format('dddd, MMMM Do');
+			} 
+		}
 	}
 
 	

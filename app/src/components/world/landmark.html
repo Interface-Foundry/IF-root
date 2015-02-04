@@ -26,7 +26,7 @@
 						<img if-src="{{::landmark.avatar}}" class="media-object">
 						<div class="explore-media-body">
 						<h3 class="explore-media-heading">{{::landmark.name}}</h3>
-						<h6>{{::landmark.time.start | date: 'EEE, MMM d - h:mm a'}}</h6>
+						<h6>{{::landmark.time.start | date: 'EEE, MMM d | h:mm a'}} - {{::landmark.time.end | date: 'h:mm a'}}</h6>
 						<p>{{::landmark.summary}}</p>
 						<p><span ng-show="landmark.loc_info.floor_num">Floor: {{::landmark.loc_info.floor_num}} <span ng-show="landmark.loc_info.room_name">Room: {{::landmark.loc_info.room_name}}</span></p>
 						</div>
