@@ -43,10 +43,11 @@ var route = function(userCoord0, userCoord1, userTime, res){
 });
     for(var key in four_groups) {
         four_groups[key] = _.sortBy(four_groups[key], function(world) {
-        return -(world.distance + Math.pow( (new Date(world.time.start) - new Date(userTime))/3600000), 2); //time interval is in milliseconds
- });
+        //return (world.distance + Math.pow( (new Date(world.time.start) - new Date(userTime))/3600000), 2); //time interval is in milliseconds
+    return [world.distance, world.time.start].join("_");
+        });
     for (var i = 0; i < (four_groups[key]).length; i++){
-        console.log(four_groups[key][i]['distance'], four_groups[key][i]['name'])}
+        console.log(four_groups[key][i]['distance'], four_groups[key][i]['name'], four_groups[key][i]['time'])}
     };
 
     res.send([four_groups]);
