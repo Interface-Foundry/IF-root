@@ -1,19 +1,24 @@
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
-console.log('--EditController--');
+
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
+//isnt ready for mobile yet
 //@ENDIF
 
 
 var aperture = apertureService,
-	ears = [],
 	map = mapManager,
 	style = styleManager,
 	alerts = alertManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
-zoomControl.style.left = "40%";
+zoomControl.style.left = "40%"; 
+//TODO: do this in map controller
+
+var lastRoute = $route.current;
+$scope.worldURL = $routeParams.worldURL;
+
 aperture.set('full');
 
 $scope.mapThemeSelect = 'arabesque';
@@ -28,11 +33,13 @@ $scope.kinds = [
 	{name: 'Campus'},
 	{name: 'Home'},
 	{name: 'Neighborhood'}
-];
+]; 
+//TODO: Switch to ifGlobal source 
 
 $scope.mapThemes = ifGlobals.mapThemes;
 
-function tempID() {
+function tempID() { 
+	//Used because angular leaflet has issues with watching when a marker is replaced with a marker of the same name. Kind of stupid.
 	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
 }
 
@@ -41,34 +48,29 @@ var markerID = tempID();
 $scope.temp = {
 	scale: 1
 }
-
+ //Used for local map scaling
 
 $http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
-});
+}); 
+//weird way of throwing tooltip text on before we had solidified it, 
 
 if ($routeParams.view) {
-	$scope.view = $routeParams.view;
+	$scope.view = $routeParams.view; 
+	//switching between the three subviews
 } else {
 	$scope.view = 'details';
 }
 
-console.log($scope.view); 
-$scope.worldURL = $routeParams.worldURL;
-
-var lastRoute = $route.current;
-
-
 $scope.initView = function() {
+	//switch the state of the circle mask on or off, style view wants flat black
 	switch ($scope.view) {
 		case 'details':
 		map.setCircleMaskState('mask');
-		
 			break;
 		case 'maps': 
 		map.setCircleMaskState('mask');
-		
 			break;
 		case 'styles':
 		console.log('switching to styles');
@@ -77,7 +79,8 @@ $scope.initView = function() {
 	}
 }
 
-$scope.onWorldIconSelect = function($files) {
+$scope.onWorldIconSelect = function($files) { 
+	//file uploading, uses angular-file-upload
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
@@ -85,13 +88,13 @@ $scope.onWorldIconSelect = function($files) {
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
-		console.log(data);
 		$scope.world.avatar = data;
 		$scope.uploadFinished = true;
 	});
 }
 
 $scope.onLandmarkCategoryIconSelect = function($files) {
+	//same as above
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
@@ -105,7 +108,7 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 	});
 }
 
-$scope.setUploadFinished = function(bool, type) {
+$scope.setUploadFinished = function(bool, type) { 
 	if (type == 'world') {
 		if (bool) {
 			$scope.uploadFinished = true;
@@ -127,6 +130,7 @@ $scope.setUploadFinished = function(bool, type) {
 };
 
 $scope.onLocalMapSelect = function($files) {
+	//local map image upload, then places image on map
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload_maps',
@@ -136,7 +140,6 @@ $scope.onLocalMapSelect = function($files) {
 		if (!$scope.temp) {$scope.temp = {}}
 		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
-		console.log(data);
 		$scope.mapImage = data;
 		map.placeImage(markerID, data);
 	})
@@ -177,6 +180,7 @@ switch ($scope.world.style.maps.cloudMapName) {
 }
 
 $scope.addLandmarkCategory = function() {
+	//adds landmark categories one by one to list
 	if ($scope.temp) {
 
 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
@@ -194,14 +198,11 @@ $scope.removeLandmarkCategory = function(index) {
 	$scope.world.landmarkCategories.splice(index, 1);
 }
 
-$scope.loadWorld = function(data) {
+$scope.loadWorld = function(data) { 
+	// initialize world
 	  	$scope.world = data.world;
 		$scope.style = data.style;
 		style.navBG_color = $scope.style.navBG_color;
-		
-		console.log($scope.world);
-		console.log($scope.style);
-		
 		if ($scope.world.hasLoc) {
 			console.log('hasLoc');
 			showPosition({
@@ -382,8 +383,11 @@ $scope.buildLocalMap = function () {
 		alerts.addAlert('success', 'Map built!', true);
 		console.log(response);
 		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
-		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} //remove this when world objects arent fd up
-		if (response[0]) { //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
+		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} 
+		//remove this when world objects arent fd up
+		if (response[0]) {
+			
+			 //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
 			$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
 			$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
 			$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
@@ -531,7 +535,11 @@ function locError(){
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
 ////////////////////////////////////////////////////////////
-$scope.$on('$locationChangeSuccess', function (event) {
+$scope.$on('$locationChangeSuccess', function (event, args) {
+	//stops route from changing if just changing subview
+	console.log(event, args);
+	console.log($route.current.$$route);
+	
     if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
         $scope.view = $route.current.params.view;
         $route.current = lastRoute;
@@ -540,7 +548,7 @@ $scope.$on('$locationChangeSuccess', function (event) {
     $scope.initView();
 });
 
-$scope.$on('$destroy', function (event) {
+$scope.$on('$destroy', function (event) { //controller cleanup
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
@@ -581,7 +589,6 @@ $scope.$watchCollection('world', function (newCol, oldCol) {
 		saveTimer = $timeout($scope.saveWorld, 5000);
 	}
 });
-
 
 
 ////////////////////////////////////////////////////////////

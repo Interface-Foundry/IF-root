@@ -488,5 +488,54 @@ mapManager.hasMarker = function(key) {
 	return mapManager.markers.hasOwnProperty(key);
 }
 
+mapManager.loadBubble = function(bubble, config) {
+	//config is of form
+	//{center: true/false, 	//set the center
+	//	marker: true/false  //add marker
+	var zoomLevel = 18,
+		config = config || {};
+	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
+		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
+		
+		if (config.marker) {mapManager.addMarker('c', {
+				lat: bubble.loc.coordinates[1],
+				lng: bubble.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [35, 67], 
+					iconAnchor: [17, 67],
+					popupAnchor:[0, -40]
+				},
+				message:'<a href="#/w/'+bubble.id+'/">'+bubble.name+'</a>',
+		});}
+		
+		} else {
+			console.error('No center found! Error!');
+		}
+		
+		if (bubble.style.hasOwnProperty('maps')) {
+				if (bubble.style.maps.localMapID) {
+					mapManager.addOverlay(bubble.style.maps.localMapID, 
+							bubble.style.maps.localMapName, 
+							bubble.style.maps.localMapOptions);
+				}
+				
+				if (bubble.style.maps.hasOwnProperty('localMapOptions')) {
+					zoomLevel = bubble.style.maps.localMapOptions.maxZoom || 19;
+				}
+		
+				if (tilesDict.hasOwnProperty(bubble.style.maps.cloudMapName)) {
+					mapManager.setBaseLayer(tilesDict[bubble.style.maps.cloudMapName]['url']);
+				} else if (bubble.style.maps.hasOwnProperty('cloudMapID')) {
+					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+bubble.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+				} else {
+					console.warn('No base layer found! Defaulting to forum.');
+					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+				}
+		}
+	
+}
+
 return mapManager;
     }]);

@@ -6,8 +6,8 @@ zoomControl.style.left = "1%";
 zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
-	var style = styleManager;
-	$scope.worldURL = $routeParams.worldURL;  
+var style = styleManager;
+$scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
 

@@ -1,27 +1,21 @@
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+	
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
-//@ENDIF	
+//@ENDIF
 
-
-	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
 	
-	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-		zoomControl.style.top = "50px";
-		zoomControl.style.left = "40%";
-	/*
+var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+	zoomControl.style.top = "50px";
+	zoomControl.style.left = "40%";
 
-	$scope.aperture = apertureService;
-	$scope.aperture.set('half');
-	*/
-		
-	var worldLoaded = false;
-	var landmarksLoaded = false;
+var worldLoaded = false;
+var landmarksLoaded = false;
 	
 	$scope.landmarks = [];
 	$scope.selectedIndex = 0;
@@ -31,41 +25,16 @@ $window.history.back();
 ////////////////////////////////////////////////////////////
 //////////////////////DEFINE FUNCTIONS//////////////////////
 ////////////////////////////////////////////////////////////
-/*
-	$scope.addFileUploads = function() {
-		angular.element('.fileupload').fileupload({
-        url: '/api/upload',
-        dataType: 'text',
-        progressall: function (e, data) {  
-
-            $('#progress .bar').css('width', '0%');
-
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
-            $scope.landmarks[$scope.selectedIndex].avatar = data.result;
-        }
-    });
-	}
-*/
 	
 	$scope.addLandmark = function() {
 		console.log('--addLandmark--');
 		if (!worldLoaded || !landmarksLoaded) {console.log('loading not complete');}
 		else {
-		console.log('Adding a new Landmark');
 		var tempLandmark = landmarkDefaults();
 		db.landmarks.create(tempLandmark, function(response) {
-				console.log('--db.landmarks.create--');
-				console.log('Response ID:'+response[0]._id);
+			console.log('--db.landmarks.create--');
+			console.log('Response ID:'+response[0]._id);
 			tempLandmark._id = response[0]._id;
-				console.log('tempLandmark');
-				console.log(tempLandmark);
-				console.log(tempLandmark.loc.coordinates);
 			
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
@@ -84,13 +53,8 @@ $window.history.back();
 				draggable:true,
 				message:'Drag to location on map',
 				focus:true
-			});
-			
-			//$scope.selectItem(0)
-			console.log("$scope.landmarks");
-			console.log($scope.landmarks);				
-				
-			});
+			});				
+		});
 		}
 	}
 	
@@ -106,8 +70,6 @@ $window.history.back();
 	            console.log('Delete');
 	            $scope.landmarks.splice(i, 1); //Removes from local array
 	        });
-	        
-	        
 	    }
 	}	
 	
@@ -170,10 +132,7 @@ if ($scope.landmark.hasTime) {
 	        } 
 	        //------- END TIME --------//
 		}
-*/
-		
-		
-		
+*/	
 		console.log('Saving...');
 		console.log($scope.landmarks[i]);
 		db.landmarks.create($scope.landmarks[i], function(response) {
@@ -186,56 +145,18 @@ if ($scope.landmark.hasTime) {
 	
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
-		// if ($scope.selectedIndex != i) {
+		if ($scope.selectedIndex != i) {
 			//$scope.saveItem($scope.selectedIndex);//save previous landmark
 			console.log('Continue w select');
 			$scope.selectedIndex = i; //change landmarks
-			map.setCenter($scope.landmarks[i].loc.coordinates, 18, 'editor');//center map on new markers
+			map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
 			console.log($scope.landmarks[i].name);
 			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 			map.bringMarkerToFront($scope.landmarks[i]._id);
 			map.setMarkerSelected($scope.landmarks[i]._id);
 			map.setMarkerFocus($scope.landmarks[i]._id);
 			console.log('Complete select');
-		// }
-	}
-	
-	function loadLandmarks() {
-		console.log('--loadLandmarks--');
-		//$scope.queryType = "all";
-		//$scope.queryFilter = "all";
-		db.landmarks.get({parentID: $scope.world._id}, function(data){
-				console.log('--db.landmarks.query--');
-				console.log('data');
-				console.log(data);
-			//data.shift();
-			$scope.landmarks = $scope.landmarks.concat(data.landmarks);
-				console.log('$scope.landmarks');
-				console.log($scope.landmarks);
-			
-			//add markers to map
-			angular.forEach($scope.landmarks, function(value, key) {
-				//for each landmark add a marker
-				addLandmarkMarker(value);
-				/*
-map.addMarker(value._id, {
-					lat:value.loc.coordinates[1],
-					lng:value.loc.coordinates[0],
-					draggable: true,
-					icon: {
-						iconUrl: 'img/marker/bubble-marker-50.png',
-						shadowUrl: '',
-						iconSize: [35, 67],
-						iconAnchor: [13, 10]
-					},
-					message:value.name
-				});
-*/
-			});
-			$scope.selectItem(0);
-			landmarksLoaded = true;
-			
-		});
+		}
 	}
 	
 	function addLandmarkMarker(landmark) {
@@ -292,78 +213,70 @@ $scope.$on('$destroy', function (event) {
 	}
 });
 
-$scope.onUploadAvatar = function ($files, $event) {
-	console.log('parent is grabbing it', $files, $event);
-}
-
-
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
-		console.log('controller active');
-	World.get({id: $routeParams.worldURL}, function(data) {
-			console.log('--World.get--');
-			console.log(data);
+worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
-			console.log('-World-');
-			console.log($scope.world);
 		$scope.style = data.style;
-			console.log('-Style-');
-			console.log($scope.style);
 		
 		$scope.worldURL = $routeParams.worldURL;
 		//initialize map with world settings
-		if ($scope.world.style) {
-		if ($scope.world.style.maps) {
-		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
 		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
-		map.removeAllMarkers();
+
+		if ($scope.world.style) {
+			if ($scope.world.style.maps) {
+			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
+			map.removeAllMarkers();
 		
-map.addMarker('m', {
-			lat: $scope.world.loc.coordinates[1],
-			lng: $scope.world.loc.coordinates[0],
-			focus: false,
-			draggable: false,
-			icon: {
-				iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
-				shadowUrl: '',
-				iconSize: [0,0],
-				shadowSize: [0,0],
-				iconAnchor: [0,0],
-				shadowAnchor: [0,0]
+			map.addMarker('m', {
+				lat: $scope.world.loc.coordinates[1],
+				lng: $scope.world.loc.coordinates[0],
+				focus: false,
+				draggable: false,
+				icon: {
+					iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+					shadowUrl: '',
+					iconSize: [0,0],
+					shadowSize: [0,0],
+					iconAnchor: [0,0],
+					shadowAnchor: [0,0]
+				}
+			});
+
+			map.removeCircleMask();
+			map.addCircleMaskToMarker('m', 150, 'mask');
+		
+			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+		
+			if ($scope.world.style.maps.localMapID) {
+				map.addOverlay($scope.world.style.maps.localMapID, 
+								$scope.world.style.maps.localMapName, 
+								$scope.world.style.maps.localMapOptions);
 			}
-		});
-
-		map.removeCircleMask();
-		map.addCircleMaskToMarker('m', 150, 'mask');
-		
-		/*map.addPath('worldBounds', {
-				type: 'circle',
-                radius: 150,
-				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
-				});*/
-		//map.setTiles($scope.world.style.maps.cloudMapName);
-		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		
-		if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
-		}
-		if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-			zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
-		}
-
-		
-		
+			
+			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			}
 		map.refresh();
 		
 		//world is finished loading
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		loadLandmarks();
-	});
+		return worldTree.getLandmarks(data.world._id);
+	}).then(function(data) {
+		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+					
+		//add markers to map
+		angular.forEach($scope.landmarks, function(value, key) {
+			//for each landmark add a marker
+			addLandmarkMarker(value);
+		});
+		landmarksLoaded = true;
+			
+	});	
+	
 }])
 
 app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
@@ -446,35 +359,28 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		}
 	}
 	//onclick hide location details
-	$scope.clearLoc = function(){
+$scope.clearLoc = function(){
+	//delete $scope.$parent.landmark.loc_info;
 
-		//console.log('asdfasdfasdf');
-		//delete $scope.$parent.landmark.loc_info;
-
-		$scope.$parent.landmark.loc_info.floor_num = null;
-		$scope.$parent.landmark.loc_info.room_name = null;
-	}
+	$scope.$parent.landmark.loc_info.floor_num = null;
+	$scope.$parent.landmark.loc_info.room_name = null;
+}
 	//--------------------------//
 
 	
-	$scope.onUploadAvatar = function($files) {
-		console.log('uploadAvatar');
-		var file = $files[0];
-		$scope.upload = $upload.upload({
-			url: '/api/upload/',
-			file: file,
-		}).progress(function(e) {
-			console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		}).success(function(data, status, headers, config) {
-			console.log(data);
-		$scope.$parent.landmark.avatar = data;
-		$scope.uploadFinished = true;
-		});
-	}
-	
-	$scope.$watch('avatarFiles', function(newFiles, oldFiles) {
-		console.log(newFiles, oldFiles);
+$scope.onUploadAvatar = function($files) {
+	console.log('uploadAvatar');
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file,
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+	$scope.$parent.landmark.avatar = data;
+	$scope.uploadFinished = true;
 	});
-		
+}		
 	
 }]);
