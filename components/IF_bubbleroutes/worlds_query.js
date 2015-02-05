@@ -3,7 +3,7 @@ mongoose = require('mongoose'),
 landmarkSchema = require('../IF_schemas/landmark_schema.js');
 
 var route = function(userCoord0, userCoord1, userTime, res){
-
+console.log(userCoord0, userCoord1, userTime)
   landmarkSchema.aggregate(
     [{ "$geoNear": {
       "near": {
@@ -45,15 +45,16 @@ var route = function(userCoord0, userCoord1, userTime, res){
         four_groups[key] = _(four_groups[key]).chain().sortBy(function(world) {
         return world.distance;
         }).sortBy(function(world){
-            return (Math.pow( (new Date(world.time.start) - new Date(userTime))/3600000), 2); //time interval is in milliseconds
+            return world.permissions.ownerID;
+            //console.log(Object.keys(world.time).length, 'length')
+            //return -(Math.pow( (new Date(world.time.start) - new Date(userTime))/3600000), 2); //time interval is in milliseconds
         }).value();
     for (var i = 0; i < (four_groups[key]).length; i++){
         console.log(four_groups[key][i]['distance'], four_groups[key][i]['name'], four_groups[key][i]['time'])}
     };
-
-    res.send([four_groups]);
+//  res.send([four_groups]);
 
   });
 };
-
+console.log('route', route('-73.98952799999999', '40.7392512', '2015-02-05T16:24:26.346Z'))
 module.exports = route
