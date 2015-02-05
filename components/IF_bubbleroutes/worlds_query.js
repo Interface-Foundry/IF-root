@@ -3,7 +3,8 @@ mongoose = require('mongoose'),
 landmarkSchema = require('../IF_schemas/landmark_schema.js');
 
 var route = function(userCoord0, userCoord1, userTime, res){
-console.log(userCoord0, userCoord1, userTime)
+//console.log(userCoord0, userCoord1, userTime)
+
   landmarkSchema.aggregate(
     [{ "$geoNear": {
       "near": {
@@ -48,12 +49,12 @@ console.log(userCoord0, userCoord1, userTime)
             return world.distance; // next, we sort by distance
         }).sortBy(function(world){
             if (Object.keys(world.time).length == 1){
-                return -world.time.created // if the length of the time object is one, return -time.created (descending order)
+                return -world.time.created // if the length of the time object is one (just the time created), return -time.created (descending order)
             }
             else if (Object.keys(world.time).length == 3){
-                return -world.time.start // if the length of the time object is three, return -time.start (descending order)
+                return -world.time.start // if the length of the time object is three (start and end time and created), return -time.start (descending order)
             }
-            else{ // this is when the time object has two fields
+            else{ // this is when the time object has two fields (start and created or end and created)
                 if ((world.time).hasOwnProperty('start')){
                     return -world.time.start}  // if it has time.start, return it
                 else{
@@ -61,12 +62,15 @@ console.log(userCoord0, userCoord1, userTime)
                 }
             }
         }).value();
-    for (var i = 0; i < (four_groups[key]).length; i++){
-        console.log(four_groups[key][i]['distance'], four_groups[key][i]['name'], four_groups[key][i]['time'])}
+
+        // for (var i = 0; i < (four_groups[key]).length; i++){
+        //     four_groups[key][i]['distance'], four_groups[key][i]['name'], four_groups[key][i]['time'];
+        // }
     };
-  res.send([four_groups]);
+  
+    res.send([four_groups]);
 
   });
 };
-console.log('route', route('-73.98952799999999', '40.7392512', '2015-02-05T16:24:26.346Z'))
+//console.log('route', route('-73.98952799999999', '40.7392512', '2015-02-05T16:24:26.346Z'))
 module.exports = route
