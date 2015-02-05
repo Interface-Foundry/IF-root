@@ -31,7 +31,7 @@ console.log(userCoord0, userCoord1, userTime)
             return '150mPast'; 
         }
     }
-    else {
+    else { // world distance is over 150m
         if ( (!world.time.end && !world.time.start)  
       || (new Date(world.time.start) + 604800000 > new Date(userTime)) 
       || (new Date(world.time.end) > new Date(userTime)) ) {
@@ -43,22 +43,21 @@ console.log(userCoord0, userCoord1, userTime)
 });
     for(var key in four_groups) {
         four_groups[key] = _(four_groups[key]).chain().sortBy(function(world) {
-        return world.distance;
+        return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
         }).sortBy(function(world){
-            return world.permissions.ownerID;
-            //return -(Math.pow( (new Date(world.time.start) - new Date(userTime))/3600000), 2); //time interval is in milliseconds
+            return world.distance; // next, we sort by distance
         }).sortBy(function(world){
             if (Object.keys(world.time).length == 1){
-                return -world.time.created
+                return -world.time.created // if the length of the time object is one, return -time.created (descending order)
             }
             else if (Object.keys(world.time).length == 3){
-                return -world.time.start
+                return -world.time.start // if the length of the time object is three, return -time.start (descending order)
             }
-            else{
+            else{ // this is when the time object has two fields
                 if ((world.time).hasOwnProperty('start')){
-                    return -world.time.start}
+                    return -world.time.start}  // if it has time.start, return it
                 else{
-                    return -world.time.created
+                    return -world.time.created //otherwise, return time.created
                 }
             }
         }).value();
