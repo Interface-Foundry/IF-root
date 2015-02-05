@@ -19588,7 +19588,7 @@ switch ($scope.world.style.maps.cloudMapName) {
 	case 'arabesque':
 		angular.extend($scope.style, themeDict['arabesque']);
 		break;
-	case 'haze': 
+	case 'purple haze': 
 		angular.extend($scope.style, themeDict['haze']);
 		break;
 }
