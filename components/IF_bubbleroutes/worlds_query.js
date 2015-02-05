@@ -46,8 +46,21 @@ console.log(userCoord0, userCoord1, userTime)
         return world.distance;
         }).sortBy(function(world){
             return world.permissions.ownerID;
-            //console.log(Object.keys(world.time).length, 'length')
             //return -(Math.pow( (new Date(world.time.start) - new Date(userTime))/3600000), 2); //time interval is in milliseconds
+        }).sortBy(function(world){
+            if (Object.keys(world.time).length == 1){
+                return -world.time.created
+            }
+            else if (Object.keys(world.time).length == 3){
+                return -world.time.start
+            }
+            else{
+                if ((world.time).hasOwnProperty('start')){
+                    return -world.time.start}
+                else{
+                    return -world.time.created
+                }
+            }
         }).value();
     for (var i = 0; i < (four_groups[key]).length; i++){
         console.log(four_groups[key][i]['distance'], four_groups[key][i]['name'], four_groups[key][i]['time'])}
