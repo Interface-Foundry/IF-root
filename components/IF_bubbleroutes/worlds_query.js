@@ -64,7 +64,7 @@ console.log(userCoord0, userCoord1, userTime)
     for (var i = 0; i < (four_groups[key]).length; i++){
         console.log(four_groups[key][i]['distance'], four_groups[key][i]['name'], four_groups[key][i]['time'])}
     };
-//  res.send([four_groups]);
+  res.send([four_groups]);
 
   });
 };
