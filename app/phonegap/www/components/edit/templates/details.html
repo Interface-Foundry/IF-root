@@ -88,7 +88,7 @@
 				</div>
 				<ul>
 					<li ng-repeat="landmarkCategory in world.landmarkCategories" class="clearfix">
-						<span ng-show="landmarkCategory.present" class="glyphicon glyphicon-gift" ></span> {{landmarkCategory.name}} <span ng-show="landmarkCategory.avatar"><img width="30" ng-src="{{landmarkCategory.avatar}}"></span> 
+						<span ng-show="landmarkCategory.present" class="glyphicon glyphicon-gift" ></span> {{landmarkCategory.name}} <span ng-show="landmarkCategory.avatar"><img class="circle-pic" width="30" ng-src="{{landmarkCategory.avatar}}"></span> 
 						<button type="button" class="close" ng-click="removeLandmarkCategory($index)"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 					</li>
 				</ul>
