@@ -4,6 +4,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 var MeetupStrategy = require('passport-meetup').Strategy;
 var BasicStrategy = require('passport-http').BasicStrategy;
+var BearerStrategy = require('passport-http-bearer').Strategy;
 
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
@@ -418,6 +419,27 @@ module.exports = function(passport) {
 
 
 };
+
+
+//setting up token based auth (for ios social auth)
+passport.use(  
+    new BearerStrategy(
+        function(token, done) {
+            User.findOne({ facebook.token: token },
+                function(err, user) {
+                    if(err) {
+                        return done(err);
+                    }
+                    if(!user) {
+                        return done(null, false);
+                    }
+
+                    return done(null, user);
+                }
+            );
+        }
+    )
+);
 
 
 // // load all the things we need

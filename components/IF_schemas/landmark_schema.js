@@ -1,5 +1,5 @@
-var mongoose = require('mongoose'),
-textSearch = require('mongoose-text-search');
+var mongoose = require('mongoose');
+//textSearch = require('mongoose-text-search');
 monguurl = require('monguurl');
 
 	//schema construction
@@ -158,6 +158,7 @@ monguurl = require('monguurl');
 				group_lon: Number
 			}
 		},
+		source_google_on: Boolean,
 		source_google: {
 			placeID: String,
 			icon: String,
@@ -172,6 +173,7 @@ monguurl = require('monguurl');
 			utc_offset: Number,
 			vicinity: String
 		},
+		source_yelp_on: Boolean,
 		source_yelp: {
 			id: { type: String, index: true},
 			is_closed: String,
@@ -210,7 +212,7 @@ monguurl = require('monguurl');
 	}); 
 
 
-	landmarkSchema.plugin(textSearch);
+	//landmarkSchema.plugin(textSearch);
 
 	landmarkSchema.index({loc:'2dsphere'});
 	// landmarkSchema.index({loc_nickname:'2dsphere'});
@@ -219,15 +221,14 @@ monguurl = require('monguurl');
 	landmarkSchema.index({
 	    name  				  :"text",
 	    description           :"text",
-	    shortDescription      :"text",
+	    summary               :"text",
 	    type                  :"text",
-	    loc_nicknames         :"text"
+	    loc_nickname          :"text",
+	    "category.name"       :"text",
+	    tags 				  :"text",
+	    landmarkCategories    :"text"
+
 	});
 
-	// landmarkSchema.plugin(monguurl({
-	// 	length: 40,
-	// 	source: 'name',
-	// 	target: 'id'
-	// }));
 
 module.exports = mongoose.model('landmarkModel', landmarkSchema, 'landmarks');
