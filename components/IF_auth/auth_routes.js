@@ -159,6 +159,16 @@ module.exports = function(app, passport, landmarkSchema) {
 		});
 
 	
+	// bearer login via token auth --------------------------------
+
+	app.get('/auth/bearer', passport.authenticate('bearer'),
+		function(req, res) {
+	        res.send(200,'logged in');
+	    }
+	);
+
+
+	
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
 // =============================================================================
