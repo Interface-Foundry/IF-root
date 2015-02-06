@@ -5196,7 +5196,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 					positionCompassMenu();
 														
 					scope.$watch(function () {
-						return userManager._displayName;
+						return userManager.getDisplayName();
 					}, function(newVal, oldVal) {
 						positionCompassMenu();
 					
@@ -16733,6 +16733,14 @@ var ifGlobals = {
 			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
 		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
 			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
+	},
+	mapThemes: {
+		arabesque: {name: 'Arabesque', cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb', img: 'img/mapbox/arabesque_small.png'},
+		fairy: {name: 'Fairy', cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b', img: 'img/mapbox/fairy_small.png'},
+		sunset: {name: 'Sunset', cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e', img: 'img/mapbox/sunset_small.png'},
+		urban: {name: 'Urban', cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn', img: 'img/mapbox/urban_small.png'},
+		haze: {name: 'Haze', cloudMapName:'purple haze', cloudMapID:'interfacefoundry.ig1oichl', img: 'img/mapbox/haze_small.png'},
+		mimis: {name: 'Mimis', cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55', img: 'img/mapbox/mimis_small.png'}
 	}
 }
 
@@ -16896,6 +16904,17 @@ mapManager.addMarker = function(key, marker, safe) {
 	return true;
 }
 
+mapManager.addMarkers = function(markers) {
+	if (_.isArray(markers)) {
+		angular.extend(mapManager.markers, _.indexBy(markers, function(marker) {
+			return marker._id;
+		}))
+	} else {
+		angular.extend(mapManager.markers, markers);
+	}
+}
+
+
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
 	if (mapManager.markers.hasOwnProperty(key)) {
@@ -16964,6 +16983,44 @@ mapManager.setMarkerFocus = function(key) {
 		return false;
 	}
 }
+
+mapManager.setMarkerSelected = function(key) {
+	console.log('--setMarkerSelected()--');
+	
+	// reset all marker images to default
+	angular.forEach(mapManager.markers, function(marker) {
+		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+	});
+
+	// set new image for selected marker
+	if (mapManager.markers.hasOwnProperty(key)) {
+		console.log('setting marker as selected');
+		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		return true;
+	} else {
+		console.log('Key not found in markers');
+		return false;
+	}
+};
+
+mapManager.bringMarkerToFront = function(key) {
+	console.log('--bringMarkerToFront--');
+
+	// reset all z-indices to 0
+	angular.forEach(mapManager.markers, function(marker) {
+		marker.zIndexOffset = 0;
+	});
+
+	// set z-index for selected marker
+	if (mapManager.markers.hasOwnProperty(key)) {
+		console.log('setting z-index offset');
+		mapManager.markers[key].zIndexOffset = 1000;
+		return true;
+	} else {
+		console.log('Key not found in markers');
+		return false;
+	}
+};
 
 /* addPath
 Key: Name of path to be added
@@ -17183,6 +17240,55 @@ mapManager.fadeMarkers = function(bool) {
 
 mapManager.hasMarker = function(key) {
 	return mapManager.markers.hasOwnProperty(key);
+}
+
+mapManager.loadBubble = function(bubble, config) {
+	//config is of form
+	//{center: true/false, 	//set the center
+	//	marker: true/false  //add marker
+	var zoomLevel = 18,
+		config = config || {};
+	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
+		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
+		
+		if (config.marker) {mapManager.addMarker('c', {
+				lat: bubble.loc.coordinates[1],
+				lng: bubble.loc.coordinates[0],
+				icon: {
+					iconUrl: 'img/marker/bubble-marker-50.png',
+					shadowUrl: '',
+					iconSize: [35, 67], 
+					iconAnchor: [17, 67],
+					popupAnchor:[0, -40]
+				},
+				message:'<a href="#/w/'+bubble.id+'/">'+bubble.name+'</a>',
+		});}
+		
+		} else {
+			console.error('No center found! Error!');
+		}
+		
+		if (bubble.style.hasOwnProperty('maps')) {
+				if (bubble.style.maps.localMapID) {
+					mapManager.addOverlay(bubble.style.maps.localMapID, 
+							bubble.style.maps.localMapName, 
+							bubble.style.maps.localMapOptions);
+				}
+				
+				if (bubble.style.maps.hasOwnProperty('localMapOptions')) {
+					zoomLevel = bubble.style.maps.localMapOptions.maxZoom || 19;
+				}
+		
+				if (tilesDict.hasOwnProperty(bubble.style.maps.cloudMapName)) {
+					mapManager.setBaseLayer(tilesDict[bubble.style.maps.cloudMapName]['url']);
+				} else if (bubble.style.maps.hasOwnProperty('cloudMapID')) {
+					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+bubble.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+				} else {
+					console.warn('No base layer found! Defaulting to forum.');
+					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+				}
+		}
+	
 }
 
 return mapManager;
@@ -17553,7 +17659,7 @@ var userManager = {
 
 userManager.getUser = function() {
 	var deferred = $q.defer();
-	console.log('user', userManager._user);
+
 	var user = userManager._user;
 	if (user) {
 		deferred.resolve(user);
@@ -17584,38 +17690,26 @@ userManager.saveUser = function(user) {
 }
 
 userManager.getDisplayName = function() {
-	var deferred = $q.defer();
-	
-	var displayName = userManager._displayName;
-	if (displayName) {
-		deferred.resolve(displayName);
+	if (userManager._user) {
+		var user = userManager._user;	
+		if (user.name) {displayName = user.name}
+		else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
+		else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
+		else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
+		else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
+		else {displayName = "Me"; console.log("how did this happen???");}
+			
+		var i = displayName.indexOf(" ");
+		if (i > -1) {
+			var _displayName = displayName.substring(0, i);
+		} else {
+			var _displayName = displayName;
+		}
+		
+		return _displayName;
 	} else {
-		userManager.getUser().then(function(user) {
-			if (user.name) {displayName = user.name}
-			else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
-			else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
-			else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
-			else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
-			else {displayName = "Me"; console.log("how did this happen???");}
-			
-			var i = displayName.indexOf(" ");
-			if (i > -1) {
-				var _displayName = displayName.substring(0, i);
-			} else {
-				var _displayName = displayName;
-			}
-
-			userManager._displayName = _displayName;
-			
-			userManager._displayInitials = displayName.split(' ').map(function (s) { return s.charAt(0); }).join('');
-			
-			deferred.resolve(displayName);
-		}, function(reason) {
-			deferred.reject(reason);
-		});
+		return undefined;
 	}
-	
-	return deferred.promise;
 }
 
 userManager.checkLogin = function(){
@@ -17635,9 +17729,7 @@ userManager.checkLogin = function(){
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
 	  });
-	  
-	  userManager.getDisplayName();
-	  
+	  	  
       return deferred.promise;
 };
 
@@ -17914,6 +18006,18 @@ var themeDict = {
 		worldTitle_color: '#FFF',
 		landmarkTitle_color: '#FF4081',
 		categoryTitle_color: '#F48FB1'
+	},
+	haze: {
+		name: 'haze',
+		
+		bodyBG_color: '#000830',
+		cardBG_color: '#FFFFFF',
+		titleBG_color: '#2c22cf',
+		navBG_color: '#2c22cf',
+		
+		worldTitle_color: '#FFF',
+		landmarkTitle_color: '#6ff4ff',
+		categoryTitle_color: '#6ff4ff'
 	}
 };
 app.controller('TweetlistCtrl', ['$location', '$scope', 'db', '$rootScope', '$routeParams', 'apertureService', function ($location, $scope, db, $rootScope,$routeParams,apertureService) {	
@@ -19365,18 +19469,23 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window) {
-console.log('--EditController--');
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
+
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
+//isnt ready for mobile yet
 var aperture = apertureService,
-	ears = [],
 	map = mapManager,
 	style = styleManager,
 	alerts = alertManager;
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
-zoomControl.style.left = "40%";
+zoomControl.style.left = "40%"; 
+//TODO: do this in map controller
+
+var lastRoute = $route.current;
+$scope.worldURL = $routeParams.worldURL;
+
 aperture.set('full');
 
 $scope.mapThemeSelect = 'arabesque';
@@ -19391,9 +19500,13 @@ $scope.kinds = [
 	{name: 'Campus'},
 	{name: 'Home'},
 	{name: 'Neighborhood'}
-];
+]; 
+//TODO: Switch to ifGlobal source 
 
-function tempID() {
+$scope.mapThemes = ifGlobals.mapThemes;
+
+function tempID() { 
+	//Used because angular leaflet has issues with watching when a marker is replaced with a marker of the same name. Kind of stupid.
 	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
 }
 
@@ -19402,34 +19515,29 @@ var markerID = tempID();
 $scope.temp = {
 	scale: 1
 }
-
+ //Used for local map scaling
 
 $http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
-});
+}); 
+//weird way of throwing tooltip text on before we had solidified it, 
 
 if ($routeParams.view) {
-	$scope.view = $routeParams.view;
+	$scope.view = $routeParams.view; 
+	//switching between the three subviews
 } else {
 	$scope.view = 'details';
 }
 
-console.log($scope.view); 
-$scope.worldURL = $routeParams.worldURL;
-
-var lastRoute = $route.current;
-
-
 $scope.initView = function() {
+	//switch the state of the circle mask on or off, style view wants flat black
 	switch ($scope.view) {
 		case 'details':
 		map.setCircleMaskState('mask');
-		
 			break;
 		case 'maps': 
 		map.setCircleMaskState('mask');
-		
 			break;
 		case 'styles':
 		console.log('switching to styles');
@@ -19438,7 +19546,8 @@ $scope.initView = function() {
 	}
 }
 
-$scope.onWorldIconSelect = function($files) {
+$scope.onWorldIconSelect = function($files) { 
+	//file uploading, uses angular-file-upload
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
@@ -19446,13 +19555,13 @@ $scope.onWorldIconSelect = function($files) {
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
-		console.log(data);
 		$scope.world.avatar = data;
 		$scope.uploadFinished = true;
 	});
 }
 
 $scope.onLandmarkCategoryIconSelect = function($files) {
+	//same as above
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
@@ -19466,7 +19575,7 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 	});
 }
 
-$scope.setUploadFinished = function(bool, type) {
+$scope.setUploadFinished = function(bool, type) { 
 	if (type == 'world') {
 		if (bool) {
 			$scope.uploadFinished = true;
@@ -19488,6 +19597,7 @@ $scope.setUploadFinished = function(bool, type) {
 };
 
 $scope.onLocalMapSelect = function($files) {
+	//local map image upload, then places image on map
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload_maps',
@@ -19497,33 +19607,23 @@ $scope.onLocalMapSelect = function($files) {
 		if (!$scope.temp) {$scope.temp = {}}
 		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
-		console.log(data);
 		$scope.mapImage = data;
 		map.placeImage(markerID, data);
 	})
 }
 
-$scope.selectMapTheme = function(name) {
-	console.log('--selectMapTheme--', name);
-	var mapThemes = {
-		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'},
-		mimis: {cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55'}
-	};
+$scope.selectMapTheme = function(key) {
 	if (typeof name === 'string') {
-		$scope.mapThemeSelect = name;
-		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		$scope.mapThemeSelect = key;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.mapThemes[key].cloudMapID+'/{z}/{x}/{y}.png');
 		
-		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		$scope.world.style.maps.cloudMapName = $scope.mapThemes[key].cloudMapName;
+		$scope.world.style.maps.cloudMapID = $scope.mapThemes[key].cloudMapID;
 		
 		if ($scope.style.hasOwnProperty('navBG_color')==false) {
 			$scope.setThemeFromMap();
 		}
 	}
-	
 }
 
 $scope.setThemeFromMap = function() {
@@ -19540,24 +19640,24 @@ switch ($scope.world.style.maps.cloudMapName) {
 	case 'arabesque':
 		angular.extend($scope.style, themeDict['arabesque']);
 		break;
+	case 'purple haze': 
+		angular.extend($scope.style, themeDict['haze']);
+		break;
 }
 }
 
 $scope.addLandmarkCategory = function() {
-
+	//adds landmark categories one by one to list
 	if ($scope.temp) {
 
 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
 
 		// console.log('----- TEST')
 		// console.log($scope.world.landmarkCategories);
-
-		console.log($scope.world);
 		delete $scope.temp.LandmarkCatAvatar;
 		delete $scope.temp.LandmarkCategory;
 		$scope.temp.landmarkPresent = false;
 		$scope.uploadFinishedLandmark = false;
-		console.log($scope.temp.LandmarkCatAvatar);
 	}
 }
 
@@ -19565,14 +19665,11 @@ $scope.removeLandmarkCategory = function(index) {
 	$scope.world.landmarkCategories.splice(index, 1);
 }
 
-$scope.loadWorld = function(data) {
+$scope.loadWorld = function(data) { 
+	// initialize world
 	  	$scope.world = data.world;
 		$scope.style = data.style;
 		style.navBG_color = $scope.style.navBG_color;
-		
-		console.log($scope.world);
-		console.log($scope.style);
-		
 		if ($scope.world.hasLoc) {
 			console.log('hasLoc');
 			showPosition({
@@ -19602,11 +19699,17 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
+		if ($scope.world.style.maps.localMapID) {
+			map.addOverlay($scope.world.style.maps.localMapID, 
+							$scope.world.style.maps.localMapName, 
+							$scope.world.style.maps.localMapOptions);
+		}
+
+		
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
-		}
-		
+		}		
 }
 
 $scope.saveWorld = function() {
@@ -19747,8 +19850,11 @@ $scope.buildLocalMap = function () {
 		alerts.addAlert('success', 'Map built!', true);
 		console.log(response);
 		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
-		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} //remove this when world objects arent fd up
-		if (response[0]) { //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
+		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} 
+		//remove this when world objects arent fd up
+		if (response[0]) {
+			
+			 //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
 			$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
 			$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
 			$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
@@ -19774,7 +19880,7 @@ function showPosition(position) {
 	userLng = position.coords.longitude;
 	
 	console.log(userLng);
-	map.setCenter([userLng, userLat], 17, 'editor');
+	map.setCenter([userLng, userLat], 18, 'editor');
  
 	markerID = tempID();
  
@@ -19782,7 +19888,7 @@ function showPosition(position) {
 	map.addMarker(markerID, {
 		lat: userLat,
 		lng: userLng,
-		message: "<p style='color:black;'>Drag to World's Location</p>",
+		message: "<p style='color:black;'>Drag to Bubble Location</p>",
 		focus: true,
 		draggable: true,
 		icon: {
@@ -19811,7 +19917,7 @@ function showPosition(position) {
 	if (map.circleMaskLayer) {
 		map.setCircleMaskMarker(markerID)		
 	} else {
-		map.addCircleMaskToMarker(markerID, 150, state);     
+		map.addCircleMaskToMarker(markerID, 100, state);     
 	}
 }
 
@@ -19819,10 +19925,88 @@ function locError(){
         console.log('no loc');
 }
 
+
+
+
+
+	// //---- Adding Local Maps -----//
+
+	// $scope.addLandmarkCategory = function() {
+
+	// 	if ($scope.temp) {
+
+	// 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
+
+	// 		// console.log('----- TEST')
+	// 		// console.log($scope.world.landmarkCategories);
+
+	// 		console.log($scope.world);
+	// 		delete $scope.temp.LandmarkCatAvatar;
+	// 		delete $scope.temp.LandmarkCategory;
+	// 		$scope.temp.landmarkPresent = false;
+	// 		$scope.uploadFinishedLandmark = false;
+	// 		console.log($scope.temp.LandmarkCatAvatar);
+	// 	}
+	// }
+
+	// $scope.removeLandmarkCategory = function(index) {
+	// 	$scope.world.landmarkCategories.splice(index, 1);
+	// }
+
+
+
+	// $scope.newMap = function(){
+
+	// 	//check if there are floor numbers registered, default to 0
+	// 	//populate dropdown with registered floors
+
+	// 	//if loc_info already exists, add 1
+	// 	if ($scope.landmark.loc_info){		
+	// 		if ($scope.landmark.loc_info.floor_num == null){
+	// 			$scope.landmark.loc_info.floor_num = 1;
+	// 		}
+	// 	}
+
+	// 	addLocInfo();
+	// }
+
+	// //if loc info, then load floor numbers / room names
+	// if ($scope.$parent.landmark.loc_info){
+	// 	addLocInfo();
+	// }
+
+	// function addLocInfo() {
+
+	// 	//read landmark floor array, cp to $scope
+
+	// 	$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"}];  
+
+	// 	//IF no loc_info, then floor_num = 0
+	// 	if (!$scope.$parent.landmark.loc_info){
+	// 		$scope.$parent.landmark.loc_info = {
+	// 			floor_num: 1
+	// 		};  		
+	// 	}
+	// }
+	// //onclick hide location details
+	// $scope.clearMap = function(){
+
+	// 	//console.log('asdfasdfasdf');
+	// 	//delete $scope.$parent.landmark.loc_info;
+
+	// 	$scope.landmark.loc_info.floor_num = null;
+	// 	$scope.landmark.loc_info.room_name = null;
+	// }
+	// //--------------------------//
+
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
 ////////////////////////////////////////////////////////////
-$scope.$on('$locationChangeSuccess', function (event) {
+$scope.$on('$locationChangeSuccess', function (event, args) {
+	//stops route from changing if just changing subview
+	console.log(event, args);
+	console.log($route.current.$$route);
+	
     if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
         $scope.view = $route.current.params.view;
         $route.current = lastRoute;
@@ -19831,7 +20015,7 @@ $scope.$on('$locationChangeSuccess', function (event) {
     $scope.initView();
 });
 
-$scope.$on('$destroy', function (event) {
+$scope.$on('$destroy', function (event) { //controller cleanup
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
@@ -19874,7 +20058,6 @@ $scope.$watchCollection('world', function (newCol, oldCol) {
 });
 
 
-
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -19892,25 +20075,20 @@ World.get({id: $routeParams.worldURL}, function(data) {
 }]);
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+	
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
-	console.log('Landmark Editor Controller initializing');
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
 	
-	var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-		zoomControl.style.top = "50px";
-		zoomControl.style.left = "40%";
-	/*
+var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+	zoomControl.style.top = "50px";
+	zoomControl.style.left = "40%";
 
-	$scope.aperture = apertureService;
-	$scope.aperture.set('half');
-	*/
-		
-	var worldLoaded = false;
-	var landmarksLoaded = false;
+var worldLoaded = false;
+var landmarksLoaded = false;
 	
 	$scope.landmarks = [];
 	$scope.selectedIndex = 0;
@@ -19920,41 +20098,16 @@ $window.history.back();
 ////////////////////////////////////////////////////////////
 //////////////////////DEFINE FUNCTIONS//////////////////////
 ////////////////////////////////////////////////////////////
-/*
-	$scope.addFileUploads = function() {
-		angular.element('.fileupload').fileupload({
-        url: '/api/upload',
-        dataType: 'text',
-        progressall: function (e, data) {  
-
-            $('#progress .bar').css('width', '0%');
-
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .bar').css(
-                'width',
-                progress + '%'
-            );
-        },
-        done: function (e, data) {
-            $scope.landmarks[$scope.selectedIndex].avatar = data.result;
-        }
-    });
-	}
-*/
 	
 	$scope.addLandmark = function() {
 		console.log('--addLandmark--');
 		if (!worldLoaded || !landmarksLoaded) {console.log('loading not complete');}
 		else {
-		console.log('Adding a new Landmark');
 		var tempLandmark = landmarkDefaults();
 		db.landmarks.create(tempLandmark, function(response) {
-				console.log('--db.landmarks.create--');
-				console.log('Response ID:'+response[0]._id);
+			console.log('--db.landmarks.create--');
+			console.log('Response ID:'+response[0]._id);
 			tempLandmark._id = response[0]._id;
-				console.log('tempLandmark');
-				console.log(tempLandmark);
-				console.log(tempLandmark.loc.coordinates);
 			
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
@@ -19973,13 +20126,8 @@ $window.history.back();
 				draggable:true,
 				message:'Drag to location on map',
 				focus:true
-			});
-			
-			//$scope.selectItem(0)
-			console.log("$scope.landmarks");
-			console.log($scope.landmarks);				
-				
-			});
+			});				
+		});
 		}
 	}
 	
@@ -19995,8 +20143,6 @@ $window.history.back();
 	            console.log('Delete');
 	            $scope.landmarks.splice(i, 1); //Removes from local array
 	        });
-	        
-	        
 	    }
 	}	
 	
@@ -20059,10 +20205,7 @@ if ($scope.landmark.hasTime) {
 	        } 
 	        //------- END TIME --------//
 		}
-*/
-		
-		
-		
+*/	
 		console.log('Saving...');
 		console.log($scope.landmarks[i]);
 		db.landmarks.create($scope.landmarks[i], function(response) {
@@ -20076,52 +20219,17 @@ if ($scope.landmark.hasTime) {
 	$scope.selectItem = function(i) {
 		console.log('--selectItem--');
 		if ($scope.selectedIndex != i) {
-		//$scope.saveItem($scope.selectedIndex);//save previous landmark
-		console.log('Continue w select');
-		$scope.selectedIndex = i; //change landmarks
-		map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
-		console.log($scope.landmarks[i].name);
-		map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
-		map.setMarkerFocus($scope.landmarks[i]._id);
-		console.log('Complete select');
+			//$scope.saveItem($scope.selectedIndex);//save previous landmark
+			console.log('Continue w select');
+			$scope.selectedIndex = i; //change landmarks
+			map.setCenter($scope.landmarks[i].loc.coordinates, 18);//center map on new markers
+			console.log($scope.landmarks[i].name);
+			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
+			map.bringMarkerToFront($scope.landmarks[i]._id);
+			map.setMarkerSelected($scope.landmarks[i]._id);
+			map.setMarkerFocus($scope.landmarks[i]._id);
+			console.log('Complete select');
 		}
-	}
-	
-	function loadLandmarks() {
-		console.log('--loadLandmarks--');
-		//$scope.queryType = "all";
-		//$scope.queryFilter = "all";
-		db.landmarks.get({parentID: $scope.world._id}, function(data){
-				console.log('--db.landmarks.query--');
-				console.log('data');
-				console.log(data);
-			//data.shift();
-			$scope.landmarks = $scope.landmarks.concat(data.landmarks);
-				console.log('$scope.landmarks');
-				console.log($scope.landmarks);
-			
-			//add markers to map
-			angular.forEach($scope.landmarks, function(value, key) {
-				//for each landmark add a marker
-				addLandmarkMarker(value);
-				/*
-map.addMarker(value._id, {
-					lat:value.loc.coordinates[1],
-					lng:value.loc.coordinates[0],
-					draggable: true,
-					icon: {
-						iconUrl: 'img/marker/bubble-marker-50.png',
-						shadowUrl: '',
-						iconSize: [35, 67],
-						iconAnchor: [13, 10]
-					},
-					message:value.name
-				});
-*/
-			});
-			landmarksLoaded = true;
-			
-		});
 	}
 	
 	function addLandmarkMarker(landmark) {
@@ -20178,69 +20286,70 @@ $scope.$on('$destroy', function (event) {
 	}
 });
 
-$scope.onUploadAvatar = function ($files, $event) {
-	console.log('parent is grabbing it', $files, $event);
-}
-
-
 ////////////////////////////////////////////////////////////
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
-		console.log('controller active');
-	World.get({id: $routeParams.worldURL}, function(data) {
-			console.log('--World.get--');
-			console.log(data);
+worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
-			console.log('-World-');
-			console.log($scope.world);
 		$scope.style = data.style;
-			console.log('-Style-');
-			console.log($scope.style);
 		
 		$scope.worldURL = $routeParams.worldURL;
 		//initialize map with world settings
-		if ($scope.world.style) {
-		if ($scope.world.style.maps) {
-		map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
-		map.setCenter($scope.world.loc.coordinates, 18);
-		
-map.addMarker('m', {
-			lat: $scope.world.loc.coordinates[1],
-			lng: $scope.world.loc.coordinates[0],
-			focus: false,
-			draggable: false,
-			icon: {
-				iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
-				shadowUrl: '',
-				iconSize: [0,0],
-				shadowSize: [0,0],
-				iconAnchor: [0,0],
-				shadowAnchor: [0,0]
-			}
-		});
+		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
 
-		map.removeCircleMask();
-		map.addCircleMaskToMarker('m', 150, 'mask');
+		if ($scope.world.style) {
+			if ($scope.world.style.maps) {
+			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
+			map.removeAllMarkers();
 		
-		/*map.addPath('worldBounds', {
-				type: 'circle',
-                radius: 150,
-				latlngs: {lat:$scope.world.loc.coordinates[1], lng:$scope.world.loc.coordinates[0]}
-				});*/
-		//map.setTiles($scope.world.style.maps.cloudMapName);
-		map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+			map.addMarker('m', {
+				lat: $scope.world.loc.coordinates[1],
+				lng: $scope.world.loc.coordinates[0],
+				focus: false,
+				draggable: false,
+				icon: {
+					iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+					shadowUrl: '',
+					iconSize: [0,0],
+					shadowSize: [0,0],
+					iconAnchor: [0,0],
+					shadowAnchor: [0,0]
+				}
+			});
+
+			map.removeCircleMask();
+			map.addCircleMaskToMarker('m', 150, 'mask');
 		
-		if ($scope.world.style.maps.type == "local" || $scope.world.style.maps.type == "both") {
-			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
-		}
+			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+		
+			if ($scope.world.style.maps.localMapID) {
+				map.addOverlay($scope.world.style.maps.localMapID, 
+								$scope.world.style.maps.localMapName, 
+								$scope.world.style.maps.localMapOptions);
+			}
+			
+			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			}
 		map.refresh();
 		
 		//world is finished loading
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		loadLandmarks();
-	});
+		return worldTree.getLandmarks(data.world._id);
+	}).then(function(data) {
+		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+					
+		//add markers to map
+		angular.forEach($scope.landmarks, function(value, key) {
+			//for each landmark add a marker
+			addLandmarkMarker(value);
+		});
+		landmarksLoaded = true;
+			
+	});	
+	
 }])
 
 app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
@@ -20287,26 +20396,65 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.landmark.time.end = timeEnd.toISO8601String();
 	
 	}
-	
-	$scope.onUploadAvatar = function($files) {
-		console.log('uploadAvatar');
-		var file = $files[0];
-		$scope.upload = $upload.upload({
-			url: '/api/upload/',
-			file: file,
-		}).progress(function(e) {
-			console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		}).success(function(data, status, headers, config) {
-			console.log(data);
-		$scope.$parent.landmark.avatar = data;
-		$scope.uploadFinished = true;
-		});
+
+	//---- LOCATION DETAILS -----//
+	$scope.setLocation = function(){
+
+		//check if there are floor numbers registered, default to 0
+		//populate dropdown with registered floors
+
+		//if loc_info already exists, add 1
+		if ($scope.$parent.landmark.loc_info){		
+			if ($scope.$parent.landmark.loc_info.floor_num == null){
+				$scope.$parent.landmark.loc_info.floor_num = 1;
+			}
+		}
+
+		addLocInfo();
 	}
+
+	//if loc info, then load floor numbers / room names
+	if ($scope.$parent.landmark.loc_info){
+		addLocInfo();
+	}
+
+	function addLocInfo() {
+
+		//read landmark floor array, cp to $scope
+
+		$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"},{"val":3,"label":"3rd Floor"},{"val":4,"label":"4th Floor"},{"val":5,"label":"5th Floor"},{"val":6,"label":"6th Floor"},{"val":7,"label":"7th Floor"},{"val":8,"label":"8th Floor"},{"val":9,"label":"9th Floor"},{"val":10,"label":"10th Floor"}];  
+
+		//IF no loc_info, then floor_num = 0
+		if (!$scope.$parent.landmark.loc_info){
+			$scope.$parent.landmark.loc_info = {
+				floor_num: 1
+			};  		
+		}
+	}
+	//onclick hide location details
+$scope.clearLoc = function(){
+	//delete $scope.$parent.landmark.loc_info;
+
+	$scope.$parent.landmark.loc_info.floor_num = null;
+	$scope.$parent.landmark.loc_info.room_name = null;
+}
+	//--------------------------//
+
 	
-	$scope.$watch('avatarFiles', function(newFiles, oldFiles) {
-		console.log(newFiles, oldFiles);
+$scope.onUploadAvatar = function($files) {
+	console.log('uploadAvatar');
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file,
+	}).progress(function(e) {
+		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+	}).success(function(data, status, headers, config) {
+		console.log(data);
+	$scope.$parent.landmark.avatar = data;
+	$scope.uploadFinished = true;
 	});
-		
+}		
 	
 }]);
 
@@ -20842,7 +20990,8 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
-var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(3, function() {
+	console.log('$routeChangeSuccess');
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
@@ -20947,6 +21096,15 @@ $scope.share = function(platform) {
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
   );
 };
+
+$scope.fbLogin = function() {
+	facebookConnectPlugin.login(['public_profile', 'email'], 
+	function(success) {
+		console.log('fb success', arguments)}, 
+	function(failure) {
+		console.log('failure', arguments)}
+	)
+}
 
 lockerManager.getCredentials().then(function(credentials) {
 userManager.signin(credentials.username, credentials.password).then(function(success) {
@@ -21703,7 +21861,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
-	
+	map.loadBubble(data.world);
+		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
 	console.log(landmark); 
@@ -21830,13 +21989,14 @@ console.log($scope.landmark.category);
 		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 20, 'aperture-half'); 
+	map.setCenter($scope.landmark.loc.coordinates, 18, 'aperture-half'); 
 	aperture.set('half');
-  	var markers = map.markers;
-  	angular.forEach(markers, function(marker) {
-  		console.log(marker);
-	  	map.removeMarker(marker._id);
-  	});
+  	// var markers = map.markers;
+  	// angular.forEach(markers, function(marker) {
+  	// 	console.log(marker);
+	  // 	map.removeMarker(marker._id);
+  	// });
+	map.removeAllMarkers();
   	
 
   	map.addMarker($scope.landmark._id, {
@@ -22175,7 +22335,7 @@ function profileEditMessage() {
 		avatar: $scope.world.avatar || 'img/tidepools/default.png',
 		userID: 'chatbot',
 		_id: 'profileEditMessage',
-		href: 'profile/me'
+		href: 'profile/me/messages'
 	}
 	$scope.messages.push(newChat);
 }
@@ -22292,9 +22452,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 userManager.getUser().then(function(user) {
 		$scope.user = user;
-	userManager.getDisplayName().then(function(displayName) {
-		$scope.nick = displayName;	
-	});
+		$scope.nick = userManager.getDisplayName();	
 	}, function(reason) {
 	dialogs.showDialog('messageAuthDialog.html');
 });
@@ -22343,10 +22501,7 @@ link: function(scope, element, attrs) {
 		} else if (cache) {
 			m.render(element[0], scheduleTree(cache));
 		}
-		
 	}
-	
-	
 	
 	//schedule form is
 	//{supergroup: [{group: []}, 
@@ -22376,7 +22531,7 @@ link: function(scope, element, attrs) {
 				{className: toggle[title] ? "closed" : ""},
 				[m('button.bubble-supergroup-label', 
 				{onclick: toggleSuperGroup.bind(undefined, title)},
-				 title)].concat( 
+				 title)].concat(
 				_.map(groups, groupTemplate)));
 		}
 	}
@@ -22406,8 +22561,28 @@ link: function(scope, element, attrs) {
 		return m('li.bubble-list-item', 
 			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)},
 				[m('img.bubble-list-item-img', {src: landmark.avatar}),
-				m('span', landmark.name)
+				m('span.bubble-list-item-label', [landmark.name, m('small', landmark.category)]),
+				m('footer.bubble-list-item-detail', landmarkDetail(landmark)),
+				m('footer.bubble-list-item-room-info', landmarkRoomDetail(landmark))
 			]));
+	}
+	
+	function landmarkDetail(landmark) {
+		return [
+			m('span', landmark.time.start && ('Starts ' + moment(landmark.time.start).format('ddd, MMM Do, hA'))),
+			m('span', landmark.time.end && ('Ends ' + moment(landmark.time.end).format("ddd, MMM Do, hA")))
+		]
+	}
+	
+	function landmarkRoomDetail(landmark) {
+		if (landmark.loc_info) {
+			return [
+				m('span', 'Floor: '+landmark.loc_info.floor_num),
+				m('span', 'Room: '+landmark.loc_info.room_name)
+			]
+		} else {
+			return []
+		}
 	}
 	
 	function ifURL(url) {
@@ -22416,7 +22591,7 @@ link: function(scope, element, attrs) {
 }
 	}
 }); 
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', function($scope, worldTree, $routeParams, styleManager) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', function($scope, worldTree, $routeParams, styleManager, $window, $location) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -22435,6 +22610,38 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		'Places': 13
 	}
 	
+	$scope.showCalendar = function() {
+		if ($scope.calendarActive) {
+			$scope.calendarActive = false;
+		} else {
+			$scope.calendarActive = true;
+			handleWindowResize();
+		}
+	}
+	
+	$scope.inspectLandmark = function(calEvent) {
+		$location.path('w/'+$scope.world.id+'/'+calEvent.landmark.id)
+	}
+
+
+	$scope.calConfig = {
+		height: 360,
+		eventClick: $scope.inspectLandmark,
+		defaultView: 'agendaWeek'
+	}
+
+	var handleWindowResize = _.throttle(function(e) {
+		$scope.calConfig.height = windowEl.height()-116;
+		if (windowEl.width() < 600) {
+			$scope.calConfig.defaultView = 'agendaDay';
+		} else {
+			$scope.calConfig.defaultView = 'agendaWeek';
+		}
+	}, 100)
+
+var windowEl = $($window);
+windowEl.on('resize', handleWindowResize);
+	
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
@@ -22443,10 +22650,34 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		return $scope.world._id;
 	}).then(function(_id) {return worldTree.getLandmarks(_id)})
 	.then(function(landmarks) {
+		$scope.landmarks = landmarks;
+		
+		setUpCalendar(landmarks);
+		setUpSchedule(landmarks);
+	});
+	
+	function setUpCalendar(landmarks) {
+		$scope.calendar = {
+			events: landmarks.filter(function(landmark) {return landmark.time.start})
+						.map(function(landmark) {
+							return {
+								id: landmark._id,
+								title: landmark.name,
+								start: moment(landmark.time.start),
+								end: moment(landmark.time.end),
+								landmark: landmark
+							}
+						})
+		}
+		//console.log($scope.calendar.events);
+	}
+	
+	function setUpSchedule(landmarks) {	
 		var now = moment();
 		var schedule = [];
 		var superGroups = {
 			'Upcoming': {},
+			'This Week': {},
 			'Today': {},
 			'Previous': {},
 			'Places': {}
@@ -22454,21 +22685,25 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 		
 		var groupOrderMap = {
 			'Upcoming': 0,
-			'This Year': 1,
-			'Next Month': 2,
-			'This Month': 3,
-			'Next Week': 4,
-			'This Week': 5,
-			'Tomorrow': 6,
-			'Today': 7,
-			'Yesterday': 8,
-			'Last Week': 9,
-			'Last Month': 10,
-			'Last Year': 11,
-			'Past': 12,
-			'Places': 13
+			'This Year': 10,
+			'Next Month': 20,
+			'This Month': 30,
+			'Next Week': 40,
+			'This Week': 50,
+			'6': 55,
+			'5': 56,
+			'4': 57,
+			'3': 58,
+			'2': 59,
+			'1': 60,
+			'Today': 70,
+			'Yesterday': 80,
+			'Last Week': 90,
+			'Last Month': 100,
+			'Last Year': 110,
+			'Past': 120,
+			'Places': 130
 		}
-
 		
 		 /* [{'Upcoming': []},
 						{'Today': []},
@@ -22479,7 +22714,7 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 						},
 						...] */
 		
-		_.each(landmarks, function(landmark, index, list) {
+		_.each(landmarks, function(landmark, index, landmarks) {
 			var superGroup = getSuperGroup(landmark);
 			var group = getGroup(landmark, superGroup);
 			
@@ -22489,69 +22724,103 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 				superGroups[superGroup][group] = [landmark];
 			}
 		});
-
-
+		
 		//current structure {'upcoming': {'group': [],}}
 		//first 									^ sort these
 		//then							^to array 
 		//then 				^to array
 		
-		var temp = _.each(superGroups, function(superGroup, superGroupKey, list) {
+
+		_.each(superGroups, function(superGroup, superGroupKey, superGroups) {
 			if (superGroupKey!=="Places") {
-			_.each(superGroup, function(group, groupKey, list) {
-				list[groupKey] = _.sortBy(group, function(landmark) {
+			_.each(superGroup, function(group, groupKey, superGroup) {
+				superGroup[groupKey] = _.sortBy(group, function(landmark) {
 					moment(landmark.time.start).unix()
 				});
 			})
 			}
 			
-			list[superGroupKey] = _.sortBy(
-				_.map(superGroup, function(group, groupKey) {
-					var temp = {};
-					temp[groupKey]=group;
-					return temp;
-				}), function (group, index, list) {
-					var key = _.keys(group)[0];
-					return groupOrderMap[key];
+			superGroups[superGroupKey] = 
+				_.sortBy(
+					_.map(superGroup, function(group, groupKey) {
+						var temp = {};
+						temp[groupKey]=group;
+						return temp;
+					}), function (group, index, list) {
+						var key = _.keys(group)[0];
+						return groupOrderMap[key];
 				})
-		});
+		})
 		
-		console.log(temp);
+		console.log('thisweek', superGroups['This Week']);
 		
+if (superGroups['This Week'].length > 0) {
+			superGroups['This Week'] = _.map(superGroups['This Week'], function(group, index, superGroup) {
+				var pair = _.pairs(group)[0], //["key", value]
+					title = getThisWeekString(pair[0]),
+					group = pair[1],
+					thisWeek = {};
+				thisWeek[title] = group;
+				console.log(thisWeek);
+				return thisWeek;
+			})
+		}
+
+				
 		$scope.schedule = [
 			{'Upcoming': superGroups['Upcoming']},
+			{'This Week': superGroups['This Week']},
 			{'Today': superGroups['Today']},
 			{'Places': superGroups['Places']},
 			{'Previous': superGroups['Previous']}
 		];
 		
-		console.log(schedule);
-			
+		console.log($scope.schedule);
+					
 		function getSuperGroup(landmark) {
 			var t;
 			if (!landmark.time.start) {return 'Places'}
 			
 			t = moment(landmark.time.start);
 
-			if (t.isSame(now, 'day')) {
-				return 'Today';
-			} else if (t.isAfter(now)) {
-				return 'Upcoming';
-			} else {
+			if (t.isBefore(now)) {
 				return 'Previous';
+			} else if (t.isSame(now, 'day')) {
+				return 'Today';
+			} else if (t.isBefore(moment().add(7, 'days'))) {
+				return 'This Week';
+			} else {
+				return 'Upcoming'
 			}
 		}
 		
 		function getGroup(landmark, superGroup) {
 			var t;
 			switch (superGroup) {
+				case 'This Week':
+					t = moment(landmark.time.start);
+					if (t.isSame(now)) {
+						return 0;
+					} else if (t.isSame(moment().add(1, 'day'), 'day')) {
+						return 1;
+					} else if (t.isSame(moment().add(2, 'day'), 'day')) {
+						return 2;
+					} else if (t.isSame(moment().add(3, 'day'), 'day')) {
+						return 3;
+					} else if (t.isSame(moment().add(4, 'day'), 'day')) {
+						return 4;
+					} else if (t.isSame(moment().add(5, 'day'), 'day')) {
+						return 5;
+					} else if (t.isSame(moment().add(6, 'day'), 'day')) {
+						return 6;
+					}
+					break;
+				case 'Today': 
+					return 'Today';
+					break;
 				case 'Upcoming': 
 					t = moment(landmark.time.start);
-					if (t.isSame(moment().add(1, 'day'),  'day')) {
-						return 'Tomorrow';
-					} else if (t.isSame(now, 'week')) {
-						return 'This Week';
-					} else if (t.isBefore(moment().add(2, 'week'))) {
+					if (t.isBefore(moment().add(2, 'week'))) {
 						return 'Next Week';
 					} else if (t.isSame(now, 'month')) {
 						return 'This Month';	
@@ -22562,9 +22831,6 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 					} else {
 						return 'Upcoming';
 					}
-					break;
-				case 'Today':
-					return 'Today';
 					break;
 				case 'Previous':
 					t = moment(landmark.time.start);
@@ -22586,17 +22852,39 @@ app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'st
 			}
 		}
 		
-	})
+		function getThisWeekString(key) {
+			if (key == 1) {
+				return 'Tomorrow';
+			} else if (key == 2) {
+				return moment().add(2, 'day').format('dddd, MMMM Do');
+			} else if (key == 3) {
+				return moment().add(3, 'day').format('dddd, MMMM Do');
+			} else if (key == 4) {
+				return moment().add(4, 'day').format('dddd, MMMM Do');
+			} else if (key == 5) {
+				return moment().add(5, 'day').format('dddd, MMMM Do');
+			} else if (key == 6) {
+				return moment().add(6, 'day').format('dddd, MMMM Do');
+			} 
+		}
+	}
 
 	
 }])
+app.filter('httpsify', function() {
+	return function(input) {
+		input = input || "";
+		return input.replace(/^http:\/\//i, 'https://'); 
+	}
+})
+
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
-		//$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
 	})
 
 
@@ -22618,7 +22906,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"name": string}
 //	"__v": 0}....]
 
-$scope.tweets = [{"text":"#photooftheday #beautiful #fun #instagood #couple #beer #rootbeer #cool #wine #drink #mypic… http://t.co/Xcpw85MHXs",
+/*$scope.tweets = [{"text":"#photooftheday #beautiful #fun #instagood #couple #beer #rootbeer #cool #wine #drink #mypic… http://t.co/Xcpw85MHXs",
 	"tweetID_str":"560874444558573568",
 	"tweetID":560874444558573600,
 	"_id":"54ca834bc409ce4b055555c6",
@@ -22633,35 +22921,62 @@ $scope.tweets = [{"text":"#photooftheday #beautiful #fun #instagood #couple #bee
 
 
 {"text":"Magic eye \nIt's painted my brother \n#magic #eye #cool #fun http://t.co/EhVyjan73T","tweetID_str":"560874508425650176","tweetID":560874508425650200,"_id":"54ca834bc409ce4b055555c5","created":"2015-01-29T19:00:27.751Z","hashtags":["magic","eye","cool","fun"],"media":{"media_url":"http://instagram.com/p/ycuD6JqK-j/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/427181614917902337/DX7b_B44_normal.png","screen_name":"AV21122001","name":"Анастасія Возняк"},"__v":0},{"text":"#cool #creative #clever #products #gift #ideas #Amazon http://t.co/4Vs4f6vrbl","tweetID_str":"560874516692205568","tweetID":560874516692205600,"_id":"54ca834bc409ce4b055555c4","created":"2015-01-29T19:00:27.750Z","hashtags":["cool","creative","clever","products","gift","ideas","Amazon"],"media":{"media_url":"http://pbs.twimg.com/media/B8igZpcCMAA8MwV.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/526946091686584320/P76DsJyC_normal.jpeg","screen_name":"ProductsClever","name":"Clever products"},"__v":0},{"text":"#2Cheap #Alternatives #And #Cake #Cool #Wedding #Food\nPlease RT: http://t.co/tGdff3cpGp http://t.co/f5Gt4LB8Mh","tweetID_str":"560874574414630912","tweetID":560874574414630900,"_id":"54ca834bc409ce4b055555c3","created":"2015-01-29T19:00:27.749Z","hashtags":["2Cheap","Alternatives","And","Cake","Cool","Wedding","Food"],"media":{"media_url":"http://pbs.twimg.com/media/B8igdChIUAA1XRn.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/548588078651035648/OAEzohKu_normal.jpeg","screen_name":"_amazingfoods","name":"Amazing Foods"},"__v":0},{"text":"Dexy's Midnight Runners \n#Cool","tweetID_str":"560874589644136448","tweetID":560874589644136450,"_id":"54ca834bc409ce4b055555c2","created":"2015-01-29T19:00:27.749Z","hashtags":["Cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/468714101171290112/lC-G6VC9_normal.jpeg","screen_name":"rodavlas95","name":"Salva Otamendi"},"__v":0},{"text":"RT @AandO_Realtors: FLORIDA FANS; #Architecture #Beaches #Pool #ItsALifestyle #Sunshine #Cool #RP @eluxurieshomes #AandO #EverythingREAL ht…","tweetID_str":"560874752068550656","tweetID":560874752068550660,"_id":"54ca834bc409ce4b055555c1","created":"2015-01-29T19:00:27.748Z","hashtags":["Architecture","Beaches","Pool","ItsALifestyle","Sunshine","Cool","RP","AandO","EverythingREAL"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifxvJCUAABeXD.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/553672742772277248/CQJCx5q9_normal.png","screen_name":"MusicOwnership","name":"Music with Copyright"},"__v":0},{"text":"Handsomeness at its peak....#handsome #cool #smart http://t.co/kkgCxH1gIa","tweetID_str":"560874754803240962","tweetID":560874754803240960,"_id":"54ca834bc409ce4b055555c0","created":"2015-01-29T19:00:27.748Z","hashtags":["handsome","cool","smart"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000751338842/a3edf60b3a6e56dd57b3e02ab08e46eb_normal.jpeg","screen_name":"Shaumilpatel","name":"shaumil patel"},"__v":0},{"text":"RT @fkthriftdeals: Vintage #Seaworld #SanDiego Patch by Emblems - New in Original Package http://t.co/nMJljkjSO9 #ebay #cool http://t.co/f3…","tweetID_str":"560874830644641792","tweetID":560874830644641800,"_id":"54ca834bc409ce4b055555bf","created":"2015-01-29T19:00:27.747Z","hashtags":["Seaworld","SanDiego","ebay","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8if8-6CEAAtdJE.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/534986614959644673/96U0Bgid_normal.png","screen_name":"MCamTreasures","name":"MCF"},"__v":0},{"text":"I learn #German on my iPhone - just amazingly cool and only 99 cent http://t.co/hkONpz8hfH #education #ios #cool","tweetID_str":"560874856019816449","tweetID":560874856019816450,"_id":"54ca834bc409ce4b055555be","created":"2015-01-29T19:00:27.747Z","hashtags":["German","education","ios","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000512696114/6844f7cbd90863f402e6dee85342bf90_normal.jpeg","screen_name":"harryblack81","name":"Harry Black"},"__v":0},{"text":"2 x CROMPTON F8W/33 T5 8 WATT 12\" FLUORESCENT TUBE IN http://t.co/TbbImWXzgX #cheap #Cool #Crompton #coupons #discounts #bargains #sales","tweetID_str":"560874941491732480","tweetID":560874941491732500,"_id":"54ca834bc409ce4b055555bd","created":"2015-01-29T19:00:27.746Z","hashtags":["cheap","Cool","Crompton","coupons","discounts","bargains","sales"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/3693564158/77a3ec77d2fe7773449935b3046e8c6b_normal.jpeg","screen_name":"shopblogsuk","name":"Shop Blogs (UK)"},"__v":0},{"text":"A cenar en familia y Yael me deja encerrada.. #Cool.","tweetID_str":"560874983145369601","tweetID":560874983145369600,"_id":"54ca834bc409ce4b055555bc","created":"2015-01-29T19:00:27.746Z","hashtags":["Cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/510218178295631873/HBC1-qPc_normal.jpeg","screen_name":"KarinaBaez_Y7","name":"Karina  Baez "},"__v":0},{"text":"😎 #Cool #brother #white #school http://t.co/dlCbksLODl","tweetID_str":"560875034173255680","tweetID":560875034173255700,"_id":"54ca834bc409ce4b055555bb","created":"2015-01-29T19:00:27.745Z","hashtags":["Cool","brother","white","school"],"media":{"media_url":"http://instagram.com/p/ycuTPSMPm0/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/557277807064408064/m0biVZMo_normal.jpeg","screen_name":"akinalperenn","name":"Alperen Akın"},"__v":0},{"text":"Sketches #sketch #art #girl #action #batgirl #smoke #cool #goggles #punk #mask #illustration #pencil… http://t.co/Mj1dtcibfZ","tweetID_str":"560875039495831552","tweetID":560875039495831550,"_id":"54ca834bc409ce4b055555ba","created":"2015-01-29T19:00:27.744Z","hashtags":["sketch","art","girl","action","batgirl","smoke","cool","goggles","punk","mask","illustration","pencil"],"media":{"media_url":"http://instagram.com/p/ycuTYHND1J/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/543404817428008961/fKUfznQB_normal.jpeg","screen_name":"hayleyhyuga","name":"HayleyHyuga Official"},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560873727899217920","tweetID":560873727899217900,"_id":"54ca82adc409ce4b05555424","created":"2015-01-29T18:57:49.985Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/549217327527374848/IlHnf1rY_normal.jpeg","screen_name":"marvelanne97","name":"maryvee"},"__v":0},{"text":"RT @Frankies_Style: #RETWEET\n\n#GAIN WITH #MGWV\n\n#Folllow All #Rters\n\n#COOL _FOLLOWS @Dollhouse @TeamGatito @KimmiOsborne @FairyFriend13 @Is…","tweetID_str":"560873737482801152","tweetID":560873737482801150,"_id":"54ca82adc409ce4b05555423","created":"2015-01-29T18:57:49.984Z","hashtags":["RETWEET","GAIN","MGWV","Folllow","Rters","COOL"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/464725607834587136/rMPaz8nK_normal.jpeg","screen_name":"ashrafrefaat8","name":"refaat"},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560873746182184960","tweetID":560873746182184960,"_id":"54ca82adc409ce4b05555422","created":"2015-01-29T18:57:49.983Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/536778472937373696/4a_Txa8m_normal.jpeg","screen_name":"STEEL5757","name":"Dreamchest"},"__v":0},{"text":"ILoveAllOfMyStudents! &lt;3 #love #dance #hiphop #stuggi #0711 #passion #mjk #swaggie #yeah #me #cool… http://t.co/y3wh5E3fE4","tweetID_str":"560873782622302208","tweetID":560873782622302200,"_id":"54ca82adc409ce4b05555421","created":"2015-01-29T18:57:49.982Z","hashtags":["love","dance","hiphop","stuggi","passion","mjk","swaggie","yeah","me","cool"],"media":{"media_url":"http://instagram.com/p/yctu0RGAoA/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/476116776141725696/b-ANFqif_normal.jpeg","screen_name":"manuMJK","name":"Manu MJK"},"__v":0},{"text":"#Monochrome never looked so #cool - edgy #bed #linen #designs from @BlancBedLinen http://t.co/sLvPrHGBl8","tweetID_str":"560873783754772480","tweetID":560873783754772500,"_id":"54ca82adc409ce4b05555420","created":"2015-01-29T18:57:49.980Z","hashtags":["Monochrome","cool","bed","linen","designs"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifu8xIAAA_xrE.png","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/545723005595156480/_9Crz47o_normal.png","screen_name":"maisondopulence","name":"MaisonD'Opulence"},"__v":0},{"text":"FLORIDA FANS; #Architecture #Beaches #Pool #ItsALifestyle #Sunshine #Cool #RP @eluxurieshomes #AandO #EverythingREAL http://t.co/jO4pveWcLS","tweetID_str":"560873837706104833","tweetID":560873837706104800,"_id":"54ca82adc409ce4b0555541f","created":"2015-01-29T18:57:49.979Z","hashtags":["Architecture","Beaches","Pool","ItsALifestyle","Sunshine","Cool","RP","AandO","EverythingREAL"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifxvJCUAABeXD.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/554672612774010880/5A1puCEA_normal.jpeg","screen_name":"AandO_Realtors","name":"Ofra and Adrienne"},"__v":0},{"text":"RT @Kaito_Einsam: DON'T SELL OUT\nBUY IN\nI love this t-shirt!\n@WWERollins #SethRollins #wwe #style #cool #wrestling #cosplay http://t.co/u1P…","tweetID_str":"560873939233411073","tweetID":560873939233411100,"_id":"54ca82adc409ce4b0555541e","created":"2015-01-29T18:57:49.978Z","hashtags":["SethRollins","wwe","style","cool","wrestling","cosplay"],"media":{"media_url":"http://pbs.twimg.com/media/B8iTvnbCcAAgoHA.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555159336679264256/UeHSrWzR_normal.jpeg","screen_name":"KirasOfficial","name":" Kira(Harley quinn)"},"__v":0},{"text":"Vintage #Seaworld #SanDiego Patch by Emblems - New in Original Package http://t.co/nMJljkjSO9 #ebay #cool http://t.co/f3Rt2ILsXh","tweetID_str":"560874024050229248","tweetID":560874024050229250,"_id":"54ca82adc409ce4b0555541d","created":"2015-01-29T18:57:49.977Z","hashtags":["Seaworld","SanDiego","ebay","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8if8-6CEAAtdJE.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000270680240/b2fa7d3315b14d729241288987db771c_normal.jpeg","screen_name":"fkthriftdeals","name":"Finders Keepers"},"__v":0},{"text":"#man #car #way #work #me #black #suit #style #model #handsome #cool #cute #laugh #smile #happy #best #business #ph… http://t.co/fou3eJQQz1","tweetID_str":"560874041901604865","tweetID":560874041901604860,"_id":"54ca82adc409ce4b0555541c","created":"2015-01-29T18:57:49.976Z","hashtags":["man","car","way","work","me","black","suit","style","model","handsome","cool","cute","laugh","smile","happy","best","business","ph"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/455050173521989633/FB07Wzrh_normal.jpeg","screen_name":"lifeoflawyers","name":"Lawyer Life"},"__v":0},{"text":"New @kickstarter campaign with #smarttech from #xRemote home automation! http://t.co/nx0Umdkdym #tech #gadgets #cool http://t.co/BmoTYREBBg","tweetID_str":"560874093722206208","tweetID":560874093722206200,"_id":"54ca82adc409ce4b0555541b","created":"2015-01-29T18:57:49.975Z","hashtags":["smarttech","xRemote","tech","gadgets","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8if5CiCYAAO4xe.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/3088752180/3d3837f8f877509d546b3b3e43673fd4_normal.jpeg","screen_name":"luismhuang","name":"Luis Huang"},"__v":0},{"text":"How did I become an expert on Startup Weekend events ... I`m having an advice chat for SW Blagoevgrad #cool #startupweekend #mentor #fun","tweetID_str":"560874110423937024","tweetID":560874110423937000,"_id":"54ca82adc409ce4b0555541a","created":"2015-01-29T18:57:49.974Z","hashtags":["cool","startupweekend","mentor","fun"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/556967424420233217/G1-MNyI2_normal.jpeg","screen_name":"Naloria","name":"Eva Piperevska"},"__v":0},{"text":"#cool","tweetID_str":"560874124890083328","tweetID":560874124890083300,"_id":"54ca82adc409ce4b05555419","created":"2015-01-29T18:57:49.974Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/545455417959383041/9RPL15oH_normal.jpeg","screen_name":"GivemeSum_Moore","name":"Tanner Moore"},"__v":0},{"text":"\"\"Flor De Liz  Via Tumblr\"\" http://t.co/7kLPqCPwM8 #cool #viral","tweetID_str":"560874205462659072","tweetID":560874205462659100,"_id":"54ca82adc409ce4b05555418","created":"2015-01-29T18:57:49.973Z","hashtags":["cool","viral"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/1474850309/virus_sign_normal.jpg","screen_name":"El_Viralo","name":"El Viralo"},"__v":0},{"text":"#Me #Happy #Beautiful #Picoftheday #Nofilter #Hair #Sun #Cool #Nature #Colorful #Nikon #L #310… http://t.co/q8c4jolWSb","tweetID_str":"560874311863767042","tweetID":560874311863767040,"_id":"54ca82adc409ce4b05555417","created":"2015-01-29T18:57:49.972Z","hashtags":["Me","Happy","Beautiful","Picoftheday","Nofilter","Hair","Sun","Cool","Nature","Colorful","Nikon","L"],"media":{"media_url":"http://instagram.com/p/yct-NcHXHk/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/556744572101857280/m6w9hh_w_normal.jpeg","screen_name":"fislami3","name":"Fatos™"},"__v":0},{"text":"Microsoft is definitely on a roll, with #HoloLens and in general: http://t.co/qZz1V4eR05 #cool","tweetID_str":"560874335183728640","tweetID":560874335183728640,"_id":"54ca82adc409ce4b05555416","created":"2015-01-29T18:57:49.971Z","hashtags":["HoloLens","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/520263103498301442/VjlmQr1o_normal.jpeg","screen_name":"levordashka","name":"Ana Levordashka"},"__v":0},{"text":"Good to see an early Triumph Tiger being used as a daily in Dublin #triumphtiger #classicbike #everyday #cool http://t.co/nO7AhDOcrk","tweetID_str":"560874388049129472","tweetID":560874388049129500,"_id":"54ca82adc409ce4b05555415","created":"2015-01-29T18:57:49.970Z","hashtags":["triumphtiger","classicbike","everyday","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8igSL7IEAEQW8B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/544951250153127936/B52YpwXy_normal.jpeg","screen_name":"gentlemancars","name":"Gentleman Classics"},"__v":0},{"text":"I just slept for 45 minutes straight in physics #cool","tweetID_str":"560874388128825344","tweetID":560874388128825340,"_id":"54ca82adc409ce4b05555414","created":"2015-01-29T18:57:49.969Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555593693387034624/KCG1Jnim_normal.jpeg","screen_name":"zajacingoff","name":"Emma"},"__v":0},{"text":"The Return Art Print by Danny Haas | Society6 #art  #design #awesome #print  #poster  #color  #cool  http://t.co/oLu9wp4llz","tweetID_str":"560873087550640128","tweetID":560873087550640100,"_id":"54ca8210c409ce4b0555527b","created":"2015-01-29T18:55:12.118Z","hashtags":["art","design","awesome","print","poster","color","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/525813967701045248/iR-yr-GU_normal.png","screen_name":"pine_blog","name":"Design Pine"},"__v":0},{"text":"#moskow #travel #beautiful #moment #moments #goodday #gooddaytoday #good #cool #christmastime #holliday #snow #cold… http://t.co/LaVQueM6Hi","tweetID_str":"560873171080208386","tweetID":560873171080208400,"_id":"54ca8210c409ce4b0555527a","created":"2015-01-29T18:55:12.117Z","hashtags":["moskow","travel","beautiful","moment","moments","goodday","gooddaytoday","good","cool","christmastime","holliday","snow","cold"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifLWqIAAA2weu.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/436822368183267329/3i-8SF9a_normal.png","screen_name":"InstaGorkyPark","name":"Фото. Парк Горького"},"__v":0},{"text":",, wenn ein pokemon trainer ein sonderbonbon isst, wächst ihm ein zweiter schwanz \"\n@DerDieDasAlex 2015 #pokemon #cool #dollarzeichen #cool2","tweetID_str":"560873175031226368","tweetID":560873175031226400,"_id":"54ca8210c409ce4b05555279","created":"2015-01-29T18:55:12.116Z","hashtags":["pokemon","cool","dollarzeichen","cool2"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/559346105063059456/9qN3b_Ff_normal.jpeg","screen_name":"FrapFrapYo","name":"Nico-san"},"__v":0},{"text":"RT @TomCoronel: Todays new toy #spaceship 🚀 #testBMWi lucky man #i8 #cool 👍👍😜 you like? Retweet 😘 check doors 😜🙈 http://t.co/4H6CoO6Va4","tweetID_str":"560873229485895680","tweetID":560873229485895700,"_id":"54ca8210c409ce4b05555278","created":"2015-01-29T18:55:12.115Z","hashtags":["spaceship","testBMWi","i8","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8gOc9pCcAEgYAz.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/478963333216104448/h12MKjLI_normal.jpeg","screen_name":"MLampaert","name":"Martin Lampaert"},"__v":0},{"text":"Amores da minha vida. &lt;3333 #mãe #mother #girlfriend #happiness #sun #cool @ Condominio Metropolis.… http://t.co/np8Hy8v5ZM","tweetID_str":"560873243557761024","tweetID":560873243557761000,"_id":"54ca8210c409ce4b05555277","created":"2015-01-29T18:55:12.114Z","hashtags":["mãe","mother","girlfriend","happiness","sun","cool"],"media":{"media_url":"http://instagram.com/p/yctfEaSwS_/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/481200826573004801/wQ0kKJxA_normal.jpeg","screen_name":"AngelicaBFR","name":"C-3PO"},"__v":0},{"text":"#Friendship #blue #tongue #we #too #cool http://t.co/6JdT2pA13J","tweetID_str":"560873255406686208","tweetID":560873255406686200,"_id":"54ca8210c409ce4b05555276","created":"2015-01-29T18:55:12.113Z","hashtags":["Friendship","blue","tongue","we","too","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifOsfIAAARvQz.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/560873374919168000/NOsxnuN4_normal.jpeg","screen_name":"kamileluvs","name":"Kamile"},"__v":0},{"text":"Estas cómodo uachin? JAJA :'D #Oddy #Dog #Comodo #Cute #Boring #Cool #TagsForLikes #L4l http://t.co/zDchkAqMvr","tweetID_str":"560873339737354240","tweetID":560873339737354240,"_id":"54ca8210c409ce4b05555275","created":"2015-01-29T18:55:12.111Z","hashtags":["Oddy","Dog","Comodo","Cute","Boring","Cool","TagsForLikes","L4l"],"media":{"media_url":"http://instagram.com/p/ycth69Exs7/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/556714725594386432/58wdgZNe_normal.jpeg","screen_name":"altote18","name":"Andrees ♧"},"__v":0},{"text":"you can learn German on your #iPhone with this app. http://t.co/hkONpz8hfH It's easy and #cool #ios #education #edtech #apple #rt","tweetID_str":"560873399216377856","tweetID":560873399216377860,"_id":"54ca8210c409ce4b05555274","created":"2015-01-29T18:55:12.110Z","hashtags":["iPhone","cool","ios","education","edtech","apple","rt"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000512696114/6844f7cbd90863f402e6dee85342bf90_normal.jpeg","screen_name":"harryblack81","name":"Harry Black"},"__v":0},{"text":"#cool #lol ;) #best #followback http://t.co/UsHAP4oO8T","tweetID_str":"560873415335501824","tweetID":560873415335501800,"_id":"54ca8210c409ce4b05555273","created":"2015-01-29T18:55:12.110Z","hashtags":["cool","lol","best","followback"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/499096704537210880/uB7NmnvF_normal.png","screen_name":"cett0","name":"Cetto"},"__v":0},{"text":"Oficineando. Modo #work #copy #men #office #cool @ Av. Francisco De Miranda http://t.co/xX4NguaZtA","tweetID_str":"560873418677972993","tweetID":560873418677973000,"_id":"54ca8210c409ce4b05555272","created":"2015-01-29T18:55:12.108Z","hashtags":["work","copy","men","office","cool"],"media":{"media_url":"http://instagram.com/p/yctkN3lxvz/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/1419928258/_C7_9D_CC_8D_CC_8D_CC_8D_CC_8D_D1_94_CC_B2_CC_A3_CC_A3_CC_A3_20L_20U_20I_20S_20_20T_20O_20M_20_C3_81_20S_normal.jpg","screen_name":"luisbuet","name":"Luis Tomàs Buet"},"__v":0},{"text":"#cool #lol ;) #best #followback http://t.co/hfYqkjzh2T","tweetID_str":"560873424349040642","tweetID":560873424349040640,"_id":"54ca8210c409ce4b05555271","created":"2015-01-29T18:55:12.108Z","hashtags":["cool","lol","best","followback"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/499096704537210880/uB7NmnvF_normal.png","screen_name":"cett0","name":"Cetto"},"__v":0},{"text":"#cool #lol ;) #best #followback http://t.co/zOiCOnJzEo","tweetID_str":"560873434776096768","tweetID":560873434776096800,"_id":"54ca8210c409ce4b05555270","created":"2015-01-29T18:55:12.106Z","hashtags":["cool","lol","best","followback"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/499096704537210880/uB7NmnvF_normal.png","screen_name":"cett0","name":"Cetto"},"__v":0},{"text":"se tiran por medio de mis tweets #cool","tweetID_str":"560873487292985344","tweetID":560873487292985340,"_id":"54ca8210c409ce4b0555526f","created":"2015-01-29T18:55:12.105Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/488176143791435776/AGcLbUxl_normal.jpeg","screen_name":"Esther_Plaza76","name":"Esther  Plaza "},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560873509086580737","tweetID":560873509086580740,"_id":"54ca8210c409ce4b0555526e","created":"2015-01-29T18:55:12.103Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/534986614959644673/96U0Bgid_normal.png","screen_name":"MCamTreasures","name":"MCF"},"__v":0},{"text":"When I saw mattress firm up on the \"jimmy johns\" building it made 100000000 times more excited that I'm moving 😓👍 #cool","tweetID_str":"560872473197940736","tweetID":560872473197940740,"_id":"54ca8172c409ce4b055550d0","created":"2015-01-29T18:52:34.576Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/560283326359932928/DNgMBUPm_normal.jpeg","screen_name":"Rachhhh_Lawson","name":"Rachyleeee✨"},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560872589263142912","tweetID":560872589263142900,"_id":"54ca8172c409ce4b055550cf","created":"2015-01-29T18:52:34.575Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/529099624405929984/jJ_YFYS1_normal.png","screen_name":"TGetbay","name":"Tim G"},"__v":0},{"text":"RT @fkthriftdeals: Nice Original pair of 1925 #California #License #Plates http://t.co/tAC4IHH2wh #ebay #ratrod #hotrod #cool #mancave http…","tweetID_str":"560872748525027329","tweetID":560872748525027300,"_id":"54ca8172c409ce4b055550ce","created":"2015-01-29T18:52:34.574Z","hashtags":["California","License","Plates","ebay","ratrod","hotrod","cool","mancave"],"media":{"media_url":"http://pbs.twimg.com/media/B8icJxyCAAAewP3.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/536778472937373696/4a_Txa8m_normal.jpeg","screen_name":"STEEL5757","name":"Dreamchest"},"__v":0},{"text":"RT @fkthriftdeals: Nice Original pair of 1925 #California #License #Plates http://t.co/tAC4IHH2wh #ebay #ratrod #hotrod #cool #mancave http…","tweetID_str":"560872877575405568","tweetID":560872877575405600,"_id":"54ca8172c409ce4b055550cd","created":"2015-01-29T18:52:34.573Z","hashtags":["California","License","Plates","ebay","ratrod","hotrod","cool","mancave"],"media":{"media_url":"http://pbs.twimg.com/media/B8icJxyCAAAewP3.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/548533456901525504/mn5GGrE2_normal.jpeg","screen_name":"PoppyGalore15","name":"angie wilcox"},"__v":0},{"text":"RT @GossKirk: #Cool #Cool #Mandeville currently 20°C @Jamaicaweather #Breezy 😁 #PartlyCloudy #Thursday #GoodMorning… http://t.co/KGFTyOGzkv","tweetID_str":"560872881576767488","tweetID":560872881576767500,"_id":"54ca8172c409ce4b055550cc","created":"2015-01-29T18:52:34.573Z","hashtags":["Cool","Cool","Mandeville","Breezy","PartlyCloudy","Thursday","GoodMorning"],"media":{"media_url":"http://instagram.com/p/ycI-1gFqX2/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555881386112860161/CTmalGc3_normal.jpeg","screen_name":"ArcaneWorld","name":"Λ ℜ ⓒ Λ Ŋ Ξ  Feb 14"},"__v":0},{"text":"Some girl in my class told the teacher she likes to take speed because she's \"reckless\" #cool","tweetID_str":"560872916481347584","tweetID":560872916481347600,"_id":"54ca8172c409ce4b055550cb","created":"2015-01-29T18:52:34.572Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/559521998578012162/eo8B6qCu_normal.jpeg","screen_name":"brianascheffer","name":"Briana Scheffer"},"__v":0},{"text":"#me #selfie #selfshot #portrait #selfportrait #lowpoly #polygon #tri #triapp #art #popart #cool… http://t.co/I2U35FtBOD","tweetID_str":"560872953638707201","tweetID":560872953638707200,"_id":"54ca8172c409ce4b055550ca","created":"2015-01-29T18:52:34.571Z","hashtags":["me","selfie","selfshot","portrait","selfportrait","lowpoly","polygon","tri","triapp","art","popart","cool"],"media":{"media_url":"http://instagram.com/p/yctWrMOXGn/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/557264952059514880/PMm-vXTB_normal.jpeg","screen_name":"eat_sleep_film","name":"Chris"},"__v":0},{"text":"RT @Frankies_Style: #RETWEET\n\n#GAIN WITH #MGWV\n\n#Folllow All #Rters\n\n#COOL _FOLLOWS @Dollhouse @TeamGatito @KimmiOsborne @FairyFriend13 @Is…","tweetID_str":"560873006432780289","tweetID":560873006432780300,"_id":"54ca8172c409ce4b055550c9","created":"2015-01-29T18:52:34.571Z","hashtags":["RETWEET","GAIN","MGWV","Folllow","Rters","COOL"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555938166906302464/gydCx39O_normal.jpeg","screen_name":"roryquinn3","name":" #MGWV/#GAIN / "},"__v":0},{"text":"# #cool #nice #rakı #fellas #pro @ İstiklal Caddesi http://t.co/luPvHLC2IF","tweetID_str":"560873061826973696","tweetID":560873061826973700,"_id":"54ca8172c409ce4b055550c8","created":"2015-01-29T18:52:34.569Z","hashtags":["cool","nice","rakı","fellas","pro"],"media":{"media_url":"http://instagram.com/p/yctZ03CIaB/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/551387383489630209/G0_FxBs2_normal.jpeg","screen_name":"OnurAvb","name":"Onur Çıtak"},"__v":0},{"text":"Check Out This Totally Cool App…And It's Totally FREE! http://t.co/LW8KRfr7bl #comics #dc #awesome #fun","tweetID_str":"560871907101515776","tweetID":560871907101515800,"_id":"54ca80dfc409ce4b05554f5d","created":"2015-01-29T18:50:07.703Z","hashtags":["comics","dc","awesome","fun"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/3122410750/9d3c7548ed5431ae4e1cc2ff72cceffa_normal.jpeg","screen_name":"ComicsAreAwesom","name":"Comics Are Awesome"},"__v":0},{"text":"#statueofliberty #newyork #earthcam #video #cool http://t.co/Hsc9cQFKNl","tweetID_str":"560871810376675329","tweetID":560871810376675300,"_id":"54ca80d5c409ce4b05554f30","created":"2015-01-29T18:49:57.146Z","hashtags":["statueofliberty","newyork","earthcam","video","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/550388700471754752/8Bi_KUga_normal.jpeg","screen_name":"HarpSocial","name":"James Harp"},"__v":0},{"text":"RT @ebayrt: Jake &amp; Elwood Blue Brothers Figures Exclusive ... USD 80 http://t.co/BQfwUmoGE2 #BlueBrothers #cool #love #eBay #eBayUS via @Pa…","tweetID_str":"560871812528349184","tweetID":560871812528349200,"_id":"54ca80d5c409ce4b05554f2f","created":"2015-01-29T18:49:57.146Z","hashtags":["BlueBrothers","cool","love","eBay","eBayUS"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/426926262263615489/yFooyIOD_normal.jpeg","screen_name":"WodkeHawkinson","name":"Wodke Hawkinson"},"__v":0},{"text":"Y dijo que tomaba poquito #Jajajajaja #Cool","tweetID_str":"560871827694948352","tweetID":560871827694948350,"_id":"54ca80d5c409ce4b05554f2e","created":"2015-01-29T18:49:57.146Z","hashtags":["Jajajajaja","Cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/528784337542459392/9ENtgCdu_normal.jpeg","screen_name":"MiguelBosch_n3","name":"Miguel  Bosch "},"__v":0},{"text":"@BigAlsAquarium @BigAls_Pets 3 Crested Geckos left!!! These guys are #cute $79.99ea #cool #reptiles http://t.co/gGP2TiouPW","tweetID_str":"560871890764701696","tweetID":560871890764701700,"_id":"54ca80d5c409ce4b05554f2d","created":"2015-01-29T18:49:57.145Z","hashtags":["cute","cool","reptiles"],"media":{"media_url":"http://pbs.twimg.com/media/B8ieAbGIMAAkBJ2.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/497082685223743488/VjXuQwM6_normal.jpeg","screen_name":"BigalsWhitby","name":"BigAls Whitby"},"__v":0},{"text":"Nieuwe ava #cool #gisteren http://t.co/2xTxDD2qW9","tweetID_str":"560871937849954305","tweetID":560871937849954300,"_id":"54ca80d5c409ce4b05554f2c","created":"2015-01-29T18:49:57.145Z","hashtags":["cool","gisteren"],"media":{"media_url":"http://pbs.twimg.com/media/B8ieCMSCMAA4R1c.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/560871768655925249/1nmcallr_normal.jpeg","screen_name":"lottebijlsma","name":"Lotje"},"__v":0},{"text":"Partition! 👃👅👄👂👀\n\n#me #boystyle #cool #followme #mensfashion #fashiongram #teen #boys #menstyle… http://t.co/16FZMhcdRT","tweetID_str":"560871945248714752","tweetID":560871945248714750,"_id":"54ca80d5c409ce4b05554f2b","created":"2015-01-29T18:49:57.144Z","hashtags":["me","boystyle","cool","followme","mensfashion","fashiongram","teen","boys","menstyle"],"media":{"media_url":"http://instagram.com/p/ycs5VTOieG/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/497467367694561280/Mt7cy4Bo_normal.jpeg","screen_name":"ciotti171","name":"Manuel Ciotti"},"__v":0}]
-	
+*/
 }])
 app.directive('categoryWidget', [function() {
 return {
 	restrict: 'E',
 	link: function(scope, element, attrs) {
-		m.render(element[0], categoryWidget(scope.world.landmarkCategories));
+		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
+			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
+		})
 		
 		function categoryWidget(landmarkCategories) {
-			return m('.marble-page.category-widget',
-				landmarkCategories.map(categoryButton));
+			return m('.category-widget', 
+				groupCategories(landmarkCategories))
 		}
 		
-		function categoryButton(landmarkCategory, index, landmarkCategories) {
-			return m('button', {
-				style: {width: 100 / landmarkCategories.length + '%'},
-				onclick: emitCategory(landmarkCategory.name)
-			}, landmarkCategory.name);
+		function groupCategories(landmarkCategories) {
+			if (landmarkCategories.length < 4) {
+				return buttonGroup(landmarkCategories); //3x1 grid
+			} else if (landmarkCategories.length === 4) { //2x2 grid
+				return [
+					buttonGroup(landmarkCategories.slice(0, 2)),
+					buttonGroup(landmarkCategories.slice(2))
+				]
+			} else { 
+				return [ //3x2, 3x3 grid
+					buttonGroup(landmarkCategories.slice(0, 3)),
+					buttonGroup(landmarkCategories.slice(3))
+				]
+			}
+		}
+		
+		function buttonGroup(categoryList) {
+			return m('.category-btn-group', categoryList.map(categoryButton));
+		}
+		
+		function categoryButton(category, index, categoryList) {
+			return m('.category-btn', {
+				style: {width: 100 / categoryList.length + '%'},
+				colspan: 6/categoryList.length,
+				onclick: emitCategory(category.name),
+				class: scope.selectedCategory === category.name ? 'selected-category' : null
+			}, [
+			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
+			category.name]);
 		}
 		
 		function emitCategory(landmarkCategoryName) {
-			return function () {
+			return function (event) {
+				event.stopPropagation();
 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
 			}
 		}
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -22669,8 +22984,8 @@ zoomControl.style.left = "1%";
 zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
-	var style = styleManager;
-	$scope.worldURL = $routeParams.worldURL;  
+var style = styleManager;
+$scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
 
@@ -22742,7 +23057,7 @@ $scope.loadWorld = function(data) {
 			}
 		}
 		
-		var zoomLevel = 19;
+		var zoomLevel = 18;
 		
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
@@ -23057,7 +23372,11 @@ function initLandmarks(data) {
 		if (now.isAfter(startTime) && now.isBefore(endTime)) {
 			return 'Now';
 		} else if (now.isBefore(startTime)) {
-			return 'Upcoming';
+			if (now.isSame(startTime, 'day')) {
+				return 'Today';
+			} else {
+				return 'Upcoming';
+			}
 		} else if (now.isAfter(startTime)) {
 			return 'Past';
 		}
@@ -23066,32 +23385,25 @@ function initLandmarks(data) {
 		}
 	})
 	console.log(groups);
-	$scope.places = groups['Places'];
-	$scope.upcoming = groups['Upcoming'];
-	$scope.past = groups['Past'];
-	$scope.now = groups['Now'];
-	$scope.landmarks = data.landmarks;
-	
-	angular.forEach($scope.landmarks, function(landmark, index, landmarks) {
-		if (landmark.category && landmark.category.hiddenPresent === true) {
-		  	//dont include
-		} else {
-		map.addMarker(landmark._id, {
-			lat:landmark.loc.coordinates[1],
-			lng:landmark.loc.coordinates[0],
-			draggable: false,
-			message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-            icon: {
-            	iconUrl: 'img/marker/bubble-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor: [0, -40] 
-            },
-			_id: landmark._id
-		});
-		}
-	});
+	$scope.places = groups['Places'] || [];
+	$scope.upcoming = _.compact([].concat(groups['Upcoming'], groups['Today']));
+	$scope.past = groups['Past'] || []; 
+	$scope.now = groups['Now'] || [];
+	$scope.landmarks = data.landmarks || [];
+	$scope.today = groups['Today'] || [];
+	console.log($scope.upcoming);
+		
+	if ($scope.now.length > 0) {
+		var tempMarkers = [].concat($scope.places, $scope.now);
+	} else if ($scope.today.length > 0) {
+		var tempMarkers = [].concat($scope.places, $scope.today);
+	} else {
+		var tempMarkers = [].concat($scope.places);
+	}
+	//markers should contain now + places, if length of now is 0, 
+	// upcoming today + places
+
+	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 }
 
 function markerFromLandmark(landmark) {
@@ -23119,6 +23431,7 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 		map.setCenterFromMarkers(markers);
 		map.setMarkers(markers);
 		$scope.aperture.set('full');
+		$scope.selectedCategory = landmarkCategoryName;
 	} else {
 		//handle no landmarks in category
 	}

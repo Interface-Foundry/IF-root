@@ -17,7 +17,8 @@ $scope.$on('$viewContentLoaded', function() {
 });
 
 // @IFDEF PHONEGAP
-var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(3, function() {
+	console.log('$routeChangeSuccess');
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
@@ -125,6 +126,19 @@ $scope.share = function(platform) {
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
   );
 };
+
+//@IFDEF PHONEGAP
+$scope.fbLogin = function() {
+	facebookConnectPlugin.login(['public_profile', 'email'], 
+	function(success) {
+		console.log('fb success', arguments)}, 
+	function(failure) {
+		console.log('failure', arguments)}
+	)
+}
+
+//@ENDIF
+
 
 //@IFDEF IBEACON
 if (beaconManager.supported == true) {

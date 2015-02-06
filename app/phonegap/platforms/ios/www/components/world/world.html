@@ -9,14 +9,22 @@
 		<div class="world-title noPreventDefault" fit-font>
 				<span class="vertical-middle noPreventDefault">{{world.name}}</span>
 		</div>
+		<category-widget ng-if="::category" ng-show="aperture.state==='aperture-full'" class="toolbar-category-widget"></category-widget>	
 	</div>
 
 <div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
 	<div class="surface bg-clear">
-	<category-widget ng-if="category"></category-widget>	
-		
+	
 	<!--DESCRIPTION-->
 	<div ng-include="'components/world/templates/description.html'" class="marble-page"></div>
+
+	<div class="marble-page" ng-if="category">
+			<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+			<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
+			Categories
+			</header>
+			<category-widget></category-widget>
+	</div>
 
 	<!---yelp-->
 	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
@@ -44,33 +52,6 @@
 
 	<!---nearby -->
 	<div ng-include="nearby==true ? 'components/world/templates/nearby.html' : null" class="marble-page"></div>
-
-	<!--explore-->
-	<!--
-<ul ng-style="{'background-color': style.bodyBG_color}"
-		class="clearfix" ng-show="landmarks">
-		<div class="col-xs-12 widget_margin">
-			<h4 class="category-heading" ng-style="{color: style.categoryTitle_color}">Explore</h4>
-		</div>
-		<li ng-repeat="landmark in landmarks" 
-			class="col-sm-6 col-xs-12 landmark">
-			<a ng-href="/#/w/{{world.id}}/{{landmark.id}}">
-				<div class="media card" ng-style="{'background-color': style.cardBG_color}">
-					<img ng-src="{{landmark.avatar}}" class="avatar media-object" ng-cloak> 
-					<div class="media-body">
-						<h3 class="media-heading" ng-style="{color: style.landmarkTitle_color}" ng-cloak>
-							<span>{{ landmark.name }}
-							<small style="color:#CCC">{{landmark.time.start | date: 'shortTime'}}</small></span>
-						</h3>
-						<span class="media-body-text" ng-cloak>{{landmark.summary}}</span>
-					</div>
-				</div>
-			</a>
-		</li>
-	</ul>
--->
-	
-	
 
 	<!--CLAIM WORLD-->
 	<div ng-show="world.source_meetup.id && !world.permissions.ownerID">

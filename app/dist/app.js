@@ -22405,7 +22405,6 @@ link: function(scope, element, attrs) {
 		} else if (cache) {
 			m.render(element[0], scheduleTree(cache));
 		}
-		
 	}
 	
 	//schedule form is

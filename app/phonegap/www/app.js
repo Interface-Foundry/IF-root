@@ -20990,7 +20990,8 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
-var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(3, function() {
+	console.log('$routeChangeSuccess');
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
@@ -21095,6 +21096,15 @@ $scope.share = function(platform) {
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
   );
 };
+
+$scope.fbLogin = function() {
+	facebookConnectPlugin.login(['public_profile', 'email'], 
+	function(success) {
+		console.log('fb success', arguments)}, 
+	function(failure) {
+		console.log('failure', arguments)}
+	)
+}
 
 lockerManager.getCredentials().then(function(credentials) {
 userManager.signin(credentials.username, credentials.password).then(function(success) {
@@ -22491,7 +22501,6 @@ link: function(scope, element, attrs) {
 		} else if (cache) {
 			m.render(element[0], scheduleTree(cache));
 		}
-		
 	}
 	
 	//schedule form is
