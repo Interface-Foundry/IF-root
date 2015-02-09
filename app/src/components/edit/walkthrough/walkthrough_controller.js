@@ -71,47 +71,47 @@ $scope.pictureSelect = function($files) {
 }
 
 $scope.selectMapTheme = function(name) {
-		var mapThemes = {
-			arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-			fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-			sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-			urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
-		};
-	
-		if (typeof name === 'string') {
-			$scope.mapThemeSelect = name;
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
-			
-			$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
-			
-			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
-			//	$scope.setThemeFromMap();
-			$scope.setThemeFromMap(name);
-			//}
-		}
+	var mapThemes = {
+		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
+		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
+		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
+		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
+	};
+
+	if (typeof name === 'string') {
+		$scope.mapThemeSelect = name;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		
+		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
+		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		
+		//if ($scope.style.hasOwnProperty('navBG_color')==false) {
+		//	$scope.setThemeFromMap();
+		$scope.setThemeFromMap(name);
+		//}
+	}
 }
 
 $scope.setThemeFromMap = function(name) {
-switch (name) { 
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-}
-console.log($scope.style)
+	switch (name) { 
+		case 'urban':
+			angular.extend($scope.style, themeDict['urban']);
+			break;
+		case 'sunset':
+			angular.extend($scope.style, themeDict['sunset']);
+			break;
+		case 'fairy':
+			angular.extend($scope.style, themeDict['fairy']);
+			break;
+		case 'arabesque':
+			angular.extend($scope.style, themeDict['arabesque']);
+			break;
+	}
+	console.log($scope.style)
 
-    db.styles.create($scope.style, function(response){
-        console.log(response);
-    });
+	    db.styles.create($scope.style, function(response){
+	        console.log(response);
+	    });
 }	
 	
 $scope.saveAndExit = function() {
@@ -170,110 +170,138 @@ $scope.save = function() {
 }
 
 var firstWalk = [
-	{title: 'Need a hand?',
-	caption: 'If you haven’t built a bubble before, we can walk you through it.',
-	height: 0,
-	view: '0.html',
-	valid: function() {return true},
-	skip: false},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Location', 
-	caption: 'Find its location',
-	view: 'location.html',
-	height: 290,
-	valid: function() {return $scope.world.hasLoc},
-	skip: false},
-	{title: 'Name',
-	caption: 'What\'s your bubble named?',
-	view: 'name.html',
-	height: 62,
-	valid: function() {return $scope.form.worldName.$valid},
-	skip: false},
-	{title: 'Time',
-	caption: 'Give it a start and end time',
-	view: 'time.html',
-	height: 88,
-	valid: function() {return $scope.form.time.$valid},
-	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
-	skip: true},
-	{title: 'Picture',
-	caption: 'Upload a picture for your bubble',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
+	{
+		title: 'Need a hand?',
+		caption: 'If you haven’t built a bubble before, we can walk you through it.',
+		height: 0,
+		view: '0.html',
+		valid: function() {return true},
+		skip: false
 	},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done.html',
-	height: 200,
-	skip: false}
+	{
+		title: 'Kind',
+		caption: 'What kind of bubble is it?',
+		view: 'kind.html',
+		height: 220,
+		valid: function() {return typeof $scope.world.category == "string"},
+		skip: false
+	},
+	{
+		title: 'Location', 
+		caption: 'Find its location',
+		view: 'location.html',
+		height: 290,
+		valid: function() {return $scope.world.hasLoc},
+		skip: false
+	},
+	{
+		title: 'Name',
+		caption: 'What\'s your bubble named?',
+		view: 'name.html',
+		height: 62,
+		valid: function() {return $scope.form.worldName.$valid},
+		skip: false
+	},
+	{
+		title: 'Time',
+		caption: 'Give it a start and end time',
+		view: 'time.html',
+		height: 88,
+		valid: function() {return $scope.form.time.$valid},
+		jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
+		skip: true
+	},
+	{
+		title: 'Picture',
+		caption: 'Upload a picture for your bubble',
+		view: 'picture.html',
+		height: 194,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Maps',
+		caption: 'Choose a map',
+		view: 'maptheme.html',
+		height: 426,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Hashtag',
+		caption: 'Connect your bubble\'s social media',
+		view: 'hashtag.html',
+		height: 132,
+		valid: function() {return true},
+		skip: true,
+	},
+	{
+		title: 'Done!',
+		caption: 'Now spread the word :)',
+		view: 'done.html',
+		height: 200,
+		skip: false
+	}
 ];
 
 var meetupWalk = [
 	//0 intro
-	{title: 'Claim your Meetup',
-	caption: "We'll use your Meetup group to create a bubble.",
-	view:'0.html',
-	height: 0,
-	valid: function() {return true},
-	skip: false
+	{
+		title: 'Claim your Meetup',
+		caption: "We'll use your Meetup group to create a bubble.",
+		view:'0.html',
+		height: 0,
+		valid: function() {return true},
+		skip: false
 	},
 	//1 
-	{title: 'Confirm',
-	caption: 'Make sure this information from Meetup.com is correct',
-	view: 'meetup_confirm.html',
-	height: 300,
-	valid: function() {return true},
-	skip: false
+	{
+		title: 'Confirm',
+		caption: 'Make sure this information from Meetup.com is correct',
+		view: 'meetup_confirm.html',
+		height: 300,
+		valid: function() {return true},
+		skip: false
 	},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
+	{
+		title: 'Kind',
+		caption: 'What kind of bubble is it?',
+		view: 'kind.html',
+		height: 220,
+		valid: function() {return typeof $scope.world.category == "string"},
+		skip: false
 	},
-	{title: 'Picture',
-	caption: 'Upload a picture',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done_meetup.html',
-	height: 200,
-	skip: false}
+	{
+		title: 'Hashtag',
+		caption: 'Connect your bubble\'s social media',
+		view: 'hashtag.html',
+		height: 132,
+		valid: function() {return true},
+		skip: true,
+	},
+	{
+		title: 'Picture',
+		caption: 'Upload a picture',
+		view: 'picture.html',
+		height: 194,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Maps',
+		caption: 'Choose a map',
+		view: 'maptheme.html',
+		height: 426,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Done!',
+		caption: 'Now spread the word :)',
+		view: 'done_meetup.html',
+		height: 200,
+		skip: false
+	}
 ];
 
 $scope.walk = firstWalk;
@@ -284,12 +312,12 @@ function setUpProgress() {
 	var i = 0;
 	if ($scope.walk) {
 		while (i < $scope.walk.length) {
-		$scope.progress[i] = {status: ''};
-		i++;
-	}
+			$scope.progress[i] = {status: ''};
+			i++;
+		}
 	}
 	
-$scope.progress[$scope.position].status = 'active';
+	$scope.progress[$scope.position].status = 'active';
 
 }
 
