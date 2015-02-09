@@ -22,12 +22,13 @@
 
 .walkthrough {
 	position: relative;
-	display: inline-block;
-	vertical-align: middle;
+	/*display: inline-block;*/
+	/*vertical-align: middle;*/
 	width: 496px;
-	
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 	text-align: left;
-	
 	background: #FFF;
 	border-radius: 2px;
 	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
