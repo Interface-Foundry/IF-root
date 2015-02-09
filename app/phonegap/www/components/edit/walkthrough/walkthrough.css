@@ -292,7 +292,7 @@ ul.walkthrough-grid > li > label {
 }
 
 .walk-location-btn {
-	width: 464px;
+	/*width: 464px;*/
 	height: 120px;
 	
 	margin: 0px 16px;
