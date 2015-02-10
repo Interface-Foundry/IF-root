@@ -20963,7 +20963,11 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 							m: {
 								lat: tempLat,
 								lng: tempLng,
-								draggable: false
+								icon: {
+									iconUrl: 'img/marker/bubble-marker-50.png',
+									iconSize: [35, 67]
+								},
+								draggable: true
 							}}});		
 		$scope.center.lat = tempLat;
 		$scope.center.lng = tempLng;

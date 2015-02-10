@@ -638,7 +638,7 @@ ul.walkthrough-grid > li > label {
 }
 
 .walk-location-container {
-	width: 464px;
+	/*width: 464px;*/
 	margin: 0px 16px;
 	
 	background-color: #fafdff;
@@ -706,8 +706,9 @@ ul.walkthrough-grid > li > label {
 }
 
 .loading-spin {
-	left: 211px;
-	top: 91px;
+	left: 50%;
+	transform: translateX(-50%);
+	top: 66px; /*172/2 - 40/2*/
 	width: 40px;
 	height: 40px;
 
@@ -760,8 +761,8 @@ ul.walkthrough-grid > li > label {
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	width: 462px;
-	height: 222px;
+	width: 100%;
+	height: 172px;
 	background-color: #3f51b5;
 	z-index:1000;
 }
