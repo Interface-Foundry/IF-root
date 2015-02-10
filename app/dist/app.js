@@ -20582,12 +20582,7 @@ $scope.pictureSelect = function($files) {
 }
 
 $scope.selectMapTheme = function(name) {
-	var mapThemes = {
-		arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-		fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-		sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-		urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
-	};
+	var mapThemes = $scope.global.mapThemes;
 
 	if (typeof name === 'string') {
 		$scope.mapThemeSelect = name;
@@ -20616,6 +20611,12 @@ $scope.setThemeFromMap = function(name) {
 			break;
 		case 'arabesque':
 			angular.extend($scope.style, themeDict['arabesque']);
+			break;
+		case 'haze':
+			angular.extend($scope.style, themeDict['haze']);
+			break;
+		case 'mimis':
+			angular.extend($scope.style, themeDict['mimis']);
 			break;
 	}
 	console.log($scope.style)
