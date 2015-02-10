@@ -359,17 +359,16 @@ ul.walkthrough-grid > li > label {
 }
 
 .walkthrough-maps {
-	width: 496px;
+	/*width: 496px;*/
 	overflow: auto;
+	text-align: center;
 }
 
 .walkthrough-maps-item {
 	width: 224px;
-	
-	
-	float: left;
+	/*float: left;*/
 	margin: 0px 0px 11px 16px;
-	
+	display: inline-block;
 }
 
 .walkthrough-maps-item.selected .walkthrough-maps-img {
@@ -459,4 +458,8 @@ ul.walkthrough-grid > li > label {
 	float: left; 
 	margin-right: 32px;
 	font-size: 16px;
+}
+
+.time-wrapper {
+	text-align: center;
 }
