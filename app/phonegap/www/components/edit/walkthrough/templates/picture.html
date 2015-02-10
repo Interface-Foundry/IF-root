@@ -1,19 +1,10 @@
 <div class="walkthrough-pic-upload">
-	<div class="pic-preview">
-		<img class="pic-preview-img" 
+	<div class="pic-preview circle-pic" ng-show="world.avatar">
+		<img class="pic-preview-img circle-pic" 
 			ng-src="{{world.avatar}}" 
-			ng-show="world.avatar">
-		<div class="preview-img-well"
-			ng-hide="world.avatar"
 			ng-file-select
-			ng-file-drop
-			ng-file-change="pictureSelect($files)">
-			<p class="vertical-middle">
-				Upload<br>
-				an<br>
-				Image
-			</p>
-		</div>
+			ng-file-change="pictureSelect($files)"
+			ng-file-drop data-accept="image/*">
 	</div>
 	<div class="walkthrough-pic-upload-body"
 		ng-file-select
@@ -25,8 +16,5 @@
 			or<br></span>
 			<span class="blue500-text">Select a File</span>
 		</p>
-	</div>
-	<div class="walkthrough-progress">
-		<div ng-style="{'width': picProgress}"></div>
 	</div>
 </div>
