@@ -16,14 +16,15 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
-// @IFDEF PHONEGAP
-var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(3, function() {
-	console.log('$routeChangeSuccess');
+var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
+	console.log('$locationChangeSuccess');
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-// @ENDIF
 
+$scope.$on('viewTabSwitch', function(event, tab) {
+	$scope.viewTab = tab;
+})
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -61,10 +62,10 @@ $scope.logout = function() {
       //$location.url('/');
 }
 
-$scope.sendFeedback = function(){
+$scope.sendFeedback = function(text) {
 
     var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
+      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
     }
 
     $http.post('feedback', data).
@@ -76,14 +77,6 @@ $scope.sendFeedback = function(){
       error(function(err){
         console.log('there was a problem');
     });
-    
-    if ($scope.feedback) {
-        $scope.feedback.on = false;
-    } else {
-        $scope.feedback = {
-	        on: false
-        }
-    }
 };
 
 /*

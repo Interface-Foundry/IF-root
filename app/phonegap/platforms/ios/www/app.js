@@ -20990,11 +20990,16 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
-var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(3, function() {
-	console.log('$routeChangeSuccess');
+var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
+	console.log('$locationChangeSuccess');
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
+
+$scope.$on('viewTabSwitch', function(event, tab) {
+	$scope.viewTab = tab;
+})
+
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -21118,6 +21123,50 @@ userManager.signin(credentials.username, credentials.password).then(function(suc
 	console.log('credential error', error); 
 });
 }]);
+app.directive('exploreView', ['worldTree', function(worldTree) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			scope.loadState = 'loading';
+			worldTree.getNearby().then(function(data) {
+				scope.$evalAsync(function(scope) {
+					scope.homeBubbles = data['150m'] || [];
+					scope.nearbyBubbles = data['2.5km'] || [];			
+					scope.loadState = 'success';
+				});
+			}, function(reason) {
+				//failure
+				$scope.loadState = 'failure';
+			});
+			
+			scope.closeExploreView = function() {
+				scope.$emit('viewTabSwitch', 'home');
+			}
+		},
+		templateUrl: 'components/nav/exploreView.html' 
+	}
+}])
+app.directive('navTabs', ['$rootScope', function($rootScope) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			scope.selected = 'home';
+			scope.select = function (tab) {
+				scope.$emit('viewTabSwitch', tab);
+			}
+			
+			$rootScope.$on('viewTabSwitch', function(event, tab) {
+				scope.selected=tab; 
+			})
+		},
+		template: 
+'<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
+'<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')"></button>'+
+'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+	}
+}])
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});

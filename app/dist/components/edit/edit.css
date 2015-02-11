@@ -4,7 +4,7 @@
 	bottom: 0px;
 	width: 40%;
 	
-	margin-top: 40px;
+	margin-top: 48px;
 	overflow: hidden;
 }
 
@@ -25,7 +25,7 @@ ul.edit-toolbar {
 	position: absolute;
 	pointer-events: none !important;
 	right: 0px;
-	top: 40px;
+	top: 48px;
 	width: 100%;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
