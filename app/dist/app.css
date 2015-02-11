@@ -2685,6 +2685,7 @@ nav ul {
   outline: none;
   padding: none;
   background: none;
+  cursor: pointer;
 }
 .view-tab.selected:after {
   content: '';

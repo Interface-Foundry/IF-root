@@ -50,7 +50,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<script src="app.js"></script>
 </head>
 
-<body ng-class="[aperture.state, drawerOn&&'drawer']" ng-click="closeOverlays()">
+<body ng-class="[aperture.state]" ng-click="closeOverlays()">
 
 <ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
 	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
@@ -93,6 +93,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 <explore-view class="explore-view" ng-show="viewTab == 'explore'"></explore-view>
 <search-view class="search-view" ng-show="viewTab == 'search'"></search-view>
+<drawer></drawer>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

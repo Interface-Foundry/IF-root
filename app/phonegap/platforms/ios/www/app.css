@@ -4,7 +4,7 @@
 	bottom: 0px;
 	width: 40%;
 	
-	margin-top: 40px;
+	margin-top: 48px;
 	overflow: hidden;
 }
 
@@ -25,7 +25,7 @@ ul.edit-toolbar {
 	position: absolute;
 	pointer-events: none !important;
 	right: 0px;
-	top: 40px;
+	top: 48px;
 	width: 100%;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
@@ -1126,7 +1126,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	margin-top: 56px;
+	margin-top: 64px;
 	color: #FFF;
 	z-index: 10;
 }
@@ -1970,8 +1970,8 @@ body {
 }
 
 .navfix {
-	padding-top: 40px;
-	padding-top: 56px;
+	padding-top: 48px;
+	padding-top: 64px;
 }
 
 #scrim {
@@ -2351,7 +2351,7 @@ transform:translateX(100%);
 #drawer {
   position: fixed;
   top: 0;
-  left: -280px;
+  right: -280px;
   width: 280px;
   height: 100%;
   background: #FFF;
@@ -2365,10 +2365,10 @@ transform:translateX(100%);
   z-index: 1002;
 }
 .drawer #drawer {
-  -ms-transform: translateX(100%);
-  -webkit-transform: translateX(100%);
-  -moz-transform: translateX(100%);
-  transform: translateX(100%);
+  -ms-transform: translateX(-100%);
+  -webkit-transform: translateX(-100%);
+  -moz-transform: translateX(-100%);
+  transform: translateX(-100%);
   opacity: 1;
   /*-webkit-perspective: 1000;*/
   box-shadow: 0px 0px 19px 10px rgba(0, 0, 0, 0.3), 0px 0px 6px 2px rgba(0, 0, 0, 0.2);
@@ -2416,47 +2416,79 @@ transform:translateX(100%);
   transition: 0.35s linear all;
 }
 .drawer-header {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: auto;
-  background: #FFF;
-  z-index: 3;
-}
-.drawer-label {
-  display: block;
-  width: 100%;
-  height: 40px;
-  background: #F2F2F2;
-  padding-left: 48px;
-  margin: 0;
-  font-size: 20px;
-  font-weight: 500;
-  line-height: 40px;
-  height: 55px;
-  padding-top: 15px;
-}
-.drawer-link {
   position: relative;
-  display: block;
   width: 100%;
-  height: 40px;
-  padding-left: 48px;
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 40px;
-  color: #555;
+  height: 72px;
+  border-bottom: 1px solid #CCC;
+  cursor: pointer;
 }
-.drawer-link:hover {
+.drawer-header:hover {
   background: #5C6BC0;
   color: #FFF;
 }
-span.drawer-link-icon {
+.drawer-header strong {
   position: absolute;
-  left: 20px;
-  font-size: 16px;
-  line-height: 40px;
+  top: 16px;
+  left: 72px;
+}
+.drawer-header em {
+  position: absolute;
+  bottom: 16px;
+  left: 72px;
+}
+.drawer-avatar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+.drawer-item {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  padding: 0px 0px 0px 48px;
+  line-height: 48px;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.drawer-item:hover {
+  background: #5C6BC0;
+  color: #FFF;
+}
+.drawer-item-img {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  height: 24px;
+  width: 24px;
+}
+.drawer-share {
+  background: center / 24px 24px url('img/icons/drawer/share_b.png') no-repeat;
+}
+.drawer-item:hover .drawer-share {
+  background: center / 24px 24px url('img/icons/drawer/share_w.png') no-repeat;
+}
+.drawer-edit {
+  background: center / 24px 24px url('img/icons/drawer/edit_b.png') no-repeat;
+}
+.drawer-item:hover .drawer-edit {
+  background: center / 24px 24px url('img/icons/drawer/edit_w.png') no-repeat;
+}
+.drawer-add {
+  background: center / 24px 24px url('img/icons/drawer/add_b.png') no-repeat;
+}
+.drawer-item:hover .drawer-add {
+  background: center / 24px 24px url('img/icons/drawer/add_w.png') no-repeat;
+}
+.drawer-feedback {
+  background: center / 24px 24px url('img/icons/drawer/feedback_b.png') no-repeat;
+}
+.drawer-item:hover .drawer-feedback {
+  background: center / 24px 24px url('img/icons/drawer/feedback_w.png') no-repeat;
 }
 .nearby-list-label {
   position: relative;
@@ -2528,13 +2560,12 @@ span.nearby-list-icon.loading {
   bottom: 0px;
   left: 0px;
   width: 100%;
-  padding: 0px 4px;
-  height: 20px;
   font-size: 12px;
   line-height: 20px;
   background: #FFF;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  border-top: 1px solid #ccc;
 }
 .nearbyFound .drawer-footer {
   margin-top: -1px;
@@ -2684,7 +2715,7 @@ nav ul {
   left: 0px;
   right: 0px;
   bottom: 0px;
-  z-index: 5000;
+  z-index: 100;
 }
 .user-chip-wrap {
   width: 100%;
@@ -3039,7 +3070,7 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  margin-top: 56px;
+  margin-top: 64px;
 }
 .subnavfix {
   padding-top: 112px !important;

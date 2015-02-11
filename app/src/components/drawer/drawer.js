@@ -68,6 +68,8 @@ scope.feedback = function() {
 	dialogs.showDialog('feedbackDialog.html')
 }
 
+scope.logout = userManager.logout;
+
 		},
 		templateUrl: 'components/drawer/drawer.html' 
 	}
