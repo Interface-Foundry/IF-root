@@ -1117,12 +1117,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	/*@IFDEF WEB*/
 	padding: 88px 0px 76px 0px;
-	/*@ENDIF*/
-	/*@IFDEF PHONEGAP*/
-	padding: 104px 0px 76px 0px;
-	/*@ENDIF*/
 }
 
 .message-nav {
@@ -1131,12 +1126,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	/*@IFDEF WEB*/
 	margin-top: 48px;
-	/*@ENDIF*/
-	/*@IFDEF PHONEGAP*/
-	margin-top: 64px;
-	/*@ENDIF*/
 	color: #FFF;
 	z-index: 10;
 }
@@ -1147,9 +1137,6 @@ text-align: center;
 	height: 48px;
 	right: 0px;
 	top: 40px;
-	/*@IFDEF PHONEGAP*/
-	top: 56px;
-	/*@ENDIF*/
 	border: none;
 	outline: none;
 	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
@@ -1939,12 +1926,7 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
-	/*@IFDEF WEB*/
 	padding-top: 88px;
-	/*@ENDIF*/
-	/*@IFDEF PHONEGAP*/
-	padding-top: 104px;
-	/*@ENDIF*/
 }
 /* app css stylesheet */
 
@@ -1988,9 +1970,6 @@ body {
 
 .navfix {
 	padding-top: 48px;
-	/* @IFDEF PHONEGAP */
-	padding-top: 64px;
-	/* @ENDIF */
 }
 
 #scrim {
@@ -2420,9 +2399,6 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
-  /* @IFDEF PHONEGAP */
-  top: 15px;
-  /* @ENDIF */
   z-index: 1010;
 }
 .drawer-icon {
@@ -2605,10 +2581,6 @@ nav.main-nav {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
-  /*@IFDEF PHONEGAP*/
-  height: 64px;
-  padding-top: 16px;
-  /*@ENDIF*/
 }
 .nav-title {
   display: none;
@@ -2672,9 +2644,6 @@ nav ul {
   opacity: 1;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  /* @IFDEF PHONEGAP */
-  top: 16px;
-  /* @ENDIF */
 }
 .back-button.ng-hide.ng-hide-remove {
   opacity: 0;
@@ -2727,9 +2696,6 @@ nav ul {
   bottom: 0px;
   z-index: -1;
   left: 8px;
-  /*@IFDEF PHONEGAP */
-  height: 64px;
-  /*@ENDIF*/
 }
 .home-tab {
   background: center / 32px 32px url('img/icons/nav/home.png') no-repeat;
@@ -3101,20 +3067,10 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  /* @ifdef WEB */
   margin-top: 48px;
-  /* @endif */
-  /* @ifdef PHONEGAP */
-  margin-top: 64px;
-  /* @endif */
 }
 .subnavfix {
-  /* @ifdef WEB */
   padding-top: 96px !important;
-  /* @endif */
-  /* @ifdef PHONEGAP */
-  padding-top: 112px !important;
-  /* @endif */
 }
 .subnav-header {
   display: block;
@@ -7883,22 +7839,11 @@ input[type="button"].btn-block {
           transition: height .35s ease;
 }
 
-//@IFDEF WEB
 @font-face {
   font-family: 'Glyphicons Halflings';
   src: url('/fonts/glyphicons-halflings-regular.eot');
   src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
-//@ENDIF
-
-//@IFDEF PHONEGAP
-@font-face {
-  font-family: 'Glyphicons Halflings';
-  src: url('fonts/glyphicons-halflings-regular.eot');
-  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
-}
-//@ENDIF 
-
 .glyphicon {
   position: relative;
   top: 1px;
