@@ -265,7 +265,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		
 		//begin loading landmarks
 	worldTree.getLandmarks(data.world._id).then(function(data) {
-		$scope.landmarks = data.landmarks;
+		$scope.landmarks = data;
 					
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
