@@ -1501,14 +1501,14 @@ app.get('/api/:collection', function(req, res) {
             if (req.query.limit){
               var Twlimit = parseInt(req.query.limit);
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'hashtags' : {'$in' : [ req.query.tag ] }
               };
               db.collection('tweets').find(qw).limit(Twlimit).sort({_id: -1}).toArray(fn(req, res));
             }
             //no limit
             else {
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'hashtags' : {'$in' : [ req.query.tag ] }
               };
               db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));            
             }
@@ -1532,14 +1532,14 @@ app.get('/api/:collection', function(req, res) {
             if (req.query.limit){
               var Inlimit = parseInt(req.query.limit);
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'tags' : {$in : [req.query.tag ]}
               };
               db.collection('instagrams').find(qw).limit(Inlimit).sort({_id: -1}).toArray(fn(req, res));
             }
             //no limit
             else {
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'tags' : {$in : [req.query.tag ]}
               };
               db.collection('instagrams').find(qw).sort({_id: -1}).toArray(fn(req, res));            
             }
