@@ -23,10 +23,10 @@
 	width: 100%;
 	height: 48px;
 	/*@IFDEF WEB*/
-	margin-top: 40px;
+	margin-top: 48px;
 	/*@ENDIF*/
 	/*@IFDEF PHONEGAP*/
-	margin-top: 56px;
+	margin-top: 64px;
 	/*@ENDIF*/
 	color: #FFF;
 	z-index: 10;

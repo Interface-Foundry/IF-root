@@ -1,25 +1,29 @@
-<header class="drawer-header">
-	<label class="drawer-label">Navigation</label>
-	<a if-href="#home" class="drawer-link">
-		<span class="drawer-link-icon glyphicon glyphicon-home"></span> Home
-	</a>
-	<a if-href="#profile" class="drawer-link">
-		<span class="drawer-link-icon glyphicon glyphicon-user"></span> Profile
-	</a>
-	<a if-href="#profile" class="drawer-link">
-		<span class="drawer-link-icon glyphicon glyphicon-plus"></span> New Bubble
-	</a>
-	<label class="nearby-list-label" ng-click="getNearby($event)">
-		Discover
-		<span class="nearby-list-icon glyphicon glyphicon-refresh" ng-class="{'loading': nearbyLoading}"></span>
-	</label>
-</header>
-<ul class="nearby-list">
-	<li ng-repeat="bubble in nearbyBubbles track by bubble._id" class="nearby-list-item if-animate">
-		<a class="nearby-list-item-link" if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}}</a>
+<div class="drawer-bg" ng-click="closeDrawer()"></div>
+
+<section id="drawer" ng-click="closeDrawer()">
+	<header class="drawer-header" ng-click="go('profile')">
+		<img class="drawer-avatar" if-src="{{avatar()}}"><strong>{{username()}}</strong><em>{{userBubbles().length ? userBubbles().length + ' bubbles' : 'Start building Bubbles!'}}</em>
+	</header>
+<ul class="drawer-items">
+	<li class="drawer-item" ng-show="shareAvailable" ng-click="shareDialog()">
+		<div class="drawer-item-img drawer-share"></div>Share {{currentBubble().name || 'This'}}
+	</li>
+	<li class="drawer-item" ng-show="editAvailable()" ng-click="go('edit/w/'+currentBubble().id)">
+		<div class="drawer-item-img drawer-edit"></div>Edit {{currentBubble().name || 'This'}}
+	</li>
+	<li class="drawer-item" ng-click="create()">
+		<div class="drawer-item-img drawer-add"></div>Create a New Bubble
+	</li>
+	<li class="drawer-item" ng-click="logout()">
+		Logout
 	</li>
 </ul>
+
 <footer class="drawer-footer center-text">
+	<li class="drawer-item" ng-click="feedback()">
+		<div class="drawer-item-img drawer-feedback"></div>Send Us Feedback
+	</li>
 	<img src="img/IF/IF_logo.svg" width="14" height="14">
 	Powered by <a if-href="http://interfacefoundry.com" target="_blank">Interface Foundry</a>
 </footer>
+</section>

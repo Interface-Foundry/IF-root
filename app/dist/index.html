@@ -60,16 +60,8 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 	<script src="app.js"></script>
 </head>
 
-<body ng-class="[aperture.state, drawerOn&&'drawer']" ng-click="closeOverlays()">
+<body ng-class="[aperture.state]" ng-click="closeOverlays()">
 
-<button class="drawer-tab" ng-click="drawerOn = !drawerOn">
-	<div class="drawer-icon" ng-style="drawerOn ? {'background-color': style.navBG_color} : 0"></div>
-</button>
-
-<div class="drawer-bg" ng-click="drawerOn = !drawerOn">
-	<section id="drawer" ng-include="'components/drawer/drawer.html'" 
-	ng-class="{'nearbyFound': nearbyBubbles}"></section>
-</div>
 <ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
 	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
 		<a if-href="#{{::alert.href}}" ng-click="$parent.compassOverlay = false" class="alert-link">
@@ -83,38 +75,19 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 </ul>
 
 <nav role="navigation" class="main-nav" 
-		ng-style="{'background-color': style.navBG_color}">
-	<a class="nav-title" if-href="#home">
-		<img height="40px" class="pull-left" src="img/icons/bubblli-40.png">
-		<span style="margin-left: 8px;">Bubbl.li</span>
-	</a>
-
-	<ul class="navbar-right" ng-class="{'searchSlide': searchOn}">
-		<li class="nav-item">
-			<img class="nav-icon" src="img/icons/share.png" ng-click="dialog.showDialog('shareDialog.html')">
-		</li>
-		<li class="nav-item" compass-button>
-			<img class="nav-icon" src="img/icons/compass.png" ng-click="compassOn($event, true)">
-			<span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span>
-		</li>
-	  	<li class="nav-item">
-	  		<div class="user-chip" user-chip>
-	  		</div>
-	  	</li>
-	</ul>
-	<div class="search">
-	  		<input type="text" class="form-control input-sm" placeholder="..." ng-model="searchText" ng-show="searchOn" ng-enter="search()">
-	</div>
+	ng-style="{'background-color': style.navBG_color}">
+	<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
+	<span class="nav-title">Bubbl.li</span>
+	<div class="user-chip" user-chip></div>
+	<nav-tabs class="view-tabs"></nav-tabs>
 </nav>
+
+<!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
 
 <div class="feedbackWindow" ng-show="feedback.on" ng-init="feedback.on=false">
 	<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
 	<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
 	<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-</div>
-
-<div id="scrim" ng-class="{'loading': loading}">
-	<span class="glyphicon glyphicon-refresh"></span>
 </div>
 
 <section id="aperture" ng-class="[aperture.state]">
@@ -125,8 +98,12 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 </section>
  
 <div class="dialog-bg" ng-if="dialog.show" ng-click="dialog.close($event)">
-	  <div ng-include="dialog.template" class="dialog"></div>
+	<div ng-include="dialog.template" class="dialog"></div>
 </div>
+
+<explore-view class="explore-view" ng-show="viewTab == 'explore'"></explore-view>
+<search-view class="search-view" ng-show="viewTab == 'search'"></search-view>
+<drawer></drawer>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

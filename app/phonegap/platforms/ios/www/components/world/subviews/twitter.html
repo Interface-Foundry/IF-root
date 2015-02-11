@@ -1,17 +1,20 @@
 <div class="wrap" ng-style="::{'background-color': style.bodyBG_color}">
 	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
+		<a href="" ng-click="goBack()" style="height:48px; width: 48px; position: absolute; left: 0px;">
+			<span style="color:#FFF;" class="glyphicon glyphicon-chevron-left subnav-back-chevron"></span>
+		</a>
 		<h4 class="subnav-header">Twitter <em>#{{world.resources.hashtag}}</em></h4>
 	</nav>
 	
 	<div class="twitter-wrap wrap">
 		<ul>
 			<li ng-repeat="tweet in tweets" class="tweet marble-page">
-				<a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}" target="_blank">
+				<a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}">
 					<img if-src="{{tweet.user.profile_image_url}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong> 
 					<hr class="divider">
-					<img if-src="{{tweet.media.media_url}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
-					<footer>{{tweet.text}}</footer>
 				</a>
+					<img if-src="{{tweet.media.media_url | httpsify}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
+					<footer ng-bind-html="tweet.text | linky"></footer>
 			</li>
 		</ul>
 	</div>

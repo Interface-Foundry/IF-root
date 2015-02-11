@@ -5757,31 +5757,24 @@ angular.module('IF-directives', [])
 });
 
 angular.module('IF-directives', [])
-.directive('userChip', function($rootScope, userManager, dialogs, $location) {
+.directive('userChip', ['dialogs', function(dialogs) {
 	return {
 		restrict: 'A',
 		scope: true,
-		link: function($scope, $element, attrs) {
-			$scope.openMenu = function($event) {
-				if (userManager.loginStatus && $scope.userMenu !== true) {
-					console.log('click1');
-					$scope.userMenu = true;
-					$event.stopPropagation();
-					$('html').on('click', function(e) {
-						$scope.userMenu = false;
-						$scope.$digest();
-						console.log('click');
-						$('html').off('click');
-					})
-				} else if (!userManager.loginStatus) {
-					dialogs.showDialog('authDialog.html');
-				}
+		link: function(scope, element, attrs) {
+			scope.openDrawer = function() {
+				console.log('openDrawer');
+				scope.$emit('toggleDrawer');
+			}
+			
+			scope.login = function() {
+				dialogs.showDialog('authDialog.html');
 			}
 		},
 		templateUrl: 'templates/userChip.html'
 	}
 		
-});
+}]);
 //parent
 function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
@@ -17587,8 +17580,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
 var alerts = alertManager;
    
 var userManager = {
@@ -17655,9 +17648,10 @@ userManager.getDisplayName = function() {
 }
 
 userManager.checkLogin = function(){
-      var deferred = $q.defer();
+	console.log('checklogin');
+    var deferred = $q.defer();
       
-	  userManager.getUser().then(function(user) {
+	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
 		  $rootScope.user = user;
@@ -17665,14 +17659,17 @@ userManager.checkLogin = function(){
 			  $rootScope.userID = user._id;
 			  userManager._user = user;
 		  }
-		  deferred.resolve(0);
+		  worldTree.getUserWorlds();
+		  deferred.resolve(1);
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
-	  });
-	  	  
-      return deferred.promise;
+	});
+	
+	$rootScope.$broadcast('loginSuccess');
+		  
+    return deferred.promise;
 };
 
 userManager.signin = function(username, password) {
@@ -17737,7 +17734,7 @@ userManager.signup.signup = function() {
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
 	})
-	.error(function(err){
+	.error(function(err) {
 	if (err) {
 		userManager.signup.error = "Error signing up!";
         alertManager.addAlert('danger',err, true);   
@@ -17752,8 +17749,8 @@ userManager.saveToKeychain = function() {
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
-	function($cacheFactory, $q, World, db, geoService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 
+	function($cacheFactory, $q, World, db, geoService, $http, $location) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -17890,6 +17887,34 @@ worldTree.cacheWorlds = function(worlds) {
 	if (!worlds) {return}
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
+	});
+}
+
+worldTree.getUserWorlds = function(_id) {
+	console.log('getUserWorlds')
+	var now = Date.now() / 1000; 
+	
+	if (_id) {
+		//other user -- need api endpoint
+	} else if (worldTree._userWorlds && (worldTree._userWorlds.timestamp + 60) > now) {
+		return $q.when(worldTree._userWorlds);
+	} else {
+		return $http.get('/api/user/profile', {server: true}).success(function(bubbles){	
+			worldTree._userWorlds = bubbles;
+			worldTree._userWorlds.timestamp = now;
+			worldTree.cacheWorlds(bubbles);
+		});
+	}
+}
+
+worldTree.createWorld = function() {
+	
+	var world = {newStatus: true};
+	
+	db.worlds.create(world, function(response){
+		console.log('##Create##');
+		console.log('response', response);
+		$location.path('/edit/walkthrough/'+response[0].worldID);
 	});
 }
 
@@ -19407,6 +19432,82 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function (scope, element, attrs) {
+scope._currentBubble = false;
+	
+$rootScope.$on('toggleDrawer', function() {
+	scope.drawerOn = !scope.drawerOn;
+});
+
+scope.$on('$routeChangeSuccess', function() {
+	//check if sharing and editing are available on this route
+	scope._currentBubble = false;
+	if ($routeParams.worldURL) {
+		scope.shareAvailable = true;
+	} else {
+		scope.shareAvailable = false;
+	}
+})
+
+scope.$watch('drawerOn', function(drawerOn, oldDrawerOn) {
+	if (drawerOn === true) {
+		element.addClass('drawer');	
+	} else {
+		element.removeClass('drawer');
+	}
+})
+
+scope.currentBubble = function () {
+	if (!scope._currentBubble && $routeParams.worldURL) {
+		scope._currentBubble = worldTree.worldCache.get($routeParams.worldURL);
+	}
+	return scope._currentBubble;	
+}
+
+scope.avatar = function () {
+	return userManager._user.avatar;
+}
+
+scope.username = function () {
+	return userManager.getDisplayName();
+}
+
+scope.userBubbles = function () {
+	return worldTree._userWorlds;
+}
+
+scope.editAvailable = function () {
+	if (scope.currentBubble()) {
+		return scope.currentBubble().permissions.ownerID === userManager._user._id;
+	} else {
+		return false;
+	}
+}
+
+scope.closeDrawer = function() {
+	scope.drawerOn = false;
+}
+
+scope.shareDialog = function() {
+	dialogs.showDialog('shareDialog.html');
+}
+
+scope.create = worldTree.createWorld;
+
+scope.feedback = function() {
+	dialogs.showDialog('feedbackDialog.html')
+}
+
+scope.logout = userManager.logout;
+
+		},
+		templateUrl: 'components/drawer/drawer.html' 
+	}
+}])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
 
 var aperture = apertureService,
@@ -20921,6 +21022,16 @@ $scope.$on('$viewContentLoaded', function() {
 // 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
 });
 
+var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
+	console.log('$locationChangeSuccess');
+	$rootScope.hideBack = false;
+	deregFirstShow();
+}))
+
+$scope.$on('viewTabSwitch', function(event, tab) {
+	$scope.viewTab = tab;
+})
+
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -20957,10 +21068,10 @@ $scope.logout = function() {
       //$location.url('/');
 }
 
-$scope.sendFeedback = function(){
+$scope.sendFeedback = function(text) {
 
     var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
+      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
     }
 
     $http.post('feedback', data).
@@ -20972,14 +21083,6 @@ $scope.sendFeedback = function(){
       error(function(err){
         console.log('there was a problem');
     });
-    
-    if ($scope.feedback) {
-        $scope.feedback.on = false;
-    } else {
-        $scope.feedback = {
-	        on: false
-        }
-    }
 };
 
 /*
@@ -21024,6 +21127,83 @@ $scope.share = function(platform) {
 };
 
 }]);
+app.directive('exploreView', ['worldTree', '$rootScope', function(worldTree, $rootScope) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function (scope, element, attrs) {
+			scope.loadState = 'loading';
+			
+			$rootScope.$on('viewTabSwitch', function(event, tab) {
+				if (tab === 'explore') {
+					scope.loadState = 'loading';
+					worldTree.getNearby().then(function(data) {
+						scope.homeBubbles = data['150m'] || [];
+						scope.nearbyBubbles = data['2.5km'] || [];			
+						scope.loadState = 'success';
+					}, function(reason) {
+						scope.loadState = 'failure'; 
+					});
+				}
+			});
+	
+		},
+		templateUrl: 'components/nav/exploreView.html' 
+	}
+}])
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', function($rootScope, $routeParams, $location, worldTree) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			scope.selected = 'home';
+			scope.select = function (tab) {
+				if (scope.selected===tab && tab === 'home') {
+					if ($routeParams.worldURL) {
+						var wRoute = "/w/"+$routeParams.worldURL;
+						$location.path() === wRoute ? $location.path("/") : $location.path(wRoute);
+
+					} else {
+						$location.path('/');
+					}
+				}
+				scope.$emit('viewTabSwitch', tab);
+			}
+			
+			scope.$on('$locationChangeSuccess', function(event) {
+				scope.$emit('viewTabSwitch', 'home');
+			});
+			
+			$rootScope.$on('viewTabSwitch', function(event, tab) {
+				scope.selected=tab;
+			});
+			
+			
+			scope.nearbiesLength = function() {
+				if (worldTree._nearby) {
+					return _.reduce(worldTree._nearby, function(memo, value) {return memo+_.size(value)}, 0);
+				} else {
+					return 0;
+				}
+			}
+		},
+		template: 
+'<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
+'<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
+'<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
+'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+	}
+}])
+app.directive('searchView', [function() {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+		
+		},
+		templateUrl: 'components/nav/searchView.html' 
+	}
+}])
 app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
 	/*$scope.sessionSearch = function() { 
         $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
@@ -22405,7 +22585,6 @@ link: function(scope, element, attrs) {
 		} else if (cache) {
 			m.render(element[0], scheduleTree(cache));
 		}
-		
 	}
 	
 	//schedule form is

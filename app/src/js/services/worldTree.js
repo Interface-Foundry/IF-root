@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
-	function($cacheFactory, $q, World, db, geoService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 
+	function($cacheFactory, $q, World, db, geoService, $http, $location) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -137,6 +137,38 @@ worldTree.cacheWorlds = function(worlds) {
 	if (!worlds) {return}
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
+	});
+}
+
+worldTree.getUserWorlds = function(_id) {
+	console.log('getUserWorlds')
+	var now = Date.now() / 1000; 
+	
+	if (_id) {
+		//other user -- need api endpoint
+	} else if (worldTree._userWorlds && (worldTree._userWorlds.timestamp + 60) > now) {
+		return $q.when(worldTree._userWorlds);
+	} else {
+		return $http.get('/api/user/profile', {server: true}).success(function(bubbles){	
+			worldTree._userWorlds = bubbles;
+			worldTree._userWorlds.timestamp = now;
+			worldTree.cacheWorlds(bubbles);
+		});
+	}
+}
+
+worldTree.createWorld = function() {
+	//@IFDEF PHONEGAP
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
+	//@ENDIF
+	
+	var world = {newStatus: true};
+	
+	db.worlds.create(world, function(response){
+		console.log('##Create##');
+		console.log('response', response);
+		$location.path('/edit/walkthrough/'+response[0].worldID);
 	});
 }
 

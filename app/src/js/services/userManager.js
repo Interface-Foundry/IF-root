@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
 var alerts = alertManager;
    
 var userManager = {
@@ -72,9 +72,10 @@ userManager.getDisplayName = function() {
 }
 
 userManager.checkLogin = function(){
-      var deferred = $q.defer();
+	console.log('checklogin');
+    var deferred = $q.defer();
       
-	  userManager.getUser().then(function(user) {
+	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
 		  $rootScope.user = user;
@@ -82,14 +83,17 @@ userManager.checkLogin = function(){
 			  $rootScope.userID = user._id;
 			  userManager._user = user;
 		  }
-		  deferred.resolve(0);
+		  worldTree.getUserWorlds();
+		  deferred.resolve(1);
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
-	  });
-	  	  
-      return deferred.promise;
+	});
+	
+	$rootScope.$broadcast('loginSuccess');
+		  
+    return deferred.promise;
 };
 
 userManager.signin = function(username, password) {
@@ -176,7 +180,7 @@ userManager.signup.signup = function() {
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
 	})
-	.error(function(err){
+	.error(function(err) {
 	if (err) {
 		userManager.signup.error = "Error signing up!";
         alertManager.addAlert('danger',err, true);   

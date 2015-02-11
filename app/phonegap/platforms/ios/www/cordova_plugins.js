@@ -48,6 +48,13 @@ module.exports = [
         "clobbers": [
             "window.Keychain"
         ]
+    },
+    {
+        "file": "plugins/com.phonegap.plugins.facebookconnect/facebookConnectPlugin.js",
+        "id": "com.phonegap.plugins.facebookconnect.FacebookConnectPlugin",
+        "clobbers": [
+            "facebookConnectPlugin"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -56,7 +63,8 @@ module.exports.metadata =
     "pl.makingwaves.estimotebeacons": "0.3.0",
     "org.apache.cordova.splashscreen": "0.3.4",
     "org.apache.cordova.geolocation": "0.3.10",
-    "com.shazron.cordova.plugin.keychainutil": "2.0.0"
+    "com.shazron.cordova.plugin.keychainutil": "2.0.0",
+    "com.phonegap.plugins.facebookconnect": "0.11.0"
 }
 // BOTTOM OF METADATA
 });
