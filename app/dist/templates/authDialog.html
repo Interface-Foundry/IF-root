@@ -10,7 +10,6 @@
 			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
 		
 		<button type="submit" class="auth-submit">Log In</button>
-		<!-- @ifdef WEB -->
 		<div class="text-center" style="margin:4px 0px;">or</div>
 		
 		<div class="btn-group btn-group-justified" style="margin-bottom:20px;">
@@ -27,11 +26,6 @@
 		    	<img src="img/icons/meetup-16.png" width="16px" height="16px"> Meetup</button>
 		  </div>
 		</div>
-		<!-- @endif -->
-		<!-- @ifdef PHONEGAP -->
-		<button type="button" class="auth-submit" ng-click="fbLogin()">Log in with Facebook</button>
-		<!-- @endif -->
-
 		<div ng-if="userManager.login.error">
 			Login failed!
 		</div>
