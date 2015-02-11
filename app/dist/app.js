@@ -19469,7 +19469,12 @@ scope.currentBubble = function () {
 }
 
 scope.avatar = function () {
-	return userManager._user.avatar;
+	try {
+		return userManager._user.avatar;
+	}
+	catch (e) {
+		return undefined;
+	}
 }
 
 scope.username = function () {
@@ -19481,9 +19486,10 @@ scope.userBubbles = function () {
 }
 
 scope.editAvailable = function () {
-	if (scope.currentBubble()) {
-		return scope.currentBubble().permissions.ownerID === userManager._user._id;
-	} else {
+	try {
+			return scope.currentBubble().permissions.ownerID === userManager._user._id;
+	}
+	catch (e) {
 		return false;
 	}
 }
@@ -20110,7 +20116,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20371,9 +20377,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		return worldTree.getLandmarks(data.world._id);
-	}).then(function(data) {
-		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+	worldTree.getLandmarks(data.world._id).then(function(data) {
+		$scope.landmarks = data.landmarks;
 					
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
@@ -20382,6 +20387,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		});
 		landmarksLoaded = true;
 			
+	});
 	});	
 	
 }])

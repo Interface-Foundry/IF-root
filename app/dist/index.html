@@ -103,7 +103,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
 <explore-view class="explore-view" ng-show="viewTab == 'explore'"></explore-view>
 <search-view class="search-view" ng-show="viewTab == 'search'"></search-view>
-<drawer></drawer>
+<drawer ng-if="userManager.loginStatus"></drawer>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

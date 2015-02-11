@@ -1,6 +1,6 @@
 /* *NAV* Navigation Bar */
 @nav-height: 48px;
-
+@pg-offset: 16px;
 
 nav.main-nav {
 	position: fixed;
@@ -12,11 +12,11 @@ nav.main-nav {
 	background-color: rgba(62, 82, 181, 0.96);
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	
 	z-index: 1000;
-	/* @IFDEF PHONEGAP */
-	height: 56px;
-	/* @ENDIF */
+	/*@IFDEF PHONEGAP*/
+	height: 48px + @pg-offset;
+	padding-top: @pg-offset;
+	/*@ENDIF*/
 }
 
 .nav-title {
@@ -92,6 +92,9 @@ nav ul {
 	
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	/* @IFDEF PHONEGAP */
+	top: @pg-offset;
+	/* @ENDIF */
 
 	&.ng-hide.ng-hide-remove {
 		opacity: 0;
@@ -147,18 +150,20 @@ nav ul {
 		content: '';
 		position: absolute;
 		width: 32px;
-		height: 100%;
+		height: 48px;
 		background: rgba(0, 0, 0, 0.2);
-		top: 0px;
+		bottom: 0px;
 		z-index: -1;
 		left: 8px;
+		/*@IFDEF PHONEGAP */
+		height: @nav-height + @pg-offset;
+		/*@ENDIF*/
 	}
 }
 
 .home-tab {
 	background: center / 32px 32px url('img/icons/nav/home.png') no-repeat;
 }
-
 
 .explore-tab {
 	background: center / 32px 32px url('img/icons/nav/explore.png') no-repeat;

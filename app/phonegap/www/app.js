@@ -19533,7 +19533,12 @@ scope.currentBubble = function () {
 }
 
 scope.avatar = function () {
-	return userManager._user.avatar;
+	try {
+		return userManager._user.avatar;
+	}
+	catch (e) {
+		return undefined;
+	}
 }
 
 scope.username = function () {
@@ -19545,9 +19550,10 @@ scope.userBubbles = function () {
 }
 
 scope.editAvailable = function () {
-	if (scope.currentBubble()) {
-		return scope.currentBubble().permissions.ownerID === userManager._user._id;
-	} else {
+	try {
+			return scope.currentBubble().permissions.ownerID === userManager._user._id;
+	}
+	catch (e) {
 		return false;
 	}
 }
@@ -20177,7 +20183,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
 	
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
@@ -20440,9 +20446,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		return worldTree.getLandmarks(data.world._id);
-	}).then(function(data) {
-		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+	worldTree.getLandmarks(data.world._id).then(function(data) {
+		$scope.landmarks = data.landmarks;
 					
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
@@ -20451,6 +20456,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		});
 		landmarksLoaded = true;
 			
+	});
 	});	
 	
 }])
@@ -21200,7 +21206,13 @@ $scope.share = function(platform) {
 $scope.fbLogin = function() {
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 	function(success) {
-		console.log('fb success', arguments)}, 
+		console.log('fb success', arguments)
+		$http.get('/auth/bearer', {server: true, headers: {'Authorization': 'Bearer '+success.authResponse.accessToken}}).then(function(success) {
+			console.log('success', arguments)
+		}, function(failure) {
+			console.log('failure', arguments)
+		})
+	}, 
 	function(failure) {
 		console.log('failure', arguments)}
 	)

@@ -35,7 +35,12 @@ scope.currentBubble = function () {
 }
 
 scope.avatar = function () {
-	return userManager._user.avatar;
+	try {
+		return userManager._user.avatar;
+	}
+	catch (e) {
+		return undefined;
+	}
 }
 
 scope.username = function () {
@@ -47,9 +52,10 @@ scope.userBubbles = function () {
 }
 
 scope.editAvailable = function () {
-	if (scope.currentBubble()) {
-		return scope.currentBubble().permissions.ownerID === userManager._user._id;
-	} else {
+	try {
+			return scope.currentBubble().permissions.ownerID === userManager._user._id;
+	}
+	catch (e) {
 		return false;
 	}
 }

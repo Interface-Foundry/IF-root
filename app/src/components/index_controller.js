@@ -124,7 +124,13 @@ $scope.share = function(platform) {
 $scope.fbLogin = function() {
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 	function(success) {
-		console.log('fb success', arguments)}, 
+		console.log('fb success', arguments)
+		$http.get('/auth/bearer', {server: true, headers: {'Authorization': 'Bearer '+success.authResponse.accessToken}}).then(function(success) {
+			console.log('success', arguments)
+		}, function(failure) {
+			console.log('failure', arguments)
+		})
+	}, 
 	function(failure) {
 		console.log('failure', arguments)}
 	)

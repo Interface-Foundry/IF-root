@@ -10,10 +10,7 @@
 			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
 		
 		<button type="submit" class="auth-submit">Log In</button>
-		<!--@ifdef PHONEGAP-->
 		<button type="button" class="auth-submit" ng-click="fbLogin()">Log in with Facebook</button>
-		<!--@endif-->
-
 		<div ng-if="userManager.login.error">
 			Login failed!
 		</div>
