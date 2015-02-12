@@ -198,8 +198,9 @@ ul.walkthrough-grid {
 ul.walkthrough-grid > li {
 	position: relative;
 	/*float: left; */
-	width: 144px;
-	height: 144px;
+	width: 216px;
+	height: 65px;
+	line-height: 65px;
 	margin: auto 8px 16px 8px;
 	background-color: #eceff1;
 	display: inline-block;
@@ -212,17 +213,19 @@ ul.walkthrough-grid > li.active {
 
 ul.walkthrough-grid > li > label { 
 	position: absolute;
-	bottom: 0px;
-	width: 100%;
-	height: 22px;
+	right: 0px;
+	width: 70%;
+	height: 100%;
 	margin: 0px;
-	padding: 4px 0px;
-	
+	padding: 0px 0px 0px 20px;
 	background: #FFF;
-	
-	text-align: center;
+	text-align: left;
 	font-weight: normal;
-	line-height: 1;
+}
+
+ul.walkthrough-grid > li > img { 
+	width: 30%;
+	float: left;
 }
 
 .walkthrough-pic-upload {
