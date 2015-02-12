@@ -98,6 +98,12 @@
 	border: none;
 }
 
+.save-exit {
+	position: relative;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
 .walkthrough-footer .footer-right {
 	float: right;
 }
@@ -135,7 +141,7 @@
 	outline: none;	
 }
 
-.walk-page, .progress-list, .progress-list > li {
+.progress-list, .progress-list > li {
 	float: left;
 }
 
@@ -146,7 +152,11 @@
 
 .walk-progress {
 	display: inline-block;
-	margin-top: 19px;
+	margin-top: 5px;
+}
+
+span.walk-page {
+	padding-bottom: 0px;
 }
 
 .progressWrap {
@@ -163,10 +173,6 @@
 	height: 100%;
 	border-radius: 5px;
 	background-color: #2196f3;
-}
-
-.walk-page {
-	float: left;
 }
 
 .walkthrough-next, .walkthrough-prev {
