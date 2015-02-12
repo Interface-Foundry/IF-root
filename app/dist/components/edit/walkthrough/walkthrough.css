@@ -69,7 +69,19 @@
 }
 
 .walkthrough-footer {
-	height: 32px;
+	/*height: 100px;*/
+	/*border: 1px solid black;*/
+}
+
+.walkthrough-footer-top {
+	height: 70px;
+	/*border: 1px solid black;*/
+	
+}
+
+.walkthrough-footer-bottom {
+	height: 30px;
+	/*border: 1px solid black;*/
 }
 
 .walkthrough-footer button, .walkthrough-footer span {
@@ -79,7 +91,7 @@
 	padding: 8px;
 }
 
-.walkthrough-footer > .save-exit {
+.walkthrough-footer .save-exit {
 	display: block;
 	float: left;
 	padding-left: 12px;
@@ -87,7 +99,7 @@
 	border: none;
 }
 
-.walkthrough-footer > .footer-right {
+.walkthrough-footer .footer-right {
 	float: right;
 }
 
@@ -154,39 +166,37 @@ li.progress-dot {
 }
 
 .walkthrough-next, .walkthrough-prev {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	margin: auto;
-	width: 56px;
-	height: 80px;
-
+	width: 30px;
+	height: 52px;
 	border: none;
 	outline: none;
+	position: relative;
+	top: 9px;
 }
 
 .walkthrough-next {
-	right: -64px;
-	
-	background: url('img/walkthrough/right.png') 0px 0px/56px 80px no-repeat transparent;
+	float: right;
+	right: 12px;
+	background: url('img/walkthrough/arrow_R_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
-.walkthrough-next:enabled:active {
-	background: url('img/walkthrough/right-p.png') 0px 0px/56px 80px no-repeat transparent;
+.walkthrough-next:active {
+	background: url('img/walkthrough/arrow_R_active_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
-.walkthrough-next:disabled {
+/*.walkthrough-next:disabled {
 	background: url('img/walkthrough/right-d.png') 0px 0px/56px 80px no-repeat transparent;
-}
+}*/
 
 
 .walkthrough-prev {
-	left: -64px;
-	background: url('img/walkthrough/left.png') 0px 0px/56px 80px no-repeat transparent;
+	float: left;
+	right: -12px;
+	background: url('img/walkthrough/arrow_L_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
 .walkthrough-prev:active {
-	background: url('img/walkthrough/left-p.png') 0px 0px/56px 80px no-repeat transparent;	
+	background: url('img/walkthrough/arrow_L_active_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
 ul.walkthrough-grid {
