@@ -20646,7 +20646,8 @@ $scope.saveAndExit = function() {
 		// 	}
 		// }
 
-		$location.path("/edit/w/"+$scope.world.id);
+		$location.path("/w/"+$scope.world.id);
+		$window.location.reload();
 		map.refresh();
 	} else {
 		//console
