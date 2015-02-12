@@ -15,20 +15,18 @@
 						ng-hide="position==walk.length-1"></button>
 				<button class="walkthrough-prev" ng-click="prev()" 
 						ng-hide="position==0"></button>
+				<div class="walk-progress" ng-hide="position==0">
+					<span class="walk-page">{{position+'/'+(walk.length-1)}}</span>
+					<div class="progressWrap">
+						<div class="progressFill" ng-style="getProgress()">
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="walkthrough-footer-bottom">
 				<button class="save-exit" ng-hide="position==0" ng-click="saveAndExit()">
 				Save & Exit</button>
 				<div class="footer-right">
-					<div class="walk-progress" ng-hide="position==0">
-						<ul class="progress-list">
-							<li ng-repeat="dot in progress track by $index" 
-								ng-class="{'active': position==$index, 
-										'visited': position>=$index}" class="progress-dot">
-							</li>
-						</ul>
-						<span class="walk-page">{{position+'/'+(walk.length-1)}}</span>
-					</div>
 					<button class="skip" ng-class="{'skippable': walk[position].skip}"
 							ng-disabled="!walk[position].skip"
 							ng-click="next()">Skip</button>

@@ -75,8 +75,7 @@
 
 .walkthrough-footer-top {
 	height: 70px;
-	/*border: 1px solid black;*/
-	
+	text-align: center;
 }
 
 .walkthrough-footer-bottom {
@@ -136,7 +135,7 @@
 	outline: none;	
 }
 
-.walk-page, .walk-progress, .progress-list, .progress-list > li {
+.walk-page, .progress-list, .progress-list > li {
 	float: left;
 }
 
@@ -145,24 +144,29 @@
 	padding: 0;
 }
 
-li.progress-dot {
-	width: 8px;
-	height: 8px;
-	margin: 12px 4px;
-	border-radius:8px;
+.walk-progress {
+	display: inline-block;
+	margin-top: 19px;
+}
+
+.progressWrap {
+	width: 200px;
+	height: 10px;
+	border-radius: 5px;
+	float: right;
 	background-color: #CCC;
+	position: relative;
+	top: 11px;
 }
 
-.progress-dot.visited {
-	background-color: #0d47a1;
-}
-
-.progress-dot.active {
+.progressFill {
+	height: 100%;
+	border-radius: 5px;
 	background-color: #2196f3;
 }
 
-.progress-dot:first-child {
-	display: none;
+.walk-page {
+	float: left;
 }
 
 .walkthrough-next, .walkthrough-prev {
@@ -393,6 +397,9 @@ ul.walkthrough-grid > li > img {
 	}
 	.u-media-display {
 		display: initial;
+	}
+	.progressWrap {
+		width: 100px;
 	}
 }
 
