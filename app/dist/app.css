@@ -810,6 +810,37 @@ ul.walkthrough-grid > li > img {
 .center-wrapper {
 	text-align: center;
 }
+
+.hashtagButtons {
+	text-align: center;
+}
+
+.btn.buttonToggle {
+	width: 150px;
+	outline: 0 !important;
+	color: white !important;
+}
+
+.buttonToggle img {
+	width: 16px;
+	height: 16px;
+	content: url('img/icons/ic_check_white_24px.png');
+	float: right;
+	position: relative;
+	top: 2px;
+}
+
+.buttonToggle.off img {
+	content: url('img/icons/ic_add_white_48dp.png');
+}
+
+.buttonToggle--instagram.on {
+	background-color: #517fa4;
+}
+
+.buttonToggle--twitter.on {
+	background-color: #4099FF;
+}
 .tour {
 	padding: 0;
 	margin: 0;
