@@ -2,48 +2,50 @@
 	<form name="time" class="form-inline" role="form">
 		<div class="form-group col-sm-6 col-xs-12">
 			<label class="control-label">
-			<i class="glyphicon glyphicon-calendar"></i> Start Time 
-			<span class="glyphicon glyphicon-info-sign info"></span></label><br>
-				<input type="text" size="10" class="form-control" 
-						name="startTimeDate"
-						ng-model="world.time.start"
-						ng-change="world.time.start=world.time.start.toISO8601String()"
-						data-autoclose="1"
-						placement="bottom"
-						container="body"
-						placeholder="Date" 
-						dateType="iso" bs-datepicker>
-				<input type="text" size="8" class="form-control" 
-						name="startTimeHours"
-						ng-model="world.time.start"
-						ng-change="world.time.start=world.time.start.toISO8601String()" 
-						minute-step="1"
-						placement="bottom"
-						container="body"
-						placeholder="Time" 
-						timeType="iso" bs-timepicker>
+				<i class="glyphicon glyphicon-calendar"></i> Start Time 
+			</label>
+			<br>
+			<input type="text" size="10" class="form-control" 
+					name="startTimeDate"
+					ng-model="world.time.start"
+					ng-change="world.time.start=world.time.start.toISO8601String()"
+					data-autoclose="1"
+					placement="bottom"
+					container="body"
+					placeholder="Date" 
+					dateType="iso" bs-datepicker>
+			<input type="text" size="8" class="form-control" 
+					name="startTimeHours"
+					ng-model="world.time.start"
+					ng-change="world.time.start=world.time.start.toISO8601String()" 
+					minute-step="1"
+					placement="bottom"
+					container="body"
+					placeholder="Time" 
+					timeType="iso" bs-timepicker>
 		</div>
 		<div class="form-group col-sm-6 col-xs-12">
-			<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time 
-			<span class="glyphicon glyphicon-info-sign info"></span></label><br>
-				<input type="text" size="10" class="form-control" 
-						name="endTimeDate"
-						ng-model="world.time.end"
-						ng-change="world.time.end=world.time.end.toISO8601String()"
-						data-autoclose="1" 
-						placement="bottom"
-						container="body"
-						placeholder="Date" 
-						dateType="iso" bs-datepicker>
-				<input type="text" size="8" class="form-control" 
-						name="endTimeHours"
-						ng-model="world.time.end" 
-						ng-change="world.time.end=world.time.end.toISO8601String()" 
-						minute-step="1"
-						placeholder="Time"
-						placement="bottom"
-						container="body"
-						timeType="iso" bs-timepicker>
+			<label class="control-label">
+				<i class="glyphicon glyphicon-calendar"></i> End Time 
+			</label><br>
+			<input type="text" size="10" class="form-control" 
+					name="endTimeDate"
+					ng-model="world.time.end"
+					ng-change="world.time.end=world.time.end.toISO8601String()"
+					data-autoclose="1" 
+					placement="bottom"
+					container="body"
+					placeholder="Date" 
+					dateType="iso" bs-datepicker>
+			<input type="text" size="8" class="form-control" 
+					name="endTimeHours"
+					ng-model="world.time.end" 
+					ng-change="world.time.end=world.time.end.toISO8601String()" 
+					minute-step="1"
+					placeholder="Time"
+					placement="bottom"
+					container="body"
+					timeType="iso" bs-timepicker>
 		</div>
 	</form>
 </div>
