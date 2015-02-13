@@ -122,6 +122,7 @@ $scope.share = function(platform) {
 $scope.fbLogin = function() {
 	userManager.fbLogin().then(
 		function (success) {
+			console.log(success);
 			userManager.checkLogin();
 		}, function (failure) {
 			console.log(failure);	

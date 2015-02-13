@@ -17818,6 +17818,7 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 			var authHeader = 'Bearer ' + fbToken;
+			console.log(success);
 			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
 				lockerManager.saveFBToken(fbToken)
 				ifGlobals.fbToken = fbToken;
@@ -21295,6 +21296,7 @@ $scope.share = function(platform) {
 $scope.fbLogin = function() {
 	userManager.fbLogin().then(
 		function (success) {
+			console.log(success);
 			userManager.checkLogin();
 		}, function (failure) {
 			console.log(failure);	

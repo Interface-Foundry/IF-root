@@ -17818,6 +17818,7 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 			var authHeader = 'Bearer ' + fbToken;
+			console.log(success);
 			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
 				lockerManager.saveFBToken(fbToken)
 				ifGlobals.fbToken = fbToken;
@@ -21186,8 +21187,8 @@ angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 
 $rootScope.hideBack = true; //controls back button showing
 
-var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
-	console.log('$locationChangeSuccess');
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	console.log('$routeChangeSuccess');
 	console.log(arguments);
 	$rootScope.hideBack = false;
 	deregFirstShow();
@@ -21295,6 +21296,7 @@ $scope.share = function(platform) {
 $scope.fbLogin = function() {
 	userManager.fbLogin().then(
 		function (success) {
+			console.log(success);
 			userManager.checkLogin();
 		}, function (failure) {
 			console.log(failure);	
@@ -21320,12 +21322,14 @@ lockerManager.getCredentials().then(function(credentials) {
 	console.log('credential error', error); 
 });
 }]);
-app.directive('exploreView', ['worldTree', '$rootScope', function(worldTree, $rootScope) {
+app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function (scope, element, attrs) {
 			scope.loadState = 'loading';
+			scope.kinds = ifGlobals.kinds;
+
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {
 				if (tab === 'explore') {
@@ -21344,7 +21348,7 @@ app.directive('exploreView', ['worldTree', '$rootScope', function(worldTree, $ro
 		templateUrl: 'components/nav/exploreView.html' 
 	}
 }])
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', function($rootScope, $routeParams, $location, worldTree) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -21371,6 +21375,17 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				scope.selected=tab;
 			});
 			
+			$document.on('keydown', function(e) {
+				console.log('keydown', e, scope.selected)
+			if (e.keyCode===8 && scope.selected !== 'home') {
+				console.log('keycode 8 & selected not home')
+				e.stopPropagation();
+				e.preventDefault();
+				scope.$apply(function() {
+					scope.$emit('viewTabSwitch', 'home');
+				});
+			}
+			});
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {
@@ -21397,7 +21412,7 @@ app.directive('searchView', ['$http', 'geoService', function($http, geoService) 
 				geoService.getLocation().then(function(coords) {
 				
 				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLat: coords.lng}})
+					{textQuery: searchText, userLat: coords.lat, userLat: coords.lng, localTime: new Date()}})
 					.success(function(result) {
 						if (!result.err) {
 							scope.searchResult = result;
