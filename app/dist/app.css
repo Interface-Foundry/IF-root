@@ -511,6 +511,11 @@ span.walk-page {
 	background: url('img/walkthrough/arrow_R_active_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
+.walkthrough-next.disabled {
+	background: url('img/walkthrough/arrow_R_disabled_30.png') 0px 0px/30px 52px no-repeat transparent;
+	cursor: default;
+}
+
 .walkthrough-prev {
 	float: left;
 	right: -12px;

@@ -12,9 +12,8 @@
 		<div class="walkthrough-footer">
 			<div class="walkthrough-footer-top" ng-show="position!=0">
 				<button class="walkthrough-next" ng-click="next()" 
-						ng-hide="position==walk.length-1"></button>
-				<button class="walkthrough-prev" ng-click="prev()" 
-						ng-hide="position==0"></button>
+						ng-class="{disabled: position==walk.length-1}"></button>
+				<button class="walkthrough-prev" ng-click="prev()"></button>
 				<div class="walk-progress" ng-hide="position==0">
 					<span class="walk-page">{{position+'/'+(walk.length-1)}}</span>
 					<div class="progressWrap">
