@@ -8,8 +8,7 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
-
-
+var https = require('https');
 
 // load the auth variables
 var configAuth = require('./auth'); // use this one for testing
@@ -422,22 +421,55 @@ module.exports = function(passport) {
 
 
     //setting up token based auth (for ios social auth)
-    passport.use(
+    passport.use(  
         new BearerStrategy(
             function(token, done) {
-                User.findOne({ 'facebook.token': token },
-                    function(err, user) {
-                        if (err) {
-							return done(err);
-                        }
-                        if (!user) {
-							return done(null, false);
-                        }
-                        
-                        return done(null, user);
-					}
-				);
-			}
+
+                var options = {
+                  host: 'graph.facebook.com',
+                  port: 443,
+                  path: '/me?access_token='+token,
+                  method: 'GET',
+                  headers: {
+                    accept: '*/*'
+                  }
+                };
+
+                var req = https.request(options, function(res) {
+
+                  var body = '';
+
+                  res.on('data', function(d) {
+                    body += d;
+                  });
+
+                  res.on('end', function() {
+                      var parsed = JSON.parse(body);
+
+
+                        User.findOne({ 'facebook.id': parsed.id },
+                            function(err, user) {
+                                if(err) {
+                                    return done(err);
+                                }
+                                if(!user) {
+                                    return done(null, false);
+                                }
+
+                                return done(null, user);
+                            }
+                        );
+
+                  });
+
+                });
+                req.end();
+
+                req.on('error', function(e) {
+                  console.error(e);
+                });
+
+            }
         )
     );
 
