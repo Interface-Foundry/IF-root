@@ -424,6 +424,8 @@ function isLoggedIn(req, res, next) {
 // Search
 app.get('/api/textsearch', function(req, res) {
 
+  console.log(req.query);
+
     var sText = sanitize(req.query.textQuery);
 
     sText = sText.replace(/[^\w\s]/gi, '');
