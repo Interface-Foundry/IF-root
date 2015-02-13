@@ -2721,6 +2721,34 @@ nav ul {
   bottom: 0px;
   z-index: 100;
 }
+.search-view {
+  position: absolute;
+  top: 48px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 100;
+}
+.search-bar {
+  width: 100%;
+  height: 48px;
+  padding: 2px 80px 2px 8px;
+  font-size: 24px;
+  line-height: 48px;
+  outline: none;
+  border: none;
+}
+.search-btn {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  height: 48px;
+  width: 80px;
+  color: #FFF;
+  background: #00c853;
+  border: none;
+  outline: none;
+}
 .user-chip-wrap {
   width: 100%;
   height: 100%;

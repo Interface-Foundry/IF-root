@@ -79,7 +79,7 @@ windowEl.on('resize', handleWindowResize);
 		//console.log($scope.calendar.events);
 	}
 	
-	function setUpSchedule(landmarks) {	
+	function setUpSchedule(landmarks) {	 //deals with making a tree out of flat landmark array
 		var now = moment();
 		var schedule = [];
 		var superGroups = {

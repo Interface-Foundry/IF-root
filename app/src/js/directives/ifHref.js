@@ -1,4 +1,4 @@
-app.directive('ifHref', function() {
+app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
 	return {
 		restrict: 'A',
 		priority: 99, 

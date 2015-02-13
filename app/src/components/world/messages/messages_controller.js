@@ -35,6 +35,7 @@ function scrollToBottom() {
 	}
 }
 
+//Initiates message checking loop, calls itself. 
 function checkMessages() {
 	var doScroll = firstScroll;
 db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){

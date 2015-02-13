@@ -4,7 +4,7 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 	   			//@IFDEF WEB
 	   			//@ENDIF
    			]
-   		};
+   		}; //Used to manage alerts posted to top of page. Needs better API 
 
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
    			var alertClass;

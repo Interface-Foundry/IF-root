@@ -1,7 +1,7 @@
 angular.module('tidepoolsServices')
     .factory('geoService', [ '$q', 'alertManager',
     	function($q, alertManager) {
-
+//abstract & promisify geolocation, queue requests.
 var geoService = {
 	location: {
 		//lat,

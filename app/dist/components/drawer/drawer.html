@@ -5,6 +5,12 @@
 		<img class="drawer-avatar" if-src="{{avatar()}}"><strong>{{username()}}</strong><em>{{userBubbles().length ? userBubbles().length + ' bubbles' : 'Start building Bubbles!'}}</em>
 	</header>
 <ul class="drawer-items">
+	<li class="drawer-item" ng-click="go('/profile/me')">
+		My Profile
+	</li>
+	<li class="drawer-item" ng-click="go('/profile/worlds')">
+		My Bubbles
+	</li>
 	<li class="drawer-item" ng-show="shareAvailable" ng-click="shareDialog()">
 		<div class="drawer-item-img drawer-share"></div>Share {{currentBubble().name || 'This'}}
 	</li>

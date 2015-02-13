@@ -58,9 +58,9 @@ $scope.$watch('temp.mapOn', function(newVal, oldVal) {
 			style.resetNavBG();
 		break;
 	}
-})
+}) 
 
-$rootScope.$on('leafletDirectiveMarker.click', function(event, args) {
+$rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
 	var bubble = $scope.bubbles.find(function(element, index, array) {
 		if (element._id==args.markerName) {
 			return true;
@@ -73,7 +73,7 @@ $rootScope.$on('leafletDirectiveMarker.click', function(event, args) {
 
 //INIT
 
-worldTree.getNearby().then(function(data) {
+worldTree.getNearby().then(function(data) { 
 	$scope.$evalAsync(function($scope) {
 		$scope.homeBubbles = data['150m'] || [];
 		$scope.nearbyBubbles = data['2.5km'] || [];

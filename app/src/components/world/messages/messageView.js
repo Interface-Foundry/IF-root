@@ -6,21 +6,22 @@ link: function(scope, element, attrs) {
 	scope.$watchCollection('messages', function (newCollection, oldCollection, scope) {
 		m.render(element[0], newCollection.map(messageTemplate));
 	})
+	//rerenders whenever messages changes using mithril js
 	
-	function messageTemplate(message) {
+	function messageTemplate(message) { //each message object is passed to this function
 		return m('li.message',
-			{key:message._id,
-			class: message.userID===scope.userID ? 'message-self' : '',
-			onclick: function(e) {scope.messageLink(message)}},
+			{key:message._id, 
+			class: message.userID===scope.userID ? 'message-self' : '', //message-self designates a message sent by user
+			onclick: function(e) {scope.messageLink(message)}}, //for stickers currently
 			[
 				m('picture.message-avatar',
 					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
-				messageContent(message)
+				messageContent(message) //message object passed to next function to switch content templates
 			]);
 	}
 	
-	function messageContent(message) {
+	function messageContent(message) { //content template switches based on message kind
 		var content,
 			kind = message.kind || 'text';
 		switch (kind) {
@@ -51,10 +52,10 @@ link: function(scope, element, attrs) {
 				break;
 		}
 
-		return m('.message-content', content);
+		return m('.message-content', content); //end of message building process
 	}
 
-	function bubUrl(string) {
+	function bubUrl(string) { //some urls don't have an absolute path which will break on iOS
 		if (string === undefined) {
 			return '';	
 		}
@@ -65,7 +66,7 @@ link: function(scope, element, attrs) {
 		}
 	}
 	
-	function imageLoad() {
+	function imageLoad() { //current method to keep scroll at bottom when a message is posted. Could be improved
 		element[0].scrollTop = element[0].scrollTop + this.offsetHeight;
 	}
 	

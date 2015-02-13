@@ -1,7 +1,7 @@
 app.factory('stickerManager', ['$http', '$q', function($http, $q) {
 var stickerManager = {
 	
-}
+}//manages interfacing with stickers on the server
 
 stickerManager.postSticker = function(sticker) {
 	var deferred = $q.defer();

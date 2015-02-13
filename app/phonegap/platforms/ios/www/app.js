@@ -4720,6 +4720,8 @@ var checkLoggedin = function(userManager) {
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
+						} else if (ifGlobals.fbToken) {
+							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
 						}
 	    			}
 				return request;
@@ -17376,21 +17378,30 @@ var lockerManager = {
 }
 
 lockerManager.getCredentials = function() {
-	var username = $q.defer(), password = $q.defer();
+	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
 	
 	lockerManager.keychain.getForKey(function(value) {
 		username.resolve(value);
 	}, function(error) {
-		username.reject(error);
+		username.resolve(undefined);
+		console.log(error);
 	}, 'username', 'Bubbl.li');
 
 	lockerManager.keychain.getForKey(function(value) {
 		password.resolve(value);
 	}, function(error) {
-		password.reject(error)
+		password.resolve(undefined);
+		console.log(error);
 	}, 'password', 'Bubbl.li');
 	
-	return $q.all({username: username.promise, password: password.promise});
+	lockerManager.keychain.getForKey(function(value) {
+		fbToken.resolve(value);
+	}, function(error) {
+		fbToken.resolve(undefined);
+		console.log(error);
+	}, 'fbToken', 'Bubbl.li');
+	
+	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
 
 lockerManager.saveCredentials = function(username, password) {
@@ -17411,6 +17422,18 @@ lockerManager.saveCredentials = function(username, password) {
 	'password', 'Bubbl.li', password);
 	
 	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
+lockerManager.saveFBToken = function(fbToken) {
+	var deferred = $q.defer();
+	lockerManager.keychain.setForKey(function(success) {
+		deferred.resolve(success);
+	}, function(error) {
+		deferred.reject(error);
+	},
+	'fbToken', 'Bubbl.li', fbToken);
+	
+	return deferred;
 }
 
 	 
@@ -17751,6 +17774,29 @@ userManager.signin = function(username, password) {
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
+		})
+	
+	return deferred.promise;
+}
+
+userManager.fbLogin = function() {
+	var deferred = $q.defer();
+	
+	facebookConnectPlugin.login(['public_profile', 'email'], 
+		function(success) {
+			var fbToken = success.authResponse.accessToken;
+			var authHeader = 'Bearer ' + fbToken;
+			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+				lockerManager.saveFBToken(fbToken)
+				ifGlobals.fbToken = fbToken;
+				deferred.resolve(success);
+			}, function(failure) {
+				deferred.reject(failure);
+			})
+		}, 
+		function(failure) {
+			alerts.addAlert('warning', "Please allow access to Facebook!", true);
+			deferred.reject(failure);
 		})
 	
 	return deferred.promise;
@@ -20183,7 +20229,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
 	
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
@@ -20446,9 +20492,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		return worldTree.getLandmarks(data.world._id);
-	}).then(function(data) {
-		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+	worldTree.getLandmarks(data.world._id).then(function(data) {
+		$scope.landmarks = data;
 					
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
@@ -20457,6 +20502,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		});
 		landmarksLoaded = true;
 			
+	});
 	});	
 	
 }])
@@ -21204,28 +21250,28 @@ $scope.share = function(platform) {
 };
 
 $scope.fbLogin = function() {
-	facebookConnectPlugin.login(['public_profile', 'email'], 
-	function(success) {
-		console.log('fb success', arguments)
-		$http.get('/auth/bearer', {server: true, headers: {'Authorization': 'Bearer '+success.authResponse.accessToken}}).then(function(success) {
-			console.log('success', arguments)
-		}, function(failure) {
-			console.log('failure', arguments)
+	userManager.fbLogin().then(
+		function (success) {
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
 		})
-	}, 
-	function(failure) {
-		console.log('failure', arguments)}
-	)
 }
-
 lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
+	if (credentials.username, credentials.password) {
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
 			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
 		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
+	} else if (credentials.fbToken) {
+		ifGlobals.fbToken = credentials.fbToken;
+		userManager.checkLogin().then(function(success) {
+			console.log(success);	
+		})
+	}
 }, function(err) {
 	console.log('credential error', error); 
 });

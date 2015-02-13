@@ -8,13 +8,9 @@ $scope.userManager = userManager;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"});
+angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
 
-$rootScope.hideBack = true;
-
-$scope.$on('$viewContentLoaded', function() {
-// 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
-});
+$rootScope.hideBack = true; //controls back button showing
 
 var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
 	console.log('$locationChangeSuccess');
@@ -24,7 +20,7 @@ var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() 
 
 $scope.$on('viewTabSwitch', function(event, tab) {
 	$scope.viewTab = tab;
-})
+})  //for home/explore/search tabs
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -35,7 +31,7 @@ $scope.newWorld = function() {
       console.log('response', response);
       $location.path('/edit/walkthrough/'+response[0].worldID);
     });
-}
+} //candidate for removal, should use worldTree.createWorld instead
 
 $scope.search = function() {
 	if ($scope.searchOn == true) {
@@ -46,11 +42,11 @@ $scope.search = function() {
 	} else {
 		$scope.searchOn = true;
 	}
-}
+} 
 	
 $scope.go = function(path) {
 	$location.path(path);
-}
+} 
 	
 $scope.goBack = function() {
 	$window.history.back();
@@ -60,9 +56,9 @@ $scope.logout = function() {
       $http.get('/api/user/logout', {server:true});
       userManager.loginStatus = false;
       //$location.url('/');
-}
+} //switch to userManager method
 
-$scope.sendFeedback = function(text) {
+$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 
     var data = {
       emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
@@ -122,20 +118,13 @@ $scope.share = function(platform) {
 
 //@IFDEF PHONEGAP
 $scope.fbLogin = function() {
-	facebookConnectPlugin.login(['public_profile', 'email'], 
-	function(success) {
-		console.log('fb success', arguments)
-		$http.get('/auth/bearer', {server: true, headers: {'Authorization': 'Bearer '+success.authResponse.accessToken}}).then(function(success) {
-			console.log('success', arguments)
-		}, function(failure) {
-			console.log('failure', arguments)
+	userManager.fbLogin().then(
+		function (success) {
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
 		})
-	}, 
-	function(failure) {
-		console.log('failure', arguments)}
-	)
 }
-
 //@ENDIF
 
 
@@ -146,14 +135,22 @@ if (beaconManager.supported == true) {
 //@ENDIF
 
 //@IFDEF KEYCHAIN
+//On Phonegap startup, try to login with either saved username/pw or facebook
 lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
+	if (credentials.username, credentials.password) {
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
 			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
 		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
+	} else if (credentials.fbToken) {
+		ifGlobals.fbToken = credentials.fbToken;
+		userManager.checkLogin().then(function(success) {
+			console.log(success);	
+		})
+	}
 }, function(err) {
 	console.log('credential error', error); 
 });

@@ -383,18 +383,33 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-    if (!req.isAuthenticated()){ 
-      passport.authenticate('local-basic', function(err, user, info) {
-        if (err) {
-          res.sendStatus(401);
-        }
-        if (!user) {
-          res.sendStatus(401);
-        }
-        if (user) {
-          return next();
-        }
-      })(req, res, next)
+    if (!req.isAuthenticated()){
+	    
+	    if (req.headers.authorization.indexOf('asic') > -1) {
+			passport.authenticate('local-basic', function(err, user, info) {
+				if (err) {
+					res.sendStatus(401);
+		        }
+		        if (!user) {
+		        	res.sendStatus(401);
+		        }
+		        if (user) {
+		        	return next();
+		        }
+      		})(req, res, next)
+      	} else if (req.headers.authorization.indexOf('earer') > -1) {
+	  		passport.authenticate('bearer', function(err, user, info) {
+		  		if (err) {
+			  		res.sendStatus(401);
+		  		}
+		  		if (!user) {
+			  		res.sendStatus(401);
+		  		}
+		  		if (user) {
+			  		return next();
+		  		}
+	  		})(req, res, next)
+      	}
     } else { 
        return next();
     }
@@ -409,7 +424,7 @@ function isLoggedIn(req, res, next) {
 // Search
 app.get('/api/textsearch', function(req, res) {
 
-    var sText = sanitize(req.body.textQuery);
+    var sText = sanitize(req.query.textQuery);
 
     sText = sText.replace(/[^\w\s]/gi, '');
 

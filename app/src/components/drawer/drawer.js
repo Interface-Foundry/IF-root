@@ -3,6 +3,8 @@ app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager
 		restrict: 'EA',
 		scope: true,
 		link: function (scope, element, attrs) {
+//would prefer if this method of bubble checking was replaced with an event bus (ie instead of depending on worldURL
+//can just watch for events on new bubble viewing. Or make a more centralized model)
 scope._currentBubble = false;
 	
 $rootScope.$on('toggleDrawer', function() {
@@ -17,7 +19,7 @@ scope.$on('$routeChangeSuccess', function() {
 	} else {
 		scope.shareAvailable = false;
 	}
-})
+}) //keeps shareavailable and editavailable up to date on route watching
 
 scope.$watch('drawerOn', function(drawerOn, oldDrawerOn) {
 	if (drawerOn === true) {
@@ -25,14 +27,15 @@ scope.$watch('drawerOn', function(drawerOn, oldDrawerOn) {
 	} else {
 		element.removeClass('drawer');
 	}
-})
+}) //toggles drawer
 
 scope.currentBubble = function () {
 	if (!scope._currentBubble && $routeParams.worldURL) {
 		scope._currentBubble = worldTree.worldCache.get($routeParams.worldURL);
 	}
 	return scope._currentBubble;	
-}
+} 
+//weird hack to expose current bubble on scope
 
 scope.avatar = function () {
 	try {
@@ -42,14 +45,18 @@ scope.avatar = function () {
 		return undefined;
 	}
 }
+//mirroring avatar on directive scope
 
 scope.username = function () {
 	return userManager.getDisplayName();
 }
+//^^
+
 
 scope.userBubbles = function () {
 	return worldTree._userWorlds;
 }
+//exposes current userworlds on scope
 
 scope.editAvailable = function () {
 	try {
@@ -59,6 +66,7 @@ scope.editAvailable = function () {
 		return false;
 	}
 }
+//check if user can edit. 
 
 scope.closeDrawer = function() {
 	scope.drawerOn = false;
@@ -67,14 +75,18 @@ scope.closeDrawer = function() {
 scope.shareDialog = function() {
 	dialogs.showDialog('shareDialog.html');
 }
+//pop up share dialog
 
 scope.create = worldTree.createWorld;
+//alias createworld on drawer
 
 scope.feedback = function() {
 	dialogs.showDialog('feedbackDialog.html')
 }
+//show feedback
 
 scope.logout = userManager.logout;
+//alias logout
 
 		},
 		templateUrl: 'components/drawer/drawer.html' 

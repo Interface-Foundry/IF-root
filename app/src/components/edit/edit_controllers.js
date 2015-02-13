@@ -39,7 +39,8 @@ $scope.kinds = [
 $scope.mapThemes = ifGlobals.mapThemes;
 
 function tempID() { 
-	//Used because angular leaflet has issues with watching when a marker is replaced with a marker of the same name. Kind of stupid.
+	//Used because angular leaflet has issues with watching when a marker is replaced with a marker of the same name. 
+	//Kind of stupid.
 	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
 }
 
@@ -54,7 +55,7 @@ $http.get('/components/edit/edit.locale-en-us.json').success(function(data) {
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
 }); 
-//weird way of throwing tooltip text on before we had solidified it, 
+//weird way of throwing tooltip text on before we had solidified it. TODO: centralize localization method.
 
 if ($routeParams.view) {
 	$scope.view = $routeParams.view; 

@@ -1,4 +1,4 @@
-app.directive('stickerCrosshair', ['$window', function($window) {
+app.directive('stickerCrosshair', ['$window', function($window) { //keeps sticker crosshair positioned
 	return {
 		restrict: 'A',
 		scope: true,
@@ -9,7 +9,7 @@ app.directive('stickerCrosshair', ['$window', function($window) {
 				wOffset = 0,//50,
 				hOffset = 0,//100,
 				left = w/2 - wOffset,
-				top = (h-220-40)/2+40 - hOffset;
+				top = (h-220-48)/2+48 - hOffset;
 				
 				element[0].style.left = left + 'px';
 				element[0].style.top = top + 'px';

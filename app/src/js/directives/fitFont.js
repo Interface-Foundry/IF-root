@@ -1,4 +1,4 @@
-app.directive('fitFont', function($rootScope) {
+app.directive('fitFont', function($rootScope) { //used to fit font size to large as possible without overflow
 	return {
 		restrict: 'A',
 		scope: true,

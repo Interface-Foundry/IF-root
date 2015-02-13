@@ -1,4 +1,4 @@
-app.directive('stickers', function(apertureService) {
+app.directive('stickers', function(apertureService) { //NOT USED
 	return {
 		restrict: 'A',
 		scope: true,
