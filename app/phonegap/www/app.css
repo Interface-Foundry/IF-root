@@ -345,6 +345,7 @@ ul.edit-toolbar {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
 	text-align: left;
 	background: #FFF;
 	border-radius: 2px;
@@ -419,6 +420,7 @@ ul.edit-toolbar {
 	position: relative;
 	left: 50%;
 	transform: translateX(-50%);
+	-webkit-transform: translateX(-50%);
 }
 
 .walkthrough-footer .footer-right {
@@ -734,6 +736,7 @@ ul.walkthrough-grid > li > img {
 .loading-spin {
 	left: 50%;
 	transform: translateX(-50%);
+	-webkit-transform: translateX(-50%);
 	top: 66px; /*172/2 - 40/2*/
 	width: 40px;
 	height: 40px;
