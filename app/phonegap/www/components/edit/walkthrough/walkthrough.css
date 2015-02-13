@@ -500,6 +500,8 @@ ul.walkthrough-grid > li > img {
 
 .btn.buttonToggle {
 	width: 150px;
+	background-color: #CCC;
+	margin-bottom: 10px;
 	outline: 0 !important;
 	color: white !important;
 }
