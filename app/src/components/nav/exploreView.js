@@ -1,9 +1,11 @@
-app.directive('exploreView', ['worldTree', '$rootScope', function(worldTree, $rootScope) {
+app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function (scope, element, attrs) {
 			scope.loadState = 'loading';
+			scope.kinds = ifGlobals.kinds;
+
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {
 				if (tab === 'explore') {

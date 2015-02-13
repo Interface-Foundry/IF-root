@@ -14,7 +14,6 @@ var messageList = $('.message-list');
 
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
-$rootScope.hideBack = true;
 
 $scope.msg = {};
 $scope.messages = [];
@@ -324,7 +323,6 @@ function addStickerToMap(sticker) {
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
     $timeout.cancel(checkMessagesTimeout);
-	$rootScope.hideBack = false;
     dereg();
 });
 

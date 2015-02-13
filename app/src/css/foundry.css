@@ -469,13 +469,20 @@ nav ul {
 }
 .search-view {
   position: absolute;
-  top: 48px;
+  top: 0px;
   left: 0px;
   right: 0px;
   bottom: 0px;
+  padding-top: 96px;
   z-index: 100;
+  /*@IFDEF PHONEGAP*/
+  padding-top: 112px;
+  /*@ENDIF*/
 }
 .search-bar {
+  position: absolute;
+  top: 48px;
+  left: 0px;
   width: 100%;
   height: 48px;
   padding: 2px 80px 2px 8px;
@@ -486,7 +493,7 @@ nav ul {
 }
 .search-btn {
   position: absolute;
-  top: 0px;
+  top: 48px;
   right: 0px;
   height: 48px;
   width: 80px;

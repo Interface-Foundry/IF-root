@@ -1,11 +1,11 @@
-<a if-href="#w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
 		ng-style="::{'background-color': style.titleBG_color}" 
 		ng-click="aperture.toggle('full'); zoomOn()"
 		ng-swipe-up="aperture.set('off'); zoomOn()"
-		ng-swipe-down="aperture.set('full'); zoomOn()">
+		ng-swipe-down="aperture.set('full'); zoomOn()"
+		world-shelf>
 		<div class="world-title noPreventDefault" fit-font>
 				<span class="vertical-middle noPreventDefault">{{landmark.name}}</span>
 		</div>

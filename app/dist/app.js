@@ -21084,8 +21084,9 @@ angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 
 $rootScope.hideBack = true; //controls back button showing
 
-var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
-	console.log('$locationChangeSuccess');
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	console.log('$routeChangeSuccess');
+	console.log(arguments);
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
@@ -21122,6 +21123,7 @@ $scope.go = function(path) {
 	
 $scope.goBack = function() {
 	$window.history.back();
+	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {
@@ -21189,12 +21191,14 @@ $scope.share = function(platform) {
 };
 
 }]);
-app.directive('exploreView', ['worldTree', '$rootScope', function(worldTree, $rootScope) {
+app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function (scope, element, attrs) {
 			scope.loadState = 'loading';
+			scope.kinds = ifGlobals.kinds;
+
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {
 				if (tab === 'explore') {
@@ -21213,7 +21217,7 @@ app.directive('exploreView', ['worldTree', '$rootScope', function(worldTree, $ro
 		templateUrl: 'components/nav/exploreView.html' 
 	}
 }])
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', function($rootScope, $routeParams, $location, worldTree) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -21240,6 +21244,17 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				scope.selected=tab;
 			});
 			
+			$document.on('keydown', function(e) {
+				console.log('keydown', e, scope.selected)
+			if (e.keyCode===8 && scope.selected !== 'home') {
+				console.log('keycode 8 & selected not home')
+				e.stopPropagation();
+				e.preventDefault();
+				scope.$apply(function() {
+					scope.$emit('viewTabSwitch', 'home');
+				});
+			}
+			});
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {
@@ -21256,14 +21271,17 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 '<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
 	}
 }])
-app.directive('searchView', ['$http', function($http) {
+app.directive('searchView', ['$http', 'geoService', function($http, geoService) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
-				scope.searching = $http.get('/api/textsearch', {server: true, params: {textQuery: searchText}})
+				geoService.getLocation().then(function(coords) {
+				
+				scope.searching = $http.get('/api/textsearch', {server: true, params: 
+					{textQuery: searchText, userLat: coords.lat, userLat: coords.lng, localTime: new Date()}})
 					.success(function(result) {
 						if (!result.err) {
 							scope.searchResult = result;
@@ -21272,7 +21290,7 @@ app.directive('searchView', ['$http', function($http) {
 						}
 					})
 					.error(function(err) {console.log(err)});
-					
+				});		
 			}
 			
 			scope.searchOnEnter = function($event, searchText) {
@@ -22265,7 +22283,6 @@ var messageList = $('.message-list');
 
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
-$rootScope.hideBack = true;
 
 $scope.msg = {};
 $scope.messages = [];
@@ -22575,7 +22592,6 @@ function addStickerToMap(sticker) {
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
     $timeout.cancel(checkMessagesTimeout);
-	$rootScope.hideBack = false;
     dereg();
 });
 

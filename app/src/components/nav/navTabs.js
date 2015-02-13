@@ -1,4 +1,4 @@
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', function($rootScope, $routeParams, $location, worldTree) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -25,6 +25,17 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				scope.selected=tab;
 			});
 			
+			$document.on('keydown', function(e) {
+				console.log('keydown', e, scope.selected)
+			if (e.keyCode===8 && scope.selected !== 'home') {
+				console.log('keycode 8 & selected not home')
+				e.stopPropagation();
+				e.preventDefault();
+				scope.$apply(function() {
+					scope.$emit('viewTabSwitch', 'home');
+				});
+			}
+			});
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {

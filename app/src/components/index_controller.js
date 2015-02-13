@@ -12,8 +12,9 @@ angular.extend($rootScope, {globalTitle: "Bubbl.li"});
 
 $rootScope.hideBack = true; //controls back button showing
 
-var deregFirstShow = $scope.$on('$locationChangeSuccess', _.after(2, function() {
-	console.log('$locationChangeSuccess');
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	console.log('$routeChangeSuccess');
+	console.log(arguments);
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
@@ -50,6 +51,7 @@ $scope.go = function(path) {
 	
 $scope.goBack = function() {
 	$window.history.back();
+	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {
