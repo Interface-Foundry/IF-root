@@ -1751,10 +1751,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if (req.url == "/api/worldchat/create") {
     
-      console.log('image '+req.body.img);
+      //console.log('image '+req.body.img);
 
         var wc = new worldchatSchema({
-            userID: req.user._id,
+            userID: req.body.userID,
             roomID: req.body.roomID,
             nick: req.body.nick,
             kind: req.body.kind,
@@ -1778,8 +1778,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 res.send(err);
             }
             else {
-              console.log(data);
-                console.log('SAVED new message');
+              //console.log(data);
+                //console.log('SAVED new message');
                 res.status(200).send([data]);
             }
         });
@@ -1787,13 +1787,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if ((req.url == "/api/stickers/create")
       && req.body.roomID
-      && req.user._id
+      //&& req.user._id
       && req.body.name) {
 
       var sticker = new stickerSchema({
         name: req.body.name,
-        ownerID: req.user._id,
-       roomID: req.body.roomID
+        ownerID: req.body.userID,
+        roomID: req.body.roomID
       });
 
       if (req.body.loc){
