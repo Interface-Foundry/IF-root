@@ -25,6 +25,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				scope.selected=tab;
 			});
 			
+/*
 			$document.on('keydown', function(e) {
 				console.log('keydown', e, scope.selected)
 			if (e.keyCode===8 && scope.selected !== 'home') {
@@ -36,6 +37,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				});
 			}
 			});
+*/
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {
