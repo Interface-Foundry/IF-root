@@ -2289,12 +2289,9 @@ transform:translateX(100%);
   -webkit-transform: translateY(88px);
 }
 #shelf.aperture-off {
-  transform: translateY(108px);
+  transform: translateY(116px);
   /*TODO toolbar height + nav height*/
-  -webkit-transform: translateY(108px);
-  -moz-transform: translateY(108px);
-  -ms-transform: translateY(108px);
-  -o-transform: translateY(108px);
+  -webkit-transform: translateY(116px);
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);

@@ -5779,6 +5779,7 @@ app.directive('worldShelf', ['$document', 'apertureService', function($document,
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
+/*
 			$document.on('keydown', function(e) {
 				if (e.keyCode===8 && apertureService.state==='aperture-full') {
 					e.stopPropagation();
@@ -5788,6 +5789,7 @@ app.directive('worldShelf', ['$document', 'apertureService', function($document,
 					});
 				}	
 			})	
+*/
 		}
 	}
 }]);
@@ -21244,6 +21246,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				scope.selected=tab;
 			});
 			
+/*
 			$document.on('keydown', function(e) {
 				console.log('keydown', e, scope.selected)
 			if (e.keyCode===8 && scope.selected !== 'home') {
@@ -21255,6 +21258,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				});
 			}
 			});
+*/
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {

@@ -2291,12 +2291,12 @@ transform:translateX(100%);
   -webkit-transform: translateY(88px);
 }
 #shelf.aperture-off {
-  transform: translateY(108px);
+  transform: translateY(116px);
   /*TODO toolbar height + nav height*/
-  -webkit-transform: translateY(108px);
-  -moz-transform: translateY(108px);
-  -ms-transform: translateY(108px);
-  -o-transform: translateY(108px);
+  -webkit-transform: translateY(116px);
+  transform: translateY(132px);
+  /*TODO toolbar height + nav height*/
+  -webkit-transform: translateY(132px);
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);
@@ -2742,6 +2742,7 @@ nav ul {
   line-height: 48px;
   outline: none;
   border: none;
+  top: 64px;
 }
 .search-btn {
   position: absolute;
