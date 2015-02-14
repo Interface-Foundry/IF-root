@@ -2,6 +2,7 @@ app.directive('worldShelf', ['$document', 'apertureService', function($document,
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
+/*
 			$document.on('keydown', function(e) {
 				if (e.keyCode===8 && apertureService.state==='aperture-full') {
 					e.stopPropagation();
@@ -11,6 +12,7 @@ app.directive('worldShelf', ['$document', 'apertureService', function($document,
 					});
 				}	
 			})	
+*/
 		}
 	}
 }]);
