@@ -336,16 +336,16 @@ function loadWidgets() { //needs to be generalized
 
 	}
 
-$scope.loadLandmarks = function(data) {
+$scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
-  	db.landmarks.get({parentID: $scope.world._id}, function(data) { 
-  		console.log('landmarks', data);
+	worldTree.getLandmarks($scope.world._id).then(function(data) {
+  		console.log('landmarks', {landmarks: data});
   		
-  		initLandmarks(data);
+  		initLandmarks({landmarks: data});
   		loadWidgets(); //load widget data
-  	});
- }
+  });
+}
   	
 function initLandmarks(data) {
 	var now = moment(); 

@@ -42,20 +42,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 
 worldTree.getLandmarks = function(_id) { //takes world's _id
 	var deferred = $q.defer();
-	
+	console.log('getLandmarks');
 	var landmarks = worldTree.landmarkCache.get(_id);
 	if (landmarks) {
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
 	} else {
-		db.landmarks.get({ parentID: _id}, function(data) {
-			if (data.err) {
-				deferred.reject(data.err);
-			} else {
-				worldTree.landmarkCache.put(_id, data.landmarks);
-				deferred.resolve(data.landmarks);
-			}
-		});
+		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
+			.success(function(success) {
+				console.log(success);
+				deferred.resolve(success.landmarks)})
+			.error(function(err) {
+				console.log(success);
+				deferred.resolve(err)});
 	}
 	
 	return deferred.promise;
