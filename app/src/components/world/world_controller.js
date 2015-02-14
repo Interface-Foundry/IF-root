@@ -340,11 +340,11 @@ $scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
 	worldTree.getLandmarks($scope.world._id).then(function(data) {
-  		console.log('landmarks', {landmarks: data});
+		console.log('landmarks', {landmarks: data});
   		
-  		initLandmarks({landmarks: data});
-  		loadWidgets(); //load widget data
-  });
+		initLandmarks({landmarks: data});
+		loadWidgets(); //load widget data
+	});
 }
   	
 function initLandmarks(data) {

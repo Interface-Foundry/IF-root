@@ -17892,14 +17892,16 @@ userManager.saveToKeychain = function() {
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 
-	function($cacheFactory, $q, World, db, geoService, $http, $location) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
 	styleCache: $cacheFactory('styles'),
 	landmarkCache: $cacheFactory('landmarks')
 }
+
+var alert = alertManager;
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -23607,11 +23609,11 @@ $scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
 	worldTree.getLandmarks($scope.world._id).then(function(data) {
-  		console.log('landmarks', {landmarks: data});
+		console.log('landmarks', {landmarks: data});
   		
-  		initLandmarks({landmarks: data});
-  		loadWidgets(); //load widget data
-  });
+		initLandmarks({landmarks: data});
+		loadWidgets(); //load widget data
+	});
 }
   	
 function initLandmarks(data) {
