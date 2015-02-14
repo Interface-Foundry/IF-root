@@ -21705,7 +21705,8 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 	$scope.upload = $upload.upload({
 		url: '/api/upload',
 		method: 'POST',
-		file: file
+		file: file,
+		server: true
 	}).progress(function(e) {
 		console.log('progress');
 		console.log(e);
