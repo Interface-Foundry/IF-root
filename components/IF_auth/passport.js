@@ -446,6 +446,8 @@ module.exports = function(passport) {
                   res.on('end', function() {
                       var parsed = JSON.parse(body);
 
+                        console.log('fbook parsed',parsed);
+
 
                         User.findOne({ 'facebook.id': parsed.id },
                             function(err, user) {
