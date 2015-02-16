@@ -46,27 +46,41 @@ var downloadImage = function(imageURL) {
 
       var file = fs.createWriteStream(writeStreamDestinaton);
 
-      var request = http.get(imageURL, function onImageDownload(response) {
+      var request = http.get(imageURL, function onImageDownload(err,response) {
 
-        response.on('data', function(data) {
-          file.write(data);
-        });
+        if (err){
+          console.log(err);
+        }
 
-        response.on('end', function() {
-          file.end();
+        else {
+          response.on('data', function(data) {
+            file.write(data);
+          });
 
-            //RESIZING IMAGES
-            im.resize({
-              srcPath: writeStreamDestinaton,
-              dstPath: writeStreamDestinaton,
-              width: 300,
-              height: 300,
-              quality: 0.8
-            }, function(err, stdout, stderr){
-                //console.log('RESIZED IMAGE');
-            });
+          response.on('end', function() {
+            file.end();
 
-        });
+              //RESIZING IMAGES
+              im.resize({
+                srcPath: writeStreamDestinaton,
+                dstPath: writeStreamDestinaton,
+                width: 300,
+                height: 300,
+                quality: 0.8
+              }, function(err, stdout, stderr){
+                  //console.log('RESIZED IMAGE');
+              });
+
+          });     
+          
+          response.on('error', function(err) {
+            console.log("ERROR:" + err);
+            file.read();
+          });
+
+        }
+
+
 
       });
 

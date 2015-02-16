@@ -450,22 +450,66 @@ module.exports = function(passport) {
                   res.on('end', function() {
 
                         console.log(body);
-                        
-                      var parsed = JSON.parse(body);
+
+                        var parsed = JSON.parse(body);
 
                         console.log('fbook parsed',parsed);
 
 
                         User.findOne({ 'facebook.id': parsed.id },
                             function(err, user) {
-                                if(err) {
+
+
+
+                                if (err)
                                     return done(err);
-                                }
-                                if(!user) {
-                                    return done(null, false);
+
+                                if (user) {
+
+                                    // if there is a user id already but no token (user was linked at one point and then removed)
+                                    if (!user.facebook.token) {
+                                        user.facebook.token = token;
+                                        user.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
+                                        if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                                            user.facebook.email = profile.emails[0].value;
+                                        }
+
+                                        user.save(function(err) {
+                                            if (err)
+                                                throw err;
+                                            return done(null, user);
+                                        });
+                                    }
+
+                                    return done(null, user); // user found, return that user
+                                } else {
+                                    // if there is no user, create them
+                                    var newUser            = new User();
+
+                                    newUser.facebook.id    = profile.id;
+                                    newUser.facebook.token = token;
+                                    newUser.facebook.name  = profile.displayName;
+                                    if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                                        newUser.facebook.email = profile.emails[0].value; 
+                                    }
+                                    
+
+                                    newUser.save(function(err) {
+                                        if (err)
+                                            throw err;
+                                        return done(null, newUser);
+                                    });
                                 }
 
-                                return done(null, user);
+
+
+
+                                
+                                // if(!user) {
+                                //     return done(null, false);
+                                // }
+
+                                //return done(null, user);
                             }
                         );
 
