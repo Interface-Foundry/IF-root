@@ -469,10 +469,10 @@ module.exports = function(passport) {
                                     // if there is a user id already but no token (user was linked at one point and then removed)
                                     if (!user.facebook.token) {
                                         user.facebook.token = token;
-                                        user.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
-                                        if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
-                                            user.facebook.email = profile.emails[0].value;
-                                        }
+                                        user.facebook.name  = parsed.name;
+                                        // if (parsed.emails[0].value !== undefined || parsed.emails[0].value !== null){
+                                        //     user.facebook.email = profile.emails[0].value;
+                                        // }
 
                                         user.save(function(err) {
                                             if (err)
@@ -486,12 +486,12 @@ module.exports = function(passport) {
                                     // if there is no user, create them
                                     var newUser            = new User();
 
-                                    newUser.facebook.id    = profile.id;
+                                    newUser.facebook.id    = parsed.id;
                                     newUser.facebook.token = token;
-                                    newUser.facebook.name  = profile.displayName;
-                                    if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
-                                        newUser.facebook.email = profile.emails[0].value; 
-                                    }
+                                    newUser.facebook.name  = parsed.name;
+                                    // if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                                    //     newUser.facebook.email = parsed.emails[0].value; 
+                                    // }
                                     
 
                                     newUser.save(function(err) {
