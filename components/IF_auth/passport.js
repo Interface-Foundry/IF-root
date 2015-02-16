@@ -425,6 +425,10 @@ module.exports = function(passport) {
         new BearerStrategy(
             function(token, done) {
 
+                console.log('HELLO');
+
+                console.log(token);
+
                 var options = {
                   host: 'graph.facebook.com',
                   port: 443,
@@ -444,6 +448,9 @@ module.exports = function(passport) {
                   });
 
                   res.on('end', function() {
+
+                        console.log(body);
+                        
                       var parsed = JSON.parse(body);
 
                         console.log('fbook parsed',parsed);
