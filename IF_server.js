@@ -383,21 +383,10 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-
-    console.log(req.headers);
-
     if (!req.isAuthenticated()){
-
-      console.log(req.headers.authorization);
 	    
 	    if (req.headers.authorization.indexOf('asic') > -1) {
 			passport.authenticate('local-basic', function(err, user, info) {
-
-
-          console.log('err-basic',err);
-          console.log('user-basic',user);
-          console.log('info-basic',info);
-
 				if (err) {
 					res.sendStatus(401);
 		        }
@@ -410,29 +399,17 @@ function isLoggedIn(req, res, next) {
       		})(req, res, next)
       	} else if (req.headers.authorization.indexOf('earer') > -1) {
 	  		passport.authenticate('bearer', function(err, user, info) {
-
-
-
-          console.log('err-berear',err);
-          console.log('user-bearer',user);
-          console.log('info-bearer',info);
 		  		if (err) {
 			  		res.sendStatus(401);
 		  		}
-          else {
-            return next();
-          }
-		  		// if (!user) {
-			  	// 	res.sendStatus(401);
-		  		// }
-		  		// if (user) {
-			  	// 	return next();
-		  		// }
+		  		if (!user) {
+			  		res.sendStatus(401);
+		  		}
+		  		if (user) {
+			  		return next();
+		  		}
 	  		})(req, res, next)
       	}
-        else {
-          console.log('none!');
-        }
     } else { 
        return next();
     }
