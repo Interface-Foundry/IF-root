@@ -8,8 +8,7 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
-
-
+var https = require('https');
 
 // load the auth variables
 var configAuth = require('./auth'); // use this one for testing
@@ -425,18 +424,104 @@ module.exports = function(passport) {
     passport.use(  
         new BearerStrategy(
             function(token, done) {
-                User.findOne({ 'facebook.token': token },
-                    function(err, user) {
-                        if(err) {
-                            return done(err);
-                        }
-                        if(!user) {
-                            return done(null, false);
-                        }
 
-                        return done(null, user);
-                    }
-                );
+                console.log('HELLO');
+
+                console.log(token);
+
+                var options = {
+                  host: 'graph.facebook.com',
+                  port: 443,
+                  path: '/me?access_token='+token,
+                  method: 'GET',
+                  headers: {
+                    accept: '*/*'
+                  }
+                };
+
+                var req = https.request(options, function(res) {
+
+                  var body = '';
+
+                  res.on('data', function(d) {
+                    body += d;
+                  });
+
+                  res.on('end', function() {
+
+                        console.log(body);
+
+                        var parsed = JSON.parse(body);
+
+                        console.log('fbook parsed',parsed);
+
+
+                        User.findOne({ 'facebook.id': parsed.id },
+                            function(err, user) {
+
+
+
+                                if (err)
+                                    return done(err);
+
+                                if (user) {
+
+                                    // if there is a user id already but no token (user was linked at one point and then removed)
+                                    if (!user.facebook.token) {
+                                        user.facebook.token = token;
+                                        user.facebook.name  = parsed.name;
+                                        // if (parsed.emails[0].value !== undefined || parsed.emails[0].value !== null){
+                                        //     user.facebook.email = profile.emails[0].value;
+                                        // }
+
+                                        user.save(function(err) {
+                                            if (err)
+                                                throw err;
+                                            return done(null, user);
+                                        });
+                                    }
+
+                                    return done(null, user); // user found, return that user
+                                } else {
+                                    // if there is no user, create them
+                                    var newUser            = new User();
+
+                                    newUser.facebook.id    = parsed.id;
+                                    newUser.facebook.token = token;
+                                    newUser.facebook.name  = parsed.name;
+                                    // if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
+                                    //     newUser.facebook.email = parsed.emails[0].value; 
+                                    // }
+                                    
+
+                                    newUser.save(function(err) {
+                                        if (err)
+                                            throw err;
+                                        return done(null, newUser);
+                                    });
+                                }
+
+
+
+
+                                
+                                // if(!user) {
+                                //     return done(null, false);
+                                // }
+
+                                //return done(null, user);
+                            }
+                        );
+
+                  });
+
+                });
+                req.end();
+
+                req.on('error', function(e) {
+                  console.error(e);
+                });
+
             }
         )
     );

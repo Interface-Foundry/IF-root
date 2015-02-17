@@ -20,33 +20,12 @@ $scope.collectedPresents = [];
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
-
-//currently only for upcoming...
-/*
-function reorderById (idArray) {
-	console.log('reorderById');
-	$scope.upcoming = [];
-	
-	for (var i = 0, len = idArray.length; i<len; i++) {
-	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, 0)[0];
-	}
-	
-	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		if ($scope.landmarks[i] == 0) {
-			$scope.landmarks.splice(i, 1);
-			i--;
-		}
-	}
-	console.log($scope.landmarks, $scope.upcoming);
-}
-*/
-
   	
 $scope.zoomOn = function() {
 	  	zoomControl.style.display = "block";
 }
-  	
-$scope.loadWorld = function(data) {
+ 
+$scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
@@ -59,14 +38,14 @@ $scope.loadWorld = function(data) {
 			 else {
 			 	$scope.showEdit = false;
 			 }
-		 }
+		 } 
 
-		 console.log($scope.world);
-		 console.log($scope.style);
+		//console.log($scope.world);
+		//console.log($scope.style);
 		 
 		 if ($scope.world.name) {
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 }
+		 } //TODO: cleanup on $destroy
 		 
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
@@ -81,6 +60,7 @@ $scope.loadWorld = function(data) {
 		
 		var zoomLevel = 18;
 		
+		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 			console.log('setcenter');
@@ -124,7 +104,7 @@ $scope.loadWorld = function(data) {
 		$scope.loadLandmarks();
   	}
   	
-function loadWidgets() {
+function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
 	if ($scope.style.widgets) {
 		if ($scope.style.widgets.twitter == true) {
@@ -269,7 +249,6 @@ function loadWidgets() {
 		if ($scope.style.widgets.messages==true||$scope.style.widgets.chat==true) {
 			$scope.messages = true;
 
-			//angular while loop the query every 2 seconds
 			db.messages.query({limit:1, roomID:$scope.world._id}, function(data){ 
 				console.log('db.messages', data);
 				if (data.length>0) {
@@ -282,23 +261,6 @@ function loadWidgets() {
 			$scope.category = true;
 		}
 		
-		if ($scope.style.widgets.upcoming) {
-			/*
-db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
-				console.log('queryFilter:now');
-				console.log(data);
-				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];
-				console.log($scope.now);
-			}); 
-			
-			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
-				console.log('queryFilter:upcoming');
-				console.log('upcoming data', data);
-				//console.log(angular.fromJson(data[0]));
-				reorderById(data);
-			}); 
-*/
-		}
 		}
 		
 	   if ($scope.world.resources) {
@@ -374,19 +336,19 @@ db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: use
 
 	}
 
-$scope.loadLandmarks = function(data) {
+$scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
-  	db.landmarks.get({parentID: $scope.world._id}, function(data) { 
-  		console.log('landmarks', data);
+	worldTree.getLandmarks($scope.world._id).then(function(data) {
+		console.log('landmarks', {landmarks: data});
   		
-  		initLandmarks(data);
-  		loadWidgets(); //load widget data
-  	});
- }
+		initLandmarks({landmarks: data});
+		loadWidgets(); //load widget data
+	});
+}
   	
 function initLandmarks(data) {
-	var now = moment();
+	var now = moment(); 
 	var groups = _.groupBy(data.landmarks, function(landmark) {
 		if (landmark.time.start) {
 			var startTime = moment(landmark.time.start); 

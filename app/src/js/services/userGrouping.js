@@ -4,7 +4,7 @@ angular.module('tidepoolsServices')
     	
 var userGrouping = {
 	
-}
+} //groups bubbles for user page display.
 
 userGrouping.groupByTime = function (bubbles) {
 	var groups = {

@@ -23,4 +23,6 @@ var instagramSchema = new Schema({
   }
 });
 
+instagramSchema.index({tags:1});
+
 exports.instagram = mongoose.model('Instagram', instagramSchema);

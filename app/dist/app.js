@@ -5134,7 +5134,7 @@ app.directive('bubbleBody', function(apertureService) {
 		restrict: 'A',
 		scope: true,
 		link: function(scope, element, attrs) {
-			
+			//basically just handles scroll stuff
 			var handleScroll = _.throttle(function() {
 				var st = element.scrollTop();
 				
@@ -5154,7 +5154,7 @@ app.directive('bubbleBody', function(apertureService) {
 	}
 });
 app.directive('compassButton', function(worldTree, $templateRequest, $compile, userManager, $timeout) {
-	return {
+	return { //NOT USED ANY MORE
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
@@ -5436,7 +5436,7 @@ angular.module('monospaced.elastic', [])
     }
   ]);
 
-app.directive('fitFont', function($rootScope) {
+app.directive('fitFont', function($rootScope) { //used to fit font size to large as possible without overflow
 	return {
 		restrict: 'A',
 		scope: true,
@@ -5516,7 +5516,7 @@ app.directive('fitFont', function($rootScope) {
 	}
 });
 
-app.directive('ifHref', function() {
+app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
 	return {
 		restrict: 'A',
 		priority: 99, 
@@ -5538,7 +5538,7 @@ app.directive('ifHref', function() {
 		}
 	}
 });
-app.directive('ifSrc', function() {
+app.directive('ifSrc', function() { //used to make srcs safe for phonegap and web. Only for hosted content
 	return {
 		restrict: 'A',
 		priority: 99, 
@@ -5615,7 +5615,7 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
-app.directive('stickers', function(apertureService) {
+app.directive('stickers', function(apertureService) { //NOT USED
 	return {
 		restrict: 'A',
 		scope: true,
@@ -5715,7 +5715,7 @@ app.directive('stickers', function(apertureService) {
 		}
 	}
 });
-app.directive('stickerCrosshair', ['$window', function($window) {
+app.directive('stickerCrosshair', ['$window', function($window) { //keeps sticker crosshair positioned
 	return {
 		restrict: 'A',
 		scope: true,
@@ -5726,7 +5726,7 @@ app.directive('stickerCrosshair', ['$window', function($window) {
 				wOffset = 0,//50,
 				hOffset = 0,//100,
 				left = w/2 - wOffset,
-				top = (h-220-40)/2+40 - hOffset;
+				top = (h-220-48)/2+48 - hOffset;
 				
 				element[0].style.left = left + 'px';
 				element[0].style.top = top + 'px';
@@ -5757,31 +5757,42 @@ angular.module('IF-directives', [])
 });
 
 angular.module('IF-directives', [])
-.directive('userChip', function($rootScope, userManager, dialogs, $location) {
+.directive('userChip', ['dialogs', function(dialogs) {
 	return {
 		restrict: 'A',
 		scope: true,
-		link: function($scope, $element, attrs) {
-			$scope.openMenu = function($event) {
-				if (userManager.loginStatus && $scope.userMenu !== true) {
-					console.log('click1');
-					$scope.userMenu = true;
-					$event.stopPropagation();
-					$('html').on('click', function(e) {
-						$scope.userMenu = false;
-						$scope.$digest();
-						console.log('click');
-						$('html').off('click');
-					})
-				} else if (!userManager.loginStatus) {
-					dialogs.showDialog('authDialog.html');
-				}
+		link: function(scope, element, attrs) {
+			scope.openDrawer = function() {
+				console.log('openDrawer');
+				scope.$emit('toggleDrawer');
+			}
+			
+			scope.login = function() {
+				dialogs.showDialog('authDialog.html');
 			}
 		},
 		templateUrl: 'templates/userChip.html'
 	}
 		
-});
+}]);
+app.directive('worldShelf', ['$document', 'apertureService', function($document, apertureService) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+/*
+			$document.on('keydown', function(e) {
+				if (e.keyCode===8 && apertureService.state==='aperture-full') {
+					e.stopPropagation();
+					e.preventDefault();
+					scope.$apply(function() {
+						apertureService.toggle('full');
+					});
+				}	
+			})	
+*/
+		}
+	}
+}]);
 //parent
 function WorldMakerCtrl($location, $scope, $routeParams, db, $rootScope, leafletData) {
 	var worldDetailMap = leafletData.getMap('worldDetailMap');
@@ -16563,7 +16574,7 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
    			]
-   		};
+   		}; //Used to manage alerts posted to top of page. Needs better API 
 
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
    			var alertClass;
@@ -16606,7 +16617,7 @@ angular.module('tidepoolsServices')
 function($rootScope, $compile) {
 var dialogs = {
 	dialogTemplate: null
-}
+} //used to manage different popup dialogs and modals
 
 dialogs.showDialog = function(name) {
 	dialogs.template = "templates/"+name;
@@ -16624,7 +16635,7 @@ return dialogs;
 angular.module('tidepoolsServices')
     .factory('geoService', [ '$q', 'alertManager',
     	function($q, alertManager) {
-
+//abstract & promisify geolocation, queue requests.
 var geoService = {
 	location: {
 		//lat,
@@ -16686,7 +16697,7 @@ geoService.resolveQueue = function (position) {
 return geoService;
 }]);
 'use strict';
-
+//maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
 		function() {
@@ -16860,7 +16871,7 @@ angular.module('tidepoolsServices')
 
 angular.module('tidepoolsServices')
     .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) {
+		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -16963,6 +16974,7 @@ mapManager.apertureUpdate = function(state) {
 	}
 }
 
+//use bounds from array of markers to set more accruate center
 mapManager.setCenterFromMarkers = function(markers) {
 	leafletData.getMap().then(function(map) {
 		map.fitBounds(
@@ -17479,6 +17491,10 @@ return beaconData;
 // https://bubbl.li/w/Creative_Technologies_2014/BubblBot_s_Arms/
 'use strict';
 
+//Phonegap only!
+//Uses the keychain plugin to store credentials on iOS. 
+//Implementation should eventually be platform agnostic
+
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
@@ -17492,7 +17508,7 @@ return lockerManager;
 app.factory('stickerManager', ['$http', '$q', function($http, $q) {
 var stickerManager = {
 	
-}
+}//manages interfacing with stickers on the server
 
 stickerManager.postSticker = function(sticker) {
 	var deferred = $q.defer();
@@ -17575,7 +17591,7 @@ angular.module('tidepoolsServices')
     	
 var userGrouping = {
 	
-}
+} //groups bubbles for user page display.
 
 userGrouping.groupByTime = function (bubbles) {
 	var groups = {
@@ -17709,9 +17725,12 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
 var alerts = alertManager;
+   
+   
+   //deals with loading, saving, managing user info. 
    
 var userManager = {
 	userRes: $resource('/api/updateuser'),
@@ -17721,11 +17740,11 @@ var userManager = {
 }
 
 
-userManager.getUser = function() {
+userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
 
-	var user = userManager._user;
-	if (user) {
+	var user = userManager._user; //user cached in memory 
+	if (user) {  
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -17746,14 +17765,14 @@ userManager.getUser = function() {
 	return deferred.promise;
 }
 
-userManager.saveUser = function(user) {
+userManager.saveUser = function(user) { //saves user object then updates memory cache
 	userManager.userRes.save(user, function() {
 		console.log('saveUser() succeeded');
 		userManager._user = user;
 	});
 }
 
-userManager.getDisplayName = function() {
+userManager.getDisplayName = function() { //gets a first name to display in the UI from wherever.
 	if (userManager._user) {
 		var user = userManager._user;	
 		if (user.name) {displayName = user.name}
@@ -17776,10 +17795,11 @@ userManager.getDisplayName = function() {
 	}
 }
 
-userManager.checkLogin = function(){
-      var deferred = $q.defer();
+userManager.checkLogin = function() { //checks if user is logged in with side effects. would be better to redesign.
+	console.log('checklogin');
+    var deferred = $q.defer();
       
-	  userManager.getUser().then(function(user) {
+	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
 		  $rootScope.user = user;
@@ -17787,17 +17807,20 @@ userManager.checkLogin = function(){
 			  $rootScope.userID = user._id;
 			  userManager._user = user;
 		  }
-		  deferred.resolve(0);
+		  worldTree.getUserWorlds();
+		  deferred.resolve(1);
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
-	  });
-	  	  
-      return deferred.promise;
+	});
+	
+	$rootScope.$broadcast('loginSuccess');
+		  
+    return deferred.promise;
 };
 
-userManager.signin = function(username, password) {
+userManager.signin = function(username, password) { //given a username and password, sign in 
 	console.log('signin');
 	var deferred = $q.defer();
 	var data = {
@@ -17819,14 +17842,38 @@ userManager.signin = function(username, password) {
 	return deferred.promise;
 }
 
-userManager.logout = function() {
+userManager.fbLogin = function() { //login based on facebook approval
+	var deferred = $q.defer();
+	
+	facebookConnectPlugin.login(['public_profile', 'email'], 
+		function(success) {
+			var fbToken = success.authResponse.accessToken;
+			var authHeader = 'Bearer ' + fbToken;
+			console.log(success);
+			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+				lockerManager.saveFBToken(fbToken)
+				ifGlobals.fbToken = fbToken;
+				deferred.resolve(success);
+			}, function(failure) {
+				deferred.reject(failure);
+			})
+		}, 
+		function(failure) {
+			alerts.addAlert('warning', "Please allow access to Facebook!", true);
+			deferred.reject(failure);
+		})
+	
+	return deferred.promise;
+}
+
+userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
-userManager.login.login = function() {
+userManager.login.login = function() { //login based on login form
 	console.log('login');
     var data = {
       email: userManager.login.email,
@@ -17846,7 +17893,7 @@ userManager.login.login = function() {
 	});
 }
 
-userManager.signup.signup = function() {
+userManager.signup.signup = function() { //signup based on signup form 
 	var data = {
       email: userManager.signup.email,
       password: userManager.signup.password
@@ -17859,7 +17906,7 @@ userManager.signup.signup = function() {
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
 	})
-	.error(function(err){
+	.error(function(err) {
 	if (err) {
 		userManager.signup.error = "Error signing up!";
         alertManager.addAlert('danger',err, true);   
@@ -17867,21 +17914,23 @@ userManager.signup.signup = function() {
 	});
 }
 
-userManager.saveToKeychain = function() {
+userManager.saveToKeychain = function() { 
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
 }
 
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
-	function($cacheFactory, $q, World, db, geoService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
 	styleCache: $cacheFactory('styles'),
 	landmarkCache: $cacheFactory('landmarks')
 }
+
+var alert = alertManager;
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -17917,20 +17966,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 
 worldTree.getLandmarks = function(_id) { //takes world's _id
 	var deferred = $q.defer();
-	
+	console.log('getLandmarks');
 	var landmarks = worldTree.landmarkCache.get(_id);
 	if (landmarks) {
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
 	} else {
-		db.landmarks.get({ parentID: _id}, function(data) {
-			if (data.err) {
-				deferred.reject(data.err);
-			} else {
-				worldTree.landmarkCache.put(_id, data.landmarks);
-				deferred.resolve(data.landmarks);
-			}
-		});
+		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
+			.success(function(success) {
+				console.log(success);
+				deferred.resolve(success.landmarks)})
+			.error(function(err) {
+				console.log(success);
+				deferred.resolve(err)});
 	}
 	
 	return deferred.promise;
@@ -18012,6 +18060,34 @@ worldTree.cacheWorlds = function(worlds) {
 	if (!worlds) {return}
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
+	});
+}
+
+worldTree.getUserWorlds = function(_id) {
+	console.log('getUserWorlds')
+	var now = Date.now() / 1000; 
+	
+	if (_id) {
+		//other user -- need api endpoint
+	} else if (worldTree._userWorlds && (worldTree._userWorlds.timestamp + 60) > now) {
+		return $q.when(worldTree._userWorlds);
+	} else {
+		return $http.get('/api/user/profile', {server: true}).success(function(bubbles){	
+			worldTree._userWorlds = bubbles;
+			worldTree._userWorlds.timestamp = now;
+			worldTree.cacheWorlds(bubbles);
+		});
+	}
+}
+
+worldTree.createWorld = function() {
+	
+	var world = {newStatus: true};
+	
+	db.worlds.create(world, function(response){
+		console.log('##Create##');
+		console.log('response', response);
+		$location.path('/edit/walkthrough/'+response[0].worldID);
 	});
 }
 
@@ -19529,6 +19605,100 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function (scope, element, attrs) {
+//would prefer if this method of bubble checking was replaced with an event bus (ie instead of depending on worldURL
+//can just watch for events on new bubble viewing. Or make a more centralized model)
+scope._currentBubble = false;
+	
+$rootScope.$on('toggleDrawer', function() {
+	scope.drawerOn = !scope.drawerOn;
+});
+
+scope.$on('$routeChangeSuccess', function() {
+	//check if sharing and editing are available on this route
+	scope._currentBubble = false;
+	if ($routeParams.worldURL) {
+		scope.shareAvailable = true;
+	} else {
+		scope.shareAvailable = false;
+	}
+}) //keeps shareavailable and editavailable up to date on route watching
+
+scope.$watch('drawerOn', function(drawerOn, oldDrawerOn) {
+	if (drawerOn === true) {
+		element.addClass('drawer');	
+	} else {
+		element.removeClass('drawer');
+	}
+}) //toggles drawer
+
+scope.currentBubble = function () {
+	if (!scope._currentBubble && $routeParams.worldURL) {
+		scope._currentBubble = worldTree.worldCache.get($routeParams.worldURL);
+	}
+	return scope._currentBubble;	
+} 
+//weird hack to expose current bubble on scope
+
+scope.avatar = function () {
+	try {
+		return userManager._user.avatar;
+	}
+	catch (e) {
+		return undefined;
+	}
+}
+//mirroring avatar on directive scope
+
+scope.username = function () {
+	return userManager.getDisplayName();
+}
+//^^
+
+
+scope.userBubbles = function () {
+	return worldTree._userWorlds;
+}
+//exposes current userworlds on scope
+
+scope.editAvailable = function () {
+	try {
+			return scope.currentBubble().permissions.ownerID === userManager._user._id;
+	}
+	catch (e) {
+		return false;
+	}
+}
+//check if user can edit. 
+
+scope.closeDrawer = function() {
+	scope.drawerOn = false;
+}
+
+scope.shareDialog = function() {
+	dialogs.showDialog('shareDialog.html');
+}
+//pop up share dialog
+
+scope.create = worldTree.createWorld;
+//alias createworld on drawer
+
+scope.feedback = function() {
+	dialogs.showDialog('feedbackDialog.html')
+}
+//show feedback
+
+scope.logout = userManager.logout;
+//alias logout
+
+		},
+		templateUrl: 'components/drawer/drawer.html' 
+	}
+}])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
 
 var aperture = apertureService,
@@ -19563,7 +19733,8 @@ $scope.kinds = [
 $scope.mapThemes = ifGlobals.mapThemes;
 
 function tempID() { 
-	//Used because angular leaflet has issues with watching when a marker is replaced with a marker of the same name. Kind of stupid.
+	//Used because angular leaflet has issues with watching when a marker is replaced with a marker of the same name. 
+	//Kind of stupid.
 	return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 12);
 }
 
@@ -19578,7 +19749,7 @@ $http.get('/components/edit/edit.locale-en-us.json').success(function(data) {
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
 }); 
-//weird way of throwing tooltip text on before we had solidified it, 
+//weird way of throwing tooltip text on before we had solidified it. TODO: centralize localization method.
 
 if ($routeParams.view) {
 	$scope.view = $routeParams.view; 
@@ -20131,7 +20302,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20392,9 +20563,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		return worldTree.getLandmarks(data.world._id);
-	}).then(function(data) {
-		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+	worldTree.getLandmarks(data.world._id).then(function(data) {
+		$scope.landmarks = data;
 					
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
@@ -20403,6 +20573,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		});
 		landmarksLoaded = true;
 			
+	});
 	});	
 	
 }])
@@ -21025,9 +21196,9 @@ $scope.$watch('temp.mapOn', function(newVal, oldVal) {
 			style.resetNavBG();
 		break;
 	}
-})
+}) 
 
-$rootScope.$on('leafletDirectiveMarker.click', function(event, args) {
+$rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
 	var bubble = $scope.bubbles.find(function(element, index, array) {
 		if (element._id==args.markerName) {
 			return true;
@@ -21040,7 +21211,7 @@ $rootScope.$on('leafletDirectiveMarker.click', function(event, args) {
 
 //INIT
 
-worldTree.getNearby().then(function(data) {
+worldTree.getNearby().then(function(data) { 
 	$scope.$evalAsync(function($scope) {
 		$scope.homeBubbles = data['150m'] || [];
 		$scope.nearbyBubbles = data['2.5km'] || [];
@@ -21075,13 +21246,20 @@ $scope.userManager = userManager;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"});
+angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
 
-$rootScope.hideBack = true;
+$rootScope.hideBack = true; //controls back button showing
 
-$scope.$on('$viewContentLoaded', function() {
-// 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
-});
+var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	console.log('$routeChangeSuccess');
+	console.log(arguments);
+	$rootScope.hideBack = false;
+	deregFirstShow();
+}))
+
+$scope.$on('viewTabSwitch', function(event, tab) {
+	$scope.viewTab = tab;
+})  //for home/explore/search tabs
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -21092,7 +21270,7 @@ $scope.newWorld = function() {
       console.log('response', response);
       $location.path('/edit/walkthrough/'+response[0].worldID);
     });
-}
+} //candidate for removal, should use worldTree.createWorld instead
 
 $scope.search = function() {
 	if ($scope.searchOn == true) {
@@ -21103,26 +21281,27 @@ $scope.search = function() {
 	} else {
 		$scope.searchOn = true;
 	}
-}
+} 
 	
 $scope.go = function(path) {
 	$location.path(path);
-}
+} 
 	
 $scope.goBack = function() {
 	$window.history.back();
+	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {
       $http.get('/api/user/logout', {server:true});
       userManager.loginStatus = false;
       //$location.url('/');
-}
+} //switch to userManager method
 
-$scope.sendFeedback = function(){
+$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 
     var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
+      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
     }
 
     $http.post('feedback', data).
@@ -21134,14 +21313,6 @@ $scope.sendFeedback = function(){
       error(function(err){
         console.log('there was a problem');
     });
-    
-    if ($scope.feedback) {
-        $scope.feedback.on = false;
-    } else {
-        $scope.feedback = {
-	        on: false
-        }
-    }
 };
 
 /*
@@ -21186,16 +21357,119 @@ $scope.share = function(platform) {
 };
 
 }]);
-app.controller('SearchController', ['$location', '$scope', 'db', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$route', '$routeParams', '$timeout', function ($location, $scope, db, $rootScope, apertureService, mapManager, styleManager, $route, $routeParams, $timeout){
-	/*$scope.sessionSearch = function() { 
-        $scope.landmarks = db.landmarks.query({queryType:"search", queryFilter: $scope.searchText});
-    };*/    
-    // db.landmarks.query({queryType:"search", queryFilter: $routeParams.searchQuery}, function(data) {
-	   //  console.log(data);
-    // });
+app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function (scope, element, attrs) {
+			scope.loadState = 'loading';
+			scope.kinds = ifGlobals.kinds;
 
+			
+			$rootScope.$on('viewTabSwitch', function(event, tab) {
+				if (tab === 'explore') {
+					scope.loadState = 'loading';
+					worldTree.getNearby().then(function(data) {
+						scope.homeBubbles = data['150m'] || [];
+						scope.nearbyBubbles = data['2.5km'] || [];			
+						scope.loadState = 'success';
+					}, function(reason) {
+						scope.loadState = 'failure'; 
+					});
+				}
+			});
+	
+		},
+		templateUrl: 'components/nav/exploreView.html' 
+	}
+}])
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			scope.selected = 'home';
+			scope.select = function (tab) {
+				if (scope.selected===tab && tab === 'home') {
+					if ($routeParams.worldURL) {
+						var wRoute = "/w/"+$routeParams.worldURL;
+						$location.path() === wRoute ? $location.path("/") : $location.path(wRoute);
 
-}]);
+					} else {
+						$location.path('/');
+					}
+				}
+				scope.$emit('viewTabSwitch', tab);
+			}
+			
+			scope.$on('$locationChangeSuccess', function(event) {
+				scope.$emit('viewTabSwitch', 'home');
+			});
+			
+			$rootScope.$on('viewTabSwitch', function(event, tab) {
+				scope.selected=tab;
+			});
+			
+/*
+			$document.on('keydown', function(e) {
+				console.log('keydown', e, scope.selected)
+			if (e.keyCode===8 && scope.selected !== 'home') {
+				console.log('keycode 8 & selected not home')
+				e.stopPropagation();
+				e.preventDefault();
+				scope.$apply(function() {
+					scope.$emit('viewTabSwitch', 'home');
+				});
+			}
+			});
+*/
+			
+			scope.nearbiesLength = function() {
+				if (worldTree._nearby) {
+					return _.reduce(worldTree._nearby, function(memo, value) {return memo+_.size(value)}, 0);
+				} else {
+					return 0;
+				}
+			}
+		},
+		template: 
+'<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
+'<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
+'<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
+'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+	}
+}])
+app.directive('searchView', ['$http', 'geoService', function($http, geoService) {
+	return {
+		restrict: 'EA',
+		scope: true,
+		link: function(scope, element, attrs) {
+			scope.search = function(searchText) {
+				scope.lastSearch = searchText;
+				geoService.getLocation().then(function(coords) {
+				
+				scope.searching = $http.get('/api/textsearch', {server: true, params: 
+					{textQuery: searchText, userLat: coords.lat, userLat: coords.lng, localTime: new Date()}})
+					.success(function(result) {
+						if (!result.err) {
+							scope.searchResult = result;
+						} else {
+							scope.searchResult = [];
+						}
+					})
+					.error(function(err) {console.log(err)});
+				});		
+			}
+			
+			scope.searchOnEnter = function($event, searchText) {
+				if ($event.keyCode === 13) {
+					scope.search(searchText);
+				}
+			}
+		},
+		templateUrl: 'components/nav/searchView.html' 
+	}
+}])
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
@@ -21468,7 +21742,8 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 	$scope.upload = $upload.upload({
 		url: '/api/upload',
 		method: 'POST',
-		file: file
+		file: file,
+		server: true
 	}).progress(function(e) {
 		console.log('progress');
 		console.log(e);
@@ -22094,21 +22369,22 @@ link: function(scope, element, attrs) {
 	scope.$watchCollection('messages', function (newCollection, oldCollection, scope) {
 		m.render(element[0], newCollection.map(messageTemplate));
 	})
+	//rerenders whenever messages changes using mithril js
 	
-	function messageTemplate(message) {
+	function messageTemplate(message) { //each message object is passed to this function
 		return m('li.message',
-			{key:message._id,
-			class: message.userID===scope.userID ? 'message-self' : '',
-			onclick: function(e) {scope.messageLink(message)}},
+			{key:message._id, 
+			class: message.userID===scope.userID ? 'message-self' : '', //message-self designates a message sent by user
+			onclick: function(e) {scope.messageLink(message)}}, //for stickers currently
 			[
 				m('picture.message-avatar',
 					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
-				messageContent(message)
+				messageContent(message) //message object passed to next function to switch content templates
 			]);
 	}
 	
-	function messageContent(message) {
+	function messageContent(message) { //content template switches based on message kind
 		var content,
 			kind = message.kind || 'text';
 		switch (kind) {
@@ -22139,10 +22415,10 @@ link: function(scope, element, attrs) {
 				break;
 		}
 
-		return m('.message-content', content);
+		return m('.message-content', content); //end of message building process
 	}
 
-	function bubUrl(string) {
+	function bubUrl(string) { //some urls don't have an absolute path which will break on iOS
 		if (string === undefined) {
 			return '';	
 		}
@@ -22153,7 +22429,7 @@ link: function(scope, element, attrs) {
 		}
 	}
 	
-	function imageLoad() {
+	function imageLoad() { //current method to keep scroll at bottom when a message is posted. Could be improved
 		element[0].scrollTop = element[0].scrollTop + this.offsetHeight;
 	}
 	
@@ -22176,7 +22452,6 @@ var messageList = $('.message-list');
 
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
-$rootScope.hideBack = true;
 
 $scope.msg = {};
 $scope.messages = [];
@@ -22197,6 +22472,7 @@ function scrollToBottom() {
 	}
 }
 
+//Initiates message checking loop, calls itself. 
 function checkMessages() {
 	var doScroll = firstScroll;
 db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
@@ -22485,7 +22761,6 @@ function addStickerToMap(sticker) {
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
     $timeout.cancel(checkMessagesTimeout);
-	$rootScope.hideBack = false;
     dereg();
 });
 
@@ -22556,18 +22831,17 @@ link: function(scope, element, attrs) {
 	
 	scope.$watchCollection('schedule', function (newCollection, oldCollection, scope) {
 		viewRender(newCollection);
-	})
+	}) //view rerenders on changes to schedule
 	
 	var cache;
 	
-	function viewRender(newCollection) {
+	function viewRender(newCollection) { //baby version of m.module, allows for rerenders outside watch
 		if (newCollection) {
 			m.render(element[0], scheduleTree(newCollection));	
 			cache = newCollection;
 		} else if (cache) {
 			m.render(element[0], scheduleTree(cache));
 		}
-		
 	}
 	
 	//schedule form is
@@ -22584,9 +22858,9 @@ link: function(scope, element, attrs) {
 	function scheduleTree(schedule) {
 		var scheduleTree = _.map(schedule, superGroupTemplate);
 		return scheduleTree;
-	}
+	} //maps first children of scheduleTree out, each goes through supergrouptemplate
 	
-	function superGroupTemplate(superGroup) {
+	function superGroupTemplate(superGroup) { //template built once for each supergroup
 		//{'title': [{group}, {group}]}
 		var pair = _.pairs(superGroup)[0],
 			title = pair[0],
@@ -22595,24 +22869,23 @@ link: function(scope, element, attrs) {
 			return;
 		} else {
 			return m('section.bubble-supergroup', 
-				{className: toggle[title] ? "closed" : ""},
-				[m('button.bubble-supergroup-label', 
-				{onclick: toggleSuperGroup.bind(undefined, title)},
-				 title)].concat(
-				_.map(groups, groupTemplate)));
+				{className: toggle[title] ? "closed" : ""}, //toggle logic stored here
+				[m('button.bubble-supergroup-label',
+				{onclick: toggleSuperGroup.bind(undefined, title)}, //toggle logic
+				 title)].concat( //concatenate bc these elements are siblings to the label not children
+				_.map(groups, groupTemplate))); //for each group in supergroup, build grouptemplate
 		}
 	}
 	
-	var toggle = {'Upcoming': true, 'Places': true, 'Previous': true};
+	var toggle = {'Upcoming': true, 'Places': true, 'Previous': true}; //default toggle states
 	
 	function toggleSuperGroup(title) {
 		toggle[title] = !toggle[title];	
 		console.log(toggle, title);
-		viewRender();
+		viewRender(); //rerender on toggle
 	}
 	
-	
-	function groupTemplate(group) {
+	function groupTemplate(group) { //built for each group in each supergroup
 		//{'title': [landmarks...]}
 		var pair = _.pairs(group)[0],
 			title = pair[0],
@@ -22620,16 +22893,16 @@ link: function(scope, element, attrs) {
 		
 		return m('div.bubble-group', [
 			m('header.bubble-group-label', title),
-			m('ul.bubble-list', _.map(landmarks, landmarkTemplate))
+			m('ul.bubble-list', _.map(landmarks, landmarkTemplate)) //built for each landmark in each group
 			]);
 	}
 	
 	function landmarkTemplate(landmark) {
 		return m('li.bubble-list-item', 
-			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)},
-				[m('img.bubble-list-item-img', {src: landmark.avatar}),
-				m('span.bubble-list-item-label', [landmark.name, m('small', landmark.category)]),
-				m('footer.bubble-list-item-detail', landmarkDetail(landmark)),
+			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)}, //safe if hrefs for phonegap
+				[m('img.bubble-list-item-img', {src: landmark.avatar}), 
+				m('span.bubble-list-item-label', [landmark.name, m('small', landmark.category)]), 
+				m('footer.bubble-list-item-detail', landmarkDetail(landmark)), 
 				m('footer.bubble-list-item-room-info', landmarkRoomDetail(landmark))
 			]));
 	}
@@ -22743,7 +23016,7 @@ windowEl.on('resize', handleWindowResize);
 		//console.log($scope.calendar.events);
 	}
 	
-	function setUpSchedule(landmarks) {	
+	function setUpSchedule(landmarks) {	 //deals with making a tree out of flat landmark array
 		var now = moment();
 		var schedule = [];
 		var superGroups = {
@@ -22947,7 +23220,7 @@ app.filter('httpsify', function() {
 		input = input || "";
 		return input.replace(/^http:\/\//i, 'https://'); 
 	}
-})
+}) 
 
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
@@ -22957,11 +23230,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 		
 		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
 	})
-
-
-
-
-
 
 //tweets is an array of form
 // [{"text": string,
@@ -22977,22 +23245,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"name": string}
 //	"__v": 0}....]
 
-/*$scope.tweets = [{"text":"#photooftheday #beautiful #fun #instagood #couple #beer #rootbeer #cool #wine #drink #mypic… http://t.co/Xcpw85MHXs",
-	"tweetID_str":"560874444558573568",
-	"tweetID":560874444558573600,
-	"_id":"54ca834bc409ce4b055555c6",
-	"created":"2015-01-29T19:00:27.751Z",
-	"hashtags":["photooftheday","beautiful","fun","instagood","couple","beer","rootbeer","cool","wine","drink","mypic"],
-	"media":{"media_url":"http://instagram.com/p/ycuCDnOD-4/",
-	"media_type":"instagram"},
-	"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/509794211508416513/CTjRkGwl_normal.jpeg",
-	"screen_name":"ekant111",
-	"name":"ekant baruta"},
-"__v":0},
-
-
-{"text":"Magic eye \nIt's painted my brother \n#magic #eye #cool #fun http://t.co/EhVyjan73T","tweetID_str":"560874508425650176","tweetID":560874508425650200,"_id":"54ca834bc409ce4b055555c5","created":"2015-01-29T19:00:27.751Z","hashtags":["magic","eye","cool","fun"],"media":{"media_url":"http://instagram.com/p/ycuD6JqK-j/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/427181614917902337/DX7b_B44_normal.png","screen_name":"AV21122001","name":"Анастасія Возняк"},"__v":0},{"text":"#cool #creative #clever #products #gift #ideas #Amazon http://t.co/4Vs4f6vrbl","tweetID_str":"560874516692205568","tweetID":560874516692205600,"_id":"54ca834bc409ce4b055555c4","created":"2015-01-29T19:00:27.750Z","hashtags":["cool","creative","clever","products","gift","ideas","Amazon"],"media":{"media_url":"http://pbs.twimg.com/media/B8igZpcCMAA8MwV.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/526946091686584320/P76DsJyC_normal.jpeg","screen_name":"ProductsClever","name":"Clever products"},"__v":0},{"text":"#2Cheap #Alternatives #And #Cake #Cool #Wedding #Food\nPlease RT: http://t.co/tGdff3cpGp http://t.co/f5Gt4LB8Mh","tweetID_str":"560874574414630912","tweetID":560874574414630900,"_id":"54ca834bc409ce4b055555c3","created":"2015-01-29T19:00:27.749Z","hashtags":["2Cheap","Alternatives","And","Cake","Cool","Wedding","Food"],"media":{"media_url":"http://pbs.twimg.com/media/B8igdChIUAA1XRn.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/548588078651035648/OAEzohKu_normal.jpeg","screen_name":"_amazingfoods","name":"Amazing Foods"},"__v":0},{"text":"Dexy's Midnight Runners \n#Cool","tweetID_str":"560874589644136448","tweetID":560874589644136450,"_id":"54ca834bc409ce4b055555c2","created":"2015-01-29T19:00:27.749Z","hashtags":["Cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/468714101171290112/lC-G6VC9_normal.jpeg","screen_name":"rodavlas95","name":"Salva Otamendi"},"__v":0},{"text":"RT @AandO_Realtors: FLORIDA FANS; #Architecture #Beaches #Pool #ItsALifestyle #Sunshine #Cool #RP @eluxurieshomes #AandO #EverythingREAL ht…","tweetID_str":"560874752068550656","tweetID":560874752068550660,"_id":"54ca834bc409ce4b055555c1","created":"2015-01-29T19:00:27.748Z","hashtags":["Architecture","Beaches","Pool","ItsALifestyle","Sunshine","Cool","RP","AandO","EverythingREAL"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifxvJCUAABeXD.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/553672742772277248/CQJCx5q9_normal.png","screen_name":"MusicOwnership","name":"Music with Copyright"},"__v":0},{"text":"Handsomeness at its peak....#handsome #cool #smart http://t.co/kkgCxH1gIa","tweetID_str":"560874754803240962","tweetID":560874754803240960,"_id":"54ca834bc409ce4b055555c0","created":"2015-01-29T19:00:27.748Z","hashtags":["handsome","cool","smart"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000751338842/a3edf60b3a6e56dd57b3e02ab08e46eb_normal.jpeg","screen_name":"Shaumilpatel","name":"shaumil patel"},"__v":0},{"text":"RT @fkthriftdeals: Vintage #Seaworld #SanDiego Patch by Emblems - New in Original Package http://t.co/nMJljkjSO9 #ebay #cool http://t.co/f3…","tweetID_str":"560874830644641792","tweetID":560874830644641800,"_id":"54ca834bc409ce4b055555bf","created":"2015-01-29T19:00:27.747Z","hashtags":["Seaworld","SanDiego","ebay","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8if8-6CEAAtdJE.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/534986614959644673/96U0Bgid_normal.png","screen_name":"MCamTreasures","name":"MCF"},"__v":0},{"text":"I learn #German on my iPhone - just amazingly cool and only 99 cent http://t.co/hkONpz8hfH #education #ios #cool","tweetID_str":"560874856019816449","tweetID":560874856019816450,"_id":"54ca834bc409ce4b055555be","created":"2015-01-29T19:00:27.747Z","hashtags":["German","education","ios","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000512696114/6844f7cbd90863f402e6dee85342bf90_normal.jpeg","screen_name":"harryblack81","name":"Harry Black"},"__v":0},{"text":"2 x CROMPTON F8W/33 T5 8 WATT 12\" FLUORESCENT TUBE IN http://t.co/TbbImWXzgX #cheap #Cool #Crompton #coupons #discounts #bargains #sales","tweetID_str":"560874941491732480","tweetID":560874941491732500,"_id":"54ca834bc409ce4b055555bd","created":"2015-01-29T19:00:27.746Z","hashtags":["cheap","Cool","Crompton","coupons","discounts","bargains","sales"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/3693564158/77a3ec77d2fe7773449935b3046e8c6b_normal.jpeg","screen_name":"shopblogsuk","name":"Shop Blogs (UK)"},"__v":0},{"text":"A cenar en familia y Yael me deja encerrada.. #Cool.","tweetID_str":"560874983145369601","tweetID":560874983145369600,"_id":"54ca834bc409ce4b055555bc","created":"2015-01-29T19:00:27.746Z","hashtags":["Cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/510218178295631873/HBC1-qPc_normal.jpeg","screen_name":"KarinaBaez_Y7","name":"Karina  Baez "},"__v":0},{"text":"😎 #Cool #brother #white #school http://t.co/dlCbksLODl","tweetID_str":"560875034173255680","tweetID":560875034173255700,"_id":"54ca834bc409ce4b055555bb","created":"2015-01-29T19:00:27.745Z","hashtags":["Cool","brother","white","school"],"media":{"media_url":"http://instagram.com/p/ycuTPSMPm0/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/557277807064408064/m0biVZMo_normal.jpeg","screen_name":"akinalperenn","name":"Alperen Akın"},"__v":0},{"text":"Sketches #sketch #art #girl #action #batgirl #smoke #cool #goggles #punk #mask #illustration #pencil… http://t.co/Mj1dtcibfZ","tweetID_str":"560875039495831552","tweetID":560875039495831550,"_id":"54ca834bc409ce4b055555ba","created":"2015-01-29T19:00:27.744Z","hashtags":["sketch","art","girl","action","batgirl","smoke","cool","goggles","punk","mask","illustration","pencil"],"media":{"media_url":"http://instagram.com/p/ycuTYHND1J/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/543404817428008961/fKUfznQB_normal.jpeg","screen_name":"hayleyhyuga","name":"HayleyHyuga Official"},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560873727899217920","tweetID":560873727899217900,"_id":"54ca82adc409ce4b05555424","created":"2015-01-29T18:57:49.985Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/549217327527374848/IlHnf1rY_normal.jpeg","screen_name":"marvelanne97","name":"maryvee"},"__v":0},{"text":"RT @Frankies_Style: #RETWEET\n\n#GAIN WITH #MGWV\n\n#Folllow All #Rters\n\n#COOL _FOLLOWS @Dollhouse @TeamGatito @KimmiOsborne @FairyFriend13 @Is…","tweetID_str":"560873737482801152","tweetID":560873737482801150,"_id":"54ca82adc409ce4b05555423","created":"2015-01-29T18:57:49.984Z","hashtags":["RETWEET","GAIN","MGWV","Folllow","Rters","COOL"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/464725607834587136/rMPaz8nK_normal.jpeg","screen_name":"ashrafrefaat8","name":"refaat"},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560873746182184960","tweetID":560873746182184960,"_id":"54ca82adc409ce4b05555422","created":"2015-01-29T18:57:49.983Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/536778472937373696/4a_Txa8m_normal.jpeg","screen_name":"STEEL5757","name":"Dreamchest"},"__v":0},{"text":"ILoveAllOfMyStudents! &lt;3 #love #dance #hiphop #stuggi #0711 #passion #mjk #swaggie #yeah #me #cool… http://t.co/y3wh5E3fE4","tweetID_str":"560873782622302208","tweetID":560873782622302200,"_id":"54ca82adc409ce4b05555421","created":"2015-01-29T18:57:49.982Z","hashtags":["love","dance","hiphop","stuggi","passion","mjk","swaggie","yeah","me","cool"],"media":{"media_url":"http://instagram.com/p/yctu0RGAoA/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/476116776141725696/b-ANFqif_normal.jpeg","screen_name":"manuMJK","name":"Manu MJK"},"__v":0},{"text":"#Monochrome never looked so #cool - edgy #bed #linen #designs from @BlancBedLinen http://t.co/sLvPrHGBl8","tweetID_str":"560873783754772480","tweetID":560873783754772500,"_id":"54ca82adc409ce4b05555420","created":"2015-01-29T18:57:49.980Z","hashtags":["Monochrome","cool","bed","linen","designs"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifu8xIAAA_xrE.png","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/545723005595156480/_9Crz47o_normal.png","screen_name":"maisondopulence","name":"MaisonD'Opulence"},"__v":0},{"text":"FLORIDA FANS; #Architecture #Beaches #Pool #ItsALifestyle #Sunshine #Cool #RP @eluxurieshomes #AandO #EverythingREAL http://t.co/jO4pveWcLS","tweetID_str":"560873837706104833","tweetID":560873837706104800,"_id":"54ca82adc409ce4b0555541f","created":"2015-01-29T18:57:49.979Z","hashtags":["Architecture","Beaches","Pool","ItsALifestyle","Sunshine","Cool","RP","AandO","EverythingREAL"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifxvJCUAABeXD.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/554672612774010880/5A1puCEA_normal.jpeg","screen_name":"AandO_Realtors","name":"Ofra and Adrienne"},"__v":0},{"text":"RT @Kaito_Einsam: DON'T SELL OUT\nBUY IN\nI love this t-shirt!\n@WWERollins #SethRollins #wwe #style #cool #wrestling #cosplay http://t.co/u1P…","tweetID_str":"560873939233411073","tweetID":560873939233411100,"_id":"54ca82adc409ce4b0555541e","created":"2015-01-29T18:57:49.978Z","hashtags":["SethRollins","wwe","style","cool","wrestling","cosplay"],"media":{"media_url":"http://pbs.twimg.com/media/B8iTvnbCcAAgoHA.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555159336679264256/UeHSrWzR_normal.jpeg","screen_name":"KirasOfficial","name":" Kira(Harley quinn)"},"__v":0},{"text":"Vintage #Seaworld #SanDiego Patch by Emblems - New in Original Package http://t.co/nMJljkjSO9 #ebay #cool http://t.co/f3Rt2ILsXh","tweetID_str":"560874024050229248","tweetID":560874024050229250,"_id":"54ca82adc409ce4b0555541d","created":"2015-01-29T18:57:49.977Z","hashtags":["Seaworld","SanDiego","ebay","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8if8-6CEAAtdJE.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000270680240/b2fa7d3315b14d729241288987db771c_normal.jpeg","screen_name":"fkthriftdeals","name":"Finders Keepers"},"__v":0},{"text":"#man #car #way #work #me #black #suit #style #model #handsome #cool #cute #laugh #smile #happy #best #business #ph… http://t.co/fou3eJQQz1","tweetID_str":"560874041901604865","tweetID":560874041901604860,"_id":"54ca82adc409ce4b0555541c","created":"2015-01-29T18:57:49.976Z","hashtags":["man","car","way","work","me","black","suit","style","model","handsome","cool","cute","laugh","smile","happy","best","business","ph"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/455050173521989633/FB07Wzrh_normal.jpeg","screen_name":"lifeoflawyers","name":"Lawyer Life"},"__v":0},{"text":"New @kickstarter campaign with #smarttech from #xRemote home automation! http://t.co/nx0Umdkdym #tech #gadgets #cool http://t.co/BmoTYREBBg","tweetID_str":"560874093722206208","tweetID":560874093722206200,"_id":"54ca82adc409ce4b0555541b","created":"2015-01-29T18:57:49.975Z","hashtags":["smarttech","xRemote","tech","gadgets","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8if5CiCYAAO4xe.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/3088752180/3d3837f8f877509d546b3b3e43673fd4_normal.jpeg","screen_name":"luismhuang","name":"Luis Huang"},"__v":0},{"text":"How did I become an expert on Startup Weekend events ... I`m having an advice chat for SW Blagoevgrad #cool #startupweekend #mentor #fun","tweetID_str":"560874110423937024","tweetID":560874110423937000,"_id":"54ca82adc409ce4b0555541a","created":"2015-01-29T18:57:49.974Z","hashtags":["cool","startupweekend","mentor","fun"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/556967424420233217/G1-MNyI2_normal.jpeg","screen_name":"Naloria","name":"Eva Piperevska"},"__v":0},{"text":"#cool","tweetID_str":"560874124890083328","tweetID":560874124890083300,"_id":"54ca82adc409ce4b05555419","created":"2015-01-29T18:57:49.974Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/545455417959383041/9RPL15oH_normal.jpeg","screen_name":"GivemeSum_Moore","name":"Tanner Moore"},"__v":0},{"text":"\"\"Flor De Liz  Via Tumblr\"\" http://t.co/7kLPqCPwM8 #cool #viral","tweetID_str":"560874205462659072","tweetID":560874205462659100,"_id":"54ca82adc409ce4b05555418","created":"2015-01-29T18:57:49.973Z","hashtags":["cool","viral"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/1474850309/virus_sign_normal.jpg","screen_name":"El_Viralo","name":"El Viralo"},"__v":0},{"text":"#Me #Happy #Beautiful #Picoftheday #Nofilter #Hair #Sun #Cool #Nature #Colorful #Nikon #L #310… http://t.co/q8c4jolWSb","tweetID_str":"560874311863767042","tweetID":560874311863767040,"_id":"54ca82adc409ce4b05555417","created":"2015-01-29T18:57:49.972Z","hashtags":["Me","Happy","Beautiful","Picoftheday","Nofilter","Hair","Sun","Cool","Nature","Colorful","Nikon","L"],"media":{"media_url":"http://instagram.com/p/yct-NcHXHk/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/556744572101857280/m6w9hh_w_normal.jpeg","screen_name":"fislami3","name":"Fatos™"},"__v":0},{"text":"Microsoft is definitely on a roll, with #HoloLens and in general: http://t.co/qZz1V4eR05 #cool","tweetID_str":"560874335183728640","tweetID":560874335183728640,"_id":"54ca82adc409ce4b05555416","created":"2015-01-29T18:57:49.971Z","hashtags":["HoloLens","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/520263103498301442/VjlmQr1o_normal.jpeg","screen_name":"levordashka","name":"Ana Levordashka"},"__v":0},{"text":"Good to see an early Triumph Tiger being used as a daily in Dublin #triumphtiger #classicbike #everyday #cool http://t.co/nO7AhDOcrk","tweetID_str":"560874388049129472","tweetID":560874388049129500,"_id":"54ca82adc409ce4b05555415","created":"2015-01-29T18:57:49.970Z","hashtags":["triumphtiger","classicbike","everyday","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8igSL7IEAEQW8B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/544951250153127936/B52YpwXy_normal.jpeg","screen_name":"gentlemancars","name":"Gentleman Classics"},"__v":0},{"text":"I just slept for 45 minutes straight in physics #cool","tweetID_str":"560874388128825344","tweetID":560874388128825340,"_id":"54ca82adc409ce4b05555414","created":"2015-01-29T18:57:49.969Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555593693387034624/KCG1Jnim_normal.jpeg","screen_name":"zajacingoff","name":"Emma"},"__v":0},{"text":"The Return Art Print by Danny Haas | Society6 #art  #design #awesome #print  #poster  #color  #cool  http://t.co/oLu9wp4llz","tweetID_str":"560873087550640128","tweetID":560873087550640100,"_id":"54ca8210c409ce4b0555527b","created":"2015-01-29T18:55:12.118Z","hashtags":["art","design","awesome","print","poster","color","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/525813967701045248/iR-yr-GU_normal.png","screen_name":"pine_blog","name":"Design Pine"},"__v":0},{"text":"#moskow #travel #beautiful #moment #moments #goodday #gooddaytoday #good #cool #christmastime #holliday #snow #cold… http://t.co/LaVQueM6Hi","tweetID_str":"560873171080208386","tweetID":560873171080208400,"_id":"54ca8210c409ce4b0555527a","created":"2015-01-29T18:55:12.117Z","hashtags":["moskow","travel","beautiful","moment","moments","goodday","gooddaytoday","good","cool","christmastime","holliday","snow","cold"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifLWqIAAA2weu.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/436822368183267329/3i-8SF9a_normal.png","screen_name":"InstaGorkyPark","name":"Фото. Парк Горького"},"__v":0},{"text":",, wenn ein pokemon trainer ein sonderbonbon isst, wächst ihm ein zweiter schwanz \"\n@DerDieDasAlex 2015 #pokemon #cool #dollarzeichen #cool2","tweetID_str":"560873175031226368","tweetID":560873175031226400,"_id":"54ca8210c409ce4b05555279","created":"2015-01-29T18:55:12.116Z","hashtags":["pokemon","cool","dollarzeichen","cool2"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/559346105063059456/9qN3b_Ff_normal.jpeg","screen_name":"FrapFrapYo","name":"Nico-san"},"__v":0},{"text":"RT @TomCoronel: Todays new toy #spaceship 🚀 #testBMWi lucky man #i8 #cool 👍👍😜 you like? Retweet 😘 check doors 😜🙈 http://t.co/4H6CoO6Va4","tweetID_str":"560873229485895680","tweetID":560873229485895700,"_id":"54ca8210c409ce4b05555278","created":"2015-01-29T18:55:12.115Z","hashtags":["spaceship","testBMWi","i8","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8gOc9pCcAEgYAz.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/478963333216104448/h12MKjLI_normal.jpeg","screen_name":"MLampaert","name":"Martin Lampaert"},"__v":0},{"text":"Amores da minha vida. &lt;3333 #mãe #mother #girlfriend #happiness #sun #cool @ Condominio Metropolis.… http://t.co/np8Hy8v5ZM","tweetID_str":"560873243557761024","tweetID":560873243557761000,"_id":"54ca8210c409ce4b05555277","created":"2015-01-29T18:55:12.114Z","hashtags":["mãe","mother","girlfriend","happiness","sun","cool"],"media":{"media_url":"http://instagram.com/p/yctfEaSwS_/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/481200826573004801/wQ0kKJxA_normal.jpeg","screen_name":"AngelicaBFR","name":"C-3PO"},"__v":0},{"text":"#Friendship #blue #tongue #we #too #cool http://t.co/6JdT2pA13J","tweetID_str":"560873255406686208","tweetID":560873255406686200,"_id":"54ca8210c409ce4b05555276","created":"2015-01-29T18:55:12.113Z","hashtags":["Friendship","blue","tongue","we","too","cool"],"media":{"media_url":"http://pbs.twimg.com/media/B8ifOsfIAAARvQz.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/560873374919168000/NOsxnuN4_normal.jpeg","screen_name":"kamileluvs","name":"Kamile"},"__v":0},{"text":"Estas cómodo uachin? JAJA :'D #Oddy #Dog #Comodo #Cute #Boring #Cool #TagsForLikes #L4l http://t.co/zDchkAqMvr","tweetID_str":"560873339737354240","tweetID":560873339737354240,"_id":"54ca8210c409ce4b05555275","created":"2015-01-29T18:55:12.111Z","hashtags":["Oddy","Dog","Comodo","Cute","Boring","Cool","TagsForLikes","L4l"],"media":{"media_url":"http://instagram.com/p/ycth69Exs7/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/556714725594386432/58wdgZNe_normal.jpeg","screen_name":"altote18","name":"Andrees ♧"},"__v":0},{"text":"you can learn German on your #iPhone with this app. http://t.co/hkONpz8hfH It's easy and #cool #ios #education #edtech #apple #rt","tweetID_str":"560873399216377856","tweetID":560873399216377860,"_id":"54ca8210c409ce4b05555274","created":"2015-01-29T18:55:12.110Z","hashtags":["iPhone","cool","ios","education","edtech","apple","rt"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/378800000512696114/6844f7cbd90863f402e6dee85342bf90_normal.jpeg","screen_name":"harryblack81","name":"Harry Black"},"__v":0},{"text":"#cool #lol ;) #best #followback http://t.co/UsHAP4oO8T","tweetID_str":"560873415335501824","tweetID":560873415335501800,"_id":"54ca8210c409ce4b05555273","created":"2015-01-29T18:55:12.110Z","hashtags":["cool","lol","best","followback"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/499096704537210880/uB7NmnvF_normal.png","screen_name":"cett0","name":"Cetto"},"__v":0},{"text":"Oficineando. Modo #work #copy #men #office #cool @ Av. Francisco De Miranda http://t.co/xX4NguaZtA","tweetID_str":"560873418677972993","tweetID":560873418677973000,"_id":"54ca8210c409ce4b05555272","created":"2015-01-29T18:55:12.108Z","hashtags":["work","copy","men","office","cool"],"media":{"media_url":"http://instagram.com/p/yctkN3lxvz/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/1419928258/_C7_9D_CC_8D_CC_8D_CC_8D_CC_8D_D1_94_CC_B2_CC_A3_CC_A3_CC_A3_20L_20U_20I_20S_20_20T_20O_20M_20_C3_81_20S_normal.jpg","screen_name":"luisbuet","name":"Luis Tomàs Buet"},"__v":0},{"text":"#cool #lol ;) #best #followback http://t.co/hfYqkjzh2T","tweetID_str":"560873424349040642","tweetID":560873424349040640,"_id":"54ca8210c409ce4b05555271","created":"2015-01-29T18:55:12.108Z","hashtags":["cool","lol","best","followback"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/499096704537210880/uB7NmnvF_normal.png","screen_name":"cett0","name":"Cetto"},"__v":0},{"text":"#cool #lol ;) #best #followback http://t.co/zOiCOnJzEo","tweetID_str":"560873434776096768","tweetID":560873434776096800,"_id":"54ca8210c409ce4b05555270","created":"2015-01-29T18:55:12.106Z","hashtags":["cool","lol","best","followback"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/499096704537210880/uB7NmnvF_normal.png","screen_name":"cett0","name":"Cetto"},"__v":0},{"text":"se tiran por medio de mis tweets #cool","tweetID_str":"560873487292985344","tweetID":560873487292985340,"_id":"54ca8210c409ce4b0555526f","created":"2015-01-29T18:55:12.105Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/488176143791435776/AGcLbUxl_normal.jpeg","screen_name":"Esther_Plaza76","name":"Esther  Plaza "},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560873509086580737","tweetID":560873509086580740,"_id":"54ca8210c409ce4b0555526e","created":"2015-01-29T18:55:12.103Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/534986614959644673/96U0Bgid_normal.png","screen_name":"MCamTreasures","name":"MCF"},"__v":0},{"text":"When I saw mattress firm up on the \"jimmy johns\" building it made 100000000 times more excited that I'm moving 😓👍 #cool","tweetID_str":"560872473197940736","tweetID":560872473197940740,"_id":"54ca8172c409ce4b055550d0","created":"2015-01-29T18:52:34.576Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/560283326359932928/DNgMBUPm_normal.jpeg","screen_name":"Rachhhh_Lawson","name":"Rachyleeee✨"},"__v":0},{"text":"RT @fkthriftdeals: Jake &amp; Elwood #BlueBrothers Figures -Exclusive Premiere Ltd. Ed. &amp; Numbered http://t.co/QXaL0LTlvz #ebay #cool #love htt…","tweetID_str":"560872589263142912","tweetID":560872589263142900,"_id":"54ca8172c409ce4b055550cf","created":"2015-01-29T18:52:34.575Z","hashtags":["BlueBrothers","ebay","cool","love"],"media":{"media_url":"http://pbs.twimg.com/media/B8idNo8CEAEi54B.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/529099624405929984/jJ_YFYS1_normal.png","screen_name":"TGetbay","name":"Tim G"},"__v":0},{"text":"RT @fkthriftdeals: Nice Original pair of 1925 #California #License #Plates http://t.co/tAC4IHH2wh #ebay #ratrod #hotrod #cool #mancave http…","tweetID_str":"560872748525027329","tweetID":560872748525027300,"_id":"54ca8172c409ce4b055550ce","created":"2015-01-29T18:52:34.574Z","hashtags":["California","License","Plates","ebay","ratrod","hotrod","cool","mancave"],"media":{"media_url":"http://pbs.twimg.com/media/B8icJxyCAAAewP3.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/536778472937373696/4a_Txa8m_normal.jpeg","screen_name":"STEEL5757","name":"Dreamchest"},"__v":0},{"text":"RT @fkthriftdeals: Nice Original pair of 1925 #California #License #Plates http://t.co/tAC4IHH2wh #ebay #ratrod #hotrod #cool #mancave http…","tweetID_str":"560872877575405568","tweetID":560872877575405600,"_id":"54ca8172c409ce4b055550cd","created":"2015-01-29T18:52:34.573Z","hashtags":["California","License","Plates","ebay","ratrod","hotrod","cool","mancave"],"media":{"media_url":"http://pbs.twimg.com/media/B8icJxyCAAAewP3.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/548533456901525504/mn5GGrE2_normal.jpeg","screen_name":"PoppyGalore15","name":"angie wilcox"},"__v":0},{"text":"RT @GossKirk: #Cool #Cool #Mandeville currently 20°C @Jamaicaweather #Breezy 😁 #PartlyCloudy #Thursday #GoodMorning… http://t.co/KGFTyOGzkv","tweetID_str":"560872881576767488","tweetID":560872881576767500,"_id":"54ca8172c409ce4b055550cc","created":"2015-01-29T18:52:34.573Z","hashtags":["Cool","Cool","Mandeville","Breezy","PartlyCloudy","Thursday","GoodMorning"],"media":{"media_url":"http://instagram.com/p/ycI-1gFqX2/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555881386112860161/CTmalGc3_normal.jpeg","screen_name":"ArcaneWorld","name":"Λ ℜ ⓒ Λ Ŋ Ξ  Feb 14"},"__v":0},{"text":"Some girl in my class told the teacher she likes to take speed because she's \"reckless\" #cool","tweetID_str":"560872916481347584","tweetID":560872916481347600,"_id":"54ca8172c409ce4b055550cb","created":"2015-01-29T18:52:34.572Z","hashtags":["cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/559521998578012162/eo8B6qCu_normal.jpeg","screen_name":"brianascheffer","name":"Briana Scheffer"},"__v":0},{"text":"#me #selfie #selfshot #portrait #selfportrait #lowpoly #polygon #tri #triapp #art #popart #cool… http://t.co/I2U35FtBOD","tweetID_str":"560872953638707201","tweetID":560872953638707200,"_id":"54ca8172c409ce4b055550ca","created":"2015-01-29T18:52:34.571Z","hashtags":["me","selfie","selfshot","portrait","selfportrait","lowpoly","polygon","tri","triapp","art","popart","cool"],"media":{"media_url":"http://instagram.com/p/yctWrMOXGn/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/557264952059514880/PMm-vXTB_normal.jpeg","screen_name":"eat_sleep_film","name":"Chris"},"__v":0},{"text":"RT @Frankies_Style: #RETWEET\n\n#GAIN WITH #MGWV\n\n#Folllow All #Rters\n\n#COOL _FOLLOWS @Dollhouse @TeamGatito @KimmiOsborne @FairyFriend13 @Is…","tweetID_str":"560873006432780289","tweetID":560873006432780300,"_id":"54ca8172c409ce4b055550c9","created":"2015-01-29T18:52:34.571Z","hashtags":["RETWEET","GAIN","MGWV","Folllow","Rters","COOL"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/555938166906302464/gydCx39O_normal.jpeg","screen_name":"roryquinn3","name":" #MGWV/#GAIN / "},"__v":0},{"text":"# #cool #nice #rakı #fellas #pro @ İstiklal Caddesi http://t.co/luPvHLC2IF","tweetID_str":"560873061826973696","tweetID":560873061826973700,"_id":"54ca8172c409ce4b055550c8","created":"2015-01-29T18:52:34.569Z","hashtags":["cool","nice","rakı","fellas","pro"],"media":{"media_url":"http://instagram.com/p/yctZ03CIaB/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/551387383489630209/G0_FxBs2_normal.jpeg","screen_name":"OnurAvb","name":"Onur Çıtak"},"__v":0},{"text":"Check Out This Totally Cool App…And It's Totally FREE! http://t.co/LW8KRfr7bl #comics #dc #awesome #fun","tweetID_str":"560871907101515776","tweetID":560871907101515800,"_id":"54ca80dfc409ce4b05554f5d","created":"2015-01-29T18:50:07.703Z","hashtags":["comics","dc","awesome","fun"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/3122410750/9d3c7548ed5431ae4e1cc2ff72cceffa_normal.jpeg","screen_name":"ComicsAreAwesom","name":"Comics Are Awesome"},"__v":0},{"text":"#statueofliberty #newyork #earthcam #video #cool http://t.co/Hsc9cQFKNl","tweetID_str":"560871810376675329","tweetID":560871810376675300,"_id":"54ca80d5c409ce4b05554f30","created":"2015-01-29T18:49:57.146Z","hashtags":["statueofliberty","newyork","earthcam","video","cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/550388700471754752/8Bi_KUga_normal.jpeg","screen_name":"HarpSocial","name":"James Harp"},"__v":0},{"text":"RT @ebayrt: Jake &amp; Elwood Blue Brothers Figures Exclusive ... USD 80 http://t.co/BQfwUmoGE2 #BlueBrothers #cool #love #eBay #eBayUS via @Pa…","tweetID_str":"560871812528349184","tweetID":560871812528349200,"_id":"54ca80d5c409ce4b05554f2f","created":"2015-01-29T18:49:57.146Z","hashtags":["BlueBrothers","cool","love","eBay","eBayUS"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/426926262263615489/yFooyIOD_normal.jpeg","screen_name":"WodkeHawkinson","name":"Wodke Hawkinson"},"__v":0},{"text":"Y dijo que tomaba poquito #Jajajajaja #Cool","tweetID_str":"560871827694948352","tweetID":560871827694948350,"_id":"54ca80d5c409ce4b05554f2e","created":"2015-01-29T18:49:57.146Z","hashtags":["Jajajajaja","Cool"],"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/528784337542459392/9ENtgCdu_normal.jpeg","screen_name":"MiguelBosch_n3","name":"Miguel  Bosch "},"__v":0},{"text":"@BigAlsAquarium @BigAls_Pets 3 Crested Geckos left!!! These guys are #cute $79.99ea #cool #reptiles http://t.co/gGP2TiouPW","tweetID_str":"560871890764701696","tweetID":560871890764701700,"_id":"54ca80d5c409ce4b05554f2d","created":"2015-01-29T18:49:57.145Z","hashtags":["cute","cool","reptiles"],"media":{"media_url":"http://pbs.twimg.com/media/B8ieAbGIMAAkBJ2.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/497082685223743488/VjXuQwM6_normal.jpeg","screen_name":"BigalsWhitby","name":"BigAls Whitby"},"__v":0},{"text":"Nieuwe ava #cool #gisteren http://t.co/2xTxDD2qW9","tweetID_str":"560871937849954305","tweetID":560871937849954300,"_id":"54ca80d5c409ce4b05554f2c","created":"2015-01-29T18:49:57.145Z","hashtags":["cool","gisteren"],"media":{"media_url":"http://pbs.twimg.com/media/B8ieCMSCMAA4R1c.jpg","media_type":"image"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/560871768655925249/1nmcallr_normal.jpeg","screen_name":"lottebijlsma","name":"Lotje"},"__v":0},{"text":"Partition! 👃👅👄👂👀\n\n#me #boystyle #cool #followme #mensfashion #fashiongram #teen #boys #menstyle… http://t.co/16FZMhcdRT","tweetID_str":"560871945248714752","tweetID":560871945248714750,"_id":"54ca80d5c409ce4b05554f2b","created":"2015-01-29T18:49:57.144Z","hashtags":["me","boystyle","cool","followme","mensfashion","fashiongram","teen","boys","menstyle"],"media":{"media_url":"http://instagram.com/p/ycs5VTOieG/","media_type":"instagram"},"user":{"profile_image_url":"http://pbs.twimg.com/profile_images/497467367694561280/Mt7cy4Bo_normal.jpeg","screen_name":"ciotti171","name":"Manuel Ciotti"},"__v":0}]
-*/
 }])
 app.directive('categoryWidget', [function() {
 return {
@@ -23000,14 +23252,16 @@ return {
 	link: function(scope, element, attrs) {
 		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
 			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
-		})
+		}) //rerenders on category selection
+		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
 		
 		function categoryWidget(landmarkCategories) {
 			return m('.category-widget', 
 				groupCategories(landmarkCategories))
-		}
+		} //groupCategories handles mapping
 		
 		function groupCategories(landmarkCategories) {
+			 //separates landmark categories into button groups in place of mapping
 			if (landmarkCategories.length < 4) {
 				return buttonGroup(landmarkCategories); //3x1 grid
 			} else if (landmarkCategories.length === 4) { //2x2 grid
@@ -23023,16 +23277,16 @@ return {
 			}
 		}
 		
-		function buttonGroup(categoryList) {
+		function buttonGroup(categoryList) { //from a category list, create each button.
 			return m('.category-btn-group', categoryList.map(categoryButton));
 		}
 		
-		function categoryButton(category, index, categoryList) {
+		function categoryButton(category, index, categoryList) { //create category button, needs list length
 			return m('.category-btn', {
-				style: {width: 100 / categoryList.length + '%'},
-				colspan: 6/categoryList.length,
-				onclick: emitCategory(category.name),
-				class: scope.selectedCategory === category.name ? 'selected-category' : null
+				style: {width: 100 / categoryList.length + '%'}, 
+				colspan: 6/categoryList.length, //table display attribute
+				onclick: emitCategory(category.name), //emits selection on scope
+				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
 			}, [
 			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
 			category.name]);
@@ -23069,33 +23323,12 @@ $scope.collectedPresents = [];
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
-
-//currently only for upcoming...
-/*
-function reorderById (idArray) {
-	console.log('reorderById');
-	$scope.upcoming = [];
-	
-	for (var i = 0, len = idArray.length; i<len; i++) {
-	  	$scope.upcoming[i] = $scope.landmarks.splice($scope.lookup[idArray[i]._id],1, 0)[0];
-	}
-	
-	for (var i = 0, len = $scope.landmarks.length; i<len; i++) {
-		if ($scope.landmarks[i] == 0) {
-			$scope.landmarks.splice(i, 1);
-			i--;
-		}
-	}
-	console.log($scope.landmarks, $scope.upcoming);
-}
-*/
-
   	
 $scope.zoomOn = function() {
 	  	zoomControl.style.display = "block";
 }
-  	
-$scope.loadWorld = function(data) {
+ 
+$scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
@@ -23108,14 +23341,14 @@ $scope.loadWorld = function(data) {
 			 else {
 			 	$scope.showEdit = false;
 			 }
-		 }
+		 } 
 
-		 console.log($scope.world);
-		 console.log($scope.style);
+		//console.log($scope.world);
+		//console.log($scope.style);
 		 
 		 if ($scope.world.name) {
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 }
+		 } //TODO: cleanup on $destroy
 		 
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
@@ -23130,6 +23363,7 @@ $scope.loadWorld = function(data) {
 		
 		var zoomLevel = 18;
 		
+		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 			console.log('setcenter');
@@ -23173,7 +23407,7 @@ $scope.loadWorld = function(data) {
 		$scope.loadLandmarks();
   	}
   	
-function loadWidgets() {
+function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
 	if ($scope.style.widgets) {
 		if ($scope.style.widgets.twitter == true) {
@@ -23318,7 +23552,6 @@ function loadWidgets() {
 		if ($scope.style.widgets.messages==true||$scope.style.widgets.chat==true) {
 			$scope.messages = true;
 
-			//angular while loop the query every 2 seconds
 			db.messages.query({limit:1, roomID:$scope.world._id}, function(data){ 
 				console.log('db.messages', data);
 				if (data.length>0) {
@@ -23331,23 +23564,6 @@ function loadWidgets() {
 			$scope.category = true;
 		}
 		
-		if ($scope.style.widgets.upcoming) {
-			/*
-db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: userTime}, function(data){
-				console.log('queryFilter:now');
-				console.log(data);
-				if (data[0]) $scope.now = $scope.landmarks.splice($scope.lookup[data[0]._id],1)[0];
-				console.log($scope.now);
-			}); 
-			
-			db.landmarks.query({queryFilter:'upcoming', parentID: $scope.world._id, userTime: userTime}, function(data){
-				console.log('queryFilter:upcoming');
-				console.log('upcoming data', data);
-				//console.log(angular.fromJson(data[0]));
-				reorderById(data);
-			}); 
-*/
-		}
 		}
 		
 	   if ($scope.world.resources) {
@@ -23423,19 +23639,19 @@ db.landmarks.query({queryFilter:'now', parentID: $scope.world._id, userTime: use
 
 	}
 
-$scope.loadLandmarks = function(data) {
+$scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
-  	db.landmarks.get({parentID: $scope.world._id}, function(data) { 
-  		console.log('landmarks', data);
+	worldTree.getLandmarks($scope.world._id).then(function(data) {
+		console.log('landmarks', {landmarks: data});
   		
-  		initLandmarks(data);
-  		loadWidgets(); //load widget data
-  	});
- }
+		initLandmarks({landmarks: data});
+		loadWidgets(); //load widget data
+	});
+}
   	
 function initLandmarks(data) {
-	var now = moment();
+	var now = moment(); 
 	var groups = _.groupBy(data.landmarks, function(landmark) {
 		if (landmark.time.start) {
 			var startTime = moment(landmark.time.start); 

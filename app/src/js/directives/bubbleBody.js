@@ -3,7 +3,7 @@ app.directive('bubbleBody', function(apertureService) {
 		restrict: 'A',
 		scope: true,
 		link: function(scope, element, attrs) {
-			
+			//basically just handles scroll stuff
 			var handleScroll = _.throttle(function() {
 				var st = element.scrollTop();
 				

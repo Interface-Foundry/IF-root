@@ -2,7 +2,7 @@
 
 angular.module('tidepoolsServices')
     .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) {
+		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -105,6 +105,7 @@ mapManager.apertureUpdate = function(state) {
 	}
 }
 
+//use bounds from array of markers to set more accruate center
 mapManager.setCenterFromMarkers = function(markers) {
 	leafletData.getMap().then(function(map) {
 		map.fitBounds(

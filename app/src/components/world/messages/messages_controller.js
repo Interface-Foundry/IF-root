@@ -14,7 +14,6 @@ var messageList = $('.message-list');
 
 $scope.loggedIn = false;
 $scope.nick = 'Visitor';
-$rootScope.hideBack = true;
 
 $scope.msg = {};
 $scope.messages = [];
@@ -35,6 +34,7 @@ function scrollToBottom() {
 	}
 }
 
+//Initiates message checking loop, calls itself. 
 function checkMessages() {
 	var doScroll = firstScroll;
 db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
@@ -323,7 +323,6 @@ function addStickerToMap(sticker) {
 
 var dereg = $rootScope.$on('$locationChangeSuccess', function() {
     $timeout.cancel(checkMessagesTimeout);
-	$rootScope.hideBack = false;
     dereg();
 });
 

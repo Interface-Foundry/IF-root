@@ -161,7 +161,7 @@ module.exports = function(app, passport, landmarkSchema) {
 	
 	// bearer login via token auth --------------------------------
 
-	app.get('/auth/bearer', passport.authenticate('bearer'),
+	app.get('/auth/bearer', passport.authenticate('bearer', { session: false }),
 		function(req, res) {
 	        res.send(200,'logged in');
 	    }

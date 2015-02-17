@@ -211,11 +211,7 @@ monguurl = require('monguurl');
 		tags: [String] //search tags
 	}); 
 
-
-	//landmarkSchema.plugin(textSearch);
-
 	landmarkSchema.index({loc:'2dsphere'});
-	// landmarkSchema.index({loc_nickname:'2dsphere'});
 
 	//indexing for search
 	landmarkSchema.index({
@@ -224,10 +220,8 @@ monguurl = require('monguurl');
 	    summary               :"text",
 	    type                  :"text",
 	    loc_nickname          :"text",
-	    "category.name"       :"text",
-	    tags 				  :"text",
-	    landmarkCategories    :"text"
-
+	    landmarkCategories    :"text",
+	    tags 				  :"text"
 	});
 
 

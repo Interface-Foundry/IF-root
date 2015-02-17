@@ -1,5 +1,5 @@
 app.directive('compassButton', function(worldTree, $templateRequest, $compile, userManager, $timeout) {
-	return {
+	return { //NOT USED ANY MORE
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {

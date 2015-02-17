@@ -47,6 +47,7 @@ var AWS = require('aws-sdk');
 var readChunk = require('read-chunk'); 
 var fileTypeProcess = require('file-type');
 var _ = require('underscore');
+var sanitize = require('mongo-sanitize');
 // var multer  = require('multer');
 
 
@@ -382,18 +383,38 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-    if (!req.isAuthenticated()){ 
-      passport.authenticate('local-basic', function(err, user, info) {
-        if (err) {
-          res.sendStatus(401);
-        }
-        if (!user) {
-          res.sendStatus(401);
-        }
-        if (user) {
-          return next();
-        }
-      })(req, res, next)
+    if (!req.isAuthenticated()){
+
+      if (req.headers.authorization){
+        
+        if (req.headers.authorization.indexOf('asic') > -1) {
+        passport.authenticate('local-basic', function(err, user, info) {
+          if (err) {
+            res.sendStatus(401);
+              }
+              if (!user) {
+                res.sendStatus(401);
+              }
+              if (user) {
+                return next();
+              }
+            })(req, res, next)
+          } else if (req.headers.authorization.indexOf('earer') > -1) {
+          passport.authenticate('bearer', function(err, user, info) {
+            if (err) {
+              res.sendStatus(401);
+            }
+            if (!user) {
+              res.sendStatus(401);
+            }
+            if (user) {
+              return next();
+            }
+          })(req, res, next)
+          }        
+      }
+	    
+
     } else { 
        return next();
     }
@@ -408,23 +429,25 @@ function isLoggedIn(req, res, next) {
 // Search
 app.get('/api/textsearch', function(req, res) {
 
-    var sText = req.body.textQuery.replace(/[^\w\s]/gi, '');
+    var sText = sanitize(req.query.textQuery);
 
-    // landmarkSchema.find(
-    //     { $text : { $search : sText } },
-    //     { score : { $meta: "textScore" } }
-    //   ).
-    //   sort({ score : { $meta : 'textScore' } }).
-    //   limit(100).
-    //   exec(function(err, data) {
-    //     if (data){
-    //         res.send(data);
-    //     }
-    //     else {
-    //         console.log('no results');
-    //         res.send({err:'no results'});            
-    //     }
-    //   });
+    sText = sText.replace(/[^\w\s]/gi, '');
+
+    landmarkSchema.find(
+        { $text : { $search : sText } },
+        { score : { $meta: "textScore" } }
+      ).
+      sort({ score : { $meta : 'textScore' } }).
+      limit(30).
+      exec(function(err, data) {
+        if (data){
+            res.send(data);
+        }
+        else {
+            console.log('no results');
+            res.send({err:'no results'});            
+        }
+      });
 });
 
 
@@ -1501,14 +1524,14 @@ app.get('/api/:collection', function(req, res) {
             if (req.query.limit){
               var Twlimit = parseInt(req.query.limit);
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'hashtags' : {'$in' : [ req.query.tag ] }
               };
               db.collection('tweets').find(qw).limit(Twlimit).sort({_id: -1}).toArray(fn(req, res));
             }
             //no limit
             else {
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'hashtags' : {'$in' : [ req.query.tag ] }
               };
               db.collection('tweets').find(qw).sort({_id: -1}).toArray(fn(req, res));            
             }
@@ -1532,14 +1555,14 @@ app.get('/api/:collection', function(req, res) {
             if (req.query.limit){
               var Inlimit = parseInt(req.query.limit);
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'tags' : {$in : [req.query.tag ]}
               };
               db.collection('instagrams').find(qw).limit(Inlimit).sort({_id: -1}).toArray(fn(req, res));
             }
             //no limit
             else {
               var qw = {
-                 'text' : {$regex : ".*"+'#'+req.query.tag+".*", $options: 'i'}
+                 'tags' : {$in : [req.query.tag ]}
               };
               db.collection('instagrams').find(qw).sort({_id: -1}).toArray(fn(req, res));            
             }
@@ -1733,10 +1756,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if (req.url == "/api/worldchat/create") {
     
-      console.log('image '+req.body.img);
+      //console.log('image '+req.body.img);
 
         var wc = new worldchatSchema({
-            userID: req.user._id,
+            userID: req.body.userID,
             roomID: req.body.roomID,
             nick: req.body.nick,
             kind: req.body.kind,
@@ -1760,8 +1783,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                 res.send(err);
             }
             else {
-              console.log(data);
-                console.log('SAVED new message');
+              //console.log(data);
+                //console.log('SAVED new message');
                 res.status(200).send([data]);
             }
         });
@@ -1769,13 +1792,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     if ((req.url == "/api/stickers/create")
       && req.body.roomID
-      && req.user._id
+      //&& req.user._id
       && req.body.name) {
 
       var sticker = new stickerSchema({
         name: req.body.name,
-        ownerID: req.user._id,
-       roomID: req.body.roomID
+        ownerID: req.body.userID,
+        roomID: req.body.roomID
       });
 
       if (req.body.loc){

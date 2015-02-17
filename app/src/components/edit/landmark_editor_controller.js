@@ -1,4 +1,4 @@
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
 	
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -264,9 +264,8 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		worldLoaded = true;
 		
 		//begin loading landmarks
-		return worldTree.getLandmarks(data.world._id);
-	}).then(function(data) {
-		$scope.landmarks = $scope.landmarks.concat(data.landmarks);
+	worldTree.getLandmarks(data.world._id).then(function(data) {
+		$scope.landmarks = data;
 					
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
@@ -275,6 +274,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		});
 		landmarksLoaded = true;
 			
+	});
 	});	
 	
 }])

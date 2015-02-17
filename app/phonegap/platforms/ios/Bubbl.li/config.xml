@@ -29,6 +29,16 @@
     <feature name="Geolocation">
         <param name="ios-package" value="CDVLocation" />
     </feature>
+    <feature name="FacebookConnectPlugin">
+        <param name="ios-package" value="FacebookConnectPlugin" />
+        <param name="onload" value="true" />
+    </feature>
+    <plugin name="FacebookConnectPlugin" value="FacebookConnectPlugin" />
+    <access origin="https://m.facebook.com" />
+    <access origin="https://graph.facebook.com" />
+    <access origin="https://api.facebook.com" />
+    <access origin="https://*.fbcdn.net" />
+    <access origin="https://*.akamaihd.net" />
     <feature name="Keychain">
         <param name="ios-package" value="CDVKeychain" />
     </feature>
@@ -52,6 +62,10 @@
     <splash height="2208" src="res/ios/Default-736h.png" width="1242" />
     <splash height="960" src="res/ios/Default@2x~iphone.png" width="640" />
     <splash height="480" src="res/ios/Default~iphone.png" width="320" />
+    <splash height="1242" src="res/ios/Default-Landscape-736h.png" width="2208" />
+    <splash height="1536" src="res/ios/Default-Landscape@2x~ipad.png" width="2048" />
+    <splash height="2048" src="res/ios/Default-Portrait@2x~ipad.png" width="1536" />
+    <splash height="1024" src="res/ios/Default-Portrait~ipad.png" width="768" />
     <name>Bubbl.li</name>
     <description>
         Internet of Places.

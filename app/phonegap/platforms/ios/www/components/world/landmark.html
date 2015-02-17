@@ -1,11 +1,11 @@
-<a if-href="#w/{{worldURL}}" class="back btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
 		ng-style="::{'background-color': style.titleBG_color}" 
 		ng-click="aperture.toggle('full'); zoomOn()"
 		ng-swipe-up="aperture.set('off'); zoomOn()"
-		ng-swipe-down="aperture.set('full'); zoomOn()">
+		ng-swipe-down="aperture.set('full'); zoomOn()"
+		world-shelf>
 		<div class="world-title noPreventDefault" fit-font>
 				<span class="vertical-middle noPreventDefault">{{landmark.name}}</span>
 		</div>
@@ -21,7 +21,17 @@
 	
 			<div class="marble-page landmark">
 				<div ng-style="{'background-color': style.cardBG_color}" class="card landmark-description">
-			<div ng-bind-html="landmark.description || landmark.summary"></div>
+				<article>
+					<div class="explore-media clearfix">
+						<img if-src="{{::landmark.avatar}}" class="media-object">
+						<div class="explore-media-body">
+						<h3 class="explore-media-heading">{{::landmark.name}}</h3>
+						<h6>{{::landmark.time.start | date: 'EEE, MMM d | h:mm a'}} - {{::landmark.time.end | date: 'h:mm a'}}</h6>
+						<p>{{::landmark.summary}}</p>
+						<p><span ng-show="landmark.loc_info.floor_num">Floor: {{::landmark.loc_info.floor_num}} <span ng-show="landmark.loc_info.room_name">Room: {{::landmark.loc_info.room_name}}</span></p>
+						</div>
+					</div>
+				</article>
 			</div>
 		</div>
 	</div>

@@ -28,5 +28,6 @@
 		//geo: {type: String, coordinates: [Number]}
 	});
 
+twitterSchema.index({hashtags:1});
 
 module.exports = twitterSchema;

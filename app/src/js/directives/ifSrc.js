@@ -1,4 +1,4 @@
-app.directive('ifSrc', function() {
+app.directive('ifSrc', function() { //used to make srcs safe for phonegap and web. Only for hosted content
 	return {
 		restrict: 'A',
 		priority: 99, 

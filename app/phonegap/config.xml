@@ -61,6 +61,14 @@
     <splash src="res/ios/Default@2x~iphone.png" width="640" height="960"/>
  
     <splash src="res/ios/Default~iphone.png" width="320" height="480"/>
+    
+    <splash src="res/ios/Default-Landscape-736h.png" width="2208" height="1242"/>
+    
+    <splash src="res/ios/Default-Landscape@2x~ipad.png" width="2048" height="1536"/>
+    
+    <splash src="res/ios/Default-Portrait@2x~ipad.png" width="1536" height="2048"/>
+    
+    <splash src="res/ios/Default-Portrait~ipad.png" width="768" height="1024"/>
  
 	</platform>
 	

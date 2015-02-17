@@ -23,11 +23,13 @@ var checkLoggedin = function(userManager) {
     	return {
     		'request': function(request) {
 	    			//@IFDEF PHONEGAP
-	    			if (request.server) {
+	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
 		    			request.url = 'https://bubbl.li' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
+						} else if (ifGlobals.fbToken) {
+							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
 						}
 	    			}
 	    			//@ENDIF

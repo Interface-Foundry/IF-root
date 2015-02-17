@@ -1,5 +1,5 @@
 'use strict';
-
+//maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
 		function() {

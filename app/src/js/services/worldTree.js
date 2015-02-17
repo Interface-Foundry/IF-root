@@ -1,12 +1,14 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService',
-	function($cacheFactory, $q, World, db, geoService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
 	styleCache: $cacheFactory('styles'),
 	landmarkCache: $cacheFactory('landmarks')
 }
+
+var alert = alertManager;
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -42,20 +44,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 
 worldTree.getLandmarks = function(_id) { //takes world's _id
 	var deferred = $q.defer();
-	
+	console.log('getLandmarks');
 	var landmarks = worldTree.landmarkCache.get(_id);
 	if (landmarks) {
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
 	} else {
-		db.landmarks.get({ parentID: _id}, function(data) {
-			if (data.err) {
-				deferred.reject(data.err);
-			} else {
-				worldTree.landmarkCache.put(_id, data.landmarks);
-				deferred.resolve(data.landmarks);
-			}
-		});
+		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
+			.success(function(success) {
+				console.log(success);
+				deferred.resolve(success.landmarks)})
+			.error(function(err) {
+				console.log(success);
+				deferred.resolve(err)});
 	}
 	
 	return deferred.promise;
@@ -137,6 +138,38 @@ worldTree.cacheWorlds = function(worlds) {
 	if (!worlds) {return}
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
+	});
+}
+
+worldTree.getUserWorlds = function(_id) {
+	console.log('getUserWorlds')
+	var now = Date.now() / 1000; 
+	
+	if (_id) {
+		//other user -- need api endpoint
+	} else if (worldTree._userWorlds && (worldTree._userWorlds.timestamp + 60) > now) {
+		return $q.when(worldTree._userWorlds);
+	} else {
+		return $http.get('/api/user/profile', {server: true}).success(function(bubbles){	
+			worldTree._userWorlds = bubbles;
+			worldTree._userWorlds.timestamp = now;
+			worldTree.cacheWorlds(bubbles);
+		});
+	}
+}
+
+worldTree.createWorld = function() {
+	//@IFDEF PHONEGAP
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
+	//@ENDIF
+	
+	var world = {newStatus: true};
+	
+	db.worlds.create(world, function(response){
+		console.log('##Create##');
+		console.log('response', response);
+		$location.path('/edit/walkthrough/'+response[0].worldID);
 	});
 }
 

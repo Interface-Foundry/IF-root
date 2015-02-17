@@ -1,7 +1,10 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
 var alerts = alertManager;
+   
+   
+   //deals with loading, saving, managing user info. 
    
 var userManager = {
 	//@IFDEF WEB
@@ -16,11 +19,11 @@ var userManager = {
 }
 
 
-userManager.getUser = function() {
+userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
 
-	var user = userManager._user;
-	if (user) {
+	var user = userManager._user; //user cached in memory 
+	if (user) {  
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -41,14 +44,14 @@ userManager.getUser = function() {
 	return deferred.promise;
 }
 
-userManager.saveUser = function(user) {
+userManager.saveUser = function(user) { //saves user object then updates memory cache
 	userManager.userRes.save(user, function() {
 		console.log('saveUser() succeeded');
 		userManager._user = user;
 	});
 }
 
-userManager.getDisplayName = function() {
+userManager.getDisplayName = function() { //gets a first name to display in the UI from wherever.
 	if (userManager._user) {
 		var user = userManager._user;	
 		if (user.name) {displayName = user.name}
@@ -71,10 +74,11 @@ userManager.getDisplayName = function() {
 	}
 }
 
-userManager.checkLogin = function(){
-      var deferred = $q.defer();
+userManager.checkLogin = function() { //checks if user is logged in with side effects. would be better to redesign.
+	console.log('checklogin');
+    var deferred = $q.defer();
       
-	  userManager.getUser().then(function(user) {
+	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
 		  $rootScope.user = user;
@@ -82,17 +86,20 @@ userManager.checkLogin = function(){
 			  $rootScope.userID = user._id;
 			  userManager._user = user;
 		  }
-		  deferred.resolve(0);
+		  worldTree.getUserWorlds();
+		  deferred.resolve(1);
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
 		  deferred.reject(0);
-	  });
-	  	  
-      return deferred.promise;
+	});
+	
+	$rootScope.$broadcast('loginSuccess');
+		  
+    return deferred.promise;
 };
 
-userManager.signin = function(username, password) {
+userManager.signin = function(username, password) { //given a username and password, sign in 
 	console.log('signin');
 	var deferred = $q.defer();
 	var data = {
@@ -131,14 +138,38 @@ userManager.signin = function(username, password) {
 	return deferred.promise;
 }
 
-userManager.logout = function() {
+userManager.fbLogin = function() { //login based on facebook approval
+	var deferred = $q.defer();
+	
+	facebookConnectPlugin.login(['public_profile', 'email'], 
+		function(success) {
+			var fbToken = success.authResponse.accessToken;
+			var authHeader = 'Bearer ' + fbToken;
+			console.log(success);
+			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+				lockerManager.saveFBToken(fbToken)
+				ifGlobals.fbToken = fbToken;
+				deferred.resolve(success);
+			}, function(failure) {
+				deferred.reject(failure);
+			})
+		}, 
+		function(failure) {
+			alerts.addAlert('warning', "Please allow access to Facebook!", true);
+			deferred.reject(failure);
+		})
+	
+	return deferred.promise;
+}
+
+userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
-userManager.login.login = function() {
+userManager.login.login = function() { //login based on login form
 	console.log('login');
     var data = {
       email: userManager.login.email,
@@ -163,7 +194,7 @@ userManager.login.login = function() {
 	});
 }
 
-userManager.signup.signup = function() {
+userManager.signup.signup = function() { //signup based on signup form 
 	var data = {
       email: userManager.signup.email,
       password: userManager.signup.password
@@ -176,7 +207,7 @@ userManager.signup.signup = function() {
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
 	})
-	.error(function(err){
+	.error(function(err) {
 	if (err) {
 		userManager.signup.error = "Error signing up!";
         alertManager.addAlert('danger',err, true);   
@@ -184,7 +215,7 @@ userManager.signup.signup = function() {
 	});
 }
 
-userManager.saveToKeychain = function() {
+userManager.saveToKeychain = function() { 
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
 }
 

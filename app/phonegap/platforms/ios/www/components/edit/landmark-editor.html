@@ -1,4 +1,3 @@
-<!-- <a href="#/w/{{worldURL}}" class="back btn btn-default btn-sm"><span class="glyphicon glyphicon-chevron-left"></span> Back</a> -->
 <div class="edit-view">
 <ul class="edit-nav">
 	<li class="active">
@@ -16,7 +15,7 @@
 <button class="btn btn-success" ng-click="addLandmark()"><b>+</b> Add Point of Interest or Schedule item</button>
 </div>
 <ul class="row">
-	<div class="col-xs-12">
+	<div class="col-xs-12 col-sm-10">
 	<li ng-repeat="landmark in landmarks track by landmark._id" 
 		ng-controller="LandmarkEditorItemController" 
 		class="panel panel-default" 
@@ -25,10 +24,9 @@
 		<div class="panel-heading">
 		<span class="panel-title" ng-cloak>{{landmark.name}} 
 			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-			<button type="button" class="btn btn-primary btn-sm" ng-click="saveLandmark()">Save</button>
 			</span>
 		</div>
-		<div ng-form class='panel-body' ng-show="$index === selectedIndex">
+<div ng-form class='panel-body' ng-show="$index === selectedIndex">
 		<div class="form-group">
 			
 			<div class="media">
@@ -62,14 +60,14 @@
 	<div class="form-group form-inline">
 		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> Start Time <span class="glyphicon glyphicon-info-sign info"></span></label>
 		
-		<button type="button" class="close" ng-click="landmark.time.start = null">
+		<button type="button" class="close" ng-click="landmark.time.start = null; landmark.time.end = null">
 			<span aria-hidden="true">&times;</span><span class="sr-only">Close </span>
 		</button><br>
 		<div class="form-group">
-			<input type="text" size="10" class="form-control" ng-model="landmark.time.start" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.start" ng-change="landmark.time.start=landmark.time.start.toISO8601String()" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
 		</div>
 		<div class="form-group">
-			<input type="text" size="8" class="form-control" ng-model="landmark.time.start" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.start" ng-change="landmark.time.start=landmark.time.start.toISO8601String()" minute-step="1" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
 		</div>
 	</div>
 	<button class="btn btn-info btn-sm" ng-click="setEndTime()" ng-hide="landmark.time.end">Add End Time</button>
@@ -80,19 +78,53 @@
 			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
 		</button><br> 
 		<div class="form-group">
-			<input type="text" size="10" class="form-control" ng-model="landmark.time.end" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+			<input type="text" size="10" class="form-control" ng-model="landmark.time.end" ng-change="landmark.time.end=landmark.time.end.toISO8601String()" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
 		</div>
 		<div class="form-group">
-			<input type="text" size="8" class="form-control" ng-model="landmark.time.end" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+			<input type="text" size="8" class="form-control" ng-model="landmark.time.end" ng-change="landmark.time.end=landmark.time.end.toISO8601String()" minute-step="1" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
 		</div>
 	</div>
 </div>
+	
+	<br><br>
+
+	<div class="form-group">
+		<button class="btn btn-info btn-sm" ng-click="setLocation()" ng-hide="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">Add Location Details</button>
+	</div>
 
 
+	<div ng-show="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">
+		<div class="form-group form-inline">
+			
+			<button type="button" class="close" ng-click="clearLoc()">
+				<span aria-hidden="true">&times;</span><span class="sr-only">Close </span>
+			</button><br>
+
+			<div class="form-group">
 
 
+				<label>Floor Number</label>
+				<br>
+				<button type="button" class="btn btn-default" data-html="1" ng-model="landmark.loc_info.floor_num" ng-options="floor.val as floor.label for floor in floors" bs-select>
+				  Action <span class="caret"></span>
+				</button>
 
 			</div>
+
+			<div class="form-group" style="margin-left:10px;">
+				<label>Room Number</label>
+				<br>
+				<input type="text" size="10" class="form-control" ng-model="landmark.loc_info.room_name" data-autoclose="1" placeholder="ex. 5A" placement="top-left" maxlength="18">
+			</div>
+
+		</div>
+	</div>
+
+	<button type="button" class="btn btn-primary btn-lg" ng-click="saveLandmark()">Save</button>
+
+
+</div>
+
 	</li>
 	</div>
 </ul>

@@ -8,21 +8,20 @@ $scope.userManager = userManager;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"});
+angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
 
-$rootScope.hideBack = true;
+$rootScope.hideBack = true; //controls back button showing
 
-$scope.$on('$viewContentLoaded', function() {
-// 	angular.forEach(document.getElementsByClassName("wrap"), function(element) {element.scrollTop = 0});
-});
-
-// @IFDEF PHONEGAP
 var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
+	console.log('$routeChangeSuccess');
+	console.log(arguments);
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-// @ENDIF
 
+$scope.$on('viewTabSwitch', function(event, tab) {
+	$scope.viewTab = tab;
+})  //for home/explore/search tabs
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -33,7 +32,7 @@ $scope.newWorld = function() {
       console.log('response', response);
       $location.path('/edit/walkthrough/'+response[0].worldID);
     });
-}
+} //candidate for removal, should use worldTree.createWorld instead
 
 $scope.search = function() {
 	if ($scope.searchOn == true) {
@@ -44,26 +43,27 @@ $scope.search = function() {
 	} else {
 		$scope.searchOn = true;
 	}
-}
+} 
 	
 $scope.go = function(path) {
 	$location.path(path);
-}
+} 
 	
 $scope.goBack = function() {
 	$window.history.back();
+	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {
       $http.get('/api/user/logout', {server:true});
       userManager.loginStatus = false;
       //$location.url('/');
-}
+} //switch to userManager method
 
-$scope.sendFeedback = function(){
+$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 
     var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize($scope.feedbackText) + '\n===\n===\n' + $rootScope.userName)
+      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
     }
 
     $http.post('feedback', data).
@@ -75,14 +75,6 @@ $scope.sendFeedback = function(){
       error(function(err){
         console.log('there was a problem');
     });
-    
-    if ($scope.feedback) {
-        $scope.feedback.on = false;
-    } else {
-        $scope.feedback = {
-	        on: false
-        }
-    }
 };
 
 /*
@@ -126,6 +118,19 @@ $scope.share = function(platform) {
   );
 };
 
+//@IFDEF PHONEGAP
+$scope.fbLogin = function() {
+	userManager.fbLogin().then(
+		function (success) {
+			console.log(success);
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
+		})
+}
+//@ENDIF
+
+
 //@IFDEF IBEACON
 if (beaconManager.supported == true) {
 	beaconManager.startListening();
@@ -133,14 +138,22 @@ if (beaconManager.supported == true) {
 //@ENDIF
 
 //@IFDEF KEYCHAIN
+//On Phonegap startup, try to login with either saved username/pw or facebook
 lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
+	if (credentials.username, credentials.password) {
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
 			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
 		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
+	} else if (credentials.fbToken) {
+		ifGlobals.fbToken = credentials.fbToken;
+		userManager.checkLogin().then(function(success) {
+			console.log(success);	
+		})
+	}
 }, function(err) {
 	console.log('credential error', error); 
 });

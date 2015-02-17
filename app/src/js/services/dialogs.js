@@ -3,7 +3,7 @@ angular.module('tidepoolsServices')
 function($rootScope, $compile) {
 var dialogs = {
 	dialogTemplate: null
-}
+} //used to manage different popup dialogs and modals
 
 dialogs.showDialog = function(name) {
 	dialogs.template = "templates/"+name;
