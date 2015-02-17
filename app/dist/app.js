@@ -20719,7 +20719,7 @@ var firstWalk = [
 		title: 'Time',
 		caption: 'Give it a start and end time',
 		view: 'time.html',
-		height: 88,
+		height: 288,
 		valid: function() {return $scope.form.time.$valid},
 		jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
 		skip: true
