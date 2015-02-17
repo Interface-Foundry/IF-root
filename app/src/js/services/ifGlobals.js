@@ -55,7 +55,7 @@ angular.module('tidepoolsServices')
 					},
 					Other: {
 						name: 'Other', 
-						hasTime: false, 
+						hasTime: true, 
 						img: 'other.png'
 					}
 				},

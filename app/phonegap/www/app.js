@@ -16760,7 +16760,7 @@ angular.module('tidepoolsServices')
 					},
 					Other: {
 						name: 'Other', 
-						hasTime: false, 
+						hasTime: true, 
 						img: 'other.png'
 					}
 				},
@@ -20766,7 +20766,7 @@ var firstWalk = [
 		view: 'kind.html',
 		height: 220,
 		valid: function() {return typeof $scope.world.category == "string"},
-		skip: false
+		skip: true
 	},
 	{
 		title: 'Location', 
