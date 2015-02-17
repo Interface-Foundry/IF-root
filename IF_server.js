@@ -402,12 +402,15 @@ function isLoggedIn(req, res, next) {
 		  		if (err) {
 			  		res.sendStatus(401);
 		  		}
-		  		if (!user) {
-			  		res.sendStatus(401);
-		  		}
-		  		if (user) {
-			  		return next();
-		  		}
+          else {
+            return next();
+          }
+		  		// if (!user) {
+			  	// 	res.sendStatus(401);
+		  		// }
+		  		// if (user) {
+			  	// 	return next();
+		  		// }
 	  		})(req, res, next)
       	}
     } else { 
