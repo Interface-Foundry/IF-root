@@ -339,12 +339,14 @@ ul.edit-toolbar {
 
 .walkthrough {
 	position: relative;
-	display: inline-block;
-	vertical-align: middle;
+	/*display: inline-block;*/
+	/*vertical-align: middle;*/
 	width: 496px;
-	
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	-webkit-transform: translate(-50%, -50%);
 	text-align: left;
-	
 	background: #FFF;
 	border-radius: 2px;
 	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
@@ -385,7 +387,18 @@ ul.edit-toolbar {
 }
 
 .walkthrough-footer {
-	height: 32px;
+	/*height: 100px;*/
+	/*border: 1px solid black;*/
+}
+
+.walkthrough-footer-top {
+	height: 70px;
+	text-align: center;
+}
+
+.walkthrough-footer-bottom {
+	height: 30px;
+	/*border: 1px solid black;*/
 }
 
 .walkthrough-footer button, .walkthrough-footer span {
@@ -395,7 +408,7 @@ ul.edit-toolbar {
 	padding: 8px;
 }
 
-.walkthrough-footer > .save-exit {
+.walkthrough-footer .save-exit {
 	display: block;
 	float: left;
 	padding-left: 12px;
@@ -403,7 +416,14 @@ ul.edit-toolbar {
 	border: none;
 }
 
-.walkthrough-footer > .footer-right {
+.save-exit {
+	position: relative;
+	left: 50%;
+	transform: translateX(-50%);
+	-webkit-transform: translateX(-50%);
+}
+
+.walkthrough-footer .footer-right {
 	float: right;
 }
 
@@ -440,7 +460,7 @@ ul.edit-toolbar {
 	outline: none;	
 }
 
-.walk-page, .walk-progress, .progress-list, .progress-list > li {
+.progress-list, .progress-list > li {
 	float: left;
 }
 
@@ -449,76 +469,80 @@ ul.edit-toolbar {
 	padding: 0;
 }
 
-li.progress-dot {
-	width: 8px;
-	height: 8px;
-	margin: 12px 4px;
-	border-radius:8px;
+.walk-progress {
+	display: inline-block;
+	margin-top: 5px;
+}
+
+span.walk-page {
+	padding-bottom: 0px;
+}
+
+.progressWrap {
+	width: 200px;
+	height: 10px;
+	border-radius: 5px;
+	float: right;
 	background-color: #CCC;
+	position: relative;
+	top: 11px;
 }
 
-.progress-dot.visited {
-	background-color: #0d47a1;
-}
-
-.progress-dot.active {
+.progressFill {
+	height: 100%;
+	border-radius: 5px;
 	background-color: #2196f3;
 }
 
-.progress-dot:first-child {
-	display: none;
-}
-
 .walkthrough-next, .walkthrough-prev {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	margin: auto;
-	width: 56px;
-	height: 80px;
-
+	width: 30px;
+	height: 52px;
 	border: none;
 	outline: none;
+	position: relative;
+	top: 9px;
 }
 
 .walkthrough-next {
-	right: -64px;
-	
-	background: url('img/walkthrough/right.png') 0px 0px/56px 80px no-repeat transparent;
+	float: right;
+	right: 12px;
+	background: url('img/walkthrough/arrow_R_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
-.walkthrough-next:enabled:active {
-	background: url('img/walkthrough/right-p.png') 0px 0px/56px 80px no-repeat transparent;
+.walkthrough-next:active {
+	background: url('img/walkthrough/arrow_R_active_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
-.walkthrough-next:disabled {
-	background: url('img/walkthrough/right-d.png') 0px 0px/56px 80px no-repeat transparent;
+.walkthrough-next.disabled {
+	background: url('img/walkthrough/arrow_R_disabled_30.png') 0px 0px/30px 52px no-repeat transparent;
+	cursor: default;
 }
-
 
 .walkthrough-prev {
-	left: -64px;
-	background: url('img/walkthrough/left.png') 0px 0px/56px 80px no-repeat transparent;
+	float: left;
+	right: -12px;
+	background: url('img/walkthrough/arrow_L_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
 .walkthrough-prev:active {
-	background: url('img/walkthrough/left-p.png') 0px 0px/56px 80px no-repeat transparent;	
+	background: url('img/walkthrough/arrow_L_active_30.png') 0px 0px/30px 52px no-repeat transparent;
 }
 
 ul.walkthrough-grid {
 	padding: 0px;
 	margin: 0;
+	text-align: center;
 }
 
 ul.walkthrough-grid > li {
 	position: relative;
-	float: left; 
-	width: 144px;
-	height: 144px;
-	margin-left: 16px;
-	margin-bottom: 16px;
+	/*float: left; */
+	width: 216px;
+	height: 65px;
+	line-height: 65px;
+	margin: auto 8px 16px 8px;
 	background-color: #eceff1;
-
+	display: inline-block;
 	box-shadow: 0px 2px 2px rgba(0,0,0,0.23);
 }
 
@@ -528,17 +552,19 @@ ul.walkthrough-grid > li.active {
 
 ul.walkthrough-grid > li > label { 
 	position: absolute;
-	bottom: 0px;
-	width: 100%;
-	height: 22px;
+	right: 0px;
+	width: 70%;
+	height: 100%;
 	margin: 0px;
-	padding: 4px 0px;
-	
+	padding: 0px 0px 0px 20px;
 	background: #FFF;
-	
-	text-align: center;
+	text-align: left;
 	font-weight: normal;
-	line-height: 1;
+}
+
+ul.walkthrough-grid > li > img { 
+	width: 30%;
+	float: left;
 }
 
 .walkthrough-pic-upload {
@@ -546,15 +572,18 @@ ul.walkthrough-grid > li > label {
 	width: 100%;
 	height: 176px;
 	padding: 0px 16px 0px 16px;
+	text-align: center;
 }
 
 .pic-preview {
-	float: left;
+	/*float: left;*/
 	height: 144px;
 	width: 144px;
-	
+	display: inline-block;
 	border: 1px solid #cfd8dc;
 	background: #FFF;
+	position: relative;
+	top: -8px;
 }
 
 .pic-preview-img {
@@ -563,34 +592,16 @@ ul.walkthrough-grid > li > label {
 	margin: 8px;
 }
 
-.preview-img-well {
-	height: 126px;
-	width: 126px;
-	margin: 8px;
-	
-	font-size: 16px;
-	text-align: center;
-	color: #FFF;
-	
-	background-color: #7986cb;
-}
-
 .walkthrough-pic-upload-body {
-	float: left;
-	width: 310px;
+	/*float: left;*/
+	width: 144px;
 	height: 144px;
-	
+	display: inline-block;
 	border: 1px solid transparent;
-	
-	margin-left: 8px;
-	
+	/*margin-left: 8px;*/
 	text-align: center;
 	font-size: 16px;
-}
-
-.walkthrough-pic-upload-body:hover {
-	background-color: #eceff1;
-	border: 1px solid #b0bec5;
+	overflow: initial !important;
 }
 
 .walkthrough-progress {
@@ -608,7 +619,7 @@ ul.walkthrough-grid > li > label {
 }
 
 .walk-location-btn {
-	width: 464px;
+	/*width: 464px;*/
 	height: 120px;
 	
 	margin: 0px 16px;
@@ -652,7 +663,7 @@ ul.walkthrough-grid > li > label {
 }
 
 .walk-location-container {
-	width: 464px;
+	/*width: 464px;*/
 	margin: 0px 16px;
 	
 	background-color: #fafdff;
@@ -673,17 +684,16 @@ ul.walkthrough-grid > li > label {
 }
 
 .walkthrough-maps {
-	width: 496px;
+	/*width: 496px;*/
 	overflow: auto;
+	text-align: center;
 }
 
 .walkthrough-maps-item {
 	width: 224px;
-	
-	
-	float: left;
+	/*float: left;*/
 	margin: 0px 0px 11px 16px;
-	
+	display: inline-block;
 }
 
 .walkthrough-maps-item.selected .walkthrough-maps-img {
@@ -703,9 +713,31 @@ ul.walkthrough-grid > li > label {
 	
 }
 
+.u-pointer {
+	cursor: pointer;
+}
+
+.u-media-display {
+	display: none;
+}
+
+@media only screen and (max-width: 480px) {
+	.u-media-display-none {
+		display: none;
+	}
+	.u-media-display {
+		display: initial;
+	}
+	.progressWrap {
+		width: 100px;
+	}
+}
+
 .loading-spin {
-	left: 211px;
-	top: 91px;
+	left: 50%;
+	transform: translateX(-50%);
+	-webkit-transform: translateX(-50%);
+	top: 66px; /*172/2 - 40/2*/
 	width: 40px;
 	height: 40px;
 
@@ -758,8 +790,8 @@ ul.walkthrough-grid > li > label {
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	width: 462px;
-	height: 222px;
+	width: 100%;
+	height: 172px;
 	background-color: #3f51b5;
 	z-index:1000;
 }
@@ -773,6 +805,43 @@ ul.walkthrough-grid > li > label {
 	float: left; 
 	margin-right: 32px;
 	font-size: 16px;
+}
+
+.center-wrapper {
+	text-align: center;
+}
+
+.hashtagButtons {
+	text-align: center;
+}
+
+.btn.buttonToggle {
+	width: 150px;
+	background-color: #CCC;
+	margin-bottom: 10px;
+	outline: 0 !important;
+	color: white !important;
+}
+
+.buttonToggle img {
+	width: 16px;
+	height: 16px;
+	content: url('img/icons/ic_check_white_24px.png');
+	float: right;
+	position: relative;
+	top: 2px;
+}
+
+.buttonToggle.off img {
+	content: url('img/icons/ic_add_white_48dp.png');
+}
+
+.buttonToggle--instagram.on {
+	background-color: #517fa4;
+}
+
+.buttonToggle--twitter.on {
+	background-color: #4099FF;
 }
 .tour {
 	padding: 0;

@@ -1,53 +1,53 @@
 <div ng-controller="WalkLocationController">
-<div class="walk-location-btn" ng-click="locationSearch=!locationSearch;
-										temp.MapActive=true;
-										searchByLocation()"
-	ng-class="{'walk-location-btn-off': addressSearch,
-				'walk-location-btn-on': locationSearch,
-				'walk-location-btn-switch': !addressSearch && !locationSearch}">
-	<span class="blue500-text">Start from your current location</span>
-	<button type="button" class="close" ng-show="locationSearch">
-		<span aria-hidden="true">&times;</span>
-		<span class="sr-only">Close</span>
-	</button>
-</div>
-<hr class="edit-hr" ng-hide="locationSearch || addressSearch">
-<div class="walk-location-btn" ng-click="addressSearch=!addressSearch; 
-										temp.MapActive=false"
-	ng-class="{'walk-location-btn-off': locationSearch,
-				'walk-location-btn-on': addressSearch,
-				'walk-location-btn-switch': !addressSearch && !locationSearch}">
-	<span class="blue500-text">Search by an address or name</span>
-	<button type="button" class="close" ng-show="addressSearch">
-		<span aria-hidden="true">&times;</span>
-		<span class="sr-only">Close</span>
-	</button>
-</div>
-<div class="walk-location-container" ng-show="locationSearch || addressSearch">
-	<div class="input-group" ng-show="addressSearch">
-		<input type="text" class="form-control" placeholder="Address or Name..."
-			ng-model="temp.address"
-			ng-enter="temp.MapActive=true;
-					searchByAddress()">
-		<span class="input-group-btn">
-			<button class="btn btn-default" type="button" 
-				ng-click="temp.MapActive=true;
-						searchByAddress();
-						$event.stopPropagation()">Find</button>
-		</span>
+	<div class="walk-location-btn" ng-click="locationSearch=!locationSearch;
+											temp.MapActive=true;
+											searchByLocation()"
+		ng-class="{'walk-location-btn-off': addressSearch,
+					'walk-location-btn-on': locationSearch,
+					'walk-location-btn-switch': !addressSearch && !locationSearch}">
+		<span class="blue500-text">Start from your current location</span>
+		<button type="button" class="close" ng-show="locationSearch">
+			<span aria-hidden="true">&times;</span>
+			<span class="sr-only">Close</span>
+		</button>
 	</div>
-	<div ng-show="temp.MapActive" style="position:relative;">
-		<leaflet id="locMap"
-			width="462px" height="222px" 
-			center="center"
-			tiles="tiles"
-			markers="markers">
-		</leaflet>
-		<div class="loc-loading-overlay" ng-show="locLoading"></div>
-		<div class="loading-spin" ng-show="locLoading">
-			<div class="db1"></div>
-			<div class="db2"></div>
+	<hr class="edit-hr" ng-hide="locationSearch || addressSearch">
+	<div class="walk-location-btn" ng-click="addressSearch=!addressSearch; 
+											temp.MapActive=false"
+		ng-class="{'walk-location-btn-off': locationSearch,
+					'walk-location-btn-on': addressSearch,
+					'walk-location-btn-switch': !addressSearch && !locationSearch}">
+		<span class="blue500-text">Search by an address or name</span>
+		<button type="button" class="close" ng-show="addressSearch">
+			<span aria-hidden="true">&times;</span>
+			<span class="sr-only">Close</span>
+		</button>
+	</div>
+	<div class="walk-location-container" ng-show="locationSearch || addressSearch">
+		<div class="input-group" ng-show="addressSearch">
+			<input type="text" class="form-control" placeholder="Address or Name..."
+				ng-model="temp.address"
+				ng-enter="temp.MapActive=true;
+						searchByAddress()">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" 
+					ng-click="temp.MapActive=true;
+							searchByAddress();
+							$event.stopPropagation()">Find</button>
+			</span>
+		</div>
+		<div ng-show="temp.MapActive" style="position:relative;">
+			<leaflet id="locMap"
+				height="172px" 
+				center="center"
+				tiles="tiles"
+				markers="markers">
+			</leaflet>
+			<div class="loc-loading-overlay" ng-show="locLoading"></div>
+			<div class="loading-spin" ng-show="locLoading">
+				<div class="db1"></div>
+				<div class="db2"></div>
+			</div>
 		</div>
 	</div>
-</div>
 </div>

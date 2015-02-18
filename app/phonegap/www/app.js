@@ -16720,50 +16720,172 @@ return geoService;
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
-function() {
-var ifGlobals = {
-	kinds: {
-		Convention: {name: 'Convention', hasTime: true, img: 'convention.png', icon: 'convention.svg'},
-		Event: {name: 'Event', hasTime: true, img: 'event.png', icon: 'event.svg'},
-		Neighborhood: {name: 'Neighborhood', hasTime: false, img: 'neighborhood.png', icon: 'neighborhood.svg'},
-		Venue: {name: 'Venue', hasTime: false, img: 'venue.png', icon: 'venue.svg'},
-		Park: {name: 'Park', hasTime: false, img: 'park.png', icon: 'park.svg'},
-		Retail: {name: 'Retail', hasTime: false, img: 'retail.png', icon: 'retail.svg'},
-		Campus: {name: 'Campus', hasTime: false, img: 'campus.png', icon: 'campus.svg'},
-		Home: {name: 'Home', hasTime: false, img: 'home.png', icon: 'home.svg'},
-		Other: {name: 'Other', hasTime: false, img: 'other.png'}
-	},
-	stickers: {
-		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png', iconInfo: {
-			iconUrl: 'img/stickers/favorite.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png', iconInfo: {
-			iconUrl: 'img/stickers/fixthis.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		Food: {name: 'Food', img: 'img/stickers/food.png', iconInfo: {
-			iconUrl: 'img/stickers/food.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png', iconInfo: {
-			iconUrl: 'img/stickers/im_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		Interesting: {name: 'Interesting', img: 'img/stickers/interesting.png', iconInfo: {
-			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
-			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
-	},
-	mapThemes: {
-		arabesque: {name: 'Arabesque', cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb', img: 'img/mapbox/arabesque_small.png'},
-		fairy: {name: 'Fairy', cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b', img: 'img/mapbox/fairy_small.png'},
-		sunset: {name: 'Sunset', cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e', img: 'img/mapbox/sunset_small.png'},
-		urban: {name: 'Urban', cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn', img: 'img/mapbox/urban_small.png'},
-		haze: {name: 'Haze', cloudMapName:'purple haze', cloudMapID:'interfacefoundry.ig1oichl', img: 'img/mapbox/haze_small.png'},
-		mimis: {name: 'Mimis', cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55', img: 'img/mapbox/mimis_small.png'}
-	}
-}
+		function() {
+			var ifGlobals = {
+				kinds: {
+					Convention: {
+						name: 'Convention', 
+						hasTime: true, 
+						img: 'convention.png', 
+						icon: 'convention.svg'
+					},
+					Event: {
+						name: 'Event', 
+						hasTime: true, 
+						img: 'event.png', 
+						icon: 'event.svg'
+					},
+					Neighborhood: {
+						name: 'Neighborhood', 
+						hasTime: false, 
+						img: 'neighborhood.png', 
+						icon: 'neighborhood.svg'
+					},
+					Venue: {
+						name: 'Venue', 
+						hasTime: false, 
+						img: 'venue.png', 
+						icon: 'venue.svg'
+					},
+					Park: {
+						name: 'Park', 
+						hasTime: false, 
+						img: 'park.png', 
+						icon: 'park.svg'
+					},
+					Retail: {
+						name: 'Retail', 
+						hasTime: false, 
+						img: 'retail.png', 
+						icon: 'retail.svg'
+					},
+					Campus: {
+						name: 'Campus', 
+						hasTime: false, 
+						img: 'campus.png', 
+						icon: 'campus.svg'
+					},
+					Home: {
+						name: 'Home', 
+						hasTime: false, 
+						img: 'home.png', 
+						icon: 'home.svg'
+					},
+					Other: {
+						name: 'Other', 
+						hasTime: true, 
+						img: 'other.png'
+					}
+				},
+				stickers: {
+					Favorite: {
+						name: 'Favorite', 
+						img: 'img/stickers/favorite.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/favorite.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					FixThis: {
+						name: 'Fix This', 
+						img: 'img/stickers/fixthis.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/fixthis.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					Food: {
+						name: 'Food', 
+						img: 'img/stickers/food.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/food.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					ImHere: {
+						name: "I'm Here", 
+						img: 'img/stickers/im_here.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/im_here.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					Interesting: {
+						name: 'Interesting', 
+						img: 'img/stickers/interesting.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/interesting.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					WereHere: {
+						name: "We're Here", 
+						img: 'img/stickers/were_here.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/were_here.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					}
+				},
+				mapThemes: {
+					arabesque: {
+						name: 'Arabesque', 
+						cloudMapName:'arabesque', 
+						cloudMapID:'interfacefoundry.ig67e7eb', 
+						img: 'img/mapbox/arabesque_small.png'
+					},
+					fairy: {
+						name: 'Fairy', 
+						cloudMapName:'fairy', 
+						cloudMapID:'interfacefoundry.ig9jd86b', 
+						img: 'img/mapbox/fairy_small.png'
+					},
+					sunset: {
+						name: 'Sunset', 
+						cloudMapName:'sunset', 
+						cloudMapID:'interfacefoundry.ig6f6j6e', 
+						img: 'img/mapbox/sunset_small.png'
+					},
+					urban: {
+						name: 'Urban', 
+						cloudMapName:'urban', 
+						cloudMapID:'interfacefoundry.ig6a7dkn', 
+						img: 'img/mapbox/urban_small.png'
+					},
+					haze: {
+						name: 'Haze', 
+						cloudMapName:'purple haze', 
+						cloudMapID:'interfacefoundry.ig1oichl', 
+						img: 'img/mapbox/haze_small.png'
+					},
+					mimis: {
+						name: 'Mimis', 
+						cloudMapName: 'mimis', 
+						cloudMapID: 'interfacefoundry.b28f1c55', 
+						img: 'img/mapbox/mimis_small.png'
+					}
+				}
+			}
 
-ifGlobals.getBasicHeader = function() {
-	var string = ifGlobals.username+":"+ifGlobals.password;
-	var encodedString = window.btoa(string);
-	return "Basic "+encodedString;
-}
+			ifGlobals.getBasicHeader = function() {
+				var string = ifGlobals.username+":"+ifGlobals.password;
+				var encodedString = window.btoa(string);
+				return "Basic "+encodedString;
+			}
 
-return ifGlobals;
+		return ifGlobals;
 }]);
 'use strict';
 
@@ -20733,47 +20855,48 @@ $scope.pictureSelect = function($files) {
 }
 
 $scope.selectMapTheme = function(name) {
-		var mapThemes = {
-			arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-			fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-			sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-			urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
-		};
-	
-		if (typeof name === 'string') {
-			$scope.mapThemeSelect = name;
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
-			
-			$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
-			
-			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
-			//	$scope.setThemeFromMap();
-			$scope.setThemeFromMap(name);
-			//}
-		}
+	var mapThemes = $scope.global.mapThemes;
+
+	if (typeof name === 'string') {
+		$scope.mapThemeSelect = name;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		
+		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
+		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		
+		//if ($scope.style.hasOwnProperty('navBG_color')==false) {
+		//	$scope.setThemeFromMap();
+		$scope.setThemeFromMap(name);
+		//}
+	}
 }
 
 $scope.setThemeFromMap = function(name) {
-switch (name) { 
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-}
-console.log($scope.style)
+	switch (name) { 
+		case 'urban':
+			angular.extend($scope.style, themeDict['urban']);
+			break;
+		case 'sunset':
+			angular.extend($scope.style, themeDict['sunset']);
+			break;
+		case 'fairy':
+			angular.extend($scope.style, themeDict['fairy']);
+			break;
+		case 'arabesque':
+			angular.extend($scope.style, themeDict['arabesque']);
+			break;
+		case 'haze':
+			angular.extend($scope.style, themeDict['haze']);
+			break;
+		case 'mimis':
+			angular.extend($scope.style, themeDict['mimis']);
+			break;
+	}
+	console.log($scope.style)
 
-    db.styles.create($scope.style, function(response){
-        console.log(response);
-    });
+	    db.styles.create($scope.style, function(response){
+	        console.log(response);
+	    });
 }	
 	
 $scope.saveAndExit = function() {
@@ -20796,7 +20919,8 @@ $scope.saveAndExit = function() {
 		// 	}
 		// }
 
-		$location.path("/edit/w/"+$scope.world.id);
+		$location.path("/w/"+$scope.world.id);
+		$window.location.reload();
 		map.refresh();
 	} else {
 		//console
@@ -20832,110 +20956,138 @@ $scope.save = function() {
 }
 
 var firstWalk = [
-	{title: 'Need a hand?',
-	caption: 'If you haven’t built a bubble before, we can walk you through it.',
-	height: 0,
-	view: '0.html',
-	valid: function() {return true},
-	skip: false},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Location', 
-	caption: 'Find its location',
-	view: 'location.html',
-	height: 290,
-	valid: function() {return $scope.world.hasLoc},
-	skip: false},
-	{title: 'Name',
-	caption: 'What\'s your bubble named?',
-	view: 'name.html',
-	height: 62,
-	valid: function() {return $scope.form.worldName.$valid},
-	skip: false},
-	{title: 'Time',
-	caption: 'Give it a start and end time',
-	view: 'time.html',
-	height: 88,
-	valid: function() {return $scope.form.time.$valid},
-	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
-	skip: true},
-	{title: 'Picture',
-	caption: 'Upload a picture for your bubble',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
+	{
+		title: 'Need a hand?',
+		caption: 'If you haven’t built a bubble before, we can walk you through it.',
+		height: 0,
+		view: '0.html',
+		valid: function() {return true},
+		skip: false
 	},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done.html',
-	height: 200,
-	skip: false}
+	{
+		title: 'Kind',
+		caption: 'What kind of bubble is it?',
+		view: 'kind.html',
+		height: 220,
+		valid: function() {return typeof $scope.world.category == "string"},
+		skip: true
+	},
+	{
+		title: 'Location', 
+		caption: 'Find its location',
+		view: 'location.html',
+		height: 290,
+		valid: function() {return $scope.world.hasLoc},
+		skip: false
+	},
+	{
+		title: 'Name',
+		caption: 'What\'s your bubble named?',
+		view: 'name.html',
+		height: 62,
+		valid: function() {return $scope.form.worldName.$valid},
+		skip: false
+	},
+	{
+		title: 'Time',
+		caption: 'Give it a start and end time',
+		view: 'time.html',
+		height: 288,
+		valid: function() {return $scope.form.time.$valid},
+		jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
+		skip: true
+	},
+	{
+		title: 'Picture',
+		caption: 'Upload a picture for your bubble',
+		view: 'picture.html',
+		height: 194,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Maps',
+		caption: 'Choose a map',
+		view: 'maptheme.html',
+		height: 426,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Hashtag',
+		caption: 'Connect your bubble\'s social media',
+		view: 'hashtag.html',
+		height: 132,
+		valid: function() {return true},
+		skip: true,
+	},
+	{
+		title: 'Done!',
+		caption: 'Now spread the word :)',
+		view: 'done.html',
+		height: 200,
+		skip: false
+	}
 ];
 
 var meetupWalk = [
 	//0 intro
-	{title: 'Claim your Meetup',
-	caption: "We'll use your Meetup group to create a bubble.",
-	view:'0.html',
-	height: 0,
-	valid: function() {return true},
-	skip: false
+	{
+		title: 'Claim your Meetup',
+		caption: "We'll use your Meetup group to create a bubble.",
+		view:'0.html',
+		height: 0,
+		valid: function() {return true},
+		skip: false
 	},
 	//1 
-	{title: 'Confirm',
-	caption: 'Make sure this information from Meetup.com is correct',
-	view: 'meetup_confirm.html',
-	height: 300,
-	valid: function() {return true},
-	skip: false
+	{
+		title: 'Confirm',
+		caption: 'Make sure this information from Meetup.com is correct',
+		view: 'meetup_confirm.html',
+		height: 300,
+		valid: function() {return true},
+		skip: false
 	},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
+	{
+		title: 'Kind',
+		caption: 'What kind of bubble is it?',
+		view: 'kind.html',
+		height: 220,
+		valid: function() {return typeof $scope.world.category == "string"},
+		skip: false
 	},
-	{title: 'Picture',
-	caption: 'Upload a picture',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done_meetup.html',
-	height: 200,
-	skip: false}
+	{
+		title: 'Hashtag',
+		caption: 'Connect your bubble\'s social media',
+		view: 'hashtag.html',
+		height: 132,
+		valid: function() {return true},
+		skip: true,
+	},
+	{
+		title: 'Picture',
+		caption: 'Upload a picture',
+		view: 'picture.html',
+		height: 194,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Maps',
+		caption: 'Choose a map',
+		view: 'maptheme.html',
+		height: 426,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Done!',
+		caption: 'Now spread the word :)',
+		view: 'done_meetup.html',
+		height: 200,
+		skip: false
+	}
 ];
 
 $scope.walk = firstWalk;
@@ -20946,13 +21098,19 @@ function setUpProgress() {
 	var i = 0;
 	if ($scope.walk) {
 		while (i < $scope.walk.length) {
-		$scope.progress[i] = {status: ''};
-		i++;
-	}
+			$scope.progress[i] = {status: ''};
+			i++;
+		}
 	}
 	
-$scope.progress[$scope.position].status = 'active';
+	$scope.progress[$scope.position].status = 'active';
 
+}
+
+$scope.getProgress = function() {
+	return {
+		'width': (100*$scope.position)/($scope.walk.length-1) + '%'
+	};
 }
 
 ////////////////////////////////////////////////////////////
@@ -21016,7 +21174,11 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 							m: {
 								lat: tempLat,
 								lng: tempLng,
-								draggable: false
+								icon: {
+									iconUrl: 'img/marker/bubble-marker-50.png',
+									iconSize: [35, 67]
+								},
+								draggable: true
 							}}});		
 		$scope.center.lat = tempLat;
 		$scope.center.lng = tempLng;
