@@ -70,7 +70,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
+					// iconSize: [35, 67],
+					iconSize: [35], 
 					iconAnchor: [17, 67],
 					popupAnchor:[0, -40]
 				},
@@ -392,6 +393,9 @@ function initLandmarks(data) {
 
 function markerFromLandmark(landmark) {
 	console.log('marker from landmark===============', landmark)
+
+	var landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
+											'img/marker/bubble-marker-50.png' : landmark.avatar;
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
@@ -399,9 +403,10 @@ function markerFromLandmark(landmark) {
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
 			// iconUrl: 'img/marker/bubble-marker-50.png',
-			iconUrl: landmark.avatar,
+			iconUrl: landmarkIcon,
 			shadowUrl: '',
-			iconSize: [35, 67],
+			// iconSize: [35, 67],
+			iconSize: [35],
 			iconAnchor: [17, 67],
 			popupAnchor: [0, -40] 
 		},

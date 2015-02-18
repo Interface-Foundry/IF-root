@@ -20345,7 +20345,8 @@ var landmarksLoaded = false;
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [50, 95],
+					// iconSize: [50, 95],
+					iconSize: [35],
 					iconAnchor: [25, 100],
 					popupAnchor: [0, -50]
 				},
@@ -20459,14 +20460,18 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	function addLandmarkMarker(landmark) {
+		var landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
+										'img/marker/bubble-marker-50.png' : landmark.avatar;
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					// iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: landmarkIcon,
 					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17.5, 60],
+					iconSize: [35],
+					// iconSize: [35, 67],
+					// iconAnchor: [17.5, 60],
 					popupAnchor: [0, -40]
 				},
 				draggable:true,
@@ -23373,7 +23378,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
+					// iconSize: [35, 67],
+					iconSize: [35], 
 					iconAnchor: [17, 67],
 					popupAnchor:[0, -40]
 				},
@@ -23695,6 +23701,9 @@ function initLandmarks(data) {
 
 function markerFromLandmark(landmark) {
 	console.log('marker from landmark===============', landmark)
+
+	var landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
+											'img/marker/bubble-marker-50.png' : landmark.avatar;
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
@@ -23702,9 +23711,10 @@ function markerFromLandmark(landmark) {
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
 			// iconUrl: 'img/marker/bubble-marker-50.png',
-			iconUrl: landmark.avatar,
+			iconUrl: landmarkIcon,
 			shadowUrl: '',
-			iconSize: [35, 67],
+			// iconSize: [35, 67],
+			iconSize: [35],
 			iconAnchor: [17, 67],
 			popupAnchor: [0, -40] 
 		},

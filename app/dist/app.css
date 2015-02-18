@@ -315,6 +315,12 @@ ul.edit-toolbar {
 .edit-landmark-navback a {
 	margin-top: 12px;
 }
+
+img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]) {
+	border-radius: 50%;
+	box-shadow: 1px 1px 4px;
+	max-height: 95px;
+}
 .walkthrough-wrap {
 	height: 100%;
 	text-align: center;
