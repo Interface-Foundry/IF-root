@@ -23694,13 +23694,15 @@ function initLandmarks(data) {
 }
 
 function markerFromLandmark(landmark) {
+	console.log('marker from landmark===============', landmark)
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
+			// iconUrl: 'img/marker/bubble-marker-50.png',
+			iconUrl: landmark.avatar,
 			shadowUrl: '',
 			iconSize: [35, 67],
 			iconAnchor: [17, 67],
