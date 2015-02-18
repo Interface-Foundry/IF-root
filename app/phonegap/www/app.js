@@ -17164,6 +17164,12 @@ mapManager.setMarkerSelected = function(key) {
 	}
 };
 
+mapManager.setIcon = function(landmarkId, icon) {
+	console.log('setting icon for ', landmarkId)
+	console.log(mapManager.markers[landmarkId])
+	mapManager.markers[landmarkId].icon.iconUrl = icon;
+}
+
 mapManager.bringMarkerToFront = function(key) {
 	console.log('--bringMarkerToFront--');
 
@@ -20472,9 +20478,9 @@ var landmarksLoaded = false;
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35],
+					iconSize: [50],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -60]
+					popupAnchor: [0, -50]
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -20714,7 +20720,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -20814,6 +20820,9 @@ $scope.onUploadAvatar = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 	$scope.$parent.landmark.avatar = data;
+	if (bubbleTypeService.get() === 'Retail') {
+		mapManager.setIcon($scope.$parent.landmark._id, $scope.$parent.landmark.avatar);
+	}
 	$scope.uploadFinished = true;
 	});
 }		

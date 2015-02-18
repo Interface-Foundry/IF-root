@@ -254,6 +254,12 @@ mapManager.setMarkerSelected = function(key) {
 	}
 };
 
+mapManager.setIcon = function(landmarkId, icon) {
+	console.log('setting icon for ', landmarkId)
+	console.log(mapManager.markers[landmarkId])
+	mapManager.markers[landmarkId].icon.iconUrl = icon;
+}
+
 mapManager.bringMarkerToFront = function(key) {
 	console.log('--bringMarkerToFront--');
 
