@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
+		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -236,13 +236,17 @@ mapManager.setMarkerSelected = function(key) {
 	
 	// reset all marker images to default
 	angular.forEach(mapManager.markers, function(marker) {
-		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		}
 	});
 
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		}
 		return true;
 	} else {
 		console.log('Key not found in markers');

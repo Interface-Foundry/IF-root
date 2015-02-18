@@ -1,4 +1,4 @@
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -46,10 +46,9 @@ var landmarksLoaded = false;
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					// iconSize: [50, 95],
 					iconSize: [35],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -50]
+					popupAnchor: [0, -60]
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -161,19 +160,24 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	function addLandmarkMarker(landmark) {
-		var landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
-										'img/marker/bubble-marker-50.png' : landmark.avatar;
+		var landmarkIcon = 'img/marker/bubble-marker-50.png',
+				popupAnchorValues = [0, -40];
+
+		if (bubbleTypeService.get() === 'Retail') {
+			landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
+													'img/marker/bubble-marker-50.png' : landmark.avatar;
+			popupAnchorValues = [0, -75];
+		}
+	
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
-					// iconUrl: 'img/marker/bubble-marker-50.png',
 					iconUrl: landmarkIcon,
 					shadowUrl: '',
 					iconSize: [35],
-					// iconSize: [35, 67],
-					// iconAnchor: [17.5, 60],
-					popupAnchor: [0, -40]
+					iconAnchor: [17.5, 60],
+					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',

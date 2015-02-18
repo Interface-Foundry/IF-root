@@ -16612,6 +16612,27 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 
    		return alerts;
    }])
+'use strict';
+// keep track of which type of bubble user is currently viewing
+app
+	.factory('bubbleTypeService', [
+		function() {
+			
+			var currentBubbleType;
+
+			return {
+				set: set,
+				get: get
+			}
+
+			function set(type) {
+				currentBubbleType = type;
+			}
+
+			function get() {
+				return currentBubbleType;
+			}
+}]);
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {
@@ -16870,8 +16891,8 @@ angular.module('tidepoolsServices')
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
+		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -17105,13 +17126,17 @@ mapManager.setMarkerSelected = function(key) {
 	
 	// reset all marker images to default
 	angular.forEach(mapManager.markers, function(marker) {
-		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		}
 	});
 
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		}
 		return true;
 	} else {
 		console.log('Key not found in markers');
@@ -17921,8 +17946,8 @@ userManager.saveToKeychain = function() {
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -17937,6 +17962,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	
 	var world = worldTree.worldCache.get(id);
 	if (world && world.style) {
+		bubbleTypeService.set(world.category);
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				deferred.resolve({world: world, style: style});
@@ -17957,6 +17983,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 		 		deferred.resolve(data);
+		 		bubbleTypeService.set(data.world.category);
 		 	}
 		 });
 	}
@@ -20302,7 +20329,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -20345,10 +20372,9 @@ var landmarksLoaded = false;
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					// iconSize: [50, 95],
 					iconSize: [35],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -50]
+					popupAnchor: [0, -60]
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -20460,19 +20486,24 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	function addLandmarkMarker(landmark) {
-		var landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
-										'img/marker/bubble-marker-50.png' : landmark.avatar;
+		var landmarkIcon = 'img/marker/bubble-marker-50.png',
+				popupAnchorValues = [0, -40];
+
+		if (bubbleTypeService.get() === 'Retail') {
+			landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
+													'img/marker/bubble-marker-50.png' : landmark.avatar;
+			popupAnchorValues = [0, -75];
+		}
+	
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
-					// iconUrl: 'img/marker/bubble-marker-50.png',
 					iconUrl: landmarkIcon,
 					shadowUrl: '',
 					iconSize: [35],
-					// iconSize: [35, 67],
-					// iconAnchor: [17.5, 60],
-					popupAnchor: [0, -40]
+					iconAnchor: [17.5, 60],
+					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
@@ -23306,7 +23337,7 @@ return {
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -23378,8 +23409,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					// iconSize: [35, 67],
-					iconSize: [35], 
+					iconSize: [35, 67],
 					iconAnchor: [17, 67],
 					popupAnchor:[0, -40]
 				},
@@ -23700,23 +23730,27 @@ function initLandmarks(data) {
 }
 
 function markerFromLandmark(landmark) {
-	console.log('marker from landmark===============', landmark)
 
-	var landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
-											'img/marker/bubble-marker-50.png' : landmark.avatar;
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40];
+
+	if (bubbleTypeService.get() === 'Retail') {
+		landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
+												'img/marker/bubble-marker-50.png' : landmark.avatar;
+		popupAnchorValues = [0, -75];
+	}
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
-			// iconUrl: 'img/marker/bubble-marker-50.png',
 			iconUrl: landmarkIcon,
 			shadowUrl: '',
-			// iconSize: [35, 67],
 			iconSize: [35],
 			iconAnchor: [17, 67],
-			popupAnchor: [0, -40] 
+			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id
 	}
@@ -23749,5 +23783,9 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	//handle this better
 });
+
+function adjustMarkerForRetail() {
+
+}
 
 }]);
