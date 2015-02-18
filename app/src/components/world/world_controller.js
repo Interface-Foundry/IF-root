@@ -393,12 +393,16 @@ function initLandmarks(data) {
 function markerFromLandmark(landmark) {
 
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40];
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			shadowAnchor = [4, -3],
+			iconAnchor = [17, 67];
 
-	if (bubbleTypeService.get() === 'Retail') {
-		landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
-												'img/marker/bubble-marker-50.png' : landmark.avatar;
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
 		popupAnchorValues = [0, -75];
+		shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [17, 50];
 	}
 
 	return {
@@ -408,9 +412,10 @@ function markerFromLandmark(landmark) {
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
 			iconUrl: landmarkIcon,
-			shadowUrl: '',
+			shadowUrl: shadowUrl,
+			shadowAnchor: shadowAnchor,
 			iconSize: [35],
-			iconAnchor: [17, 67],
+			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id

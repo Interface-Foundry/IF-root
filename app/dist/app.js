@@ -17145,8 +17145,6 @@ mapManager.setMarkerSelected = function(key) {
 };
 
 mapManager.setIcon = function(landmarkId, icon) {
-	console.log('setting icon for ', landmarkId)
-	console.log(mapManager.markers[landmarkId])
 	mapManager.markers[landmarkId].icon.iconUrl = icon;
 }
 
@@ -17397,7 +17395,6 @@ mapManager.loadBubble = function(bubble, config) {
 		config = config || {};
 	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
 		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
-		
 		if (config.marker) {mapManager.addMarker('c', {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
@@ -20493,12 +20490,16 @@ if ($scope.landmark.hasTime) {
 	
 	function addLandmarkMarker(landmark) {
 		var landmarkIcon = 'img/marker/bubble-marker-50.png',
-				popupAnchorValues = [0, -40];
+				popupAnchorValues = [0, -40],
+				shadowUrl = '',
+				shadowAnchor = [4, -3],
+				iconAnchor = [17, 67];
 
-		if (bubbleTypeService.get() === 'Retail') {
-			landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
-													'img/marker/bubble-marker-50.png' : landmark.avatar;
+		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+			landmarkIcon = landmark.avatar;
 			popupAnchorValues = [0, -75];
+			shadowUrl = 'img/marker/blue-pointer.png';
+			iconAnchor = [17, 50];
 		}
 	
 		map.addMarker(landmark._id, {
@@ -20506,9 +20507,10 @@ if ($scope.landmark.hasTime) {
 				lng:landmark.loc.coordinates[0],
 				icon: {
 					iconUrl: landmarkIcon,
-					shadowUrl: '',
+					shadowUrl: shadowUrl,
+					shadowAnchor: shadowAnchor,
 					iconSize: [35],
-					iconAnchor: [17.5, 60],
+					iconAnchor: iconAnchor,
 					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
@@ -23741,12 +23743,16 @@ function initLandmarks(data) {
 function markerFromLandmark(landmark) {
 
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40];
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			shadowAnchor = [4, -3],
+			iconAnchor = [17, 67];
 
-	if (bubbleTypeService.get() === 'Retail') {
-		landmarkIcon = landmark.avatar === 'img/tidepools/default.jpg' ?
-												'img/marker/bubble-marker-50.png' : landmark.avatar;
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
 		popupAnchorValues = [0, -75];
+		shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [17, 50];
 	}
 
 	return {
@@ -23756,9 +23762,10 @@ function markerFromLandmark(landmark) {
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
 			iconUrl: landmarkIcon,
-			shadowUrl: '',
+			shadowUrl: shadowUrl,
+			shadowAnchor: shadowAnchor,
 			iconSize: [35],
-			iconAnchor: [17, 67],
+			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id

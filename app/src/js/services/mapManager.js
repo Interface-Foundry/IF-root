@@ -255,8 +255,6 @@ mapManager.setMarkerSelected = function(key) {
 };
 
 mapManager.setIcon = function(landmarkId, icon) {
-	console.log('setting icon for ', landmarkId)
-	console.log(mapManager.markers[landmarkId])
 	mapManager.markers[landmarkId].icon.iconUrl = icon;
 }
 
@@ -507,7 +505,6 @@ mapManager.loadBubble = function(bubble, config) {
 		config = config || {};
 	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
 		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
-		
 		if (config.marker) {mapManager.addMarker('c', {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
