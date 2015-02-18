@@ -3,6 +3,9 @@ var fs = require('fs');
 var url = require('url');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 
+var AWS = require('aws-sdk'); 
+var awsBucket = "if.instagram.images";
+
 var lists = require('./lists');
 var strings = require('./strings');
 var credentials = require('./credentials');
