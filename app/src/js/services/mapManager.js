@@ -254,8 +254,10 @@ mapManager.setMarkerSelected = function(key) {
 	}
 };
 
-mapManager.setIcon = function(landmarkId, icon) {
-	mapManager.markers[landmarkId].icon.iconUrl = icon;
+mapManager.setNewIcon = function(landmark) {
+	mapManager.markers[landmark._id].icon.iconUrl = landmark.avatar;
+	mapManager.markers[landmark._id].icon.iconAnchor = [25, 25];
+	mapManager.markers[landmark._id].icon.iconSize = [50, 50];
 }
 
 mapManager.bringMarkerToFront = function(key) {

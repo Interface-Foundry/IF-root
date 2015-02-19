@@ -39,16 +39,23 @@ var landmarksLoaded = false;
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
 			
+			var landmarkIcon = 'img/marker/bubble-marker-50.png',
+					popupAnchorValues = [0, -50],
+					shadowUrl = '',
+					// shadowAnchor = [12, 20],
+					iconAnchor = [25, 100];
+
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [50],
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					// shadowAnchor: shadowAnchor,
+					iconSize: [50, 95],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -50]
+					popupAnchor: popupAnchorValues,
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -164,13 +171,15 @@ if ($scope.landmark.hasTime) {
 				popupAnchorValues = [0, -40],
 				shadowUrl = '',
 				shadowAnchor = [4, -3],
-				iconAnchor = [17, 67];
+				iconAnchor = [17, 67],
+				iconSize = [35, 67];
 
 		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 			landmarkIcon = landmark.avatar;
-			popupAnchorValues = [0, -75];
-			shadowUrl = 'img/marker/blue-pointer.png';
-			iconAnchor = [17, 50];
+			popupAnchorValues = [0, -14];
+			// shadowUrl = 'img/marker/blue-pointer.png';
+			iconAnchor = [25, 25];
+			iconSize = [50, 50]
 		}
 	
 		map.addMarker(landmark._id, {
@@ -180,7 +189,7 @@ if ($scope.landmark.hasTime) {
 					iconUrl: landmarkIcon,
 					shadowUrl: shadowUrl,
 					shadowAnchor: shadowAnchor,
-					iconSize: [35],
+					iconSize: iconSize,
 					iconAnchor: iconAnchor,
 					popupAnchor: popupAnchorValues
 				},
@@ -394,7 +403,7 @@ $scope.onUploadAvatar = function($files) {
 		console.log(data);
 	$scope.$parent.landmark.avatar = data;
 	if (bubbleTypeService.get() === 'Retail') {
-		mapManager.setIcon($scope.$parent.landmark._id, $scope.$parent.landmark.avatar);
+		mapManager.setNewIcon($scope.$parent.landmark);
 	}
 	$scope.uploadFinished = true;
 	});

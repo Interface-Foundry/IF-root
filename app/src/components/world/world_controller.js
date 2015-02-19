@@ -396,13 +396,15 @@ function markerFromLandmark(landmark) {
 			popupAnchorValues = [0, -40],
 			shadowUrl = '',
 			shadowAnchor = [4, -3],
-			iconAnchor = [17, 67];
+			iconAnchor = [17, 67],
+			iconSize = [35, 67];
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
-		popupAnchorValues = [0, -75];
-		shadowUrl = 'img/marker/blue-pointer.png';
-		iconAnchor = [17, 50];
+		popupAnchorValues = [0, -14];
+		// shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
 	}
 
 	return {
@@ -414,7 +416,7 @@ function markerFromLandmark(landmark) {
 			iconUrl: landmarkIcon,
 			shadowUrl: shadowUrl,
 			shadowAnchor: shadowAnchor,
-			iconSize: [35],
+			iconSize: iconSize,
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
@@ -450,8 +452,5 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	//handle this better
 });
 
-function adjustMarkerForRetail() {
-
-}
 
 }]);
