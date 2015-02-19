@@ -80,31 +80,27 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		} else {
 			console.error('No center found! Error!');
 		}
-		
-
-
 
 
 		var worldStyle = $scope.world.style;
 
-
 		if (worldStyle.hasOwnProperty('maps')) {
 			// default local map is localMapID
 			var thisMap = worldStyle.maps;
-console.log('local map', thisMap)
+
 			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray) {
+			if (worldStyle.maps.localMapArray.length !== 0) {
 				thisMap = findMapFromArray(worldStyle.maps.localMapArray);
 			}
-console.log('local map', thisMap)
-			if (thisMap.localMapID) {
+
+			if (thisMap.localMapID !== undefined) {
 				map.addOverlay(thisMap.localMapID, 
 							thisMap.localMapName, 
 							thisMap.localMapOptions);
 			}
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 19;
+				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
 			}
 		
 			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
@@ -121,12 +117,14 @@ console.log('local map', thisMap)
 }
 
 function findMapFromArray(mapArray) {
+	console.log('findMapArray called with', mapArray)
 	// sort floors low to high and get rid of null floor_nums
 	var sortedFloors = _.chain(mapArray)
 		.filter(function(floor) {return floor.floor_num})
 		.sortBy(function(floor) {return floor.floor_num})
 		.value();
 	// will return lowest number floor or undefined if none
+	console.log('findMapFromArray called and returning', sortedFloors[0])
 	return sortedFloors[0];
 }
 
