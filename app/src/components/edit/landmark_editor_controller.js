@@ -249,11 +249,20 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		
 			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 		
-			if ($scope.world.style.maps.localMapID) {
-				map.addOverlay($scope.world.style.maps.localMapID, 
-								$scope.world.style.maps.localMapName, 
-								$scope.world.style.maps.localMapOptions);
+			var theseMaps = [$scope.world.style.maps];
+
+			if (theseMaps[0].localMapArray.length > 0) {
+				theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
 			}
+
+			theseMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					map.addOverlay(thisMap.localMapID, 
+									thisMap.localMapName, 
+									thisMap.localMapOptions);
+				}
+				
+			})
 			
 			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;

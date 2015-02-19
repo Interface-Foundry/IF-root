@@ -377,6 +377,25 @@ mapManager.setBaseLayerFromID = function(ID) {
 	'/{z}/{x}/{y}.png');
 }
 
+mapManager.findMapFromArray = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	var sortedFloors = _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+	// will return lowest number floor or undefined if none
+	sortedFloors = sortedFloors.filter(function(floor) {
+		return floor.floor_num === sortedFloors[0].floor_num;
+	});
+
+	return sortedFloors;
+}
+
+
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
 

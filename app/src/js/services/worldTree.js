@@ -12,9 +12,10 @@ var alert = alertManager;
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
-	
+
 	var world = worldTree.worldCache.get(id);
 	if (world && world.style) {
+		console.log('world and world style')
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				deferred.resolve({world: world, style: style});
@@ -28,6 +29,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	}
 		
 	function askServer() {
+		console.log('ask server')
 		World.get({id: id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
