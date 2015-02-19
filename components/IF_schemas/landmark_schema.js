@@ -55,24 +55,10 @@ monguurl = require('monguurl');
 				type: { type: String }, //cloud, local, or both -- switch
 				cloudMapID: String,
 				cloudMapName: String,
-				localMapArray: [{
-				   map_marker_viewID: String, //for finding/updating map in array
-				   floor_num: Number,
-				   floor_name: String,
-				   temp_upload_path: String,
-				   localMapID: String,
-				   localMapName: String,
-				   localMapOptions: {
-				       attribution: String,
-				       minZoom: Number,
-				       maxZoom: Number,
-				       reuseTiles: Boolean,
-				       tms: Boolean //needed for tile server renders
-				   }
-				}],
-				localMapID: String, //legacy
-				localMapName: String, //legacy
-		        localMapOptions: { //legacy
+				localMapArray: [Schema.Types.Mixed],
+				localMapID: String,
+				localMapName: String,
+		        localMapOptions: {
 		            attribution: String,
 		            minZoom: Number,
 		            maxZoom: Number,

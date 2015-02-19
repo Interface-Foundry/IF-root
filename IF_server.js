@@ -718,10 +718,10 @@ app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
         else if (req.user._id == lm.permissions.ownerID){
 
           var newMap = {
-            map_marker_viewID: req.body.map_marker_viewID
+            map_marker_viewID: req.body.map_marker_viewID,
             floor_num: req.body.floor_num,
             floor_num: req.body.floor_name,
-            temp_upload_path: req.body.temp_upload_path,
+            temp_upload_path: req.body.temp_upload_path
           };
 
           lm.style.maps.localMapArray.push(newMap);
@@ -889,7 +889,7 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
 
         getMap(req.body.map_marker_viewID, function(map){
 
-          console.log(map);
+          console.log('build map update ',map);
 
         });
 
