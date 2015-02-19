@@ -385,6 +385,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
 	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',

@@ -233,10 +233,17 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
-		if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+		var thisMap = $scope.world.style.maps;
+
+		if (thisMap.localMapArray.length > 0) {
+			thisMap = findMapFromArray(thisMap.localMapArray);
+		}
+
+		if (this.localMapID !== undefined && thisMap.localMapID.length > 0) {
+			map.addOverlay(thisMap.localMapID, 
+							thisMap.localMapName, 
+							thisMap.localMapOptions);
 		}
 
 		
@@ -244,6 +251,18 @@ $scope.loadWorld = function(data) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
 		}		
+}
+
+function findMapFromArray(mapArray) {
+	console.log('findMapArray called with', mapArray)
+	// sort floors low to high and get rid of null floor_nums
+	var sortedFloors = _.chain(mapArray)
+		.filter(function(floor) {return floor.floor_num})
+		.sortBy(function(floor) {return floor.floor_num})
+		.value();
+	// will return lowest number floor or undefined if none
+	console.log('findMapFromArray called and returning', sortedFloors[0])
+	return sortedFloors[0];
 }
 
 $scope.saveWorld = function() {

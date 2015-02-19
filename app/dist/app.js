@@ -17248,12 +17248,13 @@ mapManager.setBaseLayerFromID = function(ID) {
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
-	console.log(localMapID, 'ARRAY MAP ID')
+
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
 	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
@@ -19928,10 +19929,17 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
-		if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+		var thisMap = $scope.world.style.maps;
+
+		if (thisMap.localMapArray.length > 0) {
+			thisMap = findMapFromArray(thisMap.localMapArray);
+		}
+
+		if (this.localMapID !== undefined && thisMap.localMapID.length > 0) {
+			map.addOverlay(thisMap.localMapID, 
+							thisMap.localMapName, 
+							thisMap.localMapOptions);
 		}
 
 		
@@ -19939,6 +19947,18 @@ $scope.loadWorld = function(data) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
 		}		
+}
+
+function findMapFromArray(mapArray) {
+	console.log('findMapArray called with', mapArray)
+	// sort floors low to high and get rid of null floor_nums
+	var sortedFloors = _.chain(mapArray)
+		.filter(function(floor) {return floor.floor_num})
+		.sortBy(function(floor) {return floor.floor_num})
+		.value();
+	// will return lowest number floor or undefined if none
+	console.log('findMapFromArray called and returning', sortedFloors[0])
+	return sortedFloors[0];
 }
 
 $scope.saveWorld = function() {
@@ -23390,18 +23410,20 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		if (worldStyle.hasOwnProperty('maps')) {
 			// default local map is localMapID
-			var thisMap = worldStyle.maps;
+			var theseMaps = [worldStyle.maps];
 
 			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray.length !== 0) {
-				thisMap = findMapFromArray(worldStyle.maps.localMapArray);
+			if (worldStyle.maps.localMapArray.length > 0) {
+				theseMaps = findMapFromArray(worldStyle.maps.localMapArray);
 			}
-
-			if (thisMap.localMapID !== undefined) {
-				map.addOverlay(thisMap.localMapID, 
-							thisMap.localMapName, 
-							thisMap.localMapOptions);
-			}
+			theseMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					map.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+				}
+				
+			})
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
@@ -23421,15 +23443,22 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 }
 
 function findMapFromArray(mapArray) {
-	console.log('findMapArray called with', mapArray)
 	// sort floors low to high and get rid of null floor_nums
 	var sortedFloors = _.chain(mapArray)
-		.filter(function(floor) {return floor.floor_num})
-		.sortBy(function(floor) {return floor.floor_num})
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
 		.value();
 	// will return lowest number floor or undefined if none
-	console.log('findMapFromArray called and returning', sortedFloors[0])
-	return sortedFloors[0];
+	sortedFloors = sortedFloors.filter(function(floor) {
+		return floor.floor_num === sortedFloors[0].floor_num;
+	});
+	console.log('sorted lowest floors', sortedFloors)
+
+	return sortedFloors;
 }
 
   	
