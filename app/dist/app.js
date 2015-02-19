@@ -19833,6 +19833,10 @@ $scope.onLocalMapSelect = function($files) {
 			'worldID': $scope.world._id,
 			'tempMarkerID': markerID
 		},
+		data: {
+			'worldID': $scope.world._id,
+			'tempMarkerID': markerID
+		},
 		file: file
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
