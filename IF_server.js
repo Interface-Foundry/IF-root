@@ -705,17 +705,89 @@ else {
 app.post('/api/delete_map', isLoggedIn, function(req,res){
 
 });
+  
+//after map upload, the front end calls to this API to save world ID with temp URL and map ID for front end tracking
+app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
+
+//     var req_worldID = '54de6875af0d120000641cb8';
+//     var req_tempMarkerID = 'asdfasdf';
+
+//     //floor num
+//     //floor name
+
+
+
+//      landmarkSchema.findById(req.body.worldID, function(err, lm) {
+//       if (!lm){
+//         console.log(err);
+//       }
+//       else if (req.user._id == lm.permissions.ownerID){
+
+//         localMapArray
+
+
+//         var newMap = {
+//           floor_num: req.body.floor_num,
+//           floor_num: req.body.floor_name,
+//           temp_upload_path: req.body.temp_upload_path,
+//           map_marker_viewID: req.body.map_marker_viewID
+//         };
+
+
+// [{
+//    floor_num: Number,
+//    floor_name: String,
+//    temp_upload: String,
+//    localMapID: String,
+//    localMapName: String,
+//    localMapOptions: {
+//        attribution: String,
+//        minZoom: Number,
+//        maxZoom: Number,
+//        reuseTiles: Boolean,
+//        tms: Boolean //needed for tile server renders
+//    }
+// }]
+
+//         lm.style.maps.localMapOptions = {
+//             minZoom: min,
+//             maxZoom: max,
+//             attribution: "IF",
+//             reuseTiles: true,
+//             tms: true
+//         }
+
+//         //NEED TO CHANGE TO ARRAY to push new marker types, eventually
+//         //lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
+
+//         lm.save(function(err, landmark) {
+//             if (err){
+//                 console.log('error');
+//             }
+//             else {
+//                 console.log(landmark);
+//                 console.log('success');
+//                 res.status(200).send(landmark);
+//             }
+//         });
+//       }
+//       else {
+//         console.log('unauthorized user');
+//       }
+//     });  
+
+
+});
 
 //upload map to build
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
-    //var req_worldID = '54de6875af0d120000641cb8';
-
-    console.log(req);
+    var fileBuffer = new Buffer('');
 
     // TEMPORARY FILE UPLOAD AND DELETE, needs to direct stream from form upload...or keep like this?
     var fstream;
     req.pipe(req.busboy);
+
     req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
 
         var fileName = filename.substr(0, filename.lastIndexOf('.')) || filename;
@@ -751,7 +823,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                         res.send(500);
                       }
                       else {   
-                        worldMapTileAdd(req,current);
+                        worldMapTileAdd(req,current); //adding temp map object
                         res.send("temp_map_uploads/"+current);
                     }
                   }); 
@@ -821,14 +893,14 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
 });
 
-function worldMapTileAdd(req,tempURL){
-//   - on temp map upload, create new object in array with tempupload path
-// - on build, remove temp path, and update object in array with parameters from tile server
+// function worldMapTileAdd(req,tempURL){
+// //   - on temp map upload, create new object in array with tempupload path
+// // - on build, remove temp path, and update object in array with parameters from tile server
 
 
   
 
-}
+// }
 
 
 //updating world map with return from tile server
