@@ -19943,7 +19943,23 @@ $scope.onLocalMapSelect = function($files) {
 	}).success(function(data, status, headers, config) {
 		$scope.mapImage = data;
 		map.placeImage(markerID, data);
-	})
+		// post details to /api/temp_map_upload
+		// will update floor_num and floor_name
+		var newData = {
+			worldID: $scope.world._id,
+			map_marker_viewID: markerID,
+			temp_upload_path: data,
+			floor_num: 1,
+			floor_name: '1st Floor'
+		};
+		$http.post('/api/temp_map_upload', newData).
+			success(function(data, status, headers, config) {
+				console.log('success: ', data);
+			}).
+			error(function(data, status, headers, config) {
+				console.log('error: ', data);
+			});
+	});
 }
 
 $scope.selectMapTheme = function(key) {
