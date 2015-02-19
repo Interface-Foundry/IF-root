@@ -19829,6 +19829,9 @@ $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload_maps',
+		fields: {
+			'markerID': markerID
+		},
 		file: file
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
