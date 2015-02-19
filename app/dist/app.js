@@ -19829,14 +19829,6 @@ $scope.onLocalMapSelect = function($files) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
 		url: '/api/upload_maps',
-		fields: {
-			'worldID': $scope.world._id,
-			'tempMarkerID': markerID
-		},
-		data: {
-			'worldID': $scope.world._id,
-			'tempMarkerID': markerID
-		},
 		file: file
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
@@ -20092,9 +20084,10 @@ $scope.buildLocalMap = function () {
 	console.log('coordBox', coordBox);
 	var coords_text = JSON.stringify(coordBox);
 		var data = {
-		      mapIMG: $scope.mapImage,
-		      coords: coords_text
-		    }
+		    mapIMG: $scope.mapImage,
+		    coords: coords_text,
+		    map_marker_viewID: markerID
+		}
 	//build map
 	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
 	$http.post('/api/build_map', data).success(function(response){
