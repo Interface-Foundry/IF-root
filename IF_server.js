@@ -702,8 +702,16 @@ else {
 });
 });
 
+app.post('/api/delete_map', isLoggedIn, function(req,res){
+
+});
+
 //upload map to build
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
+
+    //var req_worldID = '54de6875af0d120000641cb8';
+
+    console.log(req);
 
     // TEMPORARY FILE UPLOAD AND DELETE, needs to direct stream from form upload...or keep like this?
     var fstream;
@@ -743,6 +751,7 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
                         res.send(500);
                       }
                       else {   
+                        worldMapTileAdd(req,current);
                         res.send("temp_map_uploads/"+current);
                     }
                   }); 
@@ -811,6 +820,15 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
     }
 
 });
+
+function worldMapTileAdd(req,tempURL){
+//   - on temp map upload, create new object in array with tempupload path
+// - on build, remove temp path, and update object in array with parameters from tile server
+
+
+  
+
+}
 
 
 //updating world map with return from tile server
