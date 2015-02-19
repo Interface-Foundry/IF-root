@@ -23512,20 +23512,36 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			console.error('No center found! Error!');
 		}
 		
-		if ($scope.world.style.hasOwnProperty('maps')) {
-			if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+
+
+
+		var worldStyle = $scope.world.style;
+
+
+		if (worldStyle.hasOwnProperty('maps')) {
+			// default local map is localMapID
+			var thisMap = worldStyle.maps;
+console.log('local map', thisMap)
+			// if localMapArray exists, replace local map with lowest floor from array
+			if (worldStyle.maps.localMapArray) {
+				thisMap = findMapFromArray(worldStyle.maps.localMapArray);
 			}
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+console.log('local map', thisMap)
+			if (thisMap.localMapID) {
+				map.addOverlay(thisMap.localMapID, 
+							thisMap.localMapName, 
+							thisMap.localMapOptions);
+			}
+
+			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 19;
 			}
 		
-			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
-				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 			} else {
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
@@ -23533,7 +23549,18 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 		
 		$scope.loadLandmarks();
-  	}
+}
+
+function findMapFromArray(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	var sortedFloors = _.chain(mapArray)
+		.filter(function(floor) {return floor.floor_num})
+		.sortBy(function(floor) {return floor.floor_num})
+		.value();
+	// will return lowest number floor or undefined if none
+	return sortedFloors[0];
+}
+
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
