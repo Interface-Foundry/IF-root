@@ -29,6 +29,9 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	console.log(landmark); 
 	
 	goToMark();
+
+	// add local maps for current floor
+	addLocalMapsForCurrentFloor($scope.world, landmark);
 	
 console.log($scope.style.widgets.presents);
 
@@ -178,6 +181,28 @@ function goToMark() {
   	
   	map.refresh();
 };
+
+function addLocalMapsForCurrentFloor(world, landmark) {
+	map.removeOverlays();
+
+	if (!world.style || !world.style.maps || !world.style.maps.localMapArray) {
+		return;
+	}
+	var localMaps = $scope.world.style.maps.localMapArray,
+			currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
+
+	var mapsOnThisFloor = localMaps.filter(function(localMap) {
+		return localMap.floor_num === currentFloor;
+	});
+
+	mapsOnThisFloor.forEach(function(thisMap) {
+		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+			map.addOverlay(thisMap.localMapID, 
+						thisMap.localMapName, 
+						thisMap.localMapOptions);
+		}
+	});
+}
 		 
 		
 }]);
