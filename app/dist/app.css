@@ -4147,6 +4147,32 @@ li.alert {
 .fadeMarkers .leaflet-marker-icon {
   opacity: .5;
 }
+/*end map stuff*/
+.u-marginTop30 {
+  margin-top: 30px;
+}
+.u-inline {
+  display: inline;
+}
+.u-marginLeft10 {
+  margin-left: 10px;
+}
+.uploadActions--wrapper {
+  float: right;
+  margin-top: 25px;
+}
+.floorButton {
+  border: none;
+  height: 48px;
+  width: 48px;
+  position: absolute;
+}
+.upButton {
+  background: url('/img/icons/expand_up_gray.png') no-repeat;
+}
+.downButton {
+  background: url('/img/icons/expand_down_gray.png') no-repeat;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;
