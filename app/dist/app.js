@@ -19830,7 +19830,8 @@ $scope.onLocalMapSelect = function($files) {
 	$scope.upload = $upload.upload({
 		url: '/api/upload_maps',
 		fields: {
-			'markerID': markerID
+			'worldID': $scope.world._id,
+			'tempMarkerID': markerID
 		},
 		file: file
 	}).progress(function(e) {
