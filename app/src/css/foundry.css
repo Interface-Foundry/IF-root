@@ -1874,6 +1874,9 @@ li.alert {
 .u-green {
   color: #5cb85c;
 }
+.u-pointer {
+  cursor: pointer;
+}
 .uploadActions--wrapper {
   float: right;
   margin-top: 25px;

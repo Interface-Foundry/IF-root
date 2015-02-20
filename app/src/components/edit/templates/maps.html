@@ -28,9 +28,11 @@
 </div>
 
 <div>
-	<li class="panel panel-default u-marginTop30 multifloor">
+	<li class="panel panel-default u-marginTop30 multifloor"
+		ng-repeat="map in allMaps">
 
-		<div class="panel-heading">
+		<div class="panel-heading u-pointer"
+			ng-click="selectMap({{ map }})">
 			<span class="panel-title">
 				<h3 class="u-inline">1</h3> 1st Floor
 				<button type="button" class="close">
