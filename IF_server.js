@@ -705,6 +705,67 @@ else {
 app.post('/api/delete_map', isLoggedIn, function(req,res){
 
 });
+
+
+app.post('/api/update_map', isLoggedIn, function(req,res){
+
+  if (req.body.worldID){
+
+     landmarkSchema.findById(req.body.worldID, function(err, lm) {
+      if (!lm){
+        console.log(err);
+      }
+      else if (req.user._id == lm.permissions.ownerID){
+
+        if (lm.style.maps.localMapArray){
+
+          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+
+            if (lm.style.maps.localMapArray[i].map_marker_viewID){
+
+                if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //finding right item in array
+
+                    if (req.body.floor_num){
+                      if(!isNaN(parseFloat(req.body.floor_num)) && isFinite(req.body.floor_num)){ //real number
+                        lm.style.maps.localMapArray[i]['floor_num'] = req.body.floor_num;
+                      }
+                      else{
+                        console.log('not a real number');
+                      }
+                    }
+                    if (req.body.floor_name){
+                      lm.style.maps.localMapArray[i]['floor_name'] = req.body.floor_name;
+                    }
+
+                    if (req.body.floor_name || req.body.floor_num){
+                      lm.markModified('style.maps.localMapArray');
+
+                        lm.save(function(err, landmark) {
+                            if (err){
+                                console.log('error');
+                            }
+                            else {
+                                console.log('saved map updates');
+                                //console.log(landmark);
+                                res.status(200).send(landmark);
+                            }
+                        });
+                    }
+                    else {
+                      console.log('nothing to update');
+                    }
+                }
+            }
+          }
+        }
+      }
+      else {
+        console.log('unauthorized user');
+      }
+    });  
+  } 
+
+});
   
 //after map upload, the front end calls to this API to save world ID with temp URL and map ID for front end tracking
 app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
@@ -720,9 +781,18 @@ app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
           var newMap = {
             map_marker_viewID: req.body.map_marker_viewID,
             floor_num: req.body.floor_num,
-            floor_num: req.body.floor_name,
+            floor_name: req.body.floor_name,
             temp_upload_path: req.body.temp_upload_path
           };
+
+          //CHECK HERE IF OBJECT EXISTS BEFORE PUSH!!
+          function mapExists(callback){
+            callback(!_.isEmpty(_.where(lm.style.maps.localMapArray, {map_marker_viewID: req.body.map_marker_viewID})));
+          }
+          mapExists(function(d){
+            console.log('exist?',d);
+          });
+
 
           lm.style.maps.localMapArray.push(newMap);
 
@@ -731,9 +801,9 @@ app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
                   console.log('error');
               }
               else {
-                  console.log(landmark);
+                  //console.log(landmark);
                   console.log('success');
-                  //res.status(200).send(landmark);
+                  res.status(200).send(landmark);
               }
           });
         }
@@ -859,15 +929,6 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
 });
 
-// function worldMapTileAdd(req,tempURL){
-// //   - on temp map upload, create new object in array with tempupload path
-// // - on build, remove temp path, and update object in array with parameters from tile server
-
-
-  
-
-// }
-
 
 //updating world map with return from tile server
 function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be incorp into original function
@@ -880,55 +941,58 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
       }
       else if (req.user._id == lm.permissions.ownerID){
 
-
-        function getMap(id) {
-            return _.find(lm.style.maps.localMapArray, function(map) {
-                return map.map_marker_viewID == id;
-            });
-        }
-
-        getMap(req.body.map_marker_viewID, function(map){
-
-          console.log('build map update ',map);
-
-        });
-
-
-
         var min = tileRes.zooms[0];
         var max = tileRes.zooms.slice(-1)[0];
 
-        lm.style.maps = {
-            localMapID: tileRes.mapURL, 
-            localMapName: tileRes.worldID
-        };
+        if (lm.style.maps.localMapArray){
+          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
 
-        lm.style.maps.localMapOptions = {
-            minZoom: min,
-            maxZoom: max,
-            attribution: "IF",
-            reuseTiles: true,
-            tms: true
+              if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
+
+                  //lm.style.maps.localMapArray[i]['floor_num'] = 9000; //over 9000!!!1! lol sry
+
+                  lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
+
+                  lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
+                  lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
+
+                  lm.style.maps.localMapArray[i]['localMapOptions'] = {
+                      minZoom: min,
+                      maxZoom: max,
+                      attribution: "IF",
+                      reuseTiles: true,
+                      tms: true
+                  };
+
+                  lm.markModified('style.maps.localMapArray');
+
+                  lm.save(function(err, landmark) {
+                      if (err){
+                          console.log('error');
+                      }
+                      else {
+                          console.log('saved map updates');
+                          console.log(landmark);
+                          //res.status(200).send(landmark);
+                          //passBack(res,landmark);
+                          //console.log(res);
+                      }
+                  });
+              }
+          }
         }
 
-        //NEED TO CHANGE TO ARRAY to push new marker types, eventually
-        //lm.style.markers = {name:req.body.markerSelect.name, category:'all'};
-
-        lm.save(function(err, landmark) {
-            if (err){
-                console.log('error');
-            }
-            else {
-                console.log(landmark);
-                console.log('success');
-                res.status(200).send(landmark);
-            }
-        });
       }
       else {
         console.log('unauthorized user');
       }
     });       
+}
+
+function passBack(res,landmark){
+
+  res.status(200).send(landmark);
+
 }
 
 //looking for meetups in system created by user who logs in via meetup, then add them as owner

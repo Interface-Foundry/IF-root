@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
+		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -236,19 +236,29 @@ mapManager.setMarkerSelected = function(key) {
 	
 	// reset all marker images to default
 	angular.forEach(mapManager.markers, function(marker) {
-		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		}
 	});
 
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		}
 		return true;
 	} else {
 		console.log('Key not found in markers');
 		return false;
 	}
 };
+
+mapManager.setNewIcon = function(landmark) {
+	mapManager.markers[landmark._id].icon.iconUrl = landmark.avatar;
+	mapManager.markers[landmark._id].icon.iconAnchor = [25, 25];
+	mapManager.markers[landmark._id].icon.iconSize = [50, 50];
+}
 
 mapManager.bringMarkerToFront = function(key) {
 	console.log('--bringMarkerToFront--');
@@ -355,8 +365,9 @@ function refreshMap() {
     });
 }
 
-mapManager.setBaseLayer = function(layerURL) {
+mapManager.setBaseLayer = function(layerURL, localMaps) {
 	console.log('new base layer');
+
 	mapManager.layers.baselayers = {};
 	mapManager.layers.baselayers[layerURL] = {
 		name: 'newBaseMap',
@@ -370,6 +381,23 @@ mapManager.setBaseLayer = function(layerURL) {
 	};	
 }
 
+mapManager.findZoomLevel = function(localMaps) {
+	if (!localMaps) {
+		return;
+	}
+	var zooms = _.chain(localMaps)
+		.map(function(m) {
+			return m.localMapOptions.minZoom;
+		})
+		.filter(function(m) {
+			return m;
+		})
+		.value();
+	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
+
+	return lowestZoom;
+}
+
 mapManager.setBaseLayerFromID = function(ID) {
 	mapManager.setBaseLayer(
 	'https://{s}.tiles.mapbox.com/v3/'+
@@ -377,13 +405,34 @@ mapManager.setBaseLayerFromID = function(ID) {
 	'/{z}/{x}/{y}.png');
 }
 
+mapManager.findMapFromArray = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	var sortedFloors = _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+	// will return lowest number floor or undefined if none
+	sortedFloors = sortedFloors.filter(function(floor) {
+		return floor.floor_num === sortedFloors[0].floor_num;
+	});
+
+	return sortedFloors;
+}
+
+
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
+
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
 	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
@@ -497,7 +546,6 @@ mapManager.loadBubble = function(bubble, config) {
 		config = config || {};
 	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
 		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
-		
 		if (config.marker) {mapManager.addMarker('c', {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],

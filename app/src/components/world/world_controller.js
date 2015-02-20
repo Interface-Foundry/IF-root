@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -29,7 +29,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 
+
 		 //show edit buttons if user is world owner
 		 if ($rootScope.userID && $scope.world.permissions){
 			 if ($rootScope.userID == $scope.world.permissions.ownerID){
@@ -58,8 +58,17 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 		}
 		
+		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
-		
+
+		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+			if ($scope.world.style.maps.localMapArray.length > 0) {
+				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+			} else {
+				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
+			}
+		};
+
 		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
@@ -70,7 +79,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
+					iconSize: [35, 67],
 					iconAnchor: [17, 67],
 					popupAnchor:[0, -40]
 				},
@@ -80,21 +89,35 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		} else {
 			console.error('No center found! Error!');
 		}
-		
-		if ($scope.world.style.hasOwnProperty('maps')) {
-			if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+
+		var worldStyle = $scope.world.style;
+
+		if (worldStyle.hasOwnProperty('maps')) {
+			// default local map is localMapID
+			var theseMaps = [worldStyle.maps];
+
+			// if localMapArray exists, replace local map with lowest floor from array
+			if (worldStyle.maps.localMapArray.length > 0) {
+				theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
 			}
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			theseMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					map.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+				}
+				
+			})
+
+			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
 			}
-		
-			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
-				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+
+			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 			} else {
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
@@ -102,7 +125,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 		
 		$scope.loadLandmarks();
-  	}
+}
+
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -391,17 +415,34 @@ function initLandmarks(data) {
 }
 
 function markerFromLandmark(landmark) {
+
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			shadowAnchor = [4, -3],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67];
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		// shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor: [0, -40] 
+			iconUrl: landmarkIcon,
+			shadowUrl: shadowUrl,
+			shadowAnchor: shadowAnchor,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id
 	}
@@ -434,5 +475,6 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	//handle this better
 });
+
 
 }]);

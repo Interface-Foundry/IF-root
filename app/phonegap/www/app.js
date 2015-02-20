@@ -16632,6 +16632,27 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 
    		return alerts;
    }])
+'use strict';
+// keep track of which type of bubble user is currently viewing
+app
+	.factory('bubbleTypeService', [
+		function() {
+			
+			var currentBubbleType;
+
+			return {
+				set: set,
+				get: get
+			}
+
+			function set(type) {
+				currentBubbleType = type;
+			}
+
+			function get() {
+				return currentBubbleType;
+			}
+}]);
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 
 function($rootScope, $compile) {
@@ -16890,8 +16911,8 @@ angular.module('tidepoolsServices')
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
+		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -17125,19 +17146,29 @@ mapManager.setMarkerSelected = function(key) {
 	
 	// reset all marker images to default
 	angular.forEach(mapManager.markers, function(marker) {
-		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		}
 	});
 
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		}
 		return true;
 	} else {
 		console.log('Key not found in markers');
 		return false;
 	}
 };
+
+mapManager.setNewIcon = function(landmark) {
+	mapManager.markers[landmark._id].icon.iconUrl = landmark.avatar;
+	mapManager.markers[landmark._id].icon.iconAnchor = [25, 25];
+	mapManager.markers[landmark._id].icon.iconSize = [50, 50];
+}
 
 mapManager.bringMarkerToFront = function(key) {
 	console.log('--bringMarkerToFront--');
@@ -17244,8 +17275,9 @@ function refreshMap() {
     });
 }
 
-mapManager.setBaseLayer = function(layerURL) {
+mapManager.setBaseLayer = function(layerURL, localMaps) {
 	console.log('new base layer');
+
 	mapManager.layers.baselayers = {};
 	mapManager.layers.baselayers[layerURL] = {
 		name: 'newBaseMap',
@@ -17259,6 +17291,23 @@ mapManager.setBaseLayer = function(layerURL) {
 	};	
 }
 
+mapManager.findZoomLevel = function(localMaps) {
+	if (!localMaps) {
+		return;
+	}
+	var zooms = _.chain(localMaps)
+		.map(function(m) {
+			return m.localMapOptions.minZoom;
+		})
+		.filter(function(m) {
+			return m;
+		})
+		.value();
+	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
+
+	return lowestZoom;
+}
+
 mapManager.setBaseLayerFromID = function(ID) {
 	mapManager.setBaseLayer(
 	'https://{s}.tiles.mapbox.com/v3/'+
@@ -17266,13 +17315,34 @@ mapManager.setBaseLayerFromID = function(ID) {
 	'/{z}/{x}/{y}.png');
 }
 
+mapManager.findMapFromArray = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	var sortedFloors = _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+	// will return lowest number floor or undefined if none
+	sortedFloors = sortedFloors.filter(function(floor) {
+		return floor.floor_num === sortedFloors[0].floor_num;
+	});
+
+	return sortedFloors;
+}
+
+
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
+
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
 	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
 	mapManager.layers.overlays[localMapName] = {
 		name: localMapName,
 		type: 'xyz',
@@ -17386,7 +17456,6 @@ mapManager.loadBubble = function(bubble, config) {
 		config = config || {};
 	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
 		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
-		
 		if (config.marker) {mapManager.addMarker('c', {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
@@ -18014,8 +18083,8 @@ userManager.saveToKeychain = function() {
 return userManager;
 }]);
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -18027,9 +18096,11 @@ var alert = alertManager;
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
-	
+
 	var world = worldTree.worldCache.get(id);
 	if (world && world.style) {
+		console.log('world and world style');
+		bubbleTypeService.set(world.category);
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				deferred.resolve({world: world, style: style});
@@ -18043,6 +18114,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	}
 		
 	function askServer() {
+		console.log('ask server')
 		World.get({id: id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
@@ -18050,6 +18122,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 		 		deferred.resolve(data);
+		 		bubbleTypeService.set(data.world.category);
 		 	}
 		 });
 	}
@@ -20041,11 +20114,20 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
-		if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+		var theseMaps = [$scope.world.style.maps];
+
+		if (theseMaps[0].localMapArray.length > 0) {
+			theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
 		}
+
+		theseMaps.forEach(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+				map.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+			}
+		})
 
 		
 		if (!$scope.style.bodyBG_color) {
@@ -20417,7 +20499,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
@@ -20455,16 +20537,23 @@ var landmarksLoaded = false;
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
 			
+			var landmarkIcon = 'img/marker/bubble-marker-50.png',
+					popupAnchorValues = [0, -50],
+					shadowUrl = '',
+					// shadowAnchor = [12, 20],
+					iconAnchor = [25, 100];
+
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					// shadowAnchor: shadowAnchor,
 					iconSize: [50, 95],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -50]
+					popupAnchor: popupAnchorValues,
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -20576,15 +20665,31 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	function addLandmarkMarker(landmark) {
+		var landmarkIcon = 'img/marker/bubble-marker-50.png',
+				popupAnchorValues = [0, -40],
+				shadowUrl = '',
+				shadowAnchor = [4, -3],
+				iconAnchor = [17, 67],
+				iconSize = [35, 67];
+
+		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+			landmarkIcon = landmark.avatar;
+			popupAnchorValues = [0, -14];
+			// shadowUrl = 'img/marker/blue-pointer.png';
+			iconAnchor = [25, 25];
+			iconSize = [50, 50]
+		}
+	
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17.5, 60],
-					popupAnchor: [0, -40]
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					shadowAnchor: shadowAnchor,
+					iconSize: iconSize,
+					iconAnchor: iconAnchor,
+					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
@@ -20665,11 +20770,20 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		
 			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 		
-			if ($scope.world.style.maps.localMapID) {
-				map.addOverlay($scope.world.style.maps.localMapID, 
-								$scope.world.style.maps.localMapName, 
-								$scope.world.style.maps.localMapOptions);
+			var theseMaps = [$scope.world.style.maps];
+
+			if (theseMaps[0].localMapArray.length > 0) {
+				theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
 			}
+
+			theseMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					map.addOverlay(thisMap.localMapID, 
+									thisMap.localMapName, 
+									thisMap.localMapOptions);
+				}
+				
+			})
 			
 			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
@@ -20695,7 +20809,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -20795,6 +20909,9 @@ $scope.onUploadAvatar = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 	$scope.$parent.landmark.avatar = data;
+	if (bubbleTypeService.get() === 'Retail') {
+		mapManager.setNewIcon($scope.$parent.landmark);
+	}
 	$scope.uploadFinished = true;
 	});
 }		
@@ -22357,7 +22474,16 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	$scope.landmark = landmark;
 	console.log(landmark); 
 	
-	goToMark();
+	var zoomLevel = 18;
+	// find min zoom level of all maps on the current floor
+	if (findMapsOnThisFloor($scope.world, landmark)) {
+		zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+	}
+
+	goToMark(zoomLevel);
+
+	// add local maps for current floor
+	addLocalMapsForCurrentFloor($scope.world, landmark);
 	
 console.log($scope.style.widgets.presents);
 
@@ -22473,13 +22599,13 @@ console.log($scope.landmark.category);
 					}				
 				}
 
+
 })
 });
 		
-		
 
-function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 18, 'aperture-half'); 
+function goToMark(zoomLevel) {
+	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
@@ -22507,7 +22633,53 @@ function goToMark() {
   	
   	map.refresh();
 };
-		 
+
+function addLocalMapsForCurrentFloor(world, landmark) {
+	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
+		return;
+	}
+	map.removeOverlays();
+
+	findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
+		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+			map.addOverlay(thisMap.localMapID, 
+						thisMap.localMapName, 
+						thisMap.localMapOptions);
+		}
+	});
+}
+
+function findMapsOnThisFloor(world, landmark) {
+	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
+		return;
+	}
+	var localMaps = $scope.world.style.maps.localMapArray;
+
+	var currentFloor;
+	if (landmark.loc_info && landmark.loc_info.floor_num) {
+		currentFloor = landmark.loc_info.floor_num;
+	} else {
+		lowestFloor = _.chain(localMaps)
+			.map(function(m) {
+				return m.floor_num;
+			})
+			.sortBy(function(m) {
+				return m;
+			})
+			.filter(function(m) {
+				return m;
+			})
+			.value();
+
+		currentFloor = lowestFloor[0] || 1;
+	}
+
+	var mapsOnThisFloor = localMaps.filter(function(localMap) {
+		return localMap.floor_num === currentFloor;
+	});
+
+	return mapsOnThisFloor;
+}
 		
 }]);
 app.directive('messageView', function() {
@@ -23446,7 +23618,7 @@ return {
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -23477,7 +23649,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 
+
 		 //show edit buttons if user is world owner
 		 if ($rootScope.userID && $scope.world.permissions){
 			 if ($rootScope.userID == $scope.world.permissions.ownerID){
@@ -23506,8 +23678,17 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 		}
 		
+		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
-		
+
+		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+			if ($scope.world.style.maps.localMapArray.length > 0) {
+				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+			} else {
+				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
+			}
+		};
+
 		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
@@ -23518,7 +23699,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
+					iconSize: [35, 67],
 					iconAnchor: [17, 67],
 					popupAnchor:[0, -40]
 				},
@@ -23528,21 +23709,35 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		} else {
 			console.error('No center found! Error!');
 		}
-		
-		if ($scope.world.style.hasOwnProperty('maps')) {
-			if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+
+		var worldStyle = $scope.world.style;
+
+		if (worldStyle.hasOwnProperty('maps')) {
+			// default local map is localMapID
+			var theseMaps = [worldStyle.maps];
+
+			// if localMapArray exists, replace local map with lowest floor from array
+			if (worldStyle.maps.localMapArray.length > 0) {
+				theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
 			}
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+			theseMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					map.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+				}
+				
+			})
+
+			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
 			}
-		
-			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
-				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+
+			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 			} else {
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
@@ -23550,7 +23745,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 		
 		$scope.loadLandmarks();
-  	}
+}
+
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -23839,17 +24035,34 @@ function initLandmarks(data) {
 }
 
 function markerFromLandmark(landmark) {
+
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			shadowAnchor = [4, -3],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67];
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		// shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor: [0, -40] 
+			iconUrl: landmarkIcon,
+			shadowUrl: shadowUrl,
+			shadowAnchor: shadowAnchor,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id
 	}
@@ -23882,5 +24095,6 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	//handle this better
 });
+
 
 }]);
