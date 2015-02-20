@@ -28,7 +28,7 @@
 </div>
 
 <div>
-	<li class="panel panel-default u-marginTop30">
+	<li class="panel panel-default u-marginTop30 multifloor">
 
 		<div class="panel-heading">
 			<span class="panel-title">
@@ -37,33 +37,54 @@
 					<span aria-hidden="true">&times;</span>
 					<span class="sr-only"></span>
 				</button>
+				<!-- <img src="/img/icons/ic_check_green_24px.png" class="check isGreen"> -->
 			</span>
 		</div>
 
 		<div class="panel-body">
 			<div class="form-group form-inline">
-				<div class="form-group">
+				<div class="form-group col-md-3 col-sm-12 col-xs-12">
 					<label>Floor</label>
 					<br>
 					<div>
 						<button class="floorButton upButton"></button>
-						<button class="floorButton downButton"></button>
 						<input type="text" size="3" class="form-control">
+						<button class="floorButton 	downButton"></button>
 					</div>
 				</div>
 
-				<div class="form-group u-marginLeft10">
+				<div class="form-group col-md-4 col-sm-12 col-xs-12">
 					<label>Floor Name</label>
 					<br>
-					<input type="text" size="16" class="form-control">
+					<input type="text" size="12" class="form-control u-formDown48">
 				</div>
 	
-				<div class="uploadActions--wrapper">
-					<button class="btn btn-info">Upload Map</button>
+				<div class="uploadActions--wrapper col-md-5 col-sm-12 col-xs-12 u-formDown48">
+					<button class="btn btn-info uploadActions">Upload Map</button>
+					<!-- <button class="btn btn-warning uploadActions">Build Map</button> -->
+					<!-- <div class="uploadActions">
+						<img src="/img/icons/ic_check_green_24px.png" class="check isGreen">
+						<span class="u-green">Map Built</span>
+					</div> -->
+					<!-- <div class="loading-spinner uploadActions">
+						<div class="lspin1"></div>
+						<div class="lspin2"></div>
+					</div> -->
 				</div>
+
+				<!-- <div class="col-xs-12 u-marginTop20">
+					<span>Adjust map size</span>
+					<input type="range"
+						min="0.006" 
+						max="5" 
+						step="0.006" 
+						value="1">
+				</div> -->
 			</div>
 		</div>
 		
 
 	</li>
+
+	
 </div>
