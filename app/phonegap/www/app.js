@@ -23680,11 +23680,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
-		if ($scope.world.style.hasOwnProperty('maps')) {
+
+		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 			if ($scope.world.style.maps.localMapArray.length > 0) {
 				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
 			} else {
-				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom;
+				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
 			}
 		};
 
