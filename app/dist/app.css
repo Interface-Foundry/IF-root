@@ -4201,8 +4201,20 @@ li.alert {
 .upButton {
   background: url('/img/icons/expand_up_gray.png') no-repeat;
 }
+.upButton:active {
+  background: url('/img/icons/expand_up_gray_dark.png') no-repeat;
+}
+.upButton:focus {
+  outline: none;
+}
 .downButton {
   background: url('/img/icons/expand_down_gray.png') no-repeat;
+}
+.downButton:active {
+  background: url('/img/icons/expand_down_gray_dark.png') no-repeat;
+}
+.downButton:focus {
+  outline: none;
 }
 @media only screen and (max-width: 992px) {
   .multifloor .panel-body {
