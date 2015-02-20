@@ -21136,6 +21136,15 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 }]);
 
+app.directive('floorSelector', floorSelector);
+
+function floorSelector() {
+	return {
+		restrict: 'E',
+		templateUrl: 'components/floor_selector/floor.selector.html'
+		// template: '<h3>123</h3>'
+	};
+}
 app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
 var map = mapManager, style = styleManager;
 

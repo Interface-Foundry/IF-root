@@ -3144,6 +3144,12 @@ nav ul {
   -webkit-transform: translate3d(0%, 0, 0);
   transform: translate3d(0%, 0, 0);
 }
+#floor-selector {
+  position: absolute;
+  right: 10px;
+  bottom: 70px;
+  background-color: blue;
+}
 nav {
   pointer-events: auto;
 }
