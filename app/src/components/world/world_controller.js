@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -78,7 +78,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				icon: {
 					iconUrl: 'img/marker/bubble-marker-50.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
+					iconSize: [35, 67],
 					iconAnchor: [17, 67],
 					popupAnchor:[0, -40]
 				},
@@ -414,17 +414,34 @@ function initLandmarks(data) {
 }
 
 function markerFromLandmark(landmark) {
+
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			shadowAnchor = [4, -3],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67];
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		// shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
 		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor: [0, -40] 
+			iconUrl: landmarkIcon,
+			shadowUrl: shadowUrl,
+			shadowAnchor: shadowAnchor,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id
 	}
@@ -457,5 +474,6 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	//handle this better
 });
+
 
 }]);

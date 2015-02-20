@@ -1,4 +1,4 @@
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -39,16 +39,23 @@ var landmarksLoaded = false;
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
 			
+			var landmarkIcon = 'img/marker/bubble-marker-50.png',
+					popupAnchorValues = [0, -50],
+					shadowUrl = '',
+					// shadowAnchor = [12, 20],
+					iconAnchor = [25, 100];
+
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					// shadowAnchor: shadowAnchor,
 					iconSize: [50, 95],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -50]
+					popupAnchor: popupAnchorValues,
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -160,15 +167,31 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	function addLandmarkMarker(landmark) {
+		var landmarkIcon = 'img/marker/bubble-marker-50.png',
+				popupAnchorValues = [0, -40],
+				shadowUrl = '',
+				shadowAnchor = [4, -3],
+				iconAnchor = [17, 67],
+				iconSize = [35, 67];
+
+		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+			landmarkIcon = landmark.avatar;
+			popupAnchorValues = [0, -14];
+			// shadowUrl = 'img/marker/blue-pointer.png';
+			iconAnchor = [25, 25];
+			iconSize = [50, 50]
+		}
+	
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17.5, 60],
-					popupAnchor: [0, -40]
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					shadowAnchor: shadowAnchor,
+					iconSize: iconSize,
+					iconAnchor: iconAnchor,
+					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
@@ -288,7 +311,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -388,6 +411,9 @@ $scope.onUploadAvatar = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 	$scope.$parent.landmark.avatar = data;
+	if (bubbleTypeService.get() === 'Retail') {
+		mapManager.setNewIcon($scope.$parent.landmark);
+	}
 	$scope.uploadFinished = true;
 	});
 }		
