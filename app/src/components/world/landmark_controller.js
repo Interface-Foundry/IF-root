@@ -185,11 +185,29 @@ function goToMark() {
 function addLocalMapsForCurrentFloor(world, landmark) {
 	map.removeOverlays();
 
-	if (!world.style || !world.style.maps || !world.style.maps.localMapArray) {
+	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
 		return;
 	}
-	var localMaps = $scope.world.style.maps.localMapArray,
-			currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
+	var localMaps = $scope.world.style.maps.localMapArray;
+			// currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
+var currentFloor;
+	if (landmark.loc_info && landmark.loc_info.floor_num) {
+		currentFloor = landmark.loc_info.floor_num;
+	} else {
+		lowestFloor = _.chain(localMaps)
+			.map(function(m) {
+				return m.floor_num;
+			})
+			.sortBy(function(m) {
+				return m;
+			})
+			.filter(function(m) {
+				return m;
+			})
+			.value();
+
+		currentFloor = lowestFloor[0] || 1;
+	}
 
 	var mapsOnThisFloor = localMaps.filter(function(localMap) {
 		return localMap.floor_num === currentFloor;

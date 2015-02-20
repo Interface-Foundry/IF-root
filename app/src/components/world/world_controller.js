@@ -29,7 +29,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 
+
 		 //show edit buttons if user is world owner
 		 if ($rootScope.userID && $scope.world.permissions){
 			 if ($rootScope.userID == $scope.world.permissions.ownerID){
@@ -58,8 +58,16 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 		}
 		
+		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
-		
+		if ($scope.world.style.hasOwnProperty('maps')) {
+			if ($scope.world.style.maps.localMapArray.length > 0) {
+				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+			} else {
+				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom;
+			}
+		};
+
 		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
@@ -104,7 +112,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
 			}
-		
+
 			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
 				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
 			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {

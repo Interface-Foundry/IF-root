@@ -17244,8 +17244,16 @@ function refreshMap() {
     });
 }
 
-mapManager.setBaseLayer = function(layerURL) {
+mapManager.setBaseLayer = function(layerURL, localMaps) {
 	console.log('new base layer');
+
+	// mapManager._z = findZoomLevel(localMaps) || mapManager._z;
+	// angular.extend(mapManager.center, {zoom: mapManager._z});
+
+	// leafletData.getMap().then(function(map) {
+	// 	map.setZoom(mapManager._z);
+	// });
+
 	mapManager.layers.baselayers = {};
 	mapManager.layers.baselayers[layerURL] = {
 		name: 'newBaseMap',
@@ -17257,6 +17265,23 @@ mapManager.setBaseLayer = function(layerURL) {
 			maxZoom: 23
 		}
 	};	
+}
+
+mapManager.findZoomLevel = function(localMaps) {
+	if (!localMaps) {
+		return;
+	}
+	var zooms = _.chain(localMaps)
+		.map(function(m) {
+			return m.localMapOptions.minZoom;
+		})
+		.filter(function(m) {
+			return m;
+		})
+		.value();
+	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
+
+	return lowestZoom;
 }
 
 mapManager.setBaseLayerFromID = function(ID) {
@@ -22538,11 +22563,29 @@ function goToMark() {
 function addLocalMapsForCurrentFloor(world, landmark) {
 	map.removeOverlays();
 
-	if (!world.style || !world.style.maps || !world.style.maps.localMapArray) {
+	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
 		return;
 	}
-	var localMaps = $scope.world.style.maps.localMapArray,
-			currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
+	var localMaps = $scope.world.style.maps.localMapArray;
+			// currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
+var currentFloor;
+	if (landmark.loc_info && landmark.loc_info.floor_num) {
+		currentFloor = landmark.loc_info.floor_num;
+	} else {
+		lowestFloor = _.chain(localMaps)
+			.map(function(m) {
+				return m.floor_num;
+			})
+			.sortBy(function(m) {
+				return m;
+			})
+			.filter(function(m) {
+				return m;
+			})
+			.value();
+
+		currentFloor = lowestFloor[0] || 1;
+	}
 
 	var mapsOnThisFloor = localMaps.filter(function(localMap) {
 		return localMap.floor_num === currentFloor;
@@ -22555,7 +22598,6 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 						thisMap.localMapOptions);
 		}
 	});
-	debugger
 }
 		 
 		
@@ -23527,7 +23569,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 
+		 debugger
 		 //show edit buttons if user is world owner
 		 if ($rootScope.userID && $scope.world.permissions){
 			 if ($rootScope.userID == $scope.world.permissions.ownerID){
@@ -23557,7 +23599,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 		
 		var zoomLevel = 18;
-		
+		if ($scope.world.style.hasOwnProperty('maps')) {
+			if ($scope.world.style.maps.localMapArray.length > 0) {
+				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+			} else {
+				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom;
+			}
+		};
+debugger
+
 		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
@@ -23602,7 +23652,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
 			}
-		
+
+			// passing in localMaps to properly set initial, min, max zoom levels
 			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
 				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
 			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {

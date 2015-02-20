@@ -355,8 +355,9 @@ function refreshMap() {
     });
 }
 
-mapManager.setBaseLayer = function(layerURL) {
+mapManager.setBaseLayer = function(layerURL, localMaps) {
 	console.log('new base layer');
+
 	mapManager.layers.baselayers = {};
 	mapManager.layers.baselayers[layerURL] = {
 		name: 'newBaseMap',
@@ -368,6 +369,23 @@ mapManager.setBaseLayer = function(layerURL) {
 			maxZoom: 23
 		}
 	};	
+}
+
+mapManager.findZoomLevel = function(localMaps) {
+	if (!localMaps) {
+		return;
+	}
+	var zooms = _.chain(localMaps)
+		.map(function(m) {
+			return m.localMapOptions.minZoom;
+		})
+		.filter(function(m) {
+			return m;
+		})
+		.value();
+	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
+
+	return lowestZoom;
 }
 
 mapManager.setBaseLayerFromID = function(ID) {
