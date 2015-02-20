@@ -55,6 +55,7 @@ monguurl = require('monguurl');
 				type: { type: String }, //cloud, local, or both -- switch
 				cloudMapID: String,
 				cloudMapName: String,
+				localMapArray: [Schema.Types.Mixed],
 				localMapID: String,
 				localMapName: String,
 		        localMapOptions: {
