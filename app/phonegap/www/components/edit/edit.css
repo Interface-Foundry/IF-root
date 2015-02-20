@@ -319,7 +319,4 @@ ul.edit-toolbar {
 img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]) {
 	border-radius: 50%;
 	box-shadow: 1px 1px 4px;
-	/*height: 50px;*/
-	/*position: relative;*/
-	/*width: 50px !important;*/
 }
