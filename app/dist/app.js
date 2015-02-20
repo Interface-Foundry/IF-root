@@ -17227,13 +17227,6 @@ function refreshMap() {
 mapManager.setBaseLayer = function(layerURL, localMaps) {
 	console.log('new base layer');
 
-	// mapManager._z = findZoomLevel(localMaps) || mapManager._z;
-	// angular.extend(mapManager.center, {zoom: mapManager._z});
-
-	// leafletData.getMap().then(function(map) {
-	// 	map.setZoom(mapManager._z);
-	// });
-
 	mapManager.layers.baselayers = {};
 	mapManager.layers.baselayers[layerURL] = {
 		name: 'newBaseMap',
@@ -22274,7 +22267,13 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	$scope.landmark = landmark;
 	console.log(landmark); 
 	
-	goToMark();
+	var zoomLevel = 18;
+	// find min zoom level of all maps on the current floor
+	if (findMapsOnThisFloor($scope.world, landmark)) {
+		zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+	}
+
+	goToMark(zoomLevel);
 
 	// add local maps for current floor
 	addLocalMapsForCurrentFloor($scope.world, landmark);
@@ -22393,13 +22392,13 @@ console.log($scope.landmark.category);
 					}				
 				}
 
+
 })
 });
 		
-		
 
-function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 18, 'aperture-half'); 
+function goToMark(zoomLevel) {
+	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
@@ -22429,14 +22428,27 @@ function goToMark() {
 };
 
 function addLocalMapsForCurrentFloor(world, landmark) {
+	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
+		return;
+	}
 	map.removeOverlays();
 
+	findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
+		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+			map.addOverlay(thisMap.localMapID, 
+						thisMap.localMapName, 
+						thisMap.localMapOptions);
+		}
+	});
+}
+
+function findMapsOnThisFloor(world, landmark) {
 	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
 		return;
 	}
 	var localMaps = $scope.world.style.maps.localMapArray;
-			// currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
-var currentFloor;
+
+	var currentFloor;
 	if (landmark.loc_info && landmark.loc_info.floor_num) {
 		currentFloor = landmark.loc_info.floor_num;
 	} else {
@@ -22459,15 +22471,8 @@ var currentFloor;
 		return localMap.floor_num === currentFloor;
 	});
 
-	mapsOnThisFloor.forEach(function(thisMap) {
-		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-			map.addOverlay(thisMap.localMapID, 
-						thisMap.localMapName, 
-						thisMap.localMapOptions);
-		}
-	});
+	return mapsOnThisFloor;
 }
-		 
 		
 }]);
 app.directive('messageView', function() {
@@ -23441,7 +23446,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 		 style.navBG_color = $scope.style.navBG_color;
-		 debugger
+
 		 //show edit buttons if user is world owner
 		 if ($rootScope.userID && $scope.world.permissions){
 			 if ($rootScope.userID == $scope.world.permissions.ownerID){
@@ -23470,6 +23475,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 		}
 		
+		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
 		if ($scope.world.style.hasOwnProperty('maps')) {
 			if ($scope.world.style.maps.localMapArray.length > 0) {
@@ -23478,7 +23484,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom;
 			}
 		};
-debugger
 
 		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
@@ -23525,7 +23530,6 @@ debugger
 				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
 			}
 
-			// passing in localMaps to properly set initial, min, max zoom levels
 			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
 				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
 			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {

@@ -28,7 +28,13 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	$scope.landmark = landmark;
 	console.log(landmark); 
 	
-	goToMark();
+	var zoomLevel = 18;
+	// find min zoom level of all maps on the current floor
+	if (findMapsOnThisFloor($scope.world, landmark)) {
+		zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+	}
+
+	goToMark(zoomLevel);
 
 	// add local maps for current floor
 	addLocalMapsForCurrentFloor($scope.world, landmark);
@@ -147,13 +153,13 @@ console.log($scope.landmark.category);
 					}				
 				}
 
+
 })
 });
 		
-		
 
-function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 18, 'aperture-half'); 
+function goToMark(zoomLevel) {
+	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
@@ -183,14 +189,27 @@ function goToMark() {
 };
 
 function addLocalMapsForCurrentFloor(world, landmark) {
+	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
+		return;
+	}
 	map.removeOverlays();
 
+	findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
+		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+			map.addOverlay(thisMap.localMapID, 
+						thisMap.localMapName, 
+						thisMap.localMapOptions);
+		}
+	});
+}
+
+function findMapsOnThisFloor(world, landmark) {
 	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
 		return;
 	}
 	var localMaps = $scope.world.style.maps.localMapArray;
-			// currentFloor = landmark.loc_info ? landmark.loc_info.floor_num : 1;
-var currentFloor;
+
+	var currentFloor;
 	if (landmark.loc_info && landmark.loc_info.floor_num) {
 		currentFloor = landmark.loc_info.floor_num;
 	} else {
@@ -213,14 +232,7 @@ var currentFloor;
 		return localMap.floor_num === currentFloor;
 	});
 
-	mapsOnThisFloor.forEach(function(thisMap) {
-		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-			map.addOverlay(thisMap.localMapID, 
-						thisMap.localMapName, 
-						thisMap.localMapOptions);
-		}
-	});
+	return mapsOnThisFloor;
 }
-		 
 		
 }]);
