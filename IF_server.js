@@ -746,8 +746,8 @@ app.post('/api/update_map', isLoggedIn, function(req,res){
                             }
                             else {
                                 console.log('saved map updates');
-                                //console.log(landmark);
-                                res.status(200).send(landmark);
+                                console.log(landmark);
+                                //res.status(200).send(landmark);
                             }
                         });
                     }
@@ -949,13 +949,9 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
 
               if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
 
-                  //lm.style.maps.localMapArray[i]['floor_num'] = 9000; //over 9000!!!1! lol sry
-
                   lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
-
                   lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
                   lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
-
                   lm.style.maps.localMapArray[i]['localMapOptions'] = {
                       minZoom: min,
                       maxZoom: max,
@@ -964,18 +960,15 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
                       tms: true
                   };
 
-                  lm.markModified('style.maps.localMapArray');
+                  lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj
 
                   lm.save(function(err, landmark) {
                       if (err){
                           console.log('error');
                       }
                       else {
-                          console.log('saved map updates');
-                          console.log(landmark);
-                          //res.status(200).send(landmark);
-                          //passBack(res,landmark);
-                          //console.log(res);
+                          console.log('updated map',landmark);
+                          res.status(200).send(landmark);
                       }
                   });
               }
@@ -989,11 +982,7 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
     });       
 }
 
-function passBack(res,landmark){
 
-  res.status(200).send(landmark);
-
-}
 
 //looking for meetups in system created by user who logs in via meetup, then add them as owner
 app.post('/api/process_meetups', isLoggedIn, function (req, res) {
