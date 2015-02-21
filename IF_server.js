@@ -946,9 +946,7 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
 
         if (lm.style.maps.localMapArray){
           for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
-
               if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
-
                   lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
                   lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
                   lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
@@ -959,20 +957,24 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
                       reuseTiles: true,
                       tms: true
                   };
-
-                  lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj
-
-                  lm.save(function(err, landmark) {
-                      if (err){
-                          console.log('error');
-                      }
-                      else {
-                          console.log('updated map',landmark);
-                          res.status(200).send(landmark);
-                      }
-                  });
+                  saveMap();
+                  break;
               }
           }
+
+          function saveMap(){
+              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj
+              lm.save(function(err, landmark) {
+                  if (err){
+                      console.log('error');
+                  }
+                  else {
+                      console.log('map updated');
+                      res.status(200).send(landmark);                     
+                  }
+              });            
+          }
+
         }
 
       }
@@ -2027,6 +2029,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.style.maps.cloudMapID = req.body.mapThemeSelect.cloudMapID; 
             lm.style.maps.cloudMapName = req.body.mapThemeSelect.cloudMapName;
 
+
             //NEED TO CHANGE TO ARRAY to push new marker types, eventually (???)
             lm.style.markers = {
                 name:req.body.markerSelect.name, 
@@ -2038,7 +2041,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     console.log('error');
                 }
                 else {
-                    console.log(landmark);
+                    //console.log(landmark);
                     console.log('success');
                 }
             });
@@ -2074,9 +2077,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                 landmarkSchema.findById(lookupID, function(err, lm) {
                   //same name, so dont gen new id
-          if (!lm) {
-           console.log(err);
-          } else {
+                    if (!lm) {
+                     console.log(err);
+                    } else {
                     if (lm.name == req.body.name){
                       saveLandmark(lm.id);
                     }
@@ -2203,10 +2206,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                       lm.style = req.body.style;
                     }
           
-				if (req.body.hasOwnProperty('time')) {
-					lm.time.start = req.body.time.start;
-					lm.time.end = req.body.time.end;
-				}
+            				if (req.body.hasOwnProperty('time')) {
+            					lm.time.start = req.body.time.start;
+            					lm.time.end = req.body.time.end;
+            				}
 
                   //adding map location info
                   if (req.body.hasOwnProperty('loc_info')) {
@@ -2230,7 +2233,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             console.log('lm.save error');
                         }
                         else {
-                            console.log(landmark);
+                            //console.log(landmark);
                             console.log('success');
                             res.status(200).send([landmark]);
 
@@ -2367,7 +2370,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         if (err)
                             console.log(err);
                         else{
-                            console.log(landmark);
+                            //console.log(landmark);
                             //world created
                             if (worldVal == true){
                                 saveProject(landmark._id, styleRes, req.user._id, function(projectRes){

@@ -20190,7 +20190,7 @@ $scope.buildLocalMap = function () {
 			$scope.world.style.maps.localMapName = response.style.maps.localMapName;
 			$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
 		}
-		$scope.saveWorld();
+		//$scope.saveWorld();
 		});
 }
 
