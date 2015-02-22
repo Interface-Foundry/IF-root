@@ -702,121 +702,12 @@ else {
 });
 });
 
-app.post('/api/delete_map', isLoggedIn, function(req,res){
 
-});
+///////////////////////////
+///////TILE MAP APIs///////  
+///////////////////////////
 
-
-app.post('/api/update_map', isLoggedIn, function(req,res){
-
-  if (req.body.worldID){
-
-     landmarkSchema.findById(req.body.worldID, function(err, lm) {
-      if (!lm){
-        console.log(err);
-      }
-      else if (req.user._id == lm.permissions.ownerID){
-
-        if (lm.style.maps.localMapArray){
-
-          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
-
-            if (lm.style.maps.localMapArray[i].map_marker_viewID){
-
-                if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //finding right item in array
-
-                    if (req.body.floor_num){
-                      if(!isNaN(parseFloat(req.body.floor_num)) && isFinite(req.body.floor_num)){ //real number
-                        lm.style.maps.localMapArray[i]['floor_num'] = req.body.floor_num;
-                      }
-                      else{
-                        console.log('not a real number');
-                      }
-                    }
-                    if (req.body.floor_name){
-                      lm.style.maps.localMapArray[i]['floor_name'] = req.body.floor_name;
-                    }
-
-                    if (req.body.floor_name || req.body.floor_num){
-                      lm.markModified('style.maps.localMapArray');
-
-                        lm.save(function(err, landmark) {
-                            if (err){
-                                console.log('error');
-                            }
-                            else {
-                                console.log('saved map updates');
-                                console.log(landmark);
-                                //res.status(200).send(landmark);
-                            }
-                        });
-                    }
-                    else {
-                      console.log('nothing to update');
-                    }
-                }
-            }
-          }
-        }
-      }
-      else {
-        console.log('unauthorized user');
-      }
-    });  
-  } 
-
-});
-  
-//after map upload, the front end calls to this API to save world ID with temp URL and map ID for front end tracking
-app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
-
-    if (req.body.worldID){
-
-      landmarkSchema.findById(req.body.worldID, function(err, lm) {
-        if (!lm){
-          console.log(err);
-        }
-        else if (req.user._id == lm.permissions.ownerID){
-
-          var newMap = {
-            map_marker_viewID: req.body.map_marker_viewID,
-            floor_num: req.body.floor_num,
-            floor_name: req.body.floor_name,
-            temp_upload_path: req.body.temp_upload_path
-          };
-
-          //CHECK HERE IF OBJECT EXISTS BEFORE PUSH!!
-          function mapExists(callback){
-            callback(!_.isEmpty(_.where(lm.style.maps.localMapArray, {map_marker_viewID: req.body.map_marker_viewID})));
-          }
-          mapExists(function(d){
-            console.log('exist?',d);
-          });
-
-
-          lm.style.maps.localMapArray.push(newMap);
-
-          lm.save(function(err, landmark) {
-              if (err){
-                  console.log('error');
-              }
-              else {
-                  //console.log(landmark);
-                  console.log('success');
-                  res.status(200).send(landmark);
-              }
-          });
-        }
-        else {
-          console.log('unauthorized user');
-        }
-      });  
-
-    }
-
-});
-
-//upload map to build
+//upload map to temp folder locally until map built
 app.post('/api/upload_maps', isLoggedIn, function (req, res) {
 
     var fileBuffer = new Buffer('');
@@ -836,7 +727,6 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
         if (mimetype == 'image/jpg' || mimetype == 'image/png' || mimetype == 'image/jpeg') {
 
             while (1) {
-
                 var fileNumber = Math.floor((Math.random()*100000000)+1); //generate random file name
                 var fileNumber_str = fileNumber.toString(); 
                 var current = fileNumber_str + '.' + fileType;
@@ -875,6 +765,50 @@ app.post('/api/upload_maps', isLoggedIn, function (req, res) {
     });
 });
 
+
+//after map upload, the front end calls to this API to save world ID with temp URL and map ID for front end tracking
+app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
+
+    if (req.body.worldID){
+      landmarkSchema.findById(req.body.worldID, function(err, lm) {
+        if (!lm){
+          console.log(err);
+        }
+        else if (req.user._id == lm.permissions.ownerID){
+          //NEED TO ADD CHECKS FOR INCOMING DATA HERE
+          var newMap = {
+            map_marker_viewID: req.body.map_marker_viewID,
+            floor_num: req.body.floor_num,
+            floor_name: req.body.floor_name,
+            temp_upload_path: req.body.temp_upload_path
+          };
+
+          //CHECK HERE IF OBJECT EXISTS BEFORE PUSH!!
+          function mapExists(callback){
+            callback(!_.isEmpty(_.where(lm.style.maps.localMapArray, {map_marker_viewID: req.body.map_marker_viewID})));
+          }
+          mapExists(function(d){
+            console.log('exist?',d);
+          });
+
+          lm.style.maps.localMapArray.push(newMap);
+          lm.save(function(err, landmark) {
+              if (err){
+                  console.log('error');
+              }
+              else {
+                  //console.log(landmark);
+                  console.log('success');
+                  res.status(200).send(landmark);
+              }
+          });
+        }
+        else {
+          console.log('unauthorized user');
+        }
+      });  
+    }
+});
 
 //map send to tile server to build 
 app.post('/api/build_map', isLoggedIn, function (req, res) {
@@ -917,8 +851,7 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
             }
          }
       });
-      
-      
+  
         var form = r.form();
         form.append('my_buffer', new Buffer([1, 2, 3]));
         form.append(map_text, fs.createReadStream(__dirname + '/app/dist/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
@@ -931,7 +864,7 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
 
 //updating world map with return from tile server
-function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be incorp into original function
+function worldMapTileUpdate(req, res, data, mapBuild){ 
 
     var tileRes = JSON.parse(data); //incoming box coordinates
 
@@ -946,6 +879,8 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
 
         if (lm.style.maps.localMapArray){
           for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+
+            if (lm.style.maps.localMapArray[i].map_marker_viewID){
               if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
                   lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
                   lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
@@ -960,10 +895,11 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
                   saveMap();
                   break;
               }
+            }
           }
 
           function saveMap(){
-              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj
+              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
               lm.save(function(err, landmark) {
                   if (err){
                       console.log('error');
@@ -984,6 +920,117 @@ function worldMapTileUpdate(req, res, data, mapBuild){ //adding zooms, should be
     });       
 }
 
+//updates the map floor number and floor name, eventually can replace the map layer too
+app.post('/api/update_map', isLoggedIn, function(req,res){
+  if (req.body.worldID){
+     landmarkSchema.findById(req.body.worldID, function(err, lm) {
+      if (!lm){
+        console.log(err);
+      }
+      else if (req.user._id == lm.permissions.ownerID){
+
+        if (lm.style.maps.localMapArray){
+
+          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+            if (lm.style.maps.localMapArray[i].map_marker_viewID){
+                if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //finding right item in array
+
+                    if (req.body.floor_num){
+                      if(!isNaN(parseFloat(req.body.floor_num)) && isFinite(req.body.floor_num)){ //real number
+                        lm.style.maps.localMapArray[i]['floor_num'] = req.body.floor_num;
+                      }
+                      else{
+                        console.log('not a real number');
+                      }
+                    }
+                    if (req.body.floor_name){
+                      lm.style.maps.localMapArray[i]['floor_name'] = req.body.floor_name;
+                    }
+
+                    if (req.body.floor_name || req.body.floor_num){ //ok update and save kthx
+                      saveMap();
+                      break;
+                    }
+                    else {
+                      console.log('nothing to update');
+                    }
+                }
+            }
+          }
+
+          function saveMap(){
+              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
+              lm.save(function(err, landmark) {
+                  if (err){
+                      console.log('error');
+                  }
+                  else {
+                      console.log('map updated');
+                      res.status(200).send(landmark);                     
+                  }
+              });            
+          }
+
+        }
+      }
+      else {
+        console.log('unauthorized user');
+      }
+    });  
+  } 
+
+});
+
+//remove map from map array
+app.post('/api/delete_map', isLoggedIn, function(req,res){
+
+    if (req.body.worldID){
+
+     landmarkSchema.findById(req.body.worldID, function(err, lm) {
+      if (!lm){
+        console.log(err);
+      }
+      else if (req.user._id == lm.permissions.ownerID){
+
+        if (lm.style.maps.localMapArray){
+          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+            if (lm.style.maps.localMapArray[i].map_marker_viewID){
+                if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //found right item in array
+                    //**********//
+                    //if(lm.style.maps.localMapArray[i].localMapID){
+                    //if map built (localMapID) CALL TO TILE SERVER HERE TO REMOVE MAP TILES
+                    //**********//
+                    lm.style.maps.localMapArray.splice(i,1); //delete the map
+                    saveMap();
+                    break;
+                }
+            }
+          }
+          //this function can be used across 
+          function saveMap(){
+              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
+              lm.save(function(err, landmark) {
+                  if (err){
+                      console.log('error');
+                  }
+                  else {
+                      console.log('map updated');
+                      res.status(200).send(landmark);                     
+                  }
+              });            
+          }
+        }
+      }
+      else {
+        console.log('unauthorized user');
+      }
+    });  
+  } 
+});
+
+
+/////////////////////
+/////////////////////
 
 
 //looking for meetups in system created by user who logs in via meetup, then add them as owner
