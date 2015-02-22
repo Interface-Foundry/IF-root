@@ -23590,9 +23590,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			var theseMaps = [worldStyle.maps];
 
 			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray.length > 0) {
-				theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
+			if (worldStyle.maps.localMapArray){
+				if (worldStyle.maps.localMapArray.length > 0) {
+					theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
+				}			
 			}
+			
 			theseMaps.forEach(function(thisMap) {
 				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
 					map.addOverlay(thisMap.localMapID, 
