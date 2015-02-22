@@ -36,6 +36,7 @@ var downloadImage = function(imageURL) {
      return;
   }
   else {
+
     var fileName = getFileNameFromURL(imageURL);
 
     var writeStreamDestinaton = strings.IMAGE_SAVE_DESTINATION + fileName;
@@ -47,20 +48,27 @@ var downloadImage = function(imageURL) {
     } 
     else {
 
+     // console.log('11111');
+
       var file = fs.createWriteStream(writeStreamDestinaton);
 
-      var request = http.get(imageURL, function onImageDownload(err,response) {
+      var request = http.get(imageURL, function onImageDownload(response) {
 
-        if (err){
-          console.log(err);
-        }
+        // if (err){
+        //   //console.log(err);
+        //   console.log('222222');
+        // }
 
-        else {
+       // else {
           response.on('data', function(data) {
+
+           
             file.write(data);
           });
 
           response.on('end', function() {
+
+            //console.log('44444');
             file.end();
 
               //RESIZING IMAGES
@@ -77,13 +85,12 @@ var downloadImage = function(imageURL) {
           });     
           
           response.on('error', function(err) {
+            //console.log('333333');
             console.log("ERROR:" + err);
             file.read();
           });
 
-        }
-
-
+        //}
 
       });
 
