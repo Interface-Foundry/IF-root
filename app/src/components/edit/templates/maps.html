@@ -15,9 +15,9 @@
 
 <br>
 
-<button class="btn btn-info" ng-file-select ng-file-change="onLocalMapSelect($files)">+ Add a Local Map</button>
+<button class="btn btn-info" ng-click="addMapPlaceholder()">Add a Local Map</button>
 
-<div ng-show="mapImage">
+<!-- <div ng-show="mapImage">
 	<em>New Local Map</em>  
 	<button type="button" class="close" ng-click="removePlaceImage()">
 		<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
@@ -25,16 +25,16 @@
 	<input type="range" min="0.006" max="5" step="0.006" value="1" ng-model="temp.scale">
 	<br>
 	<button class="btn btn-warning" ng-click="buildLocalMap()">Build Local Map</button>
-</div>
+</div> -->
 
 <div>
 	<li class="panel panel-default u-marginTop30 multifloor"
-		ng-repeat="map in allMaps">
+		ng-repeat="map in world.style.maps.localMapArray">
 
 		<div class="panel-heading u-pointer"
-			ng-click="selectMap({{ map }})">
+			ng-click="selectMap(map)">
 			<span class="panel-title">
-				<h3 class="u-inline">1</h3> 1st Floor
+				<h3 class="u-inline">{{ map.floor_num || '1' }}</h3> {{ map.floor_name || '1st Floor' }}
 				<button type="button" class="close">
 					<span aria-hidden="true">&times;</span>
 					<span class="sr-only"></span>
@@ -43,14 +43,15 @@
 			</span>
 		</div>
 
-		<div class="panel-body">
+		<div class="panel-body"
+			ng-show="map == selectedMap">
 			<div class="form-group form-inline">
 				<div class="form-group col-md-3 col-sm-12 col-xs-12">
 					<label>Floor</label>
 					<br>
 					<div>
 						<button class="floorButton upButton"></button>
-						<input type="text" size="3" class="form-control">
+						<input type="text" size="3" class="form-control" ng-model="map.floor_num">
 						<button class="floorButton 	downButton"></button>
 					</div>
 				</div>
@@ -58,30 +59,39 @@
 				<div class="form-group col-md-4 col-sm-12 col-xs-12">
 					<label>Floor Name</label>
 					<br>
-					<input type="text" size="12" class="form-control u-formDown48">
+					<input type="text" size="12" class="form-control u-formDown48" ng-model="map.floor_name">
 				</div>
 	
 				<div class="uploadActions--wrapper col-md-5 col-sm-12 col-xs-12 u-formDown48">
-					<button class="btn btn-info uploadActions">Upload Map</button>
-					<!-- <button class="btn btn-warning uploadActions">Build Map</button> -->
-					<!-- <div class="uploadActions">
+					<button class="btn btn-info uploadActions" 
+						ng-file-select 
+						ng-file-change="onLocalMapSelect($files, map.floor_num, map.floor_name)"
+						ng-hide="map.temp_upload_path || map.localMapName">Upload Map</button>
+					<button class="btn btn-warning uploadActions" 
+						ng-click="buildLocalMap()"
+						ng-show="map.temp_upload_path && !building">Build Map</button>
+					<div class="uploadActions"
+						ng-show="map.localMapName">
 						<img src="/img/icons/ic_check_green_24px.png" class="check isGreen">
 						<span class="u-green">Map Built</span>
-					</div> -->
-					<!-- <div class="loading-spinner uploadActions">
+					</div>
+					<div class="loading-spinner uploadActions"
+						ng-show="building">
 						<div class="lspin1"></div>
 						<div class="lspin2"></div>
-					</div> -->
+					</div>
 				</div>
 
-				<!-- <div class="col-xs-12 u-marginTop20">
+				<div class="col-xs-12 u-marginTop20"
+					ng-show="map.temp_upload_path">
 					<span>Adjust map size</span>
 					<input type="range"
 						min="0.006" 
 						max="5" 
 						step="0.006" 
-						value="1">
-				</div> -->
+						value="1"
+						ng-model="temp.scale">
+				</div>
 			</div>
 		</div>
 		

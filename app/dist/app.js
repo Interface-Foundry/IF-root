@@ -19772,7 +19772,7 @@ scope.logout = userManager.logout;
 		templateUrl: 'components/drawer/drawer.html' 
 	}
 }])
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, ifGlobals) {
 
 var aperture = apertureService,
 	map = mapManager,
@@ -19785,7 +19785,6 @@ zoomControl.style.left = "40%";
 
 var lastRoute = $route.current;
 $scope.worldURL = $routeParams.worldURL;
-$scope.allMaps;
 
 aperture.set('full');
 
@@ -19898,7 +19897,7 @@ $scope.setUploadFinished = function(bool, type) {
 	}
 };
 
-$scope.onLocalMapSelect = function($files) {
+$scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 	//local map image upload, then places image on map
 	var file = $files[0];
 	$scope.upload = $upload.upload({
@@ -19910,20 +19909,28 @@ $scope.onLocalMapSelect = function($files) {
 		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 	}).success(function(data, status, headers, config) {
 		$scope.mapImage = data;
-		// markerID = tempID();
 		map.placeImage(markerID, data);
 		// post details to /api/temp_map_upload
 		// will update floor_num and floor_name
 		var newData = {
-			worldID: $scope.world._id, // + '_' + markerID
+			worldID: $scope.world._id,
 			map_marker_viewID: markerID,
 			temp_upload_path: data,
-			floor_num: 1,
-			floor_name: '1st Floor'
+			floor_num: floor_num,
+			floor_name: floor_name
 		};
 		$http.post('/api/temp_map_upload', newData).
 			success(function(data, status, headers, config) {
 				console.log('success: ', data);
+				$scope.world = data;
+				// generate new marker ID, so as to avoid duplicates
+				// showPosition({
+				// 	coords: {
+				// 		latitude: $scope.world.loc.coordinates[1],
+				// 		longitude: $scope.world.loc.coordinates[0]
+				// 	}
+				// });
+				$scope.selectLastMap();
 			}).
 			error(function(data, status, headers, config) {
 				console.log('error: ', data);
@@ -19946,23 +19953,23 @@ $scope.selectMapTheme = function(key) {
 }
 
 $scope.setThemeFromMap = function() {
-switch ($scope.world.style.maps.cloudMapName) {
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-	case 'purple haze': 
-		angular.extend($scope.style, themeDict['haze']);
-		break;
-}
+	switch ($scope.world.style.maps.cloudMapName) {
+		case 'urban':
+			angular.extend($scope.style, themeDict['urban']);
+			break;
+		case 'sunset':
+			angular.extend($scope.style, themeDict['sunset']);
+			break;
+		case 'fairy':
+			angular.extend($scope.style, themeDict['fairy']);
+			break;
+		case 'arabesque':
+			angular.extend($scope.style, themeDict['arabesque']);
+			break;
+		case 'purple haze': 
+			angular.extend($scope.style, themeDict['haze']);
+			break;
+	}
 }
 
 $scope.addLandmarkCategory = function() {
@@ -19984,23 +19991,67 @@ $scope.removeLandmarkCategory = function(index) {
 	$scope.world.landmarkCategories.splice(index, 1);
 }
 
-$scope.selectMap = function(clickedMap) {
-	console.log(clickedMap);
-
-	// remove any maps showing (built or unbuilt)
+$scope.removeAllMaps = function() {
 	map.removePlaceImage();
 	map.removeOverlays();
+};
+
+$scope.selectMap = function(clickedMap) {
+	// console.log(clickedMap);
+
+	// show panel body
+	$scope.selectedMap = clickedMap;
+	// clickedMap.isSelected = true;
+
+	// remove any maps showing (built or unbuilt)
+	$scope.removeAllMaps();
 
 	// add new maps
 	if (clickedMap.temp_upload_path == '') { // map has been built
-		map.addOverlay(clickedMap.localMapID,
-					clickedMap.localMapName,
-					clickedMap.localMapOptions); // populate this
+		// the timeout is necessary (for some reason)
+		var showMapDelay = $timeout(function() {
+			map.addOverlay(clickedMap.localMapID,
+						clickedMap.localMapName,
+						clickedMap.localMapOptions); // populate this correctly
+		}, 100);
+	} else { // map has not been built
+		var showMapDelay = $timeout(function() {
+			// map.removeAllMarkers();
+			// map.addMarker(clickedMap.map_marker_viewID, {
+			// 	lat: $scope.world.loc.coordinates[1],
+			// 	lng: $scope.world.loc.coordinates[0],
+			// 	message: "<p style='color:black;'>Drag to Bubble Location</p>",
+			// 	focus: true,
+			// 	draggable: true,
+			// 	icon: {
+			// 		iconUrl: 'img/marker/bubble-marker-50.png',
+			// 		shadowUrl: '',
+			// 		iconSize: [35, 67],
+			// 		iconAnchor: [17.5, 55],
+			// 		popupAnchor:  [0, -40]
+			// 	}
+			// });
+			map.placeImage(clickedMap.map_marker_viewID, clickedMap.temp_upload_path);
+		}, 100);
 	}
-	else { // map has not been built
-		map.placeImage(clickedMap.map_marker_viewID, clickedMap.temp_upload_path);
+};
+
+$scope.selectLastMap = function() {
+	var len = $scope.world.style.maps.localMapArray.length;
+	$scope.selectMap($scope.world.style.maps.localMapArray[len-1]);
+};
+
+$scope.addMapPlaceholder = function() {
+	// creates new temporary li in edit/maps.html
+	if ($scope.world.style.maps.localMapArray) {
+		$scope.world.style.maps.localMapArray.push({});
+	} else {
+		$scope.world.style.maps.localMapArray = [{}];
 	}
-}
+
+	// select li
+	$scope.selectLastMap();
+};
 
 $scope.loadWorld = function(data) { 
 	// initialize world
@@ -20038,12 +20089,10 @@ $scope.loadWorld = function(data) {
 		
 
 		var theseMaps = [$scope.world.style.maps];
-		$scope.allMaps = [];
 		console.log('AAAAAAAAAAAAA', theseMaps);
 
 		if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
 			theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
-			$scope.allMaps = theseMaps;
 		}
 
 		theseMaps.forEach(function(thisMap) {
@@ -20168,6 +20217,7 @@ $scope.removePlaceImage = function () {
 
 $scope.buildLocalMap = function () {
 	console.log('--buildLocalMap--');
+	$scope.building = true;
 	//get image geo coordinates, add to var to send
 	var bounds = map.getPlaceImageBounds(),
 		southEast = bounds.getSouthEast(),
@@ -20176,6 +20226,7 @@ $scope.buildLocalMap = function () {
 		northEast = bounds.getNorthEast(),
 		coordBox = {
 			worldID: $scope.world._id,
+			localMapID: $scope.world._id + '_' + markerID,
 			nw_loc_lng: northWest.lng,
 		    nw_loc_lat: northWest.lat,
 		    sw_loc_lng: southWest.lng,
@@ -20205,15 +20256,21 @@ $scope.buildLocalMap = function () {
 		if (response[0]) {
 			
 			 //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
-			$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
-			$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
-			$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
+			$scope.world = response[0];
+			// $scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
+			// $scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
+			// $scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
 		} else {
-			$scope.world.style.maps.localMapID = response.style.maps.localMapID;
-			$scope.world.style.maps.localMapName = response.style.maps.localMapName;
-			$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
+			$scope.world = response;
+			// $scope.world.style.maps.localMapID = response.style.maps.localMapID;
+			// $scope.world.style.maps.localMapName = response.style.maps.localMapName;
+			// $scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
 		}
+		$scope.building = false;
+		$route.reload();
 		// $scope.saveWorld();
+		}).error(function(response) {
+			$scope.building = false;
 		});
 }
 
