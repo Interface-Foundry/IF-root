@@ -21379,7 +21379,9 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 app.directive('floorSelector', floorSelector);
 
-function floorSelector() {
+floorSelector.$inject = ['mapManager'];
+
+function floorSelector(mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -21388,15 +21390,24 @@ function floorSelector() {
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: function(scope, elem, attr) {
 
-			scope.currentFloor = {};			
+			scope.currentFloor = {};
 
 			scope.selectFloor = function(index) {
-				scope.currentFloor = scope.floors[index];
+				scope.currentFloor = scope.floors[index][0];
 				scope.showFloors = !scope.showFloors;
+				showCurrentFloorMaps(index);
 			}
 
 			scope.openFloorMenu = function() {
 				scope.showFloors = !scope.showFloors;
+			}
+
+			function showCurrentFloorMaps(index) {
+				mapManager.removeOverlays();
+				var floorMaps = scope.floors[index];
+				floorMaps.forEach(function(m) {
+					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+				});
 			}
 			
 			// when world changes in world controller, assign local vars in directive scope
@@ -21416,11 +21427,10 @@ function floorSelector() {
 					.sortBy(function(f) {
 						return -f.floor_num;
 					})
-					.flatten()
 					.value()
 					.reverse();
 
-				scope.currentFloor = scope.floors.slice(-1)[0];
+				scope.currentFloor = scope.floors.slice(-1)[0][0];
 			});
 		}
 
