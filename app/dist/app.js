@@ -21176,15 +21176,12 @@ function floorSelector() {
 						return -f.floor_num;
 					})
 					.flatten()
-					.value();
+					.value()
+					.reverse();
 
-				scope.currentFloor = scope.floors[0];
-				console.log(scope.currentFloor)
+				scope.currentFloor = scope.floors.slice(-1)[0];
 			});
-
-
 		}
-
 
 	};
 }

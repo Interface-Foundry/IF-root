@@ -1,4 +1,4 @@
 <div id="current-floor" ng-click="openFloorMenu()">{{currentFloor.floor_num}}</div>
-<div id="floor-nums" ng-show="!showFloors" class="if-animate">
+<div id="floor-nums" ng-show="showFloors" class="if-animate">
 	<div ng-repeat="floor in floors" ng-click="selectFloor($index)">{{floor.floor_num}}</div>
 </div>
