@@ -17318,7 +17318,6 @@ mapManager.findMapFromArray = function(mapArray) {
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
-
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
@@ -21294,6 +21293,8 @@ function floorSelector(mapManager) {
 				scope.currentFloor = scope.floors[index][0];
 				scope.showFloors = !scope.showFloors;
 				showCurrentFloorMaps(index);
+				console.log('index', index)
+				console.log('floor', scope.currentFloor.floor_num)
 			}
 
 			scope.openFloorMenu = function() {

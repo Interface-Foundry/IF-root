@@ -17,6 +17,8 @@ function floorSelector(mapManager) {
 				scope.currentFloor = scope.floors[index][0];
 				scope.showFloors = !scope.showFloors;
 				showCurrentFloorMaps(index);
+				console.log('index', index)
+				console.log('floor', scope.currentFloor.floor_num)
 			}
 
 			scope.openFloorMenu = function() {
