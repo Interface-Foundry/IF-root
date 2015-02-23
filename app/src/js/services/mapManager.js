@@ -387,7 +387,9 @@ mapManager.findZoomLevel = function(localMaps) {
 	}
 	var zooms = _.chain(localMaps)
 		.map(function(m) {
-			return m.localMapOptions.minZoom;
+			if (m.localMapOptions){
+				return m.localMapOptions.minZoom;
+			}
 		})
 		.filter(function(m) {
 			return m;

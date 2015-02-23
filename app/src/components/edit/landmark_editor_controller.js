@@ -274,9 +274,12 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		
 			var theseMaps = [$scope.world.style.maps];
 
-			if (theseMaps[0].localMapArray.length > 0) {
-				theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
+			if (theseMaps[0].localMapArray){
+				if (theseMaps[0].localMapArray.length > 0) {
+					theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
+				}				
 			}
+
 
 			theseMaps.forEach(function(thisMap) {
 				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {

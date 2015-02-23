@@ -23,7 +23,7 @@ monguurl = require('monguurl');
 	  	loc_nickname: String,
 	  	loc_info: {
 	  		loc_nickname: String,
-	  		floor_num: Number,
+	  		floor_num: { type: Number, index: true },
 	  		floor_name: String,
 	  		room_id: String, //future mapping by unique room hash
 	  		room_name: String
@@ -209,7 +209,7 @@ monguurl = require('monguurl');
 			final_avatar: String,
 			final_count: Number
 		},
-		tags: [String] //search tags
+		tags:  { type: [String], index: true }  //search tags
 	}); 
 
 	landmarkSchema.index({loc:'2dsphere'});

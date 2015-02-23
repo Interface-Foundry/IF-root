@@ -17277,7 +17277,9 @@ mapManager.findZoomLevel = function(localMaps) {
 	}
 	var zooms = _.chain(localMaps)
 		.map(function(m) {
-			return m.localMapOptions.minZoom;
+			if (m.localMapOptions){
+				return m.localMapOptions.minZoom;
+			}
 		})
 		.filter(function(m) {
 			return m;
@@ -20672,9 +20674,12 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		
 			var theseMaps = [$scope.world.style.maps];
 
-			if (theseMaps[0].localMapArray.length > 0) {
-				theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
+			if (theseMaps[0].localMapArray){
+				if (theseMaps[0].localMapArray.length > 0) {
+					theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
+				}				
 			}
+
 
 			theseMaps.forEach(function(thisMap) {
 				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
@@ -23554,11 +23559,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		var zoomLevel = 18;
 
 		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-			if ($scope.world.style.maps.localMapArray.length > 0) {
-				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
-			} else {
+			if ($scope.world.style.maps.localMapArray){
+				if ($scope.world.style.maps.localMapArray.length > 0) {
+					zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+				} 
+			}
+			else {
 				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
 			}
+
 		};
 
 		//map setup
