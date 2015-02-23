@@ -3181,6 +3181,7 @@ nav ul {
   width: 48px;
   z-index: 18;
 }
+
 #floor-nums.ng-hide-add.ng-hide-add-active,
 #floor-nums.ng-hide-remove.ng-hide-remove-active {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
@@ -3191,8 +3192,8 @@ nav ul {
   height: 0px;
   padding: 0 10px;
 }
-#floor-nums div:last-child {
-  border-bottom: none;
+#floor-nums div:hover {
+	cursor: pointer;
 }
 nav {
   pointer-events: auto;
