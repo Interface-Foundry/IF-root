@@ -20837,7 +20837,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', '$q', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree, $q) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -20850,8 +20850,13 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	}
 	
 	$scope.selectLandmark = function($event) {
-		$scope.$parent.selectItem($scope.$index);
-		$scope.updateFloor();
+		// updateFloor sets up a promise chain to allow markers to
+		// disappear and regenerate before selectItem is run
+		$scope.updateFloor()
+			.then(function() {
+				console.log('SECOND')
+				$scope.$parent.selectItem($scope.$index);		
+			});
 	}
 	
 	$scope.setStartTime = function() {
@@ -20955,9 +20960,12 @@ $scope.clearLoc = function(){
 
 
 $scope.updateFloor = function() {
+	var deferred = $q.defer();
+
 	if (mapManager.localMapArrayExists($scope.world)) {
 		var localMaps = $scope.world.style.maps.localMapArray,
-				currentFloor = $scope.landmark.loc_info.floor_num;
+				// landmarks without floor info will default to floor 1
+				currentFloor = $scope.landmark.loc_info ? $scope.landmark.loc_info.floor_num : 1;
 
 		// sort and then filter floors
 		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
@@ -20971,17 +20979,28 @@ $scope.updateFloor = function() {
 			}	
 		});
 	}
-	getLandmarks();
+	getLandmarks(currentFloor).then(function() {
+		deferred.resolve(true);
+	});
+
+	return deferred.promise;
 }
 
-function getLandmarks() {
+function getLandmarks(currentFloor) {
+	var deferred = $q.defer();
+
 	worldTree.getLandmarks($scope.world._id).then(function(landmarks) {
-		showLandmarksOnFloor(filterLandmarks(landmarks, $scope.landmark.loc_info.floor_num));
+		showLandmarksOnFloor(filterLandmarks(landmarks, currentFloor))
+			.then(function() {
+				deferred.resolve(true);
+			});
 	});
+
+	return deferred.promise;
 }
 
 function filterLandmarks(landmarks, currentFloor) {
-	return _.chain(landmarks)
+	var filtered = _.chain(landmarks)
 		.filter(function(l) {
 			return l.loc_info;
 		})
@@ -20989,16 +21008,30 @@ function filterLandmarks(landmarks, currentFloor) {
 			return l.loc_info.floor_num === currentFloor;
 		})
 		.value();
+
+	// if showing the first floor then include all landmarks without a floor num
+	if (currentFloor === 1) {
+		filtered = filtered.concat(landmarks.filter(function(l) {
+			return !l.loc_info;
+		}));
+	}
+	return filtered;
 }
 
 function showLandmarksOnFloor(landmarks) {
+	var deferred = $q.defer();
+
 	// remove all landmarks
 	mapManager.removeAllMarkers();
 	landmarks.forEach(function(mark) {
-		//for each landmark add a marker
+		// for each landmark add a marker
 		$scope.$parent.addLandmarkMarker(mark);
 	});
+	deferred.resolve(true);
+
+	return deferred.promise;
 }
+
 $scope.onUploadAvatar = function($files) {
 	console.log('uploadAvatar');
 	var file = $files[0];
