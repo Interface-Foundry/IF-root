@@ -1982,6 +1982,7 @@ h6 {
 }
 
 .category-widget .category-btn {
+	cursor: pointer;
 	display:table-cell;
 	height: 100%;
 	height: 60px;	
@@ -2051,6 +2052,7 @@ h6 {
 	padding: 0px 8px 56px 8px;
 	margin-top: 20px;
 	border-bottom: 1px solid #EEE;
+	cursor: pointer;
 }
 
 .explore-media-body {
