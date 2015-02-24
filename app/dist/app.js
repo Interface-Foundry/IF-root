@@ -20589,7 +20589,7 @@ if ($scope.landmark.hasTime) {
 		}
 	}
 	
-	function addLandmarkMarker(landmark) {
+	$scope.addLandmarkMarker = function(landmark) {
 		var landmarkIcon = 'img/marker/bubble-marker-50.png',
 				popupAnchorValues = [0, -40],
 				shadowUrl = '',
@@ -20728,7 +20728,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
-			addLandmarkMarker(value);
+			$scope.addLandmarkMarker(value);
 		});
 		landmarksLoaded = true;
 			
@@ -20737,7 +20737,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -20854,7 +20854,6 @@ $scope.clearLoc = function(){
 
 
 $scope.updateFloor = function() {
-
 	if (mapManager.localMapArrayExists($scope.world)) {
 		var localMaps = $scope.world.style.maps.localMapArray,
 				currentFloor = $scope.landmark.loc_info.floor_num;
@@ -20871,9 +20870,34 @@ $scope.updateFloor = function() {
 			}	
 		});
 	}
-
+	getLandmarks();
 }
 
+function getLandmarks() {
+	worldTree.getLandmarks($scope.world._id).then(function(landmarks) {
+		showLandmarksOnFloor(filterLandmarks(landmarks, $scope.landmark.loc_info.floor_num));
+	});
+}
+
+function filterLandmarks(landmarks, currentFloor) {
+	return _.chain(landmarks)
+		.filter(function(l) {
+			return l.loc_info;
+		})
+		.filter(function(l) {
+			return l.loc_info.floor_num === currentFloor;
+		})
+		.value();
+}
+
+function showLandmarksOnFloor(landmarks) {
+	// remove all landmarks
+	mapManager.removeAllMarkers();
+	landmarks.forEach(function(mark) {
+		//for each landmark add a marker
+		$scope.$parent.addLandmarkMarker(mark);
+	});
+}
 $scope.onUploadAvatar = function($files) {
 	console.log('uploadAvatar');
 	var file = $files[0];
