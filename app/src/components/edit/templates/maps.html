@@ -15,7 +15,16 @@
 
 <br>
 
-<button class="btn btn-info" ng-click="addMapPlaceholder()">Add a Local Map</button>
+<button class="btn btn-info" 
+	ng-click="addMapPlaceholder()"
+	ng-show="mapIsBuilt(false)">Add a Local Map</button>
+<button class="btn btn-info" 
+	ng-click="addMapPlaceholder()"
+	ng-show="!mapIsBuilt(false)"
+	disabled>Add a Local Map</button>
+<span class="glyphicon glyphicon-info-sign info" 
+	bs-tooltip="tooltips.add_local_map_disabled"
+	ng-show="!mapIsBuilt(false)"></span>
 
 <!-- <div ng-show="mapImage">
 	<em>New Local Map</em>  
@@ -37,7 +46,7 @@
 				<h3 class="u-inline">{{ map.floor_num }}</h3> {{ map.floor_name }}
 				<button type="button" 
 					class="close"
-					ng-click="deleteMap(map); $event.stopPropagation()">
+					ng-click="removeMap(map); $event.stopPropagation()">
 					<span aria-hidden="true">&times;</span>
 					<span class="sr-only"></span>
 				</button>

@@ -20120,6 +20120,22 @@ $scope.mapIsUploaded = function(map) {
 	return map.temp_upload_path || map.localMapName;
 };
 
+$scope.mapIsBuilt = function(map) {
+	if (map) {
+		return map.localMapName;
+	}
+	else {
+		// check if the last map in the array is built
+		if ($scope.world.style.maps.localMapArray &&
+			$scope.world.style.maps.localMapArray.length>0) {
+			var len = $scope.world.style.maps.localMapArray.length;
+			return $scope.world.style.maps.localMapArray[len-1].hasOwnProperty('localMapName');
+		}
+		// no localMapArrat
+		return true;
+	}
+}
+
 $scope.selectMap = function(clickedMap) {
 	// show panel body
 	$scope.selectedMap = clickedMap;
@@ -20166,21 +20182,10 @@ $scope.addMapPlaceholder = function() {
 	$scope.selectLastMap();
 };
 
-$scope.deleteMap = function(map) {
+$scope.removeMap = function(map) {
 	if (window.confirm('Are you sure you want to delete this local map?')) {
 		if ($scope.mapIsUploaded(map)) {
-			var data = {
-				worldID: $scope.world._id,
-				map_marker_viewID: map.map_marker_viewID
-			};
-			$http.post('/api/delete_map', data).
-				success(function(data) {
-					console.log('success: ', data);
-					$scope.world = data;
-				}).
-				error(function(data) {
-					console.log('error', data);
-				});
+			deleteMap(map);
 		}
 		else {
 			// remove last object in map array
@@ -20190,9 +20195,36 @@ $scope.deleteMap = function(map) {
 	}
 };
 
+function deleteMap(map) {
+	var data = {
+		worldID: $scope.world._id,
+		map_marker_viewID: map.map_marker_viewID
+	};
+	$http.post('/api/delete_map', data).
+		success(function(data) {
+			console.log('success: ', data);
+			$scope.world = data;
+		}).
+		error(function(data) {
+			console.log('error', data);
+		});
+}
+
 $scope.loadWorld = function(data) { 
 	// initialize world
 	  	$scope.world = data.world;
+		console.log('AAAAAAAAAAAAA', $scope.world);
+
+	  	// don't load unbuilt maps (can only be last map in array)
+	  	if ($scope.world.style.maps.localMapArray && 
+	  		$scope.world.style.maps.localMapArray.length>0) {
+			var len = $scope.world.style.maps.localMapArray.length;
+			if ($scope.world.style.maps.localMapArray[len-1].temp_upload_path != '') {
+				// delete unbuilt map
+				deleteMap($scope.world.style.maps.localMapArray[len-1]);
+			}
+	  	}
+
 		$scope.style = data.style;
 		style.navBG_color = $scope.style.navBG_color;
 		if ($scope.world.hasLoc) {
@@ -20226,7 +20258,6 @@ $scope.loadWorld = function(data) {
 		
 
 		var theseMaps = [$scope.world.style.maps];
-		console.log('AAAAAAAAAAAAA', theseMaps);
 
 		if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
 			theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
@@ -20272,7 +20303,7 @@ $scope.saveWorld = function() {
     	console.log(response);
     	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
-    	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
+    	// alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     	$timeout.cancel(saveTimer);
     });
 	
