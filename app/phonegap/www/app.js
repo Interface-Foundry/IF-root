@@ -20150,7 +20150,7 @@ $scope.selectLastMap = function() {
 
 $scope.addMapPlaceholder = function() {
 	// creates new temporary li in edit/maps.html
-	if ($scope.world.style.maps.localMapArray) {
+	if ($scope.world.style.maps.localMapArray && $scope.world.style.maps.localMapArray.length>0) {
 		$scope.world.style.maps.localMapArray.push({
 			floor_num: $scope.getHighestFloor()+1,
 			floor_name: 'Floor ' + ($scope.getHighestFloor()+1)
@@ -20164,6 +20164,30 @@ $scope.addMapPlaceholder = function() {
 
 	// select li
 	$scope.selectLastMap();
+};
+
+$scope.deleteMap = function(map) {
+	if (window.confirm('Are you sure you want to delete this local map?')) {
+		if ($scope.mapIsUploaded(map)) {
+			var data = {
+				worldID: $scope.world._id,
+				map_marker_viewID: map.map_marker_viewID
+			};
+			$http.post('/api/delete_map', data).
+				success(function(data) {
+					console.log('success: ', data);
+					$scope.world = data;
+				}).
+				error(function(data) {
+					console.log('error', data);
+				});
+		}
+		else {
+			// remove last object in map array
+			$scope.world.style.maps.localMapArray.pop();
+		}
+		
+	}
 };
 
 $scope.loadWorld = function(data) { 

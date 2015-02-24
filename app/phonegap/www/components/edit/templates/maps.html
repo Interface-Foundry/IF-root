@@ -35,7 +35,9 @@
 			ng-click="selectMap(map)">
 			<span class="panel-title">
 				<h3 class="u-inline">{{ map.floor_num }}</h3> {{ map.floor_name }}
-				<button type="button" class="close">
+				<button type="button" 
+					class="close"
+					ng-click="deleteMap(map); $event.stopPropagation()">
 					<span aria-hidden="true">&times;</span>
 					<span class="sr-only"></span>
 				</button>
@@ -76,7 +78,7 @@
 							ng-model="map.floor_name"
 							ng-readonly="mapIsUploaded(map)">
 					</div>
-					
+
 				</div>
 				
 				<div class="uploadActions--wrapper col-md-5 col-sm-12 col-xs-12 u-formDown48">
