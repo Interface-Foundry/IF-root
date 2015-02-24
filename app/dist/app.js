@@ -17358,6 +17358,29 @@ mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	});
 }
 
+mapManager.localMapArrayExists = function(world) {
+	return world && world.style && world.style.maps 
+		&& world.style.maps.localMapArray && world.style.maps.localMapArray.length;
+}
+
+mapManager.filterToCurrentFloor = function(sortedFloors, currentFloor) {
+	return sortedFloors.filter(function(f) {
+		return f.floor_num === currentFloor;
+	});
+}
+
+mapManager.sortFloors = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	return _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+}
+
 mapManager.setCircleMaskState = function(state) {
 	if (mapManager.circleMaskLayer) {
 		mapManager.circleMaskLayer._setState(state);
@@ -20688,7 +20711,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 									thisMap.localMapOptions);
 				}
 				
-			})
+			});
 			
 			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
@@ -20790,26 +20813,28 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	function addLocInfo() {
 		//read landmark floor array, cp to $scope
 
-		var floors = [];
-		var localMaps = _.chain($scope.world.style.maps.localMapArray)
-			.filter(function(m) {
-				return m.floor_num;
-			})
-			.sortBy(function(m) {
-				return m.floor_num;
-			})
-			.uniq(function(m) {
-				return m.floor_num;
-			})
-			.value();
-debugger
-		localMaps.forEach(function(m) {
-			floors.push(populateFloors(m));
-		});
+		if ($scope.world && $scope.world.style && $scope.world.style.maps && $scope.world.style.maps.localMapArray.length) {
+			var floors = [];
+			var localMaps = _.chain($scope.world.style.maps.localMapArray)
+				.filter(function(m) {
+					return m.floor_num;
+				})
+				.sortBy(function(m) {
+					return m.floor_num;
+				})
+				.uniq(function(m) {
+					return m.floor_num;
+				})
+				.value();
 
-		$scope.$parent.floors = floors;
+			localMaps.forEach(function(m) {
+				floors.push(populateFloors(m));
+			});
 
-		// $scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"},{"val":3,"label":"3rd Floor"},{"val":4,"label":"4th Floor"},{"val":5,"label":"5th Floor"},{"val":6,"label":"6th Floor"},{"val":7,"label":"7th Floor"},{"val":8,"label":"8th Floor"},{"val":9,"label":"9th Floor"},{"val":10,"label":"10th Floor"}];  
+			$scope.$parent.floors = floors;
+		} else {
+			$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"},{"val":3,"label":"3rd Floor"},{"val":4,"label":"4th Floor"},{"val":5,"label":"5th Floor"},{"val":6,"label":"6th Floor"},{"val":7,"label":"7th Floor"},{"val":8,"label":"8th Floor"},{"val":9,"label":"9th Floor"},{"val":10,"label":"10th Floor"}];  
+		}
 
 		//IF no loc_info, then floor_num = 0
 		if (!$scope.$parent.landmark.loc_info){
@@ -20827,7 +20852,28 @@ $scope.clearLoc = function(){
 }
 	//--------------------------//
 
-	
+
+$scope.updateFloor = function() {
+
+	if (mapManager.localMapArrayExists($scope.world)) {
+		var localMaps = $scope.world.style.maps.localMapArray,
+				currentFloor = $scope.landmark.loc_info.floor_num;
+
+		// sort and then filter floors
+		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
+
+		mapManager.removeOverlays();
+		floorMaps.forEach(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
+				mapManager.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+			}	
+		});
+	}
+
+}
+
 $scope.onUploadAvatar = function($files) {
 	console.log('uploadAvatar');
 	var file = $files[0];

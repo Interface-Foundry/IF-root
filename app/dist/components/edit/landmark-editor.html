@@ -105,7 +105,13 @@
 
 				<label>Floor Number</label>
 				<br>
-				<button type="button" class="btn btn-default" data-html="1" ng-model="landmark.loc_info.floor_num" ng-options="floor.val as floor.label for floor in floors" bs-select>
+				<button type="button" 
+								class="btn btn-default" 
+								data-html="1" 
+								ng-model="landmark.loc_info.floor_num" 
+								ng-options="floor.val as floor.label for floor in floors" 
+								ng-change="updateFloor()" 
+								bs-select>
 				  Action <span class="caret"></span>
 				</button>
 

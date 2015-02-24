@@ -468,6 +468,29 @@ mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	});
 }
 
+mapManager.localMapArrayExists = function(world) {
+	return world && world.style && world.style.maps 
+		&& world.style.maps.localMapArray && world.style.maps.localMapArray.length;
+}
+
+mapManager.filterToCurrentFloor = function(sortedFloors, currentFloor) {
+	return sortedFloors.filter(function(f) {
+		return f.floor_num === currentFloor;
+	});
+}
+
+mapManager.sortFloors = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	return _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+}
+
 mapManager.setCircleMaskState = function(state) {
 	if (mapManager.circleMaskLayer) {
 		mapManager.circleMaskLayer._setState(state);
