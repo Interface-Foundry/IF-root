@@ -1,4 +1,4 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, ifGlobals) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -169,6 +169,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 					console.log('error: ', data);
 				});
 			});
+		scrollToBottom(100);
 	}
 }
 
@@ -312,6 +313,8 @@ $scope.addMapPlaceholder = function() {
 			floor_name: 'Lobby'
 		}];
 	}
+	//scroll to bottom
+	scrollToBottom(100);
 
 	// select li
 	$scope.selectLastMap();
@@ -343,6 +346,21 @@ function deleteMap(map) {
 		error(function(data) {
 			console.log('error', data);
 		});
+}
+
+function scrollToBottom(timeout) {
+	$location.hash('scrollToBottom');
+	if (timeout) {
+		var scroll = $timeout(function() {
+			// give ngRepeat time to add new DOM element
+			$anchorScroll();
+			console.log('scrolled with timeout');
+		}, timeout);
+	}
+	else {
+		$anchorScroll;
+		console.log('scrolled without timeout');
+	}
 }
 
 $scope.loadWorld = function(data) { 
@@ -572,6 +590,7 @@ $scope.buildLocalMap = function () {
 		$scope.building = false;
 		// reload to reset markerID, etc.
 		$route.reload();
+		scrollToBottom(1000);
 		// $scope.saveWorld();
 		}).error(function(response) {
 			$scope.building = false;
@@ -764,7 +783,7 @@ $scope.$watchCollection('world', function (newCol, oldCol) {
 		if (saveTimer) {
 			$timeout.cancel(saveTimer);
 		}
-		saveTimer = $timeout($scope.saveWorld, 5000);
+		saveTimer = $timeout($scope.saveWorld, 1500);
 	}
 });
 

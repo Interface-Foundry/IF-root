@@ -26,18 +26,8 @@
 	bs-tooltip="tooltips.add_local_map_disabled"
 	ng-show="!mapIsBuilt(false)"></span>
 
-<!-- <div ng-show="mapImage">
-	<em>New Local Map</em>  
-	<button type="button" class="close" ng-click="removePlaceImage()">
-		<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-	</button>
-	<input type="range" min="0.006" max="5" step="0.006" value="1" ng-model="temp.scale">
-	<br>
-	<button class="btn btn-warning" ng-click="buildLocalMap()">Build Local Map</button>
-</div> -->
-
 <div>
-	<li class="panel panel-default u-marginTop30 multifloor"
+	<li class="panel panel-default u-marginTop20 multifloor"
 		ng-repeat="map in world.style.maps.localMapArray">
 
 		<div class="panel-heading u-pointer"
@@ -123,8 +113,7 @@
 			</div>
 		</div>
 		
-
 	</li>
-
-	
+	<div id="scrollToBottom"></div>
 </div>
+
