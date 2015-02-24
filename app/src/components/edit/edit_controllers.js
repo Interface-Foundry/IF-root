@@ -131,12 +131,12 @@ $scope.setUploadFinished = function(bool, type) {
 };
 
 $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
-	if (floor_num == '') {
-		alerts.addAlert('info', "Please enter a floor number", true);
-	}
-	else if (floor_num == 0) {
+	if (floor_num === 0 || floor_num === '0') {
 		alerts.addAlert('info', "The floor number can't be 0", true);
 	} 
+	else if (floor_num == '') {
+		alerts.addAlert('info', "Please enter a floor number", true);
+	}
 	else {
 		//local map image upload, then places image on map
 		var file = $files[0];
