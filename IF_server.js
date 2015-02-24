@@ -2257,6 +2257,79 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                   }
 
+                  //---------- TAG HANDLING -----------//
+
+                  if (req.body.tags && lm.tags){ //init check of objs
+                    if (req.body.tags.length > 0){ //actually content
+                      var count = 0;
+                      for (var i = 0; i < req.body.tags.length; i++) { //loop content
+
+                          var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
+
+                          if (lm.tags.indexOf(newTag) > -1){ //check if tag already in saved arr
+                            //exists dont add tag again
+                          }
+                          else {
+                            lm.tags.push(newTag); //else add to array
+                          }
+                          if (count == req.body.tags.length - 1){ //stop on final loop     
+                            checktoRemove(); //on loop end check to remove anything
+                          }
+                          count++;
+                      }
+                    }
+                    else {
+                      checktoRemove(); //no new tags, check for removes
+                    }
+
+                    //check if we should really remove tags or go to save
+                    function checktoRemove(){
+                      if (req.body.landmarkTagsRemoved){
+                        if (req.body.landmarkTagsRemoved.length > 0){ //actually contents
+                            removeTags();
+                        }
+                        else {
+                          saveLandmark();
+                        } 
+                      } 
+                      else{
+                        saveLandmark();
+                      }
+                    }
+                  }
+                  else if (req.body.landmarkTagsRemoved && lm.tags){ //no tags to add but remove tags plz
+                      if (req.body.landmarkTagsRemoved.length > 0){ //actually contents
+                          removeTags();
+                      }
+                      else {
+                        saveLandmark();
+                      } 
+                  }
+                  else {
+                    saveLandmark(); //nm, just save everything else
+                  }
+
+                  //remove tags 
+                  function removeTags(){  
+                    var count = 0;
+                    for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
+                      console.log(count);
+
+                      var position = lm.tags.indexOf(req.body.landmarkTagsRemoved[i]); //find string position
+                      if ( ~position ){ //if exists remove it
+                        lm.tags.splice(position, 1);
+                      } 
+                      if (count == req.body.landmarkTagsRemoved.length - 1){ //stop on final loop
+                        saveLandmark();
+                      }
+                      count++;
+
+                    }
+                  }
+
+                  //---------- END HANDLING -----------//
+
+                  function saveLandmark(){
 
                     lm.save(function(err, landmark) {
                         if (err){
@@ -2264,7 +2337,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             console.log('lm.save error');
                         }
                         else {
-                            //console.log(landmark);
+                            console.log(landmark);
                             console.log('success');
                             res.status(200).send([landmark]);
 
@@ -2274,6 +2347,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             }
                         }
                     });
+                  }
+
                   }
                   else {
                     console.log('unauthorized user');
@@ -2396,27 +2471,101 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                       }
                     }
 
+                  //---------- TAG HANDLING -----------//
 
-                    lm.save(function (err, landmark) {
-                        if (err)
-                            console.log(err);
-                        else{
-                            //console.log(landmark);
-                            //world created
-                            if (worldVal == true){
-                                saveProject(landmark._id, styleRes, req.user._id, function(projectRes){
-                                    
-                                var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
-                                    res.status(200).send(idArray);
-                                });
-                            }
+                  if (req.body.tags && lm.tags){ //init check of objs
+                    if (req.body.tags.length > 0){ //actually content
+                      var count = 0;
+                      for (var i = 0; i < req.body.tags.length; i++) { //loop content
 
-                            //landmark created
-                            else {
-                                res.status(200).send([{"_id":landmark._id}]);
-                            }
+                          var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
+
+                          if (lm.tags.indexOf(newTag) > -1){ //check if tag already in saved arr
+                            //exists dont add tag again
+                          }
+                          else {
+                            lm.tags.push(newTag); //else add to array
+                          }
+                          if (count == req.body.tags.length - 1){ //stop on final loop     
+                            checktoRemove(); //on loop end check to remove anything
+                          }
+                          count++;
+                      }
+                    }
+                    else {
+                      checktoRemove(); //no new tags, check for removes
+                    }
+
+                    //check if we should really remove tags or go to save
+                    function checktoRemove(){
+                      if (req.body.landmarkTagsRemoved){
+                        if (req.body.landmarkTagsRemoved.length > 0){ //actually contents
+                            removeTags();
                         }
-                    });
+                        else {
+                          saveLandmark();
+                        } 
+                      } 
+                      else{
+                        saveLandmark();
+                      }
+                    }
+                  }
+                  else if (req.body.landmarkTagsRemoved && lm.tags){ //no tags to add but remove tags plz
+                      if (req.body.landmarkTagsRemoved.length > 0){ //actually contents
+                          removeTags();
+                      }
+                      else {
+                        saveLandmark();
+                      } 
+                  }
+                  else {
+                    saveLandmark(); //nm, just save everything else
+                  }
+
+                  //remove tags 
+                  function removeTags(){  
+                    var count = 0;
+                    for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
+                      console.log(count);
+
+                      var position = lm.tags.indexOf(req.body.landmarkTagsRemoved[i]); //find string position
+                      if ( ~position ){ //if exists remove it
+                        lm.tags.splice(position, 1);
+                      } 
+                      if (count == req.body.landmarkTagsRemoved.length - 1){ //stop on final loop
+                        saveLandmark();
+                      }
+                      count++;
+
+                    }
+                  }
+
+                  //---------- END HANDLING -----------//
+
+                    function saveLandmark(){
+                      lm.save(function (err, landmark) {
+                          if (err)
+                              console.log(err);
+                          else{
+                              console.log(landmark);
+                              //world created
+                              if (worldVal == true){
+                                  saveProject(landmark._id, styleRes, req.user._id, function(projectRes){
+                                      
+                                  var idArray = [{'worldID': landmark._id, 'projectID':projectRes,'styleID':styleRes,'worldURL':landmark.id}];
+                                      res.status(200).send(idArray);
+                                  });
+                              }
+
+                              //landmark created
+                              else {
+                                  res.status(200).send([{"_id":landmark._id}]);
+                              }
+                          }
+                      });
+                    }
+
 
                 }             
             }

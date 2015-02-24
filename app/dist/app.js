@@ -5775,21 +5775,83 @@ angular.module('IF-directives', [])
 	}
 		
 }]);
-app.directive('worldShelf', ['$document', 'apertureService', function($document, apertureService) {
+app.directive('worldShelf', ['$document', 'apertureService','$rootScope','$location', function($document, apertureService,$rootScope,$location) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
-/*
-			$document.on('keydown', function(e) {
-				if (e.keyCode===8 && apertureService.state==='aperture-full') {
-					e.stopPropagation();
-					e.preventDefault();
-					scope.$apply(function() {
-						apertureService.toggle('full');
-					});
-				}	
-			})	
-*/
+
+			// window.onpopstate = function(event) {
+			// 	if (apertureService.state==='aperture-full') {
+			// 		e.stopPropagation();
+			// 		e.preventDefault();
+			// 		scope.$apply(function() {
+			// 			apertureService.toggle('full');
+			// 		});
+			// 	}	
+			// }
+
+			// DETECT KEYPRESS!!!!!!!!!!!!!!!!
+
+
+
+			
+
+		  //  $rootScope.$on('$locationChangeStart', function(event,next,current) {
+
+		  //  		if (apertureService.state==='aperture-full') {
+
+			 //   		if ($rootScope.watchPastLoc && $rootScope.watchPastLoc !== ''){ //we're not on first loaded page
+
+				// 		console.log('next',next);
+				// 		console.log('current',current);
+				// 		console.log('watchpast',$rootScope.watchPastLoc);
+
+				// 		if ($rootScope.watchPastLoc == next){ //detect switch to previous page
+
+				// 			console.log('FIRING');
+				// 			event.preventDefault();
+				// 			apertureService.toggle('full');
+
+				// 		}			
+			 //   		}
+			 //   		else {
+						
+			 //   		}
+		  //  		}
+
+				// $rootScope.watchPastLoc = current; //recording previous state before loc change
+
+		  //   });      
+
+
+
+
+
+
+		  //  $rootScope.$watch(function () {return $location.path()}, function (newLocation, oldLocation) {
+
+		  //  		console.log('asdf!!!!');
+				// if (apertureService.state==='aperture-full') {
+				// 	closeMap();
+				// }	
+		  //   });
+
+			// $document.on('keydown', function(e) {
+			// 	if (e.keyCode===8 && apertureService.state==='aperture-full') {
+			// 		closeMap();
+			// 	}	
+			// })
+
+			// function closeMap(){
+			// 	// e.stopPropagation();
+			// 	// e.preventDefault();
+			// 	scope.$apply(function() {
+			// 		apertureService.toggle('full');
+			// 	});
+			// }
+
+	
+
 		}
 	}
 }]);
@@ -17331,7 +17393,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
-		opacity: 0.8,
+		opacity: 0.8
 	};/*
 	
 
@@ -20620,6 +20682,8 @@ if ($scope.landmark.hasTime) {
 		return defaults;
 	}
 
+
+
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -20820,6 +20884,40 @@ $scope.onUploadAvatar = function($files) {
 	$scope.uploadFinished = true;
 	});
 }		
+	
+	//------- TAGGING -------//
+
+	$scope.$parent.landmark.landmarkTagsRemoved = [];
+
+	$scope.tagDetect = function(keyEvent) {
+		if (keyEvent.which === 13){
+			$scope.addTag();
+		}
+	}
+
+	$scope.addTag = function() {
+		if($scope.addTagName !== ''){
+			if (!$scope.$parent.landmark.tags){
+				$scope.$parent.landmark.tags = []; //if no array, then add
+			}
+			$scope.addTagName = $scope.addTagName.replace(/[^\w\s]/gi, '');
+
+			if($scope.$parent.landmark.tags.indexOf($scope.addTagName) > -1){ 
+				//check for dupes, if dupe dont added
+			}
+			else {
+				$scope.$parent.landmark.tags.push($scope.addTagName);
+			}
+			$scope.addTagName = '';			
+		}
+	};
+
+	$scope.closeTag = function(index) {
+		$scope.$parent.landmark.landmarkTagsRemoved.push($scope.$parent.landmark.tags[index]); //add remove to tags removed arr
+		$scope.$parent.landmark.tags.splice(index, 1);
+	};
+
+	//--------------------------//
 	
 }]);
 

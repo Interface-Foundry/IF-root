@@ -53,21 +53,21 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res){
   // landmarkSchema.aggregate(
   //  [
 
-  //     // { "$geoNear": {
-  //     //   "near": {
-  //     //     "type": "Point",
-  //     //     "coordinates": [parseFloat(userCoord1), parseFloat(userCoord0)]
-  //     //   },
-  //     //   "distanceField": "distance",
-  //     //   "minDistance": 1,
-  //     //   "maxDistance": 5000,
-  //     //   "spherical": true,
-  //     //   "query": { "loc.type": "Point" }
-  //     // } },
-
   //     { $match: { $text: { $search: sText } } },
   //     { $sort: { score: { $meta: "textScore" } } },
-  //     { $limit : 50 }
+  //     { $limit : 50 },
+  //     { "$geoNear": {
+  //       "near": {
+  //         "type": "Point",
+  //         "coordinates": [parseFloat(userCoord1), parseFloat(userCoord0)]
+  //       },
+  //       "distanceField": "distance",
+  //       "minDistance": 1,
+  //       "maxDistance": 5000,
+  //       "spherical": false,
+  //       "query": { "loc.type": "Point" }
+  //     } }
+
 
   //   //{ "$sort": { "distance": -1 } 
   // ],
@@ -81,16 +81,16 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res){
   //       res.send({err:'no results'});            
   //   }
 
-  //   // var nearby_and_alive = data.filter(function(world){
-  //   //   return ( (!world.time.end && !world.time.start)  
-  //   //   || (new Date(world.time.start) + 604800000 > new Date(userTime)) 
-  //   //   || (new Date(world.time.end) > new Date(userTime)) ) 
-  //   // });
+  // //   // var nearby_and_alive = data.filter(function(world){
+  // //   //   return ( (!world.time.end && !world.time.start)  
+  // //   //   || (new Date(world.time.start) + 604800000 > new Date(userTime)) 
+  // //   //   || (new Date(world.time.end) > new Date(userTime)) ) 
+  // //   // });
 
-  //   // var count = nearby_and_alive.length;
-  //   // var random_number = Math.floor(Math.random() * count ); 
-  //   // console.log("random item: " + JSON.stringify(nearby_and_alive[random_number]));
-  //   // res.send([nearby_and_alive[random_number]]);
+  // //   // var count = nearby_and_alive.length;
+  // //   // var random_number = Math.floor(Math.random() * count ); 
+  // //   // console.log("random item: " + JSON.stringify(nearby_and_alive[random_number]));
+  // //   // res.send([nearby_and_alive[random_number]]);
 
   // });
 
