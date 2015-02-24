@@ -54,6 +54,20 @@
 			<label>Category</label> 
 			<select class="form-control" ng-model="landmark.category" ng-options="category.name as category.name for category in world.landmarkCategories"></select>
 		</div>
+
+		<div class="form-group">
+			<label>Tags</label> 
+			<input type="text" ng-model="addTagName" ng-keypress="tagDetect($event)" class="form-control">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" ng-click="addTag()">Add</button>
+			</span>
+
+			<div ng-repeat="tag in landmark.tags" class="alert">
+ 				<h4><span style="display: inline-block;" class="label label-default">{{tag}} <button type="button" class="close" data-dismiss="alert" ng-click="closeTag($index)" aria-label="Close"><span aria-hidden="true"> &times;</span></button></h4></span>
+			</div>
+		</div>
+
+		<hr>
 	
 		<button class="btn btn-info btn-sm" ng-click="setStartTime()" ng-hide="landmark.time.start">Add a Start Time</button>
 <div ng-show="landmark.time.start">

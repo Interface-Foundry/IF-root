@@ -387,7 +387,9 @@ mapManager.findZoomLevel = function(localMaps) {
 	}
 	var zooms = _.chain(localMaps)
 		.map(function(m) {
-			return m.localMapOptions.minZoom;
+			if (m.localMapOptions){
+				return m.localMapOptions.minZoom;
+			}
 		})
 		.filter(function(m) {
 			return m;
@@ -439,7 +441,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
-		opacity: 0.8,
+		opacity: 0.8
 	};/*
 	
 

@@ -2,7 +2,7 @@ L.IFPlaceImage = L.Layer.extend({
 
 	options: {
 		opacity: 1,
-		alt: '',
+		alt: ''
 	},
 
 	initialize: function (url, marker, options) { // (String, LatLngBounds, Object)
