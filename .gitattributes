@@ -1,0 +1,7 @@
+app/dist/app.min.js merge=theirs
+app/dist/app.js merge=theirs
+app/dist/app.css merge=theirs
+
+app/phonegap/www/app.min.js merge=theirs
+app/phonegap/www/app.js merge=theirs
+app/phonegap/www/app.css merge=theirs
