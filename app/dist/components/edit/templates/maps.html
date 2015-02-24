@@ -34,7 +34,7 @@
 		<div class="panel-heading u-pointer"
 			ng-click="selectMap(map)">
 			<span class="panel-title">
-				<h3 class="u-inline">{{ map.floor_num || '1' }}</h3> {{ map.floor_name || '1st Floor' }}
+				<h3 class="u-inline">{{ map.floor_num }}</h3> {{ map.floor_name }}
 				<button type="button" class="close">
 					<span aria-hidden="true">&times;</span>
 					<span class="sr-only"></span>
@@ -50,9 +50,11 @@
 					<label>Floor</label>
 					<br>
 					<div>
-						<button class="floorButton upButton"></button>
+						<button class="floorButton upButton"
+							ng-click="increaseFloor(map)"></button>
 						<input type="text" size="3" class="form-control" ng-model="map.floor_num">
-						<button class="floorButton 	downButton"></button>
+						<button class="floorButton 	downButton"
+							ng-click="decreaseFloor(map)"></button>
 					</div>
 				</div>
 

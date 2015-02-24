@@ -19996,6 +19996,23 @@ $scope.removeAllMaps = function() {
 	map.removeOverlays();
 };
 
+$scope.getHighestFloor = function() {
+	// gets the highest floor_num in array of map objects
+	var array = $scope.world.style.maps.localMapArray;
+	array = $.map(array, function(obj) {
+		return obj.floor_num;
+	});
+	return Math.max.apply(this, array);
+};
+
+$scope.increaseFloor = function(map) {
+	map.floor_num++;
+};
+
+$scope.decreaseFloor = function(map) {
+	map.floor_num--;
+};
+
 $scope.selectMap = function(clickedMap) {
 	// console.log(clickedMap);
 
@@ -20044,9 +20061,15 @@ $scope.selectLastMap = function() {
 $scope.addMapPlaceholder = function() {
 	// creates new temporary li in edit/maps.html
 	if ($scope.world.style.maps.localMapArray) {
-		$scope.world.style.maps.localMapArray.push({});
+		$scope.world.style.maps.localMapArray.push({
+			floor_num: $scope.getHighestFloor()+1,
+			floor_name: 'Floor ' + ($scope.getHighestFloor()+1)
+		});
 	} else {
-		$scope.world.style.maps.localMapArray = [{}];
+		$scope.world.style.maps.localMapArray = [{
+			floor_num: 1,
+			floor_name: 'Floor 1'
+		}];
 	}
 
 	// select li
