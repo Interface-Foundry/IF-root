@@ -326,12 +326,14 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.saveItem($scope.$index);
 	}
 	
-	$scope.selectLandmark = function($event) {
+	$scope.selectLandmark = function(index) {
+		if (index === $scope.$parent.selectedIndex) {
+			return;
+		}
 		// updateFloor sets up a promise chain to allow markers to
 		// disappear and regenerate before selectItem is run
 		$scope.updateFloor()
 			.then(function() {
-				console.log('SECOND')
 				$scope.$parent.selectItem($scope.$index);		
 			});
 	}
@@ -437,12 +439,12 @@ $scope.clearLoc = function(){
 
 
 $scope.updateFloor = function() {
-	var deferred = $q.defer();
+	var deferred = $q.defer(),
+			// landmarks without floor info will default to floor 1
+			currentFloor = $scope.landmark.loc_info ? $scope.landmark.loc_info.floor_num : 1;
 
 	if (mapManager.localMapArrayExists($scope.world)) {
-		var localMaps = $scope.world.style.maps.localMapArray,
-				// landmarks without floor info will default to floor 1
-				currentFloor = $scope.landmark.loc_info ? $scope.landmark.loc_info.floor_num : 1;
+		var localMaps = $scope.world.style.maps.localMapArray;
 
 		// sort and then filter floors
 		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
@@ -492,6 +494,7 @@ function filterLandmarks(landmarks, currentFloor) {
 			return !l.loc_info;
 		}));
 	}
+
 	return filtered;
 }
 

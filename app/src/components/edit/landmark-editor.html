@@ -20,7 +20,7 @@
 		ng-controller="LandmarkEditorItemController" 
 		class="panel panel-default" 
 		ng-class="{active: $index === selectedIndex}"
-		ng-click="selectLandmark($event)">
+		ng-click="selectLandmark($index)">
 		<div class="panel-heading">
 		<span class="panel-title" ng-cloak>{{landmark.name}} 
 			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>

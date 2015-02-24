@@ -470,7 +470,7 @@ mapManager.addCircleMaskToMarker = function(key, radius, state) {
 
 mapManager.localMapArrayExists = function(world) {
 	return world && world.style && world.style.maps 
-		&& world.style.maps.localMapArray && world.style.maps.localMapArray.length;
+		&& world.style.maps.localMapArray && world.style.maps.localMapArray.length > 0;
 }
 
 mapManager.filterToCurrentFloor = function(sortedFloors, currentFloor) {
