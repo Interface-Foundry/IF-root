@@ -1877,6 +1877,9 @@ li.alert {
 .u-pointer {
   cursor: pointer;
 }
+.u-opacity35 {
+  opacity: 0.5;
+}
 .uploadActions--wrapper {
   float: right;
   margin-top: 25px;

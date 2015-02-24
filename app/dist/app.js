@@ -19898,44 +19898,45 @@ $scope.setUploadFinished = function(bool, type) {
 };
 
 $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
-	//local map image upload, then places image on map
-	var file = $files[0];
-	$scope.upload = $upload.upload({
-		url: '/api/upload_maps',
-		file: file
-	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		if (!$scope.temp) {$scope.temp = {}}
-		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
-	}).success(function(data, status, headers, config) {
-		$scope.mapImage = data;
-		map.placeImage(markerID, data);
-		// post details to /api/temp_map_upload
-		// will update floor_num and floor_name
-		var newData = {
-			worldID: $scope.world._id,
-			map_marker_viewID: markerID,
-			temp_upload_path: data,
-			floor_num: floor_num,
-			floor_name: floor_name
-		};
-		$http.post('/api/temp_map_upload', newData).
-			success(function(data, status, headers, config) {
-				console.log('success: ', data);
-				$scope.world = data;
-				// generate new marker ID, so as to avoid duplicates
-				// showPosition({
-				// 	coords: {
-				// 		latitude: $scope.world.loc.coordinates[1],
-				// 		longitude: $scope.world.loc.coordinates[0]
-				// 	}
-				// });
-				$scope.selectLastMap();
-			}).
-			error(function(data, status, headers, config) {
-				console.log('error: ', data);
+	if (floor_num == '') {
+		alerts.addAlert('info', "Please enter a floor number", true);
+	}
+	else if (floor_num == 0) {
+		alerts.addAlert('info', "The floor number can't be 0", true);
+	} 
+	else {
+		//local map image upload, then places image on map
+		var file = $files[0];
+		$scope.upload = $upload.upload({
+			url: '/api/upload_maps',
+			file: file
+		}).progress(function(e) {
+			console.log('%' + parseInt(100.0 * e.loaded/e.total));
+			if (!$scope.temp) {$scope.temp = {}}
+			$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
+		}).success(function(data, status, headers, config) {
+			$scope.mapImage = data;
+			map.placeImage(markerID, data);
+			// post details to /api/temp_map_upload
+			// will update floor_num and floor_name
+			var newData = {
+				worldID: $scope.world._id,
+				map_marker_viewID: markerID,
+				temp_upload_path: data,
+				floor_num: floor_num,
+				floor_name: floor_name
+			};
+			$http.post('/api/temp_map_upload', newData).
+				success(function(data, status, headers, config) {
+					console.log('success: ', data);
+					$scope.world = data;
+					$scope.selectLastMap();
+				}).
+				error(function(data, status, headers, config) {
+					console.log('error: ', data);
+				});
 			});
-	});
+	}
 }
 
 $scope.selectMapTheme = function(key) {
@@ -20006,16 +20007,22 @@ $scope.getHighestFloor = function() {
 };
 
 $scope.increaseFloor = function(map) {
-	map.floor_num++;
+	if (!$scope.mapIsUploaded(map)) {
+		map.floor_num++;
+	}
 };
 
 $scope.decreaseFloor = function(map) {
-	map.floor_num--;
+	if (!$scope.mapIsUploaded(map)) {
+		map.floor_num--;
+	}
+};
+
+$scope.mapIsUploaded = function(map) {
+	return map.temp_upload_path || map.localMapName;
 };
 
 $scope.selectMap = function(clickedMap) {
-	// console.log(clickedMap);
-
 	// show panel body
 	$scope.selectedMap = clickedMap;
 	// clickedMap.isSelected = true;
@@ -20033,21 +20040,6 @@ $scope.selectMap = function(clickedMap) {
 		}, 100);
 	} else { // map has not been built
 		var showMapDelay = $timeout(function() {
-			// map.removeAllMarkers();
-			// map.addMarker(clickedMap.map_marker_viewID, {
-			// 	lat: $scope.world.loc.coordinates[1],
-			// 	lng: $scope.world.loc.coordinates[0],
-			// 	message: "<p style='color:black;'>Drag to Bubble Location</p>",
-			// 	focus: true,
-			// 	draggable: true,
-			// 	icon: {
-			// 		iconUrl: 'img/marker/bubble-marker-50.png',
-			// 		shadowUrl: '',
-			// 		iconSize: [35, 67],
-			// 		iconAnchor: [17.5, 55],
-			// 		popupAnchor:  [0, -40]
-			// 	}
-			// });
 			map.placeImage(clickedMap.map_marker_viewID, clickedMap.temp_upload_path);
 		}, 100);
 	}
@@ -20065,10 +20057,10 @@ $scope.addMapPlaceholder = function() {
 			floor_num: $scope.getHighestFloor()+1,
 			floor_name: 'Floor ' + ($scope.getHighestFloor()+1)
 		});
-	} else {
+	} else { // first map to upload
 		$scope.world.style.maps.localMapArray = [{
 			floor_num: 1,
-			floor_name: 'Floor 1'
+			floor_name: 'Lobby'
 		}];
 	}
 
@@ -20290,6 +20282,7 @@ $scope.buildLocalMap = function () {
 			// $scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
 		}
 		$scope.building = false;
+		// reload to reset markerID, etc.
 		$route.reload();
 		// $scope.saveWorld();
 		}).error(function(response) {

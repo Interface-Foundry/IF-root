@@ -39,36 +39,51 @@
 					<span aria-hidden="true">&times;</span>
 					<span class="sr-only"></span>
 				</button>
-				<!-- <img src="/img/icons/ic_check_green_24px.png" class="check isGreen"> -->
+				<img src="/img/icons/ic_check_green_24px.png" 
+					class="check isGreen"
+					ng-show="map != selectedMap && map.localMapName">
 			</span>
 		</div>
 
 		<div class="panel-body"
 			ng-show="map == selectedMap">
 			<div class="form-group form-inline">
-				<div class="form-group col-md-3 col-sm-12 col-xs-12">
-					<label>Floor</label>
-					<br>
-					<div>
-						<button class="floorButton upButton"
-							ng-click="increaseFloor(map)"></button>
-						<input type="text" size="3" class="form-control" ng-model="map.floor_num">
-						<button class="floorButton 	downButton"
-							ng-click="decreaseFloor(map)"></button>
-					</div>
-				</div>
 
-				<div class="form-group col-md-4 col-sm-12 col-xs-12">
-					<label>Floor Name</label>
-					<br>
-					<input type="text" size="12" class="form-control u-formDown48" ng-model="map.floor_name">
+				<div ng-class="{'u-opacity35': mapIsUploaded(map)}">
+
+					<div class="form-group col-md-3 col-sm-12 col-xs-12">
+						<label>Floor</label>
+						<br>
+						<div>
+							<button class="floorButton upButton"
+								ng-click="increaseFloor(map)"></button>
+							<input type="text" 
+								size="3" 
+								class="form-control" 
+								ng-model="map.floor_num"
+								ng-readonly="mapIsUploaded(map)">
+							<button class="floorButton 	downButton"
+								ng-click="decreaseFloor(map)"></button>
+						</div>
+					</div>
+
+					<div class="form-group col-md-4 col-sm-12 col-xs-12">
+						<label>Floor Name</label>
+						<br>
+						<input type="text" 
+							size="12" 
+							class="form-control u-formDown48" 
+							ng-model="map.floor_name"
+							ng-readonly="mapIsUploaded(map)">
+					</div>
+					
 				</div>
-	
+				
 				<div class="uploadActions--wrapper col-md-5 col-sm-12 col-xs-12 u-formDown48">
 					<button class="btn btn-info uploadActions" 
 						ng-file-select 
 						ng-file-change="onLocalMapSelect($files, map.floor_num, map.floor_name)"
-						ng-hide="map.temp_upload_path || map.localMapName">Upload Map</button>
+						ng-hide="mapIsUploaded(map)">Upload Map</button>
 					<button class="btn btn-warning uploadActions" 
 						ng-click="buildLocalMap()"
 						ng-show="map.temp_upload_path && !building">Build Map</button>
