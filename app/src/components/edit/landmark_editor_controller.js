@@ -328,6 +328,7 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	
 	$scope.selectLandmark = function($event) {
 		$scope.$parent.selectItem($scope.$index);
+		$scope.updateFloor();
 	}
 	
 	$scope.setStartTime = function() {
@@ -380,7 +381,7 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		addLocInfo();
 	}
 
-	function populateFloors(localMap) {
+	function populateFloorsDropdown(localMap) {
 		var newFloor = {};
 		newFloor.val = localMap.floor_num;
 		newFloor.label = localMap.floor_name;
@@ -390,7 +391,7 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	function addLocInfo() {
 		//read landmark floor array, cp to $scope
 
-		if ($scope.world && $scope.world.style && $scope.world.style.maps && $scope.world.style.maps.localMapArray.length) {
+		if (mapManager.localMapArrayExists($scope.world)) {
 			var floors = [];
 			var localMaps = _.chain($scope.world.style.maps.localMapArray)
 				.filter(function(m) {
@@ -405,7 +406,7 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 				.value();
 
 			localMaps.forEach(function(m) {
-				floors.push(populateFloors(m));
+				floors.push(populateFloorsDropdown(m));
 			});
 
 			$scope.$parent.floors = floors;
