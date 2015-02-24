@@ -244,7 +244,7 @@ mapManager.setMarkerSelected = function(key) {
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		if (bubbleTypeService.get() !== 'Retail') {
+		if (bubbleTypeService.get() !== 'Retail' ||	mapManager.markers[key].icon.iconUrl === 'img/marker/bubble-marker-50.png') {
 			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
 		}
 		return true;
