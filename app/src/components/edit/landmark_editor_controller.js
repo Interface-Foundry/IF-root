@@ -166,7 +166,7 @@ if ($scope.landmark.hasTime) {
 		}
 	}
 	
-	function addLandmarkMarker(landmark) {
+	$scope.addLandmarkMarker = function(landmark) {
 		var landmarkIcon = 'img/marker/bubble-marker-50.png',
 				popupAnchorValues = [0, -40],
 				shadowUrl = '',
@@ -290,7 +290,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 									thisMap.localMapOptions);
 				}
 				
-			})
+			});
 			
 			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
@@ -307,7 +307,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		//add markers to map
 		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
-			addLandmarkMarker(value);
+			$scope.addLandmarkMarker(value);
 		});
 		landmarksLoaded = true;
 			
@@ -316,7 +316,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', '$q', '$log', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree, $q, $log) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -328,8 +328,16 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.saveItem($scope.$index);
 	}
 	
-	$scope.selectLandmark = function($event) {
-		$scope.$parent.selectItem($scope.$index);
+	$scope.selectLandmark = function(index) {
+		if (index === $scope.$parent.selectedIndex) {
+			return;
+		}
+		// updateFloor sets up a promise chain to allow markers to
+		// disappear and regenerate before selectItem is run
+		$scope.updateFloor()
+			.then(function() {
+				$scope.$parent.selectItem($scope.$index);		
+			});
 	}
 	
 	$scope.setStartTime = function() {
@@ -382,11 +390,48 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		addLocInfo();
 	}
 
-	function addLocInfo() {
+	function populateFloorsDropdown(localMap) {
+		var newFloor = {};
+		newFloor.val = localMap.floor_num;
+		newFloor.label = localMap.floor_name;
+		return newFloor;
+	}
 
+	$scope.$on('leafletDirectiveMarker.dragend',function (marker, ev) {
+		var lat = ev.leafletEvent.target._latlng.lat,
+				lng = ev.leafletEvent.target._latlng.lng;
+
+		mapManager.markers[ev.markerName].lat = lat;
+		mapManager.markers[ev.markerName].lng = lng;
+
+
+  });
+
+	function addLocInfo() {
 		//read landmark floor array, cp to $scope
 
-		$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"},{"val":3,"label":"3rd Floor"},{"val":4,"label":"4th Floor"},{"val":5,"label":"5th Floor"},{"val":6,"label":"6th Floor"},{"val":7,"label":"7th Floor"},{"val":8,"label":"8th Floor"},{"val":9,"label":"9th Floor"},{"val":10,"label":"10th Floor"}];  
+		if (mapManager.localMapArrayExists($scope.world)) {
+			var floors = [];
+			var localMaps = _.chain($scope.world.style.maps.localMapArray)
+				.filter(function(m) {
+					return m.floor_num;
+				})
+				.sortBy(function(m) {
+					return m.floor_num;
+				})
+				.uniq(function(m) {
+					return m.floor_num;
+				})
+				.value();
+
+			localMaps.forEach(function(m) {
+				floors.push(populateFloorsDropdown(m));
+			});
+
+			$scope.$parent.floors = floors;
+		} else {
+			$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"},{"val":3,"label":"3rd Floor"},{"val":4,"label":"4th Floor"},{"val":5,"label":"5th Floor"},{"val":6,"label":"6th Floor"},{"val":7,"label":"7th Floor"},{"val":8,"label":"8th Floor"},{"val":9,"label":"9th Floor"},{"val":10,"label":"10th Floor"}];  
+		}
 
 		//IF no loc_info, then floor_num = 0
 		if (!$scope.$parent.landmark.loc_info){
@@ -404,7 +449,84 @@ $scope.clearLoc = function(){
 }
 	//--------------------------//
 
-	
+
+$scope.updateFloor = function() {
+	var deferred = $q.defer(),
+			// landmarks without floor info will default to floor 1
+			currentFloor = $scope.landmark.loc_info ? $scope.landmark.loc_info.floor_num : 1;
+
+	if (mapManager.localMapArrayExists($scope.world)) {
+		var localMaps = $scope.world.style.maps.localMapArray;
+
+		// sort and then filter floors
+		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
+
+		mapManager.removeOverlays();
+		floorMaps.forEach(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
+				mapManager.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+			}	
+		});
+	}
+	getLandmarks(currentFloor).then(function() {
+		deferred.resolve(true);
+	});
+
+	return deferred.promise;
+}
+
+function getLandmarks(currentFloor) {
+	var deferred = $q.defer();
+
+	worldTree.getLandmarks($scope.world._id).then(function(data) {
+		$scope.$parent.landmarks.length = 0;
+		angular.copy(data, $scope.$parent.landmarks);
+		showLandmarksOnFloor(filterLandmarks($scope.$parent.landmarks, currentFloor))
+			.then(function() {
+				deferred.resolve(true);
+			});
+	});
+
+	return deferred.promise;
+}
+
+function filterLandmarks(landmarks, currentFloor) {
+	var filtered = _.chain(landmarks)
+		.filter(function(l) {
+			return l.loc_info;
+		})
+		.filter(function(l) {
+			return l.loc_info.floor_num === currentFloor;
+		})
+		.value();
+
+	// if showing the first floor then include all landmarks without a floor num
+	if (currentFloor === 1) {
+		filtered = filtered.concat(landmarks.filter(function(l) {
+			return !l.loc_info;
+		}));
+	}
+
+	return filtered;
+}
+
+function showLandmarksOnFloor(landmarks) {
+	var deferred = $q.defer();
+
+	// remove all landmarks
+	mapManager.removeAllMarkers();
+	angular.forEach(landmarks, function(mark) {
+		// for each landmark add a marker
+		$scope.$parent.addLandmarkMarker(mark);
+	});
+
+	deferred.resolve(true);
+
+	return deferred.promise;
+}
+
 $scope.onUploadAvatar = function($files) {
 	console.log('uploadAvatar');
 	var file = $files[0];

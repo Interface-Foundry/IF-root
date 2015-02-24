@@ -244,7 +244,7 @@ mapManager.setMarkerSelected = function(key) {
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		if (bubbleTypeService.get() !== 'Retail') {
+		if (bubbleTypeService.get() !== 'Retail' ||	mapManager.markers[key].icon.iconUrl === 'img/marker/bubble-marker-50.png') {
 			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
 		}
 		return true;
@@ -466,6 +466,29 @@ mapManager.addCircleMaskToMarker = function(key, radius, state) {
 		mapManager.circleMaskLayer._draw();
 	});
 	});
+}
+
+mapManager.localMapArrayExists = function(world) {
+	return world && world.style && world.style.maps 
+		&& world.style.maps.localMapArray && world.style.maps.localMapArray.length > 0;
+}
+
+mapManager.filterToCurrentFloor = function(sortedFloors, currentFloor) {
+	return sortedFloors.filter(function(f) {
+		return f.floor_num === currentFloor;
+	});
+}
+
+mapManager.sortFloors = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	return _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
 }
 
 mapManager.setCircleMaskState = function(state) {

@@ -316,7 +316,103 @@ ul.edit-toolbar {
 	margin-top: 12px;
 }
 
-img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]) {
+img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]):not([src="img/marker/bubble-marker-50_selected.png"]) {
 	border-radius: 50%;
 	box-shadow: 1px 1px 4px;
 }
+
+/*MAP STUFF*/
+.u-marginTop20 {
+  margin-top: 20px;
+}
+.u-inline {
+  display: inline;
+}
+.u-formDown48 {
+  position: relative;
+  top: 48px;
+}
+@media only screen and (max-width: 992px) {
+  .u-formDown48 {
+    top: 0px;
+  }
+}
+.u-green {
+  color: #5cb85c;
+}
+.u-pointer {
+  cursor: pointer;
+}
+.u-opacity35 {
+  opacity: 0.5;
+}
+.uploadActions--wrapper {
+  float: right;
+  margin-top: 25px;
+}
+.uploadActions {
+  float: right;
+  margin: 0px;
+}
+.uploadActions.loading-spinner {
+	margin: 0px;
+}
+@media only screen and (max-width: 992px) {
+  .uploadActions {
+    float: none;
+    display: inline-block;
+  }
+}
+.floorButton {
+  border: none;
+  height: 48px;
+  width: 48px;
+  display: block;
+  position: relative;
+  left: 3px;
+}
+@media only screen and (max-width: 992px) {
+  .floorButton {
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%);
+  }
+}
+.upButton {
+  background: url('/img/icons/expand_up_gray.png') no-repeat;
+}
+.upButton:active {
+  background: url('/img/icons/expand_up_gray_dark.png') no-repeat;
+}
+.upButton:focus {
+  outline: none;
+}
+.downButton {
+  background: url('/img/icons/expand_down_gray.png') no-repeat;
+}
+.downButton:active {
+  background: url('/img/icons/expand_down_gray_dark.png') no-repeat;
+}
+.downButton:focus {
+  outline: none;
+}
+@media only screen and (max-width: 992px) {
+  .multifloor .panel-body {
+    text-align: center;
+  }
+}
+.multifloor .check {
+  position: relative;
+  top: -2px;
+}
+.multifloor .check.isGreen {
+  width: 36px;
+}
+.multifloor .panel-heading .check {
+  width: 24px;
+  float: right;
+  margin-right: 30px;
+  top: 0px;
+}
+
+/*END MAP STUFF*/
