@@ -7,6 +7,7 @@
 		"hashtag": "Your official hashtag for twitter and instagram",
 		"landmarkcategories": "Kinds of places for your world (i.e. a park has: benches, washrooms, bbqs, ponds)",
 		"local_map": "Upload a picture to place on your map, such as a floorplan or hand drawing of the area",
-		"widgets": "Add widgets to your world to help organize and add new information"
+		"widgets": "Add widgets to your world to help organize and add new information",
+		"add_local_map_disabled": "Please upload and build the current map before adding a new local map"
 	}
 }
