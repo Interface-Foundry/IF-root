@@ -19936,7 +19936,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 					console.log('error: ', data);
 				});
 			});
-		scrollToBottom(100);
+		scrollToBottom(300);
 	}
 }
 
@@ -20029,10 +20029,12 @@ $scope.mapIsBuilt = function(map) {
 	}
 	else {
 		// check if the last map in the array is built
-		if ($scope.world.style.maps.localMapArray &&
-			$scope.world.style.maps.localMapArray.length>0) {
-			var len = $scope.world.style.maps.localMapArray.length;
-			return $scope.world.style.maps.localMapArray[len-1].hasOwnProperty('localMapName');
+		if ($scope.world) {
+			if ($scope.world.style.maps.localMapArray &&
+				$scope.world.style.maps.localMapArray.length>0) {
+				var len = $scope.world.style.maps.localMapArray.length;
+				return $scope.world.style.maps.localMapArray[len-1].hasOwnProperty('localMapName');
+			}
 		}
 		// no localMapArrat
 		return true;
