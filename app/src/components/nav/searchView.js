@@ -8,7 +8,7 @@ app.directive('searchView', ['$http', 'geoService', function($http, geoService) 
 				geoService.getLocation().then(function(coords) {
 				
 				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLat: coords.lng, localTime: new Date()}})
+					{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
 					.success(function(result) {
 						if (!result.err) {
 							scope.searchResult = result;

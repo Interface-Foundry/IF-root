@@ -2,7 +2,7 @@ L.IFPlaceImage = L.Layer.extend({
 
 	options: {
 		opacity: 1,
-		alt: '',
+		alt: ''
 	},
 
 	initialize: function (url, marker, options) { // (String, LatLngBounds, Object)
@@ -13,6 +13,7 @@ L.IFPlaceImage = L.Layer.extend({
 		this.on('load', this._imgLoaded, this);
 		
 		L.setOptions(this, options);
+
 	},
 
 	onAdd: function () {
@@ -23,9 +24,15 @@ L.IFPlaceImage = L.Layer.extend({
 			if (this.options.opacity < 1) {
 				this._updateOpacity();
 			}
+
+			// if (this.options.draggable){
+			// 	L.Draggable(this).enable();
+			// }
 		}
 
 		this.getPane().appendChild(this._image);
+
+		//this.Draggable();
 
 		this._reset();
 	},

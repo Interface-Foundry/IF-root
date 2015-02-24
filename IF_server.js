@@ -55,6 +55,9 @@ var sanitize = require('mongo-sanitize');
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
 
+//---- SEARCH -------//
+var text_search = require('./components/IF_search/text_search');
+
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
     stickerSchema = require('./components/IF_schemas/sticker_schema.js'),
@@ -428,26 +431,7 @@ function isLoggedIn(req, res, next) {
 
 // Search
 app.get('/api/textsearch', function(req, res) {
-
-    var sText = sanitize(req.query.textQuery);
-
-    sText = sText.replace(/[^\w\s]/gi, '');
-
-    landmarkSchema.find(
-        { $text : { $search : sText } },
-        { score : { $meta: "textScore" } }
-      ).
-      sort({ score : { $meta : 'textScore' } }).
-      limit(30).
-      exec(function(err, data) {
-        if (data){
-            res.send(data);
-        }
-        else {
-            console.log('no results');
-            res.send({err:'no results'});            
-        }
-      });
+    text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
 });
 
 

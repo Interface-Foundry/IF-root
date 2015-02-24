@@ -12823,7 +12823,7 @@ L.Map.include({
 	};
 
 	ga_storage = new function () {
-		var ga_url = 'http://www.google-analytics.com';
+		var ga_url = 'https://www.google-analytics.com';
 		var ga_ssl_url = 'https://ssl.google-analytics.com';
 		var last_url = '/'; // used to keep track of last page view logged to pass forward to subsequent events tracked
 		var last_nav_url = '/'; // used to keep track of last page actually visited by the user (not popup_hidden or popup_blurred!)
@@ -13287,7 +13287,7 @@ L.IFPlaceImage = L.Layer.extend({
 
 	options: {
 		opacity: 1,
-		alt: '',
+		alt: ''
 	},
 
 	initialize: function (url, marker, options) { // (String, LatLngBounds, Object)
@@ -13298,6 +13298,7 @@ L.IFPlaceImage = L.Layer.extend({
 		this.on('load', this._imgLoaded, this);
 		
 		L.setOptions(this, options);
+
 	},
 
 	onAdd: function () {
@@ -13308,9 +13309,15 @@ L.IFPlaceImage = L.Layer.extend({
 			if (this.options.opacity < 1) {
 				this._updateOpacity();
 			}
+
+			// if (this.options.draggable){
+			// 	L.Draggable(this).enable();
+			// }
 		}
 
 		this.getPane().appendChild(this._image);
+
+		//this.Draggable();
 
 		this._reset();
 	},
