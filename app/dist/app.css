@@ -316,7 +316,7 @@ ul.edit-toolbar {
 	margin-top: 12px;
 }
 
-img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]) {
+img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]):not([src="img/marker/bubble-marker-50_selected.png"]) {
 	border-radius: 50%;
 	box-shadow: 1px 1px 4px;
 }
@@ -416,6 +416,7 @@ img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]) {
 }
 
 /*END MAP STUFF*/
+
 .walkthrough-wrap {
 	height: 100%;
 	text-align: center;
