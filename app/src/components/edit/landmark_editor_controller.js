@@ -314,7 +314,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', '$q', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree, $q) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', '$q', '$log', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree, $q, $log) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -395,6 +395,16 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		return newFloor;
 	}
 
+	$scope.$on('leafletDirectiveMarker.dragend',function (marker, ev) {
+		var lat = ev.leafletEvent.target._latlng.lat,
+				lng = ev.leafletEvent.target._latlng.lng;
+
+		mapManager.markers[ev.markerName].lat = lat;
+		mapManager.markers[ev.markerName].lng = lng;
+
+
+  });
+
 	function addLocInfo() {
 		//read landmark floor array, cp to $scope
 
@@ -468,8 +478,10 @@ $scope.updateFloor = function() {
 function getLandmarks(currentFloor) {
 	var deferred = $q.defer();
 
-	worldTree.getLandmarks($scope.world._id).then(function(landmarks) {
-		showLandmarksOnFloor(filterLandmarks(landmarks, currentFloor))
+	worldTree.getLandmarks($scope.world._id).then(function(data) {
+		$scope.$parent.landmarks.length = 0;
+		angular.copy(data, $scope.$parent.landmarks);
+		showLandmarksOnFloor(filterLandmarks($scope.$parent.landmarks, currentFloor))
 			.then(function() {
 				deferred.resolve(true);
 			});
@@ -503,10 +515,11 @@ function showLandmarksOnFloor(landmarks) {
 
 	// remove all landmarks
 	mapManager.removeAllMarkers();
-	landmarks.forEach(function(mark) {
+	angular.forEach(landmarks, function(mark) {
 		// for each landmark add a marker
 		$scope.$parent.addLandmarkMarker(mark);
 	});
+
 	deferred.resolve(true);
 
 	return deferred.promise;
