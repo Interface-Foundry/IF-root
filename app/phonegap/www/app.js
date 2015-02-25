@@ -21155,13 +21155,8 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 	}
 
 	$scope.$on('leafletDirectiveMarker.dragend',function (marker, ev) {
-		var lat = ev.leafletEvent.target._latlng.lat,
-				lng = ev.leafletEvent.target._latlng.lng;
-
-		mapManager.markers[ev.markerName].lat = lat;
-		mapManager.markers[ev.markerName].lng = lng;
-
-
+		mapManager.markers[ev.markerName].lat = ev.leafletEvent.target._latlng.lat;
+		mapManager.markers[ev.markerName].lng = ev.leafletEvent.target._latlng.lng;
   });
 
 	function addLocInfo() {
@@ -21208,6 +21203,7 @@ $scope.clearLoc = function(){
 
 
 $scope.updateFloor = function() {
+
 	var deferred = $q.defer(),
 			// landmarks without floor info will default to floor 1
 			currentFloor = $scope.landmark.loc_info ? $scope.landmark.loc_info.floor_num : 1;
@@ -21237,14 +21233,10 @@ $scope.updateFloor = function() {
 function getLandmarks(currentFloor) {
 	var deferred = $q.defer();
 
-	worldTree.getLandmarks($scope.world._id).then(function(data) {
-		$scope.$parent.landmarks.length = 0;
-		angular.copy(data, $scope.$parent.landmarks);
-		showLandmarksOnFloor(filterLandmarks($scope.$parent.landmarks, currentFloor))
-			.then(function() {
-				deferred.resolve(true);
-			});
-	});
+	showLandmarksOnFloor(filterLandmarks($scope.$parent.landmarks, currentFloor))
+		.then(function() {
+			deferred.resolve(true);
+		});
 
 	return deferred.promise;
 }
