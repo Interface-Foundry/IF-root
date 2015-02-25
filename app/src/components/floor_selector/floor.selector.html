@@ -1,0 +1,9 @@
+<div id="current-floor" 
+		 ng-click="openFloorMenu()" 
+		 ng-style="::{'background-color': world.style.titleBG_color}"
+		 class="if-animate">{{currentFloor.floor_num}}</div>
+<div id="floor-nums" ng-show="showFloors" class="if-animate">
+	<div ng-repeat="floor in floors" ng-click="selectFloor($index)">
+		<div class="floor-indicator" ng-if="$index === floors.length - currentFloor.floor_num"></div>{{floor[0].floor_num}}
+	</div>
+</div>
