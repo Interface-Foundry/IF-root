@@ -2480,6 +2480,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                           var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
 
+                          newTag = newTag.toLowerCase();
+
                           if (lm.tags.indexOf(newTag) > -1){ //check if tag already in saved arr
                             //exists dont add tag again
                           }
