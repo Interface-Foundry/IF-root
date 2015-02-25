@@ -21795,52 +21795,70 @@ function floorSelector(mapManager) {
 			style: '=style'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
-		link: function(scope, elem, attr) {
+		link: link
+	};
 
-			scope.currentFloor = {};
+	function link(scope, elem, attr) {
 
-			scope.selectFloor = function(index) {
-				scope.currentFloor = scope.floors[index][0];
-				scope.showFloors = !scope.showFloors;
-				showCurrentFloorMaps(index);
-			}
+		scope.showFloors = false;
+		scope.floors = _.chain(scope.world.style.maps.localMapArray)
+			.filter(function(f) {
+				return f.floor_num;
+			})
+			.groupBy(function(f) {
+				return f.floor_num;
+			})
+			.sortBy(function(f) {
+				return -f.floor_num;
+			})
+			.value()
+			.reverse();
 
-			scope.openFloorMenu = function() {
-				scope.showFloors = !scope.showFloors;
-			}
-
-			function showCurrentFloorMaps(index) {
-				mapManager.removeOverlays();
-				var floorMaps = scope.floors[index];
-				floorMaps.forEach(function(m) {
-					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-				});
-			}
-			
-			// when world changes in world controller, assign local vars in directive scope
-			scope.$watch('world', function(world) {
-
-				if (!world.style || !world.style.maps || !world.style.maps.localMapArray) {
-					return;
-				}
-				scope.showFloors = false;
-				scope.floors = _.chain(world.style.maps.localMapArray)
-					.filter(function(f) {
-						return f.floor_num;
-					})
-					.groupBy(function(f) {
-						return f.floor_num;
-					})
-					.sortBy(function(f) {
-						return -f.floor_num;
-					})
-					.value()
-					.reverse();
-				scope.currentFloor = scope.floors.slice(-1)[0][0];
+		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
+											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+debugger
+		function findCurrentFloor(floors) {
+			var tempFiltered = floors.filter(function(f) {
+				return f[0].floor_num > 0;
 			});
+			return tempFiltered.length ? tempFiltered.slice(-1)[0][0] : floors[0][0];
 		}
 
-	};
+		scope.selectFloor = function(index) {
+			scope.currentFloor = scope.floors[index][0];
+			scope.showFloors = !scope.showFloors;
+			showCurrentFloorMaps(index);
+		}
+
+		scope.openFloorMenu = function() {
+			scope.showFloors = !scope.showFloors;
+		}
+
+		function showCurrentFloorMaps(index) {
+			mapManager.removeOverlays();
+			var floorMaps = scope.floors[index];
+			floorMaps.forEach(function(m) {
+				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+			});
+		}
+		
+	}
+	
+}
+
+app.filter('floorNumberFilter', floorNumberFilter);
+
+function floorNumberFilter() {
+	return function(floor) {
+		if (!floor) {
+			return;
+		}
+		if (floor.floor_num <= 1) {
+			return floor.floor_name[0];
+		} else {
+			return floor.floor_num;
+		}
+	}
 }
 app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
 var map = mapManager, style = styleManager;
