@@ -20025,7 +20025,7 @@ $scope.initView = function() {
 		map.setCircleMaskState('mask');
 			break;
 		case 'styles':
-		console.log('switching to styles');
+		// console.log('switching to styles');
 		map.setCircleMaskState('cover');
 			break;
 	}
@@ -20038,7 +20038,7 @@ $scope.onWorldIconSelect = function($files) {
 		url: '/api/upload/',
 		file: file,
 	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		// console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
 		$scope.world.avatar = data;
 		$scope.uploadFinished = true;
@@ -20052,9 +20052,9 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 		url: '/api/upload/',
 		file: file,
 	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		// console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
-		console.log(data);
+		// console.log(data);
 		$scope.temp.LandmarkCatAvatar = data;
 		$scope.uploadFinishedLandmark = true;
 	});
@@ -20095,7 +20095,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 			url: '/api/upload_maps',
 			file: file
 		}).progress(function(e) {
-			console.log('%' + parseInt(100.0 * e.loaded/e.total));
+			// console.log('%' + parseInt(100.0 * e.loaded/e.total));
 			if (!$scope.temp) {$scope.temp = {}}
 			$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
 		}).success(function(data, status, headers, config) {
@@ -20112,12 +20112,12 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 			};
 			$http.post('/api/temp_map_upload', newData).
 				success(function(data, status, headers, config) {
-					console.log('success: ', data);
+					// console.log('success: ', data);
 					$scope.world = data;
 					$scope.selectLastMap();
 				}).
 				error(function(data, status, headers, config) {
-					console.log('error: ', data);
+					// console.log('error: ', data);
 				});
 			});
 		scrollToBottom(300);
@@ -20293,11 +20293,11 @@ function deleteMap(map) {
 	};
 	$http.post('/api/delete_map', data).
 		success(function(data) {
-			console.log('success: ', data);
+			// console.log('success: ', data);
 			$scope.world = data;
 		}).
 		error(function(data) {
-			console.log('error', data);
+			// console.log('error', data);
 		});
 }
 
@@ -20307,19 +20307,19 @@ function scrollToBottom(timeout) {
 		var scroll = $timeout(function() {
 			// give ngRepeat time to add new DOM element
 			$anchorScroll();
-			console.log('scrolled with timeout');
+			// console.log('scrolled with timeout');
 		}, timeout);
 	}
 	else {
 		$anchorScroll;
-		console.log('scrolled without timeout');
+		// console.log('scrolled without timeout');
 	}
 }
 
 $scope.loadWorld = function(data) { 
 	// initialize world
 	  	$scope.world = data.world;
-		console.log('AAAAAAAAAAAAA', $scope.world);
+		// console.log('$scope.world: ', $scope.world);
 
 	  	// don't load unbuilt maps (can only be last map in array)
 	  	if ($scope.world.style.maps.localMapArray && 
@@ -20409,7 +20409,7 @@ $scope.saveWorld = function() {
     	console.log(response);
     	$scope.world.id = response[0].id; //updating world id with server new ID
     	$scope.whenSaving = false;
-    	// alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
+    	alerts.addAlert('success', 'Save successful! Go to <a class="alert-link" target="_blank" href="#/w/'+$scope.world.id+'">'+$scope.world.name+'</a>', true);
     	$timeout.cancel(saveTimer);
     });
 	
@@ -20510,8 +20510,8 @@ $scope.buildLocalMap = function () {
 			se_loc_lng: southEast.lng,
 			se_loc_lat: southEast.lat 
 		};
-	console.log('bounds', bounds);
-	console.log('coordBox', coordBox);
+	// console.log('bounds', bounds);
+	// console.log('coordBox', coordBox);
 	var coords_text = JSON.stringify(coordBox);
 		var data = {
 		    mapIMG: $scope.mapImage,
@@ -20523,7 +20523,7 @@ $scope.buildLocalMap = function () {
 	$http.post('/api/build_map', data).success(function(response){
 		//response = JSON.parse(response);
 		alerts.addAlert('success', 'Map built!', true);
-		console.log(response);
+		// console.log(response);
 		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
 		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} 
 		//remove this when world objects arent fd up
@@ -20558,11 +20558,11 @@ function findLoc() {
 }
 
 function showPosition(position) {
-	console.log('--showPosition--');
+	// console.log('--showPosition--');
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
 	
-	console.log(userLng);
+	// console.log(userLng);
 	map.setCenter([userLng, userLat], 18, 'editor');
  
 	markerID = tempID();
@@ -20584,7 +20584,7 @@ function showPosition(position) {
 	});
 	
 	var state;
-	console.log('$scope.view', $scope.view);
+	// console.log('$scope.view', $scope.view);
 	switch ($scope.view) {
 		case 'details':
 		state = 'mask';
@@ -20605,7 +20605,7 @@ function showPosition(position) {
 }
 
 function locError(){
-        console.log('no loc');
+        // console.log('no loc');
 }
 
 
@@ -20687,19 +20687,19 @@ function locError(){
 ////////////////////////////////////////////////////////////
 $scope.$on('$locationChangeSuccess', function (event, args) {
 	//stops route from changing if just changing subview
-	console.log(event, args);
-	console.log($route.current.$$route);
+	// console.log(event, args);
+	// console.log($route.current.$$route);
 	
     if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
         $scope.view = $route.current.params.view;
         $route.current = lastRoute;
-        console.log($scope.view);
+        // console.log($scope.view);
     }
     $scope.initView();
 });
 
 $scope.$on('$destroy', function (event) { //controller cleanup
-	console.log('$destroy event', event);
+	// console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
 	map.removePlaceImage();
@@ -20726,7 +20726,7 @@ $scope.$watch('world.name', function(current, old) {
 $scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
-		console.log(map.getPlaceImageBounds());
+		// console.log(map.getPlaceImageBounds());
 	}
 });
 
@@ -20746,8 +20746,8 @@ $scope.$watchCollection('world', function (newCol, oldCol) {
 ////////////////////////////////////////////////////////////
 World.get({id: $routeParams.worldURL}, function(data) {
 	if (data.err) {
-		 console.log('World not found!');
-		 console.log(data.err);
+		 // console.log('World not found!');
+		 // console.log(data.err);
 	} else {
 		$scope.loadWorld(data);
 	}
