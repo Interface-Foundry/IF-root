@@ -72,6 +72,13 @@
 	</div>
 
 </div>
+<div ng-if="world.style.maps.localMapArray.length">
+	<floor-selector class="if-animate" ng-class="[aperture.state]"
+									world="world" 
+									style="style"
+									landmarks="landmarks"
+									load-landmarks="loadLandmarks()"></floor-selector>
+</div>
 <a if-href="#w/{{world.id}}/messages" class="action-button world-action-button" 
 ng-if="messages==true" 
 ng-class="[aperture.state]"
