@@ -1922,6 +1922,7 @@ li.alert {
   border-radius: 28px;
   bottom: 80px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2), 0px -1px 0px rgba(0, 0, 0, 0.1);
+  color: #fff;
   font-size: 18px;
   font-weight: bold;
   height: 50px;
@@ -1946,14 +1947,17 @@ li.alert {
   font-size: 18px;
   font-weight: normal;
   line-height: 42px;
+  max-height: 80%;
   min-height: 0px;
   opacity: 1;
+  overflow-y: scroll;
   outline: none;
   position: absolute;
   right: 18px;
   text-align: center;
   width: 42px;
   z-index: 18;
+  -webkit-overflow-scrolling: touch;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }

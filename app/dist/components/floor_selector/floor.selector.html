@@ -1,7 +1,7 @@
 <div id="floor-selector-shadow"></div>
 <div id="current-floor" 
 		 ng-click="openFloorMenu()" 
-		 ng-style="::{'background-color': style.titleBG_color, 'color': style.cardBG_color}"
+		 ng-style="::{'background-color': style.titleBG_color}"
 		 class="if-animate">{{currentFloor | floorNumberFilter}}</div>
 <div id="floor-nums" ng-show="showFloors" class="if-animate">
 	<div ng-repeat="floor in floors" ng-click="selectFloor($index)">
