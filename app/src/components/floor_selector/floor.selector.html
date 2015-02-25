@@ -4,7 +4,8 @@
 		 ng-style="::{'background-color': style.titleBG_color}"
 		 class="if-animate">{{currentFloor | floorNumberFilter}}</div>
 <div id="floor-nums" ng-show="showFloors" class="if-animate">
-	<div ng-repeat="floor in floors" ng-click="selectFloor($index)">
+	<div ng-repeat="floor in floors" 
+			 ng-click="selectFloor($index)">
 		<div class="floor-indicator" 
 				 ng-if="floor[0].floor_num === currentFloor.floor_num"
 				 ng-style="::{'border-left-color': style.titleBG_color}"></div>{{floor[0] | floorNumberFilter}}

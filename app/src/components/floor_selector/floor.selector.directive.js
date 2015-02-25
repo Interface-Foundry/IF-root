@@ -7,7 +7,9 @@ function floorSelector(mapManager) {
 		restrict: 'E',
 		scope: {
 			world: '=world',
-			style: '=style'
+			style: '=style',
+			landmarks: '=landmarks',
+			loadLandmarks: '&'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: link
@@ -41,8 +43,8 @@ function floorSelector(mapManager) {
 
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
-			scope.showFloors = !scope.showFloors;
 			showCurrentFloorMaps(index);
+			showCurrentFloorLandmarks(index);
 		}
 
 		scope.openFloorMenu = function() {
@@ -56,7 +58,26 @@ function floorSelector(mapManager) {
 				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
 			});
 		}
-		
+
+		function showCurrentFloorLandmarks(index) {
+			scope.loadLandmarks();
+
+			setTimeout(function() {
+
+				var removeLandmarks = _.chain(scope.landmarks)
+					.filter(function(l) {
+						return l.loc_info;
+					})
+					.filter(function(l) {
+						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
+					})
+					.value();
+
+					removeLandmarks.forEach(function(l) {
+						mapManager.removeMarker(l._id);
+					});
+					
+				}, 500)
+		}	
 	}
-	
 }
