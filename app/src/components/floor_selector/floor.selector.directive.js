@@ -6,7 +6,8 @@ function floorSelector(mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
-			world: '@world'
+			world: '=world',
+			style: '=style'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: function(scope, elem, attr) {
@@ -17,8 +18,6 @@ function floorSelector(mapManager) {
 				scope.currentFloor = scope.floors[index][0];
 				scope.showFloors = !scope.showFloors;
 				showCurrentFloorMaps(index);
-				console.log('index', index)
-				console.log('floor', scope.currentFloor.floor_num)
 			}
 
 			scope.openFloorMenu = function() {
@@ -34,8 +33,8 @@ function floorSelector(mapManager) {
 			}
 			
 			// when world changes in world controller, assign local vars in directive scope
-			attr.$observe('world', function(world) {
-				var world = JSON.parse(attr.world);
+			scope.$watch('world', function(world) {
+
 				if (!world.style || !world.style.maps || !world.style.maps.localMapArray) {
 					return;
 				}
@@ -52,7 +51,6 @@ function floorSelector(mapManager) {
 					})
 					.value()
 					.reverse();
-
 				scope.currentFloor = scope.floors.slice(-1)[0][0];
 			});
 		}
