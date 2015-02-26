@@ -31,7 +31,7 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	var zoomLevel = 18;
 	// find min zoom level of all maps on the current floor
 	if (findMapsOnThisFloor($scope.world, landmark)) {
-		zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+		zoomLevel = Number(mapManager.findZoomLevel($scope.world.style.maps.localMapArray));
 	}
 
 	goToMark(zoomLevel);
@@ -159,6 +159,7 @@ console.log($scope.landmark.category);
 		
 
 function goToMark(zoomLevel) {
+
 	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
 	aperture.set('half');
   	// var markers = map.markers;
@@ -186,25 +187,28 @@ function goToMark(zoomLevel) {
   	map.setMarkerFocus($scope.landmark._id);
   	
   	map.refresh();
+
 };
 
 function addLocalMapsForCurrentFloor(world, landmark) {
-	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
+	if (!map.localMapArrayExists(world)) {
 		return;
 	}
 	map.removeOverlays();
 
-	findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
-		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-			map.addOverlay(thisMap.localMapID, 
-						thisMap.localMapName, 
-						thisMap.localMapOptions);
-		}
-	});
+	setTimeout(function() {
+		findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+				map.addOverlay(thisMap.localMapID, 
+							thisMap.localMapName, 
+							thisMap.localMapOptions);
+			}
+		});
+	}, 100)
 }
 
 function findMapsOnThisFloor(world, landmark) {
-	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
+	if (!map.localMapArrayExists(world)) {
 		return;
 	}
 	var localMaps = $scope.world.style.maps.localMapArray;
@@ -231,7 +235,6 @@ function findMapsOnThisFloor(world, landmark) {
 	var mapsOnThisFloor = localMaps.filter(function(localMap) {
 		return localMap.floor_num === currentFloor;
 	});
-
 	return mapsOnThisFloor;
 }
 		
