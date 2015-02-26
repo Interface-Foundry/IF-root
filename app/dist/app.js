@@ -17401,7 +17401,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 */
 	console.log(mapManager);
 	console.log(newOverlay);
-	// mapManager.refresh();
+	mapManager.refresh();
 };
 
 mapManager.removeOverlays = function() {
@@ -24122,18 +24122,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 					theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
 				}			
 			}
-			
-			theseMaps.forEach(function(thisMap) {
-				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-					map.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-				}
-				
-			})
+			map.removeOverlays();
+			setTimeout(function() {
+				theseMaps.forEach(function(thisMap) {
+
+					if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+						map.addOverlay(thisMap.localMapID, 
+									thisMap.localMapName, 
+									thisMap.localMapOptions);
+					}
+					
+				})
+			}, 100)
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
+				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
 			}
 
 			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
