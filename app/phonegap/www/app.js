@@ -21314,6 +21314,8 @@ $scope.onUploadAvatar = function($files) {
 			}
 			$scope.addTagName = $scope.addTagName.replace(/[^\w\s]/gi, '');
 
+			$scope.addTagName = $scope.addTagName.toLowerCase();
+
 			if($scope.$parent.landmark.tags.indexOf($scope.addTagName) > -1){ 
 				//check for dupes, if dupe dont added
 			}

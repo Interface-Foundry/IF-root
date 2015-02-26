@@ -783,6 +783,8 @@ app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
               else {
                   //console.log(landmark);
                   console.log('success');
+
+                  console.log(JSON.stringify(landmark));
                   res.status(200).send(landmark);
               }
           });
@@ -1903,7 +1905,8 @@ app.get('/api/worlds/:id', function(req, res) {
 app.post('/api/:collection/create', isLoggedIn, function(req, res) { 
 
     if (req.url == "/api/styles/create"){
-    
+
+
         editStyle(); //edit style
     }
 
@@ -2049,7 +2052,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
     //adding/editing map to world
     function worldMapEdit(){
-   
+
+
          landmarkSchema.findById(req.body.worldID, function(err, lm) {
           if (!lm){
             console.log(err);
@@ -2059,6 +2063,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             lm.style.maps.type = req.body.type; //local, cloud or both
             lm.style.maps.cloudMapID = req.body.mapThemeSelect.cloudMapID; 
             lm.style.maps.cloudMapName = req.body.mapThemeSelect.cloudMapName;
+
 
 
             //NEED TO CHANGE TO ARRAY to push new marker types, eventually (???)
@@ -2166,7 +2171,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         //unique id found, now save/ update
         function saveLandmark(finalID){
-            
+
             //an edit
             if (!req.body.newStatus){
 
@@ -2234,7 +2239,27 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                     //if user checks box to activate time 
 
                     if (req.body.style) {
-                      lm.style = req.body.style;
+
+                      if (req.body.style.styleID){
+                        lm.style.styleID = req.body.style.styleID;
+                      }
+
+                      if (req.body.style.maps){
+
+                        if (req.body.style.maps.type){
+                          lm.style.maps.type = req.body.style.maps.type;
+                        }
+
+                        if (req.body.style.maps.cloudMapID){
+                          lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
+                        }
+
+                        if (req.body.style.maps.cloudMapName){
+                          lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
+                        }
+
+                      }
+                      
                     }
           
             				if (req.body.hasOwnProperty('time')) {
@@ -2479,6 +2504,8 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                       for (var i = 0; i < req.body.tags.length; i++) { //loop content
 
                           var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
+
+                          newTag = newTag.toLowerCase();
 
                           if (lm.tags.indexOf(newTag) > -1){ //check if tag already in saved arr
                             //exists dont add tag again
