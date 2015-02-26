@@ -21062,11 +21062,11 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
 					
-		//add markers to map
-		angular.forEach($scope.landmarks, function(value, key) {
+		//add markers to map in reverse order so popup matches left sidebar
+		for (var i = $scope.landmarks.length - 1; i >= 0; i--) {
 			//for each landmark add a marker
-			$scope.addLandmarkMarker(value);
-		});
+			$scope.addLandmarkMarker($scope.landmarks[i]);
+		}
 		landmarksLoaded = true;
 			
 	});
@@ -21269,10 +21269,11 @@ function showLandmarksOnFloor(landmarks) {
 
 	// remove all landmarks
 	mapManager.removeAllMarkers();
-	angular.forEach(landmarks, function(mark) {
-		// for each landmark add a marker
-		$scope.$parent.addLandmarkMarker(mark);
-	});
+
+	// add landmarks that match the floor in reverse order so popup appears over the first landmark
+	for (var i = landmarks.length - 1; i >=0; i--) {
+		$scope.$parent.addLandmarkMarker(landmarks[i]);
+	}
 
 	deferred.resolve(true);
 
