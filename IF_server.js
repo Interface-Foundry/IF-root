@@ -2238,28 +2238,22 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                     //if user checks box to activate time 
 
+                    //ADDING / UPDATING CLOUD MAP INFO
                     if (req.body.style) {
-
                       if (req.body.style.styleID){
                         lm.style.styleID = req.body.style.styleID;
                       }
-
                       if (req.body.style.maps){
-
                         if (req.body.style.maps.type){
                           lm.style.maps.type = req.body.style.maps.type;
                         }
-
                         if (req.body.style.maps.cloudMapID){
                           lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
                         }
-
                         if (req.body.style.maps.cloudMapName){
                           lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
                         }
-
                       }
-                      
                     }
           
             				if (req.body.hasOwnProperty('time')) {
@@ -2481,6 +2475,24 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         lm.time.start = req.body.time.start || null;
                         lm.time.end = req.body.time.end || null;
                         lm.hasTime = true;
+                    }
+
+                    //ADDING / UPDATING CLOUD MAP INFO
+                    if (req.body.style) {
+                      if (req.body.style.styleID){
+                        lm.style.styleID = req.body.style.styleID;
+                      }
+                      if (req.body.style.maps){
+                        if (req.body.style.maps.type){
+                          lm.style.maps.type = req.body.style.maps.type;
+                        }
+                        if (req.body.style.maps.cloudMapID){
+                          lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
+                        }
+                        if (req.body.style.maps.cloudMapName){
+                          lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
+                        }
+                      }
                     }
 
 
