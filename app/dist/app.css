@@ -4399,6 +4399,76 @@ li.alert {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
 }
+/*want this*/
+.wtgt {
+  float: none !important;
+  margin: 0 auto;
+}
+.wtgt h4 {
+  display: inline-block;
+}
+.wtgt .upload {
+  height: 180px;
+  padding: 0;
+  text-align: center;
+  margin-top: 25px;
+  margin-bottom: 60px;
+  box-shadow: 0px 2px 8px 2px #cccccc;
+}
+@media only screen and (max-width: 768px) {
+  .wtgt .upload {
+    height: 140px;
+  }
+}
+.wtgt .head {
+  color: #ffffff;
+  height: 15%;
+  width: 100%;
+}
+.wtgt .head span {
+  line-height: 27px;
+}
+@media only screen and (max-width: 768px) {
+  .wtgt .head span {
+    line-height: 21px;
+  }
+}
+.wtgt .body {
+  height: 85%;
+}
+.wtgt .body .want {
+  background: url('img/icons/want_55.png') no-repeat center center;
+  height: 100%;
+}
+.wtgt .body .got {
+  background: url('img/icons/have_55.png') no-repeat center center;
+  height: 100%;
+}
+.wtgt .camera {
+  border-radius: 50%;
+  background: #ffffff url('img/icons/camera-tiny-light.png') no-repeat center center;
+  background-size: 29.7px 24px;
+  box-shadow: 0px 4px 8px 2px #cccccc;
+  height: 50px;
+  width: 50px;
+  position: relative;
+  left: 100%;
+  -webkit-transform: translate(-70%, -70%);
+  transform: translate(-70%, -70%);
+}
+.wtgt .hashtag--upload {
+  position: relative;
+  top: -40px;
+  font-weight: bold;
+}
+.marble-page-footer.tag {
+  background: #eeeeee;
+  text-align: center;
+}
+.marble-page-footer.tag p {
+  position: relative;
+  top: 4px;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;
