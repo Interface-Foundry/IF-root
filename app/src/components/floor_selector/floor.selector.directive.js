@@ -53,10 +53,14 @@ function floorSelector(mapManager) {
 
 		function showCurrentFloorMaps(index) {
 			mapManager.removeOverlays();
-			var floorMaps = scope.floors[index];
-			floorMaps.forEach(function(m) {
-				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-			});
+			setTimeout(function() {
+				var floorMaps = scope.floors[index];
+				floorMaps.forEach(function(m) {
+					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+				});
+
+					
+			}, 100)
 		}
 
 		function showCurrentFloorLandmarks(index) {

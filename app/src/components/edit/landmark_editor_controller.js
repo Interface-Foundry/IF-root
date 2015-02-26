@@ -458,13 +458,15 @@ $scope.updateFloor = function() {
 		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
 
 		mapManager.removeOverlays();
-		floorMaps.forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
-				mapManager.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-			}	
-		});
+		setTimeout(function() {
+			floorMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
+					mapManager.addOverlay(thisMap.localMapID, 
+									thisMap.localMapName, 
+									thisMap.localMapOptions);
+				}	
+			});
+		}, 100);
 	}
 	getLandmarks(currentFloor).then(function() {
 		deferred.resolve(true);

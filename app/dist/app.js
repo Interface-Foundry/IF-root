@@ -17380,6 +17380,7 @@ mapManager.findMapFromArray = function(mapArray) {
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
+
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
@@ -17400,6 +17401,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 */
 	console.log(mapManager);
 	console.log(newOverlay);
+	// mapManager.refresh();
 };
 
 mapManager.removeOverlays = function() {
@@ -21114,13 +21116,15 @@ $scope.updateFloor = function() {
 		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
 
 		mapManager.removeOverlays();
-		floorMaps.forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
-				mapManager.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-			}	
-		});
+		setTimeout(function() {
+			floorMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
+					mapManager.addOverlay(thisMap.localMapID, 
+									thisMap.localMapName, 
+									thisMap.localMapOptions);
+				}	
+			});
+		}, 100);
 	}
 	getLandmarks(currentFloor).then(function() {
 		deferred.resolve(true);
@@ -21736,10 +21740,14 @@ function floorSelector(mapManager) {
 
 		function showCurrentFloorMaps(index) {
 			mapManager.removeOverlays();
-			var floorMaps = scope.floors[index];
-			floorMaps.forEach(function(m) {
-				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-			});
+			setTimeout(function() {
+				var floorMaps = scope.floors[index];
+				floorMaps.forEach(function(m) {
+					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+				});
+
+					
+			}, 100)
 		}
 
 		function showCurrentFloorLandmarks(index) {
