@@ -21058,7 +21058,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			if (theseMaps[0].localMapArray){
 				if (theseMaps[0].localMapArray.length > 0) {
 					theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
-				}				
+				}
 			}
 
 
@@ -21082,24 +21082,43 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		//begin loading landmarks
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
-		var initialFloor = $scope.landmarks[0].loc_info ? $scope.landmarks[0].loc_info.floor_num : 1;
 
-		var filtered = $scope.landmarks.filter(function(l) {
-			return !l.loc_info || l.loc_info.floor_num === initialFloor;
-		});
+		var filtered = filterLandmarks($scope.landmarks);
 
 		angular.forEach(filtered, function(value, key) {
 			//for each landmark add a marker
 			$scope.addLandmarkMarker(value);
 		});
 
-		map.setMarkerFocus($scope.landmarks[0]._id);
+		map.setMarkerFocus(filtered[0]._id);
 
 		landmarksLoaded = true;
 			
 	});
 	});	
 	
+	function filterLandmarks(landmarks) {
+		var initialFloor = landmarks[0].loc_info ? landmarks[0].loc_info.floor_num : 1;
+
+		var filtered;
+
+		if (initialFloor === 1) {
+			filtered = $scope.landmarks.filter(function(l) {
+				return !l.loc_info || l.loc_info.floor_num === initialFloor;
+			});
+		} else {
+			filtered = _.chain(landmarks)
+				.filter(function(l) {
+					return l.loc_info;
+				})
+				.filter(function(l) {
+					return l.loc_info.floor_num === initialFloor;
+				})
+				.value();
+		}
+		return filtered;
+	}
+
 }])
 
 app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', '$q', '$log', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree, $q, $log) {
@@ -21213,7 +21232,13 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		} else {
 			$scope.$parent.floors = [{"val":1,"label":"1st Floor"}];  
 		}
-		$scope.floorNumber = $scope.$parent.floors[0].label;
+		
+		if (!$scope.$parent.landmark.loc_info || $scope.$parent.landmark.loc_info.floor_num === null) {
+			$scope.floorNumber = $scope.$parent.floors[0].label;
+		} else {
+			var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
+			$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;	
+		}
 
 		//IF no loc_info, then floor_num = 0
 		if (!$scope.$parent.landmark.loc_info){
@@ -21238,10 +21263,8 @@ $scope.chooseNewFloor = function(index) {
 }
 
 $scope.updateFloor = function() {
-	if (!$scope.$parent.landmark.loc_info) {
+	if (!$scope.$parent.landmark.loc_info || $scope.$parent.landmark.loc_info.floor_num === null) {
 		addLocInfo();
-		$scope.floorNumber = $scope.$parent.floors[0].label;
-	} else if ($scope.$parent.landmark.loc_info.floor_num === null) {
 		$scope.floorNumber = $scope.$parent.floors[0].label;
 	} else {
 		var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
