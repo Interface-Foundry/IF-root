@@ -18,8 +18,21 @@
 				<span>WANT THIS</span>
 			</div>
 
-			<div class="body">
-				<div class="want"></div>
+			<div class="body"
+				ng-file-select
+				ng-file-change="uploadWTGT($files, 'want')"
+				ng-file-drop
+				data-accept="image/*">
+				<div class="wrapper col-xs-10 col-xs-offset-1"
+					ng-show="wtgtImages.want">
+					<div class="more">
+						See More
+					</div>
+					<img ng-src="{{ wtgtImages.want }}">
+				</div>
+				
+				<div class="want"
+					ng-show="!wtgtImages.want"></div>
 			</div>
 
 			<div class="camera"></div>
@@ -31,7 +44,7 @@
 
 		<div class="upload col-xs-5 col-xs-offset-2">
 			<div class="head"
-				ng-style="{background: 'rgba(0, 0, 0, 0.4)'}">
+				ng-style="{background: 'rgba(0, 0, 0, 0.23)'}">
 				<span>GOT THIS</span>
 			</div>
 

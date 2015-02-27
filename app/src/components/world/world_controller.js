@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -14,6 +14,7 @@ $scope.aperture.set('third');
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
+$scope.wtgtImages = {};
 
 $scope.collectedPresents = [];
 	
@@ -23,6 +24,22 @@ var landmarksLoaded;
   	
 $scope.zoomOn = function() {
 	  	zoomControl.style.display = "block";
+}
+
+$scope.uploadWTGT = function($files, state) {
+	var file = $files[0];
+	$scope.upload = $upload.upload({
+		url: '/api/upload/',
+		file: file
+	}).progress(function(e) {
+	}).success(function(data) {
+		if (state == 'want') {
+			$scope.wtgtImages.want = data;
+		}
+		else if (state == 'got') {
+			$scope.wtgtImages.got = data;
+		}
+	});
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
