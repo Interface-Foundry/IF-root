@@ -21052,24 +21052,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			map.addCircleMaskToMarker('m', 150, 'mask');
 		
 			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		
-			var theseMaps = [$scope.world.style.maps];
-
-			if (theseMaps[0].localMapArray){
-				if (theseMaps[0].localMapArray.length > 0) {
-					theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
-				}
-			}
-
-
-			theseMaps.forEach(function(thisMap) {
-				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-					map.addOverlay(thisMap.localMapID, 
-									thisMap.localMapName, 
-									thisMap.localMapOptions);
-				}
-				
-			});
+	
 			
 			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
@@ -21093,9 +21076,30 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		map.setMarkerFocus(filtered[0]._id);
 
 		landmarksLoaded = true;
+		addOverlay();
 			
 	});
-	});	
+	});
+
+	function addOverlay() {
+		var initialFloor = $scope.landmarks[0].loc_info ? $scope.landmarks[0].loc_info.floor_num : 1;
+		var floorMaps = [$scope.world.style.maps];
+
+		if (floorMaps[0].localMapArray){
+			if (floorMaps[0].localMapArray.length > 0) {
+				floorMaps = filterMaps(floorMaps[0].localMapArray, initialFloor);
+			}
+		}
+
+		floorMaps.forEach(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+				map.addOverlay(thisMap.localMapID, 
+								thisMap.localMapName, 
+								thisMap.localMapOptions);
+			}
+			
+		});
+	}
 	
 	function filterLandmarks(landmarks) {
 		var initialFloor = landmarks[0].loc_info ? landmarks[0].loc_info.floor_num : 1;
@@ -21117,6 +21121,12 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 				.value();
 		}
 		return filtered;
+	}
+
+	function filterMaps(maps, floor) {
+		return maps.filter(function(m) {
+			return m.floor_num === floor
+		});
 	}
 
 }])
