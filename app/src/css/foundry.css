@@ -2040,13 +2040,17 @@ li.alert {
 .wtgt .body .want {
   background: url('img/icons/want_55.png') no-repeat center center;
   height: 100%;
+  cursor: pointer;
 }
 .wtgt .body .got {
   background: url('img/icons/have_55.png') no-repeat center center;
   height: 100%;
+  cursor: pointer;
 }
 .wtgt .body .more {
   background: #cccccc;
+  font-size: 12px;
+  cursor: pointer;
 }
 .wtgt .body .wrapper {
   height: 130px;
@@ -2071,6 +2075,7 @@ li.alert {
   width: 50px;
   position: relative;
   left: 100%;
+  cursor: pointer;
   -webkit-transform: translate(-70%, -70%);
   transform: translate(-70%, -70%);
 }
@@ -2086,4 +2091,7 @@ li.alert {
 .marble-page-footer.tag p {
   position: relative;
   top: 4px;
+}
+.u-pointer {
+  cursor: pointer;
 }

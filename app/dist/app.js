@@ -23993,7 +23993,7 @@ $scope.zoomOn = function() {
 $scope.uploadWTGT = function($files, state) {
 	var file = $files[0];
 	$scope.upload = $upload.upload({
-		url: '/api/upload/',
+		url: '/api/uploadPicture/',
 		file: file
 	}).progress(function(e) {
 	}).success(function(data) {

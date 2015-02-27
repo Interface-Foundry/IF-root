@@ -9,7 +9,7 @@
 	<div class="wtgt col-xs-11">
 		<h4>Win a $50 gift card</h4>
 		<span class="glyphicon glyphicon-info-sign info" 
-			bs-tooltip=""></span>
+			bs-tooltip="tooltips.wtgt_gift_card"></span>
 		<p>Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.</p>
 
 		<div class="upload col-xs-5">
@@ -18,11 +18,7 @@
 				<span>WANT THIS</span>
 			</div>
 
-			<div class="body"
-				ng-file-select
-				ng-file-change="uploadWTGT($files, 'want')"
-				ng-file-drop
-				data-accept="image/*">
+			<div class="body">
 				<div class="wrapper col-xs-10 col-xs-offset-1"
 					ng-show="wtgtImages.want">
 					<div class="more">
@@ -32,10 +28,18 @@
 				</div>
 				
 				<div class="want"
-					ng-show="!wtgtImages.want"></div>
+					ng-show="!wtgtImages.want"
+					ng-file-select
+					ng-file-change="uploadWTGT($files, 'want')"
+					ng-file-drop
+					data-accept="image/*"></div>
 			</div>
 
-			<div class="camera"></div>
+			<div class="camera"
+				ng-file-select
+				ng-file-change="uploadWTGT($files, 'want')"
+				ng-file-drop
+				data-accept="image/*"></div>
 
 			<div class="hashtag--upload">
 				<span>#hashtag1</span>
@@ -49,10 +53,27 @@
 			</div>
 
 			<div class="body">
-				<div class="got"></div>
+				<div class="wrapper col-xs-10 col-xs-offset-1"
+					ng-show="wtgtImages.got">
+					<div class="more">
+						See More
+					</div>
+					<img ng-src="{{ wtgtImages.got }}">
+				</div>
+				
+				<div class="got"
+					ng-show="!wtgtImages.got"
+					ng-file-select
+					ng-file-change="uploadWTGT($files, 'got')"
+					ng-file-drop
+					data-accept="image/*"></div>
 			</div>
 
-			<div class="camera"></div>
+			<div class="camera"
+				ng-file-select
+				ng-file-change="uploadWTGT($files, 'got')"
+				ng-file-drop
+				data-accept="image/*"></div>
 
 			<div class="hashtag--upload">
 				<span>#hashtag2</span>
