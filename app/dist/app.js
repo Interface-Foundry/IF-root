@@ -23996,12 +23996,20 @@ $scope.uploadWTGT = function($files, state) {
 		url: '/api/uploadPicture/',
 		file: file
 	}).progress(function(e) {
+		if (state == 'want') {
+			$scope.wtgtImages.wantBuilding = true;
+		}
+		else if (state == 'got') {
+			$scope.wtgtImages.gotBuilding = true;
+		}
 	}).success(function(data) {
 		if (state == 'want') {
 			$scope.wtgtImages.want = data;
+			$scope.wtgtImages.wantBuilding = false;
 		}
 		else if (state == 'got') {
 			$scope.wtgtImages.got = data;
+			$scope.wtgtImages.gotBuilding = false;
 		}
 	});
 }
