@@ -18057,6 +18057,9 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
  * The $tooltip service creates tooltip- and popover-like directives as well as
  * houses global options for them.
  */
+
+// ANGULAR UI TOOLTIP COMMENTED OUT BC IT CONFLICTS WITH ANGULARSTRAP TOOLTIP
+
 // .provider( '$tooltip', function () {
 //   // The default options tooltip and popover.
 //   var defaultOptions = {

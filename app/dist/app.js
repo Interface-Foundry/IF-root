@@ -21206,6 +21206,7 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		} else {
 			$scope.$parent.floors = [{"val":1,"label":"1st Floor"}];  
 		}
+		$scope.floorNumber = $scope.$parent.floors[0].label;
 
 		//IF no loc_info, then floor_num = 0
 		if (!$scope.$parent.landmark.loc_info){
@@ -21223,8 +21224,14 @@ $scope.clearLoc = function(){
 }
 	//--------------------------//
 
+$scope.chooseNewFloor = function(index) {
+	$scope.floorNumber = index;
+	$scope.$parent.landmark.loc_info.floor_num = $scope.$parent.floors[index].val;
+	$scope.updateFloor();
+}
 
 $scope.updateFloor = function() {
+	$scope.floorNumber = $scope.$parent.landmark.loc_info.floor_num || $scope.$parent.floors[0].label;
 
 	var deferred = $q.defer(),
 			// landmarks without floor info will default to floor 1
@@ -23159,7 +23166,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 							thisMap.localMapOptions);
 			}
 		});
-	}, 100)
+	}, 200)
 }
 
 function findMapsOnThisFloor(world, landmark) {

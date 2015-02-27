@@ -204,7 +204,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 							thisMap.localMapOptions);
 			}
 		});
-	}, 100)
+	}, 200)
 }
 
 function findMapsOnThisFloor(world, landmark) {
