@@ -20,22 +20,25 @@
 
 			<div class="body">
 				<div class="wrapper col-xs-10 col-xs-offset-1"
-					ng-show="wtgtImages.want && !wtgtImages.wantBuilding">
-					<div class="more">
-						See More
-					</div>
-					<img ng-src="{{ wtgtImages.want }}">
+					ng-show="wtgt.images.want && !wtgt.images.wantBuilding">
+					<a ng-href="/w/{{worldURL}}/content/{{ wtgt.hashtags.want }}"
+						target="_self">
+						<div class="more">
+							See More
+						</div>
+						<img ng-src="{{ wtgt.images.want }}">
+					</a>
 				</div>
 				
 				<div class="want"
-					ng-show="!wtgtImages.want && !wtgtImages.wantBuilding"
+					ng-show="!wtgt.images.want && !wtgt.images.wantBuilding"
 					ng-file-select
 					ng-file-change="uploadWTGT($files, 'want')"
 					ng-file-drop
 					data-accept="image/*"></div>
 
 				<div class="loading-spinner u-centerY"
-					ng-show="wtgtImages.wantBuilding">
+					ng-show="wtgt.images.wantBuilding">
 					<div class="lspin1"></div>
 					<div class="lspin2"></div>
 				</div>
@@ -49,7 +52,7 @@
 				data-accept="image/*"></div>
 
 			<div class="hashtag--upload">
-				<span>#hashtag1</span>
+				<span>#{{ wtgt.hashtags.want }}</span>
 			</div>
 		</div>
 
@@ -61,22 +64,25 @@
 
 			<div class="body">
 				<div class="wrapper col-xs-10 col-xs-offset-1"
-					ng-show="wtgtImages.got && !wtgtImages.gotBuilding">
-					<div class="more">
-						See More
-					</div>
-					<img ng-src="{{ wtgtImages.got }}">
+					ng-show="wtgt.images.got && !wtgt.images.gotBuilding">
+					<a ng-href="/w/{{worldURL}}/content/{{ wtgt.hashtags.got }}"
+						target="_self">
+						<div class="more">
+							See More
+						</div>
+						<img ng-src="{{ wtgt.images.got }}">
+					</a>
 				</div>
 				
 				<div class="got"
-					ng-show="!wtgtImages.got && !wtgtImages.gotBuilding"
+					ng-show="!wtgt.images.got && !wtgt.images.gotBuilding"
 					ng-file-select
 					ng-file-change="uploadWTGT($files, 'got')"
 					ng-file-drop
 					data-accept="image/*"></div>
 
 				<div class="loading-spinner u-centerY"
-					ng-show="wtgtImages.gotBuilding">
+					ng-show="wtgt.images.gotBuilding">
 					<div class="lspin1"></div>
 					<div class="lspin2"></div>
 				</div>
@@ -90,7 +96,7 @@
 				data-accept="image/*"></div>
 
 			<div class="hashtag--upload">
-				<span>#hashtag2</span>
+				<span>#{{ wtgt.hashtags.got }}</span>
 			</div>
 		</div>
 

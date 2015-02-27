@@ -78,6 +78,7 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
+	  when('/w/:worldURL/content/:contentType', {templateUrl: 'components/world/subviews/content.html', controller: 'ContentController'}).
 
 
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).

@@ -4760,6 +4760,7 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
+	  when('/w/:worldURL/content/:contentType', {templateUrl: 'components/world/subviews/content.html', controller: 'ContentController'}).
 
 
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
@@ -23461,6 +23462,17 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+// app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+// 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+// 		$scope.world = data.world;
+// 		$scope.style = data.style;
+// 		styleManager.navBG_color = $scope.style.navBG_color; 
+		
+// 		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+// 	})
+// }])
+
+// model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -23978,7 +23990,13 @@ $scope.aperture.set('third');
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
-$scope.wtgtImages = {};
+$scope.wtgt = {
+	hashtags: {
+		want: 'hashtag1',
+		got: 'hashtag2'
+	},
+	images: {}
+};
 
 $scope.collectedPresents = [];
 	
@@ -23997,19 +24015,19 @@ $scope.uploadWTGT = function($files, state) {
 		file: file
 	}).progress(function(e) {
 		if (state == 'want') {
-			$scope.wtgtImages.wantBuilding = true;
+			$scope.wtgt.images.wantBuilding = true;
 		}
 		else if (state == 'got') {
-			$scope.wtgtImages.gotBuilding = true;
+			$scope.wtgt.images.gotBuilding = true;
 		}
 	}).success(function(data) {
 		if (state == 'want') {
-			$scope.wtgtImages.want = data;
-			$scope.wtgtImages.wantBuilding = false;
+			$scope.wtgt.images.want = data;
+			$scope.wtgt.images.wantBuilding = false;
 		}
 		else if (state == 'got') {
-			$scope.wtgtImages.got = data;
-			$scope.wtgtImages.gotBuilding = false;
+			$scope.wtgt.images.got = data;
+			$scope.wtgt.images.gotBuilding = false;
 		}
 	});
 }

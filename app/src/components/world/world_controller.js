@@ -14,7 +14,13 @@ $scope.aperture.set('third');
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
-$scope.wtgtImages = {};
+$scope.wtgt = {
+	hashtags: {
+		want: 'hashtag1',
+		got: 'hashtag2'
+	},
+	images: {}
+};
 
 $scope.collectedPresents = [];
 	
@@ -33,19 +39,19 @@ $scope.uploadWTGT = function($files, state) {
 		file: file
 	}).progress(function(e) {
 		if (state == 'want') {
-			$scope.wtgtImages.wantBuilding = true;
+			$scope.wtgt.images.wantBuilding = true;
 		}
 		else if (state == 'got') {
-			$scope.wtgtImages.gotBuilding = true;
+			$scope.wtgt.images.gotBuilding = true;
 		}
 	}).success(function(data) {
 		if (state == 'want') {
-			$scope.wtgtImages.want = data;
-			$scope.wtgtImages.wantBuilding = false;
+			$scope.wtgt.images.want = data;
+			$scope.wtgt.images.wantBuilding = false;
 		}
 		else if (state == 'got') {
-			$scope.wtgtImages.got = data;
-			$scope.wtgtImages.gotBuilding = false;
+			$scope.wtgt.images.got = data;
+			$scope.wtgt.images.gotBuilding = false;
 		}
 	});
 }

@@ -4443,6 +4443,7 @@ li.alert {
   background: #cccccc;
   font-size: 12px;
   cursor: pointer;
+  color: black;
 }
 .wtgt .body .wrapper {
   height: 130px;
@@ -4457,6 +4458,7 @@ li.alert {
 }
 .wtgt .body img {
   width: 100%;
+  cursor: pointer;
 }
 .wtgt .camera {
   border-radius: 50%;
