@@ -303,13 +303,19 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		//begin loading landmarks
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
-					
-		angular.forEach($scope.landmarks, function(value, key) {
+		var initialFloor = $scope.landmarks[0].loc_info ? $scope.landmarks[0].loc_info.floor_num : 1;
+
+		var filtered = $scope.landmarks.filter(function(l) {
+			return !l.loc_info || l.loc_info.floor_num === initialFloor;
+		});
+
+		angular.forEach(filtered, function(value, key) {
 			//for each landmark add a marker
 			$scope.addLandmarkMarker(value);
 		});
 
-		map.setMarkerFocus($scope.landmarks[0]._id)
+		map.setMarkerFocus($scope.landmarks[0]._id);
+
 		landmarksLoaded = true;
 			
 	});
@@ -453,12 +459,19 @@ $scope.chooseNewFloor = function(index) {
 }
 
 $scope.updateFloor = function() {
-	var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
-	$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;
+	if (!$scope.$parent.landmark.loc_info) {
+		addLocInfo();
+		$scope.floorNumber = $scope.$parent.floors[0].label;
+	} else if ($scope.$parent.landmark.loc_info.floor_num === null) {
+		$scope.floorNumber = $scope.$parent.floors[0].label;
+	} else {
+		var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
+		$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;	
+	}
 
 	var deferred = $q.defer(),
 			// landmarks without floor info will default to floor 1
-			currentFloor = $scope.landmark.loc_info ? $scope.landmark.loc_info.floor_num : 1;
+			currentFloor = $scope.landmark.loc_info && $scope.landmark.loc_info.floor_num !== null ? $scope.landmark.loc_info.floor_num : 1;
 
 	if (mapManager.localMapArrayExists($scope.world)) {
 		var localMaps = $scope.world.style.maps.localMapArray;
@@ -525,8 +538,8 @@ function showLandmarksOnFloor(landmarks) {
 		// for each landmark add a marker
 		$scope.$parent.addLandmarkMarker(mark);
 	});
-	mapManager.setMarkerFocus($scope.$parent.landmark._id)
-
+	mapManager.setMarkerFocus($scope.$parent.landmark._id);
+	mapManager.setMarkerSelected($scope.$parent.landmark._id);
 	deferred.resolve(true);
 
 	return deferred.promise;
