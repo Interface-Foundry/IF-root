@@ -30,8 +30,9 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	
 	var zoomLevel = 18;
 	// find min zoom level of all maps on the current floor
-	if (findMapsOnThisFloor($scope.world, landmark)) {
-		zoomLevel = Number(mapManager.findZoomLevel($scope.world.style.maps.localMapArray));
+	var mapsOnThisFloor = findMapsOnThisFloor($scope.world, landmark);
+	if (mapsOnThisFloor) {
+		zoomLevel = Number(mapManager.findZoomLevel(findMapsOnThisFloor($scope.world, landmark)));
 	}
 
 	goToMark(zoomLevel);
