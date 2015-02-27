@@ -170,7 +170,7 @@ if ($scope.landmark.hasTime) {
 		var landmarkIcon = 'img/marker/bubble-marker-50.png',
 				popupAnchorValues = [0, -40],
 				shadowUrl = '',
-				shadowAnchor = [4, -3],
+				// shadowAnchor = [4, -3],
 				iconAnchor = [17, 67],
 				iconSize = [35, 67];
 
@@ -188,7 +188,7 @@ if ($scope.landmark.hasTime) {
 				icon: {
 					iconUrl: landmarkIcon,
 					shadowUrl: shadowUrl,
-					shadowAnchor: shadowAnchor,
+					// shadowAnchor: shadowAnchor,
 					iconSize: iconSize,
 					iconAnchor: iconAnchor,
 					popupAnchor: popupAnchorValues

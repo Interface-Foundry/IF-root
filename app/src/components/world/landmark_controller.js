@@ -1,5 +1,5 @@
-app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 
-function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree) {
+app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService',
+function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "100px";
@@ -169,25 +169,39 @@ function goToMark(zoomLevel) {
 	  // 	map.removeMarker(marker._id);
   	// });
 	map.removeAllMarkers();
-  	
 
-  	map.addMarker($scope.landmark._id, {
-  			lat: $scope.landmark.loc.coordinates[1],
-  			lng: $scope.landmark.loc.coordinates[0],
-  			draggable:false,
-  			message:$scope.landmark.name,
-		  	icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17.5, 60],
-				popupAnchor: [0, -40]
-			},
-  			_id: $scope.landmark._id
-  			});
-  	map.setMarkerFocus($scope.landmark._id);
-  	
-  	map.refresh();
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			// shadowAnchor = [4, -3],
+			iconAnchor = [17.5, 60],
+			iconSize = [35, 67];
+
+	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = $scope.landmark.avatar;
+		popupAnchorValues = [0, -14];
+		// shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
+	map.addMarker($scope.landmark._id, {
+			lat: $scope.landmark.loc.coordinates[1],
+			lng: $scope.landmark.loc.coordinates[0],
+			draggable:false,
+			message:$scope.landmark.name,
+	  	icon: {
+			iconUrl: landmarkIcon,
+			shadowUrl: '',
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
+		},
+			_id: $scope.landmark._id
+			});
+	map.setMarkerFocus($scope.landmark._id);
+	
+	map.refresh();
 
 };
 
