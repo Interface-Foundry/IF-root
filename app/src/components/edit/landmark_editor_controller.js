@@ -304,11 +304,12 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
 					
-		//add markers to map in reverse order so popup matches left sidebar
-		for (var i = $scope.landmarks.length - 1; i >= 0; i--) {
+		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
-			$scope.addLandmarkMarker($scope.landmarks[i]);
-		}
+			$scope.addLandmarkMarker(value);
+		});
+
+		map.setMarkerFocus($scope.landmarks[0]._id)
 		landmarksLoaded = true;
 			
 	});
@@ -446,13 +447,14 @@ $scope.clearLoc = function(){
 	//--------------------------//
 
 $scope.chooseNewFloor = function(index) {
-	$scope.floorNumber = index;
+	$scope.floorNumber = $scope.$parent.floors[index].label;
 	$scope.$parent.landmark.loc_info.floor_num = $scope.$parent.floors[index].val;
 	$scope.updateFloor();
 }
 
 $scope.updateFloor = function() {
-	$scope.floorNumber = $scope.$parent.landmark.loc_info.floor_num || $scope.$parent.floors[0].label;
+	var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
+	$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;
 
 	var deferred = $q.defer(),
 			// landmarks without floor info will default to floor 1
@@ -519,10 +521,11 @@ function showLandmarksOnFloor(landmarks) {
 	// remove all landmarks
 	mapManager.removeAllMarkers();
 
-	// add landmarks that match the floor in reverse order so popup matches left sidebar
-	for (var i = landmarks.length - 1; i >=0; i--) {
-		$scope.$parent.addLandmarkMarker(landmarks[i]);
-	}
+	angular.forEach(landmarks, function(mark) {
+		// for each landmark add a marker
+		$scope.$parent.addLandmarkMarker(mark);
+	});
+	mapManager.setMarkerFocus($scope.$parent.landmark._id)
 
 	deferred.resolve(true);
 
