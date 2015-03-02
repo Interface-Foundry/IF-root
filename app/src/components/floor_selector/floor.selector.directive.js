@@ -6,56 +6,82 @@ function floorSelector(mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
-			world: '@world'
+			world: '=world',
+			style: '=style',
+			landmarks: '=landmarks',
+			loadLandmarks: '&'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
-		link: function(scope, elem, attr) {
+		link: link
+	};
 
-			scope.currentFloor = {};
+	function link(scope, elem, attr) {
 
-			scope.selectFloor = function(index) {
-				scope.currentFloor = scope.floors[index][0];
-				scope.showFloors = !scope.showFloors;
-				showCurrentFloorMaps(index);
-				console.log('index', index)
-				console.log('floor', scope.currentFloor.floor_num)
-			}
+		scope.showFloors = false;
+		scope.floors = _.chain(scope.world.style.maps.localMapArray)
+			.filter(function(f) {
+				return f.floor_num;
+			})
+			.groupBy(function(f) {
+				return f.floor_num;
+			})
+			.sortBy(function(f) {
+				return -f.floor_num;
+			})
+			.value()
+			.reverse();
 
-			scope.openFloorMenu = function() {
-				scope.showFloors = !scope.showFloors;
-			}
+		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
+											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
 
-			function showCurrentFloorMaps(index) {
-				mapManager.removeOverlays();
+		function findCurrentFloor(floors) {
+			var tempFiltered = floors.filter(function(f) {
+				return f[0].floor_num > 0;
+			});
+			return tempFiltered.length ? tempFiltered.slice(-1)[0][0] : floors[0][0];
+		}
+
+		scope.selectFloor = function(index) {
+			scope.currentFloor = scope.floors[index][0];
+			showCurrentFloorMaps(index);
+			showCurrentFloorLandmarks(index);
+		}
+
+		scope.openFloorMenu = function() {
+			scope.showFloors = !scope.showFloors;
+		}
+
+		function showCurrentFloorMaps(index) {
+			mapManager.removeOverlays();
+			setTimeout(function() {
 				var floorMaps = scope.floors[index];
 				floorMaps.forEach(function(m) {
 					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
 				});
-			}
-			
-			// when world changes in world controller, assign local vars in directive scope
-			attr.$observe('world', function(world) {
-				var world = JSON.parse(attr.world);
-				if (!world.style || !world.style.maps || !world.style.maps.localMapArray) {
-					return;
-				}
-				scope.showFloors = false;
-				scope.floors = _.chain(world.style.maps.localMapArray)
-					.filter(function(f) {
-						return f.floor_num;
-					})
-					.groupBy(function(f) {
-						return f.floor_num;
-					})
-					.sortBy(function(f) {
-						return -f.floor_num;
-					})
-					.value()
-					.reverse();
 
-				scope.currentFloor = scope.floors.slice(-1)[0][0];
-			});
+					
+			}, 100)
 		}
 
-	};
+		function showCurrentFloorLandmarks(index) {
+			scope.loadLandmarks();
+
+			setTimeout(function() {
+
+				var removeLandmarks = _.chain(scope.landmarks)
+					.filter(function(l) {
+						return l.loc_info;
+					})
+					.filter(function(l) {
+						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
+					})
+					.value();
+
+					removeLandmarks.forEach(function(l) {
+						mapManager.removeMarker(l._id);
+					});
+					
+				}, 500)
+		}	
+	}
 }

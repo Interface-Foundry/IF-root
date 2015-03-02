@@ -458,13 +458,15 @@ $scope.updateFloor = function() {
 		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
 
 		mapManager.removeOverlays();
-		floorMaps.forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
-				mapManager.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-			}	
-		});
+		setTimeout(function() {
+			floorMaps.forEach(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
+					mapManager.addOverlay(thisMap.localMapID, 
+									thisMap.localMapName, 
+									thisMap.localMapOptions);
+				}	
+			});
+		}, 100);
 	}
 	getLandmarks(currentFloor).then(function() {
 		deferred.resolve(true);
@@ -553,6 +555,8 @@ $scope.onUploadAvatar = function($files) {
 				$scope.$parent.landmark.tags = []; //if no array, then add
 			}
 			$scope.addTagName = $scope.addTagName.replace(/[^\w\s]/gi, '');
+
+			$scope.addTagName = $scope.addTagName.toLowerCase();
 
 			if($scope.$parent.landmark.tags.indexOf($scope.addTagName) > -1){ 
 				//check for dupes, if dupe dont added

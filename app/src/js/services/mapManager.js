@@ -428,6 +428,7 @@ mapManager.findMapFromArray = function(mapArray) {
 
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
+
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
@@ -448,6 +449,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 */
 	console.log(mapManager);
 	console.log(newOverlay);
+	// mapManager.refresh();
 };
 
 mapManager.removeOverlays = function() {
