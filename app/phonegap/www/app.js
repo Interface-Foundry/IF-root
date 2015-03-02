@@ -24137,17 +24137,54 @@ $scope.zoomOn = function() {
 }
 
 $scope.uploadWTGT = function($files, state) {
+	if (state == 'want') {
+		$scope.wtgt.images.wantBuilding = true;
+	}
+	else if (state == 'got') {
+		$scope.wtgt.images.gotBuilding = true;
+	}
+
 	var file = $files[0];
+
+	// get time
+	var time = new Date();
+
+	// get hashtag
+	var hashtag = null;
+	if (state == 'want') {
+		hashtag = $scope.wtgt.hashtags.want;
+	}
+	else if (state == 'got') {
+		hashtag = $scope.wtgt.hashtags.got;
+	}
+
+	var data = {
+		world_id: $scope.world._id,
+		worldID: $scope.world.id,
+		hashtag: hashtag,
+		userTime: time,
+		userLat: null,
+		userLon: null,
+		type: 'retail_campaign'
+	};
+
+	// get location
+	geoService.getLocation().then(function(coords) {
+		// console.log('coords: ', coords);
+		data.userLat = coords.lat;
+		data.userLon = coords.lng;
+		uploadPicture(file, state, data);
+	}, function(err) {
+		uploadPicture(file, state, data);
+	});
+}
+
+function uploadPicture(file, state, data) {
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
-		file: file
+		file: file,
+		data: JSON.stringify(data)
 	}).progress(function(e) {
-		if (state == 'want') {
-			$scope.wtgt.images.wantBuilding = true;
-		}
-		else if (state == 'got') {
-			$scope.wtgt.images.gotBuilding = true;
-		}
 	}).success(function(data) {
 		if (state == 'want') {
 			$scope.wtgt.images.want = data;
