@@ -64,7 +64,7 @@ function floorSelector(mapManager) {
 		}
 
 		function showCurrentFloorLandmarks() {
-			scope.loadLandmarks();
+			// scope.loadLandmarks();
 
 			var layers = scope.floors.map(function(f) {
 				return f[0].floor_num || 1;
@@ -76,25 +76,6 @@ function floorSelector(mapManager) {
 
 			mapManager.layers.overlays[(String(scope.currentFloor.floor_num))].visible = true;
 
-
-
-// 			setTimeout(function() {
-
-// 				var removeLandmarks = _.chain(scope.landmarks)
-// 					.filter(function(l) {
-// 						return l.loc_info;
-// 					})
-// 					.filter(function(l) {
-// 						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
-// 					})
-// 					.value();
-
-// 					removeLandmarks.forEach(function(l) {
-// 						mapManager.removeMarker(l._id);
-// 					});
-					
-// 				}, 500)
-// debugger
 		}	
 	}
 }

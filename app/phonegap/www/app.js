@@ -17141,9 +17141,13 @@ mapManager.newMarkerOverlay = function(landmark) {
 		mapManager.layers.overlays[layer] = {
 			type: 'group',
 			name: layer,
-			visible: true
+			visible: false
 		};
 	}
+}
+
+mapManager.toggleOverlay = function(layer) {
+	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
 }
 
 mapManager.getMarker = function(key) {
@@ -20962,7 +20966,10 @@ if ($scope.landmark.hasTime) {
 			iconAnchor = [25, 25];
 			iconSize = [50, 50]
 		}
-	
+		
+
+		mapManager.newMarkerOverlay(landmark);
+
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
@@ -20976,9 +20983,9 @@ if ($scope.landmark.hasTime) {
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
-				focus:true
+				focus:true,
+				layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
 			});
-		map.addMarkerToGroup(landmark);
 	}
 	
 	function landmarkDefaults() {
@@ -21292,7 +21299,7 @@ function showLandmarksOnFloor(landmarks) {
 	var deferred = $q.defer();
 
 	// remove all landmarks
-	mapManager.removeAllMarkers();
+	// mapManager.removeAllMarkers();
 	angular.forEach(landmarks, function(mark) {
 		// for each landmark add a marker
 		$scope.$parent.addLandmarkMarker(mark);
@@ -21879,7 +21886,7 @@ function floorSelector(mapManager) {
 		}
 
 		function showCurrentFloorLandmarks() {
-			scope.loadLandmarks();
+			// scope.loadLandmarks();
 
 			var layers = scope.floors.map(function(f) {
 				return f[0].floor_num || 1;
@@ -21891,25 +21898,6 @@ function floorSelector(mapManager) {
 
 			mapManager.layers.overlays[(String(scope.currentFloor.floor_num))].visible = true;
 
-
-
-// 			setTimeout(function() {
-
-// 				var removeLandmarks = _.chain(scope.landmarks)
-// 					.filter(function(l) {
-// 						return l.loc_info;
-// 					})
-// 					.filter(function(l) {
-// 						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
-// 					})
-// 					.value();
-
-// 					removeLandmarks.forEach(function(l) {
-// 						mapManager.removeMarker(l._id);
-// 					});
-					
-// 				}, 500)
-// debugger
 		}	
 	}
 }
@@ -24601,6 +24589,20 @@ function initLandmarks(data) {
 
 
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	mapManager.toggleOverlay(lowestFloor(tempMarkers));
+}
+
+function lowestFloor(landmarks) {
+	var sorted = _.chain(landmarks)
+		.filter(function(l) {
+			return l.loc_info;
+		})
+		.sortBy(function(l) {
+			return l.loc_info.floor_num;
+		})
+		.value();
+
+		return sorted.length ? String(sorted[0].loc_info.floor_num) : '1';
 }
 
 function markerFromLandmark(landmark) {

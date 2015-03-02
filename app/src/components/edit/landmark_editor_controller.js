@@ -182,7 +182,10 @@ if ($scope.landmark.hasTime) {
 			iconAnchor = [25, 25];
 			iconSize = [50, 50]
 		}
-	
+		
+
+		mapManager.newMarkerOverlay(landmark);
+
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
@@ -196,9 +199,9 @@ if ($scope.landmark.hasTime) {
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
-				focus:true
+				focus:true,
+				layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
 			});
-		map.addMarkerToGroup(landmark);
 	}
 	
 	function landmarkDefaults() {
@@ -512,7 +515,7 @@ function showLandmarksOnFloor(landmarks) {
 	var deferred = $q.defer();
 
 	// remove all landmarks
-	mapManager.removeAllMarkers();
+	// mapManager.removeAllMarkers();
 	angular.forEach(landmarks, function(mark) {
 		// for each landmark add a marker
 		$scope.$parent.addLandmarkMarker(mark);

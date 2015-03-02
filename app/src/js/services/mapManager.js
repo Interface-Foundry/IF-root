@@ -169,9 +169,13 @@ mapManager.newMarkerOverlay = function(landmark) {
 		mapManager.layers.overlays[layer] = {
 			type: 'group',
 			name: layer,
-			visible: true
+			visible: false
 		};
 	}
+}
+
+mapManager.toggleOverlay = function(layer) {
+	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
 }
 
 mapManager.getMarker = function(key) {

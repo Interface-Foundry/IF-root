@@ -425,6 +425,20 @@ function initLandmarks(data) {
 
 
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	mapManager.toggleOverlay(lowestFloor(tempMarkers));
+}
+
+function lowestFloor(landmarks) {
+	var sorted = _.chain(landmarks)
+		.filter(function(l) {
+			return l.loc_info;
+		})
+		.sortBy(function(l) {
+			return l.loc_info.floor_num;
+		})
+		.value();
+
+		return sorted.length ? String(sorted[0].loc_info.floor_num) : '1';
 }
 
 function markerFromLandmark(landmark) {
