@@ -4769,6 +4769,7 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
+	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
 
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
@@ -23640,6 +23641,17 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+// app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+// 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+// 		$scope.world = data.world;
+// 		$scope.style = data.style;
+// 		styleManager.navBG_color = $scope.style.navBG_color; 
+		
+// 		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+// 	})
+// }])
+
+// model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -24137,7 +24149,7 @@ return {
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -24153,6 +24165,14 @@ $scope.aperture.set('third');
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
+$scope.wtgt = {
+	hashtags: {
+		want: 'hashtag1',
+		got: 'hashtag2'
+	},
+	images: {}
+};
+$scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
@@ -24163,10 +24183,75 @@ var landmarksLoaded;
 $scope.zoomOn = function() {
 	  	zoomControl.style.display = "block";
 }
+
+$scope.uploadWTGT = function($files, state) {
+	if (state == 'want') {
+		$scope.wtgt.images.wantBuilding = true;
+	}
+	else if (state == 'got') {
+		$scope.wtgt.images.gotBuilding = true;
+	}
+
+	var file = $files[0];
+
+	// get time
+	var time = new Date();
+
+	// get hashtag
+	var hashtag = null;
+	if (state == 'want') {
+		hashtag = $scope.wtgt.hashtags.want;
+	}
+	else if (state == 'got') {
+		hashtag = $scope.wtgt.hashtags.got;
+	}
+
+	var data = {
+		world_id: $scope.world._id,
+		worldID: $scope.world.id,
+		hashtag: hashtag,
+		userTime: time,
+		userLat: null,
+		userLon: null,
+		type: 'retail_campaign'
+	};
+
+	// get location
+	geoService.getLocation().then(function(coords) {
+		// console.log('coords: ', coords);
+		data.userLat = coords.lat;
+		data.userLon = coords.lng;
+		uploadPicture(file, state, data);
+	}, function(err) {
+		uploadPicture(file, state, data);
+	});
+}
+
+function uploadPicture(file, state, data) {
+	$scope.upload = $upload.upload({
+		url: '/api/uploadPicture/',
+		file: file,
+		data: JSON.stringify(data)
+	}).progress(function(e) {
+	}).success(function(data) {
+		if (state == 'want') {
+			$scope.wtgt.images.want = data;
+			$scope.wtgt.images.wantBuilding = false;
+		}
+		else if (state == 'got') {
+			$scope.wtgt.images.got = data;
+			$scope.wtgt.images.gotBuilding = false;
+		}
+	});
+}
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
+
+		 if (bubbleTypeService.get() == 'Retail') {
+		 	$scope.isRetail = true;
+		 }
 		 style.navBG_color = $scope.style.navBG_color;
 
 		 //show edit buttons if user is world owner
