@@ -21073,7 +21073,10 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.addLandmarkMarker(value);
 		});
 
-		map.setMarkerFocus(filtered[0]._id);
+		if (filtered.length) {
+			map.setMarkerFocus(filtered[0]._id);
+			map.setMarkerSelected(filtered[0]._id);
+		}
 
 		landmarksLoaded = true;
 		addOverlay();
@@ -21082,7 +21085,14 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	});
 
 	function addOverlay() {
-		var initialFloor = $scope.landmarks[0].loc_info ? $scope.landmarks[0].loc_info.floor_num : 1;
+		var initialFloor;
+
+		if ($scope.landmarks.length) {
+			initialFloor = $scope.landmarks[0].loc_info ? $scope.landmarks[0].loc_info.floor_num : 1;
+		} else {
+			initialFloor = 1;
+		}
+
 		var floorMaps = [$scope.world.style.maps];
 
 		if (floorMaps[0].localMapArray){
@@ -21102,7 +21112,13 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	}
 	
 	function filterLandmarks(landmarks) {
-		var initialFloor = landmarks[0].loc_info ? landmarks[0].loc_info.floor_num : 1;
+		var initialFloor;
+
+		if ($scope.landmarks.length) {
+			initialFloor = landmarks[0].loc_info ? landmarks[0].loc_info.floor_num : 1;
+		} else {
+			initialFloor = 1;
+		}
 
 		var filtered;
 
