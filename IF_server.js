@@ -15,7 +15,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 
   interfacefoundry.com <3 <3 <3 
 
-  v0.6 Illya 
+  v0.8 Illya 
 */
 
 var fs = require('fs');
@@ -26,7 +26,11 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'), Magic = mmm.Magic;
 var configDB = require('./components/IF_auth/database.js');
+
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
+var submitContestEntry = require('./components/IF_contests/IF_contests.js');
+
+
 var crypto = require('crypto');
 var validator = require('validator');
 var passport = require('passport');
@@ -51,6 +55,8 @@ var sanitize = require('mongo-sanitize');
 // var multer  = require('multer');
 
 
+
+
 //--- BUBBLE ROUTING ----//
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
@@ -68,6 +74,7 @@ var mongoose = require('mongoose'),
     serverwidgetsSchema = require('./components/IF_schemas/serverwidgets_schema.js'),
     worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
+    anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
     monguurl = require('monguurl');
 
 mongoose.connect(configDB.url); 
@@ -539,10 +546,12 @@ function manageServerWidgets(id, tag, widgets){
 
 //upload profile pictures for worlds and landmarks and (users?)
 app.post('/api/upload', isLoggedIn, function (req, res) {
+
   var fstream;
   req.pipe(req.busboy);
 
   req.busboy.on('file', function (fieldname, file, filename, filesize, mimetype) {
+
     if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg'){
           if (req.headers['content-length'] > 10000000){
         console.log("Filesize too large.");
@@ -618,6 +627,14 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
+  var uploadContents;
+
+  //capturing incoming extra data in upload
+  req.busboy.on('field', function (key,val) {
+    uploadContents = JSON.parse(val);
+  });
+
+
   var fstream;
   req.pipe(req.busboy);
 
@@ -651,32 +668,53 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
         var buffer = readChunk.sync(tempPath, 0, 262);
 
         if (fileTypeProcess(buffer) == false){
-                    fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+          fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
+        }
+        else {  
+          im.resize({
+            srcPath: tempPath,
+            dstPath: tempPath,
+            width: 600,
+            quality: 0.8
+          }, function(err, stdout, stderr){
+
+            fs.readFile(tempPath, function(err, fileData) {
+
+              var s3 = new AWS.S3(); 
+              s3.putObject({ Bucket: 'if-server-general-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
+
+                if (err) 
+                  console.log(err);
+                else {    
+                  res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                  fs.unlink(tempPath);
+
+                  //passed in front end
+
+
+                  uploadContents = {
+                    userLat:"40.7179807",
+                    userLon:"-74.00594130000002",
+                    userTime: "",
+                    userID: "53c6b2c071109400002078c6",
+                    type: "retail_campaign",
+                    worldID: "5471d579dff0b473d62e1afd"
                   }
-                  else {  
-                    im.resize({
-                      srcPath: tempPath,
-                      dstPath: tempPath,
-                      width: 600,
-                      quality: 0.8
-                    }, function(err, stdout, stderr){
 
-                      fs.readFile(tempPath, function(err, fileData) {
+                  //additional content was passed with the image, handle it here
+                  if (uploadContents){
 
-                        var s3 = new AWS.S3(); 
-                        s3.putObject({ Bucket: 'if-server-general-images', Key: awsKey, Body: fileData, ACL:'public-read'}, function(err, data) {
-
-                          if (err) 
-                            console.log(err);
-                          else {    
-                            res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                            fs.unlink(tempPath);
-                          }
-                        });
-                      });
-                    });
+                    if (uploadContents.type == 'retail_campaign'){
+                      submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                    }
                   }
-                });
+
+                }
+              });
+            });
+          });
+        }
+      });
 }
 }
 else {
@@ -685,6 +723,7 @@ else {
 }
 });
 });
+
 
 
 ///////////////////////////
@@ -1018,6 +1057,71 @@ app.post('/api/delete_map', isLoggedIn, function(req,res){
 /////////////////////
 /////////////////////
 
+
+///////////////////////
+// ANON USER HANDLING//
+//////////////////////
+
+app.post('/api/anon_user/create', function(req,res){
+
+  //expecting lat lon time
+
+    var au = new anonUserSchema({ });
+
+    //
+
+    au.instances.push({
+      time: req.body.userTime
+    });
+
+    au.save(function (err, data) {
+        if (err){
+            console.log(err);
+            res.send(err);
+        }
+        else {
+            res.status(200).send([data._id]);
+            //NEW SESSION ID
+        }
+    });
+
+});
+
+
+//check user ID
+// CHECK IF USER EXISTS
+// THEN IF YES: GEN NEW SESSION ID AND RETURN
+// IF NOT, GEN NEW USER AND SEND BACK SESSION ID AND USER ID 
+
+
+app.post('/api/anon_user/update', function(req,res){
+
+  //expecting lat lon time
+  //expecting sessionID to track current user session to find and update in arr
+
+    anonUserSchema.findById(req.body.anonID, function(err, au) {
+
+      au.instances.push({
+        time: req.body.userTime
+      });    
+
+      au.save(function (err, data) {
+          if (err){
+              console.log(err);
+              res.send(err);
+          }
+          else {
+              res.status(200).send([data._id]);
+          }
+      });
+
+    });
+
+});
+
+///////////////////////////
+//END ANON USER HANDLING///
+//////////////////////////
 
 //looking for meetups in system created by user who logs in via meetup, then add them as owner
 app.post('/api/process_meetups', isLoggedIn, function (req, res) {
