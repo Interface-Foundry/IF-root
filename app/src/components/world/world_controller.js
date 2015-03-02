@@ -418,6 +418,12 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+
+	tempMarkers.forEach(function(m) {
+		mapManager.newMarkerOverlay(m);
+	});
+
+
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 }
 
@@ -451,7 +457,8 @@ function markerFromLandmark(landmark) {
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-		_id: landmark._id
+		_id: landmark._id,
+		layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
 	}
 }
 

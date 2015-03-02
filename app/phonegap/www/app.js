@@ -16973,8 +16973,8 @@ angular.module('tidepoolsServices')
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService', 'leafletMarkersHelpers',
+		function(leafletData, $rootScope, bubbleTypeService, leafletMarkersHelpers) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -17133,6 +17133,18 @@ mapManager.addMarkers = function(markers) {
 	}
 }
 
+mapManager.newMarkerOverlay = function(landmark) {
+	var layer = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
+	if (mapManager.layers.overlays[layer]) {
+		return;
+	} else {
+		mapManager.layers.overlays[layer] = {
+			type: 'group',
+			name: layer,
+			visible: true
+		};
+	}
+}
 
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
@@ -17424,9 +17436,19 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	// mapManager.refresh();
 };
 
-mapManager.removeOverlays = function() {
-	mapManager.layers.overlays = {};
-	mapManager.refresh();
+mapManager.removeOverlays = function(type) {
+	if (type) {
+		var temp = mapManager.layers.overlays;
+		mapManager.layers.overlays = {};
+		for (var p in temp) {
+			if (temp[p].type !== type) {
+				mapManager.layers.overlays[p] = temp[p];
+			}
+		}
+	} else {
+		mapManager.layers.overlays = {};
+		mapManager.refresh();
+	}
 }
 
 
@@ -20818,7 +20840,8 @@ var landmarksLoaded = false;
 				draggable:true,
 				message:'Drag to location on map',
 				focus:true
-			});				
+			});
+
 		});
 		}
 	}
@@ -20955,6 +20978,7 @@ if ($scope.landmark.hasTime) {
 				message:landmark.name || 'Drag to location on map',
 				focus:true
 			});
+		map.addMarkerToGroup(landmark);
 	}
 	
 	function landmarkDefaults() {
@@ -21835,7 +21859,7 @@ function floorSelector(mapManager) {
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
 			showCurrentFloorMaps(index);
-			showCurrentFloorLandmarks(index);
+			showCurrentFloorLandmarks();
 		}
 
 		scope.openFloorMenu = function() {
@@ -21843,7 +21867,7 @@ function floorSelector(mapManager) {
 		}
 
 		function showCurrentFloorMaps(index) {
-			mapManager.removeOverlays();
+			mapManager.removeOverlays('xyz');
 			setTimeout(function() {
 				var floorMaps = scope.floors[index];
 				floorMaps.forEach(function(m) {
@@ -21854,25 +21878,38 @@ function floorSelector(mapManager) {
 			}, 100)
 		}
 
-		function showCurrentFloorLandmarks(index) {
+		function showCurrentFloorLandmarks() {
 			scope.loadLandmarks();
 
-			setTimeout(function() {
+			var layers = scope.floors.map(function(f) {
+				return f[0].floor_num || 1;
+			});
 
-				var removeLandmarks = _.chain(scope.landmarks)
-					.filter(function(l) {
-						return l.loc_info;
-					})
-					.filter(function(l) {
-						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
-					})
-					.value();
+			layers.forEach(function(l) {
+				mapManager.layers.overlays[String(l)].visible = false;
+			});
 
-					removeLandmarks.forEach(function(l) {
-						mapManager.removeMarker(l._id);
-					});
+			mapManager.layers.overlays[(String(scope.currentFloor.floor_num))].visible = true;
+
+
+
+// 			setTimeout(function() {
+
+// 				var removeLandmarks = _.chain(scope.landmarks)
+// 					.filter(function(l) {
+// 						return l.loc_info;
+// 					})
+// 					.filter(function(l) {
+// 						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
+// 					})
+// 					.value();
+
+// 					removeLandmarks.forEach(function(l) {
+// 						mapManager.removeMarker(l._id);
+// 					});
 					
-				}, 500)
+// 				}, 500)
+// debugger
 		}	
 	}
 }
@@ -23157,7 +23194,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
 		return;
 	}
-	map.removeOverlays();
+	// map.removeOverlays();
 
 	findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
 		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
@@ -24557,6 +24594,12 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+
+	tempMarkers.forEach(function(m) {
+		mapManager.newMarkerOverlay(m);
+	});
+
+
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 }
 
@@ -24590,7 +24633,8 @@ function markerFromLandmark(landmark) {
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-		_id: landmark._id
+		_id: landmark._id,
+		layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
 	}
 }
 

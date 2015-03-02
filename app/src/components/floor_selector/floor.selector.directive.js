@@ -44,7 +44,7 @@ function floorSelector(mapManager) {
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
 			showCurrentFloorMaps(index);
-			showCurrentFloorLandmarks(index);
+			showCurrentFloorLandmarks();
 		}
 
 		scope.openFloorMenu = function() {
@@ -52,7 +52,7 @@ function floorSelector(mapManager) {
 		}
 
 		function showCurrentFloorMaps(index) {
-			mapManager.removeOverlays();
+			mapManager.removeOverlays('xyz');
 			setTimeout(function() {
 				var floorMaps = scope.floors[index];
 				floorMaps.forEach(function(m) {
@@ -63,25 +63,38 @@ function floorSelector(mapManager) {
 			}, 100)
 		}
 
-		function showCurrentFloorLandmarks(index) {
+		function showCurrentFloorLandmarks() {
 			scope.loadLandmarks();
 
-			setTimeout(function() {
+			var layers = scope.floors.map(function(f) {
+				return f[0].floor_num || 1;
+			});
 
-				var removeLandmarks = _.chain(scope.landmarks)
-					.filter(function(l) {
-						return l.loc_info;
-					})
-					.filter(function(l) {
-						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
-					})
-					.value();
+			layers.forEach(function(l) {
+				mapManager.layers.overlays[String(l)].visible = false;
+			});
 
-					removeLandmarks.forEach(function(l) {
-						mapManager.removeMarker(l._id);
-					});
+			mapManager.layers.overlays[(String(scope.currentFloor.floor_num))].visible = true;
+
+
+
+// 			setTimeout(function() {
+
+// 				var removeLandmarks = _.chain(scope.landmarks)
+// 					.filter(function(l) {
+// 						return l.loc_info;
+// 					})
+// 					.filter(function(l) {
+// 						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
+// 					})
+// 					.value();
+
+// 					removeLandmarks.forEach(function(l) {
+// 						mapManager.removeMarker(l._id);
+// 					});
 					
-				}, 500)
+// 				}, 500)
+// debugger
 		}	
 	}
 }

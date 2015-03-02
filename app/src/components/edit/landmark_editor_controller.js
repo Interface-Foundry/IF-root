@@ -60,7 +60,8 @@ var landmarksLoaded = false;
 				draggable:true,
 				message:'Drag to location on map',
 				focus:true
-			});				
+			});
+
 		});
 		}
 	}
@@ -197,6 +198,7 @@ if ($scope.landmark.hasTime) {
 				message:landmark.name || 'Drag to location on map',
 				focus:true
 			});
+		map.addMarkerToGroup(landmark);
 	}
 	
 	function landmarkDefaults() {

@@ -192,7 +192,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 	if (!(world.style && world.style.maps && world.style.maps.localMapArray)) {
 		return;
 	}
-	map.removeOverlays();
+	// map.removeOverlays();
 
 	findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
 		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
