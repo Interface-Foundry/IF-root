@@ -5,13 +5,16 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 
 var contestSchema = mongoose.Schema({
 
-    timestamp: { type: Date, default: Date.now },
-    userID: String,
+    userTime: { type: Date, default: Date.now },
+    userID: { type: String, index: true},
     userName: String,
     worldID: String,
+    worldName: String,
     v: Boolean,
-    userLat: String,
-    userLng: String
+    userLat: Number,
+    userLng: Number,
+    contestTag: String,
+    imgURL: String
 });
 
 

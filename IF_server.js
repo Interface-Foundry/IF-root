@@ -627,12 +627,24 @@ app.post('/api/upload', isLoggedIn, function (req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
 
-  var uploadContents;
+  var uploadContents = '';
 
   //capturing incoming extra data in upload
   req.busboy.on('field', function (key,val) {
-    uploadContents = JSON.parse(val);
+    uploadContents += val;
   });
+
+  // req.busboy.on('finish', function (key,val) {
+
+  //   if(uploadContents){
+  //     try {
+  //       uploadContents = JSON.parse(uploadContents);
+  //     }
+  //     catch(err){
+  //       console.log(err);
+  //     }
+  //   }
+  // });
 
 
   var fstream;
@@ -689,21 +701,14 @@ app.post('/api/uploadPicture', isLoggedIn, function (req, res) {
                   res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                   fs.unlink(tempPath);
 
-                  //passed in front end
-
-
-                  uploadContents = {
-                    userLat:"40.7179807",
-                    userLon:"-74.00594130000002",
-                    userTime: "",
-                    userID: "53c6b2c071109400002078c6",
-                    type: "retail_campaign",
-                    worldID: "5471d579dff0b473d62e1afd"
-                  }
-
                   //additional content was passed with the image, handle it here
                   if (uploadContents){
-
+                    try {
+                      uploadContents = JSON.parse(uploadContents);
+                    }
+                    catch(err){
+                      console.log(err);
+                    }
                     if (uploadContents.type == 'retail_campaign'){
                       submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
                     }
