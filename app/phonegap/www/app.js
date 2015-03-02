@@ -24125,6 +24125,7 @@ $scope.wtgt = {
 	},
 	images: {}
 };
+$scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
@@ -24200,6 +24201,10 @@ function uploadPicture(file, state, data) {
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
+
+		 if (bubbleTypeService.get() == 'Retail') {
+		 	$scope.isRetail = true;
+		 }
 		 style.navBG_color = $scope.style.navBG_color;
 
 		 //show edit buttons if user is world owner
