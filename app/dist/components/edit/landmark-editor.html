@@ -103,7 +103,7 @@
 	<br><br>
 
 	<div class="form-group">
-		<button class="btn btn-info btn-sm" ng-click="setLocation()" ng-hide="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">Add Location Details</button>
+		<button class="btn btn-info btn-sm"  ng-click="setLocation()" ng-hide="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">Add Location Details</button>
 	</div>
 
 
@@ -119,15 +119,16 @@
 
 				<label>Floor Number</label>
 				<br>
-				<button type="button" 
-								class="btn btn-default" 
-								data-html="1" 
-								ng-model="landmark.loc_info.floor_num" 
-								ng-options="floor.val as floor.label for floor in floors" 
-								ng-change="updateFloor()" 
-								bs-select>
-				  Action <span class="caret"></span>
-				</button>
+
+				<div class="btn-group" dropdown>
+		      <button type="button" 
+		      				class="btn btn-default dropdown-toggle" 
+		      				dropdown-toggle>{{floorNumber}}&nbsp;<span class="caret"></span>
+		      </button>
+		      <ul class="dropdown-menu" role="menu">
+		        <li ng-repeat="floor in floors" ng-click="chooseNewFloor($index)"><a href="#">{{floor.label}}</a></li>
+		      </ul>
+		    </div>
 
 			</div>
 

@@ -34,6 +34,8 @@ function floorSelector(mapManager) {
 		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
 
+		showCurrentFloorLandmarks(1);
+
 		function findCurrentFloor(floors) {
 			var tempFiltered = floors.filter(function(f) {
 				return f[0].floor_num > 0;
@@ -44,7 +46,8 @@ function floorSelector(mapManager) {
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
 			showCurrentFloorMaps(index);
-			showCurrentFloorLandmarks(index);
+			showCurrentFloorLandmarks();
+
 		}
 
 		scope.openFloorMenu = function() {
@@ -63,7 +66,8 @@ function floorSelector(mapManager) {
 			}, 100)
 		}
 
-		function showCurrentFloorLandmarks(index) {
+		function showCurrentFloorLandmarks(floor) {
+			floor = floor || scope.currentFloor.floor_num;
 			scope.loadLandmarks();
 
 			setTimeout(function() {
@@ -73,14 +77,14 @@ function floorSelector(mapManager) {
 						return l.loc_info;
 					})
 					.filter(function(l) {
-						return l.loc_info.floor_num !== scope.currentFloor.floor_num;
+						return l.loc_info.floor_num !== floor;
 					})
 					.value();
 
 					removeLandmarks.forEach(function(l) {
 						mapManager.removeMarker(l._id);
 					});
-					
+					scope.$apply()
 				}, 500)
 		}	
 	}

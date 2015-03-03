@@ -449,7 +449,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 */
 	console.log(mapManager);
 	console.log(newOverlay);
-	// mapManager.refresh();
+	mapManager.refresh();
 };
 
 mapManager.removeOverlays = function() {
