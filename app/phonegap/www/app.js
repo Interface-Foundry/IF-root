@@ -16837,26 +16837,114 @@ app
 				return currentBubbleType;
 			}
 }]);
-angular.module('tidepoolsServices')
-	.factory('dialogs', ['$rootScope', '$compile', 
-function($rootScope, $compile) {
-var dialogs = {
-	dialogTemplate: null
-} //used to manage different popup dialogs and modals
+app.factory('contest', ['$http', 'localStore', function($http, localStore) {
+	
+	var isContest = false;
+	var hashtag;
+	var id;
+	var startTime;
 
-dialogs.showDialog = function(name) {
-	dialogs.template = "templates/"+name;
-	dialogs.show = true;
-}
-
-dialogs.close = function($event) {
-	if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
-		dialogs.show = false;
+	return {
+		set: set,
+		login: login,
+		close: close
 	}
-}
 
-return dialogs;
+	function set(setID, setHashtag) {
+		isContest = true;
+		id = setID;
+		hashtag = setHashtag;
+		startTime = new Date();
+	}
+
+	function login(endTime) {
+		// call if user logs in after login prompt on photo upload (wtgt)
+		// tracking login by clicking "log in" or "create account" on auth dialog
+		if (isContest) {
+			timeDuration = getTimeDuration(startTime, endTime);
+			var data = {
+				anonID: id,
+				selectedUploadType: hashtag,
+				signedUp: true,
+				userTimeDuration: timeDuration
+			}
+			$http.post('/api/anon_user/update', data).
+				success(function(data) {
+					// console.log('success: ', data);
+				}).
+				error(function(data) {
+					// console.log('error: ', data);
+				});
+			reset();
+		}
+	}
+
+	function close(endTime) {
+		// call if user closes modal after login prompt on photo upload (wtgt)
+		if (isContest) {
+			var response;
+			timeDuration = getTimeDuration(startTime, endTime);
+			var data = {
+				anonID: id,
+				selectedUploadType: hashtag,
+				closedNoLogin: true,
+				userTimeDuration: timeDuration
+			}
+			$http.post('/api/anon_user/update', data).
+				success(function(data, status, headers, config) {
+					response = data[0];
+					// console.log('response: ', response);
+				}).
+				error(function(data, status, headers, config) {
+					// console.log('error: ', data);
+				});
+			compare(response, id);
+			reset();
+		}
+	}
+
+	function reset() {
+		isContest = false;
+		id = null;
+		hashtag = null;
+		startTime = null;
+	}
+
+	function getTimeDuration(start, end) {
+		var start = start.getTime();
+		var end = end.getTime();
+		return end - start; // in ms
+	}
+
+	function compare(response, id) {
+		// if the id returned from api is different from id passed into api, then update the id
+		if (response && response!== id) {
+			localStore.setID(response);
+		}
+	}
+
 }]);
+angular.module('tidepoolsServices')
+	.factory('dialogs', ['$rootScope', '$compile', 'contest',
+		function($rootScope, $compile, contest) {
+			var dialogs = {
+				dialogTemplate: null
+			} //used to manage different popup dialogs and modals
+
+			dialogs.showDialog = function(name) {
+				dialogs.template = "templates/"+name;
+				dialogs.show = true;
+			}
+
+			dialogs.close = function($event) {
+				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
+					dialogs.show = false;
+					contest.close(new Date); // for wtgt contest
+				}
+			}
+
+			return dialogs;
+		}]);
 angular.module('tidepoolsServices')
     .factory('geoService', [ '$q', 'alertManager',
     	function($q, alertManager) {
@@ -17091,6 +17179,42 @@ angular.module('tidepoolsServices')
 			}
 
 		return ifGlobals;
+}]);
+app.factory('localStore', ['$http', function($http) {
+
+	return {
+		getID: getID,
+		setID: setID,
+		createID: createID
+	}
+
+	function getID() {
+		if (typeof Storage !== 'undefined') {
+			return localStorage.id || undefined;
+		}
+		return undefined;
+	}
+
+	function setID(id) {
+		if (typeof Storage !== 'undefined') {
+			localStorage.id = id;
+		}
+	}
+
+	function createID() {
+		var data = {
+			userTime: new Date()
+		}
+		$http.post('/api/anon_user/create', data).
+			success(function(data) {
+				setID(data[0]);
+				// console.log('success: ', data);
+			}).
+			error(function(data) {
+				// console.log('error: ', data);
+			});
+	}
+
 }]);
 'use strict';
 
@@ -22190,7 +22314,7 @@ worldTree.getNearby().then(function(data) {
 });
 
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -22235,6 +22359,10 @@ $scope.search = function() {
 	} else {
 		$scope.searchOn = true;
 	}
+}
+
+$scope.wtgtLogin = function() {
+	contest.login(new Date);
 } 
 	
 $scope.go = function(path) {
@@ -24365,7 +24493,7 @@ return {
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -24386,7 +24514,8 @@ $scope.wtgt = {
 		want: 'hashtag1',
 		got: 'hashtag2'
 	},
-	images: {}
+	images: {},
+	building: {}
 };
 $scope.isRetail = false;
 
@@ -24401,46 +24530,42 @@ $scope.zoomOn = function() {
 }
 
 $scope.uploadWTGT = function($files, state) {
-	if (state == 'want') {
-		$scope.wtgt.images.wantBuilding = true;
+	if (userManager.loginStatus) {
+		$scope.wtgt.building[state] = true;
+
+		var file = $files[0];
+
+		// get time
+		var time = new Date();
+
+		// get hashtag
+		var hashtag = null;
+		hashtag = $scope.wtgt.hashtags[state];
+
+		var data = {
+			world_id: $scope.world._id,
+			worldID: $scope.world.id,
+			hashtag: hashtag,
+			userTime: time,
+			userLat: null,
+			userLon: null,
+			type: 'retail_campaign'
+		};
+
+		// get location
+		geoService.getLocation().then(function(coords) {
+			// console.log('coords: ', coords);
+			data.userLat = coords.lat;
+			data.userLon = coords.lng;
+			uploadPicture(file, state, data);
+		}, function(err) {
+			uploadPicture(file, state, data);
+		});
+	} else { // not logged in
+		dialogs.showDialog('authDialog.html');
+		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
 	}
-	else if (state == 'got') {
-		$scope.wtgt.images.gotBuilding = true;
-	}
-
-	var file = $files[0];
-
-	// get time
-	var time = new Date();
-
-	// get hashtag
-	var hashtag = null;
-	if (state == 'want') {
-		hashtag = $scope.wtgt.hashtags.want;
-	}
-	else if (state == 'got') {
-		hashtag = $scope.wtgt.hashtags.got;
-	}
-
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
-
-	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
-	}, function(err) {
-		uploadPicture(file, state, data);
-	});
+	
 }
 
 function uploadPicture(file, state, data) {
@@ -24450,14 +24575,8 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		if (state == 'want') {
-			$scope.wtgt.images.want = data;
-			$scope.wtgt.images.wantBuilding = false;
-		}
-		else if (state == 'got') {
-			$scope.wtgt.images.got = data;
-			$scope.wtgt.images.gotBuilding = false;
-		}
+		$scope.wtgt.images[state] = data;
+		$scope.wtgt.building[state] = false;
 	});
 }
  
@@ -24468,6 +24587,13 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
 		 }
+
+		 //local storage
+		 if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	 }
+		 
+
 		 style.navBG_color = $scope.style.navBG_color;
 
 		 //show edit buttons if user is world owner
