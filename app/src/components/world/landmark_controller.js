@@ -209,7 +209,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 	if (!map.localMapArrayExists(world)) {
 		return;
 	}
-	map.removeOverlays();
+	// map.removeOverlays();
 
 	setTimeout(function() {
 		findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
