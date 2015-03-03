@@ -166,7 +166,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 
 		var worldStyle = $scope.world.style;
-		groupFloorMaps(worldStyle);
+		map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -185,34 +185,34 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		$scope.loadLandmarks();
 }
 
-	function groupFloorMaps(worldStyle) {
-		if (!worldStyle.hasOwnProperty('maps')) {
-			return;
-		}
+	// function groupFloorMaps(worldStyle) {
+	// 	if (!worldStyle.hasOwnProperty('maps')) {
+	// 		return;
+	// 	}
 
-		// create array of overlay maps for each floor
+	// 	// create array of overlay maps for each floor
 
-		// legacy maps
-		var localMaps = [worldStyle.maps];
+	// 	// legacy maps
+	// 	var localMaps = [worldStyle.maps];
 		
-		// if localMapArray exists, replace local map with sorted array
-		if (hasLocalMapArray(worldStyle.maps)) {
-			localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
-				return m.floor_num
-			});
-			for (mapGroup in localMaps) {
-				var overlayGroup = localMaps[mapGroup].map(function(m) {
-					return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-				});
-				var groupName = mapGroup + '-maps';
-				map.addOverlayGroup(overlayGroup, groupName);
-			}
-		}
-	}
+	// 	// if localMapArray exists, replace local map with sorted array
+	// 	if (hasLocalMapArray(worldStyle.maps)) {
+	// 		localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+	// 			return m.floor_num
+	// 		});
+	// 		for (mapGroup in localMaps) {
+	// 			var overlayGroup = localMaps[mapGroup].map(function(m) {
+	// 				return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+	// 			});
+	// 			var groupName = mapGroup + '-maps';
+	// 			map.addOverlayGroup(overlayGroup, groupName);
+	// 		}
+	// 	}
+	// }
 
-	function hasLocalMapArray(maps) {
-		return maps.localMapArray && maps.localMapArray.length;
-	}
+	// function hasLocalMapArray(maps) {
+	// 	return maps.localMapArray && maps.localMapArray.length;
+	// }
 
 
 

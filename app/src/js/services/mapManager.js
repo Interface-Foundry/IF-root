@@ -587,6 +587,33 @@ mapManager.sortFloors = function(mapArray) {
 		.value();
 }
 
+mapManager.groupFloorMaps = function(worldStyle) {
+	if (!worldStyle.hasOwnProperty('maps')) {
+		return;
+	}
+
+	// legacy maps
+	var localMaps = [worldStyle.maps];
+	
+	// if localMapArray exists, replace local map with sorted array
+	if (hasLocalMapArray(worldStyle.maps)) {
+		localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+			return m.floor_num
+		});
+		for (mapGroup in localMaps) {
+			var overlayGroup = localMaps[mapGroup].map(function(m) {
+				return mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+			});
+			var groupName = mapGroup + '-maps';
+			mapManager.addOverlayGroup(overlayGroup, groupName);
+		}
+	}
+}
+
+function hasLocalMapArray(maps) {
+	return maps.localMapArray && maps.localMapArray.length;
+}
+
 mapManager.setCircleMaskState = function(state) {
 	if (mapManager.circleMaskLayer) {
 		mapManager.circleMaskLayer._setState(state);
