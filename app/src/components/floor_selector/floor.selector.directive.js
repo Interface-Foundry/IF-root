@@ -52,30 +52,32 @@ function floorSelector(mapManager) {
 		}
 
 		function showCurrentFloorMaps(index) {
-			mapManager.removeOverlays('xyz');
-			setTimeout(function() {
-				var floorMaps = scope.floors[index];
-				floorMaps.forEach(function(m) {
-					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-				});
+	// 		mapManager.removeOverlays('xyz');
+	// 		setTimeout(function() {
+	// 			var floorMaps = scope.floors[index];
+	// 			floorMaps.forEach(function(m) {
+	// 				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+	// 			});
 
 					
-			}, 100)
+	// 		}, 100);
+
+	// debugger
+			// var layers = _.chain(scope.floors)
+			// 	.filter()
+
 		}
 
 		function showCurrentFloorLandmarks() {
-			// scope.loadLandmarks();
-
 			var layers = scope.floors.map(function(f) {
 				return f[0].floor_num || 1;
 			});
 
 			layers.forEach(function(l) {
-				mapManager.layers.overlays[String(l)].visible = false;
+				mapManager.turnOffOverlay(String(l));
 			});
 
-			mapManager.layers.overlays[(String(scope.currentFloor.floor_num))].visible = true;
-
+			mapManager.toggleOverlay(String(scope.currentFloor.floor_num));
 		}	
 	}
 }

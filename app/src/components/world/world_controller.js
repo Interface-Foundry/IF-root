@@ -94,28 +94,29 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			console.error('No center found! Error!');
 		}
 
-
 		var worldStyle = $scope.world.style;
+		groupFloorMaps(worldStyle);
 
-		if (worldStyle.hasOwnProperty('maps')) {
-			// default local map is localMapID
-			var theseMaps = [worldStyle.maps];
+		// if (worldStyle.hasOwnProperty('maps')) {
+		// 	// default local map is localMapID
+		// 	var theseMaps = [worldStyle.maps];
 
-			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray){
-				if (worldStyle.maps.localMapArray.length > 0) {
-					theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
-				}			
-			}
+		// 	// if localMapArray exists, replace local map with lowest floor from array
+		// 	if (worldStyle.maps.localMapArray){
+		// 		if (worldStyle.maps.localMapArray.length > 0) {
+		// 			theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
+		// 		}			
+		// 	}
 			
-			theseMaps.forEach(function(thisMap) {
-				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-					map.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-				}
+		// 	var overlays = [];
+		// 	theseMaps.forEach(function(thisMap) {
+		// 		if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+		// 			overlays.push(map.addOverlay(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions, thisMap.floor_num));
+		// 		}
 				
-			})
+		// 	})
+		// 	var groupName = theseMaps[0].floor_num ? String(theseMaps[0].floor_num) : '1';
+		// 	map.addOverlayGroup(overlays, groupName)
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = worldStyle.maps.localMapOptions.maxZoom || 22;
@@ -129,10 +130,38 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 			}
-		}
+		// }
 		
 		$scope.loadLandmarks();
 }
+
+	function groupFloorMaps(worldStyle) {
+		if (!worldStyle.hasOwnProperty('maps')) {
+			return;
+		}
+
+		// create array of overlay maps for each floor
+
+		// legacy maps
+		var localMaps = [worldStyle.maps];
+		
+		// if localMapArray exists, replace local map with sorted array
+		if (worldStyle.maps.localMapArray) {
+			if (worldStyle.maps.localMapArray.length > 0) {
+				localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+					return m.floor_num
+				});
+			}
+		}
+		for (mapGroup in localMaps) {
+			var overlayGroup = localMaps[mapGroup].map(function(m) {
+				return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+			});
+			map.addOverlayGroup(overlayGroup, mapGroup);
+		}
+	}
+
+
 
   	
 function loadWidgets() { //needs to be generalized
