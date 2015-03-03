@@ -163,23 +163,35 @@ mapManager.addMarkers = function(markers) {
 
 mapManager.newMarkerOverlay = function(landmark) {
 	var layer = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
-	if (mapManager.layers.overlays[layer]) {
+	if (mapManager.layers.overlays[layer + '-landmarks']) {
 		return;
 	} else {
-		mapManager.layers.overlays[layer] = {
+		mapManager.layers.overlays[layer + '-landmarks'] = {
 			type: 'group',
-			name: layer,
+			name: layer + '-landmarks',
 			visible: false
 		};
 	}
 }
 
 mapManager.toggleOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
 	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
 }
 
 mapManager.turnOffOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
 	return mapManager.layers.overlays[layer].visible = false;
+}
+
+mapManager.findVisibleLayers = function() {
+	return _.filter(mapManager.layers.overlays, function(l) {
+		return l.visible === true;
+	});
 }
 
 mapManager.getMarker = function(key) {

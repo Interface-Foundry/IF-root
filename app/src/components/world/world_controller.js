@@ -146,19 +146,22 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		var localMaps = [worldStyle.maps];
 		
 		// if localMapArray exists, replace local map with sorted array
-		if (worldStyle.maps.localMapArray) {
-			if (worldStyle.maps.localMapArray.length > 0) {
-				localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
-					return m.floor_num
+		if (hasLocalMapArray(worldStyle.maps)) {
+			localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+				return m.floor_num
+			});
+			for (mapGroup in localMaps) {
+				var overlayGroup = localMaps[mapGroup].map(function(m) {
+					return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
 				});
+				var groupName = mapGroup + '-maps';
+				map.addOverlayGroup(overlayGroup, groupName);
 			}
 		}
-		for (mapGroup in localMaps) {
-			var overlayGroup = localMaps[mapGroup].map(function(m) {
-				return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-			});
-			map.addOverlayGroup(overlayGroup, mapGroup);
-		}
+	}
+
+	function hasLocalMapArray(maps) {
+		return maps.localMapArray && maps.localMapArray.length;
 	}
 
 
@@ -447,14 +450,23 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	if (tempMarkers.length) {
+		createMapAndMarkerLayers(tempMarkers)
+	}
+	
+}
 
+function createMapAndMarkerLayers(tempMarkers) {
 	tempMarkers.forEach(function(m) {
 		mapManager.newMarkerOverlay(m);
 	});
 
 
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
-	mapManager.toggleOverlay(lowestFloor(tempMarkers));
+	var mapLayer = lowestFloor(tempMarkers) + '-maps';
+	var landmarkLayer = lowestFloor(tempMarkers) + '-landmarks';
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
 }
 
 function lowestFloor(landmarks) {
@@ -477,7 +489,8 @@ function markerFromLandmark(landmark) {
 			shadowUrl = '',
 			shadowAnchor = [4, -3],
 			iconAnchor = [17, 67],
-			iconSize = [35, 67];
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
@@ -501,8 +514,12 @@ function markerFromLandmark(landmark) {
 			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id,
-		layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
+		layer: layerGroup
 	}
+}
+
+function getLayerGroup(landmark) {
+	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
 }
 
 

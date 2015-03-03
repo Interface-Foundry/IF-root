@@ -43,41 +43,34 @@ function floorSelector(mapManager) {
 
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
-			showCurrentFloorMaps(index);
-			showCurrentFloorLandmarks();
+			turnOffFloorLayers();
+			turnOnFloorMaps();
+			turnOnFloorLandmarks();
 		}
 
 		scope.openFloorMenu = function() {
 			scope.showFloors = !scope.showFloors;
 		}
 
-		function showCurrentFloorMaps(index) {
-	// 		mapManager.removeOverlays('xyz');
-	// 		setTimeout(function() {
-	// 			var floorMaps = scope.floors[index];
-	// 			floorMaps.forEach(function(m) {
-	// 				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-	// 			});
 
-					
-	// 		}, 100);
-
-	// debugger
-			// var layers = _.chain(scope.floors)
-			// 	.filter()
-
-		}
-
-		function showCurrentFloorLandmarks() {
+		function turnOffFloorLayers() {
 			var layers = scope.floors.map(function(f) {
 				return f[0].floor_num || 1;
 			});
 
-			layers.forEach(function(l) {
-				mapManager.turnOffOverlay(String(l));
+			mapManager.findVisibleLayers().forEach(function(l) {
+				mapManager.toggleOverlay(l.name);			
 			});
+		}
 
-			mapManager.toggleOverlay(String(scope.currentFloor.floor_num));
-		}	
+		function turnOnFloorMaps() {
+			var currentMapLayer = scope.currentFloor.floor_num + '-maps';
+			mapManager.toggleOverlay(currentMapLayer);
+		}
+
+		function turnOnFloorLandmarks() {
+			var currentLandmarkLayer = scope.currentFloor.floor_num + '-landmarks';
+			mapManager.toggleOverlay(currentLandmarkLayer);
+		}
 	}
 }

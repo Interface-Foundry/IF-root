@@ -17236,23 +17236,35 @@ mapManager.addMarkers = function(markers) {
 
 mapManager.newMarkerOverlay = function(landmark) {
 	var layer = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
-	if (mapManager.layers.overlays[layer]) {
+	if (mapManager.layers.overlays[layer + '-landmarks']) {
 		return;
 	} else {
-		mapManager.layers.overlays[layer] = {
+		mapManager.layers.overlays[layer + '-landmarks'] = {
 			type: 'group',
-			name: layer,
+			name: layer + '-landmarks',
 			visible: false
 		};
 	}
 }
 
 mapManager.toggleOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
 	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
 }
 
 mapManager.turnOffOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
 	return mapManager.layers.overlays[layer].visible = false;
+}
+
+mapManager.findVisibleLayers = function() {
+	return _.filter(mapManager.layers.overlays, function(l) {
+		return l.visible === true;
+	});
 }
 
 mapManager.getMarker = function(key) {
@@ -21032,7 +21044,8 @@ if ($scope.landmark.hasTime) {
 				shadowUrl = '',
 				shadowAnchor = [4, -3],
 				iconAnchor = [17, 67],
-				iconSize = [35, 67];
+				iconSize = [35, 67],
+				layerGroup = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
 
 		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 			landmarkIcon = landmark.avatar;
@@ -21059,7 +21072,7 @@ if ($scope.landmark.hasTime) {
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
 				focus:true,
-				layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
+				layer: layerGroup + '-landmarks'
 			});
 	}
 	
@@ -21938,42 +21951,35 @@ function floorSelector(mapManager) {
 
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
-			showCurrentFloorMaps(index);
-			showCurrentFloorLandmarks();
+			turnOffFloorLayers();
+			turnOnFloorMaps();
+			turnOnFloorLandmarks();
 		}
 
 		scope.openFloorMenu = function() {
 			scope.showFloors = !scope.showFloors;
 		}
 
-		function showCurrentFloorMaps(index) {
-	// 		mapManager.removeOverlays('xyz');
-	// 		setTimeout(function() {
-	// 			var floorMaps = scope.floors[index];
-	// 			floorMaps.forEach(function(m) {
-	// 				mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-	// 			});
 
-					
-	// 		}, 100);
-
-	// debugger
-			// var layers = _.chain(scope.floors)
-			// 	.filter()
-
-		}
-
-		function showCurrentFloorLandmarks() {
+		function turnOffFloorLayers() {
 			var layers = scope.floors.map(function(f) {
 				return f[0].floor_num || 1;
 			});
 
-			layers.forEach(function(l) {
-				mapManager.turnOffOverlay(String(l));
+			mapManager.findVisibleLayers().forEach(function(l) {
+				mapManager.toggleOverlay(l.name);			
 			});
+		}
 
-			mapManager.toggleOverlay(String(scope.currentFloor.floor_num));
-		}	
+		function turnOnFloorMaps() {
+			var currentMapLayer = scope.currentFloor.floor_num + '-maps';
+			mapManager.toggleOverlay(currentMapLayer);
+		}
+
+		function turnOnFloorLandmarks() {
+			var currentLandmarkLayer = scope.currentFloor.floor_num + '-landmarks';
+			mapManager.toggleOverlay(currentLandmarkLayer);
+		}
 	}
 }
 
@@ -24359,19 +24365,22 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		var localMaps = [worldStyle.maps];
 		
 		// if localMapArray exists, replace local map with sorted array
-		if (worldStyle.maps.localMapArray) {
-			if (worldStyle.maps.localMapArray.length > 0) {
-				localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
-					return m.floor_num
+		if (hasLocalMapArray(worldStyle.maps)) {
+			localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+				return m.floor_num
+			});
+			for (mapGroup in localMaps) {
+				var overlayGroup = localMaps[mapGroup].map(function(m) {
+					return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
 				});
+				var groupName = mapGroup + '-maps';
+				map.addOverlayGroup(overlayGroup, groupName);
 			}
 		}
-		for (mapGroup in localMaps) {
-			var overlayGroup = localMaps[mapGroup].map(function(m) {
-				return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-			});
-			map.addOverlayGroup(overlayGroup, mapGroup);
-		}
+	}
+
+	function hasLocalMapArray(maps) {
+		return maps.localMapArray && maps.localMapArray.length;
 	}
 
 
@@ -24660,14 +24669,23 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	if (tempMarkers.length) {
+		createMapAndMarkerLayers(tempMarkers)
+	}
+	
+}
 
+function createMapAndMarkerLayers(tempMarkers) {
 	tempMarkers.forEach(function(m) {
 		mapManager.newMarkerOverlay(m);
 	});
 
 
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
-	mapManager.toggleOverlay(lowestFloor(tempMarkers));
+	var mapLayer = lowestFloor(tempMarkers) + '-maps';
+	var landmarkLayer = lowestFloor(tempMarkers) + '-landmarks';
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
 }
 
 function lowestFloor(landmarks) {
@@ -24690,7 +24708,8 @@ function markerFromLandmark(landmark) {
 			shadowUrl = '',
 			shadowAnchor = [4, -3],
 			iconAnchor = [17, 67],
-			iconSize = [35, 67];
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
@@ -24714,8 +24733,12 @@ function markerFromLandmark(landmark) {
 			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id,
-		layer: landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1'
+		layer: layerGroup
 	}
+}
+
+function getLayerGroup(landmark) {
+	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
 }
 
 
