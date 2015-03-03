@@ -94,11 +94,10 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 }
 
 		 //local storage
-		 if (!userManager.loginStatus) {
-		 	if (!localStore.getID()) {
-		 		localStore.createID();
-		 	}
-		 }
+		 if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	 }
+		 
 
 		 style.navBG_color = $scope.style.navBG_color;
 
