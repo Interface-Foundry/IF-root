@@ -34,8 +34,6 @@ function floorSelector(mapManager) {
 		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
 
-		showCurrentFloorLandmarks(1);
-
 		function findCurrentFloor(floors) {
 			var tempFiltered = floors.filter(function(f) {
 				return f[0].floor_num > 0;

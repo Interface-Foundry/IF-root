@@ -17750,6 +17750,10 @@ mapManager.addOverlayGroup = function(overlays, groupName) {
 	}
 }
 
+mapManager.overlayExists = function(layerName) {
+	return mapManager.layers.overlays.hasOwnProperty(layerName);
+}
+
 
 mapManager.removeOverlays = function(type) {
 	if (type) {
@@ -22240,8 +22244,6 @@ function floorSelector(mapManager) {
 		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
 
-		showCurrentFloorLandmarks(1);
-
 		function findCurrentFloor(floors) {
 			var tempFiltered = floors.filter(function(f) {
 				return f[0].floor_num > 0;
@@ -23583,17 +23585,35 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 	if (!map.localMapArrayExists(world)) {
 		return;
 	}
-	// map.removeOverlays();
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
 
-	setTimeout(function() {
-		findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-				map.addOverlay(thisMap.localMapID, 
-							thisMap.localMapName, 
-							thisMap.localMapOptions);
-			}
-		});
-	}, 200)
+		var groupName = landmark.loc_info && landmark.loc_info.floor_num ? 
+										landmark.loc_info.floor_num + '-maps' : '1-maps';
+
+		if (mapManager.overlayExists(groupName)) {
+			mapManager.toggleOverlay(groupName);
+		} else {
+			// setTimeout(function() {
+				overlayGroup = findMapsOnThisFloor(world, landmark).map(function(thisMap) {
+					if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+						return map.addOverlay(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+					}
+				});
+				map.addOverlayGroup(overlayGroup, groupName);
+				mapManager.toggleOverlay(groupName);
+			// }, 200)
+		}
+
+	// // find landmark floor
+	// var layerGroup = landmark.loc_info && landmark.loc_info.floor_num ? 
+	// 	landmark.loc_info.floor_num + '-maps' : '1-map';
+	// // hide other overlays
+	// mapManager.findVisibleLayers().forEach(function(l) {
+	// 	mapManager.toggleOverlay(l.name);
+	// });
+	// // show landmark floor overlay
 }
 
 function findMapsOnThisFloor(world, landmark) {

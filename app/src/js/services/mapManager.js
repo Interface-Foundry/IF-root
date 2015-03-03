@@ -532,6 +532,10 @@ mapManager.addOverlayGroup = function(overlays, groupName) {
 	}
 }
 
+mapManager.overlayExists = function(layerName) {
+	return mapManager.layers.overlays.hasOwnProperty(layerName);
+}
+
 
 mapManager.removeOverlays = function(type) {
 	if (type) {
