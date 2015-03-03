@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -19,7 +19,8 @@ $scope.wtgt = {
 		want: 'hashtag1',
 		got: 'hashtag2'
 	},
-	images: {}
+	images: {},
+	building: {}
 };
 $scope.isRetail = false;
 
@@ -34,46 +35,42 @@ $scope.zoomOn = function() {
 }
 
 $scope.uploadWTGT = function($files, state) {
-	if (state == 'want') {
-		$scope.wtgt.images.wantBuilding = true;
+	if (userManager.loginStatus) {
+		$scope.wtgt.building[state] = true;
+
+		var file = $files[0];
+
+		// get time
+		var time = new Date();
+
+		// get hashtag
+		var hashtag = null;
+		hashtag = $scope.wtgt.hashtags[state];
+
+		var data = {
+			world_id: $scope.world._id,
+			worldID: $scope.world.id,
+			hashtag: hashtag,
+			userTime: time,
+			userLat: null,
+			userLon: null,
+			type: 'retail_campaign'
+		};
+
+		// get location
+		geoService.getLocation().then(function(coords) {
+			// console.log('coords: ', coords);
+			data.userLat = coords.lat;
+			data.userLon = coords.lng;
+			uploadPicture(file, state, data);
+		}, function(err) {
+			uploadPicture(file, state, data);
+		});
+	} else { // not logged in
+		dialogs.showDialog('authDialog.html');
+		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
 	}
-	else if (state == 'got') {
-		$scope.wtgt.images.gotBuilding = true;
-	}
-
-	var file = $files[0];
-
-	// get time
-	var time = new Date();
-
-	// get hashtag
-	var hashtag = null;
-	if (state == 'want') {
-		hashtag = $scope.wtgt.hashtags.want;
-	}
-	else if (state == 'got') {
-		hashtag = $scope.wtgt.hashtags.got;
-	}
-
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
-
-	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
-	}, function(err) {
-		uploadPicture(file, state, data);
-	});
+	
 }
 
 function uploadPicture(file, state, data) {
@@ -83,14 +80,8 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		if (state == 'want') {
-			$scope.wtgt.images.want = data;
-			$scope.wtgt.images.wantBuilding = false;
-		}
-		else if (state == 'got') {
-			$scope.wtgt.images.got = data;
-			$scope.wtgt.images.gotBuilding = false;
-		}
+		$scope.wtgt.images[state] = data;
+		$scope.wtgt.building[state] = false;
 	});
 }
  
@@ -101,6 +92,14 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
 		 }
+
+		 //local storage
+		 if (!userManager.loginStatus) {
+		 	if (!localStore.getID()) {
+		 		localStore.createID();
+		 	}
+		 }
+
 		 style.navBG_color = $scope.style.navBG_color;
 
 		 //show edit buttons if user is world owner

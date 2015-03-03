@@ -1076,7 +1076,7 @@ app.post('/api/anon_user/create', function(req,res){
     //
 
     au.instances.push({
-      time: req.body.userTime
+      userTime: req.body.userTime
     });
 
     au.save(function (err, data) {
@@ -1107,7 +1107,7 @@ app.post('/api/anon_user/update', function(req,res){
     anonUserSchema.findById(req.body.anonID, function(err, au) {
 
       au.instances.push({
-        time: req.body.userTime
+        userTime: req.body.userTime
       });    
 
       au.save(function (err, data) {
