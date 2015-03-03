@@ -340,9 +340,6 @@ img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]):not([src="i
 .u-green {
   color: #5cb85c;
 }
-.u-pointer {
-  cursor: pointer;
-}
 .u-opacity35 {
   opacity: 0.5;
 }
