@@ -1979,15 +1979,18 @@ li.alert {
   cursor: pointer;
 }
 .floor-indicator {
-  width: 0;
-  height: 0;
+  bottom: 100px;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
   border-left: 8px solid blue;
   display: inline-block;
-  margin-left: -16px;
-  margin-right: 8px;
-  margin-bottom: -1px;
+  height: 0;
+  position: absolute;
+  right: 44px;
+  width: 0;
+  z-index: 20;
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
 #floor-selector-shadow {
   position: absolute;
@@ -2013,6 +2016,20 @@ li.alert {
 .aperture-third #floor-nums {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
+}
+.aperture-off .floor-indicator {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-third .floor-indicator {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-off .floor-indicator {
+  right: -44px;
+}
+.aperture-third .floor-indicator {
+  right: -44px;
 }
 /*want this*/
 .wtgt {

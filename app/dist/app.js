@@ -22026,6 +22026,7 @@ function floorSelector(mapManager) {
 	function link(scope, elem, attr) {
 
 		scope.showFloors = false;
+
 		scope.floors = _.chain(scope.world.style.maps.localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
@@ -22038,6 +22039,8 @@ function floorSelector(mapManager) {
 			})
 			.value()
 			.reverse();
+
+		scope.selectedIndex = scope.floors.length - 1;
 
 		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
@@ -22052,7 +22055,9 @@ function floorSelector(mapManager) {
 		}
 
 		scope.selectFloor = function(index) {
+			scope.selectedIndex = index;
 			scope.currentFloor = scope.floors[index][0];
+			updateIndicator();
 			showCurrentFloorMaps(index);
 			showCurrentFloorLandmarks();
 
@@ -22060,6 +22065,7 @@ function floorSelector(mapManager) {
 
 		scope.openFloorMenu = function() {
 			scope.showFloors = !scope.showFloors;
+			updateIndicator();
 		}
 
 		function showCurrentFloorMaps(index) {
@@ -22094,7 +22100,16 @@ function floorSelector(mapManager) {
 					});
 					scope.$apply()
 				}, 500)
-		}	
+		}
+
+		function updateIndicator() {
+			if (scope.showFloors) {
+				var bottom = (scope.floors.length - scope.selectedIndex - 1) * 42 + 148 + 'px';
+				$('.floor-indicator').css({bottom: bottom, opacity: 1});
+			} else {
+				$('.floor-indicator').css({bottom: '100px', opacity: 0});
+			}
+		}
 	}
 }
 
