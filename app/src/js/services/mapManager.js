@@ -191,6 +191,15 @@ mapManager.removeAllMarkers = function() {
 	mapManager.markers = {};
 }
 
+mapManager.moveMarker = function(key, pos) {
+	var marker = mapManager.getMarker(key);
+	if (marker) {
+		marker.lat = pos.lat;
+		marker.lng = pos.lng;
+	}
+	mapManager.refresh();
+};
+
 mapManager.setMarkers = function(markers) {
 	if (_.isArray(markers)) {
 		mapManager.markers = _.indexBy(markers, function(marker) {
