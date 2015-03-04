@@ -440,37 +440,37 @@ mapManager.findMapFromArray = function(mapArray) {
 }
 
 
-// mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
-// 	console.log('addOverlay');
+mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
+	console.log('addOverlay');
 
-// 	var newOverlay = {};
-// 	// if (localMapOptions.maxZoom>19) {
-// 	// 	localMapOptions.maxZoom = 19;
-// 	// }
-// 	localMapOptions.zIndex = 10;
-// 	console.log('requesting new overlay')
-// 	mapManager.layers.overlays[localMapID] = {
-// 		name: localMapName,
-// 		type: 'xyz',
-// 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
-// 		layerOptions: localMapOptions,
-// 		visible: true,
-// 		opacity: 0.8
-// 	};/*
+	var newOverlay = {};
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
+	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
+	mapManager.layers.overlays[localMapID] = {
+		name: localMapName,
+		type: 'xyz',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		layerOptions: localMapOptions,
+		visible: true,
+		opacity: 0.8
+	};/*
 	
 
-// 	mapManager.layers.overlays = newOverlay;
-// */
+	mapManager.layers.overlays = newOverlay;
+*/
 
 
-// 	console.log(mapManager);
-// 	console.log(newOverlay);
-// 	// mapManager.refresh();
-// };
+	console.log(mapManager);
+	console.log(newOverlay);
+	// mapManager.refresh();
+};
 
 /* OVERLAY METHODS */
 
-mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
+mapManager.addManyOverlays = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
 
 	var newOverlay = {};
@@ -600,7 +600,7 @@ mapManager.groupFloorMaps = function(worldStyle) {
 		});
 		for (mapGroup in localMaps) {
 			var overlayGroup = localMaps[mapGroup].map(function(m) {
-				return mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+				return mapManager.addManyOverlays(m.localMapID, m.localMapName, m.localMapOptions);
 			});
 			var groupName = mapGroup + '-maps';
 			mapManager.addOverlayGroup(overlayGroup, groupName);

@@ -166,7 +166,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 
 		var worldStyle = $scope.world.style;
-		var lowestFloor = map.groupFloorMaps(worldStyle);
+		map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -490,29 +490,8 @@ function createMapAndMarkerLayers(tempMarkers) {
 	var mapLayer = lowestFloor + '-maps';
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
-
-
 	mapManager.toggleOverlay(mapLayer);
 	mapManager.toggleOverlay(landmarkLayer);
-}
-
-function lowestFloor(landmarks) {
-	if (map.localMapArrayExists) {
-		return map.sortFloors($scope.world.style.maps.localMapArray);
-	} else {
-		return 1;
-	}
-	// var sorted = _.chain(landmarks)
-	// 	.filter(function(l) {
-	// 		return l.loc_info;
-	// 	})
-	// 	.sortBy(function(l) {
-	// 		return l.loc_info.floor_num;
-	// 	})
-	// 	.value();
-
-	// return sorted.length ? String(sorted[0].loc_info.floor_num) : '1';
-
 }
 
 function markerFromLandmark(landmark) {

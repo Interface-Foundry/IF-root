@@ -221,7 +221,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 		} else {
 			overlayGroup = findMapsOnThisFloor(world, landmark).map(function(thisMap) {
 				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-					return map.addOverlay(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+					return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
 				}
 			});
 			map.addOverlayGroup(overlayGroup, groupName);

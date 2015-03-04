@@ -17658,37 +17658,37 @@ mapManager.findMapFromArray = function(mapArray) {
 }
 
 
-// mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
-// 	console.log('addOverlay');
+mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
+	console.log('addOverlay');
 
-// 	var newOverlay = {};
-// 	// if (localMapOptions.maxZoom>19) {
-// 	// 	localMapOptions.maxZoom = 19;
-// 	// }
-// 	localMapOptions.zIndex = 10;
-// 	console.log('requesting new overlay')
-// 	mapManager.layers.overlays[localMapID] = {
-// 		name: localMapName,
-// 		type: 'xyz',
-// 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
-// 		layerOptions: localMapOptions,
-// 		visible: true,
-// 		opacity: 0.8
-// 	};/*
+	var newOverlay = {};
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
+	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
+	mapManager.layers.overlays[localMapID] = {
+		name: localMapName,
+		type: 'xyz',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		layerOptions: localMapOptions,
+		visible: true,
+		opacity: 0.8
+	};/*
 	
 
-// 	mapManager.layers.overlays = newOverlay;
-// */
+	mapManager.layers.overlays = newOverlay;
+*/
 
 
-// 	console.log(mapManager);
-// 	console.log(newOverlay);
-// 	// mapManager.refresh();
-// };
+	console.log(mapManager);
+	console.log(newOverlay);
+	// mapManager.refresh();
+};
 
 /* OVERLAY METHODS */
 
-mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
+mapManager.addManyOverlays = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
 
 	var newOverlay = {};
@@ -17818,7 +17818,7 @@ mapManager.groupFloorMaps = function(worldStyle) {
 		});
 		for (mapGroup in localMaps) {
 			var overlayGroup = localMaps[mapGroup].map(function(m) {
-				return mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
+				return mapManager.addManyOverlays(m.localMapID, m.localMapName, m.localMapOptions);
 			});
 			var groupName = mapGroup + '-maps';
 			mapManager.addOverlayGroup(overlayGroup, groupName);
@@ -23531,7 +23531,7 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 		} else {
 			overlayGroup = findMapsOnThisFloor(world, landmark).map(function(thisMap) {
 				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-					return map.addOverlay(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+					return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
 				}
 			});
 			map.addOverlayGroup(overlayGroup, groupName);
@@ -24686,7 +24686,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 
 		var worldStyle = $scope.world.style;
-		var lowestFloor = map.groupFloorMaps(worldStyle);
+		map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -25010,29 +25010,8 @@ function createMapAndMarkerLayers(tempMarkers) {
 	var mapLayer = lowestFloor + '-maps';
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
-
-
 	mapManager.toggleOverlay(mapLayer);
 	mapManager.toggleOverlay(landmarkLayer);
-}
-
-function lowestFloor(landmarks) {
-	if (map.localMapArrayExists) {
-		return map.sortFloors($scope.world.style.maps.localMapArray);
-	} else {
-		return 1;
-	}
-	// var sorted = _.chain(landmarks)
-	// 	.filter(function(l) {
-	// 		return l.loc_info;
-	// 	})
-	// 	.sortBy(function(l) {
-	// 		return l.loc_info.floor_num;
-	// 	})
-	// 	.value();
-
-	// return sorted.length ? String(sorted[0].loc_info.floor_num) : '1';
-
 }
 
 function markerFromLandmark(landmark) {
