@@ -24558,7 +24558,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}
 
 		var worldStyle = $scope.world.style;
-		map.groupFloorMaps(worldStyle);
+		var lowestFloor = map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -24576,38 +24576,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		
 		$scope.loadLandmarks();
 }
-
-	// function groupFloorMaps(worldStyle) {
-	// 	if (!worldStyle.hasOwnProperty('maps')) {
-	// 		return;
-	// 	}
-
-	// 	// create array of overlay maps for each floor
-
-	// 	// legacy maps
-	// 	var localMaps = [worldStyle.maps];
-		
-	// 	// if localMapArray exists, replace local map with sorted array
-	// 	if (hasLocalMapArray(worldStyle.maps)) {
-	// 		localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
-	// 			return m.floor_num
-	// 		});
-	// 		for (mapGroup in localMaps) {
-	// 			var overlayGroup = localMaps[mapGroup].map(function(m) {
-	// 				return map.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-	// 			});
-	// 			var groupName = mapGroup + '-maps';
-	// 			map.addOverlayGroup(overlayGroup, groupName);
-	// 		}
-	// 	}
-	// }
-
-	// function hasLocalMapArray(maps) {
-	// 	return maps.localMapArray && maps.localMapArray.length;
-	// }
-
-
-
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -24899,29 +24867,44 @@ function initLandmarks(data) {
 }
 
 function createMapAndMarkerLayers(tempMarkers) {
+	var lowestFloor = 1;
+
 	tempMarkers.forEach(function(m) {
 		mapManager.newMarkerOverlay(m);
 	});
 
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+
 
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
-	var mapLayer = lowestFloor(tempMarkers) + '-maps';
-	var landmarkLayer = lowestFloor(tempMarkers) + '-landmarks';
+	var mapLayer = lowestFloor + '-maps';
+	var landmarkLayer = lowestFloor + '-landmarks';
+	
+
+
 	mapManager.toggleOverlay(mapLayer);
 	mapManager.toggleOverlay(landmarkLayer);
 }
 
 function lowestFloor(landmarks) {
-	var sorted = _.chain(landmarks)
-		.filter(function(l) {
-			return l.loc_info;
-		})
-		.sortBy(function(l) {
-			return l.loc_info.floor_num;
-		})
-		.value();
+	if (map.localMapArrayExists) {
+		return map.sortFloors($scope.world.style.maps.localMapArray);
+	} else {
+		return 1;
+	}
+	// var sorted = _.chain(landmarks)
+	// 	.filter(function(l) {
+	// 		return l.loc_info;
+	// 	})
+	// 	.sortBy(function(l) {
+	// 		return l.loc_info.floor_num;
+	// 	})
+	// 	.value();
 
-		return sorted.length ? String(sorted[0].loc_info.floor_num) : '1';
+	// return sorted.length ? String(sorted[0].loc_info.floor_num) : '1';
+
 }
 
 function markerFromLandmark(landmark) {
