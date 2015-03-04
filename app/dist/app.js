@@ -16998,10 +16998,10 @@ geoService.trackStart = function() {
 			lat: 0,
 			lng: 0,
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50_selected.png',
+				iconUrl: 'img/marker/user-marker-50.png',
 				shadowUrl: '',
-				iconSize: [35, 67], 
-				iconAnchor: [17, 67],
+				iconSize: [35, 43], 
+				iconAnchor: [17, 43],
 				popupAnchor:[0, -40]
 			},
 			alt: 'track' // used for tracking marker DOM element
