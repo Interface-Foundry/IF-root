@@ -16946,8 +16946,8 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager',
-    	function($q, alertManager) {
+    .factory('geoService', [ '$q', 'alertManager', 'mapManager',
+    	function($q, alertManager, mapManager) {
 //abstract & promisify geolocation, queue requests.
 var geoService = {
 	location: {
@@ -16958,6 +16958,9 @@ var geoService = {
 	inProgress: false,
 	requestQueue: [] 
 }	
+
+var marker = [];
+var watchID;
  
 geoService.getLocation = function(maxAge) {
 	var deferred = $q.defer();
@@ -17005,6 +17008,96 @@ geoService.resolveQueue = function (position) {
 		}
 	}
 	geoService.inProgress = false;
+}
+
+geoService.trackStart = function() {
+	if (navigator.geolocation && window.DeviceOrientationEvent) {
+
+		// marker
+		mapManager.addMarker('track', {
+			lat: 0,
+			lng: 0,
+			icon: {
+				iconUrl: 'img/marker/user-marker-50.png',
+				shadowUrl: '',
+				iconSize: [35, 43], 
+				iconAnchor: [17, 43],
+				popupAnchor:[0, -40]
+			},
+			alt: 'track' // used for tracking marker DOM element
+		});
+		mapManager.bringMarkerToFront('track');
+
+		// movement XY
+		watchID = navigator.geolocation.watchPosition(function(position) {
+			var pos = {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			};
+			mapManager.moveMarker('track', pos);
+		}, function() {
+			// console.log('location error');
+		}, {
+			// enableHighAccuracy: true
+		});
+
+		// movement rotation
+		window.addEventListener('deviceorientation', rotateMarker);
+
+	}
+};
+
+geoService.trackStop = function() {
+
+	// movement: clear watch
+	if (watchID) {
+		navigator.geolocation.clearWatch(watchID);
+		watchID = undefined;
+	}
+
+	// rotation: remove event listener
+	window.removeEventListener('deviceorientation', rotateMarker);
+
+	// remove marker
+	mapManager.removeMarker('track');
+	marker = [];
+
+};
+
+function rotateMarker(data) {
+	// make sure new marker is loaded in DOM
+	if (marker.length > 0) {
+		var alpha = data.webkitCompassHeading || data.alpha;
+		var matrix = marker.css('transform');
+
+		// account for the fact that marker is initially facing south
+		var adjust = 180 + Math.round(alpha);
+
+		marker.css('transform', getNewTransformMatrix(matrix, adjust));
+	} else {
+		marker = $('img[alt="track"]');
+	}
+}
+
+function getNewTransformMatrix(matrix, angle) {
+	// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
+	var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
+	
+	if (newMatrix.length !== 6) { // not 2D matrix
+		return matrix;
+	}
+	
+	// get translation and don't change
+	var tx = newMatrix[4];
+	var ty = newMatrix[5];
+	
+	// set new values for rotation matrix
+	var a = Math.cos(angle * Math.PI / 180);
+	var b = -Math.sin(angle * Math.PI / 180);
+	var c = -b;
+	var d = a;
+	
+	return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
 }
 
 return geoService;
@@ -17408,6 +17501,15 @@ mapManager.removeAllMarkers = function() {
 	console.log('--removeAllMarkers--');
 	mapManager.markers = {};
 }
+
+mapManager.moveMarker = function(key, pos) {
+	var marker = mapManager.getMarker(key);
+	if (marker) {
+		marker.lat = pos.lat;
+		marker.lng = pos.lng;
+	}
+	mapManager.refresh();
+};
 
 mapManager.setMarkers = function(markers) {
 	if (_.isArray(markers)) {
@@ -23290,8 +23392,8 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	});
  	   
 }
-app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService',
-function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService) {
+app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
+function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "100px";
@@ -23315,6 +23417,16 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
+
+	if (bubbleTypeService.get() === 'Retail') {
+		$scope.$watch('aperture.state', function(newVal, oldVal) {
+			if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+				geoService.trackStart();
+			} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+				geoService.trackStop();
+			}
+		});	
+	}
 		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
@@ -23449,7 +23561,6 @@ console.log($scope.landmark.category);
 
 })
 });
-		
 
 function goToMark(zoomLevel) {
 
@@ -24586,6 +24697,13 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
+		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
+		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+		 			geoService.trackStart();
+		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+		 			geoService.trackStop();
+		 		}
+		 	});	
 		 }
 
 		 //local storage
@@ -25023,7 +25141,6 @@ function markerFromLandmark(landmark) {
 		_id: landmark._id
 	}
 }
-
 
 $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);
