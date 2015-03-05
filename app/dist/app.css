@@ -316,7 +316,7 @@ ul.edit-toolbar {
 	margin-top: 12px;
 }
 
-img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]):not([src="img/marker/bubble-marker-50_selected.png"]) {
+img.leaflet-marker-icon:not([src="img/marker/bubble-marker-50.png"]):not([src="img/marker/bubble-marker-50_selected.png"]):not([src="img/marker/user-marker-50.png"]) {
 	border-radius: 50%;
 	box-shadow: 1px 1px 4px;
 }
@@ -4334,6 +4334,8 @@ li.alert {
 #floor-nums {
   background-color: white;
   border: none;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
   bottom: 114px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2);
   font-size: 18px;
@@ -4371,15 +4373,18 @@ li.alert {
   cursor: pointer;
 }
 .floor-indicator {
-  width: 0;
-  height: 0;
+  bottom: 100px;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
   border-left: 8px solid blue;
   display: inline-block;
-  margin-left: -16px;
-  margin-right: 8px;
-  margin-bottom: -1px;
+  height: 0;
+  position: absolute;
+  right: 44px;
+  width: 0;
+  z-index: 20;
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
 #floor-selector-shadow {
   position: absolute;
@@ -4405,6 +4410,20 @@ li.alert {
 .aperture-third #floor-nums {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
+}
+.aperture-off .floor-indicator {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-third .floor-indicator {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-off .floor-indicator {
+  right: -44px;
+}
+.aperture-third .floor-indicator {
+  right: -44px;
 }
 /*want this*/
 .wtgt {

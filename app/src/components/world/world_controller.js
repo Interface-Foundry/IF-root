@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService, bubbleTypeService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -19,7 +19,8 @@ $scope.wtgt = {
 		want: 'hashtag1',
 		got: 'hashtag2'
 	},
-	images: {}
+	images: {},
+	building: {}
 };
 $scope.isRetail = false;
 
@@ -34,46 +35,42 @@ $scope.zoomOn = function() {
 }
 
 $scope.uploadWTGT = function($files, state) {
-	if (state == 'want') {
-		$scope.wtgt.images.wantBuilding = true;
+	if (userManager.loginStatus) {
+		$scope.wtgt.building[state] = true;
+
+		var file = $files[0];
+
+		// get time
+		var time = new Date();
+
+		// get hashtag
+		var hashtag = null;
+		hashtag = $scope.wtgt.hashtags[state];
+
+		var data = {
+			world_id: $scope.world._id,
+			worldID: $scope.world.id,
+			hashtag: hashtag,
+			userTime: time,
+			userLat: null,
+			userLon: null,
+			type: 'retail_campaign'
+		};
+
+		// get location
+		geoService.getLocation().then(function(coords) {
+			// console.log('coords: ', coords);
+			data.userLat = coords.lat;
+			data.userLon = coords.lng;
+			uploadPicture(file, state, data);
+		}, function(err) {
+			uploadPicture(file, state, data);
+		});
+	} else { // not logged in
+		dialogs.showDialog('authDialog.html');
+		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
 	}
-	else if (state == 'got') {
-		$scope.wtgt.images.gotBuilding = true;
-	}
-
-	var file = $files[0];
-
-	// get time
-	var time = new Date();
-
-	// get hashtag
-	var hashtag = null;
-	if (state == 'want') {
-		hashtag = $scope.wtgt.hashtags.want;
-	}
-	else if (state == 'got') {
-		hashtag = $scope.wtgt.hashtags.got;
-	}
-
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
-
-	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
-	}, function(err) {
-		uploadPicture(file, state, data);
-	});
+	
 }
 
 function uploadPicture(file, state, data) {
@@ -83,14 +80,8 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		if (state == 'want') {
-			$scope.wtgt.images.want = data;
-			$scope.wtgt.images.wantBuilding = false;
-		}
-		else if (state == 'got') {
-			$scope.wtgt.images.got = data;
-			$scope.wtgt.images.gotBuilding = false;
-		}
+		$scope.wtgt.images[state] = data;
+		$scope.wtgt.building[state] = false;
 	});
 }
  
@@ -100,7 +91,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
+		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
+		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+		 			geoService.trackStart();
+		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+		 			geoService.trackStop();
+		 		}
+		 	});	
 		 }
+
+		 //local storage
+		 if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	 }
+		 
+
 		 style.navBG_color = $scope.style.navBG_color;
 
 		 //show edit buttons if user is world owner
@@ -167,31 +172,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			console.error('No center found! Error!');
 		}
 
-
 		var worldStyle = $scope.world.style;
-
-		if (worldStyle.hasOwnProperty('maps')) {
-			// default local map is localMapID
-			var theseMaps = [worldStyle.maps];
-
-			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray){
-				if (worldStyle.maps.localMapArray.length > 0) {
-					theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
-				}			
-			}
-			map.removeOverlays();
-			setTimeout(function() {
-				theseMaps.forEach(function(thisMap) {
-
-					if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-						map.addOverlay(thisMap.localMapID, 
-									thisMap.localMapName, 
-									thisMap.localMapOptions);
-					}
-					
-				})
-			}, 100)
+		map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -205,11 +187,10 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 			}
-		}
+		// }
 		
 		$scope.loadLandmarks();
 }
-
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -494,7 +475,30 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	if (tempMarkers.length) {
+		createMapAndMarkerLayers(tempMarkers)
+	}
+	
+}
+
+function createMapAndMarkerLayers(tempMarkers) {
+	var lowestFloor = 1;
+
+	tempMarkers.forEach(function(m) {
+		mapManager.newMarkerOverlay(m);
+	});
+
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+
+
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var mapLayer = lowestFloor + '-maps';
+	var landmarkLayer = lowestFloor + '-landmarks';
+	
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
 }
 
 function markerFromLandmark(landmark) {
@@ -504,7 +508,8 @@ function markerFromLandmark(landmark) {
 			shadowUrl = '',
 			shadowAnchor = [4, -3],
 			iconAnchor = [17, 67],
-			iconSize = [35, 67];
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
@@ -527,10 +532,14 @@ function markerFromLandmark(landmark) {
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-		_id: landmark._id
+		_id: landmark._id,
+		layer: layerGroup
 	}
 }
 
+function getLayerGroup(landmark) {
+	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+}
 
 $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);

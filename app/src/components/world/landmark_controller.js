@@ -1,5 +1,5 @@
-app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService',
-function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService) {
+app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
+function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "100px";
@@ -23,6 +23,16 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
+
+	if (bubbleTypeService.get() === 'Retail') {
+		$scope.$watch('aperture.state', function(newVal, oldVal) {
+			if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+				geoService.trackStart();
+			} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+				geoService.trackStop();
+			}
+		});	
+	}
 		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
@@ -157,7 +167,6 @@ console.log($scope.landmark.category);
 
 })
 });
-		
 
 function goToMark(zoomLevel) {
 
@@ -209,17 +218,24 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 	if (!map.localMapArrayExists(world)) {
 		return;
 	}
-	map.removeOverlays();
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
 
-	setTimeout(function() {
-		findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-				map.addOverlay(thisMap.localMapID, 
-							thisMap.localMapName, 
-							thisMap.localMapOptions);
-			}
-		});
-	}, 200)
+		var groupName = landmark.loc_info && landmark.loc_info.floor_num ? 
+										landmark.loc_info.floor_num + '-maps' : '1-maps';
+
+		if (mapManager.overlayExists(groupName)) {
+			mapManager.toggleOverlay(groupName);
+		} else {
+			overlayGroup = findMapsOnThisFloor(world, landmark).map(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+				}
+			});
+			map.addOverlayGroup(overlayGroup, groupName);
+			mapManager.toggleOverlay(groupName);
+		}
 }
 
 function findMapsOnThisFloor(world, landmark) {

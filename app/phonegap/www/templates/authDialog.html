@@ -9,7 +9,7 @@
 		<input name="password" type="password" 
 			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
 		
-		<button type="submit" class="auth-submit">Log In</button>
+		<button type="submit" class="auth-submit" ng-click="wtgtLogin()">Log In</button>
 		
 <button type="button" class="auth-submit" ng-click="fbLogin()">Log in with Facebook</button>
 		<div ng-if="userManager.login.error">
@@ -19,7 +19,7 @@
 		<a ng-click="dialog.showDialog('forgotDialog.html')" href="">Forgot your password?</a>
 
 		
-		<button type="button" class="auth-create" ng-click="dialog.showDialog('createAccountDialog.html')">Create Account</button>
+		<button type="button" class="auth-create" ng-click="dialog.showDialog('createAccountDialog.html'); wtgtLogin()">Create Account</button>
 		
 	</form>
 </div>

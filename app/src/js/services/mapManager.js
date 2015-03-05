@@ -128,6 +128,9 @@ mapManager.resetMap = function() {
 	mapManager.refresh();
 }
 
+
+/* MARKER METHODS */
+
 /* addMarker
 Key: Name of marker to be added
 Marker: Object representing marker
@@ -161,6 +164,18 @@ mapManager.addMarkers = function(markers) {
 	}
 }
 
+mapManager.newMarkerOverlay = function(landmark) {
+	var layer = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	if (mapManager.layers.overlays[layer + '-landmarks']) {
+		return;
+	} else {
+		mapManager.layers.overlays[layer + '-landmarks'] = {
+			type: 'group',
+			name: layer + '-landmarks',
+			visible: false
+		};
+	}
+}
 
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
@@ -190,6 +205,15 @@ mapManager.removeAllMarkers = function() {
 	console.log('--removeAllMarkers--');
 	mapManager.markers = {};
 }
+
+mapManager.moveMarker = function(key, pos) {
+	var marker = mapManager.getMarker(key);
+	if (marker) {
+		marker.lat = pos.lat;
+		marker.lng = pos.lng;
+	}
+	mapManager.refresh();
+};
 
 mapManager.setMarkers = function(markers) {
 	if (_.isArray(markers)) {
@@ -278,6 +302,13 @@ mapManager.bringMarkerToFront = function(key) {
 		return false;
 	}
 };
+
+mapManager.changeMarkerLayerGroup = function(markerId, newGroup) {
+	if (!mapManager.markers[markerId]) {
+		return false;
+	}
+	return mapManager.markers[markerId].layer = newGroup;
+}
 
 /* addPath
 Key: Name of path to be added
@@ -408,19 +439,11 @@ mapManager.setBaseLayerFromID = function(ID) {
 }
 
 mapManager.findMapFromArray = function(mapArray) {
-	// sort floors low to high and get rid of null floor_nums
 	var sortedFloors = _.chain(mapArray)
-		.filter(function(floor) {
-			return floor.floor_num;
-		})
 		.sortBy(function(floor) {
 			return floor.floor_num;
 		})
 		.value();
-	// will return lowest number floor or undefined if none
-	sortedFloors = sortedFloors.filter(function(floor) {
-		return floor.floor_num === sortedFloors[0].floor_num;
-	});
 
 	return sortedFloors;
 }
@@ -435,7 +458,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	// }
 	localMapOptions.zIndex = 10;
 	console.log('requesting new overlay')
-	mapManager.layers.overlays[localMapName] = {
+	mapManager.layers.overlays[localMapID] = {
 		name: localMapName,
 		type: 'xyz',
 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
@@ -447,25 +470,104 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 
 	mapManager.layers.overlays = newOverlay;
 */
+
+
 	console.log(mapManager);
 	console.log(newOverlay);
-	mapManager.refresh();
+	// mapManager.refresh();
 };
 
-mapManager.removeOverlays = function() {
-	mapManager.layers.overlays = {};
-	mapManager.refresh();
+/* OVERLAY METHODS */
+
+mapManager.addManyOverlays = function(localMapID, localMapName, localMapOptions) {
+	console.log('addOverlay');
+
+	var newOverlay = {};
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
+	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
+	newOverlay = {
+		name: localMapName,
+		type: 'xyz',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		layerOptions: localMapOptions,
+		visible: true,
+		opacity: 0.8
+	};
+	return newOverlay;
 }
 
+mapManager.addOverlayGroup = function(overlays, groupName) {
+	if (mapManager.layers.overlays.hasOwnProperty(groupName)) {
+		// mapManager.layers.overlays[groupName].layers = mapManager.layers.overlays[groupName].layers.concat(overlays);
+		return
+	} else {
+		var group = {
+			type: 'group',
+			name: groupName,
+			layerOptions: {
+				layers: []
+			},
+			visible: false
+		};
+		overlays.forEach(function(overlay) {
+			group.layerOptions.layers.push(overlay);
+		})
+
+		mapManager.layers.overlays[groupName] = group;
+	}
+}
+
+mapManager.overlayExists = function(layerName) {
+	return mapManager.layers.overlays.hasOwnProperty(layerName);
+}
+
+
+mapManager.removeOverlays = function(type) {
+	if (type) {
+		var temp = mapManager.layers.overlays;
+		mapManager.layers.overlays = {};
+		for (var p in temp) {
+			if (temp[p].type !== type) {
+				mapManager.layers.overlays[p] = temp[p];
+			}
+		}
+	} else {
+		mapManager.layers.overlays = {};
+		mapManager.refresh();
+	}
+}
+
+mapManager.toggleOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
+}
+
+mapManager.turnOffOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = false;
+}
+
+mapManager.findVisibleLayers = function() {
+	return _.filter(mapManager.layers.overlays, function(l) {
+		return l.visible === true;
+	});
+}
 
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
 	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 120, state);
 	leafletData.getMap().then(function(map) {
-	map.addLayer(mapManager.circleMaskLayer);
-	mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
-		mapManager.circleMaskLayer._draw();
-	});
+		map.addLayer(mapManager.circleMaskLayer);
+		mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+			mapManager.circleMaskLayer._draw();
+		});
 	});
 }
 
@@ -490,6 +592,33 @@ mapManager.sortFloors = function(mapArray) {
 			return floor.floor_num;
 		})
 		.value();
+}
+
+mapManager.groupFloorMaps = function(worldStyle) {
+	if (!worldStyle.hasOwnProperty('maps')) {
+		return;
+	}
+
+	// legacy maps
+	var localMaps = [worldStyle.maps];
+	
+	// if localMapArray exists, replace local map with sorted array
+	if (hasLocalMapArray(worldStyle.maps)) {
+		localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+			return m.floor_num
+		});
+		for (mapGroup in localMaps) {
+			var overlayGroup = localMaps[mapGroup].map(function(m) {
+				return mapManager.addManyOverlays(m.localMapID, m.localMapName, m.localMapOptions);
+			});
+			var groupName = mapGroup + '-maps';
+			mapManager.addOverlayGroup(overlayGroup, groupName);
+		}
+	}
+}
+
+function hasLocalMapArray(maps) {
+	return maps.localMapArray && maps.localMapArray.length;
 }
 
 mapManager.setCircleMaskState = function(state) {
