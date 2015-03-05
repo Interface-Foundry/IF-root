@@ -39,6 +39,10 @@ function floorSelector(mapManager) {
 
 		showCurrentFloorLandmarks(1);
 
+		if (scope.style.widgets.category === true) {
+			// adjust bottom property of all floor selector elements
+		}
+
 		function findCurrentFloor(floors) {
 			var tempFiltered = floors.filter(function(f) {
 				return f[0].floor_num > 0;
