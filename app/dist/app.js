@@ -22160,25 +22160,6 @@ function floorSelector(mapManager) {
 	};
 
 	function link(scope, elem, attr) {
-
-// <<<<<<< HEAD
-// 		scope.showFloors = false;
-// 		scope.floors = _.chain(scope.world.style.maps.localMapArray)
-// 			.filter(function(f) {
-// 				return f.floor_num;
-// 			})
-// 			.groupBy(function(f) {
-// 				return f.floor_num;
-// 			})
-// 			.sortBy(function(f) {
-// 				return -f.floor_num;
-// 			})
-// 			.value()
-// 			.reverse();
-
-// 		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
-// 											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
-// =======
 		activate(elem);
 
 		function activate(elem) {
@@ -22202,7 +22183,6 @@ function floorSelector(mapManager) {
 			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
 
-			// showCurrentFloorLandmarks(1);
 			checkCategories(elem);
 		}
 
@@ -22218,7 +22198,6 @@ function floorSelector(mapManager) {
 				});
 			}
 		}
-// >>>>>>> world-view_floor-indicator-fixes
 
 		function findCurrentFloor(floors) {
 			var tempFiltered = floors.filter(function(f) {
@@ -22230,16 +22209,10 @@ function floorSelector(mapManager) {
 		scope.selectFloor = function(index) {
 			scope.selectedIndex = index;
 			scope.currentFloor = scope.floors[index][0];
-// <<<<<<< HEAD
 			turnOffFloorLayers();
 			turnOnFloorMaps();
 			turnOnFloorLandmarks();
-// =======
 			updateIndicator();
-			// showCurrentFloorMaps(index);
-			// showCurrentFloorLandmarks();
-
-// >>>>>>> world-view_floor-indicator-fixes
 		}
 
 		scope.openFloorMenu = function() {
@@ -22262,16 +22235,9 @@ function floorSelector(mapManager) {
 			mapManager.toggleOverlay(currentMapLayer);
 		}
 
-// <<<<<<< HEAD
 		function turnOnFloorLandmarks() {
 			var currentLandmarkLayer = scope.currentFloor.floor_num + '-landmarks';
 			mapManager.toggleOverlay(currentLandmarkLayer);
-// =======
-				// 	removeLandmarks.forEach(function(l) {
-				// 		mapManager.removeMarker(l._id);
-				// 	});
-				// 	scope.$apply()
-				// }, 500)
 		}
 
 		function updateIndicator() {
@@ -22282,7 +22248,6 @@ function floorSelector(mapManager) {
 			} else {
 				$('.floor-indicator').css({bottom: baseline + 'px', opacity: 0});
 			}
-// >>>>>>> world-view_floor-indicator-fixes
 		}
 	}
 }
@@ -25070,7 +25035,9 @@ function createMapAndMarkerLayers(tempMarkers) {
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
 	mapManager.toggleOverlay(mapLayer);
-	mapManager.toggleOverlay(landmarkLayer);
+	if (bubbleTypeService.get() !== 'Retail') {
+		mapManager.toggleOverlay(landmarkLayer);
+	}
 }
 
 function markerFromLandmark(landmark) {

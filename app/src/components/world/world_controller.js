@@ -498,7 +498,9 @@ function createMapAndMarkerLayers(tempMarkers) {
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
 	mapManager.toggleOverlay(mapLayer);
-	mapManager.toggleOverlay(landmarkLayer);
+	if (bubbleTypeService.get() !== 'Retail') {
+		mapManager.toggleOverlay(landmarkLayer);
+	}
 }
 
 function markerFromLandmark(landmark) {
