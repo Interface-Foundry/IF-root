@@ -69,11 +69,46 @@ function floorSelector(mapManager) {
 			turnOnFloorMaps();
 			turnOnFloorLandmarks();
 			updateIndicator();
+			adjustZoom(index);
 		}
 
 		scope.openFloorMenu = function() {
 			scope.showFloors = !scope.showFloors;
 			updateIndicator();
+		}
+
+		function adjustZoom(index) {
+			// get current zoom
+			var currentZoom = mapManager.center.zoom,
+					lowestMinZoom,
+					highestMaxZoom,
+					floors = scope.floors[index];
+			// checkout zoom levels of all maps on current floor
+			for (var i = 0, len = floors.length; i < len; i++) {
+				if (zoomInRange(currentZoom, floors[i].localMapOptions)) {
+				return;
+				} else {
+					// if zoom not in range hold on to highest and lowest zooms
+					lowestMinZoom = lowestMinZoom ? Math.min(lowestMinZoom, floors[i].localMapOptions.minZoom) : floors[i].localMapOptions.minZoom;
+					highestMaxZoom = highestMaxZoom ? Math.max(highestMaxZoom, floors[i].localMapOptions.maxZoom) : floors[i].localMapOptions.maxZoom;
+				}
+			}
+
+			// adjust zoom to nearest in map range
+			if (currentZoom < lowestMinZoom) {
+				mapManager.center.zoom = Number(lowestMinZoom);
+			} else if (currentZoom > highestMaxZoom) {
+				mapManager.center.zoom = Number(highestMaxZoom);
+			}
+			// if no maps on floor, it should keep current zoom
+		}
+
+		function zoomInRange(currentZoom, floorOptions) {
+			if (floorOptions.minZoom <= currentZoom && currentZoom <= floorOptions.maxZoom) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		function turnOffFloorLayers() {

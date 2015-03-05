@@ -456,6 +456,9 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
+
+	localMapOptions = localMapOptions || {};
+
 	localMapOptions.zIndex = 10;
 	console.log('requesting new overlay')
 	mapManager.layers.overlays[localMapID] = {
@@ -480,14 +483,16 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 /* OVERLAY METHODS */
 
 mapManager.addManyOverlays = function(localMapID, localMapName, localMapOptions) {
-	console.log('addOverlay');
 
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
+
+	localMapOptions = localMapOptions || {};
+
 	localMapOptions.zIndex = 10;
-	console.log('requesting new overlay')
+
 	newOverlay = {
 		name: localMapName,
 		type: 'xyz',

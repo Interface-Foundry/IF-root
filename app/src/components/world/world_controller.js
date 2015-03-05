@@ -155,19 +155,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 			console.log('setcenter');
-			map.addMarker('c', {
-				lat: $scope.world.loc.coordinates[1],
-				lng: $scope.world.loc.coordinates[0],
-				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
-				},
-				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
-			});
+			// if bubble has local maps then do not show world marker
+			if (!map.localMapArrayExists($scope.world)) {
+				addWorldMarker();
+			}
+
 		} else {
 			console.error('No center found! Error!');
 		}
@@ -190,6 +183,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		// }
 		
 		$scope.loadLandmarks();
+}
+
+function addWorldMarker() {
+	map.addMarker('c', {
+		lat: $scope.world.loc.coordinates[1],
+		lng: $scope.world.loc.coordinates[0],
+		icon: {
+			iconUrl: 'img/marker/bubble-marker-50.png',
+			shadowUrl: '',
+			iconSize: [35, 67],
+			iconAnchor: [17, 67],
+			popupAnchor:[0, -40]
+		},
+		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
+	});
 }
   	
 function loadWidgets() { //needs to be generalized
@@ -475,30 +483,34 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	var lowestFloor = 1;
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+	createMapLayer(lowestFloor);
+
 	if (tempMarkers.length) {
-		createMapAndMarkerLayers(tempMarkers)
+		createMarkerLayer(tempMarkers, lowestFloor)
 	}
 	
 }
 
-function createMapAndMarkerLayers(tempMarkers) {
-	var lowestFloor = 1;
+function createMapLayer(lowestFloor) {
+	var mapLayer = lowestFloor + '-maps';
+	mapManager.toggleOverlay(mapLayer);
+}
 
+function createMarkerLayer(tempMarkers, lowestFloor) {
 	tempMarkers.forEach(function(m) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	if (map.localMapArrayExists($scope.world)) {
-		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
-	}
-
-
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
-	var mapLayer = lowestFloor + '-maps';
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
-	mapManager.toggleOverlay(mapLayer);
-	mapManager.toggleOverlay(landmarkLayer);
+	if (bubbleTypeService.get() !== 'Retail') {
+		mapManager.toggleOverlay(landmarkLayer);
+	}
 }
 
 function markerFromLandmark(landmark) {
