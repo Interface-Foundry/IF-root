@@ -4531,6 +4531,33 @@ li.alert {
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+.category-widget-item {
+  width: 25%;
+  display: inline-block;
+  vertical-align: top;
+  text-align: center;
+}
+.category-widget-item img {
+  width: 50px;
+}
+.category-widget-item .category-letter {
+  font-size: 2em;
+  font-weight: 700;
+}
+.category-widget-item p {
+  font-size: .8em;
+}
+.category-widget-directory-btn {
+  border-top: 1px solid #EEE;
+  cursor: pointer;
+  text-align: center;
+}
+.category-widget-directory-btn p {
+  color: #444;
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin: 2px;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;

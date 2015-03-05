@@ -23352,6 +23352,19 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	});
  	   
 }
+app.directive('categoryWidgetSr', [function() {
+	return {
+		restrict: 'E',
+		scope: {
+			categories: '=categories',
+			style: '=style'
+		},
+		templateUrl: 'components/world/category_widget/category.widget.html',
+		link: function(scope, element, attrs) {
+			// scope.groupedCategories = _.group(scope.categories, 'name');
+		}
+	}
+}]);
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
