@@ -24692,19 +24692,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 			console.log('setcenter');
-			map.addMarker('c', {
-				lat: $scope.world.loc.coordinates[1],
-				lng: $scope.world.loc.coordinates[0],
-				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
-				},
-				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
-			});
+			// if bubble has local maps then do not show world marker
+			if (!map.localMapArrayExists($scope.world)) {
+				addWorldMarker();
+			}
+
 		} else {
 			console.error('No center found! Error!');
 		}
@@ -24727,6 +24720,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		// }
 		
 		$scope.loadLandmarks();
+}
+
+function addWorldMarker() {
+	map.addMarker('c', {
+		lat: $scope.world.loc.coordinates[1],
+		lng: $scope.world.loc.coordinates[0],
+		icon: {
+			iconUrl: 'img/marker/bubble-marker-50.png',
+			shadowUrl: '',
+			iconSize: [35, 67],
+			iconAnchor: [17, 67],
+			popupAnchor:[0, -40]
+		},
+		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
+	});
 }
   	
 function loadWidgets() { //needs to be generalized
