@@ -1106,7 +1106,6 @@ app.post('/api/anon_user/update', function(req,res){
 
     if (req.body.anonID){
 
-<<<<<<< HEAD
       //IF USER ID DOESN"T EXIST CREATE NEW USER AND SEND TAHT ID BACK
 
         anonUserSchema.findById(req.body.anonID, function(err, au) {
@@ -1128,12 +1127,6 @@ app.post('/api/anon_user/update', function(req,res){
         });
 
     }
-=======
-      au.instances.push({
-        userTime: req.body.userTime
-      });    
->>>>>>> origin/Bubblli
-
 
 
 });
