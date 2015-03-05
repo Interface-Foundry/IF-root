@@ -483,29 +483,31 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	var lowestFloor = 1;
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+	createMapLayer(lowestFloor);
+
 	if (tempMarkers.length) {
-		createMapAndMarkerLayers(tempMarkers)
+		createMarkerLayer(tempMarkers, lowestFloor)
 	}
 	
 }
 
-function createMapAndMarkerLayers(tempMarkers) {
-	var lowestFloor = 1;
+function createMapLayer(lowestFloor) {
+	var mapLayer = lowestFloor + '-maps';
+	mapManager.toggleOverlay(mapLayer);
+}
 
+function createMarkerLayer(tempMarkers, lowestFloor) {
 	tempMarkers.forEach(function(m) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	if (map.localMapArrayExists($scope.world)) {
-		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
-	}
-
-
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
-	var mapLayer = lowestFloor + '-maps';
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
-	mapManager.toggleOverlay(mapLayer);
 	if (bubbleTypeService.get() !== 'Retail') {
 		mapManager.toggleOverlay(landmarkLayer);
 	}

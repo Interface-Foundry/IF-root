@@ -22213,11 +22213,46 @@ function floorSelector(mapManager) {
 			turnOnFloorMaps();
 			turnOnFloorLandmarks();
 			updateIndicator();
+			adjustZoom(index);
 		}
 
 		scope.openFloorMenu = function() {
 			scope.showFloors = !scope.showFloors;
 			updateIndicator();
+		}
+
+		function adjustZoom(index) {
+			// get current zoom
+			var currentZoom = mapManager.center.zoom,
+					lowestMinZoom,
+					highestMaxZoom,
+					floors = scope.floors[index];
+			// checkout zoom levels of all maps on current floor
+			for (var i = 0, len = floors.length; i < len; i++) {
+				if (zoomInRange(currentZoom, floors[i].localMapOptions)) {
+				return;
+				} else {
+					// if zoom not in range hold on to highest and lowest zooms
+					lowestMinZoom = lowestMinZoom ? Math.min(lowestMinZoom, floors[i].localMapOptions.minZoom) : floors[i].localMapOptions.minZoom;
+					highestMaxZoom = highestMaxZoom ? Math.max(highestMaxZoom, floors[i].localMapOptions.maxZoom) : floors[i].localMapOptions.maxZoom;
+				}
+			}
+
+			// adjust zoom to nearest in map range
+			if (currentZoom < lowestMinZoom) {
+				mapManager.center.zoom = Number(lowestMinZoom);
+			} else if (currentZoom > highestMaxZoom) {
+				mapManager.center.zoom = Number(highestMaxZoom);
+			}
+			// if no maps on floor, it should keep current zoom
+		}
+
+		function zoomInRange(currentZoom, floorOptions) {
+			if (floorOptions.minZoom <= currentZoom && currentZoom <= floorOptions.maxZoom) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		function turnOffFloorLayers() {
@@ -25020,29 +25055,31 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	var lowestFloor = 1;
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+	createMapLayer(lowestFloor);
+
 	if (tempMarkers.length) {
-		createMapAndMarkerLayers(tempMarkers)
+		createMarkerLayer(tempMarkers, lowestFloor)
 	}
 	
 }
 
-function createMapAndMarkerLayers(tempMarkers) {
-	var lowestFloor = 1;
+function createMapLayer(lowestFloor) {
+	var mapLayer = lowestFloor + '-maps';
+	mapManager.toggleOverlay(mapLayer);
+}
 
+function createMarkerLayer(tempMarkers, lowestFloor) {
 	tempMarkers.forEach(function(m) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	if (map.localMapArrayExists($scope.world)) {
-		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
-	}
-
-
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
-	var mapLayer = lowestFloor + '-maps';
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
-	mapManager.toggleOverlay(mapLayer);
 	if (bubbleTypeService.get() !== 'Retail') {
 		mapManager.toggleOverlay(landmarkLayer);
 	}
