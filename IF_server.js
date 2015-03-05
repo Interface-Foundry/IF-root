@@ -1076,7 +1076,7 @@ app.post('/api/anon_user/create', function(req,res){
     //
 
     au.instances.push({
-      time: req.body.userTime
+      userTime: req.body.userTime
     });
 
     au.save(function (err, data) {
@@ -1104,23 +1104,31 @@ app.post('/api/anon_user/update', function(req,res){
   //expecting lat lon time
   //expecting sessionID to track current user session to find and update in arr
 
-    anonUserSchema.findById(req.body.anonID, function(err, au) {
+    if (req.body.anonID){
 
-      au.instances.push({
-        time: req.body.userTime
-      });    
+      //IF USER ID DOESN"T EXIST CREATE NEW USER AND SEND TAHT ID BACK
 
-      au.save(function (err, data) {
-          if (err){
-              console.log(err);
-              res.send(err);
-          }
-          else {
-              res.status(200).send([data._id]);
-          }
-      });
+        anonUserSchema.findById(req.body.anonID, function(err, au) {
 
-    });
+          au.instances.push({
+            userTime: req.body.userTime
+          });    
+
+          au.save(function (err, data) {
+              if (err){
+                  console.log(err);
+                  res.send(err);
+              }
+              else {
+                  res.status(200).send([data._id]);
+              }
+          });
+
+        });
+
+    }
+
+
 
 });
 
