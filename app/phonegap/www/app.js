@@ -17439,6 +17439,9 @@ mapManager.resetMap = function() {
 	mapManager.refresh();
 }
 
+
+/* MARKER METHODS */
+
 /* addMarker
 Key: Name of marker to be added
 Marker: Object representing marker
@@ -17472,6 +17475,18 @@ mapManager.addMarkers = function(markers) {
 	}
 }
 
+mapManager.newMarkerOverlay = function(landmark) {
+	var layer = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	if (mapManager.layers.overlays[layer + '-landmarks']) {
+		return;
+	} else {
+		mapManager.layers.overlays[layer + '-landmarks'] = {
+			type: 'group',
+			name: layer + '-landmarks',
+			visible: false
+		};
+	}
+}
 
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
@@ -17598,6 +17613,13 @@ mapManager.bringMarkerToFront = function(key) {
 		return false;
 	}
 };
+
+mapManager.changeMarkerLayerGroup = function(markerId, newGroup) {
+	if (!mapManager.markers[markerId]) {
+		return false;
+	}
+	return mapManager.markers[markerId].layer = newGroup;
+}
 
 /* addPath
 Key: Name of path to be added
@@ -17728,19 +17750,11 @@ mapManager.setBaseLayerFromID = function(ID) {
 }
 
 mapManager.findMapFromArray = function(mapArray) {
-	// sort floors low to high and get rid of null floor_nums
 	var sortedFloors = _.chain(mapArray)
-		.filter(function(floor) {
-			return floor.floor_num;
-		})
 		.sortBy(function(floor) {
 			return floor.floor_num;
 		})
 		.value();
-	// will return lowest number floor or undefined if none
-	sortedFloors = sortedFloors.filter(function(floor) {
-		return floor.floor_num === sortedFloors[0].floor_num;
-	});
 
 	return sortedFloors;
 }
@@ -17755,7 +17769,7 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	// }
 	localMapOptions.zIndex = 10;
 	console.log('requesting new overlay')
-	mapManager.layers.overlays[localMapName] = {
+	mapManager.layers.overlays[localMapID] = {
 		name: localMapName,
 		type: 'xyz',
 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
@@ -17767,25 +17781,104 @@ mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 
 	mapManager.layers.overlays = newOverlay;
 */
+
+
 	console.log(mapManager);
 	console.log(newOverlay);
-	mapManager.refresh();
+	// mapManager.refresh();
 };
 
-mapManager.removeOverlays = function() {
-	mapManager.layers.overlays = {};
-	mapManager.refresh();
+/* OVERLAY METHODS */
+
+mapManager.addManyOverlays = function(localMapID, localMapName, localMapOptions) {
+	console.log('addOverlay');
+
+	var newOverlay = {};
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
+	localMapOptions.zIndex = 10;
+	console.log('requesting new overlay')
+	newOverlay = {
+		name: localMapName,
+		type: 'xyz',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		layerOptions: localMapOptions,
+		visible: true,
+		opacity: 0.8
+	};
+	return newOverlay;
 }
 
+mapManager.addOverlayGroup = function(overlays, groupName) {
+	if (mapManager.layers.overlays.hasOwnProperty(groupName)) {
+		// mapManager.layers.overlays[groupName].layers = mapManager.layers.overlays[groupName].layers.concat(overlays);
+		return
+	} else {
+		var group = {
+			type: 'group',
+			name: groupName,
+			layerOptions: {
+				layers: []
+			},
+			visible: false
+		};
+		overlays.forEach(function(overlay) {
+			group.layerOptions.layers.push(overlay);
+		})
+
+		mapManager.layers.overlays[groupName] = group;
+	}
+}
+
+mapManager.overlayExists = function(layerName) {
+	return mapManager.layers.overlays.hasOwnProperty(layerName);
+}
+
+
+mapManager.removeOverlays = function(type) {
+	if (type) {
+		var temp = mapManager.layers.overlays;
+		mapManager.layers.overlays = {};
+		for (var p in temp) {
+			if (temp[p].type !== type) {
+				mapManager.layers.overlays[p] = temp[p];
+			}
+		}
+	} else {
+		mapManager.layers.overlays = {};
+		mapManager.refresh();
+	}
+}
+
+mapManager.toggleOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
+}
+
+mapManager.turnOffOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = false;
+}
+
+mapManager.findVisibleLayers = function() {
+	return _.filter(mapManager.layers.overlays, function(l) {
+		return l.visible === true;
+	});
+}
 
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
 	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 120, state);
 	leafletData.getMap().then(function(map) {
-	map.addLayer(mapManager.circleMaskLayer);
-	mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
-		mapManager.circleMaskLayer._draw();
-	});
+		map.addLayer(mapManager.circleMaskLayer);
+		mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+			mapManager.circleMaskLayer._draw();
+		});
 	});
 }
 
@@ -17810,6 +17903,33 @@ mapManager.sortFloors = function(mapArray) {
 			return floor.floor_num;
 		})
 		.value();
+}
+
+mapManager.groupFloorMaps = function(worldStyle) {
+	if (!worldStyle.hasOwnProperty('maps')) {
+		return;
+	}
+
+	// legacy maps
+	var localMaps = [worldStyle.maps];
+	
+	// if localMapArray exists, replace local map with sorted array
+	if (hasLocalMapArray(worldStyle.maps)) {
+		localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+			return m.floor_num
+		});
+		for (mapGroup in localMaps) {
+			var overlayGroup = localMaps[mapGroup].map(function(m) {
+				return mapManager.addManyOverlays(m.localMapID, m.localMapName, m.localMapOptions);
+			});
+			var groupName = mapGroup + '-maps';
+			mapManager.addOverlayGroup(overlayGroup, groupName);
+		}
+	}
+}
+
+function hasLocalMapArray(maps) {
+	return maps.localMapArray && maps.localMapArray.length;
 }
 
 mapManager.setCircleMaskState = function(state) {
@@ -21166,7 +21286,8 @@ var landmarksLoaded = false;
 				draggable:true,
 				message:'Drag to location on map',
 				focus:true
-			});				
+			});
+
 		});
 		}
 	}
@@ -21276,35 +21397,43 @@ if ($scope.landmark.hasTime) {
 		var landmarkIcon = 'img/marker/bubble-marker-50.png',
 				popupAnchorValues = [0, -40],
 				shadowUrl = '',
-				// shadowAnchor = [4, -3],
+				shadowAnchor = [4, -3],
 				iconAnchor = [17, 67],
-				iconSize = [35, 67];
+				iconSize = [35, 67],
+				layerGroup = getLayerGroup(landmark) + '-landmarks';
 
 		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 			landmarkIcon = landmark.avatar;
 			popupAnchorValues = [0, -14];
-			// shadowUrl = 'img/marker/blue-pointer.png';
 			iconAnchor = [25, 25];
 			iconSize = [50, 50]
 		}
-	
+		
+
+		mapManager.newMarkerOverlay(landmark);
+
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
 					iconUrl: landmarkIcon,
 					shadowUrl: shadowUrl,
-					// shadowAnchor: shadowAnchor,
+					shadowAnchor: shadowAnchor,
 					iconSize: iconSize,
 					iconAnchor: iconAnchor,
 					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
-				focus:true
+				focus:true,
+				layer: layerGroup,
+				_id: landmark._id
 			});
 	}
-	
+	function getLayerGroup(landmark) {
+		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	}
+
 	function landmarkDefaults() {
 		console.log('--landmarkDefaults()--');
 		var defaults = {
@@ -21348,70 +21477,73 @@ $scope.$on('$destroy', function (event) {
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
-		$scope.style = data.style;
-		
-		$scope.worldURL = $routeParams.worldURL;
-		//initialize map with world settings
-		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
-
-		if ($scope.world.style) {
-			if ($scope.world.style.maps) {
-			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
-			map.removeAllMarkers();
-		
-			map.addMarker('m', {
-				lat: $scope.world.loc.coordinates[1],
-				lng: $scope.world.loc.coordinates[0],
-				focus: false,
-				draggable: false,
-				icon: {
-					iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
-					shadowUrl: '',
-					iconSize: [0,0],
-					shadowSize: [0,0],
-					iconAnchor: [0,0],
-					shadowAnchor: [0,0]
-				}
-			});
-
-			map.removeCircleMask();
-			map.addCircleMaskToMarker('m', 150, 'mask');
-		
-			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+	$scope.world = data.world;
+	$scope.style = data.style;
 	
-			
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
-			}
-		map.refresh();
-		
-		//world is finished loading
-		worldLoaded = true;
-		
-		//begin loading landmarks
+	$scope.worldURL = $routeParams.worldURL;
+	//initialize map with world settings
+	map.setCenter($scope.world.loc.coordinates, 18, 'editor');
+
+	if ($scope.world.style) {
+		if ($scope.world.style.maps) {
+			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)
+		}
+	}
+	map.removeAllMarkers();
+
+	// marker for world
+	map.addMarker('m', {
+		lat: $scope.world.loc.coordinates[1],
+		lng: $scope.world.loc.coordinates[0],
+		focus: false,
+		draggable: false,
+		icon: {
+			iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+			shadowUrl: '',
+			iconSize: [0,0],
+			shadowSize: [0,0],
+			iconAnchor: [0,0],
+			shadowAnchor: [0,0]
+		}
+	});
+
+	map.removeCircleMask();
+	map.addCircleMaskToMarker('m', 150, 'mask');
+
+	map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+
+	
+	if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+		zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+	}
+	map.refresh();
+	
+	//world is finished loading
+	worldLoaded = true;
+	
+	//begin loading landmarks
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
 
-		var filtered = filterLandmarks($scope.landmarks);
+		// var filtered = filterLandmarks($scope.landmarks);
 
-		angular.forEach(filtered, function(value, key) {
+		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
 			$scope.addLandmarkMarker(value);
 		});
 
-		if (filtered.length) {
-			map.setMarkerFocus(filtered[0]._id);
-			map.setMarkerSelected(filtered[0]._id);
+		if ($scope.landmarks.length) {
+			map.setMarkerFocus($scope.landmarks[0]._id);
+			map.setMarkerSelected($scope.landmarks[0]._id);
 		}
 
 		landmarksLoaded = true;
-		addOverlay();
+		addFloorMaps();
 			
 	});
-	});
+});
 
-	function addOverlay() {
+	function addFloorMaps() {
 		var initialFloor;
 
 		if ($scope.landmarks.length) {
@@ -21419,56 +21551,22 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		} else {
 			initialFloor = 1;
 		}
+		var mapLayer = initialFloor + '-maps',
+				landmarkLayer = initialFloor + '-landmarks';
 
-		var floorMaps = [$scope.world.style.maps];
-
-		if (floorMaps[0].localMapArray){
-			if (floorMaps[0].localMapArray.length > 0) {
-				floorMaps = filterMaps(floorMaps[0].localMapArray, initialFloor);
-			}
-		}
-
-		floorMaps.forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-				map.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-			}
-			
+		map.groupFloorMaps($scope.world.style);
+		
+		mapManager.findVisibleLayers().forEach(function(l) {
+			mapManager.toggleOverlay(l.name);
 		});
-	}
-	
-	function filterLandmarks(landmarks) {
-		var initialFloor;
-
-		if ($scope.landmarks.length) {
-			initialFloor = landmarks[0].loc_info ? landmarks[0].loc_info.floor_num : 1;
-		} else {
-			initialFloor = 1;
-		}
-
-		var filtered;
-
-		if (initialFloor === 1) {
-			filtered = $scope.landmarks.filter(function(l) {
-				return !l.loc_info || l.loc_info.floor_num === initialFloor;
-			});
-		} else {
-			filtered = _.chain(landmarks)
-				.filter(function(l) {
-					return l.loc_info;
-				})
-				.filter(function(l) {
-					return l.loc_info.floor_num === initialFloor;
-				})
-				.value();
-		}
-		return filtered;
+		
+		map.toggleOverlay(mapLayer);
+		map.toggleOverlay(landmarkLayer);
 	}
 
 	function filterMaps(maps, floor) {
 		return maps.filter(function(m) {
-			return m.floor_num === floor
+			return m.floor_num === floor;
 		});
 	}
 
@@ -21490,12 +21588,9 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		if (index === $scope.$parent.selectedIndex) {
 			return;
 		}
-		// updateFloor sets up a promise chain to allow markers to
-		// disappear and regenerate before selectItem is run
+
 		$scope.updateFloor()
-			.then(function() {
-				$scope.$parent.selectItem($scope.$index);		
-			});
+		$scope.$parent.selectItem($scope.$index);		
 	}
 	
 	$scope.setStartTime = function() {
@@ -21555,10 +21650,10 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		return newFloor;
 	}
 
-	$scope.$on('leafletDirectiveMarker.dragend',function (marker, ev) {
-		mapManager.markers[ev.markerName].lat = ev.leafletEvent.target._latlng.lat;
-		mapManager.markers[ev.markerName].lng = ev.leafletEvent.target._latlng.lng;
-  });
+	// $scope.$on('leafletDirectiveMarker.dragend',function (marker, ev) {
+	// 	mapManager.markers[ev.markerName].lat = ev.leafletEvent.target._latlng.lat;
+	// 	mapManager.markers[ev.markerName].lng = ev.leafletEvent.target._latlng.lng;
+ //  });
 
 	function addLocInfo() {
 		//read landmark floor array, cp to $scope
@@ -21624,80 +21719,19 @@ $scope.updateFloor = function() {
 		$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;	
 	}
 
-	var deferred = $q.defer(),
-			// landmarks without floor info will default to floor 1
-			currentFloor = $scope.landmark.loc_info && $scope.landmark.loc_info.floor_num !== null ? $scope.landmark.loc_info.floor_num : 1;
+	var currentFloor = $scope.landmark.loc_info && $scope.landmark.loc_info.floor_num !== null ? $scope.landmark.loc_info.floor_num : 1;
+	var mapLayer = currentFloor + '-maps';
+	var landmarkLayer = currentFloor + '-landmarks';
 
-	if (mapManager.localMapArrayExists($scope.world)) {
-		var localMaps = $scope.world.style.maps.localMapArray;
 
-		// sort and then filter floors
-		var floorMaps = mapManager.filterToCurrentFloor(mapManager.sortFloors(localMaps), currentFloor);	
-
-		mapManager.removeOverlays();
-		setTimeout(function() {
-			floorMaps.forEach(function(thisMap) {
-				if (thisMap.localMapID !== undefined && thisMap.localMapID.length) {
-					mapManager.addOverlay(thisMap.localMapID, 
-									thisMap.localMapName, 
-									thisMap.localMapOptions);
-				}	
-			});
-		}, 100);
-	}
-	getLandmarks(currentFloor).then(function() {
-		deferred.resolve(true);
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
 	});
-
-	return deferred.promise;
-}
-
-function getLandmarks(currentFloor) {
-	var deferred = $q.defer();
-
-	showLandmarksOnFloor(filterLandmarks($scope.$parent.landmarks, currentFloor))
-		.then(function() {
-			deferred.resolve(true);
-		});
-
-	return deferred.promise;
-}
-
-function filterLandmarks(landmarks, currentFloor) {
-	var filtered = _.chain(landmarks)
-		.filter(function(l) {
-			return l.loc_info;
-		})
-		.filter(function(l) {
-			return l.loc_info.floor_num === currentFloor;
-		})
-		.value();
-
-	// if showing the first floor then include all landmarks without a floor num
-	if (currentFloor === 1) {
-		filtered = filtered.concat(landmarks.filter(function(l) {
-			return !l.loc_info;
-		}));
-	}
-
-	return filtered;
-}
-
-function showLandmarksOnFloor(landmarks) {
-	var deferred = $q.defer();
-
-	// remove all landmarks
-	mapManager.removeAllMarkers();
-
-	angular.forEach(landmarks, function(mark) {
-		// for each landmark add a marker
-		$scope.$parent.addLandmarkMarker(mark);
-	});
-	mapManager.setMarkerFocus($scope.$parent.landmark._id);
-	mapManager.setMarkerSelected($scope.$parent.landmark._id);
-	deferred.resolve(true);
-
-	return deferred.promise;
+	
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
+	mapManager.changeMarkerLayerGroup($scope.landmark._id, landmarkLayer);
+	// mapManager.setMarkerFocus($scope.landmark._id);
 }
 
 $scope.onUploadAvatar = function($files) {
@@ -22246,8 +22280,6 @@ function floorSelector(mapManager) {
 		scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 											   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
 
-		showCurrentFloorLandmarks(1);
-
 		function findCurrentFloor(floors) {
 			var tempFiltered = floors.filter(function(f) {
 				return f[0].floor_num > 0;
@@ -22257,48 +22289,34 @@ function floorSelector(mapManager) {
 
 		scope.selectFloor = function(index) {
 			scope.currentFloor = scope.floors[index][0];
-			showCurrentFloorMaps(index);
-			showCurrentFloorLandmarks();
-
+			turnOffFloorLayers();
+			turnOnFloorMaps();
+			turnOnFloorLandmarks();
 		}
 
 		scope.openFloorMenu = function() {
 			scope.showFloors = !scope.showFloors;
 		}
 
-		function showCurrentFloorMaps(index) {
-			mapManager.removeOverlays();
-			setTimeout(function() {
-				var floorMaps = scope.floors[index];
-				floorMaps.forEach(function(m) {
-					mapManager.addOverlay(m.localMapID, m.localMapName, m.localMapOptions);
-				});
+		function turnOffFloorLayers() {
+			var layers = scope.floors.map(function(f) {
+				return f[0].floor_num || 1;
+			});
 
-					
-			}, 100)
+			mapManager.findVisibleLayers().forEach(function(l) {
+				mapManager.toggleOverlay(l.name);			
+			});
 		}
 
-		function showCurrentFloorLandmarks(floor) {
-			floor = floor || scope.currentFloor.floor_num;
-			scope.loadLandmarks();
+		function turnOnFloorMaps() {
+			var currentMapLayer = scope.currentFloor.floor_num + '-maps';
+			mapManager.toggleOverlay(currentMapLayer);
+		}
 
-			setTimeout(function() {
-
-				var removeLandmarks = _.chain(scope.landmarks)
-					.filter(function(l) {
-						return l.loc_info;
-					})
-					.filter(function(l) {
-						return l.loc_info.floor_num !== floor;
-					})
-					.value();
-
-					removeLandmarks.forEach(function(l) {
-						mapManager.removeMarker(l._id);
-					});
-					scope.$apply()
-				}, 500)
-		}	
+		function turnOnFloorLandmarks() {
+			var currentLandmarkLayer = scope.currentFloor.floor_num + '-landmarks';
+			mapManager.toggleOverlay(currentLandmarkLayer);
+		}
 	}
 }
 
@@ -23612,17 +23630,24 @@ function addLocalMapsForCurrentFloor(world, landmark) {
 	if (!map.localMapArrayExists(world)) {
 		return;
 	}
-	map.removeOverlays();
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
 
-	setTimeout(function() {
-		findMapsOnThisFloor(world, landmark).forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-				map.addOverlay(thisMap.localMapID, 
-							thisMap.localMapName, 
-							thisMap.localMapOptions);
-			}
-		});
-	}, 200)
+		var groupName = landmark.loc_info && landmark.loc_info.floor_num ? 
+										landmark.loc_info.floor_num + '-maps' : '1-maps';
+
+		if (mapManager.overlayExists(groupName)) {
+			mapManager.toggleOverlay(groupName);
+		} else {
+			overlayGroup = findMapsOnThisFloor(world, landmark).map(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+				}
+			});
+			map.addOverlayGroup(overlayGroup, groupName);
+			mapManager.toggleOverlay(groupName);
+		}
 }
 
 function findMapsOnThisFloor(world, landmark) {
@@ -24778,31 +24803,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			console.error('No center found! Error!');
 		}
 
-
 		var worldStyle = $scope.world.style;
-
-		if (worldStyle.hasOwnProperty('maps')) {
-			// default local map is localMapID
-			var theseMaps = [worldStyle.maps];
-
-			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray){
-				if (worldStyle.maps.localMapArray.length > 0) {
-					theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
-				}			
-			}
-			map.removeOverlays();
-			setTimeout(function() {
-				theseMaps.forEach(function(thisMap) {
-
-					if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-						map.addOverlay(thisMap.localMapID, 
-									thisMap.localMapName, 
-									thisMap.localMapOptions);
-					}
-					
-				})
-			}, 100)
+		map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -24816,11 +24818,10 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 			}
-		}
+		// }
 		
 		$scope.loadLandmarks();
 }
-
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -25105,7 +25106,30 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	if (tempMarkers.length) {
+		createMapAndMarkerLayers(tempMarkers)
+	}
+	
+}
+
+function createMapAndMarkerLayers(tempMarkers) {
+	var lowestFloor = 1;
+
+	tempMarkers.forEach(function(m) {
+		mapManager.newMarkerOverlay(m);
+	});
+
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+
+
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var mapLayer = lowestFloor + '-maps';
+	var landmarkLayer = lowestFloor + '-landmarks';
+	
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
 }
 
 function markerFromLandmark(landmark) {
@@ -25115,7 +25139,8 @@ function markerFromLandmark(landmark) {
 			shadowUrl = '',
 			shadowAnchor = [4, -3],
 			iconAnchor = [17, 67],
-			iconSize = [35, 67];
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
@@ -25138,8 +25163,13 @@ function markerFromLandmark(landmark) {
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-		_id: landmark._id
+		_id: landmark._id,
+		layer: layerGroup
 	}
+}
+
+function getLayerGroup(landmark) {
+	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
 }
 
 $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {

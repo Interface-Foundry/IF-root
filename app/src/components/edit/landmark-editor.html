@@ -126,7 +126,10 @@
 		      				dropdown-toggle>{{floorNumber}}&nbsp;<span class="caret"></span>
 		      </button>
 		      <ul class="dropdown-menu" role="menu">
-		        <li ng-repeat="floor in floors" ng-click="chooseNewFloor($index)"><a href="#">{{floor.label}}</a></li>
+		        <li ng-repeat="floor in floors" 
+		        		ng-click="chooseNewFloor($index)">
+		        	<a href="#">{{floor.label}}</a>
+		        </li>
 		      </ul>
 		    </div>
 

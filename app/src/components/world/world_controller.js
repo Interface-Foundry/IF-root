@@ -172,31 +172,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			console.error('No center found! Error!');
 		}
 
-
 		var worldStyle = $scope.world.style;
-
-		if (worldStyle.hasOwnProperty('maps')) {
-			// default local map is localMapID
-			var theseMaps = [worldStyle.maps];
-
-			// if localMapArray exists, replace local map with lowest floor from array
-			if (worldStyle.maps.localMapArray){
-				if (worldStyle.maps.localMapArray.length > 0) {
-					theseMaps = map.findMapFromArray(worldStyle.maps.localMapArray);
-				}			
-			}
-			map.removeOverlays();
-			setTimeout(function() {
-				theseMaps.forEach(function(thisMap) {
-
-					if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-						map.addOverlay(thisMap.localMapID, 
-									thisMap.localMapName, 
-									thisMap.localMapOptions);
-					}
-					
-				})
-			}, 100)
+		map.groupFloorMaps(worldStyle);
 
 			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
 				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
@@ -210,11 +187,10 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 			}
-		}
+		// }
 		
 		$scope.loadLandmarks();
 }
-
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -499,7 +475,30 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	if (tempMarkers.length) {
+		createMapAndMarkerLayers(tempMarkers)
+	}
+	
+}
+
+function createMapAndMarkerLayers(tempMarkers) {
+	var lowestFloor = 1;
+
+	tempMarkers.forEach(function(m) {
+		mapManager.newMarkerOverlay(m);
+	});
+
+	if (map.localMapArrayExists($scope.world)) {
+		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	}
+
+
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var mapLayer = lowestFloor + '-maps';
+	var landmarkLayer = lowestFloor + '-landmarks';
+	
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
 }
 
 function markerFromLandmark(landmark) {
@@ -509,7 +508,8 @@ function markerFromLandmark(landmark) {
 			shadowUrl = '',
 			shadowAnchor = [4, -3],
 			iconAnchor = [17, 67],
-			iconSize = [35, 67];
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
@@ -532,8 +532,13 @@ function markerFromLandmark(landmark) {
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-		_id: landmark._id
+		_id: landmark._id,
+		layer: layerGroup
 	}
+}
+
+function getLayerGroup(landmark) {
+	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
 }
 
 $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
