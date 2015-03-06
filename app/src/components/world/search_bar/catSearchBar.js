@@ -5,7 +5,7 @@ app.directive('catSearchBar', ['apertureService', function(apertureService) {
 			text: '=',
 			color: '='
 		},
-		templateUrl: 'templates/catSearchBar.html',
+		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
 
 			// bind text
