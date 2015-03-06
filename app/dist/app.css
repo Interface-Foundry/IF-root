@@ -4546,9 +4546,14 @@ li.alert {
   top: 2px;
 }
 .search-cat input {
-  width: 80%;
+  width: 65%;
   outline: 0;
   border: 0;
+}
+.search-cat .clear-text {
+  float: right;
+  width: 26px;
+  margin-right: 16px;
 }
 
 .leaflet-areaselect-shade {

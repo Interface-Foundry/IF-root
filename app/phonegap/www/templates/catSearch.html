@@ -1,6 +1,8 @@
-<div class="marble-page search-cat">
+<div class="marble-page search-cat"
+	ng-click="selectText()">
 	<div class="marble-page-header">
 		<div class="marble-page-header-icon">
+			<!-- inline svg allows color change -->
 			<svg xmlns="http://www.w3.org/2000/svg" 
 				width="24" 
 				height="24" 
@@ -12,7 +14,10 @@
 		</div>
 		<input type="text" 
 			class="u-centerY" 
-			ng-value="text"
+			ng-model="searchText"
 			ng-style="{color: color}">
+		<img src="img/icons/ic_clear_grey600_24dp.png" 
+			class="clear-text u-centerY"
+			ng-click="clearText()">
 	</div>
 </div>
