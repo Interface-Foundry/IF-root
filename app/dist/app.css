@@ -4577,6 +4577,30 @@ li.alert {
   letter-spacing: 1px;
   margin: 12px;
 }
+/*SEARCH CAT*/
+.search-cat {
+  min-height: 0px;
+}
+.search-cat .marble-page-header-icon {
+  background-color: transparent;
+  padding: 0px;
+}
+.search-cat .marble-page-header-icon svg {
+  width: 24px;
+  display: block;
+  position: relative;
+  top: 2px;
+}
+.search-cat input {
+  width: 65%;
+  outline: 0;
+  border: 0;
+}
+.search-cat .clear-text {
+  float: right;
+  width: 26px;
+  margin-right: 16px;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;

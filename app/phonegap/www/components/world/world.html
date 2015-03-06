@@ -15,6 +15,10 @@
 
 	<div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
 		<div class="surface bg-clear">
+
+			<cat-search-bar ng-show="isRetail" 
+				color="style.landmarkTitle_color"
+				text="'What are you looking for?'"></cat-search-bar>
 		
 			<!--DESCRIPTION-->
 			<div ng-include="'components/world/templates/description.html'" class="marble-page"></div>
