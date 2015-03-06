@@ -16816,6 +16816,30 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 
    		return alerts;
    }])
+app.factory('bubbleSearchService', bubbleSearchService);
+
+bubbleSearchService.$inject = ['$http'];
+
+function bubbleSearchService($http) {
+	
+	var data = [];
+
+	return {
+		data: data,
+		search: search
+	};
+	
+	function search(bubbleId, input) {
+		return $http.get('/api/bubbles/' + bubbleId + '/bubblesearch', {
+			params: {
+				search: input
+			}
+		}).then(function(response) {
+			angular.copy(response.data, data);
+		});
+	}
+
+}
 'use strict';
 // keep track of which type of bubble user is currently viewing
 app
@@ -22249,6 +22273,8 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 }]);
 
+'use strict';
+
 app.directive('floorSelector', floorSelector);
 
 floorSelector.$inject = ['mapManager'];
@@ -23484,19 +23510,30 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	});
  	   
 }
-app.directive('categoryWidgetSr', [function() {
+app.directive('categoryWidgetSr', categoryWidgetSr);
+
+categoryWidgetSr.$inject = ['bubbleSearchService'];
+
+function categoryWidgetSr(bubbleSearchService) {
 	return {
 		restrict: 'E',
 		scope: {
 			categories: '=categories',
-			style: '=style'
+			style: '=style',
+			world: '=world'
 		},
 		templateUrl: 'components/world/category_widget/category.widget.html',
-		link: function(scope, element, attrs) {
-			scope.groupedCategories = _.groupBy(scope.categories, 'name');
+		controller: function($scope) {
+			$scope.groupedCategories = _.groupBy($scope.categories, 'name');
+
+			$scope.search = function(index) {
+				var category = this.category[0].name;
+				bubbleSearchService.search($scope.world._id, category);
+			}
 		}
-	}
-}]);
+			
+	};
+}
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
