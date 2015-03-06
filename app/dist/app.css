@@ -4559,7 +4559,10 @@ li.alert {
   height: 50px;
 }
 .category-widget-item p {
-  font-size: .8em;
+  font-size: .9em;
+  height: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .category-widget-directory-btn {
   border-top: 1px solid #EEE;
