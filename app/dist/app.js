@@ -23361,7 +23361,7 @@ app.directive('categoryWidgetSr', [function() {
 		},
 		templateUrl: 'components/world/category_widget/category.widget.html',
 		link: function(scope, element, attrs) {
-			// scope.groupedCategories = _.group(scope.categories, 'name');
+			scope.groupedCategories = _.groupBy(scope.categories, 'name');
 		}
 	}
 }]);

@@ -1,16 +1,21 @@
-
-<div class="category-widget-item" ng-repeat="category in categories track by $index">
-	<img ng-if="category.avatar" 
-			 ng-src="{{category.avatar}}"/>
-	<div ng-if="!category.avatar" 
-			 class="category-letter"
-			 ng-style="{color: style.titleBG_color}">
-		{{category.name[0].toUpperCase()}}
+<article class="marble-page-content">
+	<div class="category-list">
+		<div class="category-widget-item" 
+				 ng-repeat="category in groupedCategories track by $index"
+				 ng-click="">
+			<img ng-if="category[0].avatar" 
+					 ng-src="{{category[0].avatar}}"/>
+			<div ng-if="!category[0].avatar" 
+					 class="category-letter"
+					 ng-style="{color: style.titleBG_color}">
+				{{category[0].name[0].toUpperCase()}}
+			</div>
+			<p>{{category[0].name}}</p>
+		</div>
 	</div>
-	<p>{{category.name}}</p>
-</div>
+</article>
 <div class="category-widget-directory-btn" 
-		 ng-click="" 
-		 ng-style="{color: style.titleBG_color}">
+		 ng-click="">
 	<p>Directory</p>
+
 </div>
