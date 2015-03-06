@@ -23378,6 +23378,25 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	});
  	   
 }
+'use strict';
+
+app.controller('CategoryWidgetController', CategoryWidgetController);
+
+CategoryWidgetController.$inject = ['$scope', 'bubbleSearchService'];
+
+function CategoryWidgetController($scope, bubbleSearchService) {
+	var vm = this;
+
+	vm.bubbleId = $scope.world._id;
+	vm.groupedCategories = _.groupBy($scope.categories, 'name');
+	vm.search = search;
+
+	function search(category, index) {
+		bubbleSearchService.search(this.bubbleId, category);
+	}
+}
+'use strict';
+
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
 categoryWidgetSr.$inject = ['bubbleSearchService'];
@@ -23386,20 +23405,19 @@ function categoryWidgetSr(bubbleSearchService) {
 	return {
 		restrict: 'E',
 		scope: {
+			aperture: '=aperture',
 			categories: '=categories',
 			style: '=style',
 			world: '=world'
 		},
-		templateUrl: 'components/world/category_widget/category.widget.html',
-		controller: function($scope) {
-			$scope.groupedCategories = _.groupBy($scope.categories, 'name');
-
-			$scope.search = function(index) {
-				var category = this.category[0].name;
-				bubbleSearchService.search($scope.world._id, category);
+		templateUrl: function(elem, attrs) {
+			if (attrs.aperture === 'full') {
+				return 'components/world/category_widget/category.widget.fullaperture.html'
+			} else {
+				return 'components/world/category_widget/category.widget.noaperture.html'
 			}
-		}
-			
+		},
+		controller: 'CategoryWidgetController as catCtrl'
 	};
 }
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',

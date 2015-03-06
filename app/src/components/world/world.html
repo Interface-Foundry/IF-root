@@ -10,7 +10,14 @@
 		<div class="world-title noPreventDefault" fit-font>
 			<span class="vertical-middle noPreventDefault">{{world.name}}</span>
 		</div>
-		<category-widget ng-if="::category" ng-show="aperture.state==='aperture-full'" class="toolbar-category-widget"></category-widget>
+<!-- 		<category-widget ng-if="::category" ng-show="aperture.state==='aperture-full'" class="toolbar-category-widget"></category-widget> -->
+		<category-widget-sr ng-if="::category"
+												ng-show="aperture.state === 'aperture-full'"
+												class="category-map-view-scroll"
+												aperture="full"
+												categories="world.landmarkCategories"
+												style="style"
+												world="world"></category-widget-sr>
 	</div>
 
 	<div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
@@ -28,7 +35,8 @@
 					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
 				Categories
 				</header>
-				<category-widget-sr categories="world.landmarkCategories"
+				<category-widget-sr aperture="off"
+														categories="world.landmarkCategories"
 														style="style"
 														world="world"></category-widget-sr>
 			</div>

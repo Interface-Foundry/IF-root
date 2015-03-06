@@ -1,0 +1,22 @@
+<div class="category-list map-view">
+	<div class="category-widget-item"
+			 ng-click="search('all')">
+		<div class="category-letter"
+				 ng-class="{ active: $index === catCtrl.selectedIndex }"
+				 ng-style="{color: style.titleBG_color}">
+			All
+		</div>
+	</div>
+
+	<div class="category-widget-item" 
+			 ng-repeat="category in catCtrl.groupedCategories track by $index"
+			 ng-click="catCtrl.search(category[0].name, $index)">
+		<img ng-if="category[0].avatar" 
+				 ng-src="{{category[0].avatar}}"/>
+		<div ng-if="!category[0].avatar" 
+				 class="category-letter"
+				 ng-style="{color: style.titleBG_color}">
+			{{category[0].name[0].toUpperCase()}}
+		</div>
+	</div>
+</div>

@@ -1,8 +1,8 @@
 <article class="marble-page-content">
 	<div class="category-list">
 		<div class="category-widget-item" 
-				 ng-repeat="category in groupedCategories track by $index"
-				 ng-click="search($index)">
+				 ng-repeat="category in catCtrl.groupedCategories track by $index"
+				 ng-click="catCtrl.search(category[0].name)">
 			<img ng-if="category[0].avatar" 
 					 ng-src="{{category[0].avatar}}"/>
 			<div ng-if="!category[0].avatar" 
