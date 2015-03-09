@@ -14,10 +14,11 @@ function bubbleSearchService($http) {
 	function search(searchType, bubbleID, input) {
 		var params = {
 			worldID: bubbleID,
-			category: input
+			catName: input,
+			textSearch: input
 		};
 
-		return $http.get('/api/bubblesearch/' + searchType, params)
+		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
 			});

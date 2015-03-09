@@ -16829,13 +16829,14 @@ function bubbleSearchService($http) {
 		search: search
 	};
 	
-	function search(searchType, bubbleID, input) {
+	function search(searchType, bubbleID, input, text) {
 		var params = {
 			worldID: bubbleID,
-			category: input
+			catName: input,
+			textSearch: input
 		};
 
-		return $http.get('/api/bubblesearch/' + searchType, params)
+		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
 			});
