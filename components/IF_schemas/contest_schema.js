@@ -11,9 +11,9 @@ var contestSchema = mongoose.Schema({
     worldID: String,
     worldName: String,
     v: Boolean,
+    contestTag: { type: String, index: true},
     userLat: Number,
     userLng: Number,
-    contestTag: String,
     imgURL: String
 });
 

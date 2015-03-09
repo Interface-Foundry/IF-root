@@ -40,7 +40,7 @@ monguurl = require('monguurl');
 		type: String, //event, place
 		subType: { type: [String], index: true }, // type of event/place	
 		category: { //only for landmarks (world:false)
-			name: String, 
+			name: { type: String, index: true}, 
 			avatar: String,
 			hiddenPresent: Boolean
 		},
