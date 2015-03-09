@@ -2200,11 +2200,14 @@ li.alert {
   height: 43px;
   margin-top: -2px;
 }
+.category-list.map-view #category-all {
+  box-shadow: 0px 2px 10px 0px rgba(0, 0, 0, 0.5);
+  margin: 2px;
+}
 .category-map-view-scroll {
   background: white;
   border-top: 2px solid #ddd;
-  /*border-bottom: 2px solid #DD8;*/
-  bottom: 60px;
+  bottom: 57px;
   height: 50px;
   padding: 2px 0;
   position: absolute;

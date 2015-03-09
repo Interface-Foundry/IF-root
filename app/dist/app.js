@@ -16809,7 +16809,7 @@ function bubbleSearchService($http) {
 		search: search
 	};
 	
-	function search(searchType, bubbleID, input, text) {
+	function search(searchType, bubbleID, input) {
 		var params = {
 			worldID: bubbleID,
 			catName: input,
@@ -16819,6 +16819,8 @@ function bubbleSearchService($http) {
 		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
+			}, function(error) {
+				console.log(error);
 			});
 	}
 
@@ -23385,9 +23387,9 @@ $scope.$on('$locationChangeSuccess', function (event) {
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location'];
 
-function categoryWidgetSr(bubbleSearchService) {
+function categoryWidgetSr(bubbleSearchService, $location) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -23413,6 +23415,7 @@ function categoryWidgetSr(bubbleSearchService) {
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
+				// $location.path('/w/' + scope.bubbleId + '/results/category?catName=' + category);
 			}
 
 		}
