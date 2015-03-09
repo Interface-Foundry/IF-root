@@ -63,6 +63,9 @@ var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
 
 //---- SEARCH -------//
 var text_search = require('./components/IF_search/text_search');
+var bubble_search = require('./components/IF_search/bubble_search');
+
+
 
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
@@ -440,7 +443,10 @@ function isLoggedIn(req, res, next) {
 app.get('/api/textsearch', function(req, res) {
     text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
 });
-
+//In Bubble Search
+app.get('/api/bubblesearch/:type', function (req, res) {
+       bubble_search(req.params.type, req.query, res);
+});
 
 
 // Save world visitor anonymously
@@ -1075,6 +1081,8 @@ app.post('/api/anon_user/create', function(req,res){
 
     //
 
+    console.log(req.body);
+
     au.instances.push({
       userTime: req.body.userTime
     });
@@ -1103,6 +1111,8 @@ app.post('/api/anon_user/update', function(req,res){
 
   //expecting lat lon time
   //expecting sessionID to track current user session to find and update in arr
+
+      console.log(req.body);
 
     if (req.body.anonID){
 
