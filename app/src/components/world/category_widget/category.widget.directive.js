@@ -15,11 +15,23 @@ function categoryWidgetSr(bubbleSearchService) {
 		},
 		templateUrl: function(elem, attrs) {
 			if (attrs.aperture === 'full') {
-				return 'components/world/category_widget/category.widget.fullaperture.html'
+				return 'components/world/category_widget/category.widget.fullaperture.html';
 			} else {
-				return 'components/world/category_widget/category.widget.noaperture.html'
+				return 'components/world/category_widget/category.widget.noaperture.html';
 			}
 		},
-		controller: 'CategoryWidgetController as catCtrl'
+		link: function(scope, elem, attrs) {
+			scope.bubbleId = scope.world._id;
+			scope.groupedCategories = _.groupBy(scope.categories, 'name');
+			scope.selectedIndex;
+
+			scope.search = function(category, index) {
+				// bubbleSearchService.search(scope.bubbleId, category);
+				if (index !== undefined) {
+					scope.selectedIndex = index;
+				}
+			}
+
+		}
 	};
 }

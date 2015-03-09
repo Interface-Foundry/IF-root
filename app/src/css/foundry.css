@@ -2147,6 +2147,7 @@ li.alert {
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
 }
+/* CATEGORY WIDGET */
 .category-list {
   width: 100%;
 }
@@ -2186,16 +2187,24 @@ li.alert {
   margin: 12px;
 }
 .category-list.map-view {
+  box-shadow: -23px 0px 21px -19px rgba(0, 0, 0, 0.4) inset;
+  margin-top: -5px;
   overflow-x: scroll;
   padding-left: 0;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
 }
+.category-list.map-view .active {
+  background-color: #ddd;
+  border: 1px solid white;
+  height: 43px;
+  margin-top: -2px;
+}
 .category-map-view-scroll {
   background: white;
   border-top: 2px solid #ddd;
   border-bottom: 2px solid #DD8;
-  bottom: 68px;
+  bottom: 60px;
   height: 50px;
   padding: 2px 0;
   position: absolute;
