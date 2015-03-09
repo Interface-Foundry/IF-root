@@ -80,7 +80,7 @@ $routeProvider.
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
 	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
-
+	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
       
@@ -91,9 +91,6 @@ $routeProvider.
       
       when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
       when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-
-      
-      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: 'SearchController'}).
       
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 

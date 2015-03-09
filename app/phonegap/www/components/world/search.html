@@ -1,0 +1,33 @@
+<div id="shelf" ng-class="[aperture.state]">
+	<div id='top-shelf' class="noPreventDefault"
+		ng-class="[aperture.navfix, aperture.state]" 
+		ng-style="::{'background-color': style.titleBG_color}" 
+		ng-click="aperture.toggle('full'); zoomOn()"
+		ng-swipe-up="aperture.set('off'); zoomOn()"
+		ng-swipe-down="aperture.set('full'); zoomOn()"
+		world-shelf>
+		<div class="world-title noPreventDefault" fit-font>
+			<span class="vertical-middle noPreventDefault">{{world.name}}</span>
+		</div>
+	</div>
+
+	<div class="shelf-surface wrap">		
+		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
+		
+			<cat-search-bar ng-show="bubbleTypeService.get() === 'Retail'" 
+				color="style.landmarkTitle_color"
+				text="'What are you looking for?'"></cat-search-bar>
+
+			<div class="bubble-group" ng-repeat="group in groups">
+				<header class="bubble-group-label">{{group.letter}}</header>
+				<ul class="bubble-list">
+					<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
+							<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+							<span>{{::landmark.name}}</span>
+					</li>
+				</ul>
+			</div>
+			
+		</div>
+	</div>
+</div>	

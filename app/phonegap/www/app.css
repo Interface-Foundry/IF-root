@@ -3609,10 +3609,15 @@ span.subnav-back-chevron {
   margin: 0px -8px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
 }
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 480px) {
+  .bubble-list {
+    width: 456px;
+    margin: 0px auto;
+  }
+}
+@media only screen and (min-width: 768px) {
   .bubble-list {
     width: 600px;
-    margin: 0px auto;
   }
 }
 .bubble-group {
@@ -3622,10 +3627,15 @@ span.subnav-back-chevron {
   color: #888;
   font-weight: 500;
 }
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 480px) {
+  .bubble-group-label {
+    width: 456px;
+    margin: 0px auto;
+  }
+}
+@media only screen and (min-width: 768px) {
   .bubble-group-label {
     width: 600px;
-    margin: 0px auto;
   }
 }
 .bubble-supergroup {
@@ -3651,10 +3661,15 @@ span.subnav-back-chevron {
   border: none;
   outline: none;
 }
-@media only screen and (min-width: 600px) {
+@media only screen and (min-width: 480px) {
+  .bubble-supergroup-label {
+    width: 456px;
+    margin: 8px auto;
+  }
+}
+@media only screen and (min-width: 768px) {
   .bubble-supergroup-label {
     width: 600px;
-    margin: 8px auto;
   }
 }
 .bubble-supergroup-label:before {
