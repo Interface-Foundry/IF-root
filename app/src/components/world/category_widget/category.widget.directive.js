@@ -26,7 +26,7 @@ function categoryWidgetSr(bubbleSearchService) {
 			scope.selectedIndex;
 
 			scope.search = function(category, index) {
-				// bubbleSearchService.search(scope.bubbleId, category);
+				bubbleSearchService.search('category', scope.bubbleId, category);
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}

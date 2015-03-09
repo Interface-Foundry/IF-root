@@ -11,14 +11,16 @@ function bubbleSearchService($http) {
 		search: search
 	};
 	
-	function search(bubbleId, input) {
-		return $http.get('/api/bubbles/' + bubbleId + '/bubblesearch', {
-			params: {
-				search: input
-			}
-		}).then(function(response) {
-			angular.copy(response.data, data);
-		});
+	function search(searchType, bubbleID, input) {
+		var params = {
+			worldID: bubbleID,
+			category: input
+		};
+
+		return $http.get('/api/bubblesearch/' + searchType, params)
+			.then(function(response) {
+				angular.copy(response.data, data);
+			});
 	}
 
 }
