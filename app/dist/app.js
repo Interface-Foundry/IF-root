@@ -4883,7 +4883,7 @@ $routeProvider.
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
 	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
-
+	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
       
@@ -4894,9 +4894,6 @@ $routeProvider.
       
       when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
       when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-
-      
-      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: 'SearchController'}).
       
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
@@ -23283,6 +23280,48 @@ userManager.getUser().then(
 
 }]);
 
+app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService) {
+
+	$scope.aperture = apertureService;
+	$scope.bubbleTypeService = bubbleTypeService
+	$scope.groups;
+	$scope.world;
+	$scope.style;
+	
+	var map = mapManager;
+
+	$scope.aperture.set('third');
+
+	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+		$scope.world = data.world;
+		$scope.style = data.style;
+
+		// used for dummy data. this should actually be coming from http.get
+		worldTree.getLandmarks($scope.world._id).then(function(data) {
+			$scope.groups = groupResults(data);
+		});
+	});
+
+
+	function groupResults(data) {
+		var groups = _.chain(data)
+			// group landmarks by first letter
+			.groupBy(function(result) {
+				return result.name[0].toUpperCase();
+			})
+			// map from object {A: [landmark1, landmark2], B: [landmark3, landmark4]} to array of objects [{letter: 'A', results: [landmark1, landmark2]}, {letter: 'B', results: [landmark3, landmark4]}], which enables sorting
+			.map(function(group, key) {
+				return {
+					letter: key,
+					results: group
+				}
+			})
+			.sortBy('letter')
+			.value();
+		return groups;
+	}
+
+}]);
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
   	var style = styleManager;
