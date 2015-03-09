@@ -64,8 +64,8 @@ var route = function(searchType, query, res){
       if (sID && sCat){
 
           landmarkSchema.find(
-            {'parentID': sID },
-            {'category.name': sCat}
+            {'parentID': sID,
+            'category': sCat}
           ).
           sort({ 'name' : 'desc' } ). //alphabetical order
           exec(function(err, data) {

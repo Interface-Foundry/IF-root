@@ -2,9 +2,9 @@
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location'];
 
-function categoryWidgetSr(bubbleSearchService) {
+function categoryWidgetSr(bubbleSearchService, $location) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -30,6 +30,7 @@ function categoryWidgetSr(bubbleSearchService) {
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
+				// $location.path('/w/' + scope.bubbleId + '/results/category?catName=' + category);
 			}
 
 		}

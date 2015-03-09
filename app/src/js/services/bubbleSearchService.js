@@ -21,6 +21,8 @@ function bubbleSearchService($http) {
 		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
+			}, function(error) {
+				console.log(error);
 			});
 	}
 
