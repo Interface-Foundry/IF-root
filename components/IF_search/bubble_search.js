@@ -5,7 +5,6 @@ landmarkSchema = require('../IF_schemas/landmark_schema.js');
 
 var route = function(searchType, query, res){
 
-
   switch(searchType){
 
     //text search inside bubble
@@ -66,7 +65,7 @@ var route = function(searchType, query, res){
 
           landmarkSchema.find(
             {'parentID': sID },
-            {'category.name': sText}
+            {'category.name': sCat}
           ).
           sort({ 'name' : 'desc' } ). //alphabetical order
           exec(function(err, data) {
