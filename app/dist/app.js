@@ -4884,6 +4884,9 @@ $routeProvider.
 	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
       
@@ -18611,9 +18614,6 @@ function worldBuilderService(mapManager, userManager, localStore) {
 			}
 		};
 
-		// set zoom control position
-		mapManager.defaults.zoomControlPosition = 'topleft';
-
 		//map setup
 		if (world.hasOwnProperty('loc') && world.loc.hasOwnProperty('coordinates')) {
 			mapManager.setCenter([world.loc.coordinates[0], world.loc.coordinates[1]], zoomLevel, aperture.state);
@@ -23431,7 +23431,6 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			$scope.groups = groupResults(data);
 		});
 	});
-
 
 	function groupResults(data) {
 		var groups = _.chain(data)

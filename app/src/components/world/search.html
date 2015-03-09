@@ -13,10 +13,22 @@
 
 	<div class="shelf-surface wrap">		
 		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
-		
+
 			<cat-search-bar ng-show="bubbleTypeService.get() === 'Retail'" 
 				color="style.landmarkTitle_color"
 				text="'What are you looking for?'"></cat-search-bar>
+
+			<div class="marble-page" ng-if="style.widgets.category">
+				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
+				Categories
+				</header>
+				<category-widget-sr ng-if="::style.widgets.category"
+					aperture="off"
+					categories="world.landmarkCategories"
+					style="style"
+					world="world"></category-widget-sr>
+			</div>
 
 			<div class="bubble-group" ng-repeat="group in groups">
 				<header class="bubble-group-label">{{group.letter}}</header>
