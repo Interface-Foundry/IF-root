@@ -18609,8 +18609,10 @@ function worldBuilderService(mapManager, userManager, localStore) {
 			else {
 				zoomLevel = world.style.maps.localMapOptions.minZoom || 18;
 			}
-
 		};
+
+		// set zoom control position
+		mapManager.defaults.zoomControlPosition = 'topleft';
 
 		//map setup
 		if (world.hasOwnProperty('loc') && world.loc.hasOwnProperty('coordinates')) {

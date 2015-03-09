@@ -29,7 +29,6 @@ function worldBuilderService(mapManager, userManager, localStore) {
 			else {
 				zoomLevel = world.style.maps.localMapOptions.minZoom || 18;
 			}
-
 		};
 
 		//map setup
