@@ -20,7 +20,6 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		});
 	});
 
-
 	function groupResults(data) {
 		var groups = _.chain(data)
 			// group landmarks by first letter
