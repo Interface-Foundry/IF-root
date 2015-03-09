@@ -52,7 +52,7 @@ var route = function(searchType, query, res){
     //category search inside bubble
     case 'category':
 
-      var sCat = sanitize(textQuery.catName);
+      var sCat = sanitize(query.catName);
       if (sCat){
         sCat = sCat.replace(/[^\w\s]/gi, ''); //remove all special characters
       }
