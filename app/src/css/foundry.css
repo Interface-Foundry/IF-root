@@ -2227,6 +2227,7 @@ li.alert {
   padding: 2px 0;
   position: absolute;
   width: 100%;
+  z-index: -1;
 }
 .category-map-view-scroll .category-widget-item {
   padding: 0;

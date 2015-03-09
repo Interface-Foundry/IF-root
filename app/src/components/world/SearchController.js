@@ -1,4 +1,4 @@
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService) {
+app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService
@@ -13,6 +13,8 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
+
+		worldBuilderService.loadWorld($scope.world);
 
 		// used for dummy data. this should actually be coming from http.get
 		worldTree.getLandmarks($scope.world._id).then(function(data) {

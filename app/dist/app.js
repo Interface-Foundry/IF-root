@@ -16793,6 +16793,8 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 
    		return alerts;
    }])
+'use strict';
+
 app.factory('bubbleSearchService', bubbleSearchService);
 
 bubbleSearchService.$inject = ['$http'];
@@ -18576,6 +18578,99 @@ userManager.saveToKeychain = function() {
 
 return userManager;
 }]);
+'use strict';
+
+app.factory('worldBuilderService', worldBuilderService);
+
+worldBuilderService.$inject = ['mapManager', 'userManager', 'localStore'];
+
+function worldBuilderService(mapManager, userManager, localStore) {
+
+	return {
+		loadWorld: loadWorld
+	};
+	
+	function loadWorld(world) {
+
+	//local storage
+	if (!userManager.loginStatus && !localStore.getID()) {
+ 		localStore.createID();
+ 	}
+		
+		// set appropriate zoom level based on local maps
+		var zoomLevel = 18;
+
+		if (world.style.hasOwnProperty('maps') && world.style.maps.hasOwnProperty('localMapOptions')) {
+			if (world.style.maps.localMapArray){
+				if (world.style.maps.localMapArray.length > 0) {
+					zoomLevel = mapManager.findZoomLevel(world.style.maps.localMapArray);
+				} 
+			}
+			else {
+				zoomLevel = world.style.maps.localMapOptions.minZoom || 18;
+			}
+
+		};
+
+		//map setup
+		if (world.hasOwnProperty('loc') && world.loc.hasOwnProperty('coordinates')) {
+			mapManager.setCenter([world.loc.coordinates[0], world.loc.coordinates[1]], zoomLevel, aperture.state);
+			console.log('setcenter');
+
+			// if bubble has local maps then do not show world marker
+			if (!mapManager.localMapArrayExists(world)) {
+				addWorldMarker();
+			}
+
+		} else {
+			console.error('No center found! Error!');
+		}
+
+		var worldStyle = world.style;
+		mapManager.groupFloorMaps(worldStyle);
+
+		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+		}
+
+		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+			mapManager.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+			mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
+		} else {
+			console.warn('No base layer found! Defaulting to forum.');
+			mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+		}
+
+		createMapLayer(world);
+
+	}
+	function addWorldMarker() {
+		mapManager.addMarker('c', {
+			lat: world.loc.coordinates[1],
+			lng: world.loc.coordinates[0],
+			icon: {
+				iconUrl: 'img/marker/bubble-marker-50.png',
+				shadowUrl: '',
+				iconSize: [35, 67],
+				iconAnchor: [17, 67],
+				popupAnchor:[0, -40]
+			},
+			message:'<a href="#/w/'+world.id+'/">'+world.name+'</a>',
+		});
+	}
+
+	function createMapLayer(world) {
+		var lowestFloor = 1,
+				mapLayer;
+		if (mapManager.localMapArrayExists(world)) {
+			lowestFloor = mapManager.sortFloors(world.style.maps.localMapArray)[0].floor_num;
+		}
+		mapLayer = lowestFloor + '-maps';
+		mapManager.toggleOverlay(mapLayer);
+	}
+
+}
 angular.module('tidepoolsServices')
 	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
 	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
@@ -23311,7 +23406,7 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService) {
+app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService
@@ -23326,6 +23421,8 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
+
+		worldBuilderService.loadWorld($scope.world);
 
 		// used for dummy data. this should actually be coming from http.get
 		worldTree.getLandmarks($scope.world._id).then(function(data) {

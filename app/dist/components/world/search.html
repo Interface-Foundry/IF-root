@@ -30,4 +30,20 @@
 			
 		</div>
 	</div>
-</div>	
+</div>
+
+<category-widget-sr ng-if="::style.widgets.category"
+										ng-show="aperture.state === 'aperture-full'"
+										class="category-map-view-scroll"
+										aperture="full"
+										categories="world.landmarkCategories"
+										style="style"
+										world="world"></category-widget-sr>
+
+<div ng-if="world.style.maps.localMapArray.length">
+	<floor-selector class="if-animate" ng-class="[aperture.state]"
+									world="world" 
+									style="style"
+									landmarks="landmarks"
+									load-landmarks="loadLandmarks(upperFloors)"></floor-selector>
+</div>
