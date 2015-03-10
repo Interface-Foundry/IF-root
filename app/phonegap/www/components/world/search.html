@@ -38,7 +38,7 @@
 				<header class="bubble-group-label">{{group.letter}}</header>
 				<ul class="bubble-list">
 					<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
-							<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+							<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
 							<span>{{::landmark.name}}</span>
 					</li>
 				</ul>
