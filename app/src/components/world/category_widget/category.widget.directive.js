@@ -2,9 +2,9 @@
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager'];
 
-function categoryWidgetSr(bubbleSearchService, $location) {
+function categoryWidgetSr(bubbleSearchService, $location, mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -26,13 +26,41 @@ function categoryWidgetSr(bubbleSearchService, $location) {
 			scope.selectedIndex;
 
 			scope.search = function(category, index) {
-				bubbleSearchService.search('category', scope.bubbleId, category);
+				bubbleSearchService.search('category', scope.bubbleId, category)
+				.then(function(response) {
+					updateLandmarks();
+				});
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
-				// $location.path('/w/' + scope.bubbleId + '/results/category?catName=' + category);
+				$location.path('/w/' + scope.bubbleId + '/search/category/' + category);
 			}
 
+			function updateLandmarks() {
+				var landmarks = bubbleSearchService.data,
+						markers = landmarks.map(mapManager.markerFromLandmark);
+
+				landmarks.forEach(function(m) {
+					mapManager.newMarkerOverlay(m);
+				});
+				
+				// mapManager.setCenterFromMarkers(markers);
+				mapManager.setMarkers(markers);
+
+				turnOnOverlays(landmarks);
+			}
+
+			function turnOnOverlays(landmarks) {
+				_.chain(landmarks)
+					.map(function(l) {
+						return l.loc_info ? l.loc_info.floor_num : 1;
+					})
+					.uniq()
+					.value()
+					.forEach(function(l) {
+						mapManager.toggleOverlay(String(l).concat('-landmarks'));
+					});
+			}
 		}
 	};
 }

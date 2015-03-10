@@ -131,6 +131,39 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
+mapManager.markerFromLandmark = function(landmark, world) {
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
+	return {
+		lat:landmark.loc.coordinates[1],
+		lng:landmark.loc.coordinates[0],
+		draggable:false,
+		message: '<a if-href="#w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		icon: {
+			iconUrl: landmarkIcon,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
+		},
+		_id: landmark._id,
+		layer: layerGroup
+	}
+	function getLayerGroup(landmark) {
+		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	}
+}
+
 /* addMarker
 Key: Name of marker to be added
 Marker: Object representing marker

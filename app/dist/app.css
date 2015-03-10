@@ -4666,6 +4666,11 @@ li.alert {
   width: 26px;
   margin-right: 16px;
 }
+.aperture-full .leaflet-bottom.leaflet-left {
+  top: 60px;
+  left: 1%;
+  display: block;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;

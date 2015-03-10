@@ -17473,6 +17473,39 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
+mapManager.markerFromLandmark = function(landmark, world) {
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
+	return {
+		lat:landmark.loc.coordinates[1],
+		lng:landmark.loc.coordinates[0],
+		draggable:false,
+		message: '<a if-href="#w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		icon: {
+			iconUrl: landmarkIcon,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
+		},
+		_id: landmark._id,
+		layer: layerGroup
+	}
+	function getLayerGroup(landmark) {
+		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	}
+}
+
 /* addMarker
 Key: Name of marker to be added
 Marker: Object representing marker
@@ -23656,9 +23689,9 @@ $scope.$on('$locationChangeSuccess', function (event) {
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager'];
 
-function categoryWidgetSr(bubbleSearchService, $location) {
+function categoryWidgetSr(bubbleSearchService, $location, mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -23680,13 +23713,41 @@ function categoryWidgetSr(bubbleSearchService, $location) {
 			scope.selectedIndex;
 
 			scope.search = function(category, index) {
-				bubbleSearchService.search('category', scope.bubbleId, category);
+				bubbleSearchService.search('category', scope.bubbleId, category)
+				.then(function(response) {
+					updateLandmarks();
+				});
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
-				// $location.path('/w/' + scope.bubbleId + '/results/category?catName=' + category);
+				$location.path('/w/' + scope.bubbleId + '/search/category/' + category);
 			}
 
+			function updateLandmarks() {
+				var landmarks = bubbleSearchService.data,
+						markers = landmarks.map(mapManager.markerFromLandmark);
+
+				landmarks.forEach(function(m) {
+					mapManager.newMarkerOverlay(m);
+				});
+				
+				// mapManager.setCenterFromMarkers(markers);
+				mapManager.setMarkers(markers);
+
+				turnOnOverlays(landmarks);
+			}
+
+			function turnOnOverlays(landmarks) {
+				_.chain(landmarks)
+					.map(function(l) {
+						return l.loc_info ? l.loc_info.floor_num : 1;
+					})
+					.uniq()
+					.value()
+					.forEach(function(l) {
+						mapManager.toggleOverlay(String(l).concat('-landmarks'));
+					});
+			}
 		}
 	};
 }
