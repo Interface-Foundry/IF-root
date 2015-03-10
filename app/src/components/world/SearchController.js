@@ -1,4 +1,4 @@
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -11,6 +11,7 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 	$scope.showCategory;
 	$scope.showFloors;
 	$scope.showText;
+	$scope.searchBarText;
 	
 	var map = mapManager;
 
@@ -48,26 +49,32 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		var searchType;
 		var input;
 		if (routeParams.category) {
-			if (routeParams.category === 'all') {
-				$scope.showAll = true;
-				searchType = 'all';
-			}
 			$scope.showCategory = true;
+			$scope.searchBarText = routeParams.category;
 			searchType = 'category';
 			input = routeParams.category;
 		} else if (routeParams.text) {
 			$scope.showText = true;
+			$scope.searchBarText = routeParams.text;
 			searchType = 'text';
 			input = routeParams.text;
-		} else { // generic search
-			$scope.showAll = false;
-			$scope.showCategory = false;
-			$scope.showText = false;
+		} else {
+			if ($location.path().slice(-3) === 'all') { // last 3 letters
+				$scope.showAll = true;
+				$scope.searchBarText = 'All';
+				searchType = 'all';
+				input = 'null';
+			} else { // generic search
+				$scope.showAll = false;
+				$scope.showCategory = false;
+				$scope.showText = false;
+				$scope.searchBarText = 'What are you looking for?';
+			}
 		}
 
 		if (searchType) {
 			bubbleSearchService.search(searchType, $scope.world._id, input)
-				.then(function(data) {
+				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data);
 					updateMap(bubbleSearchService.data);
 				});

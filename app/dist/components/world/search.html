@@ -15,11 +15,13 @@
 	<div class="shelf-surface wrap">		
 		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
 
-			<cat-search-bar ng-show="bubbleTypeService.get() === 'Retail'" 
+			<cat-search-bar ng-if="searchBarText" 
 				color="style.landmarkTitle_color"
-				text="'What are you looking for?'"></cat-search-bar>
+				text="searchBarText"
+				world="world"></cat-search-bar>
 
-			<div class="marble-page" ng-if="style.widgets.category">
+			<div class="marble-page" 
+				ng-if="style.widgets.category && !showAll && !showCategory && !showText">
 				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
 				Categories
@@ -31,11 +33,13 @@
 					world="world"></category-widget-sr>
 			</div>
 
-			<div class="bubble-group" ng-repeat="group in groups">
+			<div class="bubble-group" 
+				ng-repeat="group in groups"
+				ng-if="showCategory || showText || showAll">
 				<header class="bubble-group-label">{{group.letter}}</header>
 				<ul class="bubble-list">
 					<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
-							<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+							<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
 							<span>{{::landmark.name}}</span>
 					</li>
 				</ul>

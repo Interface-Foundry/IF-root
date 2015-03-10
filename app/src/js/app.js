@@ -81,6 +81,7 @@ $routeProvider.
 	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 

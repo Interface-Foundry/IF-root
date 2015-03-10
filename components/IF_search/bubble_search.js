@@ -25,23 +25,24 @@ var route = function(searchType, query, res){
 
           if (sID && sText){
 
-              landmarkSchema.find(
-                { 'parentID': sID },
-                { $text : { $search : sText } },
-                { score : { $meta: "textScore" } }
-              ).
-              sort({ score : { $meta : 'textScore' } }).
-              exec(function(err, data) {
-                if (data){
-                    res.send(data);
-                }
-                else {
-                    console.log('no results');
-                    res.send({err:'no results'});            
-                }
-              }); 
+           console.log(sText);
 
-          }
+             landmarkSchema.find(
+               { parentID: sID, $text : { $search : sText } },
+               { score : { $meta: "textScore" } }
+             ).
+             sort({ score : { $meta : 'textScore' } }).
+             exec(function(err, data) {
+               if (data){
+                   res.send(data);
+               }
+               else {
+                   console.log('no results');
+                   res.send({err:'no results'});            
+               }
+             });
+
+         }
           else {
             res.send({err:'no results'});
           }

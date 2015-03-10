@@ -1,9 +1,10 @@
-app.directive('catSearchBar', ['apertureService', function(apertureService) {
+app.directive('catSearchBar', ['$location', 'apertureService', function($location, apertureService) {
 	return {
 		restrict: 'E',
 		scope: {
 			text: '=',
-			color: '='
+			color: '=',
+			world: '='
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
@@ -19,6 +20,12 @@ app.directive('catSearchBar', ['apertureService', function(apertureService) {
 			scope.clearText = function() {
 				scope.searchText = '';
 				// propagates and calls scope.selectText
+			}
+
+			scope.search = function(keyEvent) {
+				if (keyEvent.which === 13){
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.searchText);
+				}
 			}
 
 		}
