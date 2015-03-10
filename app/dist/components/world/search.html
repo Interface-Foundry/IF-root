@@ -1,4 +1,3 @@
-<div class="aperture-pop" ng-click="aperture.set('full'); zoomOn()" ng-show="aperture.state=='aperture-third'"></div>
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
@@ -62,6 +61,5 @@
 		world="world" 
 		style="style"
 		landmarks="landmarks"
-		load-landmarks="loadLandmarks(upperFloors)"
-		show-floors="showFloors"></floor-selector>
+		load-landmarks="loadLandmarks(upperFloors)"></floor-selector>
 </div>
