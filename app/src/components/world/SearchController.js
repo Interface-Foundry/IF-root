@@ -1,10 +1,13 @@
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService) {
+app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService
 	$scope.groups;
 	$scope.world;
 	$scope.style;
+	$scope.showAll;
+	$scope.showCategory;
+	$scope.showText;
 	
 	var map = mapManager;
 
@@ -16,10 +19,8 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 
 		worldBuilderService.loadWorld($scope.world);
 
-		// used for dummy data. this should actually be coming from http.get
-		worldTree.getLandmarks($scope.world._id).then(function(data) {
-			$scope.groups = groupResults(data);
-		});
+		populateSearchView($routeParams);
+	
 	});
 
 	function groupResults(data) {
@@ -38,6 +39,35 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			.sortBy('letter')
 			.value();
 		return groups;
+	}
+
+	function populateSearchView(routeParams) {
+		var searchType;
+		var input;
+		if (routeParams.category) {
+			if (routeParams.category === 'all') {
+				$scope.showAll = true;
+				searchType = 'all';
+			}
+			$scope.showCategory = true;
+			searchType = 'category';
+			input = routeParams.category;
+		} else if (routeParams.text) {
+			$scope.showText = true;
+			searchType = 'text';
+			input = routeParams.text;
+		} else { // generic search
+			$scope.showAll = false;
+			$scope.showCategory = false;
+			$scope.showText = false;
+		}
+
+		if (searchType) {
+			bubbleSearchService.search(searchType, $scope.world._id, input)
+				.then(function(data) {
+					$scope.groups = groupResults(bubbleSearchService.data);
+				});
+		}
 	}
 
 }]);
