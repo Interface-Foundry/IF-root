@@ -1,17 +1,20 @@
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService) {
+app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
 
 	$scope.aperture = apertureService;
-	$scope.bubbleTypeService = bubbleTypeService
+	$scope.bubbleTypeService = bubbleTypeService;
+	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.groups;
 	$scope.world;
+	$scope.selectedIndex;
 	$scope.style;
 	$scope.showAll;
 	$scope.showCategory;
+	$scope.showFloors;
 	$scope.showText;
 	
 	var map = mapManager;
 
-	$scope.aperture.set('third');
+	// $scope.aperture.set('third');
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -66,8 +69,42 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			bubbleSearchService.search(searchType, $scope.world._id, input)
 				.then(function(data) {
 					$scope.groups = groupResults(bubbleSearchService.data);
+					updateMap(bubbleSearchService.data);
 				});
 		}
+	}
+
+	function updateSelectedIndex() {
+
+	}
+
+	function updateMap(landmarks) {
+		// check if results on more than 1 floor and if so open selector
+		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
+			floorSelectorService.showFloors = true;
+			$scope.showFloors = floorSelectorService.showFloors;
+		} else {
+			floorSelectorService.showFloors = false;
+			$scope.showFloors = floorSelectorService.showFloors;
+		}
+		// floor map / current floor should not change
+
+		// create landmarks for all that match search, but only show landmarks on current floor
+		updateLandmarks(landmarks);
+	}
+
+	function updateLandmarks(landmarks) {
+		var markers = landmarks.map(mapManager.markerFromLandmark),
+				floor = String(floorSelectorService.currentFloor.floor_num);
+
+		landmarks.forEach(function(m) {
+			mapManager.newMarkerOverlay(m);
+		});
+		
+		// mapManager.setCenterFromMarkers(markers);
+		mapManager.setMarkers(markers);
+		mapManager.toggleOverlay(floor.concat('-landmarks'));
+
 	}
 
 }]);

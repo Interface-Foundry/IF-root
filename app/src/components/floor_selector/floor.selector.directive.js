@@ -2,16 +2,17 @@
 
 app.directive('floorSelector', floorSelector);
 
-floorSelector.$inject = ['mapManager'];
+floorSelector.$inject = ['mapManager', 'floorSelectorService'];
 
-function floorSelector(mapManager) {
+function floorSelector(mapManager, floorSelectorService) {
 	return {
 		restrict: 'E',
 		scope: {
 			world: '=world',
 			style: '=style',
 			landmarks: '=landmarks',
-			loadLandmarks: '&'
+			loadLandmarks: '&',
+			showFloors: '=showFloors'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: link
@@ -21,7 +22,7 @@ function floorSelector(mapManager) {
 		activate(elem);
 
 		function activate(elem) {
-			scope.showFloors = false;
+			// scope.showFloors = floorSelectorService.showFloors;
 
 			scope.floors = _.chain(scope.world.style.maps.localMapArray)
 				.filter(function(f) {
@@ -40,6 +41,7 @@ function floorSelector(mapManager) {
 
 			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+			floorSelectorService.currentFloor = scope.currentFloor;
 
 			checkCategories(elem);
 		}
@@ -67,6 +69,7 @@ function floorSelector(mapManager) {
 		scope.selectFloor = function(index) {
 			scope.selectedIndex = index;
 			scope.currentFloor = scope.floors[index][0];
+			floorSelectorService.currentFloor = scope.currentFloor;
 			turnOffFloorLayers();
 			turnOnFloorMaps();
 			turnOnFloorLandmarks();
@@ -75,7 +78,8 @@ function floorSelector(mapManager) {
 		}
 
 		scope.openFloorMenu = function() {
-			scope.showFloors = !scope.showFloors;
+			floorSelectorService.showFloors = !floorSelectorService.showFloors;
+			scope.showFloors = floorSelectorService.showFloors;
 			updateIndicator();
 		}
 

@@ -4926,6 +4926,20 @@ angular.element(document).ready(function() {
 	angular.bootstrap(document, ['IF']);
 
 });
+app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+    var original = $location.path;
+    $location.path = function (path, reload) {
+        if (reload === false) {
+            var lastRoute = $route.current;
+            var un = $rootScope.$on('$locationChangeSuccess', function () {
+                $route.current = lastRoute;
+                un();
+            });
+        }
+        return original.apply($location, [path]);
+    };
+}])
+
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -18623,16 +18637,24 @@ worldBuilderService.$inject = ['mapManager', 'userManager', 'localStore'];
 
 function worldBuilderService(mapManager, userManager, localStore) {
 
+	var currentWorldId;
+
 	return {
+		currentWorldId: currentWorldId,
 		loadWorld: loadWorld
 	};
 	
 	function loadWorld(world) {
+		if (currentWorldId && world._id === currentWorldId) {
+			return;
+		}
 
-	//local storage
-	if (!userManager.loginStatus && !localStore.getID()) {
- 		localStore.createID();
- 	}
+		currentWorldId = world._id;	
+
+		//local storage
+		if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	}
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
@@ -22308,16 +22330,17 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 app.directive('floorSelector', floorSelector);
 
-floorSelector.$inject = ['mapManager'];
+floorSelector.$inject = ['mapManager', 'floorSelectorService'];
 
-function floorSelector(mapManager) {
+function floorSelector(mapManager, floorSelectorService) {
 	return {
 		restrict: 'E',
 		scope: {
 			world: '=world',
 			style: '=style',
 			landmarks: '=landmarks',
-			loadLandmarks: '&'
+			loadLandmarks: '&',
+			showFloors: '=showFloors'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: link
@@ -22327,7 +22350,7 @@ function floorSelector(mapManager) {
 		activate(elem);
 
 		function activate(elem) {
-			scope.showFloors = false;
+			// scope.showFloors = floorSelectorService.showFloors;
 
 			scope.floors = _.chain(scope.world.style.maps.localMapArray)
 				.filter(function(f) {
@@ -22346,6 +22369,7 @@ function floorSelector(mapManager) {
 
 			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+			floorSelectorService.currentFloor = scope.currentFloor;
 
 			checkCategories(elem);
 		}
@@ -22373,6 +22397,7 @@ function floorSelector(mapManager) {
 		scope.selectFloor = function(index) {
 			scope.selectedIndex = index;
 			scope.currentFloor = scope.floors[index][0];
+			floorSelectorService.currentFloor = scope.currentFloor;
 			turnOffFloorLayers();
 			turnOnFloorMaps();
 			turnOnFloorLandmarks();
@@ -22381,7 +22406,8 @@ function floorSelector(mapManager) {
 		}
 
 		scope.openFloorMenu = function() {
-			scope.showFloors = !scope.showFloors;
+			floorSelectorService.showFloors = !floorSelectorService.showFloors;
+			scope.showFloors = floorSelectorService.showFloors;
 			updateIndicator();
 		}
 
@@ -22464,6 +22490,33 @@ function floorNumberFilter() {
 			return floor.floor_num;
 		}
 	}
+}
+'use strict';
+
+app.factory('floorSelectorService', floorSelectorService);
+
+floorSelectorService.$inject = [];
+
+function floorSelectorService() {
+	
+	var currentFloor,
+			showFloors;
+
+	return {
+		currentFloor: currentFloor,
+		landmarksToFloors: landmarksToFloors,
+		showFloors: showFloors
+	};
+
+	function landmarksToFloors(landmarks) {
+		return _.chain(landmarks)
+			.map(function(l) {
+				return l.loc_info ? l.loc_info.floor_num : 1;
+			})
+			.uniq()
+			.value()
+	}
+
 }
 app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
 var map = mapManager, style = styleManager;
@@ -23442,20 +23495,23 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService) {
+app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
 
 	$scope.aperture = apertureService;
-	$scope.bubbleTypeService = bubbleTypeService
+	$scope.bubbleTypeService = bubbleTypeService;
+	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.groups;
 	$scope.world;
+	$scope.selectedIndex;
 	$scope.style;
 	$scope.showAll;
 	$scope.showCategory;
+	$scope.showFloors;
 	$scope.showText;
 	
 	var map = mapManager;
 
-	$scope.aperture.set('third');
+	// $scope.aperture.set('third');
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -23510,8 +23566,42 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			bubbleSearchService.search(searchType, $scope.world._id, input)
 				.then(function(data) {
 					$scope.groups = groupResults(bubbleSearchService.data);
+					updateMap(bubbleSearchService.data);
 				});
 		}
+	}
+
+	function updateSelectedIndex() {
+
+	}
+
+	function updateMap(landmarks) {
+		// check if results on more than 1 floor and if so open selector
+		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
+			floorSelectorService.showFloors = true;
+			$scope.showFloors = floorSelectorService.showFloors;
+		} else {
+			floorSelectorService.showFloors = false;
+			$scope.showFloors = floorSelectorService.showFloors;
+		}
+		// floor map / current floor should not change
+
+		// create landmarks for all that match search, but only show landmarks on current floor
+		updateLandmarks(landmarks);
+	}
+
+	function updateLandmarks(landmarks) {
+		var markers = landmarks.map(mapManager.markerFromLandmark),
+				floor = String(floorSelectorService.currentFloor.floor_num);
+
+		landmarks.forEach(function(m) {
+			mapManager.newMarkerOverlay(m);
+		});
+		
+		// mapManager.setCenterFromMarkers(markers);
+		mapManager.setMarkers(markers);
+		mapManager.toggleOverlay(floor.concat('-landmarks'));
+
 	}
 
 }]);
@@ -23588,9 +23678,9 @@ $scope.$on('$locationChangeSuccess', function (event) {
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', 'apertureService', '$route'];
 
-function categoryWidgetSr(bubbleSearchService, $location, mapManager) {
+function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureService, $route) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -23608,44 +23698,15 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager) {
 		},
 		link: function(scope, elem, attrs) {
 			scope.bubbleId = scope.world._id;
+			scope.bubbleName = scope.world.id;
 			scope.groupedCategories = _.groupBy(scope.categories, 'name');
 			scope.selectedIndex;
 
 			scope.search = function(category, index) {
-				bubbleSearchService.search('category', scope.bubbleId, category)
-				.then(function(response) {
-					updateLandmarks();
-				});
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
-				$location.path('/w/' + scope.bubbleId + '/search/category/' + category);
-			}
-
-			function updateLandmarks() {
-				var landmarks = bubbleSearchService.data,
-						markers = landmarks.map(mapManager.markerFromLandmark);
-
-				landmarks.forEach(function(m) {
-					mapManager.newMarkerOverlay(m);
-				});
-				
-				// mapManager.setCenterFromMarkers(markers);
-				mapManager.setMarkers(markers);
-
-				turnOnOverlays(landmarks);
-			}
-
-			function turnOnOverlays(landmarks) {
-				_.chain(landmarks)
-					.map(function(l) {
-						return l.loc_info ? l.loc_info.floor_num : 1;
-					})
-					.uniq()
-					.value()
-					.forEach(function(l) {
-						mapManager.toggleOverlay(String(l).concat('-landmarks'));
-					});
+				$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
 			}
 		}
 	};

@@ -6,16 +6,24 @@ worldBuilderService.$inject = ['mapManager', 'userManager', 'localStore'];
 
 function worldBuilderService(mapManager, userManager, localStore) {
 
+	var currentWorldId;
+
 	return {
+		currentWorldId: currentWorldId,
 		loadWorld: loadWorld
 	};
 	
 	function loadWorld(world) {
+		if (currentWorldId && world._id === currentWorldId) {
+			return;
+		}
 
-	//local storage
-	if (!userManager.loginStatus && !localStore.getID()) {
- 		localStore.createID();
- 	}
+		currentWorldId = world._id;	
+
+		//local storage
+		if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	}
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
