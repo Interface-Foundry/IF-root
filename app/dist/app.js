@@ -4884,6 +4884,7 @@ $routeProvider.
 	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 
@@ -23442,7 +23443,7 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', function($scope, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService
@@ -23452,6 +23453,7 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 	$scope.showAll;
 	$scope.showCategory;
 	$scope.showText;
+	$scope.searchBarText;
 	
 	var map = mapManager;
 
@@ -23489,26 +23491,32 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		var searchType;
 		var input;
 		if (routeParams.category) {
-			if (routeParams.category === 'all') {
-				$scope.showAll = true;
-				searchType = 'all';
-			}
 			$scope.showCategory = true;
+			$scope.searchBarText = routeParams.category;
 			searchType = 'category';
 			input = routeParams.category;
 		} else if (routeParams.text) {
 			$scope.showText = true;
+			$scope.searchBarText = routeParams.text;
 			searchType = 'text';
 			input = routeParams.text;
-		} else { // generic search
-			$scope.showAll = false;
-			$scope.showCategory = false;
-			$scope.showText = false;
+		} else {
+			if ($location.path().slice(-3) === 'all') { // last 3 letters
+				$scope.showAll = true;
+				$scope.searchBarText = 'All';
+				searchType = 'all';
+				input = 'null';
+			} else { // generic search
+				$scope.showAll = false;
+				$scope.showCategory = false;
+				$scope.showText = false;
+				$scope.searchBarText = 'What are you looking for?';
+			}
 		}
 
 		if (searchType) {
 			bubbleSearchService.search(searchType, $scope.world._id, input)
-				.then(function(data) {
+				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data);
 				});
 		}
@@ -24361,12 +24369,13 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['apertureService', function(apertureService) {
+app.directive('catSearchBar', ['$location', 'apertureService', function($location, apertureService) {
 	return {
 		restrict: 'E',
 		scope: {
 			text: '=',
-			color: '='
+			color: '=',
+			world: '='
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
@@ -24382,6 +24391,12 @@ app.directive('catSearchBar', ['apertureService', function(apertureService) {
 			scope.clearText = function() {
 				scope.searchText = '';
 				// propagates and calls scope.selectText
+			}
+
+			scope.search = function(keyEvent) {
+				if (keyEvent.which === 13){
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.searchText);
+				}
 			}
 
 		}
