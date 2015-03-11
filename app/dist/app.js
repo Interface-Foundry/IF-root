@@ -22346,8 +22346,7 @@ function floorSelector(mapManager, floorSelectorService) {
 		scope: {
 			world: '=world',
 			style: '=style',
-			landmarks: '=landmarks',
-			showFloors: '=?showFloors'
+			landmarks: '=landmarks'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: link
@@ -22358,6 +22357,8 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		function activate(elem) {
 			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
+
+			scope.service = floorSelectorService;
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
@@ -22401,7 +22402,6 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		scope.openFloorMenu = function() {
 			floorSelectorService.showFloors = !floorSelectorService.showFloors;
-			scope.showFloors = floorSelectorService.showFloors;
 			updateIndicator();
 		}
 
@@ -23544,7 +23544,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.style;
 	$scope.showAll;
 	$scope.showCategory;
-	$scope.showFloors;
 	$scope.showText;
 	$scope.searchBarText;
 	$scope.updateMap = updateMap;
@@ -23676,10 +23675,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		// check if results on more than 1 floor and if so open selector
 		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
 			floorSelectorService.showFloors = true;
-			$scope.showFloors = floorSelectorService.showFloors;
 		} else {
 			floorSelectorService.showFloors = false;
-			$scope.showFloors = floorSelectorService.showFloors;
 		}
 
 		// if no results, return

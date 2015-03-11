@@ -8,7 +8,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.style;
 	$scope.showAll;
 	$scope.showCategory;
-	$scope.showFloors;
 	$scope.showText;
 	$scope.searchBarText;
 	$scope.updateMap = updateMap;
@@ -140,10 +139,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		// check if results on more than 1 floor and if so open selector
 		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
 			floorSelectorService.showFloors = true;
-			$scope.showFloors = floorSelectorService.showFloors;
 		} else {
 			floorSelectorService.showFloors = false;
-			$scope.showFloors = floorSelectorService.showFloors;
 		}
 
 		// if no results, return

@@ -10,8 +10,7 @@ function floorSelector(mapManager, floorSelectorService) {
 		scope: {
 			world: '=world',
 			style: '=style',
-			landmarks: '=landmarks',
-			showFloors: '=?showFloors'
+			landmarks: '=landmarks'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: link
@@ -22,6 +21,8 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		function activate(elem) {
 			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
+
+			scope.service = floorSelectorService;
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
@@ -65,7 +66,6 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		scope.openFloorMenu = function() {
 			floorSelectorService.showFloors = !floorSelectorService.showFloors;
-			scope.showFloors = floorSelectorService.showFloors;
 			updateIndicator();
 		}
 
