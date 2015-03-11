@@ -38,9 +38,9 @@ function floorSelectorService() {
 		angular.copy(floor, currentFloor);
 	}
 
-	function updateIndicator(category) {
-		var baseline = category ? 140 : 100;
-		selectedIndex = selectedIndex || getSelectedIndex();
+	function updateIndicator(categoryMode) {
+		var baseline = categoryMode ? 140 : 100;
+		selectedIndex = selectedIndex >= 0 ? selectedIndex : getSelectedIndex();
 		if (this.showFloors) {
 			var bottom = (floors.length - selectedIndex - 1) * 42 + baseline + 48 + 'px';
 			$('.floor-indicator').css({bottom: bottom, opacity: 1});

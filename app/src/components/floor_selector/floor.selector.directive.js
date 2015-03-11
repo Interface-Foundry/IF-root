@@ -11,7 +11,7 @@ function floorSelector(mapManager, floorSelectorService) {
 			world: '=world',
 			style: '=style',
 			landmarks: '=landmarks',
-			showFloors: '=showFloors'
+			showFloors: '=?showFloors'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
 		link: link

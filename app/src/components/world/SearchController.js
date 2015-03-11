@@ -161,9 +161,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		// create landmarks for all that match search, but only show landmarks on current floor
 		updateLandmarks(landmarks);
 
-		floorSelectorService.setSelectedIndex(floorSelectorService.floors.indexOf($scope.currentFloor));
-
-		floorSelectorService.updateIndicator(true);
+		updateFloorIndicator(landmarks);
 	}
 
 	function updateFloorMaps(landmarks) {
@@ -205,6 +203,18 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 
+	}
+
+	function updateFloorIndicator(landmarks) {
+		var floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num,
+				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
+		var floors = floorSelectorService.floors.map(function(f) {
+			return f[0].floor_num;
+		})
+		var i = floors.indexOf(floor);
+
+		floorSelectorService.setSelectedIndex(i);
+		floorSelectorService.updateIndicator(true);
 	}
 
 }]);
