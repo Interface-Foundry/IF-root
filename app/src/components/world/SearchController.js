@@ -5,13 +5,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.groups;
 	$scope.world;
-	$scope.selectedIndex;
 	$scope.style;
 	$scope.showAll;
 	$scope.showCategory;
 	$scope.showFloors;
 	$scope.showText;
 	$scope.searchBarText;
+	$scope.updateMap = updateMap;
 	
 	var map = mapManager;
 
@@ -121,6 +121,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				$scope.showCategory = false;
 				$scope.showText = false;
 				$scope.searchBarText = 'What are you looking for?';
+			// TO DO: write function to clear landmarks
 			}
 		}
 
@@ -133,11 +134,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		}
 	}
 
-	function updateSelectedIndex() {
+	function updateMap() {
+		var landmarks = bubbleSearchService.data;
 
-	}
-
-	function updateMap(landmarks) {
 		// check if results on more than 1 floor and if so open selector
 		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
 			floorSelectorService.showFloors = true;
@@ -146,23 +145,65 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			floorSelectorService.showFloors = false;
 			$scope.showFloors = floorSelectorService.showFloors;
 		}
-		// floor map / current floor should not change
+
+		// if no results, return
+		if (!landmarks.length) {
+			mapManager.removeAllMarkers();
+			return;
+		}
+
+		mapManager.findVisibleLayers().forEach(function(l) {
+			mapManager.toggleOverlay(l.name);			
+		});
+		// if no results on current floor, update floor map to nearest floor
+		updateFloorMaps(landmarks);
 
 		// create landmarks for all that match search, but only show landmarks on current floor
 		updateLandmarks(landmarks);
+
+		floorSelectorService.setSelectedIndex(floorSelectorService.floors.indexOf($scope.currentFloor));
+
+		floorSelectorService.updateIndicator(true);
+	}
+
+	function updateFloorMaps(landmarks) {
+
+		var floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num,
+				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
+
+		if (resultFloors.indexOf(floor) < 0) {
+			var sortedMarks = _.chain(landmarks)
+				.filter(function(l) {
+					return l.loc_info;
+				})
+				.sortBy(function(l) {
+					return l.loc_info.floor_num;
+				})
+				.value();
+
+			angular.copy(sortedMarks[0], $scope.currentFloor);
+			floorSelectorService.setCurrentFloor(sortedMarks[0]);
+			floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num;
+		}
+		mapManager.turnOnOverlay(String(floor).concat('-maps'));
 	}
 
 	function updateLandmarks(landmarks) {
-		var markers = landmarks.map(mapManager.markerFromLandmark),
-				floor = String(floorSelectorService.currentFloor.floor_num);
+		var markers = landmarks.map(function(l) {
+			return mapManager.markerFromLandmark(l, $scope.world)
+		});
+		var floor = floorSelectorService.currentFloor.floor_num ? 
+								String(floorSelectorService.currentFloor.floor_num) :
+								String(floorSelectorService.currentFloor.loc_info.floor_num);
 
 		landmarks.forEach(function(m) {
 			mapManager.newMarkerOverlay(m);
 		});
 		
-		// mapManager.setCenterFromMarkers(markers);
+		mapManager.setCenterFromMarkers(markers);
 		mapManager.setMarkers(markers);
-		mapManager.toggleOverlay(floor.concat('-landmarks'));
+
+		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 
 	}
 

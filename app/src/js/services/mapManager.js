@@ -149,7 +149,7 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
-		message: '<a if-href="#w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
@@ -590,6 +590,13 @@ mapManager.turnOffOverlay = function(layer) {
 		return;
 	}
 	return mapManager.layers.overlays[layer].visible = false;
+}
+
+mapManager.turnOnOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = true;
 }
 
 mapManager.findVisibleLayers = function() {

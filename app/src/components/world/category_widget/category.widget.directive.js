@@ -11,6 +11,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			aperture: '=aperture',
 			categories: '=categories',
 			style: '=style',
+			updateMap: '&updateMap',
 			world: '=world'
 		},
 		templateUrl: function(elem, attrs) {
@@ -30,7 +31,19 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
-				$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+				bubbleSearchService.search('category', scope.bubbleId, category)
+				.then(function() {
+					scope.updateMap();
+				});
+				if ($location.path().indexOf('search') > 0) {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
+				}
+			}
+
+			scope.searchAll = function() {
+				// /search/all
 			}
 		}
 	};
