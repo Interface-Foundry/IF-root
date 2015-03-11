@@ -4598,9 +4598,10 @@ li.alert {
 }
 .category-widget-directory-btn p {
   color: #444;
-  font-size: 12px;
+  font-size: 1.5em;
   letter-spacing: 1px;
-  margin: 12px;
+  margin: 4px;
+  font-weight: 500;
 }
 .category-list.map-view {
   box-shadow: -23px 0px 21px -19px rgba(0, 0, 0, 0.4) inset;
@@ -4632,16 +4633,17 @@ li.alert {
 }
 .category-map-view-scroll .category-widget-item {
   padding: 0;
-  width: 13%;
+  width: 50px;
 }
 .category-map-view-scroll .category-widget-item img {
   height: 40px;
-  padding-top: 5px;
+  padding-top: 2px;
 }
 .category-map-view-scroll .category-widget-item .category-letter {
-  font-size: 2em;
+  font-size: 1.5em;
   font-weight: 500;
   height: 40px;
+  padding: 8px;
 }
 .category-map-view-scroll .category-map-view-scroll .category-widget-item:first-child {
   border: 1px solid rgba(0, 0, 0, 0.2);
