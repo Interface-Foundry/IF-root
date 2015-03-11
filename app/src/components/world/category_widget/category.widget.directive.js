@@ -11,7 +11,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			aperture: '=aperture',
 			categories: '=categories',
 			style: '=style',
-			updateMap: '&updateMap',
+			populateSearchView: '=',
 			world: '=world'
 		},
 		templateUrl: function(elem, attrs) {
@@ -31,11 +31,11 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
-				bubbleSearchService.search('category', scope.bubbleId, category)
-				.then(function() {
-					scope.updateMap();
-				});
 				if ($location.path().indexOf('search') > 0) {
+					bubbleSearchService.search('category', scope.bubbleId, category)
+					.then(function() {
+						scope.populateSearchView(category, 'category');
+					});
 					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
 				} else {
 					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
@@ -43,7 +43,15 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			}
 
 			scope.searchAll = function() {
-				// /search/all
+				if ($location.path().indexOf('search') > 0) {
+					bubbleSearchService.search('all', scope.bubbleId, 'all')
+					.then(function() {
+						scope.populateSearchView('All', 'all');
+					});
+					$location.path('/w/' + scope.bubbleName + '/search/all', false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/all', true);
+				}
 			}
 		}
 	};
