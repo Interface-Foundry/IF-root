@@ -23613,12 +23613,6 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 	function updateMap() {
 		var landmarks = bubbleSearchService.data;
 
-		// if no results, return
-		if (!landmarks.length) {
-			mapManager.removeAllMarkers();
-			return;
-		}
-
 		// check if results on more than 1 floor and if so open selector
 		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
 			floorSelectorService.showFloors = true;
@@ -23626,6 +23620,12 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		} else {
 			floorSelectorService.showFloors = false;
 			$scope.showFloors = floorSelectorService.showFloors;
+		}
+
+		// if no results, return
+		if (!landmarks.length) {
+			mapManager.removeAllMarkers();
+			return;
 		}
 
 		mapManager.findVisibleLayers().forEach(function(l) {
@@ -23660,8 +23660,8 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			angular.copy(sortedMarks[0], $scope.currentFloor);
 			floorSelectorService.setCurrentFloor(sortedMarks[0]);
 			floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num;
-			mapManager.turnOnOverlay(String(floor).concat('-maps'));
 		}
+		mapManager.turnOnOverlay(String(floor).concat('-maps'));
 	}
 
 	function updateLandmarks(landmarks) {
@@ -23676,7 +23676,7 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			mapManager.newMarkerOverlay(m);
 		});
 		
-		// mapManager.setCenterFromMarkers(markers);
+		mapManager.setCenterFromMarkers(markers);
 		mapManager.setMarkers(markers);
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
