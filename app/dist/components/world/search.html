@@ -19,8 +19,9 @@
 				text="searchBarText"
 				world="world"></cat-search-bar>
 
+			<!-- category widget -->
 			<div class="marble-page" 
-				ng-if="style.widgets.category && !showAll && !showCategory && !showText">
+				ng-if="style.widgets.category && show.generic">
 				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
 					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
 				Categories
@@ -29,13 +30,14 @@
 					aperture="off"
 					categories="world.landmarkCategories"
 					style="style"
-					update-map="updateMap()"
+					populate-search-view="populateSearchView"
 					world="world"></category-widget-sr>
 			</div>
 
+			<!-- grouped landmarks (category or text search) -->
 			<div class="bubble-group" 
 				ng-repeat="group in groups"
-				ng-if="showCategory || showText">
+				ng-if="show.category || show.text">
 				<header class="bubble-group-label">{{group.letter}}</header>
 				<ul class="bubble-list">
 					<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
@@ -45,12 +47,13 @@
 				</ul>
 			</div>
 
+			<!-- grouped landmarks (all) -->
 			<div class="bubble-group-directory"
 				ng-repeat="cat in groups">
 				<header class="bubble-group-label bubble-group-label-directory">{{cat.catName}}</header>
 				<div class="bubble-group" 
 					ng-repeat="group in cat.results"
-					ng-if="showAll">
+					ng-if="show.all">
 					<header class="bubble-group-label">{{group.letter}}</header>
 					<ul class="bubble-list">
 						<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
@@ -72,7 +75,7 @@
 	aperture="full"
 	categories="world.landmarkCategories"
 	style="style"
-	update-map="updateMap()"
+	populate-search-view="populateSearchView"
 	world="world"></category-widget-sr>
 
 <div ng-if="world.style.maps.localMapArray.length">

@@ -9,22 +9,19 @@ app.directive('catSearchBar', ['$location', 'apertureService', function($locatio
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
 
-			// bind text
-			scope.searchText = scope.text;
-
 			scope.selectText = function() {
 				$('.search-cat input').select();
 				apertureService.set('off');
 			}
 
 			scope.clearText = function() {
-				scope.searchText = '';
+				scope.text = '';
 				// propagates and calls scope.selectText
 			}
 
 			scope.search = function(keyEvent) {
 				if (keyEvent.which === 13){
-					$location.path('/w/' + scope.world.id + '/search/text/' + scope.searchText);
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
 				}
 			}
 

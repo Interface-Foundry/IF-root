@@ -3,18 +3,16 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
+	$scope.populateSearchView = populateSearchView;
 	$scope.groups;
 	$scope.world;
 	$scope.style;
-	$scope.showAll;
-	$scope.showCategory;
-	$scope.showText;
 	$scope.searchBarText;
-	$scope.updateMap = updateMap;
+	$scope.show;
 	
 	var map = mapManager;
 
-	// $scope.aperture.set('third');
+	$scope.aperture.set('third');
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -22,11 +20,21 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		worldBuilderService.loadWorld($scope.world);
 
-		populateSearchView($routeParams);
+		// call populateSearchView with the right parameters
+		if ($routeParams.category) {
+			populateSearchView($routeParams.category, 'category');
+		} else if ($routeParams.text) {
+			populateSearchView($routeParams.text, 'text');
+		} else if ($location.path().slice(-3) === 'all') {
+			populateSearchView('All', 'all');
+		} else {
+			populateSearchView('What are you looking for?', 'generic');
+		}
 	
 	});
 
 	function groupResults(data, searchType) {
+		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
 		if (searchType === 'all') {
 			// group landmarks by category, then first letter, then sort
 			var groups = _.chain(data)
@@ -96,35 +104,17 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		return groups;
 	}
 
-	function populateSearchView(routeParams) {
-		var searchType;
-		var input;
-		if (routeParams.category) {
-			$scope.showCategory = true;
-			$scope.searchBarText = routeParams.category;
-			searchType = 'category';
-			input = routeParams.category;
-		} else if (routeParams.text) {
-			$scope.showText = true;
-			$scope.searchBarText = routeParams.text;
-			searchType = 'text';
-			input = routeParams.text;
-		} else {
-			if ($location.path().slice(-3) === 'all') { // last 3 letters
-				$scope.showAll = true;
-				$scope.searchBarText = 'All';
-				searchType = 'all';
-				input = 'null';
-			} else { // generic search
-				$scope.showAll = false;
-				$scope.showCategory = false;
-				$scope.showText = false;
-				$scope.searchBarText = 'What are you looking for?';
-			// TO DO: write function to clear landmarks
-			}
-		}
+	function populateSearchView(input, searchType) {
+		$scope.searchBarText = input;
+		$scope.show = { // used for displaying different views
+			all: false,
+			category: false,
+			text: false,
+			generic: false
+		};
+		$scope.show[searchType] = true;
 
-		if (searchType) {
+		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			bubbleSearchService.search(searchType, $scope.world._id, input)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);

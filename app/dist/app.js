@@ -23539,18 +23539,16 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
+	$scope.populateSearchView = populateSearchView;
 	$scope.groups;
 	$scope.world;
 	$scope.style;
-	$scope.showAll;
-	$scope.showCategory;
-	$scope.showText;
 	$scope.searchBarText;
-	$scope.updateMap = updateMap;
+	$scope.show;
 	
 	var map = mapManager;
 
-	// $scope.aperture.set('third');
+	$scope.aperture.set('third');
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -23558,11 +23556,21 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		worldBuilderService.loadWorld($scope.world);
 
-		populateSearchView($routeParams);
+		// call populateSearchView with the right parameters
+		if ($routeParams.category) {
+			populateSearchView($routeParams.category, 'category');
+		} else if ($routeParams.text) {
+			populateSearchView($routeParams.text, 'text');
+		} else if ($location.path().slice(-3) === 'all') {
+			populateSearchView('All', 'all');
+		} else {
+			populateSearchView('What are you looking for?', 'generic');
+		}
 	
 	});
 
 	function groupResults(data, searchType) {
+		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
 		if (searchType === 'all') {
 			// group landmarks by category, then first letter, then sort
 			var groups = _.chain(data)
@@ -23632,35 +23640,17 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		return groups;
 	}
 
-	function populateSearchView(routeParams) {
-		var searchType;
-		var input;
-		if (routeParams.category) {
-			$scope.showCategory = true;
-			$scope.searchBarText = routeParams.category;
-			searchType = 'category';
-			input = routeParams.category;
-		} else if (routeParams.text) {
-			$scope.showText = true;
-			$scope.searchBarText = routeParams.text;
-			searchType = 'text';
-			input = routeParams.text;
-		} else {
-			if ($location.path().slice(-3) === 'all') { // last 3 letters
-				$scope.showAll = true;
-				$scope.searchBarText = 'All';
-				searchType = 'all';
-				input = 'null';
-			} else { // generic search
-				$scope.showAll = false;
-				$scope.showCategory = false;
-				$scope.showText = false;
-				$scope.searchBarText = 'What are you looking for?';
-			// TO DO: write function to clear landmarks
-			}
-		}
+	function populateSearchView(input, searchType) {
+		$scope.searchBarText = input;
+		$scope.show = { // used for displaying different views
+			all: false,
+			category: false,
+			text: false,
+			generic: false
+		};
+		$scope.show[searchType] = true;
 
-		if (searchType) {
+		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			bubbleSearchService.search(searchType, $scope.world._id, input)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
@@ -23833,7 +23823,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			aperture: '=aperture',
 			categories: '=categories',
 			style: '=style',
-			updateMap: '&updateMap',
+			populateSearchView: '=',
 			world: '=world'
 		},
 		templateUrl: function(elem, attrs) {
@@ -23853,11 +23843,11 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
-				bubbleSearchService.search('category', scope.bubbleId, category)
-				.then(function() {
-					scope.updateMap();
-				});
 				if ($location.path().indexOf('search') > 0) {
+					bubbleSearchService.search('category', scope.bubbleId, category)
+					.then(function() {
+						scope.populateSearchView(category, 'category');
+					});
 					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
 				} else {
 					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
@@ -23865,7 +23855,15 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			}
 
 			scope.searchAll = function() {
-				// /search/all
+				if ($location.path().indexOf('search') > 0) {
+					bubbleSearchService.search('all', scope.bubbleId, 'all')
+					.then(function() {
+						scope.populateSearchView('All', 'all');
+					});
+					$location.path('/w/' + scope.bubbleName + '/search/all', false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/all', true);
+				}
 			}
 		}
 	};
@@ -24592,22 +24590,19 @@ app.directive('catSearchBar', ['$location', 'apertureService', function($locatio
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
 
-			// bind text
-			scope.searchText = scope.text;
-
 			scope.selectText = function() {
 				$('.search-cat input').select();
 				apertureService.set('off');
 			}
 
 			scope.clearText = function() {
-				scope.searchText = '';
+				scope.text = '';
 				// propagates and calls scope.selectText
 			}
 
 			scope.search = function(keyEvent) {
 				if (keyEvent.which === 13){
-					$location.path('/w/' + scope.world.id + '/search/text/' + scope.searchText);
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
 				}
 			}
 
