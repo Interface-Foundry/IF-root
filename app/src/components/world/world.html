@@ -30,7 +30,10 @@
 				world="world"></cat-search-bar>
 		
 			<!--DESCRIPTION-->
-			<div ng-include="'components/world/templates/description.html'" class="marble-page"></div>
+			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' :
+																	'components/world/templates/description.html'" 
+					 class="marble-page"></div>
+
 
 			<div class="marble-page" ng-if="category">
 				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">

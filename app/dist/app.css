@@ -4688,6 +4688,17 @@ li.alert {
 .aperture-third .leaflet-bottom.leaflet-left {
   display: none;
 }
+/* DESCRIPTION CARD */
+.description-card-img {
+  display: inline-block;
+  margin: 10px;
+  width: 80px;
+  vertical-align: top;
+}
+.description-card-info {
+  display: inline-block;
+  margin: 10px;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;
