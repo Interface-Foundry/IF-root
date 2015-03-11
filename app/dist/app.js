@@ -22376,7 +22376,7 @@ function floorSelector(mapManager, floorSelectorService) {
 					// get current bottom property pixels
 					var bottom = parseInt($(el).css('bottom'));
 					// raise 60px to account for category bar
-					$(el).css('bottom', bottom + 60 + 'px');
+					$(el).css('bottom', bottom + 40 + 'px');
 				});
 			}
 		}
@@ -22520,7 +22520,7 @@ function floorSelectorService() {
 	}
 
 	function updateIndicator(category) {
-		var baseline = category ? 160 : 100;
+		var baseline = category ? 140 : 100;
 		selectedIndex = selectedIndex || getSelectedIndex();
 		if (this.showFloors) {
 			var bottom = (floors.length - selectedIndex - 1) * 42 + baseline + 48 + 'px';

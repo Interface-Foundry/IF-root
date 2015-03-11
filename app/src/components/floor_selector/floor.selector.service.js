@@ -39,7 +39,7 @@ function floorSelectorService() {
 	}
 
 	function updateIndicator(category) {
-		var baseline = category ? 160 : 100;
+		var baseline = category ? 140 : 100;
 		selectedIndex = selectedIndex || getSelectedIndex();
 		if (this.showFloors) {
 			var bottom = (floors.length - selectedIndex - 1) * 42 + baseline + 48 + 'px';

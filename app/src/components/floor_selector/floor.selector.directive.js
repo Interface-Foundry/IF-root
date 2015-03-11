@@ -40,7 +40,7 @@ function floorSelector(mapManager, floorSelectorService) {
 					// get current bottom property pixels
 					var bottom = parseInt($(el).css('bottom'));
 					// raise 60px to account for category bar
-					$(el).css('bottom', bottom + 60 + 'px');
+					$(el).css('bottom', bottom + 40 + 'px');
 				});
 			}
 		}
