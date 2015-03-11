@@ -4685,6 +4685,9 @@ li.alert {
   left: 1%;
   display: block;
 }
+.aperture-third .leaflet-bottom.leaflet-left {
+  display: none;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;
