@@ -2288,6 +2288,10 @@ li.alert {
   width: 26px;
   margin-right: 16px;
 }
+.search-aperture {
+  position: relative;
+  top: 45px;
+}
 .aperture-full .leaflet-bottom.leaflet-left {
   top: 60px;
   left: 1%;

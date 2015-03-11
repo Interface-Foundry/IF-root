@@ -1,4 +1,4 @@
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, geoService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -28,7 +28,18 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($location.path().slice(-3) === 'all') {
 			populateSearchView('All', 'all');
 		} else {
-			populateSearchView('What are you looking for?', 'generic');
+			populateSearchView(bubbleSearchService.defaultText, 'generic');
+		}
+
+		// geo tracking
+		if (bubbleTypeService.get() == 'Retail') {
+			$scope.$watch('aperture.state', function(newVal, oldVal) {
+				if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+					geoService.trackStart();
+				} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+					geoService.trackStop();
+				}
+			});	
 		}
 	
 	});
