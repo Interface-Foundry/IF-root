@@ -11,6 +11,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			aperture: '=aperture',
 			categories: '=categories',
 			style: '=style',
+			updateMap: '&updateMap',
 			world: '=world'
 		},
 		templateUrl: function(elem, attrs) {
@@ -30,6 +31,10 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 				if (index !== undefined) {
 					scope.selectedIndex = index;
 				}
+				bubbleSearchService.search('category', scope.bubbleId, category)
+				.then(function() {
+					scope.updateMap();
+				});
 				$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
 			}
 		}

@@ -1,4 +1,3 @@
-<div class="aperture-pop" ng-click="aperture.set('full'); zoomOn()" ng-show="aperture.state=='aperture-third'"></div>
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
@@ -28,6 +27,7 @@
 					aperture="off"
 					categories="world.landmarkCategories"
 					style="style"
+					update-map="updateMap(data)"
 					world="world"></category-widget-sr>
 			</div>
 
@@ -51,6 +51,7 @@
 	aperture="full"
 	categories="world.landmarkCategories"
 	style="style"
+	update-map="updateMap(data)"
 	world="world"></category-widget-sr>
 
 <div ng-if="world.style.maps.localMapArray.length">

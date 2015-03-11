@@ -11,7 +11,6 @@ function floorSelector(mapManager, floorSelectorService) {
 			world: '=world',
 			style: '=style',
 			landmarks: '=landmarks',
-			loadLandmarks: '&',
 			showFloors: '=showFloors'
 		},
 		templateUrl: 'components/floor_selector/floor.selector.html',
@@ -24,24 +23,25 @@ function floorSelector(mapManager, floorSelectorService) {
 		function activate(elem) {
 			// scope.showFloors = floorSelectorService.showFloors;
 
-			scope.floors = _.chain(scope.world.style.maps.localMapArray)
-				.filter(function(f) {
-					return f.floor_num;
-				})
-				.groupBy(function(f) {
-					return f.floor_num;
-				})
-				.sortBy(function(f) {
-					return -f.floor_num;
-				})
-				.value()
-				.reverse();
+			// scope.floors = _.chain(scope.world.style.maps.localMapArray)
+			// 	.filter(function(f) {
+			// 		return f.floor_num;
+			// 	})
+			// 	.groupBy(function(f) {
+			// 		return f.floor_num;
+			// 	})
+			// 	.sortBy(function(f) {
+			// 		return -f.floor_num;
+			// 	})
+			// 	.value()
+			// 	.reverse();
+			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
 
 			scope.selectedIndex = scope.floors.length - 1;
 
 			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
-			floorSelectorService.currentFloor = scope.currentFloor;
+			floorSelectorService.setCurrentFloor(scope.currentFloor);
 
 			checkCategories(elem);
 		}
@@ -67,9 +67,9 @@ function floorSelector(mapManager, floorSelectorService) {
 		}
 
 		scope.selectFloor = function(index) {
-			scope.selectedIndex = index;
+			scope.selectedIndex = floorSelectorService.setSelectedIndex(index);
 			scope.currentFloor = scope.floors[index][0];
-			floorSelectorService.currentFloor = scope.currentFloor;
+			floorSelectorService.setCurrentFloor(scope.currentFloor);
 			turnOffFloorLayers();
 			turnOnFloorMaps();
 			turnOnFloorLandmarks();
@@ -138,13 +138,14 @@ function floorSelector(mapManager, floorSelectorService) {
 		}
 
 		function updateIndicator() {
-			var baseline = scope.category ? 160 : 100;
-			if (scope.showFloors) {
-				var bottom = (scope.floors.length - scope.selectedIndex - 1) * 42 + baseline + 48 + 'px';
-				$('.floor-indicator').css({bottom: bottom, opacity: 1});
-			} else {
-				$('.floor-indicator').css({bottom: baseline + 'px', opacity: 0});
-			}
+			floorSelectorService.updateIndicator(scope.category, scope.floors, scope.selectedIndex)
+			// var baseline = scope.category ? 160 : 100;
+			// if (scope.showFloors) {
+			// 	var bottom = (scope.floors.length - scope.selectedIndex - 1) * 42 + baseline + 48 + 'px';
+			// 	$('.floor-indicator').css({bottom: bottom, opacity: 1});
+			// } else {
+			// 	$('.floor-indicator').css({bottom: baseline + 'px', opacity: 0});
+			// }
 		}
 	}
 }

@@ -5,12 +5,12 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.groups;
 	$scope.world;
-	$scope.selectedIndex;
 	$scope.style;
 	$scope.showAll;
 	$scope.showCategory;
 	$scope.showFloors;
 	$scope.showText;
+	$scope.updateMap = updateMap;
 	
 	var map = mapManager;
 
@@ -63,6 +63,7 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			$scope.showAll = false;
 			$scope.showCategory = false;
 			$scope.showText = false;
+			// TO DO: write function to clear landmarks
 		}
 
 		if (searchType) {
@@ -74,11 +75,8 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		}
 	}
 
-	function updateSelectedIndex() {
-
-	}
-
-	function updateMap(landmarks) {
+	function updateMap() {
+		var landmarks = bubbleSearchService.data;
 		// check if results on more than 1 floor and if so open selector
 		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
 			floorSelectorService.showFloors = true;
@@ -87,15 +85,40 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			floorSelectorService.showFloors = false;
 			$scope.showFloors = floorSelectorService.showFloors;
 		}
-		// floor map / current floor should not change
+		// if no results on current floor, update floor map to nearest floor
+		updateFloorMaps(landmarks);
 
 		// create landmarks for all that match search, but only show landmarks on current floor
 		updateLandmarks(landmarks);
+
+		floorSelectorService.updateIndicator(true);
+	}
+
+	function updateFloorMaps(landmarks) {
+		var floor = floorSelectorService.currentFloor.floor_num,
+				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
+
+		if (resultFloors.indexOf(floor) < 0) {
+			var sortedMarks = _.chain(landmarks)
+				.filter(function(l) {
+					return l.loc_info;
+				})
+				.sortBy(function(l) {
+					return l.loc_info.floor_num;
+				})
+				.value();
+			mapManager.toggleOverlay(String($scope.currentFloor.floor_num).concat('-maps'));
+			angular.copy(sortedMarks[0], $scope.currentFloor);
+			floorSelectorService.setCurrentFloor(sortedMarks[0]);
+			mapManager.toggleOverlay(String($scope.currentFloor.floor_num).concat('-maps'));
+		}
 	}
 
 	function updateLandmarks(landmarks) {
-		var markers = landmarks.map(mapManager.markerFromLandmark),
-				floor = String(floorSelectorService.currentFloor.floor_num);
+		var markers = landmarks.map(function(l) {
+			return mapManager.markerFromLandmark(l, $scope.world)
+		});
+		var floor = String(floorSelectorService.currentFloor.floor_num);
 
 		landmarks.forEach(function(m) {
 			mapManager.newMarkerOverlay(m);

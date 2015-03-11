@@ -27,6 +27,7 @@
 					aperture="off"
 					categories="world.landmarkCategories"
 					style="style"
+					update-map="updateMap(data)"
 					world="world"></category-widget-sr>
 			</div>
 
@@ -50,6 +51,7 @@
 	aperture="full"
 	categories="world.landmarkCategories"
 	style="style"
+	update-map="updateMap(data)"
 	world="world"></category-widget-sr>
 
 <div ng-if="world.style.maps.localMapArray.length">
@@ -57,5 +59,6 @@
 		world="world" 
 		style="style"
 		landmarks="landmarks"
-		load-landmarks="loadLandmarks(upperFloors)"></floor-selector>
+		load-landmarks="loadLandmarks(upperFloors)"
+		show-floors="showFloors"></floor-selector>
 </div>
