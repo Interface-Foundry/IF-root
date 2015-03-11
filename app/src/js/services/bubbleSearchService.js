@@ -10,7 +10,8 @@ function bubbleSearchService($http) {
 
 	return {
 		data: data,
-		search: search
+		search: search,
+		defaultText: 'What are you looking for?'
 	};
 	
 	function search(searchType, bubbleID, input) {

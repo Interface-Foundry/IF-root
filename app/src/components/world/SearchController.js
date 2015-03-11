@@ -28,7 +28,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($location.path().slice(-3) === 'all') {
 			populateSearchView('All', 'all');
 		} else {
-			populateSearchView('What are you looking for?', 'generic');
+			populateSearchView(bubbleSearchService.defaultText, 'generic');
 		}
 	
 	});

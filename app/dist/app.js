@@ -16823,7 +16823,8 @@ function bubbleSearchService($http) {
 
 	return {
 		data: data,
-		search: search
+		search: search,
+		defaultText: 'What are you looking for?'
 	};
 	
 	function search(searchType, bubbleID, input) {
@@ -23564,7 +23565,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($location.path().slice(-3) === 'all') {
 			populateSearchView('All', 'all');
 		} else {
-			populateSearchView('What are you looking for?', 'generic');
+			populateSearchView(bubbleSearchService.defaultText, 'generic');
 		}
 	
 	});
@@ -24579,31 +24580,45 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['$location', 'apertureService', function($location, apertureService) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', function($location, apertureService, bubbleSearchService) {
 	return {
 		restrict: 'E',
 		scope: {
 			text: '=',
 			color: '=',
-			world: '='
+			world: '=',
+			populateSearchView: '='
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
 
-			scope.selectText = function() {
-				$('.search-cat input').select();
-				apertureService.set('off');
+			var defaultText = bubbleSearchService.defaultText;
+
+			scope.clearTextSearch = function() {
+				scope.populateSearchView(defaultText, 'generic');
+				$location.path('/w/' + scope.world.id + '/search', false);
+				apertureService.set('third');
+				scope.text = defaultText;
 			}
 
-			scope.clearText = function() {
-				scope.text = '';
-				// propagates and calls scope.selectText
+			scope.select = function() {
+				if (scope.text === defaultText) {
+					scope.text = '';
+				}
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('off');
+				}
+				$('.search-cat input').focus();
 			}
 
 			scope.search = function(keyEvent) {
 				if (keyEvent.which === 13){
 					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
 				}
+			}
+
+			scope.showX = function() {
+				return scope.text && scope.text !== defaultText;
 			}
 
 		}
@@ -25121,7 +25136,7 @@ return {
 	}
 }
 }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService) {
 
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "60px";
@@ -25132,6 +25147,7 @@ var map = mapManager;
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
+$scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
 
 $scope.world = {};

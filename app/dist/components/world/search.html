@@ -14,10 +14,11 @@
 	<div class="shelf-surface wrap">		
 		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
 
-			<cat-search-bar ng-if="searchBarText" 
+			<cat-search-bar ng-if="searchBarText && aperture.state !== 'aperture-full'" 
 				color="style.landmarkTitle_color"
 				text="searchBarText"
-				world="world"></cat-search-bar>
+				world="world"
+				populate-search-view="populateSearchView"></cat-search-bar>
 
 			<!-- category widget -->
 			<div class="marble-page" 
@@ -49,7 +50,8 @@
 
 			<!-- grouped landmarks (all) -->
 			<div class="bubble-group-directory"
-				ng-repeat="cat in groups">
+				ng-repeat="cat in groups"
+				ng-if="show.all">
 				<header class="bubble-group-label bubble-group-label-directory">{{cat.catName}}</header>
 				<div class="bubble-group" 
 					ng-repeat="group in cat.results"
@@ -86,3 +88,10 @@
 		load-landmarks="loadLandmarks(upperFloors)"
 		show-floors="showFloors"></floor-selector>
 </div>
+
+<cat-search-bar class="search-aperture" 
+	ng-if="searchBarText && aperture.state === 'aperture-full'" 
+	color="style.landmarkTitle_color"
+	text="searchBarText"
+	world="world"
+	populate-search-view="populateSearchView"></cat-search-bar>
