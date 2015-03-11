@@ -41,6 +41,10 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
 				}
 			}
+
+			scope.searchAll = function() {
+				// /search/all
+			}
 		}
 	};
 }
