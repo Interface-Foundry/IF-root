@@ -34,7 +34,7 @@
 
 			<div class="bubble-group" 
 				ng-repeat="group in groups"
-				ng-if="showCategory || showText || showAll">
+				ng-if="showCategory || showText">
 				<header class="bubble-group-label">{{group.letter}}</header>
 				<ul class="bubble-list">
 					<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
@@ -43,6 +43,23 @@
 					</li>
 				</ul>
 			</div>
+
+			<div class="bubble-group-directory"
+				ng-repeat="cat in groups">
+				<header class="bubble-group-label bubble-group-label-directory">{{cat.catName}}</header>
+				<div class="bubble-group" 
+					ng-repeat="group in cat.results"
+					ng-if="showAll">
+					<header class="bubble-group-label">{{group.letter}}</header>
+					<ul class="bubble-list">
+						<li class="bubble-list-item" ng-repeat="landmark in group.results track by $index">
+								<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
+								<span>{{::landmark.name}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+			
 			
 		</div>
 	</div>

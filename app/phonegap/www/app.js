@@ -23657,21 +23657,73 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	
 	});
 
-	function groupResults(data) {
-		var groups = _.chain(data)
-			// group landmarks by first letter
-			.groupBy(function(result) {
-				return result.name[0].toUpperCase();
-			})
-			// map from object {A: [landmark1, landmark2], B: [landmark3, landmark4]} to array of objects [{letter: 'A', results: [landmark1, landmark2]}, {letter: 'B', results: [landmark3, landmark4]}], which enables sorting
-			.map(function(group, key) {
-				return {
-					letter: key,
-					results: group
-				}
-			})
-			.sortBy('letter')
-			.value();
+	function groupResults(data, searchType) {
+		if (searchType === 'all') {
+			// group landmarks by category, then first letter, then sort
+			var groups = _.chain(data)
+				// group landmarks by category
+				.groupBy(function(landmark) {
+					return landmark.category || 'Other';
+				})
+				.each(function(value, key, list) {
+					list[key] = _.chain(value)
+						// 1st sort puts landamrks in order
+						.sortBy(function(result) {
+							return result.name.toLowerCase();
+						})
+						// group landmarks by first letter
+						.groupBy(function(result) {
+							var firstChar = result.name[0];
+							if (firstChar.toUpperCase() !== firstChar.toLowerCase()) { // not a letter (regex might be better here)
+								return firstChar.toUpperCase();
+							} else { // number, #, ., etc...
+								return '#';
+							}
+						})
+						// map from object {A: [landmark1, landmark2], B: [landmark3, landmark4]} to array of objects [{letter: 'A', results: [landmark1, landmark2]}, {letter: 'B', results: [landmark3, landmark4]}], which enables sorting
+						.map(function(group, key) {
+							return {
+								letter: key,
+								results: group
+							}
+						})
+						.sortBy('letter')
+						.value();
+				})
+				.map(function(group, key) {
+					return {
+						catName: key,
+						results: group
+					}
+				})
+				.sortBy(function(result) {
+					return result.catName.toLowerCase();
+				})
+				.value()
+		} else {
+			// group landmarks by first letter, then sort
+			// same as above, without grouping by category
+			var groups = _.chain(data)
+				.sortBy(function(result) {
+					return result.name.toLowerCase();
+				})
+				.groupBy(function(result) {
+					var firstChar = result.name[0];
+					if (firstChar.toUpperCase() !== firstChar.toLowerCase()) { 
+						return firstChar.toUpperCase();
+					} else { 
+						return '#';
+					}
+				})
+				.map(function(group, key) {
+					return {
+						letter: key,
+						results: group
+					}
+				})
+				.sortBy('letter')
+				.value();
+		}
 		return groups;
 	}
 
@@ -23705,7 +23757,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		if (searchType) {
 			bubbleSearchService.search(searchType, $scope.world._id, input)
 				.then(function(response) {
-					$scope.groups = groupResults(bubbleSearchService.data);
+					$scope.groups = groupResults(bubbleSearchService.data, searchType);
 					updateMap(bubbleSearchService.data);
 				});
 		}
