@@ -35,7 +35,11 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 				.then(function() {
 					scope.updateMap();
 				});
-				$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+				if ($location.path().indexOf('search') > 0) {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
+				}
 			}
 		}
 	};

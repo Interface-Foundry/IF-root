@@ -7,7 +7,7 @@ floorSelectorService.$inject = [];
 function floorSelectorService() {
 	
 	var currentFloor = {floor_num: 1},
-			floors,
+			floors = [],
 			selectedIndex,
 			showFloors;
 
@@ -50,7 +50,7 @@ function floorSelectorService() {
 	}
 
 	function getFloors(localMapArray) {
-		floors = _.chain(localMapArray)
+		var sorted = _.chain(localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
 			})
@@ -62,6 +62,7 @@ function floorSelectorService() {
 			})
 			.value()
 			.reverse();
+		angular.copy(sorted, floors);
 		return floors;
 	}
 

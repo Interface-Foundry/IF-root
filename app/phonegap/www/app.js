@@ -4836,6 +4836,15 @@ var checkLoggedin = function(userManager) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
+	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
+		    			request.url = 'https://bubbl.li' + request.url;
+		    			if (ifGlobals.username&&ifGlobals.password) {
+							request.headers['Authorization'] = ifGlobals.getBasicHeader();
+							//console.log(request);
+						} else if (ifGlobals.fbToken) {
+							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
+						}
+	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4904,9 +4913,6 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
-$locationProvider.html5Mode({
-	enabled: true
-});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4916,16 +4922,31 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
-	userManager.checkLogin();
 	
 	
+	navigator.splashscreen.hide();
 	
+/*
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+*/
 });
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-
-});
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
 app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5299,7 +5320,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 4;
+					var topOffset = 19;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5663,10 +5684,6 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
-			var firstHash = value.indexOf('#');
-			if (firstHash > -1) {
-				value = value.slice(0, firstHash) + value.slice(firstHash+1);
-			}
 			$attr.$set('href', value);
 			
 			});
@@ -5685,6 +5702,9 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
+				if (value.indexOf('http')<0) {
+					value = 'https://bubbl.li/'+value;
+				}
 				
 				$attr.$set('src', value);
 			
@@ -17929,6 +17949,13 @@ mapManager.turnOffOverlay = function(layer) {
 	return mapManager.layers.overlays[layer].visible = false;
 }
 
+mapManager.turnOnOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = true;
+}
+
 mapManager.findVisibleLayers = function() {
 	return _.filter(mapManager.layers.overlays, function(l) {
 		return l.visible === true;
@@ -18207,8 +18234,77 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: false
+	supported: true,
+	keychain: new Keychain()
 }
+
+//getCredentials returns a promise->map of the available credentials. 
+//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+//	because all will return rejected if you do.
+
+lockerManager.getCredentials = function() {
+	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
+	
+	lockerManager.keychain.getForKey(function(value) {
+		username.resolve(value);
+	}, function(error) {
+		username.resolve(undefined);
+		console.log(error);
+	}, 'username', 'Bubbl.li');
+
+	lockerManager.keychain.getForKey(function(value) {
+		password.resolve(value);
+	}, function(error) {
+		password.resolve(undefined);
+		console.log(error);
+	}, 'password', 'Bubbl.li');
+	
+	lockerManager.keychain.getForKey(function(value) {
+		fbToken.resolve(value);
+	}, function(error) {
+		fbToken.resolve(undefined);
+		console.log(error);
+	}, 'fbToken', 'Bubbl.li');
+	
+	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
+}
+
+//saves username and password. Should be changed to use a map instead of args?
+
+lockerManager.saveCredentials = function(username, password) {
+	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
+	
+	lockerManager.keychain.setForKey(function(success) {
+		usernameSuccess.resolve(success);
+	}, function(error) {
+		usernameSuccess.reject(error);
+	},
+	'username', 'Bubbl.li', username);
+	
+	lockerManager.keychain.setForKey(function(success) {
+		passwordSuccess.resolve(success);
+	}, function(error) {
+		passwordSuccess.reject(error);
+	},
+	'password', 'Bubbl.li', password);
+	
+	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
+
+//saves the FB token
+lockerManager.saveFBToken = function(fbToken) {
+	var deferred = $q.defer();
+	lockerManager.keychain.setForKey(function(success) {
+		deferred.resolve(success);
+	}, function(error) {
+		deferred.reject(error);
+	},
+	'fbToken', 'Bubbl.li', fbToken);
+	
+	return deferred;
+}
+
 	 
 return lockerManager;
 	   
@@ -18442,7 +18538,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('/api/updateuser'),
+	userRes: $resource('https://bubbl.li/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -18537,16 +18633,20 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	$http.post('/api/user/login', data, {server: true})
+	
+	ifGlobals.username = username;
+	ifGlobals.password = password;
+	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			ifGlobals.loginStatus = true;
+			
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
-	
 	
 	return deferred.promise;
 }
@@ -18593,7 +18693,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.show = false;
+		dialogs.showDialog('keychainDialog.html');
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -18894,6 +18994,8 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
 	
 	var world = {newStatus: true};
 	
@@ -20514,6 +20616,9 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//isnt ready for mobile yet
 var aperture = apertureService,
 	map = mapManager,
 	style = styleManager,
@@ -21315,6 +21420,8 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -21875,6 +21982,8 @@ $scope.onUploadAvatar = function($files) {
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -22349,23 +22458,9 @@ function floorSelector(mapManager, floorSelectorService) {
 		activate(elem);
 
 		function activate(elem) {
-			// scope.showFloors = floorSelectorService.showFloors;
-
-			// scope.floors = _.chain(scope.world.style.maps.localMapArray)
-			// 	.filter(function(f) {
-			// 		return f.floor_num;
-			// 	})
-			// 	.groupBy(function(f) {
-			// 		return f.floor_num;
-			// 	})
-			// 	.sortBy(function(f) {
-			// 		return -f.floor_num;
-			// 	})
-			// 	.value()
-			// 	.reverse();
 			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
 
-			scope.selectedIndex = scope.floors.length - 1;
+			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
 			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
 												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
@@ -22466,14 +22561,7 @@ function floorSelector(mapManager, floorSelectorService) {
 		}
 
 		function updateIndicator() {
-			floorSelectorService.updateIndicator(scope.category, scope.floors, scope.selectedIndex)
-			// var baseline = scope.category ? 160 : 100;
-			// if (scope.showFloors) {
-			// 	var bottom = (scope.floors.length - scope.selectedIndex - 1) * 42 + baseline + 48 + 'px';
-			// 	$('.floor-indicator').css({bottom: bottom, opacity: 1});
-			// } else {
-			// 	$('.floor-indicator').css({bottom: baseline + 'px', opacity: 0});
-			// }
+			floorSelectorService.updateIndicator(scope.category, scope.floors, scope.selectedIndex);
 		}
 	}
 }
@@ -22501,7 +22589,7 @@ floorSelectorService.$inject = [];
 function floorSelectorService() {
 	
 	var currentFloor = {floor_num: 1},
-			floors,
+			floors = [],
 			selectedIndex,
 			showFloors;
 
@@ -22544,7 +22632,7 @@ function floorSelectorService() {
 	}
 
 	function getFloors(localMapArray) {
-		floors = _.chain(localMapArray)
+		var sorted = _.chain(localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
 			})
@@ -22556,6 +22644,7 @@ function floorSelectorService() {
 			})
 			.value()
 			.reverse();
+		angular.copy(sorted, floors);
 		return floors;
 	}
 
@@ -22793,6 +22882,34 @@ $scope.share = function(platform) {
   );
 };
 
+$scope.fbLogin = function() {
+	userManager.fbLogin().then(
+		function (success) {
+			console.log(success);
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
+		})
+}
+//On Phonegap startup, try to login with either saved username/pw or facebook
+lockerManager.getCredentials().then(function(credentials) {
+	if (credentials.username, credentials.password) {
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
+			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
+		});
+	} else if (credentials.fbToken) {
+		ifGlobals.fbToken = credentials.fbToken;
+		userManager.checkLogin().then(function(success) {
+			console.log(success);	
+		})
+	}
+}, function(err) {
+	console.log('credential error', error); 
+});
 }]);
 app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
@@ -23520,6 +23637,8 @@ $scope.deleteBubble = function(_id) {
 $scope.newWorld = function() {
 	console.log('newWorld()');
 	
+	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
+	return;
 	
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
@@ -23625,6 +23744,13 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 
 	function updateMap() {
 		var landmarks = bubbleSearchService.data;
+
+		// if no results, return
+		if (!landmarks.length) {
+			mapManager.removeAllMarkers();
+			return;
+		}
+
 		// check if results on more than 1 floor and if so open selector
 		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
 			floorSelectorService.showFloors = true;
@@ -23633,17 +23759,24 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 			floorSelectorService.showFloors = false;
 			$scope.showFloors = floorSelectorService.showFloors;
 		}
+
+		mapManager.findVisibleLayers().forEach(function(l) {
+			mapManager.toggleOverlay(l.name);			
+		});
 		// if no results on current floor, update floor map to nearest floor
 		updateFloorMaps(landmarks);
 
 		// create landmarks for all that match search, but only show landmarks on current floor
 		updateLandmarks(landmarks);
 
+		floorSelectorService.setSelectedIndex(floorSelectorService.floors.indexOf($scope.currentFloor));
+
 		floorSelectorService.updateIndicator(true);
 	}
 
 	function updateFloorMaps(landmarks) {
-		var floor = floorSelectorService.currentFloor.floor_num,
+
+		var floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num,
 				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
 
 		if (resultFloors.indexOf(floor) < 0) {
@@ -23655,10 +23788,11 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 					return l.loc_info.floor_num;
 				})
 				.value();
-			mapManager.toggleOverlay(String($scope.currentFloor.floor_num).concat('-maps'));
+
 			angular.copy(sortedMarks[0], $scope.currentFloor);
 			floorSelectorService.setCurrentFloor(sortedMarks[0]);
-			mapManager.toggleOverlay(String($scope.currentFloor.floor_num).concat('-maps'));
+			floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num;
+			mapManager.turnOnOverlay(String(floor).concat('-maps'));
 		}
 	}
 
@@ -23666,7 +23800,9 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		var markers = landmarks.map(function(l) {
 			return mapManager.markerFromLandmark(l, $scope.world)
 		});
-		var floor = String(floorSelectorService.currentFloor.floor_num);
+		var floor = floorSelectorService.currentFloor.floor_num ? 
+								String(floorSelectorService.currentFloor.floor_num) :
+								String(floorSelectorService.currentFloor.loc_info.floor_num);
 
 		landmarks.forEach(function(m) {
 			mapManager.newMarkerOverlay(m);
@@ -23674,7 +23810,8 @@ app.controller('SearchController', ['$scope', '$routeParams', '$timeout', 'apert
 		
 		// mapManager.setCenterFromMarkers(markers);
 		mapManager.setMarkers(markers);
-		mapManager.toggleOverlay(floor.concat('-landmarks'));
+
+		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 
 	}
 
@@ -23785,7 +23922,11 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 				.then(function() {
 					scope.updateMap();
 				});
-				$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+				if ($location.path().indexOf('search') > 0) {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
+				}
 			}
 		}
 	};
@@ -24664,10 +24805,6 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
-		var firstHash = url.indexOf('#');
-		if (firstHash > -1) {
-			return url.slice(0, firstHash) + url.slice(firstHash+1);
-		} else {return url}
 		return url;
 	}
 }

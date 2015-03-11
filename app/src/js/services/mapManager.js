@@ -592,6 +592,13 @@ mapManager.turnOffOverlay = function(layer) {
 	return mapManager.layers.overlays[layer].visible = false;
 }
 
+mapManager.turnOnOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = true;
+}
+
 mapManager.findVisibleLayers = function() {
 	return _.filter(mapManager.layers.overlays, function(l) {
 		return l.visible === true;
