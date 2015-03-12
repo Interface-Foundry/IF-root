@@ -1,4 +1,4 @@
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', function($location, apertureService, bubbleSearchService) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'mapManager', function($location, apertureService, bubbleSearchService, mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -16,6 +16,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 				scope.populateSearchView(defaultText, 'generic');
 				$location.path('/w/' + scope.world.id + '/search', false);
 				scope.text = defaultText;
+				mapManager.removeAllMarkers();
 				if (apertureService.state !== 'aperture-full') {
 					apertureService.set('third');
 				}
