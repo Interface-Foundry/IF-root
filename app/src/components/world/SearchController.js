@@ -196,7 +196,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			mapManager.newMarkerOverlay(m);
 		});
 		
-		mapManager.setCenterFromMarkers(markers);
+		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
+
 		mapManager.setMarkers(markers);
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));

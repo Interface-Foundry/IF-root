@@ -17383,6 +17383,7 @@ worldBounds: {
 	}
 };
 
+															//latlng should be array [lat, lng]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	console.log('--mapManager--');
 	console.log('--setCenter--', latlng, z, state);
@@ -17420,6 +17421,8 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
 			console.log(mapManager.center);
 			mapManager.refresh();
+			console.log('map manager center SRVC', mapManager.center)
+			console.log('map manager actual center SRVC', mapManager._actualCenter)
 	});
 }
 
@@ -17445,16 +17448,59 @@ mapManager.apertureUpdate = function(state) {
 }
 
 //use bounds from array of markers to set more accruate center
-mapManager.setCenterFromMarkers = function(markers) {
+mapManager.setCenterFromMarkers = function(markers, done) {
 	leafletData.getMap().then(function(map) {
 		map.fitBounds(
 			L.latLngBounds(markers.map(latLngFromMarker)),
 			{maxZoom: 20}
 		)
+		if (done) {
+			done();
+		}
 	});
 	
 	function latLngFromMarker(marker) {
 		return [marker.lat, marker.lng];
+	}
+}
+
+mapManager.setCenterFromMarkersWithAperture = function(markers, aperture) {
+
+	var bottom = mapManager.adjustHeightByAperture(aperture, mapManager.windowSize().h);
+	var top = aperture === 'aperture-full' ? 140 : 60;
+
+	leafletData.getMap().then(function(map) {
+		map.fitBounds(
+			L.latLngBounds(markers.map(mapManager.latLngFromMarker)),
+			{maxZoom: 20,
+			paddingTopLeft: [0, top],
+			paddingBottomRight: [0, bottom]}
+		)
+	});
+}
+
+mapManager.adjustHeightByAperture = function(aperture, height) {
+	switch (aperture) {
+		case 'aperture-half':
+			return height * 0.5;
+			break;
+		case 'aperture-third': 
+			return height * 0.78;
+			break;
+		case 'aperture-full':
+			return 110;
+			break;
+	}
+}
+
+mapManager.latLngFromMarker = function(marker) {
+	return [marker.lat, marker.lng];
+}
+
+mapManager.windowSize = function() {
+	return {
+		h: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
 	}
 }
 
@@ -23783,7 +23829,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			mapManager.newMarkerOverlay(m);
 		});
 		
-		mapManager.setCenterFromMarkers(markers);
+		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
+
 		mapManager.setMarkers(markers);
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
@@ -24658,7 +24705,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', function($location, apertureService, bubbleSearchService, floorSelectorService) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -24669,6 +24716,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
+scope.mapmanager = mapManager
 
 			var defaultText = bubbleSearchService.defaultText;
 
@@ -24701,7 +24749,6 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			scope.showX = function() {
 				return scope.text && scope.text !== defaultText;
 			}
-
 		}
 	};
 }]);
