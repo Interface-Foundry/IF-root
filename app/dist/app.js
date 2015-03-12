@@ -22381,7 +22381,7 @@ function floorSelector(mapManager, floorSelectorService) {
 			if (scope.style.widgets.category === true) {
 				// default to hide landmarks
 				floorSelectorService.showLandmarks = false;
-				
+
 				scope.category = true;
 				// adjust bottom property of all floor selector elements
 				angular.forEach(elem.children(), function(el) {
@@ -22390,6 +22390,8 @@ function floorSelector(mapManager, floorSelectorService) {
 					// raise 60px to account for category bar
 					$(el).css('bottom', bottom + 40 + 'px');
 				});
+			} else {
+				floorSelectorService.showLandmarks = true;
 			}
 		}
 
