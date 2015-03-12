@@ -4,6 +4,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
+	$scope.go = go;
 	$scope.groups;
 	$scope.world;
 	$scope.style;
@@ -32,6 +33,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		}
 	
 	});
+
+	function go(path) {
+		$location.path(path);
+	}
 
 	function groupResults(data, searchType) {
 		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
