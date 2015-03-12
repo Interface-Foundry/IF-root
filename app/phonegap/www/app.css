@@ -3623,6 +3623,10 @@ span.subnav-back-chevron {
 .bubble-group {
   margin-bottom: 16px;
 }
+.bubble-group:last-of-type {
+  /*bottom of page gets cut off for some reason*/
+  margin-bottom: 200px;
+}
 .bubble-group-label {
   color: #ffffff;
   font-weight: 500;
