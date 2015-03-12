@@ -44,6 +44,7 @@ worldBounds: {
 	}
 };
 
+															//latlng should be array [lat, lng]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	console.log('--mapManager--');
 	console.log('--setCenter--', latlng, z, state);
@@ -106,16 +107,59 @@ mapManager.apertureUpdate = function(state) {
 }
 
 //use bounds from array of markers to set more accruate center
-mapManager.setCenterFromMarkers = function(markers) {
+mapManager.setCenterFromMarkers = function(markers, done) {
 	leafletData.getMap().then(function(map) {
 		map.fitBounds(
 			L.latLngBounds(markers.map(latLngFromMarker)),
 			{maxZoom: 20}
 		)
+		if (done) {
+			done();
+		}
 	});
 	
 	function latLngFromMarker(marker) {
 		return [marker.lat, marker.lng];
+	}
+}
+
+mapManager.setCenterFromMarkersWithAperture = function(markers, aperture) {
+
+	var bottom = mapManager.adjustHeightByAperture(aperture, mapManager.windowSize().h);
+	var top = aperture === 'aperture-full' ? 140 : 60;
+
+	leafletData.getMap().then(function(map) {
+		map.fitBounds(
+			L.latLngBounds(markers.map(mapManager.latLngFromMarker)),
+			{maxZoom: 20,
+			paddingTopLeft: [0, top],
+			paddingBottomRight: [0, bottom]}
+		)
+	});
+}
+
+mapManager.adjustHeightByAperture = function(aperture, height) {
+	switch (aperture) {
+		case 'aperture-half':
+			return height * 0.5;
+			break;
+		case 'aperture-third': 
+			return height * 0.78;
+			break;
+		case 'aperture-full':
+			return 110;
+			break;
+	}
+}
+
+mapManager.latLngFromMarker = function(marker) {
+	return [marker.lat, marker.lng];
+}
+
+mapManager.windowSize = function() {
+	return {
+		h: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
 	}
 }
 
