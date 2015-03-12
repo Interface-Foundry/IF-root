@@ -24700,11 +24700,17 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 
 			scope.search = function(keyEvent) {
 				if (keyEvent.which === 13) { // pressed enter
-					scope.populateSearchView(scope.text, 'text');
-					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('third');
 					}
+					if ($location.path().indexOf('search') > -1) {
+						scope.populateSearchView(scope.text, 'text');
+						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+					} else {
+						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+					}
+					
+					
 				}
 			}
 
@@ -24720,6 +24726,13 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 				};
 			}
 
+			if ($location.path().indexOf('search') > -1) {
+				scope.$parent.$parent.$watch('searchBarText', function(newValue, oldValue) {
+					// 1st parent is ngIf scope, next parent is searchController scope
+					scope.text = newValue;
+				});
+			}
+			
 		}
 	};
 }]);
