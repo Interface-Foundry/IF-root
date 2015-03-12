@@ -15,8 +15,10 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			scope.clearTextSearch = function() {
 				scope.populateSearchView(defaultText, 'generic');
 				$location.path('/w/' + scope.world.id + '/search', false);
-				apertureService.set('third');
 				scope.text = defaultText;
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
 			}
 
 			scope.resetDefaultSearch = function() {
