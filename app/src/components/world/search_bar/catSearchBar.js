@@ -1,4 +1,5 @@
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'mapManager', function($location, apertureService, bubbleSearchService, mapManager) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager) {
+
 	return {
 		restrict: 'E',
 		scope: {
@@ -9,6 +10,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
+scope.mapmanager = mapManager
 
 			var defaultText = bubbleSearchService.defaultText;
 
@@ -39,6 +41,9 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 					apertureService.set('off');
 				}
 				$('.search-cat input').focus();
+
+				// close floor selector
+				floorSelectorService.showFloors = false;
 			}
 
 			scope.search = function(keyEvent) {
