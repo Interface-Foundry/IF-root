@@ -17,9 +17,9 @@ $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
 var map = mapManager;
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 
-zoomControl.style.display = 'none'; 
+
+
 
 $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background

@@ -1,9 +1,9 @@
 app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService) {
 
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-zoomControl.style.top = "60px";
-zoomControl.style.left = "1%";
-zoomControl.style.display = 'none';
+// var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+// zoomControl.style.top = "60px";
+// zoomControl.style.left = "1%";
+// zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
@@ -30,10 +30,6 @@ $scope.collectedPresents = [];
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
-  	
-$scope.zoomOn = function() {
-	  	zoomControl.style.display = "block";
-}
 
 $scope.uploadWTGT = function($files, state) {
 	if (userManager.loginStatus) {

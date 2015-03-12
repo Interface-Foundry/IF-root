@@ -1,9 +1,6 @@
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-zoomControl.style.top = "100px";
-zoomControl.style.left = "1%";
 
 console.log('--Landmark Controller--');
 var map = mapManager;

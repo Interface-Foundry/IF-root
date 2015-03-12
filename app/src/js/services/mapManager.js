@@ -36,7 +36,7 @@ worldBounds: {
 		controls: {
 			layers: {
 				visible: false,
-				position: 'bottomright',
+				position: 'topleft',
 				collapsed: true
 			}
 		},

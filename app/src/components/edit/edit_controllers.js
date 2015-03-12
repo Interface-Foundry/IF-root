@@ -412,25 +412,58 @@ $scope.loadWorld = function(data) {
 		}*/
 		
 
-		var theseMaps = [$scope.world.style.maps];
+		// var theseMaps = [$scope.world.style.maps];
 
-		if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
-			theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
-		}
+		// if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
+		// 	theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
+		// }
 
-		theseMaps.forEach(function(thisMap) {
-			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-				map.addOverlay(thisMap.localMapID, 
-								thisMap.localMapName, 
-								thisMap.localMapOptions);
-			}
-		})
+		// theseMaps.forEach(function(thisMap) {
+		// 	if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+		// 		map.addOverlay(thisMap.localMapID, 
+		// 						thisMap.localMapName, 
+		// 						thisMap.localMapOptions);
+		// 	}
+		// })
 
+		turnOnFloorMaps();
 		
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
 		}		
+}
+
+function turnOnFloorMaps() {
+	if (!map.localMapArrayExists($scope.world)) {
+		return;
+	}
+
+	var lowestFloor = mapManager.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	var groupName = lowestFloor ? lowestFloor + '-maps' : '1-maps';
+
+	// turn off any visible layers
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
+
+	if (mapManager.overlayExists(groupName)) {
+		mapManager.toggleOverlay(groupName);
+	} else {
+		overlayGroup = findMapsOnThisFloor($scope.world, lowestFloor).map(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+				return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+			}
+		});
+		map.addOverlayGroup(overlayGroup, groupName);
+		mapManager.toggleOverlay(groupName);
+	}
+}
+
+function findMapsOnFloor(world, floor) {
+	world.style.maps.localMapArray.filter(function(m) {
+		return m.floor_num === floor;
+	});
 }
 
 $scope.saveWorld = function() {
@@ -753,8 +786,8 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	map.removeCircleMask();
 	map.removePlaceImage();
 	if (zoomControl.style) {
-		zoomControl.style.top = "";
-		zoomControl.style.left = "";
+		zoomControl.style.top = "60px";
+		zoomControl.style.left = "1%";
 	}
 	}
 	
