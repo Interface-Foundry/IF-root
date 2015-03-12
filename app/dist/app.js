@@ -23612,6 +23612,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				.map(function(group, key) {
 					return {
 						catName: key,
+						// avatar: _.findWhere($scope.world.landmarkCategories, {
+						// 	name: key
+						// }).avatar,
 						results: group
 					}
 				})
@@ -24046,8 +24049,8 @@ console.log($scope.landmark.category);
 
 function goToMark(zoomLevel) {
 
-	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
-	aperture.set('half');
+	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-third'); 
+	aperture.set('third');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
   	// 	console.log(marker);

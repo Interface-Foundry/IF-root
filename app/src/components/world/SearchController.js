@@ -75,6 +75,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				.map(function(group, key) {
 					return {
 						catName: key,
+						// avatar: _.findWhere($scope.world.landmarkCategories, {
+						// 	name: key
+						// }).avatar,
 						results: group
 					}
 				})
