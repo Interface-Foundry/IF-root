@@ -24790,7 +24790,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', function($location, apertureService, bubbleSearchService) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', function($location, apertureService, bubbleSearchService, floorSelectorService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -24819,6 +24819,9 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 					apertureService.set('off');
 				}
 				$('.search-cat input').focus();
+
+				// close floor selector
+				floorSelectorService.showFloors = false;
 			}
 
 			scope.search = function(keyEvent) {
