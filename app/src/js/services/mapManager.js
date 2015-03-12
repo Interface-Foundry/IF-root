@@ -205,7 +205,8 @@ mapManager.newMarkerOverlay = function(landmark) {
 		mapManager.layers.overlays[layer + '-landmarks'] = {
 			type: 'group',
 			name: layer + '-landmarks',
-			visible: false
+			visible: false,
+			groupType: 'landmarks'
 		};
 	}
 }
@@ -602,6 +603,12 @@ mapManager.turnOnOverlay = function(layer) {
 mapManager.findVisibleLayers = function() {
 	return _.filter(mapManager.layers.overlays, function(l) {
 		return l.visible === true;
+	});
+}
+
+mapManager.groupOverlays = function(groupType) {
+	return _.filter(mapManager.layers.overlays, function(o) {
+		return o.hasOwnProperty('groupType') && o.groupType === groupType;
 	});
 }
 

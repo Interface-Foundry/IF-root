@@ -2,9 +2,11 @@
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', 'apertureService', '$route'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
+												  	'floorSelectorService'];
 
-function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureService, $route) {
+function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
+													floorSelectorService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -25,12 +27,30 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			scope.bubbleId = scope.world._id;
 			scope.bubbleName = scope.world.id;
 			scope.groupedCategories = _.groupBy(scope.categories, 'name');
-			scope.selectedIndex;
+			scope.mapManager = mapManager;
+			scope.selectedIndex = null;
 
 			scope.search = function(category, index) {
-				if (index !== undefined) {
+				if (index === scope.selectedIndex) {
+					// hide landmarks
+					mapManager.groupOverlays('landmarks').forEach(function(o) {
+						mapManager.turnOffOverlay(o.name)
+					});
+					// scope.mapManager.
+					floorSelectorService.showLandmarks = false;
+					// unselect category
+					scope.selectedIndex = null;
+					// do not run search
+					return;
+				}
+
+				if (index !== null) {
 					scope.selectedIndex = index;
 				}
+
+				// show landmarks
+				floorSelectorService.showLandmarks = true;
+
 				if ($location.path().indexOf('search') > 0) {
 					bubbleSearchService.search('category', scope.bubbleId, category)
 					.then(function() {

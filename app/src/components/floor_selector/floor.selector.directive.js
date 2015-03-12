@@ -35,6 +35,9 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		function checkCategories(elem) {
 			if (scope.style.widgets.category === true) {
+				// default to hide landmarks
+				floorSelectorService.showLandmarks = false;
+				
 				scope.category = true;
 				// adjust bottom property of all floor selector elements
 				angular.forEach(elem.children(), function(el) {
@@ -59,9 +62,12 @@ function floorSelector(mapManager, floorSelectorService) {
 			floorSelectorService.setCurrentFloor(scope.currentFloor);
 			turnOffFloorLayers();
 			turnOnFloorMaps();
-			turnOnFloorLandmarks();
 			updateIndicator();
 			adjustZoom(index);
+			
+			if (floorSelectorService.showLandmarks) {
+				turnOnFloorLandmarks();
+			}
 		}
 
 		scope.openFloorMenu = function() {

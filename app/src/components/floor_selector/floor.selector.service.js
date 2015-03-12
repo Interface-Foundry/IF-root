@@ -9,7 +9,8 @@ function floorSelectorService() {
 	var currentFloor = {floor_num: 1},
 			floors = [],
 			selectedIndex,
-			showFloors;
+			showFloors,
+			showLandmarks = true;
 
 	return {
 		currentFloor: currentFloor,
@@ -21,6 +22,7 @@ function floorSelectorService() {
 		setCurrentFloor: setCurrentFloor,
 		setSelectedIndex: setSelectedIndex,
 		showFloors: showFloors,
+		showLandmarks: showLandmarks,
 		updateIndicator: updateIndicator
 	};
 

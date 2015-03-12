@@ -17544,7 +17544,8 @@ mapManager.newMarkerOverlay = function(landmark) {
 		mapManager.layers.overlays[layer + '-landmarks'] = {
 			type: 'group',
 			name: layer + '-landmarks',
-			visible: false
+			visible: false,
+			groupType: 'landmarks'
 		};
 	}
 }
@@ -17941,6 +17942,12 @@ mapManager.turnOnOverlay = function(layer) {
 mapManager.findVisibleLayers = function() {
 	return _.filter(mapManager.layers.overlays, function(l) {
 		return l.visible === true;
+	});
+}
+
+mapManager.groupOverlays = function(groupType) {
+	return _.filter(mapManager.layers.overlays, function(o) {
+		return o.hasOwnProperty('groupType') && o.groupType === groupType;
 	});
 }
 
@@ -22372,6 +22379,9 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		function checkCategories(elem) {
 			if (scope.style.widgets.category === true) {
+				// default to hide landmarks
+				floorSelectorService.showLandmarks = false;
+				
 				scope.category = true;
 				// adjust bottom property of all floor selector elements
 				angular.forEach(elem.children(), function(el) {
@@ -22396,9 +22406,12 @@ function floorSelector(mapManager, floorSelectorService) {
 			floorSelectorService.setCurrentFloor(scope.currentFloor);
 			turnOffFloorLayers();
 			turnOnFloorMaps();
-			turnOnFloorLandmarks();
 			updateIndicator();
 			adjustZoom(index);
+			
+			if (floorSelectorService.showLandmarks) {
+				turnOnFloorLandmarks();
+			}
 		}
 
 		scope.openFloorMenu = function() {
@@ -22491,7 +22504,8 @@ function floorSelectorService() {
 	var currentFloor = {floor_num: 1},
 			floors = [],
 			selectedIndex,
-			showFloors;
+			showFloors,
+			showLandmarks = true;
 
 	return {
 		currentFloor: currentFloor,
@@ -22503,6 +22517,7 @@ function floorSelectorService() {
 		setCurrentFloor: setCurrentFloor,
 		setSelectedIndex: setSelectedIndex,
 		showFloors: showFloors,
+		showLandmarks: showLandmarks,
 		updateIndicator: updateIndicator
 	};
 
@@ -23826,9 +23841,11 @@ $scope.$on('$locationChangeSuccess', function (event) {
 
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', 'apertureService', '$route'];
+categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
+												  	'floorSelectorService'];
 
-function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureService, $route) {
+function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
+													floorSelectorService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -23849,12 +23866,30 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, apertureSe
 			scope.bubbleId = scope.world._id;
 			scope.bubbleName = scope.world.id;
 			scope.groupedCategories = _.groupBy(scope.categories, 'name');
-			scope.selectedIndex;
+			scope.mapManager = mapManager;
+			scope.selectedIndex = null;
 
 			scope.search = function(category, index) {
-				if (index !== undefined) {
+				if (index === scope.selectedIndex) {
+					// hide landmarks
+					mapManager.groupOverlays('landmarks').forEach(function(o) {
+						mapManager.turnOffOverlay(o.name)
+					});
+					// scope.mapManager.
+					floorSelectorService.showLandmarks = false;
+					// unselect category
+					scope.selectedIndex = null;
+					// do not run search
+					return;
+				}
+
+				if (index !== null) {
 					scope.selectedIndex = index;
 				}
+
+				// show landmarks
+				floorSelectorService.showLandmarks = true;
+
 				if ($location.path().indexOf('search') > 0) {
 					bubbleSearchService.search('category', scope.bubbleId, category)
 					.then(function() {
