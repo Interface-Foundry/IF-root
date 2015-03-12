@@ -19,6 +19,15 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 				scope.text = defaultText;
 			}
 
+			scope.resetDefaultSearch = function() {
+				if (scope.text === '') {
+					scope.text = defaultText;
+				}
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
+			}
+
 			scope.select = function() {
 				if (scope.text === defaultText) {
 					scope.text = '';

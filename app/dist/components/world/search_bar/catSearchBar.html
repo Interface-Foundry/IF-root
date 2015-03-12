@@ -16,7 +16,8 @@
 			class="u-centerY" 
 			ng-model="text"
 			ng-style="getColor()"
-			ng-keypress="search($event)">
+			ng-keypress="search($event)"
+			ng-blur="resetDefaultSearch()">
 		<div class="clearText"
 			ng-click="clearTextSearch($event); $event.stopPropagation()"
 			ng-show="showX()">
