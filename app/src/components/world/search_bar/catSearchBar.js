@@ -30,13 +30,21 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.search = function(keyEvent) {
-				if (keyEvent.which === 13){
+				if (keyEvent.which === 13) { // pressed enter
 					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
 				}
 			}
 
 			scope.showX = function() {
 				return scope.text && scope.text !== defaultText;
+			}
+
+			scope.getColor = function() {
+				// leave placeholder text as default color, black otherwise
+				var result = scope.text === defaultText ? scope.color : 'black';
+				return {
+					color: result
+				};
 			}
 
 		}

@@ -15,7 +15,7 @@
 		<input type="text" 
 			class="u-centerY" 
 			ng-model="text"
-			ng-style="{color: color}"
+			ng-style="getColor()"
 			ng-keypress="search($event)">
 		<div class="clearText"
 			ng-click="clearTextSearch($event); $event.stopPropagation()"
