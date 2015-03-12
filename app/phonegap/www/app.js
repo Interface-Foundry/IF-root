@@ -23717,12 +23717,13 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, geoService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
+	$scope.go = go;
 	$scope.groups;
 	$scope.world;
 	$scope.style;
@@ -23749,19 +23750,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else {
 			populateSearchView(bubbleSearchService.defaultText, 'generic');
 		}
-
-		// geo tracking
-		if (bubbleTypeService.get() == 'Retail') {
-			$scope.$watch('aperture.state', function(newVal, oldVal) {
-				if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-					geoService.trackStart();
-				} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-					geoService.trackStop();
-				}
-			});	
-		}
 	
 	});
+
+	function go(path) {
+		$location.path(path);
+	}
 
 	function groupResults(data, searchType) {
 		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
@@ -23800,6 +23794,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				.map(function(group, key) {
 					return {
 						catName: key,
+						// avatar: _.findWhere($scope.world.landmarkCategories, {
+						// 	name: key
+						// }).avatar,
 						results: group
 					}
 				})
@@ -24251,8 +24248,8 @@ console.log($scope.landmark.category);
 
 function goToMark(zoomLevel) {
 
-	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
-	aperture.set('half');
+	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-third'); 
+	aperture.set('third');
   	// var markers = map.markers;
   	// angular.forEach(markers, function(marker) {
   	// 	console.log(marker);
@@ -24790,7 +24787,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', function($location, apertureService, bubbleSearchService) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'mapManager', function($location, apertureService, bubbleSearchService, mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -24807,8 +24804,20 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			scope.clearTextSearch = function() {
 				scope.populateSearchView(defaultText, 'generic');
 				$location.path('/w/' + scope.world.id + '/search', false);
-				apertureService.set('third');
 				scope.text = defaultText;
+				mapManager.removeAllMarkers();
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
+			}
+
+			scope.resetDefaultSearch = function() {
+				if (scope.text === '') {
+					scope.text = defaultText;
+				}
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
 			}
 
 			scope.select = function() {
@@ -24822,13 +24831,25 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.search = function(keyEvent) {
-				if (keyEvent.which === 13){
-					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+				if (keyEvent.which === 13) { // pressed enter
+					scope.populateSearchView(scope.text, 'text');
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+					if (apertureService.state !== 'aperture-full') {
+						apertureService.set('third');
+					}
 				}
 			}
 
 			scope.showX = function() {
 				return scope.text && scope.text !== defaultText;
+			}
+
+			scope.getColor = function() {
+				// leave placeholder text as default color, black otherwise
+				var result = scope.text === defaultText ? scope.color : 'black';
+				return {
+					color: result
+				};
 			}
 
 		}

@@ -1,4 +1,4 @@
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', function($location, apertureService, bubbleSearchService) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'mapManager', function($location, apertureService, bubbleSearchService, mapManager) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -15,8 +15,20 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			scope.clearTextSearch = function() {
 				scope.populateSearchView(defaultText, 'generic');
 				$location.path('/w/' + scope.world.id + '/search', false);
-				apertureService.set('third');
 				scope.text = defaultText;
+				mapManager.removeAllMarkers();
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
+			}
+
+			scope.resetDefaultSearch = function() {
+				if (scope.text === '') {
+					scope.text = defaultText;
+				}
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
 			}
 
 			scope.select = function() {
@@ -30,13 +42,25 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.search = function(keyEvent) {
-				if (keyEvent.which === 13){
-					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+				if (keyEvent.which === 13) { // pressed enter
+					scope.populateSearchView(scope.text, 'text');
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+					if (apertureService.state !== 'aperture-full') {
+						apertureService.set('third');
+					}
 				}
 			}
 
 			scope.showX = function() {
 				return scope.text && scope.text !== defaultText;
+			}
+
+			scope.getColor = function() {
+				// leave placeholder text as default color, black otherwise
+				var result = scope.text === defaultText ? scope.color : 'black';
+				return {
+					color: result
+				};
 			}
 
 		}

@@ -1,9 +1,10 @@
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, geoService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
+	$scope.go = go;
 	$scope.groups;
 	$scope.world;
 	$scope.style;
@@ -30,19 +31,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else {
 			populateSearchView(bubbleSearchService.defaultText, 'generic');
 		}
-
-		// geo tracking
-		if (bubbleTypeService.get() == 'Retail') {
-			$scope.$watch('aperture.state', function(newVal, oldVal) {
-				if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-					geoService.trackStart();
-				} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-					geoService.trackStop();
-				}
-			});	
-		}
 	
 	});
+
+	function go(path) {
+		$location.path(path);
+	}
 
 	function groupResults(data, searchType) {
 		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
@@ -81,6 +75,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				.map(function(group, key) {
 					return {
 						catName: key,
+						// avatar: _.findWhere($scope.world.landmarkCategories, {
+						// 	name: key
+						// }).avatar,
 						results: group
 					}
 				})
