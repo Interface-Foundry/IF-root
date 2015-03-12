@@ -17,9 +17,11 @@
 			ng-model="text"
 			ng-style="{color: color}"
 			ng-keypress="search($event)">
-		<img src="img/icons/ic_clear_grey600_24dp.png" 
-			class="clear-text u-centerY"
+		<div class="clearText"
 			ng-click="clearTextSearch($event); $event.stopPropagation()"
 			ng-show="showX()">
+			<img src="img/icons/ic_clear_grey600_24dp.png" 
+				class="clearText-img u-centerY">
+		</div>
 	</div>
 </div>

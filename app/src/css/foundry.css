@@ -2283,10 +2283,16 @@ li.alert {
   outline: 0;
   border: 0;
 }
-.search-cat .clear-text {
+.search-cat .clearText {
   float: right;
-  width: 26px;
+  height: 56px;
+  width: 56px;
+}
+.search-cat .clearText-img {
+  float: right;
+  width: 23px;
   margin-right: 16px;
+  opacity: 0.9;
 }
 .search-aperture {
   position: relative;
