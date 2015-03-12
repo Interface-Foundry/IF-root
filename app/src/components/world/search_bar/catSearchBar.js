@@ -43,7 +43,11 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 
 			scope.search = function(keyEvent) {
 				if (keyEvent.which === 13) { // pressed enter
-					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+					scope.populateSearchView(scope.text, 'text');
+					$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+					if (apertureService.state !== 'aperture-full') {
+						apertureService.set('third');
+					}
 				}
 			}
 
