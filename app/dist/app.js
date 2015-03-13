@@ -18693,9 +18693,9 @@ return userManager;
 
 app.factory('worldBuilderService', worldBuilderService);
 
-worldBuilderService.$inject = ['mapManager', 'userManager', 'localStore'];
+worldBuilderService.$inject = ['mapManager', 'userManager', 'localStore', 'apertureService'];
 
-function worldBuilderService(mapManager, userManager, localStore) {
+function worldBuilderService(mapManager, userManager, localStore, apertureService) {
 
 	var currentWorldId;
 
@@ -18733,7 +18733,7 @@ function worldBuilderService(mapManager, userManager, localStore) {
 
 		//map setup
 		if (world.hasOwnProperty('loc') && world.loc.hasOwnProperty('coordinates')) {
-			mapManager.setCenter([world.loc.coordinates[0], world.loc.coordinates[1]], zoomLevel, aperture.state);
+			mapManager.setCenter([world.loc.coordinates[0], world.loc.coordinates[1]], zoomLevel, apertureService.state);
 			console.log('setcenter');
 
 			// if bubble has local maps then do not show world marker
