@@ -1,4 +1,4 @@
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService) {
 
 	return {
 		restrict: 'E',
@@ -22,6 +22,8 @@ scope.mapmanager = mapManager
 				if (apertureService.state !== 'aperture-full') {
 					apertureService.set('third');
 				}
+				categoryWidgetService.selectedIndex = null;
+				floorSelectorService.showFloors = false;
 			}
 
 			scope.resetDefaultSearch = function() {
