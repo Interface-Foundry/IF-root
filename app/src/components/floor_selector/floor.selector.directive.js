@@ -18,6 +18,11 @@ function floorSelector(mapManager, floorSelectorService) {
 
 	function link(scope, elem, attr) {
 		activate(elem);
+		
+		// make sure floor selector is closed if switching to a new bubble
+		scope.$on('$destroy', function(ev) {
+			floorSelectorService.showFloors = false;
+		});
 
 		function activate(elem) {
 			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)

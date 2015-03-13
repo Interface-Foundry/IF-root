@@ -9,6 +9,7 @@ function worldBuilderService(mapManager, userManager, localStore) {
 	var currentWorldId;
 
 	return {
+		createMapLayer: createMapLayer,
 		currentWorldId: currentWorldId,
 		loadWorld: loadWorld
 	};
@@ -69,7 +70,8 @@ function worldBuilderService(mapManager, userManager, localStore) {
 			mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 		}
 
-		createMapLayer(world);
+		var mapLayer = createMapLayer(world);
+		mapManager.toggleOverlay(mapLayer);
 
 	}
 	function addWorldMarker() {
@@ -97,8 +99,7 @@ function worldBuilderService(mapManager, userManager, localStore) {
 				});
 			lowestFloor = lowestPositiveNumber(sortedFloorNums);
 		}
-		mapLayer = lowestFloor + '-maps';
-		mapManager.toggleOverlay(mapLayer);
+		return mapLayer = lowestFloor + '-maps';
 	}
 
 	function lowestPositiveNumber(array) {

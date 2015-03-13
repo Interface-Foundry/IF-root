@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -480,20 +480,7 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
-	var lowestFloor = 1;
-	if (map.localMapArrayExists($scope.world)) {
-		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
-	}
-	createMapLayer(lowestFloor);
-
-	if (tempMarkers.length) {
-		createMarkerLayer(tempMarkers, lowestFloor)
-	}
-	
-}
-
-function createMapLayer(lowestFloor) {
-	var mapLayer = lowestFloor + '-maps';
+	var mapLayer = worldBuilderService.createMapLayer($scope.world);
 	mapManager.toggleOverlay(mapLayer);
 }
 
