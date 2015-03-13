@@ -91,10 +91,34 @@ function worldBuilderService(mapManager, userManager, localStore) {
 		var lowestFloor = 1,
 				mapLayer;
 		if (mapManager.localMapArrayExists(world)) {
-			lowestFloor = mapManager.sortFloors(world.style.maps.localMapArray)[0].floor_num;
+			sortedFloorNums = mapManager.sortFloors(world.style.maps.localMapArray)
+				.map(function(f) {
+					return f.floor_num;
+				});
+			lowestFloor = lowestPositiveNumber(sortedFloorNums);
 		}
 		mapLayer = lowestFloor + '-maps';
 		mapManager.toggleOverlay(mapLayer);
+	}
+
+	function lowestPositiveNumber(array) {
+		var highestNegative;
+	
+		for (var i = 0, len = array.length; i < len; i++) {
+			if (array[i] > 0) {
+				return array[i];
+			} else {
+				highestNegative = Math.max(highestNegative, array[i]);
+			}
+		}
+
+		// if no positive floor numbers, return floor closest to 0
+		if (highestNegative) {
+			return highestNegative;
+		}
+
+		// if the above fails - which it shouldn't - return floor 1
+		return 1;
 	}
 
 }

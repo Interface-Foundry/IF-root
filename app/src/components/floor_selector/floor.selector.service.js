@@ -38,6 +38,11 @@ function floorSelectorService() {
 
 	function setCurrentFloor(floor) {
 		angular.copy(floor, currentFloor);
+		var nums = floors.map(function(f) {
+			return f[0].floor_num;
+		});
+		var i = nums.indexOf(currentFloor.floor_num);
+		setSelectedIndex(i);
 	}
 
 	function updateIndicator(categoryMode) {
