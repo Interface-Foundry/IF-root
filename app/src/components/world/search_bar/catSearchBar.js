@@ -53,9 +53,9 @@ scope.mapmanager = mapManager
 					}
 					if ($location.path().indexOf('search') > -1) {
 						scope.populateSearchView(scope.text, 'text');
-						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text), false);
 					} else {
-						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text));
 					}
 					
 					

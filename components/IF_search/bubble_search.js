@@ -10,7 +10,8 @@ var route = function(searchType, query, res){
     //text search inside bubble
     case 'text':
 
-          var sText = sanitize(query.textSearch);
+          var sText = decodeURI(query.textSearch)
+          sText = sanitize(sText);
           if (sText){
             sText = sText.replace(/[^\w\s]/gi, ''); //remove all special characters
           }
@@ -52,39 +53,39 @@ var route = function(searchType, query, res){
     //category search inside bubble
     case 'category':
 
-      var sCat = sanitize(query.catName);
-      if (sCat){
-        sCat = sCat.replace(/[^\w\s]/gi, ''); //remove all special characters
-      }
+       var sCat = decodeURI(query.catName); //removing %20 etc.
+       sCat = sanitize(sCat);
 
-      var sID = sanitize(query.worldID); //sanitize worldID
-      if (sID){
-        sID = sID.replace(/[^\w\s]/gi, ''); //remove all special characters
-      }
+       var sID = sanitize(query.worldID); //sanitize worldID
+       // if (sID){
+       //   sID = sID.replace(/[^\w\s]/gi, ''); //remove all special characters
+       // }
 
-      if (sID && sCat){
+       if (sID && sCat){
 
-          landmarkSchema.find(
-            {'parentID': sID,
-            'category': sCat}
-          ).
-          sort({ 'name' : 'desc' } ). //alphabetical order
-          exec(function(err, data) {
-            if (data){
-                res.send(data);
-            }
-            else {
-                console.log('no results');
-                res.send({err:'no results'});            
-            }
-          }); 
+           landmarkSchema.find({
+              parentID: sID,
+              category: sCat
+           }).
+           sort({ 'name' : 'desc' } ). //alphabetical order
+           exec(function(err, data) {
+             if (data){
 
-      } 
-      else {
-        res.send({err:'no results'});
-      }
+               console.log(data);
+                 res.send(data);
+             }
+             else {
+                 console.log('no results');
+                 res.send({err:'no results'});            
+             }
+           });
 
-    break;
+       } 
+       else {
+         res.send({err:'no results'});
+       }
+
+     break;
 
     //all landmarks in bubble
     case 'all':

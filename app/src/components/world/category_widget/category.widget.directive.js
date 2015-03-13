@@ -50,24 +50,17 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 
 				// show landmarks
 				floorSelectorService.showLandmarks = true;
-
 				if ($location.path().indexOf('search') > 0) {
-					bubbleSearchService.search('category', scope.bubbleId, category)
-					.then(function() {
-						scope.populateSearchView(category, 'category');
-					});
-					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+					scope.populateSearchView(category, 'category');
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + encodeURIComponent(category), false);
 				} else {
-					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + encodeURIComponent(category), true);
 				}
 			}
 
 			scope.searchAll = function() {
 				if ($location.path().indexOf('search') > 0) {
-					bubbleSearchService.search('all', scope.bubbleId, 'all')
-					.then(function() {
-						scope.populateSearchView('All', 'all');
-					});
+					scope.populateSearchView('All', 'all');
 					$location.path('/w/' + scope.bubbleName + '/search/all', false);
 				} else {
 					$location.path('/w/' + scope.bubbleName + '/search/all', true);
