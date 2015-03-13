@@ -23664,7 +23664,7 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -23698,6 +23698,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			populateSearchView(bubbleSearchService.defaultText, 'generic');
 		}
 	
+	});
+
+	$scope.$on('$destroy', function(ev) {
+		categoryWidgetService.selectedIndex = null;
 	});
 
 	function go(path) {
@@ -23955,10 +23959,10 @@ $scope.$on('$locationChangeSuccess', function (event) {
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
 categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
-												  	'floorSelectorService'];
+												  	'floorSelectorService', 'categoryWidgetService'];
 
 function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
-													floorSelectorService) {
+													floorSelectorService, categoryWidgetService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -23980,10 +23984,10 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 			scope.bubbleName = scope.world.id;
 			scope.groupedCategories = _.groupBy(scope.categories, 'name');
 			scope.mapManager = mapManager;
-			scope.selectedIndex = null;
+			scope.categoryWidgetService = categoryWidgetService;
 
 			function updateIndex(index) {
-				if (index === scope.selectedIndex) {
+				if (index === categoryWidgetService.selectedIndex) {
 					// hide landmarks
 					mapManager.groupOverlays('landmarks').forEach(function(o) {
 						mapManager.turnOffOverlay(o.name)
@@ -23991,13 +23995,13 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					// scope.mapManager.
 					floorSelectorService.showLandmarks = false;
 					// unselect category
-					scope.selectedIndex = null;
+					categoryWidgetService.selectedIndex = null;
 					// do not run search
 					return false;
 				}
 
 				if (index !== null) {
-					scope.selectedIndex = index;
+					categoryWidgetService.selectedIndex = index;
 				}
 				return true;
 			}
@@ -24033,6 +24037,21 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 			}
 		}
 	};
+}
+'use strict';
+
+app.factory('categoryWidgetService', categoryWidgetService);
+
+categoryWidgetService.$inject = [];
+
+function categoryWidgetService() {
+	
+	var selectedIndex = null;
+
+	return {
+		selectedIndex: selectedIndex
+	}
+	
 }
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
@@ -24742,7 +24761,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager) {
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService) {
 
 	return {
 		restrict: 'E',
@@ -24776,7 +24795,8 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 				if (apertureService.state !== 'aperture-full') {
 					apertureService.set('third');
 				}
-				
+				categoryWidgetService.selectedIndex = null;
+				floorSelectorService.showFloors = false;
 			}
 
 			scope.resetDefaultSearch = function() {

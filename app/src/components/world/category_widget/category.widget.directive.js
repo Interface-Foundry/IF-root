@@ -3,10 +3,10 @@
 app.directive('categoryWidgetSr', categoryWidgetSr);
 
 categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
-												  	'floorSelectorService'];
+												  	'floorSelectorService', 'categoryWidgetService'];
 
 function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
-													floorSelectorService) {
+													floorSelectorService, categoryWidgetService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -28,10 +28,10 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 			scope.bubbleName = scope.world.id;
 			scope.groupedCategories = _.groupBy(scope.categories, 'name');
 			scope.mapManager = mapManager;
-			scope.selectedIndex = null;
+			scope.categoryWidgetService = categoryWidgetService;
 
 			function updateIndex(index) {
-				if (index === scope.selectedIndex) {
+				if (index === categoryWidgetService.selectedIndex) {
 					// hide landmarks
 					mapManager.groupOverlays('landmarks').forEach(function(o) {
 						mapManager.turnOffOverlay(o.name)
@@ -39,13 +39,13 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					// scope.mapManager.
 					floorSelectorService.showLandmarks = false;
 					// unselect category
-					scope.selectedIndex = null;
+					categoryWidgetService.selectedIndex = null;
 					// do not run search
 					return false;
 				}
 
 				if (index !== null) {
-					scope.selectedIndex = index;
+					categoryWidgetService.selectedIndex = index;
 				}
 				return true;
 			}
