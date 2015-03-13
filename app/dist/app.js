@@ -23779,7 +23779,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function populateSearchView(input, searchType) {
-		$scope.searchBarText = input;
+		var decodedInput = decodeURIComponent(input);
+		// set text in catSearchBar
+		$scope.searchBarText = decodedInput;
 		$scope.show = { // used for displaying different views
 			all: false,
 			category: false,
@@ -23787,9 +23789,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			generic: false
 		};
 		$scope.show[searchType] = true;
-
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
-			bubbleSearchService.search(searchType, $scope.world._id, input)
+			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
 					updateMap(bubbleSearchService.data);
@@ -24008,15 +24009,11 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 				}
 				// show landmarks
 				floorSelectorService.showLandmarks = true;
-
 				if ($location.path().indexOf('search') > 0) {
-					bubbleSearchService.search('category', scope.bubbleId, category)
-					.then(function() {
-						scope.populateSearchView(category, 'category');
-					});
-					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, false);
+					scope.populateSearchView(category, 'category');
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + encodeURIComponent(category), false);
 				} else {
-					$location.path('/w/' + scope.bubbleName + '/search/category/' + category, true);
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + encodeURIComponent(category), true);
 				}
 			}
 
@@ -24028,10 +24025,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 				floorSelectorService.showLandmarks = true;
 
 				if ($location.path().indexOf('search') > 0) {
-					bubbleSearchService.search('all', scope.bubbleId, 'all')
-					.then(function() {
-						scope.populateSearchView('All', 'all');
-					});
+					scope.populateSearchView('All', 'all');
 					$location.path('/w/' + scope.bubbleName + '/search/all', false);
 				} else {
 					$location.path('/w/' + scope.bubbleName + '/search/all', true);
@@ -24814,9 +24808,9 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 					}
 					if (inSearchView()) {
 						scope.populateSearchView(scope.text, 'text');
-						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text), false);
 					} else {
-						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text));
 					}
 					$('.search-cat input').blur();
 				}

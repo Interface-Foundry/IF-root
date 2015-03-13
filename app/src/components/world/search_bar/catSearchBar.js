@@ -64,9 +64,9 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 					}
 					if (inSearchView()) {
 						scope.populateSearchView(scope.text, 'text');
-						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text, false);
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text), false);
 					} else {
-						$location.path('/w/' + scope.world.id + '/search/text/' + scope.text);
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text));
 					}
 					$('.search-cat input').blur();
 				}

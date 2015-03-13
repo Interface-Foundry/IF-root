@@ -113,7 +113,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function populateSearchView(input, searchType) {
-		$scope.searchBarText = input;
+		var decodedInput = decodeURIComponent(input);
+		// set text in catSearchBar
+		$scope.searchBarText = decodedInput;
 		$scope.show = { // used for displaying different views
 			all: false,
 			category: false,
@@ -121,9 +123,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			generic: false
 		};
 		$scope.show[searchType] = true;
-
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
-			bubbleSearchService.search(searchType, $scope.world._id, input)
+			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
 					updateMap(bubbleSearchService.data);
