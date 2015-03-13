@@ -349,8 +349,13 @@ span.subnav-back-chevron {
 	margin-bottom: 16px;
 }
 
-.bubble-group:last-of-type { /*bottom of page gets cut off for some reason*/
+.bubble-group:last-of-type,
+.bubble-group-directory:last-of-type { /*bottom of page gets cut off for some reason*/
 	margin-bottom: 200px;
+}
+
+.bubble-group-directory .bubble-group:last-of-type {
+	margin-bottom: 16px;
 }
 
 .bubble-group-label {
@@ -375,7 +380,7 @@ span.subnav-back-chevron {
 }
 
 .bubble-group-label-directory {
-	font-size: 30px;
+	font-size: 27px;
 }
 
 .bubble-supergroup {
@@ -1518,6 +1523,7 @@ margin-bottom: 4px;
 
 .search-cat {
 	min-height: 0px;
+	height: 56px;
 }
 
 .search-cat .marble-page-header-icon {
@@ -1533,9 +1539,11 @@ margin-bottom: 4px;
 }
 
 .search-cat input {
-	width: 65%;
+	width: 60%;
 	outline: 0;
 	border: 0;
+	height: 28px;
+	line-height: 28px;
 }
 
 .search-cat .clearText {

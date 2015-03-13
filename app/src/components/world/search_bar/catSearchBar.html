@@ -13,12 +13,11 @@
 			</svg>
 		</div>
 		<input type="text" 
-			class="u-centerY" 
 			ng-model="text"
 			ng-style="getColor()"
 			ng-keypress="search($event)"
 			ng-blur="resetDefaultSearch()">
-		<div class="clearText"
+		<div class="clearText u-pointer"
 			ng-click="clearTextSearch($event); $event.stopPropagation()"
 			ng-show="showX()">
 			<img src="img/icons/ic_clear_grey600_24dp.png" 
