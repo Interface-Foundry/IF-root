@@ -30,7 +30,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 			scope.mapManager = mapManager;
 			scope.selectedIndex = null;
 
-			scope.search = function(category, index) {
+			function updateIndex(index) {
 				if (index === scope.selectedIndex) {
 					// hide landmarks
 					mapManager.groupOverlays('landmarks').forEach(function(o) {
@@ -41,13 +41,20 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					// unselect category
 					scope.selectedIndex = null;
 					// do not run search
-					return;
+					return false;
 				}
 
 				if (index !== null) {
 					scope.selectedIndex = index;
 				}
+				return true;
+			}
 
+			scope.search = function(category, index) {
+
+				if (!updateIndex(index)) {
+					return;
+				}
 				// show landmarks
 				floorSelectorService.showLandmarks = true;
 
@@ -63,6 +70,12 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 			}
 
 			scope.searchAll = function() {
+				if (!updateIndex('all')) {
+					return;
+				}
+
+				floorSelectorService.showLandmarks = true;
+
 				if ($location.path().indexOf('search') > 0) {
 					bubbleSearchService.search('all', scope.bubbleId, 'all')
 					.then(function() {
