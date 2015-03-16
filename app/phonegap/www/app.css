@@ -4566,6 +4566,9 @@ li.alert {
 .wtgt .loading-spinner {
   margin: 0px auto;
 }
+.wtgt p {
+  font-size: .9em;
+}
 .marble-page-footer.tag {
   background: #eeeeee;
   text-align: center;
@@ -4573,6 +4576,7 @@ li.alert {
 .marble-page-footer.tag p {
   position: relative;
   top: 4px;
+  font-size: 0.9em;
 }
 .u-pointer {
   cursor: pointer;
