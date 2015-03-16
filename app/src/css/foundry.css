@@ -2207,17 +2207,17 @@ li.alert {
 }
 .category-widget-directory-btn {
   border-top: 1px solid #EEE;
-  clear: both;
-  cursor: pointer;
-  height: 40px;
-  text-align: center;
-}
-.category-widget-directory-btn p {
-  color: #444;
-  font-size: 12px;
-  letter-spacing: 1px;
-  margin: 10px;
-  font-weight: 500;
+  /*	clear: both;
+	cursor: pointer;
+	height: 40px;
+	text-align: center;*/
+  /*	p {
+		color: #444;
+	  font-size: 12px;
+	  letter-spacing: 1px;
+	  margin: 10px;
+	  font-weight: 500;
+	}*/
 }
 .category-list.map-view {
   margin-top: -5px;
