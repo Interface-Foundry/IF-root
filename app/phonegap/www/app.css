@@ -4704,6 +4704,8 @@ li.alert {
   float: right;
   height: 56px;
   width: 56px;
+  -webkit-transform: translateY(-100%);
+  transform: translateY(-100%);
 }
 .search-cat .clearText-img {
   float: right;

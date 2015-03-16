@@ -12,11 +12,16 @@
 			    <path d="M0 0h24v24h-24z" fill="none"/>
 			</svg>
 		</div>
-		<input type="text" 
-			ng-model="text"
-			ng-style="getColor()"
-			ng-keypress="search($event)"
-			ng-blur="resetDefaultSearch()">
+		
+		<form>
+			<input type="text" 
+				name="search"
+				ng-model="text"
+				ng-style="getColor()"
+				ng-keypress="search($event)"
+				ng-blur="resetDefaultSearch()">
+		</form>
+		
 		<div class="clearText u-pointer"
 			ng-click="clearTextSearch($event); $event.stopPropagation()"
 			ng-show="showX()">
