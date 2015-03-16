@@ -1,8 +1,9 @@
-app.directive('searchView', ['$http', 'geoService', function($http, geoService) {
+app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+			scope.routeParams = $routeParams;
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
 				geoService.getLocation().then(function(coords) {
