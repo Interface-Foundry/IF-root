@@ -70,6 +70,9 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text));
 					}
 					$('.search-cat input').blur();
+
+					// deselect active category
+					categoryWidgetService.selectedIndex = null;
 				}
 			}
 

@@ -27,7 +27,7 @@ function floorSelector(mapManager, floorSelectorService) {
 		function activate(elem) {
 			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
 
-			scope.service = floorSelectorService;
+			scope.floorSelectorService = floorSelectorService;
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 

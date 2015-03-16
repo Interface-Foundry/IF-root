@@ -22473,7 +22473,7 @@ function floorSelector(mapManager, floorSelectorService) {
 		function activate(elem) {
 			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
 
-			scope.service = floorSelectorService;
+			scope.floorSelectorService = floorSelectorService;
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
@@ -23859,9 +23859,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				})
 				.value();
 
-			angular.copy(sortedMarks[0], $scope.currentFloor);
-			floorSelectorService.setCurrentFloor(sortedMarks[0]);
-			floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num;
+			$scope.currentFloor = _.filter(floorSelectorService.floors, function(f) {
+				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
+			})[0][0];
+
+			// angular.copy(sortedMarks[0], $scope.currentFloor);
+			floorSelectorService.setCurrentFloor($scope.currentFloor);
+			floor = floorSelectorService.currentFloor.floor_num;
 		}
 		mapManager.turnOnOverlay(String(floor).concat('-maps'));
 	}
@@ -23887,7 +23891,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function updateFloorIndicator(landmarks) {
-		var floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num,
+		var floor = floorSelectorService.currentFloor.floor_num,
 				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
 		var floors = floorSelectorService.floors.map(function(f) {
 			return f[0].floor_num;
@@ -24006,8 +24010,9 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					mapManager.groupOverlays('landmarks').forEach(function(o) {
 						mapManager.turnOffOverlay(o.name)
 					});
-					// scope.mapManager.
+
 					floorSelectorService.showLandmarks = false;
+					floorSelectorService.showFloors = false;
 					// unselect category
 					categoryWidgetService.selectedIndex = null;
 					// do not run search
@@ -24855,6 +24860,9 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text));
 					}
 					$('.search-cat input').blur();
+
+					// deselect active category
+					categoryWidgetService.selectedIndex = null;
 				}
 			}
 
