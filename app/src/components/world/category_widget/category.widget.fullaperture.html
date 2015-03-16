@@ -1,7 +1,7 @@
 <div class="category-list map-view">
 	<div class="category-widget-item"
-			 ng-class="{ active: categoryWidgetService.selectedIndex === 'all' }"
-			 ng-click="searchAll()">
+			 ng-click="searchAll()"
+			 ng-style="getStyle('all')">
 		<div id="category-all"
 				 class="category-letter"
 				 ng-style="{color: style.titleBG_color}">
