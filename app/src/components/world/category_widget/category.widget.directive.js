@@ -36,8 +36,9 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					mapManager.groupOverlays('landmarks').forEach(function(o) {
 						mapManager.turnOffOverlay(o.name)
 					});
-					// scope.mapManager.
+
 					floorSelectorService.showLandmarks = false;
+					floorSelectorService.showFloors = false;
 					// unselect category
 					categoryWidgetService.selectedIndex = null;
 					// do not run search

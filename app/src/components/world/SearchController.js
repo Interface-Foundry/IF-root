@@ -183,9 +183,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				})
 				.value();
 
-			angular.copy(sortedMarks[0], $scope.currentFloor);
-			floorSelectorService.setCurrentFloor(sortedMarks[0]);
-			floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num;
+			$scope.currentFloor = _.filter(floorSelectorService.floors, function(f) {
+				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
+			})[0][0];
+
+			// angular.copy(sortedMarks[0], $scope.currentFloor);
+			floorSelectorService.setCurrentFloor($scope.currentFloor);
+			floor = floorSelectorService.currentFloor.floor_num;
 		}
 		mapManager.turnOnOverlay(String(floor).concat('-maps'));
 	}
@@ -211,7 +215,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function updateFloorIndicator(landmarks) {
-		var floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num,
+		var floor = floorSelectorService.currentFloor.floor_num,
 				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
 		var floors = floorSelectorService.floors.map(function(f) {
 			return f[0].floor_num;
