@@ -1,7 +1,7 @@
 <div class="category-list map-view">
 	<div class="category-widget-item"
-			 ng-class="{ active: categoryWidgetService.selectedIndex === 'all' }"
-			 ng-click="searchAll()">
+			 ng-click="searchAll()"
+			 ng-style="getStyle('all')">
 		<div id="category-all"
 				 class="category-letter"
 				 ng-style="{color: style.titleBG_color}">
@@ -11,7 +11,7 @@
 
 	<div class="category-widget-item" 
 			 ng-repeat="category in groupedCategories track by $index"
-			 ng-class="{ active: $index === categoryWidgetService.selectedIndex }"
+			 ng-style="getStyle($index)"
 			 ng-click="search(category[0].name, $index)">
 		<img ng-if="category[0].avatar" 
 				 ng-src="{{category[0].avatar}}"/>
@@ -21,4 +21,6 @@
 			{{category[0].name[0].toUpperCase()}}
 		</div>
 	</div>
+</div>
+<div class="category-list-shadow">
 </div>

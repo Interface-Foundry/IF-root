@@ -24049,6 +24049,14 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					$location.path('/w/' + scope.bubbleName + '/search/all', true);
 				}
 			}
+
+			scope.getStyle = function(index) {
+				if (index === categoryWidgetService.selectedIndex) {
+					return {
+						'border-top': '2px solid ' + scope.style.titleBG_color
+					}
+				}
+			}
 		}
 	};
 }
