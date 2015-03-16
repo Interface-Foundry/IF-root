@@ -2310,6 +2310,13 @@ li.alert {
   position: relative;
   top: 45px;
 }
+@media only screen and (min-width: 0px) and (max-width: 480px) {
+  .search-aperture .search-cat {
+    width: initial;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
 /* Map zoom controls positioning for Desktop only */
 @media only screen and (min-width: 768px) {
   .aperture-full .leaflet-bottom.leaflet-left {
