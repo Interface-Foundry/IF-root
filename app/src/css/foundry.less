@@ -1456,7 +1456,6 @@ margin-bottom: 4px;
 }
 
 .category-list.map-view {
-  box-shadow: -23px 0px 21px -19px rgba(0, 0, 0, 0.4) inset;
 	margin-top: -5px;
 	overflow-x: scroll;
 	padding-left: 0;
@@ -1478,7 +1477,19 @@ margin-bottom: 4px;
 		position: absolute;
 		width: 46px;
 	}
+
+	&::before {
+	  box-shadow: -23px 0px 21px -19px rgba(0, 0, 0, 0.4) inset;
+	  position: absolute;
+	  /* top: 0; */
+	  /* left: 0; */
+	  width: 100%;
+	  height: 100%;
+	  content: "";
+
+	}
 }
+
 
 .category-map-view-scroll {
 	background: white;
@@ -1492,7 +1503,8 @@ margin-bottom: 4px;
 
 	.category-widget-item {
 		padding: 0;
-		width: 50px;
+	  max-width: 76px;
+	  width: 13%;
 
 		img {
 			height: 40px;
