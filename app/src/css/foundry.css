@@ -2225,9 +2225,10 @@ li.alert {
   padding-left: 0;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
+  /*-webkit-filter: grayscale(0%);*/
 }
 .category-list.map-view .active {
-  border-top: 2px solid blue;
+  /*-webkit-filter: grayscale(100%);*/
 }
 .category-list.map-view #category-all {
   background-color: white;
