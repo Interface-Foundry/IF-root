@@ -23674,7 +23674,7 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -23694,6 +23694,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
+		// set nav color using styleManager
+		styleManager.navBG_color = $scope.style.navBG_color;
 
 		worldBuilderService.loadWorld($scope.world);
 
@@ -23809,6 +23811,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
 					updateMap(bubbleSearchService.data);
 				});
+		} else { // generic search
+			map.removeAllMarkers();
 		}
 	}
 
