@@ -2260,19 +2260,19 @@ li.alert {
 }
 .category-map-view-scroll .category-widget-item {
   padding: 0;
+  margin-top: 3px;
   max-width: 76px;
   min-width: 50px;
   width: 13%;
 }
 .category-map-view-scroll .category-widget-item img {
   height: 40px;
-  padding-top: 3px;
 }
 .category-map-view-scroll .category-widget-item .category-letter {
   font-size: 1.5em;
   font-weight: 500;
   height: 40px;
-  padding: 8px;
+  padding: 5px;
 }
 .category-map-view-scroll .category-map-view-scroll .category-widget-item:first-child {
   border: 1px solid rgba(0, 0, 0, 0.2);

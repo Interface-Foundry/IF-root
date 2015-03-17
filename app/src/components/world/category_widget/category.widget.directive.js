@@ -84,7 +84,9 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 			scope.getStyle = function(index) {
 				if (index === categoryWidgetService.selectedIndex) {
 					return {
-						'border-top': '2px solid ' + scope.style.titleBG_color
+						// 'box-shadow': 'inset 0px 2px 0px 0px ' + scope.style.titleBG_color
+						'border-top': '4px solid ' + scope.style.titleBG_color,
+						'margin-top': '1px'
 					}
 				}
 			}

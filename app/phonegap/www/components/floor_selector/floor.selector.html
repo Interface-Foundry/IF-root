@@ -2,14 +2,15 @@
 <div id="current-floor" 
 		 ng-click="openFloorMenu()" 
 		 ng-style="::{'background-color': style.titleBG_color}"
-		 class="if-animate">{{floorSelectorService.currentFloor | floorNumberFilter}}</div>
+		 class="if-animate">{{floorSelectorService.currentFloor | floorNumberFilter}}
+</div>
 <div id="floor-nums" ng-show="floorSelectorService.showFloors" class="if-animate">
 	<div ng-repeat="floor in floors" 
 			 ng-click="selectFloor($index)">
 		{{floor[0] | floorNumberFilter}}
 	</div>
-</div>
-<div class="floor-indicator"
-		 ng-show="floorSelectorService.showFloors"
-		 ng-style="::{'border-left-color': style.titleBG_color}">
+	<div class="floor-indicator"
+			 ng-show="floorSelectorService.showFloors"
+			 ng-style="::{'border-left-color': style.titleBG_color}">
+	</div>
 </div>
