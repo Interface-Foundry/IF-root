@@ -11,7 +11,8 @@ function bubbleSearchService($http) {
 	return {
 		data: data,
 		search: search,
-		defaultText: 'What are you looking for?'
+		defaultText: 'What are you looking for?',
+		noResultsText: 'No results'
 	};
 	
 	function search(searchType, bubbleID, input) {

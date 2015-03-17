@@ -16824,7 +16824,8 @@ function bubbleSearchService($http) {
 	return {
 		data: data,
 		search: search,
-		defaultText: 'What are you looking for?'
+		defaultText: 'What are you looking for?',
+		noResultsText: 'No results'
 	};
 	
 	function search(searchType, bubbleID, input) {
@@ -22652,13 +22653,13 @@ function floorSelectorService() {
 	}
 
 	function updateIndicator(categoryMode) {
-		var baseline = categoryMode ? 140 : 100;
 		selectedIndex = selectedIndex >= 0 ? selectedIndex : getSelectedIndex();
 		if (this.showFloors) {
-			var bottom = (floors.length - selectedIndex - 1) * 42 + baseline + 48 + 'px';
-			$('.floor-indicator').css({bottom: bottom, opacity: 1});
+			// 42 is height of floor, 20 is margin-bottom on bottom floor, selected index adds pixels for floor-tile:after border
+			var top = (42 * (selectedIndex + 1) - 48 + 20) + selectedIndex + 'px';
+			$('.floor-indicator').css({top: top, opacity: 1});
 		} else {
-			$('.floor-indicator').css({bottom: baseline + 'px', opacity: 0});
+			$('.floor-indicator').css({opacity: 0});
 		}
 	}
 
@@ -23815,6 +23816,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
 					updateMap(bubbleSearchService.data);
+					if (bubbleSearchService.data.length === 0) { // no results
+						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+					}
 				});
 		} else { // generic search
 			map.removeAllMarkers();
@@ -24804,6 +24808,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			// scope.mapmanager = mapManager;
 
 			var defaultText = bubbleSearchService.defaultText;
+			var noResultsText = bubbleSearchService.noResultsText;
 
 			// change text in search bar whenever $scope.searchBarTet changes in searchController
 			if (inSearchView()) {
@@ -24839,7 +24844,11 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			scope.select = function() {
 				if (scope.text === defaultText) {
 					scope.text = '';
+				} else if (scope.text.indexOf(noResultsText) > -1) {
+					// remove "(No results)" part of input
+					scope.text = scope.text.slice(0, scope.text.length - 13);
 				}
+
 				if (apertureService.state !== 'aperture-full') {
 					apertureService.set('off');
 				}
@@ -24872,11 +24881,25 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.getColor = function() {
-				// leave placeholder text as default color, black otherwise
-				var result = scope.text === defaultText ? scope.color : 'black';
-				return {
-					color: result
-				};
+				var result;
+
+				// set style based on input
+				if (scope.text === defaultText) {
+					result = {
+						'color': scope.color
+					};
+				} else if (scope.text.indexOf(noResultsText) > -1) {
+					result = {
+						'color': 'gray',
+						'font-style': 'italic'
+					};
+				} else {
+					result = {
+						'color': 'black'
+					};
+				}
+
+				return result;
 			}
 
 			function inSearchView() {

@@ -13,6 +13,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			// scope.mapmanager = mapManager;
 
 			var defaultText = bubbleSearchService.defaultText;
+			var noResultsText = bubbleSearchService.noResultsText;
 
 			// change text in search bar whenever $scope.searchBarTet changes in searchController
 			if (inSearchView()) {
@@ -48,7 +49,11 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			scope.select = function() {
 				if (scope.text === defaultText) {
 					scope.text = '';
+				} else if (scope.text.indexOf(noResultsText) > -1) {
+					// remove "(No results)" part of input
+					scope.text = scope.text.slice(0, scope.text.length - 13);
 				}
+
 				if (apertureService.state !== 'aperture-full') {
 					apertureService.set('off');
 				}
@@ -81,11 +86,25 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.getColor = function() {
-				// leave placeholder text as default color, black otherwise
-				var result = scope.text === defaultText ? scope.color : 'black';
-				return {
-					color: result
-				};
+				var result;
+
+				// set style based on input
+				if (scope.text === defaultText) {
+					result = {
+						'color': scope.color
+					};
+				} else if (scope.text.indexOf(noResultsText) > -1) {
+					result = {
+						'color': 'gray',
+						'font-style': 'italic'
+					};
+				} else {
+					result = {
+						'color': 'black'
+					};
+				}
+
+				return result;
 			}
 
 			function inSearchView() {

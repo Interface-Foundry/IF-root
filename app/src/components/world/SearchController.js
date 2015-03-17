@@ -136,6 +136,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
 					updateMap(bubbleSearchService.data);
+					if (bubbleSearchService.data.length === 0) { // no results
+						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+					}
 				});
 		} else { // generic search
 			map.removeAllMarkers();

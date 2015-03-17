@@ -1200,7 +1200,7 @@ margin-bottom: 4px;
   font-size: 18px;
   font-weight: normal;
   line-height: 42px;
-  max-height: 80%;
+  /*max-height: 80%;*/
   min-height: 0px;
   opacity: 1;
 	overflow-y: scroll;
@@ -1210,6 +1210,22 @@ margin-bottom: 4px;
   text-align: center;
   width: 42px;
   z-index: 18;
+
+  @media only screen and (min-height: 0px) {
+    max-height: 200px;
+  }
+
+  @media only screen and (min-height: 567px) {
+    max-height: 285px;
+  }
+
+  @media only screen and (min-height: 666px) {
+    max-height: 380px;
+  }
+
+  @media only screen and (min-height: 735px) {
+    max-height: 450px;
+  }
 
   -webkit-overflow-scrolling: touch;
 
@@ -1244,7 +1260,7 @@ margin-bottom: 4px;
   display: inline-block;
   height: 0;
   position: absolute;
-  right: 44px;
+  right: 26px;
   width: 0;
   z-index: 20;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
@@ -1262,6 +1278,20 @@ margin-bottom: 4px;
 	-webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
+
+.floor-tile:after {
+	content: '';
+	height: 1px;
+	width: 42px;
+	display: block;
+	position: relative;
+	background: -webkit-linear-gradient(left, white 0%, rgba(0, 0, 0, 0.1), white 100%);
+	background: -moz-linear-gradient(left, white 0%, rgba(0, 0, 0, 0.1), white 100%);
+	background: -o-linear-gradient(left, white 0%, rgba(0, 0, 0, 0.1), white 100%);
+	background: linear-gradient(left, white 0%, rgba(0, 0, 0, 0.1), white 100%);
+
+}
+
 .aperture-off #current-floor {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
@@ -1521,6 +1551,7 @@ margin-bottom: 4px;
 .search-cat {
 	min-height: 0px;
 	height: 56px;
+	z-index: 21; /*puts above floor switcher*/
 }
 
 .search-cat .marble-page-header-icon {
