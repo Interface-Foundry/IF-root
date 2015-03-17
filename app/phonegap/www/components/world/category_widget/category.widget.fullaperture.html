@@ -1,0 +1,26 @@
+<div class="category-widget-item all-button"
+		 ng-click="searchAll()"
+		 ng-style="getStyle('all')">
+	<div id="category-all"
+			 class="category-letter"
+			 ng-style="{color: style.titleBG_color}">
+		All
+	</div>
+</div>
+
+<span class="category-list map-view">
+	<div class="category-widget-item" 
+			 ng-repeat="category in groupedCategories track by $index"
+			 ng-style="getStyle($index)"
+			 ng-click="search(category[0].name, $index)">
+		<img ng-if="category[0].avatar" 
+				 ng-src="{{category[0].avatar}}"/>
+		<div ng-if="!category[0].avatar" 
+				 class="category-letter"
+				 ng-style="{color: style.titleBG_color}">
+			{{category[0].name[0].toUpperCase()}}
+		</div>
+	</div>
+</span>
+
+<div class="category-list-shadow"></div>

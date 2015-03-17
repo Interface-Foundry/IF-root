@@ -92,7 +92,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 </div>
 
 <explore-view class="explore-view" ng-show="viewTab == 'explore'"></explore-view>
-<search-view class="search-view" ng-show="viewTab == 'search'"></search-view>
+<search-view class="search-view" ng-show="viewTab == 'search' && !routeParams.worldURL"></search-view>
 <drawer ng-if="userManager.loginStatus"></drawer>
 
 <script>

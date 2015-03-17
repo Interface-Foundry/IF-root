@@ -1,14 +1,15 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService) {
 
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-zoomControl.style.top = "60px";
-zoomControl.style.left = "1%";
-zoomControl.style.display = 'none';
+// var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+// zoomControl.style.top = "60px";
+// zoomControl.style.left = "1%";
+// zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
+$scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
 
 $scope.world = {};
@@ -29,10 +30,6 @@ $scope.collectedPresents = [];
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
-  	
-$scope.zoomOn = function() {
-	  	zoomControl.style.display = "block";
-}
 
 $scope.uploadWTGT = function($files, state) {
 	if (userManager.loginStatus) {
@@ -483,20 +480,7 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
-	var lowestFloor = 1;
-	if (map.localMapArrayExists($scope.world)) {
-		lowestFloor = map.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
-	}
-	createMapLayer(lowestFloor);
-
-	if (tempMarkers.length) {
-		createMarkerLayer(tempMarkers, lowestFloor)
-	}
-	
-}
-
-function createMapLayer(lowestFloor) {
-	var mapLayer = lowestFloor + '-maps';
+	var mapLayer = worldBuilderService.createMapLayer($scope.world);
 	mapManager.toggleOverlay(mapLayer);
 }
 
@@ -535,7 +519,7 @@ function markerFromLandmark(landmark) {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
-		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		message: '<a if-href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
 			iconUrl: landmarkIcon,
 			shadowUrl: shadowUrl,

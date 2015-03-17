@@ -1,9 +1,6 @@
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-zoomControl.style.top = "100px";
-zoomControl.style.left = "1%";
 
 console.log('--Landmark Controller--');
 var map = mapManager;
@@ -37,15 +34,9 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
 	console.log(landmark); 
-	
-	var zoomLevel = 18;
-	// find min zoom level of all maps on the current floor
-	var mapsOnThisFloor = findMapsOnThisFloor($scope.world, landmark);
-	if (mapsOnThisFloor) {
-		zoomLevel = Number(mapManager.findZoomLevel(findMapsOnThisFloor($scope.world, landmark)));
-	}
 
-	goToMark(zoomLevel);
+
+	goToMark();
 
 	// add local maps for current floor
 	addLocalMapsForCurrentFloor($scope.world, landmark);
@@ -168,28 +159,22 @@ console.log($scope.landmark.category);
 })
 });
 
-function goToMark(zoomLevel) {
+function goToMark() {
 
-	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-half'); 
-	aperture.set('half');
-  	// var markers = map.markers;
-  	// angular.forEach(markers, function(marker) {
-  	// 	console.log(marker);
-	  // 	map.removeMarker(marker._id);
-  	// });
+	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
+	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
+	aperture.set('third');
 	map.removeAllMarkers();
 
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
 			popupAnchorValues = [0, -40],
 			shadowUrl = '',
-			// shadowAnchor = [4, -3],
 			iconAnchor = [17.5, 60],
 			iconSize = [35, 67];
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = $scope.landmark.avatar;
 		popupAnchorValues = [0, -14];
-		// shadowUrl = 'img/marker/blue-pointer.png';
 		iconAnchor = [25, 25];
 		iconSize = [50, 50]
 	}

@@ -1,11 +1,11 @@
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
 			scope.selected = 'home';
 			scope.select = function (tab) {
-				if (scope.selected===tab && tab === 'home') {
+				if (tab === 'home') {
 					if ($routeParams.worldURL) {
 						var wRoute = "/w/"+$routeParams.worldURL;
 						$location.path() === wRoute ? $location.path("/") : $location.path(wRoute);
@@ -14,11 +14,21 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 						$location.path('/');
 					}
 				}
+				else if (tab === 'search') {
+					// if in bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					if ($routeParams.worldURL) {
+						apertureService.set('third');
+						$location.path('/w/' + $routeParams.worldURL + '/search');
+					}
+				}
 				scope.$emit('viewTabSwitch', tab);
 			}
 			
 			scope.$on('$locationChangeSuccess', function(event) {
 				scope.$emit('viewTabSwitch', 'home');
+				if ($location.path().indexOf('search') > -1) {
+					scope.$emit('viewTabSwitch', 'search');
+				}
 			});
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {

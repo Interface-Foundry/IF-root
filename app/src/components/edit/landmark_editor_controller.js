@@ -9,10 +9,10 @@ $window.history.back();
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
-	
+
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-	zoomControl.style.top = "50px";
-	zoomControl.style.left = "40%";
+zoomControl.style.top = "50px";
+zoomControl.style.left = "40%";
 
 var worldLoaded = false;
 var landmarksLoaded = false;
@@ -239,11 +239,11 @@ $scope.$on('$destroy', function (event) {
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
-	
-	if (zoomControl.style) {
-	zoomControl.style.top = "";
-	zoomControl.style.left = "";
-	}
+
+		if (zoomControl.style) {
+			zoomControl.style.top = "";
+			zoomControl.style.left = "";
+		}
 	}
 });
 

@@ -36,7 +36,7 @@ worldBounds: {
 		controls: {
 			layers: {
 				visible: false,
-				position: 'bottomright',
+				position: 'topleft',
 				collapsed: true
 			}
 		},
@@ -44,11 +44,14 @@ worldBounds: {
 	}
 };
 
+															//latlng should be array [lat, lng]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
+	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');
 	console.log('--setCenter--', latlng, z, state);
 	mapManager._actualCenter = latlng;
 	mapManager._z = z;
+
 	
 	switch (state) {
 		case 'aperture-half':
@@ -106,16 +109,59 @@ mapManager.apertureUpdate = function(state) {
 }
 
 //use bounds from array of markers to set more accruate center
-mapManager.setCenterFromMarkers = function(markers) {
+mapManager.setCenterFromMarkers = function(markers, done) {
 	leafletData.getMap().then(function(map) {
 		map.fitBounds(
 			L.latLngBounds(markers.map(latLngFromMarker)),
 			{maxZoom: 20}
 		)
+		if (done) {
+			done();
+		}
 	});
 	
 	function latLngFromMarker(marker) {
 		return [marker.lat, marker.lng];
+	}
+}
+
+mapManager.setCenterFromMarkersWithAperture = function(markers, aperture) {
+
+	var bottom = mapManager.adjustHeightByAperture(aperture, mapManager.windowSize().h);
+	var top = aperture === 'aperture-full' ? 140 : 60;
+
+	leafletData.getMap().then(function(map) {
+		map.fitBounds(
+			L.latLngBounds(markers.map(mapManager.latLngFromMarker)),
+			{maxZoom: 20,
+			paddingTopLeft: [0, top],
+			paddingBottomRight: [0, bottom]}
+		)
+	});
+}
+
+mapManager.adjustHeightByAperture = function(aperture, height) {
+	switch (aperture) {
+		case 'aperture-half':
+			return height * 0.5;
+			break;
+		case 'aperture-third': 
+			return height * 0.78;
+			break;
+		case 'aperture-full':
+			return 110;
+			break;
+	}
+}
+
+mapManager.latLngFromMarker = function(marker) {
+	return [marker.lat, marker.lng];
+}
+
+mapManager.windowSize = function() {
+	return {
+		h: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
 	}
 }
 
@@ -130,6 +176,39 @@ mapManager.resetMap = function() {
 
 
 /* MARKER METHODS */
+
+mapManager.markerFromLandmark = function(landmark, world) {
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks';
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		iconAnchor = [25, 25];
+		iconSize = [50, 50]
+	}
+
+	return {
+		lat:landmark.loc.coordinates[1],
+		lng:landmark.loc.coordinates[0],
+		draggable:false,
+		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		icon: {
+			iconUrl: landmarkIcon,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
+		},
+		_id: landmark._id,
+		layer: layerGroup
+	}
+	function getLayerGroup(landmark) {
+		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	}
+}
 
 /* addMarker
 Key: Name of marker to be added
@@ -172,7 +251,8 @@ mapManager.newMarkerOverlay = function(landmark) {
 		mapManager.layers.overlays[layer + '-landmarks'] = {
 			type: 'group',
 			name: layer + '-landmarks',
-			visible: false
+			visible: false,
+			groupType: 'landmarks'
 		};
 	}
 }
@@ -559,9 +639,22 @@ mapManager.turnOffOverlay = function(layer) {
 	return mapManager.layers.overlays[layer].visible = false;
 }
 
+mapManager.turnOnOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = true;
+}
+
 mapManager.findVisibleLayers = function() {
 	return _.filter(mapManager.layers.overlays, function(l) {
 		return l.visible === true;
+	});
+}
+
+mapManager.groupOverlays = function(groupType) {
+	return _.filter(mapManager.layers.overlays, function(o) {
+		return o.hasOwnProperty('groupType') && o.groupType === groupType;
 	});
 }
 
