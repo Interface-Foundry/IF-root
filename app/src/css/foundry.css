@@ -2192,8 +2192,8 @@ li.alert {
   bottom: 4px;
   border: 1px solid black;
   right: -22px;
-  box-shadow: -7px 9px 21px 5px rgba(0, 0, 0, 0.4);
-  -webkit-box-shadow: -7px 9px 21px 5px rgba(0, 0, 0, 0.4);
+  box-shadow: -1px 9px 13px 4px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: -1px 9px 13px 4px rgba(0, 0, 0, 0.4);
 }
 .category-list {
   width: 100%;
@@ -2222,6 +2222,7 @@ li.alert {
 }
 .category-widget-item.all-button {
   box-shadow: 1px 4px 7px -1px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: 1px 4px 7px -1px rgba(0, 0, 0, 0.4);
   max-width: 46px;
   margin-top: -5px;
   position: relative;
