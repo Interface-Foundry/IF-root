@@ -13,7 +13,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	
 	var map = mapManager;
 
-	$scope.aperture.set('third');
+	if ($scope.aperture.state !== 'aperture-full') {
+		$scope.aperture.set('third');
+	}
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;

@@ -2233,12 +2233,7 @@ li.alert {
   -webkit-overflow-scrolling: touch;
 }
 #category-all {
-  /*background-color: white;*/
   height: 44px;
-  /*margin-top: 3px;
-	padding-top: 4px;
-	position: fixed;
-	width: 46px;*/
 }
 .category-map-view-scroll {
   background: white;

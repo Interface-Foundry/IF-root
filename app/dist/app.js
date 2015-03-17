@@ -22940,7 +22940,7 @@ app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(w
 		templateUrl: 'components/nav/exploreView.html' 
 	}
 }])
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -22959,6 +22959,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				else if (tab === 'search') {
 					// if in bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
 					if ($routeParams.worldURL) {
+						apertureService.set('third');
 						$location.path('/w/' + $routeParams.worldURL + '/search');
 					}
 				}
@@ -23691,7 +23692,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	
 	var map = mapManager;
 
-	$scope.aperture.set('third');
+	if ($scope.aperture.state !== 'aperture-full') {
+		$scope.aperture.set('third');
+	}
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;

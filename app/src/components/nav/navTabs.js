@@ -1,4 +1,4 @@
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -17,6 +17,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				else if (tab === 'search') {
 					// if in bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
 					if ($routeParams.worldURL) {
+						apertureService.set('third');
 						$location.path('/w/' + $routeParams.worldURL + '/search');
 					}
 				}
