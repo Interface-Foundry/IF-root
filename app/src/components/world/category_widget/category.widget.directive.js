@@ -91,7 +91,7 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 					} else {
 						return {
 							'border-top': '4px solid ' + scope.style.titleBG_color,
-							'margin-top': '1px'
+							'margin-top': '3px'
 						};
 					}
 				}

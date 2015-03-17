@@ -34,13 +34,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
 	console.log(landmark); 
-	
-	// var zoomLevel = 18;
-	// // find min zoom level of all maps on the current floor
-	// var mapsOnThisFloor = findMapsOnThisFloor($scope.world, landmark);
-	// if (mapsOnThisFloor) {
-	// 	zoomLevel = Number(mapManager.findZoomLevel(findMapsOnThisFloor($scope.world, landmark)));
-	// }
+
 
 	goToMark();
 
@@ -167,6 +161,7 @@ console.log($scope.landmark.category);
 
 function goToMark() {
 
+	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	aperture.set('third');
 	map.removeAllMarkers();
@@ -174,14 +169,12 @@ function goToMark() {
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
 			popupAnchorValues = [0, -40],
 			shadowUrl = '',
-			// shadowAnchor = [4, -3],
 			iconAnchor = [17.5, 60],
 			iconSize = [35, 67];
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = $scope.landmark.avatar;
 		popupAnchorValues = [0, -14];
-		// shadowUrl = 'img/marker/blue-pointer.png';
 		iconAnchor = [25, 25];
 		iconSize = [50, 50]
 	}
