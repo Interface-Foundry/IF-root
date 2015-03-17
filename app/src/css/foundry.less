@@ -1457,9 +1457,12 @@ margin-bottom: 4px;
   }
 }
 
-.category-map-view-scroll .category-widget-item:nth-of-type(1) {
-	float: left;
+.category-widget-item.all-button {
+	box-shadow: 1px 4px 7px -1px rgba(0,0,0,0.4);
 	max-width: 46px;
+	margin-top: -5px;
+	position: relative;
+  z-index: 1;
 }
 
 .category-widget-directory-btn {
@@ -1473,8 +1476,9 @@ margin-bottom: 4px;
 	white-space: nowrap;
 	-webkit-overflow-scrolling: touch;
 
-	width: 100%;
+
 	position: absolute;
+	width: 100%;
 
 	#category-all {
 		background-color: white;
@@ -1485,7 +1489,6 @@ margin-bottom: 4px;
 		width: 46px;
 	}
 }
-
 
 .category-map-view-scroll {
 	background: white;
