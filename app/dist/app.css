@@ -3407,6 +3407,7 @@ span.subnav-back-chevron {
   padding: 8px;
   background: #e6e6e6;
   overflow: auto;
+  padding-bottom: 100px;
 }
 .shelf-surface {
   position: absolute;
