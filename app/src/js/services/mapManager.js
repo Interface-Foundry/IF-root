@@ -46,10 +46,12 @@ worldBounds: {
 
 															//latlng should be array [lat, lng]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
+	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');
 	console.log('--setCenter--', latlng, z, state);
 	mapManager._actualCenter = latlng;
 	mapManager._z = z;
+
 	
 	switch (state) {
 		case 'aperture-half':

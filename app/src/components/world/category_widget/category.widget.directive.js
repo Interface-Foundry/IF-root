@@ -87,12 +87,12 @@ function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
 						return {
 							'border-top': '4px solid ' + scope.style.titleBG_color,
 							'margin-top': '-3px'
-						}
+						};
 					} else {
 						return {
 							'border-top': '4px solid ' + scope.style.titleBG_color,
 							'margin-top': '1px'
-						}
+						};
 					}
 				}
 			}

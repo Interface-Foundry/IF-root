@@ -35,14 +35,14 @@ worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(
 	$scope.landmark = landmark;
 	console.log(landmark); 
 	
-	var zoomLevel = 18;
-	// find min zoom level of all maps on the current floor
-	var mapsOnThisFloor = findMapsOnThisFloor($scope.world, landmark);
-	if (mapsOnThisFloor) {
-		zoomLevel = Number(mapManager.findZoomLevel(findMapsOnThisFloor($scope.world, landmark)));
-	}
+	// var zoomLevel = 18;
+	// // find min zoom level of all maps on the current floor
+	// var mapsOnThisFloor = findMapsOnThisFloor($scope.world, landmark);
+	// if (mapsOnThisFloor) {
+	// 	zoomLevel = Number(mapManager.findZoomLevel(findMapsOnThisFloor($scope.world, landmark)));
+	// }
 
-	goToMark(zoomLevel);
+	goToMark();
 
 	// add local maps for current floor
 	addLocalMapsForCurrentFloor($scope.world, landmark);
@@ -165,15 +165,10 @@ console.log($scope.landmark.category);
 })
 });
 
-function goToMark(zoomLevel) {
+function goToMark() {
 
-	map.setCenter($scope.landmark.loc.coordinates, zoomLevel, 'aperture-third'); 
+	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	aperture.set('third');
-  	// var markers = map.markers;
-  	// angular.forEach(markers, function(marker) {
-  	// 	console.log(marker);
-	  // 	map.removeMarker(marker._id);
-  	// });
 	map.removeAllMarkers();
 
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
