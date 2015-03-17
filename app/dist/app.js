@@ -22651,13 +22651,13 @@ function floorSelectorService() {
 	}
 
 	function updateIndicator(categoryMode) {
-		var baseline = categoryMode ? 140 : 100;
 		selectedIndex = selectedIndex >= 0 ? selectedIndex : getSelectedIndex();
 		if (this.showFloors) {
-			var bottom = (floors.length - selectedIndex - 1) * 42 + baseline + 48 + 'px';
-			$('.floor-indicator').css({bottom: bottom, opacity: 1});
+			// 42 is height of floor, 20 is margin-bottom on bottom floor, selected index adds pixels for floor-tile:after border
+			var top = (42 * (selectedIndex + 1) - 48 + 20) + selectedIndex + 'px';
+			$('.floor-indicator').css({top: top, opacity: 1});
 		} else {
-			$('.floor-indicator').css({bottom: baseline + 'px', opacity: 0});
+			$('.floor-indicator').css({opacity: 0});
 		}
 	}
 
