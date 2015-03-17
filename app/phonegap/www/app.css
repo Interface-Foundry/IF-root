@@ -4625,6 +4625,7 @@ li.alert {
   text-overflow: ellipsis;
 }
 .category-map-view-scroll .category-widget-item:nth-of-type(1) {
+  float: left;
   max-width: 46px;
 }
 .category-widget-directory-btn {
@@ -4636,6 +4637,8 @@ li.alert {
   padding-left: 0;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  position: absolute;
 }
 .category-list.map-view #category-all {
   background-color: white;
@@ -4658,6 +4661,7 @@ li.alert {
 .category-map-view-scroll .category-widget-item {
   padding: 0;
   max-width: 76px;
+  min-width: 50px;
   width: 13%;
 }
 .category-map-view-scroll .category-widget-item img {

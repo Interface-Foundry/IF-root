@@ -1458,6 +1458,7 @@ margin-bottom: 4px;
 }
 
 .category-map-view-scroll .category-widget-item:nth-of-type(1) {
+	float: left;
 	max-width: 46px;
 }
 
@@ -1472,6 +1473,9 @@ margin-bottom: 4px;
 	white-space: nowrap;
 	-webkit-overflow-scrolling: touch;
 
+	width: 100%;
+	position: absolute;
+
 	#category-all {
 		background-color: white;
 		box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.5);
@@ -1480,8 +1484,6 @@ margin-bottom: 4px;
 		position: fixed;
 		width: 46px;
 	}
-
-
 }
 
 
@@ -1498,6 +1500,7 @@ margin-bottom: 4px;
 	.category-widget-item {
 		padding: 0;
 	  max-width: 76px;
+	  min-width: 50px;
 	  width: 13%;
 
 		img {

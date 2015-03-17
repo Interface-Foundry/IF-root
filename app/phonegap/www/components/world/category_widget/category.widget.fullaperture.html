@@ -1,14 +1,15 @@
-<div class="category-list map-view">
-	<div class="category-widget-item"
-			 ng-click="searchAll()"
-			 ng-style="getStyle('all')">
-		<div id="category-all"
-				 class="category-letter"
-				 ng-style="{color: style.titleBG_color}">
-			All
-		</div>
+<div>
+	<span class="category-widget-item"
+		 ng-click="searchAll()"
+		 ng-style="getStyle('all')">
+	<div id="category-all"
+			 class="category-letter"
+			 ng-style="{color: style.titleBG_color}">
+		All
 	</div>
+</span>
 
+<span class="category-list map-view">
 	<div class="category-widget-item" 
 			 ng-repeat="category in groupedCategories track by $index"
 			 ng-style="getStyle($index)"
@@ -21,6 +22,7 @@
 			{{category[0].name[0].toUpperCase()}}
 		</div>
 	</div>
-</div>
-<div class="category-list-shadow">
+</span>
+
+<div class="category-list-shadow"></div>
 </div>
