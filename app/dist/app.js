@@ -23686,6 +23686,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.go = go;
 	$scope.groups;
+	$scope.loading = false;
 	$scope.world;
 	$scope.style;
 	$scope.searchBarText;
@@ -23812,9 +23813,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		};
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
+			
+			$scope.loading = true;
 			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
+					$scope.loading = false;
+
 					updateMap(bubbleSearchService.data);
 					if (bubbleSearchService.data.length === 0) { // no results
 						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
@@ -24801,7 +24806,8 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			text: '=',
 			color: '=',
 			world: '=',
-			populateSearchView: '='
+			populateSearchView: '=',
+			loading: '='
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {

@@ -2351,6 +2351,12 @@ li.alert {
     margin-right: 8px;
   }
 }
+.loading-spin.category-search {
+  left: 30px;
+  height: 30px;
+  top: 14px;
+  width: 30px;
+}
 /* Map zoom controls positioning for Desktop only */
 @media only screen and (min-width: 768px) {
   .aperture-full .leaflet-bottom.leaflet-left {
