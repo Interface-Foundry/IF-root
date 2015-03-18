@@ -182,13 +182,15 @@ mapManager.markerFromLandmark = function(landmark, world) {
 			popupAnchorValues = [0, -40],
 			iconAnchor = [17, 67],
 			iconSize = [35, 67],
-			layerGroup = getLayerGroup(landmark) + '-landmarks';
+			layerGroup = getLayerGroup(landmark) + '-landmarks',
+			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
 		popupAnchorValues = [0, -14];
 		iconAnchor = [25, 25];
-		iconSize = [50, 50]
+		iconSize = [50, 50];
+		alt = 'store';
 	}
 
 	return {
@@ -203,7 +205,8 @@ mapManager.markerFromLandmark = function(landmark, world) {
 			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id,
-		layer: layerGroup
+		layer: layerGroup,
+		alt: alt
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';

@@ -174,13 +174,15 @@ if ($scope.landmark.hasTime) {
 				shadowAnchor = [4, -3],
 				iconAnchor = [17, 67],
 				iconSize = [35, 67],
-				layerGroup = getLayerGroup(landmark) + '-landmarks';
+				layerGroup = getLayerGroup(landmark) + '-landmarks',
+				alt = null;
 
 		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 			landmarkIcon = landmark.avatar;
 			popupAnchorValues = [0, -14];
 			iconAnchor = [25, 25];
-			iconSize = [50, 50]
+			iconSize = [50, 50];
+			alt = 'store';
 		}
 		
 
@@ -201,7 +203,8 @@ if ($scope.landmark.hasTime) {
 				message:landmark.name || 'Drag to location on map',
 				focus:true,
 				layer: layerGroup,
-				_id: landmark._id
+				_id: landmark._id,
+				alt: alt
 			});
 	}
 	function getLayerGroup(landmark) {
