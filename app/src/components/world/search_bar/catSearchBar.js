@@ -8,7 +8,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			world: '=',
 			populateSearchView: '='
 		},
-		templateUrl: 'components/world/cat_search_bar/catSearchBar.html',
+		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
 			// scope.mapmanager = mapManager;
 
