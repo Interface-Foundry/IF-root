@@ -2,9 +2,9 @@
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
 		ng-style="::{'background-color': style.titleBG_color}" 
-		ng-click="aperture.toggle('full')"
-		ng-swipe-up="aperture.set('off')"
-		ng-swipe-down="aperture.set('full')"
+		ng-click="apertureToggle('full')"
+		ng-swipe-up="apertureSet('off')"
+		ng-swipe-down="apertureSet('full')"
 		world-shelf>
 		<div class="world-title noPreventDefault" fit-font>
 			<span class="vertical-middle noPreventDefault">{{world.name}}</span>

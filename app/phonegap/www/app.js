@@ -23855,6 +23855,22 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		categoryWidgetService.selectedIndex = null;
 	});
 
+	$scope.apertureSet = function(newState) {
+		mapManager._z = mapManager.center.zoom;
+		mapManager._actualCenter.length = 0;
+		mapManager._actualCenter.push(mapManager.center.lng);
+		mapManager._actualCenter.push(mapManager.center.lat);
+		apertureService.set(newState);
+	}
+
+	$scope.apertureToggle = function(newState) {
+		mapManager._z = mapManager.center.zoom;
+		mapManager._actualCenter.length = 0;
+		mapManager._actualCenter.push(mapManager.center.lng);
+		mapManager._actualCenter.push(mapManager.center.lat);
+		apertureService.toggle(newState);
+	}
+
 	function go(path) {
 		$location.path(path);
 	}
