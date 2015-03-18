@@ -4,7 +4,7 @@
 
 		<div class="marble-page-header-icon">
 			<!-- inline svg allows color change -->
-			<svg ng-show="!loading"
+			<svg ng-hide="loading===true"
 				xmlns="http://www.w3.org/2000/svg" 
 				width="24" 
 				height="24" 
@@ -25,7 +25,7 @@
 		</form>
 
 
-		<div class="loading-spin category-search" ng-show="loading">
+		<div class="loading-spin category-search" ng-show="loading===true">
 			<div class="db1" ng-style="{ 'background-color': color }"></div>
 			<div class="db2" ng-style="{ 'background-color': color }"></div>
 		</div>

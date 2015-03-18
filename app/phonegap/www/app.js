@@ -23818,7 +23818,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.go = go;
 	$scope.groups;
-	$scope.loading = false;
+	$scope.loading = false; // for loading animation on searchbar
 	$scope.world;
 	$scope.style;
 	$scope.searchBarText;
@@ -23946,7 +23946,14 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			
-			$scope.loading = true;
+			$scope.loading = 'delay';
+
+			$timeout(function() {
+				if ($scope.loading === 'delay') {
+					$scope.loading = true;
+				}
+			}, 300);
+
 			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
