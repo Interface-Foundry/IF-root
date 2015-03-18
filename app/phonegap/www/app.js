@@ -23856,19 +23856,23 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	});
 
 	$scope.apertureSet = function(newState) {
-		mapManager._z = mapManager.center.zoom;
-		mapManager._actualCenter.length = 0;
-		mapManager._actualCenter.push(mapManager.center.lng);
-		mapManager._actualCenter.push(mapManager.center.lat);
+		adjustMapCenter();
 		apertureService.set(newState);
 	}
 
 	$scope.apertureToggle = function(newState) {
+		adjustMapCenter();
+		apertureService.toggle(newState);
+	}
+
+	function adjustMapCenter() {
+		if ($scope.aperture.state === 'aperture-third') {
+			return;
+		}
 		mapManager._z = mapManager.center.zoom;
 		mapManager._actualCenter.length = 0;
 		mapManager._actualCenter.push(mapManager.center.lng);
-		mapManager._actualCenter.push(mapManager.center.lat);
-		apertureService.toggle(newState);
+		mapManager._actualCenter.push(mapManager.center.lat);		
 	}
 
 	function go(path) {
