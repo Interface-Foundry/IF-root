@@ -6,6 +6,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.go = go;
 	$scope.groups;
+	$scope.loading = false; // for loading animation on searchbar
 	$scope.world;
 	$scope.style;
 	$scope.searchBarText;
@@ -41,6 +42,26 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
 	});
+
+	$scope.apertureSet = function(newState) {
+		adjustMapCenter();
+		apertureService.set(newState);
+	}
+
+	$scope.apertureToggle = function(newState) {
+		adjustMapCenter();
+		apertureService.toggle(newState);
+	}
+
+	function adjustMapCenter() {
+		if ($scope.aperture.state === 'aperture-third') {
+			return;
+		}
+		mapManager._z = mapManager.center.zoom;
+		mapManager._actualCenter.length = 0;
+		mapManager._actualCenter.push(mapManager.center.lng);
+		mapManager._actualCenter.push(mapManager.center.lat);		
+	}
 
 	function go(path) {
 		$location.path(path);
@@ -132,9 +153,20 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		};
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
+			
+			$scope.loading = 'delay';
+
+			$timeout(function() {
+				if ($scope.loading === 'delay') {
+					$scope.loading = true;
+				}
+			}, 300);
+
 			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
+					$scope.loading = false;
+
 					updateMap(bubbleSearchService.data);
 					if (bubbleSearchService.data.length === 0) { // no results
 						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';

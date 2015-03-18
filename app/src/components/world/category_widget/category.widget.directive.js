@@ -1,11 +1,11 @@
 'use strict';
 
-app.directive('categoryWidgetSr', categoryWidgetSr);
+app.directive('categoryWidget', categoryWidget);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
+categoryWidget.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
 												  	'floorSelectorService', 'categoryWidgetService'];
 
-function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
+function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 													floorSelectorService, categoryWidgetService) {
 	return {
 		restrict: 'E',

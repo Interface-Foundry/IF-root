@@ -6,7 +6,8 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			text: '=',
 			color: '=',
 			world: '=',
-			populateSearchView: '='
+			populateSearchView: '=',
+			loading: '='
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
@@ -64,7 +65,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.search = function(keyEvent) {
-				if (keyEvent.which === 13) { // pressed enter
+				if (keyEvent.which === 13 && scope.text) { // pressed enter and input isn't empty
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('third');
 					}

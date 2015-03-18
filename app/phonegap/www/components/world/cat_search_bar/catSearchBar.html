@@ -1,11 +1,9 @@
 <div class="marble-page search-cat"
 	ng-click="select()">
 	<div class="marble-page-header">
-
 		<div class="marble-page-header-icon">
 			<!-- inline svg allows color change -->
-			<svg ng-hide="loading===true"
-				xmlns="http://www.w3.org/2000/svg" 
+			<svg xmlns="http://www.w3.org/2000/svg" 
 				width="24" 
 				height="24" 
 				viewBox="0 0 24 24"
@@ -23,12 +21,6 @@
 				ng-keypress="search($event)"
 				ng-blur="resetDefaultSearch()">
 		</form>
-
-
-		<div class="loading-spin category-search" ng-show="loading===true">
-			<div class="db1" ng-style="{ 'background-color': color }"></div>
-			<div class="db2" ng-style="{ 'background-color': color }"></div>
-		</div>
 		
 		<div class="clearText u-pointer"
 			ng-click="clearTextSearch($event); $event.stopPropagation()"

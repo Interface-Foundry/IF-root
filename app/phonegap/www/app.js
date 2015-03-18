@@ -5772,6 +5772,40 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
+app.directive('singleClick', ['$timeout', '$parse', function($timeout, $parse) {
+	// directive that replaces ngClick when you need to use ngClick and ngDblclick on the same element. This will make the element wait for some delay before carrying out the click callback, so use sparingly.
+
+	return {
+		restrict: 'EA',
+		link: link,
+		scope: {
+			callback: '=',
+			vars: '='
+		}
+	};
+
+	function link(scope, elem, attrs) {
+		var delay = 300;
+		var clicks = 0;
+		var timer;
+
+		elem.on('click', function(event) {
+			clicks++;
+			if (clicks === 1) {
+				timer = $timeout(function() {
+					scope.$apply(function() {
+						scope.callback.apply(scope.callback, scope.vars); // apply lets you call the callback function, where the parameters are the elements of the vars array
+					});
+					clicks = 0;
+				}, delay);
+			} else { // double-click, don't execute callback above
+				$timeout.cancel(timer);
+				clicks = 0;
+			}
+		});
+	}
+
+}]);
 app.directive('stickers', function(apertureService) { //NOT USED
 	return {
 		restrict: 'A',
@@ -22591,9 +22625,6 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		function checkCategories(elem) {
 			if (scope.style.widgets.category === true) {
-				// default to hide landmarks
-				floorSelectorService.showLandmarks = false;
-
 				scope.category = true;
 				// adjust bottom property of all floor selector elements
 				angular.forEach(elem.children(), function(el) {
@@ -23096,13 +23127,16 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				}
 				scope.$emit('viewTabSwitch', tab);
 			}
+
+			scope.hardSearch = function() {
+				$location.path('/');
+				scope.$emit('viewTabSwitch', 'search');
+			};
 			
-			scope.$on('$locationChangeSuccess', function(event) {
-				scope.$emit('viewTabSwitch', 'home');
-				if ($location.path().indexOf('search') > -1) {
-					scope.$emit('viewTabSwitch', 'search');
-				}
-			});
+			// commented below out because it was complicating things. not sure why it's here (the specific functions should emit the viewTabSwitch)
+			// scope.$on('$locationChangeSuccess', function(event, newValue, oldValue) {
+			// 	scope.$emit('viewTabSwitch', 'home');
+			// });
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {
 				scope.selected=tab;
@@ -23134,7 +23168,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 '<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
 '<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
 '<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
-'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
 app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
@@ -23818,6 +23852,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.go = go;
 	$scope.groups;
+	$scope.loading = false; // for loading animation on searchbar
 	$scope.world;
 	$scope.style;
 	$scope.searchBarText;
@@ -23853,6 +23888,26 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
 	});
+
+	$scope.apertureSet = function(newState) {
+		adjustMapCenter();
+		apertureService.set(newState);
+	}
+
+	$scope.apertureToggle = function(newState) {
+		adjustMapCenter();
+		apertureService.toggle(newState);
+	}
+
+	function adjustMapCenter() {
+		if ($scope.aperture.state === 'aperture-third') {
+			return;
+		}
+		mapManager._z = mapManager.center.zoom;
+		mapManager._actualCenter.length = 0;
+		mapManager._actualCenter.push(mapManager.center.lng);
+		mapManager._actualCenter.push(mapManager.center.lat);		
+	}
 
 	function go(path) {
 		$location.path(path);
@@ -23944,9 +23999,20 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		};
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
+			
+			$scope.loading = 'delay';
+
+			$timeout(function() {
+				if ($scope.loading === 'delay') {
+					$scope.loading = true;
+				}
+			}, 300);
+
 			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
 					$scope.groups = groupResults(bubbleSearchService.data, searchType);
+					$scope.loading = false;
+
 					updateMap(bubbleSearchService.data);
 					if (bubbleSearchService.data.length === 0) { // no results
 						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
@@ -24115,12 +24181,12 @@ $scope.$on('$locationChangeSuccess', function (event) {
 }
 'use strict';
 
-app.directive('categoryWidgetSr', categoryWidgetSr);
+app.directive('categoryWidget', categoryWidget);
 
-categoryWidgetSr.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
+categoryWidget.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
 												  	'floorSelectorService', 'categoryWidgetService'];
 
-function categoryWidgetSr(bubbleSearchService, $location, mapManager, $route,
+function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 													floorSelectorService, categoryWidgetService) {
 	return {
 		restrict: 'E',
@@ -24933,7 +24999,8 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			text: '=',
 			color: '=',
 			world: '=',
-			populateSearchView: '='
+			populateSearchView: '=',
+			loading: '='
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
@@ -24991,7 +25058,7 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 			}
 
 			scope.search = function(keyEvent) {
-				if (keyEvent.which === 13) { // pressed enter
+				if (keyEvent.which === 13 && scope.text) { // pressed enter and input isn't empty
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('third');
 					}
@@ -25495,61 +25562,61 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //	"__v": 0}....]
 
 }])
-app.directive('categoryWidget', [function() {
-return {
-	restrict: 'E',
-	link: function(scope, element, attrs) {
-		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
-			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
-		}) //rerenders on category selection
-		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
+// app.directive('categoryWidget', [function() {
+// return {
+// 	restrict: 'E',
+// 	link: function(scope, element, attrs) {
+// 		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
+// 			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
+// 		}) //rerenders on category selection
+// 		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
 		
-		function categoryWidget(landmarkCategories) {
-			return m('.category-widget', 
-				groupCategories(landmarkCategories))
-		} //groupCategories handles mapping
+// 		function categoryWidget(landmarkCategories) {
+// 			return m('.category-widget', 
+// 				groupCategories(landmarkCategories))
+// 		} //groupCategories handles mapping
 		
-		function groupCategories(landmarkCategories) {
-			 //separates landmark categories into button groups in place of mapping
-			if (landmarkCategories.length < 4) {
-				return buttonGroup(landmarkCategories); //3x1 grid
-			} else if (landmarkCategories.length === 4) { //2x2 grid
-				return [
-					buttonGroup(landmarkCategories.slice(0, 2)),
-					buttonGroup(landmarkCategories.slice(2))
-				]
-			} else { 
-				return [ //3x2, 3x3 grid
-					buttonGroup(landmarkCategories.slice(0, 3)),
-					buttonGroup(landmarkCategories.slice(3))
-				]
-			}
-		}
+// 		function groupCategories(landmarkCategories) {
+// 			 //separates landmark categories into button groups in place of mapping
+// 			if (landmarkCategories.length < 4) {
+// 				return buttonGroup(landmarkCategories); //3x1 grid
+// 			} else if (landmarkCategories.length === 4) { //2x2 grid
+// 				return [
+// 					buttonGroup(landmarkCategories.slice(0, 2)),
+// 					buttonGroup(landmarkCategories.slice(2))
+// 				]
+// 			} else { 
+// 				return [ //3x2, 3x3 grid
+// 					buttonGroup(landmarkCategories.slice(0, 3)),
+// 					buttonGroup(landmarkCategories.slice(3))
+// 				]
+// 			}
+// 		}
 		
-		function buttonGroup(categoryList) { //from a category list, create each button.
-			return m('.category-btn-group', categoryList.map(categoryButton));
-		}
+// 		function buttonGroup(categoryList) { //from a category list, create each button.
+// 			return m('.category-btn-group', categoryList.map(categoryButton));
+// 		}
 		
-		function categoryButton(category, index, categoryList) { //create category button, needs list length
-			return m('.category-btn', {
-				style: {width: 100 / categoryList.length + '%'}, 
-				colspan: 6/categoryList.length, //table display attribute
-				onclick: emitCategory(category.name), //emits selection on scope
-				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
-			}, [
-			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
-			category.name]);
-		}
+// 		function categoryButton(category, index, categoryList) { //create category button, needs list length
+// 			return m('.category-btn', {
+// 				style: {width: 100 / categoryList.length + '%'}, 
+// 				colspan: 6/categoryList.length, //table display attribute
+// 				onclick: emitCategory(category.name), //emits selection on scope
+// 				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
+// 			}, [
+// 			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
+// 			category.name]);
+// 		}
 		
-		function emitCategory(landmarkCategoryName) {
-			return function (event) {
-				event.stopPropagation();
-				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
-			}
-		}
-	}
-}
-}])
+// 		function emitCategory(landmarkCategoryName) {
+// 			return function (event) {
+// 				event.stopPropagation();
+// 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
+// 			}
+// 		}
+// 	}
+// }
+// }])
 app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
