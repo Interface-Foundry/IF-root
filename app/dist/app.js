@@ -22489,9 +22489,6 @@ function floorSelector(mapManager, floorSelectorService) {
 
 		function checkCategories(elem) {
 			if (scope.style.widgets.category === true) {
-				// default to hide landmarks
-				floorSelectorService.showLandmarks = false;
-
 				scope.category = true;
 				// adjust bottom property of all floor selector elements
 				angular.forEach(elem.children(), function(el) {
