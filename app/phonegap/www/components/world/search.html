@@ -1,3 +1,4 @@
+<div class="aperture-pop u-pointer" ng-click="apertureSet('full')" ng-show="aperture.state=='aperture-third'"></div>
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
@@ -28,12 +29,12 @@
 					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
 				Categories
 				</header>
-				<category-widget-sr ng-if="::style.widgets.category"
+				<category-widget ng-if="::style.widgets.category"
 					aperture="off"
 					categories="world.landmarkCategories"
 					style="style"
 					populate-search-view="populateSearchView"
-					world="world"></category-widget-sr>
+					world="world"></category-widget>
 			</div>
 
 			<!-- grouped landmarks (category or text search) -->
@@ -79,14 +80,14 @@
 	</div>
 </div>
 
-<category-widget-sr ng-if="::style.widgets.category"
+<category-widget ng-if="::style.widgets.category"
 	ng-show="aperture.state === 'aperture-full'"
 	class="category-map-view-scroll"
 	aperture="full"
 	categories="world.landmarkCategories"
 	style="style"
 	populate-search-view="populateSearchView"
-	world="world"></category-widget-sr>
+	world="world"></category-widget>
 
 <div ng-if="world.style.maps.localMapArray.length">
 	<floor-selector class="if-animate" ng-class="[aperture.state]"
