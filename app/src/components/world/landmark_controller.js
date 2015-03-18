@@ -170,13 +170,15 @@ function goToMark() {
 			popupAnchorValues = [0, -40],
 			shadowUrl = '',
 			iconAnchor = [17.5, 60],
-			iconSize = [35, 67];
+			iconSize = [35, 67],
+			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = $scope.landmark.avatar;
 		popupAnchorValues = [0, -14];
 		iconAnchor = [25, 25];
-		iconSize = [50, 50]
+		iconSize = [50, 50];
+		alt = 'store';
 	}
 
 	map.addMarker($scope.landmark._id, {
@@ -191,7 +193,8 @@ function goToMark() {
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-			_id: $scope.landmark._id
+			_id: $scope.landmark._id,
+			alt: alt
 			});
 	map.setMarkerFocus($scope.landmark._id);
 	

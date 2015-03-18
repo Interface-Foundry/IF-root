@@ -480,6 +480,10 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	var lowestFloor = lowestLandmarkFloor(tempMarkers);
+
+	createMarkerLayer(tempMarkers, lowestFloor);
+
 	var mapLayer = worldBuilderService.createMapLayer($scope.world);
 	mapManager.toggleOverlay(mapLayer);
 }
@@ -497,6 +501,18 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 	}
 }
 
+function lowestLandmarkFloor(tempMarkers) {
+	var sorted = _.chain(tempMarkers)
+		.filter(function(m) {
+			return m.loc_info;
+		})
+		.sortBy(function(m) {
+			return m.loc_info.floor_num;
+		})
+		.value();
+	return sorted.length ? sorted[0].loc_info.floor_num : 1;
+}
+
 function markerFromLandmark(landmark) {
 
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
@@ -505,14 +521,16 @@ function markerFromLandmark(landmark) {
 			shadowAnchor = [4, -3],
 			iconAnchor = [17, 67],
 			iconSize = [35, 67],
-			layerGroup = getLayerGroup(landmark) + '-landmarks';
+			layerGroup = getLayerGroup(landmark) + '-landmarks',
+			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
 		landmarkIcon = landmark.avatar;
 		popupAnchorValues = [0, -14];
 		// shadowUrl = 'img/marker/blue-pointer.png';
 		iconAnchor = [25, 25];
-		iconSize = [50, 50]
+		iconSize = [50, 50];
+		alt = 'store';
 	}
 
 	return {
@@ -529,7 +547,8 @@ function markerFromLandmark(landmark) {
 			popupAnchor: popupAnchorValues
 		},
 		_id: landmark._id,
-		layer: layerGroup
+		layer: layerGroup,
+		alt: alt
 	}
 }
 
