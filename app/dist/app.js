@@ -5752,6 +5752,40 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
+app.directive('singleClick', ['$timeout', '$parse', function($timeout, $parse) {
+	// directive that replaces ngClick when you need to use ngClick and ngDblclick on the same element. This will make the element wait for some delay before carrying out the click callback, so use sparingly.
+
+	return {
+		restrict: 'EA',
+		link: link,
+		scope: {
+			callback: '=',
+			vars: '='
+		}
+	};
+
+	function link(scope, elem, attrs) {
+		var delay = 300;
+		var clicks = 0;
+		var timer;
+
+		elem.on('click', function(event) {
+			clicks++;
+			if (clicks === 1) {
+				timer = $timeout(function() {
+					scope.$apply(function() {
+						scope.callback.apply(scope.callback, scope.vars); // apply lets you call the callback function, where the parameters are the elements of the vars array
+					});
+					clicks = 0;
+				}, delay);
+			} else { // double-click, don't execute callback above
+				$timeout.cancel(timer);
+				clicks = 0;
+			}
+		});
+	}
+
+}]);
 app.directive('stickers', function(apertureService) { //NOT USED
 	return {
 		restrict: 'A',
@@ -22966,13 +23000,16 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				}
 				scope.$emit('viewTabSwitch', tab);
 			}
+
+			scope.hardSearch = function() {
+				$location.path('/');
+				scope.$emit('viewTabSwitch', 'search');
+			};
 			
-			scope.$on('$locationChangeSuccess', function(event) {
-				scope.$emit('viewTabSwitch', 'home');
-				if ($location.path().indexOf('search') > -1) {
-					scope.$emit('viewTabSwitch', 'search');
-				}
-			});
+			// commented below out because it was complicating things. not sure why it's here (the specific functions should emit the viewTabSwitch)
+			// scope.$on('$locationChangeSuccess', function(event, newValue, oldValue) {
+			// 	scope.$emit('viewTabSwitch', 'home');
+			// });
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {
 				scope.selected=tab;
@@ -23004,7 +23041,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 '<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
 '<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
 '<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
-'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
 app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {

@@ -23,13 +23,16 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				}
 				scope.$emit('viewTabSwitch', tab);
 			}
+
+			scope.hardSearch = function() {
+				$location.path('/');
+				scope.$emit('viewTabSwitch', 'search');
+			};
 			
-			scope.$on('$locationChangeSuccess', function(event) {
-				scope.$emit('viewTabSwitch', 'home');
-				if ($location.path().indexOf('search') > -1) {
-					scope.$emit('viewTabSwitch', 'search');
-				}
-			});
+			// commented below out because it was complicating things. not sure why it's here (the specific functions should emit the viewTabSwitch)
+			// scope.$on('$locationChangeSuccess', function(event, newValue, oldValue) {
+			// 	scope.$emit('viewTabSwitch', 'home');
+			// });
 			
 			$rootScope.$on('viewTabSwitch', function(event, tab) {
 				scope.selected=tab;
@@ -61,6 +64,6 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 '<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
 '<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
 '<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
-'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
