@@ -24175,14 +24175,13 @@ console.log('--Landmark Controller--');
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-//$scope.aperture = apertureService;
+$scope.aperture = apertureService;
 var aperture = apertureService;
 
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
 	
 $scope.collectedPresents = [];
-
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
