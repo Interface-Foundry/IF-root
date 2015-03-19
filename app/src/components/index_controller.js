@@ -1,10 +1,11 @@
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
 $scope.style = styleManager;
 $scope.alerts = alertManager;
 $scope.userManager = userManager;
+$scope.navService = navService;
 
 $scope.dialog = dialogs;
     
@@ -18,10 +19,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-
-$scope.$on('viewTabSwitch', function(event, tab) {
-	$scope.viewTab = tab;
-})  //for home/explore/search tabs
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -50,12 +47,13 @@ $scope.wtgtLogin = function() {
 } 
 	
 $scope.go = function(path) {
+	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
+	navService.reset();
 	$window.history.back();
-	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {

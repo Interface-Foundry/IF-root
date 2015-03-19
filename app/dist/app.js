@@ -22827,13 +22827,14 @@ worldTree.getNearby().then(function(data) {
 });
 
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
 $scope.style = styleManager;
 $scope.alerts = alertManager;
 $scope.userManager = userManager;
+$scope.navService = navService;
 
 $scope.dialog = dialogs;
     
@@ -22847,10 +22848,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-
-$scope.$on('viewTabSwitch', function(event, tab) {
-	$scope.viewTab = tab;
-})  //for home/explore/search tabs
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -22879,12 +22876,13 @@ $scope.wtgtLogin = function() {
 } 
 	
 $scope.go = function(path) {
+	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
+	navService.reset();
 	$window.history.back();
-	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {
@@ -22960,30 +22958,56 @@ app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(w
 			scope.loadState = 'loading';
 			scope.kinds = ifGlobals.kinds;
 
-			
-			$rootScope.$on('viewTabSwitch', function(event, tab) {
-				if (tab === 'explore') {
-					scope.loadState = 'loading';
-					worldTree.getNearby().then(function(data) {
-						scope.homeBubbles = data['150m'] || [];
-						scope.nearbyBubbles = data['2.5km'] || [];			
-						scope.loadState = 'success';
-					}, function(reason) {
-						scope.loadState = 'failure'; 
-					});
-				}
+			// ng-if in index.html will recompile link function everytime the explore-view DOM element is loaded
+			worldTree.getNearby().then(function(data) {
+				scope.homeBubbles = data['150m'] || [];
+				scope.nearbyBubbles = data['2.5km'] || [];			
+				scope.loadState = 'success';
+			}, function(reason) {
+				scope.loadState = 'failure'; 
 			});
 	
 		},
 		templateUrl: 'components/nav/exploreView.html' 
 	}
 }])
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService) {
+app.factory('navService', [function() {
+	// used for displaying correct selection on nav icons, as well as showing and hiding explore-view and search-view directives in index.html
+
+	var status = {
+		home: true, // default home nav selected
+		explore: false,
+		search: false, // main bubblli search
+		searchWithinBubble: false // search within a bubble (all, text, category)
+	};
+
+	return {
+		status: status,
+		reset: reset,
+		show: show
+	};
+
+	function reset() {
+		// set all values in status to false, except home
+		_.each(status, function(value, key) {
+			status[key] = false;
+		});
+		status.home = true;
+	}
+
+	function show(key) {
+		// sets one navShow to true, sets others to false
+		reset();
+		status.home = false;
+		status[key] = true;
+	}
+
+}]);
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
-			scope.selected = 'home';
 			scope.select = function (tab) {
 				if (tab === 'home') {
 					if ($routeParams.worldURL) {
@@ -22997,40 +23021,18 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				else if (tab === 'search') {
 					// if in bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
 					if ($routeParams.worldURL) {
+						tab = 'searchWithinBubble';
 						apertureService.set('third');
 						$location.path('/w/' + $routeParams.worldURL + '/search');
 					}
 				}
-				scope.$emit('viewTabSwitch', tab);
+				navService.show(tab);
 			}
 
 			scope.hardSearch = function() {
 				$location.path('/');
-				scope.$emit('viewTabSwitch', 'search');
+				navService.show('search');
 			};
-			
-			// commented below out because it was complicating things. not sure why it's here (the specific functions should emit the viewTabSwitch)
-			// scope.$on('$locationChangeSuccess', function(event, newValue, oldValue) {
-			// 	scope.$emit('viewTabSwitch', 'home');
-			// });
-			
-			$rootScope.$on('viewTabSwitch', function(event, tab) {
-				scope.selected=tab;
-			});
-			
-/*
-			$document.on('keydown', function(e) {
-				console.log('keydown', e, scope.selected)
-			if (e.keyCode===8 && scope.selected !== 'home') {
-				console.log('keycode 8 & selected not home')
-				e.stopPropagation();
-				e.preventDefault();
-				scope.$apply(function() {
-					scope.$emit('viewTabSwitch', 'home');
-				});
-			}
-			});
-*/
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {
@@ -23041,10 +23043,10 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 			}
 		},
 		template: 
-'<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
-'<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
+'<button class="view-tab home-tab" ng-class="{selected: navService.status.home}" ng-click="select(\'home\')"></button>'+
+'<button class="view-tab explore-tab" ng-class="{selected: navService.status.explore}" ng-click="select(\'explore\')">'+
 '<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
-'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
+'<button class="view-tab search-tab" ng-class="{selected: navService.status.search || navService.status.searchWithinBubble}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
 app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
@@ -23718,7 +23720,7 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -23737,6 +23739,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
 	}
+
+	navService.show('searchWithinBubble');
 
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -24177,14 +24181,13 @@ console.log('--Landmark Controller--');
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-//$scope.aperture = apertureService;
+$scope.aperture = apertureService;
 var aperture = apertureService;
 
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
 	
 $scope.collectedPresents = [];
-
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
@@ -25498,7 +25501,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -25511,6 +25514,7 @@ $scope.worldURL = $routeParams.worldURL;
 $scope.aperture = apertureService;	
 $scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
+navService.show('home');
 
 $scope.world = {};
 $scope.landmarks = [];
