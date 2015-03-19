@@ -5,7 +5,7 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 // stores any sort of analytics that we might want to use for training algorithms
 var analyticsSchema = mongoose.Schema({
 
-    anonUserId: String, // required
+    analyticsUserId: String, // required
     userId: String, // optional, can remove if the user opts out of tracking?
     hashedSessionId: String, // for stringing session data together.
                              // we can't store the actual session id,
