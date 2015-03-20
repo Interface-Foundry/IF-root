@@ -4470,10 +4470,10 @@ li.alert {
   width: 42px;
   display: block;
   position: relative;
-  background: -webkit-linear-gradient(left, #ffffff 0%, rgba(0, 0, 0, 0.1), #ffffff 100%);
-  background: -moz-linear-gradient(left, #ffffff 0%, rgba(0, 0, 0, 0.1), #ffffff 100%);
-  background: -o-linear-gradient(left, #ffffff 0%, rgba(0, 0, 0, 0.1), #ffffff 100%);
-  background: linear-gradient(left, #ffffff 0%, rgba(0, 0, 0, 0.1), #ffffff 100%);
+  background: -webkit-linear-gradient(left, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
+  background: -moz-linear-gradient(right, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
+  background: -o-linear-gradient(right, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
+  background: linear-gradient(to right, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
 }
 .aperture-off #current-floor {
   -webkit-transform: translate3D(200%, 0px, 0);
