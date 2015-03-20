@@ -5714,6 +5714,36 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 		}
 	}
 });
+'use strict';
+
+app.directive('markerPopupClick', markerPopupClick);
+
+markerPopupClick.$inject = ['$location'];
+
+function markerPopupClick($location) {
+	return {
+		scope: true,
+		restrict: 'A',
+		template: "<p ng-click='clickMe()'>hello</p>",
+		link: function(scope, elem, attr) {
+
+			scope.link = attr.link;
+
+			scope.clickMe = function() {
+				console.log('i clicked me', this.link)
+				$location.path(this.link);
+			}
+
+			// elem.bind('click', function(a, b, c) {
+			// 	console.log('clicked, redirecting to')
+			// })
+			// console.log('LINK', attr.link)
+		}
+	};
+
+
+}
+
 app.directive('progressCircle', function() {
 	return {
 		restrict: 'EA',
@@ -17395,8 +17425,8 @@ app.factory('localStore', ['$http', function($http) {
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService', 'leafletEvents',
+		function(leafletData, $rootScope, bubbleTypeService, leafletEvents) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -17587,11 +17617,13 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		alt = 'store';
 	}
 
+	var link = '/w/'+world.id+'/'+landmark.id;
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
-		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		message: '<div marker-popup-click link="' + link + '"></div>',
 		icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
@@ -17600,7 +17632,10 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		},
 		_id: landmark._id,
 		layer: layerGroup,
-		alt: alt
+		alt: alt,
+		// popupOptions: {
+		// 	className: 'marker-popup-click'
+		// }
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -23865,6 +23900,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.style;
 	$scope.searchBarText;
 	$scope.show;
+
+	$scope.clickMe = function() {
+		console.log('click!!!!!!!!!!!!!!!!')
+	}
 	
 	var map = mapManager;
 

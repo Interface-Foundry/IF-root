@@ -11,6 +11,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.style;
 	$scope.searchBarText;
 	$scope.show;
+
+	$scope.clickMe = function() {
+		console.log('click!!!!!!!!!!!!!!!!')
+	}
 	
 	var map = mapManager;
 

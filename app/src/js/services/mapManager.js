@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService', 'leafletEvents',
+		function(leafletData, $rootScope, bubbleTypeService, leafletEvents) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -193,11 +193,13 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		alt = 'store';
 	}
 
+	var link = '/w/'+world.id+'/'+landmark.id;
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
-		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		message: '<div marker-popup-click link="' + link + '"></div>',
 		icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
@@ -206,7 +208,10 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		},
 		_id: landmark._id,
 		layer: layerGroup,
-		alt: alt
+		alt: alt,
+		// popupOptions: {
+		// 	className: 'marker-popup-click'
+		// }
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
