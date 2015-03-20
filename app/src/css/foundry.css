@@ -2390,3 +2390,11 @@ li.alert {
   font-size: .9em;
   word-wrap: break-word;
 }
+div.marker-popup-click {
+  height: 42px;
+  width: 100%;
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  cursor: pointer;
+}

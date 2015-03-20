@@ -5702,7 +5702,7 @@ markerPopupClick.$inject = ['$location'];
 
 function markerPopupClick($location) {
 	return {
-		scope: true,
+		scope: {},
 		restrict: 'A',
 		template: "<p ng-click='clickMe()'>hello</p>",
 		link: function(scope, elem, attr) {
@@ -17405,8 +17405,8 @@ app.factory('localStore', ['$http', function($http) {
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService', 'leafletEvents',
-		function(leafletData, $rootScope, bubbleTypeService, leafletEvents) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
+		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -17597,13 +17597,11 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		alt = 'store';
 	}
 
-	var link = '/w/'+world.id+'/'+landmark.id;
-
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
-		message: '<div marker-popup-click link="' + link + '"></div>',
+		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
 		icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
@@ -17612,10 +17610,7 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		},
 		_id: landmark._id,
 		layer: layerGroup,
-		alt: alt,
-		// popupOptions: {
-		// 	className: 'marker-popup-click'
-		// }
+		alt: alt
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -23769,10 +23764,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.searchBarText;
 	$scope.show;
 
-	$scope.clickMe = function() {
-		console.log('click!!!!!!!!!!!!!!!!')
-	}
-	
 	var map = mapManager;
 
 	if ($scope.aperture.state !== 'aperture-full') {

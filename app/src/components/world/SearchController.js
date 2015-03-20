@@ -12,10 +12,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.searchBarText;
 	$scope.show;
 
-	$scope.clickMe = function() {
-		console.log('click!!!!!!!!!!!!!!!!')
-	}
-	
 	var map = mapManager;
 
 	if ($scope.aperture.state !== 'aperture-full') {

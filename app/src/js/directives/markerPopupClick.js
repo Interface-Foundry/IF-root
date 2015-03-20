@@ -6,7 +6,7 @@ markerPopupClick.$inject = ['$location'];
 
 function markerPopupClick($location) {
 	return {
-		scope: true,
+		scope: {},
 		restrict: 'A',
 		template: "<p ng-click='clickMe()'>hello</p>",
 		link: function(scope, elem, attr) {
