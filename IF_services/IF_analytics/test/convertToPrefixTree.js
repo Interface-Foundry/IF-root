@@ -7,6 +7,7 @@ var sequenceSchema = mongoose.Schema({
 });
 var Sequence = mongoose.model('sequence', sequenceSchema);
 
+var GeoTrie = require('./geo_trie_schema');
 
 // test database
 mongoose.connect('mongodb://localhost:37017', function(err) {
@@ -21,17 +22,17 @@ Sequence.find().select('geohashSequence').exec(function(err, data) {
     if (err) {
         return console.error(err);
     }
-    
+
+    var i = 0;
+
+    // add all the sequences to the prefix tree (trie)
     data.map(function(sequence) {
-        var LP = LongestPrefixSearch(Root(PT), sequence);
-        // Append T to LP TODO
-        LP.map(function(v) {
-            v.support = v.support + support(sequence);
+        GeoTrie.add(sequence.geohashSequence, function(err) {
+            if (err) {
+                return console.error(err);
+            }
+
+            console.log(i++);
         });
-
-        sequence.map(v) { // T\LP?? TODO only nodes not in LP??
-            v.support = support(sequence);
-        }
-
     });
 });
