@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var analytics = require('../../../components/IF_schemas/analytics_schema');
 
+
 var sequenceSchema = mongoose.Schema({
     analyticsUserId: String,
     lonLatSequence: [],
@@ -80,10 +81,9 @@ analytics
 });
 
 
-
+var geohash = require('ngeohash');
 function lonLatToGeohash(lonlat) {
-    // TODO
-    return 'HASH!';
+    return geohash.encode(lonlat[1], lonlat[0]); //default precision is 9 chars... perfect!
 }
 
 function lonLatToBubble(lonlat) {
