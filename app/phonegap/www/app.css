@@ -317,9 +317,11 @@ ul.edit-toolbar {
 }
 
 img[alt="store"] {
+	background-color: white;
 	border-radius: 50%;
 	box-shadow: 1px 1px 4px;
 }
+
 
 /*MAP STUFF*/
 .u-marginTop20 {
