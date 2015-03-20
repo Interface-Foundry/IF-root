@@ -20763,13 +20763,7 @@ $scope.setUploadFinished = function(bool, type) {
 };
 
 $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
-	if (floor_num === 0 || floor_num === '0') {
-		alerts.addAlert('info', "The floor number can't be 0", true);
-	} else if (floor_num == '') {
-		alerts.addAlert('info', "Please enter a floor number", true);
-	} else if (isNaN(floor_num)) {
-		alerts.addAlert('info', "The floor number must be a number", true);
-	} else {
+	if (validateFloorNum(floor_num)) {
 		//local map image upload, then places image on map
 		var file = $files[0];
 		$scope.upload = $upload.upload({
@@ -20803,6 +20797,23 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 			});
 		scrollToBottom(300);
 	}
+}
+
+function validateFloorNum(floor_num) {
+	if (floor_num === 0 || floor_num === '0') {
+		alerts.addAlert('info', "The floor number can't be 0", true);
+		return false;
+	} else if (floor_num == '') {
+		alerts.addAlert('info', "Please enter a floor number", true);
+		return false;
+	} else if (isNaN(floor_num)) {
+		alerts.addAlert('info', "The floor number must be a number", true);
+		return false;
+	} else if ((String(floor_num).split('.')[1] || []).length > 1) { // get number of decimal places
+		alerts.addAlert('info', "Too many decimal places", true);
+		return false;
+	}
+	return true;
 }
 
 $scope.selectMapTheme = function(key) {
