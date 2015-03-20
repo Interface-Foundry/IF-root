@@ -20793,13 +20793,7 @@ $scope.setUploadFinished = function(bool, type) {
 };
 
 $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
-	if (floor_num === 0 || floor_num === '0') {
-		alerts.addAlert('info', "The floor number can't be 0", true);
-	} 
-	else if (floor_num == '') {
-		alerts.addAlert('info', "Please enter a floor number", true);
-	}
-	else {
+	if (validateFloorNum(floor_num)) {
 		//local map image upload, then places image on map
 		var file = $files[0];
 		$scope.upload = $upload.upload({
@@ -20818,7 +20812,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 				worldID: $scope.world._id,
 				map_marker_viewID: markerID,
 				temp_upload_path: data,
-				floor_num: floor_num,
+				floor_num: parseFloat(floor_num),
 				floor_name: floor_name
 			};
 			$http.post('/api/temp_map_upload', newData).
@@ -20833,6 +20827,23 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 			});
 		scrollToBottom(300);
 	}
+}
+
+function validateFloorNum(floor_num) {
+	if (floor_num === 0 || floor_num === '0') {
+		alerts.addAlert('info', "The floor number can't be 0", true);
+		return false;
+	} else if (floor_num == '') {
+		alerts.addAlert('info', "Please enter a floor number", true);
+		return false;
+	} else if (isNaN(floor_num)) {
+		alerts.addAlert('info', "The floor number must be a number", true);
+		return false;
+	} else if ((String(floor_num).split('.')[1] || []).length > 1) { // get number of decimal places
+		alerts.addAlert('info', "Too many decimal places", true);
+		return false;
+	}
+	return true;
 }
 
 $scope.selectMapTheme = function(key) {
@@ -23033,7 +23044,7 @@ app.factory('navService', [function() {
 	}
 
 }]);
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -23049,8 +23060,8 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 					}
 				}
 				else if (tab === 'search') {
-					// if in bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
-					if ($routeParams.worldURL) {
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
 						tab = 'searchWithinBubble';
 						apertureService.set('third');
 						$location.path('/w/' + $routeParams.worldURL + '/search');
