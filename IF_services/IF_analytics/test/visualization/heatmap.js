@@ -5,6 +5,11 @@ L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18
 }).addTo(map);
 
-// using window.latlngs
+// using window.trajectories
 
-var heat = L.heatLayer(latlngs, { radius: 25}).addTo(map);
+var points = trajectories.reduce(function(p, c) {
+    return p.concat(c);
+}, []);
+
+
+var heat = L.heatLayer(points, { radius: 5}).addTo(map);

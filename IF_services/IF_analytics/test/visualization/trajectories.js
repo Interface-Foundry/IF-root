@@ -5,6 +5,18 @@ L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18
 }).addTo(map);
 
-// using window.latlngs
+// using window.trajectories  from trajectoryData.js
 
-var heat = L.heatLayer(latlngs, { radius: 25}).addTo(map);
+trajectories.map(function(t) {
+    L.polyline(t, {color: getRandomColor(), weight: 1}).addTo(map);
+});
+
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
