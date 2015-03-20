@@ -1231,7 +1231,7 @@ span.subnav-back-chevron {
   margin-bottom: 16px;
 }
 .bubble-group-label {
-  color: #ffffff;
+  color: #888;
   font-weight: 500;
 }
 @media only screen and (min-width: 480px) {
@@ -1244,6 +1244,9 @@ span.subnav-back-chevron {
   .bubble-group-label {
     width: 600px;
   }
+}
+.search--retail .bubble-group-label {
+  color: #ffffff;
 }
 .bubble-group-directory {
   margin-top: 100px;
