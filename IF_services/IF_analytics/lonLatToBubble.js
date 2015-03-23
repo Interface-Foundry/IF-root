@@ -27,7 +27,6 @@ var lonLatToBubble = module.exports = function(lonlat, cb) {
             }
         })
         .exec(function(err, landmarks) {
-            debugger;
             if (err) {
                 cb(err);
             } else if (landmarks.length === 0) {
