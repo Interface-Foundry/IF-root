@@ -78,6 +78,7 @@ var mongoose = require('mongoose'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
+    announcementsSchema = require('./components/IF_schemas/announcements_schema.js'),
     monguurl = require('monguurl');
 
 mongoose.connect(configDB.url);
