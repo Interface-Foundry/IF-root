@@ -19,7 +19,7 @@ var lonLatToBubble = module.exports = function(lonlat, cb) {
                     "coordinates": lonlat
                 },
                 "distanceField": "distance",
-                "maxDistance": 1000, //meters
+                "maxDistance": 10, //meters
                 "spherical": true,
                 "query": {
                     "world": true // bubbles only
