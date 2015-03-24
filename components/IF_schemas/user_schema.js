@@ -76,6 +76,7 @@ var userSchema = mongoose.Schema({
     // }],
     // email: [Schema.Types.Mixed],
     email: String,
+    emailConfirmed: Boolean,
     // tel: [{
     
     //     label: String,
@@ -90,9 +91,12 @@ var userSchema = mongoose.Schema({
     profileID: { type: String, index: true}, 
     permissions: [{
         
+    }],
+    admin: Boolean,
+    bubbleRole: [{  
+        worldId: {type: String},
+        role: {type: String, default: 'user'}
     }]
-
-
 });
 
 // generating a hash
