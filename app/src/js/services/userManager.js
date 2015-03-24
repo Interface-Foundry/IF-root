@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest) {
 var alerts = alertManager;
    
    
@@ -186,6 +186,7 @@ userManager.login.login = function() { //login based on login form
 		//@IFDEF KEYCHAIN
 		dialogs.showDialog('keychainDialog.html');
 		//@ENDIF
+		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);

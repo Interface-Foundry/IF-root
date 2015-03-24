@@ -16921,7 +16921,8 @@ app
 			}
 }]);
 app.factory('contest', ['$http', 'localStore', function($http, localStore) {
-	
+	// manages want this got this contest
+
 	var isContest = false;
 	var hashtag;
 	var id;
@@ -16942,7 +16943,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 
 	function login(endTime) {
 		// call if user logs in after login prompt on photo upload (wtgt)
-		// tracking login by clicking "log in" or "create account" on auth dialog
+		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
@@ -18654,8 +18655,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest) {
 var alerts = alertManager;
    
    
@@ -18818,6 +18819,7 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 		dialogs.showDialog('keychainDialog.html');
+		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
