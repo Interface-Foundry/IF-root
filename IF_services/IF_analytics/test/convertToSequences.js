@@ -1,19 +1,11 @@
 var mongoose = require('mongoose');
 var analytics = require('../../../components/IF_schemas/analytics_schema');
 
-
-var sequenceSchema = mongoose.Schema({
-    analyticsUserId: String,
-    lonLatSequence: [],
-    geohashSequence: [String],
-    bubbleSequence: [String]
-});
-
-var Sequence = mongoose.model('sequence', sequenceSchema);
+var Sequence = require('./sequence_schema');
 
 
 // test database
-mongoose.connect('mongodb://localhost:37017', function(err) {
+mongoose.connect('mongodb://localhost:27017/if', function(err) {
     if (err) {
         console.error(err);
     }
@@ -87,6 +79,7 @@ function lonLatToGeohash(lonlat) {
 }
 
 function lonLatToBubble(lonlat) {
-    // TODO
+    // done in convertToBubbleSequence.js
+    // nothing to see here... well except that the unset value is "bubble_id"
     return 'bubble_id';
 }

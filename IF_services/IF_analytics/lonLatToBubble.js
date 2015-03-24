@@ -19,7 +19,7 @@ var lonLatToBubble = module.exports = function(lonlat, cb) {
                     "coordinates": lonlat
                 },
                 "distanceField": "distance",
-                "maxDistance": 10, //meters
+                "maxDistance": 1000, //meters
                 "spherical": true,
                 "query": {
                     "world": true // bubbles only
@@ -35,7 +35,7 @@ var lonLatToBubble = module.exports = function(lonlat, cb) {
                 // what to do if there are multiple landmarks returned? include the most specific oe only
                 // TODO
                 cb(null, landmarks[0]);
-            } else if (landmakrs.length == 1) {
+            } else if (landmarks.length == 1) {
                 cb(null, landmarks[0]);
             } else {
                 cb(new Error('Unexpected error getting bubble from lonlat'));
