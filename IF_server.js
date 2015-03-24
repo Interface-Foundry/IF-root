@@ -485,7 +485,7 @@ app.post('/api/analytics/:action', function(req, res) {
         return res;
     }
 
-    var key = hash(analytics._id).toString(); 
+    var key = hash(analytics._id).toString();
 
     redisClient.set(key, analytics, function(err, reply) {
         console.log(reply);
@@ -494,10 +494,10 @@ app.post('/api/analytics/:action', function(req, res) {
 
     // DONE!  then a separate node process dumps the redis cache to db
     // Create a caching service. This is really the hardest part, but the general flow looks something like this:
-// make request to cache service.
-// cache service checks redis for cached object based on query.
-// cache returns data from redis if it exists OR from mongo if it doesn't exist.
-// if data didn't already exist in redis or had expired, cache service writes data to redis.
+    // make request to cache service.
+    // cache service checks redis for cached object based on query.
+    // cache returns data from redis if it exists OR from mongo if it doesn't exist.
+    // if data didn't already exist in redis or had expired, cache service writes data to redis.
 
 });
 
