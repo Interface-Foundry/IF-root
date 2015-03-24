@@ -56,8 +56,6 @@ var sanitize = require('mongo-sanitize');
 // var multer  = require('multer');
 
 
-
-
 //--- BUBBLE ROUTING ----//
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
@@ -198,6 +196,15 @@ app.post('/feedback', function(req, res) {
         res.send(500, 'bad email parameters');
     }
 });
+
+
+//-------------------------------------//
+//---- Redis -----//
+//-------------------------------------//
+// var redis = require('redis');
+// var client = redis.createClient(); //creates a new client 
+
+var redisClient = require('./redis.js');
 
 
 //====================================//
@@ -468,57 +475,32 @@ app.get('/api/bubblesearch/:type', function(req, res) {
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
     var analytics = new analyticsSchema(req.body.doc);
-    analytics.save(function(err, data) {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        } else {
-            console.log('Analytics logged.')
-            res.status(200); 
-        }
-    });
-});
 
-//Assuming Analytics Objects are stored in HTML5 Local Storage in front end and being sent here in post body?
-//This might not even be necessary
-
-//Geolocation query event
-app.post('/api/analytics/geoloc', function(req, res) {
-  //Get cached current analytics object from front end
-    var currentAnalytics = req.body.analytics;
-    //If logged in
-    if (currentAnalytics.userId) {
-        if (req.user._id) {
-            var userId = req.user._id;
+    function hash(str) {
+        var res = 0,
+            len = str.length;
+        for (var i = 0; i < len; i++) {
+            res = res * 31 + str.charCodeAt(i);
         }
+        return res;
     }
 
-  //Find actual current analytics object in db??
- // analyticsSchema.findOne({
- //        analyticsUserId: currentAnalytics.analyticsUserId
- //    }, function(err, data) {
- //        if (data) {
- //            console.log(data);
- //            res.send(data);
- //        } else {
- //            console.log(err);
- //            res.send({
- //            });
- //        }
- //    })
+    var key = hash(analytics._id).toString(); 
 
-    //CREATE NEW ANALYTICS OBJECT WITH NEW DATA AND INCREMENTED SEQUENCE NUMBER
-     var analytics = new analyticsSchema(req.body.doc);
-     analytics.save(function(err, data) {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        } else {
-            res.status(200).send(data);
-        }
+    redisClient.set(key, analytics, function(err, reply) {
+        console.log(reply);
+        res.send('ok');
     });
 
+    // DONE!  then a separate node process dumps the redis cache to db
+    // Create a caching service. This is really the hardest part, but the general flow looks something like this:
+// make request to cache service.
+// cache service checks redis for cached object based on query.
+// cache returns data from redis if it exists OR from mongo if it doesn't exist.
+// if data didn't already exist in redis or had expired, cache service writes data to redis.
+
 });
+
 
 
 
