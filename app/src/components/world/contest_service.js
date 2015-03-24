@@ -10,8 +10,8 @@ function contestService($http) {
 		getPictures: getPictures
 	};
 
-	function getPictures(worldId, hashTag) {
-		return $http.get(/* '/api/worldId/contest/hashTag...?' */);
+	function getPictures(start, worldId, hashTag) {
+		return $http.get(/* '/api/worldId/contest/start/hashTag...?' */);
 	}
 
 }

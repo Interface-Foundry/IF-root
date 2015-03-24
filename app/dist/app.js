@@ -5694,6 +5694,37 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 		}
 	}
 });
+'use strict';
+
+app.directive('lazyLoad', lazyLoad);
+
+lazyLoad.$inject = [];
+
+function lazyLoad() {
+	return {
+		scope: {
+			loadMore: '&'
+		},
+		restrict: 'A',
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+		var visibleHeight = elem.height();
+		var threshold = 500;
+
+		elem.scroll(function() {
+			var scrollableHeight = elem.prop('scrollHeight');
+			var hiddenContentHeight = scrollableHeight - visibleHeight;
+
+			if (hiddenContentHeight - elem.scrollTop() < threshold) {
+				// scroll is almost at bottom. Load more data
+				scope.$apply(scope.loadMore);
+			}
+		});
+	}
+}
+
 app.directive('progressCircle', function() {
 	return {
 		restrict: 'EA',
@@ -24199,17 +24230,33 @@ ContestController.$inject = ['$routeParams', 'contestService'];
 function ContestController($routeParams, contestService) {
 	var vm = this;
 
+	vm.dummyData = dummyData;
 	vm.hashTag = $routeParams.hashTag;
+	vm.loadPictures = loadPictures;
 	vm.pictures = [];
 	vm.worldId = $routeParams.worldURL;
 
 	// activate();
-
+	dummyData()
 	function activate() {
-		contestService.getPictures(vm.worldId, vm.hashTag)
+		contestService.getPictures(0, vm.worldId, vm.hashTag)
 		.then(function(response) {
 			angular.copy(response.data, vm.pictures);
 		});
+	}
+
+	function loadPictures() {
+		contestService.getPictures(vm.pictures.length, vm.worldId, vm.hashTag)
+		.then(function(response) {
+			vm.pictures = vm.pictures.concat(response.data);
+		});
+	}
+
+	function dummyData() {
+		console.log("FILLING DUMMY DATA")
+		for (var i = 0; i < 20; i++) {
+			vm.pictures.push('data' + i);
+		}
 	}
 }
 'use strict';
@@ -24224,8 +24271,8 @@ function contestService($http) {
 		getPictures: getPictures
 	};
 
-	function getPictures(worldId, hashTag) {
-		return $http.get(/* '/api/worldId/contest/hashTag...?' */);
+	function getPictures(start, worldId, hashTag) {
+		return $http.get(/* '/api/worldId/contest/start/hashTag...?' */);
 	}
 
 }
@@ -25060,9 +25107,14 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
 		$scope.style = data.style;
+		$scope.loadInstagrams = loadInstagrams;
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
-		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+		loadInstagrams();
+
+		function loadInstagrams() {
+			$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+		}
 	})
 }])
 
