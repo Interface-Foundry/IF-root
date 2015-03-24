@@ -226,7 +226,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
 			})[0][0];
 
-			// angular.copy(sortedMarks[0], $scope.currentFloor);
 			floorSelectorService.setCurrentFloor($scope.currentFloor);
 			floor = floorSelectorService.currentFloor.floor_num;
 		}
@@ -235,7 +234,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	function updateLandmarks(landmarks) {
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world)
+			return mapManager.markerFromLandmark(l, $scope.world, $scope)
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :
@@ -247,7 +246,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
 
-		mapManager.setMarkers(markers);
+		mapManager.removeAllMarkers();
+
+		// defer waits until call stack is empty so we won't run into leaflet bug
+		// where adding a marker with the same key as an existing marker breaks the directive
+		_.defer(function() {
+			mapManager.setMarkers(markers);
+		});
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 

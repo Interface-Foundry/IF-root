@@ -177,7 +177,7 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-mapManager.markerFromLandmark = function(landmark, world) {
+mapManager.markerFromLandmark = function(landmark, world, $scope) {
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
 			popupAnchorValues = [0, -40],
 			iconAnchor = [17, 67],
@@ -206,7 +206,8 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		},
 		_id: landmark._id,
 		layer: layerGroup,
-		alt: alt
+		alt: alt,
+		getMessageScope: function() { return $scope; }
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';

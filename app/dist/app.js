@@ -5694,36 +5694,6 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 		}
 	}
 });
-'use strict';
-
-app.directive('markerPopupClick', markerPopupClick);
-
-markerPopupClick.$inject = ['$location'];
-
-function markerPopupClick($location) {
-	return {
-		scope: {},
-		restrict: 'A',
-		template: "<p ng-click='clickMe()'>hello</p>",
-		link: function(scope, elem, attr) {
-
-			scope.link = attr.link;
-
-			scope.clickMe = function() {
-				console.log('i clicked me', this.link)
-				$location.path(this.link);
-			}
-
-			// elem.bind('click', function(a, b, c) {
-			// 	console.log('clicked, redirecting to')
-			// })
-			// console.log('LINK', attr.link)
-		}
-	};
-
-
-}
-
 app.directive('progressCircle', function() {
 	return {
 		restrict: 'EA',
@@ -17581,7 +17551,7 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-mapManager.markerFromLandmark = function(landmark, world) {
+mapManager.markerFromLandmark = function(landmark, world, $scope) {
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
 			popupAnchorValues = [0, -40],
 			iconAnchor = [17, 67],
@@ -17610,7 +17580,8 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		},
 		_id: landmark._id,
 		layer: layerGroup,
-		alt: alt
+		alt: alt,
+		getMessageScope: function() { return $scope; }
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -23989,7 +23960,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
 			})[0][0];
 
-			// angular.copy(sortedMarks[0], $scope.currentFloor);
 			floorSelectorService.setCurrentFloor($scope.currentFloor);
 			floor = floorSelectorService.currentFloor.floor_num;
 		}
@@ -23998,7 +23968,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	function updateLandmarks(landmarks) {
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world)
+			return mapManager.markerFromLandmark(l, $scope.world, $scope)
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :
@@ -24010,7 +23980,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
 
-		mapManager.setMarkers(markers);
+		mapManager.removeAllMarkers();
+
+		// defer waits until call stack is empty so we won't run into leaflet bug
+		// where adding a marker with the same key as an existing marker breaks the directive
+		_.defer(function() {
+			mapManager.setMarkers(markers);
+		});
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 
@@ -24397,20 +24373,20 @@ function goToMark() {
 	}
 
 	map.addMarker($scope.landmark._id, {
-			lat: $scope.landmark.loc.coordinates[1],
-			lng: $scope.landmark.loc.coordinates[0],
-			draggable:false,
-			message:$scope.landmark.name,
-	  	icon: {
+		lat: $scope.landmark.loc.coordinates[1],
+		lng: $scope.landmark.loc.coordinates[0],
+		draggable:false,
+		message:$scope.landmark.name,
+  	icon: {
 			iconUrl: landmarkIcon,
-			shadowUrl: '',
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-			_id: $scope.landmark._id,
-			alt: alt
-			});
+		_id: $scope.landmark._id,
+		alt: alt
+	});
+
 	map.setMarkerFocus($scope.landmark._id);
 	
 	map.refresh();

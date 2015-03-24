@@ -181,20 +181,20 @@ function goToMark() {
 	}
 
 	map.addMarker($scope.landmark._id, {
-			lat: $scope.landmark.loc.coordinates[1],
-			lng: $scope.landmark.loc.coordinates[0],
-			draggable:false,
-			message:$scope.landmark.name,
-	  	icon: {
+		lat: $scope.landmark.loc.coordinates[1],
+		lng: $scope.landmark.loc.coordinates[0],
+		draggable:false,
+		message:$scope.landmark.name,
+  	icon: {
 			iconUrl: landmarkIcon,
-			shadowUrl: '',
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-			_id: $scope.landmark._id,
-			alt: alt
-			});
+		_id: $scope.landmark._id,
+		alt: alt
+	});
+
 	map.setMarkerFocus($scope.landmark._id);
 	
 	map.refresh();
