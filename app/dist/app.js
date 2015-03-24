@@ -4881,7 +4881,7 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
-	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
+	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController as contest'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
@@ -24190,6 +24190,45 @@ function categoryWidgetService() {
 	}
 	
 }
+'use strict';
+
+app.controller('ContestController', ContestController);
+
+ContestController.$inject = ['$routeParams', 'contestService'];
+
+function ContestController($routeParams, contestService) {
+	var vm = this;
+
+	vm.hashTag = $routeParams.hashTag;
+	vm.pictures = [];
+	vm.worldId = $routeParams.worldURL;
+
+	// activate();
+
+	function activate() {
+		contestService.getPictures(vm.worldId, vm.hashTag)
+		.then(function(response) {
+			angular.copy(response.data, vm.pictures);
+		});
+	}
+}
+'use strict';
+
+app.service('contestService', contestService);
+
+contestService.$inject = ['$http'];
+
+function contestService($http) {
+	
+	return {
+		getPictures: getPictures
+	};
+
+	function getPictures(worldId, hashTag) {
+		return $http.get(/* '/api/worldId/contest/hashTag...?' */);
+	}
+
+}
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
@@ -25877,49 +25916,39 @@ function loadWidgets() { //needs to be generalized
 		
 		}
 		
-	   if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	   }
+	  if ($scope.world.resources) {
+			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	  }
 
-	   if ($scope.style.widgets.nearby == true) {
-	      $scope.nearby = true;
-	      $scope.loadState = 'loading';
+	  if ($scope.style.widgets.nearby == true) {
+      $scope.nearby = true;
+      $scope.loadState = 'loading';
 
-	      worldTree.getNearby().then(function(data){
+      worldTree.getNearby().then(function(data){
 
-	      	if(!data){
-	      		$scope.loadState = 'failure';
-	      	}
+      	if(!data){
+      		$scope.loadState = 'failure';
+      	}
 
-	      	if(data['150m'].length > 0 || data['2.5km'].length > 0){
+      	data['150m'] = data['150m'] || [];
+      	data['2.5km'] = data['2.5km'] || [];
 
-	      		//probably a better way to do this =_=
-	      		if (data['150m'].length > 0 && data['2.5km'].length > 0){
-					$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
-	      		}
-	      		else if (data['150m'].length > 0 && data['2.5km'].length < 0){
-	      			$scope.nearbyBubbles = data['150m'];
-	      		}
-	      		else if (data['150m'].length < 0 && data['2.5km'].length > 0){
-	      			$scope.nearbyBubbles = data['2.5km'];
-	      		}
-	      		else {
-	      			$scope.loadState = 'failure';
-	      		}
+      	$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
 
-	      		//remove bubble you're inside
-	      		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
-				    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
-				        $scope.nearbyBubbles.splice(i, 1);
-				    }
+    		//remove bubble you're inside
+    		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
+			    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
+			      $scope.nearbyBubbles.splice(i, 1);
+			    }
 				}
 
 				//only 3 bubbles
 				if ($scope.nearbyBubbles.length > 3){
 					$scope.nearbyBubbles.length = 3;
 				}
-		
-	      	}
+	
+      // }
+
 
 	      	$scope.loadState = 'success';
 
