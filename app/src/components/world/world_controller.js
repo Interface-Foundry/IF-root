@@ -89,13 +89,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
-		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-		 			geoService.trackStart();
-		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-		 			geoService.trackStop();
-		 		}
-		 	});	
 		 }
 
 		 //local storage

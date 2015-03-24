@@ -44,7 +44,7 @@ worldBounds: {
 	}
 };
 
-															//latlng should be array [lat, lng]
+															//latlng should be array [lng, lat]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');

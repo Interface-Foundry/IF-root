@@ -1,4 +1,4 @@
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -156,6 +156,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			
+			// show loading animation if search query is taking a long time
 			$scope.loading = 'delay';
 
 			$timeout(function() {
@@ -205,6 +206,11 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		updateLandmarks(landmarks);
 
 		updateFloorIndicator(landmarks);
+
+		// if we were already showing userLocation, continute showing (since updating map removes all markers, including userLocation marker)
+		if (geoService.tracking) {
+			geoService.trackStart();
+		}
 	}
 
 	function updateFloorMaps(landmarks) {

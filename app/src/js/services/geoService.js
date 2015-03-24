@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager', 'mapManager',
-    	function($q, alertManager, mapManager) {
+    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
+    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
@@ -9,11 +9,28 @@ angular.module('tidepoolsServices')
 					//timestamp  
 				},
 				inProgress: false,
-				requestQueue: [] 
-			}	
+				requestQueue: [],
+				tracking: false // bool indicating whether or not geolocation is being tracked
+			};	
 
 			var marker = [];
+			var pos = {
+				lat: 0,
+				lng: 0
+			};
 			var watchID;
+			$rootScope.aperture = apertureService;
+
+			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
+				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
+					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+						geoService.trackStart();
+					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+						geoService.trackStop();
+					}
+				}
+			});	
 			 
 			geoService.getLocation = function(maxAge) {
 				var deferred = $q.defer();
@@ -65,12 +82,17 @@ angular.module('tidepoolsServices')
 
 			geoService.trackStart = function() {
 				// used to start showing user's location on map
+
+				// if we are already tracking, stop current session before starting new one
+				if (geoService.tracking) {
+					geoService.trackStop();
+				}
 				if (navigator.geolocation && window.DeviceOrientationEvent) {
 
 					// marker
 					mapManager.addMarker('track', {
-						lat: 0,
-						lng: 0,
+						lat: pos.lat,
+						lng: pos.lng,
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
@@ -84,7 +106,7 @@ angular.module('tidepoolsServices')
 
 					// movement XY
 					watchID = navigator.geolocation.watchPosition(function(position) {
-						var pos = {
+						pos = {
 							lat: position.coords.latitude,
 							lng: position.coords.longitude
 						};
@@ -97,25 +119,29 @@ angular.module('tidepoolsServices')
 
 					// movement rotation
 					window.addEventListener('deviceorientation', rotateMarker);
-
 				}
+				geoService.tracking = true;
+				
 			};
 
 			geoService.trackStop = function() {
 				// used to stop showing user's location on map
 
-				// movement: clear watch
-				if (watchID) {
-					navigator.geolocation.clearWatch(watchID);
-					watchID = undefined;
+				if (geoService.tracking) { // only stop tracking if already tracking
+					// movement: clear watch
+					if (watchID) {
+						navigator.geolocation.clearWatch(watchID);
+						watchID = undefined;
+					}
+
+					// rotation: remove event listener
+					window.removeEventListener('deviceorientation', rotateMarker);
+
+					// remove marker
+					mapManager.removeMarker('track');
+					marker = [];
 				}
-
-				// rotation: remove event listener
-				window.removeEventListener('deviceorientation', rotateMarker);
-
-				// remove marker
-				mapManager.removeMarker('track');
-				marker = [];
+				geoService.tracking = false;
 
 			};
 
