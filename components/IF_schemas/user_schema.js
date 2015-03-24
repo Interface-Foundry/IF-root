@@ -87,7 +87,7 @@ var userSchema = mongoose.Schema({
     presents: {
         collected:[Schema.Types.Mixed]
     },
-    profileID: { type: String, index: true},
+    profileID: { type: String, index: true}, 
     permissions: [{
         
     }]
