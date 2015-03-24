@@ -17009,162 +17009,191 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager', 'mapManager',
-    	function($q, alertManager, mapManager) {
-//abstract & promisify geolocation, queue requests.
-var geoService = {
-	location: {
-		//lat,
-		//lng
-		//timestamp  
-	},
-	inProgress: false,
-	requestQueue: [] 
-}	
+    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
+    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
+			//abstract & promisify geolocation, queue requests.
+			var geoService = {
+				location: {
+					//lat,
+					//lng
+					//timestamp  
+				},
+				inProgress: false,
+				requestQueue: [],
+				tracking: false // bool indicating whether or not geolocation is being tracked
+			};	
 
-var marker = [];
-var watchID;
- 
-geoService.getLocation = function(maxAge) {
-	var deferred = $q.defer();
-	
-	geoService.requestQueue.push(deferred);
-
-	if (geoService.inProgress) {
-		// inprog
-	} else if (navigator.geolocation) {
-		geoService.inProgress = true;
-		console.log('geo: using navigator');
-		
-		function geolocationSuccess(position) {
-			geoService.location.lat = position.coords.latitude;
-			geoService.location.lng = position.coords.longitude;
-			geoService.location.timestamp = Date.now();
-			geoService.resolveQueue({
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			})
-		}
-
-		function geolocationError(error) {
-			geoService.resolveQueue({err: error.code});
-		}
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError);
-
-	} else {
-		//browser update message
-		alerts.addAlert('warning', 'Your browser does not support location services.')
-	}
-	
-	return deferred.promise;
-}
-
-geoService.resolveQueue = function (position) {
-	while (geoService.requestQueue.length > 0) {
-		var request = geoService.requestQueue.pop();
-		if (position.err) {
-			request.reject(position.err);
-		} else {
-			request.resolve(position);
-		}
-	}
-	geoService.inProgress = false;
-}
-
-geoService.trackStart = function() {
-	if (navigator.geolocation && window.DeviceOrientationEvent) {
-
-		// marker
-		mapManager.addMarker('track', {
-			lat: 0,
-			lng: 0,
-			icon: {
-				iconUrl: 'img/marker/user-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 43], 
-				iconAnchor: [17, 43],
-				popupAnchor:[0, -40]
-			},
-			alt: 'track' // used for tracking marker DOM element
-		});
-		mapManager.bringMarkerToFront('track');
-
-		// movement XY
-		watchID = navigator.geolocation.watchPosition(function(position) {
+			var marker = [];
 			var pos = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
+				lat: 0,
+				lng: 0
 			};
-			mapManager.moveMarker('track', pos);
-		}, function() {
-			// console.log('location error');
-		}, {
-			// enableHighAccuracy: true
-		});
+			var watchID;
+			$rootScope.aperture = apertureService;
 
-		// movement rotation
-		window.addEventListener('deviceorientation', rotateMarker);
+			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
+				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
+					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+						geoService.trackStart();
+					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+						geoService.trackStop();
+					}
+				}
+			});	
+			 
+			geoService.getLocation = function(maxAge) {
+				var deferred = $q.defer();
+				
+				geoService.requestQueue.push(deferred);
 
-	}
-};
+				if (geoService.inProgress) {
+					// inprog
+				} else if (navigator.geolocation) {
+					geoService.inProgress = true;
+					console.log('geo: using navigator');
+					
+					function geolocationSuccess(position) {
+						geoService.location.lat = position.coords.latitude;
+						geoService.location.lng = position.coords.longitude;
+						geoService.location.timestamp = Date.now();
+						geoService.resolveQueue({
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						})
+					}
 
-geoService.trackStop = function() {
+					function geolocationError(error) {
+						geoService.resolveQueue({err: error.code});
+					}
+					
+					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+						geolocationError);
 
-	// movement: clear watch
-	if (watchID) {
-		navigator.geolocation.clearWatch(watchID);
-		watchID = undefined;
-	}
+				} else {
+					//browser update message
+					alerts.addAlert('warning', 'Your browser does not support location services.')
+				}
+				
+				return deferred.promise;
+			}
 
-	// rotation: remove event listener
-	window.removeEventListener('deviceorientation', rotateMarker);
+			geoService.resolveQueue = function (position) {
+				while (geoService.requestQueue.length > 0) {
+					var request = geoService.requestQueue.pop();
+					if (position.err) {
+						request.reject(position.err);
+					} else {
+						request.resolve(position);
+					}
+				}
+				geoService.inProgress = false;
+			}
 
-	// remove marker
-	mapManager.removeMarker('track');
-	marker = [];
+			geoService.trackStart = function() {
+				// used to start showing user's location on map
 
-};
+				// if we are already tracking, stop current session before starting new one
+				if (geoService.tracking) {
+					geoService.trackStop();
+				}
+				if (navigator.geolocation && window.DeviceOrientationEvent) {
 
-function rotateMarker(data) {
-	// make sure new marker is loaded in DOM
-	if (marker.length > 0) {
-		var alpha = data.webkitCompassHeading || data.alpha;
-		var matrix = marker.css('transform');
+					// marker
+					mapManager.addMarker('track', {
+						lat: pos.lat,
+						lng: pos.lng,
+						icon: {
+							iconUrl: 'img/marker/user-marker-50.png',
+							shadowUrl: '',
+							iconSize: [35, 43], 
+							iconAnchor: [17, 43],
+							popupAnchor:[0, -40]
+						},
+						alt: 'track' // used for tracking marker DOM element
+					});
+					mapManager.bringMarkerToFront('track');
 
-		// account for the fact that marker is initially facing south
-		var adjust = 180 + Math.round(alpha);
+					// movement XY
+					watchID = navigator.geolocation.watchPosition(function(position) {
+						pos = {
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						};
+						mapManager.moveMarker('track', pos);
+					}, function() {
+						// console.log('location error');
+					}, {
+						// enableHighAccuracy: true
+					});
 
-		marker.css('transform', getNewTransformMatrix(matrix, adjust));
-	} else {
-		marker = $('img[alt="track"]');
-	}
-}
+					// movement rotation
+					window.addEventListener('deviceorientation', rotateMarker);
+				}
+				geoService.tracking = true;
+				
+			};
 
-function getNewTransformMatrix(matrix, angle) {
-	// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
-	var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
-	
-	if (newMatrix.length !== 6) { // not 2D matrix
-		return matrix;
-	}
-	
-	// get translation and don't change
-	var tx = newMatrix[4];
-	var ty = newMatrix[5];
-	
-	// set new values for rotation matrix
-	var a = Math.cos(angle * Math.PI / 180);
-	var b = -Math.sin(angle * Math.PI / 180);
-	var c = -b;
-	var d = a;
-	
-	return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
-}
+			geoService.trackStop = function() {
+				// used to stop showing user's location on map
 
-return geoService;
+				if (geoService.tracking) { // only stop tracking if already tracking
+					// movement: clear watch
+					if (watchID) {
+						navigator.geolocation.clearWatch(watchID);
+						watchID = undefined;
+					}
+
+					// rotation: remove event listener
+					window.removeEventListener('deviceorientation', rotateMarker);
+
+					// remove marker
+					mapManager.removeMarker('track');
+					marker = [];
+				}
+				geoService.tracking = false;
+
+			};
+
+			function rotateMarker(data) {
+				// make sure new marker is loaded in DOM
+				if (marker.length > 0) {
+					var alpha = data.webkitCompassHeading || data.alpha;
+					var matrix = marker.css('transform');
+
+					// account for the fact that marker is initially facing south
+					var adjust = 180 + Math.round(alpha);
+
+					marker.css('transform', getNewTransformMatrix(matrix, adjust));
+				} else {
+					marker = $('img[alt="track"]');
+				}
+			}
+
+			function getNewTransformMatrix(matrix, angle) {
+				// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
+				var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
+				
+				if (newMatrix.length !== 6) { // not 2D matrix
+					return matrix;
+				}
+				
+				// get translation and don't change
+				var tx = newMatrix[4];
+				var ty = newMatrix[5];
+				
+				// set new values for rotation matrix
+				var a = Math.cos(angle * Math.PI / 180);
+				var b = -Math.sin(angle * Math.PI / 180);
+				var c = -b;
+				var d = a;
+				
+				return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
+			}
+
+			return geoService;
 }]);
+
 'use strict';
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
@@ -17337,7 +17366,8 @@ angular.module('tidepoolsServices')
 		return ifGlobals;
 }]);
 app.factory('localStore', ['$http', function($http) {
-
+	// used for localStorage (to track anon users)
+	
 	return {
 		getID: getID,
 		setID: setID,
@@ -17418,7 +17448,7 @@ worldBounds: {
 	}
 };
 
-															//latlng should be array [lat, lng]
+															//latlng should be array [lng, lat]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');
@@ -23732,7 +23762,36 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService) {
+app.directive('userLocation', ['geoService', 'mapManager', function(geoService, mapManager) {
+	
+	return {
+		restrict: 'E',
+		scope: {
+			style: '='
+		},
+		templateUrl: 'components/userLocation/userLocation.html',
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		
+		if (scope.style.widgets.category) {
+			// raise button from 80px to 120px to account for category widget
+			$('.userLocation').css('bottom', '120px');
+		}
+
+		scope.locateAndPan = function() {
+			geoService.trackStart();
+			var marker = mapManager.getMarker('track');
+			if (marker.lng !== 0 && marker.lat!== 0) {
+				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
+			}
+		};
+
+	}
+
+}]);
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -23890,6 +23949,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			
+			// show loading animation if search query is taking a long time
 			$scope.loading = 'delay';
 
 			$timeout(function() {
@@ -23939,6 +23999,11 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		updateLandmarks(landmarks);
 
 		updateFloorIndicator(landmarks);
+
+		// if we were already showing userLocation, continute showing (since updating map removes all markers, including userLocation marker)
+		if (geoService.tracking) {
+			geoService.trackStart();
+		}
 	}
 
 	function updateFloorMaps(landmarks) {
@@ -24195,32 +24260,25 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 
 
 console.log('--Landmark Controller--');
+
+$scope.aperture = apertureService;
+$scope.bubbleTypeService = bubbleTypeService;
+$scope.worldURL = $routeParams.worldURL;
+$scope.landmarkURL = $routeParams.landmarkURL;
+$scope.collectedPresents = [];
+
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-$scope.aperture = apertureService;
 var aperture = apertureService;
 
-$scope.worldURL = $routeParams.worldURL;
-$scope.landmarkURL = $routeParams.landmarkURL;
-	
-$scope.collectedPresents = [];
+
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
-
-	if (bubbleTypeService.get() === 'Retail') {
-		$scope.$watch('aperture.state', function(newVal, oldVal) {
-			if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-				geoService.trackStart();
-			} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-				geoService.trackStop();
-			}
-		});	
-	}
 		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
@@ -25609,13 +25667,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
-		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-		 			geoService.trackStart();
-		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-		 			geoService.trackStop();
-		 		}
-		 	});	
 		 }
 
 		 //local storage

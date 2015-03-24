@@ -1,5 +1,6 @@
 app.factory('localStore', ['$http', function($http) {
-
+	// used for localStorage (to track anon users)
+	
 	return {
 		getID: getID,
 		setID: setID,
