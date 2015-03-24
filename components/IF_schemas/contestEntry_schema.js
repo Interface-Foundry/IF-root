@@ -10,11 +10,12 @@ var contestEntrySchema = mongoose.Schema({
     worldID: String,
     worldName: String,
     v: Boolean, //valid or not
-    contestTag: { type: String, index: true}, //hashtag 
+    contestTag: {type: String, enum: ['wantit','getit'], index: true}, 
     userLat: Number,
     userLng: Number,
     imgURL: String,
-    // distancefrombubble field property harversin property???
+    //'harversin' calculation?
+    distanceFromWorld: Number
 });
 
 // create the model for users and expose it to our app

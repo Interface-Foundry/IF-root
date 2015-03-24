@@ -21,8 +21,20 @@ var contestSchema = mongoose.Schema({
     imgURL: {
         type: String,
         required: true
-    }
+    },
+    current: {type: Boolean, required: true},
+    startTime: { type: Date, default: Date.now },
+    endTime: { type: Date},
+    contestTag: {type: String, enum: ['wantit','getit'], index: true} 
+    // { type: String, index: true}, //hashtag 
 });
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('contest', contestSchema);
+
+// Contest object
+// start end
+// head 
+// body 
+// hashtags
+// latest: bool

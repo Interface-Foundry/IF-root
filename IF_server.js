@@ -487,12 +487,16 @@ app.post('/api/analytics/:action', function(req, res) {
 
     var key = hash(analytics._id).toString();
 
+
+    //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
     redisClient.set(key, analytics, function(err, reply) {
         console.log(reply);
         res.send('ok');
     });
 
     // DONE!  then a separate node process dumps the redis cache to db
+
+    //From Stackoverflow:
     // Create a caching service. This is really the hardest part, but the general flow looks something like this:
     // make request to cache service.
     // cache service checks redis for cached object based on query.
