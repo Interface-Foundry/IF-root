@@ -4910,8 +4910,8 @@ $routeProvider.
     
     when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
-		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController as superCtrl', resolve: {} }).
-		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController as superCtrl', resolve: {} }).
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {} }).
 
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
@@ -23261,23 +23261,47 @@ angular.module('IF')
 
 app.controller('SuperuserController', SuperuserController);
 
-SuperuserController.$inject = ['$scope', 'Announcements'];
+SuperuserController.$inject = ['$scope', '$routeParams', 'Announcements'];
 
-function SuperuserController($scope, Announcements) {
-	var vm = this;
+function SuperuserController($scope, $routeParams, Announcements) {
 
-	vm.announcement = {};
-	vm.submit = submit;
+	$scope.announcement = {};
+	$scope.newAnnouncement = newAnnouncement;
+	$scope.region = capitalizeFirstLetter($routeParams.region);
+	$scope.routes = ['Global Announcements', 'Contests'];
+	$scope.currentRoute = $scope.routes[0];
+	$scope.showAddAnnouncement = false;
+	$scope.submit = submit;
 
-	Announcements.get().$promise
-    .then(function(announcements) {
-      vm.announcements = announcements;
-    })
+	activate();
+
+	function activate() {
+		Announcements.get().$promise
+	    .then(function(announcements) {
+	      $scope.announcements = announcements;
+	    })		
+	}
+
+	// can make this into a filter
+	function capitalizeFirstLetter(input) {
+		return input[0].toUpperCase() + input.slice(1);
+	}
+
+	function newAnnouncement() {
+		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
+	}
 
 	function submit() {
 		console.log('Submitted:', vm.announcement);
 	}
 
+
+
+	function post() {
+		Announcments.post({
+
+		})
+	}
 }
 
 

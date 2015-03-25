@@ -1,32 +1,33 @@
+<nav class="subnav-fixed">
+  <select class="menu pull-left" 
+          ng-model="currentRoute" 
+          ng-options="route for route in routes">
+    <option value="/profile/worlds">My Bubbles ⌄</option>
+    <option value="/profile/me">My Profile ⌄</option>
+  </select>
+  <h5>{{region}} Announcements</h5>
+</nav>
+
 <div id="shelf" class="defaultBG">
-    <div class="container-fluid navfix defaultBG">
-        <div class="row">
-            <div class="col-xs-12">
-                <center>
-                    <h1>Announcements</h1>
-                    <button class="btn btn-success" ng-click="newAnnouncement()">+ Add an Announcement</button>
-                </center>
-            </div>
-            <div class="clearfix"></div>
-            <ul>
-                <li class="landmark col-xs-12 col-sm-6" ng-repeat="announcement in announcements">
-                    <div class="media card">
-                        {{announcement}}
-                        <!--   
-      <a ng-href="#/w/{{world.id}}"><img ng-src="{{world.avatar}}" class="avatar pull-left"></a>
-      <div class="media-body">
-        <button type="button" class="close" ng-click="deleteWorld($index)">
-        <span aria-hidden="true">&times;</span>
-        <span class="sr-only">Close</span>
+  <div class="container-fluid navfix defaultBG">
+    <div class="row">
+      <div class="col-xs-12">
+        <button ng-if="!showAddAnnouncement"
+                class="btn btn-success" 
+                ng-click="newAnnouncement()">
+          + Add an Announcement
         </button>
-        <a ng-href="#/w/{{world.id}}"><h4 class="profile-media-heading media-heading">{{world.name || 'New'}}</h4></a>
-        
-        <a ng-href="/edit/walkthrough/{{world._id}}" ><div class="btn btn-xs btn-success" ng-show="world.source_meetup.id">Set Up Meetup</div><div class="text-muted btn btn-xs btn-default" ng-hide="world.source_meetup.id">Set Up Bubble</div> <br></a>
-        <a ng-href="#/edit/w/{{world.id}}">Edit</a> | <a ng-href="#/w/{{world.id}}">Go to this world</a> | {{world.views || 0}} views
-      </div> -->
-                    </div>
-                </li>
-            </ul>
-        </div>
+        <div ng-if="showAddAnnouncement"
+             ng-include="'components/super_user/superuser.announcements.new.html'"></div>
+      </div>
     </div>
+  </div>
+  <div class="clearfix"></div>
+  <ul>
+    <li class="landmark col-xs-12 col-sm-6" ng-repeat="announcement in announcements">
+      <div class="media card">
+        {{announcement}}
+      </div>
+    </li>
+  </ul>
 </div>

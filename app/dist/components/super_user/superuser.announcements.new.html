@@ -2,32 +2,33 @@
 	<div class="form-group">
 		<form>
 
-			<button class="x-button">x</button>
+			<button class="x-button"
+							ng-click="newAnnouncement()">x</button>
 
 			<label for="headline">Headline</label>
 			<input type="text"
 						 class="form-control"
-						 ng-model="superCtrl.announcement.headline"/>
+						 ng-model="announcement.headline"/>
 
 			<label for="body">Body</label>
 			<textarea class="form-control"
-								ng-model="superCtrl.announcement.body">
+								ng-model="announcement.body">
 			</textarea>
 
 			<label for="url-path">URL Path</label>
 			<input type="text" 
 						 class="form-control"
-						 ng-model="superCtrl.announcement.urlPath">
+						 ng-model="announcement.urlPath">
 
 			<label for="url-name">URL Name</label>
 			<input type="text" 
 						 class="form-control"
-						 ng-model="superCtrl.announcement.urlName">
+						 ng-model="announcement.urlName">
 
 			<input type="submit" 
 						 value="Save" 
 						 class="btn btn-success"
-						 ng-click="superCtrl.submit()" />
+						 ng-click="submit()" />
 
 		</form>
 	</div>
