@@ -27,7 +27,11 @@ setTimeout(function() {
         doc = JSON.parse(doc_str);
       }
       catch (e){
-        console.error('Error JSON.parsing analytics doc' + doc);
+        console.error('Error JSON.parsing analytics doc' + doc_str);
+
+        // remove from processing queue
+        client.lrem('analytics', 1, doc_str, redis.print);
+        return;
       }
 
       // save to db
