@@ -21,6 +21,7 @@ var announcementsSchema = mongoose.Schema({
         required: true
     }, 
     priority: {type: Number},
+    live: {type: Boolean},
     imgURL: {
         type: String,
         required: true

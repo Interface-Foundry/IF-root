@@ -474,24 +474,12 @@ app.get('/api/bubblesearch/:type', function(req, res) {
 
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
-    var analytics = new analyticsSchema(req.body.doc);
-
-    function hash(str) {
-        var res = 0,
-            len = str.length;
-        for (var i = 0; i < len; i++) {
-            res = res * 31 + str.charCodeAt(i);
-        }
-        return res;
-    }
-
-    var key = hash(analytics._id).toString();
-
+    var analytics = new analyticsSchema();
 
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
-    redisClient.set(key, analytics, function(err, reply) {
+    redisClient.rpush(analytics, function(err, reply) {
         console.log(reply);
-        res.send('ok');
+        res.send('pushed!');
     });
 
     // DONE!  then a separate node process dumps the redis cache to db
@@ -502,6 +490,19 @@ app.post('/api/analytics/:action', function(req, res) {
     // cache service checks redis for cached object based on query.
     // cache returns data from redis if it exists OR from mongo if it doesn't exist.
     // if data didn't already exist in redis or had expired, cache service writes data to redis.
+
+    // client.get(cacheKey, function(err, data) {
+    //     // data is null if the key doesn't exist
+    //     if (err || data === null) {
+    //         mongoose.model('users').find(function(err, users) {
+    //             console.log('Setting cache: ' + cacheKey);
+    //             client.set(cacheKey, users, redis.print);
+    //             res.send(users);
+    //         });
+    //     } else {
+    //         return data;
+    //     }
+    // });
 
 });
 
