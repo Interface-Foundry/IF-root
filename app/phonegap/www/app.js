@@ -4910,8 +4910,8 @@ $routeProvider.
     
     when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
-		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController as superCtrl', resolve: {} }).
-		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController as superCtrl', resolve: {} }).
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {} }).
 
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
@@ -23295,18 +23295,41 @@ SuperuserController.$inject = ['$scope', 'Announcements','$routeParams'];
 
 function SuperuserController($scope, Announcements, $routeParams) {
 
-  $scope.region = $routeParams.region;
-	
-	Announcements.query({id: $scope.region}).$promise
-    .then(function(as) {
-   
-      $scope.as = as;
-    })
+	$scope.announcement = {};
+	$scope.newAnnouncement = newAnnouncement;
+	$scope.region = capitalizeFirstLetter($routeParams.region);
+	$scope.routes = ['Global Announcements', 'Contests'];
+	$scope.currentRoute = $scope.routes[0];
+	$scope.showAddAnnouncement = false;
+	$scope.submit = submit;
+
+	activate();
+
+	function activate() {
+		Announcements.query({id: $scope.region}).$promise
+	    .then(function(as) {
+	      $scope.as = as;
+	    });
+	}
+
+	// can make this into a filter
+	function capitalizeFirstLetter(input) {
+		return input[0].toUpperCase() + input.slice(1);
+	}
+
+	function newAnnouncement() {
+		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
+	}
 
 	function submit() {
 		console.log('Submitted:', vm.announcement);
 	}
 
+	function post() {
+		Announcments.post({
+
+		})
+	}
 }
 
 
