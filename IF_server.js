@@ -363,6 +363,16 @@ app.get('/api/user/loggedin', function(req, res) {
   }
 }); 
 
+// SUPERUSER SECTION =========================
+app.get('/api/announcements/:id', isLoggedIn, function(req, res) {
+
+
+}
+
+app.post('/api/announcements/:id', isLoggedIn, function(req, res) {
+
+
+}
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {

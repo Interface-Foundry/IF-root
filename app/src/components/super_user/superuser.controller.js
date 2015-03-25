@@ -2,8 +2,10 @@
 
 app.controller('SuperuserController', SuperuserController);
 
-SuperuserController.$inject = [];
+SuperuserController.$inject = ['Announcements'];
 
 function SuperuserController() {
+
+
 
 }

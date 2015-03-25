@@ -23099,11 +23099,43 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 }])
 'use strict';
 
+angular.module('IF')
+    .factory('Announcements', function($resource) {
+
+        return $resource("/api/announcements/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            scan: {
+                method: 'POST',
+                isArray:true,
+                params: {
+                    option: 'scan'
+                }
+            },
+            sort: {
+                method: 'POST',
+                isArray: true,
+                params: {
+                    option: 'sort'
+                }
+            },
+            remove: {
+                method: 'DELETE'
+            }
+        });
+    });
+'use strict';
+
 app.controller('SuperuserController', SuperuserController);
 
-SuperuserController.$inject = [];
+SuperuserController.$inject = ['Announcements'];
 
 function SuperuserController() {
+
+
 
 }
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
