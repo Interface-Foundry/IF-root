@@ -440,18 +440,19 @@ app.get('/api/announcements/:id', function(req, res) {
 //load all contests for that region
 //load all announcements for that region
 app.get('/api/contests/:id', function(req, res) {
-app.post('/api/announcements', function(req, res) {
-    if (req.user.admin) {
-        var newcontest = new contestSchema();
-        var contest = _.extend(newcontest, req.body);
 
-        contest.save(
-            function(err, contest) {
-                if (err) {
-                    console.log(err)
-                }
-                return res.send(contest);
-            });
+    if (req.user.admin) {
+        contestSchema.find({
+            region: req.params.id.toString().toLowerCase()
+        }, function(err, contests) {
+            if (err) {
+                return handleError(res, err);
+            }
+            console.log('hitting, -->', contests)
+            return res.send(contests);
+        });
+    } else {
+        console.log('you are not authorized...stand down..')
     }
 })
 
@@ -474,7 +475,9 @@ app.post('/api/announcements', function(req, res) {
 //create new contest for that region
 app.post('/api/contests', function(req, res) {
     if (req.user.admin) {
-        var contest = new contestSchema(req.body);
+        var newcontest = new contestSchema();
+        var contest = _.extend(newcontest, req.body);
+
         contest.save(
             function(err, contest) {
                 if (err) {
