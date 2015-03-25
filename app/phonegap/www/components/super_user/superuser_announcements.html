@@ -1,9 +1,8 @@
 <nav class="subnav-fixed">
   <select class="menu pull-left" 
+          ng-change="changeRoute()"
           ng-model="currentRoute" 
           ng-options="route for route in routes">
-    <option value="/profile/worlds">My Bubbles ⌄</option>
-    <option value="/profile/me">My Profile ⌄</option>
   </select>
   <p>{{region}} Announcements</p>
 </nav>
