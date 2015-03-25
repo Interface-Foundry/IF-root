@@ -440,19 +440,18 @@ app.get('/api/announcements/:id', function(req, res) {
 //load all contests for that region
 //load all announcements for that region
 app.get('/api/contests/:id', function(req, res) {
-
+app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
-        contestSchema.find({
-            region: req.params.id.toString().toLowerCase()
-        }, function(err, contests) {
-            if (err) {
-                return handleError(res, err);
-            }
-            console.log('hitting, -->', contests)
-            return res.send(contests);
-        });
-    } else {
-        console.log('you are not authorized...stand down..')
+        var newcontest = new contestSchema();
+        var contest = _.extend(newcontest, req.body);
+
+        contest.save(
+            function(err, contest) {
+                if (err) {
+                    console.log(err)
+                }
+                return res.send(contest);
+            });
     }
 })
 
@@ -467,7 +466,6 @@ app.post('/api/announcements', function(req, res) {
                 if (err) {
                     console.log(err)
                 }
-                console.log('backend result is..',announcement)
                 return res.send(announcement);
             });
     }
