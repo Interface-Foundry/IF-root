@@ -903,6 +903,21 @@ nav ul {
   margin-right: 8px;
   margin-bottom: -1px;
 }
+.new-announcement-form {
+  background-color: #eee;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 30px 50px;
+  width: 60%;
+}
+.new-announcement-form .x-button {
+  float: right;
+  border: none;
+  background-color: inherit;
+}
+.new-announcement-form input[type="submit"] {
+  margin-top: 10px;
+}
 nav {
   pointer-events: auto;
 }

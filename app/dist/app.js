@@ -4901,8 +4901,8 @@ $routeProvider.
     
     when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
-		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {} }).
-		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {} }).
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController as superCtrl', resolve: {} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController as superCtrl', resolve: {} }).
 
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
@@ -23104,8 +23104,43 @@ app.controller('SuperuserController', SuperuserController);
 SuperuserController.$inject = [];
 
 function SuperuserController() {
+	var vm = this;
 
+	vm.announcement = {};
+	vm.submit = submit;
+
+	function submit() {
+		console.log('Submitted:', vm.announcement);
+	}
 }
+
+
+// var announcementsSchema = mongoose.Schema({
+//     headline: {
+//         type: String,
+//         required: true
+//     }, 
+//     body: {
+//         type: String,
+//         required: true
+//     }, 
+//     URL: {
+//         type: String,
+//         required: true
+//     }, 
+//     priority: {type: Number},
+//     live: {type: Boolean},
+//     imgURL: {
+//         type: String,
+//         required: true
+//     },
+//     region: {
+//         type: String,
+//         default: 'global'
+//     },
+//     timestamp: { type: Date, default: Date.now }
+// });
+
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
