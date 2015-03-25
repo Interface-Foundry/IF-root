@@ -21,11 +21,8 @@ var announcementsSchema = mongoose.Schema({
         required: true,
         default:'www.google.com'
     }, 
-    priority: {type: Number},
+    priority: {type: Number, default:1},
     live: {type: Boolean},
-    imgURL: {
-        type: String
-    },
     region: {
         type: String,
         default: 'global'

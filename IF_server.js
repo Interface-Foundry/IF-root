@@ -459,7 +459,11 @@ app.get('/api/contests/:id', function(req, res) {
 //create new announcement for that region
 app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
+        //decrement priority for all other announcements
+        announcementSchema.update({$dec:{priority:1}})
+        //create new announcement with priority 1
         var newannouncement = new announcementSchema();
+
         var announcement = _.extend(newannouncement, req.body);
 
         announcement.save(

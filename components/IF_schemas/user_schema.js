@@ -75,7 +75,7 @@ var userSchema = mongoose.Schema({
     //     P: Number
     // }],
     // email: [Schema.Types.Mixed],
-    email: String,
+    email: {type: String, unique: true, lowercase:true}, //FORCE LOWERCASE
     emailConfirmed: Boolean,
     // tel: [{
     
