@@ -23301,7 +23301,13 @@ function SuperuserController($scope, Announcements, $routeParams) {
 	$scope.routes = ['Global Announcements', 'Contests'];
 	$scope.currentRoute = $scope.routes[0];
 	$scope.showAddAnnouncement = false;
-	$scope.submit = submit;
+	$scope.submit = function () {
+      console.log('announcement in front end is..', $scope.announcement)
+      Announcements.save($scope.announcement).$promise
+      .then(function(result) {
+        console.log('successfuly created!', result)
+      });
+    };
 
 	activate();
 

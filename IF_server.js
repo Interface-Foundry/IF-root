@@ -424,7 +424,7 @@ app.get('/api/announcements/:id',  function(req, res) {
    
     if (req.user.admin) {
         announcementSchema.find({
-            region: req.params.id
+            region: req.params.id.toString().toLowerCase()
         }, function(err, announcements) {
             if (err) {
                 return handleError(res, err);
@@ -444,7 +444,7 @@ app.get('/api/contests/:id',  function(req, res) {
    
     if (req.user.admin) {
         contestSchema.find({
-            region: req.params.id
+            region: req.params.id.toString().toLowerCase()
         }, function(err, contests) {
             if (err) {
                 return handleError(res, err);
@@ -459,11 +459,15 @@ app.get('/api/contests/:id',  function(req, res) {
 })
 
 //create new announcement for that region
-app.post('/api/announcements/:id', function(req, res) {
+app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
-       announcementSchema.create(req.body, function(err, announcement) {
-            if (err) {
-                return handleError(res, err);
+
+var announcement = new announcementSchema(req.body);
+
+    announcement.save(
+        function(err, announcement) {
+             if (err) {
+                console.log(err)
             }
             return res.send(announcement);
         });
