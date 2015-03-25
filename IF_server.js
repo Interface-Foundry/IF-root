@@ -459,12 +459,15 @@ app.get('/api/contests/:id', function(req, res) {
 //create new announcement for that region
 app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
-        var announcement = new announcementSchema(req.body);
+        var newannouncement = new announcementSchema();
+        var announcement = _.extend(newannouncement, req.body);
+
         announcement.save(
             function(err, announcement) {
                 if (err) {
                     console.log(err)
                 }
+                console.log('backend result is..',announcement)
                 return res.send(announcement);
             });
     }
