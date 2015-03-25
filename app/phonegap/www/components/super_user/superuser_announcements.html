@@ -9,9 +9,10 @@
             </div>
             <div class="clearfix"></div>
             <ul>
-                <li class="landmark col-xs-12 col-sm-6" ng-repeat="announcement in announcements">
+                <li class="landmark col-xs-12 col-sm-6" ng-repeat="a in as">
                     <div class="media card">
-                        {{announcement}}
+                        {{a.headline}}
+                        {{a.region}}
                         <!--   
       <a ng-href="#/w/{{world.id}}"><img ng-src="{{world.avatar}}" class="avatar pull-left"></a>
       <div class="media-body">

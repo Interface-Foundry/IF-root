@@ -389,63 +389,6 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
-// SUPERUSER SECTION =========================
-
-//load all announcements for that region
-app.get('/api/announcements/:id', isLoggedIn, function(req, res) {
-    if (req.user.admin) {
-        announcementSchema.find({
-            region: req.params.id
-        }, function(err, announcements) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.json(200, announcements);
-        });
-    } else {
-        console.log('You are not a superuser!')
-    }
-})
-
-//load all contests for that region
-app.get('/api/contests/:id', isLoggedIn, function(req, res) {
-    if (req.user.admin) {
-        contestSchema.find({
-            region: req.params.id
-        }, function(err, contests) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.json(200, contests);
-        });
-    } else {
-        console.log('You are not a superuser!')
-    }
-})
-
-//create new announcement for that region
-app.post('/api/announcements/:id', isLoggedIn, function(req, res) {
-    if (req.user.admin) {
-       announcementSchema.create(req.body, function(err, announcement) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.json(201, announcement);
-        });
-    }
-})
-
-//create new contest for that region
-app.post('/api/contests/:id', isLoggedIn, function(req, res) {
-    if (req.user.admin) {
-       contestSchema.create(req.body, function(err, contest) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.json(201, contest);
-        });
-    }
-})
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
@@ -473,6 +416,71 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
         res.send(lm);
     });
 });
+
+// SUPERUSER SECTION =========================
+
+//load all announcements for that region
+app.get('/api/announcements/:id',  function(req, res) {
+   
+    if (req.user.admin) {
+        announcementSchema.find({
+            region: req.params.id
+        }, function(err, announcements) {
+            if (err) {
+                return handleError(res, err);
+            }
+            console.log('hitting, -->' , announcements)
+            return res.send(announcements);
+        });
+    }
+    else {
+        console.log('you are not authorized...stand down..')
+    }
+})
+
+//load all contests for that region
+//load all announcements for that region
+app.get('/api/contests/:id',  function(req, res) {
+   
+    if (req.user.admin) {
+        contestSchema.find({
+            region: req.params.id
+        }, function(err, contests) {
+            if (err) {
+                return handleError(res, err);
+            }
+            console.log('hitting, -->' , contests)
+            return res.send(contests);
+        });
+    }
+    else {
+        console.log('you are not authorized...stand down..')
+    }
+})
+
+//create new announcement for that region
+app.post('/api/announcements/:id', function(req, res) {
+    if (req.user.admin) {
+       announcementSchema.create(req.body, function(err, announcement) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.send(announcement);
+        });
+    }
+})
+
+//create new contest for that region
+app.post('/api/contests/:id', isLoggedIn, function(req, res) {
+    if (req.user.admin) {
+       contestSchema.create(req.body, function(err, contest) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.send(contest);
+        });
+    }
+})
 
 
 

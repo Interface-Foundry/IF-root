@@ -23129,19 +23129,48 @@ angular.module('IF')
     });
 'use strict';
 
+angular.module('IF')
+    .factory('Contests', function($resource) {
+
+        return $resource("/api/contests/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            scan: {
+                method: 'POST',
+                isArray:true,
+                params: {
+                    option: 'scan'
+                }
+            },
+            sort: {
+                method: 'POST',
+                isArray: true,
+                params: {
+                    option: 'sort'
+                }
+            },
+            remove: {
+                method: 'DELETE'
+            }
+        });
+    });
+'use strict';
+
 app.controller('SuperuserController', SuperuserController);
 
-SuperuserController.$inject = ['$scope', 'Announcements'];
+SuperuserController.$inject = ['$scope', 'Announcements','$routeParams'];
 
-function SuperuserController($scope, Announcements) {
-	var vm = this;
+function SuperuserController($scope, Announcements, $routeParams) {
 
-	vm.announcement = {};
-	vm.submit = submit;
-
-	Announcements.get().$promise
-    .then(function(announcements) {
-      vm.announcements = announcements;
+  $scope.region = $routeParams.region;
+	
+	Announcements.query({id: $scope.region}).$promise
+    .then(function(as) {
+   
+      $scope.as = as;
     })
 
 	function submit() {
