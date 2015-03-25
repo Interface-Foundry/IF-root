@@ -4867,26 +4867,26 @@ var checkLoggedin = function(userManager) {
     // Define all the routes
     //================================================
 $routeProvider.
-      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-      
-      when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
-      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
-      when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-      when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+    when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+    when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
+    when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+    when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+    
+    when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
+    when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
+    when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+    when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+    when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
-      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-      
-      when('/profile', {redirectTo:'/profile/worlds'}).
-      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
-      when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
-      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+    when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+    when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+    
+    when('/profile', {redirectTo:'/profile/worlds'}).
+    when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+    when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+    when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
+    when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
+    when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
@@ -4897,18 +4897,22 @@ $routeProvider.
 	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 
-      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
-      when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
-      
-      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
-      when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+    when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
+    when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
+    
+    when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
+    when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
       
-      when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
-      when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-      
-      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
+    when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
+    when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
+    
+    when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
+
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {} }).
+
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -23223,6 +23227,15 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+'use strict';
+
+app.controller('SuperuserController', SuperuserController);
+
+SuperuserController.$inject = [];
+
+function SuperuserController() {
+
+}
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
