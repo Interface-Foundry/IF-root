@@ -918,6 +918,17 @@ nav ul {
 .new-announcement-form input[type="submit"] {
   margin-top: 10px;
 }
+.add-button {
+  border: none;
+  background-color: inherit;
+}
+.add-button::before {
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  display: inline-block;
+  background-color: red;
+}
 nav {
   pointer-events: auto;
 }
