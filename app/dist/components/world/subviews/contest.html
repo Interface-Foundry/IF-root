@@ -3,9 +3,9 @@
 		<h4 class="subnav-header">Contest <em>#{{contest.hashTag}}</em></h4>
 	</nav>
 	
-	<div class="instagram-wrap wrap" lazy-load load-more="contest.dummyData()">
+	<div class="instagram-wrap wrap" lazy-load load-more="contestCtrl.dummyData()">
 		<ul>
-			<li ng-repeat="picture in contest.pictures track by $index" class="instagram marble-page">
+			<li ng-repeat="picture in contestCtrl.pictures track by $index" class="instagram marble-page">
 				<img ng-src="{{picture.imgURL}}">
 				<p>{{picture}}</p>
 				<footer><h4>{{::picture.contestTag}}</footer>

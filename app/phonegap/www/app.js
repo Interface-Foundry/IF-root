@@ -4890,7 +4890,7 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
-	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController as contest'}).
+	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController as contestCtrl'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
