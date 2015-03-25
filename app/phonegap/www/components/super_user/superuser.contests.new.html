@@ -1,16 +1,42 @@
-<div>
-	<form>
+<div class="new-announcement-form">
+	<div class="form-group">
+		<form>
 
-		Headline
-		<input type="text" />
+			<button class="x-button">x</button>
 
-		Body
-		<textarea>
-		</textarea>
+			<label for="name">Name</label>
+			<input type="text"
+						 class="form-control"
+						 ng-model="superCtrl.contest.name"/>
 
-		URL Path
-		<input>
+			<label for="headline">Contest Card Headline</label>
+			<input type="text"
+						 class="form-control"
+						 ng-model="superCtrl.contest.headline"/>
 
+			<label for="body">Body</label>
+			<textarea class="form-control"
+								ng-model="superCtrl.contest.body">
+			</textarea>
 
-	</form>
+			<text-angular ng-model="superCtrl.contest.html"></text-angular>
+			<div class="clearfix"></div>
+
+			<label for="hashtag1">Hashtag #1</label>
+			<input type="text"
+						 class="form-control"
+						 ng-model="superCtrl.contest.hashtag1"/>
+
+			<label for="hashtag2">Hashtag #2</label>
+			<input type="text"
+						 class="form-control"
+						 ng-model="superCtrl.contest.hashtag2"/>
+
+			<input type="submit" 
+						 value="Save" 
+						 class="btn btn-success"
+						 ng-click="superCtrl.submit()" />
+
+		</form>
+	</div>
 </div>
