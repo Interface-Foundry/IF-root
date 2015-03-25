@@ -76,7 +76,8 @@ var mongoose = require('mongoose'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
-    announcementsSchema = require('./components/IF_schemas/announcements_schema.js'),
+    announcementSchema = require('./components/IF_schemas/announcements_schema.js'),
+    contestSchema = require('./components/IF_schemas/contest_schema.js'),
     monguurl = require('monguurl');
 
 mongoose.connect(configDB.url);
@@ -389,15 +390,41 @@ app.get('/api/user/loggedin', function(req, res) {
 });
 
 // SUPERUSER SECTION =========================
+
+//load all announcements for that region
 app.get('/api/announcements/:id', isLoggedIn, function(req, res) {
+    if (req.user.admin) {
+        announcementSchema.find({
+            region: req.params.id
+        }, function(err, announcements) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.json(200, announcements);
+        });
+    }
+    else {
+        console.log('You are not a superuser!')
+    }
+})
 
+//load all contests for that region
+app.get('/api/contests/:id', isLoggedIn, function(req, res) {
+    if (req.user.admin) {
+            contestSchema.find({
+                region: req.params.id
+            }, function(err, contests) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                return res.json(200, contests);
+            });
+        }
+        else {
+            console.log('You are not a superuser!')
+        }
+})
 
-}
-
-app.post('/api/announcements/:id', isLoggedIn, function(req, res) {
-
-
-}
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
@@ -467,6 +494,7 @@ function isLoggedIn(req, res, next) {
         return next();
     }
 }
+
 
 
 // Query

@@ -23129,15 +23129,13 @@ angular.module('IF')
     });
 'use strict';
 
-app.controller('SuperuserController', SuperuserController);
-
-SuperuserController.$inject = ['Announcements'];
-
-function SuperuserController() {
-
-
-
-}
+angular.module('IF')
+    .controller('SuperuserController', function($scope, Announcements) {
+        Announcements.get().$promise
+            .then(function(announcements) {
+                $scope.announcements = announcements;
+            })
+    });
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
