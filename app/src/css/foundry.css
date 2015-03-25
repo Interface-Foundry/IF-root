@@ -2006,7 +2006,7 @@ li.alert {
     max-height: 40%;
   }
 }
-@media only screen and (min-height: 700px) {
+@media only screen and (min-height: 680px) {
   #floor-nums {
     max-height: 50%;
   }
