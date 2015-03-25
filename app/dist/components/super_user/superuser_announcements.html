@@ -5,7 +5,7 @@
     <option value="/profile/worlds">My Bubbles ⌄</option>
     <option value="/profile/me">My Profile ⌄</option>
   </select>
-  <h5>{{region}} Announcements</h5>
+  <p>{{region}} Announcements</p>
 </nav>
 
 <div id="shelf" class="defaultBG">
@@ -13,7 +13,7 @@
     <div class="row">
       <div class="col-xs-12">
         <button ng-if="!showAddAnnouncement"
-                class="btn btn-success" 
+                class="add-button"
                 ng-click="newAnnouncement()">
           + Add an Announcement
         </button>

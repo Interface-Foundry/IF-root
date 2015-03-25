@@ -3322,6 +3322,10 @@ nav ul {
 .new-announcement-form input[type="submit"] {
   margin-top: 10px;
 }
+.add-button {
+  border: none;
+  background-color: inherit;
+}
 nav {
   pointer-events: auto;
 }
