@@ -402,8 +402,7 @@ app.get('/api/announcements/:id', isLoggedIn, function(req, res) {
             }
             return res.json(200, announcements);
         });
-    }
-    else {
+    } else {
         console.log('You are not a superuser!')
     }
 })
@@ -411,20 +410,42 @@ app.get('/api/announcements/:id', isLoggedIn, function(req, res) {
 //load all contests for that region
 app.get('/api/contests/:id', isLoggedIn, function(req, res) {
     if (req.user.admin) {
-            contestSchema.find({
-                region: req.params.id
-            }, function(err, contests) {
-                if (err) {
-                    return handleError(res, err);
-                }
-                return res.json(200, contests);
-            });
-        }
-        else {
-            console.log('You are not a superuser!')
-        }
+        contestSchema.find({
+            region: req.params.id
+        }, function(err, contests) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.json(200, contests);
+        });
+    } else {
+        console.log('You are not a superuser!')
+    }
 })
 
+//create new announcement for that region
+app.post('/api/announcements/:id', isLoggedIn, function(req, res) {
+    if (req.user.admin) {
+       announcementSchema.create(req.body, function(err, announcement) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.json(201, announcement);
+        });
+    }
+})
+
+//create new contest for that region
+app.post('/api/contests/:id', isLoggedIn, function(req, res) {
+    if (req.user.admin) {
+       contestSchema.create(req.body, function(err, contest) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.json(201, contest);
+        });
+    }
+})
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
