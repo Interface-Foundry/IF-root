@@ -420,8 +420,8 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 // SUPERUSER SECTION =========================
 
 //load all announcements for that region
-app.get('/api/announcements/:id',  function(req, res) {
-   
+app.get('/api/announcements/:id', function(req, res) {
+
     if (req.user.admin) {
         announcementSchema.find({
             region: req.params.id.toString().toLowerCase()
@@ -429,19 +429,18 @@ app.get('/api/announcements/:id',  function(req, res) {
             if (err) {
                 return handleError(res, err);
             }
-            console.log('hitting, -->' , announcements)
+            console.log('hitting, -->', announcements)
             return res.send(announcements);
         });
-    }
-    else {
+    } else {
         console.log('you are not authorized...stand down..')
     }
 })
 
 //load all contests for that region
 //load all announcements for that region
-app.get('/api/contests/:id',  function(req, res) {
-   
+app.get('/api/contests/:id', function(req, res) {
+
     if (req.user.admin) {
         contestSchema.find({
             region: req.params.id.toString().toLowerCase()
@@ -449,11 +448,10 @@ app.get('/api/contests/:id',  function(req, res) {
             if (err) {
                 return handleError(res, err);
             }
-            console.log('hitting, -->' , contests)
+            console.log('hitting, -->', contests)
             return res.send(contests);
         });
-    }
-    else {
+    } else {
         console.log('you are not authorized...stand down..')
     }
 })
@@ -461,32 +459,32 @@ app.get('/api/contests/:id',  function(req, res) {
 //create new announcement for that region
 app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
-
-var announcement = new announcementSchema(req.body);
-
-    announcement.save(
-        function(err, announcement) {
-             if (err) {
-                console.log(err)
-            }
-            return res.send(announcement);
-        });
+        var announcement = new announcementSchema(req.body);
+        announcement.save(
+            function(err, announcement) {
+                if (err) {
+                    console.log(err)
+                }
+                return res.send(announcement);
+            });
     }
 })
 
 //create new contest for that region
-app.post('/api/contests/:id', isLoggedIn, function(req, res) {
+app.post('/api/contests', function(req, res) {
     if (req.user.admin) {
-       contestSchema.create(req.body, function(err, contest) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.send(contest);
-        });
+        var contest = new contestSchema(req.body);
+        contest.save(
+            function(err, contest) {
+                if (err) {
+                    console.log(err)
+                }
+                return res.send(contest);
+            });
     }
 })
 
-
+// END OF SUPERUSER SECTION =========================
 
 
 // route middleware to ensure user is logged in
