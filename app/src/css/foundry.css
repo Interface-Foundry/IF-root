@@ -2219,6 +2219,10 @@ li.alert {
 .wtgt p {
   font-size: .9em;
 }
+.wtgt .verifyUpload {
+  width: 100%;
+  height: 100%;
+}
 .marble-page-footer.tag {
   background: #eeeeee;
   text-align: center;

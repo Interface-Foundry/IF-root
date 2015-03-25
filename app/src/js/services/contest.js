@@ -1,7 +1,7 @@
 app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 	// manages want this got this contest
 
-	var isContest = false;
+	var isContest = false; // determines whether or not a process involves the wtgt contest
 	var hashtag;
 	var id;
 	var startTime;

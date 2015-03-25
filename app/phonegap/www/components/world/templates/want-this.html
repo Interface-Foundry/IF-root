@@ -34,7 +34,9 @@
 					ng-file-select
 					ng-file-change="uploadWTGT($files, 'want')"
 					ng-file-drop
-					data-accept="image/*"></div>
+					data-accept="image/*">
+					<div class="verifyUpload" ng-click="verifyUpload($event, 'want')"></div>
+				</div>
 
 				<div class="loading-spinner u-centerY"
 					ng-show="wtgt.building.want">
@@ -48,7 +50,9 @@
 				ng-file-select
 				ng-file-change="uploadWTGT($files, 'want')"
 				ng-file-drop
-				data-accept="image/*"></div>
+				data-accept="image/*">
+				<div class="verifyUpload" ng-click="verifyUpload($event, 'want')"></div>
+			</div>
 
 			<div class="hashtag--upload">
 				<span>#{{ wtgt.hashtags.want }}</span>
@@ -78,7 +82,9 @@
 					ng-file-select
 					ng-file-change="uploadWTGT($files, 'got')"
 					ng-file-drop
-					data-accept="image/*"></div>
+					data-accept="image/*">
+					<div class="verifyUpload" ng-click="verifyUpload($event, 'got')"></div>
+				</div>
 
 				<div class="loading-spinner u-centerY"
 					ng-show="wtgt.building.got">
@@ -92,7 +98,9 @@
 				ng-file-select
 				ng-file-change="uploadWTGT($files, 'got')"
 				ng-file-drop
-				data-accept="image/*"></div>
+				data-accept="image/*">
+				<div class="verifyUpload" ng-click="verifyUpload($event, 'got')"></div>
+			</div>
 
 			<div class="hashtag--upload">
 				<span>#{{ wtgt.hashtags.got }}</span>
