@@ -4381,7 +4381,7 @@ li.alert {
   font-size: 18px;
   font-weight: normal;
   line-height: 42px;
-  /*max-height: 80%;*/
+  max-height: 30%;
   min-height: 0px;
   opacity: 1;
   overflow-y: scroll;
@@ -4395,24 +4395,14 @@ li.alert {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
-@media only screen and (min-height: 0px) {
+@media only screen and (min-height: 550px) {
   #floor-nums {
-    max-height: 200px;
+    max-height: 40%;
   }
 }
-@media only screen and (min-height: 567px) {
+@media only screen and (min-height: 700px) {
   #floor-nums {
-    max-height: 285px;
-  }
-}
-@media only screen and (min-height: 666px) {
-  #floor-nums {
-    max-height: 380px;
-  }
-}
-@media only screen and (min-height: 735px) {
-  #floor-nums {
-    max-height: 450px;
+    max-height: 50%;
   }
 }
 #floor-nums.ng-hide-add.ng-hide-add-active,

@@ -22674,8 +22674,7 @@ function floorSelector(mapManager, floorSelectorService) {
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
-			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
-												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+			scope.currentFloor = findCurrentFloor(scope.floors);
 			floorSelectorService.setCurrentFloor(scope.currentFloor);
 
 			checkCategories(elem);
@@ -22855,18 +22854,19 @@ function floorSelectorService() {
 	}
 
 	function getFloors(localMapArray) {
+
 		var sorted = _.chain(localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
 			})
-			.groupBy(function(f) {
-				return f.floor_num;
+			.groupBy('floor_num')
+			.toArray()
+			.sortBy(function(arr) {
+				return arr[0].floor_num;
 			})
-			.sortBy(function(f) {
-				return -f.floor_num;
-			})
+			.reverse()
 			.value()
-			.reverse();
+
 		angular.copy(sorted, floors);
 		return floors;
 	}
