@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager', 'mapManager',
-    	function($q, alertManager, mapManager) {
+    .factory('geoService', [ '$q', 'alertManager', 'mapManager', 'locationAnalyticsService',
+    	function($q, alertManager, mapManager, locationAnalyticsService) {
 //abstract & promisify geolocation, queue requests.
 var geoService = {
 	location: {
@@ -34,6 +34,13 @@ geoService.getLocation = function(maxAge) {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			})
+			locationAnalyticsService.log({
+				type: "GPS",
+				loc: {
+					type: "Point",
+					coordinates: [position.coords.longitude, position.coords.latitude]
+				}
+			});
 		}
 
 		function geolocationError(error) {

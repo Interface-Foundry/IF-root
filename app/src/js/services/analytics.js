@@ -2,10 +2,11 @@
 
 app.factory('analyticsService', analyticsService);
 
-analyticsService.$inject = ['$http', "geoService"];
+analyticsService.$inject = ['$http', '$injector'];
 
-function analyticsService($http, geoService) {
+function analyticsService($http, $injector) {
     var sequenceNumber = 0;
+    var geoService; // lazy loaded to avoid circ dependency
 
     return {
         log: log
@@ -19,6 +20,9 @@ function analyticsService($http, geoService) {
      */
     function log(action, data) {
         sequenceNumber++; // update this global sequence number every time something interesting happens
+		if (typeof geoService === 'undefined') {
+			geoService = $injector.get('geoService');
+		}
 
         geoService.getLocation().then(function(coords) {
 
