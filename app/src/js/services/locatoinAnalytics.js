@@ -6,7 +6,7 @@ locationAnalyticsService.$inject = ['$http', 'analyticsService'];
 
 function locationAnalyticsService($http, analyticsService) {
     var locationBuffer = []; // array of any kind of location data
-    var maxBufferSize = 3; // when to flush the buffer
+    var maxBufferSize = 1000; // when to flush the buffer
 
     return {
         log: log,
