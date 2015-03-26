@@ -423,19 +423,43 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 app.get('/api/announcements/:id', function(req, res) {
 
     if (req.user.admin) {
-        announcementSchema.find({
-            region: req.params.id.toString().toLowerCase()
+        announcementSchema.aggregate({
+            $match: {
+                region: req.params.id.toString().toLowerCase()
+            }
+        }, {
+            $sort: {
+                priority: 1
+            }
         }, function(err, announcements) {
             if (err) {
                 return handleError(res, err);
             }
-            console.log('hitting, -->', announcements)
             return res.send(announcements);
         });
+
     } else {
         console.log('you are not authorized...stand down..')
     }
 })
+
+
+
+
+
+
+//         find({region: req.params.id.toString().toLowerCase()},
+//             {$sort :{priority:1}}
+//             ,function(err, announcements) {
+//             if (err) {
+//                 return handleError(res, err);
+//             }
+//             return res.send(announcements);
+//         });
+//     } else {
+//         console.log('you are not authorized...stand down..')
+//     }
+// })
 
 //load all contests for that region
 app.get('/api/contests/:id', function(req, res) {
@@ -447,7 +471,7 @@ app.get('/api/contests/:id', function(req, res) {
             if (err) {
                 return handleError(res, err);
             }
-           
+
             return res.send(contests);
         });
     } else {
@@ -458,9 +482,20 @@ app.get('/api/contests/:id', function(req, res) {
 //create new announcement for that region
 app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
-        //decrement priority for all other announcements
-        // announcementSchema.update({$dec:{priority:1}})
-        //create new announcement with priority 1
+        //increment priority for all other announcements
+        announcementSchema.update({}, {
+                $inc: {
+                    priority: 1
+                }
+            }, {
+                multi: true
+            }, function(err, result) {
+                if (err) {
+                    console.log(err)
+                }
+                console.log('documents incremented', result)
+            })
+            //create new announcement with priority 1
         var newannouncement = new announcementSchema();
 
         var announcement = _.extend(newannouncement, req.body);
@@ -470,10 +505,10 @@ app.post('/api/announcements', function(req, res) {
                 if (err) {
                     console.log(err)
                 }
-                 console.log('saved!', announcement)
-                 announcementSchema.find(function(err, results) {
+                console.log('saved!', announcement)
+                announcementSchema.find(function(err, results) {
                     res.send(results);
-                 })
+                })
             });
     }
 })

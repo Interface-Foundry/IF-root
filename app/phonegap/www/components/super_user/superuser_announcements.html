@@ -4,7 +4,7 @@
           ng-model="currentRoute" 
           ng-options="route for route in routes">
   </select>
-  <p class="superuser-title">{{region}} AHAHAHAAHAnnouncements</p>
+  <p class="superuser-title">{{region}} Announcements</p>
 </nav>
 
 <div id="shelf" class="shelf-surface wrap superuser-background">
@@ -26,6 +26,7 @@
             <h5>{{a.headline}}</h5>
             <p>{{a.body}}</p>
             <p>{{a.URL}}</p>
+            {{a.priority}}
           </div>
         </li>
       </ul>
