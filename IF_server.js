@@ -502,8 +502,8 @@ app.post('/api/announcements/:id/sort', function(req, res) {
             announcementSchema.update({
                 _id: req.params.id
             }, {
-                $dec: {
-                    priority: 1
+                $inc: {
+                    priority: -1
                 }
             }).exec(function() {
                 //Re-sort all announcements, then send to front-end
@@ -527,8 +527,8 @@ app.post('/api/announcements/:id/sort', function(req, res) {
         announcementSchema.update({
             priority: req.body.priority - 1
         }, {
-            dec: {
-                priority: 1
+            $inc: {
+                priority: -1
             }
         }).exec(function() {
             //find the current announcement and increment it's priority
