@@ -3,7 +3,7 @@
 		<form>
 
 			<button class="x-button"
-							ng-click="toggleNewAnnouncement()">x</button>
+							ng-click="toggleNewAnnouncement(); resetAnnouncement()">x</button>
 
 			<label for="headline">Headline</label>
 			<input type="text"
@@ -32,8 +32,15 @@
 
 			<input type="submit" 
 						 value="Save" 
+						 ng-if="!edit"
 						 class="btn btn-success"
 						 ng-click="submitAnnouncement()" />
+
+			<input type="submit" 
+						 value="Update"
+						 ng-if="edit" 
+						 class="btn btn-warning"
+						 ng-click="updateAnnouncement()" />
 
 		</form>
 	</div>
