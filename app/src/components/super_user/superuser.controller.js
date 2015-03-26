@@ -6,12 +6,9 @@ SuperuserController.$inject = ['$scope', 'Announcements','$routeParams', '$locat
 
 function SuperuserController($scope, Announcements, $routeParams, $location) {
 
-	$scope.announcement = {
-		live: false,
-		region: 'global'
-	};
-	$scope.newAnnouncement = newAnnouncement;
-	$scope.newContest = newContest;
+	$scope.announcement = {};
+	$scope.toggleNewAnnouncement = toggleNewAnnouncement;
+	$scope.toggleNewContest = toggleNewContest;
 	$scope.region = capitalizeFirstLetter($routeParams.region);
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
@@ -21,6 +18,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	activate();
 
 	function activate() {
+		resetAnnouncement();
 		Announcements.query({id: $scope.region}).$promise
 	    .then(function(as) {
 	      $scope.as = as;
@@ -37,14 +35,21 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
 	}
 
-	function newAnnouncement() {
+	function toggleNewAnnouncement() {
 		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
 		$scope.showAddContest = false;
 	}
 
-	function newContest() {
+	function toggleNewContest() {
 		$scope.showAddContest = !$scope.showAddContest;
 		$scope.showAddAnnouncement = false;
+	}
+
+	function resetAnnouncement() {
+		$scope.announcement = {
+			live: false,
+			region: 'global'
+		};
 	}
 
 	$scope.submitAnnouncement = function () {
@@ -52,40 +57,11 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
     Announcements.save($scope.announcement).$promise
     .then(function(result) {
       console.log('successfuly created!', result)
-      $scope.announcement = {};
-      $scope.url = {};
-      newAnnouncement();
+      resetAnnouncement();
+      $scope.as = result;
+      toggleNewAnnouncement();
     }, function(error) {
     	console.log(error.data);
     });
   };
 }
-
-
-
-// var announcementsSchema = mongoose.Schema({
-//     headline: {
-//         type: String,
-//         required: true
-//     }, 
-//     body: {
-//         type: String,
-//         required: true
-//     }, 
-//     URL: {
-//         type: String,
-//         required: true
-//     }, 
-//     priority: {type: Number},
-//     live: {type: Boolean},
-//     imgURL: {
-//         type: String,
-//         required: true
-//     },
-//     region: {
-//         type: String,
-//         default: 'global'
-//     },
-//     timestamp: { type: Date, default: Date.now }
-// });
-
