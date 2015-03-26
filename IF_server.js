@@ -443,7 +443,7 @@ app.get('/api/announcements/:id', function(req, res) {
     }
 })
 
-//create new announcement for that region and shift priorities for all others
+//Create new announcement for that region and shift priorities for all others
 app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
         //Increment priority for all other announcements other than one being created
@@ -461,16 +461,16 @@ app.post('/api/announcements', function(req, res) {
             })
             //Then create the new announcement with priority one
         var newannouncement = new announcementSchema();
-        //merge new announcement with whatever is sent from frontend
+        //Merge new announcement with whatever is sent from frontend
         var announcement = _.extend(newannouncement, req.body);
-        //save it
+        //Save announcement
         announcement.save(
             function(err, announcement) {
                 if (err) {
                     console.log(err)
                 }
                 console.log('saved!', announcement)
-
+                    //Re-sort all announcements, then send to front-end
                 announcementSchema.find().sort({
                     priority: 1
                 }).exec(function(err, announcements) {
@@ -482,6 +482,77 @@ app.post('/api/announcements', function(req, res) {
                 })
             });
     }
+})
+
+//When superuser changes priority of announcement
+app.put('/api/announcements/:id/sort', function(req, res) {
+
+    //-------If priority is moving up-----//
+    if (req.body.dir === 'up'&&req.body.priority !== 1) {
+        //find the announcement immediately above the current announcement
+        //and increment it's priority
+        announcementSchema.update({
+            priority: req.body.priority - 1
+        }, {
+            $inc: {
+                priority: 1
+            }
+        }).exec(function() {
+            //find the current announcement and decrement it's priority
+            announcementSchema.update({
+                _id: req.params.id
+            }, {
+                $dec: {
+                    priority: 1
+                }
+            }).exec(function() {
+                //Re-sort all announcements, then send to front-end
+                announcementSchema.find().sort({
+                    priority: 1
+                }).exec(function(err, announcements) {
+                    console.log('announcements is..', announcements)
+                    if (err) {
+                        console.log(err)
+                    }
+                    return res.send(announcements)
+                })
+            })
+        })
+    }
+
+     //-------If priority is moving down-----//
+         if (req.body.dir === 'down') {
+        //find the announcement immediately above the current announcement
+        //and decrement it's priority
+        announcementSchema.update({
+            priority: req.body.priority - 1
+        }, {
+            $dec: {
+                priority: 1
+            }
+        }).exec(function() {
+            //find the current announcement and increment it's priority
+            announcementSchema.update({
+                _id: req.params.id
+            }, {
+                $inc: {
+                    priority: 1
+                }
+            }).exec(function() {
+                //Re-sort all announcements, then send to front-end
+                announcementSchema.find().sort({
+                    priority: 1
+                }).exec(function(err, announcements) {
+                    console.log('announcements is..', announcements)
+                    if (err) {
+                        console.log(err)
+                    }
+                    return res.send(announcements)
+                })
+            })
+        })
+    }
+    
 })
 
 //delete announcement for that region
