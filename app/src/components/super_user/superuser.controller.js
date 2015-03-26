@@ -14,7 +14,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	$scope.editAnnouncement = editAnnouncement;
 	$scope.editIndex;
 	$scope.region = capitalizeFirstLetter($routeParams.region);
-	$scope.routes = ['Announcements', 'Contests'];
+	$scope.routes = ['Announcements ⌄', 'Contests ⌄'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
 	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
@@ -33,7 +33,6 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		}).$promise
 	    .then(function(response) {
 	      $scope.announcements = response;
-	      console.log($scope.announcements)
 	    });
 	}
 
@@ -88,11 +87,13 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		};
 	}
 
-	$scope.submitAnnouncement = function () {
-    console.log('announcement in front end is..', $scope.announcement);
+	$scope.submitAnnouncement = function (form) {
+		if (form.$invalid) {
+			console.log('Form is missing required fields.');
+			return;
+		}
     Announcements.save($scope.announcement).$promise
     .then(function(announcements) {
-      console.log('successfully created!', announcements)
       resetAnnouncement();
       $scope.announcements = announcements;
       toggleNewAnnouncement();
@@ -118,7 +119,11 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
   	}, $scope.announcements[index]);
   }
 
-  function updateAnnouncement() {
+  function updateAnnouncement(form) {
+  	if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;
+  	}
   	$scope.announcement.live = false;
   	Announcements.update({
   		id: $scope.announcement._id

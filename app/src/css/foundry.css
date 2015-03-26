@@ -913,6 +913,10 @@ nav ul {
 .new-announcement-form input[type="submit"] {
   margin-top: 10px;
 }
+.new-announcement-form input.ng-invalid.ng-touched,
+.new-announcement-form textarea.ng-invalid.ng-touched {
+  border: 1px solid red;
+}
 .x-button {
   background-color: inherit;
   border: none;
