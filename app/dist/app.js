@@ -23170,7 +23170,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	$scope.editAnnouncement = editAnnouncement;
 	$scope.editIndex;
 	$scope.region = capitalizeFirstLetter($routeParams.region);
-	$scope.routes = ['Announcements ⌄', 'Contests ⌄'];
+	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
 	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
