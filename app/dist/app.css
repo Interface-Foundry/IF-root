@@ -3348,6 +3348,17 @@ nav ul {
 #shelf.superuser-background .superuser-list li {
   margin: 20px 0;
 }
+#shelf.superuser-background .superuser-list li .superuser-left-col {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+#shelf.superuser-background .superuser-list li .superuser-left-col div:nth-child(2),
+#shelf.superuser-background .superuser-list li .superuser-left-col div:last-child {
+  cursor: pointer;
+  font-size: 30px;
+}
 #shelf.superuser-background .superuser-list li button.btn {
   width: 70px;
 }
