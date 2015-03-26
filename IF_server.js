@@ -459,7 +459,7 @@ app.post('/api/announcements', function(req, res) {
                 }
                 console.log('documents incremented', result)
             })
-        //Then create the new announcement with priority one
+            //Then create the new announcement with priority one
         var newannouncement = new announcementSchema();
         //merge new announcement with whatever is sent from frontend
         var announcement = _.extend(newannouncement, req.body);
@@ -470,8 +470,15 @@ app.post('/api/announcements', function(req, res) {
                     console.log(err)
                 }
                 console.log('saved!', announcement)
-                announcementSchema.find(function(err, results) {
-                    res.send(results);
+
+                announcementSchema.find().sort({
+                    priority: 1
+                }).exec(function(err, announcements) {
+                    console.log('announcements is..', announcements)
+                    if (err) {
+                        console.log(err)
+                    }
+                    return res.send(announcements)
                 })
             });
     }
@@ -479,14 +486,20 @@ app.post('/api/announcements', function(req, res) {
 
 //delete announcement for that region
 app.delete('/api/announcements:id', function(req, res) {
-  announcementSchema.findById(req.params.id, function (err, announcement) {
-    if(err) { return handleError(res, err); }
-    if(!announcement) { return res.send(404); }
-    announcement.remove(function(err) {
-      if(err) { return handleError(res, err); }
-      return res.send(204);
+    announcementSchema.findById(req.params.id, function(err, announcement) {
+        if (err) {
+            return handleError(res, err);
+        }
+        if (!announcement) {
+            return res.send(404);
+        }
+        announcement.remove(function(err) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.send(204);
+        });
     });
-  });
 })
 
 

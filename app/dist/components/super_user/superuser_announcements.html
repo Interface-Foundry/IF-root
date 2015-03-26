@@ -24,6 +24,7 @@
           <button ng-if="!a.live" class="btn btn-default">Draft</button>
           <div class="media card superuser-list-item">
             <h4>{{a.headline}}</h4>
+            {{a.priority}}
             <p>{{a.body}}</p>
             <a ng-href="{{a.urlPath}}">{{a.urlName}}</a>
           </div>
