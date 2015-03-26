@@ -40,7 +40,9 @@ function analyticsService($http, $injector, $rootScope, $timeout, localStore, $l
 			
 			return userManager.getUser();
 		}).then(function(user) {
-			doc.user = user._id;
+			if (user.permissions.indexOf('do_not_track') == -1) {
+				doc.user = user._id;
+			}
 		}).finally(function() {
 			// dude trust me, this is gonna work. no need for a response
 			$http.post('/api/analytics/' + action, doc);
