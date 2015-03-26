@@ -37,9 +37,12 @@
                  ng-if="!$last">&or;</div>
           </div>
           <div class="media card superuser-list-item">
+
             <h4 ng-click="editAnnouncement($index)">{{announcement.headline}}</h4>
             <p>{{announcement.body}}</p>
+            <p>{{announcement.priority}}</p>
             <a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a>
+
           </div>
           <button class="x-button"
                   ng-click="deleteAnnouncement($index)">x</button>

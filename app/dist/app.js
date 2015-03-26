@@ -23120,7 +23120,8 @@ angular.module('IF')
                 }
             },
             remove: {
-                method: 'DELETE'
+                method: 'DELETE',
+                isArray:true
             }
         });
     });
