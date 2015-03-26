@@ -28,9 +28,13 @@
             <button ng-if="!announcement.live" 
                     class="btn btn-default"
                     ng-click="toggleDraftState($index)">Draft</button>
-            <div>&and;</div>
+            <div class="arrow"
+                 ng-click="changeAnnouncementOrder($index, 'up')"
+                 ng-if="!$first">&and;</div>
             <div>{{$index + 1}}</div>
-            <div>&or;</div>
+            <div class="arrow"
+                 ng-click="changeAnnouncementOrder($index, 'down')"
+                 ng-if="!$last">&or;</div>
           </div>
           <div class="media card superuser-list-item">
             <h4 ng-click="editAnnouncement($index)">{{announcement.headline}}</h4>

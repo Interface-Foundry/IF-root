@@ -917,6 +917,7 @@ nav ul {
   background-color: inherit;
   border: none;
   float: right;
+  font-size: 1.3em;
   margin: 0;
 }
 .add-button {
@@ -950,8 +951,7 @@ nav ul {
   font-weight: bold;
   text-align: center;
 }
-#shelf.superuser-background .superuser-list li .superuser-left-col div:nth-child(2),
-#shelf.superuser-background .superuser-list li .superuser-left-col div:last-child {
+#shelf.superuser-background .superuser-list li .superuser-left-col .arrow {
   cursor: pointer;
   font-size: 30px;
 }

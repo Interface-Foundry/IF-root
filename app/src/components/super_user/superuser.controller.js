@@ -8,6 +8,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	$scope.announcement = {};
 	$scope.announcements = [];
+	$scope.changeAnnouncementOrder = changeAnnouncementOrder;
 	$scope.deleteAnnouncement = deleteAnnouncement;
 	$scope.edit = false;
 	$scope.editAnnouncement = editAnnouncement;
@@ -39,6 +40,19 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	// can make this into a filter
 	function capitalizeFirstLetter(input) {
 		return input[0].toUpperCase() + input.slice(1);
+	}
+
+	function changeAnnouncementOrder(index, direction) {
+		Announcements.sort({
+			id: $scope.announcements[index]
+		}, {
+			dir: direction,
+			priority: $scope.announcements[index].priority
+		})
+		.$promise
+		.then(function(response) {
+			$scope.announcements = response;
+		});
 	}
 
 	$scope.changeRoute = function() {
@@ -105,6 +119,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
   }
 
   function updateAnnouncement() {
+  	$scope.announcement.live = false;
   	Announcements.update({
   		id: $scope.announcement._id
   	}, $scope.announcement)
