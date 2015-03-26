@@ -2,9 +2,9 @@
 
 app.factory('bubbleSearchService', bubbleSearchService);
 
-bubbleSearchService.$inject = ['$http'];
+bubbleSearchService.$inject = ['$http', 'analyticsService'];
 
-function bubbleSearchService($http) {
+function bubbleSearchService($http, analyticsService) {
 	
 	var data = [];
 
@@ -21,6 +21,8 @@ function bubbleSearchService($http) {
 			catName: input,
 			textSearch: input
 		};
+		
+		analyticsService.log('search.' + searchType, params);
 
 		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {

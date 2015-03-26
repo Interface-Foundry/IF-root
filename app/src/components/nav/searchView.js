@@ -1,4 +1,4 @@
-app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService analyticsService) {
+app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -7,10 +7,10 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
 				geoService.getLocation().then(function(coords) {
-				analyticsService.log("search.keyword", {textQuery: searchText});
+					searchParams = {textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}
+				analyticsService.log("search.text", searchParams);
 				
-				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
+				scope.searching = $http.get('/api/textsearch', {server: true, params: searchParams})
 					.success(function(result) {
 						if (!result.err) {
 							scope.searchResult = result;
