@@ -2,16 +2,27 @@
 
 app.factory('locationAnalyticsService', locationAnalyticsService);
 
-locationAnalyticsService.$inject = ['$http', 'analyticsService'];
+locationAnalyticsService.$inject = ['$http', 'analyticsService', '$interval'];
 
-function locationAnalyticsService($http, analyticsService) {
+function locationAnalyticsService($http, analyticsService, $interval) {
     var locationBuffer = []; // array of any kind of location data
     var maxBufferSize = 1000; // when to flush the buffer
-
-    return {
-        log: log,
-        forceFlushBuffer: flushBuffer
-    };
+    var maxBufferAge = 60*1000; // flush every so often
+    
+    // use localstorage if they have it    
+	if (typeof localStorage !== 'undefined') {
+		try {
+			locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+		}
+		catch (e) {
+			locationBuffer = [];
+			localStorage.setItem("locationBuffer", "[]");
+		}
+		
+		if (!locationBuffer) {
+			locationBuffer = [];
+		}
+	}
 
     /**
      * Log any sort of location analytics data
@@ -26,16 +37,45 @@ function locationAnalyticsService($http, analyticsService) {
      * 
      * @param data the dat you want to log to the db
      */
-    function log(data) {
+    function log(data) {		
 		data.timestamp = Date.now();
 		locationBuffer.push(data);
+		
 		if (locationBuffer.length == maxBufferSize) {
 			flushBuffer();
+		}
+		
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem("locationBuffer", JSON.stringify(locationBuffer));
 		}
     }
     
     function flushBuffer() {
-		analyticsService.log('geolocation.updates', locationBuffer);
-		locationBuffer = [];
+		// use localstorage if they have it
+		if (typeof localStorage !== 'undefined') {
+			try {
+				locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+			}
+			catch (e) {
+				// welp... start over.
+				localStorage.setItem("locationBuffer", "[]");
+				locationBuffer = [];
+				return;
+			}
+		}
+		
+		if (locationBuffer.length > 0) {
+			analyticsService.log('geolocation.updates', locationBuffer);
+			locationBuffer = [];
+		}
 	}
+	
+	$interval(function() {
+		flushBuffer();
+	}, maxBufferAge);
+	
+	return {
+        log: log,
+        forceFlushBuffer: flushBuffer
+    };
 }
