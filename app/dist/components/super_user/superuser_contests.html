@@ -7,17 +7,17 @@
   <p>{{region}} Contests</p>
 </nav>
 
-<div id="shelf" class="shelf-surface wrap">
-  <div class="container-fluid navfix defaultBG">
-    <div class="row">
-      <div class="col-xs-12">
-        <button ng-if="!showAddContest"
-                class="add-button"
-                ng-click="newContest()">
-          + Add A Contest
-        </button>
-        <div ng-if="showAddContest"
-             ng-include="'components/super_user/superuser.contests.new.html'"></div>
+<div id="shelf" class="shelf-surface wrap superuser-background">
+  <div class="container-fluid navfix">
+    <div class="superuser-list">
+      <div ng-if="!showAddContest"
+              class="add-button"
+              ng-click="toggleNewContest()">
+        <div class="circle">+</div>
+        Create New Contest
+      </div>
+      <div ng-if="showAddContest"
+           ng-include="'components/super_user/superuser.contests.new.html'"></div>
       </div>
     </div>
   </div>

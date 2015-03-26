@@ -3314,13 +3314,14 @@ nav ul {
   padding: 30px 50px;
   width: 100%;
 }
-.new-announcement-form .x-button {
-  float: right;
-  border: none;
-  background-color: inherit;
-}
 .new-announcement-form input[type="submit"] {
   margin-top: 10px;
+}
+.x-button {
+  background-color: inherit;
+  border: none;
+  float: right;
+  margin: 0 10px;
 }
 .add-button {
   cursor: pointer;
@@ -3331,17 +3332,35 @@ nav ul {
 .superuser-title {
   margin: 0;
 }
-.superuser-background {
+#shelf.superuser-background {
   background-color: #ddd;
+  height: 90%;
+  padding-bottom: 60px;
   padding-left: 10%;
   padding-right: 10%;
 }
-.superuser-background .superuser-list {
+#shelf.superuser-background .superuser-list {
   margin-left: auto;
   margin-right: auto;
+  min-width: 350px;
   width: 60%;
 }
-.superuser-background .superuser-list .superuser-list-item h4 {
+#shelf.superuser-background .superuser-list li {
+  margin: 20px 0;
+}
+#shelf.superuser-background .superuser-list li button.btn {
+  width: 70px;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item {
+  cursor: auto;
+  display: inline-block;
+  height: 100%;
+  margin-top: 1px;
+  padding: 5px 20px;
+  width: 75%;
+  vertical-align: top;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item h4 {
   text-align: center;
 }
 .circle {

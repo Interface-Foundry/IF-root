@@ -12,7 +12,7 @@
     <div class="superuser-list">
       <div ng-if="!showAddAnnouncement"
               class="add-button"
-              ng-click="newAnnouncement()">
+              ng-click="toggleNewAnnouncement()">
         <div class="circle">+</div>
         Create New Announcement
       </div>
@@ -23,11 +23,12 @@
           <button ng-if="a.live" class="btn btn-success">Live &#10004;</button>
           <button ng-if="!a.live" class="btn btn-default">Draft</button>
           <div class="media card superuser-list-item">
-            <h5>{{a.headline}}</h5>
+            <h4>{{a.headline}}</h4>
             <p>{{a.body}}</p>
-            <p>{{a.URL}}</p>
-            {{a.priority}}
+            <a ng-href="{{a.urlPath}}">{{a.urlName}}</a>
           </div>
+          <button class="x-button"
+                  ng-click="deleteAnnouncement($index)">x</button>
         </li>
       </ul>
     </div>
