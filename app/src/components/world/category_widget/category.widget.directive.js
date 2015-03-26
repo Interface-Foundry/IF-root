@@ -3,10 +3,10 @@
 app.directive('categoryWidget', categoryWidget);
 
 categoryWidget.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
-												  	'floorSelectorService', 'categoryWidgetService'];
+												  	'floorSelectorService', 'categoryWidgetService', 'analyticsService'];
 
 function categoryWidget(bubbleSearchService, $location, mapManager, $route,
-													floorSelectorService, categoryWidgetService) {
+													floorSelectorService, categoryWidgetService, analyticsService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -52,7 +52,7 @@ function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 			}
 
 			scope.search = function(category, index) {
-
+				analyticsService.log('search.category', {category: category});
 				if (!updateIndex(index)) {
 					return;
 				}
@@ -67,6 +67,7 @@ function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 			}
 
 			scope.searchAll = function() {
+				analyticsService.log('search.category.all', {});
 				if (!updateIndex('all')) {
 					return;
 				}

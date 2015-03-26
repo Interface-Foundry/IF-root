@@ -35,6 +35,6 @@ function analyticsService($http, geoService) {
 
             // dude trust me, this is gonna work. no need for a response
             $http.post('/api/analytics/' + action, doc);
-        };
+        });
     }
 }
