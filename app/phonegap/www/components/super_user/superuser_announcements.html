@@ -19,14 +19,20 @@
       <div ng-if="showAddAnnouncement"
            ng-include="'components/super_user/superuser.announcements.new.html'"></div>
       <ul>
-        <li ng-repeat="a in as">
-          <button ng-if="a.live" class="btn btn-success">Live &#10004;</button>
-          <button ng-if="!a.live" class="btn btn-default">Draft</button>
+        <li ng-repeat="announcement in announcements">
+          <button ng-if="announcement.live" 
+                  class="btn btn-success"
+                  ng-click="toggleDraftState($index)">Live &#10004;</button>
+          <button ng-if="!announcement.live" 
+                  class="btn btn-default"
+                  ng-click="toggleDraftState($index)">Draft</button>
           <div class="media card superuser-list-item">
-            <h4>{{a.headline}}</h4>
-            {{a.priority}}
-            <p>{{a.body}}</p>
-            <a ng-href="{{a.urlPath}}">{{a.urlName}}</a>
+
+            <h4 ng-click="editAnnouncement($index)">{{announcement.headline}}</h4>
+            <p>{{announcement.body}}</p>
+            <p>{{announcement.priority}}</p>
+            <a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a>
+
           </div>
           <button class="x-button"
                   ng-click="deleteAnnouncement($index)">x</button>

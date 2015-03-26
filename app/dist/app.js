@@ -23163,14 +23163,21 @@ SuperuserController.$inject = ['$scope', 'Announcements','$routeParams', '$locat
 function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	$scope.announcement = {};
+	$scope.announcements = [];
 	$scope.deleteAnnouncement = deleteAnnouncement;
-	$scope.toggleNewAnnouncement = toggleNewAnnouncement;
-	$scope.toggleNewContest = toggleNewContest;
+	$scope.edit = false;
+	$scope.editAnnouncement = editAnnouncement;
+	$scope.editIndex;
 	$scope.region = capitalizeFirstLetter($routeParams.region);
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
 	$scope.showAddContest = false;
+	$scope.toggleNewAnnouncement = toggleNewAnnouncement;
+	$scope.toggleNewContest = toggleNewContest;
+	$scope.toggleDraftState = toggleDraftState;
+	$scope.updateAnnouncement = updateAnnouncement;
 
 	activate();
 
@@ -23179,9 +23186,9 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		Announcements.query({
 			id: $scope.region
 		}).$promise
-	    .then(function(as) {
-	      $scope.as = as;
-	      console.log(as)
+	    .then(function(response) {
+	      $scope.announcements = response;
+	      console.log($scope.announcements)
 	    });
 	}
 
@@ -23198,23 +23205,22 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		var deleteConfirm = confirm("Are you sure you want to delete this?");
 		if (deleteConfirm) {
 			Announcements.remove({
-				id: $scope.as[index]._id
+				id: $scope.announcements[index]._id
 			})
 			.$promise
 			.then(function(response) {
-				$scope.as = response;
+				$scope.announcements = response;
 			});
 		}
 	}
 
-	function toggleNewAnnouncement() {
-		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
-		$scope.showAddContest = false;
-	}
-
-	function toggleNewContest() {
-		$scope.showAddContest = !$scope.showAddContest;
-		$scope.showAddAnnouncement = false;
+	function editAnnouncement(index) {
+		var tempAnnouncement = {};
+		angular.copy($scope.announcements[index], tempAnnouncement);
+		$scope.announcement = tempAnnouncement;
+		$scope.edit = true;
+		$scope.editIndex = index;
+		$scope.showAddAnnouncement = true;
 	}
 
 	function resetAnnouncement() {
@@ -23227,15 +23233,42 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	$scope.submitAnnouncement = function () {
     console.log('announcement in front end is..', $scope.announcement);
     Announcements.save($scope.announcement).$promise
-    .then(function(result) {
-      console.log('successfuly created!', result)
+    .then(function(announcements) {
+      console.log('successfully created!', announcements)
       resetAnnouncement();
-      $scope.as = result;
+      $scope.announcements = announcements;
       toggleNewAnnouncement();
     }, function(error) {
     	console.log(error.data);
     });
   };
+
+	function toggleNewAnnouncement() {
+		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
+		$scope.showAddContest = false;
+	}
+
+	function toggleNewContest() {
+		$scope.showAddContest = !$scope.showAddContest;
+		$scope.showAddAnnouncement = false;
+	}
+
+  function toggleDraftState(index) {
+  	$scope.announcements[index].live = !$scope.announcements[index].live;
+  	Announcements.update({
+  		id: $scope.announcements[index]._id
+  	}, $scope.announcements[index]);
+  }
+
+  function updateAnnouncement() {
+  	Announcements.update({
+  		id: $scope.announcement._id
+  	}, $scope.announcement)
+  	.$promise
+  	.then(function(response) {
+  		$scope.announcements[$scope.editIndex] = response;
+  	});	
+  }
 }
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
