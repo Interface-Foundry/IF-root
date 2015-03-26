@@ -485,10 +485,10 @@ app.post('/api/announcements', function(req, res) {
 })
 
 //When superuser changes priority of announcement
-app.put('/api/announcements/:id/sort', function(req, res) {
+app.post('/api/announcements/:id/sort', function(req, res) {
 
     //-------If priority is moving up-----//
-    if (req.body.dir === 'up'&&req.body.priority !== 1) {
+    if (req.body.dir === 'up' && req.body.priority !== 1) {
         //find the announcement immediately above the current announcement
         //and increment it's priority
         announcementSchema.update({
@@ -520,14 +520,14 @@ app.put('/api/announcements/:id/sort', function(req, res) {
         })
     }
 
-     //-------If priority is moving down-----//
-         if (req.body.dir === 'down') {
+    //-------If priority is moving down-----//
+    if (req.body.dir === 'down') {
         //find the announcement immediately above the current announcement
         //and decrement it's priority
         announcementSchema.update({
             priority: req.body.priority - 1
         }, {
-            $dec: {
+            dec: {
                 priority: 1
             }
         }).exec(function() {
@@ -552,11 +552,46 @@ app.put('/api/announcements/:id/sort', function(req, res) {
             })
         })
     }
-    
+
+})
+
+//When superuser edits announcement content or toggles 'Live' button
+app.put('/api/announcements/:id', function(req, res) {
+    announcementSchema.findOne({
+        _id: req.params.id
+    }, function(err, result) {
+        if (err) {
+            return handleError(res, err);
+        }
+        if (!result) {
+            return res.send(404);
+        }
+        //Merge existing announcement with updated object from frontend
+        var announcement = _.extend(result, req.body);
+
+        //Save announcement
+        announcement.save(
+            function(err, announcement) {
+                if (err) {
+                    console.log(err)
+                }
+                console.log('updated announcement is..', announcement)
+                    //Re-sort all announcements, then send to front-end
+                announcementSchema.find().sort({
+                    priority: 1
+                }).exec(function(err, announcements) {
+
+                    if (err) {
+                        console.log(err)
+                    }
+                    return res.send(announcement)
+                })
+            })
+    })
 })
 
 //delete announcement for that region
-app.delete('/api/announcements:id', function(req, res) {
+app.delete('/api/announcements/:id', function(req, res) {
     announcementSchema.findById(req.params.id, function(err, announcement) {
         if (err) {
             return handleError(res, err);
@@ -564,12 +599,42 @@ app.delete('/api/announcements:id', function(req, res) {
         if (!announcement) {
             return res.send(404);
         }
-        announcement.remove(function(err) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.send(204);
-        });
+        var prior = announcement.priority;
+
+        announcementSchema.update({
+                priority: {
+                    $gt: prior
+                }
+            }, {
+                $inc: {
+                    priority: -1
+                }
+            }, {
+                multi: true
+            },
+            function(err, numberAffected, rawResponse) {
+                if (err) {
+                    console.log(err)
+                }
+                console.log('updated ', numberAffected, 'records')
+                console.log(rawResponse)
+                announcement.remove(function(err) {
+                    if (err) {
+                        return handleError(res, err);
+                    }
+                    console.log('deleted successfully!')
+                        //Re-sort all announcements, then send to front-end
+                    announcementSchema.find().sort({
+                        priority: 1
+                    }).exec(function(err, announcements) {
+                        console.log('announcements is..', announcements)
+                        if (err) {
+                            console.log(err)
+                        }
+                        return res.send(announcements)
+                    })
+                })
+            })
     });
 })
 
