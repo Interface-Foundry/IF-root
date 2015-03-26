@@ -421,8 +421,8 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
 //load all announcements for that region
 app.get('/api/announcements/:id', function(req, res) {
-
     if (req.user.admin) {
+        //find all announcements for given region, then sort by priority
         announcementSchema.aggregate({
             $match: {
                 region: req.params.id.toString().toLowerCase()
@@ -443,27 +443,56 @@ app.get('/api/announcements/:id', function(req, res) {
     }
 })
 
+//create new announcement for that region and shift priorities for all others
+app.post('/api/announcements', function(req, res) {
+    if (req.user.admin) {
+        //Increment priority for all other announcements other than one being created
+        announcementSchema.update({}, {
+                $inc: {
+                    priority: 1
+                }
+            }, {
+                multi: true
+            }, function(err, result) {
+                if (err) {
+                    console.log(err)
+                }
+                console.log('documents incremented', result)
+            })
+        //Then create the new announcement with priority one
+        var newannouncement = new announcementSchema();
+        //merge new announcement with whatever is sent from frontend
+        var announcement = _.extend(newannouncement, req.body);
+        //save it
+        announcement.save(
+            function(err, announcement) {
+                if (err) {
+                    console.log(err)
+                }
+                console.log('saved!', announcement)
+                announcementSchema.find(function(err, results) {
+                    res.send(results);
+                })
+            });
+    }
+})
+
+//delete announcement for that region
+app.delete('/api/announcements:id', function(req, res) {
+  announcementSchema.findById(req.params.id, function (err, announcement) {
+    if(err) { return handleError(res, err); }
+    if(!announcement) { return res.send(404); }
+    announcement.remove(function(err) {
+      if(err) { return handleError(res, err); }
+      return res.send(204);
+    });
+  });
+})
 
 
-
-
-
-//         find({region: req.params.id.toString().toLowerCase()},
-//             {$sort :{priority:1}}
-//             ,function(err, announcements) {
-//             if (err) {
-//                 return handleError(res, err);
-//             }
-//             return res.send(announcements);
-//         });
-//     } else {
-//         console.log('you are not authorized...stand down..')
-//     }
-// })
 
 //load all contests for that region
 app.get('/api/contests/:id', function(req, res) {
-
     if (req.user.admin) {
         contestSchema.find({
             region: req.params.id.toString().toLowerCase()
@@ -479,39 +508,6 @@ app.get('/api/contests/:id', function(req, res) {
     }
 })
 
-//create new announcement for that region
-app.post('/api/announcements', function(req, res) {
-    if (req.user.admin) {
-        //increment priority for all other announcements
-        announcementSchema.update({}, {
-                $inc: {
-                    priority: 1
-                }
-            }, {
-                multi: true
-            }, function(err, result) {
-                if (err) {
-                    console.log(err)
-                }
-                console.log('documents incremented', result)
-            })
-            //create new announcement with priority 1
-        var newannouncement = new announcementSchema();
-
-        var announcement = _.extend(newannouncement, req.body);
-
-        announcement.save(
-            function(err, announcement) {
-                if (err) {
-                    console.log(err)
-                }
-                console.log('saved!', announcement)
-                announcementSchema.find(function(err, results) {
-                    res.send(results);
-                })
-            });
-    }
-})
 
 //create new contest for that region
 app.post('/api/contests', function(req, res) {
