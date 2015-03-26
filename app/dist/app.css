@@ -3348,6 +3348,9 @@ nav ul {
 #shelf.superuser-background .superuser-list li {
   margin: 20px 0;
 }
+#shelf.superuser-background .superuser-list li button.btn {
+  width: 70px;
+}
 #shelf.superuser-background .superuser-list .superuser-list-item {
   cursor: auto;
   display: inline-block;

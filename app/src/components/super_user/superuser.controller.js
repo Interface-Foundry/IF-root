@@ -42,7 +42,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		var deleteConfirm = confirm("Are you sure you want to delete this?");
 		if (deleteConfirm) {
 			Announcements.remove({
-				_id: $scope.as[index]._id
+				id: $scope.as[index]._id
 			})
 			.$promise
 			.then(function(response) {
