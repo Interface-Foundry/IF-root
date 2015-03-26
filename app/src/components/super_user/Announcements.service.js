@@ -9,12 +9,9 @@ angular.module('IF')
             update: {
                 method: 'put'
             },
-            scan: {
+            save: {
                 method: 'POST',
-                isArray:true,
-                params: {
-                    option: 'scan'
-                }
+                isArray:true
             },
             sort: {
                 method: 'POST',
