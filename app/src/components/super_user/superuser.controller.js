@@ -7,6 +7,7 @@ SuperuserController.$inject = ['$scope', 'Announcements','$routeParams', '$locat
 function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	$scope.announcement = {};
+	$scope.deleteAnnouncement = deleteAnnouncement;
 	$scope.toggleNewAnnouncement = toggleNewAnnouncement;
 	$scope.toggleNewContest = toggleNewContest;
 	$scope.region = capitalizeFirstLetter($routeParams.region);
@@ -19,7 +20,9 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	function activate() {
 		resetAnnouncement();
-		Announcements.query({id: $scope.region}).$promise
+		Announcements.query({
+			id: $scope.region
+		}).$promise
 	    .then(function(as) {
 	      $scope.as = as;
 	      console.log(as)
@@ -33,6 +36,19 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	$scope.changeRoute = function() {
 		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+	}
+
+	function deleteAnnouncement(index) {
+		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		if (deleteConfirm) {
+			Announcements.remove({
+				_id: $scope.as[index]._id
+			})
+			.$promise
+			.then(function(response) {
+				$scope.as = response;
+			});
+		}
 	}
 
 	function toggleNewAnnouncement() {
