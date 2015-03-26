@@ -29,7 +29,7 @@ function analyticsService($http, geoService) {
                 sequenceNumber: sequenceNumber,
                 loc: {
                     type: "Point",
-                    coordinates: [coords.lon, coords.lat]
+                    coordinates: [coords.lng, coords.lat]
                 }
             };
 
