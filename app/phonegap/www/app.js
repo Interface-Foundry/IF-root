@@ -23296,16 +23296,16 @@ SuperuserController.$inject = ['$scope', 'Announcements','$routeParams', '$locat
 function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	$scope.announcement = {
+		live: false,
 		region: 'global'
 	};
 	$scope.newAnnouncement = newAnnouncement;
+	$scope.newContest = newContest;
 	$scope.region = capitalizeFirstLetter($routeParams.region);
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
 	$scope.showAddAnnouncement = false;
 	$scope.showAddContest = false;
-	$scope.url = {};
-
 
 	activate();
 
@@ -23313,6 +23313,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		Announcements.query({id: $scope.region}).$promise
 	    .then(function(as) {
 	      $scope.as = as;
+	      console.log(as)
 	    });
 	}
 
@@ -23323,11 +23324,6 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	$scope.changeRoute = function() {
 		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
-	}
-
-
-	function createAnnouncementUrl() {
-		return '<a href="' + $scope.url.path + '">' + $scope.url.name + '</a>';
 	}
 
 	function newAnnouncement() {
@@ -23341,7 +23337,6 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	}
 
 	$scope.submitAnnouncement = function () {
-    $scope.announcement.URL = createAnnouncementUrl();
     console.log('announcement in front end is..', $scope.announcement);
     Announcements.save($scope.announcement).$promise
     .then(function(result) {
@@ -23349,6 +23344,8 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
       $scope.announcement = {};
       $scope.url = {};
       newAnnouncement();
+    }, function(error) {
+    	console.log(error.data);
     });
   };
 }

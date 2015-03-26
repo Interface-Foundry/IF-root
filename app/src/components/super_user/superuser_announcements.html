@@ -4,30 +4,32 @@
           ng-model="currentRoute" 
           ng-options="route for route in routes">
   </select>
-  <p>{{region}} Announcements</p>
+  <p class="superuser-title">{{region}} Announcements</p>
 </nav>
 
-<div id="shelf" class="defaultBG">
-  <div class="container-fluid navfix defaultBG">
-    <div class="row">
-      <div class="col-xs-12">
-        <button ng-if="!showAddAnnouncement"
-                class="add-button"
-                ng-click="newAnnouncement()">
-          + Add an Announcement
-        </button>
-        <div ng-if="showAddAnnouncement"
-             ng-include="'components/super_user/superuser.announcements.new.html'"></div>
+<div id="shelf" class="shelf-surface wrap superuser-background">
+  <div class="container-fluid navfix">
+    <div class="superuser-list">
+      <div ng-if="!showAddAnnouncement"
+              class="add-button"
+              ng-click="newAnnouncement()">
+        <div class="circle">+</div>
+        Create New Announcement
       </div>
+      <div ng-if="showAddAnnouncement"
+           ng-include="'components/super_user/superuser.announcements.new.html'"></div>
+      <ul>
+        <li ng-repeat="a in as">
+          <button ng-if="a.live" class="btn btn-success">Live &#10004;</button>
+          <button ng-if="!a.live" class="btn btn-default">Draft</button>
+          <div class="media card superuser-list-item">
+            <h5>{{a.headline}}</h5>
+            <p>{{a.body}}</p>
+            <p>{{a.URL}}</p>
+          </div>
+        </li>
+      </ul>
     </div>
   </div>
   <div class="clearfix"></div>
-  <ul>
-    <li class="landmark col-xs-12 col-sm-6" ng-repeat="a in as">
-      <div class="media card">
-        {{a}}
-    
-      </div>
-    </li>
-  </ul>
 </div>
