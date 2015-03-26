@@ -36,6 +36,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
 	}
 
+
 	function createAnnouncementUrl() {
 		return '<a href="' + $scope.url.path + '">' + $scope.url.name + '</a>';
 	}
@@ -62,3 +63,32 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
     });
   };
 }
+
+
+
+// var announcementsSchema = mongoose.Schema({
+//     headline: {
+//         type: String,
+//         required: true
+//     }, 
+//     body: {
+//         type: String,
+//         required: true
+//     }, 
+//     URL: {
+//         type: String,
+//         required: true
+//     }, 
+//     priority: {type: Number},
+//     live: {type: Boolean},
+//     imgURL: {
+//         type: String,
+//         required: true
+//     },
+//     region: {
+//         type: String,
+//         default: 'global'
+//     },
+//     timestamp: { type: Date, default: Date.now }
+// });
+
