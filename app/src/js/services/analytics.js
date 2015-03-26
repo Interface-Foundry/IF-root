@@ -2,15 +2,11 @@
 
 app.factory('analyticsService', analyticsService);
 
-analyticsService.$inject = ['$http', '$injector'];
+analyticsService.$inject = ['$http', '$injector', '$rootScope', '$timeout'];
 
-function analyticsService($http, $injector) {
+function analyticsService($http, $injector, $rootScope, $timeout) {
     var sequenceNumber = 0;
     var geoService; // lazy loaded to avoid circ dependency
-
-    return {
-        log: log
-    };
 
     /**
      * Log any sort of analytics data
@@ -41,4 +37,23 @@ function analyticsService($http, $injector) {
             $http.post('/api/analytics/' + action, doc);
         });
     }
+    
+    // log all route changes to teh db
+    $rootScope.$on('$routeChangeSuccess', function(event, url) {
+		
+		// wait until render finishes
+		$timeout(function() {
+			
+			// the main shelf scope has all the interesting stuff
+			var scope = angular.element('#shelf').scope() || {};
+			log('route.change', {
+				url: location.href,
+				world: scope.world 
+			});
+		});
+	});
+    
+    return {
+        log: log
+    };
 }
