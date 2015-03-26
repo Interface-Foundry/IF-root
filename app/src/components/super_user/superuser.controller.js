@@ -38,17 +38,7 @@ function SuperuserController($scope, Announcements, $routeParams) {
 		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
 	}
 
-	function submit() {
-		console.log('Submitted:', vm.announcement);
-	}
-
-	function post() {
-		Announcments.post({
-
-		})
-	}
 }
-
 
 // var announcementsSchema = mongoose.Schema({
 //     headline: {

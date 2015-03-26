@@ -438,7 +438,6 @@ app.get('/api/announcements/:id', function(req, res) {
 })
 
 //load all contests for that region
-//load all announcements for that region
 app.get('/api/contests/:id', function(req, res) {
 
     if (req.user.admin) {
@@ -448,7 +447,7 @@ app.get('/api/contests/:id', function(req, res) {
             if (err) {
                 return handleError(res, err);
             }
-            console.log('hitting, -->', contests)
+           
             return res.send(contests);
         });
     } else {
@@ -460,7 +459,7 @@ app.get('/api/contests/:id', function(req, res) {
 app.post('/api/announcements', function(req, res) {
     if (req.user.admin) {
         //decrement priority for all other announcements
-        announcementSchema.update({$dec:{priority:1}})
+        // announcementSchema.update({$dec:{priority:1}})
         //create new announcement with priority 1
         var newannouncement = new announcementSchema();
 
@@ -471,7 +470,10 @@ app.post('/api/announcements', function(req, res) {
                 if (err) {
                     console.log(err)
                 }
-                return res.send(announcement);
+                 console.log('saved!', announcement)
+                 announcementSchema.find(function(err, results) {
+                    res.send(results);
+                 })
             });
     }
 })

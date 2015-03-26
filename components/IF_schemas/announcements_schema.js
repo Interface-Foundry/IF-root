@@ -3,10 +3,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
 
-// ANNOUCEMENTS | Add announcement schema (timestamp, region: 'global') 
-// with ability for super user to add announcements in object array 
-// (headline, html body, URL, priority #,. maybe img url) @mitsuakiuchimoto 
-
 var announcementsSchema = mongoose.Schema({
     headline: {
         type: String,
@@ -16,13 +12,16 @@ var announcementsSchema = mongoose.Schema({
         type: String,
         required: true
     }, 
-    URL: {
+    urlPath: {
         type: String,
-        required: true,
-        default:'www.google.com'
+        required: true
+    }, 
+    urlName: {
+        type: String,
+        required: true
     }, 
     priority: {type: Number, default:1},
-    live: {type: Boolean},
+    live: {type: Boolean, default:false},
     region: {
         type: String,
         default: 'global'
