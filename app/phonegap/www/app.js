@@ -18663,8 +18663,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -18812,6 +18812,7 @@ userManager.logout = function() {
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
+	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
@@ -18989,8 +18990,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 }
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19162,6 +19163,7 @@ worldTree.createWorld = function() {
 		console.log('##Create##');
 		console.log('response', response);
 		$location.path('/edit/walkthrough/'+response[0].worldID);
+		navService.reset();
 	});
 }
 
@@ -22203,6 +22205,8 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
+$scope.location = $location;
+
 var map = mapManager;
 
 
@@ -23236,21 +23240,30 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
 			scope.routeParams = $routeParams;
+			scope.loading = false; // for showing loading animation
+
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
+				scope.loading = true;
+				scope.searchResult = []; // clear last results
+
 				geoService.getLocation().then(function(coords) {
-				
-				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
-					.success(function(result) {
-						if (!result.err) {
-							scope.searchResult = result;
-						} else {
-							scope.searchResult = [];
-						}
-					})
-					.error(function(err) {console.log(err)});
+					scope.searching = $http.get('/api/textsearch', {server: true, params: 
+						{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
+						.success(function(result) {
+							if (!result.err) {
+								scope.searchResult = result;
+							} else {
+								scope.searchResult = [];
+							}
+							scope.loading = false;
+						})
+						.error(function(err) {
+							console.log(err)
+							scope.loading = false;
+						});
 				});		
 			}
 			

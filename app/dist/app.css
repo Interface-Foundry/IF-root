@@ -4616,6 +4616,7 @@ li.alert {
   top: 4px;
   font-size: 0.9em;
 }
+/*UTILITIES*/
 .u-pointer {
   cursor: pointer;
 }
@@ -4624,6 +4625,10 @@ li.alert {
   top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.u-100XY {
+  width: 100%;
+  height: 100%;
 }
 /* CATEGORY WIDGET */
 .category-list-shadow {

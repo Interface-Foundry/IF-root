@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -166,6 +166,7 @@ userManager.logout = function() {
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
+	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
