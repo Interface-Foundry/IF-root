@@ -2,9 +2,9 @@
 
 app.factory('locationAnalyticsService', locationAnalyticsService);
 
-locationAnalyticsService.$inject = ['$http', '$interval', 'analyticsService'];
+locationAnalyticsService.$inject = ['$http', '$interval', 'analyticsService', 'localStore'];
 
-function locationAnalyticsService($http, $interval, analyticsService) {
+function locationAnalyticsService($http, $interval, analyticsService, localStore) {
     var locationBuffer = []; // array of any kind of location data
     var maxBufferSize = 1000; // when to flush the buffer
     var maxBufferAge = 60*1000; // flush every so often
@@ -38,44 +38,28 @@ function locationAnalyticsService($http, $interval, analyticsService) {
      * @param data the dat you want to log to the db
      */
     function log(data) {		
-		data.timestamp = Date.now();
-		locationBuffer.push(data);
-		
-		if (locationBuffer.length == maxBufferSize) {
-			flushBuffer();
-		}
-		
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem("locationBuffer", JSON.stringify(locationBuffer));
-		}
+      data.timestamp = Date.now();
+      localStore.locationBuffer.push(data);
+      if (localStore.locationBuffer.getLength == maxBufferSize) {
+	flushBuffer();
+      }
     }
     
     function flushBuffer() {
-		// use localstorage if they have it
-		if (typeof localStorage !== 'undefined') {
-			try {
-				locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
-			}
-			catch (e) {
-				// welp... start over.
-				localStorage.setItem("locationBuffer", "[]");
-				locationBuffer = [];
-				return;
-			}
-		}
+      var locationBuffer = localStore.locationBuffer.flush();
 		
-		if (locationBuffer.length > 0) {
-			analyticsService.log('geolocation.updates', locationBuffer);
-			locationBuffer = [];
-		}
-	}
-	
-	$interval(function() {
-		flushBuffer();
-	}, maxBufferAge);
-	
-	return {
-        log: log,
-        forceFlushBuffer: flushBuffer
-    };
+      if (locationBuffer.length > 0) {
+	  analyticsService.log('geolocation.updates', locationBuffer);
+      }
+      
+    }
+    
+  $interval(function() {
+	  flushBuffer();
+  }, maxBufferAge);
+    
+  return {
+    log: log,
+    forceFlushBuffer: flushBuffer
+  };
 }

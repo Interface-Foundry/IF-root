@@ -1,7 +1,10 @@
 app.factory('localStore', ['$http', '$q', function($http, $q) {
+	
+	var hasLocalStorage = (typeof localStorage !== 'undefined');
 
 	var localStore = {
-		getID: getID
+		getID: getID,
+		locationBuffer: locationBuffer
 	};
 	
 	var id; // id for when the user doesn't have localStorage
@@ -49,6 +52,53 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 				return res.data[0];
 			});
 	}
+	
+	
+	/**
+	 * Location Buffer
+	 */
+	 var _locationBuffer = [];
+	 var locationBuffer = {
+		 push: function(data) {
+			_locationBuffer.push(data);
+			
+			if (typeof localStorage !== 'undefined') {
+				localStorage.setItem("locationBuffer", JSON.stringify(_locationBuffer));
+			}
+		 },
+		 getLength: function() {
+			var l;
+			 if (hasLocalStorage) {
+				 try {
+					 l = JSON.parse(localStorage.locationBuffer).length;
+				 } catch (e) {
+					 localStorage.locationBuffer = "[]";
+					 l = 0;
+				 }
+				 return l;
+			 } else {
+				 return _locationBuffer.length;
+			 }
+		 },
+		 flush: function() {
+			// use localstorage if they have it
+			if (typeof localStorage !== 'undefined') {
+				try {
+					_locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+				}
+				catch (e) {
+					// welp... start over.
+					localStorage.setItem("locationBuffer", "[]");
+					locationBuffer = [];
+					return [];
+				}
+			}
+			var lb = angular.copy(_locationBuffer);
+			_locationBuffer = [];
+			return lb;
+		 }
+	 };
+	
 	
 	return localStore;
 }]);
