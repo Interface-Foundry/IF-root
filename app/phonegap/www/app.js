@@ -23617,13 +23617,13 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
 	activate();
 
 	function activate() {
-		today();
 		Contests.query({
 			id: $scope.region
 		}).$promise
-	    .then(function(response) {
-	      $scope.contest = response;
-	    });
+    .then(function(response) {
+      $scope.contest = response;
+			getDates();
+    });
 	}
 
 	$scope.changeRoute = function() {
@@ -23678,12 +23678,19 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
     });;
 	}
 
-	function today() {
-		var d = new Date;
-    $scope.dateTime.startDate = d;
-    $scope.dateTime.startTime = d;
-    $scope.dateTime.endDate = d;
-    $scope.dateTime.endTime = d;
+	function getDates() {
+		if (_.isEmpty($scope.contest)) {
+			var d = new Date;
+	    $scope.dateTime.startDate = d;
+	    $scope.dateTime.startTime = d;
+	    $scope.dateTime.endDate = d;
+	    $scope.dateTime.endTime = d;
+		} else {
+			$scope.dateTime.startDate = $scope.contest.startDate;
+	    $scope.dateTime.startTime = $scope.contest.startTime;
+	    $scope.dateTime.endDate = $scope.contest.endDate;
+	    $scope.dateTime.endTime = $scope.contest.endTime;
+		}
   }
 
   function updateContest(form) {
