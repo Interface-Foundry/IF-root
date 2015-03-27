@@ -2,18 +2,18 @@
 
 app.controller('SuperuserContestController', SuperuserContestController);
 
-SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location'];
+SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location', 'superuserService'];
 
-function SuperuserContestController($scope, Contests, $routeParams, $location) {
+function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
 
 	$scope.contest = {};
+	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
     formatYear: 'yy',
     startingDay: 1
   };
   $scope.dateTime = {};
-	$scope.routes = ['Announcements', 'Contests'];
-	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.routes = superuserService.routes
 	$scope.openEnd = openEnd;
 	$scope.openStart = openStart;
 	$scope.region = $routeParams.region;
@@ -29,13 +29,15 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
     .then(function(response) {
       $scope.contest = response;
 			getDates();
+    }, function(error) {
+    	console.log('Error:', error);
+    	getDates();
     });
 	}
 
 	$scope.changeRoute = function() {
-		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
-
 
 	function formatDateTime() {
 		var sd = $scope.dateTime.startDate,

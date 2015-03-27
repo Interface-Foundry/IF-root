@@ -4916,7 +4916,7 @@ $routeProvider.
 
 		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserAnnouncementController', resolve: {isAdmin: checkAdminStatus} }).
 		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
-
+		when('/su/entries/:region', {templateUrl: 'components/super_user/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -23192,22 +23192,80 @@ angular.module('IF')
     });
 'use strict';
 
+angular.module('IF')
+    .factory('Entries', function($resource) {
+
+        return $resource("/api/entries/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            scan: {
+                method: 'POST',
+                isArray:true,
+                params: {
+                    option: 'scan'
+                }
+            },
+            remove: {
+                method: 'DELETE'
+            }
+        });
+    });
+'use strict';
+
+app.factory('superuserService', superuserService);
+
+superuserService.$inject = ['$location'];
+
+function superuserService($location) {
+	
+	var currentRoute = '',
+			routes = ['Announcements', 'Contests', 'Entries'];
+
+	return {
+		changeRoute: changeRoute,
+		getCurrentRoute: getCurrentRoute,
+		routes: routes
+	};
+
+	function changeRoute(newRoute, region) {
+		currentRoute = newRoute;
+		$location.path('/su/' + newRoute.toLowerCase() + '/' + region.toLowerCase());
+	}
+
+	function getCurrentRoute() {
+		currentRoute = currentRoute.length ? currentRoute :
+								findRoute();
+		return currentRoute;
+	}
+
+	function findRoute() {
+		var path = $location.path();
+		var len = path.slice(4).indexOf('/');
+		return path.slice(4)[0].toUpperCase() + path.slice(5, len + 4);
+	}
+
+}
+'use strict';
+
 app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
 
-SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location'];
+SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location', 'superuserService'];
 
-function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location) {
+function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location, superuserService) {
 
 	$scope.announcement = {};
 	$scope.announcements = [];
 	$scope.changeAnnouncementOrder = changeAnnouncementOrder;
+	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.deleteAnnouncement = deleteAnnouncement;
 	$scope.edit = false;
 	$scope.editAnnouncement = editAnnouncement;
 	$scope.editIndex;
 	$scope.region = $routeParams.region;
-	$scope.routes = ['Announcements', 'Contests'];
-	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.routes = superuserService.routes;
 	$scope.regions = ['global'];
 	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
@@ -23243,7 +23301,7 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	}
 
 	$scope.changeRoute = function() {
-		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
 
 	function deleteAnnouncement(index) {
@@ -23327,18 +23385,18 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 
 app.controller('SuperuserContestController', SuperuserContestController);
 
-SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location'];
+SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location', 'superuserService'];
 
-function SuperuserContestController($scope, Contests, $routeParams, $location) {
+function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
 
 	$scope.contest = {};
+	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
     formatYear: 'yy',
     startingDay: 1
   };
   $scope.dateTime = {};
-	$scope.routes = ['Announcements', 'Contests'];
-	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.routes = superuserService.routes
 	$scope.openEnd = openEnd;
 	$scope.openStart = openStart;
 	$scope.region = $routeParams.region;
@@ -23354,13 +23412,15 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
     .then(function(response) {
       $scope.contest = response;
 			getDates();
+    }, function(error) {
+    	console.log('Error:', error);
+    	getDates();
     });
 	}
 
 	$scope.changeRoute = function() {
-		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
-
 
 	function formatDateTime() {
 		var sd = $scope.dateTime.startDate,
@@ -23431,6 +23491,35 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
   		$scope.contest = response;
   	});	
   }
+
+}
+'use strict';
+
+app.controller('SuperuserEntriesController', SuperuserEntriesController);
+
+SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$location', 'superuserService'];
+
+function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
+
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.entries = [];
+	$scope.region = $routeParams.region;
+	$scope.routes = superuserService.routes;
+	
+	activate();
+
+	function activate() {
+		Entries.query({
+			id: $scope.region
+		}).$promise
+    .then(function(response) {
+      $scope.entries = response;
+    });
+	}
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
 
 }
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
