@@ -16,6 +16,7 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	$scope.region = capitalizeFirstLetter($routeParams.region);
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.regions = ['global'];
 	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
 	$scope.showAddContest = false;
