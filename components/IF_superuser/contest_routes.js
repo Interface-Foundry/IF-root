@@ -9,7 +9,6 @@ var express = require('express'),
 //load current contest for that region
 router.get('/:id', function(req, res) {
     if (req.user.admin) {
-
         console.log('hitting get contest')
             //find current contest
         contestSchema.findOne({
@@ -19,6 +18,7 @@ router.get('/:id', function(req, res) {
             if (err) {
                 console.log(err);
             }
+            console.log('found a contest! -->', contest)
             return res.send(contest);
         });
 
@@ -30,6 +30,7 @@ router.get('/:id', function(req, res) {
 
 //create new contest for that region
 router.post('/', function(req, res) {
+    console.log('hitting post, req.body is..', req.body)
     if (req.user.admin) {
         var newcontest = new contestSchema();
         var contest = _.extend(newcontest, req.body);
@@ -43,6 +44,34 @@ router.post('/', function(req, res) {
             });
     }
 })
+
+// //edit the current contest
+// router.post('/:id', function(req, res) {
+//     console.log('hitting edit, req.body is..', req.body)
+//     if (req.user.admin) {
+//          //find current contest
+//         contestSchema.findOne({
+//             region: req.params.id.toString().toLowerCase(),
+//             live: true
+//         }, function(err, contest) {
+//             if (err) {
+//                 console.log(err);
+//             }
+//             console.log('found a contest! -->', contest)
+//             return res.send(contest);
+//         });
+        
+//         var contest = _.extend(newcontest, req.body);
+
+//         contest.save(
+//             function(err, contest) {
+//                 if (err) {
+//                     console.log(err)
+//                 }
+//                 return res.send(contest);
+//             });
+//     }
+// })
 
 
 module.exports = router;

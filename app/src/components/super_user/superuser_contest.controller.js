@@ -74,7 +74,14 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
 		$scope.contest.startDate = formatDateTime().start;
 		$scope.contest.endDate = formatDateTime().end;
 
-		Contests.save($scope.contest);
+		Contests.save($scope.contest).$promise
+    .then(function(contest) {
+    console.log(contest);
+      $scope.newcontest = contest;
+      
+    }, function(error) {
+      console.log(error.data);
+    });;
 	}
 
 	function today() {
