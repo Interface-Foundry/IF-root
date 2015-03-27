@@ -14,6 +14,19 @@ var checkLoggedin = function(userManager) {
     return userManager.checkLogin();
 }
 
+var checkAdminStatus = function(userManager, $location) {
+	userManager.checkAdminStatus()
+	.then(function(isAdmin) {
+		if (isAdmin) {
+			return true;
+		} else {
+			return $location.path('/');
+		}
+	}, function(err) {
+		return $location.path('/');
+	});
+}
+
     //================================================
     
     //================================================
@@ -98,8 +111,8 @@ $routeProvider.
     
     when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
-		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {} }).
-		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {} }).
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {isAdmin: checkAdminStatus} }).
 
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).

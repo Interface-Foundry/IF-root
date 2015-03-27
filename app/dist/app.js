@@ -4828,6 +4828,19 @@ var checkLoggedin = function(userManager) {
     return userManager.checkLogin();
 }
 
+var checkAdminStatus = function(userManager, $location) {
+	userManager.checkAdminStatus()
+	.then(function(isAdmin) {
+		if (isAdmin) {
+			return true;
+		} else {
+			return $location.path('/');
+		}
+	}, function(err) {
+		return $location.path('/');
+	});
+}
+
     //================================================
     
     //================================================
@@ -4901,8 +4914,8 @@ $routeProvider.
     
     when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
-		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {} }).
-		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {} }).
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/superuser_announcements.html', controller: 'SuperuserController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/superuser_contests.html', controller: 'SuperuserController', resolve: {isAdmin: checkAdminStatus} }).
 
 
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
@@ -18730,6 +18743,22 @@ userManager.signup.signup = function() { //signup based on signup form
 
 userManager.saveToKeychain = function() { 
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+}
+
+userManager.checkAdminStatus = function() {
+	var deferred = $q.defer();
+
+	userManager.getUser().then(function(user) {
+	  if (user.admin) {
+		  deferred.resolve(true);
+	  } else {
+	  	deferred.reject(false);
+	  }
+	}, function(error) {
+		deferred.reject(false);
+	});
+
+	return deferred.promise;
 }
 
 return userManager;
