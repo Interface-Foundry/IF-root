@@ -66,7 +66,8 @@ $scope.uploadWTGT = function($files, state) {
 		});
 	} else { // not logged in
 		dialogs.showDialog('authDialog.html');
-		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+		contest.set($scope.wtgt.hashtags[state]);
+		
 	}
 	
 }
@@ -96,13 +97,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 			geoService.trackStop();
 		 		}
 		 	});	
-		 }
-
-		 //local storage
-		 if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	 }
-		 
+		 }		 
 
 		 style.navBG_color = $scope.style.navBG_color;
 

@@ -29,7 +29,6 @@ function analyticsService($http, $injector, $rootScope, $timeout, localStore, $l
 			data: data,
 			userTimestamp: Date.now(),
 			sequenceNumber: sequenceNumber,
-            anon_user_id: localStore.getID(),
             world: getWorld()
 		};
 
@@ -39,11 +38,15 @@ function analyticsService($http, $injector, $rootScope, $timeout, localStore, $l
 				coordinates: [coords.lng, coords.lat]
 			};
 			
+			return localStore.getID();
+		}).then(function(id) {
+			doc.anon_user_id = id;
 			return userManager.getUser();
 		}).then(function(user) {
 			if (user.permissions.indexOf('do_not_track') == -1) {
 				doc.user = user._id;
 			}
+			
 		}).finally(function() {
 			// dude trust me, this is gonna work. no need for a response
 			$http.post('/api/analytics/' + action, doc);

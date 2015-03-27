@@ -2,7 +2,6 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 	
 	var isContest = false;
 	var hashtag;
-	var id;
 	var startTime;
 
 	return {
@@ -11,9 +10,8 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		close: close
 	}
 
-	function set(setID, setHashtag) {
+	function set(setHashtag) {
 		isContest = true;
-		id = setID;
 		hashtag = setHashtag;
 		startTime = new Date();
 	}
@@ -24,19 +22,23 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
-				anonID: id,
 				selectedUploadType: hashtag,
 				signedUp: true,
 				userTimeDuration: timeDuration
-			}
-			$http.post('/api/anon_user/update', data).
-				success(function(data) {
-					// console.log('success: ', data);
-				}).
-				error(function(data) {
-					// console.log('error: ', data);
-				});
-			reset();
+			};
+			
+			localStore.getID().then(function(id) {
+				data.anonID = id;
+			}).then(function() {
+				$http.post('/api/anon_user/update', data).
+					success(function(data) {
+						// console.log('success: ', data);
+					}).
+					error(function(data) {
+						// console.log('error: ', data);
+					});
+				reset();
+			})
 		}
 	}
 
@@ -46,27 +48,28 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			var response;
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
-				anonID: id,
 				selectedUploadType: hashtag,
 				closedNoLogin: true,
 				userTimeDuration: timeDuration
 			}
-			$http.post('/api/anon_user/update', data).
-				success(function(data, status, headers, config) {
-					response = data[0];
-					// console.log('response: ', response);
-				}).
-				error(function(data, status, headers, config) {
-					// console.log('error: ', data);
-				});
-			compare(response, id);
-			reset();
+			
+			localStore.getID().then(function(id) {
+				data.anonID = id;
+			}).then(function() {
+				$http.post('/api/anon_user/update', data).
+					success(function(data, status, headers, config) {
+						// console.log('response: ', response);
+					}).
+					error(function(data, status, headers, config) {
+						// console.log('error: ', data);
+					});
+				reset();
+			});
 		}
 	}
 
 	function reset() {
 		isContest = false;
-		id = null;
 		hashtag = null;
 		startTime = null;
 	}
@@ -76,12 +79,4 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		var end = end.getTime();
 		return end - start; // in ms
 	}
-
-	function compare(response, id) {
-		// if the id returned from api is different from id passed into api, then update the id
-		if (response && response!== id) {
-			localStore.setID(response);
-		}
-	}
-
 }]);
