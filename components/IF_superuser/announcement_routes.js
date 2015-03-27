@@ -2,7 +2,8 @@
 
 var express = require('express'),
 router = express.Router(),
-announcementSchema = require('../IF_schemas/announcements_schema.js')
+announcementSchema = require('../IF_schemas/announcements_schema.js'),
+_ = require('underscore');
     
 //load all announcements for that region
 router.get('/:id', function(req, res) {

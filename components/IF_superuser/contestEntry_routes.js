@@ -2,34 +2,24 @@
 
 var express = require('express'),
 router = express.Router(),
-contestSchema = require('../IF_schemas/contest_schema.js'),
+contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
 _ = require('underscore');
 
-
-//load current contest for that region
-router.get('/:id', function(req, res) {
+//load contest entries by newest
+router.get('/:number', function(req, res) {
     if (req.user.admin) {
-
-        console.log('hitting get contest')
-        //find current contest
-        announcementSchema.aggregate({
-            $match: {
-                region: req.params.id.toString().toLowerCase()
-            }
-        }, {
-            current: true
-        }, function(err, contest) {
+        console.log('loading contest entries')
+        contestSchema.find().sort({usertime:-1}).exec(function(err, contests) {
             if (err) {
                 console.log(err);
             }
-            return res.send(contest);
+            return res.send(contests);
         });
 
     } else {
         console.log('you are not authorized...stand down..')
     }
 })
-
 
 //create new contest for that region
 router.post('/', function(req, res) {
@@ -47,7 +37,4 @@ router.post('/', function(req, res) {
     }
 })
 
-
 module.exports = router;
-
-
