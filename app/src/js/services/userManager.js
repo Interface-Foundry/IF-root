@@ -219,5 +219,21 @@ userManager.saveToKeychain = function() {
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
 }
 
+userManager.checkAdminStatus = function() {
+	var deferred = $q.defer();
+
+	userManager.getUser().then(function(user) {
+	  if (user.admin) {
+		  deferred.resolve(true);
+	  } else {
+	  	deferred.reject(false);
+	  }
+	}, function(error) {
+		deferred.reject(false);
+	});
+
+	return deferred.promise;
+}
+
 return userManager;
 }]);
