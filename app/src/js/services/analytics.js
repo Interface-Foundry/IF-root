@@ -29,7 +29,8 @@ function analyticsService($http, $injector, $rootScope, $timeout, localStore, $l
 			data: data,
 			userTimestamp: Date.now(),
 			sequenceNumber: sequenceNumber,
-            anon_user_id: localStore.getID()
+            anon_user_id: localStore.getID(),
+            world: getWorld()
 		};
 
 		geoService.getLocation().then(function(coords) {
@@ -54,20 +55,25 @@ function analyticsService($http, $injector, $rootScope, $timeout, localStore, $l
 		
 		// wait until render finishes
 		$timeout(function() {
-			
-			// the main shelf scope has all the interesting stuff
-			var scope = angular.element('#shelf').scope() || {};
-			var world = (scope.world && scope.world._id) ? {
-					_id: scope.world._id,
-					category: scope.world.categor,
-					loc: scope.world.loc
-				} : null;
 			log('route.change', {
 				url: $location.absUrl(),
-				world: world
+				world: getWorld()
 			});
 		});
 	});
+	
+	// attempt to get the currently viewed world if it exists
+	function getWorld() {
+		// the main shelf scope has all the interesting stuff
+		var scope = angular.element('#shelf').scope() || {};
+		if (scope.world && scope.world._id) {
+			return {
+				_id: scope.world._id,
+				category: scope.world.category,
+				loc: scope.world.loc
+			};
+		}
+	}
     
     return {
         log: log
