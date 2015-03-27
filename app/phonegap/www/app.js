@@ -23359,7 +23359,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 
 	function changeAnnouncementOrder(index, direction) {
 		Announcements.sort({
-			id: $scope.announcements[index]
+			id: $scope.announcements[index]._id
 		}, {
 			dir: direction,
 			priority: $scope.announcements[index].priority
