@@ -2226,11 +2226,24 @@ li.alert {
 .u-pointer {
   cursor: pointer;
 }
+.u-centerX {
+  position: relative;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
 .u-centerY {
   position: relative;
   top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.u-centerXY {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 .u-100XY {
   width: 100%;
@@ -2416,4 +2429,32 @@ div.marker-popup-click {
   left: 1px;
   top: 1px;
   cursor: pointer;
+}
+/*SPLASH*/
+.fullPage {
+  border: 1px solid black;
+  /*remove*/
+  background: #dcdcdc;
+  /*remove*/
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  text-align: center;
+  width: 100vw;
+  height: 100vh;
+}
+.fullPage-content {
+  border: 1px solid black;
+  height: 400px;
+  width: 300px;
+}
+.fullPage-close {
+  border: 1px solid black;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin-top: 20px;
+  margin-right: 20px;
+  height: 30px;
+  width: 30px;
 }
