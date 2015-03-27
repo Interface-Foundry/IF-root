@@ -1,9 +1,9 @@
 'use strict';
 
 var express = require('express'),
-router = express.Router(),
-contestSchema = require('../IF_schemas/contest_schema.js'),
-_ = require('underscore');
+    router = express.Router(),
+    contestSchema = require('../IF_schemas/contest_schema.js'),
+    _ = require('underscore');
 
 
 //load current contest for that region
@@ -11,13 +11,10 @@ router.get('/:id', function(req, res) {
     if (req.user.admin) {
 
         console.log('hitting get contest')
-        //find current contest
-        contestSchema.aggregate({
-            $match: {
-                region: req.params.id.toString().toLowerCase()
-            }
-        }, {
-            current: true
+            //find current contest
+        contestSchema.findOne({
+            region: req.params.id.toString().toLowerCase(),
+            live: true
         }, function(err, contest) {
             if (err) {
                 console.log(err);
@@ -49,5 +46,3 @@ router.post('/', function(req, res) {
 
 
 module.exports = router;
-
-

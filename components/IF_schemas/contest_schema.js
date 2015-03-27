@@ -21,7 +21,8 @@ var contestSchema = mongoose.Schema({
     },
     live: {
         type: Boolean,
-        required: true
+        required: true,
+        default:true
     },
     region: {
         type: String,
