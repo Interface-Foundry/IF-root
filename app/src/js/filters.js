@@ -87,4 +87,12 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   return _date.toUpperCase();
 
  };
-});
+})
+
+.filter('capitalizeFirst', capitalizeFirst);
+
+function capitalizeFirst() {
+  return function(input) {
+    return input[0].toUpperCase() + input.slice(1);
+  }
+}

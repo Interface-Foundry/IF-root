@@ -3351,20 +3351,20 @@ nav ul {
   min-width: 350px;
   width: 60%;
 }
-#shelf.superuser-background .superuser-list li {
+#shelf.superuser-background .superuser-list li.announcement {
   margin: 20px 0;
 }
-#shelf.superuser-background .superuser-list li .superuser-left-col {
+#shelf.superuser-background .superuser-list li.announcement .superuser-left-col {
   display: inline-block;
   font-size: 20px;
   font-weight: bold;
   text-align: center;
 }
-#shelf.superuser-background .superuser-list li .superuser-left-col .arrow {
+#shelf.superuser-background .superuser-list li.announcement .superuser-left-col .arrow {
   cursor: pointer;
   font-size: 30px;
 }
-#shelf.superuser-background .superuser-list li button.btn {
+#shelf.superuser-background .superuser-list li.announcement button.btn {
   width: 70px;
 }
 #shelf.superuser-background .superuser-list .superuser-list-item {
@@ -3377,8 +3377,17 @@ nav ul {
   vertical-align: top;
 }
 #shelf.superuser-background .superuser-list .superuser-list-item h4 {
-  cursor: pointer;
   text-align: center;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item h4 span {
+  cursor: pointer;
+  float: right;
+}
+.datepicker-group {
+  margin-top: 34px;
+}
+.datepicker-group .dropdown-menu {
+  margin-bottom: 50px;
 }
 .circle {
   background-color: rgba(62, 82, 181, 0.960784);

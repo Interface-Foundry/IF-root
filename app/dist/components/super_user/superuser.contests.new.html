@@ -1,42 +1,145 @@
 <div class="new-announcement-form">
 	<div class="form-group">
-		<form>
+		<form name="contestForm" novalidate>
 
 			<button class="x-button"
 							ng-click="toggleNewContest()">x</button>
 
 			<label for="name">Name</label>
-			<input type="text"
-						 class="form-control"
-						 ng-model="contest.name"/>
+			<input name="contestName"
+						 ng-model="contest.name"
+						 type="text"
+						 class="form-control" 
+						 required/>
+			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
+  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+	    </div>
 
 			<label for="headline">Contest Card Headline</label>
-			<input type="text"
-						 class="form-control"
-						 ng-model="contest.headline"/>
+			<input name="contestHeadline"
+						 ng-model="contest.headline"
+						 type="text"
+						 class="form-control" 
+						 required/>
+			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
+  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+	    </div>
+
+			<label for="subheading">Subheading</label>
+			<input name="contestSubheading"
+						 ng-model="contest.subheading"
+						 type="text"
+						 class="form-control" 
+						 required/>
+			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
+  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+	    </div>
 
 			<label for="body">Body</label>
-			<textarea class="form-control"
-								ng-model="contest.body">
+			<textarea name="contestBody"
+								ng-model="contest.body"
+								class="form-control"
+								required>
 			</textarea>
+			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
+  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+	    </div>
 
-			<text-angular ng-model="contest.html"></text-angular>
+			<text-angular ng-model="contest.htmlBody"></text-angular>
 			<div class="clearfix"></div>
 
-			<label for="hashtag1">Hashtag #1</label>
-			<input type="text"
-						 class="form-control"
-						 ng-model="contest.hashtag1"/>
+			<div class="col-lg-6 col-md-6 col-sm-6">
+				<label for="hashtag1title">Hashtag #1 Title</label>
+				<input name="contestHashtag1Title"
+							 ng-model="contest.hashtag1Title"
+							 type="text"
+							 class="form-control" />
 
-			<label for="hashtag2">Hashtag #2</label>
-			<input type="text"
-						 class="form-control"
-						 ng-model="contest.hashtag2"/>
+				<label for="hashtag1">Hashtag #1</label>
+				<input name="contestHashtag1"
+							 ng-model="contest.hashtag1"
+							 type="text"
+							 class="form-control" />
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-6">
+				<label for="hashtag2title">Hashtag #2 Title</label>
+				<input name="contestHashtag2Title"
+							 ng-model="contest.hashtag2Title"
+							 type="text"
+							 class="form-control" />
+
+				<label for="hashtag2">Hashtag #2</label>
+				<input name="contestHashtag2"
+							 ng-model="contest.hashtag2"
+							 type="text"
+							 class="form-control" />
+			</div>
+
+
+
+        <div class="col-md-6">
+            <p class="input-group datepicker-group">
+              <input type="text" 
+              			 class="form-control" 
+              			 datepicker-popup="{{'dd-MMMM-yyyy'}}" 
+              			 ng-model="dateTime.startDate" 
+              			 is-open="$parent.openedStart" 
+              			 datepicker-options="dateOptions" 
+              			 ng-required="true" 
+              			 close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" 
+                				class="btn btn-default" 
+                				ng-click="openStart($event)">
+                				<i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+        </div>
+        <timepicker ng-model="dateTime.startTime" 
+        						hour-step="1" 
+        						minute-step="15" 
+        						show-meridian="true"></timepicker>
+
+
+
+
+    		
+        <div class="col-md-6">
+            <p class="input-group datepicker-group">
+              <input type="text" 
+              			 class="form-control" 
+              			 datepicker-popup="{{'dd-MMMM-yyyy'}}" 
+              			 ng-model="dateTime.endDate" 
+              			 is-open="$parent.openedEnd" 
+              			 datepicker-options="dateOptions" 
+              			 ng-required="true" 
+              			 close-text="Close" />
+              <span class="input-group-btn">
+                <button type="button" 
+                				class="btn btn-default" 
+                				ng-click="openEnd($event)">
+                				<i class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+        </div>
+        <timepicker ng-model="dateTime.endTime" 
+        						hour-step="1" 
+        						minute-step="15" 
+        						show-meridian="true"></timepicker>
+
+
+
+
 
 			<input type="submit" 
 						 value="Save" 
 						 class="btn btn-success"
-						 ng-click="submit()" />
+						 ng-click="submit(contestForm)" />
+
+			<input type="submit" 
+						 value="Edit" 
+						 class="btn btn-warning"
+						 ng-click="updateContest(contestForm)" />
 
 		</form>
 	</div>
