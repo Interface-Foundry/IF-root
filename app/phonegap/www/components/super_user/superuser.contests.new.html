@@ -2,17 +2,14 @@
 	<div class="form-group">
 		<form name="contestForm" novalidate>
 
-			<button class="x-button"
-							ng-click="toggleNewContest()">x</button>
-
 			<label for="name">Name</label>
 			<input name="contestName"
 						 ng-model="contest.name"
 						 type="text"
 						 class="form-control" 
 						 required/>
-			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
-  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+			<div ng-show="contestForm.$submitted || contestForm.contestName.$touched">
+  	    <div ng-show="contestForm.contestName.$error.required">This field is required.</div>
 	    </div>
 
 			<label for="headline">Contest Card Headline</label>
@@ -21,8 +18,8 @@
 						 type="text"
 						 class="form-control" 
 						 required/>
-			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
-  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+			<div ng-show="contestForm.$submitted || contestForm.contestHeadline.$touched">
+  	    <div ng-show="contestForm.contestHeadline.$error.required">This field is required.</div>
 	    </div>
 
 			<label for="subheading">Subheading</label>
@@ -31,8 +28,8 @@
 						 type="text"
 						 class="form-control" 
 						 required/>
-			<div ng-show="contestForm.$submitted || contestForm.contestBody.$touched">
-  	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
+			<div ng-show="contestForm.$submitted || contestForm.contestSubheading.$touched">
+  	    <div ng-show="contestForm.contestSubheading.$error.required">This field is required.</div>
 	    </div>
 
 			<label for="body">Body</label>
@@ -99,10 +96,6 @@
         						hour-step="1" 
         						minute-step="15" 
         						show-meridian="true"></timepicker>
-
-
-
-
     		
         <div class="col-md-6">
             <p class="input-group datepicker-group">
@@ -126,10 +119,6 @@
         						hour-step="1" 
         						minute-step="15" 
         						show-meridian="true"></timepicker>
-
-
-
-
 
 			<input type="submit" 
 						 value="Save" 
