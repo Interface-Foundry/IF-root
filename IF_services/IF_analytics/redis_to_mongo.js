@@ -17,7 +17,7 @@ mongoose.connect(analyticsdb, function(err) {
 });
 
 // periodically dump the redis cache into the analytics db
-setTimeout(function() {
+setInterval(function() {
 
   // get all the documents
   client.lrange('analytics', 0, -1, function (err, docs) {
