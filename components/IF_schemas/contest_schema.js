@@ -35,15 +35,12 @@ var contestSchema = mongoose.Schema({
         type: Date
     },
     contestTag: [{
-        {
-            tag: {
-                type: String,
-                index: true
-            }
-        }, {
-            title: {
-                type: String
-            }
+        tag: {
+            type: String,
+            index: true
+        },
+        title: {
+            type: String
         }
     }],
     subheading: {
