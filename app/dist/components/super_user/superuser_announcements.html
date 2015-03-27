@@ -20,7 +20,7 @@
            ng-include="'components/super_user/superuser.announcements.new.html'"></div>
 
       <ul>
-        <li class="announcement" ng-repeat="announcement in announcements">
+        <li ng-repeat="announcement in announcements">
           <div class="superuser-left-col">
             <button ng-if="announcement.live" 
                     class="btn btn-success"
