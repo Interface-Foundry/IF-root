@@ -1,6 +1,6 @@
 <div class="new-announcement-form">
 	<div class="form-group">
-		<form name="form" novalidate>
+		<form name="announcementForm" novalidate>
 
 			<button class="x-button"
 							ng-click="toggleNewAnnouncement(); resetAnnouncement()">x</button>
@@ -11,8 +11,8 @@
 						 type="text"
 						 class="form-control"
 						 required/>
-	   	<div ng-show="form.$submitted || form.announcementHeadline.$touched">
-  	    <div ng-show="form.announcementHeadline.$error.required">This field is required.</div>
+	   	<div ng-show="announcementForm.$submitted || announcementForm.announcementHeadline.$touched">
+  	    <div ng-show="announcementForm.announcementHeadline.$error.required">This field is required.</div>
 	    </div>
 
 			<label for="body">Body</label>
@@ -21,8 +21,8 @@
 								class="form-control"
 								required>
 			</textarea>
-	   	<div ng-show="form.$submitted || form.announcementBody.$touched">
-  	    <div ng-show="form.announcementBody.$error.required">This field is required.</div>
+	   	<div ng-show="announcementForm.$submitted || announcementForm.announcementBody.$touched">
+  	    <div ng-show="announcementForm.announcementBody.$error.required">This field is required.</div>
 	    </div>
 
 			<label for="url-path">URL Path</label>
@@ -50,13 +50,13 @@
 						 value="Save" 
 						 ng-if="!edit"
 						 class="btn btn-success"
-						 ng-click="submitAnnouncement(form)" />
+						 ng-click="submitAnnouncement(announcementForm)" />
 
 			<input type="submit" 
 						 value="Update"
 						 ng-if="edit" 
 						 class="btn btn-warning"
-						 ng-click="updateAnnouncement(form)" />
+						 ng-click="updateAnnouncement(announcementForm)" />
 
 		</form>
 	</div>

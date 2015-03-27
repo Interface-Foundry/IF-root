@@ -4,20 +4,13 @@
           ng-model="currentRoute" 
           ng-options="route for route in routes">
   </select>
-  <p>{{region}} Contests</p>
+  <p>{{region | capitalizeFirst}} Contests</p>
 </nav>
 
 <div id="shelf" class="shelf-surface wrap superuser-background">
   <div class="container-fluid navfix">
     <div class="superuser-list">
-      <div ng-if="!showAddContest"
-              class="add-button"
-              ng-click="toggleNewContest()">
-        <div class="circle">+</div>
-        Create New Contest
-      </div>
-      <div ng-if="showAddContest"
-           ng-include="'components/super_user/superuser.contests.new.html'"></div>
+      <div ng-include="'components/super_user/superuser.contests.new.html'"></div>
       </div>
     </div>
   </div>

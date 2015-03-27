@@ -4,7 +4,7 @@
           ng-model="currentRoute"
           ng-options="route for route in routes">
   </select>
-  <p class="superuser-title">{{region}} Announcements</p>
+  <p class="superuser-title">{{region | capitalizeFirst}} Announcements</p>
 </nav>
 
 <div id="shelf" class="shelf-surface wrap superuser-background">
@@ -38,7 +38,7 @@
           </div>
           <div class="media card superuser-list-item">
 
-            <h4 ng-click="editAnnouncement($index)">{{announcement.headline}}</h4>
+            <h4>{{announcement.headline}}<span ng-click="editAnnouncement($index)">&#9998;</span></h4>
             <p>{{announcement.body}}</p>
             <a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a>
 

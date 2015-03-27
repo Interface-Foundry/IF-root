@@ -13,7 +13,7 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	$scope.edit = false;
 	$scope.editAnnouncement = editAnnouncement;
 	$scope.editIndex;
-	$scope.region = capitalizeFirstLetter($routeParams.region);
+	$scope.region = $routeParams.region;
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
 	$scope.regions = ['global'];
@@ -35,11 +35,6 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	    .then(function(response) {
 	      $scope.announcements = response;
 	    });
-	}
-
-	// can make this into a filter
-	function capitalizeFirstLetter(input) {
-		return input[0].toUpperCase() + input.slice(1);
 	}
 
 	function changeAnnouncementOrder(index, direction) {
