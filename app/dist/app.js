@@ -23317,6 +23317,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
   	.$promise
   	.then(function(response) {
   		$scope.announcements[$scope.editIndex] = response;
+  		toggleNewAnnouncement();
   	});	
   }
 }
