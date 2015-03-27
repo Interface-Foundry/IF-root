@@ -2,9 +2,9 @@
 
 app.factory('locationAnalyticsService', locationAnalyticsService);
 
-locationAnalyticsService.$inject = ['$http', 'analyticsService', '$interval'];
+locationAnalyticsService.$inject = ['$http', '$interval', 'analyticsService'];
 
-function locationAnalyticsService($http, analyticsService, $interval) {
+function locationAnalyticsService($http, $interval, analyticsService) {
     var locationBuffer = []; // array of any kind of location data
     var maxBufferSize = 1000; // when to flush the buffer
     var maxBufferAge = 60*1000; // flush every so often

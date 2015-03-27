@@ -2,9 +2,9 @@
 
 app.factory('analyticsService', analyticsService);
 
-analyticsService.$inject = ['$http', '$injector', '$rootScope', '$timeout', 'localStore', '$location'];
+analyticsService.$inject = ['$http', '$injector', '$rootScope', '$timeout', '$location', 'localStore'];
 
-function analyticsService($http, $injector, $rootScope, $timeout, localStore, $location) {
+function analyticsService($http, $injector, $rootScope, $timeout, $location, localStore) {
     var sequenceNumber = 0;
     var geoService; // lazy loaded to avoid circ dependency
     var userManager; // ditto
