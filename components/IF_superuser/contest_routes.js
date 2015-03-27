@@ -34,12 +34,13 @@ router.post('/', function(req, res) {
     if (req.user.admin) {
         var newcontest = new contestSchema();
         var contest = _.extend(newcontest, req.body);
-
+         console.log('hitting post, req.body is..', contest)
         contest.save(
             function(err, contest) {
                 if (err) {
                     console.log(err)
                 }
+                console.log('final contest is..', contest)
                 return res.send(contest);
             });
     }

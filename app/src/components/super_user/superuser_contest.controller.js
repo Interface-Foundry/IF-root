@@ -23,13 +23,13 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
 	activate();
 
 	function activate() {
+		today();
 		Contests.query({
 			id: $scope.region
 		}).$promise
-    .then(function(response) {
-      $scope.contest = response;
-			getDates();
-    });
+	    .then(function(response) {
+	      $scope.contest = response;
+	    });
 	}
 
 	$scope.changeRoute = function() {
@@ -71,32 +71,18 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
   		return;			
 		}
 
-
 		$scope.contest.startDate = formatDateTime().start;
 		$scope.contest.endDate = formatDateTime().end;
-     console.log('lol',$scope.contest);
-		Contests.save($scope.contest).$promise
-    .then(function(contest) {
-    console.log('returned from backend', contest)
-      
-    }, function(error) {
-      console.log('error -->',error.data);
-    });;
+
+		Contests.save($scope.contest);
 	}
 
-	function getDates() {
-		if (_.isEmpty($scope.contest)) {
-			var d = new Date;
-	    $scope.dateTime.startDate = d;
-	    $scope.dateTime.startTime = d;
-	    $scope.dateTime.endDate = d;
-	    $scope.dateTime.endTime = d;
-		} else {
-			$scope.dateTime.startDate = $scope.contest.startDate;
-	    $scope.dateTime.startTime = $scope.contest.startTime;
-	    $scope.dateTime.endDate = $scope.contest.endDate;
-	    $scope.dateTime.endTime = $scope.contest.endTime;
-		}
+	function today() {
+		var d = new Date;
+    $scope.dateTime.startDate = d;
+    $scope.dateTime.startTime = d;
+    $scope.dateTime.endDate = d;
+    $scope.dateTime.endTime = d;
   }
 
   function updateContest(form) {
