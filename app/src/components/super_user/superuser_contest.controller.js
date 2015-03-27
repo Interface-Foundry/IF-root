@@ -2,18 +2,18 @@
 
 app.controller('SuperuserContestController', SuperuserContestController);
 
-SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location'];
+SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location', 'superuserService'];
 
-function SuperuserContestController($scope, Contests, $routeParams, $location) {
+function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
 
 	$scope.contest = {};
+	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
     formatYear: 'yy',
     startingDay: 1
   };
   $scope.dateTime = {};
-	$scope.routes = ['Announcements', 'Contests'];
-	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.routes = superuserService.routes
 	$scope.openEnd = openEnd;
 	$scope.openStart = openStart;
 	$scope.region = $routeParams.region;
@@ -23,19 +23,21 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
 	activate();
 
 	function activate() {
-		today();
 		Contests.get({
 			id: $scope.region
 		}).$promise
-	    .then(function(response) {
-	      $scope.contest = response;
-	    });
+    .then(function(response) {
+      $scope.contest = response;
+			getDates();
+    }, function(error) {
+    	console.log('Error:', error);
+    	getDates();
+    });
 	}
 
 	$scope.changeRoute = function() {
-		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
-
 
 	function formatDateTime() {
 		var sd = $scope.dateTime.startDate,
@@ -80,12 +82,19 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
       });;
 	}
 
-	function today() {
-		var d = new Date;
-    $scope.dateTime.startDate = d;
-    $scope.dateTime.startTime = d;
-    $scope.dateTime.endDate = d;
-    $scope.dateTime.endTime = d;
+	function getDates() {
+		if (!$scope.contest._id) {
+			var d = new Date;
+	    $scope.dateTime.startDate = d;
+	    $scope.dateTime.startTime = d;
+	    $scope.dateTime.endDate = d;
+	    $scope.dateTime.endTime = d;
+		} else {
+		  $scope.dateTime.startDate = $scope.contest.startDate;
+	    $scope.dateTime.startTime = $scope.contest.startTime;
+	    $scope.dateTime.endDate = $scope.contest.endDate;
+	    $scope.dateTime.endTime = $scope.contest.endTime;
+		}
   }
 
   function updateContest(form) {

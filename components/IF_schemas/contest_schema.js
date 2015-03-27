@@ -32,12 +32,13 @@ var contestSchema = mongoose.Schema({
         type: String,
         default: 'global'
     },
-    startTime: {
+    startDate: {
         type: Date,
         default: Date.now
     },
-    endTime: {
-        type: Date
+    endDate: {
+        type: Date,
+        default: Date.now
     },
     contestTag: [{
         tag: {

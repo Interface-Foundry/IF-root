@@ -72,48 +72,46 @@
 							 class="form-control" />
 			</div>
 
-
-
-        <div class="col-md-6">
-            <p class="input-group datepicker-group">
-              <input type="text" 
-              			 class="form-control" 
-              			 datepicker-popup="{{'dd-MMMM-yyyy'}}" 
-              			 ng-model="dateTime.startDate" 
-              			 is-open="$parent.openedStart" 
-              			 datepicker-options="dateOptions" 
-              			 ng-required="true" 
-              			 close-text="Close" />
-              <span class="input-group-btn">
-                <button type="button" 
-                				class="btn btn-default" 
-                				ng-click="openStart($event)">
-                				<i class="glyphicon glyphicon-calendar"></i></button>
-              </span>
-            </p>
-        </div>
-        <timepicker ng-model="dateTime.startTime" 
-        						hour-step="1" 
-        						minute-step="15" 
-        						show-meridian="true"></timepicker>
-    		
-        <div class="col-md-6">
-            <p class="input-group datepicker-group">
-              <input type="text" 
-              			 class="form-control" 
-              			 datepicker-popup="{{'dd-MMMM-yyyy'}}" 
-              			 ng-model="dateTime.endDate" 
-              			 is-open="$parent.openedEnd" 
-              			 datepicker-options="dateOptions" 
-              			 ng-required="true" 
-              			 close-text="Close" />
-              <span class="input-group-btn">
-                <button type="button" 
-                				class="btn btn-default" 
-                				ng-click="openEnd($event)">
-                				<i class="glyphicon glyphicon-calendar"></i></button>
-              </span>
-            </p>
+      <div class="col-md-6">
+          <p class="input-group datepicker-group">
+            <input type="text" 
+            			 class="form-control" 
+            			 datepicker-popup="{{'dd-MMMM-yyyy'}}" 
+            			 ng-model="dateTime.startDate" 
+            			 is-open="$parent.openedStart" 
+            			 datepicker-options="dateOptions" 
+            			 ng-required="true" 
+            			 close-text="Close" />
+            <span class="input-group-btn">
+              <button type="button" 
+              				class="btn btn-default" 
+              				ng-click="openStart($event)">
+              				<i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+          </p>
+      </div>
+      <timepicker ng-model="dateTime.startTime" 
+      						hour-step="1" 
+      						minute-step="15" 
+      						show-meridian="true"></timepicker>
+  		
+      <div class="col-md-6">
+          <p class="input-group datepicker-group">
+            <input type="text" 
+            			 class="form-control" 
+            			 datepicker-popup="{{'dd-MMMM-yyyy'}}" 
+            			 ng-model="dateTime.endDate" 
+            			 is-open="$parent.openedEnd" 
+            			 datepicker-options="dateOptions" 
+            			 ng-required="true" 
+            			 close-text="Close" />
+            <span class="input-group-btn">
+              <button type="button" 
+              				class="btn btn-default" 
+              				ng-click="openEnd($event)">
+              				<i class="glyphicon glyphicon-calendar"></i></button>
+            </span>
+          </p>
         </div>
         <timepicker ng-model="dateTime.endTime" 
         						hour-step="1" 

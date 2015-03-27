@@ -2,20 +2,20 @@
 
 app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
 
-SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location'];
+SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location', 'superuserService'];
 
-function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location) {
+function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location, superuserService) {
 
 	$scope.announcement = {};
 	$scope.announcements = [];
 	$scope.changeAnnouncementOrder = changeAnnouncementOrder;
+	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.deleteAnnouncement = deleteAnnouncement;
 	$scope.edit = false;
 	$scope.editAnnouncement = editAnnouncement;
 	$scope.editIndex;
 	$scope.region = $routeParams.region;
-	$scope.routes = ['Announcements', 'Contests'];
-	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.routes = superuserService.routes;
 	$scope.regions = ['global'];
 	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
@@ -51,7 +51,7 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	}
 
 	$scope.changeRoute = function() {
-		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
 
 	function deleteAnnouncement(index) {
