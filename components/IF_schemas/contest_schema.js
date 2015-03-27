@@ -12,20 +12,44 @@ var contestSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    htmlBody: {
+        type: String,
+        required: true
+    },
     imgURL: {
         type: String
     },
-    current: {type: Boolean, required: true}, //is this the current active contest or not 
+    live: {
+        type: Boolean,
+        required: true
+    },
     region: {
         type: String,
         default: 'global'
     },
-    startTime: { type: Date, default: Date.now },
-    endTime: { type: Date},
-    contestTag: [{type: String, index: true}] ,
-    subheading:{type: String}
+    startTime: {
+        type: Date,
+        default: Date.now
+    },
+    endTime: {
+        type: Date
+    },
+    contestTag: [{
+        {
+            tag: {
+                type: String,
+                index: true
+            }
+        }, {
+            title: {
+                type: String
+            }
+        }
+    }],
+    subheading: {
+        type: String
+    }
 });
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('contest', contestSchema);
-

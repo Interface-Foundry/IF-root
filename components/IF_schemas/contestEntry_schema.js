@@ -9,6 +9,10 @@ var contestEntrySchema = mongoose.Schema({
     userName: String,
     worldID: String,
     worldName: String,
+    region: {
+        type: String,
+        default: 'global'
+    },
     valid: Boolean, //valid or not
     contestTag: [{type: String, index: true}], 
     userLat: Number,
