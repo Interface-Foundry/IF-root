@@ -71,16 +71,16 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
   		return;			
 		}
 
+
 		$scope.contest.startDate = formatDateTime().start;
 		$scope.contest.endDate = formatDateTime().end;
-
+     console.log('lol',$scope.contest);
 		Contests.save($scope.contest).$promise
     .then(function(contest) {
-    console.log(contest);
-      $scope.newcontest = contest;
+    console.log('returned from backend', contest)
       
     }, function(error) {
-      console.log(error.data);
+      console.log('error -->',error.data);
     });;
 	}
 

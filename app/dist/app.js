@@ -23178,9 +23178,6 @@ angular.module('IF')
             update: {
                 method: 'put'
             },
-             save: {
-                method: 'POST'
-            },
             scan: {
                 method: 'POST',
                 isArray:true,
@@ -23536,16 +23533,17 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
   		return;			
 		}
 
+        console.log('lol',$scope.contest);
+
 		$scope.contest.startDate = formatDateTime().start;
 		$scope.contest.endDate = formatDateTime().end;
-
+     console.log('lol',$scope.contest);
 		Contests.save($scope.contest).$promise
     .then(function(contest) {
-    console.log(contest);
-      $scope.newcontest = contest;
+    console.log('returned from backend')
       
     }, function(error) {
-      console.log(error.data);
+      console.log('error -->',error.data);
     });;
 	}
 
