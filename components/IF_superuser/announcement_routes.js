@@ -1,10 +1,10 @@
 'use strict';
 
 var express = require('express'),
-router = express.Router(),
-announcementSchema = require('../IF_schemas/announcements_schema.js'),
-_ = require('underscore');
-    
+    router = express.Router(),
+    announcementSchema = require('../IF_schemas/announcements_schema.js'),
+    _ = require('underscore');
+
 //load all announcements for that region
 router.get('/:id', function(req, res) {
     if (req.user.admin) {
@@ -94,11 +94,11 @@ router.post('/:id/sort', function(req, res) {
             }).exec(function(err, result) {
 
                 console.log('prioritiezed announcement is..', result)
-                //Re-sort all announcements, then send to front-end
+                    //Re-sort all announcements, then send to front-end
                 announcementSchema.find().sort({
                     priority: 1
                 }).exec(function(err, announcements) {
-              
+
                     if (err) {
                         console.log(err)
                     }
@@ -128,12 +128,12 @@ router.post('/:id/sort', function(req, res) {
                 }
             }).exec(function(err, result) {
 
-                 console.log('prioritiezed announcement is..', result)
-                //Re-sort all announcements, then send to front-end
+                console.log('prioritiezed announcement is..', result)
+                    //Re-sort all announcements, then send to front-end
                 announcementSchema.find().sort({
                     priority: 1
                 }).exec(function(err, announcements) {
-                  
+
                     if (err) {
                         console.log(err)
                     }
@@ -182,50 +182,54 @@ router.put('/:id', function(req, res) {
 
 //delete announcement for that region
 router.delete('/:id', function(req, res) {
-    announcementSchema.findById(req.params.id, function(err, announcement) {
-        if (err) {
-            return handleError(res, err);
-        }
-        if (!announcement) {
-            return res.send(404);
-        }
-        var prior = announcement.priority;
+    if (req.user.admin) {
+        announcementSchema.findById(req.params.id, function(err, announcement) {
+            if (err) {
+                return handleError(res, err);
+            }
+            if (!announcement) {
+                return res.send(404);
+            }
+            var prior = announcement.priority;
 
-        announcementSchema.update({
-                priority: {
-                    $gt: prior
-                }
-            }, {
-                $inc: {
-                    priority: -1
-                }
-            }, {
-                multi: true
-            },
-            function(err, numberAffected, rawResponse) {
-                if (err) {
-                    console.log(err)
-                }
-                console.log('updated ', numberAffected, 'records')
-                console.log(rawResponse)
-                announcement.remove(function(err) {
-                    if (err) {
-                        return handleError(res, err);
+            announcementSchema.update({
+                    priority: {
+                        $gt: prior
                     }
-                    console.log('deleted successfully!')
-                        //Re-sort all announcements, then send to front-end
-                    announcementSchema.find().sort({
-                        priority: 1
-                    }).exec(function(err, announcements) {
-                        console.log('announcements is..', announcements)
+                }, {
+                    $inc: {
+                        priority: -1
+                    }
+                }, {
+                    multi: true
+                },
+                function(err, numberAffected, rawResponse) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.log('updated ', numberAffected, 'records')
+                    console.log(rawResponse)
+                    announcement.remove(function(err) {
                         if (err) {
-                            console.log(err)
+                            return handleError(res, err);
                         }
-                        return res.send(announcements)
+                        console.log('deleted successfully!')
+                            //Re-sort all announcements, then send to front-end
+                        announcementSchema.find().sort({
+                            priority: 1
+                        }).exec(function(err, announcements) {
+                            console.log('announcements is..', announcements)
+                            if (err) {
+                                console.log(err)
+                            }
+                            return res.send(announcements)
+                        })
                     })
                 })
-            })
-    });
+        });
+    } else {
+        console.log('you are not authorized...stand down..')
+    }
 })
 
 module.exports = router;

@@ -12,7 +12,7 @@ router.get('/:id', function(req, res) {
 
         console.log('hitting get contest')
         //find current contest
-        announcementSchema.aggregate({
+        contestSchema.aggregate({
             $match: {
                 region: req.params.id.toString().toLowerCase()
             }

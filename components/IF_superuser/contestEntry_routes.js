@@ -1,15 +1,36 @@
 'use strict';
 
 var express = require('express'),
-router = express.Router(),
-contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
-_ = require('underscore');
+    router = express.Router(),
+    contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
+    _ = require('underscore');
 
-//load contest entries by newest
-router.get('/:number', function(req, res) {
+//user creates a new contest entry for specified region
+router.post('/:id', function(req, res) {
+    if (req.user.admin) {
+        var newentry = new contestEntrySchema();
+        var entry = _.extend(newentry, req.body);
+        entry.save(
+            function(err, entry) {
+                if (err) {
+                    console.log(err)
+                }
+                return res.send(entry);
+            });
+    }
+})
+
+//load contest entries sorted newest and skips # already loaded on page (lazy load)
+router.get('/su/:number', function(req, res) {
     if (req.user.admin) {
         console.log('loading contest entries')
-        contestSchema.find().sort({usertime:-1}).exec(function(err, contests) {
+        contestEntrySchema.aggregate({
+            $sort: {
+                userTime: -1
+            }
+        }, {
+            $skip: req.params.number
+        }, function(err, contests) {
             if (err) {
                 console.log(err);
             }
@@ -21,20 +42,36 @@ router.get('/:number', function(req, res) {
     }
 })
 
-//create new contest for that region
-router.post('/', function(req, res) {
+//delete a contest entry
+router.delete('/su/:id', function(req, res) {
     if (req.user.admin) {
-        var newcontest = new contestSchema();
-        var contest = _.extend(newcontest, req.body);
-
-        contest.save(
-            function(err, contest) {
-                if (err) {
-                    console.log(err)
-                }
-                return res.send(contest);
-            });
+        contestEntrySchema.findById(req.params.id, function(err, entry) {
+            if (err) {
+                return handleError(res, err);
+            }
+            if (!entry) {
+                return res.send(404);
+            }
+            //Delete entry
+            entry.remove(function(err) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.log('deleted successfully!')
+                })
+                //Should I send something back?
+        })
+    } else {
+        console.log('you are not authorized...stand down..')
     }
 })
+
+
+
+
+
+
+
+
 
 module.exports = router;
