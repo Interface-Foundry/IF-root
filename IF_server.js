@@ -505,12 +505,14 @@ app.post('/api/announcements/:id/sort', function(req, res) {
                 $inc: {
                     priority: -1
                 }
-            }).exec(function() {
+            }).exec(function(err, result) {
+
+                console.log('prioritiezed announcement is..', result)
                 //Re-sort all announcements, then send to front-end
                 announcementSchema.find().sort({
                     priority: 1
                 }).exec(function(err, announcements) {
-                    console.log('announcements is..', announcements)
+              
                     if (err) {
                         console.log(err)
                     }
@@ -522,10 +524,10 @@ app.post('/api/announcements/:id/sort', function(req, res) {
 
     //-------If priority is moving down-----//
     if (req.body.dir === 'down') {
-        //find the announcement immediately above the current announcement
-        //and decrement it's priority
+        //find the announcement immediately below the current announcement
+        //and decrement it's priority (aka move priority up)
         announcementSchema.update({
-            priority: req.body.priority - 1
+            priority: req.body.priority + 1
         }, {
             $inc: {
                 priority: -1
@@ -538,12 +540,14 @@ app.post('/api/announcements/:id/sort', function(req, res) {
                 $inc: {
                     priority: 1
                 }
-            }).exec(function() {
+            }).exec(function(err, result) {
+
+                 console.log('prioritiezed announcement is..', result)
                 //Re-sort all announcements, then send to front-end
                 announcementSchema.find().sort({
                     priority: 1
                 }).exec(function(err, announcements) {
-                    console.log('announcements is..', announcements)
+                  
                     if (err) {
                         console.log(err)
                     }
