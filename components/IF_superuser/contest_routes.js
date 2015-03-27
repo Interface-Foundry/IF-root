@@ -30,11 +30,27 @@ router.get('/:id', function(req, res) {
 
 //create new contest for that region
 router.post('/', function(req, res) {
-    console.log('hitting post, req.body is..', req.body)
+
     if (req.user.admin) {
+        //Set all other contests to live:false
+        contestSchema.update({}, {
+            live: false
+        }, {
+            multi: true
+        }, function(err, result) {
+            if (err) {
+                console.log(err)
+            }
+            console.log('all others now false', result)
+        })
+
         var newcontest = new contestSchema();
+        if (req.body._id) {
+            delete req.body._id;
+            delete req.body._v;
+        }
         var contest = _.extend(newcontest, req.body);
-         console.log('hitting post, req.body is..', contest)
+        console.log('hitting post, req.body is..', contest)
         contest.save(
             function(err, contest) {
                 if (err) {
@@ -42,37 +58,35 @@ router.post('/', function(req, res) {
                 }
                 console.log('final contest is..', contest)
                 return res.send(contest);
+
             });
     }
 })
 
 // //edit the current contest
-// router.post('/:id', function(req, res) {
-//     console.log('hitting edit, req.body is..', req.body)
-//     if (req.user.admin) {
-//          //find current contest
-//         contestSchema.findOne({
-//             region: req.params.id.toString().toLowerCase(),
-//             live: true
-//         }, function(err, contest) {
-//             if (err) {
-//                 console.log(err);
-//             }
-//             console.log('found a contest! -->', contest)
-//             return res.send(contest);
-//         });
-        
-//         var contest = _.extend(newcontest, req.body);
+router.put('/:id', function(req, res) {
+    if (req.user.admin) {
+        //find current contest
+        contestSchema.findOne({
+            live: true
+        }, function(err, result) {
+            if (err) {
+                console.log(err);
+            }
+            console.log('found a contest! -->', result)
+            var contest = _.extend(result, req.body);
 
-//         contest.save(
-//             function(err, contest) {
-//                 if (err) {
-//                     console.log(err)
-//                 }
-//                 return res.send(contest);
-//             });
-//     }
-// })
+            contest.save(
+                function(err, contest) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    return res.send(contest);
+                });
+          
+        });
+    }
+})
 
 
 module.exports = router;

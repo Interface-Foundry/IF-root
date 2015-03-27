@@ -24,7 +24,7 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
 
 	function activate() {
 		today();
-		Contests.query({
+		Contests.get({
 			id: $scope.region
 		}).$promise
 	    .then(function(response) {
@@ -74,7 +74,10 @@ function SuperuserContestController($scope, Contests, $routeParams, $location) {
 		$scope.contest.startDate = formatDateTime().start;
 		$scope.contest.endDate = formatDateTime().end;
 
-		Contests.save($scope.contest);
+		Contests.save($scope.contest).$promise
+      .then(function(response) {
+        $scope.contest = response;
+      });;
 	}
 
 	function today() {
