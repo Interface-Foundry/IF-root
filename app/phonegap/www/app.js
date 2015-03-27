@@ -4849,15 +4849,6 @@ var checkAdminStatus = function(userManager, $location) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
-	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://bubbl.li' + request.url;
-		    			if (ifGlobals.username&&ifGlobals.password) {
-							request.headers['Authorization'] = ifGlobals.getBasicHeader();
-							//console.log(request);
-						} else if (ifGlobals.fbToken) {
-							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
-						}
-	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4931,6 +4922,9 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
+$locationProvider.html5Mode({
+	enabled: true
+});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4940,31 +4934,16 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
+	userManager.checkLogin();
 	
 	
-	navigator.splashscreen.hide();
 	
-/*
-lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
-			console.log(success);
-		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
-}, function(err) {
-	console.log('credential error', error); 
-});
-*/
 });
 
-document.addEventListener('deviceready', onDeviceReady, true);
-function onDeviceReady() {
-	angular.element(document).ready(function() {
-		angular.bootstrap(document, ['IF']);
-	});
-}
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+
+});
 app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5338,7 +5317,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 19;
+					var topOffset = 4;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5702,6 +5681,10 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
+			var firstHash = value.indexOf('#');
+			if (firstHash > -1) {
+				value = value.slice(0, firstHash) + value.slice(firstHash+1);
+			}
 			$attr.$set('href', value);
 			
 			});
@@ -5720,9 +5703,6 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
-				if (value.indexOf('http')<0) {
-					value = 'https://bubbl.li/'+value;
-				}
 				
 				$attr.$set('src', value);
 			
@@ -6494,7 +6474,15 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   return _date.toUpperCase();
 
  };
-});
+})
+
+.filter('capitalizeFirst', capitalizeFirst);
+
+function capitalizeFirst() {
+  return function(input) {
+    return input[0].toUpperCase() + input.slice(1);
+  }
+}
 
 /*!
  * FullCalendar v2.2.2
@@ -18345,77 +18333,8 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: true,
-	keychain: new Keychain()
+	supported: false
 }
-
-//getCredentials returns a promise->map of the available credentials. 
-//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-//	because all will return rejected if you do.
-
-lockerManager.getCredentials = function() {
-	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
-	
-	lockerManager.keychain.getForKey(function(value) {
-		username.resolve(value);
-	}, function(error) {
-		username.resolve(undefined);
-		console.log(error);
-	}, 'username', 'Bubbl.li');
-
-	lockerManager.keychain.getForKey(function(value) {
-		password.resolve(value);
-	}, function(error) {
-		password.resolve(undefined);
-		console.log(error);
-	}, 'password', 'Bubbl.li');
-	
-	lockerManager.keychain.getForKey(function(value) {
-		fbToken.resolve(value);
-	}, function(error) {
-		fbToken.resolve(undefined);
-		console.log(error);
-	}, 'fbToken', 'Bubbl.li');
-	
-	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-}
-
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Bubbl.li', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Bubbl.li', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
-
-
-//saves the FB token
-lockerManager.saveFBToken = function(fbToken) {
-	var deferred = $q.defer();
-	lockerManager.keychain.setForKey(function(success) {
-		deferred.resolve(success);
-	}, function(error) {
-		deferred.reject(error);
-	},
-	'fbToken', 'Bubbl.li', fbToken);
-	
-	return deferred;
-}
-
 	 
 return lockerManager;
 	   
@@ -18649,7 +18568,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -18747,20 +18666,17 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	
-	ifGlobals.username = username;
-	ifGlobals.password = password;
-	$http.post('/api/user/login-basic', data, {server: true})
+	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
-			ifGlobals.loginStatus = true;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	
 	
 	return deferred.promise;
 }
@@ -18809,7 +18725,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.showDialog('keychainDialog.html');
+		dialogs.show = false;
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -19152,8 +19068,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	var world = {newStatus: true};
 	
@@ -20774,9 +20688,6 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
-//isnt ready for mobile yet
 var aperture = apertureService,
 	map = mapManager,
 	style = styleManager,
@@ -21622,8 +21533,6 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -22187,8 +22096,6 @@ $scope.onUploadAvatar = function($files) {
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -23100,34 +23007,6 @@ $scope.share = function(platform) {
   );
 };
 
-$scope.fbLogin = function() {
-	userManager.fbLogin().then(
-		function (success) {
-			console.log(success);
-			userManager.checkLogin();
-		}, function (failure) {
-			console.log(failure);	
-		})
-}
-//On Phonegap startup, try to login with either saved username/pw or facebook
-lockerManager.getCredentials().then(function(credentials) {
-	if (credentials.username, credentials.password) {
-		userManager.signin(credentials.username, credentials.password).then(function(success) {
-			userManager.checkLogin().then(function(success) {
-			console.log(success);
-			});
-		}, function (reason) {
-			console.log('credential signin error', reason)
-		});
-	} else if (credentials.fbToken) {
-		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log(success);	
-		})
-	}
-}, function(err) {
-	console.log('credential error', error); 
-});
 }]);
 app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
@@ -23306,13 +23185,6 @@ angular.module('IF')
                     option: 'scan'
                 }
             },
-            sort: {
-                method: 'POST',
-                isArray: true,
-                params: {
-                    option: 'sort'
-                }
-            },
             remove: {
                 method: 'DELETE'
             }
@@ -23333,7 +23205,7 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	$scope.edit = false;
 	$scope.editAnnouncement = editAnnouncement;
 	$scope.editIndex;
-	$scope.region = capitalizeFirstLetter($routeParams.region);
+	$scope.region = $routeParams.region;
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
 	$scope.regions = ['global'];
@@ -23355,11 +23227,6 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 	    .then(function(response) {
 	      $scope.announcements = response;
 	    });
-	}
-
-	// can make this into a filter
-	function capitalizeFirstLetter(input) {
-		return input[0].toUpperCase() + input.slice(1);
 	}
 
 	function changeAnnouncementOrder(index, direction) {
@@ -23460,138 +23327,104 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 
 app.controller('SuperuserContestController', SuperuserContestController);
 
-SuperuserContestController.$inject = ['$scope', 'Announcements','$routeParams', '$location'];
+SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location'];
 
-function SuperuserContestController($scope, Announcements, $routeParams, $location) {
+function SuperuserContestController($scope, Contests, $routeParams, $location) {
 
-	// $scope.announcement = {};
-	// $scope.announcements = [];
-	// $scope.changeAnnouncementOrder = changeAnnouncementOrder;
-	// $scope.deleteAnnouncement = deleteAnnouncement;
-	// $scope.edit = false;
-	// $scope.editAnnouncement = editAnnouncement;
-	// $scope.editIndex;
-	// $scope.region = capitalizeFirstLetter($routeParams.region);
-	// $scope.routes = ['Announcements', 'Contests'];
-	// $scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
-	// $scope.resetAnnouncement = resetAnnouncement;
-	// $scope.showAddAnnouncement = false;
-	// $scope.showAddContest = false;
-	// $scope.toggleNewAnnouncement = toggleNewAnnouncement;
-	// $scope.toggleNewContest = toggleNewContest;
-	// $scope.toggleDraftState = toggleDraftState;
-	// $scope.updateAnnouncement = updateAnnouncement;
+	$scope.contest = {};
+	$scope.dateOptions = {
+    formatYear: 'yy',
+    startingDay: 1
+  };
+  $scope.dateTime = {};
+	$scope.routes = ['Announcements', 'Contests'];
+	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.openEnd = openEnd;
+	$scope.openStart = openStart;
+	$scope.region = $routeParams.region;
+	$scope.submit = submit;
+	$scope.updateContest = updateContest;
 
-	// activate();
+	activate();
 
-	// function activate() {
-	// 	resetAnnouncement();
-	// 	Announcements.query({
-	// 		id: $scope.region
-	// 	}).$promise
-	//     .then(function(response) {
-	//       $scope.announcements = response;
-	//     });
-	// }
+	function activate() {
+		today();
+		Contests.query({
+			id: $scope.region
+		}).$promise
+	    .then(function(response) {
+	      $scope.contest = response;
+	    });
+	}
 
-	// // can make this into a filter
-	// function capitalizeFirstLetter(input) {
-	// 	return input[0].toUpperCase() + input.slice(1);
-	// }
+	$scope.changeRoute = function() {
+		$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
+	}
 
-	// function changeAnnouncementOrder(index, direction) {
-	// 	Announcements.sort({
-	// 		id: $scope.announcements[index]._id
-	// 	}, {
-	// 		dir: direction,
-	// 		priority: $scope.announcements[index].priority
-	// 	})
-	// 	.$promise
-	// 	.then(function(response) {
-	// 		$scope.announcements = response;
-	// 	});
-	// }
 
-	// $scope.changeRoute = function() {
-	// 	$location.path('/su/' + $scope.currentRoute.toLowerCase() + '/' + $scope.region.toLowerCase());
-	// }
+	function formatDateTime() {
+		var sd = $scope.dateTime.startDate,
+				st = $scope.dateTime.startTime,
+				ed = $scope.dateTime.endDate,
+				et = $scope.dateTime.endTime;
+		var start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), st.getHours(), st.getMinutes(), 0, 0);
+		var end = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), et.getHours(), et.getMinutes(), 0, 0);
 
-	// function deleteAnnouncement(index) {
-	// 	var deleteConfirm = confirm("Are you sure you want to delete this?");
-	// 	if (deleteConfirm) {
-	// 		Announcements.remove({
-	// 			id: $scope.announcements[index]._id
-	// 		})
-	// 		.$promise
-	// 		.then(function(response) {
-	// 			$scope.announcements = response;
-	// 		});
-	// 	}
-	// }
+		return {
+			start: start,
+			end: end
+		};
+	}
 
-	// function editAnnouncement(index) {
-	// 	var tempAnnouncement = {};
-	// 	angular.copy($scope.announcements[index], tempAnnouncement);
-	// 	$scope.announcement = tempAnnouncement;
-	// 	$scope.edit = true;
-	// 	$scope.editIndex = index;
-	// 	$scope.showAddAnnouncement = true;
-	// }
+  function openEnd($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
 
-	// function resetAnnouncement() {
-	// 	$scope.announcement = {
-	// 		live: false,
-	// 		region: 'global'
-	// 	};
-	// }
+    $scope.openedEnd = true;
+  }
 
-	// $scope.submitAnnouncement = function (form) {
-	// 	if (form.$invalid) {
-	// 		console.log('Form is missing required fields.');
-	// 		return;
-	// 	}
- //    Announcements.save($scope.announcement).$promise
- //    .then(function(announcements) {
- //      resetAnnouncement();
- //      $scope.announcements = announcements;
- //      toggleNewAnnouncement();
- //    }, function(error) {
- //    	console.log(error.data);
- //    });
- //  };
+  function openStart($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
 
-	// function toggleNewAnnouncement() {
-	// 	$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
-	// 	$scope.showAddContest = false;
-	// }
+    $scope.openedStart = true;
+  }
 
-	// function toggleNewContest() {
-	// 	$scope.showAddContest = !$scope.showAddContest;
-	// 	$scope.showAddAnnouncement = false;
-	// }
+	function submit(form) {
+		if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;			
+		}
 
- //  function toggleDraftState(index) {
- //  	$scope.announcements[index].live = !$scope.announcements[index].live;
- //  	Announcements.update({
- //  		id: $scope.announcements[index]._id
- //  	}, $scope.announcements[index]);
- //  }
+		$scope.contest.startDate = formatDateTime().start;
+		$scope.contest.endDate = formatDateTime().end;
 
- //  function updateAnnouncement(form) {
- //  	if (form.$invalid) {
- //  		console.log('Form is missing required fields.');
- //  		return;
- //  	}
- //  	$scope.announcement.live = false;
- //  	Announcements.update({
- //  		id: $scope.announcement._id
- //  	}, $scope.announcement)
- //  	.$promise
- //  	.then(function(response) {
- //  		$scope.announcements[$scope.editIndex] = response;
- //  		toggleNewAnnouncement();
- //  	});	
- //  }
+		Contests.save($scope.contest);
+	}
+
+	function today() {
+		var d = new Date;
+    $scope.dateTime.startDate = d;
+    $scope.dateTime.startTime = d;
+    $scope.dateTime.endDate = d;
+    $scope.dateTime.endTime = d;
+  }
+
+  function updateContest(form) {
+  	if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;
+  	}
+
+  	Contests.update({
+  		id: $scope.contest._id
+  	}, $scope.contest)
+  	.$promise
+  	.then(function(response) {
+  		$scope.contest = response;
+  	});	
+  }
+
 }
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
@@ -24206,8 +24039,6 @@ $scope.deleteBubble = function(_id) {
 $scope.newWorld = function() {
 	console.log('newWorld()');
 	
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
@@ -25645,6 +25476,10 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
+		var firstHash = url.indexOf('#');
+		if (firstHash > -1) {
+			return url.slice(0, firstHash) + url.slice(firstHash+1);
+		} else {return url}
 		return url;
 	}
 }

@@ -16,13 +16,6 @@ angular.module('IF')
                     option: 'scan'
                 }
             },
-            sort: {
-                method: 'POST',
-                isArray: true,
-                params: {
-                    option: 'sort'
-                }
-            },
             remove: {
                 method: 'DELETE'
             }
