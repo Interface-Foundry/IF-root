@@ -643,19 +643,25 @@ app.delete('/api/announcements/:id', function(req, res) {
 })
 
 
-
-//load all contests for that region
+//load current contest for that region
 app.get('/api/contests/:id', function(req, res) {
     if (req.user.admin) {
-        contestSchema.find({
-            region: req.params.id.toString().toLowerCase()
-        }, function(err, contests) {
-            if (err) {
-                return handleError(res, err);
-            }
 
-            return res.send(contests);
+        console.log('hitting get contest')
+        //find current contest
+        announcementSchema.aggregate({
+            $match: {
+                region: req.params.id.toString().toLowerCase()
+            }
+        }, {
+            current: true
+        }, function(err, contest) {
+            if (err) {
+                console.log(err);
+            }
+            return res.send(contest);
         });
+
     } else {
         console.log('you are not authorized...stand down..')
     }

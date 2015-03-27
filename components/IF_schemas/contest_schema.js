@@ -12,15 +12,8 @@ var contestSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    loc: { 
-        type: {
-            type: String //GeoJSON-'point'
-        },
-        coordinates: []
-    },
     imgURL: {
-        type: String,
-        required: true
+        type: String
     },
     current: {type: Boolean, required: true}, //is this the current active contest or not 
     region: {
@@ -29,7 +22,8 @@ var contestSchema = mongoose.Schema({
     },
     startTime: { type: Date, default: Date.now },
     endTime: { type: Date},
-    contestTag: {type: String, enum: ['wantit','getit'], index: true} 
+    contestTag: [{type: String, index: true}] ,
+    subheading:{type: String}
 });
 
 // create the model for users and expose it to our app

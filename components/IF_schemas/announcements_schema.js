@@ -13,12 +13,10 @@ var announcementsSchema = mongoose.Schema({
         required: true
     }, 
     urlPath: {
-        type: String,
-        required: true
+        type: String
     }, 
     urlName: {
-        type: String,
-        required: true
+        type: String
     }, 
     priority: {type: Number, default:1},
     live: {type: Boolean, default:false},

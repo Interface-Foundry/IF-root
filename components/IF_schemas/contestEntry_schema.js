@@ -9,12 +9,12 @@ var contestEntrySchema = mongoose.Schema({
     userName: String,
     worldID: String,
     worldName: String,
-    v: Boolean, //valid or not
-    contestTag: {type: String, enum: ['wantit','getit'], index: true}, 
+    valid: Boolean, //valid or not
+    contestTag: [{type: String, index: true}], 
     userLat: Number,
     userLng: Number,
     imgURL: String,
-    //'harversin' calculation?
+    //'harversine' calculation?
     distanceFromWorld: Number
 });
 
