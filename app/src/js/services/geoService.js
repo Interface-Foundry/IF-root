@@ -95,6 +95,13 @@ geoService.trackStart = function() {
 				lng: position.coords.longitude
 			};
 			mapManager.moveMarker('track', pos);
+			locationAnalyticsService.log({
+				type: "GPS",
+				loc: {
+					type: "Point",
+					coordinates: [position.coords.longitude, position.coords.latitude]
+				}
+			});
 		}, function() {
 			// console.log('location error');
 		}, {
