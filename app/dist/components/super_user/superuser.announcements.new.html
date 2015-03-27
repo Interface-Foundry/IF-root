@@ -6,19 +6,19 @@
 							ng-click="toggleNewAnnouncement(); resetAnnouncement()">x</button>
 
 			<label for="headline">Headline</label>
-			<input type="text"
-						 class="form-control"
+			<input name="announcementHeadline"
 						 ng-model="announcement.headline"
-						 name="announcementHeadline"
+						 type="text"
+						 class="form-control"
 						 required/>
 	   	<div ng-show="form.$submitted || form.announcementHeadline.$touched">
   	    <div ng-show="form.announcementHeadline.$error.required">This field is required.</div>
 	    </div>
 
 			<label for="body">Body</label>
-			<textarea class="form-control"
+			<textarea name="announcementBody"
 								ng-model="announcement.body"
-								name="announcementBody"
+								class="form-control"
 								required>
 			</textarea>
 	   	<div ng-show="form.$submitted || form.announcementBody.$touched">
@@ -26,34 +26,25 @@
 	    </div>
 
 			<label for="url-path">URL Path</label>
-			<input type="text" 
-						 class="form-control"
+			<input name="announcementUrlPath"
 						 ng-model="announcement.urlPath"
-						 name="announcementUrlPath"
-						 required>
-	   	<div ng-show="form.$submitted || form.announcementUrlPath.$touched">
-  	    <div ng-show="form.announcementUrlPath.$error.required">This field is required.</div>
-	    </div>
+						 type="text"
+						 class="form-control">
 
 			<label for="url-name">URL Name</label>
-			<input type="text" 
-						 class="form-control"
+			<input name="announcementUrlName"
 						 ng-model="announcement.urlName"
-						 name="announcementUrlName"
-						 required>
-	   	<div ng-show="form.$submitted || form.announcementUrlName.$touched">
-  	    <div ng-show="form.announcementUrlName.$error.required">This field is required.</div>
-	    </div>
+						 type="text" 
+						 class="form-control">
 
 			<label for="region">Region</label>
-			<input type="text" 
-						 class="form-control"
-						 ng-model="announcement.region"
-						 name="announcementRegion"
-						 required>
-	   	<div ng-show="form.$submitted || form.announcementRegion.$touched">
-  	    <div ng-show="form.announcementRegion.$error.required">This field is required.</div>
-	    </div>
+
+
+		  <select name="announcementRegion"
+		          ng-model="announcement.region"
+		  				class="form-control"
+		          ng-options="region for region in regions">
+		  </select>
 
 			<input type="submit" 
 						 value="Save" 

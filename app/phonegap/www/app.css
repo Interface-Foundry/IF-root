@@ -3329,6 +3329,7 @@ nav ul {
   margin: 0;
 }
 .add-button {
+  color: rgba(62, 82, 181, 0.960784);
   cursor: pointer;
   font-size: 1.1em;
   height: 25px;
@@ -3371,7 +3372,7 @@ nav ul {
   display: inline-block;
   height: 100%;
   margin-top: 1px;
-  padding: 5px 20px;
+  padding: 20px;
   width: 72%;
   vertical-align: top;
 }
@@ -3380,16 +3381,16 @@ nav ul {
   text-align: center;
 }
 .circle {
-  color: white;
-  font-size: 1.7em;
-  line-height: .8;
-  text-align: center;
-  margin-right: 10px;
-  height: 25px;
-  width: 25px;
-  background-color: blue;
+  background-color: rgba(62, 82, 181, 0.960784);
   border-radius: 50%;
+  color: white;
   float: left;
+  font-size: 1.7em;
+  height: 25px;
+  line-height: .8;
+  margin-right: 10px;
+  text-align: center;
+  width: 25px;
 }
 nav {
   pointer-events: auto;

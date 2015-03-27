@@ -1,10 +1,10 @@
 'use strict';
 
-app.controller('SuperuserController', SuperuserController);
+app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
 
-SuperuserController.$inject = ['$scope', 'Announcements','$routeParams', '$location'];
+SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location'];
 
-function SuperuserController($scope, Announcements, $routeParams, $location) {
+function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location) {
 
 	$scope.announcement = {};
 	$scope.announcements = [];
@@ -16,6 +16,7 @@ function SuperuserController($scope, Announcements, $routeParams, $location) {
 	$scope.region = capitalizeFirstLetter($routeParams.region);
 	$scope.routes = ['Announcements', 'Contests'];
 	$scope.currentRoute = $location.path().indexOf('announcements') >= 0 ? $scope.routes[0] : $scope.routes[1];
+	$scope.regions = ['global'];
 	$scope.resetAnnouncement = resetAnnouncement;
 	$scope.showAddAnnouncement = false;
 	$scope.showAddContest = false;
