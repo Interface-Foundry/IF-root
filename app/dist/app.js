@@ -18561,6 +18561,7 @@ var alerts = alertManager;
    
 var userManager = {
 	userRes: $resource('/api/updateuser'),
+	adminStatus: false,
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -18629,6 +18630,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
+		  userManager.adminStatus = user.admin ? true : false;
 		  $rootScope.user = user;
 		  if (user._id){
 			  $rootScope.userID = user._id;
@@ -18639,6 +18641,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
+		  userManager.adminStatus = false;
 		  deferred.reject(0);
 	});
 	
@@ -18658,6 +18661,7 @@ userManager.signin = function(username, password) { //given a username and passw
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -18696,6 +18700,8 @@ userManager.fbLogin = function() { //login based on facebook approval
 userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
+	userManager.adminStatus = false;
+	userManager._user = {};
 	$location.path('/');
 	alerts.addAlert('success', "You're signed out!", true);
 }
@@ -18751,6 +18757,7 @@ userManager.checkAdminStatus = function() {
 	userManager.getUser().then(function(user) {
 	  if (user.admin) {
 		  deferred.resolve(true);
+		  userManager.adminStatus = true;
 	  } else {
 	  	deferred.reject(false);
 	  }
@@ -22931,10 +22938,8 @@ $scope.goBack = function() {
 }
 
 $scope.logout = function() {
-      $http.get('/api/user/logout', {server:true});
-      userManager.loginStatus = false;
-      //$location.url('/');
-} //switch to userManager method
+	userManager.logout();
+}
 
 $scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 
