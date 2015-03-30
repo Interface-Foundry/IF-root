@@ -7,42 +7,48 @@ var express = require('express'),
 
 //load all contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/su/:number', function(req, res) {
-
-    contestEntrySchema.aggregate({
-        $sort: {
-            userTime: -1
-        }
-    }, {
-        $skip: parseInt(req.query.number)
-    }, function(err, entries) {
-        if (err) {
-            console.log(err);
-        }
-        console.log('# of entries is', entries.length)
-        return res.send(entries);
-    });
+    if (req.user.admin) {
+        contestEntrySchema.aggregate({
+            $sort: {
+                userTime: -1
+            }
+        }, {
+            $skip: parseInt(req.query.number)
+        }, function(err, entries) {
+            if (err) {
+                console.log(err);
+            }
+            console.log('# of entries is', entries.length)
+            return res.send(entries);
+        });
+    } else {
+        console.log('you are not authorized...stand down..')
+    }
 })
 
 //load only valid contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/:number', function(req, res) {
-
-    contestEntrySchema.aggregate({
-        $match: {
-            valid: true
-        }
-    }, {
-        $sort: {
-            userTime: -1
-        }
-    }, {
-        $skip: parseInt(req.query.number)
-    }, function(err, entries) {
-        if (err) {
-            console.log(err);
-        }
-        console.log('# of entries is', entries.length)
-        return res.send(entries);
-    });
+    if (req.user.admin) {
+        contestEntrySchema.aggregate({
+            $match: {
+                valid: true
+            }
+        }, {
+            $sort: {
+                userTime: -1
+            }
+        }, {
+            $skip: parseInt(req.query.number)
+        }, function(err, entries) {
+            if (err) {
+                console.log(err);
+            }
+            console.log('# of entries is', entries.length)
+            return res.send(entries);
+        });
+    } else {
+        console.log('you are not authorized...stand down..')
+    }
 })
 
 //Toggle entry validity
