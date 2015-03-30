@@ -5,21 +5,6 @@ var express = require('express'),
     contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
     _ = require('underscore');
 
-//user creates a new contest entry for specified region
-router.post('/:id', function(req, res) {
-    if (req.user.admin) {
-        var newentry = new contestEntrySchema();
-        var entry = _.extend(newentry, req.body);
-        entry.save(
-            function(err, entry) {
-                if (err) {
-                    console.log(err)
-                }
-                return res.send(entry);
-            });
-    }
-})
-
 //load contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/:number', function(req, res) {
     if (req.user.admin) {
