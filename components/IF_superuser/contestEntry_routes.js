@@ -65,8 +65,13 @@ router.put('/su/:id', function(req, res) {
             if (!entry) {
                 return res.send(404);
             }
-            //Switch bool            
-            entry.valid = !entry.valid;
+
+            console.log('entry is..', entry)
+           if (entry.valid === false) {
+            entry.valid = true
+           }else {
+            entry.valid = false
+           }
             //Save entry
             entry.save(
                 function(err, entry) {
