@@ -56,9 +56,9 @@ router.post('/', function(req, res) {
 
         var contest = _.extend(newcontest, req.body);
 
-           //push hashtags into contestTag array
-        contest.contestTags.push({tag:req.body.hashtag1, title:req.body.hashtag1Title});
-        contest.contestTags.push({tag:req.body.hashtag2, title:req.body.hashtag2Title});
+            //push hashtags into contestTag array
+        contest.contestTags.push(req.body.contestTags[0]);
+        contest.contestTags.push(req.body.contestTags[1]);
 
         console.log('extended contest is..', contest)
         contest.save(
