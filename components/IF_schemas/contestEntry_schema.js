@@ -1,11 +1,18 @@
 // load the things we need
 var mongoose = require('mongoose');
 
-var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
+var Schema = mongoose.Schema,
+    ObjectID = Schema.ObjectID;
 
 var contestEntrySchema = mongoose.Schema({
-    userTime: { type: Date, default: Date.now },
-    userID: { type: String, index: true},
+    userTime: {
+        type: Date,
+        default: Date.now
+    },
+    userID: {
+        type: String,
+        index: true
+    },
     userName: String,
     worldID: String,
     worldName: String,
@@ -14,7 +21,12 @@ var contestEntrySchema = mongoose.Schema({
         default: 'global'
     },
     valid: Boolean, //valid or not
-    contestTag: [{type: String, index: true}], 
+    contestTags: [{
+        tag: {
+            type: String,
+            index: true
+        }
+    }],
     userLat: Number,
     userLng: Number,
     imgURL: String,
