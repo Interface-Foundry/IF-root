@@ -7,27 +7,27 @@ var express = require('express'),
 
 //load contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/:number', function(req, res) {
-    
-        console.log('req.params is', req.params.number)
-        console.log('req.query.number is', req.query.number)
-        contestEntrySchema.aggregate({
-            $sort: {
-                userTime: -1
-            }
-        }, {
-            $skip: parseInt(req.query.number)
-        }, function(err, entries) {
-            if (err) {
-                console.log(err);
-            }
-            console.log('# of entries is',entries.length)
-            return res.send(entries);
-        });
 
-   
+    console.log('req.params is', req.params.number)
+    console.log('req.query.number is', req.query.number)
+    contestEntrySchema.aggregate({
+        $sort: {
+            userTime: -1
+        }
+    }, {
+        $skip: parseInt(req.query.number)
+    }, function(err, entries) {
+        if (err) {
+            console.log(err);
+        }
+        console.log('# of entries is', entries.length)
+        return res.send(entries);
+    });
+
+
 })
 
-//mark an entry as invalid
+//Toggle entry validity
 router.put('/su/:id', function(req, res) {
     if (req.user.admin) {
         contestEntrySchema.findById(req.params.id, function(err, entry) {
@@ -37,14 +37,16 @@ router.put('/su/:id', function(req, res) {
             if (!entry) {
                 return res.send(404);
             }
-            //Delete entry
-            entry.remove(function(err) {
+            //Switch bool            
+            entry.valid = !entry.valid;
+            //Save entry
+            entry.save(
+                function(err, entry) {
                     if (err) {
                         console.log(err)
                     }
-                    console.log('deleted successfully!')
+                    console.log('updated entry is..', entry)
                 })
-                //Should I send something back?
         })
     } else {
         console.log('you are not authorized...stand down..')
