@@ -23542,7 +23542,9 @@ SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$loca
 function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
 
 	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.deleteEntry = deleteEntry;
 	$scope.entries = [];
+	$scope.loadEntries = loadEntries;
 	$scope.region = $routeParams.region;
 	$scope.routes = superuserService.routes;
 	$scope.toggleValidity = toggleValidity;
@@ -23579,9 +23581,22 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 		}
 	}
 
+	function loadEntries() {
+		Entries.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = response;
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+
 	function toggleValidity($index) {
   	$scope.entries[$index].valid = !$scope.entries[$index].valid;
-  	entries.update({
+  	Entries.update({
   		id: $scope.entries[$index]._id
   	}, $scope.entries[$index]);		
 	}

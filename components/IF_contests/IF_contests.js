@@ -46,14 +46,12 @@ var route = function(imgUpload, uploadContents, userID) {
                 userLat: uploadContents.userLat,
                 userLng: uploadContents.userLon,
                 type: uploadContents.type,
-                contestTags: [{tag: uploadContents.hashtag}],
+                contestTag: [{tag: uploadContents.hashtag}],
                 userID: userID,
                 valid: validEntry,
                 imgURL: imgUpload,
                 distanceFromWorld: parseInt(distance)
             });
-
-      
 
             cs.save(function(err, data) {
                 if (err) {

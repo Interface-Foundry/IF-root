@@ -21,7 +21,7 @@ var contestEntrySchema = mongoose.Schema({
         default: 'global'
     },
     valid: Boolean, //valid or not
-    contestTags: [{
+    contestTag: [{
         tag: {
             type: String,
             index: true
