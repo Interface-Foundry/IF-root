@@ -1,0 +1,61 @@
+<div class="new-announcement-form">
+	<div class="form-group">
+		<form name="announcementForm" novalidate>
+
+			<button class="x-button"
+							ng-click="toggleNewAnnouncement(); resetAnnouncement()">x</button>
+
+			<label for="headline">Headline</label>
+			<input name="announcementHeadline"
+						 ng-model="announcement.headline"
+						 type="text"
+						 class="form-control"
+						 required/>
+	   	<div ng-show="announcementForm.$submitted || announcementForm.announcementHeadline.$touched">
+  	    <div ng-show="announcementForm.announcementHeadline.$error.required">This field is required.</div>
+	    </div>
+
+			<label for="body">Body</label>
+			<textarea name="announcementBody"
+								ng-model="announcement.body"
+								class="form-control"
+								required>
+			</textarea>
+	   	<div ng-show="announcementForm.$submitted || announcementForm.announcementBody.$touched">
+  	    <div ng-show="announcementForm.announcementBody.$error.required">This field is required.</div>
+	    </div>
+
+			<label for="url-path">URL Path</label>
+			<input name="announcementUrlPath"
+						 ng-model="announcement.urlPath"
+						 type="text"
+						 class="form-control">
+
+			<label for="url-name">URL Name</label>
+			<input name="announcementUrlName"
+						 ng-model="announcement.urlName"
+						 type="text" 
+						 class="form-control">
+
+			<label for="region">Region</label>
+		  <select name="announcementRegion"
+		          ng-model="announcement.region"
+		  				class="form-control"
+		          ng-options="region for region in regions">
+		  </select>
+
+			<input type="submit" 
+						 value="Save" 
+						 ng-if="!edit"
+						 class="btn btn-success"
+						 ng-click="submitAnnouncement(announcementForm)" />
+
+			<input type="submit" 
+						 value="Update"
+						 ng-if="edit" 
+						 class="btn btn-warning"
+						 ng-click="updateAnnouncement(announcementForm)" />
+
+		</form>
+	</div>
+</div>
