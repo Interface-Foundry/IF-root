@@ -41,9 +41,9 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 			})
 			.$promise
 			.then(function(response) {
-				$scope.entries = response;
+				$scope.entries.splice($index, 1);
 			}, function(error) {
-				console.log('Error:', error);
+				console.log('Error, nothing deleted:', error);
 			});
 		}
 	}
@@ -55,7 +55,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 			number: $scope.entries.length
 		}).$promise
     .then(function(response) {
-      $scope.entries.push(response);
+      $scope.entries = $scope.entries.concat(response);
     }, function(error) {
     	console.log('Error:', error);
     });

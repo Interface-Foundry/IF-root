@@ -23571,9 +23571,9 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 			})
 			.$promise
 			.then(function(response) {
-				$scope.entries = response;
+				$scope.entries.splice($index, 1);
 			}, function(error) {
-				console.log('Error:', error);
+				console.log('Error, nothing deleted:', error);
 			});
 		}
 	}
@@ -23585,7 +23585,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 			number: $scope.entries.length
 		}).$promise
     .then(function(response) {
-      $scope.entries.push(response);
+      $scope.entries = $scope.entries.concat(response);
     }, function(error) {
     	console.log('Error:', error);
     });
@@ -24740,7 +24740,6 @@ ContestController.$inject = ['$scope', '$routeParams', 'Entries'];
 
 function ContestController($scope, $routeParams, Entries) {
 
-	$scope.dummyData = dummyData;
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
@@ -24748,7 +24747,7 @@ function ContestController($scope, $routeParams, Entries) {
 	$scope.worldId = $routeParams.worldURL;
 
 	activate();
-	// dummyData()
+
 	function activate() {
 		Entries.getValidEntries($scope.region, $scope.entries.length)
     .then(function(response) {
@@ -24758,26 +24757,13 @@ function ContestController($scope, $routeParams, Entries) {
     });
 	}
 
-
-
 	function loadEntries() {
-		// contestService.getentries($scope.entries.length, $scope.worldId, $scope.hashTag)
-		// .then(function(response) {
-		// 	$scope.entries = $scope.entries.concat(response.data);
-		// });
 		Entries.getValidEntries($scope.region, $scope.entries.length)
     .then(function(response) {
-      $scope.entries.push(response.data);
+      $scope.entries = $scope.entries.concat(response.data);
     }, function(error) {
     	console.log('Error:', error);
     });
-	}
-
-	function dummyData() {
-		console.log("FILLING DUMMY DATA")
-		for (var i = 0; i < 20; i++) {
-			$scope.entries.push('data' + i);
-		}
 	}
 }
 'use strict';
