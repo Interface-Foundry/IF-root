@@ -16897,11 +16897,96 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    }])
 'use strict';
 
+app.factory('analyticsService', analyticsService);
+
+analyticsService.$inject = ['$http', '$injector', '$rootScope', '$timeout', '$location', 'localStore'];
+
+function analyticsService($http, $injector, $rootScope, $timeout, $location, localStore) {
+    var sequenceNumber = 0;
+    var geoService; // lazy loaded to avoid circ dependency
+    var userManager; // ditto
+
+    /**
+     * Log any sort of analytics data
+     * @param action string name of the action, can be dot-separated or whatever you think is easy to search
+     *      ex "geolocation.update" or "search.keyword" or "search.category"
+     * @param data the dat you want to log to the db
+     */
+    function log(action, data) {
+        sequenceNumber++; // update this global sequence number every time something interesting happens
+		if (typeof geoService === 'undefined') {
+			geoService = $injector.get('geoService');
+		}
+		if (typeof userManager === 'undefined') {
+			userManager = $injector.get('userManager');
+		}
+		
+		var doc = {
+			action: action,
+			data: data,
+			userTimestamp: Date.now(),
+			sequenceNumber: sequenceNumber,
+            world: getWorld()
+		};
+
+		geoService.getLocation().then(function(coords) {
+			doc.loc = {
+				type: "Point",
+				coordinates: [coords.lng, coords.lat]
+			};
+			
+			return localStore.getID();
+		}).then(function(id) {
+			doc.anon_user_id = id;
+			return userManager.getUser();
+		}).then(function(user) {
+			if (user.permissions.indexOf('do_not_track') == -1) {
+				doc.user = user._id;
+			}
+			
+		}).finally(function() {
+			// dude trust me, this is gonna work. no need for a response
+			$http.post('/api/analytics/' + action, doc);
+		});
+    }
+    
+    // log all route changes to teh db
+    $rootScope.$on('$routeChangeSuccess', function(event, url) {
+		
+		// wait until render finishes
+		$timeout(function() {
+			log('route.change', {
+				url: $location.absUrl(),
+				world: getWorld()
+			});
+		});
+	});
+	
+	// attempt to get the currently viewed world if it exists
+	function getWorld() {
+		// the main shelf scope has all the interesting stuff
+		var scope = angular.element('#shelf').scope() || {};
+		if (scope.world && scope.world._id) {
+			return {
+				_id: scope.world._id,
+				category: scope.world.category,
+				loc: scope.world.loc
+			};
+		}
+	}
+    
+    return {
+        log: log
+    };
+}
+
+'use strict';
+
 app.factory('bubbleSearchService', bubbleSearchService);
 
-bubbleSearchService.$inject = ['$http'];
+bubbleSearchService.$inject = ['$http', 'analyticsService'];
 
-function bubbleSearchService($http) {
+function bubbleSearchService($http, analyticsService) {
 	
 	var data = [];
 
@@ -16918,6 +17003,8 @@ function bubbleSearchService($http) {
 			catName: input,
 			textSearch: input
 		};
+		
+		analyticsService.log('search.' + searchType, params);
 
 		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {
@@ -16929,6 +17016,7 @@ function bubbleSearchService($http) {
 	}
 
 }
+
 'use strict';
 // keep track of which type of bubble user is currently viewing
 app
@@ -16954,7 +17042,6 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 	
 	var isContest = false;
 	var hashtag;
-	var id;
 	var startTime;
 
 	return {
@@ -16963,9 +17050,8 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		close: close
 	}
 
-	function set(setID, setHashtag) {
+	function set(setHashtag) {
 		isContest = true;
-		id = setID;
 		hashtag = setHashtag;
 		startTime = new Date();
 	}
@@ -16976,19 +17062,23 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
-				anonID: id,
 				selectedUploadType: hashtag,
 				signedUp: true,
 				userTimeDuration: timeDuration
-			}
-			$http.post('/api/anon_user/update', data).
-				success(function(data) {
-					// console.log('success: ', data);
-				}).
-				error(function(data) {
-					// console.log('error: ', data);
-				});
-			reset();
+			};
+			
+			localStore.getID().then(function(id) {
+				data.anonID = id;
+			}).then(function() {
+				$http.post('/api/anon_user/update', data).
+					success(function(data) {
+						// console.log('success: ', data);
+					}).
+					error(function(data) {
+						// console.log('error: ', data);
+					});
+				reset();
+			})
 		}
 	}
 
@@ -16998,27 +17088,28 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			var response;
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
-				anonID: id,
 				selectedUploadType: hashtag,
 				closedNoLogin: true,
 				userTimeDuration: timeDuration
 			}
-			$http.post('/api/anon_user/update', data).
-				success(function(data, status, headers, config) {
-					response = data[0];
-					// console.log('response: ', response);
-				}).
-				error(function(data, status, headers, config) {
-					// console.log('error: ', data);
-				});
-			compare(response, id);
-			reset();
+			
+			localStore.getID().then(function(id) {
+				data.anonID = id;
+			}).then(function() {
+				$http.post('/api/anon_user/update', data).
+					success(function(data, status, headers, config) {
+						// console.log('response: ', response);
+					}).
+					error(function(data, status, headers, config) {
+						// console.log('error: ', data);
+					});
+				reset();
+			});
 		}
 	}
 
 	function reset() {
 		isContest = false;
-		id = null;
 		hashtag = null;
 		startTime = null;
 	}
@@ -17028,15 +17119,8 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		var end = end.getTime();
 		return end - start; // in ms
 	}
-
-	function compare(response, id) {
-		// if the id returned from api is different from id passed into api, then update the id
-		if (response && response!== id) {
-			localStore.setID(response);
-		}
-	}
-
 }]);
+
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 'contest',
 		function($rootScope, $compile, contest) {
@@ -17059,8 +17143,8 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager', 'mapManager',
-    	function($q, alertManager, mapManager) {
+    .factory('geoService', [ '$q', 'alertManager', 'mapManager', 'locationAnalyticsService',
+    	function($q, alertManager, mapManager, locationAnalyticsService) {
 //abstract & promisify geolocation, queue requests.
 var geoService = {
 	location: {
@@ -17094,6 +17178,13 @@ geoService.getLocation = function(maxAge) {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			})
+			locationAnalyticsService.log({
+				type: "GPS",
+				loc: {
+					type: "Point",
+					coordinates: [position.coords.longitude, position.coords.latitude]
+				}
+			});
 		}
 
 		function geolocationError(error) {
@@ -17148,6 +17239,13 @@ geoService.trackStart = function() {
 				lng: position.coords.longitude
 			};
 			mapManager.moveMarker('track', pos);
+			locationAnalyticsService.log({
+				type: "GPS",
+				loc: {
+					type: "Point",
+					coordinates: [position.coords.longitude, position.coords.latitude]
+				}
+			});
 		}, function() {
 			// console.log('location error');
 		}, {
@@ -17215,6 +17313,7 @@ function getNewTransformMatrix(matrix, angle) {
 
 return geoService;
 }]);
+
 'use strict';
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
@@ -17386,42 +17485,177 @@ angular.module('tidepoolsServices')
 
 		return ifGlobals;
 }]);
-app.factory('localStore', ['$http', function($http) {
+app.factory('localStore', ['$http', '$q', function($http, $q) {
+	
+	var hasLocalStorage = (typeof localStorage !== 'undefined');
 
-	return {
+	var localStore = {
 		getID: getID,
-		setID: setID,
-		createID: createID
-	}
+		locationBuffer: locationBuffer
+	};
+	
+	var id; // id for when the user doesn't have localStorage
 
+	/**
+	 * Returns a promise that is resolved with an anonymous id
+	 */
 	function getID() {
+		// get the ID if it's in localStorage
 		if (typeof Storage !== 'undefined') {
-			return localStorage.id || undefined;
+			if ((new RegExp("/^[0-9a-fA-F]{24}$")).test(localStorage.id)) {
+				var defer = $q.defer();
+				defer.resolve(localStorage.id);
+				return defer.promise;
+			} else {
+				return createID().then(function(new_id) {
+					localStorage.id = new_id;
+					return new_id;
+				});
+			}
+		} else {
+			// no localStorage :(
+			if ((new RegExp("/^[0-9a-fA-F]{24}$")).test(id)) {
+				var defer = $q.defer();
+				defer.resolve(id);
+				return defer.promise;
+			} else {
+				return createID().then(function(new_id) {
+					id = new_id;
+					return id;
+				});
+			}
 		}
-		return undefined;
 	}
 
-	function setID(id) {
-		if (typeof Storage !== 'undefined') {
-			localStorage.id = id;
-		}
-	}
-
+	/**
+	 * Returns a promise that is resolved with a new id
+	 */
 	function createID() {
 		var data = {
 			userTime: new Date()
 		}
-		$http.post('/api/anon_user/create', data).
-			success(function(data) {
-				setID(data[0]);
-				// console.log('success: ', data);
-			}).
-			error(function(data) {
-				// console.log('error: ', data);
+		return $http.post('/api/anon_user/create', data)
+			.then(function(res) {
+				return res.data[0];
 			});
 	}
-
+	
+	
+	/**
+	 * Location Buffer
+	 */
+	 var _locationBuffer = [];
+	 var locationBuffer = {
+		 push: function(data) {
+			_locationBuffer.push(data);
+			
+			if (typeof localStorage !== 'undefined') {
+				localStorage.setItem("locationBuffer", JSON.stringify(_locationBuffer));
+			}
+		 },
+		 getLength: function() {
+			var l;
+			 if (hasLocalStorage) {
+				 try {
+					 l = JSON.parse(localStorage.locationBuffer).length;
+				 } catch (e) {
+					 localStorage.locationBuffer = "[]";
+					 l = 0;
+				 }
+				 return l;
+			 } else {
+				 return _locationBuffer.length;
+			 }
+		 },
+		 flush: function() {
+			// use localstorage if they have it
+			if (typeof localStorage !== 'undefined') {
+				try {
+					_locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+				}
+				catch (e) {
+					// welp... start over.
+					localStorage.setItem("locationBuffer", "[]");
+					locationBuffer = [];
+					return [];
+				}
+			}
+			var lb = angular.copy(_locationBuffer);
+			_locationBuffer = [];
+			return lb;
+		 }
+	 };
+	
+	
+	return localStore;
 }]);
+
+'use strict';
+
+app.factory('locationAnalyticsService', locationAnalyticsService);
+
+locationAnalyticsService.$inject = ['$http', '$interval', 'analyticsService', 'localStore'];
+
+function locationAnalyticsService($http, $interval, analyticsService, localStore) {
+    var locationBuffer = []; // array of any kind of location data
+    var maxBufferSize = 1000; // when to flush the buffer
+    var maxBufferAge = 60*1000; // flush every so often
+    
+    // use localstorage if they have it    
+	if (typeof localStorage !== 'undefined') {
+		try {
+			locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+		}
+		catch (e) {
+			locationBuffer = [];
+			localStorage.setItem("locationBuffer", "[]");
+		}
+		
+		if (!locationBuffer) {
+			locationBuffer = [];
+		}
+	}
+
+    /**
+     * Log any sort of location analytics data
+     * 
+     * timestamp will be automatically added
+     * 
+     * var exampleLocationPoints = [
+		 { type: "GPS", loc: [-74.2355365, 40.2354656], timestamp: 1427326245233 },
+		 { type: "iBeacon", IDHash: "asdfafdasfasf", distance: 10, timestamp: 1427326245233},
+		 { type; "AltBeacon", IDHash: "adfkasdfasf", distance: 10, timestamp: 1427326245233 }
+		];
+     * 
+     * @param data the dat you want to log to the db
+     */
+    function log(data) {		
+      data.timestamp = Date.now();
+      localStore.locationBuffer.push(data);
+      if (localStore.locationBuffer.getLength == maxBufferSize) {
+	flushBuffer();
+      }
+    }
+    
+    function flushBuffer() {
+      var locationBuffer = localStore.locationBuffer.flush();
+		
+      if (locationBuffer.length > 0) {
+	  analyticsService.log('geolocation.updates', locationBuffer);
+      }
+      
+    }
+    
+  $interval(function() {
+	  flushBuffer();
+  }, maxBufferAge);
+    
+  return {
+    log: log,
+    forceFlushBuffer: flushBuffer
+  };
+}
+
 'use strict';
 
 angular.module('tidepoolsServices')
@@ -18874,11 +19108,6 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 		}
 
 		currentWorldId = world._id;	
-
-		//local storage
-		if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	}
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
@@ -18977,6 +19206,7 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 	}
 
 }
+
 angular.module('tidepoolsServices')
 	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
 	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
@@ -23220,7 +23450,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 '<button class="view-tab search-tab" ng-class="{selected: navService.status.search || navService.status.searchWithinBubble}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
-app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
+app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -23229,9 +23459,10 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
 				geoService.getLocation().then(function(coords) {
+					searchParams = {textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}
+				analyticsService.log("search.text", searchParams);
 				
-				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
+				scope.searching = $http.get('/api/textsearch', {server: true, params: searchParams})
 					.success(function(result) {
 						if (!result.err) {
 							scope.searchResult = result;
@@ -23252,6 +23483,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
@@ -24235,10 +24467,10 @@ $scope.$on('$locationChangeSuccess', function (event) {
 app.directive('categoryWidget', categoryWidget);
 
 categoryWidget.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
-												  	'floorSelectorService', 'categoryWidgetService'];
+												  	'floorSelectorService', 'categoryWidgetService', 'analyticsService'];
 
 function categoryWidget(bubbleSearchService, $location, mapManager, $route,
-													floorSelectorService, categoryWidgetService) {
+													floorSelectorService, categoryWidgetService, analyticsService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -24284,7 +24516,6 @@ function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 			}
 
 			scope.search = function(category, index) {
-
 				if (!updateIndex(index)) {
 					return;
 				}
@@ -24331,6 +24562,7 @@ function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 		}
 	};
 }
+
 'use strict';
 
 app.factory('categoryWidgetService', categoryWidgetService);
@@ -25738,7 +25970,8 @@ $scope.uploadWTGT = function($files, state) {
 		});
 	} else { // not logged in
 		dialogs.showDialog('authDialog.html');
-		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+		contest.set($scope.wtgt.hashtags[state]);
+		
 	}
 	
 }
@@ -25768,13 +26001,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 			geoService.trackStop();
 		 		}
 		 	});	
-		 }
-
-		 //local storage
-		 if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	 }
-		 
+		 }		 
 
 		 style.navBG_color = $scope.style.navBG_color;
 
