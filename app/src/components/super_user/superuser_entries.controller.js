@@ -7,15 +7,15 @@ SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$loca
 function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
 
 	$scope.currentRoute = superuserService.getCurrentRoute();
-	$scope.entries = [];
+	$scope.entries = [1,2,3];
 	$scope.region = $routeParams.region;
 	$scope.routes = superuserService.routes;
 	
 	activate();
 
 	function activate() {
-		Entries.query({
-			id: $scope.region
+		Entries.query({}, {
+			number: $scope.entries.length
 		}).$promise
     .then(function(response) {
       $scope.entries = response;
