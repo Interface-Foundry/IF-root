@@ -7,7 +7,7 @@ var express = require('express'),
 
 //load contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/:number', function(req, res) {
-    if (req.user.admin) {
+    
         console.log('req.params is', req.params.number)
         console.log('req.query.number is', req.query.number)
         contestEntrySchema.aggregate({
@@ -24,6 +24,28 @@ router.get('/:number', function(req, res) {
             return res.send(entries);
         });
 
+   
+})
+
+//mark an entry as invalid
+router.put('/su/:id', function(req, res) {
+    if (req.user.admin) {
+        contestEntrySchema.findById(req.params.id, function(err, entry) {
+            if (err) {
+                return handleError(res, err);
+            }
+            if (!entry) {
+                return res.send(404);
+            }
+            //Delete entry
+            entry.remove(function(err) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.log('deleted successfully!')
+                })
+                //Should I send something back?
+        })
     } else {
         console.log('you are not authorized...stand down..')
     }
