@@ -47,7 +47,7 @@ router.get('/:number', function(req, res) {
             if (err) {
                 console.log(err);
             }
-            console.log('# of entries is', entries.length)
+            console.log('# of entries is', entries)
             return res.send(entries);
         });
    
