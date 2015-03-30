@@ -2,37 +2,54 @@
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$routeParams', 'contestService'];
+ContestController.$inject = ['$routeParams', 'Entries'];
 
-function ContestController($routeParams, contestService) {
-	var vm = this;
+function ContestController($routeParams, Entries) {
 
-	vm.dummyData = dummyData;
-	vm.hashTag = $routeParams.hashTag;
-	vm.loadPictures = loadPictures;
-	vm.pictures = [];
-	vm.worldId = $routeParams.worldURL;
+	$scope.dummyData = dummyData;
+	$scope.hashTag = $routeParams.hashTag;
+	$scope.loadPictures = loadPictures;
+	$scope.entries = [];
+	$scope.worldId = $routeParams.worldURL;
 
 	// activate();
 	dummyData()
 	function activate() {
-		contestService.getPictures(0, vm.worldId, vm.hashTag)
-		.then(function(response) {
-			angular.copy(response.data, vm.pictures);
-		});
+		Entries.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = response;
+    }, function(error) {
+    	console.log('Error:', error);
+    });
 	}
 
-	function loadPictures() {
-		contestService.getPictures(vm.pictures.length, vm.worldId, vm.hashTag)
-		.then(function(response) {
-			vm.pictures = vm.pictures.concat(response.data);
-		});
+
+
+	function loadEntries() {
+		// contestService.getentries($scope.entries.length, $scope.worldId, $scope.hashTag)
+		// .then(function(response) {
+		// 	$scope.entries = $scope.entries.concat(response.data);
+		// });
+		Entries.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries.push(response);
+    }, function(error) {
+    	console.log('Error:', error);
+    });
 	}
 
 	function dummyData() {
 		console.log("FILLING DUMMY DATA")
 		for (var i = 0; i < 20; i++) {
-			vm.pictures.push('data' + i);
+			$scope.entries.push('data' + i);
 		}
 	}
 }

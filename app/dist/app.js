@@ -24739,37 +24739,54 @@ function categoryWidgetService() {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$routeParams', 'contestService'];
+ContestController.$inject = ['$routeParams', 'Entries'];
 
-function ContestController($routeParams, contestService) {
-	var vm = this;
+function ContestController($routeParams, Entries) {
 
-	vm.dummyData = dummyData;
-	vm.hashTag = $routeParams.hashTag;
-	vm.loadPictures = loadPictures;
-	vm.pictures = [];
-	vm.worldId = $routeParams.worldURL;
+	$scope.dummyData = dummyData;
+	$scope.hashTag = $routeParams.hashTag;
+	$scope.loadPictures = loadPictures;
+	$scope.entries = [];
+	$scope.worldId = $routeParams.worldURL;
 
 	// activate();
 	dummyData()
 	function activate() {
-		contestService.getPictures(0, vm.worldId, vm.hashTag)
-		.then(function(response) {
-			angular.copy(response.data, vm.pictures);
-		});
+		Entries.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = response;
+    }, function(error) {
+    	console.log('Error:', error);
+    });
 	}
 
-	function loadPictures() {
-		contestService.getPictures(vm.pictures.length, vm.worldId, vm.hashTag)
-		.then(function(response) {
-			vm.pictures = vm.pictures.concat(response.data);
-		});
+
+
+	function loadEntries() {
+		// contestService.getentries($scope.entries.length, $scope.worldId, $scope.hashTag)
+		// .then(function(response) {
+		// 	$scope.entries = $scope.entries.concat(response.data);
+		// });
+		Entries.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries.push(response);
+    }, function(error) {
+    	console.log('Error:', error);
+    });
 	}
 
 	function dummyData() {
 		console.log("FILLING DUMMY DATA")
 		for (var i = 0; i < 20; i++) {
-			vm.pictures.push('data' + i);
+			$scope.entries.push('data' + i);
 		}
 	}
 }
@@ -25619,15 +25636,27 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 // model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
-		$scope.style = data.style;
+		
 		$scope.loadInstagrams = loadInstagrams;
+		$scope.instagrams = [];
+		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
 		loadInstagrams();
 
 		function loadInstagrams() {
-			$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+			db.instagrams.query({
+				limit:30,
+				skip: $scope.instagrams.length,
+				tag:$scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.instagrams = response
+			}, function(error) {
+				console.log('Error:', error);
+			});
 		}
 	})
 }])
