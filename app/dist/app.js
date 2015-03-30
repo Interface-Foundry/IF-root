@@ -23490,26 +23490,44 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 'use strict';
 
 angular.module('IF')
-    .factory('Entries', function($resource) {
+  .factory('Entries', Entries);
 
-        return $resource("/api/entries/:id/:option", {
-            id: '@id'
-        }, {
-            query: {
-                method: 'GET',
-                params: {
-                    number: '@number'
-                },
-                isArray: true
-            },
-            update: {
-                method: 'put'
-            },
-            remove: {
-                method: 'DELETE'
-            }
-        });
-    });
+Entries.$inject = ['$http', '$resource'];
+
+function Entries($http, $resource) {
+
+  var resource = $resource("/api/entries/su/:id/:option", {
+    id: '@id'
+  }, {
+    query: {
+      method: 'GET',
+      params: {
+        number: '@number'
+      },
+      isArray: true
+    },
+    update: {
+      method: 'put'
+    },
+    remove: {
+      method: 'DELETE'
+    }
+  });
+
+  return {
+    getValidEntries: getValidEntries,
+    resource: resource
+  };
+
+  function getValidEntries(region, number) {
+    var params = {
+      number: number
+    }
+    return $http.get('/api/entries/' + region, {params: params})
+  }
+
+
+}
 'use strict';
 
 app.controller('SuperuserEntriesController', SuperuserEntriesController);
@@ -23529,7 +23547,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	activate();
 
 	function activate() {
-		Entries.query({
+		Entries.resource.query({
 			id: $scope.region
 		}, {
 			number: $scope.entries.length
@@ -23548,18 +23566,20 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	function deleteEntry($index) {
 		var deleteConfirm = confirm("Are you sure you want to delete this?");
 		if (deleteConfirm) {
-			Entries.remove({
+			Entries.resource.remove({
 				id: $scope.entries[$index]._id
 			})
 			.$promise
 			.then(function(response) {
 				$scope.entries = response;
+			}, function(error) {
+				console.log('Error:', error);
 			});
 		}
 	}
 
 	function loadEntries() {
-		Entries.query({
+		Entries.resource.query({
 			id: $scope.region
 		}, {
 			number: $scope.entries.length
@@ -23573,7 +23593,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 
 	function toggleValidity($index) {
   	$scope.entries[$index].valid = !$scope.entries[$index].valid;
-  	Entries.update({
+  	Entries.resource.update({
   		id: $scope.entries[$index]._id
   	}, $scope.entries[$index]);		
 	}
@@ -24724,18 +24744,15 @@ function ContestController($scope, $routeParams, Entries) {
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
+	$scope.region = 'global';
 	$scope.worldId = $routeParams.worldURL;
 
 	activate();
 	// dummyData()
 	function activate() {
-		Entries.query({
-			id: $scope.region
-		}, {
-			number: $scope.entries.length
-		}).$promise
+		Entries.getValidEntries($scope.region, $scope.entries.length)
     .then(function(response) {
-      $scope.entries = response;
+      $scope.entries = response.data;
     }, function(error) {
     	console.log('Error:', error);
     });
@@ -24748,13 +24765,9 @@ function ContestController($scope, $routeParams, Entries) {
 		// .then(function(response) {
 		// 	$scope.entries = $scope.entries.concat(response.data);
 		// });
-		Entries.query({
-			id: $scope.region
-		}, {
-			number: $scope.entries.length
-		}).$promise
+		Entries.getValidEntries($scope.region, $scope.entries.length)
     .then(function(response) {
-      $scope.entries.push(response);
+      $scope.entries.push(response.data);
     }, function(error) {
     	console.log('Error:', error);
     });
