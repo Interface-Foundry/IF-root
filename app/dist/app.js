@@ -23175,7 +23175,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 angular.module('IF')
     .factory('Entries', function($resource) {
 
-        return $resource("/api/entries/su/:id/:option", {
+        return $resource("/api/entries/:id/:option", {
             id: '@id'
         }, {
             query: {
@@ -23515,7 +23515,7 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 angular.module('IF')
     .factory('Entries', function($resource) {
 
-        return $resource("/api/entries/su/:id/:option", {
+        return $resource("/api/entries/:id/:option", {
             id: '@id'
         }, {
             query: {
