@@ -42,6 +42,15 @@
   	    <div ng-show="contestForm.contestBody.$error.required">This field is required.</div>
 	    </div>
 
+	    <label for="region">Region</label>
+		  <select name="contestRegion"
+		          ng-model="contest.region"
+		  				class="form-control"
+		          ng-options="region for region in regions">
+		  </select>
+
+		  <br>
+
 			<text-angular ng-model="contest.htmlBody"></text-angular>
 			<div class="clearfix"></div>
 
@@ -119,12 +128,12 @@
         						show-meridian="true"></timepicker>
 
 			<input type="submit" 
-						 value="Save" 
+						 value="New" 
 						 class="btn btn-success"
 						 ng-click="submit(contestForm)" />
 
 			<input type="submit" 
-						 value="Edit" 
+						 value="Update" 
 						 class="btn btn-warning"
 						 ng-click="updateContest(contestForm)" />
 

@@ -19,6 +19,7 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 	$scope.openEnd = openEnd;
 	$scope.openStart = openStart;
 	$scope.region = $routeParams.region;
+	$scope.regions = ['global'];
 	$scope.submit = submit;
 	$scope.updateContest = updateContest;
 
