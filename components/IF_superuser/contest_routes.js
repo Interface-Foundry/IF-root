@@ -44,19 +44,29 @@ router.post('/', function(req, res) {
             console.log('all others now false', result)
         })
 
+        console.log('hitting post, req.body is..', req.body)
+
         var newcontest = new contestSchema();
         if (req.body._id) {
             delete req.body._id;
             delete req.body._v;
         }
+
+     
+
         var contest = _.extend(newcontest, req.body);
-        console.log('hitting post, req.body is..', contest)
+
+           //push hashtags into contestTag array
+        contest.contestTags.push({tag:req.body.hashtag1, title:req.body.hashtag1Title});
+        contest.contestTags.push({tag:req.body.hashtag2, title:req.body.hashtag2Title});
+
+        console.log('extended contest is..', contest)
         contest.save(
             function(err, contest) {
                 if (err) {
                     console.log(err)
                 }
-                console.log('final contest is..', contest)
+     
                 return res.send(contest);
 
             });
