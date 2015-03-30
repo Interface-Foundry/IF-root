@@ -14,6 +14,8 @@ router.get('/su/:number', function(req, res) {
             }
         }, {
             $skip: parseInt(req.query.number)
+        }, {
+            $limit: 5
         }, function(err, entries) {
             if (err) {
                 console.log(err);
@@ -39,6 +41,8 @@ router.get('/:number', function(req, res) {
             }
         }, {
             $skip: parseInt(req.query.number)
+        }, {
+            $limit: 5
         }, function(err, entries) {
             if (err) {
                 console.log(err);
