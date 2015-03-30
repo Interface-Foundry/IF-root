@@ -10,18 +10,15 @@ function ContestController($scope, $routeParams, Entries) {
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
+	$scope.region = 'global';
 	$scope.worldId = $routeParams.worldURL;
 
 	activate();
 	// dummyData()
 	function activate() {
-		Entries.query({
-			id: $scope.region
-		}, {
-			number: $scope.entries.length
-		}).$promise
+		Entries.getValidEntries($scope.region, $scope.entries.length)
     .then(function(response) {
-      $scope.entries = response;
+      $scope.entries = response.data;
     }, function(error) {
     	console.log('Error:', error);
     });
@@ -34,13 +31,9 @@ function ContestController($scope, $routeParams, Entries) {
 		// .then(function(response) {
 		// 	$scope.entries = $scope.entries.concat(response.data);
 		// });
-		Entries.query({
-			id: $scope.region
-		}, {
-			number: $scope.entries.length
-		}).$promise
+		Entries.getValidEntries($scope.region, $scope.entries.length)
     .then(function(response) {
-      $scope.entries.push(response);
+      $scope.entries.push(response.data);
     }, function(error) {
     	console.log('Error:', error);
     });

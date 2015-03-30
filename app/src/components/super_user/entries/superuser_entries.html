@@ -12,7 +12,7 @@
     <div class="superuser-list" lazy-load load-more="loadEntries()">
      
       <ul>
-        <li class="announcement" ng-repeat="entry in entries">
+        <li class="announcement" ng-repeat="entry in entries track by $index">
 
           <div class="superuser-left-col">
             <div>
