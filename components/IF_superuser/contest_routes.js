@@ -52,7 +52,7 @@ router.post('/', function(req, res) {
             delete req.body._v;
         }
 
-        
+
      
 
         var contest = _.extend(newcontest, req.body);

@@ -23697,7 +23697,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	activate();
 
 	function activate() {
-		Entries.query({}, {
+		Entries.query({id: $scope.region}, {
 			number: $scope.entries.length
 		}).$promise
     .then(function(response) {

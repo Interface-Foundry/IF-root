@@ -392,7 +392,7 @@ app.get('/api/user/loggedin', function(req, res) {
 //--- SUPER USER ROUTER ----//
 app.use('/api/announcements', require('./components/IF_superuser/announcement_routes'));
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
-
+app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
 
 
 // PROFILE SECTION =========================

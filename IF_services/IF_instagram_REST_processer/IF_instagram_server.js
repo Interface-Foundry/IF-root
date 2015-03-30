@@ -57,8 +57,6 @@ var processTagMediaRecent = function(err, data, limit) {
 }
 
 
-
-
 // setInterval(function() {
 
 //   instagram.tag_media_recent(strings.TAG_FOR_IMAGES, processTagMediaRecent);
