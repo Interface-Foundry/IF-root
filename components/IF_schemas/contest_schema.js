@@ -40,7 +40,7 @@ var contestSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    contestTag: [{
+    contestTags: [{
         tag: {
             type: String,
             index: true
