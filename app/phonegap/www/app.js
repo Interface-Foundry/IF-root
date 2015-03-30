@@ -23302,30 +23302,6 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 'use strict';
 
 angular.module('IF')
-    .factory('Entries', function($resource) {
-
-        return $resource("/api/su/entries/:id/:option", {
-
-            id: '@id'
-        }, {
-            query: {
-                method: 'GET',
-                isArray:true,
-                params: {
-                    number: '@number'
-                }
-            },
-            update: {
-                method: 'put'
-            },
-            remove: {
-                method: 'DELETE'
-            }
-        });
-    });
-'use strict';
-
-angular.module('IF')
     .factory('Announcements', function($resource) {
 
         return $resource("/api/announcements/:id/:option", {
@@ -23765,35 +23741,6 @@ function superuserService($location) {
 		var path = $location.path();
 		var len = path.slice(4).indexOf('/');
 		return path.slice(4)[0].toUpperCase() + path.slice(5, len + 4);
-	}
-
-}
-'use strict';
-
-app.controller('SuperuserEntriesController', SuperuserEntriesController);
-
-SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$location', 'superuserService'];
-
-function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
-
-	$scope.currentRoute = superuserService.getCurrentRoute();
-	$scope.entries = [1,2,3];
-	$scope.region = $routeParams.region;
-	$scope.routes = superuserService.routes;
-	
-	activate();
-
-	function activate() {
-		Entries.query({id: $scope.region}, {
-			number: $scope.entries.length
-		}).$promise
-    .then(function(response) {
-      $scope.entries = response;
-    });
-	}
-
-	$scope.changeRoute = function() {
-		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
 
 }
