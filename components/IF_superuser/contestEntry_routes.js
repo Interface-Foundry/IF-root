@@ -23,20 +23,20 @@ router.post('/:id', function(req, res) {
 //load contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/su/:number', function(req, res) {
     if (req.user.admin) {
-           console.log('req.params is', req.params.number)
+        console.log('req.params is', req.params.number)
         console.log('req.query.number is', req.query.number)
         contestEntrySchema.aggregate({
             $sort: {
                 userTime: -1
             }
         }, {
-            $skip: req.query.number
-        }, function(err, contests) {
+            $skip: parseInt(req.query.number)
+        }, function(err, entries) {
             if (err) {
                 console.log(err);
             }
-            console.log(contests)
-            return res.send(contests);
+            console.log('# of entries is',entries.length)
+            return res.send(entries);
         });
 
     } else {
