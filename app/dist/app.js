@@ -23527,7 +23527,7 @@ SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$loc
 function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
 
 	$scope.contest = {
-		contestTag: []
+		contestTags: []
 	};
 	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
