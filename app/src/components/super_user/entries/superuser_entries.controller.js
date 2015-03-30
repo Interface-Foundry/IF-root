@@ -17,7 +17,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	activate();
 
 	function activate() {
-		Entries.query({
+		Entries.resource.query({
 			id: $scope.region
 		}, {
 			number: $scope.entries.length
@@ -36,18 +36,20 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	function deleteEntry($index) {
 		var deleteConfirm = confirm("Are you sure you want to delete this?");
 		if (deleteConfirm) {
-			Entries.remove({
+			Entries.resource.remove({
 				id: $scope.entries[$index]._id
 			})
 			.$promise
 			.then(function(response) {
 				$scope.entries = response;
+			}, function(error) {
+				console.log('Error:', error);
 			});
 		}
 	}
 
 	function loadEntries() {
-		Entries.query({
+		Entries.resource.query({
 			id: $scope.region
 		}, {
 			number: $scope.entries.length
@@ -61,7 +63,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 
 	function toggleValidity($index) {
   	$scope.entries[$index].valid = !$scope.entries[$index].valid;
-  	Entries.update({
+  	Entries.resource.update({
   		id: $scope.entries[$index]._id
   	}, $scope.entries[$index]);		
 	}
