@@ -5,10 +5,21 @@
 	
 	<div class="instagram-wrap wrap" lazy-load load-more="dummyData()">
 		<ul>
-			<li ng-repeat="picture in pictures track by $index" class="instagram marble-page">
-				<img ng-src="{{picture.imgURL}}">
-				<p>{{picture}}</p>
-				<footer><h4>{{::picture.contestTag}}</footer>
+			<li ng-repeat="entry in entries track by $index" class="instagram marble-page">
+
+          <div class="media card superuser-list-item">
+
+            <h4>{{entry.userName}}</h4>
+            do we want to show user name??
+            <p>{{entry.worldName}}</p>
+            <div class="contest-entry-pic">
+              <img ng-src="{{entry.imgURL}}">
+            </div>
+            <div ng-repeat="tag in entry.contestTags">
+              <p></p>
+            </div>
+            <p>Tag: {{entry.contestTag}}</p>
+          </div>
 
 			</li>
 		</ul>

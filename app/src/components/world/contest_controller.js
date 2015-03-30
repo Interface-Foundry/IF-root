@@ -2,18 +2,18 @@
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$routeParams', 'Entries'];
+ContestController.$inject = ['$scope', '$routeParams', 'Entries'];
 
-function ContestController($routeParams, Entries) {
+function ContestController($scope, $routeParams, Entries) {
 
 	$scope.dummyData = dummyData;
 	$scope.hashTag = $routeParams.hashTag;
-	$scope.loadPictures = loadPictures;
+	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
 	$scope.worldId = $routeParams.worldURL;
 
-	// activate();
-	dummyData()
+	activate();
+	// dummyData()
 	function activate() {
 		Entries.query({
 			id: $scope.region
