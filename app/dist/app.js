@@ -23499,7 +23499,8 @@ angular.module('IF')
                 method: 'GET',
                 params: {
                     number: '@number'
-                }
+                },
+                isArray: true
             },
             update: {
                 method: 'put'

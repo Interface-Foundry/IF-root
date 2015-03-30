@@ -23,6 +23,12 @@
 	<li class="drawer-item" ng-if="userManager.adminStatus" ng-click="go('/su/announcements/global')">
 		Announcements
 	</li>
+	<li class="drawer-item" ng-if="userManager.adminStatus" ng-click="go('/su/contests/global')">
+		Contests
+	</li>
+	<li class="drawer-item" ng-if="userManager.adminStatus" ng-click="go('/su/entries/global')">
+		Entries
+	</li>
 	<li class="drawer-item" ng-click="logout()">
 		Logout
 	</li>
