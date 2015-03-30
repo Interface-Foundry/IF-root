@@ -16,12 +16,12 @@ router.get('/su/:number', function(req, res) {
             $skip: parseInt(req.query.number)
         }, {
             $limit: 5
-        }, function(err, entries) {
+        }, function(err, entry) {
             if (err) {
                 console.log(err);
             }
-            console.log('# of entries is', entries.length)
-            return res.send(entries);
+            console.log('# of entries is', entry)
+            return res.send(entry);
         });
     } else {
         console.log('you are not authorized...stand down..')
@@ -30,7 +30,7 @@ router.get('/su/:number', function(req, res) {
 
 //load only valid contest entries sorted newest and skips # already loaded on page (lazy load)
 router.get('/:number', function(req, res) {
-    if (req.user.admin) {
+
         contestEntrySchema.aggregate({
             $match: {
                 valid: true
@@ -50,9 +50,7 @@ router.get('/:number', function(req, res) {
             console.log('# of entries is', entries.length)
             return res.send(entries);
         });
-    } else {
-        console.log('you are not authorized...stand down..')
-    }
+   
 })
 
 //Toggle entry validity
@@ -101,9 +99,9 @@ router.delete('/su/:id', function(req, res) {
                     if (err) {
                         console.log(err)
                     }
-                    console.log('deleted successfully!')
+                    res.send(200);
+                    console.log('deleted!')
                 })
-                //Should I send something back?
         })
     } else {
         console.log('you are not authorized...stand down..')
