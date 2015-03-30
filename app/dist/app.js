@@ -23585,7 +23585,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 			number: $scope.entries.length
 		}).$promise
     .then(function(response) {
-      $scope.entries = response;
+      $scope.entries.push(response);
     }, function(error) {
     	console.log('Error:', error);
     });

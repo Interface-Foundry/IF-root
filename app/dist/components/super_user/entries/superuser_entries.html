@@ -7,9 +7,10 @@
   <p class="superuser-title">{{region | capitalizeFirst}} Entries</p>
 </nav>
 
-<div id="shelf" class="shelf-surface wrap superuser-background">
+<div id="shelf" lazy-load load-more="loadEntries()" 
+     class="shelf-surface wrap superuser-background">
   <div class="container-fluid navfix">
-    <div class="superuser-list" lazy-load load-more="loadEntries()">
+    <div class="superuser-list">
      
       <ul>
         <li class="announcement" ng-repeat="entry in entries track by $index">
