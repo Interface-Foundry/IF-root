@@ -23277,11 +23277,11 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
 
-	function deleteAnnouncement(index) {
+	function deleteAnnouncement($index) {
 		var deleteConfirm = confirm("Are you sure you want to delete this?");
 		if (deleteConfirm) {
 			Announcements.remove({
-				id: $scope.announcements[index]._id
+				id: $scope.announcements[$index]._id
 			})
 			.$promise
 			.then(function(response) {
@@ -23290,12 +23290,12 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 		}
 	}
 
-	function editAnnouncement(index) {
+	function editAnnouncement($index) {
 		var tempAnnouncement = {};
-		angular.copy($scope.announcements[index], tempAnnouncement);
+		angular.copy($scope.announcements[$index], tempAnnouncement);
 		$scope.announcement = tempAnnouncement;
 		$scope.edit = true;
-		$scope.editIndex = index;
+		$scope.editIndex = $index;
 		$scope.showAddAnnouncement = true;
 	}
 
@@ -23331,11 +23331,11 @@ function SuperuserAnnouncementController($scope, Announcements, $routeParams, $l
 		$scope.showAddAnnouncement = false;
 	}
 
-  function toggleDraftState(index) {
-  	$scope.announcements[index].live = !$scope.announcements[index].live;
+  function toggleDraftState($index) {
+  	$scope.announcements[$index].live = !$scope.announcements[$index].live;
   	Announcements.update({
-  		id: $scope.announcements[index]._id
-  	}, $scope.announcements[index]);
+  		id: $scope.announcements[$index]._id
+  	}, $scope.announcements[$index]);
   }
 
   function updateAnnouncement(form) {
@@ -23545,6 +23545,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	$scope.entries = [];
 	$scope.region = $routeParams.region;
 	$scope.routes = superuserService.routes;
+	$scope.toggleValidity = toggleValidity;
 	
 	activate();
 
@@ -23556,12 +23557,35 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 		}).$promise
     .then(function(response) {
       $scope.entries = response;
+    }, function(error) {
+    	console.log('Error:', error);
     });
 	}
 
 	$scope.changeRoute = function() {
 		superuserService.changeRoute($scope.currentRoute, $scope.region);
 	}
+
+	function deleteEntry($index) {
+		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		if (deleteConfirm) {
+			Entries.remove({
+				id: $scope.entries[$index]._id
+			})
+			.$promise
+			.then(function(response) {
+				$scope.entries = response;
+			});
+		}
+	}
+
+	function toggleValidity($index) {
+  	$scope.entries[$index].valid = !$scope.entries[$index].valid;
+  	entries.update({
+  		id: $scope.entries[$index]._id
+  	}, $scope.entries[$index]);		
+	}
+
 
 }
 'use strict';

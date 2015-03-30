@@ -4,17 +4,39 @@
           ng-model="currentRoute"
           ng-options="route for route in routes">
   </select>
-  <p class="superuser-title">{{region | capitalizeFirst}} Announcements</p>
+  <p class="superuser-title">{{region | capitalizeFirst}} Entries</p>
 </nav>
 
 <div id="shelf" class="shelf-surface wrap superuser-background">
   <div class="container-fluid navfix">
-    <div class="superuser-list">
+    <div class="superuser-list" lazy-load load-more="loadInstagrams()">
      
       <ul>
-        <li ng-repeat="entry in entries">
+        <li class="announcement" ng-repeat="entry in entries">
 
+          <div class="superuser-left-col">
+            <button ng-if="entry.valid" 
+                    class="btn btn-success"
+                    ng-click="toggleValidity($index)">Valid</button>
+            <button ng-if="!entry.valid" 
+                    class="btn btn-warning"
+                    ng-click="toggleValidity($index)">Invalid</button>
+          </div>
 
+          <div class="media card superuser-list-item">
+
+            <h4>{{entry.userName}}</h4>
+            <p>{{entry.worldName}}</p>
+            <img ng-src="{{entry.imgURL}}">
+            <div ng-repeat="tag in entry.contestTags">
+              <p></p>
+            </div>
+            <p>{{entry.distanceFromWorld}}</p>
+
+          </div>
+          <button ng-if="entry.valid" 
+                  class="btn btn-danger"
+                  ng-click="deleteEntry($index)">DELETE</button>
         </li>
       </ul>
 
