@@ -14,5 +14,7 @@ data = db['collaborativeFilterData'].find()
 model = MatrixPreferenceDataModel(data)
 
 # backup the old model and save the new one
-os.rename("/data/models/collaborativeFilter", "/data/models/collaborativeFilter_bk")
+os.rename(
+    "/data/models/collaborativeFilter",
+    "/data/models/collaborativeFilter_bk")
 model.save("/data/models/collaborativeFilter")
