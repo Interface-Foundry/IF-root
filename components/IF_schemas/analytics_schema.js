@@ -5,7 +5,7 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 // stores any sort of analytics that we might want to use for training algorithms
 var analyticsSchema = mongoose.Schema({
 
-    analyticsUserId: String, // required
+    analyticsUserId: { type: Schema.Types.ObjectId, ref: 'anonusers', required: true}, // required
     userId: String, // optional, can remove if the user opts out of tracking?
     hashedSessionId: String, // for stringing session data together.
                              // we can't store the actual session id,
@@ -24,6 +24,18 @@ var analyticsSchema = mongoose.Schema({
     data: {} // free-form data logged by the application
 });
 
+// Validate analyticsUserId
+// (automatically checks that it's a mongoid already, just check that it's valid now)
+analyticsSchema.path('analyticsUserId').validate(function(value, cb) {
+    mongoose.model('anonusers').findById(value, function(err, doc) {
+        if (err || !doc) {
+            cb(false);
+        } else {
+            // maybe check the anonuser doc that was returned?
+            cb(true);
+        }
+    });
+});
 
 analyticsSchema.index({loc:'2dsphere'});
 
