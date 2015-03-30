@@ -29,16 +29,13 @@ var contestSchema = mongoose.Schema({
         default:true
     },
     region: {
-        type: String,
-        default: 'global'
+        type: String
     },
     startDate: {
-        type: Date,
-        default: Date.now
+        type: Date
     },
     endDate: {
-        type: Date,
-        default: Date.now
+        type: Date
     },
     contestTags: [{
         tag: {

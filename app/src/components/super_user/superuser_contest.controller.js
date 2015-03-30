@@ -29,7 +29,9 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 			id: $scope.region
 		}).$promise
     .then(function(response) {
-      $scope.contest = response;
+    	if (response._id) {
+      	$scope.contest = response;
+    	}
 			getDates();
     }, function(error) {
     	console.log('Error:', error);
