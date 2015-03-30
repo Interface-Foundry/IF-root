@@ -33,12 +33,16 @@
           <div class="media card superuser-list-item">
 
             <h4>{{entry.userName}}</h4>
-            <p>{{entry.worldName}}</p>
-            <img ng-src="{{entry.imgURL}}">
+            <p>From World: {{entry.worldName}}</p>
+            <div class="contest-entry-pic">
+              <img ng-src="{{entry.imgURL}}">
+            </div>
             <div ng-repeat="tag in entry.contestTags">
               <p></p>
             </div>
-            <p>{{entry.distanceFromWorld}}</p>
+            <p>Tag: {{entry.contestTag}}</p>
+            <p>Distance from contest: {{entry.distanceFromWorld}}</p>
+            <p>Region: {{entry.region}}</p>
 
           </div>
 
