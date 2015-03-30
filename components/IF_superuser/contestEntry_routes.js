@@ -99,7 +99,7 @@ router.delete('/su/:id', function(req, res) {
                     if (err) {
                         console.log(err)
                     }
-                    res.send(200);
+                    res.sendStatus(200);
                     console.log('deleted!')
                 })
         })
