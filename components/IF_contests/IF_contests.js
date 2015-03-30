@@ -50,7 +50,7 @@ var route = function(imgUpload, uploadContents, userID) {
                 userID: userID,
                 valid: validEntry,
                 imgURL: imgUpload,
-                distanceFromWorld: parseInt(distance)
+                distanceFromWorld: parseFloat(distance)
             });
 
             cs.save(function(err, data) {
