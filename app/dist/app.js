@@ -23526,7 +23526,9 @@ SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$loc
 
 function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
 
-	$scope.contest = {};
+	$scope.contest = {
+		contestTag: []
+	};
 	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
     formatYear: 'yy',
@@ -23604,17 +23606,30 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 
 	function getDates() {
 		if (!$scope.contest._id) {
-			var d = new Date;
+			// if no contest exists in DB, set calendar and clock to current date/time
+			var d = new Date,
+					st,
+					et;
 	    $scope.dateTime.startDate = d;
 	    $scope.dateTime.startTime = d;
 	    $scope.dateTime.endDate = d;
 	    $scope.dateTime.endTime = d;
+	    // set minutes to 00
+	    $scope.dateTime.startTime.setMinutes(0);
+	    $scope.dateTime.endTime.setMinutes(0);
 		} else {
-		  $scope.dateTime.startDate = $scope.contest.startDate;
-	    $scope.dateTime.startTime = $scope.contest.startTime;
-	    $scope.dateTime.endDate = $scope.contest.endDate;
-	    $scope.dateTime.endTime = $scope.contest.endTime;
+			// set calendar and clock to match the contest data
+		  $scope.dateTime.startDate = new Date($scope.contest.startDate);
+		  st = ISOtoDate($scope.contest.startDate);
+	    $scope.dateTime.startTime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours(), st.getMinutes(),0 , 0);
+	    $scope.dateTime.endDate = new Date($scope.contest.endDate);
+	    et = ISOtoDate($scope.contest.endDate);
+	    $scope.dateTime.endTime = new Date(et.getFullYear(), et.getMonth(), et.getDate(), et.getHours(), et.getMinutes(),0 , 0);
 		}
+  }
+
+  function ISOtoDate(ISOdate) {
+  	return new Date(ISOdate);
   }
 
   function updateContest(form) {
