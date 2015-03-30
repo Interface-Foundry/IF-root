@@ -5,11 +5,9 @@ var express = require('express'),
     contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
     _ = require('underscore');
 
-//load contest entries sorted newest and skips # already loaded on page (lazy load)
-router.get('/:number', function(req, res) {
+//load all contest entries sorted newest and skips # already loaded on page (lazy load)
+router.get('/su/:number', function(req, res) {
 
-    console.log('req.params is', req.params.number)
-    console.log('req.query.number is', req.query.number)
     contestEntrySchema.aggregate({
         $sort: {
             userTime: -1
@@ -23,8 +21,28 @@ router.get('/:number', function(req, res) {
         console.log('# of entries is', entries.length)
         return res.send(entries);
     });
+})
 
+//load only valid contest entries sorted newest and skips # already loaded on page (lazy load)
+router.get('/:number', function(req, res) {
 
+    contestEntrySchema.aggregate({
+        $match: {
+            valid: true
+        }
+    }, {
+        $sort: {
+            userTime: -1
+        }
+    }, {
+        $skip: parseInt(req.query.number)
+    }, function(err, entries) {
+        if (err) {
+            console.log(err);
+        }
+        console.log('# of entries is', entries.length)
+        return res.send(entries);
+    });
 })
 
 //Toggle entry validity

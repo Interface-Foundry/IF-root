@@ -23615,6 +23615,35 @@ function superuserService($location) {
 	}
 
 }
+'use strict';
+
+app.controller('SuperuserEntriesController', SuperuserEntriesController);
+
+SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$location', 'superuserService'];
+
+function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
+
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.entries = [1,2,3];
+	$scope.region = $routeParams.region;
+	$scope.routes = superuserService.routes;
+	
+	activate();
+
+	function activate() {
+		Entries.query({id: $scope.region}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = response;
+    });
+	}
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+}
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
