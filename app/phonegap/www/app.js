@@ -25738,7 +25738,7 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				tags: $scope.world.resources.hashtag
 			}).$promise
 			.then(function(response) {
-				$scope.instagrams.concat(response);
+				$scope.instagrams = $scope.instagrams.concat(response);
 			}, function(error) {
 				console.log('Error:', error);
 			});
