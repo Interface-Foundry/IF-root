@@ -25735,7 +25735,7 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 		function loadInstagrams() {
 			db.instagrams.query({
 				number: $scope.instagrams.length,
-				tag:$scope.world.resources.hashtag
+				tags: $scope.world.resources.hashtag
 			}).$promise
 			.then(function(response) {
 				$scope.instagrams.concat(response);
@@ -26442,7 +26442,10 @@ function loadWidgets() { //needs to be generalized
 			$scope.twitter = true;
 		}
 		if ($scope.style.widgets.instagram == true) {
-	  		$scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	  		$scope.instagrams = db.instagrams.query({
+	  			number: 0,
+	  			tags:$scope.world.resources.hashtag
+	  		});
 	  		$scope.instagram = true;
 		}
 

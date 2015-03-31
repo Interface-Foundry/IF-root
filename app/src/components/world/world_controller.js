@@ -207,7 +207,10 @@ function loadWidgets() { //needs to be generalized
 			$scope.twitter = true;
 		}
 		if ($scope.style.widgets.instagram == true) {
-	  		$scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	  		$scope.instagrams = db.instagrams.query({
+	  			number: 0,
+	  			tags:$scope.world.resources.hashtag
+	  		});
 	  		$scope.instagram = true;
 		}
 

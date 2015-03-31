@@ -13,7 +13,7 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 		function loadInstagrams() {
 			db.instagrams.query({
 				number: $scope.instagrams.length,
-				tag:$scope.world.resources.hashtag
+				tags: $scope.world.resources.hashtag
 			}).$promise
 			.then(function(response) {
 				$scope.instagrams.concat(response);
