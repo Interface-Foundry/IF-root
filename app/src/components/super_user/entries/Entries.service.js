@@ -7,7 +7,7 @@ Entries.$inject = ['$http', '$resource'];
 
 function Entries($http, $resource) {
 
-  var resource = $resource("/api/entries/su/:id/:option", {
+  var resource = $resource("/api/entries/:id/:option", {
     id: '@id'
   }, {
     query: {
@@ -26,16 +26,7 @@ function Entries($http, $resource) {
   });
 
   return {
-    getValidEntries: getValidEntries,
     resource: resource
   };
-
-  function getValidEntries(region, number) {
-    var params = {
-      number: number
-    }
-    return $http.get('/api/entries/' + region, {params: params})
-  }
-
 
 }

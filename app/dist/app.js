@@ -23496,7 +23496,7 @@ Entries.$inject = ['$http', '$resource'];
 
 function Entries($http, $resource) {
 
-  var resource = $resource("/api/entries/su/:id/:option", {
+  var resource = $resource("/api/entries/:id/:option", {
     id: '@id'
   }, {
     query: {
@@ -23515,17 +23515,8 @@ function Entries($http, $resource) {
   });
 
   return {
-    getValidEntries: getValidEntries,
     resource: resource
   };
-
-  function getValidEntries(region, number) {
-    var params = {
-      number: number
-    }
-    return $http.get('/api/entries/' + region, {params: params})
-  }
-
 
 }
 'use strict';
@@ -23544,20 +23535,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	$scope.routes = superuserService.routes;
 	$scope.toggleValidity = toggleValidity;
 	
-	activate();
-
-	function activate() {
-		Entries.resource.query({
-			id: $scope.region
-		}, {
-			number: $scope.entries.length
-		}).$promise
-    .then(function(response) {
-      $scope.entries = response;
-    }, function(error) {
-    	console.log('Error:', error);
-    });
-	}
+	loadEntries();
 
 	$scope.changeRoute = function() {
 		superuserService.changeRoute($scope.currentRoute, $scope.region);
@@ -24750,12 +24728,7 @@ function ContestController($scope, $routeParams, Entries, worldTree) {
 	activate();
 
 	function activate() {
-		Entries.getValidEntries($scope.region, $scope.entries.length)
-    .then(function(response) {
-      $scope.entries = response.data;
-    }, function(error) {
-    	console.log('Error:', error);
-    });
+		loadEntries();
 
     worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.style = data.style;
@@ -24763,9 +24736,13 @@ function ContestController($scope, $routeParams, Entries, worldTree) {
 	}
 
 	function loadEntries() {
-		Entries.getValidEntries($scope.region, $scope.entries.length)
+		Entries.resource.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
     .then(function(response) {
-      $scope.entries = $scope.entries.concat(response.data);
+      $scope.entries = response;
     }, function(error) {
     	console.log('Error:', error);
     });

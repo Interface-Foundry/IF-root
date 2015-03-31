@@ -14,20 +14,7 @@ function SuperuserEntriesController($scope, Entries, $routeParams, $location, su
 	$scope.routes = superuserService.routes;
 	$scope.toggleValidity = toggleValidity;
 	
-	activate();
-
-	function activate() {
-		Entries.resource.query({
-			id: $scope.region
-		}, {
-			number: $scope.entries.length
-		}).$promise
-    .then(function(response) {
-      $scope.entries = response;
-    }, function(error) {
-    	console.log('Error:', error);
-    });
-	}
+	loadEntries();
 
 	$scope.changeRoute = function() {
 		superuserService.changeRoute($scope.currentRoute, $scope.region);

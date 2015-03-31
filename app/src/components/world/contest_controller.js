@@ -16,12 +16,7 @@ function ContestController($scope, $routeParams, Entries, worldTree) {
 	activate();
 
 	function activate() {
-		Entries.getValidEntries($scope.region, $scope.entries.length)
-    .then(function(response) {
-      $scope.entries = response.data;
-    }, function(error) {
-    	console.log('Error:', error);
-    });
+		loadEntries();
 
     worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.style = data.style;
@@ -29,9 +24,13 @@ function ContestController($scope, $routeParams, Entries, worldTree) {
 	}
 
 	function loadEntries() {
-		Entries.getValidEntries($scope.region, $scope.entries.length)
+		Entries.resource.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
     .then(function(response) {
-      $scope.entries = $scope.entries.concat(response.data);
+      $scope.entries = response;
     }, function(error) {
     	console.log('Error:', error);
     });
