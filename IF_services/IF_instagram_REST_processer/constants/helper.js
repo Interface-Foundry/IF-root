@@ -137,7 +137,7 @@ var saveImage = function(imageObject) {
 
   var objectIDForDB = imageObject[strings.IMAGE_OBJECT_KEY_ID]
 
-  var newInstagramImage = instagramModel.instagram({
+  var newInstagramImage = instagramModel({
     objectID: objectIDForDB,
     user: {
       name: userObject[strings.IMAGE_OBJECT_KEY_USER_NAME],
@@ -154,7 +154,7 @@ var saveImage = function(imageObject) {
     created: new Date()
   });
 
-  instagramModel.instagram.find({objectID:objectIDForDB},
+  instagramModel.find({objectID:objectIDForDB},
     function(err, instagrams) {
       if(err) {
         console.log(err);

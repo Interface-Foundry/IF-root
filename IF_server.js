@@ -1956,46 +1956,46 @@ app.get('/api/:collection', function(req, res) {
     }
 
     //querying instagrams
-    if (req.params.collection == 'instagrams') {
+    // if (req.params.collection == 'instagrams') {
 
-        if (req.query.tag) { //hashtag filtering
-            //has limit
-            if (req.query.limit) {
-                var Inlimit = parseInt(req.query.limit);
-                var qw = {
-                    'tags': {
-                        $in: [req.query.tag]
-                    }
-                };
-                db.collection('instagrams').find(qw).limit(Inlimit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-            //no limit
-            else {
-                var qw = {
-                    'tags': {
-                        $in: [req.query.tag]
-                    }
-                };
-                db.collection('instagrams').find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
+    //     if (req.query.tag) { //hashtag filtering
+    //         //has limit
+    //         if (req.query.limit) {
+    //             var Inlimit = parseInt(req.query.limit);
+    //             var qw = {
+    //                 'tags': {
+    //                     $in: [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('instagrams').find(qw).limit(Inlimit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //         //no limit
+    //         else {
+    //             var qw = {
+    //                 'tags': {
+    //                     $in: [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('instagrams').find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
 
-        } else {
-            if (req.query.limit) { //limited tweet query
-                limit = parseInt(req.query.limit);
-                db.collection(req.params.collection).find(qw).limit(limit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            } else {
-                db.collection(req.params.collection).find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-        }
-    }
+    //     } else {
+    //         if (req.query.limit) { //limited tweet query
+    //             limit = parseInt(req.query.limit);
+    //             db.collection(req.params.collection).find(qw).limit(limit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         } else {
+    //             db.collection(req.params.collection).find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     }
+    // }
 
 
 
