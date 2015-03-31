@@ -903,6 +903,7 @@ nav ul {
   margin-right: 8px;
   margin-bottom: -1px;
 }
+/*VARIABLES*/
 nav {
   pointer-events: auto;
 }
@@ -2245,6 +2246,9 @@ li.alert {
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
+.u-100X {
+  width: 100%;
+}
 .u-100XY {
   width: 100%;
   height: 100%;
@@ -2432,24 +2436,60 @@ div.marker-popup-click {
 }
 /*SPLASH*/
 .fullPage {
-  border: 1px solid black;
-  /*remove*/
-  background: #dcdcdc;
-  /*remove*/
+  /*border: 1px solid black;*/
+  background: #e6e6e6;
   position: absolute;
   top: 0px;
   left: 0px;
   text-align: center;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
 }
 .fullPage-content {
-  border: 1px solid black;
-  height: 400px;
-  width: 300px;
+  /*border: 1px solid black;*/
+  height: 300px;
+  width: 250px;
+}
+.fullPage-body {
+  /*border: 1px solid black;*/
+  width: 95%;
+  max-width: 460px;
+  /*height: 280px;*/
+  position: absolute;
+  top: 50px;
+}
+.fullPage-header {
+  /*border: 1px solid black;*/
+  height: 50px;
+  width: 100%;
+  line-height: 50px;
+  background-color: white;
+  position: absolute;
+  top: 0px;
+}
+.fullPage-content p,
+.fullPage-body p {
+  font-size: 15px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+.fullPage-content .btnMain,
+.fullPage-body .btnMain {
+  margin-top: 20px;
+  display: block;
+}
+.fullPage-header span {
+  font-size: 18px;
+}
+.fullPage-body input {
+  height: 40px;
+  margin-top: 20px;
+  display: block;
+  padding-left: 6px;
+  border: none;
 }
 .fullPage-close {
-  border: 1px solid black;
+  /*border: 1px solid black;*/
   position: absolute;
   top: 0px;
   right: 0px;
@@ -2457,4 +2497,83 @@ div.marker-popup-click {
   margin-right: 20px;
   height: 30px;
   width: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3) url('img/icons/ic_clear_white_24dp.png') center center / 22px 22px no-repeat;
+  cursor: pointer;
+}
+.fullPage-close:hover {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+.fullPage-close:active {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.btnMain {
+  min-width: 150px;
+  height: 40px;
+  line-height: 36px;
+  /*should be 40px (same as height), but there is padding on the button somehow*/
+  border: none;
+  background-color: white;
+  color: black;
+  text-align: center;
+  border-radius: 3px;
+  padding: 0px;
+  position: relative;
+}
+.btnMain:hover {
+  background-color: #f2f2f2;
+}
+.btnMain:active {
+  background-color: #e6e6e6;
+}
+.btnMain--blue {
+  background-color: #2196f3;
+  color: white;
+}
+.btnMain--blue:hover {
+  background-color: #0d8aee;
+}
+.btnMain--blue:active {
+  background-color: #0c7cd5;
+}
+.btnMain--fb {
+  background-color: #3b5998;
+  color: white;
+}
+.btnMain--fb:hover {
+  background-color: #344e86;
+}
+.btnMain--fb:active {
+  background-color: #2d4373;
+}
+.btnMain-img {
+  /*border: 1px solid red;*/
+  width: 20px;
+  position: absolute;
+  left: 10px;
+  /*=(buttonHeight-imageHeight)/2*/
+  top: 10px;
+}
+.btnMain-img--right {
+  right: 10px;
+  left: auto;
+}
+.fullPage .inputFooter {
+  font-size: 13px;
+  margin-top: 10px;
+}
+.divider {
+  width: 100%;
+  height: 0px;
+  position: relative;
+  border-top: 1px solid #b4b4b4;
+  border-bottom: 1px solid #f6f6f6;
+}
+.divider--short {
+  width: 40%;
+}
+/*remove the irritating blue border*/
+button:active,
+button:focus {
+  outline: none;
 }
