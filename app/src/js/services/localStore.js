@@ -1,11 +1,6 @@
 app.factory('localStore', ['$http', '$q', function($http, $q) {
 	
 	var hasLocalStorage = (typeof localStorage !== 'undefined');
-
-	var localStore = {
-		getID: getID,
-		locationBuffer: locationBuffer
-	};
 	
 	var id; // id for when the user doesn't have localStorage
 
@@ -15,7 +10,7 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 	function getID() {
 		// get the ID if it's in localStorage
 		if (typeof Storage !== 'undefined') {
-			if ((new RegExp("/^[0-9a-fA-F]{24}$")).test(localStorage.id)) {
+			if ((new RegExp("^[0-9a-fA-F]{24}$")).test(localStorage.id)) {
 				var defer = $q.defer();
 				defer.resolve(localStorage.id);
 				return defer.promise;
@@ -99,6 +94,10 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 		 }
 	 };
 	
+	var localStore = {
+		getID: getID,
+		locationBuffer: locationBuffer
+	};
 	
 	return localStore;
 }]);
