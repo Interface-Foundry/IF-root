@@ -1006,6 +1006,14 @@ nav ul {
 .contest-entry-pic img {
   width: 100%;
 }
+.contest-background {
+  background-color: #fff;
+  height: 90%;
+  margin-top: -40px;
+  padding-bottom: 60px;
+  padding-left: 10%;
+  padding-right: 10%;
+}
 nav {
   pointer-events: auto;
 }

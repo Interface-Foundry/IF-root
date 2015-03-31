@@ -4894,7 +4894,7 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
-	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController as contestCtrl'}).
+	  when('/w/:worldURL/contestentries/:hashTag', {templateUrl: 'components/world/subviews/contestentries.html', controller: 'ContestEntriesController'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
@@ -4917,7 +4917,7 @@ $routeProvider.
 		when('/su/announcements/:region', {templateUrl: 'components/super_user/announcements/superuser_announcements.html', controller: 'SuperuserAnnouncementController', resolve: {isAdmin: checkAdminStatus} }).
 		when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
 		when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
-
+		when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       otherwise({redirectTo: '/'});
@@ -20623,6 +20623,31 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
+'use strict';
+
+app.controller('ContestController', ContestController);
+
+ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+
+function ContestController($scope, $routeParams, Contests) {
+	$scope.contest = {};
+	$scope.region = $routeParams.region;
+
+	activate();
+
+	function activate() {
+		Contests.get({
+			id: $scope.region
+		}).$promise
+    .then(function(response) {
+    	if (response._id) {
+      	$scope.contest = response;
+    	}
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+}
 app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
 	return {
 		restrict: 'EA',
@@ -24712,11 +24737,11 @@ function categoryWidgetService() {
 }
 'use strict';
 
-app.controller('ContestController', ContestController);
+app.controller('ContestEntriesController', ContestEntriesController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Entries', 'worldTree'];
+ContestEntriesController.$inject = ['$scope', '$routeParams', 'Entries', 'worldTree'];
 
-function ContestController($scope, $routeParams, Entries, worldTree) {
+function ContestEntriesController($scope, $routeParams, Entries, worldTree) {
 
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
@@ -24747,23 +24772,6 @@ function ContestController($scope, $routeParams, Entries, worldTree) {
     	console.log('Error:', error);
     });
 	}
-}
-'use strict';
-
-app.service('contestService', contestService);
-
-contestService.$inject = ['$http'];
-
-function contestService($http) {
-	
-	return {
-		getPictures: getPictures
-	};
-
-	function getPictures(start, worldId, hashTag) {
-		return $http.get(/* '/api/worldId/contest/start/hashTag...?' */);
-	}
-
 }
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
@@ -25581,17 +25589,6 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 		}
 	};
 }]);
-// app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
-// 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-// 		$scope.world = data.world;
-// 		$scope.style = data.style;
-// 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-// 		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
-// 	})
-// }])
-
-// model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		

@@ -1,10 +1,10 @@
 'use strict';
 
-app.controller('ContestController', ContestController);
+app.controller('ContestEntriesController', ContestEntriesController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Entries', 'worldTree'];
+ContestEntriesController.$inject = ['$scope', '$routeParams', 'Entries', 'worldTree'];
 
-function ContestController($scope, $routeParams, Entries, worldTree) {
+function ContestEntriesController($scope, $routeParams, Entries, worldTree) {
 
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
