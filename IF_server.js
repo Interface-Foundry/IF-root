@@ -768,15 +768,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
                         if (iphone) {
                             console.log('iphone is', iphone)
-                            im.convert({
-                                srcPath: tempPath,
-                                dstPath: tempPath,
-                                width: 600,
-                                quality: 0.8,
-                                rotate: 90
-                                // ,
-                                // flip: true
-                            }, function(err, stdout, stderr) {
+                            im.convert([tempPath, '-resize', '600x200', '-quality','0.8','-rotate','90',tempPath], function(err, stdout, stderr) {
                                 if (err) console.log(err)
                                 console.log('flipped!!!!!')
                                 fs.readFile(tempPath, function(err, fileData) {

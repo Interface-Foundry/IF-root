@@ -26273,7 +26273,7 @@ $scope.uploadWTGT = function($files, state) {
 		$scope.wtgt.building[state] = true;
 
 		var file = $files[0];
-
+		console.log('lol file is', JSON.stringify(file), 'state is', state);
 		// get time
 		var time = new Date();
 
@@ -26308,6 +26308,7 @@ $scope.uploadWTGT = function($files, state) {
 }
 
 function uploadPicture(file, state, data) {
+
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
 		file: file,
@@ -26315,6 +26316,7 @@ function uploadPicture(file, state, data) {
 	}).progress(function(e) {
 	}).success(function(data) {
 		$scope.wtgt.images[state] = data;
+	
 		$scope.wtgt.building[state] = false;
 	});
 }

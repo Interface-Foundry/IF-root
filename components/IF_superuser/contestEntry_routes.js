@@ -19,7 +19,7 @@ router.get('/:number', function(req, res) {
             if (err) {
                 console.log(err);
             }
-            console.log('# of entries is', entry)
+           
             return res.send(entry);
         });
 })
