@@ -1,4 +1,4 @@
-var http = require('http');
+var https = require('https');
 var fs = require('fs');
 var url = require('url');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
@@ -39,6 +39,8 @@ var downloadImage = function(imageURL) {
 
     var fileName = getFileNameFromURL(imageURL);
 
+
+                                  //
     var writeStreamDestinaton = strings.IMAGE_SAVE_DESTINATION + fileName;
 
     if (fs.existsSync(writeStreamDestinaton)) {
@@ -52,7 +54,7 @@ var downloadImage = function(imageURL) {
 
       var file = fs.createWriteStream(writeStreamDestinaton);
 
-      var request = http.get(imageURL, function onImageDownload(response) {
+      var request = https.get(imageURL, function onImageDownload(response) {
 
         // if (err){
         //   //console.log(err);
@@ -75,11 +77,13 @@ var downloadImage = function(imageURL) {
               im.resize({
                 srcPath: writeStreamDestinaton,
                 dstPath: writeStreamDestinaton,
-                width: 300,
-                height: 300,
+                width: 600,
+                height: 600,
                 quality: 0.8
               }, function(err, stdout, stderr){
                   //console.log('RESIZED IMAGE');
+                  //UPLOAD IMAGE TO AWS HERE!!!!! PASS IN writeStreamDestination
+                  //then delete local cache image
               });
 
           });     
@@ -137,7 +141,7 @@ var saveImage = function(imageObject) {
 
   var objectIDForDB = imageObject[strings.IMAGE_OBJECT_KEY_ID]
 
-  var newInstagramImage = instagramModel.instagram({
+  var newInstagramImage = instagramModel({
     objectID: objectIDForDB,
     user: {
       name: userObject[strings.IMAGE_OBJECT_KEY_USER_NAME],
@@ -148,13 +152,13 @@ var saveImage = function(imageObject) {
     },
     img_url: images[strings.INSTAGRAM_IMAGE_RESOLUTION_LOW],
     original_url: images[strings.INSTAGRAM_IMAGE_RESOLUTION_STANDARD],
-    local_path: imageObjectLocalPaths,
+    local_path: imageObjectLocalPaths, //aws link to image e.g. aws.bucketname.id
     text: captionText,
     tags: imageObject[strings.IMAGE_OBJECT_KEY_TAGS],
     created: new Date()
   });
 
-  instagramModel.instagram.find({objectID:objectIDForDB},
+  instagramModel.find({objectID:objectIDForDB},
     function(err, instagrams) {
       if(err) {
         console.log(err);
