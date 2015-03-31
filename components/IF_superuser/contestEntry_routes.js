@@ -6,8 +6,7 @@ var express = require('express'),
     _ = require('underscore');
 
 //load all contest entries sorted newest and skips # already loaded on page (lazy load)
-router.get('/su/:number', function(req, res) {
-    if (req.user.admin) {
+router.get('/:number', function(req, res) {
         contestEntrySchema.aggregate({
             $sort: {
                 userTime: -1
@@ -15,7 +14,7 @@ router.get('/su/:number', function(req, res) {
         }, {
             $skip: parseInt(req.query.number)
         }, {
-            $limit: 5
+            $limit: 20
         }, function(err, entry) {
             if (err) {
                 console.log(err);
@@ -23,35 +22,8 @@ router.get('/su/:number', function(req, res) {
             console.log('# of entries is', entry)
             return res.send(entry);
         });
-    } else {
-        console.log('you are not authorized...stand down..')
-    }
 })
 
-//load only valid contest entries sorted newest and skips # already loaded on page (lazy load)
-router.get('/:number', function(req, res) {
-
-        contestEntrySchema.aggregate({
-            $match: {
-                valid: true
-            }
-        }, {
-            $sort: {
-                userTime: -1
-            }
-        }, {
-            $skip: parseInt(req.query.number)
-        }, {
-            $limit: 5
-        }, function(err, entries) {
-            if (err) {
-                console.log(err);
-            }
-            console.log('# of entries is', entries)
-            return res.send(entries);
-        });
-   
-})
 
 //Toggle entry validity
 router.put('/su/:id', function(req, res) {

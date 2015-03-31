@@ -155,7 +155,7 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 //===================//
 
 
- 
+
 
 // passport config
 require('./components/IF_auth/passport')(passport);
@@ -393,6 +393,8 @@ app.get('/api/user/loggedin', function(req, res) {
 app.use('/api/announcements', require('./components/IF_superuser/announcement_routes'));
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
 app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
+//--- INSTAGRAM / TWITTER ROUTER ----//
+app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
 
 
 // PROFILE SECTION =========================
@@ -722,6 +724,10 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
     //   }
     // });
 
+    //Detect if captured on iPhone and set iphone boolean
+    console.log('user-AGENT IS ', req.headers["user-agent"])
+    var iphone = req.headers['user-agent'].indexOf('iPhone') > -1 ? true : false;
+
 
     var fstream;
     req.pipe(req.busboy);
@@ -759,45 +765,94 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
-                        im.resize({
-                            srcPath: tempPath,
-                            dstPath: tempPath,
-                            width: 600,
-                            quality: 0.8
-                        }, function(err, stdout, stderr) {
 
-                            fs.readFile(tempPath, function(err, fileData) {
+                        if (iphone) {
+                            console.log('iphone is', iphone)
+                            im.convert({
+                                srcPath: tempPath,
+                                dstPath: tempPath,
+                                width: 600,
+                                quality: 0.8,
+                                rotate: 90
+                                // ,
+                                // flip: true
+                            }, function(err, stdout, stderr) {
+                                if (err) console.log(err)
+                                console.log('flipped!!!!!')
+                                fs.readFile(tempPath, function(err, fileData) {
+                                    var s3 = new AWS.S3();
+                                    s3.putObject({
+                                        Bucket: 'if-server-general-images',
+                                        Key: awsKey,
+                                        Body: fileData,
+                                        ACL: 'public-read'
+                                    }, function(err, data) {
 
-                                var s3 = new AWS.S3();
-                                s3.putObject({
-                                    Bucket: 'if-server-general-images',
-                                    Key: awsKey,
-                                    Body: fileData,
-                                    ACL: 'public-read'
-                                }, function(err, data) {
+                                        if (err)
+                                            console.log(err);
+                                        else {
+                                            res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                                            fs.unlink(tempPath);
 
-                                    if (err)
-                                        console.log(err);
-                                    else {
-                                        res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                                        fs.unlink(tempPath);
-
-                                        //additional content was passed with the image, handle it here
-                                        if (uploadContents) {
-                                            try {
-                                                uploadContents = JSON.parse(uploadContents);
-                                            } catch (err) {
-                                                console.log(err);
+                                            //additional content was passed with the image, handle it here
+                                            if (uploadContents) {
+                                                try {
+                                                    uploadContents = JSON.parse(uploadContents);
+                                                } catch (err) {
+                                                    console.log(err);
+                                                }
+                                                if (uploadContents.type == 'retail_campaign') {
+                                                    submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                }
                                             }
-                                            if (uploadContents.type == 'retail_campaign') {
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                            }
+
                                         }
-
-                                    }
+                                    });
                                 });
-                            });
-                        });
+
+                            })
+                        } else {
+                            //START OF IMAGE RESIZE
+                            im.resize({
+                                srcPath: tempPath,
+                                dstPath: tempPath,
+                                width: 600,
+                                quality: 0.8
+                            }, function(err, stdout, stderr) {
+                                fs.readFile(tempPath, function(err, fileData) {
+                                    var s3 = new AWS.S3();
+                                    s3.putObject({
+                                        Bucket: 'if-server-general-images',
+                                        Key: awsKey,
+                                        Body: fileData,
+                                        ACL: 'public-read'
+                                    }, function(err, data) {
+
+                                        if (err)
+                                            console.log(err);
+                                        else {
+                                            res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                                            fs.unlink(tempPath);
+
+
+                                            //additional content was passed with the image, handle it here
+                                            if (uploadContents) {
+                                                try {
+                                                    uploadContents = JSON.parse(uploadContents);
+                                                } catch (err) {
+                                                    console.log(err);
+                                                }
+                                                if (uploadContents.type == 'retail_campaign') {
+                                                    submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                }
+                                            }
+
+                                        }
+                                    });
+                                });
+                            }); //END OF IMAGE RESIZE
+                        }
+
                     }
                 });
             }
