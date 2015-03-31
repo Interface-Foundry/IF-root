@@ -25,7 +25,21 @@ router.get('/:id', function(req, res) {
         });
 
     } else {
-        console.log('you are not authorized...stand down..')
+          //find all announcements for given region, then sort by priority
+        announcementSchema.aggregate({
+            $match: {
+                region: req.params.id.toString().toLowerCase()
+            }
+        },{live:true}, {
+            $sort: {
+                priority: 1
+            }
+        }, function(err, announcements) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.send(announcements);
+        });
     }
 })
 
