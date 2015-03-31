@@ -6,13 +6,9 @@
   <div class="instagram-wrap wrap" lazy-load load-more="loadEntries()">
     <ul>
       <li ng-repeat="entry in entries track by $index" class="instagram marble-page">
-
-          <img ng-src="{{entry.imgURL}}">
+        <img ng-src="{{entry.imgURL}}">
         <footer>
-          <h4>{{::entry.userName}}</h4>
-          <p>{{::entry.worldName}}</p>
-          <p>{{::entry.contestTag}}</p>
-
+          <p>{{::entry.userTime | date:'medium'}}</p>
         </footer>
 
       </li>
@@ -20,25 +16,3 @@
   </div>
 
 </div>
-
-<!--     <div class="superuser-list">
-      <ul>
-  			<li ng-repeat="entry in entries track by $index" class="announcement">
-
-            <div class="media card superuser-list-item">
-
-              <h4>{{entry.userName}}</h4>
-              do we want to show user name??
-              <p>{{entry.worldName}}</p>
-              <div class="contest-entry-pic">
-                <img ng-src="{{entry.imgURL}}">
-              </div>
-              <div ng-repeat="tag in entry.contestTags">
-                <p></p>
-              </div>
-              <p>Tag: {{entry.contestTag}}</p>
-            </div>
-
-  			</li>
-  		</ul>
-    </div> -->
