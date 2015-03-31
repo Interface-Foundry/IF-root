@@ -1,4 +1,5 @@
 var http = require('http');
+var https = require('https');
 var fs = require('fs');
 var url = require('url');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
@@ -31,8 +32,8 @@ var getFileNameFromURL = function(imageURL) {
 
 var downloadImage = function(imageURL) {
 
-  if (url.parse(imageURL).protocol == 'https:'){
-    //don't process https
+  if (url.parse(imageURL).protocol == 'http:'){
+    //don't process http?
      return;
   }
   else {
@@ -52,7 +53,7 @@ var downloadImage = function(imageURL) {
 
       var file = fs.createWriteStream(writeStreamDestinaton);
 
-      var request = http.get(imageURL, function onImageDownload(response) {
+      var request = https.get(imageURL, function onImageDownload(response) {
 
         // if (err){
         //   //console.log(err);
