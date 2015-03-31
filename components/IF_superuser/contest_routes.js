@@ -18,12 +18,22 @@ router.get('/:id', function(req, res) {
             if (err) {
                 console.log(err);
             }
-            console.log('found a contest! -->', contest)
+
             return res.send(contest);
         });
 
     } else {
-        console.log('you are not authorized...stand down..')
+        contestSchema.findOne({
+            region: req.params.id.toString().toLowerCase(),
+            live: true
+        }, 'htmlBody', function(err, result) {
+            if (err) {
+                console.log(err);
+            }
+            console.log('selected return is..', result)
+            return res.send(result);
+        });
+
     }
 })
 
@@ -53,11 +63,11 @@ router.post('/', function(req, res) {
         }
 
 
-     
+
 
         var contest = _.extend(newcontest, req.body);
 
-            //push hashtags into contestTag array
+        //push hashtags into contestTag array
         // contest.contestTags.push(req.body.contestTags[0]);
         // contest.contestTags.push(req.body.contestTags[1]);
 
@@ -67,7 +77,7 @@ router.post('/', function(req, res) {
                 if (err) {
                     console.log(err)
                 }
-     
+
                 return res.send(contest);
 
             });
@@ -94,7 +104,7 @@ router.put('/:id', function(req, res) {
                     }
                     return res.send(contest);
                 });
-          
+
         });
     }
 })
