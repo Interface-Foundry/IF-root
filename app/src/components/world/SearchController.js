@@ -1,4 +1,4 @@
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, analyticsService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -65,7 +65,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		mapManager._actualCenter.push(mapManager.center.lat);		
 	}
 
+	function logSearchClick(path) {
+		analyticsService.log('search.bubble.clickthrough', {
+			path: path,
+			searchText: $scope.searchBarText || $('.search-bar').val()
+		});
+	}
+
 	function go(path) {
+		logSearchClick(path);
 		$location.path(path);
 	}
 
@@ -108,7 +116,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						catName: key,
 						// avatar: _.findWhere($scope.world.landmarkCategories, {
 						// 	name: key
-						// }).avatar,
+						// }).avatar
 						results: group
 					}
 				})
