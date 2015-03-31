@@ -2,9 +2,9 @@
 
 app.directive('announcements', announcements);
 
-announcements.$inject = [];
+announcements.$inject = ['announcementsService'];
 
-function announcements() {
+function announcements(announcementsService) {
 	return {
 		restrict: 'E',
 		scope: {},
@@ -13,5 +13,11 @@ function announcements() {
 	};
 
 	function link(scope, elem, attr) {
+		scope.announcements = [];
+
+		announcementsService.get()
+		.then(function(response) {
+			scope.announcements = scope.announcements.concat(response.data);
+		});
 	}
 }
