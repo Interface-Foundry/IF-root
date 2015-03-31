@@ -1992,7 +1992,10 @@ app.get('/api/worlds/:id', function(req, res) {
 
           if (data.style){
             if (data.style.styleID){
+              console.log('data style id', data.style.styleID)
               styleSchema.findById(data.style.styleID, function(err, style) {
+                  console.log('err', err)
+                  console.log('style', style)
                   if (!style){
                     console.log(err);
                   }
