@@ -25603,12 +25603,11 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 
 		function loadInstagrams() {
 			db.instagrams.query({
-				limit:30,
-				skip: $scope.instagrams.length,
+				number: $scope.instagrams.length,
 				tag:$scope.world.resources.hashtag
 			}).$promise
 			.then(function(response) {
-				$scope.instagrams = response
+				$scope.instagrams.concat(response);
 			}, function(error) {
 				console.log('Error:', error);
 			});

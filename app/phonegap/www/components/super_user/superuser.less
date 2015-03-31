@@ -42,14 +42,29 @@
 	padding-left: 10%;
   padding-right: 10%;
 
+
+    padding-left: 0;
+    padding-right: 0;
+
+  @media only screen and (min-width: 768px) {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+
   .superuser-list {
   	margin-left: auto;
   	margin-right: auto;
-  	min-width: 350px;
-  	width: 60%;
 
 		li.announcement {
 			margin: 20px 0;
+      
+      @media only screen and (min-width: 480px) {
+        width: 456px;
+      }
+      @media only screen and (min-width: 768px) {
+        width: 600px;
+      }
+
 
 			.superuser-left-col {
 				display: inline-block;
@@ -74,9 +89,13 @@
   		height: 100%;
   		margin-top: 1px;
   		padding: 20px;
-  		width: 72%;
-  		vertical-align: top;
+      width: 58%;
+      vertical-align: top;
 
+      @media only screen and (min-width: 768px) {
+        width: 72%;
+      }
+  		
   		h4 {
   			text-align: center;
 
@@ -115,7 +134,7 @@
   margin-left: auto;
   margin-right: auto;
   text-align: center;
-  width: 300px;
+  width: 100%;
 
   img {
     width: 100%;
