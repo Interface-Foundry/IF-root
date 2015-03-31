@@ -17468,11 +17468,6 @@ angular.module('tidepoolsServices')
 app.factory('localStore', ['$http', '$q', function($http, $q) {
 	
 	var hasLocalStorage = (typeof localStorage !== 'undefined');
-
-	var localStore = {
-		getID: getID,
-		locationBuffer: locationBuffer
-	};
 	
 	var id; // id for when the user doesn't have localStorage
 
@@ -17482,7 +17477,7 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 	function getID() {
 		// get the ID if it's in localStorage
 		if (typeof Storage !== 'undefined') {
-			if ((new RegExp("/^[0-9a-fA-F]{24}$")).test(localStorage.id)) {
+			if ((new RegExp("^[0-9a-fA-F]{24}$")).test(localStorage.id)) {
 				var defer = $q.defer();
 				defer.resolve(localStorage.id);
 				return defer.promise;
@@ -17566,6 +17561,10 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 		 }
 	 };
 	
+	var localStore = {
+		getID: getID,
+		locationBuffer: locationBuffer
+	};
 	
 	return localStore;
 }]);
@@ -23098,7 +23097,7 @@ worldTree.getNearby().then(function(data) {
 });
 
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -23144,9 +23143,17 @@ $scope.search = function() {
 
 $scope.wtgtLogin = function() {
 	contest.login(new Date);
-} 
+}
+
+logSearchClick = function(path) {
+	analyticsService.log('search.general.clickthrough', {
+		path: path,
+		searchText: $scope.searchText || $('.search-bar').val()
+	});
+};
 	
 $scope.go = function(path) {
+	logSearchClick(path);
 	navService.reset();
 	$location.path(path);
 } 
@@ -23221,6 +23228,7 @@ $scope.share = function(platform) {
 };
 
 }]);
+
 app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
 		restrict: 'EA',
@@ -23993,7 +24001,7 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, analyticsService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -24060,7 +24068,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		mapManager._actualCenter.push(mapManager.center.lat);		
 	}
 
+	function logSearchClick(path) {
+		analyticsService.log('search.bubble.clickthrough', {
+			path: path,
+			searchText: $scope.searchBarText || $('.search-bar').val()
+		});
+	}
+
 	function go(path) {
+		logSearchClick(path);
 		$location.path(path);
 	}
 
@@ -24103,7 +24119,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						catName: key,
 						// avatar: _.findWhere($scope.world.landmarkCategories, {
 						// 	name: key
-						// }).avatar,
+						// }).avatar
 						results: group
 					}
 				})
@@ -24261,6 +24277,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 }]);
+
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
   	var style = styleManager;
