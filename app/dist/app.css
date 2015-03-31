@@ -3344,15 +3344,31 @@ nav ul {
   padding-bottom: 60px;
   padding-left: 10%;
   padding-right: 10%;
+  padding-left: 0;
+  padding-right: 0;
+}
+@media only screen and (min-width: 768px) {
+  #shelf.superuser-background {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
 }
 #shelf.superuser-background .superuser-list {
   margin-left: auto;
   margin-right: auto;
-  min-width: 350px;
-  width: 60%;
 }
 #shelf.superuser-background .superuser-list li.announcement {
   margin: 20px 0;
+}
+@media only screen and (min-width: 480px) {
+  #shelf.superuser-background .superuser-list li.announcement {
+    width: 456px;
+  }
+}
+@media only screen and (min-width: 768px) {
+  #shelf.superuser-background .superuser-list li.announcement {
+    width: 600px;
+  }
 }
 #shelf.superuser-background .superuser-list li.announcement .superuser-left-col {
   display: inline-block;
@@ -3373,8 +3389,13 @@ nav ul {
   height: 100%;
   margin-top: 1px;
   padding: 20px;
-  width: 72%;
+  width: 58%;
   vertical-align: top;
+}
+@media only screen and (min-width: 768px) {
+  #shelf.superuser-background .superuser-list .superuser-list-item {
+    width: 72%;
+  }
 }
 #shelf.superuser-background .superuser-list .superuser-list-item h4 {
   text-align: center;
@@ -3405,7 +3426,7 @@ nav ul {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
-  width: 300px;
+  width: 100%;
 }
 .contest-entry-pic img {
   width: 100%;
