@@ -13,10 +13,7 @@ router.use(function(req, res, next) {
 
 //load instagrams sorted newest and skips # already loaded on page (lazy load)
 router.get('/', function(req, res) {
-
-    console.log('hitting instagrams', req.query.tags);
-
-
+     console.log('hitting instagrams', req.query.tags);
     instagramSchema.find({
         tags: req.query.tags
     }).sort({

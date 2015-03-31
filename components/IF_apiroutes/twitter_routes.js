@@ -13,30 +13,23 @@ router.use(function (req, res, next) {
 });
 
 //load tweets sorted newest and skips # already loaded on page (lazy load)
-router.get('/:number/:tags', function(req, res) {
-    instagramSchema.aggregate({
-        $match: {
-            hashtags: {
-                $in: req.query.tags
-            }
-        }
-    }, {
-        $sort: {
-            created: -1
-        }
-    }, {
-        $skip: parseInt(req.query.number)
-    }, {
-        $limit: 20
-    }, function(err, posts) {
+router.get('/', function(req, res) {
+
+     console.log('hitting twittrs', req.query.tags);
+
+    twitterSchema.find({
+        tags: req.query.tags
+    }).sort({
+        created: -1
+    }).skip(req.query.number).limit(25).exec(function(err, tweets) {
         if (err) {
             console.log(err);
         }
-        console.log('# of posts is', posts.count)
-        return res.send(posts);
-    });
-})
+      
+        return res.send(tweets);
+    })
 
+})
 
 
 
