@@ -24736,14 +24736,15 @@ function categoryWidgetService() {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Entries'];
+ContestController.$inject = ['$scope', '$routeParams', 'Entries', 'worldTree'];
 
-function ContestController($scope, $routeParams, Entries) {
+function ContestController($scope, $routeParams, Entries, worldTree) {
 
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
 	$scope.region = 'global';
+	$scope.style;
 	$scope.worldId = $routeParams.worldURL;
 
 	activate();
@@ -24755,6 +24756,10 @@ function ContestController($scope, $routeParams, Entries) {
     }, function(error) {
     	console.log('Error:', error);
     });
+
+    worldTree.getWorld($routeParams.worldURL).then(function(data) {
+			$scope.style = data.style;
+		});
 	}
 
 	function loadEntries() {
