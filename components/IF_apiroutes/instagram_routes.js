@@ -5,23 +5,29 @@ var express = require('express'),
     instagramSchema = require('../../IF_services/IF_instagram_REST_processer/models/instagram.js'),
     _ = require('underscore');
 
-//load all contest entries sorted newest and skips # already loaded on page (lazy load)
-router.get('/:number', function(req, res) {
-        instagramSchema.aggregate({
-            $sort: {
-                created: -1
+//load instagrams sorted newest and skips # already loaded on page (lazy load)
+router.get('/:number/:tags', function(req, res) {
+    instagramSchema.aggregate({
+        $match: {
+            tags: {
+                $in: req.params.tags
             }
-        }, {
-            $skip: parseInt(req.query.number)
-        }, {
-            $limit: 20
-        }, function(err, posts) {
-            if (err) {
-                console.log(err);
-            }
-            console.log('# of posts is', posts.count)
-            return res.send(posts);
-        });
+        }
+    }, {
+        $sort: {
+            created: -1
+        }
+    }, {
+        $skip: parseInt(req.query.number)
+    }, {
+        $limit: 20
+    }, function(err, posts) {
+        if (err) {
+            console.log(err);
+        }
+        console.log('# of posts is', posts.count)
+        return res.send(posts);
+    });
 })
 
 // //Toggle entry validity
