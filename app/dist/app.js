@@ -20586,6 +20586,25 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
+'use strict';
+
+app.directive('announcements', announcements);
+
+announcements.$inject = [];
+
+function announcements() {
+	return {
+		restrict: 'E',
+		scope: {},
+		templateUrl: 'components/announcements/announcements.html',
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+	}
+}
+
+
 app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
 	return {
 		restrict: 'EA',
