@@ -30,7 +30,7 @@ function ContestEntriesController($scope, $routeParams, Entries, worldTree) {
 			number: $scope.entries.length
 		}).$promise
     .then(function(response) {
-      $scope.entries = response;
+      $scope.entries = $scope.entries.concat(response);
     }, function(error) {
     	console.log('Error:', error);
     });

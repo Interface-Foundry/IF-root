@@ -2609,7 +2609,7 @@ transform:translateX(100%);
 .drawer-item {
   position: relative;
   width: 100%;
-  height: 48px;
+  height: 46px;
   padding: 0px 0px 0px 48px;
   line-height: 48px;
   font-size: 14px;
@@ -3358,7 +3358,7 @@ nav ul {
   margin-right: auto;
 }
 #shelf.superuser-background .superuser-list li.announcement {
-  margin: 20px 0;
+  margin: 20px auto;
 }
 @media only screen and (min-width: 480px) {
   #shelf.superuser-background .superuser-list li.announcement {
@@ -3391,6 +3391,9 @@ nav ul {
   padding: 20px;
   width: 58%;
   vertical-align: top;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item.superuser-list-item-entry {
+  width: 72%;
 }
 @media only screen and (min-width: 768px) {
   #shelf.superuser-background .superuser-list .superuser-list-item {
