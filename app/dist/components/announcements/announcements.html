@@ -1,5 +1,5 @@
-<div class="announcements-card" ng-swipe-left="nextCard()">
-	<h3>{{currentAnnouncement.headline}}<span ng-if="!end" ng-click="nextCard()">&gt;</span></h3>
+<div class="announcements-card" ng-swipe-left="nextCard($event)">
+	<h3>{{currentAnnouncement.headline}}<span ng-if="!end" ng-click="nextCard($event)">&gt;</span></h3>
 	<p>{{currentAnnouncement.body}}</p>
 	<p><a ng-href="{{currentAnnouncement.urlPath}}">{{currentAnnouncement.urlName}}</a></p>
 </div>

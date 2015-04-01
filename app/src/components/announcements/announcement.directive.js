@@ -57,7 +57,7 @@ function announcements(announcementsService) {
 			scope.currentAnnouncement = scope.announcements[scope.index];
 		}
 
-		function nextCard() {
+		function nextCard($event) {
 			scope.index++;
 			if (scope.announcements[scope.index]) {
 				scope.currentAnnouncement = scope.announcements[scope.index];
