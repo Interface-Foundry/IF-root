@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+//var express = require('express');
+//var router = express.Router();
 var elasticsearch = require('elasticsearch');
 var RSVP = require('rsvp');
 
@@ -9,8 +9,33 @@ var es = new elasticsearch.Client({
 	log: 'trace'
 });
 
-// gets handles text searches
-router.get('/search', function(req, res) {
+module.exports = {};
+
+// health check responds with error if es is down
+module.exports.healthcheck = function(cb) {
+	es.search({
+		index: "if",
+		type: "landmarks",
+		body: {
+			query: {
+				match: {
+					body: "food"
+				}
+			},
+			size: 1 // one result is enough to prove it's up
+		}
+	}).then(function(res) {
+		if (res.hits.hits.length > 0) {
+			// yay search found something so it's up.
+			cb();
+		}
+	}, function(err) {
+		cb(err);
+	});
+};
+
+// handles text searches.  gee looks easy to convert to an express route some day...
+module.exports.search = function(req, res) {
 	var q = req.quer.textQuery;
 	var lat = req.query.userLat;
 	var lng = req.query.userLng;
@@ -34,7 +59,7 @@ router.get('/search', function(req, res) {
 	
 	var synonymQuery = {
 	};
-	var synonym = es.searchsynonymQuery);
+	var synonym = es.search(synonymQuery);
 
 	RSVP.hash({
 		fuzzy: fuzzy,
@@ -57,6 +82,7 @@ router.get('/search', function(req, res) {
 		});
 
 		// return weighted and sorted array
+		// TODO filter on distance
 		res.send(Object.keys(uniqueBubble).map(function(k) {
 			return uniqueBubble[k];
 		}).map(function(b) {
@@ -66,4 +92,4 @@ router.get('/search', function(req, res) {
 			return a.score - b.score;
 		}));
 	});
-});
+};

@@ -79,6 +79,8 @@ var mongoose = require('mongoose'),
     announcementsSchema = require('./components/IF_schemas/announcements_schema.js'),
     monguurl = require('monguurl');
 
+var env = 'production';
+
 mongoose.connect(configDB.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
@@ -461,9 +463,33 @@ function isLoggedIn(req, res, next) {
 
 // Query
 
-// Search
+// SEARCH
+// What u lookin at?
+// elasticsearch primary, mongodb failover
+var elasticsearch = require('./components/IF_search/elasticsearch.js');
+var elasticsearch_up = false; // health status
+
+// check elasticsearch health every 5 seconds
+setInterval(function() {
+	elasticsearch.healthcheck(function(err) {
+		if (err) {
+			elasticsearch_up = false;
+			if (env == 'production') {
+				console.error(err);
+			}
+		} else {
+			elasticsearch_up = true;
+		}
+	});
+}, 15000);
+
+// Search route
 app.get('/api/textsearch', function(req, res) {
-    text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
+	if (elasticsearch_up) {
+		elasticsearch.search(req, res);
+	} else {
+		text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
+	}
 });
 //In Bubble Search
 app.get('/api/bubblesearch/:type', function(req, res) {
