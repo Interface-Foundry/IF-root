@@ -207,7 +207,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = undefined;	
+		userManager.signup.error = false;	
 	})
 	.error(function(err) {
 	if (err) {

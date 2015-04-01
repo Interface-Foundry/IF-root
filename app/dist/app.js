@@ -18755,7 +18755,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = undefined;	
+		userManager.signup.error = false;	
 	})
 	.error(function(err) {
 	if (err) {
@@ -22893,6 +22893,71 @@ $scope.userManager = userManager;
 $scope.navService = navService;
 
 $scope.dialog = dialogs;
+
+// ---------------- SPLASH PAGES
+userManager.getUser().then(function(success) {
+	createShowSplash(true);
+}, function(err) {
+	createShowSplash(false);
+});
+
+function createShowSplash(user) {
+	// $scope.show controls the logic for the splash pages
+	
+	$scope.show = {
+		/**
+		 * splash: for general splash
+		 * confirm: for confirm dialog
+		 * close: for close button
+		 * signin: for sign in dialog
+		 * register: for register dialog
+		 */
+	};
+
+	if (user) { // logged in
+		$scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
+		$scope.show.confirm = userManager.loginStatus && 
+			!userManager._user.local.confirmedEmail &&
+			!userManager._user.facebook; // don't show confirm dialog for fb authenticated users 
+	} else { // not logged in
+		$scope.show.splash = true;
+		$scope.show.confirm = false;
+	}
+
+	$scope.show.close = true; // only show close button (home, not confirm) on web
+	$scope.show.signin = false;
+	$scope.show.register = false;
+}
+
+$scope.setShowSplash = function(property, bool) {
+	$scope.show[property] = bool;
+};
+
+$scope.splashNext = function() {
+	// login or create account, depending on context
+
+	if ($scope.show.signin) {
+		userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
+			$scope.show.signin = false;
+			$scope.show.splash = false;
+		}, function(err) {
+			// add notification here TODO toks
+		})
+	} else if ($scope.show.register) {
+		var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
+			if (newValue === false) { // signup success
+				$scope.show.register = false;
+				$scope.show.splash = false;
+				watchSignupError(); // clear watch
+			} else if (newValue) { // signup error
+				// add notification here TODO toks
+				watchSignupError(); // clear watch
+			}
+		});
+		userManager.signup.signup();
+	}
+};
+// ---------------- END SPLASH PAGES
     
 angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
 

@@ -12,7 +12,8 @@ var userSchema = mongoose.Schema({
         email        : { type: String, index: true },
         password     : { type: String },
         resetPasswordToken: String,
-        resetPasswordExpires: Date
+        resetPasswordExpires: Date,
+        confirmedEmail: { type: Boolean, default: false }
     },
     facebook         : {
         id           : String,

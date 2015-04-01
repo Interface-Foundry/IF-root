@@ -1,5 +1,7 @@
 <div ng-include="'components/splash/home.html'"></div>
 
-<!-- <div ng-include="'components/splash/signin.html'"></div> -->
+<div ng-include="'components/splash/signin.html'" 
+	ng-if="show.signin || show.register"></div>
 
-<!-- <div ng-include="'components/splash/confirm.html'"></div> -->
+<div ng-include="'components/splash/confirm.html'"
+	ng-if="show.confirm"></div>
