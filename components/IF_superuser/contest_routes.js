@@ -8,7 +8,7 @@ var express = require('express'),
 
 //load current contest for that region
 router.get('/:id', function(req, res) {
-    if (req.user.admin) {
+    if (req.user && req.user.admin) {
         console.log('hitting get contest')
             //find current contest
         contestSchema.findOne({
@@ -26,11 +26,11 @@ router.get('/:id', function(req, res) {
         contestSchema.findOne({
             region: req.params.id.toString().toLowerCase(),
             live: true
-        }, function(err, result) {
+        }).select('htmlBody').exec(function(err, result) {
             if (err) {
                 console.log(err);
             }
-
+            console.log('hitting this',result )
             return res.send(result);
         });
 
