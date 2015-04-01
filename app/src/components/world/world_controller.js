@@ -37,6 +37,20 @@ $scope.uploadWTGT = function($files, state) {
 		$scope.wtgt.building[state] = true;
 
 		var file = $files[0];
+
+
+			var reader = new FileReader();
+		  reader.onload = function () {
+		  	$scope.myImg = this.result;
+		  	console.log('IMG', $scope.myImg);
+		  	debugger
+		  }
+			reader.readAsBinaryString(file);	
+
+
+
+
+
 		console.log('lol file is', JSON.stringify(file), 'state is', state);
 		// get time
 		var time = new Date();
