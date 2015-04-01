@@ -1,0 +1,22 @@
+storage:
+    dbPath: "/data/software/mongodb/testdb/data_secondary"
+    directoryPerDB: true
+    journal:
+        enabled: true
+systemLog:
+    destination: file
+    path: "/data/software/mongodb/testdb/mongodb_secondary.log"
+    logAppend: true
+    timeStampFormat: iso8601-utc
+processManagement:
+    fork: true
+net:
+    bindIp: 127.0.0.1
+    port: 27018
+    wireObjectCheck: false
+    unixDomainSocket:
+        enabled: true
+replication:
+    oplogSizeMB: 128
+    replSetName: "rs1"
+
