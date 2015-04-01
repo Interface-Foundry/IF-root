@@ -2,9 +2,9 @@ var _ = require('underscore'),
     mongoose = require('mongoose'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
     contestSchema = require('../IF_schemas/contestEntry_schema.js')
-
+    cSchema = require('../IF_schemas/contest_schema.js')
 var route = function(imgUpload, uploadContents, userID) {
-    console.log('hitting route func')
+
     if (userID) {
         checkEntryValid(userID, uploadContents.userLat, uploadContents.userLon, uploadContents.userTime, uploadContents.world_id, function(valid, distance) {
             if (valid) {
@@ -17,6 +17,8 @@ var route = function(imgUpload, uploadContents, userID) {
     }
 
     function checkEntryValid(userID, userLat, userLon, userTime, worldID, callback) {
+        var distanceValid = false;
+        var timeValid = false;
         landmarkSchema.findById(worldID, function(err, lm) {
             if (err) {
                 callback(false);
@@ -24,7 +26,7 @@ var route = function(imgUpload, uploadContents, userID) {
             if (lm.loc) {
                 if (lm.loc.coordinates) {
                     getDistanceFromLatLonInKm(lm.loc.coordinates[1], lm.loc.coordinates[0], userLat, userLon, function(distance) {
-                        if (distance < 0.15) { //within 150m 
+                        if (distance <= 15) { //within 150m 
                             callback(true, distance);
                         } else { //outside 150m
                             callback(false, distance);
@@ -32,6 +34,8 @@ var route = function(imgUpload, uploadContents, userID) {
                     });
                 }
             }
+            //If contest end time?
+
 
         });
     }

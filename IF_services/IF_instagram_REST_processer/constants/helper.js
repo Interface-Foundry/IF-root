@@ -50,7 +50,7 @@ var downloadImage = function(imageURL) {
                     var buffer = readChunk.sync(writeStreamDestinaton, 0, 262);
 
                     if (fileTypeProcess(buffer) == false) {
-                      console.log('bad file!');
+                        console.log('bad file!');
                         fs.unlink(writeStreamDestinaton); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
 
@@ -68,18 +68,31 @@ var downloadImage = function(imageURL) {
                                 }
                             });
                             fs.readFile(writeStreamDestinaton, function(err, fileData) {
-                                s3.putObject({
+                                //Check if file already exists
+                                var params = {
                                     Bucket: awsBucket,
-                                    Key: fileName,
-                                    Body: fileData,
-                                    ACL: 'public-read'
-                                }, function(err, data) {
-                                    if (err) console.log(err);
-                                }); //END OF s3.putObject
+                                    Key: fileName
+                                };
+                                s3.headObject(params, function(err, metadata) {
+                                    if (err && err.code === 'Not Found') {
+                                        s3.putObject({
+                                            Bucket: awsBucket,
+                                            Key: fileName,
+                                            Body: fileData,
+                                            ACL: 'public-read'
+                                        }, function(err, data) {
+                                            if (err) console.log(err);
+                                            console.log('saved!')
+                                        }); //END OF s3.putObject 
+                                    } 
+                                    else {
+                                        console.log('File already exists!')
+                                    }
+                                });
                             })
                         }); //END OF IM.RESIZE
                         file.end(function(err) {
-                    
+
                         });
                     }
                 }); //END OF RESPONSE ON END
