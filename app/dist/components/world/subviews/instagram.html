@@ -3,7 +3,7 @@
 		<h4 class="subnav-header">Instagram <em>#{{world.resources.hashtag}}</em></h4>
 	</nav>
 	
-	<div class="instagram-wrap wrap" lazy-load load-more="$scope.loadInstagrams()">
+	<div class="instagram-wrap wrap" lazy-load load-more="loadInstagrams()">
 		<ul>
 			<li ng-repeat="instagram in instagrams track by $index" class="instagram marble-page">
 				<a ng-href="http://instagram.com/{{instagram.user.screen_name}}" target="_blank">
