@@ -26,11 +26,11 @@ router.get('/:id', function(req, res) {
         contestSchema.findOne({
             region: req.params.id.toString().toLowerCase(),
             live: true
-        }, 'htmlBody', function(err, result) {
+        }, function(err, result) {
             if (err) {
                 console.log(err);
             }
-            console.log('selected return is..', result)
+
             return res.send(result);
         });
 
