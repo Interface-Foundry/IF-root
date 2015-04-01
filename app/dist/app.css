@@ -3316,8 +3316,6 @@ nav ul {
   height: 170px;
   padding: 8px;
   background-color: rgba(62, 82, 181, 0.96);
-  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   pointer-events: auto;
 }
 .announcements-card {
@@ -3325,6 +3323,9 @@ nav ul {
   margin-left: auto;
   margin-right: auto;
   max-width: 600px;
+  opacity: 1;
+  -webkit-transition: all ease-in-out 0.4s;
+  transition: all ease-in-out 0.4s;
 }
 .announcements-card h3 {
   margin-top: 10px;
@@ -3345,6 +3346,15 @@ nav ul {
 }
 .announcements-card a:hover {
   color: #7CC3FF;
+}
+.announcements-card.ng-hide {
+  -webkit-transform: translate3d(-180%, 0, 0);
+  transform: translate3d(-180%, 0, 0);
+  transition: 0.5s ease-in-out(0.5, 0.1, 0, 1) all;
+}
+.announcements-card.ng-hide-remove {
+  -webkit-transform: translate3d(200%, 0, 0);
+  transform: translate3d(200%, 0, 0);
 }
 /*VARIABLES*/
 nav {

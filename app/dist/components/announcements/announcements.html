@@ -1,5 +1,12 @@
-<div class="announcements-card" ng-swipe-left="nextCard($event)">
-	<h3>{{currentAnnouncement.headline}}<span ng-if="!end" ng-click="nextCard($event)">&gt;</span></h3>
-	<p>{{currentAnnouncement.body}}</p>
-	<p><a ng-href="{{currentAnnouncement.urlPath}}">{{currentAnnouncement.urlName}}</a></p>
+<div ng-repeat="announcement in announcements">
+	<div class="announcements-card announcements-animate if-animate" 
+			 ng-show="$index === index"
+			 ng-swipe-left="nextCard()">
+		<h3>{{announcement.headline}}
+			<span ng-if="!(index === announcements.length - 1)"
+						ng-click="nextCard()">&gt;</span>
+		</h3>
+		<p>{{announcement.body}}</p>
+		<p><a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a></p>
+	</div>
 </div>

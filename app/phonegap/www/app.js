@@ -20685,9 +20685,9 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 app.directive('announcements', announcements);
 
-announcements.$inject = ['announcementsService'];
+announcements.$inject = ['$animate', 'announcementsService'];
 
-function announcements(announcementsService) {
+function announcements($animate, announcementsService) {
 	return {
 		restrict: 'E',
 		scope: {},
@@ -20715,6 +20715,7 @@ function announcements(announcementsService) {
 			headline: 'All caught up!',
 			body: ':)'
 		};
+		scope.$animate = $animate;
 		scope.announcements = [];
 		scope.currentAnnouncement = {};
 		scope.end = false;
@@ -20737,16 +20738,23 @@ function announcements(announcementsService) {
 		function fakeData() {
 			scope.announcements.push(announcement);
 			scope.announcements.push(announcement2);
-			scope.currentAnnouncement = scope.announcements[scope.index];
+			scope.announcements.push(scope.allCaughtUp);
+			// scope.currentAnnouncement = scope.announcements[scope.index];
 		}
 
-		function nextCard($event) {
-			scope.index++;
-			if (scope.announcements[scope.index]) {
-				scope.currentAnnouncement = scope.announcements[scope.index];
-			} else {
-				scope.currentAnnouncement = scope.allCaughtUp;
-				scope.end = true;
+		function nextCard() {
+
+			// scope.$animate.addClass($event.target, 'slide-out-animation')
+			// .then(function() {
+			// 	console.log('animation done');
+			// })
+
+			if (scope.index < scope.announcements.length - 1) {
+				scope.index++;
+				// scope.currentAnnouncement = scope.announcements[scope.index];
+			// } else {
+				// scope.currentAnnouncement = scope.allCaughtUp;
+				// scope.end = true;
 			}
 		}
 
