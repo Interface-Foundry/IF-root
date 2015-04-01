@@ -1,4 +1,4 @@
-.announcements-card {
+.announcements-card-background {
   position: absolute;
   bottom: 0px;
   left: 0px;
@@ -6,16 +6,24 @@
   height: 170px;
   padding: 8px;
   background-color: rgba(62, 82, 181, 0.96);
-  color: #FFF9BC;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   pointer-events: auto;
+}
+
+
+.announcements-card {
+  color: #FFF9BC;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
 
   h3 {
     margin-top: 10px;
     text-align: center;
 
     span {
+      cursor: pointer;
       float: right;
     }
   }
@@ -29,6 +37,10 @@
 
   a {
     color: #7CC3FF;
+
+    &:hover {
+      color: #7CC3FF;
+    }
   }
 
 }

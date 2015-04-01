@@ -1,3 +1,5 @@
-<h3>{{currentAnnouncement.headline}}<span ng-if="!end" ng-click="nextCard()">&gt;</span></h3>
-<p>{{currentAnnouncement.body}}</p>
-<p><a ng-href="{{currentAnnouncement.urlPath}}">{{currentAnnouncement.urlName}}</a></p>
+<div class="announcements-card">
+	<h3>{{currentAnnouncement.headline}}<span ng-if="!end" ng-click="nextCard()">&gt;</span></h3>
+	<p>{{currentAnnouncement.body}}</p>
+	<p><a ng-href="{{currentAnnouncement.urlPath}}">{{currentAnnouncement.urlName}}</a></p>
+</div>

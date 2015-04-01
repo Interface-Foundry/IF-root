@@ -17,7 +17,7 @@ function announcements(announcementsService) {
 			"_id" : "5515705c2e2248e875be5b8c",
 			"urlName" : "Tap here to learn more...",
 			"urlPath" : "fake/url/path",
-			"body" : "Phasellus eget augue ut tortor tincidunt tempor vitae at mi. Interdum et malesuada fames ac ante ",
+			"body" : "Phasellus eget augue ut tortor tincidunt tempor vitae at mi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Proin malesuada vehicula tristique.",
 			"headline" : "Win $100 Gift Cards!",
 			"timestamp" : "2015-03-27T14:59:40.118Z",
 			"region" : "global",
