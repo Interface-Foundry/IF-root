@@ -17,7 +17,7 @@ exports.IMAGE_OBJECT_KEY_USER_PROFILE_IMAGE_URL = 'profile_picture';
 exports.IMAGE_OBJECT_KEY_CAPTION = 'caption';
 exports.IMAGE_OBJECT_KEY_CAPTION_TEXT = 'text';
 
-exports.IMAGE_SAVE_DESTINATION = './tmpimages';
+exports.IMAGE_SAVE_DESTINATION = './tempimages/';
 
 // Credentials
 
