@@ -30,7 +30,7 @@ var contestEntrySchema = mongoose.Schema({
     userLat: Number,
     userLng: Number,
     imgURL: String,
-    //'harversine' calculation?
+    contestId: {type: Schema.Types.ObjectId, ref: 'contest'},
     distanceFromWorld: Number
 });
 
