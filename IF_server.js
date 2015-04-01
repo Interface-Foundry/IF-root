@@ -249,11 +249,12 @@ app.post('/forgot', function (req, res, next) {
         res.redirect('/#/forgot');
       });
 
-    function validateEmail(email) { 
-        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(email);
-    } 
 });
+
+function validateEmail(email) { 
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+} 
 
 app.post('/resetConfirm/:token', function(req, res) {
   User.findOne({ 'local.resetPasswordToken': req.params.token, 'local.resetPasswordExpires': { $gt: Date.now() } }, function(err, user) {
@@ -1594,19 +1595,36 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
 
 //////
 app.post('/api/user/emailUpdate', isLoggedIn, function(req,res){
-  // updates user email, checks if email is already in system
-  req.user._id
+  // updates user email, after checking if email is already in system
+  var newEmail = sanitize(req.params.updatedEmail);
 
-  // sanitize input
-  // check if valid email authroutes/passports
-  // call db find
-
-  db.collection('users').findOne({'local.email': req.params.updatedEmail}, function(err, data){
-    // if (data) res 200 email exists check latest express code
-    // else update user local.email. res 200 user updated
-  });
-
+  if (validateEmail(newEmail)) {
+    db.collection('users').findOne({'local.email': newEmail}, function(err, data) {
+      if (data) {
+        res.send({
+          err: 'Email already exists'
+        });
+      } else {
+        updateEmail(newEmail, req);
+      }
+    });
+  } else {
+    res.send({
+      err: 'Invalid email'
+    });
+  }
 });
+
+function updateEmail(email, req) {
+  User.findById(req.user._id, function(err, data) {
+    data.local.email = email;
+    data.save(function(err) {
+      res.send({
+        msg: 'Email updated successfully'
+      });
+    });
+  });
+}
 
 function uniqueProfileID(input, callback){
 
