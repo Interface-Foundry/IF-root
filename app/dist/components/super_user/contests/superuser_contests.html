@@ -10,6 +10,13 @@
 <div id="shelf" class="shelf-surface wrap superuser-background">
   <div class="container-fluid navfix">
     <div class="superuser-list">
+      <div ng-if="!showAddContest"
+           class="add-button"
+           ng-click="newContest()">
+        <div class="circle">+</div>
+        Create New Contest
+      </div>
+
       <div ng-include="'components/super_user/contests/superuser.contests.new.html'"></div>
       </div>
     </div>
@@ -18,7 +25,7 @@
   <ul>
     <li class="landmark col-xs-12 col-sm-6" ng-repeat="contest in contests">
       <div class="media card">
-
+        <h3>{{contest.name}}</h3>
       </div>
     </li>
   </ul>

@@ -23390,17 +23390,19 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 	$scope.contest = {
 		contestTags: []
 	};
+	$scope.contests;
 	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
     formatYear: 'yy',
     startingDay: 1
   };
   $scope.dateTime = {};
-	$scope.routes = superuserService.routes
+	$scope.newContest = newContest;
 	$scope.openEnd = openEnd;
 	$scope.openStart = openStart;
 	$scope.region = $routeParams.region;
 	$scope.regions = ['global'];
+	$scope.routes = superuserService.routes
 	$scope.submit = submit;
 	$scope.updateContest = updateContest;
 
@@ -23459,13 +23461,18 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
   		return;			
 		}
 
-		$scope.contest.startDate = formatDateTime().start;
-		$scope.contest.endDate = formatDateTime().end;
+		// if _id exists then we are updating an existing contest
+		if ($scope.contest._id) {
+			updateContest();
+		} else {
+			$scope.contest.startDate = formatDateTime().start;
+			$scope.contest.endDate = formatDateTime().end;
 
-		Contests.save($scope.contest).$promise
+			Contests.save($scope.contest).$promise
       .then(function(response) {
         $scope.contest = response;
       });;
+		}
 	}
 
 	function getDates() {
@@ -23496,12 +23503,14 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
   	return new Date(ISOdate);
   }
 
-  function updateContest(form) {
-  	if (form.$invalid) {
-  		console.log('Form is missing required fields.');
-  		return;
-  	}
+  function newContest() {
+		$scope.contest = {
+			contestTags: [],
+			region: $scope.region
+		};
+  }
 
+  function updateContest() {
   	Contests.update({
   		id: $scope.contest._id
   	}, $scope.contest)
@@ -26145,6 +26154,20 @@ $scope.uploadWTGT = function($files, state) {
 		$scope.wtgt.building[state] = true;
 
 		var file = $files[0];
+
+
+			var reader = new FileReader();
+		  reader.onload = function () {
+		  	$scope.myImg = this.result;
+		  	console.log('IMG', $scope.myImg);
+		  	debugger
+		  }
+			reader.readAsBinaryString(file);	
+
+
+
+
+
 		console.log('lol file is', JSON.stringify(file), 'state is', state);
 		// get time
 		var time = new Date();

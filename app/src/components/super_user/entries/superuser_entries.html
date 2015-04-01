@@ -34,7 +34,7 @@
           <div class="media card superuser-list-item superuser-list-item-entry">
 
             <h4>{{entry.userName}}</h4>
-            <p>From World: {{entry.worldName}}</p>
+            <p>From Bubble: <a ng-href="/w/{{entry.worldName}}">{{entry.worldName}}</a></p>
             <div class="contest-entry-pic">
               <img ng-src="{{entry.imgURL}}">
             </div>
@@ -43,6 +43,7 @@
             </div>
             <p>Tag: {{entry.contestTag[0].tag}}</p>
             <p>Distance: {{entry.distanceFromWorld | number}} km</p>
+            <p>{{::entry.userTime | date:'medium'}}</p>
             <p>Region: {{entry.region}}</p>
 
           </div>
