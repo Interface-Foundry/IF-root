@@ -3,6 +3,9 @@ var fs = require('fs');
 var url = require('url');
 var im = require('imagemagick'); //must also install imagemagick package on server /!\
 
+var readChunk = require('read-chunk');
+var fileTypeProcess = require('file-type');
+
 var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 var awsBucket = "if.instagram.images";
@@ -43,44 +46,50 @@ var downloadImage = function(imageURL) {
                     file.write(data);
                 });
                 response.on('end', function(data) {
-                    file.end();
-                    //Resize image
-                    im.resize({
-                        srcPath: writeStreamDestinaton,
-                        dstPath: writeStreamDestinaton,
-                        width: 600,
-                        height: 600,
-                        quality: 0.8
-                    }, function(err, stdout, stderr) {
-                        var s3bucket = new AWS.S3({
-                            params: {
-                                Bucket: awsBucket
-                            }
+
+                    var buffer = readChunk.sync(writeStreamDestinaton, 0, 262);
+
+                    if (fileTypeProcess(buffer) == false) {
+                      console.log('bad file!');
+                        fs.unlink(writeStreamDestinaton); //Need to add an alert if there are several attempts to upload bad files here
+                    } else {
+
+                        //Resize image
+                        im.resize({
+                            srcData: writeStreamDestinaton,
+                            dstPath: writeStreamDestinaton,
+                            width: 600,
+                            height: 600,
+                            quality: 0.8
+                        }, function(err, stdout, stderr) {
+                            var s3bucket = new AWS.S3({
+                                params: {
+                                    Bucket: awsBucket
+                                }
+                            });
+                            fs.readFile(writeStreamDestinaton, function(err, fileData) {
+                                s3.putObject({
+                                    Bucket: awsBucket,
+                                    Key: fileName,
+                                    Body: fileData,
+                                    ACL: 'public-read'
+                                }, function(err, data) {
+                                    if (err) console.log(err);
+                                }); //END OF s3.putObject
+                            })
+                        }); //END OF IM.RESIZE
+                        file.end(function(err) {
+                    
                         });
-                        s3.putObject({
-                            Bucket: awsBucket,
-                            Key: fileName,
-                            Body: data,
-                            ACL: 'public-read'
-                        }, function(err, data) {
-                            console.log('AWS return data is: ', data);
-                            if (err)
-                                console.log(err);
-                            else {
-                                console.log('uploaded to AWS!');
-                            }
-                        }); //END OF s3.putObject
-                    }); //END OF IM.RESIZE
-                    fs.unlink(writeStreamDestinaton, function(err) {
-                        if (err) throw err;
-                        console.log('successfully deleted cached image');
-                    });
+                    }
                 }); //END OF RESPONSE ON END
                 response.on('error', function(err) {
                     //console.log('333333');
                     console.log("ERROR:" + err);
                     file.read();
+
                 }); //END OF RESPONSE.ON
+
             }) //END OF REQUEST
     }
     return

@@ -22,7 +22,7 @@ router.get('/', function(req, res) {
         if (err) {
             console.log(err);
         }
-        console.log('results:', instagrams)
+        
         return res.send(instagrams);
     })
 
