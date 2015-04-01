@@ -30,7 +30,7 @@ router.get('/:id', function(req, res) {
             if (err) {
                 console.log(err);
             }
-            console.log('hitting this',result )
+            console.log('hitting this', result)
             return res.send(result);
         });
 
@@ -95,6 +95,7 @@ router.put('/:id', function(req, res) {
                 console.log(err);
             }
             console.log('found a contest! -->', result)
+            console.log('req.body is..', req.body.endDate)
             var contest = _.extend(result, req.body);
 
             contest.save(

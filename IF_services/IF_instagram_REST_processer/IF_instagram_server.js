@@ -201,7 +201,7 @@ async.whilst(
           }
         });
 
-        setTimeout(callback, 30000); // every minute check
+        setTimeout(callback, 300000); // Check every 5 minutes
         
     },
     function (err) {
