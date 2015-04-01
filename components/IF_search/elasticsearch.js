@@ -3,10 +3,23 @@
 var elasticsearch = require('elasticsearch');
 var RSVP = require('rsvp');
 
+// logs elasticsearch stuff, flesh out later once we know what's useful
+var ESLogger = function(config) {
+	var defaultLogger = function(){};
+
+	this.error = defaultLogger;
+	this.warning = defaultLogger;
+	this.info = defaultLogger;
+	this.debug = defaultLogger;
+	this.trace = defaultLogger;
+	this.close = defaultLogger;
+};
+
+
 // todo production configuration
 var es = new elasticsearch.Client({
 	host: 'localhost:9200',
-	log: 'trace'
+	log: ESLogger
 });
 
 module.exports = {};

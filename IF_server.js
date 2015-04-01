@@ -79,7 +79,8 @@ var mongoose = require('mongoose'),
     announcementsSchema = require('./components/IF_schemas/announcements_schema.js'),
     monguurl = require('monguurl');
 
-var env = 'production';
+var env = process.env.NODE_ENV || 'development';
+console.log("running in $env mode".replace('$env', env));
 
 mongoose.connect(configDB.url);
 var db_mongoose = mongoose.connection;
@@ -471,16 +472,17 @@ var elasticsearch_up = false; // health status
 
 // check elasticsearch health every 5 seconds
 setInterval(function() {
-	elasticsearch.healthcheck(function(err) {
-		if (err) {
-			elasticsearch_up = false;
-			if (env == 'production') {
-				console.error(err);
-			}
-		} else {
-			elasticsearch_up = true;
-		}
-	});
+    elasticsearch.healthcheck(function(err) {
+        if (err) {
+            elasticsearch_up = false;
+            if (env == 'production') {
+                console.error('elasticsearch down');
+                console.error(err);
+            }
+        } else {
+            elasticsearch_up = true;
+        }
+    });
 }, 15000);
 
 // Search route
