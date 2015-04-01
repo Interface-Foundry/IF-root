@@ -24748,9 +24748,9 @@ function categoryWidgetService() {
 
 app.controller('ContestEntriesController', ContestEntriesController);
 
-ContestEntriesController.$inject = ['$scope', '$routeParams', 'Entries', 'worldTree'];
+ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', 'Entries', 'worldTree', 'styleManager'];
 
-function ContestEntriesController($scope, $routeParams, Entries, worldTree) {
+function ContestEntriesController($scope, $routeParams, $rootScope, Entries, worldTree, styleManager) {
 
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
@@ -24766,6 +24766,8 @@ function ContestEntriesController($scope, $routeParams, Entries, worldTree) {
 
     worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.style = data.style;
+			styleManager.navBG_color = $scope.style.navBG_color;
+			// $rootScope.hideBack = false;
 		});
 	}
 
@@ -26154,19 +26156,6 @@ $scope.uploadWTGT = function($files, state) {
 		$scope.wtgt.building[state] = true;
 
 		var file = $files[0];
-
-
-			var reader = new FileReader();
-		  reader.onload = function () {
-		  	$scope.myImg = this.result;
-		  	console.log('IMG', $scope.myImg);
-		  	debugger
-		  }
-			reader.readAsBinaryString(file);	
-
-
-
-
 
 		console.log('lol file is', JSON.stringify(file), 'state is', state);
 		// get time
