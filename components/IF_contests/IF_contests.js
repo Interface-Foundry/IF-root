@@ -36,13 +36,12 @@ var route = function(imgUpload, uploadContents, userID) {
                         getDistanceFromLatLonInKm(lm.loc.coordinates[1], lm.loc.coordinates[0], userLat, userLon, function(distance) {
                             if (distance <= 15) { //within 150m 
                                 distanceValid = true;
-                                // callback(true, distance);
-                            } else { //outside 150m
+                            } else { 
                                 distanceValid = false;
-                                // callback(false, distance);
+                             
                             }
-
-                            if (userTime > contest.endDate) {
+                            console.log('userTime is', userTime, 'enddate is', contest.endDate);
+                            if (Date.parse(userTime) > Date.parse(contest.endDate)) {
                                 timeValid = false;
                                 console.log('Contest has already ended!')
                             } else {
@@ -53,18 +52,13 @@ var route = function(imgUpload, uploadContents, userID) {
                             } else {
                                 callback(false, distance);
                             }
-
                         });
                     }
                 }
-
-
-
             });
         }
 
         function saveEntry(validEntry, imgUpload, uploadContents, userID, distance) {
-
 
             var cs = new contestSchema({
                 worldID: uploadContents.world_id,
