@@ -5290,6 +5290,23 @@ app.directive('bubbleBody', function(apertureService) {
 		}
 	}
 });
+app.directive('clickToEdit', [function() {
+	// attach to input element. selects input text on click
+
+	return {
+		restrict: 'A',
+		scope: true,
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		elem.on('click', function() {
+			elem.select();
+			elem.focus();
+		});
+	}
+
+}]);
 app.directive('compassButton', function(worldTree, $templateRequest, $compile, userManager, $timeout) {
 	return { //NOT USED ANY MORE
 		restrict: 'EA',

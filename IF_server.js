@@ -1593,19 +1593,26 @@ app.post('/api/updateuser', isLoggedIn, function (req, res) {
   }
 });
 
-//////
 app.post('/api/user/emailUpdate', isLoggedIn, function(req,res){
   // updates user email, after checking if email is already in system
-  var newEmail = sanitize(req.params.updatedEmail);
+
+  var newEmail = sanitize(req.body.updatedEmail);
 
   if (validateEmail(newEmail)) {
-    db.collection('users').findOne({'local.email': newEmail}, function(err, data) {
+    db.collection('users').findOne({'local.email': newEmail}, function(err, data) {  
       if (data) {
         res.send({
           err: 'Email already exists'
         });
       } else {
-        updateEmail(newEmail, req);
+        User.findById(req.user._id, function(err, data) {
+          data.local.email = newEmail;
+          data.save(function(err) {
+            res.send({
+              msg: 'Email updated successfully'
+            });
+          });
+        });
       }
     });
   } else {
@@ -1614,17 +1621,6 @@ app.post('/api/user/emailUpdate', isLoggedIn, function(req,res){
     });
   }
 });
-
-function updateEmail(email, req) {
-  User.findById(req.user._id, function(err, data) {
-    data.local.email = email;
-    data.save(function(err) {
-      res.send({
-        msg: 'Email updated successfully'
-      });
-    });
-  });
-}
 
 function uniqueProfileID(input, callback){
 
