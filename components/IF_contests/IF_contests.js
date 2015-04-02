@@ -80,7 +80,7 @@ var route = function(imgUpload, uploadContents, userID) {
                 if (err) {
                     console.log(err);
                 } else {
-                    console.log('saved entry is..', data)
+                    console.log('backend link is ..', data.imgURL)
                     console.log('entry saved');
                 }
             });
