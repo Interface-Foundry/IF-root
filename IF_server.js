@@ -764,7 +764,40 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                             var picorientation = output.toString().trim();
                             switch (picorientation) {
                                 case '1':
+                                      im.convert([tempPath, '-resize', '600', '-quality', '0.8', tempPath], function(err, stdout, stderr) {
+                                        if (err) console.log(err)
+                                        console.log('not flipped.')
+                                        fs.readFile(tempPath, function(err, fileData) {
+                                            var s3 = new AWS.S3();
+                                            s3.putObject({
+                                                Bucket: 'if-server-general-images',
+                                                Key: awsKey,
+                                                Body: fileData,
+                                                ACL: 'public-read'
+                                            }, function(err, data) {
 
+                                                if (err)
+                                                    console.log(err);
+                                                else {
+                                                    res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                                                    fs.unlink(tempPath);
+
+                                                    //additional content was passed with the image, handle it here
+                                                    if (uploadContents) {
+                                                        try {
+                                                            uploadContents = JSON.parse(uploadContents);
+                                                        } catch (err) {
+                                                            console.log(err);
+                                                        }
+                                                        if (uploadContents.type == 'retail_campaign') {
+                                                            submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                        }
+                                                    }
+
+                                                }
+                                            });
+                                        });
+                                    })
                                     break;
                                 case '3':
                                     im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '180', tempPath], function(err, stdout, stderr) {
