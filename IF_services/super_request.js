@@ -5,8 +5,6 @@ var request = require('request'),
 
 var num = process.argv[2];
 
-
-
 function call(num) {
     var mapqurl = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json'
     var response = {};
@@ -29,10 +27,10 @@ function call(num) {
                 num--;
 
             })
-            setTimeout(callback, 100);
+            setTimeout(callback, 50);
         },
         function(err) {
-            console.log('Requested a total of ',num,' times.')
+            console.log('Requested a total of ',process.argv[2],' times.')
         }
     );
 }
