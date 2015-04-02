@@ -4897,7 +4897,8 @@ li.alert {
     display: block;
   }
   .aperture-third .leaflet-bottom.leaflet-left,
-  .aperture-half .leaflet-bottom.leaflet-left {
+  .aperture-half .leaflet-bottom.leaflet-left,
+  .aperture-off .leaflet-bottom.leaflet-left {
     display: none;
   }
 }
