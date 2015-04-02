@@ -26206,7 +26206,7 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		console.log('DATA IZZZ',data);
+
 		$scope.wtgt.images[state] = data;
 	
 		$scope.wtgt.building[state] = false;
