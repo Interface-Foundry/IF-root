@@ -712,21 +712,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
         uploadContents += val;
     });
 
-    // req.busboy.on('finish', function (key,val) {
-
-    //   if(uploadContents){
-    //     try {
-    //       uploadContents = JSON.parse(uploadContents);
-    //     }
-    //     catch(err){
-    //       console.log(err);
-    //     }
-    //   }
-    // });
-
     //Detect if captured on iPhone and set iphone boolean
-    console.log('user-AGENT IS ', req.headers)
-    var iphone = req.headers['user-agent'].indexOf('iPhone') > -1 ? true : false;
+    // console.log('user-AGENT IS ', req.headers)
+    // var iphone = req.headers['user-agent'].indexOf('iPhone') > -1 ? true : false;
 
 
     var fstream;
