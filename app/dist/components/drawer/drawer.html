@@ -20,15 +20,15 @@
 	<li class="drawer-item" ng-click="create()">
 		<div class="drawer-item-img drawer-add"></div>Create a New Bubble
 	</li>
-	<li class="drawer-item" ng-if="userManager.adminStatus" ng-click="go('/su/announcements/global')">
-		Announcements
-	</li>
-	<li class="drawer-item" ng-if="userManager.adminStatus" ng-click="go('/su/contests/global')">
-		Contests
-	</li>
-	<li class="drawer-item" ng-if="userManager.adminStatus" ng-click="go('/su/entries/global')">
-		Entries
-	</li>
+
+	<div ng-if="userManager.adminStatus">
+		<li ng-repeat="option in superuserOptions" 
+				class="drawer-item"
+				ng-click="goSuperuserOption($index)">
+			{{option}}
+		</li>
+	</div>
+	
 	<li class="drawer-item" ng-click="logout()">
 		Logout
 	</li>
