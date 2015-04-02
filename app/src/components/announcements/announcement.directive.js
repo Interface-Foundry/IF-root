@@ -55,6 +55,14 @@ function announcements($animate, announcementsService) {
 		function fakeData() {
 			scope.announcements.push(announcement);
 			scope.announcements.push(announcement2);
+						scope.announcements.push(announcement);
+			scope.announcements.push(announcement2);
+						scope.announcements.push(announcement);
+			scope.announcements.push(announcement2);
+						scope.announcements.push(announcement);
+			scope.announcements.push(announcement2);
+						scope.announcements.push(announcement);
+			scope.announcements.push(announcement2);
 			scope.announcements.push(scope.allCaughtUp);
 			// scope.currentAnnouncement = scope.announcements[scope.index];
 		}
