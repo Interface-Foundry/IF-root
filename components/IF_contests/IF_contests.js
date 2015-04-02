@@ -1,15 +1,14 @@
 var _ = require('underscore'),
     mongoose = require('mongoose'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
-    contestSchema = require('../IF_schemas/contestEntry_schema.js')
-cSchema = require('../IF_schemas/contest_schema.js')
+    contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
+    contestSchema = require('../IF_schemas/contest_schema.js')
 var route = function(imgUpload, uploadContents, userID) {
-    cSchema.findOne({
+
+    contestSchema.findOne({
         live: true
     }, function(err, contest) {
         if (err) console.log(err)
-
-
 
         if (userID) {
             checkEntryValid(userID, uploadContents.userLat, uploadContents.userLon, uploadContents.userTime, uploadContents.world_id, function(valid, distance) {
@@ -34,11 +33,11 @@ var route = function(imgUpload, uploadContents, userID) {
                 if (lm.loc) {
                     if (lm.loc.coordinates) {
                         getDistanceFromLatLonInKm(lm.loc.coordinates[1], lm.loc.coordinates[0], userLat, userLon, function(distance) {
-                            if (distance <= 15) { //within 150m 
+                            if (distance <= 15) {
                                 distanceValid = true;
-                            } else { 
+                            } else {
                                 distanceValid = false;
-                             
+
                             }
                             console.log('userTime is', userTime, 'enddate is', contest.endDate);
                             if (Date.parse(userTime) > Date.parse(contest.endDate)) {
@@ -60,24 +59,24 @@ var route = function(imgUpload, uploadContents, userID) {
 
         function saveEntry(validEntry, imgUpload, uploadContents, userID, distance) {
 
-            var cs = new contestSchema({
+            var newcontest = new contestEntrySchema({
+                userTime: uploadContents.userTime,
+                userID: userID,
                 worldID: uploadContents.world_id,
                 worldName: uploadContents.worldID,
-                userTime: uploadContents.userTime,
+                valid: validEntry,
                 userLat: uploadContents.userLat,
                 userLng: uploadContents.userLon,
                 type: uploadContents.type,
                 contestTag: [{
                     tag: uploadContents.hashtag
                 }],
-                userID: userID,
-                valid: validEntry,
-                contestId: contest._id,
                 imgURL: imgUpload,
+                contestId: contest._id,
                 distanceFromWorld: parseFloat(distance)
             });
 
-            cs.save(function(err, data) {
+            newcontest.save(function(err, data) {
                 if (err) {
                     console.log(err);
                 } else {

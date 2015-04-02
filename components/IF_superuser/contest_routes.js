@@ -5,11 +5,9 @@ var express = require('express'),
     contestSchema = require('../IF_schemas/contest_schema.js'),
     _ = require('underscore');
 
-
 //load current contest for that region
 router.get('/:id', function(req, res) {
     if (req.user && req.user.admin) {
-        console.log('hitting get contest')
             //find current contest
         contestSchema.findOne({
             region: req.params.id.toString().toLowerCase(),
@@ -18,7 +16,6 @@ router.get('/:id', function(req, res) {
             if (err) {
                 console.log(err);
             }
-
             return res.send(contest);
         });
 
@@ -37,10 +34,8 @@ router.get('/:id', function(req, res) {
     }
 })
 
-
 //create new contest for that region
 router.post('/', function(req, res) {
-
     if (req.user.admin) {
         //Set all other contests to live:false
         contestSchema.update({}, {
@@ -53,39 +48,25 @@ router.post('/', function(req, res) {
             }
             console.log('all others now false', result)
         })
-
-        console.log('hitting post, req.body is..', req.body)
-
         var newcontest = new contestSchema();
         if (req.body._id) {
             delete req.body._id;
             delete req.body._v;
         }
-
-
-
-
         var contest = _.extend(newcontest, req.body);
-
-        //push hashtags into contestTag array
-        // contest.contestTags.push(req.body.contestTags[0]);
-        // contest.contestTags.push(req.body.contestTags[1]);
-
-        console.log('extended contest is..', contest)
         contest.save(
             function(err, contest) {
                 if (err) {
                     console.log(err)
                 }
-
                 return res.send(contest);
-
             });
     }
 })
 
 // //edit the current contest
 router.put('/:id', function(req, res) {
+    console.log('hitting this?')
     if (req.user.admin) {
         //find current contest
         contestSchema.findOne({

@@ -26,7 +26,7 @@ router.get('/:number', function(req, res) {
 
 
 //Toggle entry validity
-router.put('/su/:id', function(req, res) {
+router.put('/:id', function(req, res) {
     if (req.user.admin) {
         contestEntrySchema.findById(req.params.id, function(err, entry) {
             if (err) {
