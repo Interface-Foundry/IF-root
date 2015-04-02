@@ -1,6 +1,6 @@
 <div class="announcements-card-container">
 	<div ng-repeat="announcement in announcements track by $index"
-				class="announcements-card announcements-animate if-animate" 
+			 class="announcements-card announcements-animate if-animate" 
 			 ng-show="$index === index"
 			 ng-swipe-left="nextCard()">
 		<h3>{{announcement.headline}}
