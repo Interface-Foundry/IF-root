@@ -6,9 +6,7 @@ SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$loc
 
 function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
 
-	$scope.contest = {
-		contestTags: []
-	};
+	$scope.contest = {};
 	$scope.contests;
 	$scope.currentRoute = superuserService.getCurrentRoute();
 	$scope.dateOptions = {
@@ -16,11 +14,11 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
     startingDay: 1
   };
   $scope.dateTime = {};
-	$scope.newContest = newContest;
 	$scope.openEnd = openEnd;
 	$scope.openStart = openStart;
 	$scope.region = $routeParams.region;
 	$scope.regions = ['global'];
+	$scope.resetContestForm = resetContestForm;
 	$scope.routes = superuserService.routes
 	$scope.submit = submit;
 	$scope.updateContest = updateContest;
@@ -40,6 +38,7 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
     	console.log('Error:', error);
     	getDates();
     });
+    resetContestForm();
 	}
 
 	$scope.changeRoute = function() {
@@ -74,18 +73,27 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
     $scope.openedStart = true;
   }
 
+  function resetContestForm() {
+		$scope.contest = {
+			contestTags: [],
+			region: $scope.region
+		};
+  }
+
 	function submit(form) {
 		if (form.$invalid) {
   		console.log('Form is missing required fields.');
   		return;			
 		}
 
+		// convert datepicker and timepicker and attach to contest object
+		$scope.contest.startDate = formatDateTime().start;
+		$scope.contest.endDate = formatDateTime().end;
+
 		// if _id exists then we are updating an existing contest
 		if ($scope.contest._id) {
 			updateContest();
 		} else {
-			$scope.contest.startDate = formatDateTime().start;
-			$scope.contest.endDate = formatDateTime().end;
 
 			Contests.save($scope.contest).$promise
       .then(function(response) {
@@ -120,13 +128,6 @@ function SuperuserContestController($scope, Contests, $routeParams, $location, s
 
   function ISOtoDate(ISOdate) {
   	return new Date(ISOdate);
-  }
-
-  function newContest() {
-		$scope.contest = {
-			contestTags: [],
-			region: $scope.region
-		};
   }
 
   function updateContest() {
