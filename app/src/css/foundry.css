@@ -922,18 +922,21 @@ nav ul {
 }
 .announcements-card {
   height: 100%;
-  -webkit-transition: all ease-out 0.4s;
-  transition: all ease-out 0.4s;
+  -webkit-transition: all cubic-bezier(0.03, 0.79, 0.48, 1) 0.4s;
+  transition: all cubic-bezier(0.03, 0.79, 0.48, 1) 0.4s;
 }
 .announcements-card h3 {
   margin-top: 10px;
   text-align: center;
 }
-.announcements-card h3 span {
+.announcements-card h3 img.announcement-chevron {
   cursor: pointer;
+  height: 48px;
   float: right;
+  margin-top: -10px;
 }
 .announcements-card p:nth-child(2) {
+  clear: right;
   height: 80px;
   overflow: hidden;
   padding: 0 10px;
@@ -941,6 +944,7 @@ nav ul {
 }
 .announcements-card a {
   color: #7CC3FF;
+  padding: 0 10px;
 }
 .announcements-card a:hover {
   color: #7CC3FF;
