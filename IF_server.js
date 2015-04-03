@@ -214,52 +214,54 @@ var redisClient = require('./redis.js');
 
 
 app.post('/email/confirm', function(req, res, next) {
+	console.log("entering /email/confirm");
 
-    async.waterfall([
-        function(done) {
-            crypto.randomBytes(20, function(err, buf) {
-                var token = buf.toString('hex');
-                done(err, token);
-            });
-        },
-        function(token, done) {
-            if (validateEmail(req.user.local.email)) {
-                User.findOne({
-                    'local.email': req.user.local.email
-                }, function(err, user) {
-                    if (!user) {
-                        done('No account with that email address exists, or you signed up only through Facebook/Twitter');
-                    } else {
-                        user.local.confirmEmailToken = token;
-                        user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
-                        user.save(function(err) {
-                            done(err, token, user);
-                        });
-                    }
-                });
-            } else {
-                return done('Please use a real email address');
+    if (!validateEmail(req.user.local.email)) {
+		console.log('bad email address: ' + req.user.local.email);
+		next('Please use a real email address');
+		return;
+	}
+
+	if (!req.headers.host) {
+		console.log("Cannot send confirmation mail without req.headers.host");
+		next("Can not send confirmation mail: no host");
+		return;
+	}
+
+    crypto.randomBytes(20, function(err, buf) {
+        var token = buf.toString('hex');
+		var email = req.user.local.email;
+
+        User.findOne({'local.email': email},	function(err, user) {
+            if (!user) {
+                next('No account with that email address exists, or you signed up only through Facebook/Twitter');
+				return;
             }
-        },
-        function(token, user, done) {
-            if (req.headers.host) {
-                var mailOptions = {
-                    to: req.user.local.email,
-                    from: 'Kip <noreply@kipapp.co>',
-                    subject: 'Kip – Confirm your email',
-                    text: 'Thanks for signing up for Kip! \n\n' +
-                        'Please click on the following link to confirm your email:\n\n' +
-                        'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+
+            user.local.confirmEmailToken = token;
+            user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
+            user.save(function(err) {
+				if (err) {
+					return next(err);
+				}
+
+				var mailOptions = {
+					to: email,
+					from: 'Kip <noreply@kipapp.co>',
+					subject: 'Kip – Confirm your email',
+					text: 'Thanks for signing up for Kip! \n\n' +
+                          'Please click on the following link to confirm your email:\n\n' +
+                          'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
+					if (err) {
+						return next(err);
+					}
                     console.log('sent confirmation email');
-                    done(err, 'done');
+                    res.send("｡◕‿◕｡");
                 });
-            }
-        }
-    ], function(err) {
-        if (err) return next(err);
-        //res.redirect('/forgot');
+            });
+        });
     });
 
     function validateEmail(email) {
