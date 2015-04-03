@@ -18776,8 +18776,13 @@ userManager.signup.signup = function() { //signup based on signup form
 		// send confirmation email
 		$http.post('/email/confirm').then(function(success) {
 			console.log('confirmation email sent');
+
+			// so that email/confirm doesn't get called every 2 mins (bug in system)
+			$http.get('/api/dummyRoute');
+
 		}, function(error) {
 			console.log('error :', error);
+			$http.get('/api/dummyRoute');
 		});
 	})
 	.error(function(err) {

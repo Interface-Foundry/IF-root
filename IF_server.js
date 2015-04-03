@@ -198,9 +198,13 @@ app.post('/feedback', function (req, res) {
 //-------- Send Email Confirmation ------//
 //---------------------------------------//
 
+app.get('/api/dummyRoute', function(req, res) {
+  // sometimes routes get called every 2 mins (bug). use this endpoint after another endpoint if you run into the 2 min problem (for now)
+  res.sendStatus(200);
+})
 
-app.post('/email/confirm', function (req, res, next) {
-
+app.post('/email/confirm', isLoggedIn, function (req, res, next) {
+      res.sendStatus(200);
       async.waterfall([
         function(done) {
           crypto.randomBytes(20, function(err, buf) {
@@ -209,23 +213,27 @@ app.post('/email/confirm', function (req, res, next) {
           });
         },
         function(token, done) {
-          if (validateEmail(req.user.local.email)){
-              User.findOne({ 'local.email': req.user.local.email }, function(err, user) {
-                if (!user) {
-                  done('No account with that email address exists, or you signed up only through Facebook/Twitter');
-                }
+          if (req.user.local) {
+            if (validateEmail(req.user.local.email)){
+                User.findOne({ 'local.email': req.user.local.email }, function(err, user) {
+                  if (!user) {
+                    done('No account with that email address exists, or you signed up only through Facebook/Twitter');
+                  }
 
-                else {
-                    user.local.confirmEmailToken = token;
-                    user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
-                    user.save(function(err) {
-                      done(err, token, user);
-                    }); 
-                }
-              });
-          }
-          else {
-            return done('Please use a real email address');
+                  else {
+                      user.local.confirmEmailToken = token;
+                      user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
+                      user.save(function(err) {
+                        done(err, token, user);
+                      }); 
+                  }
+                });
+            }
+            else {
+              return done('Please use a real email address');
+            }
+          } else {
+            done(err);
           }
         },
         function(token, user, done) {
