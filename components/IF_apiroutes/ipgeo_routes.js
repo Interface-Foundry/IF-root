@@ -19,8 +19,7 @@ router.get('/', function(req, res) {
 
     if (!req.query.hasloc) {
         //Freegeoip allows up to 10,000 queries per hour by default. 
-        var geoipurl = 'http://freegeoip.net/json/' + req.ip;
-
+        var geoipurl = 'localhost:8080/' + req.ip;
         request({
             url: geoipurl
         }, function(err, body) {
@@ -33,7 +32,7 @@ router.get('/', function(req, res) {
         })
 
     } else if (req.query.lat && req.query.lng) {
-        //supposedely no limit..
+        //supposedely no limit no throttle...
         var mapqurl = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json'
 
         request({
