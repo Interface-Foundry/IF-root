@@ -18096,7 +18096,7 @@ mapManager.groupFloorMaps = function(worldStyle) {
 	}
 
 	// legacy maps
-	var localMaps = [worldStyle.maps];
+	var localMap = worldStyle.maps;
 	
 	// if localMapArray exists, replace local map with sorted array
 	if (hasLocalMapArray(worldStyle.maps)) {
@@ -18110,6 +18110,8 @@ mapManager.groupFloorMaps = function(worldStyle) {
 			var groupName = mapGroup + '-maps';
 			mapManager.addOverlayGroup(overlayGroup, groupName);
 		}
+	} else {
+		mapManager.addOverlay(localMap.localMapID, localMap.localMapName, localMap.localMapOptions);
 	}
 }
 
