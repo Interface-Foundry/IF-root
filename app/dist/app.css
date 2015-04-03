@@ -3310,11 +3310,10 @@ nav ul {
   background-color: rgba(62, 82, 181, 0.96);
   left: 0px;
   width: 100%;
-  height: 178px;
-  padding: 8px;
+  height: 120px;
   position: absolute;
   pointer-events: auto;
-  top: 178px;
+  top: 230px;
 }
 .announcements-card-container {
   color: #FFF9BC;
@@ -3326,8 +3325,8 @@ nav ul {
 }
 .announcements-card {
   height: 100%;
-  -webkit-transition: all cubic-bezier(0.03, 0.79, 0.48, 1) 0.4s;
-  transition: all cubic-bezier(0.03, 0.79, 0.48, 1) 0.4s;
+  -webkit-transition: all cubic-bezier(0, 1, 0.56, 0.96) 0.4s;
+  transition: all cubic-bezier(0, 1, 0.56, 0.96) 0.4s;
 }
 .announcements-card h3 {
   margin-top: 10px;
@@ -3339,19 +3338,21 @@ nav ul {
   float: right;
   margin-top: -10px;
 }
-.announcements-card p:nth-child(2) {
+.announcements-card p.announcement-body {
   clear: right;
-  height: 80px;
+  height: 40px;
   overflow: hidden;
+  margin: 0;
   padding: 0 10px;
   text-overflow: ellipsis;
 }
-.announcements-card a {
-  color: #7CC3FF;
+.announcements-card p.announcement-link a {
+  color: #52b9f2;
+  margin-top: 2px;
   padding: 0 10px;
 }
-.announcements-card a:hover {
-  color: #7CC3FF;
+.announcements-card p.announcement-link a:hover {
+  color: #52b9f2;
 }
 .announcements-card.ng-hide {
   -webkit-transform: translate3d(-110%, 0, 0);
