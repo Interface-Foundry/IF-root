@@ -8,37 +8,38 @@ var express = require('express'),
 var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
     mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw',
-    geoipURL = 'localhost:8080/' //local freegeoip server, probably will change
+    geoipURL = '192.168.1.15:8080/', //local freegeoip server, will change based on current IP
+    geoloc = {};
 
 router.use(function(req, res, next) {
-    //Because the request library also uses 'res' we'll rename the response here
+    geoloc = {};
+    console.log('hitting middle ware', req.query)
+        //Because the request library also uses 'res' we'll rename the response here
     var response = res;
-    if (req.query.hasloc || req.query.lat || req.query.lng) {
-        console.log('hitting .use, geoloc is', geoloc)
-        var geoloc = {};
+    //query the local freegeoip server we are running 
+    //if hasloc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
+    //for now use the less accurate ip based cityName
+    request({
+        url: geoipURL + req.ip
+    }, function(err, res, body) {
+        if (err) console.log(err);
+        console.log('res is..', res)
+        var data = JSON.parse(body);
+        geoloc.cityName = data.region_name;
+        geoloc.lat = data.latitude;
+        geoloc.lng = data.longitude;
+        console.log('ip based geoloc is', geoloc)
+        response.send(geoloc);
+    })
 
-        //query the local freegeoip server we are running 
-        //if hasloc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
-        //for now use the less accurate ip based cityName
-        request({
-            url: geoipURL + req.ip
-        }, function(err, body) {
-            if (err) console.log(err);
-            var data = JSON.parse(body);
-            geoloc.cityName = data.region_name;
-            geoloc.lat = data.latitude;
-            geoloc.lng = data.longitude;
-            response.send(geoloc);
-        })
-        next();
-    }
+    next();
 });
 
 router.get('/', function(req, res) {
     var response = res;
     console.log('hitting get /geolocation', req.query)
 
-     if (req.query.hasloc && req.query.lat && req.query.lng) {
+    if (req.query.hasloc && req.query.lat && req.query.lng) {
         request({
             url: mapqURL,
             qs: {
@@ -74,6 +75,8 @@ router.get('/', function(req, res) {
         })
     } else {
         console.log('Something is missing in the query..', req.query)
+        res.sendStatus(404);
+
     }
 })
 
