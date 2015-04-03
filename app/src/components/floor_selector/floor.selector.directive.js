@@ -31,8 +31,7 @@ function floorSelector(mapManager, floorSelectorService) {
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
-			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
-												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+			scope.currentFloor = findCurrentFloor(scope.floors);
 			floorSelectorService.setCurrentFloor(scope.currentFloor);
 
 			checkCategories(elem);

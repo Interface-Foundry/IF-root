@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -172,6 +172,7 @@ userManager.logout = function() {
 	userManager.adminStatus = false;
 	userManager._user = {};
 	$location.path('/');
+	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
@@ -192,6 +193,7 @@ userManager.login.login = function() { //login based on login form
 		//@IFDEF KEYCHAIN
 		dialogs.showDialog('keychainDialog.html');
 		//@ENDIF
+		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -212,6 +214,14 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
+
 	})
 	.error(function(err) {
 	if (err) {

@@ -1283,7 +1283,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	padding: 88px 0px 76px 0px;
+	padding: 104px 0px 76px 0px;
 }
 
 .message-nav {
@@ -1292,7 +1292,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	margin-top: 48px;
+	margin-top: 64px;
 	color: #FFF;
 	z-index: 10;
 }
@@ -1303,6 +1303,7 @@ text-align: center;
 	height: 48px;
 	right: 0px;
 	top: 40px;
+	top: 56px;
 	border: none;
 	outline: none;
 	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
@@ -2094,7 +2095,7 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
-	padding-top: 88px;
+	padding-top: 104px;
 }
 /* app css stylesheet */
 
@@ -2138,6 +2139,7 @@ body {
 
 .navfix {
 	padding-top: 48px;
+	padding-top: 64px;
 }
 
 #scrim {
@@ -2460,6 +2462,9 @@ transform:translateX(100%);
   transform: translateY(116px);
   /*TODO toolbar height + nav height*/
   -webkit-transform: translateY(116px);
+  transform: translateY(132px);
+  /*TODO toolbar height + nav height*/
+  -webkit-transform: translateY(132px);
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);
@@ -2564,6 +2569,7 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
+  top: 15px;
   z-index: 1010;
 }
 .drawer-icon {
@@ -2746,6 +2752,8 @@ nav.main-nav {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
+  height: 64px;
+  padding-top: 16px;
 }
 .nav-title {
   display: none;
@@ -2809,6 +2817,7 @@ nav ul {
   opacity: 1;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  top: 16px;
 }
 .back-button.ng-hide.ng-hide-remove {
   opacity: 0;
@@ -2861,6 +2870,7 @@ nav ul {
   bottom: 0px;
   z-index: -1;
   left: 8px;
+  height: 64px;
 }
 .home-tab {
   background: center / 32px 32px url('img/icons/nav/home.png') no-repeat;
@@ -2887,6 +2897,7 @@ nav ul {
   bottom: 0px;
   padding-top: 96px;
   z-index: 100;
+  padding-top: 112px;
 }
 .search-bar {
   position: absolute;
@@ -2899,6 +2910,7 @@ nav ul {
   line-height: 48px;
   outline: none;
   border: none;
+  top: 64px;
 }
 .search-btn {
   position: absolute;
@@ -3463,10 +3475,10 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  margin-top: 48px;
+  margin-top: 64px;
 }
 .subnavfix {
-  padding-top: 96px !important;
+  padding-top: 112px !important;
 }
 .subnav-header {
   display: block;
@@ -4487,7 +4499,7 @@ li.alert {
   background-color: white;
   border: none;
   border-radius: 28px;
-  bottom: 80px;
+  bottom: 140px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2), 0px -1px 0px rgba(0, 0, 0, 0.1);
   color: #fff;
   font-size: 18px;
@@ -4511,12 +4523,12 @@ li.alert {
   border: none;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  bottom: 114px;
+  bottom: 174px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2);
   font-size: 18px;
   font-weight: normal;
   line-height: 42px;
-  /*max-height: 80%;*/
+  max-height: 30%;
   min-height: 0px;
   opacity: 1;
   overflow-y: scroll;
@@ -4530,24 +4542,14 @@ li.alert {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
-@media only screen and (min-height: 0px) {
+@media only screen and (min-height: 550px) {
   #floor-nums {
-    max-height: 200px;
+    max-height: 40%;
   }
 }
-@media only screen and (min-height: 567px) {
+@media only screen and (min-height: 680px) {
   #floor-nums {
-    max-height: 285px;
-  }
-}
-@media only screen and (min-height: 666px) {
-  #floor-nums {
-    max-height: 380px;
-  }
-}
-@media only screen and (min-height: 735px) {
-  #floor-nums {
-    max-height: 450px;
+    max-height: 50%;
   }
 }
 #floor-nums.ng-hide-add.ng-hide-add-active,
@@ -4603,7 +4605,8 @@ li.alert {
   background: -o-linear-gradient(right, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
   background: linear-gradient(to right, #ffffff 0%, #f0f0f0 50%, #ffffff 100%);
 }
-.aperture-off #current-floor {
+.aperture-off #current-floor,
+.aperture-off .userLocation {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
 }
@@ -4611,7 +4614,8 @@ li.alert {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
 }
-.aperture-third #current-floor {
+.aperture-third #current-floor,
+.aperture-third .userLocation {
   -webkit-transform: translate3D(200%, 0px, 0);
   transform: translate3D(200%, 0, 0);
 }
@@ -4638,6 +4642,21 @@ li.alert {
 }
 .aperture-third .floor-indicator {
   right: -44px;
+}
+/*USER LOCATION*/
+.userLocation {
+  background: #ffffff url('img/icons/ic_my_location_grey600_24dp.png') center center / 22px 22px no-repeat;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  position: absolute;
+  right: 14px;
+  bottom: 80px;
+  z-index: 20;
+  cursor: pointer;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2);
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
 /*want this*/
 .wtgt {
@@ -4731,6 +4750,10 @@ li.alert {
 .wtgt p {
   font-size: .9em;
 }
+.wtgt .verifyUpload {
+  width: 100%;
+  height: 100%;
+}
 .marble-page-footer.tag {
   background: #eeeeee;
   text-align: center;
@@ -4740,6 +4763,7 @@ li.alert {
   top: 4px;
   font-size: 0.9em;
 }
+/*UTILITIES*/
 .u-pointer {
   cursor: pointer;
 }
@@ -4748,6 +4772,10 @@ li.alert {
   top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.u-100XY {
+  width: 100%;
+  height: 100%;
 }
 /* CATEGORY WIDGET */
 .category-list-shadow {
@@ -8723,8 +8751,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('/fonts/glyphicons-halflings-regular.eot');
-  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('fonts/glyphicons-halflings-regular.eot');
+  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;

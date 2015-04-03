@@ -57,18 +57,19 @@ function floorSelectorService() {
 	}
 
 	function getFloors(localMapArray) {
+
 		var sorted = _.chain(localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
 			})
-			.groupBy(function(f) {
-				return f.floor_num;
+			.groupBy('floor_num')
+			.toArray()
+			.sortBy(function(arr) {
+				return arr[0].floor_num;
 			})
-			.sortBy(function(f) {
-				return -f.floor_num;
-			})
+			.reverse()
 			.value()
-			.reverse();
+
 		angular.copy(sorted, floors);
 		return floors;
 	}

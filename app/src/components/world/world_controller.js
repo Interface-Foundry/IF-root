@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -32,43 +32,51 @@ $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
 
-$scope.uploadWTGT = function($files, state) {
-	if (userManager.loginStatus) {
-		$scope.wtgt.building[state] = true;
-
-		var file = $files[0];
-
-		// get time
-		var time = new Date();
-
-		// get hashtag
-		var hashtag = null;
-		hashtag = $scope.wtgt.hashtags[state];
-
-		var data = {
-			world_id: $scope.world._id,
-			worldID: $scope.world.id,
-			hashtag: hashtag,
-			userTime: time,
-			userLat: null,
-			userLon: null,
-			type: 'retail_campaign'
-		};
-
-		// get location
-		geoService.getLocation().then(function(coords) {
-			// console.log('coords: ', coords);
-			data.userLat = coords.lat;
-			data.userLon = coords.lng;
-			uploadPicture(file, state, data);
-		}, function(err) {
-			uploadPicture(file, state, data);
-		});
-	} else { // not logged in
-		dialogs.showDialog('authDialog.html');
-		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+$scope.verifyUpload = function(event, state) {
+	// stops user from uploading wtgt photo if they aren't logged in
+	if (!userManager.loginStatus) {
+		event.stopPropagation();
+		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
+		$timeout(function() {
+			dialogs.showDialog('authDialog.html');
+			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+		}, 1500);
+		
 	}
-	
+}
+
+$scope.uploadWTGT = function($files, state) {
+	$scope.wtgt.building[state] = true;
+
+	var file = $files[0];
+
+	// get time
+	var time = new Date();
+
+	// get hashtag
+	var hashtag = null;
+	hashtag = $scope.wtgt.hashtags[state];
+
+	var data = {
+		world_id: $scope.world._id,
+		worldID: $scope.world.id,
+		hashtag: hashtag,
+		userTime: time,
+		userLat: null,
+		userLon: null,
+		type: 'retail_campaign'
+	};
+
+	// get location
+	geoService.getLocation().then(function(coords) {
+		// console.log('coords: ', coords);
+		data.userLat = coords.lat;
+		data.userLon = coords.lng;
+		uploadPicture(file, state, data);
+	}, function(err) {
+		uploadPicture(file, state, data);
+	});
+
 }
 
 function uploadPicture(file, state, data) {
@@ -92,13 +100,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
-		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-		 			geoService.trackStart();
-		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-		 			geoService.trackStop();
-		 		}
-		 	});	
 		 }
 
 		 //local storage

@@ -1,6 +1,7 @@
 app.factory('contest', ['$http', 'localStore', function($http, localStore) {
-	
-	var isContest = false;
+	// manages want this got this contest
+
+	var isContest = false; // determines whether or not a process involves the wtgt contest
 	var hashtag;
 	var id;
 	var startTime;
@@ -20,7 +21,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 
 	function login(endTime) {
 		// call if user logs in after login prompt on photo upload (wtgt)
-		// tracking login by clicking "log in" or "create account" on auth dialog
+		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {

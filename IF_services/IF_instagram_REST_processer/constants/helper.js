@@ -162,7 +162,7 @@ var saveImage = function(imageObject) {
         },
         img_url: images[strings.INSTAGRAM_IMAGE_RESOLUTION_LOW],
         original_url: images[strings.INSTAGRAM_IMAGE_RESOLUTION_STANDARD],
-        local_path:  imageObjectLocalPaths, //aws link to image e.g. aws.bucketname.id
+        local_path:  imageObjectLocalPaths, //aws link to image e.g. aws.bucketname.id
         text: captionText,
         tags: imageObject[strings.IMAGE_OBJECT_KEY_TAGS],
         created: new Date()

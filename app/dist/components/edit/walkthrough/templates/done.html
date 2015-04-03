@@ -7,7 +7,10 @@
 <br>
 <div>
 	<ul class="done-list">
-		<a target="_blank" ng-href="/w/{{world.id}}"><button class="btn btn-primary center-block">View your new Bubble now!</button></a>
+		<button class="btn btn-primary center-block"
+			ng-click="location.path('/w/{{world.id}}')">
+			View your new Bubble now!
+		</button>
 	</ul>
 </div>
 
