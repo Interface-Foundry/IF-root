@@ -5,6 +5,12 @@ landmarkSchema = require('../IF_schemas/landmark_schema.js');
 var route = function(userCoord0, userCoord1, userTime, res){
 //console.log(userCoord0, userCoord1, userTime)
 
+// db.landmarkSchema.aggregate([
+//   {$match: {
+//       $text: {$search: "great test text"} ,
+//       loc: {$geoWithin: {$centerSphere: [[ 14.3, 48.3], 5/6731]}}
+//   }}])
+
   landmarkSchema.aggregate(
     [{ "$geoNear": {
       "near": {

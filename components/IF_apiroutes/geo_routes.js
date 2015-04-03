@@ -8,36 +8,37 @@ var express = require('express'),
 var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
     mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw',
-    geoipURL = '192.168.1.15:8080/', //local freegeoip server, will change based on current IP
+    geoipURL = 'http://127.0.0.1:8080/json/', //local freegeoip server, will change based on current IP
     geoloc = {};
 
 router.use(function(req, res, next) {
     geoloc = {};
-    console.log('hitting middle ware', req.query)
+    console.log('hitting middle ware, req.query is.. ', req.query, 'req.ip is.. ',req.ip)
         //Because the request library also uses 'res' we'll rename the response here
     var response = res;
     //query the local freegeoip server we are running 
     //if hasloc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
     //for now use the less accurate ip based cityName
     request({
-        url: geoipURL + req.ip
+        url: geoipURL + '192.30.252.128'
     }, function(err, res, body) {
         if (err) console.log(err);
-        console.log('res is..', res)
+        console.log('body is..', body)
         var data = JSON.parse(body);
         geoloc.cityName = data.region_name;
         geoloc.lat = data.latitude;
         geoloc.lng = data.longitude;
+        req.geoloc = geoloc;
         console.log('ip based geoloc is', geoloc)
-        response.send(geoloc);
+       return next();
     })
 
-    next();
+    
 });
 
 router.get('/', function(req, res) {
     var response = res;
-    console.log('hitting get /geolocation', req.query)
+    console.log('hitting get /, req.query is.. ', req.query, 'req.geoloc is.. ', req.geoloc)
 
     if (req.query.hasloc && req.query.lat && req.query.lng) {
         request({
@@ -62,21 +63,23 @@ router.get('/', function(req, res) {
                 }, function(err, body) {
                     if (err) console.log(err);
                     var data = JSON.parse(body);
-                    geoloc.cityName = data.features[1].text;
-                    console.log('Mapbox based result geoloc is..', geoloc)
-                    response.send(geoloc);
+                    req.geoloc.cityName = data.features[1].text;
+                    console.log('Mapbox based result geoloc is..', req.geoloc)
+                    response.send(req.geoloc);
                 })
             } else {
                 var data = JSON.parse(body);
-                geoloc.cityName = data.address.city;
+                req.geoloc.cityName = data.address.city;
                 console.log('Mapquest based result geoloc is..', geoloc)
-                response.send(geoloc);
+                response.send(req.geoloc);
             }
         })
-    } else {
+    } else if (!req.query.hasloc) {
+        console.log('If user id not provide geoloc coordinates.. ip-based req.geoloc is..', req.geoloc)
+         response.send(req.geoloc);
+     } else {
         console.log('Something is missing in the query..', req.query)
         res.sendStatus(404);
-
     }
 })
 
