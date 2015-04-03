@@ -64,7 +64,6 @@ $routeProvider.
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).

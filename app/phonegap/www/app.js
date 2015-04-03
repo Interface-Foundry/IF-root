@@ -4876,7 +4876,6 @@ $routeProvider.
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -23021,33 +23020,59 @@ $scope.navService = navService;
 $scope.dialog = dialogs;
 
 // ---------------- SPLASH PAGES
-userManager.getUser().then(function(success) {
-	createShowSplash(true);
-}, function(err) {
-	createShowSplash(false);
-});
+if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+	createShowSplash('confirmThanks');
 
-function createShowSplash(user) {
+	// get token from url
+	var token = $location.path().slice(15);
+
+	$http.post('/email/request_confirm/' + token).
+		success(function(data) {
+			$scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+		}).
+		error(function(err) {
+			$scope.confirmThanksText = 'There was a problem confirming your email';
+		});
+
+	// redirect to home page
+	$location.path('/');
+} else {
+	userManager.getUser().then(function(success) {
+		createShowSplash(true);
+	}, function(err) {
+		createShowSplash(false);
+	});
+}
+
+
+function createShowSplash(condition) {
 	// $scope.show controls the logic for the splash pages
 	
 	$scope.show = {
 		/**
 		 * splash: for general splash
 		 * confirm: for confirm dialog
+		 * confirmThanks: for confirmThanks dialog
 		 * close: for close button
 		 * signin: for sign in dialog
 		 * register: for register dialog
 		 */
 	};
 
-	if (user) { // logged in
+	if (condition === 'confirmThanks') {
+		$scope.show.splash = true;
+		$scope.show.confirm = false;
+		$scope.show.confirmThanks = true;
+	} else if (condition) { // logged in
 		$scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
 		$scope.show.confirm = userManager.loginStatus && 
 			!userManager._user.local.confirmedEmail &&
-			!userManager._user.facebook; // don't show confirm dialog for fb authenticated users 
+			!userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+		$scope.show.confirmThanks = false; 
 	} else { // not logged in
 		$scope.show.splash = true;
 		$scope.show.confirm = false;
+		$scope.show.confirmThanks = false;
 	}
 
 	$scope.show.signin = false;
@@ -23603,29 +23628,6 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
-
-
-app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  $http.post('/email/request_confirm/'+$routeParams.token).
-    success(function(data){
-        console.log('email confirmed');
-        $scope.alerts.addAlert('success','Thanks for confirming your email');
-    }).
-    error(function(err){
-      if (err){
-        $scope.alerts.addAlert('danger',err);
-      }
-    });
-
-
-
-}]);
-
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});

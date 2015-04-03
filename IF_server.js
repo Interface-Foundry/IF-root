@@ -260,7 +260,9 @@ app.post('/email/request_confirm/:token', function(req, res) {
 
     User.findOne({ 'local.confirmEmailToken': req.params.token, 'local.confirmEmailExpires': { $gt: Date.now() } }, function(err, user) {
       if (!user) {
-        res.send('Email confirm token is invalid or has expired.');
+        res.send({
+          err: 'Email confirm token is invalid or has expired.'
+        });
       }
 
       else {
