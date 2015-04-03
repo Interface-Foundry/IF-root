@@ -41,6 +41,8 @@ router.get('/', function(req, res) {
     console.log('hitting get /, req.query is.. ', req.query, 'req.geoloc is.. ', req.geoloc)
 
     if (req.query.hasloc && req.query.lat && req.query.lng) {
+         req.geoloc.lat = req.query.lat;
+         req.geoloc.lng = req.query.lng;
         request({
             url: mapqURL,
             qs: {
@@ -64,13 +66,19 @@ router.get('/', function(req, res) {
                     if (err) console.log(err);
                     var data = JSON.parse(body);
                     req.geoloc.cityName = data.features[1].text;
+
                     console.log('Mapbox based result geoloc is..', req.geoloc)
                     response.send(req.geoloc);
                 })
             } else {
                 var data = JSON.parse(body);
+                if (data.address.city) {
                 req.geoloc.cityName = data.address.city;
-                console.log('Mapquest based result geoloc is..', geoloc)
+            }
+              if (data.address.village) {
+                req.geoloc.cityName = data.address.village;
+            }
+                console.log('Mapquest based result geoloc is..', req.geoloc)
                 response.send(req.geoloc);
             }
         })
