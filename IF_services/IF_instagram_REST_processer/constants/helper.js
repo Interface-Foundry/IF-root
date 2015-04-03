@@ -74,7 +74,8 @@ var downloadImage = function(imageURL) {
                                     Key: fileName
                                 };
                                 s3.headObject(params, function(err, metadata) {
-                                    if (err && err.code === 'Not Found') {
+                                    if (err && err.code == 'NotFound') {
+                                       console.log('Not found! Saving!')
                                         s3.putObject({
                                             Bucket: awsBucket,
                                             Key: fileName,
