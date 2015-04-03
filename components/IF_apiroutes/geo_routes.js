@@ -25,10 +25,13 @@ router.use(function(req, res, next) {
         if (err) console.log(err);
         console.log('body is..', body)
         var data = JSON.parse(body);
-        geoloc.cityName = data.region_name;
-        geoloc.lat = data.latitude;
-        geoloc.lng = data.longitude;
+        if (!data.region_name) {
+            req.geoloc.cityName = 'My Location' 
+        }
         req.geoloc = geoloc;
+        req.geoloc.lat = data.latitude;
+        req.geoloc.lng = data.longitude;
+        
         console.log('ip based geoloc is', geoloc)
        return next();
     })
