@@ -30,7 +30,7 @@ function call(num) {
             setTimeout(callback, 50);
         },
         function(err) {
-            console.log('Requested a total of ',process.argv[2],' times.')
+            console.log('Finished!')
         }
     );
 }

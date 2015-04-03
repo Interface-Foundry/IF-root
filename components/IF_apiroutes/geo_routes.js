@@ -5,23 +5,24 @@ var express = require('express'),
     request = require('request'),
     _ = require('underscore');
 
+var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
+    mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
+    mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
+
+
+
 router.use(function(req, res, next) {
+
     if (req.query.hasloc || req.query.lat || req.query.lng) {
-        next();
-    }
-});
+        console.log('hitting .use, geoloc is', geoloc)
+        var geoloc = {};
 
-router.get('/', function(req, res) {
-    //Because the request library also uses 'res' we'll rename the response here
-    var response = res;
-
-    var geoloc = {};
-
-    if (!req.query.hasloc) {
-        //query the local freegeoip server running
-        var geoipurl = 'localhost:8080/' + req.ip;
+        //query the local freegeoip server we are running 
+        //if hasloc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
+        //for now use the less accurate ip based cityName
+        var geoipURL = 'localhost:8080/' + req.ip;
         request({
-            url: geoipurl
+            url: geoipURL
         }, function(err, body) {
             if (err) console.log(err);
             var data = JSON.parse(body);
@@ -30,27 +31,65 @@ router.get('/', function(req, res) {
             geoloc.lng = data.longitude;
             response.send(geoloc);
         })
+        next();
+    }
+});
+
+router.get('/', function(req, res) {
+    //Because the request library also uses 'res' we'll rename the response here
+    var response = res;
+
+    if (!req.query.hasloc) {
+        console.log('hitting get /, geo loc is: ', geoloc)
+            //query the local freegeoip server we are running
+        var geoipURL = 'localhost:8080/' + req.ip;
+        request({
+            url: geoipURL
+        }, function(err, body) {
+            if (err) console.log(err);
+            var data = JSON.parse(body);
+            geoloc.cityName = data.region_name;
+            geoloc.lat = data.latitude;
+            geoloc.lng = data.longitude;
+            console.log('ip based result geoloc is..', geoloc)
+            response.send(geoloc);
+        })
 
     } else if (req.query.lat && req.query.lng) {
-        //supposedely no limit no throttle...
-        var mapqurl = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json'
-
         request({
-            url: mapqurl,
+            url: mapqURL,
             qs: {
                 lat: req.query.lat,
                 lon: req.query.lng
             }
         }, function(err, res, body) {
-            if (err) console.log(err);
-            var data = JSON.parse(body);
-            geoloc.cityName = data.address.city;
-            geoloc.lat = data.lat;
-            geoloc.lng = data.lon;
-            response.send(geoloc);
+
+            // 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/{lon},{lat}.json?access_token=<your access token>'
+
+            //If error res is 303 try mapbox instead
+            if (err || res.statusCode == 303) {
+                if (err) console.log(err);
+                console.log('Mapquest didnt work. Querying Mapbox instead..', res.statusCode);
+                request({
+                    url: mapboxURL + req.query.lng + ',' + req.query.lat + '.json',
+                    qs: {
+                        access_token: mapboxKey
+                    }
+                }, function(err, body) {
+                    if (err) console.log(err);
+                    var data = JSON.parse(body);
+                    geoloc.cityName = data.features[1].text;
+                    console.log('Mapbox based result geoloc is..', geoloc)
+                    response.send(geoloc);
+                })
+            } else {
+                var data = JSON.parse(body);
+                geoloc.cityName = data.address.city;
+                console.log('Mapquest based result geoloc is..', geoloc)
+                response.send(geoloc);
+            }
         })
     }
-
 })
 
 module.exports = router;
