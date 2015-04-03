@@ -4862,12 +4862,12 @@ $routeProvider.
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
       when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-      
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -18772,7 +18772,14 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = false;	
+		userManager.signup.error = false;		
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
 	})
 	.error(function(err) {
 	if (err) {
@@ -23468,6 +23475,27 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 
 }]); 
 
+
+app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  $http.post('/email/request_confirm/'+$routeParams.token).
+    success(function(data){
+        console.log('email confirmed');
+        $scope.alerts.addAlert('success','Thanks for confirming your email');
+    }).
+    error(function(err){
+      if (err){
+        $scope.alerts.addAlert('danger',err);
+      }
+    });
+
+
+
+}]);
 
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
