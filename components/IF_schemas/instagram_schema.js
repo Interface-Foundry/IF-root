@@ -15,7 +15,7 @@ var instagramSchema = mongoose.Schema({
   img_url: String, // Assuming this is the low resolution
   original_url: String, // Assuming this is the original size
   local_path: [String], // There could be multiple images being saved
-  text: { type: String, index: true },
+  text: { type: String },
   tags: [{ type: String, index: true }],
   created: {
     type: Date,
