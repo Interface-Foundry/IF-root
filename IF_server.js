@@ -256,7 +256,7 @@ app.post('/email/confirm', function (req, res, next) {
 });
 
 
-app.post('/email/confirm/:token', function(req, res) {
+app.post('/email/request_confirm/:token', function(req, res) {
 
     User.findOne({ 'local.confirmEmailToken': req.params.token, 'local.confirmEmailExpires': { $gt: Date.now() } }, function(err, user) {
       if (!user) {
@@ -269,7 +269,7 @@ app.post('/email/confirm/:token', function(req, res) {
         user.local.confirmEmailExpires = undefined;
 
         user.save(function(err) {
-          res.send('Email address confirmed');
+          res.status(200).send('Email address confirmed');
         });      
       }
     });

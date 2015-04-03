@@ -208,6 +208,14 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
+
 	})
 	.error(function(err) {
 	if (err) {
