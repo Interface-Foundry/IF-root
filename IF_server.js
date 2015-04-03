@@ -395,7 +395,7 @@ app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes')
 //--- INSTAGRAM / TWITTER ROUTER ----//
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
 //--- IP GEOLOCATION AND NAME ROUTER ----//
-app.use('/api/geolocation', require('./components/IF_apiroutes/ipgeo_routes'));
+app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {

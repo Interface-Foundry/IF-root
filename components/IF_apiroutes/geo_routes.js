@@ -12,20 +12,20 @@ router.use(function(req, res, next) {
 });
 
 router.get('/', function(req, res) {
-    //because the request library also uses 'res'...
+    //Because the request library also uses 'res' we'll rename the response here
     var response = res;
 
     var geoloc = {};
 
     if (!req.query.hasloc) {
-        //Freegeoip allows up to 10,000 queries per hour by default. 
+        //query the local freegeoip server running
         var geoipurl = 'localhost:8080/' + req.ip;
         request({
             url: geoipurl
         }, function(err, body) {
             if (err) console.log(err);
             var data = JSON.parse(body);
-            geoloc.name = data.region_name;
+            geoloc.cityName = data.region_name;
             geoloc.lat = data.latitude;
             geoloc.lng = data.longitude;
             response.send(geoloc);
@@ -44,7 +44,9 @@ router.get('/', function(req, res) {
         }, function(err, res, body) {
             if (err) console.log(err);
             var data = JSON.parse(body);
-            geoloc.name = data.address.city;
+            geoloc.cityName = data.address.city;
+            geoloc.lat = data.lat;
+            geoloc.lng = data.lon;
             response.send(geoloc);
         })
     }
