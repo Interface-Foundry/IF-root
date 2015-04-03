@@ -17,22 +17,27 @@
   overflow: hidden;
 }
 
+img.announcement-chevron {
+  cursor: pointer;
+  height: 48px;
+  position: absolute;
+  right: 0;
+
+  @media only screen and (min-width: 768px) {
+    right: 22%;
+  }
+  
+}
+
 .announcements-card {
   height: 100%;
   -webkit-transition:all cubic-bezier(0,1,.56,.96) 0.4s;
   transition:all cubic-bezier(0,1,.56,.96) 0.4s;
 
   h3 {
+    height: 26px;
     margin-top: 10px;
     text-align: center;
-
-    img.announcement-chevron {
-      cursor: pointer;
-      height: 48px;
-      float: right;
-      margin-top: -10px;
-    }
-
   }
 
   p.announcement-body {
@@ -40,7 +45,7 @@
     height: 40px;
     overflow: hidden;
     margin: 0;
-    padding: 0 10px;
+    padding: 0 30px;
     text-overflow: ellipsis;
   }
 
@@ -49,7 +54,7 @@
   p.announcement-link a {
     color: rgb(82, 185, 242);
     margin-top: 2px;
-    padding: 0 10px;
+    padding: 0 30px;
 
     &:hover {
       color: rgb(82, 185, 242);

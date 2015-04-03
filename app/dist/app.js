@@ -20590,9 +20590,9 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 app.directive('announcements', announcements);
 
-announcements.$inject = ['$animate', 'announcementsService'];
+announcements.$inject = ['$animate', '$timeout', 'announcementsService'];
 
-function announcements($animate, announcementsService) {
+function announcements($animate, $timeout, announcementsService) {
 	return {
 		restrict: 'E',
 		scope: {},
@@ -20622,6 +20622,7 @@ function announcements($animate, announcementsService) {
 		};
 		scope.$animate = $animate;
 		scope.announcements = [];
+		scope.chevron = angular.element('.announcement-chevron');
 		scope.currentAnnouncement = {};
 		scope.end = false;
 		scope.index = 0;
@@ -20656,8 +20657,15 @@ function announcements($animate, announcementsService) {
 		}
 
 		function nextCard() {
+			// console.time('animate')
+			scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
+			// console.timeEnd('animate')
+			scope.chevron.animate({opacity: 0}, 350);
 			if (scope.index < scope.announcements.length - 1) {
 				scope.index++;
+				$timeout(function() {
+					scope.chevron.animate({opacity: 1}, 400);
+				}, 650);
 			}
 		}
 

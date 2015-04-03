@@ -3323,33 +3323,39 @@ nav ul {
   max-width: 600px;
   overflow: hidden;
 }
+img.announcement-chevron {
+  cursor: pointer;
+  height: 48px;
+  position: absolute;
+  right: 0;
+}
+@media only screen and (min-width: 768px) {
+  img.announcement-chevron {
+    right: 22%;
+  }
+}
 .announcements-card {
   height: 100%;
   -webkit-transition: all cubic-bezier(0, 1, 0.56, 0.96) 0.4s;
   transition: all cubic-bezier(0, 1, 0.56, 0.96) 0.4s;
 }
 .announcements-card h3 {
+  height: 26px;
   margin-top: 10px;
   text-align: center;
-}
-.announcements-card h3 img.announcement-chevron {
-  cursor: pointer;
-  height: 48px;
-  float: right;
-  margin-top: -10px;
 }
 .announcements-card p.announcement-body {
   clear: right;
   height: 40px;
   overflow: hidden;
   margin: 0;
-  padding: 0 10px;
+  padding: 0 30px;
   text-overflow: ellipsis;
 }
 .announcements-card p.announcement-link a {
   color: #52b9f2;
   margin-top: 2px;
-  padding: 0 10px;
+  padding: 0 30px;
 }
 .announcements-card p.announcement-link a:hover {
   color: #52b9f2;
