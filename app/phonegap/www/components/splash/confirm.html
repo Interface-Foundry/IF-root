@@ -9,11 +9,11 @@
 			<input type="text" 
 				class="inputEdit u-textAlignCenter u-relative"
 				style="left: -12px; color: rgb(100, 100, 100)" 
-				value="{{ userManager._user.local.email }}" 
 				size="24"
+				ng-model="email.newEmail"
 				click-to-edit>
 		</p>
-		<button class="btnMain btnMain--blue u-centerX">RESEND EMAIL</button>
+		<button class="btnMain btnMain--blue u-centerX" ng-click="resendEmail()">RESEND EMAIL</button>
 	</div>
 	<div class="fullPage-close" ng-click="setShowSplash('splash', false)"></div>
 </div>
