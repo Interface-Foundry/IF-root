@@ -5,7 +5,9 @@
 			 ng-swipe-left="nextCard()">
 		<h3>{{announcement.headline}}
 			<span ng-if="!(index === announcements.length - 1)"
-						ng-click="nextCard()">&gt;</span>
+						ng-click="nextCard()">
+				<img src="img/icons/ic_chevron_right_blue_48dp.png">
+			</span>
 		</h3>
 		<p>{{announcement.body}}</p>
 		<p><a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a></p>

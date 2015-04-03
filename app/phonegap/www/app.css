@@ -3326,8 +3326,8 @@ nav ul {
 }
 .announcements-card {
   height: 100%;
-  -webkit-transition: all ease-out 0.4s;
-  transition: all ease-out 0.4s;
+  -webkit-transition: all cubic-bezier(0.000, 0.635, 0.580, 1.000) 0.4s;
+  transition: all cubic-bezier(0.000, 0.635, 0.580, 1.000) 0.4s;
 }
 .announcements-card h3 {
   margin-top: 10px;
@@ -3353,7 +3353,7 @@ nav ul {
   -webkit-transform: translate3d(-110%, 0, 0);
   transform: translate3d(-110%, 0, 0);
 }
-.announcements-card.ng-hide-remove {
+.announcements-card.ng-hide-remove-active {
   -webkit-transform: translate3d(110%, 0, 0);
   transform: translate3d(110%, 0, 0);
 }
