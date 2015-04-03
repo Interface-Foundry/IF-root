@@ -4880,26 +4880,28 @@ var checkAdminStatus = function(userManager, $location) {
     // Define all the routes
     //================================================
 $routeProvider.
-    when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-    when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-    when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-    when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-    
-    when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
-    when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-    when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
-    when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-    when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
-    when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-    when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-    
-    when('/profile', {redirectTo:'/profile/worlds'}).
-    when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-    when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-    when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
-    when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
-    when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
+      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
+      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
+
+      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+      
+      when('/profile', {redirectTo:'/profile/worlds'}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
+      when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
+      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
@@ -16886,7 +16888,9 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
-   			var alertClass;
+   			
+            var alertClass;
+
    			switch (alertType) {
 	   			case 'success':
 	   				alertClass = 'alert-success';
@@ -16901,14 +16905,19 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 	   				alertClass = 'alert-danger';
 	   				break;
    			}
-   			var len = alerts.list.push(
- {class: alertClass, msg: alertMsg, id: alertMsg});
+
+   			var len = alerts.list.push({
+               class: alertClass, 
+               msg: alertMsg, 
+               id: alertMsg
+            });
+
    			if (timeout) {
-   			$timeout(function () {
-	   			alerts.list.splice(len-1, 1);
-   			}, 1500);
-   			
+   			   $timeout(function () {
+	   			  alerts.list.splice(len-1, 1);
+   			   }, 1500);
    			}
+
    		}
 
    		alerts.closeAlert = function(index) {
@@ -16920,6 +16929,7 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}
 
    		return alerts;
+         
    }])
 'use strict';
 
@@ -16977,8 +16987,9 @@ app
 			}
 }]);
 app.factory('contest', ['$http', 'localStore', function($http, localStore) {
-	
-	var isContest = false;
+	// manages want this got this contest
+
+	var isContest = false; // determines whether or not a process involves the wtgt contest
 	var hashtag;
 	var id;
 	var startTime;
@@ -16998,7 +17009,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 
 	function login(endTime) {
 		// call if user logs in after login prompt on photo upload (wtgt)
-		// tracking login by clicking "log in" or "create account" on auth dialog
+		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
@@ -17085,162 +17096,191 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager', 'mapManager',
-    	function($q, alertManager, mapManager) {
-//abstract & promisify geolocation, queue requests.
-var geoService = {
-	location: {
-		//lat,
-		//lng
-		//timestamp  
-	},
-	inProgress: false,
-	requestQueue: [] 
-}	
+    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
+    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
+			//abstract & promisify geolocation, queue requests.
+			var geoService = {
+				location: {
+					//lat,
+					//lng
+					//timestamp  
+				},
+				inProgress: false,
+				requestQueue: [],
+				tracking: false // bool indicating whether or not geolocation is being tracked
+			};	
 
-var marker = [];
-var watchID;
- 
-geoService.getLocation = function(maxAge) {
-	var deferred = $q.defer();
-	
-	geoService.requestQueue.push(deferred);
-
-	if (geoService.inProgress) {
-		// inprog
-	} else if (navigator.geolocation) {
-		geoService.inProgress = true;
-		console.log('geo: using navigator');
-		
-		function geolocationSuccess(position) {
-			geoService.location.lat = position.coords.latitude;
-			geoService.location.lng = position.coords.longitude;
-			geoService.location.timestamp = Date.now();
-			geoService.resolveQueue({
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			})
-		}
-
-		function geolocationError(error) {
-			geoService.resolveQueue({err: error.code});
-		}
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError);
-
-	} else {
-		//browser update message
-		alerts.addAlert('warning', 'Your browser does not support location services.')
-	}
-	
-	return deferred.promise;
-}
-
-geoService.resolveQueue = function (position) {
-	while (geoService.requestQueue.length > 0) {
-		var request = geoService.requestQueue.pop();
-		if (position.err) {
-			request.reject(position.err);
-		} else {
-			request.resolve(position);
-		}
-	}
-	geoService.inProgress = false;
-}
-
-geoService.trackStart = function() {
-	if (navigator.geolocation && window.DeviceOrientationEvent) {
-
-		// marker
-		mapManager.addMarker('track', {
-			lat: 0,
-			lng: 0,
-			icon: {
-				iconUrl: 'img/marker/user-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 43], 
-				iconAnchor: [17, 43],
-				popupAnchor:[0, -40]
-			},
-			alt: 'track' // used for tracking marker DOM element
-		});
-		mapManager.bringMarkerToFront('track');
-
-		// movement XY
-		watchID = navigator.geolocation.watchPosition(function(position) {
+			var marker = [];
 			var pos = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
+				lat: 0,
+				lng: 0
 			};
-			mapManager.moveMarker('track', pos);
-		}, function() {
-			// console.log('location error');
-		}, {
-			// enableHighAccuracy: true
-		});
+			var watchID;
+			$rootScope.aperture = apertureService;
 
-		// movement rotation
-		window.addEventListener('deviceorientation', rotateMarker);
+			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
+				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
+					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+						geoService.trackStart();
+					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+						geoService.trackStop();
+					}
+				}
+			});	
+			 
+			geoService.getLocation = function(maxAge) {
+				var deferred = $q.defer();
+				
+				geoService.requestQueue.push(deferred);
 
-	}
-};
+				if (geoService.inProgress) {
+					// inprog
+				} else if (navigator.geolocation) {
+					geoService.inProgress = true;
+					console.log('geo: using navigator');
+					
+					function geolocationSuccess(position) {
+						geoService.location.lat = position.coords.latitude;
+						geoService.location.lng = position.coords.longitude;
+						geoService.location.timestamp = Date.now();
+						geoService.resolveQueue({
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						})
+					}
 
-geoService.trackStop = function() {
+					function geolocationError(error) {
+						geoService.resolveQueue({err: error.code});
+					}
+					
+					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+						geolocationError);
 
-	// movement: clear watch
-	if (watchID) {
-		navigator.geolocation.clearWatch(watchID);
-		watchID = undefined;
-	}
+				} else {
+					//browser update message
+					alerts.addAlert('warning', 'Your browser does not support location services.')
+				}
+				
+				return deferred.promise;
+			}
 
-	// rotation: remove event listener
-	window.removeEventListener('deviceorientation', rotateMarker);
+			geoService.resolveQueue = function (position) {
+				while (geoService.requestQueue.length > 0) {
+					var request = geoService.requestQueue.pop();
+					if (position.err) {
+						request.reject(position.err);
+					} else {
+						request.resolve(position);
+					}
+				}
+				geoService.inProgress = false;
+			}
 
-	// remove marker
-	mapManager.removeMarker('track');
-	marker = [];
+			geoService.trackStart = function() {
+				// used to start showing user's location on map
 
-};
+				// if we are already tracking, stop current session before starting new one
+				if (geoService.tracking) {
+					geoService.trackStop();
+				}
+				if (navigator.geolocation && window.DeviceOrientationEvent) {
 
-function rotateMarker(data) {
-	// make sure new marker is loaded in DOM
-	if (marker.length > 0) {
-		var alpha = data.webkitCompassHeading || data.alpha;
-		var matrix = marker.css('transform');
+					// marker
+					mapManager.addMarker('track', {
+						lat: pos.lat,
+						lng: pos.lng,
+						icon: {
+							iconUrl: 'img/marker/user-marker-50.png',
+							shadowUrl: '',
+							iconSize: [35, 43], 
+							iconAnchor: [17, 43],
+							popupAnchor:[0, -40]
+						},
+						alt: 'track' // used for tracking marker DOM element
+					});
+					mapManager.bringMarkerToFront('track');
 
-		// account for the fact that marker is initially facing south
-		var adjust = 180 + Math.round(alpha);
+					// movement XY
+					watchID = navigator.geolocation.watchPosition(function(position) {
+						pos = {
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						};
+						mapManager.moveMarker('track', pos);
+					}, function() {
+						// console.log('location error');
+					}, {
+						// enableHighAccuracy: true
+					});
 
-		marker.css('transform', getNewTransformMatrix(matrix, adjust));
-	} else {
-		marker = $('img[alt="track"]');
-	}
-}
+					// movement rotation
+					window.addEventListener('deviceorientation', rotateMarker);
+				}
+				geoService.tracking = true;
+				
+			};
 
-function getNewTransformMatrix(matrix, angle) {
-	// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
-	var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
-	
-	if (newMatrix.length !== 6) { // not 2D matrix
-		return matrix;
-	}
-	
-	// get translation and don't change
-	var tx = newMatrix[4];
-	var ty = newMatrix[5];
-	
-	// set new values for rotation matrix
-	var a = Math.cos(angle * Math.PI / 180);
-	var b = -Math.sin(angle * Math.PI / 180);
-	var c = -b;
-	var d = a;
-	
-	return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
-}
+			geoService.trackStop = function() {
+				// used to stop showing user's location on map
 
-return geoService;
+				if (geoService.tracking) { // only stop tracking if already tracking
+					// movement: clear watch
+					if (watchID) {
+						navigator.geolocation.clearWatch(watchID);
+						watchID = undefined;
+					}
+
+					// rotation: remove event listener
+					window.removeEventListener('deviceorientation', rotateMarker);
+
+					// remove marker
+					mapManager.removeMarker('track');
+					marker = [];
+				}
+				geoService.tracking = false;
+
+			};
+
+			function rotateMarker(data) {
+				// make sure new marker is loaded in DOM
+				if (marker.length > 0) {
+					var alpha = data.webkitCompassHeading || data.alpha;
+					var matrix = marker.css('transform');
+
+					// account for the fact that marker is initially facing south
+					var adjust = 180 + Math.round(alpha);
+
+					marker.css('transform', getNewTransformMatrix(matrix, adjust));
+				} else {
+					marker = $('img[alt="track"]');
+				}
+			}
+
+			function getNewTransformMatrix(matrix, angle) {
+				// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
+				var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
+				
+				if (newMatrix.length !== 6) { // not 2D matrix
+					return matrix;
+				}
+				
+				// get translation and don't change
+				var tx = newMatrix[4];
+				var ty = newMatrix[5];
+				
+				// set new values for rotation matrix
+				var a = Math.cos(angle * Math.PI / 180);
+				var b = -Math.sin(angle * Math.PI / 180);
+				var c = -b;
+				var d = a;
+				
+				return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
+			}
+
+			return geoService;
 }]);
+
 'use strict';
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
@@ -17413,7 +17453,8 @@ angular.module('tidepoolsServices')
 		return ifGlobals;
 }]);
 app.factory('localStore', ['$http', function($http) {
-
+	// used for localStorage (to track anon users)
+	
 	return {
 		getID: getID,
 		setID: setID,
@@ -17494,7 +17535,7 @@ worldBounds: {
 	}
 };
 
-															//latlng should be array [lat, lng]
+															//latlng should be array [lng, lat]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');
@@ -18680,8 +18721,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -18834,6 +18875,7 @@ userManager.logout = function() {
 	userManager.adminStatus = false;
 	userManager._user = {};
 	$location.path('/');
+	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
@@ -18849,6 +18891,7 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 		dialogs.showDialog('keychainDialog.html');
+		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -18869,6 +18912,14 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
+
 	})
 	.error(function(err) {
 	if (err) {
@@ -19027,8 +19078,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 }
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19200,6 +19251,7 @@ worldTree.createWorld = function() {
 		console.log('##Create##');
 		console.log('response', response);
 		$location.path('/edit/walkthrough/'+response[0].worldID);
+		navService.reset();
 	});
 }
 
@@ -22273,6 +22325,8 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
+$scope.location = $location;
+
 var map = mapManager;
 
 
@@ -22744,8 +22798,7 @@ function floorSelector(mapManager, floorSelectorService) {
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
-			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
-												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+			scope.currentFloor = findCurrentFloor(scope.floors);
 			floorSelectorService.setCurrentFloor(scope.currentFloor);
 
 			checkCategories(elem);
@@ -22925,18 +22978,19 @@ function floorSelectorService() {
 	}
 
 	function getFloors(localMapArray) {
+
 		var sorted = _.chain(localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
 			})
-			.groupBy(function(f) {
-				return f.floor_num;
+			.groupBy('floor_num')
+			.toArray()
+			.sortBy(function(arr) {
+				return arr[0].floor_num;
 			})
-			.sortBy(function(f) {
-				return -f.floor_num;
-			})
+			.reverse()
 			.value()
-			.reverse();
+
 		angular.copy(sorted, floors);
 		return floors;
 	}
@@ -23304,21 +23358,30 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
 			scope.routeParams = $routeParams;
+			scope.loading = false; // for showing loading animation
+
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
+				scope.loading = true;
+				scope.searchResult = []; // clear last results
+
 				geoService.getLocation().then(function(coords) {
-				
-				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
-					.success(function(result) {
-						if (!result.err) {
-							scope.searchResult = result;
-						} else {
-							scope.searchResult = [];
-						}
-					})
-					.error(function(err) {console.log(err)});
+					scope.searching = $http.get('/api/textsearch', {server: true, params: 
+						{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
+						.success(function(result) {
+							if (!result.err) {
+								scope.searchResult = result;
+							} else {
+								scope.searchResult = [];
+							}
+							scope.loading = false;
+						})
+						.error(function(err) {
+							console.log(err)
+							scope.loading = false;
+						});
 				});		
 			}
 			
@@ -24025,6 +24088,27 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 }]); 
 
 
+app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  $http.post('/email/request_confirm/'+$routeParams.token).
+    success(function(data){
+        console.log('email confirmed');
+        $scope.alerts.addAlert('success','Thanks for confirming your email');
+    }).
+    error(function(err){
+      if (err){
+        $scope.alerts.addAlert('danger',err);
+      }
+    });
+
+
+
+}]);
+
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});
@@ -24425,7 +24509,36 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService) {
+app.directive('userLocation', ['geoService', 'mapManager', function(geoService, mapManager) {
+	
+	return {
+		restrict: 'E',
+		scope: {
+			style: '='
+		},
+		templateUrl: 'components/userLocation/userLocation.html',
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		
+		if (scope.style.widgets.category) {
+			// raise button from 80px to 120px to account for category widget
+			$('.userLocation').css('bottom', '120px');
+		}
+
+		scope.locateAndPan = function() {
+			geoService.trackStart();
+			var marker = mapManager.getMarker('track');
+			if (marker.lng !== 0 && marker.lat!== 0) {
+				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
+			}
+		};
+
+	}
+
+}]);
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -24583,6 +24696,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			
+			// show loading animation if search query is taking a long time
 			$scope.loading = 'delay';
 
 			$timeout(function() {
@@ -24632,6 +24746,11 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		updateLandmarks(landmarks);
 
 		updateFloorIndicator(landmarks);
+
+		// if we were already showing userLocation, continute showing (since updating map removes all markers, including userLocation marker)
+		if (geoService.tracking) {
+			geoService.trackStart();
+		}
 	}
 
 	function updateFloorMaps(landmarks) {
@@ -24928,32 +25047,25 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 
 
 console.log('--Landmark Controller--');
+
+$scope.aperture = apertureService;
+$scope.bubbleTypeService = bubbleTypeService;
+$scope.worldURL = $routeParams.worldURL;
+$scope.landmarkURL = $routeParams.landmarkURL;
+$scope.collectedPresents = [];
+
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-$scope.aperture = apertureService;
 var aperture = apertureService;
 
-$scope.worldURL = $routeParams.worldURL;
-$scope.landmarkURL = $routeParams.landmarkURL;
-	
-$scope.collectedPresents = [];
+
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
-
-	if (bubbleTypeService.get() === 'Retail') {
-		$scope.$watch('aperture.state', function(newVal, oldVal) {
-			if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-				geoService.trackStart();
-			} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-				geoService.trackStop();
-			}
-		});	
-	}
 		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
@@ -26252,7 +26364,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -26286,43 +26398,51 @@ $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
 
-$scope.uploadWTGT = function($files, state) {
-	if (userManager.loginStatus) {
-		$scope.wtgt.building[state] = true;
-
-		var file = $files[0];
-
-		// get time
-		var time = new Date();
-
-		// get hashtag
-		var hashtag = null;
-		hashtag = $scope.wtgt.hashtags[state];
-
-		var data = {
-			world_id: $scope.world._id,
-			worldID: $scope.world.id,
-			hashtag: hashtag,
-			userTime: time,
-			userLat: null,
-			userLon: null,
-			type: 'retail_campaign'
-		};
-
-		// get location
-		geoService.getLocation().then(function(coords) {
-			// console.log('coords: ', coords);
-			data.userLat = coords.lat;
-			data.userLon = coords.lng;
-			uploadPicture(file, state, data);
-		}, function(err) {
-			uploadPicture(file, state, data);
-		});
-	} else { // not logged in
-		dialogs.showDialog('authDialog.html');
-		contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+$scope.verifyUpload = function(event, state) {
+	// stops user from uploading wtgt photo if they aren't logged in
+	if (!userManager.loginStatus) {
+		event.stopPropagation();
+		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
+		$timeout(function() {
+			dialogs.showDialog('authDialog.html');
+			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+		}, 1500);
+		
 	}
-	
+}
+
+$scope.uploadWTGT = function($files, state) {
+	$scope.wtgt.building[state] = true;
+
+	var file = $files[0];
+
+	// get time
+	var time = new Date();
+
+	// get hashtag
+	var hashtag = null;
+	hashtag = $scope.wtgt.hashtags[state];
+
+	var data = {
+		world_id: $scope.world._id,
+		worldID: $scope.world.id,
+		hashtag: hashtag,
+		userTime: time,
+		userLat: null,
+		userLon: null,
+		type: 'retail_campaign'
+	};
+
+	// get location
+	geoService.getLocation().then(function(coords) {
+		// console.log('coords: ', coords);
+		data.userLat = coords.lat;
+		data.userLon = coords.lng;
+		uploadPicture(file, state, data);
+	}, function(err) {
+		uploadPicture(file, state, data);
+	});
+
 }
 
 function uploadPicture(file, state, data) {
@@ -26346,13 +26466,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
-		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-		 			geoService.trackStart();
-		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-		 			geoService.trackStop();
-		 		}
-		 	});	
 		 }
 
 		 //local storage

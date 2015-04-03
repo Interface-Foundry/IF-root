@@ -68,26 +68,28 @@ var checkAdminStatus = function(userManager, $location) {
     // Define all the routes
     //================================================
 $routeProvider.
-    when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-    when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-    when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-    when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-    
-    when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
-    when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-    when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
-    when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-    when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
-    when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-    when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-    
-    when('/profile', {redirectTo:'/profile/worlds'}).
-    when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-    when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-    when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
-    when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
-    when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
+      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+      when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
+      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
+
+      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+      
+      when('/profile', {redirectTo:'/profile/worlds'}).
+      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
+      when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
+      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).

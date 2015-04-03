@@ -199,6 +199,7 @@ app.post('/feedback', function(req, res) {
 });
 
 
+
 //-------------------------------------//
 //---- Redis -----//
 //-------------------------------------//
@@ -206,6 +207,91 @@ app.post('/feedback', function(req, res) {
 // var client = redis.createClient(); //creates a new client 
 
 var redisClient = require('./redis.js');
+
+//---------------------------------------//
+//-------- Send Email Confirmation ------//
+//---------------------------------------//
+
+
+app.post('/email/confirm', function(req, res, next) {
+
+    async.waterfall([
+        function(done) {
+            crypto.randomBytes(20, function(err, buf) {
+                var token = buf.toString('hex');
+                done(err, token);
+            });
+        },
+        function(token, done) {
+            if (validateEmail(req.user.local.email)) {
+                User.findOne({
+                    'local.email': req.user.local.email
+                }, function(err, user) {
+                    if (!user) {
+                        done('No account with that email address exists, or you signed up only through Facebook/Twitter');
+                    } else {
+                        user.local.confirmEmailToken = token;
+                        user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
+                        user.save(function(err) {
+                            done(err, token, user);
+                        });
+                    }
+                });
+            } else {
+                return done('Please use a real email address');
+            }
+        },
+        function(token, user, done) {
+            if (req.headers.host) {
+                var mailOptions = {
+                    to: req.user.local.email,
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip – Confirm your email',
+                    text: 'Thanks for signing up for Kip! \n\n' +
+                        'Please click on the following link to confirm your email:\n\n' +
+                        'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    console.log('sent confirmation email');
+                    done(err, 'done');
+                });
+            }
+        }
+    ], function(err) {
+        if (err) return next(err);
+        //res.redirect('/forgot');
+    });
+
+    function validateEmail(email) {
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+});
+
+
+app.post('/email/request_confirm/:token', function(req, res) {
+
+    User.findOne({
+        'local.confirmEmailToken': req.params.token,
+        'local.confirmEmailExpires': {
+            $gt: Date.now()
+        }
+    }, function(err, user) {
+        if (!user) {
+            res.send('Email confirm token is invalid or has expired.');
+        } else {
+            user.local.confirmedEmail = true;
+            user.local.confirmEmailToken = undefined;
+            user.local.confirmEmailExpires = undefined;
+
+            user.save(function(err) {
+                res.status(200).send('Email address confirmed');
+            });
+        }
+    });
+});
+
+
 
 //====================================//
 //======= RESET PASSWORD MAILER ======//
@@ -247,7 +333,7 @@ app.post('/forgot', function(req, res, next) {
                     subject: 'Bubbl Password Reset',
                     text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
                         'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-                        'https://' + req.headers.host + '/#/reset/' + token + '\n\n' +
+                        'https://' + req.headers.host + '/reset/' + token + '\n\n' +
                         'If you did not request this, please ignore this email and your password will remain unchanged.\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
@@ -759,7 +845,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                     } else {
 
                         //AUTO-REORIENT
-                        im.convert([tempPath, '-auto-orient','-quality', '0.8','-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+                        im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                             if (err) console.log(err)
                             console.log('REORIENTED TO 1!')
                             fs.readFile(tempPath, function(err, fileData) {

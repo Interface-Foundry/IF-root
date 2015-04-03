@@ -103,6 +103,13 @@
 									style="style"
 									landmarks="landmarks"></floor-selector>
 </div>
+
+<user-location class="if-animate"
+	style="style" 
+	ng-if="isRetail"
+	ng-class="[aperture.state]">
+</user-location>
+
 <a if-href="#w/{{world.id}}/messages" class="action-button world-action-button" 
 ng-if="messages==true" 
 ng-class="[aperture.state]"

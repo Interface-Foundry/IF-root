@@ -7,7 +7,9 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
-   			var alertClass;
+   			
+            var alertClass;
+
    			switch (alertType) {
 	   			case 'success':
 	   				alertClass = 'alert-success';
@@ -22,14 +24,19 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 	   				alertClass = 'alert-danger';
 	   				break;
    			}
-   			var len = alerts.list.push(
- {class: alertClass, msg: alertMsg, id: alertMsg});
+
+   			var len = alerts.list.push({
+               class: alertClass, 
+               msg: alertMsg, 
+               id: alertMsg
+            });
+
    			if (timeout) {
-   			$timeout(function () {
-	   			alerts.list.splice(len-1, 1);
-   			}, 1500);
-   			
+   			   $timeout(function () {
+	   			  alerts.list.splice(len-1, 1);
+   			   }, 1500);
    			}
+
    		}
 
    		alerts.closeAlert = function(index) {
@@ -41,4 +48,5 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}
 
    		return alerts;
+         
    }])
