@@ -49,12 +49,6 @@ var userSchema = mongoose.Schema({
     avatar: String,
     name: String,
     note: String,
-    // org: [{
-    //     label: String,
-    //     name: String,
-    //     P: Number,
-    // }],
-    //org: [Schema.Types.Mixed],
     social: {
         linkedIn: String,
         linkedInP: Number,
@@ -68,25 +62,8 @@ var userSchema = mongoose.Schema({
         githubP: Number,
     },
     contact: [Schema.Types.Mixed],
-    // contact: [{
-    //     fauserID: String,
-    //     permission: Number
-    // }],
-    // email: [{
-    //     label: String,
-    //     addr: String,
-    //     P: Number
-    // }],
-    // email: [Schema.Types.Mixed],
     email: {type: String, unique: true, lowercase:true}, //FORCE LOWERCASE
     emailConfirmed: Boolean,
-    // tel: [{
-    
-    //     label: String,
-    //     number: String,
-    //     P: Number
-    // }],
-    //tel: [Schema.Types.Mixed],
     tel: String,
     presents: {
         collected:[Schema.Types.Mixed]

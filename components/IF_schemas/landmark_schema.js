@@ -16,7 +16,7 @@ monguurl = require('monguurl');
 		hasLoc: Boolean,
 		loc: { //user inputted loc
 	    	type: {
-	      		type: String //GeoJSON-'point'
+	      		type: String, default: 'Point' //GeoJSON-'point'
 	    	},
 	    	coordinates: []
 	  	},

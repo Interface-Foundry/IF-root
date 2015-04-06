@@ -8,11 +8,10 @@ var express = require('express'),
 var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
     mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw',
-    geoipURL = 'http://127.0.0.1:8080/json/', //local freegeoip server, will change based on current IP
-    geoloc = {};
+    geoipURL = 'http://127.0.0.1:8080/json/' //local freegeoip server, will change based on current IP;
 
 router.use(function(req, res, next) {
-    geoloc = {};
+    req.geoloc = {};
     console.log('hitting middle ware, req.query is.. ', req.query, 'req.ip is.. ',req.ip)
         //Because the request library also uses 'res' we'll rename the response here
     var response = res;
@@ -28,11 +27,10 @@ router.use(function(req, res, next) {
         if (!data.region_name) {
             req.geoloc.cityName = 'My Location' 
         }
-        req.geoloc = geoloc;
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
         
-        console.log('ip based geoloc is', geoloc)
+        console.log('ip based geoloc is', req.geoloc)
        return next();
     })
 
