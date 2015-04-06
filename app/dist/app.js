@@ -18654,7 +18654,7 @@ userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
 
 	var user = userManager._user; //user cached in memory 
-	if (user) {  
+	if (!(_.isEmpty(user))) {  
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
