@@ -67,14 +67,27 @@ module.exports.search = function(req, res) {
 		type: "landmarks",
 		body: {
 			query: {
-				multi_match: {
-					query: q,
-					fuzziness: fuzziness,
-					prefix_length: 1,
-					type: "best_fields",
-					fields: ["name^2", "summary"],
-					tie_breaker: 0.2,
-					minimum_should_match: "30%"
+				filtered: {
+					query: {
+						multi_match: {
+							query: q,
+							fuzziness: fuzziness,
+							prefix_length: 1,
+							type: "best_fields",
+							fields: ["name^2", "summary"],
+							tie_breaker: 0.2,
+							minimum_should_match: "30%"
+						}
+					},
+					filter: {
+						geo_distance: {
+							distance: "10km",
+							"loc.coordinates": {
+								lat: lat,
+								lon: lng
+							}
+						}
+					}
 				}
 			}
 		}
