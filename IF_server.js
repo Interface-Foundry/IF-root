@@ -488,6 +488,7 @@ setInterval(function() {
 // Search route
 app.get('/api/textsearch', function(req, res) {
 	if (elasticsearch_up) {
+		console.log('using elasticsearch');
 		elasticsearch.search(req, res);
 	} else {
 		text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);

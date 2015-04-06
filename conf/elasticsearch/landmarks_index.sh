@@ -7,10 +7,6 @@ curl -XPUT 'localhost:9200/if' -d '
 					"type":       "stop",
 					"stopwords":  "_english_" 
 				},
-				"english_keywords": {
-					"type":       "keyword_marker",
-					"keywords":   [] 
-				},
 				"english_stemmer": {
 					"type":       "stemmer",
 					"language":   "english"
@@ -28,12 +24,13 @@ curl -XPUT 'localhost:9200/if' -d '
 			"analyzer": {
 				"english": {
 					"tokenizer":  "standard",
+					"char_filter": ["html_strip"],
 					"filter": [
 						"english_possessive_stemmer",
 						"lowercase",
 						"english_stop",
-						"english_keywords",
 						"english_stemmer",
+						"asciifolding",
 						"if_synonyms"
 					]
 				}

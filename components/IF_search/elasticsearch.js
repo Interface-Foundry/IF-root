@@ -32,7 +32,7 @@ module.exports.healthcheck = function(cb) {
 		body: {
 			query: {
 				match: {
-					body: "food"
+					_all: "food"
 				}
 			},
 			size: 1 // one result is enough to prove it's up
@@ -49,7 +49,7 @@ module.exports.healthcheck = function(cb) {
 
 // handles text searches.  gee looks easy to convert to an express route some day...
 module.exports.search = function(req, res) {
-	var q = req.quer.textQuery;
+	var q = req.query.textQuery;
 	var lat = req.query.userLat;
 	var lng = req.query.userLng;
 	var t = req.query.localTime;
@@ -57,7 +57,7 @@ module.exports.search = function(req, res) {
 	var fuzzyQuery = {
 		"query": {
 			"match": {
-				"title": {
+				"_all": {
 					"query": q,
 					"fuzziness": 2, // do not increase
 					"prefix_length": 1
@@ -68,41 +68,35 @@ module.exports.search = function(req, res) {
 
 	var fuzzy = es.search(fuzzyQuery);
 
-	// TODO synonym query
-	
-	var synonymQuery = {
-	};
-	var synonym = es.search(synonymQuery);
-
 	RSVP.hash({
-		fuzzy: fuzzy,
-		synonym: synonym
+		fuzzy: fuzzy
 	}).then(function(results) {
 		// Merge and sort the results
 		var uniqueBubbles = {} // id is key
 		results.fuzzy.hits.hits.map(function(b) {
-			// each hit has a "searchResult" field which will
-			// contain everything we need to give to angular
-			b.searchResult.fuzzyScore = b.score;
-			uniqueBubbles[b.searchResult.id] = b.searchResult;
+			b.fuzzyScore = b._score;
+			uniqueBubbles[b._id] = b;
 		});
 
-		results.synonym.hits.hits.map(function(b) {
-			if (!uniqueBubbles[b.searchResult.id]) {
-				uniqueBubbles[b.searchResult.id] = b.searchResult;
-			}
-			uniqueBubbes[b.searchResult.id].synonymScore = b.score;
-		});
+//		results.synonym.hits.hits.map(function(b) {
+//			if (!uniqueBubbles[b.id]) {
+//				uniqueBubbles[b.id] = b.searchResult;
+//			}
+//			uniqueBubbes[b.id].synonymScore = b.score;
+//		});
 
 		// return weighted and sorted array
 		// TODO filter on distance
-		res.send(Object.keys(uniqueBubble).map(function(k) {
-			return uniqueBubble[k];
+		//
+		res.send(Object.keys(uniqueBubbles).map(function(k) {
+			return uniqueBubbles[k];
 		}).map(function(b) {
-			b.score = 10*b.fuzzyScore + 5*b.synonymScore;
+			b.kip_score = 10*b.fuzzyScore;
 			return b;
 		}).sort(function(a, b) {
-			return a.score - b.score;
+			return a.kip_score - b.kip_score;
+		}).slice(0, 50).map(function(b) {
+			return b._source;
 		}));
 	});
 };
