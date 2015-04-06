@@ -3,15 +3,16 @@
 		<h3>Please Confirm Your Email</h3>
 		<p>Email you signed up with:</p>
 		<p>
-			<img src="img/icons/ic_edit_grey600.png" 
-				class="u-relative u-inlineBlock" 
-				style="width: 24px; top: -2px">
 			<input type="text" 
 				class="inputEdit u-textAlignCenter u-relative"
-				style="left: -12px; color: rgb(100, 100, 100)" 
+				style="left: 16px; color: rgb(100, 100, 100); padding-right: 22px" 
 				size="24"
-				ng-model="email.newEmail"
+				ng-model="user.newEmail"
+				initial-val="{{ user.newEmail }}"
 				click-to-edit>
+			<img src="img/icons/ic_edit_grey600.png" 
+				class="u-relative u-inlineBlock" 
+				style="width: 24px; top: -2px; left: -12px; z-index:-1">
 		</p>
 		<button class="btnMain btnMain--blue u-centerX" ng-click="resendEmail()">RESEND EMAIL</button>
 	</div>

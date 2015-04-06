@@ -21,22 +21,27 @@
 
 		<p>OR</p>
 		
-		<!-- email and password inputs for login -->
-		<input type="text" placeholder="Email" class="u-100X" ng-if="show.signin" ng-model="userManager.login.email">
-		<input type="password" placeholder="Password" class="u-100X" ng-if="show.signin" ng-model="userManager.login.password">
+		<form onSubmit="return false">
+			<!-- email and password inputs for login -->
+			<input type="text" placeholder="Email" class="u-100X" ng-if="show.signin" ng-model="userManager.login.email">
+			<input type="password" placeholder="Password" class="u-100X" ng-if="show.signin" ng-model="userManager.login.password">
 
-		<!-- email and password inputs for signup -->
-		<input type="text" placeholder="Email" class="u-100X" ng-if="show.register" ng-model="userManager.signup.email">
-		<input type="password" placeholder="Password" class="u-100X" ng-if="show.register" ng-model="userManager.signup.password">
+			<!-- email and password inputs for signup -->
+			<input type="text" placeholder="Email" class="u-100X" ng-if="show.register" ng-model="userManager.signup.email">
+			<input type="password" placeholder="Password" class="u-100X" ng-if="show.register" ng-model="userManager.signup.password">
 
-		<p class="inputFooter" ng-if="show.signin"><a href="">FORGOT PASSWORD?</a></p>
+			<p class="inputFooter" ng-if="show.signin">
+				<a href="" ng-click="setShowSplash('passwordForgot', true)">FORGOT PASSWORD?</a>
+			</p>
+			
+			<button class="btnMain btnMain--blue u-100X" 
+				style="margin-top: 80px"
+				ng-click="splashNext()">
+				<img class="btnMain-img btnMain-img--right" src="img/icons/ic_chevron_right_white_48dp.png" style="width: 40px; top: 0px; right: 0px">
+				NEXT
+			</button>
+		</form>
 		
-		<button class="btnMain btnMain--blue u-100X" 
-			style="margin-top: 80px"
-			ng-click="splashNext()">
-			<img class="btnMain-img btnMain-img--right" src="img/icons/ic_chevron_right_white_48dp.png" style="width: 40px; top: 0px; right: 0px">
-			NEXT
-		</button>
 	</div>
 
 </div>

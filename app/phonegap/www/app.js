@@ -5320,10 +5320,21 @@ app.directive('clickToEdit', [function() {
 	};
 
 	function link(scope, elem, attrs) {
+
 		elem.on('click', function() {
 			elem.select();
 			elem.focus();
 		});
+
+		// [optional] reset input value to initial value when empty
+		if (attrs.initialVal) {
+			var initialVal = attrs.initialVal;
+			elem.on('blur', function() {
+				if (angular.element(elem).val() === '') {
+					angular.element(elem).val(initialVal);
+				}
+			});
+		}
 	}
 
 }]);
@@ -23309,6 +23320,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 	$scope.setShowSplash = setShowSplash;
 	$scope.splashNext = splashNext;
 	$scope.resendEmail = resendEmail;
+	$scope.sendPasswordForgot = sendPasswordForgot;
+	$scope.sendPasswordReset = sendPasswordReset;
 	$scope.show = {
 		/**
 		 * splash: for general splash
@@ -23317,9 +23330,11 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 		 * close: for close button
 		 * signin: for sign in dialog
 		 * register: for register dialog
+		 * passwordForgot: for forgot password dialog
+		 * passwordReset: for reset password dialog
 		 */
 	};
-	$scope.email = {};
+	$scope.user = {};
 	$scope.confirmThanksText;
 
 	init();
@@ -23342,6 +23357,22 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 
 			// redirect to home page
 			$location.path('/');
+		} else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+			
+			createShowSplash('passwordReset');
+
+			// get token from url
+			var token = $location.path().slice(7);
+			
+			$http.post('/resetConfirm/' + token).
+			  success(function(data){
+			      
+			  }).
+			  error(function(err){
+			    if (err){
+			      console.log('err: ', err);
+			    }
+			  });
 		} else {
 			userManager.getUser().then(function(success) {
 				createShowSplash(true);
@@ -23358,13 +23389,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 			$scope.show.splash = true;
 			$scope.show.confirm = false;
 			$scope.show.confirmThanks = true;
+		} else if (condition == 'passwordReset') {
+			$scope.show.splash = true;
+			$scope.show.passwordReset = true;
 		} else if (condition) { // logged in
 			$scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
 			$scope.show.confirm = userManager.loginStatus && 
 				!userManager._user.local.confirmedEmail &&
 				!userManager._user.facebook; // don't show confirm dialog for fb authenticated users
 			$scope.show.confirmThanks = false; 
-			$scope.email.newEmail = userManager._user.local.email;
+			$scope.user.newEmail = userManager._user.local.email;
 		} else { // not logged in
 			$scope.show.splash = true;
 			$scope.show.confirm = false;
@@ -23381,6 +23415,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 
 	function splashNext() {
 		// login or create account, depending on context
+
+		userManager.signup.error = undefined;
 
 		if ($scope.show.signin) {
 			userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
@@ -23405,14 +23441,14 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 	}
 
 	function resendEmail() {
-		if ($scope.email.newEmail === userManager._user.local.email) {
+		if ($scope.user.newEmail === userManager._user.local.email) {
 			sendEmailConfirmation();
 			$scope.show.splash = false;
 			$scope.show.confirm = false;
 		} else {
 			// update email 1st (user just edited email)
 			var data = {
-				updatedEmail: $scope.email.newEmail
+				updatedEmail: $scope.user.newEmail
 			};
 			$http.post('api/user/emailUpdate', data).
 				success(function(data) {
@@ -23433,6 +23469,38 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 		}, function(error) {
 			http.get('/api/dummyRoute');
 		});
+	}
+
+	function sendPasswordForgot() {
+		var data = {
+		  email: $scope.user.email
+		};
+
+		$http.post('/forgot', data).
+		  success(function(data){
+		      $scope.user.email = '';
+		  }).
+		  error(function(err){
+		    if (err){
+		      // $scope.alerts.addAlert('danger',err);
+		    }
+		  });
+	}
+
+	function sendPasswordReset() {
+		var data = {
+		  password: $scope.user.newPassword
+		}
+
+		$http.post('/reset/' + $location.path().slice(7), data).
+			success(function(data) {
+				setShowSplash('splash', false);
+			}).
+			error(function(err){
+		    	if (err){
+		      		// $scope.alerts.addAlert('danger',err);
+		    	}
+		  	});
 	}
 
 }]);
