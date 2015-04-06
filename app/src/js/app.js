@@ -61,7 +61,7 @@ $routeProvider.
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 

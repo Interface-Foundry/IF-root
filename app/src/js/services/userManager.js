@@ -223,7 +223,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	})
 	.error(function(err) {
 	if (err) {
-		userManager.signup.error = "Error signing up!";
+		userManager.signup.error = err || "Error signing up!";
         alertManager.addAlert('danger',err, true);   
 	}
 	});

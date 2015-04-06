@@ -405,7 +405,11 @@ app.post('/reset/:token', function(req, res) {
 
     }
   ], function(err) {
-    res.send('password changed successfully');
+    if (err) {
+      res.send({err: err});
+    } else {
+      res.send('password changed successfully');
+    }
   });
 }); 
 

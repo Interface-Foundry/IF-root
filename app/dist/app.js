@@ -4864,7 +4864,7 @@ $routeProvider.
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
@@ -18798,7 +18798,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	})
 	.error(function(err) {
 	if (err) {
-		userManager.signup.error = "Error signing up!";
+		userManager.signup.error = err || "Error signing up!";
         alertManager.addAlert('danger',err, true);   
 	}
 	});
@@ -23185,7 +23185,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
-app.controller('SplashController', ['$scope', '$location', '$http', 'userManager', function($scope, $location, $http, userManager) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs) {
 
 	$scope.setShowSplash = setShowSplash;
 	$scope.splashNext = splashNext;
@@ -23206,6 +23206,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 	};
 	$scope.user = {};
 	$scope.confirmThanksText;
+	$scope.errorMsg;
 
 	init();
 
@@ -23300,7 +23301,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 				$scope.show.signin = false;
 				$scope.show.splash = false;
 			}, function(err) {
-				// add notification here TODO toks
+				addErrorMsg(err || 'Incorrect username or password', 3000);
 			})
 		} else if ($scope.show.register) {
 			var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
@@ -23308,8 +23309,9 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 					$scope.show.register = false;
 					$scope.show.splash = false;
 					watchSignupError(); // clear watch
+					alertManager.addAlert('info', 'Welcome to Kip!', true);
 				} else if (newValue) { // signup error
-					// add notification here TODO toks
+					addErrorMsg(newValue, 3000);
 					watchSignupError(); // clear watch
 				}
 			});
@@ -23322,6 +23324,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 			sendEmailConfirmation();
 			$scope.show.splash = false;
 			$scope.show.confirm = false;
+			alertManager.addAlert('info', 'Confirmation email sent', true);
 		} else {
 			// update email 1st (user just edited email)
 			var data = {
@@ -23330,11 +23333,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 			$http.post('api/user/emailUpdate', data).
 				success(function(data) {
 					if (data.err) {
-						// TODO toks add notif
+						addErrorMsg(data.err, 3000);
 					} else {
 						sendEmailConfirmation();
 						$scope.show.splash = false;
 						$scope.show.confirm = false;
+						alertManager.addAlert('info', 'Email updated. Confirmation email sent', true);
 					}
 				});
 		}
@@ -23359,7 +23363,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 		  }).
 		  error(function(err){
 		    if (err){
-		      // $scope.alerts.addAlert('danger',err);
+		    	addErrorMsg(err, 3000);
 		    }
 		  });
 	}
@@ -23368,16 +23372,31 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 		var data = {
 		  password: $scope.user.newPassword
 		}
-
+		
 		$http.post('/reset/' + $location.path().slice(7), data).
 			success(function(data) {
-				setShowSplash('splash', false);
+				if (data.err) {
+					addErrorMsg(data.err, 3000);
+				} else {
+					$location.path('/');
+					$timeout(function() {
+						setShowSplash('splash', false);
+					}, 500);
+					alertManager.addAlert('info', 'Password changed successfully', true);
+				}
 			}).
 			error(function(err){
-		    	if (err){
-		      		// $scope.alerts.addAlert('danger',err);
-		    	}
+		    	console.log('err: ', err);
 		  	});
+	}
+
+	function addErrorMsg(message, time) {
+		$scope.errorMsg = message;
+		if (time) {
+			$timeout(function() {
+				$scope.errorMsg = '';
+			}, time);
+		}
 	}
 
 }]);

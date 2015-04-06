@@ -14,7 +14,13 @@
 				class="u-relative u-inlineBlock" 
 				style="width: 24px; top: -2px; left: -12px; z-index:-1">
 		</p>
-		<button class="btnMain btnMain--blue u-centerX" ng-click="resendEmail()">RESEND EMAIL</button>
+
+		<span class="errorMsg u-absolute u-centerX" 
+			ng-if="errorMsg">{{ errorMsg }}</span>
+
+		<button class="btnMain btnMain--blue u-centerX" 
+			style="margin-top: 80px"
+			ng-click="resendEmail()">RESEND EMAIL</button>
 	</div>
 	<div class="fullPage-close" ng-click="setShowSplash('splash', false)"></div>
 </div>

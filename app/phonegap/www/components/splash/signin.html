@@ -33,6 +33,10 @@
 			<p class="inputFooter" ng-if="show.signin">
 				<a href="" ng-click="setShowSplash('passwordForgot', true)">FORGOT PASSWORD?</a>
 			</p>
+
+			<span class="errorMsg u-absolute u-centerX" 
+				ng-if="errorMsg"
+				ng-style="{'margin-top': show.signin ? '0px' : '30px'}">{{ errorMsg }}</span>
 			
 			<button class="btnMain btnMain--blue u-100X" 
 				style="margin-top: 80px"
