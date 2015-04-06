@@ -22683,6 +22683,15 @@ function floorSelector(mapManager, floorSelectorService) {
 	};
 
 	function link(scope, elem, attr) {
+
+		// hide floor selector for maps with only one floor
+		if (!mapManager.localMapArrayExists(scope.world) ||
+				mapManager.sortFloors(scope.world.style.maps.localMapArray).length <= 1) {
+			elem.css({
+				display: 'none'
+			});
+		}
+
 		activate(elem);
 		
 		// make sure floor selector is closed if switching to a new bubble
