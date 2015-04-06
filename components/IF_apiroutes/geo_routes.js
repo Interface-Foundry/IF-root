@@ -24,7 +24,7 @@ router.use(function(req, res, next) {
         if (err) console.log(err);
         console.log('body is..', body)
         var data = JSON.parse(body);
-        if (!data.region_name) {
+        if (data.city == null) {
             req.geoloc.cityName = 'My Location' 
         }
         req.geoloc.lat = data.latitude;
@@ -39,7 +39,6 @@ router.use(function(req, res, next) {
 
 router.get('/', function(req, res) {
     var response = res;
-    console.log('hitting get /, req.query is.. ', req.query, 'req.geoloc is.. ', req.geoloc)
 
     if (req.query.hasloc && req.query.lat && req.query.lng) {
          req.geoloc.lat = req.query.lat;

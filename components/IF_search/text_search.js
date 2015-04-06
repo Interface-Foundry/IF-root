@@ -46,7 +46,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 if (data.length >= 50) {
                     callback(true, data);
                 } else {
-                    console.log('Not enough results, increasing distance..')
+                    console.log('Only ',data.length,' results, increasing distance..')
                     callback(null, data)
                 }
             })

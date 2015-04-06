@@ -885,7 +885,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                     'image_request[language]': 'en'
                                                 }
                                             }
-                                            //run stored image through cloudsight, retreive tags
+                                            //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
                                         request.post(options, function(err, res, body) {
                                             if (err) console.log(err);
                                             var data = JSON.parse(body);
@@ -899,7 +899,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
                                             async.whilst(
                                                 function() {
-                                                    return (results.status == 'not completed' && tries < 7);
+                                                    return (results.status == 'not completed' && tries < 10);
                                                 },
                                                 function(callback) {
                                                     var options = {
@@ -923,7 +923,6 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 },
                                                 function(err) {
                                                     console.log('Description of image is..', description)
-
                                                     //additional content was passed with the image, handle it here
                                                     if (uploadContents) {
                                                         try {
@@ -933,8 +932,6 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                         }
                                                         if (uploadContents.type == 'retail_campaign') {
                                                             var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                            console.log('newString is..', newString);
-                                                            console.log('uploadContents',uploadContents)
                                                             uploadContents.description = newString;
                                                             submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
                                                         }
