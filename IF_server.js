@@ -1926,6 +1926,21 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
     }
 });
 
+//////
+app.post('/api/user/emailUpdate', isLoggedIn, function(req,res){
+  // updates user email, checks if email is already in system
+  req.user._id
+
+  // sanitize input
+  // check if valid email authroutes/passports
+  // call db find
+
+  db.collection('users').findOne({'local.email': req.params.updatedEmail}, function(err, data){
+    // if (data) res 200 email exists check latest express code
+    // else update user local.email. res 200 user updated
+  });
+
+});
 
 function uniqueProfileID(input, callback) {
 

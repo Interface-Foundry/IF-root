@@ -20773,6 +20773,78 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 'use strict';
 
+app.directive('announcements', announcements);
+
+announcements.$inject = ['$timeout', 'announcementsService'];
+
+function announcements($timeout, announcementsService) {
+	return {
+		restrict: 'E',
+		scope: {},
+		templateUrl: 'components/announcements/announcements.html',
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+
+		scope.allCaughtUp = {
+			headline: 'All caught up!',
+			body: ':)'
+		};
+		scope.announcements = [];
+		scope.chevron = angular.element('.announcement-chevron');
+		scope.end = false;
+		scope.index = 0;
+		scope.nextCard = nextCard;
+		scope.region = 'global';
+
+		activate();
+
+		function activate() {
+			// Announcements.query({
+			// 	id: scope.region
+			// }).$promise
+			announcementsService.get()
+			.then(function(response) {
+				scope.announcements = scope.announcements.concat(response.data);
+				scope.announcements.push(scope.allCaughtUp);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+
+		function nextCard() {
+			scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
+			scope.chevron.animate({opacity: 0}, 350);
+			if (scope.index < scope.announcements.length - 1) {
+				scope.index++;
+				$timeout(function() {
+					scope.chevron.animate({opacity: 1}, 400);
+				}, 650);
+			}
+		}
+	}
+}
+
+'use strict';
+
+app.service('announcementsService', announcementsService);
+
+announcementsService.$inject = ['$http'];
+
+function announcementsService($http) {
+	
+	return {
+		get: get
+	};
+
+	function get() {
+		return $http.get('api/announcements/global');
+	}
+}
+
+'use strict';
+
 app.controller('ContestController', ContestController);
 
 ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
@@ -23410,7 +23482,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 angular.module('IF')
     .factory('Announcements', function($resource) {
 
-        return $resource("/api/announcements/:id/:option", {
+        return $resource("/api/announcements/su/:id/:option", {
             id: '@id'
         }, {
             update: {

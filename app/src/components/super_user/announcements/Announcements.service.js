@@ -3,7 +3,7 @@
 angular.module('IF')
     .factory('Announcements', function($resource) {
 
-        return $resource("/api/announcements/:id/:option", {
+        return $resource("/api/announcements/su/:id/:option", {
             id: '@id'
         }, {
             update: {
