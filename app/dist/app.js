@@ -22841,7 +22841,7 @@ function floorSelectorService() {
 			floors = [],
 			selectedIndex,
 			showFloors,
-			showLandmarks = true;
+			showLandmarks = false;
 
 	return {
 		currentFloor: currentFloor,
@@ -24463,6 +24463,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
+		floorSelectorService.showLandmarks = false;
 	});
 
 	$scope.apertureSet = function(newState) {
