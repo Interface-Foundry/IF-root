@@ -53,14 +53,14 @@ module.exports.search = function(req, res) {
 	var lat = req.query.userLat;
 	var lng = req.query.userLng;
 	var t = req.query.localTime;
-
-	var fuzzyPartGenerator = function(q) {
-		return {
-			query: q, 
-			fuzziness: 2,
-			prefix_length: 1
-		};
-	};
+	
+	// update fuzziness of query based on search term length
+	var fuzziness = 0;
+	if (q.length >= 4) {
+		fuzziness = 1;
+	} else if (q.length >= 6) {
+		fuzziness = 2;
+	}
 
 	var fuzzyQuery = {
 		index: "if",
@@ -69,8 +69,10 @@ module.exports.search = function(req, res) {
 			query: {
 				multi_match: {
 					query: q,
+					fuzziness: fuzziness,
+					prefix_length: 1,
 					type: "best_fields",
-					fields: ["name", "summary"],
+					fields: ["name^2", "summary"],
 					tie_breaker: 0.2,
 					minimum_should_match: "30%"
 				}
@@ -107,7 +109,7 @@ module.exports.search = function(req, res) {
 			b.kip_score = 10*b.fuzzyScore;
 			return b;
 		}).sort(function(a, b) {
-			return a.kip_score - b.kip_score;
+			return b.kip_score - a.kip_score;
 		}).slice(0, 50).map(function(b) {
 			return b._source;
 		}));
