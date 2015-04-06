@@ -54,13 +54,25 @@ module.exports.search = function(req, res) {
 	var lng = req.query.userLng;
 	var t = req.query.localTime;
 
+	var fuzzyPartGenerator = function(q) {
+		return {
+			query: q, 
+			fuzziness: 2,
+			prefix_length: 1
+		};
+	};
+
 	var fuzzyQuery = {
-		"query": {
-			"match": {
-				"_all": {
-					"query": q,
-					"fuzziness": 2, // do not increase
-					"prefix_length": 1
+		index: "if",
+		type: "landmarks",
+		body: {
+			query: {
+				multi_match: {
+					query: q,
+					type: "best_fields",
+					fields: ["name", "summary"],
+					tie_breaker: 0.2,
+					minimum_should_match: "30%"
 				}
 			}
 		}
@@ -91,6 +103,7 @@ module.exports.search = function(req, res) {
 		res.send(Object.keys(uniqueBubbles).map(function(k) {
 			return uniqueBubbles[k];
 		}).map(function(b) {
+			b._source.kip_score = 10*b.fuzzyScore;
 			b.kip_score = 10*b.fuzzyScore;
 			return b;
 		}).sort(function(a, b) {
