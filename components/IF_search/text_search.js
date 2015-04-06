@@ -69,7 +69,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
         function(err, results) {
             if (err) console.log(err);
             console.log('Found ', results[results.length - 1].length, 'results.');
-            res.send(results[results.length - 1]);
+            res.send(results[results.length-1]);
         });
 
 

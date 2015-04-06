@@ -847,7 +847,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                             if (err) console.log(err)
-                            console.log('REORIENTED TO 1!')
+
                             fs.readFile(tempPath, function(err, fileData) {
                                 var s3 = new AWS.S3();
                                 s3.putObject({
@@ -863,37 +863,93 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
-                                        //additional content was passed with the image, handle it here
-                                        if (uploadContents) {
-                                            try {
-                                                uploadContents = JSON.parse(uploadContents);
-                                            } catch (err) {
-                                                console.log(err);
+                                        // //additional content was passed with the image, handle it here
+                                        // if (uploadContents) {
+                                        //     try {
+                                        //         uploadContents = JSON.parse(uploadContents);
+                                        //     } catch (err) {
+                                        //         console.log(err);
+                                        //     }
+                                        //     if (uploadContents.type == 'retail_campaign') {
+                                        //         submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                        //     }
+                                        // }
+                                        var options = {
+                                                url: "https://api.cloudsightapi.com/image_requests",
+                                                headers: {
+                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                },
+                                                qs: {
+                                                    'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                    'image_request[locale]': 'en-US',
+                                                    'image_request[language]': 'en'
+                                                }
                                             }
-                                            if (uploadContents.type == 'retail_campaign') {
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                            }
-                                        }
+                                            //run stored image through cloudsight, retreive tags
+                                        request.post(options, function(err, res, body) {
+                                            if (err) console.log(err);
+                                            var data = JSON.parse(body);
+
+                                            var results = {
+                                                status: 'not completed'
+                                            };
+                                            var description = '';
+
+                                            var tries = 0;
+
+                                            async.whilst(
+                                                function() {
+                                                    return (results.status == 'not completed' && tries < 7);
+                                                },
+                                                function(callback) {
+                                                    var options = {
+                                                        url: "https://api.cloudsightapi.com/image_responses/" + data.token,
+                                                        headers: {
+                                                            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                        }
+                                                    }
+
+                                                    request(options, function(err, res, body) {
+                                                        if (err) console.log(err);
+                                                        console.log('cloudsight status is..', body)
+                                                        body = JSON.parse(body);
+                                                        if (body.status == 'completed') {
+                                                            results.status = 'completed';
+                                                            description = body.name;
+                                                        }
+                                                    })
+                                                    tries++;
+                                                    setTimeout(callback, 5000);
+                                                },
+                                                function(err) {
+                                                    console.log('Description of image is..', description)
+
+                                                    //additional content was passed with the image, handle it here
+                                                    if (uploadContents) {
+                                                        try {
+                                                            uploadContents = JSON.parse(uploadContents);
+                                                        } catch (err) {
+                                                            console.log(err);
+                                                        }
+                                                        if (uploadContents.type == 'retail_campaign') {
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            console.log('newString is..', newString);
+                                                            console.log('uploadContents',uploadContents)
+                                                            uploadContents.description = newString;
+                                                            submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                        }
+                                                    }
+
+                                                }
+                                            );
+
+
+                                        })
 
                                     }
                                 });
                             });
                         })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                         // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
                         //     if (err) throw err;
