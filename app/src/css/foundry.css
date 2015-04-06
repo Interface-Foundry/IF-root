@@ -2469,6 +2469,18 @@ li.alert {
   width: 100%;
   height: 100%;
 }
+.u-textAlignCenter {
+  text-align: center;
+}
+.u-relative {
+  position: relative;
+}
+.u-absolute {
+  position: absolute;
+}
+.u-inlineBlock {
+  display: inline-block;
+}
 /* CATEGORY WIDGET */
 .category-list-shadow {
   position: absolute;
@@ -2788,6 +2800,18 @@ div.marker-popup-click {
 }
 .divider--short {
   width: 40%;
+}
+.inputEdit {
+  background-color: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.inputEdit:focus {
+  outline: none;
+}
+.errorMsg {
+  color: red;
 }
 /*remove the irritating blue border*/
 button:active,

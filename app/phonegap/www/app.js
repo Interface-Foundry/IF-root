@@ -4887,10 +4887,9 @@ $routeProvider.
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -5330,6 +5329,34 @@ app.directive('bubbleBody', function(apertureService) {
 		}
 	}
 });
+app.directive('clickToEdit', [function() {
+	// attach to input element. selects input text on click
+
+	return {
+		restrict: 'A',
+		scope: true,
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+
+		elem.on('click', function() {
+			elem.select();
+			elem.focus();
+		});
+
+		// [optional] reset input value to initial value when empty
+		if (attrs.initialVal) {
+			var initialVal = attrs.initialVal;
+			elem.on('blur', function() {
+				if (angular.element(elem).val() === '') {
+					angular.element(elem).val(initialVal);
+				}
+			});
+		}
+	}
+
+}]);
 app.directive('compassButton', function(worldTree, $templateRequest, $compile, userManager, $timeout) {
 	return { //NOT USED ANY MORE
 		restrict: 'EA',
@@ -18913,7 +18940,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = undefined;	
+		userManager.signup.error = false;		
 
 		// send confirmation email
 		$http.post('/email/confirm').then(function(success) {
@@ -18921,11 +18948,10 @@ userManager.signup.signup = function() { //signup based on signup form
 		}, function(error) {
 			console.log('error :', error);
 		});
-
 	})
 	.error(function(err) {
 	if (err) {
-		userManager.signup.error = "Error signing up!";
+		userManager.signup.error = err || "Error signing up!";
         alertManager.addAlert('danger',err, true);   
 	}
 	});
@@ -23454,6 +23480,218 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs) {
+
+	$scope.setShowSplash = setShowSplash;
+	$scope.splashNext = splashNext;
+	$scope.resendEmail = resendEmail;
+	$scope.sendPasswordForgot = sendPasswordForgot;
+	$scope.sendPasswordReset = sendPasswordReset;
+	$scope.show = {
+		/**
+		 * splash: for general splash
+		 * confirm: for confirm dialog
+		 * confirmThanks: for confirmThanks dialog
+		 * close: for close button
+		 * signin: for sign in dialog
+		 * register: for register dialog
+		 * passwordForgot: for forgot password dialog
+		 * passwordReset: for reset password dialog
+		 */
+	};
+	$scope.user = {};
+	$scope.confirmThanksText;
+	$scope.errorMsg;
+
+	init();
+
+	function init() {
+		if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+			
+			createShowSplash('confirmThanks');
+
+			// get token from url
+			var token = $location.path().slice(15);
+
+			$http.post('/email/request_confirm/' + token).
+				success(function(data) {
+					$scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+				}).
+				error(function(err) {
+					$scope.confirmThanksText = 'There was a problem confirming your email';
+				});
+
+			// redirect to home page
+			$location.path('/');
+		} else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+			
+			createShowSplash('passwordReset');
+
+			// get token from url
+			var token = $location.path().slice(7);
+			
+			$http.post('/resetConfirm/' + token).
+			  success(function(data){
+			      
+			  }).
+			  error(function(err){
+			    if (err){
+			      console.log('err: ', err);
+			    }
+			  });
+		} else {
+			userManager.getUser().then(function(success) {
+				createShowSplash(true);
+			}, function(err) {
+				createShowSplash(false);
+			});
+		}
+	}
+
+	function createShowSplash(condition) {
+		// $scope.show controls the logic for the splash pages
+		
+		if (condition === 'confirmThanks') {
+			$scope.show.splash = true;
+			$scope.show.confirm = false;
+			$scope.show.confirmThanks = true;
+		} else if (condition == 'passwordReset') {
+			$scope.show.splash = true;
+			$scope.show.passwordReset = true;
+		} else if (condition) { // logged in
+			$scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
+			$scope.show.confirm = userManager.loginStatus && 
+				!userManager._user.local.confirmedEmail &&
+				!userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+			$scope.show.confirmThanks = false; 
+			$scope.user.newEmail = userManager._user.local.email;
+		} else { // not logged in
+			$scope.show.splash = true;
+			$scope.show.confirm = false;
+			$scope.show.confirmThanks = false;
+		}
+
+		$scope.show.signin = false;
+		$scope.show.register = false;
+	}
+
+	function setShowSplash(property, bool) {
+		if (property instanceof Array) {
+			_.each(property, function(prop) {
+				$scope.show[prop] = bool;
+			});
+		} else {
+			$scope.show[property] = bool;
+		}
+	}
+
+	function splashNext() {
+		// login or create account, depending on context
+
+		userManager.signup.error = undefined;
+
+		if ($scope.show.signin) {
+			userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
+				$scope.show.signin = false;
+				$scope.show.splash = false;
+			}, function(err) {
+				addErrorMsg(err || 'Incorrect username or password', 3000);
+			})
+		} else if ($scope.show.register) {
+			var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
+				if (newValue === false) { // signup success
+					$scope.show.register = false;
+					$scope.show.splash = false;
+					watchSignupError(); // clear watch
+					alertManager.addAlert('info', 'Welcome to Kip!', true);
+				} else if (newValue) { // signup error
+					addErrorMsg(newValue, 3000);
+					watchSignupError(); // clear watch
+				}
+			});
+			userManager.signup.signup();
+		}
+	}
+
+	function resendEmail() {
+		if ($scope.user.newEmail === userManager._user.local.email) {
+			sendEmailConfirmation();
+			$scope.show.splash = false;
+			$scope.show.confirm = false;
+			alertManager.addAlert('info', 'Confirmation email sent', true);
+		} else {
+			// update email 1st (user just edited email)
+			var data = {
+				updatedEmail: $scope.user.newEmail
+			};
+			$http.post('api/user/emailUpdate', data).
+				success(function(data) {
+					if (data.err) {
+						addErrorMsg(data.err, 3000);
+					} else {
+						sendEmailConfirmation();
+						$scope.show.splash = false;
+						$scope.show.confirm = false;
+						alertManager.addAlert('info', 'Email updated. Confirmation email sent', true);
+					}
+				});
+		}
+	}
+
+	function sendEmailConfirmation() {
+		$http.post('/email/confirm').then(function(sucess) {
+		}, function(error) {
+		});
+	}
+
+	function sendPasswordForgot() {
+		var data = {
+		  email: $scope.user.email
+		};
+
+		$http.post('/forgot', data).
+		  success(function(data){
+		      $scope.user.email = '';
+		  }).
+		  error(function(err){
+		    if (err){
+		    	addErrorMsg(err, 3000);
+		    }
+		  });
+	}
+
+	function sendPasswordReset() {
+		var data = {
+		  password: $scope.user.newPassword
+		}
+		
+		$http.post('/reset/' + $location.path().slice(7), data).
+			success(function(data) {
+				if (data.err) {
+					addErrorMsg(data.err, 3000);
+				} else {
+					$location.path('/');
+					$timeout(function() {
+						setShowSplash('splash', false);
+					}, 500);
+					alertManager.addAlert('info', 'Password changed successfully', true);
+				}
+			}).
+			error(function(err){
+		    	console.log('err: ', err);
+		  	});
+	}
+
+	function addErrorMsg(message, time) {
+		$scope.errorMsg = message;
+		if (time) {
+			$timeout(function() {
+				$scope.errorMsg = '';
+			}, time);
+		}
+	}
+
+}]);
 'use strict';
 
 angular.module('IF')
@@ -24146,29 +24384,6 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
-
-
-app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  $http.post('/email/request_confirm/'+$routeParams.token).
-    success(function(data){
-        console.log('email confirmed');
-        $scope.alerts.addAlert('success','Thanks for confirming your email');
-    }).
-    error(function(err){
-      if (err){
-        $scope.alerts.addAlert('danger',err);
-      }
-    });
-
-
-
-}]);
-
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});

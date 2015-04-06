@@ -212,51 +212,50 @@ var redisClient = require('./redis.js');
 //-------- Send Email Confirmation ------//
 //---------------------------------------//
 
-
-app.post('/email/confirm', function(req, res, next) {
-	console.log("entering /email/confirm");
+app.post('/email/confirm', isLoggedIn, function(req, res, next) {
+  console.log("entering /email/confirm");
 
     if (!validateEmail(req.user.local.email)) {
-		console.log('bad email address: ' + req.user.local.email);
-		next('Please use a real email address');
-		return;
-	}
+    console.log('bad email address: ' + req.user.local.email);
+    next('Please use a real email address');
+    return;
+  }
 
-	if (!req.headers.host) {
-		console.log("Cannot send confirmation mail without req.headers.host");
-		next("Can not send confirmation mail: no host");
-		return;
-	}
+  if (!req.headers.host) {
+    console.log("Cannot send confirmation mail without req.headers.host");
+    next("Can not send confirmation mail: no host");
+    return;
+  }
 
     crypto.randomBytes(20, function(err, buf) {
         var token = buf.toString('hex');
-		var email = req.user.local.email;
+    var email = req.user.local.email;
 
-        User.findOne({'local.email': email},	function(err, user) {
+        User.findOne({'local.email': email},  function(err, user) {
             if (!user) {
                 next('No account with that email address exists, or you signed up only through Facebook/Twitter');
-				return;
+        return;
             }
 
             user.local.confirmEmailToken = token;
             user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
             user.save(function(err) {
-				if (err) {
-					return next(err);
-				}
+        if (err) {
+          return next(err);
+        }
 
-				var mailOptions = {
-					to: email,
-					from: 'Kip <noreply@kipapp.co>',
-					subject: 'Kip – Confirm your email',
-					text: 'Thanks for signing up for Kip! \n\n' +
+        var mailOptions = {
+          to: email,
+          from: 'Kip <noreply@kipapp.co>',
+          subject: 'Kip – Confirm your email',
+          text: 'Thanks for signing up for Kip! \n\n' +
                           'Please click on the following link to confirm your email:\n\n' +
                           'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
-					if (err) {
-						return next(err);
-					}
+          if (err) {
+            return next(err);
+          }
                     console.log('sent confirmation email');
                     res.send("｡◕‿◕｡");
                 });
@@ -271,20 +270,20 @@ app.post('/email/confirm', function(req, res, next) {
 });
 
 
+
 app.post('/email/request_confirm/:token', function(req, res) {
 
-    User.findOne({
-        'local.confirmEmailToken': req.params.token,
-        'local.confirmEmailExpires': {
-            $gt: Date.now()
-        }
-    }, function(err, user) {
-        if (!user) {
-            res.send('Email confirm token is invalid or has expired.');
-        } else {
-            user.local.confirmedEmail = true;
-            user.local.confirmEmailToken = undefined;
-            user.local.confirmEmailExpires = undefined;
+    User.findOne({ 'local.confirmEmailToken': req.params.token, 'local.confirmEmailExpires': { $gt: Date.now() } }, function(err, user) {
+      if (!user) {
+        res.send({
+          err: 'Email confirm token is invalid or has expired.'
+        });
+      }
+
+      else {
+        user.local.confirmedEmail = true;
+        user.local.confirmEmailToken = undefined;
+        user.local.confirmEmailExpires = undefined;
 
             user.save(function(err) {
                 res.status(200).send('Email address confirmed');
@@ -348,12 +347,12 @@ app.post('/forgot', function(req, res, next) {
         if (err) return next(err);
         res.redirect('/#/forgot');
     });
-
-    function validateEmail(email) {
-        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(email);
-    }
 });
+
+function validateEmail(email) { 
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+} 
 
 app.post('/resetConfirm/:token', function(req, res) {
     User.findOne({
@@ -415,12 +414,15 @@ app.post('/reset/:token', function(req, res) {
                 req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
                 done(err, 'done');
             });
-
-        }
-    ], function(err) {
-        res.send('password changed successfully');
-    });
-});
+    }
+  ], function(err) {
+    if (err) {
+      res.send({err: err});
+    } else {
+      res.send('password changed successfully');
+    }
+  });
+}); 
 
 //====================================//
 //========  END MAIL RESET  ==========//
@@ -1926,20 +1928,33 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
     }
 });
 
-//////
 app.post('/api/user/emailUpdate', isLoggedIn, function(req,res){
-  // updates user email, checks if email is already in system
-  req.user._id
+  // updates user email, after checking if email is already in system
 
-  // sanitize input
-  // check if valid email authroutes/passports
-  // call db find
+  var newEmail = sanitize(req.body.updatedEmail);
 
-  db.collection('users').findOne({'local.email': req.params.updatedEmail}, function(err, data){
-    // if (data) res 200 email exists check latest express code
-    // else update user local.email. res 200 user updated
-  });
-
+  if (validateEmail(newEmail)) {
+    db.collection('users').findOne({'local.email': newEmail}, function(err, data) {  
+      if (data) {
+        res.send({
+          err: 'Email already exists'
+        });
+      } else {
+        User.findById(req.user._id, function(err, data) {
+          data.local.email = newEmail;
+          data.save(function(err) {
+            res.send({
+              msg: 'Email updated successfully'
+            });
+          });
+        });
+      }
+    });
+  } else {
+    res.send({
+      err: 'Invalid email'
+    });
+  }
 });
 
 function uniqueProfileID(input, callback) {
