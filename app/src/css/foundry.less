@@ -199,6 +199,33 @@ span.subnav-back-chevron {
 	top: -32px;
 }
 
+.grey-block {
+	display: none;
+}
+
+.inactive span,
+.inactive button.btn.meetup-btn {
+	color: grey;
+
+	&:hover {
+		cursor: default;
+		color: grey;
+	}
+
+	.grey-block {
+		height: 14px;
+	  width: 16px;
+	  background-color: grey;
+	  border-radius: 3px;
+	  display: inline-block;
+	  vertical-align: middle;
+	}
+
+	img {
+		display: none;
+	}
+}
+
 .marble-smooth-card {
 	position: relative;
 	background: #FFF;

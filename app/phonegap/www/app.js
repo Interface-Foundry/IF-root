@@ -24143,8 +24143,8 @@ if ($routeParams.incoming == 'meetup'){
 	}).
 	error(function(data) {
 		angular.extend($rootScope, {loading: false});
-		$http.get('/api/user/profile', {server: true}).success(function(user){
-			$scope.worlds = user;	
+		$http.get('/api/user/profile', {server: true}).success(function(response){
+			$scope.worlds = response;	
 			$scope.waitingforMeetup = false;	
 		});
 	});
@@ -24154,16 +24154,16 @@ else if ($routeParams.incoming == 'messages'){
 	$scope.fromMessages = true;
 }
 else {
-	$http.get('/api/user/profile', {server: true}).success(function(user){
-		console.log(user);
+	$http.get('/api/user/profile', {server: true}).success(function(response){
+		console.log(response);
 		
 		//$scope.worlds = user;
-		$scope.groups = userGrouping.groupByTime(user);
+		$scope.groups = userGrouping.groupByTime(response);
 		console.log($scope.groups);
 		
-		$scope.bubbles = user;
+		$scope.bubbles = response;
 
-		//sortWorlds(user);
+		//sortWorlds(response);
 	});
 }
 
@@ -24378,9 +24378,9 @@ $scope.go = function(url) {
 }
 
 userManager.getUser().then(
-	function(response) {
-	console.log('response', response);
-	$scope.user = response;
+	function(user) {
+	console.log('response', user);
+	$scope.user = user;
 }, function(reason) {
 	console.log('reason', reason);
 	$location.path('/');

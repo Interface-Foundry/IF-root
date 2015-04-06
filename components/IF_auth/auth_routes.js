@@ -147,6 +147,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 		app.get('/auth/meetup', function(req, res, next) {
 		  req.session.redirect = req.query.redirect;
+		 	console.log('auth/meetup')
 		  next();
 		}, passport.authenticate('meetup', { scope : 'email' }));
 
@@ -154,6 +155,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.get('/auth/meetup/callback', passport.authenticate('meetup', {
 		  failureRedirect: '/login'
 		}), function (req, res) {
+			console.log('call back')
 		  res.redirect(req.session.redirect || '/profile/worlds/meetup');
 		  delete req.session.redirect;
 		});

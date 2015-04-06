@@ -1207,6 +1207,31 @@ span.subnav-back-chevron {
   padding-left: 2px;
   top: -32px;
 }
+.grey-block {
+  display: none;
+}
+.inactive span,
+.inactive button.btn.meetup-btn {
+  color: grey;
+}
+.inactive span:hover,
+.inactive button.btn.meetup-btn:hover {
+  cursor: default;
+  color: grey;
+}
+.inactive span .grey-block,
+.inactive button.btn.meetup-btn .grey-block {
+  height: 14px;
+  width: 16px;
+  background-color: grey;
+  border-radius: 3px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.inactive span img,
+.inactive button.btn.meetup-btn img {
+  display: none;
+}
 .marble-smooth-card {
   position: relative;
   background: #FFF;
