@@ -22993,23 +22993,11 @@ var map = mapManager, style = styleManager;
 style.resetNavBG();
 map.resetMap();
 
-$scope.temp = {};
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 
 $scope.select = function(bubble) {
-	if ($scope.temp.mapOn) {
-		if ($scope.selected==bubble) {
-			// already selected
-			$location.path('w/'+bubble.id);
-		} else {
-			$scope.selected = bubble;
-			map.setMarkerFocus(bubble._id);
-			map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
-		}
-	} else {
-		$location.path('w/'+bubble.id);
-	}
+	$location.path('w/'+bubble.id);
 }
 
 function initMarkers() {
@@ -23036,18 +23024,7 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
-//LISTENERS//
-
-$scope.$watch('temp.mapOn', function(newVal, oldVal) {
-	switch (newVal) {
-		case true:
-			style.navBG_color = 'rgba(245, 67, 54, 0.96)';
-		break;
-		case false:
-			style.resetNavBG();
-		break;
-	}
-}) 
+//LISTENERS// 
 
 $rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
 	var bubble = $scope.bubbles.find(function(element, index, array) {
