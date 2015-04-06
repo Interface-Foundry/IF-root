@@ -97,7 +97,13 @@ app.controller('SplashController', ['$scope', '$location', '$http', 'userManager
 	}
 
 	function setShowSplash(property, bool) {
-		$scope.show[property] = bool;
+		if (property instanceof Array) {
+			_.each(property, function(prop) {
+				$scope.show[prop] = bool;
+			});
+		} else {
+			$scope.show[property] = bool;
+		}
 	}
 
 	function splashNext() {
