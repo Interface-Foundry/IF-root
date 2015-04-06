@@ -17498,7 +17498,7 @@ var mapManager = {
 	center: {
 		lat: 42,
 		lng: -83,
-		zoom: 14
+		zoom: 17
 	},
 	markers: {},
 	layers: {
