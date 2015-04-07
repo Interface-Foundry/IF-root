@@ -1,76 +1,115 @@
-<div class="aperture-pop" ng-click="aperture.set('full'); zoomOn()" ng-show="aperture.state=='aperture-third'"></div>
+<div class="aperture-pop u-pointer" ng-click="aperture.set('full')" ng-show="aperture.state=='aperture-third'"></div>
+<category-widget ng-if="::category"
+										ng-show="aperture.state === 'aperture-full'"
+										class="category-map-view-scroll"
+										aperture="full"
+										categories="world.landmarkCategories"
+										style="style"
+										world="world"></category-widget>
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
 		ng-style="::{'background-color': style.titleBG_color}" 
-		ng-click="aperture.toggle('full'); zoomOn()"
-		ng-swipe-up="aperture.set('off'); zoomOn()"
-		ng-swipe-down="aperture.set('full'); zoomOn()"
+		ng-click="aperture.toggle('full')"
+		ng-swipe-up="aperture.set('off')"
+		ng-swipe-down="aperture.set('full')"
 		world-shelf>
 		<div class="world-title noPreventDefault" fit-font>
-				<span class="vertical-middle noPreventDefault">{{world.name}}</span>
+			<span class="vertical-middle noPreventDefault">{{world.name}}</span>
 		</div>
-		<category-widget ng-if="::category" ng-show="aperture.state==='aperture-full'" class="toolbar-category-widget"></category-widget>
+
+	</div>
+	<div>
 	</div>
 
-<div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
-	<div class="surface bg-clear">
-	
-	<!--DESCRIPTION-->
-	<div ng-include="'components/world/templates/description.html'" class="marble-page"></div>
+	<!-- bubbleBody directive controls aperture change on scroll -->
+	<div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
+		<div class="surface bg-clear">
 
-	<div class="marble-page" ng-if="category">
-			<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
-			<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
-			Categories
-			</header>
-			<category-widget></category-widget>
+			<cat-search-bar ng-show="isRetail" 
+				color="style.landmarkTitle_color"
+				text="defaultText"
+				world="world"></cat-search-bar>
+		
+			<!--DESCRIPTION-->
+			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' :
+																	'components/world/templates/description.html'" 
+					 class="marble-page"></div>
+
+
+			<div class="marble-page" ng-if="category">
+				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
+				Categories
+				</header>
+				<category-widget ng-if="::category"
+														aperture="off"
+														categories="world.landmarkCategories"
+														style="style"
+														world="world"></category-widget>
+			</div>
+
+			<!---want this got this -->
+			<div ng-include="isRetail ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
+
+			<!---yelp-->
+			<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
+			
+			<!--LANDMARKS-->
+			<div ng-include="landmarks.length>0 && !isRetail ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
+			
+			<!--MESSAGES-->
+			<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
+
+			<!--PRESENTS-->
+			<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null" class="marble-page"></div>
+
+			<!---streetview -->
+			<div ng-include="streetview==true ? 'components/world/templates/streetview.html' : null" class="marble-page"></div>
+
+			<!---meetup-->
+			<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null" class="marble-page"></div>
+			
+			<!--TWITTER-->
+			<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page" class="marble-page"></div>
+			
+			<!--INSTAGRAM-->
+			<div ng-include="instagram ? 'components/world/templates/instagram.html' : null" class="marble-page" class="marble-page"></div>
+
+			<!---nearby -->
+			<div ng-include="nearby==true ? 'components/world/templates/nearby.html' : null" class="marble-page"></div>
+
+			<!--CLAIM WORLD-->
+			<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
+				<em class="center-block text-center">Are you an organizer for this Meetup? Claim it now!</em>
+				<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
+			</div>
+
+
+			<div ng-show="showEdit">
+				<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest</a>
+			<a class="btn btn-default" if-href="#edit/w/{{worldURL}}">Edit your Bubble</a>
+			</div>
+			<div class="col-xs-12">
+				<div style="height:300px;"></div>
+			</div>
+		</div>
 	</div>
 
-	<!---yelp-->
-	<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
-	
-	<!--LANDMARKS-->
-	<div ng-include="landmarks.length>0 ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
-	
-	<!--MESSAGES-->
-	<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
-
-	<!--PRESENTS-->
-	<div ng-include="temp.presents==true ? 'components/world/templates/presents.html' : null" class="marble-page"></div>
-
-	<!---streetview -->
-	<div ng-include="streetview==true ? 'components/world/templates/streetview.html' : null" class="marble-page"></div>
-
-	<!---meetup-->
-	<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null" class="marble-page"></div>
-	
-	<!--TWITTER-->
-	<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page" class="marble-page"></div>
-	
-	<!--INSTAGRAM-->
-	<div ng-include="instagram ? 'components/world/templates/instagram.html' : null" class="marble-page" class="marble-page"></div>
-
-	<!---nearby -->
-	<div ng-include="nearby==true ? 'components/world/templates/nearby.html' : null" class="marble-page"></div>
-
-	<!--CLAIM WORLD-->
-	<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
-
-		<em class="center-block text-center">Are you an organizer for this Meetup? Claim it now!</em>
-		<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
-	</div>
-
-
-<div ng-show="showEdit">
-	<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest</a>
-<a class="btn btn-default" if-href="#edit/w/{{worldURL}}">Edit your Bubble</a>
 </div>
-	<div class="col-xs-12"><div style="height:300px;"></div></div>
-</div>
+<div ng-if="world.style.maps.localMapArray.length">
+	<floor-selector class="if-animate" ng-class="[aperture.state]"
+									world="world" 
+									style="style"
+									landmarks="landmarks"></floor-selector>
 </div>
 
-</div>
+<user-location class="if-animate"
+	style="style" 
+	ng-if="isRetail"
+	ng-class="[aperture.state]">
+</user-location>
+
 <a if-href="#w/{{world.id}}/messages" class="action-button world-action-button" 
 ng-if="messages==true" 
 ng-class="[aperture.state]"

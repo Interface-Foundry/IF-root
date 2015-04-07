@@ -139,6 +139,29 @@ module.exports = function(app, passport, landmarkSchema) {
 		});
 
 
+
+	// iOS Facebook Auth --------------------------------
+		app.route('/auth/facebook/mobile_sigin').post(function(req, res, next){
+			console.log('f_sign in');
+
+			passport.authenticate('client_facebook', function(err, user, info){
+				if (err || !user){
+					res.status(400).send(info);
+				} else {
+					req.login(user, function(err){
+						if (err){
+							res.status(400).send(err);
+						} else {
+							res.json(user);
+						}
+					});
+					//res.json(user);
+				}
+			})(req, res, next);
+		});
+
+
+
 	// meetup --------------------------------
 
 		// send to meetup to do the authentication

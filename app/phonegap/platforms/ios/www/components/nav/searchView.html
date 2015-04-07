@@ -2,14 +2,15 @@
 <div class="wrap gray-e6e6e6">
 	<div class="surface">
 		<!--results -->
-		<div ng-if="searching.$$state.pending">
+		<div ng-if="loading">
 			<div class="loading-spinner">
 				<div class="lspin1"></div>
 				<div class="lspin2"></div>
 			</div>
 		</div>
 		<div ng-if="searching.$$state.status==1">
-			<header class="bubble-group-label">{{searchResult.length}} results for {{lastSearch}}</header>
+			<header class="bubble-group-label"
+				ng-show="!loading">{{searchResult.length}} results for {{lastSearch}}</header>
 			<ul class="bubble-list">
 				<li class="bubble-list-item" ng-repeat="bubble in searchResult track by bubble._id" 
 					ng-click="go('w/'+bubble.id)">
