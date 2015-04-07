@@ -52,7 +52,7 @@ router.get('/', function(req, res) {
                 lon: req.query.lng
             }
         }, function(err, res, body) {
-
+            var data = JSON.parse(body);
             // 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/{lon},{lat}.json?access_token=<your access token>'
 
             //If error res is 303 try mapbox instead
