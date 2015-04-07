@@ -95,7 +95,6 @@ router.get('/', function(req, res) {
                 }
                 console.log(req.geoloc)
                 response.send(req.geoloc);
-
             }
 
         })//END OF MAPQUEST REQUEST
