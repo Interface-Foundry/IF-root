@@ -2615,7 +2615,7 @@ transform:translateX(100%);
 .drawer-item {
   position: relative;
   width: 100%;
-  height: 48px;
+  height: 46px;
   padding: 0px 0px 0px 48px;
   line-height: 48px;
   font-size: 14px;
@@ -3318,6 +3318,141 @@ nav ul {
   margin-left: -16px;
   margin-right: 8px;
   margin-bottom: -1px;
+}
+.new-announcement-form {
+  background-color: #eee;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 30px 50px;
+  width: 100%;
+}
+.new-announcement-form input[type="submit"] {
+  margin-top: 10px;
+}
+.new-announcement-form input.ng-invalid.ng-touched,
+.new-announcement-form textarea.ng-invalid.ng-touched {
+  border: 1px solid red;
+}
+.x-button {
+  background-color: inherit;
+  border: none;
+  float: right;
+  font-size: 1.3em;
+  margin: 0;
+}
+.add-button {
+  color: rgba(62, 82, 181, 0.960784);
+  cursor: pointer;
+  font-size: 1.1em;
+  height: 25px;
+  margin: 5px;
+}
+.superuser-title {
+  margin: 0;
+}
+#shelf.superuser-background {
+  background-color: #ddd;
+  height: 90%;
+  padding-bottom: 60px;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-left: 0;
+  padding-right: 0;
+}
+@media only screen and (min-width: 768px) {
+  #shelf.superuser-background {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+}
+#shelf.superuser-background .superuser-list {
+  margin-left: auto;
+  margin-right: auto;
+}
+#shelf.superuser-background .superuser-list li.announcement {
+  margin: 20px auto;
+}
+@media only screen and (min-width: 480px) {
+  #shelf.superuser-background .superuser-list li.announcement {
+    width: 456px;
+  }
+}
+@media only screen and (min-width: 768px) {
+  #shelf.superuser-background .superuser-list li.announcement {
+    width: 600px;
+  }
+}
+#shelf.superuser-background .superuser-list li.announcement .superuser-left-col {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+#shelf.superuser-background .superuser-list li.announcement .superuser-left-col .arrow {
+  cursor: pointer;
+  font-size: 30px;
+}
+#shelf.superuser-background .superuser-list li.announcement button.btn {
+  width: 70px;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item {
+  cursor: auto;
+  display: inline-block;
+  height: 100%;
+  margin-top: 1px;
+  padding: 20px;
+  width: 58%;
+  vertical-align: top;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item.superuser-list-item-entry {
+  width: 72%;
+}
+@media only screen and (min-width: 768px) {
+  #shelf.superuser-background .superuser-list .superuser-list-item {
+    width: 72%;
+  }
+}
+#shelf.superuser-background .superuser-list .superuser-list-item h4 {
+  text-align: center;
+}
+#shelf.superuser-background .superuser-list .superuser-list-item h4 span {
+  cursor: pointer;
+  float: right;
+}
+.datepicker-group {
+  margin-top: 34px;
+}
+.datepicker-group .dropdown-menu {
+  margin-bottom: 50px;
+}
+.circle {
+  background-color: rgba(62, 82, 181, 0.960784);
+  border-radius: 50%;
+  color: white;
+  float: left;
+  font-size: 1.7em;
+  height: 25px;
+  line-height: .8;
+  margin-right: 10px;
+  text-align: center;
+  width: 25px;
+}
+.contest-entry-pic {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  width: 100%;
+}
+.contest-entry-pic img {
+  width: 100%;
+}
+.contest-background {
+  background-color: #fff;
+  height: 90%;
+  margin-top: -40px;
+  padding-bottom: 60px;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 /*VARIABLES*/
 nav {
@@ -4807,7 +4942,8 @@ li.alert {
     display: block;
   }
   .aperture-third .leaflet-bottom.leaflet-left,
-  .aperture-half .leaflet-bottom.leaflet-left {
+  .aperture-half .leaflet-bottom.leaflet-left,
+  .aperture-off .leaflet-bottom.leaflet-left {
     display: none;
   }
 }

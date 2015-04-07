@@ -80,13 +80,16 @@ $scope.uploadWTGT = function($files, state) {
 }
 
 function uploadPicture(file, state, data) {
+
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
 		file: file,
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
+
 		$scope.wtgt.images[state] = data;
+	
 		$scope.wtgt.building[state] = false;
 	});
 }
@@ -206,7 +209,10 @@ function loadWidgets() { //needs to be generalized
 			$scope.twitter = true;
 		}
 		if ($scope.style.widgets.instagram == true) {
-	  		$scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	  		$scope.instagrams = db.instagrams.query({
+	  			number: 0,
+	  			tags:$scope.world.resources.hashtag
+	  		});
 	  		$scope.instagram = true;
 		}
 
@@ -358,49 +364,39 @@ function loadWidgets() { //needs to be generalized
 		
 		}
 		
-	   if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	   }
+	  if ($scope.world.resources) {
+			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	  }
 
-	   if ($scope.style.widgets.nearby == true) {
-	      $scope.nearby = true;
-	      $scope.loadState = 'loading';
+	  if ($scope.style.widgets.nearby == true) {
+      $scope.nearby = true;
+      $scope.loadState = 'loading';
 
-	      worldTree.getNearby().then(function(data){
+      worldTree.getNearby().then(function(data){
 
-	      	if(!data){
-	      		$scope.loadState = 'failure';
-	      	}
+      	if(!data){
+      		$scope.loadState = 'failure';
+      	}
 
-	      	if(data['150m'].length > 0 || data['2.5km'].length > 0){
+      	data['150m'] = data['150m'] || [];
+      	data['2.5km'] = data['2.5km'] || [];
 
-	      		//probably a better way to do this =_=
-	      		if (data['150m'].length > 0 && data['2.5km'].length > 0){
-					$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
-	      		}
-	      		else if (data['150m'].length > 0 && data['2.5km'].length < 0){
-	      			$scope.nearbyBubbles = data['150m'];
-	      		}
-	      		else if (data['150m'].length < 0 && data['2.5km'].length > 0){
-	      			$scope.nearbyBubbles = data['2.5km'];
-	      		}
-	      		else {
-	      			$scope.loadState = 'failure';
-	      		}
+      	$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
 
-	      		//remove bubble you're inside
-	      		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
-				    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
-				        $scope.nearbyBubbles.splice(i, 1);
-				    }
+    		//remove bubble you're inside
+    		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
+			    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
+			      $scope.nearbyBubbles.splice(i, 1);
+			    }
 				}
 
 				//only 3 bubbles
 				if ($scope.nearbyBubbles.length > 3){
 					$scope.nearbyBubbles.length = 3;
 				}
-		
-	      	}
+	
+      // }
+
 
 	      	$scope.loadState = 'success';
 

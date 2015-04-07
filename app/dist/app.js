@@ -4828,6 +4828,19 @@ var checkLoggedin = function(userManager) {
     return userManager.checkLogin();
 }
 
+var checkAdminStatus = function(userManager, $location) {
+	userManager.checkAdminStatus()
+	.then(function(isAdmin) {
+		if (isAdmin) {
+			return true;
+		} else {
+			return $location.path('/');
+		}
+	}, function(err) {
+		return $location.path('/');
+	});
+}
+
     //================================================
     
     //================================================
@@ -4858,16 +4871,17 @@ var checkLoggedin = function(userManager) {
     // Define all the routes
     //================================================
 $routeProvider.
+
       when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
       when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-      
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -4878,29 +4892,34 @@ $routeProvider.
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
-	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
+	  when('/w/:worldURL/contestentries/:hashTag', {templateUrl: 'components/world/subviews/contestentries.html', controller: 'ContestEntriesController'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 
-      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
-      when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
-      
-      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
-      when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+    when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
+    when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
+    
+    when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
+    when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
       
-      when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
-      when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-      
-      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
+    when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
+    when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
+    
+    when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/announcements/superuser_announcements.html', controller: 'SuperuserAnnouncementController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       otherwise({redirectTo: '/'});
@@ -5694,6 +5713,37 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 		}
 	}
 });
+'use strict';
+
+app.directive('lazyLoad', lazyLoad);
+
+lazyLoad.$inject = [];
+
+function lazyLoad() {
+	return {
+		scope: {
+			loadMore: '&'
+		},
+		restrict: 'A',
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+		var visibleHeight = elem.height();
+		var threshold = 500;
+
+		elem.scroll(function() {
+			var scrollableHeight = elem.prop('scrollHeight');
+			var hiddenContentHeight = scrollableHeight - visibleHeight;
+
+			if (hiddenContentHeight - elem.scrollTop() < threshold) {
+				// scroll is almost at bottom. Load more data
+				scope.$apply(scope.loadMore);
+			}
+		});
+	}
+}
+
 app.directive('progressCircle', function() {
 	return {
 		restrict: 'EA',
@@ -6457,7 +6507,15 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   return _date.toUpperCase();
 
  };
-});
+})
+
+.filter('capitalizeFirst', capitalizeFirst);
+
+function capitalizeFirst() {
+  return function(input) {
+    return input[0].toUpperCase() + input.slice(1);
+  }
+}
 
 /*!
  * FullCalendar v2.2.2
@@ -18583,6 +18641,7 @@ var alerts = alertManager;
    
 var userManager = {
 	userRes: $resource('/api/updateuser'),
+	adminStatus: false,
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -18651,6 +18710,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
+		  userManager.adminStatus = user.admin ? true : false;
 		  $rootScope.user = user;
 		  if (user._id){
 			  $rootScope.userID = user._id;
@@ -18661,6 +18721,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
+		  userManager.adminStatus = false;
 		  deferred.reject(0);
 	});
 	
@@ -18680,6 +18741,7 @@ userManager.signin = function(username, password) { //given a username and passw
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -18718,6 +18780,8 @@ userManager.fbLogin = function() { //login based on facebook approval
 userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
+	userManager.adminStatus = false;
+	userManager._user = {};
 	$location.path('/');
 	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
@@ -18756,6 +18820,14 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
+
 	})
 	.error(function(err) {
 	if (err) {
@@ -18767,6 +18839,23 @@ userManager.signup.signup = function() { //signup based on signup form
 
 userManager.saveToKeychain = function() { 
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+}
+
+userManager.checkAdminStatus = function() {
+	var deferred = $q.defer();
+
+	userManager.getUser().then(function(user) {
+	  if (user.admin) {
+		  deferred.resolve(true);
+		  userManager.adminStatus = true;
+	  } else {
+	  	deferred.reject(false);
+	  }
+	}, function(error) {
+		deferred.reject(false);
+	});
+
+	return deferred.promise;
 }
 
 return userManager;
@@ -20586,7 +20675,32 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
+'use strict';
+
+app.controller('ContestController', ContestController);
+
+ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+
+function ContestController($scope, $routeParams, Contests) {
+	$scope.contest = {};
+	$scope.region = $routeParams.region;
+
+	activate();
+
+	function activate() {
+		Contests.get({
+			id: $scope.region
+		}).$promise
+    .then(function(response) {
+    	if (response._id) {
+      	$scope.contest = response;
+    	}
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+}
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -20639,6 +20753,13 @@ scope.username = function () {
 	return userManager.getDisplayName();
 }
 //^^
+
+scope.superuserOptions = superuserService.routes;
+
+scope.goSuperuserOption = function($index) {
+	var region = $routeParams.region ? $routeParams.region : 'global';
+	superuserService.changeRoute(scope.superuserOptions[$index], region);
+}
 
 
 scope.userBubbles = function () {
@@ -22942,10 +23063,8 @@ $scope.goBack = function() {
 }
 
 $scope.logout = function() {
-      $http.get('/api/user/logout', {server:true});
-      userManager.loginStatus = false;
-      //$location.url('/');
-} //switch to userManager method
+	userManager.logout();
+}
 
 $scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 
@@ -23146,6 +23265,459 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+'use strict';
+
+angular.module('IF')
+    .factory('Announcements', function($resource) {
+
+        return $resource("/api/announcements/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            save: {
+                method: 'POST',
+                isArray:true
+            },
+            sort: {
+                method: 'POST',
+                isArray: true,
+                params: {
+                    option: 'sort'
+                }
+            },
+            remove: {
+                method: 'DELETE',
+                isArray:true
+            }
+        });
+    });
+'use strict';
+
+app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
+
+SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location', 'superuserService'];
+
+function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location, superuserService) {
+
+	$scope.announcement = {};
+	$scope.announcements = [];
+	$scope.changeAnnouncementOrder = changeAnnouncementOrder;
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.deleteAnnouncement = deleteAnnouncement;
+	$scope.edit = false;
+	$scope.editAnnouncement = editAnnouncement;
+	$scope.editIndex;
+	$scope.region = $routeParams.region;
+	$scope.routes = superuserService.routes;
+	$scope.regions = ['global'];
+	$scope.resetAnnouncement = resetAnnouncement;
+	$scope.showAddAnnouncement = false;
+	$scope.showAddContest = false;
+	$scope.toggleNewAnnouncement = toggleNewAnnouncement;
+	$scope.toggleNewContest = toggleNewContest;
+	$scope.toggleDraftState = toggleDraftState;
+	$scope.updateAnnouncement = updateAnnouncement;
+
+	activate();
+
+	function activate() {
+		resetAnnouncement();
+		Announcements.query({
+			id: $scope.region
+		}).$promise
+	    .then(function(response) {
+	      $scope.announcements = response;
+	    });
+	}
+
+	function changeAnnouncementOrder(index, direction) {
+		Announcements.sort({
+			id: $scope.announcements[index]._id
+		}, {
+			dir: direction,
+			priority: $scope.announcements[index].priority
+		})
+		.$promise
+		.then(function(response) {
+			$scope.announcements = response;
+		});
+	}
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+	function deleteAnnouncement($index) {
+		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		if (deleteConfirm) {
+			Announcements.remove({
+				id: $scope.announcements[$index]._id
+			})
+			.$promise
+			.then(function(response) {
+				$scope.announcements = response;
+			});
+		}
+	}
+
+	function editAnnouncement($index) {
+		var tempAnnouncement = {};
+		angular.copy($scope.announcements[$index], tempAnnouncement);
+		$scope.announcement = tempAnnouncement;
+		$scope.edit = true;
+		$scope.editIndex = $index;
+		$scope.showAddAnnouncement = true;
+	}
+
+	function resetAnnouncement() {
+		$scope.announcement = {
+			live: false,
+			region: 'global'
+		};
+	}
+
+	$scope.submitAnnouncement = function (form) {
+		if (form.$invalid) {
+			console.log('Form is missing required fields.');
+			return;
+		}
+    Announcements.save($scope.announcement).$promise
+    .then(function(announcements) {
+      resetAnnouncement();
+      $scope.announcements = announcements;
+      toggleNewAnnouncement();
+    }, function(error) {
+    	console.log(error.data);
+    });
+  };
+
+	function toggleNewAnnouncement() {
+		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
+		$scope.showAddContest = false;
+	}
+
+	function toggleNewContest() {
+		$scope.showAddContest = !$scope.showAddContest;
+		$scope.showAddAnnouncement = false;
+	}
+
+  function toggleDraftState($index) {
+  	$scope.announcements[$index].live = !$scope.announcements[$index].live;
+  	Announcements.update({
+  		id: $scope.announcements[$index]._id
+  	}, $scope.announcements[$index]);
+  }
+
+  function updateAnnouncement(form) {
+  	if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;
+  	}
+  	$scope.announcement.live = false;
+  	Announcements.update({
+  		id: $scope.announcement._id
+  	}, $scope.announcement)
+  	.$promise
+  	.then(function(response) {
+  		$scope.announcements[$scope.editIndex] = response;
+  		toggleNewAnnouncement();
+  	});	
+  }
+}
+'use strict';
+
+angular.module('IF')
+    .factory('Contests', function($resource) {
+
+        return $resource("/api/contests/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            scan: {
+                method: 'POST',
+                isArray:true,
+                params: {
+                    option: 'scan'
+                }
+            },
+            remove: {
+                method: 'DELETE'
+            }
+        });
+    });
+'use strict';
+
+app.controller('SuperuserContestController', SuperuserContestController);
+
+SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location', 'superuserService'];
+
+function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
+
+	$scope.contest = {};
+	$scope.contests;
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.dateOptions = {
+    formatYear: 'yy',
+    startingDay: 1
+  };
+  $scope.dateTime = {};
+	$scope.openEnd = openEnd;
+	$scope.openStart = openStart;
+	$scope.region = $routeParams.region;
+	$scope.regions = ['global'];
+	$scope.resetContestForm = resetContestForm;
+	$scope.routes = superuserService.routes
+	$scope.submit = submit;
+	$scope.updateContest = updateContest;
+
+	activate();
+
+	function activate() {
+		Contests.get({
+			id: $scope.region
+		}).$promise
+    .then(function(response) {
+    	if (response._id) {
+      	$scope.contest = response;
+    	}
+			getDates();
+    }, function(error) {
+    	console.log('Error:', error);
+    	getDates();
+    });
+    resetContestForm();
+	}
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+	function formatDateTime() {
+		var sd = $scope.dateTime.startDate,
+				st = $scope.dateTime.startTime,
+				ed = $scope.dateTime.endDate,
+				et = $scope.dateTime.endTime;
+		var start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), st.getHours(), st.getMinutes(), 0, 0);
+		var end = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), et.getHours(), et.getMinutes(), 0, 0);
+
+		return {
+			start: start,
+			end: end
+		};
+	}
+
+  function openEnd($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.openedEnd = true;
+  }
+
+  function openStart($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.openedStart = true;
+  }
+
+  function resetContestForm() {
+		$scope.contest = {
+			contestTags: [],
+			region: $scope.region
+		};
+  }
+
+	function submit(form) {
+		if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;			
+		}
+
+		// convert datepicker and timepicker and attach to contest object
+		$scope.contest.startDate = formatDateTime().start;
+		$scope.contest.endDate = formatDateTime().end;
+
+		// if _id exists then we are updating an existing contest
+		if ($scope.contest._id) {
+			updateContest();
+		} else {
+
+			Contests.save($scope.contest).$promise
+      .then(function(response) {
+        $scope.contest = response;
+      });;
+		}
+	}
+
+	function getDates() {
+		if (!$scope.contest._id) {
+			// if no contest exists in DB, set calendar and clock to current date/time
+			var d = new Date,
+					st,
+					et;
+	    $scope.dateTime.startDate = d;
+	    $scope.dateTime.startTime = d;
+	    $scope.dateTime.endDate = d;
+	    $scope.dateTime.endTime = d;
+	    // set minutes to 00
+	    $scope.dateTime.startTime.setMinutes(0);
+	    $scope.dateTime.endTime.setMinutes(0);
+		} else {
+			// set calendar and clock to match the contest data
+		  $scope.dateTime.startDate = new Date($scope.contest.startDate);
+		  st = ISOtoDate($scope.contest.startDate);
+	    $scope.dateTime.startTime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours(), st.getMinutes(),0 , 0);
+	    $scope.dateTime.endDate = new Date($scope.contest.endDate);
+	    et = ISOtoDate($scope.contest.endDate);
+	    $scope.dateTime.endTime = new Date(et.getFullYear(), et.getMonth(), et.getDate(), et.getHours(), et.getMinutes(),0 , 0);
+		}
+  }
+
+  function ISOtoDate(ISOdate) {
+  	return new Date(ISOdate);
+  }
+
+  function updateContest() {
+  	Contests.update({
+  		id: $scope.contest._id
+  	}, $scope.contest)
+  	.$promise
+  	.then(function(response) {
+  		$scope.contest = response;
+  	});	
+  }
+
+}
+'use strict';
+
+angular.module('IF')
+  .factory('Entries', Entries);
+
+Entries.$inject = ['$http', '$resource'];
+
+function Entries($http, $resource) {
+
+  var resource = $resource("/api/entries/:id/:option", {
+    id: '@id'
+  }, {
+    query: {
+      method: 'GET',
+      params: {
+        number: '@number'
+      },
+      isArray: true
+    },
+    update: {
+      method: 'put'
+    },
+    remove: {
+      method: 'DELETE'
+    }
+  });
+
+  return {
+    resource: resource
+  };
+
+}
+'use strict';
+
+app.controller('SuperuserEntriesController', SuperuserEntriesController);
+
+SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$location', 'superuserService'];
+
+function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
+
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.deleteEntry = deleteEntry;
+	$scope.entries = [];
+	$scope.loadEntries = loadEntries;
+	$scope.region = $routeParams.region;
+	$scope.routes = superuserService.routes;
+	$scope.toggleValidity = toggleValidity;
+	
+	loadEntries();
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+	function deleteEntry($index) {
+		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		if (deleteConfirm) {
+			Entries.resource.remove({
+				id: $scope.entries[$index]._id
+			})
+			.$promise
+			.then(function(response) {
+				$scope.entries.splice($index, 1);
+			}, function(error) {
+				console.log('Error, nothing deleted:', error);
+			});
+		}
+	}
+
+	function loadEntries() {
+		Entries.resource.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = $scope.entries.concat(response);
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+
+	function toggleValidity($index) {
+  	$scope.entries[$index].valid = !$scope.entries[$index].valid;
+  	Entries.resource.update({
+  		id: $scope.entries[$index]._id
+  	}, $scope.entries[$index]);		
+	}
+
+
+}
+'use strict';
+
+app.factory('superuserService', superuserService);
+
+superuserService.$inject = ['$location'];
+
+function superuserService($location) {
+	
+	var currentRoute = '',
+			routes = ['Announcements', 'Contests', 'Entries'];
+
+	return {
+		changeRoute: changeRoute,
+		getCurrentRoute: getCurrentRoute,
+		routes: routes
+	};
+
+	function changeRoute(newRoute, region) {
+		currentRoute = newRoute;
+		$location.path('/su/' + newRoute.toLowerCase() + '/' + region.toLowerCase());
+	}
+
+	function getCurrentRoute() {
+		currentRoute = currentRoute.length ? currentRoute :
+								findRoute();
+		return currentRoute;
+	}
+
+	function findRoute() {
+		var path = $location.path();
+		var len = path.slice(4).indexOf('/');
+		return path.slice(4)[0].toUpperCase() + path.slice(5, len + 4);
+	}
+
+}
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
@@ -23386,6 +23958,27 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 
 }]); 
 
+
+app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  $http.post('/email/request_confirm/'+$routeParams.token).
+    success(function(data){
+        console.log('email confirmed');
+        $scope.alerts.addAlert('success','Thanks for confirming your email');
+    }).
+    error(function(err){
+      if (err){
+        $scope.alerts.addAlert('danger',err);
+      }
+    });
+
+
+
+}]);
 
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
@@ -24278,6 +24871,46 @@ function categoryWidgetService() {
 	}
 	
 }
+'use strict';
+
+app.controller('ContestEntriesController', ContestEntriesController);
+
+ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', 'Entries', 'worldTree', 'styleManager'];
+
+function ContestEntriesController($scope, $routeParams, $rootScope, Entries, worldTree, styleManager) {
+
+	$scope.hashTag = $routeParams.hashTag;
+	$scope.loadEntries = loadEntries;
+	$scope.entries = [];
+	$scope.region = 'global';
+	$scope.style;
+	$scope.worldId = $routeParams.worldURL;
+
+	activate();
+
+	function activate() {
+		loadEntries();
+
+    worldTree.getWorld($routeParams.worldURL).then(function(data) {
+			$scope.style = data.style;
+			styleManager.navBG_color = $scope.style.navBG_color;
+			// $rootScope.hideBack = false;
+		});
+	}
+
+	function loadEntries() {
+		Entries.resource.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = $scope.entries.concat(response);
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+}
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
@@ -25087,24 +25720,29 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 		}
 	};
 }]);
-// app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
-// 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-// 		$scope.world = data.world;
-// 		$scope.style = data.style;
-// 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-// 		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
-// 	})
-// }])
-
-// model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		
+		$scope.loadInstagrams = loadInstagrams;
+		$scope.instagrams = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
-		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+		loadInstagrams();
+
+		function loadInstagrams() {
+			db.instagrams.query({
+				number: $scope.instagrams.length,
+				tags: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.instagrams = $scope.instagrams.concat(response);
+			}, function(error) {
+				console.log('Error:', error);
+			});
+		}
 	})
 }])
 
@@ -25681,13 +26319,16 @@ $scope.uploadWTGT = function($files, state) {
 }
 
 function uploadPicture(file, state, data) {
+
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
 		file: file,
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
+
 		$scope.wtgt.images[state] = data;
+	
 		$scope.wtgt.building[state] = false;
 	});
 }
@@ -25807,7 +26448,10 @@ function loadWidgets() { //needs to be generalized
 			$scope.twitter = true;
 		}
 		if ($scope.style.widgets.instagram == true) {
-	  		$scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	  		$scope.instagrams = db.instagrams.query({
+	  			number: 0,
+	  			tags:$scope.world.resources.hashtag
+	  		});
 	  		$scope.instagram = true;
 		}
 
@@ -25959,49 +26603,39 @@ function loadWidgets() { //needs to be generalized
 		
 		}
 		
-	   if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	   }
+	  if ($scope.world.resources) {
+			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	  }
 
-	   if ($scope.style.widgets.nearby == true) {
-	      $scope.nearby = true;
-	      $scope.loadState = 'loading';
+	  if ($scope.style.widgets.nearby == true) {
+      $scope.nearby = true;
+      $scope.loadState = 'loading';
 
-	      worldTree.getNearby().then(function(data){
+      worldTree.getNearby().then(function(data){
 
-	      	if(!data){
-	      		$scope.loadState = 'failure';
-	      	}
+      	if(!data){
+      		$scope.loadState = 'failure';
+      	}
 
-	      	if(data['150m'].length > 0 || data['2.5km'].length > 0){
+      	data['150m'] = data['150m'] || [];
+      	data['2.5km'] = data['2.5km'] || [];
 
-	      		//probably a better way to do this =_=
-	      		if (data['150m'].length > 0 && data['2.5km'].length > 0){
-					$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
-	      		}
-	      		else if (data['150m'].length > 0 && data['2.5km'].length < 0){
-	      			$scope.nearbyBubbles = data['150m'];
-	      		}
-	      		else if (data['150m'].length < 0 && data['2.5km'].length > 0){
-	      			$scope.nearbyBubbles = data['2.5km'];
-	      		}
-	      		else {
-	      			$scope.loadState = 'failure';
-	      		}
+      	$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
 
-	      		//remove bubble you're inside
-	      		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
-				    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
-				        $scope.nearbyBubbles.splice(i, 1);
-				    }
+    		//remove bubble you're inside
+    		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
+			    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
+			      $scope.nearbyBubbles.splice(i, 1);
+			    }
 				}
 
 				//only 3 bubbles
 				if ($scope.nearbyBubbles.length > 3){
 					$scope.nearbyBubbles.length = 3;
 				}
-		
-	      	}
+	
+      // }
+
 
 	      	$scope.loadState = 'success';
 

@@ -3,6 +3,9 @@
 @import 'nav.less';
 @import '../components/home/home.less';
 @import '../components/floor_selector/floorselector.less';
+@import '../components/super_user/superuser.less';
+@import '../components/contest/contest.less';
+
 
 /*VARIABLES*/
 @darkenPctg-hover: 5%;
@@ -1673,7 +1676,8 @@ and (min-width : 768px) {
 	}
 
 	.aperture-third .leaflet-bottom.leaflet-left,
-	.aperture-half .leaflet-bottom.leaflet-left {
+	.aperture-half .leaflet-bottom.leaflet-left,
+	.aperture-off .leaflet-bottom.leaflet-left {
 		display: none;
 	}
 }
@@ -1873,4 +1877,3 @@ button:active,
 button:focus {
 	outline: none;
 }
-

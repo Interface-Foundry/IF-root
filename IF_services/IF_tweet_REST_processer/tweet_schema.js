@@ -21,7 +21,7 @@
 			media_url: String
 		},
 		text: { type: String, index: true },
-		hashtags:[String],
+		hashtags:[{ type: String, index: true }],
 
 		created: { type: Date, default: Date.now }
 		//_id: Schema.Types.ObjectId,

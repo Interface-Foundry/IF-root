@@ -1,4 +1,4 @@
-app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -51,6 +51,13 @@ scope.username = function () {
 	return userManager.getDisplayName();
 }
 //^^
+
+scope.superuserOptions = superuserService.routes;
+
+scope.goSuperuserOption = function($index) {
+	var region = $routeParams.region ? $routeParams.region : 'global';
+	superuserService.changeRoute(scope.superuserOptions[$index], region);
+}
 
 
 scope.userBubbles = function () {

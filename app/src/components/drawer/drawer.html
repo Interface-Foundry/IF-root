@@ -20,6 +20,15 @@
 	<li class="drawer-item" ng-click="create()">
 		<div class="drawer-item-img drawer-add"></div>Create a New Bubble
 	</li>
+
+	<div ng-if="userManager.adminStatus">
+		<li ng-repeat="option in superuserOptions" 
+				class="drawer-item"
+				ng-click="goSuperuserOption($index)">
+			{{option}}
+		</li>
+	</div>
+	
 	<li class="drawer-item" ng-click="logout()">
 		Logout
 	</li>
