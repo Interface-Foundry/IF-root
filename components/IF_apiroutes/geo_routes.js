@@ -82,7 +82,7 @@ router.get('/', function(req, res) {
                 response.send(req.geoloc);
             }
         })
-    } else if (!req.query.hasloc) {
+    } else if (req.query.hasloc == 'false') {
         console.log('If user id not provide geoloc coordinates.. ip-based req.geoloc is..', req.geoloc)
          response.send(req.geoloc);
      } else {
