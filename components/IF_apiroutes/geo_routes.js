@@ -26,6 +26,8 @@ router.use(function(req, res, next) {
         var data = JSON.parse(body);
         if (data.city == null) {
             req.geoloc.cityName = 'My Location'
+        } else {
+            req.geoloc.cityName = data.city;
         }
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
