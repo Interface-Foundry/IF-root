@@ -73,15 +73,21 @@ router.get('/', function(req, res) {
                     response.send(req.geoloc);
                 })
             } else {
-                var data = JSON.parse(body);
-                if (data.address.city) {
-                    req.geoloc.cityName = data.address.city;
+                //Otherwise query mapquest
+                if (data.address) {
+                    var data = JSON.parse(body);
+
+                    if (data.address.city) {
+                        req.geoloc.cityName = data.address.city;
+                    }
+                    if (data.address.village) {
+                        req.geoloc.cityName = data.address.village;
+                    }
+                    console.log('Mapquest based result geoloc is..', req.geoloc)
+                    response.send(req.geoloc);
+                } else {
+                    req.geoloc.cityName = 'My Location'
                 }
-                if (data.address.village) {
-                    req.geoloc.cityName = data.address.village;
-                }
-                console.log('Mapquest based result geoloc is..', req.geoloc)
-                response.send(req.geoloc);
             }
         })
     } else if (req.query.hasloc == 'false' && !req.query.lat && !req.query.lng) {
