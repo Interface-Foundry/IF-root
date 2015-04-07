@@ -16,7 +16,7 @@ router.use(function(req, res, next) {
         //Because the request library also uses 'res' we'll rename the response here
     var response = res;
     //query the local freegeoip server we are running 
-    //if hasloc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
+    //if hasLoc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
     //for now use the less accurate ip based cityName
     request({
         url: geoipURL + '192.30.252.128'
@@ -42,7 +42,7 @@ router.use(function(req, res, next) {
 router.get('/', function(req, res) {
     var response = res;
 
-    if (req.query.hasloc && req.query.lat && req.query.lng) {
+    if (req.query.hasLoc && req.query.lat && req.query.lng) {
         req.geoloc.lat = req.query.lat;
         req.geoloc.lng = req.query.lng;
         request({
@@ -68,7 +68,7 @@ router.get('/', function(req, res) {
                     if (err) console.log(err);
                     var data = JSON.parse(body);
                     req.geoloc.cityName = data.features[1].text;
-
+                    req.geoloc.src = 'mapbox';
                     console.log('Mapbox based result geoloc is..', req.geoloc)
                     response.send(req.geoloc);
                 })
@@ -86,6 +86,7 @@ router.get('/', function(req, res) {
                     if (data.address.village) {
                         req.geoloc.cityName = data.address.village;
                     }
+                    req.geoloc.src = 'mapquest';
                     console.log('Mapquest based result geoloc is..', req.geoloc)
                     response.send(req.geoloc);
                 } else {
@@ -93,8 +94,9 @@ router.get('/', function(req, res) {
                 }
             }
         })
-    } else if (req.query.hasloc == 'false' && !req.query.lat && !req.query.lng) {
+    } else if (req.query.hasLoc == 'false' && !req.query.lat && !req.query.lng) {
         console.log('If user id not provide geoloc coordinates.. ip-based req.geoloc is..', req.geoloc)
+        req.geoloc.src = 'ip-based';
         response.send(req.geoloc);
     } else {
         console.log('Incorrect query..', req.query)
