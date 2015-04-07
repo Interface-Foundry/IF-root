@@ -18,25 +18,15 @@ $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
 $scope.wtgt = {
-	hashtags: {
-		want: 'hashtag1',
-		got: 'hashtag2'
-	},
 	images: {},
 	building: {}
 };
+
 $scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
-
-$scope.contest = {"_id":"551d51e9a68fa40000953256","endDate":"2015-06-01T03:00:00.000Z","startDate":"2015-04-01T12:00:00.000Z","body":"Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.","subheading":"Or tag your photos on our Facebook or Instagram to enter to win!","headline":"Win a $50 gift card","name":"Post Pics, Win Prizes!","htmlBody":"<h1>Hello.</h1><p>This is where the contest info will go.</p><p><img src=\"http://www.quickmeme.com/img/b2/b252b36ce5c266c6da23acdc32f40dd3cd31cc0f625a5badfb37a927a797f55b.jpg\"/><br/></p>","region":"global","__v":1,"contestTags":[{"tag":"#wantthis","title":"WANT THIS","_id":"552437083fc8bccde79ebccf"},{"title":"GOT THIS","tag":"#gotthis","_id":"552437083fc8bccde79ebcce"}],"live":true}
-
-
-
-
-
 
 var landmarksLoaded;
 
@@ -53,8 +43,8 @@ $scope.verifyUpload = function(event, state) {
 	}
 }
 
-$scope.uploadWTGT = function($files, state) {
-	$scope.wtgt.building[state] = true;
+$scope.uploadWTGT = function($files, hashtag) {
+	$scope.wtgt.building[hashtag] = true;
 
 	var file = $files[0];
 
@@ -62,8 +52,8 @@ $scope.uploadWTGT = function($files, state) {
 	var time = new Date();
 
 	// get hashtag
-	var hashtag = null;
-	hashtag = $scope.wtgt.hashtags[state];
+	// var hashtag = null;
+	// hashtag = $scope.wtgt.hashtags[hashtag];
 
 	var data = {
 		world_id: $scope.world._id,
@@ -80,14 +70,14 @@ $scope.uploadWTGT = function($files, state) {
 		// console.log('coords: ', coords);
 		data.userLat = coords.lat;
 		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	}, function(err) {
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	});
 
 }
 
-function uploadPicture(file, state, data) {
+function uploadPicture(file, hashtag, data) {
 
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
@@ -95,17 +85,20 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		console.log('DATA IZZZ',data);
-		$scope.wtgt.images[state] = data;
-	
-		$scope.wtgt.building[state] = false;
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
 	});
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
 		$scope.style = data.style;
-		// $scope.contest = data.contest ? data.contest : {};
+		$scope.contest = _.isEmpty(data.contest) ? {} : data.contest;
+		if (!(_.isEmpty(data.submissions))) {
+			data.submissions.forEach(function(s) {
+				$scope.wtgt[s.hashtag] = s.imgURL;
+			});
+		}
 
 		if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;

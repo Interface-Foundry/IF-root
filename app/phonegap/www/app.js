@@ -4849,15 +4849,6 @@ var checkAdminStatus = function(userManager, $location) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
-	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://bubbl.li' + request.url;
-		    			if (ifGlobals.username&&ifGlobals.password) {
-							request.headers['Authorization'] = ifGlobals.getBasicHeader();
-							//console.log(request);
-						} else if (ifGlobals.fbToken) {
-							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
-						}
-	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4933,6 +4924,9 @@ $routeProvider.
 
       otherwise({redirectTo: '/'});
       
+$locationProvider.html5Mode({
+	enabled: true
+});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4942,31 +4936,16 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
+	userManager.checkLogin();
 	
 	
-	navigator.splashscreen.hide();
 	
-/*
-lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
-			console.log(success);
-		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
-}, function(err) {
-	console.log('credential error', error); 
-});
-*/
 });
 
-document.addEventListener('deviceready', onDeviceReady, true);
-function onDeviceReady() {
-	angular.element(document).ready(function() {
-		angular.bootstrap(document, ['IF']);
-	});
-}
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+
+});
 app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5340,7 +5319,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 19;
+					var topOffset = 4;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5704,6 +5683,10 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
+			var firstHash = value.indexOf('#');
+			if (firstHash > -1) {
+				value = value.slice(0, firstHash) + value.slice(firstHash+1);
+			}
 			$attr.$set('href', value);
 			
 			});
@@ -5722,9 +5705,6 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
-				if (value.indexOf('http')<0) {
-					value = 'https://bubbl.li/'+value;
-				}
 				
 				$attr.$set('src', value);
 			
@@ -18427,77 +18407,8 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: true,
-	keychain: new Keychain()
+	supported: false
 }
-
-//getCredentials returns a promise->map of the available credentials. 
-//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-//	because all will return rejected if you do.
-
-lockerManager.getCredentials = function() {
-	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
-	
-	lockerManager.keychain.getForKey(function(value) {
-		username.resolve(value);
-	}, function(error) {
-		username.resolve(undefined);
-		console.log(error);
-	}, 'username', 'Bubbl.li');
-
-	lockerManager.keychain.getForKey(function(value) {
-		password.resolve(value);
-	}, function(error) {
-		password.resolve(undefined);
-		console.log(error);
-	}, 'password', 'Bubbl.li');
-	
-	lockerManager.keychain.getForKey(function(value) {
-		fbToken.resolve(value);
-	}, function(error) {
-		fbToken.resolve(undefined);
-		console.log(error);
-	}, 'fbToken', 'Bubbl.li');
-	
-	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-}
-
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Bubbl.li', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Bubbl.li', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
-
-
-//saves the FB token
-lockerManager.saveFBToken = function(fbToken) {
-	var deferred = $q.defer();
-	lockerManager.keychain.setForKey(function(success) {
-		deferred.resolve(success);
-	}, function(error) {
-		deferred.reject(error);
-	},
-	'fbToken', 'Bubbl.li', fbToken);
-	
-	return deferred;
-}
-
 	 
 return lockerManager;
 	   
@@ -18731,7 +18642,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -18829,20 +18740,17 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	
-	ifGlobals.username = username;
-	ifGlobals.password = password;
-	$http.post('/api/user/login-basic', data, {server: true})
+	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
-			ifGlobals.loginStatus = true;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	
 	
 	return deferred.promise;
 }
@@ -18892,7 +18800,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.showDialog('keychainDialog.html');
+		dialogs.show = false;
 		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
@@ -19244,8 +19152,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	var world = {newStatus: true};
 	
@@ -20899,9 +20805,6 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
-//isnt ready for mobile yet
 var aperture = apertureService,
 	map = mapManager,
 	style = styleManager,
@@ -21747,8 +21650,6 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -22312,8 +22213,6 @@ $scope.onUploadAvatar = function($files) {
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -23236,34 +23135,6 @@ $scope.share = function(platform) {
   );
 };
 
-$scope.fbLogin = function() {
-	userManager.fbLogin().then(
-		function (success) {
-			console.log(success);
-			userManager.checkLogin();
-		}, function (failure) {
-			console.log(failure);	
-		})
-}
-//On Phonegap startup, try to login with either saved username/pw or facebook
-lockerManager.getCredentials().then(function(credentials) {
-	if (credentials.username, credentials.password) {
-		userManager.signin(credentials.username, credentials.password).then(function(success) {
-			userManager.checkLogin().then(function(success) {
-			console.log(success);
-			});
-		}, function (reason) {
-			console.log('credential signin error', reason)
-		});
-	} else if (credentials.fbToken) {
-		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log(success);	
-		})
-	}
-}, function(err) {
-	console.log('credential error', error); 
-});
 }]);
 app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
@@ -24492,8 +24363,6 @@ $scope.deleteBubble = function(_id) {
 $scope.newWorld = function() {
 	console.log('newWorld()');
 	
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
@@ -26005,6 +25874,10 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
+		var firstHash = url.indexOf('#');
+		if (firstHash > -1) {
+			return url.slice(0, firstHash) + url.slice(firstHash+1);
+		} else {return url}
 		return url;
 	}
 }
@@ -26396,25 +26269,15 @@ $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
 $scope.wtgt = {
-	hashtags: {
-		want: 'hashtag1',
-		got: 'hashtag2'
-	},
 	images: {},
 	building: {}
 };
+
 $scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
-
-$scope.contest = {"_id":"551d51e9a68fa40000953256","endDate":"2015-06-01T03:00:00.000Z","startDate":"2015-04-01T12:00:00.000Z","body":"Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.","subheading":"Or tag your photos on our Facebook or Instagram to enter to win!","headline":"Win a $50 gift card","name":"Post Pics, Win Prizes!","htmlBody":"<h1>Hello.</h1><p>This is where the contest info will go.</p><p><img src=\"http://www.quickmeme.com/img/b2/b252b36ce5c266c6da23acdc32f40dd3cd31cc0f625a5badfb37a927a797f55b.jpg\"/><br/></p>","region":"global","__v":1,"contestTags":[{"tag":"#wantthis","title":"WANT THIS","_id":"552437083fc8bccde79ebccf"},{"title":"GOT THIS","tag":"#gotthis","_id":"552437083fc8bccde79ebcce"}],"live":true}
-
-
-
-
-
 
 var landmarksLoaded;
 
@@ -26431,8 +26294,8 @@ $scope.verifyUpload = function(event, state) {
 	}
 }
 
-$scope.uploadWTGT = function($files, state) {
-	$scope.wtgt.building[state] = true;
+$scope.uploadWTGT = function($files, hashtag) {
+	$scope.wtgt.building[hashtag] = true;
 
 	var file = $files[0];
 
@@ -26440,8 +26303,8 @@ $scope.uploadWTGT = function($files, state) {
 	var time = new Date();
 
 	// get hashtag
-	var hashtag = null;
-	hashtag = $scope.wtgt.hashtags[state];
+	// var hashtag = null;
+	// hashtag = $scope.wtgt.hashtags[hashtag];
 
 	var data = {
 		world_id: $scope.world._id,
@@ -26458,14 +26321,14 @@ $scope.uploadWTGT = function($files, state) {
 		// console.log('coords: ', coords);
 		data.userLat = coords.lat;
 		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	}, function(err) {
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	});
 
 }
 
-function uploadPicture(file, state, data) {
+function uploadPicture(file, hashtag, data) {
 
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
@@ -26473,17 +26336,20 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		console.log('DATA IZZZ',data);
-		$scope.wtgt.images[state] = data;
-	
-		$scope.wtgt.building[state] = false;
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
 	});
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
 		$scope.style = data.style;
-		// $scope.contest = data.contest ? data.contest : {};
+		$scope.contest = _.isEmpty(data.contest) ? {} : data.contest;
+		if (!(_.isEmpty(data.submissions))) {
+			data.submissions.forEach(function(s) {
+				$scope.wtgt[s.hashtag] = s.imgURL;
+			});
+		}
 
 		if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
