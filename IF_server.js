@@ -217,49 +217,51 @@ var redis = require("redis"),
 
 
 app.post('/email/confirm', function(req, res, next) {
-	console.log("entering /email/confirm");
+    console.log("entering /email/confirm");
 
     if (!validateEmail(req.user.local.email)) {
-		console.log('bad email address: ' + req.user.local.email);
-		next('Please use a real email address');
-		return;
-	}
+        console.log('bad email address: ' + req.user.local.email);
+        next('Please use a real email address');
+        return;
+    }
 
-	if (!req.headers.host) {
-		console.log("Cannot send confirmation mail without req.headers.host");
-		next("Can not send confirmation mail: no host");
-		return;
-	}
+    if (!req.headers.host) {
+        console.log("Cannot send confirmation mail without req.headers.host");
+        next("Can not send confirmation mail: no host");
+        return;
+    }
 
     crypto.randomBytes(20, function(err, buf) {
         var token = buf.toString('hex');
-		var email = req.user.local.email;
+        var email = req.user.local.email;
 
-        User.findOne({'local.email': email},	function(err, user) {
+        User.findOne({
+            'local.email': email
+        }, function(err, user) {
             if (!user) {
                 next('No account with that email address exists, or you signed up only through Facebook/Twitter');
-				return;
+                return;
             }
 
             user.local.confirmEmailToken = token;
             user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
             user.save(function(err) {
-				if (err) {
-					return next(err);
-				}
+                if (err) {
+                    return next(err);
+                }
 
-				var mailOptions = {
-					to: email,
-					from: 'Kip <noreply@kipapp.co>',
-					subject: 'Kip – Confirm your email',
-					text: 'Thanks for signing up for Kip! \n\n' +
-                          'Please click on the following link to confirm your email:\n\n' +
-                          'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+                var mailOptions = {
+                    to: email,
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip – Confirm your email',
+                    text: 'Thanks for signing up for Kip! \n\n' +
+                        'Please click on the following link to confirm your email:\n\n' +
+                        'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
-					if (err) {
-						return next(err);
-					}
+                    if (err) {
+                        return next(err);
+                    }
                     console.log('sent confirmation email');
                     res.send("｡◕‿◕｡");
                 });
@@ -2458,16 +2460,17 @@ app.get('/api/worlds/:id', function(req, res) {
                                 live: true
                             }, function(err, contest) {
                                 if (err) console.log(err)
-                                //IS USER LOGGED IN?
+                                    //IS USER LOGGED IN?
                                 if (req.user) {
                                     //DOES USER HAVE RELEVANT SUBMISSIONS?
                                     if (req.user.submissions) {
                                         req.user.submissions.forEach(function(el) {
-                                            if (el.worldID == data.id && el.contestID == contest._id) {
-                                                contestSubmissions.push(el);
-                                            }
-                                        })
-                                        var submits = _.pluck(contestSubmissions, hashtag, imgURL)
+                                                if (el.worldID == data._id && el.contestID == contest._id) {
+                                                    contestSubmissions.push(el);
+                                                }
+                                            })
+                                            // console.log('contest submissions is: ', contestSubmissions)
+                                        var submits = _.pluck(contestSubmissions, 'hashtag', 'imgURL')
                                         res.send({
                                             contest: contest,
                                             submissions: submits,
@@ -2475,24 +2478,38 @@ app.get('/api/worlds/:id', function(req, res) {
                                             world: data
                                         });
                                     } //end of if user has submissions field
+
                                     //if user logged in but no submissions
-                                    res.send({
-                                        contest: contest,
-                                        submissions: null,
-                                        style: style,
-                                        world: data
-                                    });
+                                    if (req.user && !req.user.submissions) {
+                                        res.send({
+                                            contest: contest,
+                                            submissions: null,
+                                            style: style,
+                                            world: data
+                                        });
+                                    }
                                 } //END OF USER LOGGED IN
                             })
                         } //END OF RETAIL
 
+                        //If user logged in and world is not retail
+                        if (req.user && data.category !== 'Retail') {
+                            res.send({
+                                contest: null,
+                                submissions: null,
+                                style: style,
+                                world: data
+                            });
+                        }
                         //If user not logged in and world is not retail
-                        res.send({
-                            contest: null,
-                            submissions: null,
-                            style: style,
-                            world: data
-                        });
+                        else if (!req.user && data.category !== 'Retail') {
+                            res.send({
+                                contest: null,
+                                submissions: null,
+                                style: style,
+                                world: data
+                            });
+                        }
                     }
                 });
 
@@ -2509,8 +2526,6 @@ app.get('/api/worlds/:id', function(req, res) {
                         console.log('view update succes');
                     }
                 });
-
-
             }
         } else {
             console.log('world doesnt have a styleID');
