@@ -77,6 +77,8 @@ var mongoose = require('mongoose'),
     worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
+    contestSchema = require('./components/IF_schemas/contest_schema.js'),
+    contestEntrySchema = require('./components/IF_schemas/contestEntry_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
     monguurl = require('monguurl');
 
@@ -206,7 +208,8 @@ app.post('/feedback', function(req, res) {
 // var redis = require('redis');
 // var client = redis.createClient(); //creates a new client 
 
-var redisClient = require('./redis.js');
+var redis = require("redis"),
+    client = redis.createClient();
 
 //---------------------------------------//
 //-------- Send Email Confirmation ------//
@@ -572,7 +575,7 @@ app.post('/api/analytics/:action', function(req, res) {
     var analytics = new analyticsSchema();
 
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
-    redisClient.rpush(analytics, function(err, reply) {
+    client.rpush(analytics, function(err, reply) {
         console.log(reply);
         res.send('pushed!');
     });
@@ -863,17 +866,14 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
-                                        // //additional content was passed with the image, handle it here
-                                        // if (uploadContents) {
-                                        //     try {
-                                        //         uploadContents = JSON.parse(uploadContents);
-                                        //     } catch (err) {
-                                        //         console.log(err);
-                                        //     }
-                                        //     if (uploadContents.type == 'retail_campaign') {
-                                        //         submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                        //     }
-                                        // }
+                                        //Testing redis
+                                        client.rpush({
+                                            test: 'test'
+                                        }, function(err, reply) {
+                                            console.log('redis reply: ', reply);
+
+                                        });
+
                                         var options = {
                                                 url: "https://api.cloudsightapi.com/image_requests",
                                                 headers: {
@@ -923,7 +923,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 },
                                                 function(err) {
                                                     console.log('Description of image is..', description)
-                                                    //additional content was passed with the image, handle it here
+                                                        //additional content was passed with the image, handle it here
                                                     if (uploadContents) {
                                                         try {
                                                             uploadContents = JSON.parse(uploadContents);
@@ -2431,6 +2431,10 @@ app.get('/api/worlds/:id', function(req, res) {
             }
         });
     }
+
+
+
+
     //if world, query for style and return
     function combineQuery(data, res) {
         //look up style associated with world
@@ -2442,12 +2446,57 @@ app.get('/api/worlds/:id', function(req, res) {
                         console.log(err);
                     }
                     if (style) {
-                        //console.log(style);
-                        var resWorldStyle = {
-                            "world": data,
-                            "style": style
-                        };
-                        res.status(200).send(resWorldStyle);
+
+                        //If bubble category is Retail, send contest object
+                        if (data.category == 'Retail') {
+
+                            var contestSubmissions = [];
+
+                            contestSchema.findOne({
+                                live: true
+                            }, function(err, contest) {
+                                if (err) console.log(err)
+                                if (req.user) {
+                                    //Check users submissions for relevent contest submissions in this world for this contest
+                                    if (req.user.submissions) {
+                                        req.user.submissions.forEach(function(el) {
+                                            if (el.worldID == data.id && el.contestID == contest._id) {
+                                                contestSubmissions.push(el);
+                                            }
+                                        })
+                                        var submits = _.pluck(contestSubmissions, hashtag, imgURL)
+                                        res.send({
+                                            contest: contest,
+                                            submissions: submits,
+                                            style: style,
+                                            world: data
+                                        });
+                                    } //end of if user has submissions field
+                                    //if user logged in but no submissions
+                                    res.send({
+                                        contest: contest,
+                                        submissions: null,
+                                        style: style,
+                                        world: data
+                                    });
+                                } //END OF IF USER LOGGED IN
+                                //if user not logged in at all
+                                res.send({
+                                    contest: contest,
+                                    submissions: null,
+                                    style: style,
+                                    world: world
+                                });
+                            })
+                        } //END OF IF RETAIL
+
+                        //If user not logged in and world is not retail
+                        res.send({
+                            contest: null,
+                            submissions: null,
+                            style: style,
+                            world: world
+                        });
                     }
                 });
 

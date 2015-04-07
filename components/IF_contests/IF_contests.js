@@ -94,9 +94,9 @@ var route = function(imgUpload, uploadContents, userID) {
                         if(!user) console.log('user not found');
                         console.log(user);
                         var mailOptions = {
-                            to: 'IF <IF Bubbl <mail@bubbl.li>>',
+                            to: 'IF <hello@interfacefoundry.com>',
                             from: user.local.email,
-                            subject: 'New Contest Submission!',
+                            subject: 'New Contest' + data.region +'Submission!',
                             text: 'Hello,\n\n' +
                                 user.profileID + ' (id:'+ user._id+') has entered contest: ' + data.contestId + '. \n \n The AWS image link is: '+data.imgURL
                         };
