@@ -12,12 +12,16 @@ function currentWorldService() {
 	};
 	
 	function floorNumToName(floorNum) {
-		return floorDirectory[floorNum];
+		if (_.isEmpty(floorDirectory)) {
+			return floorNum;
+		} else {
+			return floorDirectory[floorNum];
+		}
 	}
 
 	function createFloorDirectory(localMapArray) {
 		localMapArray.forEach(function(m) {
-			floorDirectory[String(m.floor_num)] = m.floor_name;
+			floorDirectory[String(m.floor_num)] = m.floor_name || m.floor_num;
 		});
 	}
 }

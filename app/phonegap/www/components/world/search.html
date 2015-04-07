@@ -70,6 +70,7 @@
 							ng-click="go('w/' + world.id + '/' + landmark.id)">
 								<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
 								<span>{{::landmark.name}}</span>
+								<span>Here: {{::landmark.loc_info.floor_num | floorNumToName }}</span>
 						</li>
 					</ul>
 				</div>

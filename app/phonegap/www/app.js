@@ -6537,6 +6537,17 @@ function capitalizeFirst() {
   }
 }
 
+angular.module('tidepoolsFilters')
+.filter('floorNumToName', floorNumToName);
+
+floorNumToName.$inject = ['currentWorldService'];
+
+function floorNumToName(currentWorldService) {
+  return function(input) {
+    return currentWorldService.floorNumToName(input);
+  }
+}
+
 /*!
  * FullCalendar v2.2.2
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -17088,12 +17099,16 @@ function currentWorldService() {
 	};
 	
 	function floorNumToName(floorNum) {
-		return floorDirectory[floorNum];
+		if (_.isEmpty(floorDirectory)) {
+			return floorNum;
+		} else {
+			return floorDirectory[floorNum];
+		}
 	}
 
 	function createFloorDirectory(localMapArray) {
 		localMapArray.forEach(function(m) {
-			floorDirectory[String(m.floor_num)] = m.floor_name;
+			floorDirectory[String(m.floor_num)] = m.floor_name || m.floor_num;
 		});
 	}
 }
