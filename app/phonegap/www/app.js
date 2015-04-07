@@ -17642,6 +17642,9 @@ mapManager.adjustHeightByAperture = function(aperture, height) {
 		case 'aperture-full':
 			return 110;
 			break;
+		case 'aperture-off':
+			return height * 0.78; 
+			break;
 	}
 }
 
