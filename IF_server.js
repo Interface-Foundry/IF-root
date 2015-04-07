@@ -2447,7 +2447,7 @@ app.get('/api/worlds/:id', function(req, res) {
                     }
                     if (style) {
 
-                        //If bubble category is Retail, send contest object
+                        //IS THIS BUBBLE RETAIL?
                         if (data.category == 'Retail') {
 
                             var contestSubmissions = [];
@@ -2456,8 +2456,9 @@ app.get('/api/worlds/:id', function(req, res) {
                                 live: true
                             }, function(err, contest) {
                                 if (err) console.log(err)
+                                //IS USER LOGGED IN?
                                 if (req.user) {
-                                    //Check users submissions for relevent contest submissions in this world for this contest
+                                    //DOES USER HAVE RELEVANT SUBMISSIONS?
                                     if (req.user.submissions) {
                                         req.user.submissions.forEach(function(el) {
                                             if (el.worldID == data.id && el.contestID == contest._id) {
@@ -2479,23 +2480,16 @@ app.get('/api/worlds/:id', function(req, res) {
                                         style: style,
                                         world: data
                                     });
-                                } //END OF IF USER LOGGED IN
-                                //if user not logged in at all
-                                res.send({
-                                    contest: contest,
-                                    submissions: null,
-                                    style: style,
-                                    world: world
-                                });
+                                } //END OF USER LOGGED IN
                             })
-                        } //END OF IF RETAIL
+                        } //END OF RETAIL
 
                         //If user not logged in and world is not retail
                         res.send({
                             contest: null,
                             submissions: null,
                             style: style,
-                            world: world
+                            world: data
                         });
                     }
                 });
