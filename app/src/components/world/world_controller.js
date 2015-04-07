@@ -13,6 +13,7 @@ $scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
 navService.show('home');
 
+$scope.contest = {};
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
@@ -29,7 +30,14 @@ $scope.isRetail = false;
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
-	
+
+$scope.contest = {"_id":"551d51e9a68fa40000953256","endDate":"2015-06-01T03:00:00.000Z","startDate":"2015-04-01T12:00:00.000Z","body":"Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.","subheading":"Or tag your photos on our Facebook or Instagram to enter to win!","headline":"Win a $50 gift card","name":"Post Pics, Win Prizes!","htmlBody":"<h1>Hello.</h1><p>This is where the contest info will go.</p><p><img src=\"http://www.quickmeme.com/img/b2/b252b36ce5c266c6da23acdc32f40dd3cd31cc0f625a5badfb37a927a797f55b.jpg\"/><br/></p>","region":"global","__v":1,"contestTags":[{"tag":"#wantthis","title":"WANT THIS","_id":"552437083fc8bccde79ebccf"},{"title":"GOT THIS","tag":"#gotthis","_id":"552437083fc8bccde79ebcce"}],"live":true}
+
+
+
+
+
+
 var landmarksLoaded;
 
 $scope.verifyUpload = function(event, state) {
@@ -95,37 +103,38 @@ function uploadPicture(file, state, data) {
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
-	  	 $scope.world = data.world;
-		 $scope.style = data.style;
+	  $scope.world = data.world;
+		$scope.style = data.style;
+		// $scope.contest = data.contest ? data.contest : {};
 
-		 if (bubbleTypeService.get() == 'Retail') {
+		if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 }
+		}
 
 		 //local storage
-		 if (!userManager.loginStatus && !localStore.getID()) {
+		if (!userManager.loginStatus && !localStore.getID()) {
 	 		localStore.createID();
-	 	 }
+	 	}
 		 
 
-		 style.navBG_color = $scope.style.navBG_color;
+		style.navBG_color = $scope.style.navBG_color;
 
-		 //show edit buttons if user is world owner
-		 if ($rootScope.userID && $scope.world.permissions){
-			 if ($rootScope.userID == $scope.world.permissions.ownerID){
+		//show edit buttons if user is world owner
+		if ($rootScope.userID && $scope.world.permissions){
+			if ($rootScope.userID == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
-			 }
-			 else {
+			}
+			else {
 			 	$scope.showEdit = false;
-			 }
-		 } 
+			}
+		} 
 
 		//console.log($scope.world);
 		//console.log($scope.style);
 		 
-		 if ($scope.world.name) {
-			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 } //TODO: cleanup on $destroy
+		if ($scope.world.name) {
+			angular.extend($rootScope, {globalTitle: $scope.world.name});
+		} //TODO: cleanup on $destroy
 		 
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {

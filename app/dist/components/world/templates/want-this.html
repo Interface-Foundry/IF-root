@@ -2,19 +2,19 @@
 	<div class="marble-page-header-icon">
 		<img style="display:block;" src="img/icons/ic_redeem_black_18dp.png" width="16" height="16">
 	</div>
-	Post Pics, Win Prizes!
+	{{contest.name}}
 </header>
 
 <article class="marble-page-content">
 	<div class="wtgt col-xs-11">
-		<h4>Win a $50 gift card</h4>
+		<h4>{{contest.headline}}</h4>
 		<span class="glyphicon glyphicon-info-sign info"></span>
-		<p>Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.</p>
+		<p>{{contest.body}}</p>
 
 		<div class="upload col-xs-5">
 			<div class="head"
 				ng-style="{background: style.titleBG_color}">
-				<span>WANT THIS</span>
+				<span>{{contest.contestTags[0].title}}</span>
 			</div>
 
 			<div class="body">
@@ -54,14 +54,14 @@
 			</div>
 
 			<div class="hashtag--upload">
-				<span>#{{ wtgt.hashtags.want }}</span>
+				<span>{{contest.contestTags[0].tag}}</span>
 			</div>
 		</div>
 
 		<div class="upload col-xs-5 col-xs-offset-2">
 			<div class="head"
 				ng-style="{background: 'rgba(0, 0, 0, 0.23)'}">
-				<span>GOT THIS</span>
+				<span>{{contest.contestTags[1].title}}</span>
 			</div>
 
 			<div class="body">
@@ -101,7 +101,7 @@
 			</div>
 
 			<div class="hashtag--upload">
-				<span>#{{ wtgt.hashtags.got }}</span>
+				<span>{{contest.contestTags[1].tag}}</span>
 			</div>
 		</div>
 
@@ -109,5 +109,5 @@
 </article>
 
 <div class="marble-page-footer tag col-xs-12">
-	<p>Or tag your photos on our Facebook or Instagram to enter to win!</p>
+	<p>{{contest.subheading}}</p>
 </div>

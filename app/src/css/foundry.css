@@ -2353,8 +2353,9 @@ li.alert {
   }
 }
 .wtgt .body img {
-  width: 100%;
   cursor: pointer;
+  max-height: 100%;
+  max-width: 100%;
 }
 .wtgt .camera {
   border-radius: 50%;
