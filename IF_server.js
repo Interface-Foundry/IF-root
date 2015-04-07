@@ -2471,6 +2471,7 @@ app.get('/api/worlds/:id', function(req, res) {
                                             })
                                             // console.log('contest submissions is: ', contestSubmissions)
                                         var submits = _.pluck(contestSubmissions, 'hashtag', 'imgURL')
+                                        console.log('hitting user logged in and submissions: ', submits)
                                         res.send({
                                             contest: contest,
                                             submissions: submits,
@@ -2481,6 +2482,7 @@ app.get('/api/worlds/:id', function(req, res) {
 
                                     //if user logged in but no submissions
                                     if (req.user && !req.user.submissions) {
+                                          console.log('hitting user logged in but NO submissions: ', req.user.submissions)
                                         res.send({
                                             contest: contest,
                                             submissions: null,
@@ -2489,29 +2491,42 @@ app.get('/api/worlds/:id', function(req, res) {
                                         });
                                     }
                                 } //END OF USER LOGGED IN
+
+                                //If user not logged in and world is retail
+                                if (!req.user && data.category == 'Retail') {
+                                    console.log('hitting user NOT logged in but retail store ', contest)
+                                    res.send({
+                                        contest: contest,
+                                        submissions: null,
+                                        style: style,
+                                        world: data
+                                    });
+                                }
                             })
                         } //END OF RETAIL
+                        if(!req.user && data.category !== 'Retail') {
+                            console.log('hitting user NOT logged and NOT retail store ', data)
+                            res.send({
+                                contest: null,
+                                submissions: null,
+                                style: style,
+                                world: data
+                            });
 
-                        //If user logged in and world is not retail
-                        if (req.user && data.category !== 'Retail') {
-                            res.send({
-                                contest: null,
-                                submissions: null,
-                                style: style,
-                                world: data
-                            });
                         }
-                        //If user not logged in and world is not retail
-                        else if (!req.user && data.category !== 'Retail') {
-                            res.send({
-                                contest: null,
-                                submissions: null,
-                                style: style,
-                                world: data
-                            });
-                        }
+
+                        // //If user not logged in and world is not retail
+                        // else if (!req.user && data.category !== 'Retail') {
+
+                        //     res.send({
+                        //         contest: null,
+                        //         submissions: null,
+                        //         style: style,
+                        //         world: data
+                        //     });
+                        // }
                     }
-                });
+                }); //END OF STYLESCHEMA FIND
 
                 landmarkSchema.update({
                     _id: data._id
