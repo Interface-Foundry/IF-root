@@ -2469,8 +2469,11 @@ app.get('/api/worlds/:id', function(req, res) {
                                                     contestSubmissions.push(el);
                                                 }
                                             })
-                                            // console.log('contest submissions is: ', contestSubmissions)
-                                        var submits = _.pluck(contestSubmissions, 'hashtag', 'imgURL')
+                                            
+                                        var submits =contestSubmissions.map(function(el) {
+                                            return {hashtag: el.hashtag, imgURL:el.imgURL }
+                                        })
+                                        console.log('contest submissions is: ', contestSubmissions)
                                         console.log('hitting user logged in and submissions: ', submits)
                                         res.send({
                                             contest: contest,
