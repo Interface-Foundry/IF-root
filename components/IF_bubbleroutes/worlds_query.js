@@ -13,38 +13,36 @@ var route = function(userCoord0, userCoord1, userTime, res) {
 
     landmarkSchema.aggregate(
         [{
-            "$geoNear": {
-                "near": {
-                    "type": "Point",
-                    "coordinates": [parseFloat(userCoord0), parseFloat(userCoord1)]
+            $geoNear: {
+                near: {
+                    type: "Point",
+                    coordinates: [parseFloat(userCoord0), parseFloat(userCoord1)]
                 },
-                "distanceField": "distance",
-                "maxDistance": 2500,
-                "spherical": true,
-                "query": {
+                distanceField: "distance",
+                maxDistance: 2500,
+                spherical: true,
+                query: {
                     "loc.type": "Point"
                 }
             }
         }, {
-            "$match": {
-                "world": true
+            $match: {
+                world: true
             }
-        }
-        // , {
-        //     "$match": {
-        //         "time.end": {
-        //             "$exists": true,
-        //             "$lt": new Date(new Date().setYear(new Date().getFullYear() - 1)) 
-        //             // new Date(new Date().setYear(new Date().getFullYear() - 1))
-        //         }
-        //     }
-        // }
-        , {
-            "$sort": {
-                "distance": -1
+        }, {
+            $sort: {
+                distance: -1
             }
         }],
         function(err, data) {
+            if (err) console.log(err);
+            //Remove entries with end time over one year ago...
+            data.forEach(function(el) {
+                if (el.time.end && el.time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
+                    data.splice(data.indexOf(el), 1);
+                }
+            })
+            
             var four_groups = _.groupBy(data, function(world) {
 
                 if (world.distance <= 150) {
