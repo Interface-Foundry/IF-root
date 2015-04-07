@@ -15,13 +15,13 @@ function currentWorldService() {
 		if (_.isEmpty(floorDirectory)) {
 			return floorNum;
 		} else {
-			return floorDirectory[floorNum];
+			return floorDirectory[floorNum] || 'Floor ' + floorNum;
 		}
 	}
 
 	function createFloorDirectory(localMapArray) {
 		localMapArray.forEach(function(m) {
-			floorDirectory[String(m.floor_num)] = m.floor_name || m.floor_num;
+			floorDirectory[String(m.floor_num)] = m.floor_name || 'Floor ' + m.floor_num;
 		});
 	}
 }
