@@ -86,7 +86,7 @@ router.get('/', function(req, res) {
                     console.log('Mapquest based result geoloc is..', req.geoloc)
                     response.send(req.geoloc);
                 } else {
-                    req.geoloc.cityName = 'My Location'
+                    console.log('Location not found in Mapquest, using ip based city')
                 }
             }
         })
