@@ -12,7 +12,7 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
 
 router.use(function(req, res, next) {
     req.geoloc = {};
-    console.log('hitting middle ware, req.query is.. ', req.query, 'req.ip is.. ',req.ip)
+    console.log('hitting middle ware, req.query is.. ', req.query, 'req.ip is.. ', req.ip)
         //Because the request library also uses 'res' we'll rename the response here
     var response = res;
     //query the local freegeoip server we are running 
@@ -25,24 +25,24 @@ router.use(function(req, res, next) {
         console.log('body is..', body)
         var data = JSON.parse(body);
         if (data.city == null) {
-            req.geoloc.cityName = 'My Location' 
+            req.geoloc.cityName = 'My Location'
         }
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
-        
+
         console.log('ip based geoloc is', req.geoloc)
-       return next();
+        return next();
     })
 
-    
+
 });
 
 router.get('/', function(req, res) {
     var response = res;
 
     if (req.query.hasloc && req.query.lat && req.query.lng) {
-         req.geoloc.lat = req.query.lat;
-         req.geoloc.lng = req.query.lng;
+        req.geoloc.lat = req.query.lat;
+        req.geoloc.lng = req.query.lng;
         request({
             url: mapqURL,
             qs: {
@@ -73,20 +73,20 @@ router.get('/', function(req, res) {
             } else {
                 var data = JSON.parse(body);
                 if (data.address.city) {
-                req.geoloc.cityName = data.address.city;
-            }
-              if (data.address.village) {
-                req.geoloc.cityName = data.address.village;
-            }
+                    req.geoloc.cityName = data.address.city;
+                }
+                if (data.address.village) {
+                    req.geoloc.cityName = data.address.village;
+                }
                 console.log('Mapquest based result geoloc is..', req.geoloc)
                 response.send(req.geoloc);
             }
         })
-    } else if (req.query.hasloc == 'false') {
+    } else if (req.query.hasloc == 'false' && !req.query.lat && !req.query.lng) {
         console.log('If user id not provide geoloc coordinates.. ip-based req.geoloc is..', req.geoloc)
-         response.send(req.geoloc);
-     } else {
-        console.log('Something is missing in the query..', req.query)
+        response.send(req.geoloc);
+    } else {
+        console.log('Incorrect query..', req.query)
         res.sendStatus(404);
     }
 })
