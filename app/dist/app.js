@@ -17054,6 +17054,29 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 	}
 
 }]);
+'use strict';
+
+app.factory('currentWorldService', currentWorldService);
+
+function currentWorldService() {
+	
+	var floorDirectory = {};
+
+	return {
+		createFloorDirectory: createFloorDirectory,
+		floorNumToName: floorNumToName
+	};
+	
+	function floorNumToName(floorNum) {
+		return floorDirectory[floorNum];
+	}
+
+	function createFloorDirectory(localMapArray) {
+		localMapArray.forEach(function(m) {
+			floorDirectory[String(m.floor_num)] = m.floor_name;
+		});
+	}
+}
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 'contest',
 		function($rootScope, $compile, contest) {
@@ -18988,8 +19011,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 }
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService', 'mapManager', 'currentWorldService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService, mapManager, currentWorldService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19006,6 +19029,9 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	if (world && world.style) {
 		console.log('world and world style');
 		bubbleTypeService.set(world.category);
+		if (mapManager.localMapArrayExists(world)) {
+			currentWorldService.createFloorDirectory(world.style.maps.localMapArray);
+		}
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				deferred.resolve({world: world, style: style});
@@ -19028,6 +19054,9 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.styleCache.put(data.style._id, data.style);
 		 		deferred.resolve(data);
 		 		bubbleTypeService.set(data.world.category);
+		 		if (mapManager.localMapArrayExists(data.world)) {
+					currentWorldService.createFloorDirectory(data.world.style.maps.localMapArray);
+				}
 		 	}
 		 });
 	}
