@@ -78,6 +78,9 @@ router.get('/', function(req, res) {
                     var data = JSON.parse(body);
 
                     if (data.address.city) {
+                        if (data.address.city == 'NYC') {
+                            data.address.city = 'New York City'
+                        }
                         req.geoloc.cityName = data.address.city;
                     }
                     if (data.address.village) {
