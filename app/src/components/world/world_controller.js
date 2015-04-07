@@ -95,7 +95,7 @@ function uploadPicture(file, hashtag, data) {
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
 		$scope.style = data.style;
-		$scope.contest = _.isEmpty(data.contest) ? {} : data.contest;
+		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 		if (!(_.isEmpty(data.submissions))) {
 			data.submissions.forEach(function(s) {
 				$scope.wtgt[s.hashtag] = s.imgURL;
