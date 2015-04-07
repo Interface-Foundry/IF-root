@@ -26336,8 +26336,10 @@ function uploadPicture(file, hashtag, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
+
 		$scope.wtgt.images[hashtag] = data;
 		$scope.wtgt.building[hashtag] = false;
+
 	});
 }
  

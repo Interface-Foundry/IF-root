@@ -2,7 +2,10 @@ var _ = require('underscore'),
     mongoose = require('mongoose'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
     contestEntrySchema = require('../IF_schemas/contestEntry_schema.js'),
-    contestSchema = require('../IF_schemas/contest_schema.js')
+    contestSchema = require('../IF_schemas/contest_schema.js'),
+    userSchema = require('../IF_schemas/user_schema.js'),
+    mailerTransport = require('../IF_mail/IF_mail.js');
+
 var route = function(imgUpload, uploadContents, userID) {
 
     contestSchema.findOne({
@@ -70,6 +73,8 @@ var route = function(imgUpload, uploadContents, userID) {
                 type: uploadContents.type,
                 contestTag: [{
                     tag: uploadContents.hashtag
+                }, {
+                    tag: uploadContents.description
                 }],
                 imgURL: imgUpload,
                 contestId: contest._id,
@@ -80,7 +85,41 @@ var route = function(imgUpload, uploadContents, userID) {
                 if (err) {
                     console.log(err);
                 } else {
-                    console.log('backend link is ..', data.imgURL)
+                    console.log('saved contest entry is: ',data);
+
+                    userSchema.findOneAndUpdate({
+                        _id: data.userID
+                    }, {
+                        $push: {
+                            submissions: {
+                                worldID: uploadContents.world_id,
+                                contestID: contest._id,
+                                entryID: data._id,
+                                imgURL: imgUpload,
+                                timestamp: uploadContents.userTime,
+                                hashtag: uploadContents.hashtag
+                            }
+                        }
+                    },function(err, user) {
+                        if (err) console.log(err);
+                        console.log('user updated with new submission!',user)
+
+                        //Send contest submission notification email
+                        var mailOptions = {
+                            to: 'IF <hello@interfacefoundry.com>',
+                            from: user.local.email,
+                            subject: 'New Contest' + data.region + 'Submission!',
+                            text: 'Hello,\n\n' +
+                                user.profileID + ' (id:' + user._id + ') has entered contest: ' + data.contestId + '. \n \n The AWS image link is: ' + data.imgURL
+                        };
+                        mailerTransport.sendMail(mailOptions, function(err) {
+                            if (err) console.log(err);
+                            console.log('Contest entry email sent!');
+                        });
+                        //end of email
+
+                    })
+
                     console.log('entry saved');
                 }
             });
