@@ -1,11 +1,11 @@
 storage:
-    dbPath: "/data/software/mongodb/testdb/data_secondary"
+    dbPath: "/mongodb/data/secondary"
     directoryPerDB: true
     journal:
         enabled: true
 systemLog:
     destination: file
-    path: "/data/software/mongodb/testdb/mongodb_secondary.log"
+    path: "/mongodb/log/secondary.log"
     logAppend: true
     timeStampFormat: iso8601-utc
 processManagement:

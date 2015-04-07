@@ -1,11 +1,11 @@
 storage:
-    dbPath: "/data/software/mongodb/testdb/data"
+    dbPath: "/mongodb/data/primary"
     directoryPerDB: true
     journal:
         enabled: true
 systemLog:
     destination: file
-    path: "/data/software/mongodb/testdb/mongodb.log"
+    path: "/mongodb/log/primary.log"
     logAppend: true
     timeStampFormat: iso8601-utc
 processManagement:
@@ -19,4 +19,3 @@ net:
 replication:
     oplogSizeMB: 128
     replSetName: "rs1"
-

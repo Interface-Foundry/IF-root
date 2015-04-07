@@ -2,9 +2,9 @@
 
 # all you need to do is symnlink the mongod binary you want here
 
-/data/software/mongodb/testdb/mongod -f /data/software/mongodb/testdb/primary.yaml
-/data/software/mongodb/testdb/mongod -f /data/software/mongodb/testdb/secondary.yaml
-/data/software/mongodb/testdb/mongod -f /data/software/mongodb/testdb/arbiter.yaml
+mongod -f /mongodb/conf/primary.yaml
+mongod -f /mongodb/conf/secondary.yaml
+mongod -f /mongodb/conf/arbiter.yaml
 
 sleep 3
 

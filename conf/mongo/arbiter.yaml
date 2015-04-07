@@ -1,11 +1,11 @@
 storage:
-    dbPath: "/data/software/mongodb/testdb/data_arbiter"
+    dbPath: "/mongodb/data/arbiter"
     directoryPerDB: true
     journal:
         enabled: false
 systemLog:
     destination: file
-    path: "/data/software/mongodb/testdb/mongodb_arbiter.log"
+    path: "/mongodb/log/arbiter.log"
     logAppend: true
     timeStampFormat: iso8601-utc
 processManagement:
