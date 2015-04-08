@@ -152,7 +152,6 @@ console.log($scope.landmark.category);
 });
 
 function goToMark() {
-
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	aperture.set('third');
@@ -178,7 +177,7 @@ function goToMark() {
 		lng: $scope.landmark.loc.coordinates[0],
 		draggable:false,
 		message:$scope.landmark.name,
-  	icon: {
+	  	icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,

@@ -24638,7 +24638,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
 	$scope.go = go;
-	$scope.goLandmark = goLandmark;
 	$scope.citySearchResults = {};
 	$scope.groups;
 	$scope.loading = false; // for loading animation on searchbar
@@ -24733,25 +24732,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$location.path(path);
 	}
 
-	function goLandmark(landmark) {
-		// get the link for a landmark, when not already in landmark's world
-
-		var data = {
-			params: {
-				m: true
-			}
-		};
-		$http.get('/api/worlds/' + landmark.parentID, data).
-			success(function(result) {
-				if (result.world) {
-					$location.path('/w/' + result.world.id + '/' + landmark.id);
-				}
-			})
-			.error(function(err) {
-				console.log('err: ', err);
-			});
-	}
-
 	function groupResults(data, searchType) {
 		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
 		if (searchType === 'all') {
@@ -24763,7 +24743,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				})
 				.each(function(value, key, list) {
 					list[key] = _.chain(value)
-						// 1st sort puts landamrks in order
+						// 1st sort puts landmarks in order
 						.sortBy(function(result) {
 							return result.name.toLowerCase();
 						})
@@ -24923,7 +24903,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								lat: landmark.loc.coordinates[1],
 								lng: landmark.loc.coordinates[0],
 								draggable: false,
-								// message: '<a ng-click="goLandmark(landmark)"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+								message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
 								icon: {
 									iconUrl: 'img/marker/bubble-marker-50_selected.png',
 									iconSize: [35, 67],
@@ -25432,7 +25412,6 @@ console.log($scope.landmark.category);
 });
 
 function goToMark() {
-
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	aperture.set('third');
@@ -25458,7 +25437,7 @@ function goToMark() {
 		lng: $scope.landmark.loc.coordinates[0],
 		draggable:false,
 		message:$scope.landmark.name,
-  	icon: {
+	  	icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,
