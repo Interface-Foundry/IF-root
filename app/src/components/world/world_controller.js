@@ -91,6 +91,25 @@ function uploadPicture(file, hashtag, data) {
 
 	});
 }
+
+function checkUserForSubmissions() {
+	if (!$rootScope.user || !$rootScope.user.submissions) {
+		return;
+	}
+	_.chain($rootScope.user.submissions)
+		.groupBy(function(sub) {
+			return sub.hashtag;
+		})
+		.sortBy(function(sub) {
+			return sub.timestamp;
+		})
+		.value()
+		.forEach(function(sub) {
+			// sub.forEach(function(s) {
+				$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
+			// });
+		});
+}
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
@@ -100,6 +119,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			data.submissions.forEach(function(s) {
 				$scope.wtgt.images[s.hashtag] = s.imgURL;
 			});
+		} else {
+			checkUserForSubmissions();
 		}
 
 		if (bubbleTypeService.get() == 'Retail') {

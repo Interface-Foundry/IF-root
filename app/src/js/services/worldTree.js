@@ -7,7 +7,7 @@ var worldTree = {
 	styleCache: $cacheFactory('styles'),
 	landmarkCache: $cacheFactory('landmarks'),
 	contestCache: $cacheFactory('contest'),
-
+	// submissionCache: $cacheFactory('submission')
 }
 
 var alert = alertManager;
@@ -31,7 +31,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	} else {
 		askServer();
 	}
-		
+
 	function askServer() {
 		console.log('ask server')
 		World.get({id: id}, function(data) {
@@ -41,6 +41,12 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 	 			worldTree.contestCache.put('active', data.contest);
+				// if (!(_.isEmpty(data.submissions))) {
+				// 	data.submissions.forEach(function(s) {
+				// 		worldTree.submissionCache.put(s.hashtag, s);
+				// 	});
+				// }
+
 		 		deferred.resolve(data);
 		 		bubbleTypeService.set(data.world.category);
 		 	}
