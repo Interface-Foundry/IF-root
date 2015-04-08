@@ -835,6 +835,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             var count = 0;
             var totalSize = req.headers['content-length'];
             var picorientation;
+            var newentryID = '';
             file.on('data', function(data) {
                 count += data.length;
                 var percentUploaded = Math.floor(count / totalSize * 100);
@@ -889,7 +890,10 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                             if (uploadContents.type == 'retail_campaign') {
                                                 // var newString = description.replace(/[^A-Z0-9]/ig, "");
                                                 // uploadContents.description = newString;
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
+                                                    //Retrieve new saved contest entry ID
+                                                    newentryID = data
+                                                }); //contest entry, send to bac
                                             }
                                         }
 
@@ -924,6 +928,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                     return (results.status == 'not completed' && tries < 10);
                                                 },
                                                 function(callback) {
+
                                                     var options = {
                                                         url: "https://api.cloudsightapi.com/image_responses/" + data.token,
                                                         headers: {
@@ -939,58 +944,31 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                             results.status = 'completed';
                                                             description = body.name;
 
-                                                            if (uploadContents) {
-                                                                try {
-                                                                    uploadContents = JSON.parse(uploadContents);
-                                                                } catch (err) {
-                                                                    console.log(err);
-                                                                }
-                                                                if (uploadContents.type == 'retail_campaign') {
-                                                                    var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                                    uploadContents.description = newString;
-                                                                    
-                                                                    User.findOneAndUpdate({
-                                                                            _id: data.userID
-                                                                        }, {
-                                                                            $push: {
-                                                                                submissions: {
-                                                                                    worldID: uploadContents.world_id,
-                                                                                    contestID: contest._id,
-                                                                                    entryID: data._id,
-                                                                                    imgURL: imgUpload,
-                                                                                    timestamp: uploadContents.userTime,
-                                                                                    hashtag: uploadContents.hashtag
-                                                                                }
-                                                                            }
-                                                                        }, function(err, user) {
-                                                                            if (err) console.log(err);
-                                                                            console.log('user updated with new submission!', user)
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            uploadContents.description = newString;
 
-                                                                            //Send contest submission notification email
-                                                                            var mailOptions = {
-                                                                                to: 'IF <hello@interfacefoundry.com>',
-                                                                                from: 'Kip Submissions <contestsubmissions@kipapp.co>',
-                                                                                subject: 'New Contest' + data.region + 'Submission!',
-                                                                                text: 'Hello,\n\n' +
-                                                                                    user.profileID + ' (id:' + user._id + ') has entered contest: ' + data.contestId + '. \n \n The AWS image link is: ' + data.imgURL
-                                                                            };
-                                                                            mailerTransport.sendMail(mailOptions, function(err) {
-                                                                                if (err) console.log(err);
-                                                                                console.log('Contest entry email sent!');
-                                                                            });
-                                                                            //end of email
+                                                            contestEntrySchema.findOneAndUpdate({
+                                                                    _id: newentryID
+                                                                }, {
+                                                                    $push: {
+                                                                        contestTag: {
+                                                                            tag: uploadContents.description
+                                                                        }
+                                                                    }
+                                                                },
+                                                                function(err, result) {
+                                                                    if (err) console.log(err);
+                                                                    console.log('contest updated with cloudsight', result)
+                                                                })
 
-                                                                        })
-                                                                        // submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                                                }
-                                                            }
-                                                        }
+                                                        } //END OF BODY.STATUS COMPLETED
                                                     })
+
                                                     tries++;
                                                     setTimeout(callback, 5000);
                                                 },
                                                 function(err) {
-                                                    console.log('Description of image is..', description)
+                                               
                                                 }
                                             );
 

@@ -6,7 +6,7 @@ var _ = require('underscore'),
     userSchema = require('../IF_schemas/user_schema.js'),
     mailerTransport = require('../IF_mail/IF_mail.js');
 
-var route = function(imgUpload, uploadContents, userID) {
+var route = function(imgUpload, uploadContents, userID, cb) {
 
     contestSchema.findOne({
         live: true
@@ -83,7 +83,9 @@ var route = function(imgUpload, uploadContents, userID) {
                 if (err) {
                     console.log(err);
                 } else {
-                    console.log('saved contest entry is: ',data);
+                    //Send back new contest id to the server via callback
+                    cb(data._id)
+
 
                     userSchema.findOneAndUpdate({
                         _id: data.userID
@@ -100,7 +102,7 @@ var route = function(imgUpload, uploadContents, userID) {
                         }
                     },function(err, user) {
                         if (err) console.log(err);
-                        console.log('user updated with new submission!',user)
+                        // console.log('user updated with new submission!',user)
 
                         //Send contest submission notification email
                         var mailOptions = {
