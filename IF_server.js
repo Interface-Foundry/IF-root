@@ -486,17 +486,22 @@ setInterval(function() {
 }, 15000);
 
 // Search route
-app.get('/api/textsearch', function(req, res) {
+app.get('/api/textsearch', function(req, res, next) {
 	if (elasticsearch_up) {
 		console.log('using elasticsearch');
-		elasticsearch.search(req, res);
+		elasticsearch.search(req, res, next);
 	} else {
 		text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
 	}
 });
 //In Bubble Search
-app.get('/api/bubblesearch/:type', function(req, res) {
-    bubble_search(req.params.type, req.query, res);
+app.get('/api/bubblesearch/:type', function(req, res, next) {
+    if (elasticsearch_up) {
+        console.log('using elasticsearch');
+        elasticsearch.bubbleSearch(req, res, next);
+    } else {
+        bubble_search(req.params.type, req.query, res);
+    }
 });
 
 /* Logging Analytics */
