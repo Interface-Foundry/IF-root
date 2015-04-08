@@ -6517,6 +6517,17 @@ function capitalizeFirst() {
   }
 }
 
+angular.module('tidepoolsFilters')
+.filter('floorNumToName', floorNumToName);
+
+floorNumToName.$inject = ['currentWorldService'];
+
+function floorNumToName(currentWorldService) {
+  return function(input) {
+    return currentWorldService.floorNumToName(input);
+  }
+}
+
 /*!
  * FullCalendar v2.2.2
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -17138,6 +17149,33 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 	}
 }]);
 
+'use strict';
+
+app.factory('currentWorldService', currentWorldService);
+
+function currentWorldService() {
+	
+	var floorDirectory = {};
+
+	return {
+		createFloorDirectory: createFloorDirectory,
+		floorNumToName: floorNumToName
+	};
+	
+	function floorNumToName(floorNum) {
+		if (_.isEmpty(floorDirectory)) {
+			return floorNum;
+		} else {
+			return floorDirectory[floorNum] || 'Floor ' + floorNum;
+		}
+	}
+
+	function createFloorDirectory(localMapArray) {
+		localMapArray.forEach(function(m) {
+			floorDirectory[String(m.floor_num)] = m.floor_name || 'Floor ' + m.floor_num;
+		});
+	}
+}
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 'contest',
 		function($rootScope, $compile, contest) {
@@ -17852,6 +17890,9 @@ mapManager.adjustHeightByAperture = function(aperture, height) {
 			break;
 		case 'aperture-full':
 			return 110;
+			break;
+		case 'aperture-off':
+			return height * 0.78; 
 			break;
 	}
 }
@@ -19215,8 +19256,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 }
 
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService', 'mapManager', 'currentWorldService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService, mapManager, currentWorldService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19233,6 +19274,9 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	if (world && world.style) {
 		console.log('world and world style');
 		bubbleTypeService.set(world.category);
+		if (mapManager.localMapArrayExists(world)) {
+			currentWorldService.createFloorDirectory(world.style.maps.localMapArray);
+		}
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				deferred.resolve({world: world, style: style});
@@ -19255,6 +19299,9 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.styleCache.put(data.style._id, data.style);
 		 		deferred.resolve(data);
 		 		bubbleTypeService.set(data.world.category);
+		 		if (mapManager.localMapArrayExists(data.world)) {
+					currentWorldService.createFloorDirectory(data.world.style.maps.localMapArray);
+				}
 		 	}
 		 });
 	}
@@ -21496,8 +21543,8 @@ function turnOnFloorMaps() {
 	}
 }
 
-function findMapsOnFloor(world, floor) {
-	world.style.maps.localMapArray.filter(function(m) {
+function findMapsOnThisFloor(world, floor) {
+	return world.style.maps.localMapArray.filter(function(m) {
 		return m.floor_num === floor;
 	});
 }

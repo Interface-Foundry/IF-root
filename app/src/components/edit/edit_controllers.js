@@ -471,8 +471,8 @@ function turnOnFloorMaps() {
 	}
 }
 
-function findMapsOnFloor(world, floor) {
-	world.style.maps.localMapArray.filter(function(m) {
+function findMapsOnThisFloor(world, floor) {
+	return world.style.maps.localMapArray.filter(function(m) {
 		return m.floor_num === floor;
 	});
 }

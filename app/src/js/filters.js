@@ -96,3 +96,14 @@ function capitalizeFirst() {
     return input[0].toUpperCase() + input.slice(1);
   }
 }
+
+angular.module('tidepoolsFilters')
+.filter('floorNumToName', floorNumToName);
+
+floorNumToName.$inject = ['currentWorldService'];
+
+function floorNumToName(currentWorldService) {
+  return function(input) {
+    return currentWorldService.floorNumToName(input);
+  }
+}

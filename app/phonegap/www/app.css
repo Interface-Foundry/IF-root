@@ -3904,6 +3904,9 @@ span.subnav-back-chevron {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+.bubble-list-item .floor-num {
+  float: right;
+}
 .bubble-list-item:last-child {
   border-bottom: none;
 }
