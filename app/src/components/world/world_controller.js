@@ -85,31 +85,29 @@ function uploadPicture(file, hashtag, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-
+		worldTree.cacheSubmission($scope.world._id, hashtag, data);
 		$scope.wtgt.images[hashtag] = data;
 		$scope.wtgt.building[hashtag] = false;
 
 	});
 }
 
-function checkUserForSubmissions() {
-	if (!$rootScope.user || !$rootScope.user.submissions) {
-		return;
-	}
-	_.chain($rootScope.user.submissions)
-		.groupBy(function(sub) {
-			return sub.hashtag;
-		})
-		.sortBy(function(sub) {
-			return sub.timestamp;
-		})
-		.value()
-		.forEach(function(sub) {
-			// sub.forEach(function(s) {
-				$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-			// });
-		});
-}
+// function checkUserForSubmissions() {
+// 	if (!$rootScope.user || !$rootScope.user.submissions) {
+// 		return;
+// 	}
+// 	_.chain($rootScope.user.submissions)
+// 		.groupBy(function(sub) {
+// 			return sub.hashtag;
+// 		})
+// 		.sortBy(function(sub) {
+// 			return sub.timestamp;
+// 		})
+// 		.value()
+// 		.forEach(function(sub) {
+// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
+// 		});
+// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
@@ -117,10 +115,13 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 		if (!(_.isEmpty(data.submissions))) {
 			data.submissions.forEach(function(s) {
+				if (!s) {
+					return;
+				}
 				$scope.wtgt.images[s.hashtag] = s.imgURL;
 			});
-		} else {
-			checkUserForSubmissions();
+		// } else {
+		// 	checkUserForSubmissions();
 		}
 
 		if (bubbleTypeService.get() == 'Retail') {
