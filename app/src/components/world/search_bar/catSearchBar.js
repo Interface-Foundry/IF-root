@@ -90,6 +90,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 						// get user's current location on every search
 						scope.loading = true;
+
+						// cache of 23s and timeout of 3s
 						geoService.getLocation(23*1000, 3*1000).then(function(location) {
 							var data = {
 								params: {
