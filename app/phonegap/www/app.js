@@ -26032,7 +26032,7 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 						// get user's current location on every search
 						scope.loading = true;
-						geoService.getLocation(23*1000, 10*1000).then(function(location) {
+						geoService.getLocation(23*1000, 3*1000).then(function(location) {
 							var data = {
 								params: {
 									hasLoc: true,
