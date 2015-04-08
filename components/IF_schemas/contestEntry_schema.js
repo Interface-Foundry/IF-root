@@ -1,20 +1,36 @@
 // load the things we need
 var mongoose = require('mongoose');
 
-var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
+var Schema = mongoose.Schema,
+    ObjectID = Schema.ObjectID;
 
 var contestEntrySchema = mongoose.Schema({
-    userTime: { type: Date, default: Date.now },
-    userID: { type: String, index: true},
+    userTime: {
+        type: Date,
+        default: Date.now
+    },
+    userID: {
+        type: String,
+        index: true
+    },
     userName: String,
     worldID: String,
     worldName: String,
-    v: Boolean, //valid or not
-    contestTag: {type: String, enum: ['wantit','getit'], index: true}, 
+    region: {
+        type: String,
+        default: 'global'
+    },
+    valid: {type:Boolean,default:true}, //valid or not
+    contestTag: [{
+        tag: {
+            type: String,
+            index: true
+        }
+    }],
     userLat: Number,
     userLng: Number,
     imgURL: String,
-    //'harversin' calculation?
+    contestId: {type: Schema.Types.ObjectId, ref: 'contest'},
     distanceFromWorld: Number
 });
 

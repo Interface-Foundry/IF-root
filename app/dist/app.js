@@ -4828,6 +4828,19 @@ var checkLoggedin = function(userManager) {
     return userManager.checkLogin();
 }
 
+var checkAdminStatus = function(userManager, $location) {
+	userManager.checkAdminStatus()
+	.then(function(isAdmin) {
+		if (isAdmin) {
+			return true;
+		} else {
+			return $location.path('/');
+		}
+	}, function(err) {
+		return $location.path('/');
+	});
+}
+
     //================================================
     
     //================================================
@@ -4858,16 +4871,17 @@ var checkLoggedin = function(userManager) {
     // Define all the routes
     //================================================
 $routeProvider.
+
       when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
       when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-      
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
       when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -4878,29 +4892,34 @@ $routeProvider.
       when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
       when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
       when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
-	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
+	  when('/w/:worldURL/contestentries/:hashTag', {templateUrl: 'components/world/subviews/contestentries.html', controller: 'ContestEntriesController'}).
 
 	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 
-      when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
-      when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
-      
-      when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
-      when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+    when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
+    when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
+    
+    when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
+    when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
       
-      when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
-      when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-      
-      when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
+    when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
+    when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
+    
+    when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
+		when('/su/announcements/:region', {templateUrl: 'components/super_user/announcements/superuser_announcements.html', controller: 'SuperuserAnnouncementController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
+		when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       otherwise({redirectTo: '/'});
@@ -5696,32 +5715,33 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 });
 'use strict';
 
-app.directive('markerPopupClick', markerPopupClick);
+app.directive('lazyLoad', lazyLoad);
 
-markerPopupClick.$inject = ['$location'];
+lazyLoad.$inject = [];
 
-function markerPopupClick($location) {
+function lazyLoad() {
 	return {
-		scope: {},
+		scope: {
+			loadMore: '&'
+		},
 		restrict: 'A',
-		template: "<p ng-click='clickMe()'>hello</p>",
-		link: function(scope, elem, attr) {
-
-			scope.link = attr.link;
-
-			scope.clickMe = function() {
-				console.log('i clicked me', this.link)
-				$location.path(this.link);
-			}
-
-			// elem.bind('click', function(a, b, c) {
-			// 	console.log('clicked, redirecting to')
-			// })
-			// console.log('LINK', attr.link)
-		}
+		link: link
 	};
 
+	function link(scope, elem, attr) {
+		var visibleHeight = elem.height();
+		var threshold = 500;
 
+		elem.scroll(function() {
+			var scrollableHeight = elem.prop('scrollHeight');
+			var hiddenContentHeight = scrollableHeight - visibleHeight;
+
+			if (hiddenContentHeight - elem.scrollTop() < threshold) {
+				// scroll is almost at bottom. Load more data
+				scope.$apply(scope.loadMore);
+			}
+		});
+	}
 }
 
 app.directive('progressCircle', function() {
@@ -6487,7 +6507,15 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   return _date.toUpperCase();
 
  };
-});
+})
+
+.filter('capitalizeFirst', capitalizeFirst);
+
+function capitalizeFirst() {
+  return function(input) {
+    return input[0].toUpperCase() + input.slice(1);
+  }
+}
 
 /*!
  * FullCalendar v2.2.2
@@ -16840,7 +16868,9 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
-   			var alertClass;
+   			
+            var alertClass;
+
    			switch (alertType) {
 	   			case 'success':
 	   				alertClass = 'alert-success';
@@ -16855,14 +16885,19 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 	   				alertClass = 'alert-danger';
 	   				break;
    			}
-   			var len = alerts.list.push(
- {class: alertClass, msg: alertMsg, id: alertMsg});
+
+   			var len = alerts.list.push({
+               class: alertClass, 
+               msg: alertMsg, 
+               id: alertMsg
+            });
+
    			if (timeout) {
-   			$timeout(function () {
-	   			alerts.list.splice(len-1, 1);
-   			}, 1500);
-   			
+   			   $timeout(function () {
+	   			  alerts.list.splice(len-1, 1);
+   			   }, 1500);
    			}
+
    		}
 
    		alerts.closeAlert = function(index) {
@@ -16874,6 +16909,7 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}
 
    		return alerts;
+         
    }])
 'use strict';
 
@@ -17019,8 +17055,9 @@ app
 			}
 }]);
 app.factory('contest', ['$http', 'localStore', function($http, localStore) {
-	
-	var isContest = false;
+	// manages want this got this contest
+
+	var isContest = false; // determines whether or not a process involves the wtgt contest
 	var hashtag;
 	var startTime;
 
@@ -17038,7 +17075,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 
 	function login(endTime) {
 		// call if user logs in after login prompt on photo upload (wtgt)
-		// tracking login by clicking "log in" or "create account" on auth dialog
+		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
@@ -17123,177 +17160,205 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager', 'mapManager', 'locationAnalyticsService',
-    	function($q, alertManager, mapManager, locationAnalyticsService) {
-//abstract & promisify geolocation, queue requests.
-var geoService = {
-	location: {
-		//lat,
-		//lng
-		//timestamp  
-	},
-	inProgress: false,
-	requestQueue: [] 
-}	
-
-var marker = [];
-var watchID;
- 
-geoService.getLocation = function(maxAge) {
-	var deferred = $q.defer();
-	
-	geoService.requestQueue.push(deferred);
-
-	if (geoService.inProgress) {
-		// inprog
-	} else if (navigator.geolocation) {
-		geoService.inProgress = true;
-		console.log('geo: using navigator');
-		
-		function geolocationSuccess(position) {
-			geoService.location.lat = position.coords.latitude;
-			geoService.location.lng = position.coords.longitude;
-			geoService.location.timestamp = Date.now();
-			geoService.resolveQueue({
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			})
-			locationAnalyticsService.log({
-				type: "GPS",
-				loc: {
-					type: "Point",
-					coordinates: [position.coords.longitude, position.coords.latitude]
-				}
-			});
-		}
-
-		function geolocationError(error) {
-			geoService.resolveQueue({err: error.code});
-		}
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError);
-
-	} else {
-		//browser update message
-		alerts.addAlert('warning', 'Your browser does not support location services.')
-	}
-	
-	return deferred.promise;
-}
-
-geoService.resolveQueue = function (position) {
-	while (geoService.requestQueue.length > 0) {
-		var request = geoService.requestQueue.pop();
-		if (position.err) {
-			request.reject(position.err);
-		} else {
-			request.resolve(position);
-		}
-	}
-	geoService.inProgress = false;
-}
-
-geoService.trackStart = function() {
-	if (navigator.geolocation && window.DeviceOrientationEvent) {
-
-		// marker
-		mapManager.addMarker('track', {
-			lat: 0,
-			lng: 0,
-			icon: {
-				iconUrl: 'img/marker/user-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 43], 
-				iconAnchor: [17, 43],
-				popupAnchor:[0, -40]
-			},
-			alt: 'track' // used for tracking marker DOM element
-		});
-		mapManager.bringMarkerToFront('track');
-
-		// movement XY
-		watchID = navigator.geolocation.watchPosition(function(position) {
-			var pos = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
+	.factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+		function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+			//abstract & promisify geolocation, queue requests.
+			var geoService = {
+				location: {
+					//lat,
+					//lng
+					//timestamp  
+				},
+				inProgress: false,
+				requestQueue: [],
+				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
-			mapManager.moveMarker('track', pos);
-			locationAnalyticsService.log({
-				type: "GPS",
-				loc: {
-					type: "Point",
-					coordinates: [position.coords.longitude, position.coords.latitude]
+
+			var marker = [];
+			var pos = {
+				lat: 0,
+				lng: 0
+			};
+			var watchID;
+			$rootScope.aperture = apertureService;
+
+			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
+				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
+					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+						geoService.trackStart();
+					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+						geoService.trackStop();
+					}
 				}
 			});
-		}, function() {
-			// console.log('location error');
-		}, {
-			// enableHighAccuracy: true
-		});
 
-		// movement rotation
-		window.addEventListener('deviceorientation', rotateMarker);
+			geoService.getLocation = function(maxAge) {
+				var deferred = $q.defer();
 
-	}
-};
+				geoService.requestQueue.push(deferred);
 
-geoService.trackStop = function() {
+				if (geoService.inProgress) {
+					// inprog
+				} else if (navigator.geolocation) {
+					geoService.inProgress = true;
+					console.log('geo: using navigator');
 
-	// movement: clear watch
-	if (watchID) {
-		navigator.geolocation.clearWatch(watchID);
-		watchID = undefined;
-	}
+					function geolocationSuccess(position) {
+						geoService.location.lat = position.coords.latitude;
+						geoService.location.lng = position.coords.longitude;
+						geoService.location.timestamp = Date.now();
+						geoService.resolveQueue({
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						});
 
-	// rotation: remove event listener
-	window.removeEventListener('deviceorientation', rotateMarker);
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [position.coords.latitude, position.coords.longitude]
+							}
+						});
+					}
 
-	// remove marker
-	mapManager.removeMarker('track');
-	marker = [];
+					function geolocationError(error) {
+						geoService.resolveQueue({err: error.code});
+					}
 
-};
+					navigator.geolocation.getCurrentPosition(geolocationSuccess,
+						geolocationError);
 
-function rotateMarker(data) {
-	// make sure new marker is loaded in DOM
-	if (marker.length > 0) {
-		var alpha = data.webkitCompassHeading || data.alpha;
-		var matrix = marker.css('transform');
+				} else {
+					//browser update message
+					alerts.addAlert('warning', 'Your browser does not support location services.')
+				}
 
-		// account for the fact that marker is initially facing south
-		var adjust = 180 + Math.round(alpha);
+				return deferred.promise;
+			}
 
-		marker.css('transform', getNewTransformMatrix(matrix, adjust));
-	} else {
-		marker = $('img[alt="track"]');
-	}
-}
+			geoService.resolveQueue = function (position) {
+				while (geoService.requestQueue.length > 0) {
+					var request = geoService.requestQueue.pop();
+					if (position.err) {
+						request.reject(position.err);
+					} else {
+						request.resolve(position);
+					}
+				}
+				geoService.inProgress = false;
+			}
 
-function getNewTransformMatrix(matrix, angle) {
-	// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
-	var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
-	
-	if (newMatrix.length !== 6) { // not 2D matrix
-		return matrix;
-	}
-	
-	// get translation and don't change
-	var tx = newMatrix[4];
-	var ty = newMatrix[5];
-	
-	// set new values for rotation matrix
-	var a = Math.cos(angle * Math.PI / 180);
-	var b = -Math.sin(angle * Math.PI / 180);
-	var c = -b;
-	var d = a;
-	
-	return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
-}
+			geoService.trackStart = function() {
+				// used to start showing user's location on map
 
-return geoService;
-}]);
+				// if we are already tracking, stop current session before starting new one
+				if (geoService.tracking) {
+					geoService.trackStop();
+				}
+				if (navigator.geolocation && window.DeviceOrientationEvent) {
 
+					// marker
+					mapManager.addMarker('track', {
+						lat: pos.lat,
+						lng: pos.lng,
+						icon: {
+							iconUrl: 'img/marker/user-marker-50.png',
+							shadowUrl: '',
+							iconSize: [35, 43],
+							iconAnchor: [17, 43],
+							popupAnchor:[0, -40]
+						},
+						alt: 'track' // used for tracking marker DOM element
+					});
+					mapManager.bringMarkerToFront('track');
+
+					// movement XY
+					watchID = navigator.geolocation.watchPosition(function(position) {
+						pos = {
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						};
+						mapManager.moveMarker('track', pos);
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [position.coords.latitude, position.coords.longitude]
+							}
+						});
+					}, function() {
+						// console.log('location error');
+					}, {
+						// enableHighAccuracy: true
+					});
+
+					// movement rotation
+					window.addEventListener('deviceorientation', rotateMarker);
+				}
+				geoService.tracking = true;
+
+			};
+
+			geoService.trackStop = function() {
+				// used to stop showing user's location on map
+
+				if (geoService.tracking) { // only stop tracking if already tracking
+					// movement: clear watch
+					if (watchID) {
+						navigator.geolocation.clearWatch(watchID);
+						watchID = undefined;
+					}
+
+					// rotation: remove event listener
+					window.removeEventListener('deviceorientation', rotateMarker);
+
+					// remove marker
+					mapManager.removeMarker('track');
+					marker = [];
+				}
+				geoService.tracking = false;
+
+			};
+
+			function rotateMarker(data) {
+				// make sure new marker is loaded in DOM
+				if (marker.length > 0) {
+					var alpha = data.webkitCompassHeading || data.alpha;
+					var matrix = marker.css('transform');
+
+					// account for the fact that marker is initially facing south
+					var adjust = 180 + Math.round(alpha);
+
+					marker.css('transform', getNewTransformMatrix(matrix, adjust));
+				} else {
+					marker = $('img[alt="track"]');
+				}
+			}
+
+			function getNewTransformMatrix(matrix, angle) {
+				// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
+				var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
+
+				if (newMatrix.length !== 6) { // not 2D matrix
+					return matrix;
+				}
+
+				// get translation and don't change
+				var tx = newMatrix[4];
+				var ty = newMatrix[5];
+
+				// set new values for rotation matrix
+				var a = Math.cos(angle * Math.PI / 180);
+				var b = -Math.sin(angle * Math.PI / 180);
+				var c = -b;
+				var d = a;
+
+				return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
+			}
+
+			return geoService;
+		}]);
 'use strict';
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
@@ -17644,7 +17709,7 @@ var mapManager = {
 	center: {
 		lat: 42,
 		lng: -83,
-		zoom: 14
+		zoom: 17
 	},
 	markers: {},
 	layers: {
@@ -17681,7 +17746,7 @@ worldBounds: {
 	}
 };
 
-															//latlng should be array [lat, lng]
+															//latlng should be array [lng, lat]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
 	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');
@@ -17814,7 +17879,7 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-mapManager.markerFromLandmark = function(landmark, world) {
+mapManager.markerFromLandmark = function(landmark, world, $scope) {
 	var landmarkIcon = 'img/marker/bubble-marker-50.png',
 			popupAnchorValues = [0, -40],
 			iconAnchor = [17, 67],
@@ -17843,7 +17908,8 @@ mapManager.markerFromLandmark = function(landmark, world) {
 		},
 		_id: landmark._id,
 		layer: layerGroup,
-		alt: alt
+		alt: alt,
+		getMessageScope: function() { return $scope; }
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -18338,7 +18404,7 @@ mapManager.groupFloorMaps = function(worldStyle) {
 	}
 
 	// legacy maps
-	var localMaps = [worldStyle.maps];
+	var localMap = worldStyle.maps;
 	
 	// if localMapArray exists, replace local map with sorted array
 	if (hasLocalMapArray(worldStyle.maps)) {
@@ -18352,6 +18418,8 @@ mapManager.groupFloorMaps = function(worldStyle) {
 			var groupName = mapGroup + '-maps';
 			mapManager.addOverlayGroup(overlayGroup, groupName);
 		}
+	} else {
+		mapManager.addOverlay(localMap.localMapID, localMap.localMapName, localMap.localMapOptions);
 	}
 }
 
@@ -18797,8 +18865,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -18806,6 +18874,7 @@ var alerts = alertManager;
    
 var userManager = {
 	userRes: $resource('/api/updateuser'),
+	adminStatus: false,
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -18816,7 +18885,7 @@ userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
 
 	var user = userManager._user; //user cached in memory 
-	if (user) {  
+	if (!(_.isEmpty(user))) {  
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -18874,6 +18943,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
+		  userManager.adminStatus = user.admin ? true : false;
 		  $rootScope.user = user;
 		  if (user._id){
 			  $rootScope.userID = user._id;
@@ -18884,6 +18954,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
+		  userManager.adminStatus = false;
 		  deferred.reject(0);
 	});
 	
@@ -18903,6 +18974,7 @@ userManager.signin = function(username, password) { //given a username and passw
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -18941,7 +19013,10 @@ userManager.fbLogin = function() { //login based on facebook approval
 userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
+	userManager.adminStatus = false;
+	userManager._user = {};
 	$location.path('/');
+	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
@@ -18957,6 +19032,7 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 		dialogs.show = false;
+		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -18977,6 +19053,14 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = undefined;	
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
+
 	})
 	.error(function(err) {
 	if (err) {
@@ -18988,6 +19072,23 @@ userManager.signup.signup = function() { //signup based on signup form
 
 userManager.saveToKeychain = function() { 
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+}
+
+userManager.checkAdminStatus = function() {
+	var deferred = $q.defer();
+
+	userManager.getUser().then(function(user) {
+	  if (user.admin) {
+		  deferred.resolve(true);
+		  userManager.adminStatus = true;
+	  } else {
+	  	deferred.reject(false);
+	  }
+	}, function(error) {
+		deferred.reject(false);
+	});
+
+	return deferred.promise;
 }
 
 return userManager;
@@ -19114,8 +19215,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 }
 
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19285,6 +19386,7 @@ worldTree.createWorld = function() {
 		console.log('##Create##');
 		console.log('response', response);
 		$location.path('/edit/walkthrough/'+response[0].worldID);
+		navService.reset();
 	});
 }
 
@@ -20802,7 +20904,32 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
-app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', function(worldTree, $rootScope, $routeParams, userManager, dialogs) {
+'use strict';
+
+app.controller('ContestController', ContestController);
+
+ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+
+function ContestController($scope, $routeParams, Contests) {
+	$scope.contest = {};
+	$scope.region = $routeParams.region;
+
+	activate();
+
+	function activate() {
+		Contests.get({
+			id: $scope.region
+		}).$promise
+    .then(function(response) {
+    	if (response._id) {
+      	$scope.contest = response;
+    	}
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+}
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -20855,6 +20982,13 @@ scope.username = function () {
 	return userManager.getDisplayName();
 }
 //^^
+
+scope.superuserOptions = superuserService.routes;
+
+scope.goSuperuserOption = function($index) {
+	var region = $routeParams.region ? $routeParams.region : 'global';
+	superuserService.changeRoute(scope.superuserOptions[$index], region);
+}
 
 
 scope.userBubbles = function () {
@@ -22319,6 +22453,8 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
+$scope.location = $location;
+
 var map = mapManager;
 
 
@@ -22776,6 +22912,15 @@ function floorSelector(mapManager, floorSelectorService) {
 	};
 
 	function link(scope, elem, attr) {
+
+		// hide floor selector for maps with only one floor
+		if (!mapManager.localMapArrayExists(scope.world) ||
+				mapManager.sortFloors(scope.world.style.maps.localMapArray).length <= 1) {
+			elem.css({
+				display: 'none'
+			});
+		}
+
 		activate(elem);
 		
 		// make sure floor selector is closed if switching to a new bubble
@@ -22790,8 +22935,7 @@ function floorSelector(mapManager, floorSelectorService) {
 
 			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
 
-			scope.currentFloor = scope.floors.slice(-1)[0][0] > 0 ? 
-												   scope.floors.slice(-1)[0][0] : findCurrentFloor(scope.floors);
+			scope.currentFloor = findCurrentFloor(scope.floors);
 			floorSelectorService.setCurrentFloor(scope.currentFloor);
 
 			checkCategories(elem);
@@ -22924,7 +23068,7 @@ function floorSelectorService() {
 			floors = [],
 			selectedIndex,
 			showFloors,
-			showLandmarks = true;
+			showLandmarks = false;
 
 	return {
 		currentFloor: currentFloor,
@@ -22971,18 +23115,19 @@ function floorSelectorService() {
 	}
 
 	function getFloors(localMapArray) {
+
 		var sorted = _.chain(localMapArray)
 			.filter(function(f) {
 				return f.floor_num;
 			})
-			.groupBy(function(f) {
-				return f.floor_num;
+			.groupBy('floor_num')
+			.toArray()
+			.sortBy(function(arr) {
+				return arr[0].floor_num;
 			})
-			.sortBy(function(f) {
-				return -f.floor_num;
-			})
+			.reverse()
 			.value()
-			.reverse();
+
 		angular.copy(sorted, floors);
 		return floors;
 	}
@@ -23164,10 +23309,8 @@ $scope.goBack = function() {
 }
 
 $scope.logout = function() {
-      $http.get('/api/user/logout', {server:true});
-      userManager.loginStatus = false;
-      //$location.url('/');
-} //switch to userManager method
+	userManager.logout();
+}
 
 $scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 
@@ -23333,22 +23476,32 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
 			scope.routeParams = $routeParams;
+			scope.loading = false; // for showing loading animation
+
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
+				scope.loading = true;
+				scope.searchResult = []; // clear last results
+
 				geoService.getLocation().then(function(coords) {
 					searchParams = {textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}
-				analyticsService.log("search.text", searchParams);
+					analyticsService.log("search.text", searchParams);
 				
-				scope.searching = $http.get('/api/textsearch', {server: true, params: searchParams})
+					scope.searching = $http.get('/api/textsearch', {server: true, params: searchParams})
 					.success(function(result) {
 						if (!result.err) {
 							scope.searchResult = result;
 						} else {
 							scope.searchResult = [];
 						}
+							scope.loading = false;
 					})
-					.error(function(err) {console.log(err)});
+					.error(function(err) {
+							console.log(err)
+							scope.loading = false;
+						});
 				});		
 			}
 			
@@ -23362,6 +23515,459 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
+'use strict';
+
+angular.module('IF')
+    .factory('Announcements', function($resource) {
+
+        return $resource("/api/announcements/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            save: {
+                method: 'POST',
+                isArray:true
+            },
+            sort: {
+                method: 'POST',
+                isArray: true,
+                params: {
+                    option: 'sort'
+                }
+            },
+            remove: {
+                method: 'DELETE',
+                isArray:true
+            }
+        });
+    });
+'use strict';
+
+app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
+
+SuperuserAnnouncementController.$inject = ['$scope', 'Announcements','$routeParams', '$location', 'superuserService'];
+
+function SuperuserAnnouncementController($scope, Announcements, $routeParams, $location, superuserService) {
+
+	$scope.announcement = {};
+	$scope.announcements = [];
+	$scope.changeAnnouncementOrder = changeAnnouncementOrder;
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.deleteAnnouncement = deleteAnnouncement;
+	$scope.edit = false;
+	$scope.editAnnouncement = editAnnouncement;
+	$scope.editIndex;
+	$scope.region = $routeParams.region;
+	$scope.routes = superuserService.routes;
+	$scope.regions = ['global'];
+	$scope.resetAnnouncement = resetAnnouncement;
+	$scope.showAddAnnouncement = false;
+	$scope.showAddContest = false;
+	$scope.toggleNewAnnouncement = toggleNewAnnouncement;
+	$scope.toggleNewContest = toggleNewContest;
+	$scope.toggleDraftState = toggleDraftState;
+	$scope.updateAnnouncement = updateAnnouncement;
+
+	activate();
+
+	function activate() {
+		resetAnnouncement();
+		Announcements.query({
+			id: $scope.region
+		}).$promise
+	    .then(function(response) {
+	      $scope.announcements = response;
+	    });
+	}
+
+	function changeAnnouncementOrder(index, direction) {
+		Announcements.sort({
+			id: $scope.announcements[index]._id
+		}, {
+			dir: direction,
+			priority: $scope.announcements[index].priority
+		})
+		.$promise
+		.then(function(response) {
+			$scope.announcements = response;
+		});
+	}
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+	function deleteAnnouncement($index) {
+		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		if (deleteConfirm) {
+			Announcements.remove({
+				id: $scope.announcements[$index]._id
+			})
+			.$promise
+			.then(function(response) {
+				$scope.announcements = response;
+			});
+		}
+	}
+
+	function editAnnouncement($index) {
+		var tempAnnouncement = {};
+		angular.copy($scope.announcements[$index], tempAnnouncement);
+		$scope.announcement = tempAnnouncement;
+		$scope.edit = true;
+		$scope.editIndex = $index;
+		$scope.showAddAnnouncement = true;
+	}
+
+	function resetAnnouncement() {
+		$scope.announcement = {
+			live: false,
+			region: 'global'
+		};
+	}
+
+	$scope.submitAnnouncement = function (form) {
+		if (form.$invalid) {
+			console.log('Form is missing required fields.');
+			return;
+		}
+    Announcements.save($scope.announcement).$promise
+    .then(function(announcements) {
+      resetAnnouncement();
+      $scope.announcements = announcements;
+      toggleNewAnnouncement();
+    }, function(error) {
+    	console.log(error.data);
+    });
+  };
+
+	function toggleNewAnnouncement() {
+		$scope.showAddAnnouncement = !$scope.showAddAnnouncement;
+		$scope.showAddContest = false;
+	}
+
+	function toggleNewContest() {
+		$scope.showAddContest = !$scope.showAddContest;
+		$scope.showAddAnnouncement = false;
+	}
+
+  function toggleDraftState($index) {
+  	$scope.announcements[$index].live = !$scope.announcements[$index].live;
+  	Announcements.update({
+  		id: $scope.announcements[$index]._id
+  	}, $scope.announcements[$index]);
+  }
+
+  function updateAnnouncement(form) {
+  	if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;
+  	}
+  	$scope.announcement.live = false;
+  	Announcements.update({
+  		id: $scope.announcement._id
+  	}, $scope.announcement)
+  	.$promise
+  	.then(function(response) {
+  		$scope.announcements[$scope.editIndex] = response;
+  		toggleNewAnnouncement();
+  	});	
+  }
+}
+'use strict';
+
+angular.module('IF')
+    .factory('Contests', function($resource) {
+
+        return $resource("/api/contests/:id/:option", {
+            id: '@id'
+        }, {
+            update: {
+                method: 'put'
+            },
+            scan: {
+                method: 'POST',
+                isArray:true,
+                params: {
+                    option: 'scan'
+                }
+            },
+            remove: {
+                method: 'DELETE'
+            }
+        });
+    });
+'use strict';
+
+app.controller('SuperuserContestController', SuperuserContestController);
+
+SuperuserContestController.$inject = ['$scope', 'Contests','$routeParams', '$location', 'superuserService'];
+
+function SuperuserContestController($scope, Contests, $routeParams, $location, superuserService) {
+
+	$scope.contest = {};
+	$scope.contests;
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.dateOptions = {
+    formatYear: 'yy',
+    startingDay: 1
+  };
+  $scope.dateTime = {};
+	$scope.openEnd = openEnd;
+	$scope.openStart = openStart;
+	$scope.region = $routeParams.region;
+	$scope.regions = ['global'];
+	$scope.resetContestForm = resetContestForm;
+	$scope.routes = superuserService.routes
+	$scope.submit = submit;
+	$scope.updateContest = updateContest;
+
+	activate();
+
+	function activate() {
+		Contests.get({
+			id: $scope.region
+		}).$promise
+    .then(function(response) {
+    	if (response._id) {
+      	$scope.contest = response;
+    	}
+			getDates();
+    }, function(error) {
+    	console.log('Error:', error);
+    	getDates();
+    });
+    resetContestForm();
+	}
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+	function formatDateTime() {
+		var sd = $scope.dateTime.startDate,
+				st = $scope.dateTime.startTime,
+				ed = $scope.dateTime.endDate,
+				et = $scope.dateTime.endTime;
+		var start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), st.getHours(), st.getMinutes(), 0, 0);
+		var end = new Date(ed.getFullYear(), ed.getMonth(), ed.getDate(), et.getHours(), et.getMinutes(), 0, 0);
+
+		return {
+			start: start,
+			end: end
+		};
+	}
+
+  function openEnd($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.openedEnd = true;
+  }
+
+  function openStart($event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+
+    $scope.openedStart = true;
+  }
+
+  function resetContestForm() {
+		$scope.contest = {
+			contestTags: [],
+			region: $scope.region
+		};
+  }
+
+	function submit(form) {
+		if (form.$invalid) {
+  		console.log('Form is missing required fields.');
+  		return;			
+		}
+
+		// convert datepicker and timepicker and attach to contest object
+		$scope.contest.startDate = formatDateTime().start;
+		$scope.contest.endDate = formatDateTime().end;
+
+		// if _id exists then we are updating an existing contest
+		if ($scope.contest._id) {
+			updateContest();
+		} else {
+
+			Contests.save($scope.contest).$promise
+      .then(function(response) {
+        $scope.contest = response;
+      });;
+		}
+	}
+
+	function getDates() {
+		if (!$scope.contest._id) {
+			// if no contest exists in DB, set calendar and clock to current date/time
+			var d = new Date,
+					st,
+					et;
+	    $scope.dateTime.startDate = d;
+	    $scope.dateTime.startTime = d;
+	    $scope.dateTime.endDate = d;
+	    $scope.dateTime.endTime = d;
+	    // set minutes to 00
+	    $scope.dateTime.startTime.setMinutes(0);
+	    $scope.dateTime.endTime.setMinutes(0);
+		} else {
+			// set calendar and clock to match the contest data
+		  $scope.dateTime.startDate = new Date($scope.contest.startDate);
+		  st = ISOtoDate($scope.contest.startDate);
+	    $scope.dateTime.startTime = new Date(st.getFullYear(), st.getMonth(), st.getDate(), st.getHours(), st.getMinutes(),0 , 0);
+	    $scope.dateTime.endDate = new Date($scope.contest.endDate);
+	    et = ISOtoDate($scope.contest.endDate);
+	    $scope.dateTime.endTime = new Date(et.getFullYear(), et.getMonth(), et.getDate(), et.getHours(), et.getMinutes(),0 , 0);
+		}
+  }
+
+  function ISOtoDate(ISOdate) {
+  	return new Date(ISOdate);
+  }
+
+  function updateContest() {
+  	Contests.update({
+  		id: $scope.contest._id
+  	}, $scope.contest)
+  	.$promise
+  	.then(function(response) {
+  		$scope.contest = response;
+  	});	
+  }
+
+}
+'use strict';
+
+angular.module('IF')
+  .factory('Entries', Entries);
+
+Entries.$inject = ['$http', '$resource'];
+
+function Entries($http, $resource) {
+
+  var resource = $resource("/api/entries/:id/:option", {
+    id: '@id'
+  }, {
+    query: {
+      method: 'GET',
+      params: {
+        number: '@number'
+      },
+      isArray: true
+    },
+    update: {
+      method: 'put'
+    },
+    remove: {
+      method: 'DELETE'
+    }
+  });
+
+  return {
+    resource: resource
+  };
+
+}
+'use strict';
+
+app.controller('SuperuserEntriesController', SuperuserEntriesController);
+
+SuperuserEntriesController.$inject = ['$scope', 'Entries','$routeParams', '$location', 'superuserService'];
+
+function SuperuserEntriesController($scope, Entries, $routeParams, $location, superuserService) {
+
+	$scope.currentRoute = superuserService.getCurrentRoute();
+	$scope.deleteEntry = deleteEntry;
+	$scope.entries = [];
+	$scope.loadEntries = loadEntries;
+	$scope.region = $routeParams.region;
+	$scope.routes = superuserService.routes;
+	$scope.toggleValidity = toggleValidity;
+	
+	loadEntries();
+
+	$scope.changeRoute = function() {
+		superuserService.changeRoute($scope.currentRoute, $scope.region);
+	}
+
+	function deleteEntry($index) {
+		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		if (deleteConfirm) {
+			Entries.resource.remove({
+				id: $scope.entries[$index]._id
+			})
+			.$promise
+			.then(function(response) {
+				$scope.entries.splice($index, 1);
+			}, function(error) {
+				console.log('Error, nothing deleted:', error);
+			});
+		}
+	}
+
+	function loadEntries() {
+		Entries.resource.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = $scope.entries.concat(response);
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+
+	function toggleValidity($index) {
+  	$scope.entries[$index].valid = !$scope.entries[$index].valid;
+  	Entries.resource.update({
+  		id: $scope.entries[$index]._id
+  	}, $scope.entries[$index]);		
+	}
+
+
+}
+'use strict';
+
+app.factory('superuserService', superuserService);
+
+superuserService.$inject = ['$location'];
+
+function superuserService($location) {
+	
+	var currentRoute = '',
+			routes = ['Announcements', 'Contests', 'Entries'];
+
+	return {
+		changeRoute: changeRoute,
+		getCurrentRoute: getCurrentRoute,
+		routes: routes
+	};
+
+	function changeRoute(newRoute, region) {
+		currentRoute = newRoute;
+		$location.path('/su/' + newRoute.toLowerCase() + '/' + region.toLowerCase());
+	}
+
+	function getCurrentRoute() {
+		currentRoute = currentRoute.length ? currentRoute :
+								findRoute();
+		return currentRoute;
+	}
+
+	function findRoute() {
+		var path = $location.path();
+		var len = path.slice(4).indexOf('/');
+		return path.slice(4)[0].toUpperCase() + path.slice(5, len + 4);
+	}
+
+}
 app.controller('MeetupController', ['$scope', '$window', '$location', 'styleManager', '$rootScope','dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 
 
@@ -23603,6 +24209,27 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
 }]); 
 
 
+app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
+  $scope.alerts = alertManager;
+  $scope.aperture = apertureService;  
+
+  $scope.aperture.set('off');
+
+  $http.post('/email/request_confirm/'+$routeParams.token).
+    success(function(data){
+        console.log('email confirmed');
+        $scope.alerts.addAlert('success','Thanks for confirming your email');
+    }).
+    error(function(err){
+      if (err){
+        $scope.alerts.addAlert('danger',err);
+      }
+    });
+
+
+
+}]);
+
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});
@@ -23755,8 +24382,8 @@ if ($routeParams.incoming == 'meetup'){
 	}).
 	error(function(data) {
 		angular.extend($rootScope, {loading: false});
-		$http.get('/api/user/profile', {server: true}).success(function(user){
-			$scope.worlds = user;	
+		$http.get('/api/user/profile', {server: true}).success(function(response){
+			$scope.worlds = response;	
 			$scope.waitingforMeetup = false;	
 		});
 	});
@@ -23766,16 +24393,16 @@ else if ($routeParams.incoming == 'messages'){
 	$scope.fromMessages = true;
 }
 else {
-	$http.get('/api/user/profile', {server: true}).success(function(user){
-		console.log(user);
+	$http.get('/api/user/profile', {server: true}).success(function(response){
+		console.log(response);
 		
 		//$scope.worlds = user;
-		$scope.groups = userGrouping.groupByTime(user);
+		$scope.groups = userGrouping.groupByTime(response);
 		console.log($scope.groups);
 		
-		$scope.bubbles = user;
+		$scope.bubbles = response;
 
-		//sortWorlds(user);
+		//sortWorlds(response);
 	});
 }
 
@@ -23990,9 +24617,9 @@ $scope.go = function(url) {
 }
 
 userManager.getUser().then(
-	function(response) {
-	console.log('response', response);
-	$scope.user = response;
+	function(user) {
+	console.log('response', user);
+	$scope.user = user;
 }, function(reason) {
 	console.log('reason', reason);
 	$location.path('/');
@@ -24001,8 +24628,36 @@ userManager.getUser().then(
 
 }]);
 
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, analyticsService) {
+app.directive('userLocation', ['geoService', 'mapManager', function(geoService, mapManager) {
+	
+	return {
+		restrict: 'E',
+		scope: {
+			style: '='
+		},
+		templateUrl: 'components/userLocation/userLocation.html',
+		link: link
+	};
 
+	function link(scope, elem, attrs) {
+		
+		if (scope.style.widgets.category) {
+			// raise button from 80px to 120px to account for category widget
+			$('.userLocation').css('bottom', '120px');
+		}
+
+		scope.locateAndPan = function() {
+			geoService.trackStart();
+			var marker = mapManager.getMarker('track');
+			if (marker.lng !== 0 && marker.lat!== 0) {
+				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
+			}
+		};
+
+	}
+
+}]);
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, analyticsService) {
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
@@ -24046,6 +24701,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
+		floorSelectorService.showLandmarks = false;
 	});
 
 	$scope.apertureSet = function(newState) {
@@ -24167,6 +24823,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			
+			// show loading animation if search query is taking a long time
 			$scope.loading = 'delay';
 
 			$timeout(function() {
@@ -24216,6 +24873,11 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		updateLandmarks(landmarks);
 
 		updateFloorIndicator(landmarks);
+
+		// if we were already showing userLocation, continute showing (since updating map removes all markers, including userLocation marker)
+		if (geoService.tracking) {
+			geoService.trackStart();
+		}
 	}
 
 	function updateFloorMaps(landmarks) {
@@ -24237,7 +24899,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
 			})[0][0];
 
-			// angular.copy(sortedMarks[0], $scope.currentFloor);
 			floorSelectorService.setCurrentFloor($scope.currentFloor);
 			floor = floorSelectorService.currentFloor.floor_num;
 		}
@@ -24246,7 +24907,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	function updateLandmarks(landmarks) {
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world)
+			return mapManager.markerFromLandmark(l, $scope.world, $scope)
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :
@@ -24258,7 +24919,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
 
-		mapManager.setMarkers(markers);
+		mapManager.removeAllMarkers();
+
+		// defer waits until call stack is empty so we won't run into leaflet bug
+		// where adding a marker with the same key as an existing marker breaks the directive
+		_.defer(function() {
+			mapManager.setMarkers(markers);
+		});
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 
@@ -24463,37 +25130,70 @@ function categoryWidgetService() {
 	}
 	
 }
+'use strict';
+
+app.controller('ContestEntriesController', ContestEntriesController);
+
+ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', 'Entries', 'worldTree', 'styleManager'];
+
+function ContestEntriesController($scope, $routeParams, $rootScope, Entries, worldTree, styleManager) {
+
+	$scope.hashTag = $routeParams.hashTag;
+	$scope.loadEntries = loadEntries;
+	$scope.entries = [];
+	$scope.region = 'global';
+	$scope.style;
+	$scope.worldId = $routeParams.worldURL;
+
+	activate();
+
+	function activate() {
+		loadEntries();
+
+    worldTree.getWorld($routeParams.worldURL).then(function(data) {
+			$scope.style = data.style;
+			styleManager.navBG_color = $scope.style.navBG_color;
+			// $rootScope.hideBack = false;
+		});
+	}
+
+	function loadEntries() {
+		Entries.resource.query({
+			id: $scope.region
+		}, {
+			number: $scope.entries.length
+		}).$promise
+    .then(function(response) {
+      $scope.entries = $scope.entries.concat(response);
+    }, function(error) {
+    	console.log('Error:', error);
+    });
+	}
+}
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
 function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
 
 
 console.log('--Landmark Controller--');
+
+$scope.aperture = apertureService;
+$scope.bubbleTypeService = bubbleTypeService;
+$scope.worldURL = $routeParams.worldURL;
+$scope.landmarkURL = $routeParams.landmarkURL;
+$scope.collectedPresents = [];
+
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-$scope.aperture = apertureService;
 var aperture = apertureService;
 
-$scope.worldURL = $routeParams.worldURL;
-$scope.landmarkURL = $routeParams.landmarkURL;
-	
-$scope.collectedPresents = [];
+
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
-
-	if (bubbleTypeService.get() === 'Retail') {
-		$scope.$watch('aperture.state', function(newVal, oldVal) {
-			if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-				geoService.trackStart();
-			} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-				geoService.trackStop();
-			}
-		});	
-	}
 		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
@@ -24646,20 +25346,20 @@ function goToMark() {
 	}
 
 	map.addMarker($scope.landmark._id, {
-			lat: $scope.landmark.loc.coordinates[1],
-			lng: $scope.landmark.loc.coordinates[0],
-			draggable:false,
-			message:$scope.landmark.name,
-	  	icon: {
+		lat: $scope.landmark.loc.coordinates[1],
+		lng: $scope.landmark.loc.coordinates[0],
+		draggable:false,
+		message:$scope.landmark.name,
+  	icon: {
 			iconUrl: landmarkIcon,
-			shadowUrl: '',
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-			_id: $scope.landmark._id,
-			alt: alt
-			});
+		_id: $scope.landmark._id,
+		alt: alt
+	});
+
 	map.setMarkerFocus($scope.landmark._id);
 	
 	map.refresh();
@@ -25279,24 +25979,29 @@ app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchServ
 		}
 	};
 }]);
-// app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
-// 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-// 		$scope.world = data.world;
-// 		$scope.style = data.style;
-// 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-// 		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
-// 	})
-// }])
-
-// model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		
+		$scope.loadInstagrams = loadInstagrams;
+		$scope.instagrams = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
-		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+		loadInstagrams();
+
+		function loadInstagrams() {
+			db.instagrams.query({
+				number: $scope.instagrams.length,
+				tags: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.instagrams = $scope.instagrams.concat(response);
+			}, function(error) {
+				console.log('Error:', error);
+			});
+		}
 	})
 }])
 
@@ -25791,7 +26496,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, analyticsService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -25825,54 +26530,63 @@ $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
 
-$scope.uploadWTGT = function($files, state) {
-	if (userManager.loginStatus) {
-		$scope.wtgt.building[state] = true;
-
-		var file = $files[0];
-
-		// get time
-		var time = new Date();
-
-		// get hashtag
-		var hashtag = null;
-		hashtag = $scope.wtgt.hashtags[state];
-
-		var data = {
-			world_id: $scope.world._id,
-			worldID: $scope.world.id,
-			hashtag: hashtag,
-			userTime: time,
-			userLat: null,
-			userLon: null,
-			type: 'retail_campaign'
-		};
-
-		// get location
-		geoService.getLocation().then(function(coords) {
-			// console.log('coords: ', coords);
-			data.userLat = coords.lat;
-			data.userLon = coords.lng;
-			uploadPicture(file, state, data);
-		}, function(err) {
-			uploadPicture(file, state, data);
-		});
-	} else { // not logged in
-		dialogs.showDialog('authDialog.html');
-		contest.set($scope.wtgt.hashtags[state]);
+$scope.verifyUpload = function(event, state) {
+	// stops user from uploading wtgt photo if they aren't logged in
+	if (!userManager.loginStatus) {
+		event.stopPropagation();
+		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
+		$timeout(function() {
+			dialogs.showDialog('authDialog.html');
+			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+		}, 1500);
 		
 	}
-	
 }
 
+$scope.uploadWTGT = function($files, state) {
+	$scope.wtgt.building[state] = true;
+
+	var file = $files[0];
+
+	// get time
+	var time = new Date();
+
+	// get hashtag
+	var hashtag = null;
+	hashtag = $scope.wtgt.hashtags[state];
+
+	var data = {
+		world_id: $scope.world._id,
+		worldID: $scope.world.id,
+		hashtag: hashtag,
+		userTime: time,
+		userLat: null,
+		userLon: null,
+		type: 'retail_campaign'
+	};
+
+	// get location
+	geoService.getLocation().then(function(coords) {
+		// console.log('coords: ', coords);
+		data.userLat = coords.lat;
+		data.userLon = coords.lng;
+		uploadPicture(file, state, data);
+	}, function(err) {
+		uploadPicture(file, state, data);
+	});
+};
+
 function uploadPicture(file, state, data) {
+
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
 		file: file,
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
+		console.log('DATA IZZZ',data);
 		$scope.wtgt.images[state] = data;
+	
 		$scope.wtgt.building[state] = false;
 	});
 }
@@ -25889,14 +26603,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 	$scope.$watch('aperture.state', function(newVal, oldVal) {
-		 		if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-		 			geoService.trackStart();
-		 		} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-		 			geoService.trackStop();
-		 		}
-		 	});	
-		 }		 
+		 }
 
 		 style.navBG_color = $scope.style.navBG_color;
 
@@ -25999,7 +26706,10 @@ function loadWidgets() { //needs to be generalized
 			$scope.twitter = true;
 		}
 		if ($scope.style.widgets.instagram == true) {
-	  		$scope.instagrams = db.instagrams.query({limit:1, tag:$scope.world.resources.hashtag});
+	  		$scope.instagrams = db.instagrams.query({
+	  			number: 0,
+	  			tags:$scope.world.resources.hashtag
+	  		});
 	  		$scope.instagram = true;
 		}
 
@@ -26151,49 +26861,39 @@ function loadWidgets() { //needs to be generalized
 		
 		}
 		
-	   if ($scope.world.resources) {
-		$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
-	   }
+	  if ($scope.world.resources) {
+			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+	  }
 
-	   if ($scope.style.widgets.nearby == true) {
-	      $scope.nearby = true;
-	      $scope.loadState = 'loading';
+	  if ($scope.style.widgets.nearby == true) {
+      $scope.nearby = true;
+      $scope.loadState = 'loading';
 
-	      worldTree.getNearby().then(function(data){
+      worldTree.getNearby().then(function(data){
 
-	      	if(!data){
-	      		$scope.loadState = 'failure';
-	      	}
+      	if(!data){
+      		$scope.loadState = 'failure';
+      	}
 
-	      	if(data['150m'].length > 0 || data['2.5km'].length > 0){
+      	data['150m'] = data['150m'] || [];
+      	data['2.5km'] = data['2.5km'] || [];
 
-	      		//probably a better way to do this =_=
-	      		if (data['150m'].length > 0 && data['2.5km'].length > 0){
-					$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
-	      		}
-	      		else if (data['150m'].length > 0 && data['2.5km'].length < 0){
-	      			$scope.nearbyBubbles = data['150m'];
-	      		}
-	      		else if (data['150m'].length < 0 && data['2.5km'].length > 0){
-	      			$scope.nearbyBubbles = data['2.5km'];
-	      		}
-	      		else {
-	      			$scope.loadState = 'failure';
-	      		}
+      	$scope.nearbyBubbles = data['150m'].concat(data['2.5km']);
 
-	      		//remove bubble you're inside
-	      		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
-				    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
-				        $scope.nearbyBubbles.splice(i, 1);
-				    }
+    		//remove bubble you're inside
+    		for(var i = 0; i < $scope.nearbyBubbles.length; i++) {
+			    if($scope.nearbyBubbles[i]._id == $scope.world._id) {
+			      $scope.nearbyBubbles.splice(i, 1);
+			    }
 				}
 
 				//only 3 bubbles
 				if ($scope.nearbyBubbles.length > 3){
 					$scope.nearbyBubbles.length = 3;
 				}
-		
-	      	}
+	
+      // }
+
 
 	      	$scope.loadState = 'success';
 

@@ -16,6 +16,8 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
+$scope.location = $location;
+
 var map = mapManager;
 
 

@@ -3,32 +3,25 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 
 
 console.log('--Landmark Controller--');
+
+$scope.aperture = apertureService;
+$scope.bubbleTypeService = bubbleTypeService;
+$scope.worldURL = $routeParams.worldURL;
+$scope.landmarkURL = $routeParams.landmarkURL;
+$scope.collectedPresents = [];
+
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-$scope.aperture = apertureService;
 var aperture = apertureService;
 
-$scope.worldURL = $routeParams.worldURL;
-$scope.landmarkURL = $routeParams.landmarkURL;
-	
-$scope.collectedPresents = [];
+
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
-
-	if (bubbleTypeService.get() === 'Retail') {
-		$scope.$watch('aperture.state', function(newVal, oldVal) {
-			if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
-				geoService.trackStart();
-			} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
-				geoService.trackStop();
-			}
-		});	
-	}
 		
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
@@ -181,20 +174,20 @@ function goToMark() {
 	}
 
 	map.addMarker($scope.landmark._id, {
-			lat: $scope.landmark.loc.coordinates[1],
-			lng: $scope.landmark.loc.coordinates[0],
-			draggable:false,
-			message:$scope.landmark.name,
-	  	icon: {
+		lat: $scope.landmark.loc.coordinates[1],
+		lng: $scope.landmark.loc.coordinates[0],
+		draggable:false,
+		message:$scope.landmark.name,
+  	icon: {
 			iconUrl: landmarkIcon,
-			shadowUrl: '',
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,
 			popupAnchor: popupAnchorValues
 		},
-			_id: $scope.landmark._id,
-			alt: alt
-			});
+		_id: $scope.landmark._id,
+		alt: alt
+	});
+
 	map.setMarkerFocus($scope.landmark._id);
 	
 	map.refresh();

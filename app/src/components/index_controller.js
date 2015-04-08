@@ -65,10 +65,8 @@ $scope.goBack = function() {
 }
 
 $scope.logout = function() {
-      $http.get('/api/user/logout', {server:true});
-      userManager.loginStatus = false;
-      //$location.url('/');
-} //switch to userManager method
+	userManager.logout();
+}
 
 $scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
 

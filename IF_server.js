@@ -60,6 +60,8 @@ var sanitize = require('mongo-sanitize');
 var worlds_query = require('./components/IF_bubbleroutes/worlds_query');
 var random_bubble = require('./components/IF_bubbleroutes/random_bubble');
 
+
+
 //---- SEARCH -------//
 var text_search = require('./components/IF_search/text_search');
 var bubble_search = require('./components/IF_search/bubble_search');
@@ -76,7 +78,6 @@ var mongoose = require('mongoose'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
-    announcementsSchema = require('./components/IF_schemas/announcements_schema.js'),
     monguurl = require('monguurl');
 
 mongoose.connect(configDB.url);
@@ -198,6 +199,7 @@ app.post('/feedback', function(req, res) {
 });
 
 
+
 //-------------------------------------//
 //---- Redis -----//
 //-------------------------------------//
@@ -205,6 +207,92 @@ app.post('/feedback', function(req, res) {
 // var client = redis.createClient(); //creates a new client 
 
 var redisClient = require('./redis.js');
+
+//---------------------------------------//
+//-------- Send Email Confirmation ------//
+//---------------------------------------//
+
+
+app.post('/email/confirm', function(req, res, next) {
+	console.log("entering /email/confirm");
+
+    if (!validateEmail(req.user.local.email)) {
+		console.log('bad email address: ' + req.user.local.email);
+		next('Please use a real email address');
+		return;
+	}
+
+	if (!req.headers.host) {
+		console.log("Cannot send confirmation mail without req.headers.host");
+		next("Can not send confirmation mail: no host");
+		return;
+	}
+
+    crypto.randomBytes(20, function(err, buf) {
+        var token = buf.toString('hex');
+		var email = req.user.local.email;
+
+        User.findOne({'local.email': email},	function(err, user) {
+            if (!user) {
+                next('No account with that email address exists, or you signed up only through Facebook/Twitter');
+				return;
+            }
+
+            user.local.confirmEmailToken = token;
+            user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
+            user.save(function(err) {
+				if (err) {
+					return next(err);
+				}
+
+				var mailOptions = {
+					to: email,
+					from: 'Kip <noreply@kipapp.co>',
+					subject: 'Kip – Confirm your email',
+					text: 'Thanks for signing up for Kip! \n\n' +
+                          'Please click on the following link to confirm your email:\n\n' +
+                          'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+					if (err) {
+						return next(err);
+					}
+                    console.log('sent confirmation email');
+                    res.send("｡◕‿◕｡");
+                });
+            });
+        });
+    });
+
+    function validateEmail(email) {
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+});
+
+
+app.post('/email/request_confirm/:token', function(req, res) {
+
+    User.findOne({
+        'local.confirmEmailToken': req.params.token,
+        'local.confirmEmailExpires': {
+            $gt: Date.now()
+        }
+    }, function(err, user) {
+        if (!user) {
+            res.send('Email confirm token is invalid or has expired.');
+        } else {
+            user.local.confirmedEmail = true;
+            user.local.confirmEmailToken = undefined;
+            user.local.confirmEmailExpires = undefined;
+
+            user.save(function(err) {
+                res.status(200).send('Email address confirmed');
+            });
+        }
+    });
+});
+
 
 
 //====================================//
@@ -247,7 +335,7 @@ app.post('/forgot', function(req, res, next) {
                     subject: 'Bubbl Password Reset',
                     text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
                         'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-                        'https://' + req.headers.host + '/#/reset/' + token + '\n\n' +
+                        'https://' + req.headers.host + '/reset/' + token + '\n\n' +
                         'If you did not request this, please ignore this email and your password will remain unchanged.\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
@@ -389,6 +477,14 @@ app.get('/api/user/loggedin', function(req, res) {
 });
 
 
+//--- SUPER USER ROUTER ----//
+app.use('/api/announcements', require('./components/IF_superuser/announcement_routes'));
+app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
+app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
+//--- INSTAGRAM / TWITTER ROUTER ----//
+app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
+
+
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
@@ -457,6 +553,7 @@ function isLoggedIn(req, res, next) {
         return next();
     }
 }
+
 
 
 // Query
@@ -700,17 +797,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
         uploadContents += val;
     });
 
-    // req.busboy.on('finish', function (key,val) {
-
-    //   if(uploadContents){
-    //     try {
-    //       uploadContents = JSON.parse(uploadContents);
-    //     }
-    //     catch(err){
-    //       console.log(err);
-    //     }
-    //   }
-    // });
+    //Detect if captured on iPhone and set iphone boolean
+    // console.log('user-AGENT IS ', req.headers)
+    // var iphone = req.headers['user-agent'].indexOf('iPhone') > -1 ? true : false;
 
 
     var fstream;
@@ -718,46 +807,47 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
     req.busboy.on('file', function(fieldname, file, filename, filesize, mimetype) {
 
-        if (mimetype == 'image/jpeg' || mimetype == 'image/png' || mimetype == 'image/gif' || mimetype == 'image/jpg') {
-            if (req.headers['content-length'] > 10000000) {
-                console.log("Filesize too large.");
-            } else {
+        if (!mimetype == 'image/jpeg' || !mimetype == 'image/png' || !mimetype == 'image/gif' || !mimetype == 'image/jpg') {
 
-                var stuff_to_hash = filename + (new Date().toString());
-                var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
-                var fileType = filename.split('.').pop();
-                var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
-                var current = object_key + "." + fileType;
-                var tempPath = "app/dist/temp_general_uploads/" + current;
-                var awsKey = date_in_path + current;
-                fstream = fs.createWriteStream(tempPath);
-                var count = 0;
-                var totalSize = req.headers['content-length'];
+            res.send(500, 'Please use .jpg .png or .gif');
 
-                file.on('data', function(data) {
-                    count += data.length;
-                    var percentUploaded = Math.floor(count / totalSize * 100);
-                    io.emit('uploadstatus', {
-                        message: "Uploaded " + percentUploaded + "%"
-                    });
-                }).pipe(fstream);
+        }
+        if (req.headers['content-length'] > 10000000) {
+            console.log("Filesize too large.");
+        } else {
 
-                fstream.on('close', function() {
+            var stuff_to_hash = filename + (new Date().toString());
+            var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
+            var fileType = filename.split('.').pop();
+            var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
+            var current = object_key + "." + fileType;
+            var tempPath = "app/dist/temp_general_uploads/" + current;
+            var awsKey = date_in_path + current;
+            fstream = fs.createWriteStream(tempPath);
+            var count = 0;
+            var totalSize = req.headers['content-length'];
+            var picorientation;
+            file.on('data', function(data) {
+                count += data.length;
+                var percentUploaded = Math.floor(count / totalSize * 100);
+                io.emit('uploadstatus', {
+                    message: "Uploaded " + percentUploaded + "%"
+                });
+            }).pipe(fstream);
+
+            fstream.on('close', function() {
 
                     var buffer = readChunk.sync(tempPath, 0, 262);
 
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
-                        im.resize({
-                            srcPath: tempPath,
-                            dstPath: tempPath,
-                            width: 600,
-                            quality: 0.8
-                        }, function(err, stdout, stderr) {
 
+                        //AUTO-REORIENT
+                        im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+                            if (err) console.log(err)
+                            console.log('REORIENTED TO 1!')
                             fs.readFile(tempPath, function(err, fileData) {
-
                                 var s3 = new AWS.S3();
                                 s3.putObject({
                                     Bucket: 'if-server-general-images',
@@ -787,14 +877,220 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                     }
                                 });
                             });
-                        });
-                    }
-                });
-            }
-        } else {
-            res.send(500, 'Please use .jpg .png or .gif');
+                        })
 
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
+                        //     if (err) throw err;
+                        //     console.log('orientation: ' + output);
+                        //     var picorientation = output.toString().trim();
+                        //     switch (picorientation) {
+                        //         case '1':
+                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', tempPath], function(err, stdout, stderr) {
+                        //                 if (err) console.log(err)
+                        //                 console.log('not flipped.')
+                        //                 fs.readFile(tempPath, function(err, fileData) {
+                        //                     var s3 = new AWS.S3();
+                        //                     s3.putObject({
+                        //                         Bucket: 'if-server-general-images',
+                        //                         Key: awsKey,
+                        //                         Body: fileData,
+                        //                         ACL: 'public-read'
+                        //                     }, function(err, data) {
+
+                        //                         if (err)
+                        //                             console.log(err);
+                        //                         else {
+                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                        //                             fs.unlink(tempPath);
+
+                        //                             //additional content was passed with the image, handle it here
+                        //                             if (uploadContents) {
+                        //                                 try {
+                        //                                     uploadContents = JSON.parse(uploadContents);
+                        //                                 } catch (err) {
+                        //                                     console.log(err);
+                        //                                 }
+                        //                                 if (uploadContents.type == 'retail_campaign') {
+                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                        //                                 }
+                        //                             }
+
+                        //                         }
+                        //                     });
+                        //                 });
+                        //             })
+                        //             break;
+                        //         case '3':
+                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '180', tempPath], function(err, stdout, stderr) {
+                        //                 if (err) console.log(err)
+                        //                 console.log('flipped')
+                        //                 fs.readFile(tempPath, function(err, fileData) {
+                        //                     var s3 = new AWS.S3();
+                        //                     s3.putObject({
+                        //                         Bucket: 'if-server-general-images',
+                        //                         Key: awsKey,
+                        //                         Body: fileData,
+                        //                         ACL: 'public-read'
+                        //                     }, function(err, data) {
+
+                        //                         if (err)
+                        //                             console.log(err);
+                        //                         else {
+                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                        //                             fs.unlink(tempPath);
+
+                        //                             //additional content was passed with the image, handle it here
+                        //                             if (uploadContents) {
+                        //                                 try {
+                        //                                     uploadContents = JSON.parse(uploadContents);
+                        //                                 } catch (err) {
+                        //                                     console.log(err);
+                        //                                 }
+                        //                                 if (uploadContents.type == 'retail_campaign') {
+                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                        //                                 }
+                        //                             }
+
+                        //                         }
+                        //                     });
+                        //                 });
+                        //             })
+                        //             break;
+                        //         case '6':
+                        //             console.log('hitting ', picorientation);
+                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '90', tempPath], function(err, stdout, stderr) {
+                        //                 if (err) console.log(err)
+                        //                 console.log('flipped!!!!!')
+                        //                 fs.readFile(tempPath, function(err, fileData) {
+                        //                     var s3 = new AWS.S3();
+                        //                     s3.putObject({
+                        //                         Bucket: 'if-server-general-images',
+                        //                         Key: awsKey,
+                        //                         Body: fileData,
+                        //                         ACL: 'public-read'
+                        //                     }, function(err, data) {
+
+                        //                         if (err)
+                        //                             console.log(err);
+                        //                         else {
+                        //                             console.log('front end link is https://s3.amazonaws.com/if-server-general-images/' + awsKey)
+                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                        //                             fs.unlink(tempPath);
+
+                        //                             //additional content was passed with the image, handle it here
+                        //                             if (uploadContents) {
+                        //                                 try {
+                        //                                     uploadContents = JSON.parse(uploadContents);
+                        //                                 } catch (err) {
+                        //                                     console.log(err);
+                        //                                 }
+                        //                                 if (uploadContents.type == 'retail_campaign') {
+                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                        //                                 }
+                        //                             }
+
+                        //                         }
+                        //                     });
+                        //                 });
+                        //             })
+                        //             break;
+                        //         case '8':
+                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '270', tempPath], function(err, stdout, stderr) {
+                        //                 if (err) console.log(err)
+                        //                 console.log('flipped!!!!!')
+                        //                 fs.readFile(tempPath, function(err, fileData) {
+                        //                     var s3 = new AWS.S3();
+                        //                     s3.putObject({
+                        //                         Bucket: 'if-server-general-images',
+                        //                         Key: awsKey,
+                        //                         Body: fileData,
+                        //                         ACL: 'public-read'
+                        //                     }, function(err, data) {
+
+                        //                         if (err)
+                        //                             console.log(err);
+                        //                         else {
+                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                        //                             fs.unlink(tempPath);
+
+                        //                             //additional content was passed with the image, handle it here
+                        //                             if (uploadContents) {
+                        //                                 try {
+                        //                                     uploadContents = JSON.parse(uploadContents);
+                        //                                 } catch (err) {
+                        //                                     console.log(err);
+                        //                                 }
+                        //                                 if (uploadContents.type == 'retail_campaign') {
+                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                        //                                 }
+                        //                             }
+
+                        //                         }
+                        //                     });
+                        //                 });
+                        //             })
+                        //             break;
+                        //         default:
+                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', tempPath], function(err, stdout, stderr) {
+                        //                 if (err) console.log(err)
+                        //                 console.log('not flipped.')
+                        //                 fs.readFile(tempPath, function(err, fileData) {
+                        //                     var s3 = new AWS.S3();
+                        //                     s3.putObject({
+                        //                         Bucket: 'if-server-general-images',
+                        //                         Key: awsKey,
+                        //                         Body: fileData,
+                        //                         ACL: 'public-read'
+                        //                     }, function(err, data) {
+
+                        //                         if (err)
+                        //                             console.log(err);
+                        //                         else {
+
+                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                        //                             fs.unlink(tempPath);
+
+                        //                             //additional content was passed with the image, handle it here
+                        //                             if (uploadContents) {
+                        //                                 try {
+                        //                                     uploadContents = JSON.parse(uploadContents);
+                        //                                 } catch (err) {
+                        //                                     console.log(err);
+                        //                                 }
+                        //                                 if (uploadContents.type == 'retail_campaign') {
+                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                        //                                 }
+                        //                             }
+
+                        //                         }
+                        //                     });
+                        //                 });
+                        //             })
+                        //     } //END OF SWITCH
+                        // }); //END OF IM.IDENTIFY
+
+
+
+
+                    } //END OF INNER ELSE
+                }) //END OF FS.STREAM ON
+        } //END OF OUTER ELSE
+
     });
 });
 
@@ -1899,46 +2195,46 @@ app.get('/api/:collection', function(req, res) {
     }
 
     //querying instagrams
-    if (req.params.collection == 'instagrams') {
+    // if (req.params.collection == 'instagrams') {
 
-        if (req.query.tag) { //hashtag filtering
-            //has limit
-            if (req.query.limit) {
-                var Inlimit = parseInt(req.query.limit);
-                var qw = {
-                    'tags': {
-                        $in: [req.query.tag]
-                    }
-                };
-                db.collection('instagrams').find(qw).limit(Inlimit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-            //no limit
-            else {
-                var qw = {
-                    'tags': {
-                        $in: [req.query.tag]
-                    }
-                };
-                db.collection('instagrams').find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
+    //     if (req.query.tag) { //hashtag filtering
+    //         //has limit
+    //         if (req.query.limit) {
+    //             var Inlimit = parseInt(req.query.limit);
+    //             var qw = {
+    //                 'tags': {
+    //                     $in: [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('instagrams').find(qw).limit(Inlimit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //         //no limit
+    //         else {
+    //             var qw = {
+    //                 'tags': {
+    //                     $in: [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('instagrams').find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
 
-        } else {
-            if (req.query.limit) { //limited tweet query
-                limit = parseInt(req.query.limit);
-                db.collection(req.params.collection).find(qw).limit(limit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            } else {
-                db.collection(req.params.collection).find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-        }
-    }
+    //     } else {
+    //         if (req.query.limit) { //limited tweet query
+    //             limit = parseInt(req.query.limit);
+    //             db.collection(req.params.collection).find(qw).limit(limit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         } else {
+    //             db.collection(req.params.collection).find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     }
+    // }
 
 
 

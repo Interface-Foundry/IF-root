@@ -3,11 +3,11 @@
 		<h4 class="subnav-header">Instagram <em>#{{world.resources.hashtag}}</em></h4>
 	</nav>
 	
-	<div class="instagram-wrap wrap">
+	<div class="instagram-wrap wrap" lazy-load load-more="loadInstagrams()">
 		<ul>
-			<li ng-repeat="instagram in instagrams" class="instagram marble-page">
+			<li ng-repeat="instagram in instagrams track by $index" class="instagram marble-page">
 				<a ng-href="http://instagram.com/{{instagram.user.screen_name}}" target="_blank">
-					<img if-src="img/instagram/{{instagram.local_path[0]}}">
+					<img if-src="https://s3.amazonaws.com/if.instagram.images/{{instagram.local_path[0]}}">
 				<footer><h4>{{::instagram.user.name || instagram.user.screen_name}}</h4>{{::instagram.text}}</footer>
 				</a>
 			</li>

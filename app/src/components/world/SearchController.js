@@ -1,5 +1,4 @@
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, analyticsService) {
-
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, analyticsService) {
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
@@ -43,6 +42,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
+		floorSelectorService.showLandmarks = false;
 	});
 
 	$scope.apertureSet = function(newState) {
@@ -164,6 +164,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.show[searchType] = true;
 		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
 			
+			// show loading animation if search query is taking a long time
 			$scope.loading = 'delay';
 
 			$timeout(function() {
@@ -213,6 +214,11 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		updateLandmarks(landmarks);
 
 		updateFloorIndicator(landmarks);
+
+		// if we were already showing userLocation, continute showing (since updating map removes all markers, including userLocation marker)
+		if (geoService.tracking) {
+			geoService.trackStart();
+		}
 	}
 
 	function updateFloorMaps(landmarks) {
@@ -234,7 +240,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
 			})[0][0];
 
-			// angular.copy(sortedMarks[0], $scope.currentFloor);
 			floorSelectorService.setCurrentFloor($scope.currentFloor);
 			floor = floorSelectorService.currentFloor.floor_num;
 		}
@@ -243,7 +248,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	function updateLandmarks(landmarks) {
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world)
+			return mapManager.markerFromLandmark(l, $scope.world, $scope)
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :
@@ -255,7 +260,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
 
-		mapManager.setMarkers(markers);
+		mapManager.removeAllMarkers();
+
+		// defer waits until call stack is empty so we won't run into leaflet bug
+		// where adding a marker with the same key as an existing marker breaks the directive
+		_.defer(function() {
+			mapManager.setMarkers(markers);
+		});
 
 		mapManager.turnOnOverlay(floor.concat('-landmarks'));
 

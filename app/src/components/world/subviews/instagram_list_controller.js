@@ -1,10 +1,26 @@
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		
+		$scope.loadInstagrams = loadInstagrams;
+		$scope.instagrams = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
 		
-		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+		loadInstagrams();
+
+		function loadInstagrams() {
+			db.instagrams.query({
+				number: $scope.instagrams.length,
+				tags: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.instagrams = $scope.instagrams.concat(response);
+			}, function(error) {
+				console.log('Error:', error);
+			});
+		}
 	})
 }])
 

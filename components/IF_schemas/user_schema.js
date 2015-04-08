@@ -12,7 +12,10 @@ var userSchema = mongoose.Schema({
         email        : { type: String, index: true },
         password     : { type: String },
         resetPasswordToken: String,
-        resetPasswordExpires: Date
+        resetPasswordExpires: Date,
+        confirmedEmail: { type: Boolean, default: false },
+        confirmEmailToken: String,
+        confirmEmailExpires: Date
     },
     facebook         : {
         id           : String,
@@ -75,7 +78,7 @@ var userSchema = mongoose.Schema({
     //     P: Number
     // }],
     // email: [Schema.Types.Mixed],
-    email: String,
+    email: {type: String, unique: true, lowercase:true}, //FORCE LOWERCASE
     emailConfirmed: Boolean,
     // tel: [{
     

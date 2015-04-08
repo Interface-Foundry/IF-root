@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -174,6 +174,7 @@ worldTree.createWorld = function() {
 		console.log('##Create##');
 		console.log('response', response);
 		$location.path('/edit/walkthrough/'+response[0].worldID);
+		navService.reset();
 	});
 }
 
