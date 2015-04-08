@@ -262,12 +262,19 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				success(function(result) {
 					if (!result.err) {
 						map.removeAllMarkers();
-						_.each(result, function(item) {
-							map.addMarker(item._id, {
-								lat: item.loc.coordinates[1],
-								lng: item.loc.coordinates[0],
+			
+						// separate bubbles from landmarks
+						result = _.groupBy(result, 'world');
+						$scope.citySearchResults.bubbles = result.true;
+						$scope.citySearchResults.landmarks = result.false;
+
+						// add bubble markers
+						_.each($scope.citySearchResults.bubbles, function(bubble) {
+							map.addMarker(bubble._id, {
+								lat: bubble.loc.coordinates[1],
+								lng: bubble.loc.coordinates[0],
 								draggable: false,
-								// message:
+								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
 									iconUrl: 'img/marker/bubble-marker-50.png',
 									iconSize: [35, 67],
@@ -276,10 +283,22 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								}
 							});
 						});
-						// separate bubbles from landmarks
-						result = _.groupBy(result, 'world');
-						$scope.citySearchResults.bubbles = result.true;
-						$scope.citySearchResults.landmarks = result.false;
+
+						// add landmark markers
+						_.each($scope.citySearchResults.landmarks, function(landmark) {
+							map.addMarker(landmark._id, {
+								lat: landmark.loc.coordinates[1],
+								lng: landmark.loc.coordinates[0],
+								draggable: false,
+								// message: '<a ng-click="goLandmark(landmark)"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+								icon: {
+									iconUrl: 'img/marker/bubble-marker-50_selected.png',
+									iconSize: [35, 67],
+									iconAnchor: [17, 67],
+									popupAnchor: [0, -40]
+								}
+							});
+						});
 
 					} else {
 						$scope.citySearchResults = [];
