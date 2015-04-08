@@ -307,7 +307,9 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 						// add markers and set aperture
 						mapManager.addMarkers(markers);
-						mapManager.setCenterFromMarkersWithAperture(markers, apertureService.state);
+						if (markers.length > 0) {
+							mapManager.setCenterFromMarkersWithAperture(markers, apertureService.state);
+						}
 
 					} else {
 						$scope.citySearchResults = [];

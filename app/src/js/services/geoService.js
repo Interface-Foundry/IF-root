@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
-    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
+    .factory('geoService', [ '$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
+    	function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService) {
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
@@ -14,12 +14,18 @@ angular.module('tidepoolsServices')
 			};	
 
 			var marker = [];
+			var pos = {
+				/**
+				 * lat:
+				 * lng:
+				 */
+			}
 			var watchID;
 			$rootScope.aperture = apertureService;
 
-			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			// start tracking when in full aperture (and retail bubble or world search) and stop otherwise
 			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
-				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
+				if (bubbleTypeService.get() === 'Retail' || $routeParams.cityName) {
 					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
 						geoService.trackStart();
 					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
@@ -92,8 +98,8 @@ angular.module('tidepoolsServices')
 
 					// marker
 					mapManager.addMarker('track', {
-						lat: geoService.location.lat || 0,
-						lng: geoService.location.lng || 0,
+						lat: pos.lat || geoService.location.lat || 0,
+						lng: pos.lng || geoService.location.lng || 0,
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
@@ -107,7 +113,7 @@ angular.module('tidepoolsServices')
 
 					// movement XY
 					watchID = navigator.geolocation.watchPosition(function(position) {
-						var pos = {
+						pos = {
 							lat: position.coords.latitude,
 							lng: position.coords.longitude
 						};
