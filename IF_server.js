@@ -835,6 +835,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             var count = 0;
             var totalSize = req.headers['content-length'];
             var picorientation;
+            var newentryID = '';
             file.on('data', function(data) {
                 count += data.length;
                 var percentUploaded = Math.floor(count / totalSize * 100);
@@ -889,22 +890,28 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                             if (uploadContents.type == 'retail_campaign') {
                                                 // var newString = description.replace(/[^A-Z0-9]/ig, "");
                                                 // uploadContents.description = newString;
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
+                                                    //Retrieve new saved contest entry ID
+                                                    newentryID = data
+                                                }); //contest entry, send to bac
                                             }
                                         }
 
+
+                                        //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+
                                         var options = {
-                                                url: "https://api.cloudsightapi.com/image_requests",
-                                                headers: {
-                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-                                                },
-                                                qs: {
-                                                    'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
-                                                    'image_request[locale]': 'en-US',
-                                                    'image_request[language]': 'en'
-                                                }
+                                            url: "https://api.cloudsightapi.com/image_requests",
+                                            headers: {
+                                                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                            },
+                                            qs: {
+                                                'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                'image_request[locale]': 'en-US',
+                                                'image_request[language]': 'en'
                                             }
-                                            //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+                                        }
+
                                         request.post(options, function(err, res, body) {
                                             if (err) console.log(err);
                                             var data = JSON.parse(body);
@@ -921,6 +928,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                     return (results.status == 'not completed' && tries < 10);
                                                 },
                                                 function(callback) {
+
                                                     var options = {
                                                         url: "https://api.cloudsightapi.com/image_responses/" + data.token,
                                                         headers: {
@@ -935,16 +943,32 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                         if (body.status == 'completed') {
                                                             results.status = 'completed';
                                                             description = body.name;
-                                                            
-                                                        }
+
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            uploadContents.description = newString;
+
+                                                            contestEntrySchema.findOneAndUpdate({
+                                                                    _id: newentryID
+                                                                }, {
+                                                                    $push: {
+                                                                        contestTag: {
+                                                                            tag: uploadContents.description
+                                                                        }
+                                                                    }
+                                                                },
+                                                                function(err, result) {
+                                                                    if (err) console.log(err);
+                                                                    console.log('contest updated with cloudsight', result)
+                                                                })
+
+                                                        } //END OF BODY.STATUS COMPLETED
                                                     })
+
                                                     tries++;
                                                     setTimeout(callback, 5000);
                                                 },
                                                 function(err) {
-                                                    console.log('Description of image is..', description)
-
-
+                                               
                                                 }
                                             );
 
