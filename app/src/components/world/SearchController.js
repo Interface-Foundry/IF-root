@@ -22,8 +22,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$scope.aperture.set('third');
 	}
 
-	
-
 	if ($routeParams.worldURL) {
 		navService.show('searchWithinBubble');
 

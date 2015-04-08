@@ -40,7 +40,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
 						$location.path('/w/' + scope.world.id + '/search', false);
-						mapManager.removeAllMarkers();
 					}
 					categoryWidgetService.selectedIndex = null;
 					floorSelectorService.showFloors = false;

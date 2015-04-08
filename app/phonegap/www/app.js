@@ -17810,9 +17810,15 @@ mapManager.removeMarker = function(key) {
 	}
 }
 
-mapManager.removeAllMarkers = function() {
+mapManager.removeAllMarkers = function(hardRemove) {
 	console.log('--removeAllMarkers--');
+	var trackMarker = mapManager.getMarker('track');
 	mapManager.markers = {};
+
+	// re-add user location marker
+	if (!hardRemove && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
+	}
 }
 
 mapManager.moveMarker = function(key, pos) {
@@ -17824,13 +17830,21 @@ mapManager.moveMarker = function(key, pos) {
 	mapManager.refresh();
 };
 
-mapManager.setMarkers = function(markers) {
+mapManager.setMarkers = function(markers, hardSet) {
+	var trackMarker = mapManager.getMarker('track');
+	
 	if (_.isArray(markers)) {
 		mapManager.markers = _.indexBy(markers, function(marker) {
 			return marker._id;
-		})
+		});
 	} else {
 		mapManager.markers = markers;
+
+	}
+
+	// re-add user location marker
+	if (!hardSet && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
 	}
 }
 
@@ -24609,7 +24623,7 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 				geoService.trackStart();
 			}
 			var marker = mapManager.getMarker('track');
-			if (marker.lng !== 0 && marker.lat!== 0) {
+			if (marker && marker.lng !== 0 && marker.lat!== 0) {
 				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
 			}
 		};
@@ -24640,8 +24654,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
 	}
-
-	
 
 	if ($routeParams.worldURL) {
 		navService.show('searchWithinBubble');
@@ -26000,7 +26012,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
 						$location.path('/w/' + scope.world.id + '/search', false);
-						mapManager.removeAllMarkers();
 					}
 					categoryWidgetService.selectedIndex = null;
 					floorSelectorService.showFloors = false;
