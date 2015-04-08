@@ -16933,11 +16933,96 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    }])
 'use strict';
 
+app.factory('analyticsService', analyticsService);
+
+analyticsService.$inject = ['$http', '$injector', '$rootScope', '$timeout', '$location', 'localStore'];
+
+function analyticsService($http, $injector, $rootScope, $timeout, $location, localStore) {
+    var sequenceNumber = 0;
+    var geoService; // lazy loaded to avoid circ dependency
+    var userManager; // ditto
+
+    /**
+     * Log any sort of analytics data
+     * @param action string name of the action, can be dot-separated or whatever you think is easy to search
+     *      ex "geolocation.update" or "search.keyword" or "search.category"
+     * @param data the dat you want to log to the db
+     */
+    function log(action, data) {
+        sequenceNumber++; // update this global sequence number every time something interesting happens
+		if (typeof geoService === 'undefined') {
+			geoService = $injector.get('geoService');
+		}
+		if (typeof userManager === 'undefined') {
+			userManager = $injector.get('userManager');
+		}
+		
+		var doc = {
+			action: action,
+			data: data,
+			userTimestamp: Date.now(),
+			sequenceNumber: sequenceNumber,
+            world: getWorld()
+		};
+
+		geoService.getLocation().then(function(coords) {
+			doc.loc = {
+				type: "Point",
+				coordinates: [coords.lng, coords.lat]
+			};
+			
+			return localStore.getID();
+		}).then(function(id) {
+			doc.anon_user_id = id;
+			return userManager.getUser();
+		}).then(function(user) {
+			if (user.permissions.indexOf('do_not_track') == -1) {
+				doc.user = user._id;
+			}
+			
+		}).finally(function() {
+			// dude trust me, this is gonna work. no need for a response
+			$http.post('/api/analytics/' + action, doc);
+		});
+    }
+    
+    // log all route changes to teh db
+    $rootScope.$on('$routeChangeSuccess', function(event, url) {
+		
+		// wait until render finishes
+		$timeout(function() {
+			log('route.change', {
+				url: $location.absUrl(),
+				world: getWorld()
+			});
+		});
+	});
+	
+	// attempt to get the currently viewed world if it exists
+	function getWorld() {
+		// the main shelf scope has all the interesting stuff
+		var scope = angular.element('#shelf').scope() || {};
+		if (scope.world && scope.world._id) {
+			return {
+				_id: scope.world._id,
+				category: scope.world.category,
+				loc: scope.world.loc
+			};
+		}
+	}
+    
+    return {
+        log: log
+    };
+}
+
+'use strict';
+
 app.factory('bubbleSearchService', bubbleSearchService);
 
-bubbleSearchService.$inject = ['$http'];
+bubbleSearchService.$inject = ['$http', 'analyticsService'];
 
-function bubbleSearchService($http) {
+function bubbleSearchService($http, analyticsService) {
 	
 	var data = [];
 
@@ -16954,6 +17039,8 @@ function bubbleSearchService($http) {
 			catName: input,
 			textSearch: input
 		};
+		
+		analyticsService.log('search.' + searchType, params);
 
 		return $http.get('/api/bubblesearch/' + searchType, {params:params})
 			.then(function(response) {
@@ -16965,6 +17052,7 @@ function bubbleSearchService($http) {
 	}
 
 }
+
 'use strict';
 // keep track of which type of bubble user is currently viewing
 app
@@ -16991,7 +17079,6 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 
 	var isContest = false; // determines whether or not a process involves the wtgt contest
 	var hashtag;
-	var id;
 	var startTime;
 
 	return {
@@ -17000,9 +17087,8 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		close: close
 	}
 
-	function set(setID, setHashtag) {
+	function set(setHashtag) {
 		isContest = true;
-		id = setID;
 		hashtag = setHashtag;
 		startTime = new Date();
 	}
@@ -17013,19 +17099,23 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		if (isContest) {
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
-				anonID: id,
 				selectedUploadType: hashtag,
 				signedUp: true,
 				userTimeDuration: timeDuration
-			}
-			$http.post('/api/anon_user/update', data).
-				success(function(data) {
-					// console.log('success: ', data);
-				}).
-				error(function(data) {
-					// console.log('error: ', data);
-				});
-			reset();
+			};
+			
+			localStore.getID().then(function(id) {
+				data.anonID = id;
+			}).then(function() {
+				$http.post('/api/anon_user/update', data).
+					success(function(data) {
+						// console.log('success: ', data);
+					}).
+					error(function(data) {
+						// console.log('error: ', data);
+					});
+				reset();
+			})
 		}
 	}
 
@@ -17035,27 +17125,28 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			var response;
 			timeDuration = getTimeDuration(startTime, endTime);
 			var data = {
-				anonID: id,
 				selectedUploadType: hashtag,
 				closedNoLogin: true,
 				userTimeDuration: timeDuration
 			}
-			$http.post('/api/anon_user/update', data).
-				success(function(data, status, headers, config) {
-					response = data[0];
-					// console.log('response: ', response);
-				}).
-				error(function(data, status, headers, config) {
-					// console.log('error: ', data);
-				});
-			compare(response, id);
-			reset();
+			
+			localStore.getID().then(function(id) {
+				data.anonID = id;
+			}).then(function() {
+				$http.post('/api/anon_user/update', data).
+					success(function(data, status, headers, config) {
+						// console.log('response: ', response);
+					}).
+					error(function(data, status, headers, config) {
+						// console.log('error: ', data);
+					});
+				reset();
+			});
 		}
 	}
 
 	function reset() {
 		isContest = false;
-		id = null;
 		hashtag = null;
 		startTime = null;
 	}
@@ -17065,15 +17156,8 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		var end = end.getTime();
 		return end - start; // in ms
 	}
-
-	function compare(response, id) {
-		// if the id returned from api is different from id passed into api, then update the id
-		if (response && response!== id) {
-			localStore.setID(response);
-		}
-	}
-
 }]);
+
 angular.module('tidepoolsServices')
 	.factory('dialogs', ['$rootScope', '$compile', 'contest',
 		function($rootScope, $compile, contest) {
@@ -17096,8 +17180,8 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
-    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
+	.factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+		function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
@@ -17108,7 +17192,7 @@ angular.module('tidepoolsServices')
 				inProgress: false,
 				requestQueue: [],
 				tracking: false // bool indicating whether or not geolocation is being tracked
-			};	
+			};
 
 			var marker = [];
 			var pos = {
@@ -17127,11 +17211,11 @@ angular.module('tidepoolsServices')
 						geoService.trackStop();
 					}
 				}
-			});	
-			 
+			});
+
 			geoService.getLocation = function(maxAge) {
 				var deferred = $q.defer();
-				
+
 				geoService.requestQueue.push(deferred);
 
 				if (geoService.inProgress) {
@@ -17139,7 +17223,7 @@ angular.module('tidepoolsServices')
 				} else if (navigator.geolocation) {
 					geoService.inProgress = true;
 					console.log('geo: using navigator');
-					
+
 					function geolocationSuccess(position) {
 						geoService.location.lat = position.coords.latitude;
 						geoService.location.lng = position.coords.longitude;
@@ -17147,21 +17231,29 @@ angular.module('tidepoolsServices')
 						geoService.resolveQueue({
 							lat: position.coords.latitude,
 							lng: position.coords.longitude
-						})
+						});
+
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [position.coords.latitude, position.coords.longitude]
+							}
+						});
 					}
 
 					function geolocationError(error) {
 						geoService.resolveQueue({err: error.code});
 					}
-					
-					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+
+					navigator.geolocation.getCurrentPosition(geolocationSuccess,
 						geolocationError);
 
 				} else {
 					//browser update message
 					alerts.addAlert('warning', 'Your browser does not support location services.')
 				}
-				
+
 				return deferred.promise;
 			}
 
@@ -17193,7 +17285,7 @@ angular.module('tidepoolsServices')
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
-							iconSize: [35, 43], 
+							iconSize: [35, 43],
 							iconAnchor: [17, 43],
 							popupAnchor:[0, -40]
 						},
@@ -17208,6 +17300,13 @@ angular.module('tidepoolsServices')
 							lng: position.coords.longitude
 						};
 						mapManager.moveMarker('track', pos);
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [position.coords.latitude, position.coords.longitude]
+							}
+						});
 					}, function() {
 						// console.log('location error');
 					}, {
@@ -17218,7 +17317,7 @@ angular.module('tidepoolsServices')
 					window.addEventListener('deviceorientation', rotateMarker);
 				}
 				geoService.tracking = true;
-				
+
 			};
 
 			geoService.trackStop = function() {
@@ -17260,27 +17359,26 @@ angular.module('tidepoolsServices')
 			function getNewTransformMatrix(matrix, angle) {
 				// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
 				var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
-				
+
 				if (newMatrix.length !== 6) { // not 2D matrix
 					return matrix;
 				}
-				
+
 				// get translation and don't change
 				var tx = newMatrix[4];
 				var ty = newMatrix[5];
-				
+
 				// set new values for rotation matrix
 				var a = Math.cos(angle * Math.PI / 180);
 				var b = -Math.sin(angle * Math.PI / 180);
 				var c = -b;
 				var d = a;
-				
+
 				return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
 			}
 
 			return geoService;
-}]);
-
+		}]);
 'use strict';
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
@@ -17452,43 +17550,176 @@ angular.module('tidepoolsServices')
 
 		return ifGlobals;
 }]);
-app.factory('localStore', ['$http', function($http) {
-	// used for localStorage (to track anon users)
+app.factory('localStore', ['$http', '$q', function($http, $q) {
 	
-	return {
-		getID: getID,
-		setID: setID,
-		createID: createID
-	}
+	var hasLocalStorage = (typeof localStorage !== 'undefined');
+	
+	var id; // id for when the user doesn't have localStorage
 
+	/**
+	 * Returns a promise that is resolved with an anonymous id
+	 */
 	function getID() {
+		// get the ID if it's in localStorage
 		if (typeof Storage !== 'undefined') {
-			return localStorage.id || undefined;
+			if ((new RegExp("^[0-9a-fA-F]{24}$")).test(localStorage.id)) {
+				var defer = $q.defer();
+				defer.resolve(localStorage.id);
+				return defer.promise;
+			} else {
+				return createID().then(function(new_id) {
+					localStorage.id = new_id;
+					return new_id;
+				});
+			}
+		} else {
+			// no localStorage :(
+			if ((new RegExp("/^[0-9a-fA-F]{24}$")).test(id)) {
+				var defer = $q.defer();
+				defer.resolve(id);
+				return defer.promise;
+			} else {
+				return createID().then(function(new_id) {
+					id = new_id;
+					return id;
+				});
+			}
 		}
-		return undefined;
 	}
 
-	function setID(id) {
-		if (typeof Storage !== 'undefined') {
-			localStorage.id = id;
-		}
-	}
-
+	/**
+	 * Returns a promise that is resolved with a new id
+	 */
 	function createID() {
 		var data = {
 			userTime: new Date()
 		}
-		$http.post('/api/anon_user/create', data).
-			success(function(data) {
-				setID(data[0]);
-				// console.log('success: ', data);
-			}).
-			error(function(data) {
-				// console.log('error: ', data);
+		return $http.post('/api/anon_user/create', data)
+			.then(function(res) {
+				return res.data[0];
 			});
 	}
-
+	
+	
+	/**
+	 * Location Buffer
+	 */
+	 var _locationBuffer = [];
+	 var locationBuffer = {
+		 push: function(data) {
+			_locationBuffer.push(data);
+			
+			if (typeof localStorage !== 'undefined') {
+				localStorage.setItem("locationBuffer", JSON.stringify(_locationBuffer));
+			}
+		 },
+		 getLength: function() {
+			var l;
+			 if (hasLocalStorage) {
+				 try {
+					 l = JSON.parse(localStorage.locationBuffer).length;
+				 } catch (e) {
+					 localStorage.locationBuffer = "[]";
+					 l = 0;
+				 }
+				 return l;
+			 } else {
+				 return _locationBuffer.length;
+			 }
+		 },
+		 flush: function() {
+			// use localstorage if they have it
+			if (typeof localStorage !== 'undefined') {
+				try {
+					_locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+				}
+				catch (e) {
+					// welp... start over.
+					localStorage.setItem("locationBuffer", "[]");
+					locationBuffer = [];
+					return [];
+				}
+			}
+			var lb = angular.copy(_locationBuffer);
+			_locationBuffer = [];
+			return lb;
+		 }
+	 };
+	
+	var localStore = {
+		getID: getID,
+		locationBuffer: locationBuffer
+	};
+	
+	return localStore;
 }]);
+
+'use strict';
+
+app.factory('locationAnalyticsService', locationAnalyticsService);
+
+locationAnalyticsService.$inject = ['$http', '$interval', 'analyticsService', 'localStore'];
+
+function locationAnalyticsService($http, $interval, analyticsService, localStore) {
+    var locationBuffer = []; // array of any kind of location data
+    var maxBufferSize = 1000; // when to flush the buffer
+    var maxBufferAge = 60*1000; // flush every so often
+    
+    // use localstorage if they have it    
+	if (typeof localStorage !== 'undefined') {
+		try {
+			locationBuffer = JSON.parse(localStorage.getItem("locationBuffer"));
+		}
+		catch (e) {
+			locationBuffer = [];
+			localStorage.setItem("locationBuffer", "[]");
+		}
+		
+		if (!locationBuffer) {
+			locationBuffer = [];
+		}
+	}
+
+    /**
+     * Log any sort of location analytics data
+     * 
+     * timestamp will be automatically added
+     * 
+     * var exampleLocationPoints = [
+		 { type: "GPS", loc: [-74.2355365, 40.2354656], timestamp: 1427326245233 },
+		 { type: "iBeacon", IDHash: "asdfafdasfasf", distance: 10, timestamp: 1427326245233},
+		 { type; "AltBeacon", IDHash: "adfkasdfasf", distance: 10, timestamp: 1427326245233 }
+		];
+     * 
+     * @param data the dat you want to log to the db
+     */
+    function log(data) {		
+      data.timestamp = Date.now();
+      localStore.locationBuffer.push(data);
+      if (localStore.locationBuffer.getLength == maxBufferSize) {
+	flushBuffer();
+      }
+    }
+    
+    function flushBuffer() {
+      var locationBuffer = localStore.locationBuffer.flush();
+		
+      if (locationBuffer.length > 0) {
+	  analyticsService.log('geolocation.updates', locationBuffer);
+      }
+      
+    }
+    
+  $interval(function() {
+	  flushBuffer();
+  }, maxBufferAge);
+    
+  return {
+    log: log,
+    forceFlushBuffer: flushBuffer
+  };
+}
+
 'use strict';
 
 angular.module('tidepoolsServices')
@@ -18976,11 +19207,6 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 		}
 
 		currentWorldId = world._id;	
-
-		//local storage
-		if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	}
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
@@ -19079,6 +19305,7 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 	}
 
 }
+
 angular.module('tidepoolsServices')
 	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
 	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
@@ -23116,7 +23343,7 @@ worldTree.getNearby().then(function(data) {
 });
 
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -23162,9 +23389,17 @@ $scope.search = function() {
 
 $scope.wtgtLogin = function() {
 	contest.login(new Date);
-} 
+}
+
+logSearchClick = function(path) {
+	analyticsService.log('search.general.clickthrough', {
+		path: path,
+		searchText: $scope.searchText || $('.search-bar').val()
+	});
+};
 	
 $scope.go = function(path) {
+	logSearchClick(path);
 	navService.reset();
 	$location.path(path);
 } 
@@ -23265,6 +23500,7 @@ lockerManager.getCredentials().then(function(credentials) {
 	console.log('credential error', error); 
 });
 }]);
+
 app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
 		restrict: 'EA',
@@ -23364,7 +23600,7 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 '<button class="view-tab search-tab" ng-class="{selected: navService.status.search || navService.status.searchWithinBubble}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
-app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
+app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -23379,17 +23615,19 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 				scope.searchResult = []; // clear last results
 
 				geoService.getLocation().then(function(coords) {
-					scope.searching = $http.get('/api/textsearch', {server: true, params: 
-						{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
-						.success(function(result) {
-							if (!result.err) {
-								scope.searchResult = result;
-							} else {
-								scope.searchResult = [];
-							}
+					searchParams = {textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}
+					analyticsService.log("search.text", searchParams);
+				
+					scope.searching = $http.get('/api/textsearch', {server: true, params: searchParams})
+					.success(function(result) {
+						if (!result.err) {
+							scope.searchResult = result;
+						} else {
+							scope.searchResult = [];
+						}
 							scope.loading = false;
-						})
-						.error(function(err) {
+					})
+					.error(function(err) {
 							console.log(err)
 							scope.loading = false;
 						});
@@ -23405,6 +23643,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+
 'use strict';
 
 angular.module('IF')
@@ -24549,8 +24788,7 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 	}
 
 }]);
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService) {
-
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'analyticsService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, analyticsService) {
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
@@ -24617,7 +24855,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		mapManager._actualCenter.push(mapManager.center.lat);		
 	}
 
+	function logSearchClick(path) {
+		analyticsService.log('search.bubble.clickthrough', {
+			path: path,
+			searchText: $scope.searchBarText || $('.search-bar').val()
+		});
+	}
+
 	function go(path) {
+		logSearchClick(path);
 		$location.path(path);
 	}
 
@@ -24660,7 +24906,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						catName: key,
 						// avatar: _.findWhere($scope.world.landmarkCategories, {
 						// 	name: key
-						// }).avatar,
+						// }).avatar
 						results: group
 					}
 				})
@@ -24829,6 +25075,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 }]);
+
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
   	var style = styleManager;
@@ -24903,10 +25150,10 @@ $scope.$on('$locationChangeSuccess', function (event) {
 app.directive('categoryWidget', categoryWidget);
 
 categoryWidget.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
-												  	'floorSelectorService', 'categoryWidgetService'];
+												  	'floorSelectorService', 'categoryWidgetService', 'analyticsService'];
 
 function categoryWidget(bubbleSearchService, $location, mapManager, $route,
-													floorSelectorService, categoryWidgetService) {
+													floorSelectorService, categoryWidgetService, analyticsService) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -24952,7 +25199,6 @@ function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 			}
 
 			scope.search = function(category, index) {
-
 				if (!updateIndex(index)) {
 					return;
 				}
@@ -24999,6 +25245,7 @@ function categoryWidget(bubbleSearchService, $location, mapManager, $route,
 		}
 	};
 }
+
 'use strict';
 
 app.factory('categoryWidgetService', categoryWidgetService);
@@ -26376,7 +26623,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -26454,8 +26701,7 @@ $scope.uploadWTGT = function($files, state) {
 	}, function(err) {
 		uploadPicture(file, state, data);
 	});
-
-}
+};
 
 function uploadPicture(file, state, data) {
 
@@ -26476,15 +26722,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 
+
+
+		analyticsService.log('bubble.visit', {
+			id: $scope.world._id
+		});
+
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
 		 }
-
-		 //local storage
-		 if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	 }
-		 
 
 		 style.navBG_color = $scope.style.navBG_color;
 

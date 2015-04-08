@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
-    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
+	.factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+		function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
@@ -11,7 +11,7 @@ angular.module('tidepoolsServices')
 				inProgress: false,
 				requestQueue: [],
 				tracking: false // bool indicating whether or not geolocation is being tracked
-			};	
+			};
 
 			var marker = [];
 			var pos = {
@@ -30,11 +30,11 @@ angular.module('tidepoolsServices')
 						geoService.trackStop();
 					}
 				}
-			});	
-			 
+			});
+
 			geoService.getLocation = function(maxAge) {
 				var deferred = $q.defer();
-				
+
 				geoService.requestQueue.push(deferred);
 
 				if (geoService.inProgress) {
@@ -42,7 +42,7 @@ angular.module('tidepoolsServices')
 				} else if (navigator.geolocation) {
 					geoService.inProgress = true;
 					console.log('geo: using navigator');
-					
+
 					function geolocationSuccess(position) {
 						geoService.location.lat = position.coords.latitude;
 						geoService.location.lng = position.coords.longitude;
@@ -50,21 +50,29 @@ angular.module('tidepoolsServices')
 						geoService.resolveQueue({
 							lat: position.coords.latitude,
 							lng: position.coords.longitude
-						})
+						});
+
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [position.coords.latitude, position.coords.longitude]
+							}
+						});
 					}
 
 					function geolocationError(error) {
 						geoService.resolveQueue({err: error.code});
 					}
-					
-					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+
+					navigator.geolocation.getCurrentPosition(geolocationSuccess,
 						geolocationError);
 
 				} else {
 					//browser update message
 					alerts.addAlert('warning', 'Your browser does not support location services.')
 				}
-				
+
 				return deferred.promise;
 			}
 
@@ -96,7 +104,7 @@ angular.module('tidepoolsServices')
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
-							iconSize: [35, 43], 
+							iconSize: [35, 43],
 							iconAnchor: [17, 43],
 							popupAnchor:[0, -40]
 						},
@@ -111,6 +119,13 @@ angular.module('tidepoolsServices')
 							lng: position.coords.longitude
 						};
 						mapManager.moveMarker('track', pos);
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [position.coords.latitude, position.coords.longitude]
+							}
+						});
 					}, function() {
 						// console.log('location error');
 					}, {
@@ -121,7 +136,7 @@ angular.module('tidepoolsServices')
 					window.addEventListener('deviceorientation', rotateMarker);
 				}
 				geoService.tracking = true;
-				
+
 			};
 
 			geoService.trackStop = function() {
@@ -163,23 +178,23 @@ angular.module('tidepoolsServices')
 			function getNewTransformMatrix(matrix, angle) {
 				// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
 				var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
-				
+
 				if (newMatrix.length !== 6) { // not 2D matrix
 					return matrix;
 				}
-				
+
 				// get translation and don't change
 				var tx = newMatrix[4];
 				var ty = newMatrix[5];
-				
+
 				// set new values for rotation matrix
 				var a = Math.cos(angle * Math.PI / 180);
 				var b = -Math.sin(angle * Math.PI / 180);
 				var c = -b;
 				var d = a;
-				
+
 				return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
 			}
 
 			return geoService;
-}]);
+		}]);

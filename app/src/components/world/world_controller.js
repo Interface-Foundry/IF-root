@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -76,8 +76,7 @@ $scope.uploadWTGT = function($files, state) {
 	}, function(err) {
 		uploadPicture(file, state, data);
 	});
-
-}
+};
 
 function uploadPicture(file, state, data) {
 
@@ -98,15 +97,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
 
+
+
+		analyticsService.log('bubble.visit', {
+			id: $scope.world._id
+		});
+
 		 if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
 		 }
-
-		 //local storage
-		 if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	 }
-		 
 
 		 style.navBG_color = $scope.style.navBG_color;
 

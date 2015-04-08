@@ -20,11 +20,6 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 		}
 
 		currentWorldId = world._id;	
-
-		//local storage
-		if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	}
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;

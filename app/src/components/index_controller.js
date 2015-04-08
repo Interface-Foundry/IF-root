@@ -1,4 +1,4 @@
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -44,9 +44,17 @@ $scope.search = function() {
 
 $scope.wtgtLogin = function() {
 	contest.login(new Date);
-} 
+}
+
+logSearchClick = function(path) {
+	analyticsService.log('search.general.clickthrough', {
+		path: path,
+		searchText: $scope.searchText || $('.search-bar').val()
+	});
+};
 	
 $scope.go = function(path) {
+	logSearchClick(path);
 	navService.reset();
 	$location.path(path);
 } 

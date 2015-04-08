@@ -571,12 +571,9 @@ app.get('/api/bubblesearch/:type', function(req, res) {
 
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
-    var analytics = new analyticsSchema();
-
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
-    redisClient.rpush(analytics, function(err, reply) {
-        console.log(reply);
-        res.send('pushed!');
+    redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
+        res.send('(=^･ｪ･^=)');
     });
 
     // DONE!  then a separate node process dumps the redis cache to db

@@ -1,4 +1,4 @@
-app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
+app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -13,17 +13,19 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', function($ht
 				scope.searchResult = []; // clear last results
 
 				geoService.getLocation().then(function(coords) {
-					scope.searching = $http.get('/api/textsearch', {server: true, params: 
-						{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
-						.success(function(result) {
-							if (!result.err) {
-								scope.searchResult = result;
-							} else {
-								scope.searchResult = [];
-							}
+					searchParams = {textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}
+					analyticsService.log("search.text", searchParams);
+				
+					scope.searching = $http.get('/api/textsearch', {server: true, params: searchParams})
+					.success(function(result) {
+						if (!result.err) {
+							scope.searchResult = result;
+						} else {
+							scope.searchResult = [];
+						}
 							scope.loading = false;
-						})
-						.error(function(err) {
+					})
+					.error(function(err) {
 							console.log(err)
 							scope.loading = false;
 						});

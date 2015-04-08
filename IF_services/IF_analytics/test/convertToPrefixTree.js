@@ -1,11 +1,6 @@
 var mongoose = require('mongoose');
-var sequenceSchema = mongoose.Schema({
-    analyticsUserId: String,
-    lonLatSequence: [],
-    geohashSequence: [String],
-    bubbleSequence: [String]
-});
-var Sequence = mongoose.model('sequence', sequenceSchema);
+
+var Sequence = require('./sequence_schema');
 
 var GeoTrie = require('./geo_trie_schema');
 

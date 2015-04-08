@@ -6,19 +6,24 @@ export IF_ANGULAR="$IF_ROOT"/app/src
 export IF_SCHEMAS="$IF_ROOT"/components/IF_schemas
 export IF_ANALYTICS="$IF_ROOT"/IF_services/IF_analytics
 
+alias IF='cd "$IF_ROOT"'
+
 # fun aliases
 alias wow='git status'
 alias such='git'
 alias very='git'
 alias much='git'
 
-alias doge='cat'
+alias give='cat'
+alias icanhaz='cat'
+
 
 alias up='cd ..'
 
+
 # typos
 alias ndoe='node'
-
+alias l='ls'
 
 
 export TESTDB='localhost:37017'
