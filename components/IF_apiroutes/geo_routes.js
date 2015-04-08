@@ -85,7 +85,7 @@ router.get('/', function(req, res) {
                                 data.address.city = 'New York City'
                             }
                             req.geoloc.src = 'mapquest';
-                            console.log('hitting mapquest data.address.city', data)
+                            // console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
                         } else if (data.address.village) {
                             req.geoloc.cityName = data.address.village;

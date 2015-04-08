@@ -33,8 +33,9 @@ function call(num) {
 
                 response = data.address.city;
 
-                //Testing Redis
-                client.rpush('mylist', data, redis.print, function(err, reply) {
+                // Testing Redis
+                var stringifiedObject = JSON.stringify(data);
+                client.rpush('newlist', stringifiedObject , redis.print, function(err, reply) {
                     if (err) console.log(err);
                     console.log('redis reply: ', reply);
                 });
@@ -48,8 +49,12 @@ function call(num) {
         function(err) {
             console.log('Finished!')
 
-            var values = client.lrange('mylist',-100, 100, redis.print);
-            console.log('values is..', values);
+            var values = client.lrange('newlist',-100, 100, function(err, reply) {
+                if (err) console.log(err);
+                console.log(reply);
+              
+            });
+            // console.log('values is..', values);
         }
     );
 }

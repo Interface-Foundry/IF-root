@@ -579,15 +579,20 @@ app.get('/api/bubblesearch/:type', function(req, res) {
 app.post('/api/analytics/:action', function(req, res) {
     var analytics = new analyticsSchema();
 
-    //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
+    var cacheObject = JSON.stringify(analytics);
 
     //Testing Redis
-    client.rpush(analytics._id, analytics, redis.print, function(err, reply) {
+    client.rpush(analytics._id, cacheObject, function(err, reply) {
         if (err) console.log(err);
         console.log('redis reply: ', reply);
     });
 
+
+
     // DONE!  then a separate node process dumps the redis cache to db
+
+
+
 
     //From Stackoverflow:
     // Create a caching service. This is really the hardest part, but the general flow looks something like this:
@@ -2505,66 +2510,76 @@ app.get('/api/worlds/:id', function(req, res) {
                             }, function(err, contest) {
 
                                 if (err) console.log(err)
-                                var contestSubmissions = [];
+
                                 //IS USER LOGGED IN?
                                 if (req.user) {
-                                    
-                                    //DOES USER HAVE RELEVANT SUBMISSIONS?
-                                    if (req.user.submissions) {
 
+                                    if (req.user.submissions) {
+                                        var contestSubmissions = [];
                                         req.user.submissions.forEach(function(el) {
                                             if (el.worldID == data._id && el.contestID == contest._id) {
                                                 contestSubmissions.push(el);
                                             }
                                         })
 
-                                        var latestDate = contestSubmissions.reduce(function(a, b) {
-                                            return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
-                                        })
-                                        var newestSubmission = contestSubmissions.filter(function(submission) {
-                                            if (submission.timestamp == latestDate) {
-                                                return submission;
-                                            }
-                                        })
+                                        //DOES USER HAVE RELEVANT SUBMISSIONS?
+                                        if (contestSubmissions.length < 1) {
+                                            console.log('hitting')
+                                            res.send({
+                                                contest: contest,
+                                                submissions: null,
+                                                style: style,
+                                                world: data
+                                            });
+                                            console.log('no submissions yet.', contestSubmissions);
+                                        } else {
+                                            var latestDate = contestSubmissions.reduce(function(a, b) {
+                                                return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                            })
+                                            var newestSubmission = contestSubmissions.filter(function(submission) {
+                                                if (submission.timestamp == latestDate) {
+                                                    return submission;
+                                                }
+                                            })
 
-                                        // console.log('newestSubmission is: ', newestSubmission)
-                                        var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
-                                            if (submission.hashtag !== newestSubmission[0].hashtag) {
-                                                return submission;
-                                            }
-                                        })
-                                         // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
-                                        var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
-                                            return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
-                                        })
-                                         // console.log('otherLatestDate is: ', otherLatestDate)
-                                        var otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
-                                            if (submission.timestamp == otherLatestDate) {
-                                                return submission;
-                                            }
-                                        })
-                                         // console.log('otherNewestSubmission is: ', otherNewestSubmission)
-                                        var latestTwoUniqueSubmissions = [];
-                                        latestTwoUniqueSubmissions.push(newestSubmission[0]);
-                                        latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
-                                         // console.log('  latestTwoUniqueSubmissions is: ',   latestTwoUniqueSubmissions)
-                                        var submits = latestTwoUniqueSubmissions.map(function(el) {
-                                            return {
-                                                hashtag: el.hashtag,
-                                                imgURL: el.imgURL
-                                            }
-                                        })
+                                            // console.log('newestSubmission is: ', newestSubmission)
+                                            var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
+                                                    if (submission.hashtag !== newestSubmission[0].hashtag) {
+                                                        return submission;
+                                                    }
+                                                })
+                                                // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
+                                            var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
+                                                    return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                })
+                                                // console.log('otherLatestDate is: ', otherLatestDate)
+                                            var otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
+                                                    if (submission.timestamp == otherLatestDate) {
+                                                        return submission;
+                                                    }
+                                                })
+                                                // console.log('otherNewestSubmission is: ', otherNewestSubmission)
+                                            var latestTwoUniqueSubmissions = [];
+                                            latestTwoUniqueSubmissions.push(newestSubmission[0]);
+                                            latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
+                                            // console.log('  latestTwoUniqueSubmissions is: ',   latestTwoUniqueSubmissions)
+                                            var submits = latestTwoUniqueSubmissions.map(function(el) {
+                                                return {
+                                                    hashtag: el.hashtag,
+                                                    imgURL: el.imgURL
+                                                }
+                                            })
 
-                                        console.log('hitting user logged in and latest two submissions is: ', submits)
+                                            console.log('hitting user logged in and latest two submissions is: ', submits)
 
-                                        res.send({
-                                            contest: contest,
-                                            submissions: submits,
-                                            style: style,
-                                            world: data
-                                        });
+                                            res.send({
+                                                contest: contest,
+                                                submissions: submits,
+                                                style: style,
+                                                world: data
+                                            });
 
-
+                                        }//end of if contestSubmissions not empty
                                     } //end of if user has submissions field
 
                                     //if user logged in but no submissions
