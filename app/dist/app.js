@@ -17506,7 +17506,7 @@ var mapManager = {
 	center: {
 		lat: 42,
 		lng: -83,
-		zoom: 14
+		zoom: 17
 	},
 	markers: {},
 	layers: {
@@ -18201,7 +18201,7 @@ mapManager.groupFloorMaps = function(worldStyle) {
 	}
 
 	// legacy maps
-	var localMaps = [worldStyle.maps];
+	var localMap = worldStyle.maps;
 	
 	// if localMapArray exists, replace local map with sorted array
 	if (hasLocalMapArray(worldStyle.maps)) {
@@ -18215,6 +18215,8 @@ mapManager.groupFloorMaps = function(worldStyle) {
 			var groupName = mapGroup + '-maps';
 			mapManager.addOverlayGroup(overlayGroup, groupName);
 		}
+	} else {
+		mapManager.addOverlay(localMap.localMapID, localMap.localMapName, localMap.localMapOptions);
 	}
 }
 
@@ -18680,7 +18682,7 @@ userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
 
 	var user = userManager._user; //user cached in memory 
-	if (user) {  
+	if (!(_.isEmpty(user))) {  
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -22746,6 +22748,15 @@ function floorSelector(mapManager, floorSelectorService) {
 	};
 
 	function link(scope, elem, attr) {
+
+		// hide floor selector for maps with only one floor
+		if (!mapManager.localMapArrayExists(scope.world) ||
+				mapManager.sortFloors(scope.world.style.maps.localMapArray).length <= 1) {
+			elem.css({
+				display: 'none'
+			});
+		}
+
 		activate(elem);
 		
 		// make sure floor selector is closed if switching to a new bubble
@@ -22893,7 +22904,7 @@ function floorSelectorService() {
 			floors = [],
 			selectedIndex,
 			showFloors,
-			showLandmarks = true;
+			showLandmarks = false;
 
 	return {
 		currentFloor: currentFloor,
@@ -24203,8 +24214,8 @@ if ($routeParams.incoming == 'meetup'){
 	}).
 	error(function(data) {
 		angular.extend($rootScope, {loading: false});
-		$http.get('/api/user/profile', {server: true}).success(function(user){
-			$scope.worlds = user;	
+		$http.get('/api/user/profile', {server: true}).success(function(response){
+			$scope.worlds = response;	
 			$scope.waitingforMeetup = false;	
 		});
 	});
@@ -24214,16 +24225,16 @@ else if ($routeParams.incoming == 'messages'){
 	$scope.fromMessages = true;
 }
 else {
-	$http.get('/api/user/profile', {server: true}).success(function(user){
-		console.log(user);
+	$http.get('/api/user/profile', {server: true}).success(function(response){
+		console.log(response);
 		
 		//$scope.worlds = user;
-		$scope.groups = userGrouping.groupByTime(user);
+		$scope.groups = userGrouping.groupByTime(response);
 		console.log($scope.groups);
 		
-		$scope.bubbles = user;
+		$scope.bubbles = response;
 
-		//sortWorlds(user);
+		//sortWorlds(response);
 	});
 }
 
@@ -24438,9 +24449,9 @@ $scope.go = function(url) {
 }
 
 userManager.getUser().then(
-	function(response) {
-	console.log('response', response);
-	$scope.user = response;
+	function(user) {
+	console.log('response', user);
+	$scope.user = user;
 }, function(reason) {
 	console.log('reason', reason);
 	$location.path('/');
@@ -24545,6 +24556,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
+		floorSelectorService.showLandmarks = false;
 	});
 
 	$scope.apertureSet = function(newState) {
@@ -26527,23 +26539,21 @@ $scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
 navService.show('home');
 
+$scope.contest = {};
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
 $scope.wtgt = {
-	hashtags: {
-		want: 'hashtag1',
-		got: 'hashtag2'
-	},
 	images: {},
 	building: {}
 };
+
 $scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
-	
+
 var landmarksLoaded;
 
 $scope.verifyUpload = function(event, state) {
@@ -26559,8 +26569,8 @@ $scope.verifyUpload = function(event, state) {
 	}
 }
 
-$scope.uploadWTGT = function($files, state) {
-	$scope.wtgt.building[state] = true;
+$scope.uploadWTGT = function($files, hashtag) {
+	$scope.wtgt.building[hashtag] = true;
 
 	var file = $files[0];
 
@@ -26568,8 +26578,8 @@ $scope.uploadWTGT = function($files, state) {
 	var time = new Date();
 
 	// get hashtag
-	var hashtag = null;
-	hashtag = $scope.wtgt.hashtags[state];
+	// var hashtag = null;
+	// hashtag = $scope.wtgt.hashtags[hashtag];
 
 	var data = {
 		world_id: $scope.world._id,
@@ -26586,14 +26596,14 @@ $scope.uploadWTGT = function($files, state) {
 		// console.log('coords: ', coords);
 		data.userLat = coords.lat;
 		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	}, function(err) {
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	});
 
 }
 
-function uploadPicture(file, state, data) {
+function uploadPicture(file, hashtag, data) {
 
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
@@ -26602,44 +26612,50 @@ function uploadPicture(file, state, data) {
 	}).progress(function(e) {
 	}).success(function(data) {
 
-		$scope.wtgt.images[state] = data;
-	
-		$scope.wtgt.building[state] = false;
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
+
 	});
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
-	  	 $scope.world = data.world;
-		 $scope.style = data.style;
+	  $scope.world = data.world;
+		$scope.style = data.style;
+		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+		if (!(_.isEmpty(data.submissions))) {
+			data.submissions.forEach(function(s) {
+				$scope.wtgt.images[s.hashtag] = s.imgURL;
+			});
+		}
 
-		 if (bubbleTypeService.get() == 'Retail') {
+		if (bubbleTypeService.get() == 'Retail') {
 		 	$scope.isRetail = true;
-		 }
+		}
 
 		 //local storage
-		 if (!userManager.loginStatus && !localStore.getID()) {
+		if (!userManager.loginStatus && !localStore.getID()) {
 	 		localStore.createID();
-	 	 }
+	 	}
 		 
 
-		 style.navBG_color = $scope.style.navBG_color;
+		style.navBG_color = $scope.style.navBG_color;
 
-		 //show edit buttons if user is world owner
-		 if ($rootScope.userID && $scope.world.permissions){
-			 if ($rootScope.userID == $scope.world.permissions.ownerID){
+		//show edit buttons if user is world owner
+		if ($rootScope.userID && $scope.world.permissions){
+			if ($rootScope.userID == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
-			 }
-			 else {
+			}
+			else {
 			 	$scope.showEdit = false;
-			 }
-		 } 
+			}
+		} 
 
 		//console.log($scope.world);
 		//console.log($scope.style);
 		 
-		 if ($scope.world.name) {
-			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 } //TODO: cleanup on $destroy
+		if ($scope.world.name) {
+			angular.extend($rootScope, {globalTitle: $scope.world.name});
+		} //TODO: cleanup on $destroy
 		 
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {

@@ -42,8 +42,8 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 if (err) {
                     return console.log(err)
                 }
-
-                if (data.length >= 50) {
+                //If results are less than 20, increase radius of search distance
+                if (data.length >= 20) {
                     callback(true, data);
                 } else {
                     console.log('Only ',data.length,' results, increasing distance..')
@@ -68,7 +68,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
         ],
         function(err, results) {
             if (err) console.log(err);
-            console.log('Found ', results[results.length - 1].length, 'results.');
+            console.log('Found ', results[results.length - 1], 'results.');
             res.send(results[results.length-1]);
         });
 

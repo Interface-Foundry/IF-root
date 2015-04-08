@@ -1197,6 +1197,42 @@ span.subnav-back-chevron {
   line-height: 16px;
   font-weight: 500;
 }
+.profile-contact-sort:last-child {
+  padding: 32px 8px;
+}
+.profile-contact-sort:last-child .profile-contact-card {
+  background: inherit;
+  padding: 0;
+}
+.profile-contact-sort:last-child .sort-heading {
+  padding-left: 2px;
+  top: -32px;
+}
+.grey-block {
+  display: none;
+}
+.inactive span,
+.inactive button.btn.meetup-btn {
+  color: grey;
+}
+.inactive span:hover,
+.inactive button.btn.meetup-btn:hover {
+  cursor: default;
+  color: grey;
+}
+.inactive span .grey-block,
+.inactive button.btn.meetup-btn .grey-block {
+  height: 14px;
+  width: 16px;
+  background-color: grey;
+  border-radius: 3px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.inactive span img,
+.inactive button.btn.meetup-btn img {
+  display: none;
+}
 .marble-smooth-card {
   position: relative;
   background: #FFF;
@@ -2318,8 +2354,9 @@ li.alert {
   }
 }
 .wtgt .body img {
-  width: 100%;
   cursor: pointer;
+  max-height: 100%;
+  max-width: 100%;
 }
 .wtgt .camera {
   border-radius: 50%;

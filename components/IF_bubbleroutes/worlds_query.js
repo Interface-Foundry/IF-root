@@ -62,7 +62,7 @@ var route = function(userCoord0, userCoord1, userTime, res) {
                 }
             });
             for (var key in four_groups) {
-                console.log('fourgroups[key] is..', four_groups[key].length)
+    
                 four_groups[key] = _(four_groups[key]).chain().sortBy(function(world) {
                     return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
                 }).sortBy(function(world) {

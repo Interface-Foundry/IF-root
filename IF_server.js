@@ -77,6 +77,8 @@ var mongoose = require('mongoose'),
     worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
+    contestSchema = require('./components/IF_schemas/contest_schema.js'),
+    contestEntrySchema = require('./components/IF_schemas/contestEntry_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
     monguurl = require('monguurl');
 
@@ -206,7 +208,8 @@ app.post('/feedback', function(req, res) {
 // var redis = require('redis');
 // var client = redis.createClient(); //creates a new client 
 
-var redisClient = require('./redis.js');
+var redis = require("redis"),
+    client = redis.createClient();
 
 //---------------------------------------//
 //-------- Send Email Confirmation ------//
@@ -214,37 +217,41 @@ var redisClient = require('./redis.js');
 
 
 app.post('/email/confirm', function(req, res, next) {
+    console.log("entering /email/confirm");
 
-    async.waterfall([
-        function(done) {
-            crypto.randomBytes(20, function(err, buf) {
-                var token = buf.toString('hex');
-                done(err, token);
-            });
-        },
-        function(token, done) {
-            if (validateEmail(req.user.local.email)) {
-                User.findOne({
-                    'local.email': req.user.local.email
-                }, function(err, user) {
-                    if (!user) {
-                        done('No account with that email address exists, or you signed up only through Facebook/Twitter');
-                    } else {
-                        user.local.confirmEmailToken = token;
-                        user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
-                        user.save(function(err) {
-                            done(err, token, user);
-                        });
-                    }
-                });
-            } else {
-                return done('Please use a real email address');
+    if (!validateEmail(req.user.local.email)) {
+        console.log('bad email address: ' + req.user.local.email);
+        next('Please use a real email address');
+        return;
+    }
+
+    if (!req.headers.host) {
+        console.log("Cannot send confirmation mail without req.headers.host");
+        next("Can not send confirmation mail: no host");
+        return;
+    }
+
+    crypto.randomBytes(20, function(err, buf) {
+        var token = buf.toString('hex');
+        var email = req.user.local.email;
+
+        User.findOne({
+            'local.email': email
+        }, function(err, user) {
+            if (!user) {
+                next('No account with that email address exists, or you signed up only through Facebook/Twitter');
+                return;
             }
-        },
-        function(token, user, done) {
-            if (req.headers.host) {
+
+            user.local.confirmEmailToken = token;
+            user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
+            user.save(function(err) {
+                if (err) {
+                    return next(err);
+                }
+
                 var mailOptions = {
-                    to: req.user.local.email,
+                    to: email,
                     from: 'Kip <noreply@kipapp.co>',
                     subject: 'Kip – Confirm your email',
                     text: 'Thanks for signing up for Kip! \n\n' +
@@ -252,14 +259,14 @@ app.post('/email/confirm', function(req, res, next) {
                         'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) {
+                        return next(err);
+                    }
                     console.log('sent confirmation email');
-                    done(err, 'done');
+                    res.send("｡◕‿◕｡");
                 });
-            }
-        }
-    ], function(err) {
-        if (err) return next(err);
-        //res.redirect('/forgot');
+            });
+        });
     });
 
     function validateEmail(email) {
@@ -572,7 +579,7 @@ app.post('/api/analytics/:action', function(req, res) {
     var analytics = new analyticsSchema();
 
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
-    redisClient.rpush(analytics, function(err, reply) {
+    client.rpush(analytics, function(err, reply) {
         console.log(reply);
         res.send('pushed!');
     });
@@ -828,6 +835,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             var count = 0;
             var totalSize = req.headers['content-length'];
             var picorientation;
+            var newentryID = '';
             file.on('data', function(data) {
                 count += data.length;
                 var percentUploaded = Math.floor(count / totalSize * 100);
@@ -863,29 +871,47 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
-                                        // //additional content was passed with the image, handle it here
-                                        // if (uploadContents) {
-                                        //     try {
-                                        //         uploadContents = JSON.parse(uploadContents);
-                                        //     } catch (err) {
-                                        //         console.log(err);
-                                        //     }
-                                        //     if (uploadContents.type == 'retail_campaign') {
-                                        //         submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                        //     }
-                                        // }
-                                        var options = {
-                                                url: "https://api.cloudsightapi.com/image_requests",
-                                                headers: {
-                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-                                                },
-                                                qs: {
-                                                    'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
-                                                    'image_request[locale]': 'en-US',
-                                                    'image_request[language]': 'en'
-                                                }
+                                        //Testing redis
+                                        client.rpush({
+                                            test: 'test'
+                                        }, function(err, reply) {
+                                            console.log('redis reply: ', reply);
+
+                                        });
+
+                                        //additional content was passed with the image, handle it here
+                                        //Then save the contest entry
+                                        if (uploadContents) {
+                                            try {
+                                                uploadContents = JSON.parse(uploadContents);
+                                            } catch (err) {
+                                                console.log(err);
                                             }
-                                            //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+                                            if (uploadContents.type == 'retail_campaign') {
+                                                // var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                // uploadContents.description = newString;
+                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
+                                                    //Retrieve new saved contest entry ID
+                                                    newentryID = data
+                                                }); //contest entry, send to bac
+                                            }
+                                        }
+
+
+                                        //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+
+                                        var options = {
+                                            url: "https://api.cloudsightapi.com/image_requests",
+                                            headers: {
+                                                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                            },
+                                            qs: {
+                                                'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                'image_request[locale]': 'en-US',
+                                                'image_request[language]': 'en'
+                                            }
+                                        }
+
                                         request.post(options, function(err, res, body) {
                                             if (err) console.log(err);
                                             var data = JSON.parse(body);
@@ -902,6 +928,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                     return (results.status == 'not completed' && tries < 10);
                                                 },
                                                 function(callback) {
+
                                                     var options = {
                                                         url: "https://api.cloudsightapi.com/image_responses/" + data.token,
                                                         headers: {
@@ -916,27 +943,32 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                         if (body.status == 'completed') {
                                                             results.status = 'completed';
                                                             description = body.name;
-                                                        }
+
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            uploadContents.description = newString;
+
+                                                            contestEntrySchema.findOneAndUpdate({
+                                                                    _id: newentryID
+                                                                }, {
+                                                                    $push: {
+                                                                        contestTag: {
+                                                                            tag: uploadContents.description
+                                                                        }
+                                                                    }
+                                                                },
+                                                                function(err, result) {
+                                                                    if (err) console.log(err);
+                                                                    console.log('contest updated with cloudsight', result)
+                                                                })
+
+                                                        } //END OF BODY.STATUS COMPLETED
                                                     })
+
                                                     tries++;
                                                     setTimeout(callback, 5000);
                                                 },
                                                 function(err) {
-                                                    console.log('Description of image is..', description)
-                                                    //additional content was passed with the image, handle it here
-                                                    if (uploadContents) {
-                                                        try {
-                                                            uploadContents = JSON.parse(uploadContents);
-                                                        } catch (err) {
-                                                            console.log(err);
-                                                        }
-                                                        if (uploadContents.type == 'retail_campaign') {
-                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                            uploadContents.description = newString;
-                                                            submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                                        }
-                                                    }
-
+                                               
                                                 }
                                             );
 
@@ -2446,6 +2478,10 @@ app.get('/api/worlds/:id', function(req, res) {
             }
         });
     }
+
+
+
+
     //if world, query for style and return
     function combineQuery(data, res) {
         //look up style associated with world
@@ -2457,14 +2493,89 @@ app.get('/api/worlds/:id', function(req, res) {
                         console.log(err);
                     }
                     if (style) {
-                        //console.log(style);
-                        var resWorldStyle = {
-                            "world": data,
-                            "style": style
-                        };
-                        res.status(200).send(resWorldStyle);
+
+                        //IS THIS BUBBLE RETAIL?
+                        if (data.category == 'Retail') {
+
+                            var contestSubmissions = [];
+
+                            contestSchema.findOne({
+                                live: true
+                            }, function(err, contest) {
+                                if (err) console.log(err)
+                                    //IS USER LOGGED IN?
+                                if (req.user) {
+                                    //DOES USER HAVE RELEVANT SUBMISSIONS?
+                                    if (req.user.submissions) {
+                                        req.user.submissions.forEach(function(el) {
+                                            if (el.worldID == data._id && el.contestID == contest._id) {
+                                                contestSubmissions.push(el);
+                                            }
+                                        })
+
+                                        var submits = contestSubmissions.map(function(el) {
+                                            return {
+                                                hashtag: el.hashtag,
+                                                imgURL: el.imgURL
+                                            }
+                                        })
+                                        console.log('contest submissions is: ', contestSubmissions)
+                                        console.log('hitting user logged in and submissions: ', submits)
+                                        res.send({
+                                            contest: contest,
+                                            submissions: submits,
+                                            style: style,
+                                            world: data
+                                        });
+                                    } //end of if user has submissions field
+
+                                    //if user logged in but no submissions
+                                    if (req.user && !req.user.submissions) {
+                                        console.log('hitting user logged in but NO submissions: ', req.user.submissions)
+                                        res.send({
+                                            contest: contest,
+                                            submissions: null,
+                                            style: style,
+                                            world: data
+                                        });
+                                    }
+                                } //END OF USER LOGGED IN
+
+                                //If user not logged in and world is retail
+                                if (!req.user && data.category == 'Retail') {
+                                    console.log('hitting user NOT logged in but retail store ', contest)
+                                    res.send({
+                                        contest: contest,
+                                        submissions: null,
+                                        style: style,
+                                        world: data
+                                    });
+                                }
+                            })
+                        } //END OF RETAIL
+                        if (!req.user && data.category !== 'Retail') {
+                            console.log('hitting user NOT logged and NOT retail store ', data)
+                            res.send({
+                                contest: null,
+                                submissions: null,
+                                style: style,
+                                world: data
+                            });
+
+                        }
+
+                        // //If user not logged in and world is not retail
+                        // else if (!req.user && data.category !== 'Retail') {
+
+                        //     res.send({
+                        //         contest: null,
+                        //         submissions: null,
+                        //         style: style,
+                        //         world: data
+                        //     });
+                        // }
                     }
-                });
+                }); //END OF STYLESCHEMA FIND
 
                 landmarkSchema.update({
                     _id: data._id
@@ -2479,8 +2590,6 @@ app.get('/api/worlds/:id', function(req, res) {
                         console.log('view update succes');
                     }
                 });
-
-
             }
         } else {
             console.log('world doesnt have a styleID');
