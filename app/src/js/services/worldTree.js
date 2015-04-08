@@ -7,7 +7,7 @@ var worldTree = {
 	styleCache: $cacheFactory('styles'),
 	landmarkCache: $cacheFactory('landmarks'),
 	contestCache: $cacheFactory('contest'),
-	// submissionCache: $cacheFactory('submission')
+	submissionCache: $cacheFactory('submission')
 }
 
 var alert = alertManager;
@@ -23,7 +23,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				var contest = worldTree.contestCache.get('active');
-				deferred.resolve({world: world, style: style, contest: contest});
+				var submissions = [];
+				var worldSubs = worldTree.submissionCache.get(world._id);
+				if (worldSubs) {
+					submissions.push(worldSubs[contest.contestTags[0].tag]);
+					submissions.push(worldSubs[contest.contestTags[1].tag]);
+				}
+
+				deferred.resolve({
+					world: world,
+					style: style,
+					contest: contest,
+					submissions: submissions
+				});
 				console.log('world & style in cache!');
 			} else {
 				console.log('missing style');
@@ -42,11 +54,13 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 	 			worldTree.contestCache.put('active', data.contest);
-				// if (!(_.isEmpty(data.submissions))) {
-				// 	data.submissions.forEach(function(s) {
-				// 		worldTree.submissionCache.put(s.hashtag, s);
-				// 	});
-				// }
+				if (!(_.isEmpty(data.submissions))) {
+					var submissions = {};
+					data.submissions.forEach(function(s) {
+						submissions[s.hashtag] = s;
+					});
+					worldTree.submissionCache.put(data.world._id, submissions);
+				}
 
 		 		deferred.resolve(data);
 		 		bubbleTypeService.set(data.world.category);
@@ -188,6 +202,15 @@ worldTree.cacheWorlds = function(worlds) {
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
 	});
+}
+
+worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
+	var worldSubmissions = worldTree.submissionCache.get(worldId) || {};
+	worldSubmissions[hashtag] = {
+		hashtag: hashtag,
+		imgURL: imgURL
+	};
+	worldTree.submissionCache.put(worldId, worldSubmissions);
 }
 
 worldTree.getUserWorlds = function(_id) {
