@@ -98,7 +98,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 		if (!(_.isEmpty(data.submissions))) {
 			data.submissions.forEach(function(s) {
-				$scope.wtgt[s.hashtag] = s.imgURL;
+				$scope.wtgt.images[s.hashtag] = s.imgURL;
 			});
 		}
 
