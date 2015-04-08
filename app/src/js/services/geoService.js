@@ -32,7 +32,7 @@ angular.module('tidepoolsServices')
 				}
 			});	
 			 
-			geoService.getLocation = function(maxAge) {
+			geoService.getLocation = function(maxAge, timeout) {
 				var deferred = $q.defer();
 				
 				geoService.requestQueue.push(deferred);
@@ -56,9 +56,14 @@ angular.module('tidepoolsServices')
 					function geolocationError(error) {
 						geoService.resolveQueue({err: error.code});
 					}
+
+					var options = {
+						maximumAge: maxAge || 0,
+						timeout: timeout || Infinity
+					};
 					
 					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-						geolocationError);
+						geolocationError, options);
 
 				} else {
 					//browser update message
