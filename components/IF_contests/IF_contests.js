@@ -73,8 +73,6 @@ var route = function(imgUpload, uploadContents, userID) {
                 type: uploadContents.type,
                 contestTag: [{
                     tag: uploadContents.hashtag
-                }, {
-                    tag: uploadContents.description
                 }],
                 imgURL: imgUpload,
                 contestId: contest._id,
@@ -107,7 +105,7 @@ var route = function(imgUpload, uploadContents, userID) {
                         //Send contest submission notification email
                         var mailOptions = {
                             to: 'IF <hello@interfacefoundry.com>',
-                            from: user.local.email,
+                            from: 'Kip Submissions <contestsubmissions@kipapp.co>',
                             subject: 'New Contest' + data.region + 'Submission!',
                             text: 'Hello,\n\n' +
                                 user.profileID + ' (id:' + user._id + ') has entered contest: ' + data.contestId + '. \n \n The AWS image link is: ' + data.imgURL

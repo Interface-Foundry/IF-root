@@ -878,6 +878,21 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
                                         });
 
+                                        //additional content was passed with the image, handle it here
+                                        //Then save the contest entry
+                                        if (uploadContents) {
+                                            try {
+                                                uploadContents = JSON.parse(uploadContents);
+                                            } catch (err) {
+                                                console.log(err);
+                                            }
+                                            if (uploadContents.type == 'retail_campaign') {
+                                                // var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                // uploadContents.description = newString;
+                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                            }
+                                        }
+
                                         var options = {
                                                 url: "https://api.cloudsightapi.com/image_requests",
                                                 headers: {
@@ -920,6 +935,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                         if (body.status == 'completed') {
                                                             results.status = 'completed';
                                                             description = body.name;
+                                                            
                                                         }
                                                     })
                                                     tries++;
@@ -927,19 +943,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 },
                                                 function(err) {
                                                     console.log('Description of image is..', description)
-                                                        //additional content was passed with the image, handle it here
-                                                    if (uploadContents) {
-                                                        try {
-                                                            uploadContents = JSON.parse(uploadContents);
-                                                        } catch (err) {
-                                                            console.log(err);
-                                                        }
-                                                        if (uploadContents.type == 'retail_campaign') {
-                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                            uploadContents.description = newString;
-                                                            submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                                        }
-                                                    }
+
 
                                                 }
                                             );
@@ -2465,13 +2469,16 @@ app.get('/api/worlds/:id', function(req, res) {
                                     //DOES USER HAVE RELEVANT SUBMISSIONS?
                                     if (req.user.submissions) {
                                         req.user.submissions.forEach(function(el) {
-                                                if (el.worldID == data._id && el.contestID == contest._id) {
-                                                    contestSubmissions.push(el);
-                                                }
-                                            })
-                                            
-                                        var submits =contestSubmissions.map(function(el) {
-                                            return {hashtag: el.hashtag, imgURL:el.imgURL }
+                                            if (el.worldID == data._id && el.contestID == contest._id) {
+                                                contestSubmissions.push(el);
+                                            }
+                                        })
+
+                                        var submits = contestSubmissions.map(function(el) {
+                                            return {
+                                                hashtag: el.hashtag,
+                                                imgURL: el.imgURL
+                                            }
                                         })
                                         console.log('contest submissions is: ', contestSubmissions)
                                         console.log('hitting user logged in and submissions: ', submits)
@@ -2485,7 +2492,7 @@ app.get('/api/worlds/:id', function(req, res) {
 
                                     //if user logged in but no submissions
                                     if (req.user && !req.user.submissions) {
-                                          console.log('hitting user logged in but NO submissions: ', req.user.submissions)
+                                        console.log('hitting user logged in but NO submissions: ', req.user.submissions)
                                         res.send({
                                             contest: contest,
                                             submissions: null,
@@ -2507,7 +2514,7 @@ app.get('/api/worlds/:id', function(req, res) {
                                 }
                             })
                         } //END OF RETAIL
-                        if(!req.user && data.category !== 'Retail') {
+                        if (!req.user && data.category !== 'Retail') {
                             console.log('hitting user NOT logged and NOT retail store ', data)
                             res.send({
                                 contest: null,
