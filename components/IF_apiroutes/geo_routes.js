@@ -12,7 +12,7 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
 
 router.use(function(req, res, next) {
     req.geoloc = {};
-    // console.log('hitting middle ware, req.query is.. ', req.query, 'req.ip is.. ', req.ip)
+    
     //Because the request library also uses 'res' we'll rename the response here
     var response = res;
     //query the local freegeoip server we are running 
@@ -31,7 +31,7 @@ router.use(function(req, res, next) {
         }
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
-
+        console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
         return next();
     })
 
@@ -41,66 +41,68 @@ router.use(function(req, res, next) {
 router.get('/', function(req, res) {
     var response = res;
 
-    if (req.query.hasLoc) {
+    if (req.query.hasLoc==true) {
         req.geoloc.lat = req.query.lat;
         req.geoloc.lng = req.query.lng;
 
         //MAPQUEST REQUEST
         request({
-            url: mapqURL,
-            qs: {
-                lat: req.query.lat,
-                lon: req.query.lng
-            }
-        }, function(err, res, body) {
-            var data = JSON.parse(body);
+                url: mapqURL,
+                qs: {
+                    lat: req.query.lat,
+                    lon: req.query.lng
+                }
+            }, function(err, res, body) {
+                var data = JSON.parse(body);
 
-            //MAPBOX SECTION
-            if (err || res.statusCode == 303) {
-                if (err) console.log(err);
-                console.log('Mapquest didnt work. Querying Mapbox instead..', res.statusCode);
-                request({
-                    url: mapboxURL + req.query.lng + ',' + req.query.lat + '.json',
-                    qs: {
-                        access_token: mapboxKey
-                    }
-                }, function(err, body) {
+                //MAPBOX SECTION
+                if (err || res.statusCode == 303) {
                     if (err) console.log(err);
-                    var data = JSON.parse(body);
-                    if (data.features[1].text) {
-                        req.geoloc.cityName = data.features[1].text;
-                        req.geoloc.src = 'mapbox';
-                        console.log(req.geoloc)
-                        response.send(req.geoloc);
+                    console.log('Mapquest didnt work. Querying Mapbox instead..', res.statusCode);
+                    request({
+                        url: mapboxURL + req.query.lng + ',' + req.query.lat + '.json',
+                        qs: {
+                            access_token: mapboxKey
+                        }
+                    }, function(err, body) {
+                        if (err) console.log(err);
+                        var data = JSON.parse(body);
+                        if (data.features[1].text) {
+                            req.geoloc.cityName = data.features[1].text;
+                            req.geoloc.src = 'mapbox';
+                            console.log(req.geoloc)
+                            response.send(req.geoloc);
+                        } else {
+                            req.geoloc.src = 'ip-based'
+                        }
+                    })
+                } //END OF MAPBOX SECTION
+
+                 else {
+                    //MAPQUEST 
+                    if (data.address) {
+                        if (data.address.city) {
+                            if (data.address.city == 'NYC') {
+                                data.address.city = 'New York City'
+                            }
+                            req.geoloc.src = 'mapquest';
+                            req.geoloc.cityName = data.address.city;
+                        } else {
+                            req.geoloc.cityName = data.address.village;
+                            req.geoloc.src = 'mapquest';
+                        }
                     } else {
                         req.geoloc.src = 'ip-based'
+                        console.log('Location not found in Mapquest, using ip based city')
                     }
-                })
-
-
-            } else {
-                //Otherwise query mapquest
-                if (data.address.city) {
-                    if (data.address.city == 'NYC') {
-                        data.address.city = 'New York City'
-                    }
-                    req.geoloc.src = 'mapquest';
-                    req.geoloc.cityName = data.address.city;
-                } else if (data.address.village) {
-                    req.geoloc.cityName = data.address.village;
-                    req.geoloc.src = 'mapquest';
-                } else {
-                    req.geoloc.src = 'ip-based'
-                    console.log('Location not found in Mapquest, using ip based city')
+                    console.log(req.geoloc)
+                    response.send(req.geoloc);
                 }
-                console.log(req.geoloc)
-                response.send(req.geoloc);
-            }
 
-        })//END OF MAPQUEST REQUEST
+            }) //END OF MAPQUEST REQUEST
     } else {
-        console.log('hasLoc = false, using ip based geoloc', req.query.geoloc)
-        res.send(req.query.geoloc);
+        console.log('hasLoc = false, using ip based geoloc', req.geoloc)
+        res.send(req.geoloc);
     }
 
 })
