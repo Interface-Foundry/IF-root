@@ -1,7 +1,7 @@
 var _ = require('underscore'),
     mongoose = require('mongoose'),
-    sanitize = require('mongo-sanitize');
-landmarkSchema = require('../IF_schemas/landmark_schema.js'),
+    sanitize = require('mongo-sanitize'),
+    landmarkSchema = require('../IF_schemas/landmark_schema.js'),
     async = require('async');
 
 var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
@@ -42,11 +42,11 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 if (err) {
                     return console.log(err)
                 }
-
-                if (data.length >= 50) {
+                //If results are less than 20, increase radius of search distance
+                if (data.length >= 20) {
                     callback(true, data);
                 } else {
-                    console.log('Only ',data.length,' results, increasing distance..')
+                    console.log('Only ', data.length, ' results, increasing distance..')
                     callback(null, data)
                 }
             })
@@ -68,8 +68,54 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
         ],
         function(err, results) {
             if (err) console.log(err);
-            console.log('Found ', results[results.length - 1].length, 'results.');
-            res.send(results[results.length-1]);
+
+            //Retreive parent IDs to query for parent world names for each landmark
+            var parentIDs = results[results.length - 1].map(function(el) {
+                if (!el.parentID) {
+                    return undefined
+                } else {
+                    return el.parentID;
+                }
+            });
+            var parentNames = [];
+
+            async.eachSeries(parentIDs, function(id, callback) {
+
+                if (id) {
+                    landmarkSchema.findOne({
+                        _id: id
+                    }, function(err, parent) {
+                        if (err) console.log(err);
+                        if (!parent) return console.log('parent not found', parent)
+
+                        parentNames.push(parent.id);
+                        callback();
+                    })
+                } else {
+                    parentNames.push(undefined);
+                    callback();
+                }
+            }, function(err) {
+                if (err) {
+                    console.log('A parent failed to process');
+                } else {
+                    // console.log('Parent names gathered', parentNames);
+                    console.log('Found ', results[results.length - 1].length, 'results.');
+
+                    var count = 0;
+                    async.eachSeries(results[results.length - 1], function(el, callback) {
+                        //Set virtual property 'parentName' for each landmark in result set
+                        el.parentName = parentNames[count];
+                        //Increment counter to match parentName to correct landmark
+                        count++
+                        callback();
+                    }, function(err) {
+                        console.log('Virtual property: parentName added to results..')
+                        res.send(results[results.length - 1]);
+                    })
+                }
+            })
+
         });
 
 

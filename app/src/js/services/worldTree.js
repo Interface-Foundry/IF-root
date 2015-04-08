@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
+	.factory('worldTree', ['$cacheFactory', '$q', '$rootScope', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, $rootScope, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -11,6 +11,7 @@ var worldTree = {
 }
 
 var alert = alertManager;
+$rootScope.currentLocation = {};
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -129,20 +130,54 @@ worldTree.getNearby = function() {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
-	geoService.getLocation().then(function(location) {
-		db.worlds.query({localTime: new Date(), 
-			userCoordinate: [location.lng, location.lat]},
-			function(data) {
-				worldTree._nearby = data[0];
-				worldTree._nearby.timestamp = now;
-				deferred.resolve(data[0]);
-				
-				worldTree.cacheWorlds(data[0]['150m']);
-				worldTree.cacheWorlds(data[0]['2.5km']);
-			});
-	}, function(reason) {
-		deferred.reject(reason);
-	})
+		geoService.getLocation(23*1000, 8*1000).then(function(location) {
+			db.worlds.query({localTime: new Date(), 
+				userCoordinate: [location.lng, location.lat]},
+				function(data) {
+					worldTree._nearby = data[0];
+					worldTree._nearby.timestamp = now;
+					deferred.resolve(data[0]);
+					
+					worldTree.cacheWorlds(data[0]['150m']);
+					worldTree.cacheWorlds(data[0]['2.5km']);
+				});
+
+			// get city info
+			var data = {
+				params: {
+					hasLoc: true,
+					lat: location.lat,
+					lng: location.lng
+				}
+			};
+			$http.get('/api/geolocation', data).
+				success(function(locInfo) {
+					$rootScope.currentLocation.lat = locInfo.lat;
+					$rootScope.currentLocation.lng = locInfo.lng;
+					$rootScope.currentLocation.cityName = locInfo.cityName;
+				}).
+				error(function(err) {
+					console.log('er: ', err);
+				})
+		}, function(reason) {
+
+			// get city info
+			var data = {
+				params: {
+					hasLoc: false
+				}
+			};
+			$http.get('/api/geolocation', data).
+				success(function(locInfo) {
+					$rootScope.currentLocation.lat = locInfo.lat;
+					$rootScope.currentLocation.lng = locInfo.lng;
+					$rootScope.currentLocation.cityName = locInfo.cityName;
+				}).
+				error(function(err) {
+					console.log('er: ', err);
+				})
+			deferred.reject(reason);
+		})
 	}
 	
 	return deferred.promise;

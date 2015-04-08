@@ -14,10 +14,6 @@ angular.module('tidepoolsServices')
 			};	
 
 			var marker = [];
-			var pos = {
-				lat: 0,
-				lng: 0
-			};
 			var watchID;
 			$rootScope.aperture = apertureService;
 
@@ -32,7 +28,7 @@ angular.module('tidepoolsServices')
 				}
 			});	
 			 
-			geoService.getLocation = function(maxAge) {
+			geoService.getLocation = function(maxAge, timeout) {
 				var deferred = $q.defer();
 				
 				geoService.requestQueue.push(deferred);
@@ -56,9 +52,14 @@ angular.module('tidepoolsServices')
 					function geolocationError(error) {
 						geoService.resolveQueue({err: error.code});
 					}
+
+					var options = {
+						maximumAge: maxAge || 0,
+						timeout: timeout || Infinity
+					};
 					
 					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-						geolocationError);
+						geolocationError, options);
 
 				} else {
 					//browser update message
@@ -80,7 +81,7 @@ angular.module('tidepoolsServices')
 				geoService.inProgress = false;
 			}
 
-			geoService.trackStart = function() {
+			geoService.trackStart = function() {			
 				// used to start showing user's location on map
 
 				// if we are already tracking, stop current session before starting new one
@@ -91,8 +92,8 @@ angular.module('tidepoolsServices')
 
 					// marker
 					mapManager.addMarker('track', {
-						lat: pos.lat,
-						lng: pos.lng,
+						lat: geoService.location.lat || 0,
+						lng: geoService.location.lng || 0,
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
@@ -106,7 +107,7 @@ angular.module('tidepoolsServices')
 
 					// movement XY
 					watchID = navigator.geolocation.watchPosition(function(position) {
-						pos = {
+						var pos = {
 							lat: position.coords.latitude,
 							lng: position.coords.longitude
 						};

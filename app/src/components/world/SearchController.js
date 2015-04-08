@@ -1,45 +1,67 @@
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
+	$scope.populateCitySearchView = populateCitySearchView;
 	$scope.go = go;
+	$scope.goLandmark = goLandmark;
+	$scope.citySearchResults = {};
 	$scope.groups;
 	$scope.loading = false; // for loading animation on searchbar
 	$scope.world;
 	$scope.style;
 	$scope.searchBarText;
 	$scope.show;
-
+	
 	var map = mapManager;
+	var latLng = {};
 
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
 	}
 
-	navService.show('searchWithinBubble');
-
-	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
-		$scope.style = data.style;
-		// set nav color using styleManager
-		styleManager.navBG_color = $scope.style.navBG_color;
-
-		worldBuilderService.loadWorld($scope.world);
-
-		// call populateSearchView with the right parameters
-		if ($routeParams.category) {
-			populateSearchView($routeParams.category, 'category');
-		} else if ($routeParams.text) {
-			populateSearchView($routeParams.text, 'text');
-		} else if ($location.path().slice(-3) === 'all') {
-			populateSearchView('All', 'all');
-		} else {
-			populateSearchView(bubbleSearchService.defaultText, 'generic');
-		}
 	
-	});
+
+	if ($routeParams.worldURL) {
+		navService.show('searchWithinBubble');
+
+		worldTree.getWorld($routeParams.worldURL).then(function(data) {
+			$scope.world = data.world;
+			$scope.style = data.style;
+			// set nav color using styleManager
+			styleManager.navBG_color = $scope.style.navBG_color;
+
+			worldBuilderService.loadWorld($scope.world);
+
+			// call populateSearchView with the right parameters
+			if ($routeParams.category) {
+				populateSearchView($routeParams.category, 'category');
+			} else if ($routeParams.text) {
+				populateSearchView($routeParams.text, 'text');
+			} else if ($location.path().slice(-3) === 'all') {
+				populateSearchView('All', 'all');
+			} else {
+				populateSearchView(bubbleSearchService.defaultText, 'generic');
+			}
+		
+		});
+	} else if ($routeParams.cityName) {
+		navService.show('search');
+		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
+		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
+		map.setCenter([latLng.lng, latLng.lat], 13, 'aperture-third');
+		$scope.cityName = $routeParams.cityName;
+
+		if ($routeParams.category) {
+			populateCitySearchView($routeParams.category, 'category', latLng);
+		} else if ($routeParams.text) {
+			populateCitySearchView($routeParams.text, 'text', latLng);
+		} else {
+			populateCitySearchView(bubbleSearchService.defaultText, 'generic', latLng);
+		}
+	}
 
 	$scope.$on('$destroy', function(ev) {
 		categoryWidgetService.selectedIndex = null;
@@ -56,6 +78,18 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		apertureService.toggle(newState);
 	}
 
+	function getLatLngFromURLString(urlString) {
+		var latLng = {};
+		var startIndexLat = urlString.indexOf('lat') + 3;
+		var endIndexLat = urlString.indexOf('&lng');
+		var startIndexLng = endIndexLat + 4;
+		var latString = urlString.slice(startIndexLat, endIndexLat);
+		var lngString = urlString.slice(startIndexLng);
+		latLng.lat = encodeDotFilterFilter(latString, 'decode', true);
+		latLng.lng = encodeDotFilterFilter(lngString, 'decode', true);
+		return latLng;
+	}
+
 	function adjustMapCenter() {
 		if ($scope.aperture.state === 'aperture-third') {
 			return;
@@ -68,6 +102,25 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	function go(path) {
 		$location.path(path);
+	}
+
+	function goLandmark(landmark) {
+		// get the link for a landmark, when not already in landmark's world
+
+		var data = {
+			params: {
+				m: true
+			}
+		};
+		$http.get('/api/worlds/' + landmark.parentID, data).
+			success(function(result) {
+				if (result.world) {
+					$location.path('/w/' + result.world.id + '/' + landmark.id);
+				}
+			})
+			.error(function(err) {
+				console.log('err: ', err);
+			});
 	}
 
 	function groupResults(data, searchType) {
@@ -146,8 +199,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 	function populateSearchView(input, searchType) {
 		var decodedInput = decodeURIComponent(input);
+		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
+		
 		$scope.show = { // used for displaying different views
 			all: false,
 			category: false,
@@ -179,6 +234,87 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else { // generic search
 			map.removeAllMarkers();
 		}
+	}
+
+	function populateCitySearchView(input, searchType, latLng) {
+		var decodedInput = decodeURIComponent(input);
+		
+		// set text in catSearchBar
+		$scope.searchBarText = decodedInput;
+
+		$scope.cityShow = {
+			category: false,
+			text: false,
+			generic: false
+		};
+		$scope.cityShow[searchType] = true;
+
+		if (!$scope.cityShow.generic) {
+			var data = {
+				server: true,
+				params: {
+					textQuery: $scope.searchBarText,
+					userLat: latLng.lat,
+					userLng: latLng.lng,
+					localTime: new Date()
+				}
+			};
+			$http.get('/api/textsearch', data).
+				success(function(result) {
+					if (!result.err) {
+						map.removeAllMarkers();
+			
+						// separate bubbles from landmarks
+						result = _.groupBy(result, 'world');
+						$scope.citySearchResults.bubbles = result.true;
+						$scope.citySearchResults.landmarks = result.false;
+
+						// add bubble markers
+						_.each($scope.citySearchResults.bubbles, function(bubble) {
+							map.addMarker(bubble._id, {
+								lat: bubble.loc.coordinates[1],
+								lng: bubble.loc.coordinates[0],
+								draggable: false,
+								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
+								icon: {
+									iconUrl: 'img/marker/bubble-marker-50.png',
+									iconSize: [35, 67],
+									iconAnchor: [17, 67],
+									popupAnchor: [0, -40]
+								}
+							});
+						});
+
+						// add landmark markers
+						_.each($scope.citySearchResults.landmarks, function(landmark) {
+							map.addMarker(landmark._id, {
+								lat: landmark.loc.coordinates[1],
+								lng: landmark.loc.coordinates[0],
+								draggable: false,
+								// message: '<a ng-click="goLandmark(landmark)"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+								icon: {
+									iconUrl: 'img/marker/bubble-marker-50_selected.png',
+									iconSize: [35, 67],
+									iconAnchor: [17, 67],
+									popupAnchor: [0, -40]
+								}
+							});
+						});
+
+					} else {
+						$scope.citySearchResults = [];
+					}
+					// loading stuff here
+				}).
+				error(function(err) {
+					// loading stuff
+				});
+
+		} else {
+			map.removeAllMarkers();
+		}
+
+		
 	}
 
 	function updateMap() {
