@@ -69,6 +69,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
         function(err, results) {
             if (err) console.log(err);
 
+            //Retreive parent IDs to query for parent world names for each landmark
             var parentIDs = results[results.length - 1].map(function(el) {
                 if (!el.parentID) {
                     return undefined
@@ -98,16 +99,18 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 if (err) {
                     console.log('A parent failed to process');
                 } else {
-                    console.log('Parent names gathered', parentNames);
+                    // console.log('Parent names gathered', parentNames);
                     console.log('Found ', results[results.length - 1].length, 'results.');
 
                     var count = 0;
                     async.eachSeries(results[results.length - 1], function(el, callback) {
+                        //Set virtual property 'parentName' for each landmark in result set
                         el.parentName = parentNames[count];
+                        //Increment counter to match parentName to correct landmark
                         count++
                         callback();
                     }, function(err) {
-                        console.log('Virtual property: parentName added to results..',results[results.length - 1])
+                        console.log('Virtual property: parentName added to results..')
                         res.send(results[results.length - 1]);
                     })
                 }

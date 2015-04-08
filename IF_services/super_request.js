@@ -1,7 +1,15 @@
 'use strict';
 
 var request = require('request'),
-    async = require('async');
+    async = require('async'),
+    redis = require("redis"),
+    client = redis.createClient();
+
+client.on("connect", function(err){
+    if (err) console.log(err);
+
+    console.log('Connected to test-redis')
+})
 
 var num = process.argv[2];
 
@@ -22,15 +30,26 @@ function call(num) {
             }, function(err, res, body) {
                 if (err) console.log(err);
                 var data = JSON.parse(body);
+
                 response = data.address.city;
+
+                //Testing Redis
+                client.rpush('mylist', data, redis.print, function(err, reply) {
+                    if (err) console.log(err);
+                    console.log('redis reply: ', reply);
+                });
+
                 console.log('Requested ', num, ' times.', response)
                 num--;
 
             })
-            setTimeout(callback, 50);
+            setTimeout(callback, 500);
         },
         function(err) {
             console.log('Finished!')
+
+            var values = client.lrange('mylist',-100, 100, redis.print);
+            console.log('values is..', values);
         }
     );
 }

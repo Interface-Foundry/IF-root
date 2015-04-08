@@ -31,7 +31,7 @@ router.use(function(req, res, next) {
         }
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
-        console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
+        // console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
         return next();
     })
 
