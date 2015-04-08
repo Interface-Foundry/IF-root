@@ -48,7 +48,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
-		map.setCenter([latLng.lng, latLng.lat], 13, 'aperture-third');
+		map.setCenter([latLng.lng, latLng.lat], 14, 'aperture-third');
 		$scope.cityName = $routeParams.cityName;
 
 		if ($routeParams.category) {
@@ -213,12 +213,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		}
 	}
 
-	function populateCitySearchView(input, searchType, latLng) {
+	function populateCitySearchView(input, searchType, latLng, city) {
+		// city (optional)
+
 		var decodedInput = decodeURIComponent(input);
 		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
 
+		$scope.cityName = city || $scope.cityName;
 		$scope.cityShow = {
 			category: false,
 			text: false,

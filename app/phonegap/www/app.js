@@ -24680,7 +24680,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
-		map.setCenter([latLng.lng, latLng.lat], 13, 'aperture-third');
+		map.setCenter([latLng.lng, latLng.lat], 14, 'aperture-third');
 		$scope.cityName = $routeParams.cityName;
 
 		if ($routeParams.category) {
@@ -24845,12 +24845,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		}
 	}
 
-	function populateCitySearchView(input, searchType, latLng) {
+	function populateCitySearchView(input, searchType, latLng, city) {
+		// city (optional)
+
 		var decodedInput = decodeURIComponent(input);
 		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
 
+		$scope.cityName = city || $scope.cityName;
 		$scope.cityShow = {
 			category: false,
 			text: false,
@@ -25979,7 +25982,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 			scope.clearTextSearch = function() {
 				if (scope.mode === 'city') {
-					scope.populateCitySearchView(defaultText, 'generic');
 					var indexText = $location.path().indexOf('/text/');
 					var indexCategory = $location.path().indexOf('/category/');
 					if (indexText > -1) {
@@ -25987,6 +25989,7 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					} else if (indexCategory > -1) {
 						$location.path($location.path().slice(0, indexCategory), false);
 					}
+					scope.populateCitySearchView(defaultText, 'generic');
 				} else {
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
@@ -26055,8 +26058,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 									latLng.lat = locInfo.lat;
 									latLng.lng = locInfo.lng;
 									cityName = locInfo.cityName;
-									scope.populateCitySearchView(scope.text, 'text', latLng);
 									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', latLng, cityName);
 									scope.loading = false;
 								}).
 								error(function(err) {
@@ -26075,8 +26078,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 									latLng.lat = locInfo.lat;
 									latLng.lng = locInfo.lng;
 									cityName = locInfo.cityName;
-									scope.populateCitySearchView(scope.text, 'text', latLng);
 									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', latLng, cityName);
 									scope.loading = false;
 								}).
 								error(function(err) {

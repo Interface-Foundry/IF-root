@@ -30,6 +30,9 @@
 									{{::landmark.time.end | date: 'h:mm a'}}
 								</h6>
 								<p>
+									<span ng-show="world.name"> In {{ ::world.name }}</span>
+								</p>
+								<p>
 									<span ng-show="landmark.loc_info.floor_num">Floor: {{::landmark.loc_info.floor_num}}</span>
 									<span ng-show="landmark.loc_info.room_name">Room: {{::landmark.loc_info.room_name}}</span>
 								</p>
