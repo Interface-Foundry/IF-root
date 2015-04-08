@@ -103,9 +103,8 @@ angular.module('tidepoolsServices')
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
-							iconSize: [35, 43], 
-							iconAnchor: [17, 43],
-							popupAnchor:[0, -40]
+							iconSize: [24, 30], 
+							iconAnchor: [12, 15]
 						},
 						alt: 'track' // used for tracking marker DOM element
 					});
