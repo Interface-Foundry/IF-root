@@ -12,7 +12,7 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
 
 router.use(function(req, res, next) {
     req.geoloc = {};
-    
+
     //Because the request library also uses 'res' we'll rename the response here
     var response = res;
     //query the local freegeoip server we are running 
@@ -24,7 +24,7 @@ router.use(function(req, res, next) {
         if (err) console.log(err);
         // console.log('body is..', body)
         var data = JSON.parse(body);
-        if (data.city == null) {
+        if (!data.city) {
             req.geoloc.cityName = 'My Location'
         } else {
             req.geoloc.cityName = data.city;
@@ -41,7 +41,7 @@ router.use(function(req, res, next) {
 router.get('/', function(req, res) {
     var response = res;
 
-    if (req.query.hasLoc==true) {
+    if (req.query.hasLoc == 'true') {
         req.geoloc.lat = req.query.lat;
         req.geoloc.lng = req.query.lng;
 
@@ -77,8 +77,7 @@ router.get('/', function(req, res) {
                         }
                     })
                 } //END OF MAPBOX SECTION
-
-                 else {
+                else {
                     //MAPQUEST 
                     if (data.address) {
                         if (data.address.city) {
@@ -86,14 +85,23 @@ router.get('/', function(req, res) {
                                 data.address.city = 'New York City'
                             }
                             req.geoloc.src = 'mapquest';
+                            console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
-                        } else {
+                        } else if (data.address.village) {
                             req.geoloc.cityName = data.address.village;
+                            console.log('hitting mapquest data.address.village', data)
                             req.geoloc.src = 'mapquest';
+                        } else if (data.address.town) {
+                            req.geoloc.cityName = data.address.town;
+                            console.log('hitting mapquest data.address.town', data)
+                            req.geoloc.src = 'mapquest';
+                        } else {
+                            console.log('mapquest could not find location name', data)
+                            req.geoloc.src = 'ip-based';
                         }
                     } else {
                         req.geoloc.src = 'ip-based'
-                        console.log('Location not found in Mapquest, using ip based city')
+                        console.log('mapquest could not find location name', data)
                     }
                     console.log(req.geoloc)
                     response.send(req.geoloc);
