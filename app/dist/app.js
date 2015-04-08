@@ -24779,7 +24779,8 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 									iconAnchor: [17, 67],
 									popupAnchor: [0, -40]
 								},
-								_id: landmark._id
+								// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
+								_id: landmark._id + (new Date().getTime())
 							}
 							markers.push(marker);
 						});
