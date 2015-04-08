@@ -5,7 +5,9 @@ angular.module('tidepoolsServices')
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
 	styleCache: $cacheFactory('styles'),
-	landmarkCache: $cacheFactory('landmarks')
+	landmarkCache: $cacheFactory('landmarks'),
+	contestCache: $cacheFactory('contest'),
+
 }
 
 var alert = alertManager;
@@ -19,7 +21,8 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		bubbleTypeService.set(world.category);
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
-				deferred.resolve({world: world, style: style});
+				var contest = worldTree.contestCache.get('active');
+				deferred.resolve({world: world, style: style, contest: contest});
 				console.log('world & style in cache!');
 			} else {
 				console.log('missing style');
@@ -37,6 +40,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 		} else {
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
+	 			worldTree.contestCache.put('active', data.contest);
 		 		deferred.resolve(data);
 		 		bubbleTypeService.set(data.world.category);
 		 	}
