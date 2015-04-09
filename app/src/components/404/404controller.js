@@ -6,5 +6,5 @@ FourOhFourController.$inject = ['mapManager', 'apertureService'];
 
 function FourOhFourController(mapManager, apertureService) {
 	mapManager.center.zoom = 2;
-	apertureService.set('full')
+	apertureService.set('full');
 }
