@@ -938,7 +938,8 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
       map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
 
       // after file saved locally, send to IF-Tiler server
-      var r = request.post('https://bubbl.io/api/upload', function optionalCallback (err, httpResponse, body) {
+      //https://107.170.180.141:3000/api/upload
+      var r = request.post('https://bubbl.io:3000/api/upload', function optionalCallback (err, httpResponse, body) {
         if (err) {
             //deleting temp map upload
             if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
@@ -984,58 +985,73 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 //updating world map with return from tile server
 function worldMapTileUpdate(req, res, data, mapBuild){ 
 
-    var tileRes = JSON.parse(data); //incoming box coordinates
+    try {
+       var tileRes = JSON.parse(data); //incoming box coordinates
+    }
+    catch(err){
+      console.log(err);
+    }
 
-     landmarkSchema.findById(tileRes.worldID, function(err, lm) {
-      if (!lm){
-        console.log(err);
-      }
-      else if (req.user._id == lm.permissions.ownerID){
+    if (tileRes){
 
-        var min = tileRes.zooms[0];
-        var max = tileRes.zooms.slice(-1)[0];
+      if (tileRes.worldID){
 
-        if (lm.style.maps.localMapArray){
-          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+         landmarkSchema.findById(tileRes.worldID, function(err, lm) {
+          if (!lm){
+            console.log(err);
+          }
+          else if (req.user._id == lm.permissions.ownerID){
 
-            if (lm.style.maps.localMapArray[i].map_marker_viewID){
-              if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
-                  lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
-                  lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
-                  lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
-                  lm.style.maps.localMapArray[i]['localMapOptions'] = {
-                      minZoom: min,
-                      maxZoom: max,
-                      attribution: "IF",
-                      reuseTiles: true,
-                      tms: true
-                  };
-                  saveMap();
-                  break;
+            var min = tileRes.zooms[0];
+            var max = tileRes.zooms.slice(-1)[0];
+
+            if (lm.style.maps.localMapArray){
+              for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+
+                if (lm.style.maps.localMapArray[i].map_marker_viewID){
+                  if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
+                      lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
+                      lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
+                      lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
+                      lm.style.maps.localMapArray[i]['localMapOptions'] = {
+                          minZoom: min,
+                          maxZoom: max,
+                          attribution: "IF",
+                          reuseTiles: true,
+                          tms: true
+                      };
+                      saveMap();
+                      break;
+                  }
+                }
               }
+
+              function saveMap(){
+                  lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
+                  lm.save(function(err, landmark) {
+                      if (err){
+                          console.log('error');
+                      }
+                      else {
+                          console.log('map updated');
+                          res.status(200).send(landmark);                     
+                      }
+                  });            
+              }
+
             }
-          }
 
-          function saveMap(){
-              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
-              lm.save(function(err, landmark) {
-                  if (err){
-                      console.log('error');
-                  }
-                  else {
-                      console.log('map updated');
-                      res.status(200).send(landmark);                     
-                  }
-              });            
           }
-
-        }
+          else {
+            console.log('unauthorized user');
+          }
+        }); 
 
       }
-      else {
-        console.log('unauthorized user');
-      }
-    });       
+
+    }
+
+      
 }
 
 //updates the map floor number and floor name, eventually can replace the map layer too
