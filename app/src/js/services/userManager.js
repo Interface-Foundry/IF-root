@@ -11,7 +11,7 @@ var userManager = {
 	userRes: $resource('/api/updateuser'),
 	//@ENDIF
 	//@IFDEF PHONEGAP
-	userRes: $resource('http://107.170.152.27:1337/api/updateuser'),
+	userRes: $resource('http://45.55.182.139:1337/api/updateuser'),
 	//@ENDIF
 	loginStatus: false,
 	login: {},
@@ -154,7 +154,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('http://107.170.152.27:1337/auth/facebook/mobile_sigin', data).then(
+          	$http.post('http://45.55.182.139:1337/auth/facebook/mobile_sigin', data).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
