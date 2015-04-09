@@ -42,8 +42,8 @@ router.get('/', function(req, res) {
     var response = res;
 
     if (req.query.hasLoc == 'true') {
-        req.geoloc.lat = req.query.lat;
-        req.geoloc.lng = req.query.lng;
+        req.geoloc.lat = parseFloat(req.query.lat);
+        req.geoloc.lng = parseFloat(req.query.lng);
 
         //MAPQUEST REQUEST
         request({
