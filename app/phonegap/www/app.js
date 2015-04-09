@@ -16398,10 +16398,10 @@ function noWorlds(lat,lon) {
 		  	draggable:false,
 		  	message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
 		  	icon: {
-	            iconUrl: 'img/marker/bubble-marker-50.png',
+	            iconUrl: 'img/marker/bubbleMarker_24.png',
 	            shadowUrl: '',
-	            iconSize: [35, 67],
-	            iconAnchor: [13, 10]
+	            iconSize: [24, 24],
+	            iconAnchor: [11, 11]
 			}
 			});  
 		}
@@ -16507,10 +16507,10 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
                   draggable:false,
                   message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
                   icon: {
-                    iconUrl: 'img/marker/bubble-marker-50.png',
+                    iconUrl: 'img/marker/bubbleMarker_24.png',
                     shadowUrl: '',
-                    iconSize: [35, 67],
-                    iconAnchor: [13, 10]
+                    iconSize: [24, 24],
+                    iconAnchor: [11, 11]
                   }
                 });  
 
@@ -17711,10 +17711,10 @@ mapManager.resetMap = function() {
 /* MARKER METHODS */
 
 mapManager.markerFromLandmark = function(landmark, world, $scope) {
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 
@@ -17887,6 +17887,7 @@ mapManager.setMarkerFocus = function(key) {
 }
 
 mapManager.setMarkerSelected = function(key) {
+	// deprecated becaue bubbles and landmarks now have different representations
 	console.log('--setMarkerSelected()--');
 	
 	// reset all marker images to default
@@ -18354,11 +18355,11 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: 'img/marker/bubbleMarker_24.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
+					iconSize: [24, 24], 
+					iconAnchor: [11, 11],
+					popupAnchor:[0, -12]
 				},
 				message:'<a href="#/w/'+bubble.id+'/">'+bubble.name+'</a>',
 		});}
@@ -19089,11 +19090,11 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 			lat: world.loc.coordinates[1],
 			lng: world.loc.coordinates[0],
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'img/marker/bubbleMarker_24.png',
 				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor:[0, -40]
+				iconSize: [24, 24],
+				iconAnchor: [11, 11],
+				popupAnchor:[0, -12]
 			},
 			message:'<a href="#/w/'+world.id+'/">'+world.name+'</a>',
 		});
@@ -21696,11 +21697,10 @@ function showPosition(position) {
 		focus: true,
 		draggable: true,
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17.5, 55],
-			popupAnchor:  [0, -40]
+			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:  [0, -12]
 		}
 	});
 	
@@ -21915,24 +21915,18 @@ var landmarksLoaded = false;
 			
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
-			
-			var landmarkIcon = 'img/marker/bubble-marker-50.png',
-					popupAnchorValues = [0, -50],
-					shadowUrl = '',
-					// shadowAnchor = [12, 20],
-					iconAnchor = [25, 100];
 
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: landmarkIcon,
-					shadowUrl: shadowUrl,
+					iconUrl: 'img/marker/landmarkMarker_23.png',
+					shadowUrl: '',
 					// shadowAnchor: shadowAnchor,
-					iconSize: [50, 95],
-					iconAnchor: [25, 100],
-					popupAnchor: popupAnchorValues,
+					iconSize: [23, 23],
+					iconAnchor: [11, 11],
+					popupAnchor: [0, -4],
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -22038,19 +22032,19 @@ if ($scope.landmark.hasTime) {
 			console.log($scope.landmarks[i].name);
 			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 			map.bringMarkerToFront($scope.landmarks[i]._id);
-			map.setMarkerSelected($scope.landmarks[i]._id);
+			// map.setMarkerSelected($scope.landmarks[i]._id);
 			map.setMarkerFocus($scope.landmarks[i]._id);
 			console.log('Complete select');
 		}
 	}
 	
 	$scope.addLandmarkMarker = function(landmark) {
-		var landmarkIcon = 'img/marker/bubble-marker-50.png',
-				popupAnchorValues = [0, -40],
+		var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+				popupAnchorValues = [0, -4],
 				shadowUrl = '',
-				shadowAnchor = [4, -3],
-				iconAnchor = [17, 67],
-				iconSize = [35, 67],
+				shadowAnchor = [1, -1],
+				iconAnchor = [11, 11],
+				iconSize = [23, 23],
 				layerGroup = getLayerGroup(landmark) + '-landmarks',
 				alt = null;
 
@@ -22188,7 +22182,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 		if ($scope.landmarks.length) {
 			map.setMarkerFocus($scope.landmarks[0]._id);
-			map.setMarkerSelected($scope.landmarks[0]._id);
+			// map.setMarkerSelected($scope.landmarks[0]._id);
 		}
 
 		landmarksLoaded = true;
@@ -22837,8 +22831,8 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 								lat: tempLat,
 								lng: tempLng,
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50.png',
-									iconSize: [35, 67]
+									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconSize: [24, 24]
 								},
 								draggable: true
 							}}});		
@@ -23176,11 +23170,11 @@ function initMarkers() {
 			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
 			enable: 'leafletDirectiveMarker.click',
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'img/marker/bubbleMarker_24.png',
 				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor: [0, -30]
+				iconSize: [24, 24],
+				iconAnchor: [11, 11],
+				popupAnchor: [0, -12]
 			},
 			_id: bubble._id	
 		});
@@ -24973,10 +24967,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								draggable: false,
 								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50.png',
-									iconSize: [35, 67],
-									iconAnchor: [17, 67],
-									popupAnchor: [0, -40]
+									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconSize: [24, 24],
+									iconAnchor: [11, 11],
+									popupAnchor: [0, -12]
 								},
 								_id: bubble._id
 							};
@@ -24991,10 +24985,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								draggable: false,
 								message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50_selected.png',
-									iconSize: [35, 67],
-									iconAnchor: [17, 67],
-									popupAnchor: [0, -40]
+									iconUrl: 'img/marker/landmarkMarker_23.png',
+									iconSize: [23, 23],
+									iconAnchor: [11, 11],
+									popupAnchor: [0, -4]
 								},
 								// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
 								_id: landmark._id + (new Date().getTime())
@@ -25504,11 +25498,11 @@ function goToMark() {
 	aperture.set('third');
 	map.removeAllMarkers();
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			iconAnchor = [17.5, 60],
-			iconSize = [35, 67],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
@@ -25925,11 +25919,11 @@ function loadWorld() {
 				lat: $scope.world.loc.coordinates[1],
 				lng: $scope.world.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: 'img/marker/bubbleMarker_24.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
+					iconSize: [24, 24], 
+					iconAnchor: [11, 11],
+					popupAnchor:[0, -12]
 				},
 				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
@@ -26935,11 +26929,11 @@ function addWorldMarker() {
 		lat: $scope.world.loc.coordinates[1],
 		lng: $scope.world.loc.coordinates[0],
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
+			iconUrl: 'img/marker/bubbleMarker_24.png',
 			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor:[0, -40]
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:[0, -12]
 		},
 		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 	});
@@ -27256,12 +27250,12 @@ function lowestLandmarkFloor(tempMarkers) {
 
 function markerFromLandmark(landmark) {
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			shadowAnchor = [4, -3],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+			shadowAnchor = [1, -1],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 

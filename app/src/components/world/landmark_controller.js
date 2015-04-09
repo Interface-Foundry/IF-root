@@ -157,11 +157,11 @@ function goToMark() {
 	aperture.set('third');
 	map.removeAllMarkers();
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			iconAnchor = [17.5, 60],
-			iconSize = [35, 67],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {

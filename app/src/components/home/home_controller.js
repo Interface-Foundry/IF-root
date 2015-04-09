@@ -34,11 +34,11 @@ function initMarkers() {
 			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
 			enable: 'leafletDirectiveMarker.click',
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'img/marker/bubbleMarker_24.png',
 				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor: [0, -30]
+				iconSize: [24, 24],
+				iconAnchor: [11, 11],
+				popupAnchor: [0, -12]
 			},
 			_id: bubble._id	
 		});

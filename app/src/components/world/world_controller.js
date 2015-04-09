@@ -192,11 +192,11 @@ function addWorldMarker() {
 		lat: $scope.world.loc.coordinates[1],
 		lng: $scope.world.loc.coordinates[0],
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
+			iconUrl: 'img/marker/bubbleMarker_24.png',
 			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor:[0, -40]
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:[0, -12]
 		},
 		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 	});
@@ -513,12 +513,12 @@ function lowestLandmarkFloor(tempMarkers) {
 
 function markerFromLandmark(landmark) {
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			shadowAnchor = [4, -3],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+			shadowAnchor = [1, -1],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 
