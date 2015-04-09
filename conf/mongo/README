@@ -1,0 +1,13 @@
+To set up a dev repl set:
+
+1. edit the paths in the *.yaml files to be whatever you want on your computer
+2. edit start.sh to be wherever the instance of mongod you want to use lives
+3. run start.sh
+4. tail the log files and fix whatever didn't work
+5. run start.sh
+6. tail the log files and fix whatever didn't work
+7. run start.sh
+8. tail the log files and fix whatever didn't work
+9. run start.sh
+
+or at least that's what worked for me.

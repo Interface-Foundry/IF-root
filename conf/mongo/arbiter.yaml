@@ -1,0 +1,22 @@
+storage:
+    dbPath: "/mongodb/data/arbiter"
+    directoryPerDB: true
+    journal:
+        enabled: false
+systemLog:
+    destination: file
+    path: "/mongodb/log/arbiter.log"
+    logAppend: true
+    timeStampFormat: iso8601-utc
+processManagement:
+    fork: true
+net:
+    bindIp: 127.0.0.1
+    port: 27019
+    wireObjectCheck: false
+    unixDomainSocket:
+        enabled: true
+replication:
+    oplogSizeMB: 128
+    replSetName: "rs1"
+
