@@ -1,14 +1,18 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService', 'mapManager', 'currentWorldService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService, mapManager, currentWorldService) {
+
+	.factory('worldTree', ['$cacheFactory', '$q','$rootScope', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService', 'mapManager', 'currentWorldService',
+	function($cacheFactory, $q, World, db, geoService, $http,$rootScope, $location, alertManager, bubbleTypeService, navService, mapManager, currentWorldService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
 	styleCache: $cacheFactory('styles'),
-	landmarkCache: $cacheFactory('landmarks')
+	landmarkCache: $cacheFactory('landmarks'),
+	contestCache: $cacheFactory('contest'),
+	submissionCache: $cacheFactory('submission')
 }
 
 var alert = alertManager;
+$rootScope.currentLocation = {};
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -22,7 +26,20 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		}
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
-				deferred.resolve({world: world, style: style});
+				var contest = worldTree.contestCache.get('active');
+				var submissions = [];
+				var worldSubs = worldTree.submissionCache.get(world._id);
+				if (worldSubs) {
+					submissions.push(worldSubs[contest.contestTags[0].tag]);
+					submissions.push(worldSubs[contest.contestTags[1].tag]);
+				}
+
+				deferred.resolve({
+					world: world,
+					style: style,
+					contest: contest,
+					submissions: submissions
+				});
 				console.log('world & style in cache!');
 			} else {
 				console.log('missing style');
@@ -31,7 +48,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	} else {
 		askServer();
 	}
-		
+
 	function askServer() {
 		console.log('ask server')
 		World.get({id: id}, function(data) {
@@ -40,6 +57,15 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 		} else {
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
+	 			worldTree.contestCache.put('active', data.contest);
+				if (!(_.isEmpty(data.submissions))) {
+					var submissions = {};
+					data.submissions.forEach(function(s) {
+						submissions[s.hashtag] = s;
+					});
+					worldTree.submissionCache.put(data.world._id, submissions);
+				}
+
 		 		deferred.resolve(data);
 		 		bubbleTypeService.set(data.world.category);
 		 		if (mapManager.localMapArrayExists(data.world)) {
@@ -125,20 +151,54 @@ worldTree.getNearby = function() {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
-	geoService.getLocation().then(function(location) {
-		db.worlds.query({localTime: new Date(), 
-			userCoordinate: [location.lng, location.lat]},
-			function(data) {
-				worldTree._nearby = data[0];
-				worldTree._nearby.timestamp = now;
-				deferred.resolve(data[0]);
-				
-				worldTree.cacheWorlds(data[0]['150m']);
-				worldTree.cacheWorlds(data[0]['2.5km']);
-			});
-	}, function(reason) {
-		deferred.reject(reason);
-	})
+		geoService.getLocation(23*1000, 8*1000).then(function(location) {
+			db.worlds.query({localTime: new Date(), 
+				userCoordinate: [location.lng, location.lat]},
+				function(data) {
+					worldTree._nearby = data[0];
+					worldTree._nearby.timestamp = now;
+					deferred.resolve(data[0]);
+					
+					worldTree.cacheWorlds(data[0]['150m']);
+					worldTree.cacheWorlds(data[0]['2.5km']);
+				});
+
+			// get city info
+			var data = {
+				params: {
+					hasLoc: true,
+					lat: location.lat,
+					lng: location.lng
+				}
+			};
+			$http.get('/api/geolocation', data).
+				success(function(locInfo) {
+					$rootScope.currentLocation.lat = locInfo.lat;
+					$rootScope.currentLocation.lng = locInfo.lng;
+					$rootScope.currentLocation.cityName = locInfo.cityName;
+				}).
+				error(function(err) {
+					console.log('er: ', err);
+				})
+		}, function(reason) {
+
+			// get city info
+			var data = {
+				params: {
+					hasLoc: false
+				}
+			};
+			$http.get('/api/geolocation', data).
+				success(function(locInfo) {
+					$rootScope.currentLocation.lat = locInfo.lat;
+					$rootScope.currentLocation.lng = locInfo.lng;
+					$rootScope.currentLocation.cityName = locInfo.cityName;
+				}).
+				error(function(err) {
+					console.log('er: ', err);
+				})
+			deferred.reject(reason);
+		})
 	}
 	
 	return deferred.promise;
@@ -149,6 +209,15 @@ worldTree.cacheWorlds = function(worlds) {
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
 	});
+}
+
+worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
+	var worldSubmissions = worldTree.submissionCache.get(worldId) || {};
+	worldSubmissions[hashtag] = {
+		hashtag: hashtag,
+		imgURL: imgURL
+	};
+	worldTree.submissionCache.put(worldId, worldSubmissions);
 }
 
 worldTree.getUserWorlds = function(_id) {

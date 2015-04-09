@@ -79,6 +79,8 @@ var mongoose = require('mongoose'),
     worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
+    contestSchema = require('./components/IF_schemas/contest_schema.js'),
+    contestEntrySchema = require('./components/IF_schemas/contestEntry_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
     monguurl = require('monguurl');
 
@@ -102,6 +104,13 @@ var express = require('express'),
     app = module.exports.app = express(),
     // cors = require('cors'),
     db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+
+
+//===== SET UP ENVIRONMENT =====//
+
+// Set default node environment to development
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+var config = require('./config');
 
 //express compression
 var oneDay = 86400000;
@@ -218,55 +227,76 @@ app.post('/feedback', function(req, res) {
 
 
 
+
+//-------------------------------------//
+//---- LOAD FREEGEOIP SERVER -----//
+//-------------------------------------//
+
+var sys = require('sys')
+var exec = require('child_process').exec;
+function puts(error, stdout, stderr) {
+    sys.puts(stdout)
+}
+
+if (process.env.NODE_ENV == 'production') {
+    console.log('Running in production mode, running production freegeoip server', process.env.NODE_ENV)
+exec("freegeoip", puts);
+}
+
+
+
+
 //---------------------------------------//
 //-------- Send Email Confirmation ------//
 //---------------------------------------//
 
 
 app.post('/email/confirm', function(req, res, next) {
-	console.log("entering /email/confirm");
+    console.log("entering /email/confirm");
 
     if (!validateEmail(req.user.local.email)) {
-		console.log('bad email address: ' + req.user.local.email);
-		next('Please use a real email address');
-		return;
-	}
+        console.log('bad email address: ' + req.user.local.email);
+        next('Please use a real email address');
+        return;
+    }
 
-	if (!req.headers.host) {
-		console.log("Cannot send confirmation mail without req.headers.host");
-		next("Can not send confirmation mail: no host");
-		return;
-	}
+    if (!req.headers.host) {
+        console.log("Cannot send confirmation mail without req.headers.host");
+        next("Can not send confirmation mail: no host");
+        return;
+    }
 
     crypto.randomBytes(20, function(err, buf) {
         var token = buf.toString('hex');
-		var email = req.user.local.email;
+        var email = req.user.local.email;
 
-        User.findOne({'local.email': email},	function(err, user) {
+        User.findOne({
+            'local.email': email
+        }, function(err, user) {
             if (!user) {
                 next('No account with that email address exists, or you signed up only through Facebook/Twitter');
-				return;
+                return;
             }
 
             user.local.confirmEmailToken = token;
             user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
             user.save(function(err) {
-				if (err) {
-					return next(err);
-				}
+                if (err) {
+                    return next(err);
+                }
 
-				var mailOptions = {
-					to: email,
-					from: 'Kip <noreply@kipapp.co>',
-					subject: 'Kip – Confirm your email',
-					text: 'Thanks for signing up for Kip! \n\n' +
-                          'Please click on the following link to confirm your email:\n\n' +
-                          'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+                var mailOptions = {
+                    to: email,
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip – Confirm your email',
+                    text: 'Thanks for signing up for Kip! \n\n' +
+                        'Please click on the following link to confirm your email:\n\n' +
+                        'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
-					if (err) {
-						return next(err);
-					}
+                    if (err) {
+                        return next(err);
+                    }
                     console.log('sent confirmation email');
                     res.send("｡◕‿◕｡");
                 });
@@ -486,14 +516,14 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
-
 //--- SUPER USER ROUTER ----//
 app.use('/api/announcements', require('./components/IF_superuser/announcement_routes'));
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
 app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
 //--- INSTAGRAM / TWITTER ROUTER ----//
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
-
+//--- IP GEOLOCATION AND NAME ROUTER ----//
+app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
@@ -581,12 +611,19 @@ app.get('/api/bubblesearch/:type', function(req, res) {
 
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
+
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
     redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
         res.send('(=^･ｪ･^=)');
+
     });
 
+
+
     // DONE!  then a separate node process dumps the redis cache to db
+
+
+
 
     //From Stackoverflow:
     // Create a caching service. This is really the hardest part, but the general flow looks something like this:
@@ -837,6 +874,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             var count = 0;
             var totalSize = req.headers['content-length'];
             var picorientation;
+            var newentryID = '';
             file.on('data', function(data) {
                 count += data.length;
                 var percentUploaded = Math.floor(count / totalSize * 100);
@@ -856,7 +894,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                             if (err) console.log(err)
-                            console.log('REORIENTED TO 1!')
+
                             fs.readFile(tempPath, function(err, fileData) {
                                 var s3 = new AWS.S3();
                                 s3.putObject({
@@ -872,7 +910,10 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
+
+
                                         //additional content was passed with the image, handle it here
+                                        //Then save the contest entry
                                         if (uploadContents) {
                                             try {
                                                 uploadContents = JSON.parse(uploadContents);
@@ -880,29 +921,97 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 console.log(err);
                                             }
                                             if (uploadContents.type == 'retail_campaign') {
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                // var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                // uploadContents.description = newString;
+                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
+                                                    //Retrieve new saved contest entry ID
+                                                    newentryID = data
+                                                }); //contest entry, send to bac
                                             }
                                         }
+
+
+                                        //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+
+                                        var options = {
+                                            url: "https://api.cloudsightapi.com/image_requests",
+                                            headers: {
+                                                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                            },
+                                            qs: {
+                                                'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                'image_request[locale]': 'en-US',
+                                                'image_request[language]': 'en'
+                                            }
+                                        }
+
+                                        request.post(options, function(err, res, body) {
+                                            if (err) console.log(err);
+                                            var data = JSON.parse(body);
+
+                                            var results = {
+                                                status: 'not completed'
+                                            };
+                                            var description = '';
+
+                                            var tries = 0;
+
+                                            async.whilst(
+                                                function() {
+                                                    return (results.status == 'not completed' && tries < 10);
+                                                },
+                                                function(callback) {
+
+                                                    var options = {
+                                                        url: "https://api.cloudsightapi.com/image_responses/" + data.token,
+                                                        headers: {
+                                                            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                        }
+                                                    }
+
+                                                    request(options, function(err, res, body) {
+                                                        if (err) console.log(err);
+                                                        console.log('cloudsight status is..', body)
+                                                        body = JSON.parse(body);
+                                                        if (body.status == 'completed') {
+                                                            results.status = 'completed';
+                                                            description = body.name;
+
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            uploadContents.description = newString;
+
+                                                            contestEntrySchema.findOneAndUpdate({
+                                                                    _id: newentryID
+                                                                }, {
+                                                                    $push: {
+                                                                        contestTag: {
+                                                                            tag: uploadContents.description
+                                                                        }
+                                                                    }
+                                                                },
+                                                                function(err, result) {
+                                                                    if (err) console.log(err);
+                                                                    console.log('contest updated with cloudsight', result)
+                                                                })
+
+                                                        } //END OF BODY.STATUS COMPLETED
+                                                    })
+
+                                                    tries++;
+                                                    setTimeout(callback, 5000);
+                                                },
+                                                function(err) {
+
+                                                }
+                                            );
+
+
+                                        })
 
                                     }
                                 });
                             });
                         })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                         // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
                         //     if (err) throw err;
@@ -1933,6 +2042,23 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
     }
 });
 
+//////
+app.post('/api/user/emailUpdate', isLoggedIn, function(req, res) {
+    // updates user email, checks if email is already in system
+    req.user._id
+
+    // sanitize input
+    // check if valid email authroutes/passports
+    // call db find
+
+    db.collection('users').findOne({
+        'local.email': req.params.updatedEmail
+    }, function(err, data) {
+        // if (data) res 200 email exists check latest express code
+        // else update user local.email. res 200 user updated
+    });
+
+});
 
 function uniqueProfileID(input, callback) {
 
@@ -2354,6 +2480,8 @@ app.get('/api/stickers/:id', function(req, res) {
 // Read World
 app.get('/api/worlds/:id', function(req, res) {
 
+
+
     if (req.query.m == "true") {
 
         db.collection('landmarks').findOne({
@@ -2387,6 +2515,10 @@ app.get('/api/worlds/:id', function(req, res) {
             }
         });
     }
+
+
+
+
     //if world, query for style and return
     function combineQuery(data, res) {
         //look up style associated with world
@@ -2398,14 +2530,161 @@ app.get('/api/worlds/:id', function(req, res) {
                         console.log(err);
                     }
                     if (style) {
-                        //console.log(style);
-                        var resWorldStyle = {
-                            "world": data,
-                            "style": style
-                        };
-                        res.status(200).send(resWorldStyle);
+
+                        //IS THIS BUBBLE RETAIL?
+                        if (data.category == 'Retail') {
+
+                            contestSchema.findOne({
+                                live: true
+                            }, function(err, contest) {
+
+                                if (err) console.log(err)
+
+                                //IS USER LOGGED IN?
+                                if (req.user) {
+
+                                    if (req.user.submissions) {
+                                        var contestSubmissions = [];
+                                        req.user.submissions.forEach(function(el) {
+                                            if (el.worldID == data._id && el.contestID == contest._id) {
+                                                contestSubmissions.push(el);
+                                            }
+                                        })
+
+                                        //DOES USER HAVE RELEVANT SUBMISSIONS?
+                                        if (contestSubmissions.length < 1) {
+                                            // console.log('hitting')
+                                            res.send({
+                                                contest: contest,
+                                                submissions: null,
+                                                style: style,
+                                                world: data
+                                            });
+                                            // console.log('no submissions yet.', contestSubmissions);
+                                        } else {
+                                            var newestSubmission = [];
+
+                                            if (contestSubmissions.length == 1) {
+                                                newestSubmission.push(contestSubmissions[0])
+                                            } else {
+
+                                                var latestDate = contestSubmissions.reduce(function(a, b) {
+                                                    return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                })
+
+                                                newestSubmission = contestSubmissions.filter(function(submission) {
+                                                    if (submission.timestamp == latestDate) {
+                                                        return submission;
+                                                    }
+                                                })
+                                            }
+
+
+                                            // console.log('newestSubmission is: ', newestSubmission)
+                                            var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
+                                                    if (submission.hashtag !== newestSubmission[0].hashtag) {
+                                                        return submission;
+                                                    }
+                                                })
+                                                // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
+
+                                            var otherNewestSubmission = [];
+                                            if (otherHashTagSubmissions.length == 0) {
+                                                otherNewestSubmission.push(null);
+                                            } else if (otherHashTagSubmissions.length == 1) {
+                                                otherNewestSubmission.push(otherHashTagSubmissions[0])
+                                            } else {
+                                                var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
+                                                        return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                    })
+                                                    // console.log('otherLatestDate is: ', otherLatestDate)
+                                                otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
+                                                    if (submission.timestamp == otherLatestDate) {
+                                                        return submission;
+                                                    }
+                                                })
+                                            }
+                                            // console.log('otherNewestSubmission is: ', otherNewestSubmission)
+                                            var latestTwoUniqueSubmissions = [];
+
+                                            if (otherNewestSubmission[0] !== null) {
+                                                latestTwoUniqueSubmissions.push(newestSubmission[0]);
+                                                latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
+                                                // console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
+                                                var submits = latestTwoUniqueSubmissions.map(function(el) {
+                                                    return {
+                                                        hashtag: el.hashtag,
+                                                        imgURL: el.imgURL
+                                                    }
+                                                })
+                                            } else {
+                                                var submits = newestSubmission.map(function(el) {
+                                                    return {
+                                                        hashtag: el.hashtag,
+                                                        imgURL: el.imgURL
+                                                    }
+                                                })
+                                            }
+
+                                            // console.log('hitting user logged in and latest two submissions is: ', submits)
+
+                                            res.send({
+                                                contest: contest,
+                                                submissions: submits,
+                                                style: style,
+                                                world: data
+                                            });
+
+                                        } //end of if contestSubmissions not empty
+                                    } //end of if user has submissions field
+
+                                    //if user logged in but no submissions
+                                    if (req.user && !req.user.submissions) {
+                                        // console.log('hitting user logged in but NO submissions: ', req.user.submissions)
+                                        res.send({
+                                            contest: contest,
+                                            submissions: null,
+                                            style: style,
+                                            world: data
+                                        });
+                                    }
+                                } //END OF USER LOGGED IN
+
+                                //If user not logged in and world is retail
+                                if (!req.user && data.category == 'Retail') {
+                                    // console.log('hitting user NOT logged in but retail store ', contest)
+                                    res.send({
+                                        contest: contest,
+                                        submissions: null,
+                                        style: style,
+                                        world: data
+                                    });
+                                }
+                            })
+                        } //END OF RETAIL
+                        if (!req.user && data.category !== 'Retail') {
+                            // console.log('hitting user NOT logged and NOT retail store ', data)
+                            res.send({
+                                contest: null,
+                                submissions: null,
+                                style: style,
+                                world: data
+                            });
+
+                        }
+
+                        // //If user not logged in and world is not retail
+                        // else if (!req.user && data.category !== 'Retail') {
+
+                        //     res.send({
+                        //         contest: null,
+                        //         submissions: null,
+                        //         style: style,
+                        //         world: data
+                        //     });
+                        // }
                     }
-                });
+                }); //END OF STYLESCHEMA FIND
 
                 landmarkSchema.update({
                     _id: data._id
@@ -2420,8 +2699,6 @@ app.get('/api/worlds/:id', function(req, res) {
                         console.log('view update succes');
                     }
                 });
-
-
             }
         } else {
             console.log('world doesnt have a styleID');
@@ -3433,5 +3710,6 @@ app.all('/*', function(req, res, next) {
 // })
 
 server.listen(2997, function() {
+    console.log('Running in ', process.env.NODE_ENV, 'mode.')
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });

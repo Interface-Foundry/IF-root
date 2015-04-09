@@ -1283,7 +1283,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	padding: 104px 0px 76px 0px;
+	padding: 88px 0px 76px 0px;
 }
 
 .message-nav {
@@ -1292,7 +1292,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	margin-top: 64px;
+	margin-top: 48px;
 	color: #FFF;
 	z-index: 10;
 }
@@ -1303,7 +1303,6 @@ text-align: center;
 	height: 48px;
 	right: 0px;
 	top: 40px;
-	top: 56px;
 	border: none;
 	outline: none;
 	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
@@ -2095,7 +2094,7 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
-	padding-top: 104px;
+	padding-top: 88px;
 }
 /* app css stylesheet */
 
@@ -2139,7 +2138,6 @@ body {
 
 .navfix {
 	padding-top: 48px;
-	padding-top: 64px;
 }
 
 #scrim {
@@ -2462,9 +2460,6 @@ transform:translateX(100%);
   transform: translateY(116px);
   /*TODO toolbar height + nav height*/
   -webkit-transform: translateY(116px);
-  transform: translateY(132px);
-  /*TODO toolbar height + nav height*/
-  -webkit-transform: translateY(132px);
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);
@@ -2569,7 +2564,6 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
-  top: 15px;
   z-index: 1010;
 }
 .drawer-icon {
@@ -2752,8 +2746,6 @@ nav.main-nav {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
-  height: 64px;
-  padding-top: 16px;
 }
 .nav-title {
   display: none;
@@ -2817,7 +2809,6 @@ nav ul {
   opacity: 1;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  top: 16px;
 }
 .back-button.ng-hide.ng-hide-remove {
   opacity: 0;
@@ -2870,7 +2861,6 @@ nav ul {
   bottom: 0px;
   z-index: -1;
   left: 8px;
-  height: 64px;
 }
 .home-tab {
   background: center / 32px 32px url('img/icons/nav/home.png') no-repeat;
@@ -2897,7 +2887,6 @@ nav ul {
   bottom: 0px;
   padding-top: 96px;
   z-index: 100;
-  padding-top: 112px;
 }
 .search-bar {
   position: absolute;
@@ -2910,7 +2899,6 @@ nav ul {
   line-height: 48px;
   outline: none;
   border: none;
-  top: 64px;
 }
 .search-btn {
   position: absolute;
@@ -3454,6 +3442,7 @@ nav ul {
   padding-left: 10%;
   padding-right: 10%;
 }
+/*VARIABLES*/
 nav {
   pointer-events: auto;
 }
@@ -3475,10 +3464,10 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  margin-top: 64px;
+  margin-top: 48px;
 }
 .subnavfix {
-  padding-top: 112px !important;
+  padding-top: 96px !important;
 }
 .subnav-header {
   display: block;
@@ -4762,8 +4751,9 @@ li.alert {
   }
 }
 .wtgt .body img {
-  width: 100%;
   cursor: pointer;
+  max-height: 100%;
+  max-width: 100%;
 }
 .wtgt .camera {
   border-radius: 50%;
@@ -4806,11 +4796,27 @@ li.alert {
 .u-pointer {
   cursor: pointer;
 }
+.u-centerX {
+  position: relative;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
 .u-centerY {
   position: relative;
   top: 50%;
   -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
+}
+.u-centerXY {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+.u-100X {
+  width: 100%;
 }
 .u-100XY {
   width: 100%;
@@ -4997,6 +5003,149 @@ div.marker-popup-click {
   left: 1px;
   top: 1px;
   cursor: pointer;
+}
+/*SPLASH*/
+.fullPage {
+  /*border: 1px solid black;*/
+  background: #e6e6e6;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+.fullPage-content {
+  /*border: 1px solid black;*/
+  height: 300px;
+  width: 250px;
+}
+.fullPage-body {
+  /*border: 1px solid black;*/
+  width: 95%;
+  max-width: 460px;
+  /*height: 280px;*/
+  position: absolute;
+  top: 50px;
+}
+.fullPage-header {
+  /*border: 1px solid black;*/
+  height: 50px;
+  width: 100%;
+  line-height: 50px;
+  background-color: white;
+  position: absolute;
+  top: 0px;
+}
+.fullPage-content p,
+.fullPage-body p {
+  font-size: 15px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+.fullPage-content .btnMain,
+.fullPage-body .btnMain {
+  margin-top: 20px;
+  display: block;
+}
+.fullPage-header span {
+  font-size: 18px;
+}
+.fullPage-body input {
+  height: 40px;
+  margin-top: 20px;
+  display: block;
+  padding-left: 6px;
+  border: none;
+}
+.fullPage-close {
+  /*border: 1px solid black;*/
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin-top: 20px;
+  margin-right: 20px;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3) url('img/icons/ic_clear_white_24dp.png') center center / 22px 22px no-repeat;
+  cursor: pointer;
+}
+.fullPage-close:hover {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+.fullPage-close:active {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.btnMain {
+  min-width: 150px;
+  height: 40px;
+  line-height: 36px;
+  /*should be 40px (same as height), but there is padding on the button somehow*/
+  border: none;
+  background-color: white;
+  color: black;
+  text-align: center;
+  border-radius: 3px;
+  padding: 0px;
+  position: relative;
+}
+.btnMain:hover {
+  background-color: #f2f2f2;
+}
+.btnMain:active {
+  background-color: #e6e6e6;
+}
+.btnMain--blue {
+  background-color: #2196f3;
+  color: white;
+}
+.btnMain--blue:hover {
+  background-color: #0d8aee;
+}
+.btnMain--blue:active {
+  background-color: #0c7cd5;
+}
+.btnMain--fb {
+  background-color: #3b5998;
+  color: white;
+}
+.btnMain--fb:hover {
+  background-color: #344e86;
+}
+.btnMain--fb:active {
+  background-color: #2d4373;
+}
+.btnMain-img {
+  /*border: 1px solid red;*/
+  width: 20px;
+  position: absolute;
+  left: 10px;
+  /*=(buttonHeight-imageHeight)/2*/
+  top: 10px;
+}
+.btnMain-img--right {
+  right: 10px;
+  left: auto;
+}
+.fullPage .inputFooter {
+  font-size: 13px;
+  margin-top: 10px;
+}
+.divider {
+  width: 100%;
+  height: 0px;
+  position: relative;
+  border-top: 1px solid #b4b4b4;
+  border-bottom: 1px solid #f6f6f6;
+}
+.divider--short {
+  width: 40%;
+}
+/*remove the irritating blue border*/
+button:active,
+button:focus {
+  outline: none;
 }
 
 .leaflet-areaselect-shade {
@@ -8790,8 +8939,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('fonts/glyphicons-halflings-regular.eot');
-  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('/fonts/glyphicons-halflings-regular.eot');
+  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;

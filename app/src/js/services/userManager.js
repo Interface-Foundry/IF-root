@@ -171,6 +171,7 @@ userManager.logout = function() {
 	userManager.loginStatus = false;
 	userManager.adminStatus = false;
 	userManager._user = {};
+	worldTree.submissionCache.removeAll();
 	$location.path('/');
 	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);

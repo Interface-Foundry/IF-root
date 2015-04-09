@@ -5,9 +5,29 @@ var express = require('express'),
     announcementSchema = require('../IF_schemas/announcements_schema.js'),
     _ = require('underscore');
 
-//load all announcements for that region
+    //load all announcements for that region as a a regular user
 router.get('/:id', function(req, res) {
-    if (req.user.admin) {
+        //find all announcements for given region, then sort by priority
+        announcementSchema.aggregate({
+            $match: {
+                region: req.params.id.toString().toLowerCase(),
+                live:true
+            }
+        }, {
+            $sort: {
+                priority: 1
+            }
+        }, function(err, announcements) {
+            if (err) {
+                return handleError(res, err);
+            }
+            return res.send(announcements);
+        });
+})
+
+//load all announcements for that region as an admin
+router.get('/su/:id', function(req, res) {
+    if (req.user && req.user.admin) {
         //find all announcements for given region, then sort by priority
         announcementSchema.aggregate({
             $match: {
@@ -25,26 +45,12 @@ router.get('/:id', function(req, res) {
         });
 
     } else {
-          //find all announcements for given region, then sort by priority
-        announcementSchema.aggregate({
-            $match: {
-                region: req.params.id.toString().toLowerCase()
-            }
-        },{live:true}, {
-            $sort: {
-                priority: 1
-            }
-        }, function(err, announcements) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.send(announcements);
-        });
+        console.log('Not authorized.')
     }
 })
 
 //Create new announcement for that region and shift priorities for all others
-router.post('/', function(req, res) {
+router.post('/su', function(req, res) {
     if (req.user.admin) {
         //Increment priority for all other announcements other than one being created
         announcementSchema.update({}, {
@@ -85,7 +91,7 @@ router.post('/', function(req, res) {
 })
 
 //When superuser changes priority of announcement
-router.post('/:id/sort', function(req, res) {
+router.post('/su/:id/sort', function(req, res) {
 
     //-------If priority is moving up-----//
     if (req.body.dir === 'up' && req.body.priority !== 1) {
@@ -160,7 +166,7 @@ router.post('/:id/sort', function(req, res) {
 })
 
 //When superuser edits announcement content or toggles 'Live' button
-router.put('/:id', function(req, res) {
+router.put('/su/:id', function(req, res) {
     announcementSchema.findOne({
         _id: req.params.id
     }, function(err, result) {
@@ -195,7 +201,7 @@ router.put('/:id', function(req, res) {
 })
 
 //delete announcement for that region
-router.delete('/:id', function(req, res) {
+router.delete('/su/:id', function(req, res) {
     if (req.user.admin) {
         announcementSchema.findById(req.params.id, function(err, announcement) {
             if (err) {

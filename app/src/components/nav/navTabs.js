@@ -1,4 +1,4 @@
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService) {
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -16,10 +16,18 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 				else if (tab === 'search') {
 					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
 					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
-						tab = 'searchWithinBubble';
-						apertureService.set('third');
+						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
+					} else {
+						var data = {
+							// default to NYC if no data yet
+							lat: encodeDotFilterFilter($rootScope.currentLocation.lat || 40.7508, 'encode'),
+							lng: encodeDotFilterFilter($rootScope.currentLocation.lng || -73.9890, 'encode'),
+							cityName: $rootScope.currentLocation.cityName || 'New York City Slow'
+						};
+						$location.path('/c/' + data.cityName + '/search/' + 'lat' + data.lat + '&lng' + data.lng);
 					}
+					apertureService.set('third');
 				}
 				navService.show(tab);
 			}

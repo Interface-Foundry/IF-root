@@ -13,23 +13,21 @@ $scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
 navService.show('home');
 
+$scope.contest = {};
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
 $scope.wtgt = {
-	hashtags: {
-		want: 'hashtag1',
-		got: 'hashtag2'
-	},
 	images: {},
 	building: {}
 };
+
 $scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
-	
+
 var landmarksLoaded;
 
 $scope.verifyUpload = function(event, state) {
@@ -45,8 +43,8 @@ $scope.verifyUpload = function(event, state) {
 	}
 }
 
-$scope.uploadWTGT = function($files, state) {
-	$scope.wtgt.building[state] = true;
+$scope.uploadWTGT = function($files, hashtag) {
+	$scope.wtgt.building[hashtag] = true;
 
 	var file = $files[0];
 
@@ -54,8 +52,8 @@ $scope.uploadWTGT = function($files, state) {
 	var time = new Date();
 
 	// get hashtag
-	var hashtag = null;
-	hashtag = $scope.wtgt.hashtags[state];
+	// var hashtag = null;
+	// hashtag = $scope.wtgt.hashtags[hashtag];
 
 	var data = {
 		world_id: $scope.world._id,
@@ -72,13 +70,13 @@ $scope.uploadWTGT = function($files, state) {
 		// console.log('coords: ', coords);
 		data.userLat = coords.lat;
 		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	}, function(err) {
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	});
 };
 
-function uploadPicture(file, state, data) {
+function uploadPicture(file, hashtag, data) {
 
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
@@ -86,16 +84,45 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		console.log('DATA IZZZ',data);
-		$scope.wtgt.images[state] = data;
-	
-		$scope.wtgt.building[state] = false;
+		worldTree.cacheSubmission($scope.world._id, hashtag, data);
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
+
 	});
 }
+
+// function checkUserForSubmissions() {
+// 	if (!$rootScope.user || !$rootScope.user.submissions) {
+// 		return;
+// 	}
+// 	_.chain($rootScope.user.submissions)
+// 		.groupBy(function(sub) {
+// 			return sub.hashtag;
+// 		})
+// 		.sortBy(function(sub) {
+// 			return sub.timestamp;
+// 		})
+// 		.value()
+// 		.forEach(function(sub) {
+// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
+// 		});
+// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
-	  	 $scope.world = data.world;
-		 $scope.style = data.style;
+	  $scope.world = data.world;
+		$scope.style = data.style;
+		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+		if (!(_.isEmpty(data.submissions))) {
+			data.submissions.forEach(function(s) {
+				if (!s) {
+					return;
+				}
+				$scope.wtgt.images[s.hashtag] = s.imgURL;
+			});
+		// } else {
+		// 	checkUserForSubmissions();
+		}
+
 
 
 
@@ -104,27 +131,29 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		});
 
 		 if (bubbleTypeService.get() == 'Retail') {
+
 		 	$scope.isRetail = true;
-		 }
+		}
 
 		 style.navBG_color = $scope.style.navBG_color;
 
-		 //show edit buttons if user is world owner
-		 if ($rootScope.userID && $scope.world.permissions){
-			 if ($rootScope.userID == $scope.world.permissions.ownerID){
+
+		//show edit buttons if user is world owner
+		if ($rootScope.userID && $scope.world.permissions){
+			if ($rootScope.userID == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
-			 }
-			 else {
+			}
+			else {
 			 	$scope.showEdit = false;
-			 }
-		 } 
+			}
+		} 
 
 		//console.log($scope.world);
 		//console.log($scope.style);
 		 
-		 if ($scope.world.name) {
-			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 } //TODO: cleanup on $destroy
+		if ($scope.world.name) {
+			angular.extend($rootScope, {globalTitle: $scope.world.name});
+		} //TODO: cleanup on $destroy
 		 
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
