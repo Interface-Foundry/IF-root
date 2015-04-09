@@ -17729,7 +17729,9 @@ function locationAnalyticsService($http, $interval, analyticsService, localStore
     }
     
   $interval(function() {
-	  flushBuffer();
+	  if (localStore.locationBuffer.getLength() > 1) {
+		flushBuffer();
+	  }
   }, maxBufferAge);
     
   return {
