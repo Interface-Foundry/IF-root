@@ -152,17 +152,16 @@ console.log($scope.landmark.category);
 });
 
 function goToMark() {
-
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	aperture.set('third');
 	map.removeAllMarkers();
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			iconAnchor = [17.5, 60],
-			iconSize = [35, 67],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
@@ -178,7 +177,7 @@ function goToMark() {
 		lng: $scope.landmark.loc.coordinates[0],
 		draggable:false,
 		message:$scope.landmark.name,
-  	icon: {
+	  	icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,

@@ -104,6 +104,11 @@ $routeProvider.
     
     when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
     when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+
+	  when('/c/:cityName/search/:latLng', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+	  when('/c/:cityName/search/:latLng/category/:category', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+	  when('/c/:cityName/search/:latLng/text/:text', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+
 	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
 	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
       

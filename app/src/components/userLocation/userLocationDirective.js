@@ -11,15 +11,17 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 
 	function link(scope, elem, attrs) {
 		
-		if (scope.style.widgets.category) {
+		if (scope.style.widgets && scope.style.widgets.category) {
 			// raise button from 80px to 120px to account for category widget
 			$('.userLocation').css('bottom', '120px');
 		}
 
 		scope.locateAndPan = function() {
-			geoService.trackStart();
+			if (!geoService.tracking) {
+				geoService.trackStart();
+			}
 			var marker = mapManager.getMarker('track');
-			if (marker.lng !== 0 && marker.lat!== 0) {
+			if (marker && marker.lng !== 0 && marker.lat!== 0) {
 				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
 			}
 		};

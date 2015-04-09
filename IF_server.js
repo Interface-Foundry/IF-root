@@ -478,14 +478,14 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
-
 //--- SUPER USER ROUTER ----//
 app.use('/api/announcements', require('./components/IF_superuser/announcement_routes'));
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
 app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
 //--- INSTAGRAM / TWITTER ROUTER ----//
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
-
+//--- IP GEOLOCATION AND NAME ROUTER ----//
+app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
@@ -851,7 +851,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                             if (err) console.log(err)
-                            console.log('REORIENTED TO 1!')
+
                             fs.readFile(tempPath, function(err, fileData) {
                                 var s3 = new AWS.S3();
                                 s3.putObject({
@@ -867,37 +867,90 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
-                                        //additional content was passed with the image, handle it here
-                                        if (uploadContents) {
-                                            try {
-                                                uploadContents = JSON.parse(uploadContents);
-                                            } catch (err) {
-                                                console.log(err);
+                                        // //additional content was passed with the image, handle it here
+                                        // if (uploadContents) {
+                                        //     try {
+                                        //         uploadContents = JSON.parse(uploadContents);
+                                        //     } catch (err) {
+                                        //         console.log(err);
+                                        //     }
+                                        //     if (uploadContents.type == 'retail_campaign') {
+                                        //         submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                        //     }
+                                        // }
+                                        var options = {
+                                                url: "https://api.cloudsightapi.com/image_requests",
+                                                headers: {
+                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                },
+                                                qs: {
+                                                    'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                    'image_request[locale]': 'en-US',
+                                                    'image_request[language]': 'en'
+                                                }
                                             }
-                                            if (uploadContents.type == 'retail_campaign') {
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                                            }
-                                        }
+                                            //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+                                        request.post(options, function(err, res, body) {
+                                            if (err) console.log(err);
+                                            var data = JSON.parse(body);
+
+                                            var results = {
+                                                status: 'not completed'
+                                            };
+                                            var description = '';
+
+                                            var tries = 0;
+
+                                            async.whilst(
+                                                function() {
+                                                    return (results.status == 'not completed' && tries < 10);
+                                                },
+                                                function(callback) {
+                                                    var options = {
+                                                        url: "https://api.cloudsightapi.com/image_responses/" + data.token,
+                                                        headers: {
+                                                            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                        }
+                                                    }
+
+                                                    request(options, function(err, res, body) {
+                                                        if (err) console.log(err);
+                                                        console.log('cloudsight status is..', body)
+                                                        body = JSON.parse(body);
+                                                        if (body.status == 'completed') {
+                                                            results.status = 'completed';
+                                                            description = body.name;
+                                                        }
+                                                    })
+                                                    tries++;
+                                                    setTimeout(callback, 5000);
+                                                },
+                                                function(err) {
+                                                    console.log('Description of image is..', description)
+                                                    //additional content was passed with the image, handle it here
+                                                    if (uploadContents) {
+                                                        try {
+                                                            uploadContents = JSON.parse(uploadContents);
+                                                        } catch (err) {
+                                                            console.log(err);
+                                                        }
+                                                        if (uploadContents.type == 'retail_campaign') {
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            uploadContents.description = newString;
+                                                            submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                        }
+                                                    }
+
+                                                }
+                                            );
+
+
+                                        })
 
                                     }
                                 });
                             });
                         })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                         // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
                         //     if (err) throw err;

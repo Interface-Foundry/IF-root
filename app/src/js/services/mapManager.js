@@ -178,10 +178,10 @@ mapManager.resetMap = function() {
 /* MARKER METHODS */
 
 mapManager.markerFromLandmark = function(landmark, world, $scope) {
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 
@@ -285,9 +285,15 @@ mapManager.removeMarker = function(key) {
 	}
 }
 
-mapManager.removeAllMarkers = function() {
+mapManager.removeAllMarkers = function(hardRemove) {
 	console.log('--removeAllMarkers--');
+	var trackMarker = mapManager.getMarker('track');
 	mapManager.markers = {};
+
+	// re-add user location marker
+	if (!hardRemove && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
+	}
 }
 
 mapManager.moveMarker = function(key, pos) {
@@ -299,13 +305,21 @@ mapManager.moveMarker = function(key, pos) {
 	mapManager.refresh();
 };
 
-mapManager.setMarkers = function(markers) {
+mapManager.setMarkers = function(markers, hardSet) {
+	var trackMarker = mapManager.getMarker('track');
+	
 	if (_.isArray(markers)) {
 		mapManager.markers = _.indexBy(markers, function(marker) {
 			return marker._id;
-		})
+		});
 	} else {
 		mapManager.markers = markers;
+
+	}
+
+	// re-add user location marker
+	if (!hardSet && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
 	}
 }
 
@@ -340,6 +354,7 @@ mapManager.setMarkerFocus = function(key) {
 }
 
 mapManager.setMarkerSelected = function(key) {
+	// deprecated becaue bubbles and landmarks now have different representations
 	console.log('--setMarkerSelected()--');
 	
 	// reset all marker images to default
@@ -809,11 +824,11 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: 'img/marker/bubbleMarker_24.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
+					iconSize: [24, 24], 
+					iconAnchor: [11, 11],
+					popupAnchor:[0, -12]
 				},
 				message:'<a href="#/w/'+bubble.id+'/">'+bubble.name+'</a>',
 		});}

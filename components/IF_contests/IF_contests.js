@@ -70,7 +70,9 @@ var route = function(imgUpload, uploadContents, userID) {
                 type: uploadContents.type,
                 contestTag: [{
                     tag: uploadContents.hashtag
-                }],
+                }, {
+                    tag: uploadContents.description
+                } ],
                 imgURL: imgUpload,
                 contestId: contest._id,
                 distanceFromWorld: parseFloat(distance)

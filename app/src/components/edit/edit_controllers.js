@@ -668,11 +668,10 @@ function showPosition(position) {
 		focus: true,
 		draggable: true,
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17.5, 55],
-			popupAnchor:  [0, -40]
+			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:  [0, -12]
 		}
 	});
 	
