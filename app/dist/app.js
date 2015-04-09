@@ -19042,8 +19042,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 }
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
+	.factory('worldTree', ['$cacheFactory', '$q', '$timeout', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, $timeout, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19147,6 +19147,39 @@ worldTree.getUpcoming = function(_id) {
 	return deferred.promise;
 }
 
+function getLocationInfoFromIP(deferredObj) {
+	var data = {
+		params: {
+			hasLoc: false
+		}
+	};
+	$http.get('/api/geolocation', data).
+		success(function(locInfo) {
+			var locationData = {
+				lat: locInfo.lat,
+				lng: locInfo.lng,
+				cityName: locInfo.cityName,
+				timestamp: Date.now()
+			};
+
+			geoService.updateLocation(locationData);
+
+			db.worlds.query({localTime: new Date(), 
+				userCoordinate: [locationData.lng, locationData.lat]},
+				function(data) {
+					worldTree._nearby = data[0];
+					worldTree._nearby.timestamp = Date.now() / 1000;
+					if (deferredObj) deferredObj.resolve(data[0]);
+					
+					worldTree.cacheWorlds(data[0]['150m']);
+					worldTree.cacheWorlds(data[0]['2.5km']);
+				});
+		}).
+		error(function(err) {
+			console.log('err: ', err);
+		});
+}
+
 worldTree.getNearby = function() {
 	
 	//current nearby format
@@ -19157,22 +19190,26 @@ worldTree.getNearby = function() {
 	
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
+	var respondedToLocationRequest = false;
+	var respondedToLocationRequestTime = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
-		geoService.getLocation(23*1000, 8*1000).then(function(location) {
-			db.worlds.query({localTime: new Date(), 
-				userCoordinate: [location.lng, location.lat]},
-				function(data) {
-					worldTree._nearby = data[0];
-					worldTree._nearby.timestamp = now;
-					deferred.resolve(data[0]);
-					
-					worldTree.cacheWorlds(data[0]['150m']);
-					worldTree.cacheWorlds(data[0]['2.5km']);
-				});
+
+		// if user doesn't respond (accept or deny) to request for geolocation, use their IP after respondedToLocationRequestTime time
+		$timeout(function() {
+			if (!respondedToLocationRequest) {
+				getLocationInfoFromIP(deferred);
+			}
+		}, respondedToLocationRequestTime);
+
+		// cache location for 23s. wait for 7s before resorting to IP based location
+		geoService.getLocation(23*1000, 7*1000).then(function(location) {
+			
+			// user accepted geo request
+			respondedToLocationRequest = true;
 
 			// get city info
 			var data = {
@@ -19190,33 +19227,33 @@ worldTree.getNearby = function() {
 						cityName: locInfo.cityName,
 						timestamp: Date.now()
 					};
+
 					geoService.updateLocation(locationData);
+
+					db.worlds.query({localTime: new Date(), 
+						userCoordinate: [locationData.lng, locationData.lat]},
+						function(data) {
+							worldTree._nearby = data[0];
+							worldTree._nearby.timestamp = now;
+							deferred.resolve(data[0]);
+							
+							worldTree.cacheWorlds(data[0]['150m']);
+							worldTree.cacheWorlds(data[0]['2.5km']);
+						});
 				}).
 				error(function(err) {
 					console.log('er: ', err);
-				})
+				});
+
 		}, function(reason) {
 
-			// get city info
-			var data = {
-				params: {
-					hasLoc: false
-				}
-			};
-			$http.get('/api/geolocation', data).
-				success(function(locInfo) {
-					var locationData = {
-						lat: locInfo.lat,
-						lng: locInfo.lng,
-						cityName: locInfo.cityName,
-						timestamp: Date.now()
-					};
-					geoService.updateLocation(locationData);
-				}).
-				error(function(err) {
-					console.log('err: ', err);
-				})
-			deferred.reject(reason);
+			// user denied geo request (or accepted request, but system took too long to get location)
+			respondedToLocationRequest = true;
+
+			// get city info and query world using IP
+			getLocationInfoFromIP(deferred);
+
+			// deferred.reject(reason);
 		})
 	}
 	
