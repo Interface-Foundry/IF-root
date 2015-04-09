@@ -5704,7 +5704,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'http://107.170.152.27:1337/'+value;
+					value = 'http://45.55.182.139:1337/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -18671,7 +18671,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('http://107.170.152.27:1337/api/updateuser'),
+	userRes: $resource('http://45.55.182.139:1337/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -18799,7 +18799,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('http://107.170.152.27:1337/auth/facebook/mobile_sigin', data).then(
+          	$http.post('http://45.55.182.139:1337/auth/facebook/mobile_sigin', data).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
