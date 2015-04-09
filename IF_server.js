@@ -47,6 +47,8 @@ var request = require('request');
 var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var RedisStore = require('connect-redis')(session);
+var redis = require('redis');
 var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');
 var readChunk = require('read-chunk');
@@ -141,10 +143,25 @@ app.use(bodyParser.json({
 // passport to express requires
 // app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
 
+
+
+//-------------------------------------//
+//---- Redis -----//
+//-------------------------------------//
+// var redis = require('redis');
+// var client = redis.createClient(); //creates a new client 
+
+var redisClient = require('./redis.js');
+
+
+// Sesh
 app.use(session({
+	store: new RedisStore({
+		client: redisClient
+	}),
     secret: 'rachelwantstomakecakebutneedseggs',
-    saveUninitialized: true,
-    resave: true
+	resave: true,
+	saveUninitialized: true
 }));
 
 app.use(passport.initialize());
@@ -200,13 +217,6 @@ app.post('/feedback', function(req, res) {
 
 
 
-//-------------------------------------//
-//---- Redis -----//
-//-------------------------------------//
-// var redis = require('redis');
-// var client = redis.createClient(); //creates a new client 
-
-var redisClient = require('./redis.js');
 
 //---------------------------------------//
 //-------- Send Email Confirmation ------//
