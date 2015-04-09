@@ -103,6 +103,13 @@ var express = require('express'),
     // cors = require('cors'),
     db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
 
+
+//===== SET UP ENVIRONMENT =====//
+
+// Set default node environment to development
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+var config = require('./config');
+
 //express compression
 var oneDay = 86400000;
 var compression = require('compression');
@@ -205,11 +212,26 @@ app.post('/feedback', function(req, res) {
 //-------------------------------------//
 //---- Redis -----//
 //-------------------------------------//
-// var redis = require('redis');
-// var client = redis.createClient(); //creates a new client 
+
 
 var redis = require("redis"),
     client = redis.createClient();
+
+//-------------------------------------//
+//---- LOAD FREEGEOIP SERVER -----//
+//-------------------------------------//
+
+var sys = require('sys')
+var exec = require('child_process').exec;
+function puts(error, stdout, stderr) {
+    sys.puts(stdout)
+}
+
+if (process.env.NODE_ENV == 'production') {
+    console.log('Running in production mode', process.env.NODE_ENV)
+exec("freegeoip", puts);
+}
+
 
 
 //---------------------------------------//
@@ -3681,5 +3703,6 @@ app.all('/*', function(req, res, next) {
 // })
 
 server.listen(2997, function() {
+    console.log('Running in ', process.env.NODE_ENV, 'mode.')
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });
