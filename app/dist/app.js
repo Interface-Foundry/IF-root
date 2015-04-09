@@ -23281,6 +23281,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
 			scope.select = function (tab) {
 				if (tab === 'home') {
 					if ($routeParams.worldURL) {
@@ -23333,8 +23334,15 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 			}
 
 			scope.hardSearch = function() {
-				$location.path('/');
-				navService.show('search');
+				if (geoService.location.cityName) {
+					navService.show('search');
+					var locationData = {
+						lat: geoService.location.lat,
+						lng: geoService.location.lng,
+						cityName: geoService.location.cityName
+					};
+					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+				}
 			};
 			
 			scope.nearbiesLength = function() {
