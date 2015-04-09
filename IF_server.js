@@ -2525,8 +2525,6 @@ app.get('/api/worlds/:id', function(req, res) {
                         //IS THIS BUBBLE RETAIL?
                         if (data.category == 'Retail') {
 
-
-
                             contestSchema.findOne({
                                 live: true
                             }, function(err, contest) {
@@ -2546,14 +2544,14 @@ app.get('/api/worlds/:id', function(req, res) {
 
                                         //DOES USER HAVE RELEVANT SUBMISSIONS?
                                         if (contestSubmissions.length < 1) {
-                                            console.log('hitting')
+                                            // console.log('hitting')
                                             res.send({
                                                 contest: contest,
                                                 submissions: null,
                                                 style: style,
                                                 world: data
                                             });
-                                            console.log('no submissions yet.', contestSubmissions);
+                                            // console.log('no submissions yet.', contestSubmissions);
                                         } else {
                                             var newestSubmission = [];
 
@@ -2573,7 +2571,7 @@ app.get('/api/worlds/:id', function(req, res) {
                                             }
 
 
-                                            console.log('newestSubmission is: ', newestSubmission)
+                                            // console.log('newestSubmission is: ', newestSubmission)
                                             var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
                                                     if (submission.hashtag !== newestSubmission[0].hashtag) {
                                                         return submission;
@@ -2597,13 +2595,13 @@ app.get('/api/worlds/:id', function(req, res) {
                                                     }
                                                 })
                                             }
-                                            console.log('otherNewestSubmission is: ', otherNewestSubmission)
+                                            // console.log('otherNewestSubmission is: ', otherNewestSubmission)
                                             var latestTwoUniqueSubmissions = [];
 
                                             if (otherNewestSubmission[0] !== null) {
                                                 latestTwoUniqueSubmissions.push(newestSubmission[0]);
                                                 latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
-                                                console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
+                                                // console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
                                                 var submits = latestTwoUniqueSubmissions.map(function(el) {
                                                     return {
                                                         hashtag: el.hashtag,
@@ -2619,7 +2617,7 @@ app.get('/api/worlds/:id', function(req, res) {
                                                 })
                                             }
 
-                                            console.log('hitting user logged in and latest two submissions is: ', submits)
+                                            // console.log('hitting user logged in and latest two submissions is: ', submits)
 
                                             res.send({
                                                 contest: contest,
@@ -2633,7 +2631,7 @@ app.get('/api/worlds/:id', function(req, res) {
 
                                     //if user logged in but no submissions
                                     if (req.user && !req.user.submissions) {
-                                        console.log('hitting user logged in but NO submissions: ', req.user.submissions)
+                                        // console.log('hitting user logged in but NO submissions: ', req.user.submissions)
                                         res.send({
                                             contest: contest,
                                             submissions: null,
@@ -2645,7 +2643,7 @@ app.get('/api/worlds/:id', function(req, res) {
 
                                 //If user not logged in and world is retail
                                 if (!req.user && data.category == 'Retail') {
-                                    console.log('hitting user NOT logged in but retail store ', contest)
+                                    // console.log('hitting user NOT logged in but retail store ', contest)
                                     res.send({
                                         contest: contest,
                                         submissions: null,
@@ -2656,7 +2654,7 @@ app.get('/api/worlds/:id', function(req, res) {
                             })
                         } //END OF RETAIL
                         if (!req.user && data.category !== 'Retail') {
-                            console.log('hitting user NOT logged and NOT retail store ', data)
+                            // console.log('hitting user NOT logged and NOT retail store ', data)
                             res.send({
                                 contest: null,
                                 submissions: null,
