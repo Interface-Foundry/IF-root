@@ -2371,6 +2371,10 @@ li.alert {
   -webkit-transform: translate(-70%, -70%);
   transform: translate(-70%, -70%);
 }
+.wtgt .camera.plus-one-visible {
+  background: #ffffff url('img/icons/camera-tiny-light.png') no-repeat 10px 12px;
+  background-size: 23.76px 19.2px;
+}
 .wtgt .hashtag--upload {
   position: relative;
   top: -40px;
@@ -2387,22 +2391,21 @@ li.alert {
   height: 100%;
 }
 .plus-one {
-  background-color: #ff635e;
   border-radius: 50%;
-  box-shadow: 1px 1px 2px 0px #cccccc
   cursor: pointer;
   font-weight: bold;
-  height: 20px;
-  line-height: 1.25;
+  height: 16px;
+  line-height: 1;
   position: absolute;
-  right: -20px;
-  top: 141px;
-  width: 20px;
+  right: -11px;
+  top: 169px;
+  font-size: 1.1em;
+  width: 16px;
   z-index: 1;
 }
 @media only screen and (max-width: 768px) {
   .plus-one {
-    top: 101px;
+    top: 129px;
   }
 }
 .marble-page-footer.tag {

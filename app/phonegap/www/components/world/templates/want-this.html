@@ -51,6 +51,7 @@
 			<span class="plus-one"
 						ng-show="wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]">+</span>
 			<div class="camera"
+				ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]}"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
 				ng-file-drop
@@ -100,6 +101,7 @@
 			<span class="plus-one"
 						ng-show="wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]">+</span>
 			<div class="camera"
+						ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]}"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
 				ng-file-drop
