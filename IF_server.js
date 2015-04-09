@@ -228,7 +228,7 @@ function puts(error, stdout, stderr) {
 }
 
 if (process.env.NODE_ENV == 'production') {
-    console.log('Running in production mode', process.env.NODE_ENV)
+    console.log('Running in production mode, running production freegeoip server', process.env.NODE_ENV)
 exec("freegeoip", puts);
 }
 
