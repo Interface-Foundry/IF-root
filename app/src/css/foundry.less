@@ -5,7 +5,7 @@
 @import '../components/floor_selector/floorselector.less';
 @import '../components/super_user/superuser.less';
 @import '../components/contest/contest.less';
-
+@import '../components/announcements/announcements.less';
 
 /*VARIABLES*/
 @darkenPctg-hover: 5%;
@@ -1546,6 +1546,22 @@ margin-bottom: 4px;
 	height: 100%;
 }
 
+.u-textAlignCenter {
+	text-align: center;
+}
+
+.u-relative {
+	position: relative;
+}
+
+.u-absolute {
+	position: absolute;
+}
+
+.u-inlineBlock {
+	display: inline-block;
+}
+
 /* CATEGORY WIDGET */
 
 .category-list-shadow {
@@ -1918,8 +1934,23 @@ div.marker-popup-click {
 	width: 40%;
 }
 
+.inputEdit {
+	background-color: transparent;
+	border: none;
+	text-decoration: underline;
+	cursor: pointer;
+	&:focus {
+		outline: none;
+	}
+}
+
+.errorMsg {
+	color: red;
+}
+
 /*remove the irritating blue border*/
 button:active,
 button:focus {
 	outline: none;
 }
+

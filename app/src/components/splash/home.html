@@ -2,8 +2,10 @@
 	<div class="fullPage-content u-centerXY">
 		<h1>LOGO</h1>
 		<p>Tagline to describe the product here in a few words</p>
-		<button class="btnMain u-centerX">SIGN IN</button>
-		<button class="btnMain btnMain--blue u-centerX">REGISTER</button>
+		<button class="btnMain u-centerX"
+			ng-click="setShowSplash('signin', true)">SIGN IN</button>
+		<button class="btnMain btnMain--blue u-centerX"
+			ng-click="setShowSplash('register', true)">REGISTER</button>
 	</div>
-	<div class="fullPage-close"></div>
+	<div class="fullPage-close" ng-if="show.close" ng-click="setShowSplash('splash', false)"></div>
 </div>

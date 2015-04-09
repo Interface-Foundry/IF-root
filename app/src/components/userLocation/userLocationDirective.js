@@ -17,9 +17,11 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 		}
 
 		scope.locateAndPan = function() {
-			geoService.trackStart();
+			if (!geoService.tracking) {
+				geoService.trackStart();
+			}
 			var marker = mapManager.getMarker('track');
-			if (marker.lng !== 0 && marker.lat!== 0) {
+			if (marker && marker.lng !== 0 && marker.lat!== 0) {
 				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
 			}
 		};

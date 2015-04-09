@@ -1,8 +1,9 @@
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
+app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($routeParams, $location, $http, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
 			scope.select = function (tab) {
 				if (tab === 'home') {
 					if ($routeParams.worldURL) {
@@ -19,13 +20,35 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
 					} else {
-						var data = {
-							// default to NYC if no data yet
-							lat: encodeDotFilterFilter($rootScope.currentLocation.lat || 40.7508, 'encode'),
-							lng: encodeDotFilterFilter($rootScope.currentLocation.lng || -73.9890, 'encode'),
-							cityName: $rootScope.currentLocation.cityName || 'New York City Slow'
-						};
-						$location.path('/c/' + data.cityName + '/search/' + 'lat' + data.lat + '&lng' + data.lng);
+						if (geoService.location.cityName) {
+							var locationData = {
+								lat: geoService.location.lat,
+								lng: geoService.location.lng,
+								cityName: geoService.location.cityName
+							};
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+						} else { // use IP
+							var data = {
+								params: {
+									hasLoc: false
+								}
+							};
+							$http.get('/api/geolocation', data).
+								success(function(locInfo) {
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: Date.now()
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+								}).
+								error(function(err) {
+									console.log('err: ', err);
+								});
+						}
+						
 					}
 					apertureService.set('third');
 				}
@@ -33,8 +56,15 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 			}
 
 			scope.hardSearch = function() {
-				$location.path('/');
-				navService.show('search');
+				if (geoService.location.cityName) {
+					navService.show('search');
+					var locationData = {
+						lat: geoService.location.lat,
+						lng: geoService.location.lng,
+						cityName: geoService.location.cityName
+					};
+					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+				}
 			};
 			
 			scope.nearbiesLength = function() {

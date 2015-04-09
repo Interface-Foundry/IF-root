@@ -4878,10 +4878,9 @@ $routeProvider.
       when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
       when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
       when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-      when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+      when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
       when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
       when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-      when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
       when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
       when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -5314,6 +5313,34 @@ app.directive('bubbleBody', function(apertureService) {
 		}
 	}
 });
+app.directive('clickToEdit', [function() {
+	// attach to input element. selects input text on click
+
+	return {
+		restrict: 'A',
+		scope: true,
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+
+		elem.on('click', function() {
+			elem.select();
+			elem.focus();
+		});
+
+		// [optional] reset input value to initial value when empty
+		if (attrs.initialVal) {
+			var initialVal = attrs.initialVal;
+			elem.on('blur', function() {
+				if (angular.element(elem).val() === '') {
+					angular.element(elem).val(initialVal);
+				}
+			});
+		}
+	}
+
+}]);
 app.directive('compassButton', function(worldTree, $templateRequest, $compile, userManager, $timeout) {
 	return { //NOT USED ANY MORE
 		restrict: 'EA',
@@ -16389,10 +16416,10 @@ function noWorlds(lat,lon) {
 		  	draggable:false,
 		  	message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
 		  	icon: {
-	            iconUrl: 'img/marker/bubble-marker-50.png',
+	            iconUrl: 'img/marker/bubbleMarker_24.png',
 	            shadowUrl: '',
-	            iconSize: [35, 67],
-	            iconAnchor: [13, 10]
+	            iconSize: [24, 24],
+	            iconAnchor: [11, 11]
 			}
 			});  
 		}
@@ -16498,10 +16525,10 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
                   draggable:false,
                   message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
                   icon: {
-                    iconUrl: 'img/marker/bubble-marker-50.png',
+                    iconUrl: 'img/marker/bubbleMarker_24.png',
                     shadowUrl: '',
-                    iconSize: [35, 67],
-                    iconAnchor: [13, 10]
+                    iconSize: [24, 24],
+                    iconAnchor: [11, 11]
                   }
                 });  
 
@@ -17225,14 +17252,19 @@ angular.module('tidepoolsServices')
 			return dialogs;
 		}]);
 angular.module('tidepoolsServices')
-	.factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
-		function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+
+	.factory('geoService', [ '$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+		function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
-					//lat,
-					//lng
-					//timestamp  
+					/**
+					 * lat:
+					 * lng:
+					 * timestamp:
+					 * cityName:
+					 */ 
 				},
 				inProgress: false,
 				requestQueue: [],
@@ -17240,20 +17272,33 @@ angular.module('tidepoolsServices')
 			};
 
 			var marker = [];
+			var pos = {
+				/**
+				 * lat:
+				 * lng:
+				 */
+			}
 			var watchID;
 			$rootScope.aperture = apertureService;
 
-			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			// start tracking when in full aperture (and retail bubble or world search) and stop otherwise
 			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
-				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
-					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+				if (bubbleTypeService.get() === 'Retail' || $routeParams.cityName) {
+					if (newVal === 'aperture-full' && !geoService.tracking) {
 						geoService.trackStart();
-					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+					} else if (newVal !== 'aperture-full' && geoService.tracking) {
 						geoService.trackStop();
 					}
 				}
 
 			});	
+
+			geoService.updateLocation = function(locationData) {
+				geoService.location.lat = locationData.lat;
+				geoService.location.lng = locationData.lng;
+				geoService.location.cityName = locationData.cityName;
+				geoService.location.timestamp = locationData.timestamp;
+			};
 			 
 			geoService.getLocation = function(maxAge, timeout) {
 
@@ -17327,17 +17372,17 @@ angular.module('tidepoolsServices')
 					geoService.trackStop();
 				}
 				if (navigator.geolocation && window.DeviceOrientationEvent) {
-
 					// marker
 					mapManager.addMarker('track', {
-						lat: geoService.location.lat || 0,
-						lng: geoService.location.lng || 0,
+						lat: pos.lat || geoService.location.lat || 0,
+						lng: pos.lng || geoService.location.lng || 0,
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
-							iconSize: [35, 43],
-							iconAnchor: [17, 43],
-							popupAnchor:[0, -40]
+
+							iconSize: [24, 30], 
+							iconAnchor: [12, 15]
+
 						},
 						alt: 'track' // used for tracking marker DOM element
 					});
@@ -17345,7 +17390,7 @@ angular.module('tidepoolsServices')
 
 					// movement XY
 					watchID = navigator.geolocation.watchPosition(function(position) {
-						var pos = {
+						pos = {
 							lat: position.coords.latitude,
 							lng: position.coords.longitude
 						};
@@ -17954,10 +17999,10 @@ mapManager.resetMap = function() {
 /* MARKER METHODS */
 
 mapManager.markerFromLandmark = function(landmark, world, $scope) {
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 
@@ -18061,9 +18106,15 @@ mapManager.removeMarker = function(key) {
 	}
 }
 
-mapManager.removeAllMarkers = function() {
+mapManager.removeAllMarkers = function(hardRemove) {
 	console.log('--removeAllMarkers--');
+	var trackMarker = mapManager.getMarker('track');
 	mapManager.markers = {};
+
+	// re-add user location marker
+	if (!hardRemove && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
+	}
 }
 
 mapManager.moveMarker = function(key, pos) {
@@ -18075,13 +18126,21 @@ mapManager.moveMarker = function(key, pos) {
 	mapManager.refresh();
 };
 
-mapManager.setMarkers = function(markers) {
+mapManager.setMarkers = function(markers, hardSet) {
+	var trackMarker = mapManager.getMarker('track');
+	
 	if (_.isArray(markers)) {
 		mapManager.markers = _.indexBy(markers, function(marker) {
 			return marker._id;
-		})
+		});
 	} else {
 		mapManager.markers = markers;
+
+	}
+
+	// re-add user location marker
+	if (!hardSet && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
 	}
 }
 
@@ -18116,6 +18175,7 @@ mapManager.setMarkerFocus = function(key) {
 }
 
 mapManager.setMarkerSelected = function(key) {
+	// deprecated becaue bubbles and landmarks now have different representations
 	console.log('--setMarkerSelected()--');
 	
 	// reset all marker images to default
@@ -18585,11 +18645,11 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: 'img/marker/bubbleMarker_24.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
+					iconSize: [24, 24], 
+					iconAnchor: [11, 11],
+					popupAnchor:[0, -12]
 				},
 				message:'<a href="#/w/'+bubble.id+'/">'+bubble.name+'</a>',
 		});}
@@ -19127,7 +19187,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = undefined;	
+		userManager.signup.error = false;		
 
 		// send confirmation email
 		$http.post('/email/confirm').then(function(success) {
@@ -19135,11 +19195,10 @@ userManager.signup.signup = function() { //signup based on signup form
 		}, function(error) {
 			console.log('error :', error);
 		});
-
 	})
 	.error(function(err) {
 	if (err) {
-		userManager.signup.error = "Error signing up!";
+		userManager.signup.error = err || "Error signing up!";
         alertManager.addAlert('danger',err, true);   
 	}
 	});
@@ -19244,11 +19303,11 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 			lat: world.loc.coordinates[1],
 			lng: world.loc.coordinates[0],
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'img/marker/bubbleMarker_24.png',
 				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor:[0, -40]
+				iconSize: [24, 24],
+				iconAnchor: [11, 11],
+				popupAnchor:[0, -12]
 			},
 			message:'<a href="#/w/'+world.id+'/">'+world.name+'</a>',
 		});
@@ -19291,8 +19350,10 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 angular.module('tidepoolsServices')
 
-	.factory('worldTree', ['$cacheFactory', '$q','$rootScope', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService', 'mapManager', 'currentWorldService',
-	function($cacheFactory, $q, World, db, geoService, $http,$rootScope, $location, alertManager, bubbleTypeService, navService, mapManager, currentWorldService) {
+
+	.factory('worldTree', ['$cacheFactory', '$q','$rootScope','$timeout', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService', 'mapManager', 'currentWorldService',
+	function($cacheFactory, $q, $rootScope, $timeout, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService, mapManager, currentWorldService) {
+
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19303,7 +19364,6 @@ var worldTree = {
 }
 
 var alert = alertManager;
-$rootScope.currentLocation = {};
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -19427,6 +19487,39 @@ worldTree.getUpcoming = function(_id) {
 	return deferred.promise;
 }
 
+function getLocationInfoFromIP(deferredObj) {
+	var data = {
+		params: {
+			hasLoc: false
+		}
+	};
+	$http.get('/api/geolocation', data).
+		success(function(locInfo) {
+			var locationData = {
+				lat: locInfo.lat,
+				lng: locInfo.lng,
+				cityName: locInfo.cityName,
+				timestamp: Date.now()
+			};
+
+			geoService.updateLocation(locationData);
+
+			db.worlds.query({localTime: new Date(), 
+				userCoordinate: [locationData.lng, locationData.lat]},
+				function(data) {
+					worldTree._nearby = data[0];
+					worldTree._nearby.timestamp = Date.now() / 1000;
+					if (deferredObj) deferredObj.resolve(data[0]);
+					
+					worldTree.cacheWorlds(data[0]['150m']);
+					worldTree.cacheWorlds(data[0]['2.5km']);
+				});
+		}).
+		error(function(err) {
+			console.log('err: ', err);
+		});
+}
+
 worldTree.getNearby = function() {
 	
 	//current nearby format
@@ -19437,22 +19530,26 @@ worldTree.getNearby = function() {
 	
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
+	var respondedToLocationRequest = false;
+	var respondedToLocationRequestTime = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
-		geoService.getLocation(23*1000, 8*1000).then(function(location) {
-			db.worlds.query({localTime: new Date(), 
-				userCoordinate: [location.lng, location.lat]},
-				function(data) {
-					worldTree._nearby = data[0];
-					worldTree._nearby.timestamp = now;
-					deferred.resolve(data[0]);
-					
-					worldTree.cacheWorlds(data[0]['150m']);
-					worldTree.cacheWorlds(data[0]['2.5km']);
-				});
+
+		// if user doesn't respond (accept or deny) to request for geolocation, use their IP after respondedToLocationRequestTime time
+		$timeout(function() {
+			if (!respondedToLocationRequest) {
+				getLocationInfoFromIP(deferred);
+			}
+		}, respondedToLocationRequestTime);
+
+		// cache location for 23s. wait for 7s before resorting to IP based location
+		geoService.getLocation(23*1000, 7*1000).then(function(location) {
+			
+			// user accepted geo request
+			respondedToLocationRequest = true;
 
 			// get city info
 			var data = {
@@ -19464,31 +19561,39 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					$rootScope.currentLocation.lat = locInfo.lat;
-					$rootScope.currentLocation.lng = locInfo.lng;
-					$rootScope.currentLocation.cityName = locInfo.cityName;
+					var locationData = {
+						lat: locInfo.lat,
+						lng: locInfo.lng,
+						cityName: locInfo.cityName,
+						timestamp: Date.now()
+					};
+
+					geoService.updateLocation(locationData);
+
+					db.worlds.query({localTime: new Date(), 
+						userCoordinate: [locationData.lng, locationData.lat]},
+						function(data) {
+							worldTree._nearby = data[0];
+							worldTree._nearby.timestamp = now;
+							deferred.resolve(data[0]);
+							
+							worldTree.cacheWorlds(data[0]['150m']);
+							worldTree.cacheWorlds(data[0]['2.5km']);
+						});
 				}).
 				error(function(err) {
 					console.log('er: ', err);
-				})
+				});
+
 		}, function(reason) {
 
-			// get city info
-			var data = {
-				params: {
-					hasLoc: false
-				}
-			};
-			$http.get('/api/geolocation', data).
-				success(function(locInfo) {
-					$rootScope.currentLocation.lat = locInfo.lat;
-					$rootScope.currentLocation.lng = locInfo.lng;
-					$rootScope.currentLocation.cityName = locInfo.cityName;
-				}).
-				error(function(err) {
-					console.log('er: ', err);
-				})
-			deferred.reject(reason);
+			// user denied geo request (or accepted request, but system took too long to get location)
+			respondedToLocationRequest = true;
+
+			// get city info and query world using IP
+			getLocationInfoFromIP(deferred);
+
+			// deferred.reject(reason);
 		})
 	}
 	
@@ -21056,6 +21161,78 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 'use strict';
 
+app.directive('announcements', announcements);
+
+announcements.$inject = ['$timeout', 'announcementsService'];
+
+function announcements($timeout, announcementsService) {
+	return {
+		restrict: 'E',
+		scope: {},
+		templateUrl: 'components/announcements/announcements.html',
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+
+		scope.allCaughtUp = {
+			headline: 'All caught up!',
+			body: ':)'
+		};
+		scope.announcements = [];
+		scope.chevron = angular.element('.announcement-chevron');
+		scope.end = false;
+		scope.index = 0;
+		scope.nextCard = nextCard;
+		scope.region = 'global';
+
+		activate();
+
+		function activate() {
+			// Announcements.query({
+			// 	id: scope.region
+			// }).$promise
+			announcementsService.get()
+			.then(function(response) {
+				scope.announcements = scope.announcements.concat(response.data);
+				scope.announcements.push(scope.allCaughtUp);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+
+		function nextCard() {
+			scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
+			scope.chevron.animate({opacity: 0}, 350);
+			if (scope.index < scope.announcements.length - 1) {
+				scope.index++;
+				$timeout(function() {
+					scope.chevron.animate({opacity: 1}, 400);
+				}, 650);
+			}
+		}
+	}
+}
+
+'use strict';
+
+app.service('announcementsService', announcementsService);
+
+announcementsService.$inject = ['$http'];
+
+function announcementsService($http) {
+	
+	return {
+		get: get
+	};
+
+	function get() {
+		return $http.get('api/announcements/global');
+	}
+}
+
+'use strict';
+
 app.controller('ContestController', ContestController);
 
 ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
@@ -21843,11 +22020,10 @@ function showPosition(position) {
 		focus: true,
 		draggable: true,
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17.5, 55],
-			popupAnchor:  [0, -40]
+			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:  [0, -12]
 		}
 	});
 	
@@ -22060,24 +22236,18 @@ var landmarksLoaded = false;
 			
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
-			
-			var landmarkIcon = 'img/marker/bubble-marker-50.png',
-					popupAnchorValues = [0, -50],
-					shadowUrl = '',
-					// shadowAnchor = [12, 20],
-					iconAnchor = [25, 100];
 
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: landmarkIcon,
-					shadowUrl: shadowUrl,
+					iconUrl: 'img/marker/landmarkMarker_23.png',
+					shadowUrl: '',
 					// shadowAnchor: shadowAnchor,
-					iconSize: [50, 95],
-					iconAnchor: [25, 100],
-					popupAnchor: popupAnchorValues,
+					iconSize: [23, 23],
+					iconAnchor: [11, 11],
+					popupAnchor: [0, -4],
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -22183,19 +22353,19 @@ if ($scope.landmark.hasTime) {
 			console.log($scope.landmarks[i].name);
 			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 			map.bringMarkerToFront($scope.landmarks[i]._id);
-			map.setMarkerSelected($scope.landmarks[i]._id);
+			// map.setMarkerSelected($scope.landmarks[i]._id);
 			map.setMarkerFocus($scope.landmarks[i]._id);
 			console.log('Complete select');
 		}
 	}
 	
 	$scope.addLandmarkMarker = function(landmark) {
-		var landmarkIcon = 'img/marker/bubble-marker-50.png',
-				popupAnchorValues = [0, -40],
+		var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+				popupAnchorValues = [0, -4],
 				shadowUrl = '',
-				shadowAnchor = [4, -3],
-				iconAnchor = [17, 67],
-				iconSize = [35, 67],
+				shadowAnchor = [1, -1],
+				iconAnchor = [11, 11],
+				iconSize = [23, 23],
 				layerGroup = getLayerGroup(landmark) + '-landmarks',
 				alt = null;
 
@@ -22333,7 +22503,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 		if ($scope.landmarks.length) {
 			map.setMarkerFocus($scope.landmarks[0]._id);
-			map.setMarkerSelected($scope.landmarks[0]._id);
+			// map.setMarkerSelected($scope.landmarks[0]._id);
 		}
 
 		landmarksLoaded = true;
@@ -22980,8 +23150,8 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 								lat: tempLat,
 								lng: tempLng,
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50.png',
-									iconSize: [35, 67]
+									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconSize: [24, 24]
 								},
 								draggable: true
 							}}});		
@@ -23292,29 +23462,18 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
 map.resetMap();
 
-$scope.temp = {};
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
+$scope.searchBarText = 'Search not working on this page yet' || bubbleSearchService.defaultText;
 
 $scope.select = function(bubble) {
-	if ($scope.temp.mapOn) {
-		if ($scope.selected==bubble) {
-			// already selected
-			$location.path('w/'+bubble.id);
-		} else {
-			$scope.selected = bubble;
-			map.setMarkerFocus(bubble._id);
-			map.setCenterWithFixedAperture(bubble.loc.coordinates, 18, 0, 240);
-		}
-	} else {
-		$location.path('w/'+bubble.id);
-	}
+	$location.path('w/'+bubble.id);
 }
 
 function initMarkers() {
@@ -23328,11 +23487,11 @@ function initMarkers() {
 			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
 			enable: 'leafletDirectiveMarker.click',
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'img/marker/bubbleMarker_24.png',
 				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor: [0, -30]
+				iconSize: [24, 24],
+				iconAnchor: [11, 11],
+				popupAnchor: [0, -12]
 			},
 			_id: bubble._id	
 		});
@@ -23341,18 +23500,7 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
-//LISTENERS//
-
-$scope.$watch('temp.mapOn', function(newVal, oldVal) {
-	switch (newVal) {
-		case true:
-			style.navBG_color = 'rgba(245, 67, 54, 0.96)';
-		break;
-		case false:
-			style.resetNavBG();
-		break;
-	}
-}) 
+//LISTENERS// 
 
 $rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
 	var bubble = $scope.bubbles.find(function(element, index, array) {
@@ -23575,11 +23723,12 @@ app.factory('navService', [function() {
 	}
 
 }]);
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
+app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($routeParams, $location, $http, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
 			scope.select = function (tab) {
 				if (tab === 'home') {
 					if ($routeParams.worldURL) {
@@ -23596,13 +23745,35 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
 					} else {
-						var data = {
-							// default to NYC if no data yet
-							lat: encodeDotFilterFilter($rootScope.currentLocation.lat || 40.7508, 'encode'),
-							lng: encodeDotFilterFilter($rootScope.currentLocation.lng || -73.9890, 'encode'),
-							cityName: $rootScope.currentLocation.cityName || 'New York City Slow'
-						};
-						$location.path('/c/' + data.cityName + '/search/' + 'lat' + data.lat + '&lng' + data.lng);
+						if (geoService.location.cityName) {
+							var locationData = {
+								lat: geoService.location.lat,
+								lng: geoService.location.lng,
+								cityName: geoService.location.cityName
+							};
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+						} else { // use IP
+							var data = {
+								params: {
+									hasLoc: false
+								}
+							};
+							$http.get('/api/geolocation', data).
+								success(function(locInfo) {
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: Date.now()
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+								}).
+								error(function(err) {
+									console.log('err: ', err);
+								});
+						}
+						
 					}
 					apertureService.set('third');
 				}
@@ -23610,8 +23781,15 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 			}
 
 			scope.hardSearch = function() {
-				$location.path('/');
-				navService.show('search');
+				if (geoService.location.cityName) {
+					navService.show('search');
+					var locationData = {
+						lat: geoService.location.lat,
+						lng: geoService.location.lng,
+						cityName: geoService.location.cityName
+					};
+					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+				}
 			};
 			
 			scope.nearbiesLength = function() {
@@ -23673,12 +23851,223 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs) {
+
+    $scope.setShowSplash = setShowSplash;
+    $scope.splashNext = splashNext;
+    $scope.resendEmail = resendEmail;
+    $scope.sendPasswordForgot = sendPasswordForgot;
+    $scope.sendPasswordReset = sendPasswordReset;
+    $scope.show = {
+        /**
+         * splash: for general splash
+         * confirm: for confirm dialog
+         * confirmThanks: for confirmThanks dialog
+         * close: for close button
+         * signin: for sign in dialog
+         * register: for register dialog
+         * passwordForgot: for forgot password dialog
+         * passwordReset: for reset password dialog
+         */
+    };
+    $scope.user = {};
+    $scope.confirmThanksText;
+    $scope.errorMsg;
+
+    init();
+
+    function init() {
+        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+
+            createShowSplash('confirmThanks');
+
+            // get token from url
+            var token = $location.path().slice(15);
+
+            $http.post('/email/request_confirm/' + token).
+            success(function(data) {
+                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+            }).
+            error(function(err) {
+                $scope.confirmThanksText = 'There was a problem confirming your email';
+            });
+
+            // redirect to home page
+            $location.path('/');
+        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+
+            createShowSplash('passwordReset');
+
+            // get token from url
+            var token = $location.path().slice(7);
+
+            $http.post('/resetConfirm/' + token).
+            success(function(data) {
+
+            }).
+            error(function(err) {
+                if (err) {
+                    console.log('err: ', err);
+                }
+            });
+        } else {
+            userManager.getUser().then(function(success) {
+                createShowSplash(true);
+            }, function(err) {
+                createShowSplash(false);
+            });
+        }
+    }
+
+    function createShowSplash(condition) {
+        // $scope.show controls the logic for the splash pages
+
+        if (condition === 'confirmThanks') {
+            $scope.show.splash = true;
+            $scope.show.confirm = false;
+            $scope.show.confirmThanks = true;
+        } else if (condition == 'passwordReset') {
+            $scope.show.splash = true;
+            $scope.show.passwordReset = true;
+        } else if (condition) { // logged in
+            $scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
+            $scope.show.confirm = userManager.loginStatus &&
+                !userManager._user.local.confirmedEmail &&
+                !userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+            $scope.show.confirmThanks = false;
+            $scope.user.newEmail = userManager._user.local.email;
+        } else { // not logged in
+            $scope.show.splash = true;
+            $scope.show.confirm = false;
+            $scope.show.confirmThanks = false;
+        }
+
+        $scope.show.close = true; // only show close button (home, not confirm) on web
+        $scope.show.signin = false;
+        $scope.show.register = false;
+    }
+
+    function setShowSplash(property, bool) {
+        if (property instanceof Array) {
+            _.each(property, function(prop) {
+                $scope.show[prop] = bool;
+            });
+        } else {
+            $scope.show[property] = bool;
+        }
+    }
+
+    function splashNext() {
+        // login or create account, depending on context
+
+        userManager.signup.error = undefined;
+
+        if ($scope.show.signin) {
+            userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
+                $scope.show.signin = false;
+                $scope.show.splash = false;
+            }, function(err) {
+                addErrorMsg(err || 'Incorrect username or password', 3000);
+            })
+        } else if ($scope.show.register) {
+            var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
+                if (newValue === false) { // signup success
+                    $scope.show.register = false;
+                    $scope.show.splash = false;
+                    watchSignupError(); // clear watch
+                    alertManager.addAlert('info', 'Welcome to Kip!', true);
+                } else if (newValue) { // signup error
+                    addErrorMsg(newValue, 3000);
+                    watchSignupError(); // clear watch
+                }
+            });
+            userManager.signup.signup();
+        }
+    }
+
+    function resendEmail() {
+        if ($scope.user.newEmail === userManager._user.local.email) {
+            sendEmailConfirmation();
+            $scope.show.splash = false;
+            $scope.show.confirm = false;
+            alertManager.addAlert('info', 'Confirmation email sent', true);
+        } else {
+            // update email 1st (user just edited email)
+            var data = {
+                updatedEmail: $scope.user.newEmail
+            };
+            $http.post('api/user/emailUpdate', data).
+            success(function(data) {
+                if (data.err) {
+                    addErrorMsg(data.err, 3000);
+                } else {
+                    sendEmailConfirmation();
+                    $scope.show.splash = false;
+                    $scope.show.confirm = false;
+                    alertManager.addAlert('info', 'Email updated. Confirmation email sent', true);
+                }
+            });
+        }
+    }
+
+    function sendEmailConfirmation() {
+        $http.post('/email/confirm').then(function(sucess) {}, function(error) {});
+    }
+
+    function sendPasswordForgot() {
+        var data = {
+            email: $scope.user.email
+        };
+
+        $http.post('/forgot', data).
+        success(function(data) {
+            $scope.user.email = '';
+        }).
+        error(function(err) {
+            if (err) {
+                addErrorMsg(err, 3000);
+            }
+        });
+    }
+
+    function sendPasswordReset() {
+        var data = {
+            password: $scope.user.newPassword
+        }
+
+        $http.post('/reset/' + $location.path().slice(7), data).
+        success(function(data) {
+            if (data.err) {
+                addErrorMsg(data.err, 3000);
+            } else {
+                $location.path('/');
+                $timeout(function() {
+                    setShowSplash('splash', false);
+                }, 500);
+                alertManager.addAlert('info', 'Password changed successfully', true);
+            }
+        }).
+        error(function(err) {
+            console.log('err: ', err);
+        });
+    }
+
+    function addErrorMsg(message, time) {
+        $scope.errorMsg = message;
+        if (time) {
+            $timeout(function() {
+                $scope.errorMsg = '';
+            }, time);
+        }
+    }
+
+}]);
 'use strict';
 
 angular.module('IF')
     .factory('Announcements', function($resource) {
 
-        return $resource("/api/announcements/:id/:option", {
+        return $resource("/api/announcements/su/:id/:option", {
             id: '@id'
         }, {
             update: {
@@ -24365,29 +24754,6 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
-
-
-app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  $http.post('/email/request_confirm/'+$routeParams.token).
-    success(function(data){
-        console.log('email confirmed');
-        $scope.alerts.addAlert('success','Thanks for confirming your email');
-    }).
-    error(function(err){
-      if (err){
-        $scope.alerts.addAlert('danger',err);
-      }
-    });
-
-
-
-}]);
-
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});
@@ -24805,9 +25171,11 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 		}
 
 		scope.locateAndPan = function() {
-			geoService.trackStart();
+			if (!geoService.tracking) {
+				geoService.trackStart();
+			}
 			var marker = mapManager.getMarker('track');
-			if (marker.lng !== 0 && marker.lat!== 0) {
+			if (marker && marker.lng !== 0 && marker.lat!== 0) {
 				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
 			}
 		};
@@ -24823,7 +25191,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
 	$scope.go = go;
-	$scope.goLandmark = goLandmark;
 	$scope.citySearchResults = {};
 	$scope.groups;
 	$scope.loading = false; // for loading animation on searchbar
@@ -24838,8 +25205,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
 	}
-
-	
 
 	if ($routeParams.worldURL) {
 		navService.show('searchWithinBubble');
@@ -24868,7 +25233,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
-		map.setCenter([latLng.lng, latLng.lat], 13, 'aperture-third');
+		map.setCenter([latLng.lng, latLng.lat], 14, 'aperture-third');
 		$scope.cityName = $routeParams.cityName;
 
 		if ($routeParams.category) {
@@ -24929,25 +25294,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$location.path(path);
 	}
 
-	function goLandmark(landmark) {
-		// get the link for a landmark, when not already in landmark's world
-
-		var data = {
-			params: {
-				m: true
-			}
-		};
-		$http.get('/api/worlds/' + landmark.parentID, data).
-			success(function(result) {
-				if (result.world) {
-					$location.path('/w/' + result.world.id + '/' + landmark.id);
-				}
-			})
-			.error(function(err) {
-				console.log('err: ', err);
-			});
-	}
-
 	function groupResults(data, searchType) {
 		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
 		if (searchType === 'all') {
@@ -24959,7 +25305,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				})
 				.each(function(value, key, list) {
 					list[key] = _.chain(value)
-						// 1st sort puts landamrks in order
+						// 1st sort puts landmarks in order
 						.sortBy(function(result) {
 							return result.name.toLowerCase();
 						})
@@ -25062,10 +25408,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function populateCitySearchView(input, searchType, latLng) {
+
 		var decodedInput = decodeURIComponent(input);
 		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
+
+		if (latLng && latLng.cityName) $scope.cityName = latLng.cityName;
 
 		$scope.cityShow = {
 			category: false,
@@ -25093,38 +25442,50 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						result = _.groupBy(result, 'world');
 						$scope.citySearchResults.bubbles = result.true;
 						$scope.citySearchResults.landmarks = result.false;
+						var markers = [];
 
-						// add bubble markers
+						// bubble markers
 						_.each($scope.citySearchResults.bubbles, function(bubble) {
-							map.addMarker(bubble._id, {
+							var marker = {
 								lat: bubble.loc.coordinates[1],
 								lng: bubble.loc.coordinates[0],
 								draggable: false,
 								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50.png',
-									iconSize: [35, 67],
-									iconAnchor: [17, 67],
-									popupAnchor: [0, -40]
-								}
-							});
+									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconSize: [24, 24],
+									iconAnchor: [11, 11],
+									popupAnchor: [0, -12]
+								},
+								_id: bubble._id
+							};
+							markers.push(marker);
 						});
 
-						// add landmark markers
+						// landmark markers
 						_.each($scope.citySearchResults.landmarks, function(landmark) {
-							map.addMarker(landmark._id, {
+							var marker = {
 								lat: landmark.loc.coordinates[1],
 								lng: landmark.loc.coordinates[0],
 								draggable: false,
-								// message: '<a ng-click="goLandmark(landmark)"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+								message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50_selected.png',
-									iconSize: [35, 67],
-									iconAnchor: [17, 67],
-									popupAnchor: [0, -40]
-								}
-							});
+									iconUrl: 'img/marker/landmarkMarker_23.png',
+									iconSize: [23, 23],
+									iconAnchor: [11, 11],
+									popupAnchor: [0, -4]
+								},
+								// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
+								_id: landmark._id + (new Date().getTime())
+							}
+							markers.push(marker);
 						});
+
+						// add markers and set aperture
+						mapManager.addMarkers(markers);
+						if (markers.length > 0) {
+							mapManager.setCenterFromMarkersWithAperture(markers, apertureService.state);
+						}
 
 					} else {
 						$scope.citySearchResults = [];
@@ -25139,7 +25500,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			map.removeAllMarkers();
 		}
 
-		
 	}
 
 	function updateMap() {
@@ -25619,17 +25979,16 @@ console.log($scope.landmark.category);
 });
 
 function goToMark() {
-
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	aperture.set('third');
 	map.removeAllMarkers();
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			iconAnchor = [17.5, 60],
-			iconSize = [35, 67],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			alt = null;
 
 	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
@@ -25645,7 +26004,7 @@ function goToMark() {
 		lng: $scope.landmark.loc.coordinates[0],
 		draggable:false,
 		message:$scope.landmark.name,
-  	icon: {
+	  	icon: {
 			iconUrl: landmarkIcon,
 			iconSize: iconSize,
 			iconAnchor: iconAnchor,
@@ -26046,11 +26405,11 @@ function loadWorld() {
 				lat: $scope.world.loc.coordinates[1],
 				lng: $scope.world.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: 'img/marker/bubbleMarker_24.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
+					iconSize: [24, 24], 
+					iconAnchor: [11, 11],
+					popupAnchor:[0, -12]
 				},
 				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
@@ -26186,7 +26545,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 			scope.clearTextSearch = function() {
 				if (scope.mode === 'city') {
-					scope.populateCitySearchView(defaultText, 'generic');
 					var indexText = $location.path().indexOf('/text/');
 					var indexCategory = $location.path().indexOf('/category/');
 					if (indexText > -1) {
@@ -26194,11 +26552,13 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					} else if (indexCategory > -1) {
 						$location.path($location.path().slice(0, indexCategory), false);
 					}
+					scope.populateCitySearchView(defaultText, 'generic');
+				} else if (scope.mode === 'home') {
+					// scroll page here toks
 				} else {
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
 						$location.path('/w/' + scope.world.id + '/search', false);
-						mapManager.removeAllMarkers();
 					}
 					categoryWidgetService.selectedIndex = null;
 					floorSelectorService.showFloors = false;
@@ -26231,6 +26591,10 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 				}
 				$('.search-cat input').focus();
 
+				if (scope.mode === 'home') {
+					// scroll page here toks
+				}
+
 				// close floor selector
 				floorSelectorService.showFloors = false;
 			}
@@ -26243,11 +26607,11 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					}
 
 					if (scope.mode === 'city') {
-						var latLng = {};
-						var cityName;
 
 						// get user's current location on every search
 						scope.loading = true;
+
+						// cache of 23s and timeout of 3s
 						geoService.getLocation(23*1000, 3*1000).then(function(location) {
 							var data = {
 								params: {
@@ -26258,11 +26622,15 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 							};
 							$http.get('/api/geolocation', data).
 								success(function(locInfo) {
-									latLng.lat = locInfo.lat;
-									latLng.lng = locInfo.lng;
-									cityName = locInfo.cityName;
-									scope.populateCitySearchView(scope.text, 'text', latLng);
-									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: locInfo.timestamp
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', locationData);
 									scope.loading = false;
 								}).
 								error(function(err) {
@@ -26278,11 +26646,15 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 							};
 							$http.get('/api/geolocation', data).
 								success(function(locInfo) {
-									latLng.lat = locInfo.lat;
-									latLng.lng = locInfo.lng;
-									cityName = locInfo.cityName;
-									scope.populateCitySearchView(scope.text, 'text', latLng);
-									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: locInfo.timestamp
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', locationData);
 									scope.loading = false;
 								}).
 								error(function(err) {
@@ -26291,6 +26663,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 								})
 						})
 						
+					} else if (scope.mode == 'home') {
+						// route to city search toks. get IP location of no?
 					} else {
 						if (inSearchView()) {
 							scope.populateSearchView(scope.text, 'text');
@@ -26304,7 +26678,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 					// deselect active category
 					categoryWidgetService.selectedIndex = null;
-
 				}
 			}
 
@@ -27081,11 +27454,11 @@ function addWorldMarker() {
 		lat: $scope.world.loc.coordinates[1],
 		lng: $scope.world.loc.coordinates[0],
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
+			iconUrl: 'img/marker/bubbleMarker_24.png',
 			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor:[0, -40]
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:[0, -12]
 		},
 		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 	});
@@ -27402,12 +27775,12 @@ function lowestLandmarkFloor(tempMarkers) {
 
 function markerFromLandmark(landmark) {
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			shadowAnchor = [4, -3],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+			shadowAnchor = [1, -1],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 

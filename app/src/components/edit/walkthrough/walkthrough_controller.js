@@ -393,8 +393,8 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 								lat: tempLat,
 								lng: tempLng,
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50.png',
-									iconSize: [35, 67]
+									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconSize: [24, 24]
 								},
 								draggable: true
 							}}});		

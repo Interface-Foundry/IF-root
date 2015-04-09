@@ -22,21 +22,6 @@
 				loading="loading"
 				mode="'city'"></cat-search-bar>
 
-			<!-- old category widget -->
-			<!-- <div class="marble-page" 
-				ng-if="style.widgets.category && show.generic">
-				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
-					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
-				Categories
-				</header>
-				<category-widget ng-if="::style.widgets.category"
-					aperture="off"
-					categories="world.landmarkCategories"
-					style="style"
-					populate-search-view="populateSearchView"
-					world="world"></category-widget>
-			</div> -->
-
 			<!-- bubbles -->
 			<div class="bubble-group" ng-if="cityShow.text || cityShow.category">
 				<header class="bubble-group-label">Bubbles: {{ citySearchResults.bubbles.length || 'no' }} results</header>
@@ -56,7 +41,7 @@
 				<ul class="bubble-list">
 					<li class="bubble-list-item" 
 						ng-repeat="landmark in citySearchResults.landmarks track by $index"
-						ng-click="goLandmark(landmark)">
+						ng-click="go('w/' + landmark.parentName + '/' + landmark.id)">
 							<img if-src="{{ landmark.avatar }}" class="bubble-list-item-img">
 							<span>{{ landmark.name }}</span> 
 					</li>
@@ -66,15 +51,6 @@
 		</div>
 	</div>
 </div>
-
-<category-widget ng-if="::style.widgets.category"
-	ng-show="aperture.state === 'aperture-full'"
-	class="category-map-view-scroll"
-	aperture="full"
-	categories="world.landmarkCategories"
-	style="style"
-	populate-search-view="populateSearchView"
-	world="world"></category-widget>
 
 <user-location class="if-animate"
 	style="style" 

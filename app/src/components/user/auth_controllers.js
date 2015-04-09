@@ -185,25 +185,3 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
-
-
-app.controller('ConfirmedEmailCtrl', ['$scope', '$http', '$location', 'apertureService', 'alertManager', '$routeParams', function ($scope, $http, $location, apertureService, alertManager, $routeParams) {
-  $scope.alerts = alertManager;
-  $scope.aperture = apertureService;  
-
-  $scope.aperture.set('off');
-
-  $http.post('/email/request_confirm/'+$routeParams.token).
-    success(function(data){
-        console.log('email confirmed');
-        $scope.alerts.addAlert('success','Thanks for confirming your email');
-    }).
-    error(function(err){
-      if (err){
-        $scope.alerts.addAlert('danger',err);
-      }
-    });
-
-
-
-}]);

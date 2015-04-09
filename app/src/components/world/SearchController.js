@@ -6,7 +6,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
 	$scope.go = go;
-	$scope.goLandmark = goLandmark;
 	$scope.citySearchResults = {};
 	$scope.groups;
 	$scope.loading = false; // for loading animation on searchbar
@@ -21,8 +20,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
 	}
-
-	
 
 	if ($routeParams.worldURL) {
 		navService.show('searchWithinBubble');
@@ -51,7 +48,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
-		map.setCenter([latLng.lng, latLng.lat], 13, 'aperture-third');
+		map.setCenter([latLng.lng, latLng.lat], 14, 'aperture-third');
 		$scope.cityName = $routeParams.cityName;
 
 		if ($routeParams.category) {
@@ -112,25 +109,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		$location.path(path);
 	}
 
-	function goLandmark(landmark) {
-		// get the link for a landmark, when not already in landmark's world
-
-		var data = {
-			params: {
-				m: true
-			}
-		};
-		$http.get('/api/worlds/' + landmark.parentID, data).
-			success(function(result) {
-				if (result.world) {
-					$location.path('/w/' + result.world.id + '/' + landmark.id);
-				}
-			})
-			.error(function(err) {
-				console.log('err: ', err);
-			});
-	}
-
 	function groupResults(data, searchType) {
 		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
 		if (searchType === 'all') {
@@ -142,7 +120,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 				})
 				.each(function(value, key, list) {
 					list[key] = _.chain(value)
-						// 1st sort puts landamrks in order
+						// 1st sort puts landmarks in order
 						.sortBy(function(result) {
 							return result.name.toLowerCase();
 						})
@@ -245,10 +223,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function populateCitySearchView(input, searchType, latLng) {
+
 		var decodedInput = decodeURIComponent(input);
 		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
+
+		if (latLng && latLng.cityName) $scope.cityName = latLng.cityName;
 
 		$scope.cityShow = {
 			category: false,
@@ -276,38 +257,50 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						result = _.groupBy(result, 'world');
 						$scope.citySearchResults.bubbles = result.true;
 						$scope.citySearchResults.landmarks = result.false;
+						var markers = [];
 
-						// add bubble markers
+						// bubble markers
 						_.each($scope.citySearchResults.bubbles, function(bubble) {
-							map.addMarker(bubble._id, {
+							var marker = {
 								lat: bubble.loc.coordinates[1],
 								lng: bubble.loc.coordinates[0],
 								draggable: false,
 								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50.png',
-									iconSize: [35, 67],
-									iconAnchor: [17, 67],
-									popupAnchor: [0, -40]
-								}
-							});
+									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconSize: [24, 24],
+									iconAnchor: [11, 11],
+									popupAnchor: [0, -12]
+								},
+								_id: bubble._id
+							};
+							markers.push(marker);
 						});
 
-						// add landmark markers
+						// landmark markers
 						_.each($scope.citySearchResults.landmarks, function(landmark) {
-							map.addMarker(landmark._id, {
+							var marker = {
 								lat: landmark.loc.coordinates[1],
 								lng: landmark.loc.coordinates[0],
 								draggable: false,
-								// message: '<a ng-click="goLandmark(landmark)"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+								message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubble-marker-50_selected.png',
-									iconSize: [35, 67],
-									iconAnchor: [17, 67],
-									popupAnchor: [0, -40]
-								}
-							});
+									iconUrl: 'img/marker/landmarkMarker_23.png',
+									iconSize: [23, 23],
+									iconAnchor: [11, 11],
+									popupAnchor: [0, -4]
+								},
+								// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
+								_id: landmark._id + (new Date().getTime())
+							}
+							markers.push(marker);
 						});
+
+						// add markers and set aperture
+						mapManager.addMarkers(markers);
+						if (markers.length > 0) {
+							mapManager.setCenterFromMarkersWithAperture(markers, apertureService.state);
+						}
 
 					} else {
 						$scope.citySearchResults = [];
@@ -322,7 +315,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			map.removeAllMarkers();
 		}
 
-		
 	}
 
 	function updateMap() {
