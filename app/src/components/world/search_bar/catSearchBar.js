@@ -36,6 +36,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 						$location.path($location.path().slice(0, indexCategory), false);
 					}
 					scope.populateCitySearchView(defaultText, 'generic');
+				} else if (scope.mode === 'home') {
+					// scroll page here toks
 				} else {
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
@@ -71,6 +73,10 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					apertureService.set('off');
 				}
 				$('.search-cat input').focus();
+
+				if (scope.mode === 'home') {
+					// scroll page here toks
+				}
 
 				// close floor selector
 				floorSelectorService.showFloors = false;
@@ -140,6 +146,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 								})
 						})
 						
+					} else if (scope.mode == 'home') {
+						// route to city search toks. get IP location of no?
 					} else {
 						if (inSearchView()) {
 							scope.populateSearchView(scope.text, 'text');
@@ -153,7 +161,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 					// deselect active category
 					categoryWidgetService.selectedIndex = null;
-
 				}
 			}
 

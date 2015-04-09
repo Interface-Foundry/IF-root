@@ -23142,7 +23142,7 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
@@ -23150,6 +23150,7 @@ map.resetMap();
 
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
+$scope.searchBarText = 'Search not working on this page yet' || bubbleSearchService.defaultText;
 
 $scope.select = function(bubble) {
 	$location.path('w/'+bubble.id);
@@ -26212,6 +26213,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 						$location.path($location.path().slice(0, indexCategory), false);
 					}
 					scope.populateCitySearchView(defaultText, 'generic');
+				} else if (scope.mode === 'home') {
+					// scroll page here toks
 				} else {
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
@@ -26247,6 +26250,10 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					apertureService.set('off');
 				}
 				$('.search-cat input').focus();
+
+				if (scope.mode === 'home') {
+					// scroll page here toks
+				}
 
 				// close floor selector
 				floorSelectorService.showFloors = false;
@@ -26316,6 +26323,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 								})
 						})
 						
+					} else if (scope.mode == 'home') {
+						// route to city search toks. get IP location of no?
 					} else {
 						if (inSearchView()) {
 							scope.populateSearchView(scope.text, 'text');
@@ -26329,7 +26338,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 					// deselect active category
 					categoryWidgetService.selectedIndex = null;
-
 				}
 			}
 
