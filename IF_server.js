@@ -197,22 +197,35 @@ require('./components/IF_auth/auth_routes.js')(app, passport, landmarkSchema); /
 //---- Sending Feedback via Email -----//
 //-------------------------------------//
 app.post('/feedback', function(req, res) {
-    if (req.body.emailText) {
-        var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
-        var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+	if (!req.body.feedbackText) {
+		// nohing to report
+		return res.send(200);
+	}
 
-        var mailOptions = {
-            to: feedbackTo,
-            from: 'IF Bubbl <mail@bubbl.li>',
-            subject: 'Bubbl Feedback',
-            text: sText
-        };
-        mailerTransport.sendMail(mailOptions, function(err) {
-            res.send('email sent');
-        });
-    } else {
-        res.send(500, 'bad email parameters');
-    }
+	// sanitize inputs
+	var s = /[^\w\s\,\.\@\?\!]/gi;
+	var emailSubject = "Feedback - " + req.body.feedbackCategory.replace(s, '');
+	var emailBody = "from: $user\n\nemotion: $emotion\n\ntext: $text"
+		.replace('$user', req.user._id)
+		.replace('$emotion', req.body.feedbackEmotion)
+		.replace('$text', req.body.feedbackText)
+		.replace(s, '');
+
+    var feedbackTo = 'peter@interfacefoundry.com';
+
+    var mailOptions = {
+        to: feedbackTo,
+        from: 'IF Bubbl <mail@bubbl.li>',
+        subject: emailSubject,
+        text: emailBody
+    };
+
+    mailerTransport.sendMail(mailOptions, function(err) {
+		if (err) { 
+			console.error(err);
+		}
+        res.send('email sent');
+    });
 });
 
 

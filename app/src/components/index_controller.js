@@ -68,15 +68,37 @@ $scope.logout = function() {
 	userManager.logout();
 }
 
-$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
+$scope.feedbackCategories = [
+	{category: "map request"},
+	{category: "complaint"},
+	{category: "feature idea"},
+	{category: "other suggestion"}
+];
+
+$scope.feedbackEmotions = [
+	{emotion: "excited"},
+	{emotion: "angry"},
+	{emotion: "confused"}
+];
+
+$scope.feedbackCategory = "";
+$scope.feedbackEmotion = "";
+$scope.feedbackText = "";
+
+$scope.sendFeedback = function() { //sends feedback email. move to dialog directive
+
+	debugger;
 
     var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
-    }
+		feedbackCategory: $scope.feedbackCategory || "no category",
+		feedbackEmotion: $scope.feedbackEmotion || "no emotion",
+		feedbackText: $scope.feedbackText || null
+    };
 
     $http.post('feedback', data).
       success(function(data){
         console.log('feedback sent');
+		dialog.close();
         alert('Feedback sent, thanks!');
 
       }).
