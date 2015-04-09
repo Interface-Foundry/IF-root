@@ -2533,42 +2533,69 @@ app.get('/api/worlds/:id', function(req, res) {
                                             });
                                             console.log('no submissions yet.', contestSubmissions);
                                         } else {
-                                            var latestDate = contestSubmissions.reduce(function(a, b) {
-                                                return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
-                                            })
-                                            var newestSubmission = contestSubmissions.filter(function(submission) {
-                                                if (submission.timestamp == latestDate) {
-                                                    return submission;
-                                                }
-                                            })
+                                            var newestSubmission = [];
 
-                                            // console.log('newestSubmission is: ', newestSubmission)
+                                            if (contestSubmissions.length == 1) {
+                                                newestSubmission.push(contestSubmissions[0])
+                                            } else {
+
+                                                var latestDate = contestSubmissions.reduce(function(a, b) {
+                                                    return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                })
+
+                                                newestSubmission = contestSubmissions.filter(function(submission) {
+                                                    if (submission.timestamp == latestDate) {
+                                                        return submission;
+                                                    }
+                                                })
+                                            }
+
+
+                                            console.log('newestSubmission is: ', newestSubmission)
                                             var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
                                                     if (submission.hashtag !== newestSubmission[0].hashtag) {
                                                         return submission;
                                                     }
                                                 })
                                                 // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
-                                            var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
-                                                    return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
-                                                })
-                                                // console.log('otherLatestDate is: ', otherLatestDate)
-                                            var otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
+
+                                            var otherNewestSubmission = [];
+                                            if (otherHashTagSubmissions.length == 0) {
+                                                otherNewestSubmission.push(null);
+                                            } else if (otherHashTagSubmissions.length == 1) {
+                                                otherNewestSubmission.push(otherHashTagSubmissions[0])
+                                            } else {
+                                                var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
+                                                        return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                    })
+                                                    // console.log('otherLatestDate is: ', otherLatestDate)
+                                                otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
                                                     if (submission.timestamp == otherLatestDate) {
                                                         return submission;
                                                     }
                                                 })
-                                                // console.log('otherNewestSubmission is: ', otherNewestSubmission)
+                                            }
+                                            console.log('otherNewestSubmission is: ', otherNewestSubmission)
                                             var latestTwoUniqueSubmissions = [];
-                                            latestTwoUniqueSubmissions.push(newestSubmission[0]);
-                                            latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
-                                            // console.log('  latestTwoUniqueSubmissions is: ',   latestTwoUniqueSubmissions)
-                                            var submits = latestTwoUniqueSubmissions.map(function(el) {
-                                                return {
-                                                    hashtag: el.hashtag,
-                                                    imgURL: el.imgURL
-                                                }
-                                            })
+
+                                            if (otherNewestSubmission[0] !== null) {
+                                                latestTwoUniqueSubmissions.push(newestSubmission[0]);
+                                                latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
+                                                console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
+                                                var submits = latestTwoUniqueSubmissions.map(function(el) {
+                                                    return {
+                                                        hashtag: el.hashtag,
+                                                        imgURL: el.imgURL
+                                                    }
+                                                })
+                                            } else {
+                                                var submits = newestSubmission.map(function(el) {
+                                                    return {
+                                                        hashtag: el.hashtag,
+                                                        imgURL: el.imgURL
+                                                    }
+                                                })
+                                            }
 
                                             console.log('hitting user logged in and latest two submissions is: ', submits)
 
@@ -2579,7 +2606,7 @@ app.get('/api/worlds/:id', function(req, res) {
                                                 world: data
                                             });
 
-                                        }//end of if contestSubmissions not empty
+                                        } //end of if contestSubmissions not empty
                                     } //end of if user has submissions field
 
                                     //if user logged in but no submissions
