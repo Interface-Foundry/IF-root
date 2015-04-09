@@ -38,10 +38,10 @@
             <div class="contest-entry-pic">
               <img ng-src="{{entry.imgURL}}">
             </div>
-            <div ng-repeat="tag in entry.contestTags">
-              <p></p>
+            <div>
+            Tags:
+              <span ng-repeat="tag in entry.contestTag">{{tag.tag}}<span ng-if="!$last">, </span></span>
             </div>
-            <p>Tag: {{entry.contestTag[0].tag}}</p>
             <p>Distance: {{entry.distanceFromWorld | number}} km</p>
             <p>{{::entry.userTime | date:'medium'}}</p>
             <p>Region: {{entry.region}}</p>

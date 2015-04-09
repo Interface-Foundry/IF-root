@@ -1477,7 +1477,13 @@ margin-bottom: 4px;
 		cursor: pointer;
 		-webkit-transform: translate(-70%, -70%);
 		transform: translate(-70%, -70%);
+	
+		&.plus-one-visible {
+			background: #ffffff url('img/icons/camera-tiny-light.png') no-repeat 10px 12px;
+			background-size: 23.76px 19.2px;
+		}
 	}
+
 
 	.hashtag--upload {
 		position: relative;
@@ -1496,6 +1502,24 @@ margin-bottom: 4px;
 	.verifyUpload {
 		width: 100%;
 		height: 100%;
+	}
+}
+
+.plus-one {
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  height: 16px;
+  line-height: 1;
+  position: absolute;
+  right: -11px;
+  top: 169px;
+  font-size: 1.1em;
+  width: 16px;
+  z-index: 1;
+
+	@media only screen and (max-width: 768px) {
+		top: 129px;
 	}
 }
 
