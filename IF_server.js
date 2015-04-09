@@ -2542,7 +2542,7 @@ app.get('/api/worlds/:id', function(req, res) {
                                                 }
                                             })
 
-                                            // console.log('newestSubmission is: ', newestSubmission)
+                                            console.log('newestSubmission is: ', newestSubmission)
                                             var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
                                                     if (submission.hashtag !== newestSubmission[0].hashtag) {
                                                         return submission;

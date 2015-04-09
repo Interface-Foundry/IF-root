@@ -3,6 +3,7 @@
 		<img style="display:block;" src="img/icons/ic_redeem_black_18dp.png" width="16" height="16">
 	</div>
 	{{contest.name}}
+
 </header>
 
 <article class="marble-page-content">
@@ -47,6 +48,8 @@
 
 			</div>
 
+			<span class="plus-one"
+						ng-show="wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]">+</span>
 			<div class="camera"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
@@ -94,12 +97,15 @@
 
 			</div>
 
+			<span class="plus-one"
+						ng-show="wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]">+</span>
 			<div class="camera"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
 				ng-file-drop
 				data-accept="image/*">
 				<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[1].tag)"></div>
+
 			</div>
 
 			<div class="hashtag--upload">
