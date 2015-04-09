@@ -31,7 +31,7 @@ router.use(function(req, res, next) {
         }
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
-        console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
+        // console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
         return next();
     })
 
@@ -42,8 +42,8 @@ router.get('/', function(req, res) {
     var response = res;
 
     if (req.query.hasLoc == 'true') {
-        req.geoloc.lat = req.query.lat;
-        req.geoloc.lng = req.query.lng;
+        req.geoloc.lat = parseFloat(req.query.lat);
+        req.geoloc.lng = parseFloat(req.query.lng);
 
         //MAPQUEST REQUEST
         request({
@@ -85,7 +85,7 @@ router.get('/', function(req, res) {
                                 data.address.city = 'New York City'
                             }
                             req.geoloc.src = 'mapquest';
-                            console.log('hitting mapquest data.address.city', data)
+                            // console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
                         } else if (data.address.village) {
                             req.geoloc.cityName = data.address.village;

@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', '$rootScope', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
-	function($cacheFactory, $q, $rootScope, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -9,7 +9,6 @@ var worldTree = {
 }
 
 var alert = alertManager;
-$rootScope.currentLocation = {};
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -142,9 +141,13 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					$rootScope.currentLocation.lat = locInfo.lat;
-					$rootScope.currentLocation.lng = locInfo.lng;
-					$rootScope.currentLocation.cityName = locInfo.cityName;
+					var locationData = {
+						lat: locInfo.lat,
+						lng: locInfo.lng,
+						cityName: locInfo.cityName,
+						timestamp: Date.now()
+					};
+					geoService.updateLocation(locationData);
 				}).
 				error(function(err) {
 					console.log('er: ', err);
@@ -159,12 +162,16 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					$rootScope.currentLocation.lat = locInfo.lat;
-					$rootScope.currentLocation.lng = locInfo.lng;
-					$rootScope.currentLocation.cityName = locInfo.cityName;
+					var locationData = {
+						lat: locInfo.lat,
+						lng: locInfo.lng,
+						cityName: locInfo.cityName,
+						timestamp: Date.now()
+					};
+					geoService.updateLocation(locationData);
 				}).
 				error(function(err) {
-					console.log('er: ', err);
+					console.log('err: ', err);
 				})
 			deferred.reject(reason);
 		})

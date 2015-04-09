@@ -213,15 +213,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		}
 	}
 
-	function populateCitySearchView(input, searchType, latLng, city) {
-		// city (optional)
+	function populateCitySearchView(input, searchType, latLng) {
 
 		var decodedInput = decodeURIComponent(input);
 		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
 
-		$scope.cityName = city || $scope.cityName;
+		if (latLng && latLng.cityName) $scope.cityName = latLng.cityName;
+
 		$scope.cityShow = {
 			category: false,
 			text: false,

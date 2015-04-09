@@ -17128,9 +17128,12 @@ angular.module('tidepoolsServices')
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
-					//lat,
-					//lng
-					//timestamp  
+					/**
+					 * lat:
+					 * lng:
+					 * timestamp:
+					 * cityName:
+					 */ 
 				},
 				inProgress: false,
 				requestQueue: [],
@@ -17150,13 +17153,20 @@ angular.module('tidepoolsServices')
 			// start tracking when in full aperture (and retail bubble or world search) and stop otherwise
 			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
 				if (bubbleTypeService.get() === 'Retail' || $routeParams.cityName) {
-					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+					if (newVal === 'aperture-full' && !geoService.tracking) {
 						geoService.trackStart();
-					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+					} else if (newVal !== 'aperture-full' && geoService.tracking) {
 						geoService.trackStop();
 					}
 				}
 			});	
+
+			geoService.updateLocation = function(locationData) {
+				geoService.location.lat = locationData.lat;
+				geoService.location.lng = locationData.lng;
+				geoService.location.cityName = locationData.cityName;
+				geoService.location.timestamp = locationData.timestamp;
+			};
 			 
 			geoService.getLocation = function(maxAge, timeout) {
 				var deferred = $q.defer();
@@ -17219,7 +17229,6 @@ angular.module('tidepoolsServices')
 					geoService.trackStop();
 				}
 				if (navigator.geolocation && window.DeviceOrientationEvent) {
-
 					// marker
 					mapManager.addMarker('track', {
 						lat: pos.lat || geoService.location.lat || 0,
@@ -19125,8 +19134,8 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 }
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', '$rootScope', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
-	function($cacheFactory, $q, $rootScope, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -19135,7 +19144,6 @@ var worldTree = {
 }
 
 var alert = alertManager;
-$rootScope.currentLocation = {};
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
@@ -19268,9 +19276,13 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					$rootScope.currentLocation.lat = locInfo.lat;
-					$rootScope.currentLocation.lng = locInfo.lng;
-					$rootScope.currentLocation.cityName = locInfo.cityName;
+					var locationData = {
+						lat: locInfo.lat,
+						lng: locInfo.lng,
+						cityName: locInfo.cityName,
+						timestamp: Date.now()
+					};
+					geoService.updateLocation(locationData);
 				}).
 				error(function(err) {
 					console.log('er: ', err);
@@ -19285,12 +19297,16 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					$rootScope.currentLocation.lat = locInfo.lat;
-					$rootScope.currentLocation.lng = locInfo.lng;
-					$rootScope.currentLocation.cityName = locInfo.cityName;
+					var locationData = {
+						lat: locInfo.lat,
+						lng: locInfo.lng,
+						cityName: locInfo.cityName,
+						timestamp: Date.now()
+					};
+					geoService.updateLocation(locationData);
 				}).
 				error(function(err) {
-					console.log('er: ', err);
+					console.log('err: ', err);
 				})
 			deferred.reject(reason);
 		})
@@ -23389,7 +23405,7 @@ app.factory('navService', [function() {
 	}
 
 }]);
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
+app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($routeParams, $location, $http, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -23410,13 +23426,35 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
 					} else {
-						var data = {
-							// default to NYC if no data yet
-							lat: encodeDotFilterFilter($rootScope.currentLocation.lat || 40.7508, 'encode'),
-							lng: encodeDotFilterFilter($rootScope.currentLocation.lng || -73.9890, 'encode'),
-							cityName: $rootScope.currentLocation.cityName || 'New York City Slow'
-						};
-						$location.path('/c/' + data.cityName + '/search/' + 'lat' + data.lat + '&lng' + data.lng);
+						if (geoService.location.cityName) {
+							var locationData = {
+								lat: geoService.location.lat,
+								lng: geoService.location.lng,
+								cityName: geoService.location.cityName
+							};
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+						} else { // use IP
+							var data = {
+								params: {
+									hasLoc: false
+								}
+							};
+							$http.get('/api/geolocation', data).
+								success(function(locInfo) {
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: Date.now()
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+								}).
+								error(function(err) {
+									console.log('err: ', err);
+								});
+						}
+						
 					}
 					apertureService.set('third');
 				}
@@ -24845,15 +24883,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		}
 	}
 
-	function populateCitySearchView(input, searchType, latLng, city) {
-		// city (optional)
+	function populateCitySearchView(input, searchType, latLng) {
 
 		var decodedInput = decodeURIComponent(input);
 		
 		// set text in catSearchBar
 		$scope.searchBarText = decodedInput;
 
-		$scope.cityName = city || $scope.cityName;
+		if (latLng && latLng.cityName) $scope.cityName = latLng.cityName;
+
 		$scope.cityShow = {
 			category: false,
 			text: false,
@@ -26038,8 +26076,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					}
 
 					if (scope.mode === 'city') {
-						var latLng = {};
-						var cityName;
 
 						// get user's current location on every search
 						scope.loading = true;
@@ -26055,11 +26091,15 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 							};
 							$http.get('/api/geolocation', data).
 								success(function(locInfo) {
-									latLng.lat = locInfo.lat;
-									latLng.lng = locInfo.lng;
-									cityName = locInfo.cityName;
-									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', latLng, cityName);
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: locInfo.timestamp
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', locationData);
 									scope.loading = false;
 								}).
 								error(function(err) {
@@ -26075,11 +26115,15 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 							};
 							$http.get('/api/geolocation', data).
 								success(function(locInfo) {
-									latLng.lat = locInfo.lat;
-									latLng.lng = locInfo.lng;
-									cityName = locInfo.cityName;
-									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', latLng, cityName);
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: locInfo.timestamp
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', locationData);
 									scope.loading = false;
 								}).
 								error(function(err) {

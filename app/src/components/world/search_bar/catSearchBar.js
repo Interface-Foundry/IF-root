@@ -84,8 +84,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					}
 
 					if (scope.mode === 'city') {
-						var latLng = {};
-						var cityName;
 
 						// get user's current location on every search
 						scope.loading = true;
@@ -101,11 +99,15 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 							};
 							$http.get('/api/geolocation', data).
 								success(function(locInfo) {
-									latLng.lat = locInfo.lat;
-									latLng.lng = locInfo.lng;
-									cityName = locInfo.cityName;
-									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', latLng, cityName);
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: locInfo.timestamp
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', locationData);
 									scope.loading = false;
 								}).
 								error(function(err) {
@@ -121,11 +123,15 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 							};
 							$http.get('/api/geolocation', data).
 								success(function(locInfo) {
-									latLng.lat = locInfo.lat;
-									latLng.lng = locInfo.lng;
-									cityName = locInfo.cityName;
-									$location.path('/c/' + cityName + '/search/' + 'lat' + encodeDotFilterFilter(latLng.lat, 'encode') + '&lng' + encodeDotFilterFilter(latLng.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', latLng, cityName);
+									var locationData = {
+										lat: locInfo.lat,
+										lng: locInfo.lng,
+										cityName: locInfo.cityName,
+										timestamp: locInfo.timestamp
+									};
+									geoService.updateLocation(locationData);
+									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', locationData);
 									scope.loading = false;
 								}).
 								error(function(err) {
