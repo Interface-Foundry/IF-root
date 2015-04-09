@@ -2507,25 +2507,25 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 
 
 
-                if (req.query.m == "true") {
+                // if (req.query.m == "true") {
 
-                    db.collection('landmarks').findOne({
-                        _id: objectId(req.params.id),
-                        world: true
-                    }, function(err, data) {
-                        if (data) {
-                            combineQuery(data, res);
-                        } else {
-                            console.log('540: world doesnt exist');
-                            console.log(err);
-                            res.send({
-                                err: '540: world doesnt exist'
-                            });
-                        }
-                    });
-                }
-                //return by IF id
-                else {
+                //     db.collection('landmarks').findOne({
+                //         _id: objectId(req.params.id),
+                //         world: true
+                //     }, function(err, data) {
+                //         if (data) {
+                //             combineQuery(data, res);
+                //         } else {
+                //             console.log('540: world doesnt exist');
+                //             console.log(err);
+                //             res.send({
+                //                 err: '540: world doesnt exist'
+                //             });
+                //         }
+                //     });
+                // }
+                // //return by IF id
+                // else {
                     db.collection('landmarks').findOne({
                         id: req.params.id,
                         world: true
@@ -2539,7 +2539,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                             });
                         }
                     });
-                }
+                // 
 
 
 
@@ -2556,6 +2556,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                                 }
                                 if (style) {
 
+             
                                     //IS THIS BUBBLE RETAIL?
                                     if (data.category == 'Retail') {
 
@@ -2686,8 +2687,8 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                                                 });
                                             }
                                         })
-                                    } //END OF RETAIL
-                                    if (!req.user && data.category !== 'Retail') {
+                                    } //END OF IF RETAIL
+                                    else {
                                         // console.log('hitting user NOT logged and NOT retail store ', data)
                                         res.send({
                                             contest: null,
@@ -2697,17 +2698,6 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                                         });
 
                                     }
-
-                                    // //If user not logged in and world is not retail
-                                    // else if (!req.user && data.category !== 'Retail') {
-
-                                    //     res.send({
-                                    //         contest: null,
-                                    //         submissions: null,
-                                    //         style: style,
-                                    //         world: data
-                                    //     });
-                                    // }
                                 }
                             }); //END OF STYLESCHEMA FIND
 
