@@ -4922,7 +4922,9 @@ $routeProvider.
 		when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/'});
+    when('/404', {templateUrl: '/components/404/404.html', controller: 'FourOhFourController'}).
+
+    otherwise({redirectTo: '/'});
       
 $locationProvider.html5Mode({
 	enabled: true
@@ -19296,6 +19298,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		World.get({id: id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
+				$location.path('/404');
 	 		} else {
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
@@ -20953,6 +20956,16 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 
 
+'use strict';
+
+app.controller('FourOhFourController', FourOhFourController);
+
+FourOhFourController.$inject = ['mapManager', 'apertureService'];
+
+function FourOhFourController(mapManager, apertureService) {
+	mapManager.center.zoom = 2;
+	apertureService.set('full')
+}
 'use strict';
 
 app.controller('ContestController', ContestController);

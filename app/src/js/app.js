@@ -119,7 +119,9 @@ $routeProvider.
 		when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
       //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/'});
+    when('/404', {templateUrl: '/components/404/404.html', controller: 'FourOhFourController'}).
+
+    otherwise({redirectTo: '/'});
       
 //@IFDEF WEB
 $locationProvider.html5Mode({
