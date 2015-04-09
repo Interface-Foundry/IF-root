@@ -939,7 +939,7 @@ app.post('/api/build_map', isLoggedIn, function (req, res) {
 
       // after file saved locally, send to IF-Tiler server
       //https://107.170.180.141:3000/api/upload
-      var r = request.post('https://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
+      var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
         if (err) {
             //deleting temp map upload
             if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
