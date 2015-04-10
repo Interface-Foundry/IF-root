@@ -1,0 +1,11 @@
+<div>
+	<ul class="walkthrough-maps">
+		<li class="walkthrough-maps-item u-pointer" 
+			ng-repeat="(key, map) in global.mapThemes"
+			ng-class="{selected: mapThemeSelect == key}"
+			ng-click="selectMapTheme(key)">
+			<img class="walkthrough-maps-img" ng-src="{{map.img}}">
+			<label>{{map.name}}</label>
+		</li>
+	</ul>
+</div>

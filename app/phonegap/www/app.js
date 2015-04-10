@@ -17197,27 +17197,6 @@ function currentWorldService() {
 	}
 }
 angular.module('tidepoolsServices')
-	.factory('dialogs', ['$rootScope', '$compile', 'contest',
-		function($rootScope, $compile, contest) {
-			var dialogs = {
-				dialogTemplate: null
-			} //used to manage different popup dialogs and modals
-
-			dialogs.showDialog = function(name) {
-				dialogs.template = "templates/"+name;
-				dialogs.show = true;
-			}
-
-			dialogs.close = function($event) {
-				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
-					dialogs.show = false;
-					contest.close(new Date); // for wtgt contest
-				}
-			}
-
-			return dialogs;
-		}]);
-angular.module('tidepoolsServices')
 	.factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
 		function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
 			//abstract & promisify geolocation, queue requests.
@@ -21072,6 +21051,72 @@ function ContestController($scope, $routeParams, Contests) {
     });
 	}
 }
+angular.module('tidepoolsServices')
+	.factory('dialogs', ['$rootScope', '$compile', 'contest',
+		function($rootScope, $compile, contest) {
+			var dialogs = {
+				dialogTemplate: null
+			} //used to manage different popup dialogs and modals
+
+			dialogs.showDialog = function(name) {
+				dialogs.template = 'components/dialogs/' + name;
+				dialogs.show = true;
+			}
+
+			dialogs.close = function($event) {
+				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
+					dialogs.show = false;
+					contest.close(new Date); // for wtgt contest
+				}
+			}
+
+			return dialogs;
+		}]);
+app.controller('feedbackController', ['$http', '$location', '$scope', 'alertManager', 'analyticsService', 'dialogs', function($http, $location, $scope, alertManager, analyticsService, dialogs) {
+
+  $scope.feedbackCategories = [
+    {category: "map request"},
+    {category: "complaint"},
+    {category: "feature idea"},
+    {category: "other suggestion"}
+  ];
+
+  $scope.feedbackEmotions = [
+    {emotion: "excited"},
+    {emotion: "angry"},
+    {emotion: "confused"}
+  ];
+
+  $scope.feedbackCategory = {};
+  $scope.feedbackEmotion = {};
+
+  $scope.sendFeedback = function($event) { //sends feedback email. move to dialog directive
+
+    var data = {
+      feedbackCategory: $scope.feedbackCategory.category || "no category",
+      feedbackEmotion: $scope.feedbackEmotion.emotion || "no emotion",
+      feedbackText: $scope.feedbackText || null,
+	  currentUrl: $location.absUrl()
+    };
+
+    $http.post('feedback', data).
+      success(function(data){
+        console.log('feedback sent');
+		alertManager.addAlert('success', "Feedback sent, thanks!", true);
+      }).
+      error(function(err){
+        console.log('there was a problem');
+      });
+
+	analyticsService.log("feedback", data);
+
+    dialogs.show = false;
+    $scope.feedbackCategory = null;
+    $scope.feedbackEmotion = null;
+    $scope.feedbackText = null;
+  };
+}]);
+
 app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
 	return {
 		restrict: 'EA',
@@ -23462,22 +23507,6 @@ $scope.logout = function() {
 	userManager.logout();
 }
 
-$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
-
-    var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
-    }
-
-    $http.post('feedback', data).
-      success(function(data){
-        console.log('feedback sent');
-        alert('Feedback sent, thanks!');
-
-      }).
-      error(function(err){
-        console.log('there was a problem');
-    });
-};
 
 /*
 $scope.sessionSearch = function() { 

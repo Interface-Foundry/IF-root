@@ -68,22 +68,6 @@ $scope.logout = function() {
 	userManager.logout();
 }
 
-$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
-
-    var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
-    }
-
-    $http.post('feedback', data).
-      success(function(data){
-        console.log('feedback sent');
-        alert('Feedback sent, thanks!');
-
-      }).
-      error(function(err){
-        console.log('there was a problem');
-    });
-};
 
 /*
 $scope.sessionSearch = function() { 

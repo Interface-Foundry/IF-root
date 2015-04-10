@@ -6,6 +6,7 @@ build.xml
 .project
 .settings
 .idea/*
+*.swp
 
 # Compiled source #
 ###################
