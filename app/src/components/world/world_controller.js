@@ -124,8 +124,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 
 		 if ($scope.world.name) {
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 } //TODO: cleanup on $destroy
-		 
+		 }
+
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
 			$scope.description = true;

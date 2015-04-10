@@ -4841,6 +4841,10 @@ var checkAdminStatus = function(userManager, $location) {
 	});
 }
 
+var updateTitle = function($rootScope) {
+  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+}
+
     //================================================
     
     //================================================
@@ -4881,7 +4885,7 @@ var checkAdminStatus = function(userManager, $location) {
     //================================================
 $routeProvider.
 
-  when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
   when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
@@ -25417,6 +25421,9 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
+	if ($scope.world.name) {
+		angular.extend($rootScope, {globalTitle: $scope.world.name});
+	}
 	map.loadBubble(data.world);
 	getLandmark(data.world);
 }, function(error) {
@@ -26839,8 +26846,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 
 		 if ($scope.world.name) {
 			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 } //TODO: cleanup on $destroy
-		 
+		 }
+
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
 			$scope.description = true;

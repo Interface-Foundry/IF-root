@@ -27,6 +27,10 @@ var checkAdminStatus = function(userManager, $location) {
 	});
 }
 
+var updateTitle = function($rootScope) {
+  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+}
+
     //================================================
     
     //================================================
@@ -69,7 +73,7 @@ var checkAdminStatus = function(userManager, $location) {
     //================================================
 $routeProvider.
 
-  when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
   when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).

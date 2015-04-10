@@ -21,6 +21,9 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
+	if ($scope.world.name) {
+		angular.extend($rootScope, {globalTitle: $scope.world.name});
+	}
 	map.loadBubble(data.world);
 	getLandmark(data.world);
 }, function(error) {
