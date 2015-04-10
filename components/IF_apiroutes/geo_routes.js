@@ -12,6 +12,7 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     geoipURL = config.geoipURL //local freegeoip server, will change based on current IP;
 
 router.use(function(req, res, next) {
+    var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
     req.geoloc = {};
 
     //Because the request library also uses 'res' we'll rename the response here
@@ -20,15 +21,19 @@ router.use(function(req, res, next) {
     //if hasLoc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
     //for now use the less accurate ip based cityName
     request({
-        url: geoipURL + req.ip
+        url: geoipURL,
+        qs: {
+            q: ip
+        }
     }, function(err, res, body) {
         if (err) console.log(err);
-        // console.log('body is..', body)
         var data = JSON.parse(body);
         if (!data.city) {
             req.geoloc.cityName = 'My Location'
+            console.log('ip-based data.city does not exist, data is: ', data)
         } else {
             req.geoloc.cityName = data.city;
+            // console.log('data.city is working properly, data is: ', data)
         }
         req.geoloc.lat = data.latitude;
         req.geoloc.lng = data.longitude;
@@ -43,8 +48,7 @@ router.get('/', function(req, res) {
     var response = res;
 
     if (req.query.hasLoc == 'true') {
-        req.geoloc.lat = parseFloat(req.query.lat);
-        req.geoloc.lng = parseFloat(req.query.lng);
+
 
         //MAPQUEST REQUEST
         request({
@@ -57,23 +61,33 @@ router.get('/', function(req, res) {
                 var data = JSON.parse(body);
 
                 //MAPBOX SECTION
-                if (err || res.statusCode == 303) {
+                if (err || res.statusCode !== 200) {
                     if (err) console.log(err);
-                    console.log('Mapquest didnt work. Querying Mapbox instead..', res.statusCode);
+                    console.log('Mapquest didnt work. Querying Mapbox instead..');
+                    // console.log('Mapbox URL is: ', mapboxURL + req.query.lng + ',' + req.query.lat + '.json');
                     request({
                         url: mapboxURL + req.query.lng + ',' + req.query.lat + '.json',
                         qs: {
                             access_token: mapboxKey
                         }
-                    }, function(err, body) {
-                        if (err) console.log(err);
+                    }, function(err, res, body) {
+                        if (err) console.log('Mapbox err is:', err);
                         var data = JSON.parse(body);
-                        if (data.features[1].text) {
+
+                        if (data.features.length == 0) {
+                            console.log('mapbox could not find location name, using ip-based location.', req.geoloc)
+                            req.geoloc.src = 'ip-based'
+                        } else if (data.features[1].text) {
                             req.geoloc.cityName = data.features[1].text;
+                            //fix this
+                            req.geoloc.lat = parseFloat(req.query.lat);
+                            req.geoloc.lng = parseFloat(req.query.lng);
+
                             req.geoloc.src = 'mapbox';
                             console.log(req.geoloc)
                             response.send(req.geoloc);
                         } else {
+                            console.log('Mapbox could not find location name, using ip-based location.', req.geoloc)
                             req.geoloc.src = 'ip-based'
                         }
                     })
@@ -84,6 +98,8 @@ router.get('/', function(req, res) {
                         if (data.address.city) {
                             if (data.address.city == 'NYC') {
                                 data.address.city = 'New York City'
+                                req.geoloc.lat = parseFloat(req.query.lat);
+                                req.geoloc.lng = parseFloat(req.query.lng);
                             }
                             req.geoloc.src = 'mapquest';
                             // console.log('hitting mapquest data.address.city', data)
@@ -92,16 +108,24 @@ router.get('/', function(req, res) {
                             req.geoloc.cityName = data.address.village;
                             console.log('hitting mapquest data.address.village', data)
                             req.geoloc.src = 'mapquest';
+                            req.geoloc.lat = parseFloat(req.query.lat);
+                            req.geoloc.lng = parseFloat(req.query.lng);
                         } else if (data.address.town) {
                             req.geoloc.cityName = data.address.town;
                             console.log('hitting mapquest data.address.town', data)
                             req.geoloc.src = 'mapquest';
+                            req.geoloc.lat = parseFloat(req.query.lat);
+                            req.geoloc.lng = parseFloat(req.query.lng);
                         } else {
                             console.log('mapquest could not find location name', data)
+                            req.geoloc.lat = parseFloat(req.query.lat);
+                            req.geoloc.lng = parseFloat(req.query.lng);
                             req.geoloc.src = 'ip-based';
                         }
                     } else {
                         req.geoloc.src = 'ip-based'
+                        req.geoloc.lat = parseFloat(req.query.lat);
+                        req.geoloc.lng = parseFloat(req.query.lng);
                         console.log('mapquest could not find location name', data)
                     }
                     console.log(req.geoloc)

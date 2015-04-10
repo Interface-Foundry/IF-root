@@ -13,7 +13,7 @@ function requiredProcessEnv(name) {
 // All configurations will extend these options
 // ============================================
 var all = {
-  env: process.env.NODE_ENV,
+  env: process.env.NODE_ENV
 
   //EXAMPLE DEFAULT CONFIG SETTINGS (ACROSS ALL ENVIRONMENTS)
 
@@ -71,3 +71,9 @@ var all = {
 module.exports = _.extend(
   all,
   require('./' + process.env.NODE_ENV + '.js') || {});
+
+
+
+
+
+
