@@ -26645,7 +26645,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
-app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', function($location, $http, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter) {
+app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter) {
 
 	return {
 		restrict: 'E',
@@ -26664,6 +26664,7 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 
 			var defaultText = bubbleSearchService.defaultText;
 			var noResultsText = bubbleSearchService.noResultsText;
+			var scrollState = false;
 
 			// change text in search bar whenever $scope.searchBarText changes in searchController
 			if (inSearchView()) {
@@ -26684,7 +26685,6 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					}
 					scope.populateCitySearchView(defaultText, 'generic');
 				} else if (scope.mode === 'home') {
-					// scroll page here toks
 				} else {
 					if (inSearchView()) {
 						scope.populateSearchView(defaultText, 'generic');
@@ -26700,15 +26700,30 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 			}
 
 			scope.resetDefaultSearch = function() {
-				if (scope.text === '') {
-					scope.text = defaultText;
-				}
-				if (apertureService.state !== 'aperture-full') {
-					apertureService.set('third');
-				}
+				/**
+				 * timeout allows clearTextSearch() to be called 1st on click X. that way, the text is * changed to default before scroll or aperture change (in which case the click event * to clearTextSearch() might not be recognized) 
+				 */
+				$timeout(function() {
+					if (scope.text === '') {
+						scope.text = defaultText;
+					}
+
+					if (scope.mode === 'home' && scrollState) {
+						$('.wrap').animate({
+							scrollTop: 0
+						}, 400);
+						scrollState = false;
+					} else {
+						if (apertureService.state !== 'aperture-full') {
+							apertureService.set('third');
+						}
+					}
+				}, 100);
 			}
 
 			scope.select = function() {
+
+				// set text
 				if (scope.text === defaultText) {
 					scope.text = '';
 				} else if (scope.text.indexOf(noResultsText) > -1) {
@@ -26716,14 +26731,23 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 					scope.text = scope.text.slice(0, scope.text.length - 13);
 				}
 
-				if (apertureService.state !== 'aperture-full') {
-					apertureService.set('off');
+				// set aperture or scroll
+				if (scope.mode === 'home' && !scrollState) {
+					var offset = $('.search-cat').offset().top;
+					var navHeight = parseInt($('.main-nav').css('height'));
+					var marginTop = parseInt($('.search-cat').css('margin-top'));
+					$('.wrap').animate({
+						// subtract nav bar height and searchbar's margin-top
+						scrollTop: offset - (navHeight + marginTop)
+					}, 400);
+					scrollState = true;
+				} else {
+					if (apertureService.state !== 'aperture-full') {
+						apertureService.set('off');
+					}
 				}
-				$('.search-cat input').focus();
 
-				if (scope.mode === 'home') {
-					// scroll page here toks
-				}
+				$('.search-cat input').focus();
 
 				// close floor selector
 				floorSelectorService.showFloors = false;
@@ -26788,7 +26812,8 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 						}
 					}
 					
-					$('.search-cat input').blur();
+					// don't blur on home page or you get scrolling effect while the page changes
+					if (scope.mode !== 'home') $('.search-cat input').blur();
 
 					// deselect active category
 					categoryWidgetService.selectedIndex = null;
