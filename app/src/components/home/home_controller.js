@@ -6,7 +6,7 @@ map.resetMap();
 
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
-$scope.searchBarText = 'Search not working on this page yet' || bubbleSearchService.defaultText;
+$scope.searchBarText = bubbleSearchService.defaultText;
 
 $scope.select = function(bubble) {
 	$location.path('w/'+bubble.id);

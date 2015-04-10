@@ -23470,7 +23470,7 @@ map.resetMap();
 
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
-$scope.searchBarText = 'Search not working on this page yet' || bubbleSearchService.defaultText;
+$scope.searchBarText = bubbleSearchService.defaultText;
 
 $scope.select = function(bubble) {
 	$location.path('w/'+bubble.id);
@@ -25183,7 +25183,7 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 	}
 
 }]);
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', 'analyticsService', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter, analyticsService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -26639,32 +26639,16 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 								})
 						}, function(err) {
 							// get location from IP
-							var data = {
-								params: {
-									hasLoc: false
-								}
-							};
-							$http.get('/api/geolocation', data).
-								success(function(locInfo) {
-									var locationData = {
-										lat: locInfo.lat,
-										lng: locInfo.lng,
-										cityName: locInfo.cityName,
-										timestamp: locInfo.timestamp
-									};
-									geoService.updateLocation(locationData);
-									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', locationData);
-									scope.loading = false;
-								}).
-								error(function(err) {
-									console.log('er: ', err);
-									scope.loading = false;
-								})
+							goToLocationFromIP();
 						})
 						
 					} else if (scope.mode == 'home') {
 						// route to city search toks. get IP location of no?
+						if (geoService.location.cityName) {
+							$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
+						} else {
+							goToLocationFromIP();
+						}
 					} else {
 						if (inSearchView()) {
 							scope.populateSearchView(scope.text, 'text');
@@ -26710,6 +26694,31 @@ app.directive('catSearchBar', ['$location', '$http', 'apertureService', 'bubbleS
 			function inSearchView() {
 				return $location.path().indexOf('search') > -1;
 				// else in world view
+			}
+
+			function goToLocationFromIP() {
+				var data = {
+					params: {
+						hasLoc: false
+					}
+				};
+				$http.get('/api/geolocation', data).
+					success(function(locInfo) {
+						var locationData = {
+							lat: locInfo.lat,
+							lng: locInfo.lng,
+							cityName: locInfo.cityName,
+							timestamp: locInfo.timestamp
+						};
+						geoService.updateLocation(locationData);
+						$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+						scope.populateCitySearchView(scope.text, 'text', locationData);
+						scope.loading = false;
+					}).
+					error(function(err) {
+						console.log('er: ', err);
+						scope.loading = false;
+					});
 			}
 			
 		}

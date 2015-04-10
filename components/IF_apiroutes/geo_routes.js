@@ -28,6 +28,8 @@ router.use(function(req, res, next) {
     }, function(err, res, body) {
         if (err) console.log(err);
         var data = JSON.parse(body);
+
+        console.log('data is..', data)
         if (!data.city) {
             req.geoloc.cityName = 'My Location'
             console.log('ip-based data.city does not exist, data is: ', data)
@@ -102,7 +104,7 @@ router.get('/', function(req, res) {
                                 req.geoloc.lng = parseFloat(req.query.lng);
                             }
                             req.geoloc.src = 'mapquest';
-                            // console.log('hitting mapquest data.address.city', data)
+                            console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
                         } else if (data.address.village) {
                             req.geoloc.cityName = data.address.village;
