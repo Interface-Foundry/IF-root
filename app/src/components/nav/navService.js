@@ -8,7 +8,10 @@ app.factory('navService', [function() {
 		searchWithinBubble: false // search within a bubble (all, text, category)
 	};
 
+	var backPages = -1; // for back button, num pages to go back. useful for 404 page
+
 	return {
+		backPages: backPages,
 		status: status,
 		reset: reset,
 		show: show

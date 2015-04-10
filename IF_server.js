@@ -2566,10 +2566,14 @@ app.get('/api/worlds/:id', function(req, res) {
     }
     //return by IF id
     else {
+        console.log('ID', req.params.id)
+        console.log('LOWERCASE', req.params.id.toLowerCase())
         db.collection('landmarks').findOne({
             id: req.params.id.toLowerCase(),
             world: true
         }, function(err, data) {
+            console.log('ERR', err)
+            console.log('DATA', data)
             if (data) {
                 combineQuery(data, res);
             } else {

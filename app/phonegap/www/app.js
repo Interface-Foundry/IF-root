@@ -21246,12 +21246,18 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 app.controller('FourOhFourController', FourOhFourController);
 
-FourOhFourController.$inject = ['mapManager', 'apertureService'];
+FourOhFourController.$inject = ['$scope', 'mapManager', 'apertureService', 'navService'];
 
-function FourOhFourController(mapManager, apertureService) {
+function FourOhFourController($scope, mapManager, apertureService, navService) {
 	mapManager.center.zoom = 2;
 	mapManager.center.lat = 0;
 	apertureService.set('full');
+
+	navService.backPages = -2;
+
+	$scope.$on('$destroy', function() {
+		navService.backPages = -1;
+	});
 }
 'use strict';
 
@@ -23770,7 +23776,8 @@ $scope.go = function(path) {
 	
 $scope.goBack = function() {
 	navService.reset();
-	$window.history.back();
+	// $window.history.back();
+	$window.history.go(navService.backPages);
 }
 
 $scope.logout = function() {
@@ -23880,7 +23887,10 @@ app.factory('navService', [function() {
 		searchWithinBubble: false // search within a bubble (all, text, category)
 	};
 
+	var backPages = -1; // for back button, num pages to go back. useful for 404 page
+
 	return {
+		backPages: backPages,
 		status: status,
 		reset: reset,
 		show: show

@@ -61,7 +61,8 @@ $scope.go = function(path) {
 	
 $scope.goBack = function() {
 	navService.reset();
-	$window.history.back();
+	// $window.history.back();
+	$window.history.go(navService.backPages);
 }
 
 $scope.logout = function() {
