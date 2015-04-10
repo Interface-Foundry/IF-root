@@ -11,7 +11,7 @@ var userManager = {
 	userRes: $resource('/api/updateuser'),
 	//@ENDIF
 	//@IFDEF PHONEGAP
-	userRes: $resource('http://45.55.182.139:1337/api/updateuser'),
+	userRes: $resource('http://45.55.182.139:2997/api/updateuser'),
 	//@ENDIF
 	loginStatus: false,
 	login: {},
