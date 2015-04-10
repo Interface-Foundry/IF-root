@@ -1,0 +1,130 @@
+<div class="row">
+<div class="col-xs-12 col-md-7">
+<div class="form-group">
+	<label for="name">Name</label>
+	<input type="text" class="form-control"
+							name="name"
+							ng-model="world.name">
+</div>
+</div>
+<div class="col-xs-12 col-md-5">
+<div class="form-group">
+	<label for="category">Kind <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.kind"></span></label>
+	<select type="text" class="form-control"
+							name="category"
+							ng-model="world.category"
+							ng-options="kind.name as kind.name for kind in kinds">
+		<option>--Choose--</option>
+	</select>
+</div>
+</div>
+</div>
+<div class="form-group">
+	<label for="summary">Summary <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.summary"></span></label>
+	<input type="text" class="form-control"
+						name="summary"
+						ng-model="world.summary"
+						ng-maxlength="120">
+</div>
+<div class="form-group">
+	<label for="description">Description <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.description"></span></label>
+	<text-angular ng-model="world.description"></text-angular>
+</div>
+
+
+<div class="row">
+	<div class="col-xs-12 col-sm-6">
+		<div class="form-group">
+			<label>World Picture <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.world_icon"></span></label>
+			<div class="well world-icon">
+				<button type="button" class="close" ng-show="uploadFinished || world.avatar" ng-click="setUploadFinished(false, 'world')">
+					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+				</button>
+				<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onWorldIconSelect($files)" ng-hide="uploadFinished || world.avatar">
+					<span class="glyphicon glyphicon-picture"></span>
+					<label>Upload</label>
+				</button>
+				<img width="150" class="circle-pic" ng-show="uploadFinished || world.avatar" ng-src="{{world.avatar}}"> 
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<div class="form-group">
+			<label for="hashtag">Hashtag <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.hashtag"></span></label>
+			<div class="hashtag"><input type="text" class="form-control"
+								name="hashtag"
+								ng-model="world.resources.hashtag">
+			</div>
+		</div>
+		<div class="form-group">
+
+			<label>Landmark Categories <span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.landmarkcategories"></span></label> 
+
+			<label>Enable</label> <input type="checkbox" ng-model="temp.showLandmarks" 
+			ng-show="world.landmarkCategories.length === 0"/>
+
+
+			 <div class="form-group" ng-show="temp.showLandmarks || world.landmarkCategories.length > 0">	
+				<div class="form-group">
+					<div class="well world-icon">
+						<button type="button" class="close" ng-show="uploadFinishedLandmark" ng-click="setUploadFinished(false, 'landmark')">
+							<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+						</button>
+						<button class="btn btn-default circle-pic" ng-file-select ng-file-change="onLandmarkCategoryIconSelect($files)" ng-hide="uploadFinishedLandmark">
+							<span class="glyphicon glyphicon-picture" ></span>
+						</button>
+						<img width="80" class="circle-pic" ng-show="uploadFinishedLandmark" ng-src="{{temp.LandmarkCatAvatar}}"> 
+					</div>
+				</div>	
+
+				<label>Collectable Present</label> <input type="checkbox" ng-model="temp.landmarkPresent"/>
+
+				<div class="input-group">
+
+					<input type="text" name="temp.LandmarkCategory" ng-model="temp.LandmarkCategory"  class="form-control">
+					<span class="input-group-btn">
+						<button class="btn btn-default" type="button" ng-click="addLandmarkCategory()">Add</button>
+					</span>
+				</div>
+				<ul>
+					<li ng-repeat="landmarkCategory in world.landmarkCategories" class="clearfix">
+						<span ng-show="landmarkCategory.present" class="glyphicon glyphicon-gift" ></span> {{landmarkCategory.name}} <span ng-show="landmarkCategory.avatar"><img class="circle-pic" width="30" ng-src="{{landmarkCategory.avatar}}"></span> 
+						<button type="button" class="close" ng-click="removeLandmarkCategory($index)"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					</li>
+				</ul>
+			  </div>
+
+		</div>
+	</div>
+</div>
+
+<button class="btn btn-info" ng-click="setStartTime()" ng-hide="world.time.start">Add a Start Time</button>
+<div ng-show="world.time.start">
+	<div class="form-group form-inline">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> Start Time <span class="glyphicon glyphicon-info-sign info"></span></label>
+		
+		<button type="button" class="close" ng-click="world.time.start = undefined">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+		</button><br>
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="world.time.start" ng-change="world.time.start=world.time.start.toISO8601String()" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="world.time.start" ng-change="world.time.start=world.time.start.toISO8601String()" minute-step="1" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+	<button class="btn btn-info" ng-click="setEndTime()" ng-hide="world.time.end">Add End Time</button>
+	<div class="form-group form-inline" ng-show="world.time.end">
+		<label class="control-label"><i class="glyphicon glyphicon-calendar"></i> End Time <span class="glyphicon glyphicon-info-sign info"></span></label>
+		
+		<button type="button" class="close" ng-click="world.time.end = undefined">
+			<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+		</button><br> 
+		<div class="form-group">
+			<input type="text" size="10" class="form-control" ng-model="world.time.end" ng-change="world.time.end=world.time.end.toISO8601String()" data-autoclose="1" placeholder="Date" placement="top-left" dateType="iso" bs-datepicker>
+		</div>
+		<div class="form-group">
+			<input type="text" size="8" class="form-control" ng-model="world.time.end" ng-change="world.time.end=world.time.end.toISO8601String()" minute-step="1" placeholder="Time" placement="top-left" timeType="iso" bs-timepicker>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,119 @@
+<div class="row">
+	<div ng-repeat="(key, map) in mapThemes" class="col-xs-12 col-sm-6">
+		<label>{{::map.name}}</label>
+		<div class="edit-map-card"
+			ng-class="{selected: mapThemeSelect == key}">
+			<img ng-src="{{map.img}}" class="img-responsive"
+				ng-click="selectMapTheme(key)">
+		</div>
+	</div>
+</div>
+
+<label>Upload your own Map 
+	<span class="glyphicon glyphicon-info-sign info" bs-tooltip="tooltips.local_map"></span>
+</label> 
+
+<br>
+
+<button class="btn btn-info" 
+	ng-click="addMapPlaceholder()"
+	ng-show="mapIsBuilt(false)">Add a Local Map</button>
+<button class="btn btn-info" 
+	ng-click="addMapPlaceholder()"
+	ng-show="!mapIsBuilt(false)"
+	disabled>Add a Local Map</button>
+<span class="glyphicon glyphicon-info-sign info" 
+	bs-tooltip="tooltips.add_local_map_disabled"
+	ng-show="!mapIsBuilt(false)"></span>
+
+<div>
+	<li class="panel panel-default u-marginTop20 multifloor"
+		ng-repeat="map in world.style.maps.localMapArray">
+
+		<div class="panel-heading u-pointer"
+			ng-click="selectMap(map)">
+			<span class="panel-title">
+				<h3 class="u-inline">{{ map.floor_num }}</h3> {{ map.floor_name }}
+				<button type="button" 
+					class="close"
+					ng-click="removeMap(map); $event.stopPropagation()">
+					<span aria-hidden="true">&times;</span>
+					<span class="sr-only"></span>
+				</button>
+				<img src="/img/icons/ic_check_green_24px.png" 
+					class="check isGreen"
+					ng-show="map != selectedMap && map.localMapName">
+			</span>
+		</div>
+
+		<div class="panel-body"
+			ng-show="map == selectedMap">
+			<div class="form-group form-inline">
+
+				<div ng-class="{'u-opacity35': mapIsUploaded(map)}">
+
+					<div class="form-group col-md-3 col-sm-12 col-xs-12">
+						<label>Floor</label>
+						<br>
+						<div>
+							<button class="floorButton upButton"
+								ng-click="increaseFloor(map)"></button>
+							<input type="text" 
+								size="3" 
+								class="form-control" 
+								ng-model="map.floor_num"
+								ng-readonly="mapIsUploaded(map)">
+							<button class="floorButton 	downButton"
+								ng-click="decreaseFloor(map)"></button>
+						</div>
+					</div>
+
+					<div class="form-group col-md-4 col-sm-12 col-xs-12">
+						<label>Floor Name</label>
+						<br>
+						<input type="text" 
+							size="12" 
+							class="form-control u-formDown48" 
+							ng-model="map.floor_name"
+							ng-readonly="mapIsUploaded(map)">
+					</div>
+
+				</div>
+				
+				<div class="uploadActions--wrapper col-md-5 col-sm-12 col-xs-12 u-formDown48">
+					<button class="btn btn-info uploadActions" 
+						ng-file-select 
+						ng-file-change="onLocalMapSelect($files, map.floor_num, map.floor_name)"
+						ng-hide="mapIsUploaded(map)">Upload Map</button>
+					<button class="btn btn-warning uploadActions" 
+						ng-click="buildLocalMap()"
+						ng-show="map.temp_upload_path && !building">Build Map</button>
+					<div class="uploadActions"
+						ng-show="map.localMapName">
+						<img src="/img/icons/ic_check_green_24px.png" class="check isGreen">
+						<span class="u-green">Map Built</span>
+					</div>
+					<div class="loading-spinner uploadActions"
+						ng-show="building">
+						<div class="lspin1"></div>
+						<div class="lspin2"></div>
+					</div>
+				</div>
+
+				<div class="col-xs-12 u-marginTop20"
+					ng-show="map.temp_upload_path">
+					<span>Adjust map size</span>
+					<input type="range"
+						min="0.006" 
+						max="5" 
+						step="0.006" 
+						value="1"
+						ng-model="temp.scale">
+				</div>
+			</div>
+		</div>
+		
+	</li>
+	<div id="scrollToBottom"></div>
+</div>
+
