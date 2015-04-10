@@ -1840,39 +1840,39 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                     us.presents = req.body.presents;
                 }
 
-                //check for unique profileID before save
-                if (req.body.profileID) {
+                // //check for unique profileID before save
+                // if (req.body.profileID) {
 
-                    //if missing profileID, try to fill it in using name
-                    if (req.body.profileID == 'undefined' && req.body.name) {
+                //     //if missing profileID, try to fill it in using name
+                //     if (req.body.profileID == 'undefined' && req.body.name) {
 
-                        uniqueProfileID(req.body.name, function(output) {
-                            us.profileID = output;
-                            saveUser();
-                        });
-                    } else if (req.body.profileID == 'undefined' && us.name) {
+                //         uniqueProfileID(req.body.name, function(output) {
+                //             us.profileID = output;
+                //             saveUser();
+                //         });
+                //     } else if (req.body.profileID == 'undefined' && us.name) {
 
-                        uniqueProfileID(us.name, function(output) {
-                            us.profileID = output;
-                            saveUser();
-                        });
-                    } else if (req.body.profileID == 'undefined') {
-                        req.body.profileID = 'user';
+                //         uniqueProfileID(us.name, function(output) {
+                //             us.profileID = output;
+                //             saveUser();
+                //         });
+                //     } else if (req.body.profileID == 'undefined') {
+                //         req.body.profileID = 'user';
 
-                        uniqueProfileID(req.body.profileID, function(output) {
-                            us.profileID = output;
-                            saveUser();
-                        });
-                    } else {
-                        us.profileID = req.body.profileID;
-                        saveUser();
-                    }
+                //         uniqueProfileID(req.body.profileID, function(output) {
+                //             us.profileID = output;
+                //             saveUser();
+                //         });
+                //     } else {
+                //         us.profileID = req.body.profileID;
+                //         saveUser();
+                //     }
 
-                }
-                //or just save if no unique userID
-                else {
+                // }
+                // //or just save if no unique userID
+                // else {
                     saveUser();
-                }
+                // }
 
                 function saveUser() {
                     us.save(function(err) {
