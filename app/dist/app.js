@@ -20978,7 +20978,7 @@ angular.module('tidepoolsServices')
 
 			return dialogs;
 		}]);
-app.controller('feedbackController', ['$http', '$scope', 'dialogs', function($http, $scope, dialogs) {
+app.controller('feedbackController', ['$http', '$scope', 'alertManager', 'dialogs', function($http, $scope, alertManager, dialogs) {
 
   $scope.feedbackCategories = [
     {category: "map request"},
@@ -21004,7 +21004,7 @@ app.controller('feedbackController', ['$http', '$scope', 'dialogs', function($ht
     $http.post('feedback', data).
       success(function(data){
         console.log('feedback sent');
-        alert('Feedback sent, thanks!');
+		alertManager.addAlert('success', "Feedback sent, thanks!", true);
       }).
       error(function(err){
         console.log('there was a problem');
@@ -21016,6 +21016,7 @@ app.controller('feedbackController', ['$http', '$scope', 'dialogs', function($ht
     $scope.feedbackText = null;
   };
 }]);
+
 app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
 	return {
 		restrict: 'EA',
