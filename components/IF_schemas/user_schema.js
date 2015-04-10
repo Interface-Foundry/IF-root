@@ -83,6 +83,8 @@ var userSchema = mongoose.Schema({
     },
     profileID: {
         type: String,
+        unique: true,
+        lowercase: true,
         index: true
     },
     permissions: [{

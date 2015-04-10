@@ -10,7 +10,8 @@ var landmarkSchema = new Schema({
     name: String,
     id: {
         type: String,
-        unique: true
+        unique: true,
+        lowercase:true
     },
     world: Boolean,
     parentID: {
