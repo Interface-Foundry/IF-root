@@ -1,4 +1,4 @@
-app.controller('feedbackController', ['$http', '$scope', 'alertManager', 'dialogs', function($http, $scope, alertManager, dialogs) {
+app.controller('feedbackController', ['$http', '$location', '$scope', 'alertManager', 'dialogs', function($http, $location, $scope, alertManager, dialogs) {
 
   $scope.feedbackCategories = [
     {category: "map request"},
@@ -18,7 +18,8 @@ app.controller('feedbackController', ['$http', '$scope', 'alertManager', 'dialog
     var data = {
       feedbackCategory: $scope.feedbackCategory.category || "no category",
       feedbackEmotion: $scope.feedbackEmotion.emotion || "no emotion",
-      feedbackText: $scope.feedbackText || null
+      feedbackText: $scope.feedbackText || null,
+	  currentUrl: $location.absUrl()
     };
 
     $http.post('feedback', data).
