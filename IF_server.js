@@ -203,7 +203,8 @@ app.post('/feedback', function(req, res) {
 	}
 
 	// sanitize inputs
-	var s = /[^\w\s\,\.\@\?\!]/gi;
+	//var s = /[^\w\s\,\.\@\?\!]/gi;
+	var s = /(<([^>]+)>)/ig; // just strip out HTML stuff
 	var emailSubject = "Feedback - " + req.body.feedbackCategory.replace(s, '');
 	var emailBody = "from: $user\n\nemotion: $emotion\n\ntext: $text"
 		.replace('$user', req.user._id)
@@ -211,7 +212,7 @@ app.post('/feedback', function(req, res) {
 		.replace('$text', req.body.feedbackText)
 		.replace(s, '');
 
-    var feedbackTo = 'peter@interfacefoundry.com';
+    var feedbackTo = 'hello@interfacefoundry.com';
 
     var mailOptions = {
         to: feedbackTo,
