@@ -79,6 +79,8 @@ var mongoose = require('mongoose'),
     worldchatSchema = require('./components/IF_schemas/worldchat_schema.js'),
     visitSchema = require('./components/IF_schemas/visit_schema.js'),
     anonUserSchema = require('./components/IF_schemas/anon_user_schema.js'),
+    contestSchema = require('./components/IF_schemas/contest_schema.js'),
+    contestEntrySchema = require('./components/IF_schemas/contestEntry_schema.js'),
     analyticsSchema = require('./components/IF_schemas/analytics_schema.js'),
     monguurl = require('monguurl');
 
@@ -105,6 +107,13 @@ var express = require('express'),
     app = module.exports.app = express(),
     // cors = require('cors'),
     db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+
+
+//===== SET UP ENVIRONMENT =====//
+
+// Set default node environment to development
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+var config = require('./config');
 
 //express compression
 var oneDay = 86400000;
@@ -159,12 +168,12 @@ var redisClient = require('./redis.js');
 
 // Sesh
 app.use(session({
-	store: new RedisStore({
-		client: redisClient
-	}),
+    store: new RedisStore({
+        client: redisClient
+    }),
     secret: 'rachelwantstomakecakebutneedseggs',
-	resave: true,
-	saveUninitialized: true
+    resave: true,
+    saveUninitialized: true
 }));
 
 app.use(passport.initialize());
@@ -237,55 +246,80 @@ app.post('/feedback', function(req, res) {
 
 
 
+
+//-------------------------------------//
+//---- LOAD FREEGEOIP SERVER -----//
+//-------------------------------------//
+
+var sys = require('sys')
+var exec = require('child_process').exec;
+
+function puts(error, stdout, stderr) {
+    sys.puts(stdout)
+}
+
+if (process.env.NODE_ENV == 'production') {
+    console.log('Running in production mode, running production freegeoip server', process.env.NODE_ENV)
+    exec("freegeoip", puts);
+}
+
+
+
+
 //---------------------------------------//
 //-------- Send Email Confirmation ------//
 //---------------------------------------//
 
 
-app.post('/email/confirm', function(req, res, next) {
-	console.log("entering /email/confirm");
+
+app.post('/email/confirm', isLoggedIn, function(req, res, next) {
+    console.log("entering /email/confirm");
 
     if (!validateEmail(req.user.local.email)) {
-		console.log('bad email address: ' + req.user.local.email);
-		next('Please use a real email address');
-		return;
-	}
+        console.log('bad email address: ' + req.user.local.email);
+        next('Please use a real email address');
+        return;
+    }
 
-	if (!req.headers.host) {
-		console.log("Cannot send confirmation mail without req.headers.host");
-		next("Can not send confirmation mail: no host");
-		return;
-	}
+    if (!req.headers.host) {
+        console.log("Cannot send confirmation mail without req.headers.host");
+        next("Can not send confirmation mail: no host");
+        return;
+    }
 
     crypto.randomBytes(20, function(err, buf) {
         var token = buf.toString('hex');
-		var email = req.user.local.email;
+        var email = req.user.local.email;
 
-        User.findOne({'local.email': email},	function(err, user) {
+        User.findOne({
+            'local.email': email
+        }, function(err, user) {
             if (!user) {
                 next('No account with that email address exists, or you signed up only through Facebook/Twitter');
-				return;
+                return;
             }
 
             user.local.confirmEmailToken = token;
             user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
             user.save(function(err) {
-				if (err) {
-					return next(err);
-				}
 
-				var mailOptions = {
-					to: email,
-					from: 'Kip <noreply@kipapp.co>',
-					subject: 'Kip – Confirm your email',
-					text: 'Thanks for signing up for Kip! \n\n' +
-                          'Please click on the following link to confirm your email:\n\n' +
-                          'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+                if (err) {
+                    return next(err);
+                }
+
+                var mailOptions = {
+                    to: email,
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip – Confirm your email',
+                    text: 'Thanks for signing up for Kip! \n\n' +
+                        'Please click on the following link to confirm your email:\n\n' +
+                        'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
                 };
                 mailerTransport.sendMail(mailOptions, function(err) {
-					if (err) {
-						return next(err);
-					}
+                    if (err) {
+                        return next(err);
+                    }
+
                     console.log('sent confirmation email');
                     res.send("｡◕‿◕｡");
                 });
@@ -300,6 +334,7 @@ app.post('/email/confirm', function(req, res, next) {
 });
 
 
+
 app.post('/email/request_confirm/:token', function(req, res) {
 
     User.findOne({
@@ -309,7 +344,9 @@ app.post('/email/request_confirm/:token', function(req, res) {
         }
     }, function(err, user) {
         if (!user) {
-            res.send('Email confirm token is invalid or has expired.');
+            res.send({
+                err: 'Email confirm token is invalid or has expired.'
+            });
         } else {
             user.local.confirmedEmail = true;
             user.local.confirmEmailToken = undefined;
@@ -377,12 +414,12 @@ app.post('/forgot', function(req, res, next) {
         if (err) return next(err);
         res.redirect('/#/forgot');
     });
-
-    function validateEmail(email) {
-        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(email);
-    }
 });
+
+function validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
 
 app.post('/resetConfirm/:token', function(req, res) {
     User.findOne({
@@ -444,10 +481,15 @@ app.post('/reset/:token', function(req, res) {
                 req.flash('info', 'An e-mail has been sent to ' + user.local.email + ' with further instructions.');
                 done(err, 'done');
             });
-
         }
     ], function(err) {
-        res.send('password changed successfully');
+        if (err) {
+            res.send({
+                err: err
+            });
+        } else {
+            res.send('password changed successfully');
+        }
     });
 });
 
@@ -505,14 +547,14 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
-
 //--- SUPER USER ROUTER ----//
 app.use('/api/announcements', require('./components/IF_superuser/announcement_routes'));
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
 app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
 //--- INSTAGRAM / TWITTER ROUTER ----//
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
-
+//--- IP GEOLOCATION AND NAME ROUTER ----//
+app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
@@ -631,32 +673,17 @@ app.get('/api/bubblesearch/:type', function(req, res, next) {
 
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
+
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
     redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
         res.send('(=^･ｪ･^=)');
+
     });
+
+
 
     // DONE!  then a separate node process dumps the redis cache to db
 
-    //From Stackoverflow:
-    // Create a caching service. This is really the hardest part, but the general flow looks something like this:
-    // make request to cache service.
-    // cache service checks redis for cached object based on query.
-    // cache returns data from redis if it exists OR from mongo if it doesn't exist.
-    // if data didn't already exist in redis or had expired, cache service writes data to redis.
-
-    // client.get(cacheKey, function(err, data) {
-    //     // data is null if the key doesn't exist
-    //     if (err || data === null) {
-    //         mongoose.model('users').find(function(err, users) {
-    //             console.log('Setting cache: ' + cacheKey);
-    //             client.set(cacheKey, users, redis.print);
-    //             res.send(users);
-    //         });
-    //     } else {
-    //         return data;
-    //     }
-    // });
 
 });
 
@@ -665,6 +692,9 @@ app.post('/api/analytics/:action', function(req, res) {
 
 // Save world visitor anonymously
 app.post('/api/visit/create', function(req, res) {
+    if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
 
     if (req.body.worldID) {
         var vs = new visitSchema({
@@ -887,6 +917,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             var count = 0;
             var totalSize = req.headers['content-length'];
             var picorientation;
+            var newentryID = '';
             file.on('data', function(data) {
                 count += data.length;
                 var percentUploaded = Math.floor(count / totalSize * 100);
@@ -906,7 +937,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                             if (err) console.log(err)
-                            console.log('REORIENTED TO 1!')
+
                             fs.readFile(tempPath, function(err, fileData) {
                                 var s3 = new AWS.S3();
                                 s3.putObject({
@@ -922,7 +953,10 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
+
+
                                         //additional content was passed with the image, handle it here
+                                        //Then save the contest entry
                                         if (uploadContents) {
                                             try {
                                                 uploadContents = JSON.parse(uploadContents);
@@ -930,29 +964,97 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 console.log(err);
                                             }
                                             if (uploadContents.type == 'retail_campaign') {
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
+                                                // var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                // uploadContents.description = newString;
+                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
+                                                    //Retrieve new saved contest entry ID
+                                                    newentryID = data
+                                                }); //contest entry, send to bac
                                             }
                                         }
+
+
+                                        //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
+
+                                        var options = {
+                                            url: "https://api.cloudsightapi.com/image_requests",
+                                            headers: {
+                                                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                            },
+                                            qs: {
+                                                'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                'image_request[locale]': 'en-US',
+                                                'image_request[language]': 'en'
+                                            }
+                                        }
+
+                                        request.post(options, function(err, res, body) {
+                                            if (err) console.log(err);
+                                            var data = JSON.parse(body);
+
+                                            var results = {
+                                                status: 'not completed'
+                                            };
+                                            var description = '';
+
+                                            var tries = 0;
+
+                                            async.whilst(
+                                                function() {
+                                                    return (results.status == 'not completed' && tries < 10);
+                                                },
+                                                function(callback) {
+
+                                                    var options = {
+                                                        url: "https://api.cloudsightapi.com/image_responses/" + data.token,
+                                                        headers: {
+                                                            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                        }
+                                                    }
+
+                                                    request(options, function(err, res, body) {
+                                                        if (err) console.log(err);
+                                                        console.log('cloudsight status is..', body)
+                                                        body = JSON.parse(body);
+                                                        if (body.status == 'completed') {
+                                                            results.status = 'completed';
+                                                            description = body.name;
+
+                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                            uploadContents.description = newString;
+
+                                                            contestEntrySchema.findOneAndUpdate({
+                                                                    _id: newentryID
+                                                                }, {
+                                                                    $push: {
+                                                                        contestTag: {
+                                                                            tag: uploadContents.description
+                                                                        }
+                                                                    }
+                                                                },
+                                                                function(err, result) {
+                                                                    if (err) console.log(err);
+                                                                    console.log('contest updated with cloudsight', result)
+                                                                })
+
+                                                        } //END OF BODY.STATUS COMPLETED
+                                                    })
+
+                                                    tries++;
+                                                    setTimeout(callback, 5000);
+                                                },
+                                                function(err) {
+
+                                                }
+                                            );
+
+
+                                        })
 
                                     }
                                 });
                             });
                         })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                         // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
                         //     if (err) throw err;
@@ -1219,6 +1321,10 @@ app.post('/api/upload_maps', isLoggedIn, function(req, res) {
 app.post('/api/temp_map_upload', isLoggedIn, function(req, res) {
 
     if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
+    if (req.body.worldID) {
         landmarkSchema.findById(req.body.worldID, function(err, lm) {
             if (!lm) {
                 console.log(err);
@@ -1366,6 +1472,10 @@ function worldMapTileUpdate(req, res, data, mapBuild) {
 //updates the map floor number and floor name, eventually can replace the map layer too
 app.post('/api/update_map', isLoggedIn, function(req, res) {
     if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
+    if (req.body.worldID) {
         landmarkSchema.findById(req.body.worldID, function(err, lm) {
             if (!lm) {
                 console.log(err);
@@ -1421,6 +1531,10 @@ app.post('/api/update_map', isLoggedIn, function(req, res) {
 
 //remove map from map array
 app.post('/api/delete_map', isLoggedIn, function(req, res) {
+    if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
 
     if (req.body.worldID) {
 
@@ -1984,6 +2098,36 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 });
 
 
+app.post('/api/user/emailUpdate', isLoggedIn, function(req, res) {
+    // updates user email, after checking if email is already in system
+
+    var newEmail = sanitize(req.body.updatedEmail);
+    if (validateEmail(newEmail)) {
+        db.collection('users').findOne({
+            'local.email': newEmail
+        }, function(err, data) {
+            if (data) {
+                res.send({
+                    err: 'Email already exists'
+                });
+            } else {
+                User.findById(req.user._id, function(err, data) {
+                    data.local.email = newEmail;
+                    data.save(function(err) {
+                        res.send({
+                            msg: 'Email updated successfully'
+                        });
+                    });
+                });
+            }
+        });
+    } else {
+        res.send({
+            err: 'Invalid email'
+        });
+    }
+});
+
 function uniqueProfileID(input, callback) {
 
     var uniqueIDer = urlify(input);
@@ -2405,7 +2549,6 @@ app.get('/api/stickers/:id', function(req, res) {
 app.get('/api/worlds/:id', function(req, res) {
 
     if (req.query.m == "true") {
-
         db.collection('landmarks').findOne({
             _id: objectId(req.params.id),
             world: true
@@ -2424,7 +2567,7 @@ app.get('/api/worlds/:id', function(req, res) {
     //return by IF id
     else {
         db.collection('landmarks').findOne({
-            id: req.params.id,
+            id: req.params.id.toLowerCase(),
             world: true
         }, function(err, data) {
             if (data) {
@@ -2437,53 +2580,198 @@ app.get('/api/worlds/:id', function(req, res) {
             }
         });
     }
+
+
+
+
     //if world, query for style and return
     function combineQuery(data, res) {
-        //look up style associated with world
+            //look up style associated with world
 
-        if (data.style) {
-            if (data.style.styleID) {
-                styleSchema.findById(data.style.styleID, function(err, style) {
-                    if (!style) {
-                        console.log(err);
-                    }
-                    if (style) {
-                        //console.log(style);
-                        var resWorldStyle = {
-                            "world": data,
-                            "style": style
-                        };
-                        res.status(200).send(resWorldStyle);
-                    }
-                });
-
-                landmarkSchema.update({
-                    _id: data._id
-                }, {
-                    $inc: {
-                        views: 1
-                    }
-                }, function(err) {
-                    if (err) {
-                        console.log('view update failed');
-                    } else {
-                        console.log('view update succes');
-                    }
-                });
+            if (data.style) {
+                if (data.style.styleID) {
+                    styleSchema.findById(data.style.styleID, function(err, style) {
+                        if (!style) {
+                            console.log(err);
+                        }
+                        if (style) {
 
 
+                            //IS THIS BUBBLE RETAIL?
+                            if (data.category == 'Retail') {
+
+                                contestSchema.findOne({
+                                    live: true
+                                }, function(err, contest) {
+
+                                    if (err) console.log(err)
+
+                                    //IS USER LOGGED IN?
+                                    if (req.user) {
+
+                                        if (req.user.submissions) {
+                                            var contestSubmissions = [];
+                                            req.user.submissions.forEach(function(el) {
+                                                if (el.worldID == data._id && el.contestID == contest._id) {
+                                                    contestSubmissions.push(el);
+                                                }
+                                            })
+
+                                            //DOES USER HAVE RELEVANT SUBMISSIONS?
+                                            if (contestSubmissions.length < 1) {
+                                                // console.log('hitting')
+                                                res.send({
+                                                    contest: contest,
+                                                    submissions: null,
+                                                    style: style,
+                                                    world: data
+                                                });
+                                                // console.log('no submissions yet.', contestSubmissions);
+                                            } else {
+                                                var newestSubmission = [];
+
+                                                if (contestSubmissions.length == 1) {
+                                                    newestSubmission.push(contestSubmissions[0])
+                                                } else {
+
+                                                    var latestDate = contestSubmissions.reduce(function(a, b) {
+                                                        return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                    })
+
+                                                    newestSubmission = contestSubmissions.filter(function(submission) {
+                                                        if (submission.timestamp == latestDate) {
+                                                            return submission;
+                                                        }
+                                                    })
+                                                }
+
+
+                                                // console.log('newestSubmission is: ', newestSubmission)
+                                                var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
+                                                        if (submission.hashtag !== newestSubmission[0].hashtag) {
+                                                            return submission;
+                                                        }
+                                                    })
+                                                    // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
+
+                                                var otherNewestSubmission = [];
+                                                if (otherHashTagSubmissions.length == 0) {
+                                                    otherNewestSubmission.push(null);
+                                                } else if (otherHashTagSubmissions.length == 1) {
+                                                    otherNewestSubmission.push(otherHashTagSubmissions[0])
+                                                } else {
+                                                    var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
+                                                            return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                        })
+                                                        // console.log('otherLatestDate is: ', otherLatestDate)
+                                                    otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
+                                                        if (submission.timestamp == otherLatestDate) {
+                                                            return submission;
+                                                        }
+                                                    })
+                                                }
+                                                // console.log('otherNewestSubmission is: ', otherNewestSubmission)
+                                                var latestTwoUniqueSubmissions = [];
+
+                                                if (otherNewestSubmission[0] !== null) {
+                                                    latestTwoUniqueSubmissions.push(newestSubmission[0]);
+                                                    latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
+                                                    // console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
+                                                    var submits = latestTwoUniqueSubmissions.map(function(el) {
+                                                        return {
+                                                            hashtag: el.hashtag,
+                                                            imgURL: el.imgURL
+                                                        }
+                                                    })
+                                                } else {
+                                                    var submits = newestSubmission.map(function(el) {
+                                                        return {
+                                                            hashtag: el.hashtag,
+                                                            imgURL: el.imgURL
+                                                        }
+                                                    })
+                                                }
+
+                                                // console.log('hitting user logged in and latest two submissions is: ', submits)
+
+                                                res.send({
+                                                    contest: contest,
+                                                    submissions: submits,
+                                                    style: style,
+                                                    world: data
+                                                });
+
+                                            } //end of if contestSubmissions not empty
+                                        } //end of if user has submissions field
+
+                                        //if user logged in but no submissions
+                                        if (req.user && !req.user.submissions) {
+                                            // console.log('hitting user logged in but NO submissions: ', req.user.submissions)
+                                            res.send({
+                                                contest: contest,
+                                                submissions: null,
+                                                style: style,
+                                                world: data
+                                            });
+                                        }
+                                    } //END OF USER LOGGED IN
+
+                                    //If user not logged in and world is retail
+                                    if (!req.user && data.category == 'Retail') {
+                                        // console.log('hitting user NOT logged in but retail store ', contest)
+                                        res.send({
+                                            contest: contest,
+                                            submissions: null,
+                                            style: style,
+                                            world: data
+                                        });
+                                    }
+                                })
+                            } //END OF IF RETAIL
+                            else {
+                                // console.log('hitting user NOT logged and NOT retail store ', data)
+                                res.send({
+                                    contest: null,
+                                    submissions: null,
+                                    style: style,
+                                    world: data
+                                });
+
+                            }
+                        }
+                    }); //END OF STYLESCHEMA FIND
+
+                    landmarkSchema.update({
+                        _id: data._id
+                    }, {
+                        $inc: {
+                            views: 1
+                        }
+                    }, function(err) {
+                        if (err) {
+                            console.log('view update failed');
+                        } else {
+                            console.log('view update succes');
+                        }
+                    });
+
+
+
+
+                }
+            } else {
+                console.log('world doesnt have a styleID');
             }
-        } else {
-            console.log('world doesnt have a styleID');
-        }
-
-    }
-
+        } //END OF COMBINE QUERY
 });
 
 
 // Save 
 app.post('/api/:collection/create', isLoggedIn, function(req, res) {
+
+    if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
 
     if (req.url == "/api/styles/create") {
 
@@ -2711,6 +2999,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         //generating a unique id for world/landmark
         function idGen(input) {
+            input = input.toLowerCase();
             var uniqueIDer = urlify(input);
             urlify(uniqueIDer, function() {
                 db.collection('landmarks').findOne({
@@ -2751,6 +3040,10 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
         //unique id found, now save/ update
         function saveLandmark(finalID) {
+
+
+            //normalized!
+            finalID = finalID.toLowerCase();
 
             //an edit
             if (!req.body.newStatus) {
@@ -3483,5 +3776,6 @@ app.all('/*', function(req, res, next) {
 // })
 
 server.listen(2997, function() {
+    console.log('Running in ', process.env.NODE_ENV, 'mode.')
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });

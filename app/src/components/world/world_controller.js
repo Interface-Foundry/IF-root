@@ -13,23 +13,21 @@ $scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
 navService.show('home');
 
+$scope.contest = {};
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
 $scope.wtgt = {
-	hashtags: {
-		want: 'hashtag1',
-		got: 'hashtag2'
-	},
 	images: {},
 	building: {}
 };
+
 $scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
-	
+
 var landmarksLoaded;
 
 $scope.verifyUpload = function(event, state) {
@@ -45,8 +43,8 @@ $scope.verifyUpload = function(event, state) {
 	}
 }
 
-$scope.uploadWTGT = function($files, state) {
-	$scope.wtgt.building[state] = true;
+$scope.uploadWTGT = function($files, hashtag) {
+	$scope.wtgt.building[hashtag] = true;
 
 	var file = $files[0];
 
@@ -54,8 +52,8 @@ $scope.uploadWTGT = function($files, state) {
 	var time = new Date();
 
 	// get hashtag
-	var hashtag = null;
-	hashtag = $scope.wtgt.hashtags[state];
+	// var hashtag = null;
+	// hashtag = $scope.wtgt.hashtags[hashtag];
 
 	var data = {
 		world_id: $scope.world._id,
@@ -72,13 +70,13 @@ $scope.uploadWTGT = function($files, state) {
 		// console.log('coords: ', coords);
 		data.userLat = coords.lat;
 		data.userLon = coords.lng;
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	}, function(err) {
-		uploadPicture(file, state, data);
+		uploadPicture(file, hashtag, data);
 	});
 };
 
-function uploadPicture(file, state, data) {
+function uploadPicture(file, hashtag, data) {
 
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture/',
@@ -86,16 +84,45 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		console.log('DATA IZZZ',data);
-		$scope.wtgt.images[state] = data;
-	
-		$scope.wtgt.building[state] = false;
+		worldTree.cacheSubmission($scope.world._id, hashtag, data);
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
+
 	});
 }
+
+// function checkUserForSubmissions() {
+// 	if (!$rootScope.user || !$rootScope.user.submissions) {
+// 		return;
+// 	}
+// 	_.chain($rootScope.user.submissions)
+// 		.groupBy(function(sub) {
+// 			return sub.hashtag;
+// 		})
+// 		.sortBy(function(sub) {
+// 			return sub.timestamp;
+// 		})
+// 		.value()
+// 		.forEach(function(sub) {
+// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
+// 		});
+// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
-	  	 $scope.world = data.world;
-		 $scope.style = data.style;
+	  $scope.world = data.world;
+		$scope.style = data.style;
+		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+		if (!(_.isEmpty(data.submissions))) {
+			data.submissions.forEach(function(s) {
+				if (!s) {
+					return;
+				}
+				$scope.wtgt.images[s.hashtag] = s.imgURL;
+			});
+		// } else {
+		// 	checkUserForSubmissions();
+		}
+
 
 
 
@@ -104,8 +131,9 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		});
 
 		 if (bubbleTypeService.get() == 'Retail') {
+
 		 	$scope.isRetail = true;
-		 }
+		}
 
 		 style.navBG_color = $scope.style.navBG_color;
 
@@ -113,11 +141,11 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
 			 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
-			 }
-			 else {
+			}
+			else {
 			 	$scope.showEdit = false;
-			 }
-		 } 
+			}
+		} 
 
 		//console.log($scope.world);
 		//console.log($scope.style);
@@ -191,11 +219,11 @@ function addWorldMarker() {
 		lat: $scope.world.loc.coordinates[1],
 		lng: $scope.world.loc.coordinates[0],
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
+			iconUrl: 'img/marker/bubbleMarker_24.png',
 			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor:[0, -40]
+			iconSize: [24, 24],
+			iconAnchor: [11, 11],
+			popupAnchor:[0, -12]
 		},
 		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 	});
@@ -512,12 +540,12 @@ function lowestLandmarkFloor(tempMarkers) {
 
 function markerFromLandmark(landmark) {
 
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
 			shadowUrl = '',
-			shadowAnchor = [4, -3],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+			shadowAnchor = [1, -1],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 

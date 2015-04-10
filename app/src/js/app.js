@@ -79,10 +79,9 @@ $routeProvider.
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-  when('/reset/:token', {templateUrl: 'components/user/change-password.html', controller: 'ResetCtrl'}).
+  when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
   when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-  when('/email/confirm/:token', {templateUrl: 'components/user/email-confirm.html', controller: 'ConfirmedEmailCtrl'}).
 
   when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
   when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
@@ -111,6 +110,10 @@ $routeProvider.
   when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
   when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
   when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
+
+  when('/c/:cityName/search/:latLng', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+  when('/c/:cityName/search/:latLng/category/:category', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+  when('/c/:cityName/search/:latLng/text/:text', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
     
   when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
   when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
@@ -121,11 +124,12 @@ $routeProvider.
 	when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
-    //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
   when('/404', {templateUrl: '/components/404/404.html', controller: 'FourOhFourController'}).
 
   otherwise({redirectTo: '/404'});
+    //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
+
       
 //@IFDEF WEB
 $locationProvider.html5Mode({

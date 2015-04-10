@@ -1,0 +1,66 @@
+<div class="aperture-pop u-pointer" ng-click="apertureSet('full')" ng-show="aperture.state=='aperture-third'"></div>
+<div id="shelf" ng-class="[aperture.state]">
+	<div id='top-shelf' class="noPreventDefault"
+		ng-class="[aperture.navfix, aperture.state]" 
+		ng-style="::{'background-color': style.navBG_color}" 
+		ng-click="apertureToggle('full')"
+		ng-swipe-up="apertureSet('off')"
+		ng-swipe-down="apertureSet('full')"
+		world-shelf>
+		<div class="world-title noPreventDefault" fit-font>
+			<span class="vertical-middle noPreventDefault">{{cityName}}</span>
+		</div>
+	</div>
+
+	<div class="shelf-surface wrap" bubble-body>		
+		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
+
+			<cat-search-bar ng-if="searchBarText && aperture.state !== 'aperture-full'" 
+				color="style.navBG_color"
+				text="searchBarText"
+				populate-city-search-view="populateCitySearchView"
+				loading="loading"
+				mode="'city'"></cat-search-bar>
+
+			<!-- bubbles -->
+			<div class="bubble-group" ng-if="cityShow.text || cityShow.category">
+				<header class="bubble-group-label">Bubbles: {{ citySearchResults.bubbles.length || 'no' }} results</header>
+				<ul class="bubble-list">
+					<li class="bubble-list-item" 
+						ng-repeat="bubble in citySearchResults.bubbles track by $index"
+						ng-click="go('w/' + bubble.id)">
+							<img if-src="{{ bubble.avatar }}" class="bubble-list-item-img">
+							<span>{{ bubble.name }}</span> 
+					</li>
+				</ul>
+			</div>
+			
+			<!-- landmarks -->
+			<div class="bubble-group" ng-if="cityShow.text || cityShow.category">
+				<header class="bubble-group-label">Landmarks: {{ citySearchResults.landmarks.length || 'no' }} results</header>
+				<ul class="bubble-list">
+					<li class="bubble-list-item" 
+						ng-repeat="landmark in citySearchResults.landmarks track by $index"
+						ng-click="go('w/' + landmark.parentName + '/' + landmark.id)">
+							<img if-src="{{ landmark.avatar }}" class="bubble-list-item-img">
+							<span>{{ landmark.name }}</span> 
+					</li>
+				</ul>
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+<user-location class="if-animate"
+	style="style" 
+	ng-class="[aperture.state]">
+</user-location>
+
+<cat-search-bar class="search-aperture" 
+	ng-if="searchBarText && aperture.state === 'aperture-full'" 
+	color="style.navBG_color"
+	text="searchBarText"
+	populate-city-search-view="populateCitySearchView"
+	loading="loading"
+	mode="'city'"></cat-search-bar>

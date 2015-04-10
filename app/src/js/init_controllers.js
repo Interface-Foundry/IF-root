@@ -80,10 +80,10 @@ function noWorlds(lat,lon) {
 		  	draggable:false,
 		  	message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
 		  	icon: {
-	            iconUrl: 'img/marker/bubble-marker-50.png',
+	            iconUrl: 'img/marker/bubbleMarker_24.png',
 	            shadowUrl: '',
-	            iconSize: [35, 67],
-	            iconAnchor: [13, 10]
+	            iconSize: [24, 24],
+	            iconAnchor: [11, 11]
 			}
 			});  
 		}
@@ -189,10 +189,10 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
                   draggable:false,
                   message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
                   icon: {
-                    iconUrl: 'img/marker/bubble-marker-50.png',
+                    iconUrl: 'img/marker/bubbleMarker_24.png',
                     shadowUrl: '',
-                    iconSize: [35, 67],
-                    iconAnchor: [13, 10]
+                    iconSize: [24, 24],
+                    iconAnchor: [11, 11]
                   }
                 });  
 

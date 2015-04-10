@@ -1,12 +1,17 @@
 angular.module('tidepoolsServices')
-	.factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
-		function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+
+	.factory('geoService', [ '$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+		function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
 				location: {
-					//lat,
-					//lng
-					//timestamp  
+					/**
+					 * lat:
+					 * lng:
+					 * timestamp:
+					 * cityName:
+					 */ 
 				},
 				inProgress: false,
 				requestQueue: [],
@@ -15,24 +20,35 @@ angular.module('tidepoolsServices')
 
 			var marker = [];
 			var pos = {
-				lat: 0,
-				lng: 0
-			};
+				/**
+				 * lat:
+				 * lng:
+				 */
+			}
 			var watchID;
 			$rootScope.aperture = apertureService;
 
-			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			// start tracking when in full aperture (and retail bubble or world search) and stop otherwise
 			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
-				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
-					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+				if (bubbleTypeService.get() === 'Retail' || $routeParams.cityName) {
+					if (newVal === 'aperture-full' && !geoService.tracking) {
 						geoService.trackStart();
-					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+					} else if (newVal !== 'aperture-full' && geoService.tracking) {
 						geoService.trackStop();
 					}
 				}
-			});
 
-			geoService.getLocation = function(maxAge) {
+			});	
+
+			geoService.updateLocation = function(locationData) {
+				geoService.location.lat = locationData.lat;
+				geoService.location.lng = locationData.lng;
+				geoService.location.cityName = locationData.cityName;
+				geoService.location.timestamp = locationData.timestamp;
+			};
+			 
+			geoService.getLocation = function(maxAge, timeout) {
+
 				var deferred = $q.defer();
 
 				geoService.requestQueue.push(deferred);
@@ -65,8 +81,15 @@ angular.module('tidepoolsServices')
 						geoService.resolveQueue({err: error.code});
 					}
 
-					navigator.geolocation.getCurrentPosition(geolocationSuccess,
-						geolocationError);
+
+					var options = {
+						maximumAge: maxAge || 0,
+						timeout: timeout || Infinity
+					};
+					
+					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+						geolocationError, options);
+
 
 				} else {
 					//browser update message
@@ -88,7 +111,7 @@ angular.module('tidepoolsServices')
 				geoService.inProgress = false;
 			}
 
-			geoService.trackStart = function() {
+			geoService.trackStart = function() {			
 				// used to start showing user's location on map
 
 				// if we are already tracking, stop current session before starting new one
@@ -96,17 +119,17 @@ angular.module('tidepoolsServices')
 					geoService.trackStop();
 				}
 				if (navigator.geolocation && window.DeviceOrientationEvent) {
-
 					// marker
 					mapManager.addMarker('track', {
-						lat: pos.lat,
-						lng: pos.lng,
+						lat: pos.lat || geoService.location.lat || 0,
+						lng: pos.lng || geoService.location.lng || 0,
 						icon: {
 							iconUrl: 'img/marker/user-marker-50.png',
 							shadowUrl: '',
-							iconSize: [35, 43],
-							iconAnchor: [17, 43],
-							popupAnchor:[0, -40]
+
+							iconSize: [24, 30], 
+							iconAnchor: [12, 15]
+
 						},
 						alt: 'track' // used for tracking marker DOM element
 					});

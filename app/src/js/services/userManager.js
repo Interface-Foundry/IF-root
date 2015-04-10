@@ -172,6 +172,7 @@ userManager.logout = function() {
 	userManager.adminStatus = false;
 	userManager._user = {};
 	$rootScope.user = {};
+	worldTree.submissionCache.removeAll();
 	$location.path('/');
 	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
@@ -214,7 +215,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = undefined;	
+		userManager.signup.error = false;		
 
 		// send confirmation email
 		$http.post('/email/confirm').then(function(success) {
@@ -222,11 +223,10 @@ userManager.signup.signup = function() { //signup based on signup form
 		}, function(error) {
 			console.log('error :', error);
 		});
-
 	})
 	.error(function(err) {
 	if (err) {
-		userManager.signup.error = "Error signing up!";
+		userManager.signup.error = err || "Error signing up!";
         alertManager.addAlert('danger',err, true);   
 	}
 	});
