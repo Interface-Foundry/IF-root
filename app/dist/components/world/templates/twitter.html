@@ -6,7 +6,7 @@
 	<a if-href="#w/{{world.id}}/twitter">
 		<li ng-repeat="tweet in tweets" class="tweet">
 			<div ng-if="tweet.user.name">
-				<img if-src="{{tweet.user.profile_image_url}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong>
+				<img if-src="{{tweet.user.profile_image_url | httpsify}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong>
 				<hr class="divider">
 			</div>
 				<img if-src="{{tweet.media.media_url | httpsify}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
