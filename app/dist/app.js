@@ -23266,6 +23266,9 @@ $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 
 $scope.select = function(bubble) {
+	if (!bubble) {
+		return;
+	}
 	if ($scope.temp.mapOn) {
 		if ($scope.selected==bubble) {
 			// already selected
