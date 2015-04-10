@@ -10,6 +10,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
     if (sText) {
         sText = sText.replace(/[^\w\s]/gi, '');
+        console.log('sText is..', sText);
     } else {
         sText = '';
     }
@@ -109,7 +110,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
                     var count = 0;
                     async.eachSeries(results[results.length - 1], function(el, callback) {
-
+                        //Set virtual property parentName
                         el.parentName = parentNames[count];
                         count++
                         callback();

@@ -284,26 +284,26 @@ app.post('/email/confirm', isLoggedIn, function(req, res, next) {
             user.local.confirmEmailExpires = Date.now() + 15767999999; // about half a year before it expires
             user.save(function(err) {
 
-            if (err) {
-                return next(err);
-            }
-
-            var mailOptions = {
-                to: email,
-                from: 'Kip <noreply@kipapp.co>',
-                subject: 'Kip – Confirm your email',
-                text: 'Thanks for signing up for Kip! \n\n' +
-                    'Please click on the following link to confirm your email:\n\n' +
-                    'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
-            };
-            mailerTransport.sendMail(mailOptions, function(err) {
                 if (err) {
                     return next(err);
                 }
 
-                console.log('sent confirmation email');
-                res.send("｡◕‿◕｡");
-            });
+                var mailOptions = {
+                    to: email,
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip – Confirm your email',
+                    text: 'Thanks for signing up for Kip! \n\n' +
+                        'Please click on the following link to confirm your email:\n\n' +
+                        'https://' + req.headers.host + '/email/confirm/' + token + '\n\n'
+                };
+                mailerTransport.sendMail(mailOptions, function(err) {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    console.log('sent confirmation email');
+                    res.send("｡◕‿◕｡");
+                });
             });
         });
     });
@@ -635,28 +635,6 @@ app.post('/api/analytics/:action', function(req, res) {
     // DONE!  then a separate node process dumps the redis cache to db
 
 
-
-
-    //From Stackoverflow:
-    // Create a caching service. This is really the hardest part, but the general flow looks something like this:
-    // make request to cache service.
-    // cache service checks redis for cached object based on query.
-    // cache returns data from redis if it exists OR from mongo if it doesn't exist.
-    // if data didn't already exist in redis or had expired, cache service writes data to redis.
-
-    // client.get(cacheKey, function(err, data) {
-    //     // data is null if the key doesn't exist
-    //     if (err || data === null) {
-    //         mongoose.model('users').find(function(err, users) {
-    //             console.log('Setting cache: ' + cacheKey);
-    //             client.set(cacheKey, users, redis.print);
-    //             res.send(users);
-    //         });
-    //     } else {
-    //         return data;
-    //     }
-    // });
-
 });
 
 
@@ -664,6 +642,9 @@ app.post('/api/analytics/:action', function(req, res) {
 
 // Save world visitor anonymously
 app.post('/api/visit/create', function(req, res) {
+    if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
 
     if (req.body.worldID) {
         var vs = new visitSchema({
@@ -1290,6 +1271,10 @@ app.post('/api/upload_maps', isLoggedIn, function(req, res) {
 app.post('/api/temp_map_upload', isLoggedIn, function(req, res) {
 
     if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
+    if (req.body.worldID) {
         landmarkSchema.findById(req.body.worldID, function(err, lm) {
             if (!lm) {
                 console.log(err);
@@ -1437,6 +1422,10 @@ function worldMapTileUpdate(req, res, data, mapBuild) {
 //updates the map floor number and floor name, eventually can replace the map layer too
 app.post('/api/update_map', isLoggedIn, function(req, res) {
     if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
+    if (req.body.worldID) {
         landmarkSchema.findById(req.body.worldID, function(err, lm) {
             if (!lm) {
                 console.log(err);
@@ -1492,6 +1481,10 @@ app.post('/api/update_map', isLoggedIn, function(req, res) {
 
 //remove map from map array
 app.post('/api/delete_map', isLoggedIn, function(req, res) {
+    if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
 
     if (req.body.worldID) {
 
@@ -2055,1676 +2048,1684 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
 });
 
 
-            app.post('/api/user/emailUpdate', isLoggedIn, function(req, res) {
-                // updates user email, after checking if email is already in system
+app.post('/api/user/emailUpdate', isLoggedIn, function(req, res) {
+    // updates user email, after checking if email is already in system
 
-                var newEmail = sanitize(req.body.updatedEmail); 
-                if (validateEmail(newEmail)) {
-                    db.collection('users').findOne({
-                        'local.email': newEmail
-                    }, function(err, data) {
-                        if (data) {
-                            res.send({
-                                err: 'Email already exists'
-                            });
-                        } else {
-                            User.findById(req.user._id, function(err, data) {
-                                data.local.email = newEmail;
-                                data.save(function(err) {
-                                    res.send({
-                                        msg: 'Email updated successfully'
-                                    });
-                                });
-                            });
-                        }
-                    });
-                } else {
-                    res.send({
-                        err: 'Invalid email'
-                    });
-                }
-            });
-
-            function uniqueProfileID(input, callback) {
-
-                var uniqueIDer = urlify(input);
-                urlify(uniqueIDer, function() {
-                    db.collection('users').findOne({
-                        'profileID': uniqueIDer
-                    }, function(err, data) {
-                        if (data) {
-                            var uniqueNumber = 1;
-                            var newUnique;
-
-                            async.forever(function(next) {
-                                    var uniqueNum_string = uniqueNumber.toString();
-                                    newUnique = data.profileID + uniqueNum_string;
-
-                                    db.collection('users').findOne({
-                                        'profileID': newUnique
-                                    }, function(err, data) {
-
-                                        if (data) {
-                                            uniqueNumber++;
-                                            next();
-                                        } else {
-                                            next('unique!'); // This is where the looping is stopped
-                                        }
-                                    });
-                                },
-                                function() {
-                                    callback(newUnique);
-                                });
-                        } else {
-                            callback(uniqueIDer);
-                        }
+    var newEmail = sanitize(req.body.updatedEmail);
+    if (validateEmail(newEmail)) {
+        db.collection('users').findOne({
+            'local.email': newEmail
+        }, function(err, data) {
+            if (data) {
+                res.send({
+                    err: 'Email already exists'
+                });
+            } else {
+                User.findById(req.user._id, function(err, data) {
+                    data.local.email = newEmail;
+                    data.save(function(err) {
+                        res.send({
+                            msg: 'Email updated successfully'
+                        });
                     });
                 });
             }
+        });
+    } else {
+        res.send({
+            err: 'Invalid email'
+        });
+    }
+});
 
-            //Route that picks a random bubble nearby
-            app.get('/api/find/random', function(req, res) {
+function uniqueProfileID(input, callback) {
 
-                random_bubble(req.query.userCoordinate[0], req.query.userCoordinate[1], req.query.localTime, res);
+    var uniqueIDer = urlify(input);
+    urlify(uniqueIDer, function() {
+        db.collection('users').findOne({
+            'profileID': uniqueIDer
+        }, function(err, data) {
+            if (data) {
+                var uniqueNumber = 1;
+                var newUnique;
 
-            });
+                async.forever(function(next) {
+                        var uniqueNum_string = uniqueNumber.toString();
+                        newUnique = data.profileID + uniqueNum_string;
 
+                        db.collection('users').findOne({
+                            'profileID': newUnique
+                        }, function(err, data) {
 
-            //queries
-            app.get('/api/:collection', function(req, res) {
-
-                var item, sort = {};
-
-                //route to world
-                if (req.params.collection == 'worlds') {
-
-                    worlds_query(req.query.userCoordinate[0], req.query.userCoordinate[1], req.query.localTime, res);
-                }
-
-                //querying landmark collection (events, places, etc)
-                if (req.params.collection == 'landmarks' && req.query.parentID) {
-                    landmarkSchema.find({
-                            parentID: req.query.parentID,
-                            world: false
-                        }).sort({
-                            'time.start': 1
-                        }).exec(function(err, data) {
-                            if (err) {
-                                res.send({
-                                    err: 'No Results'
-                                });
+                            if (data) {
+                                uniqueNumber++;
+                                next();
                             } else {
-                                res.send({
-                                    landmarks: data
-                                });
-                            }
-                        })
-                        //filtering landmarks
-                        /*switch (req.query.queryFilter) {
-                          //show all landmarks inside parent world
-                          case 'all':
-                            var qw = {
-                                parentID:req.query.parentID,
-                                world:false //only landmarks
-                            };
-                            db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));     
-                            break;
-                          //return live landmarks inside parent world
-                          case 'now':
-                            console.log('now');
-                            if (req.query.userTime){
-                                var currentTime = new Date(req.query.userTime);  //time was passed from front-end (preferable to sync with user timezone)
-                            }
-                            else {
-                                var currentTime = new Date(); //no time passed from front-end, weird but ok!
-                            }
-
-                            var qw = {
-                                parentID:req.query.parentID,
-                                world:false,
-                                'time.start': {$lt: currentTime},
-                                'time.end': {$gt: currentTime}
-                            };
-
-                            landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
-
-                              if (data){
-                                  var stringArr = [];
-                                  async.forEach(data, function (obj, done){ 
-                                      stringArr.push({_id: obj._id});
-                                      done(); 
-                                  }, function(err) {
-                                      //console.log(stringArr);
-                                      res.send(JSON.stringify(stringArr));
-                                  }); 
-                                  
-                              }
-                              else {
-                                  console.log('no results');
-                                  res.send({err:'no results'});            
-                              }
-                            });
-
-                            break;
-                          //return upcoming landmarks inside parent world
-                          case 'upcoming':
-
-                            console.log('upcoming');
-                            if (req.query.userTime){
-                                var currentTime = new Date(req.query.userTime);
-                            }
-                            else {
-                                var currentTime = new Date();
-                            }
-
-                            var qw = {
-                                parentID:req.query.parentID,
-                                world:false,
-                                'time.start': {$gt: currentTime}
-                            };   
-
-                            landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
-
-                              if (data){
-                                  var stringArr = [];
-                                  async.forEach(data, function (obj, done){ 
-                                     stringArr.push({_id: obj._id});
-                                     done(); 
-                                  }, function(err) {
-                                     //console.log(stringArr);
-                                     //console.log(JSON.stringify(stringArr));
-                                     res.send(JSON.stringify( stringArr ));
-                                  });
-                                  
-                              } else {
-                                  console.log('no results');
-                                  res.send({err:'no results'});
-                              }
-                            });    
-
-                            break;
-                          default:
-
-                            var qw = {
-                                parentID:req.query.parentID,
-                                world:false
-                            };   
-                            db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));   
-
-                            break;
-                        }*/
-
-
-                }
-                //not a landmark query
-                else {
-                    //places
-                    if (req.query.queryType == "places") {
-                        //do a location radius search here option
-                        //console.log(req.query.queryFilter);
-
-                        if (req.query.queryFilter == "all") {
-                            var qw = {
-                                'type': 'place'
-                            };
-                            db.collection(req.params.collection).find(qw).sort({
-                                _id: -1
-                            }).toArray(fn(req, res));
-                        } else {
-                            var qw = {
-                                'subType': req.query.queryFilter
-                            };
-                            db.collection(req.params.collection).find(qw).sort({
-                                _id: -1
-                            }).toArray(fn(req, res));
-                        }
-                    }
-
-                    //search
-                    if (req.query.queryType == "search") {
-
-                        var searchResults = {};
-
-                        var qw = {
-                            "name": {
-                                $regex: ".*" + req.query.queryFilter + ".*",
-                                $options: 'i'
-                            }
-                        };
-                        db.collection('landmarks').find(qw).sort({
-                            _id: -1
-                        }).toArray(addSearch(req, res));
-                        //searchResults.push(search);
-
-                        function addSearch(req, res) {
-                            // console.log(req);
-                            //console.log(res);
-                        }
-                    }
-                }
-
-
-                ////sticker query
-                if (req.params.collection == 'stickers') {
-
-                    db.collection('stickers').find({
-                        worldID: req.query.worldID
-                    }).toArray(fn(req, res));
-
-                }
-
-
-                //querying tweets (social media and internal comments too, eventually)
-                if (req.params.collection == 'tweets') {
-
-                    if (req.query.tag) { //hashtag filtering
-                        //has limit
-                        if (req.query.limit) {
-                            var Twlimit = parseInt(req.query.limit);
-                            var qw = {
-                                'hashtags': {
-                                    '$in': [req.query.tag]
-                                }
-                            };
-                            db.collection('tweets').find(qw).limit(Twlimit).sort({
-                                _id: -1
-                            }).toArray(fn(req, res));
-                        }
-                        //no limit
-                        else {
-                            var qw = {
-                                'hashtags': {
-                                    '$in': [req.query.tag]
-                                }
-                            };
-                            db.collection('tweets').find(qw).sort({
-                                _id: -1
-                            }).toArray(fn(req, res));
-                        }
-                    } else {
-                        if (req.query.limit) { //limited tweet query
-                            limit = parseInt(req.query.limit);
-                            db.collection(req.params.collection).find(qw).limit(limit).sort({
-                                _id: -1
-                            }).toArray(fn(req, res));
-                        } else {
-                            db.collection(req.params.collection).find(qw).sort({
-                                _id: -1
-                            }).toArray(fn(req, res));
-                        }
-                    }
-                }
-
-                //querying instagrams
-                // if (req.params.collection == 'instagrams') {
-
-                //     if (req.query.tag) { //hashtag filtering
-                //         //has limit
-                //         if (req.query.limit) {
-                //             var Inlimit = parseInt(req.query.limit);
-                //             var qw = {
-                //                 'tags': {
-                //                     $in: [req.query.tag]
-                //                 }
-                //             };
-                //             db.collection('instagrams').find(qw).limit(Inlimit).sort({
-                //                 _id: -1
-                //             }).toArray(fn(req, res));
-                //         }
-                //         //no limit
-                //         else {
-                //             var qw = {
-                //                 'tags': {
-                //                     $in: [req.query.tag]
-                //                 }
-                //             };
-                //             db.collection('instagrams').find(qw).sort({
-                //                 _id: -1
-                //             }).toArray(fn(req, res));
-                //         }
-
-                //     } else {
-                //         if (req.query.limit) { //limited tweet query
-                //             limit = parseInt(req.query.limit);
-                //             db.collection(req.params.collection).find(qw).limit(limit).sort({
-                //                 _id: -1
-                //             }).toArray(fn(req, res));
-                //         } else {
-                //             db.collection(req.params.collection).find(qw).sort({
-                //                 _id: -1
-                //             }).toArray(fn(req, res));
-                //         }
-                //     }
-                // }
-
-
-
-                //querying worldchat
-                if (req.params.collection == 'worldchat') {
-
-                    if (req.query.sinceID == 'none' || !req.query.sinceID) {
-                        var qw = {
-                            roomID: req.query.roomID
-                        }
-                    } else {
-                        var qw = {
-                            roomID: req.query.roomID,
-                            _id: {
-                                $gt: mongoose.Types.ObjectId(req.query.sinceID)
-                            }
-                        }
-                    }
-
-                    if (req.query.limit == 1) {
-                        db.collection('worldchats').find(qw).sort({
-                            _id: -1
-                        }).limit(1).toArray(function(err, data) {
-                            if (err) {
-                                console.log(err)
-                                res.send(err);
-                            } else if (data) {
-                                res.send(data);
-                            } else {
-                                res.send(500, ['error']);
+                                next('unique!'); // This is where the looping is stopped
                             }
                         });
-                    } else {
-                        db.collection('worldchats').find(qw).limit(30).sort({
-                            _id: 1
-                        }).toArray(fn(req, res));
-                    }
-                }
-
-
-
-                //querying visits
-                if (req.params.collection == 'visit') {
-
-                    //query for user history
-                    if (req.query.option == 'userHistory') {
-                        //logged in
-                        if (req.user) {
-                            if (req.user._id) {
-                                var userString = req.user._id.toString();
-                                var qw = {
-                                    userID: userString
-                                }
-                                console.log(qw);
-                                db.collection('visits').find(qw).sort({
-                                    _id: -1
-                                }).toArray(fn(req, res));
-                            }
-                        } else {
-                            res.send(403, ['need to be logged in']);
-                        }
-                    }
-                    //query for visits to world within one hour
-                    else {
-
-                        var d = new Date(Date.now() - 60 * 60 * 1000);
-                        // var n = d.toISOString();
-
-                        var qw = {
-                            timestamp: { // 1 hour ago (from now)
-                                $gt: d
-                            },
-                            worldID: req.query.worldID
-                        }
-                        db.collection('visits').find(qw).sort({
-                            _id: -1
-                        }).toArray(fn(req, res));
-                    }
-                }
-
-            });
-            // rewrite it specifying collectoin to look in
-
-            //Read Stickers
-            app.get('/api/stickers/:id', function(req, res) {
-
-                db.collection('stickers').findOne({
-                    _id: objectId(req.params.id)
-                }, function(err, data) {
-
-                    if (data) {
-                        ///what do to here
-                        console.log(data);
-                        res.send(data);
-                    } else {
-                        console.log('540 : Sticker doesn not exist.');
-                        console.log(err);
-                        res.send({
-                            err: '540: Sticker does not exist.'
-                        });
-                    }
-                })
-
-            });
-
-
-            // Read World
-            app.get('/api/worlds/:id', function(req, res) {
-
-
-
-                // if (req.query.m == "true") {
-
-                //     db.collection('landmarks').findOne({
-                //         _id: objectId(req.params.id),
-                //         world: true
-                //     }, function(err, data) {
-                //         if (data) {
-                //             combineQuery(data, res);
-                //         } else {
-                //             console.log('540: world doesnt exist');
-                //             console.log(err);
-                //             res.send({
-                //                 err: '540: world doesnt exist'
-                //             });
-                //         }
-                //     });
-                // }
-                // //return by IF id
-                // else {
-                    db.collection('landmarks').findOne({
-                        id: req.params.id,
-                        world: true
-                    }, function(err, data) {
-                        if (data) {
-                            combineQuery(data, res);
-                        } else {
-                            console.log('552: world doesnt exist');
-                            res.send({
-                                err: '552: world doesnt exist'
-                            });
-                        }
+                    },
+                    function() {
+                        callback(newUnique);
                     });
-                // 
+            } else {
+                callback(uniqueIDer);
+            }
+        });
+    });
+}
+
+//Route that picks a random bubble nearby
+app.get('/api/find/random', function(req, res) {
+
+    random_bubble(req.query.userCoordinate[0], req.query.userCoordinate[1], req.query.localTime, res);
+
+});
+
+
+//queries
+app.get('/api/:collection', function(req, res) {
+
+    var item, sort = {};
+
+    //route to world
+    if (req.params.collection == 'worlds') {
+
+        worlds_query(req.query.userCoordinate[0], req.query.userCoordinate[1], req.query.localTime, res);
+    }
+
+    //querying landmark collection (events, places, etc)
+    if (req.params.collection == 'landmarks' && req.query.parentID) {
+        landmarkSchema.find({
+                parentID: req.query.parentID,
+                world: false
+            }).sort({
+                'time.start': 1
+            }).exec(function(err, data) {
+                if (err) {
+                    res.send({
+                        err: 'No Results'
+                    });
+                } else {
+                    res.send({
+                        landmarks: data
+                    });
+                }
+            })
+            //filtering landmarks
+            /*switch (req.query.queryFilter) {
+              //show all landmarks inside parent world
+              case 'all':
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false //only landmarks
+                };
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));     
+                break;
+              //return live landmarks inside parent world
+              case 'now':
+                console.log('now');
+                if (req.query.userTime){
+                    var currentTime = new Date(req.query.userTime);  //time was passed from front-end (preferable to sync with user timezone)
+                }
+                else {
+                    var currentTime = new Date(); //no time passed from front-end, weird but ok!
+                }
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false,
+                    'time.start': {$lt: currentTime},
+                    'time.end': {$gt: currentTime}
+                };
+
+                landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
+
+                  if (data){
+                      var stringArr = [];
+                      async.forEach(data, function (obj, done){ 
+                          stringArr.push({_id: obj._id});
+                          done(); 
+                      }, function(err) {
+                          //console.log(stringArr);
+                          res.send(JSON.stringify(stringArr));
+                      }); 
+                      
+                  }
+                  else {
+                      console.log('no results');
+                      res.send({err:'no results'});            
+                  }
+                });
+
+                break;
+              //return upcoming landmarks inside parent world
+              case 'upcoming':
+
+                console.log('upcoming');
+                if (req.query.userTime){
+                    var currentTime = new Date(req.query.userTime);
+                }
+                else {
+                    var currentTime = new Date();
+                }
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false,
+                    'time.start': {$gt: currentTime}
+                };   
+
+                landmarkSchema.find(qw).sort({'time.start': 1}).exec(function(err, data) {
+
+                  if (data){
+                      var stringArr = [];
+                      async.forEach(data, function (obj, done){ 
+                         stringArr.push({_id: obj._id});
+                         done(); 
+                      }, function(err) {
+                         //console.log(stringArr);
+                         //console.log(JSON.stringify(stringArr));
+                         res.send(JSON.stringify( stringArr ));
+                      });
+                      
+                  } else {
+                      console.log('no results');
+                      res.send({err:'no results'});
+                  }
+                });    
+
+                break;
+              default:
+
+                var qw = {
+                    parentID:req.query.parentID,
+                    world:false
+                };   
+                db.collection(req.params.collection).find(qw).sort({_id: -1}).toArray(fn(req, res));   
+
+                break;
+            }*/
+
+
+    }
+    //not a landmark query
+    else {
+        //places
+        if (req.query.queryType == "places") {
+            //do a location radius search here option
+            //console.log(req.query.queryFilter);
+
+            if (req.query.queryFilter == "all") {
+                var qw = {
+                    'type': 'place'
+                };
+                db.collection(req.params.collection).find(qw).sort({
+                    _id: -1
+                }).toArray(fn(req, res));
+            } else {
+                var qw = {
+                    'subType': req.query.queryFilter
+                };
+                db.collection(req.params.collection).find(qw).sort({
+                    _id: -1
+                }).toArray(fn(req, res));
+            }
+        }
+
+        //search
+        if (req.query.queryType == "search") {
+
+            var searchResults = {};
+
+            var qw = {
+                "name": {
+                    $regex: ".*" + req.query.queryFilter + ".*",
+                    $options: 'i'
+                }
+            };
+            db.collection('landmarks').find(qw).sort({
+                _id: -1
+            }).toArray(addSearch(req, res));
+            //searchResults.push(search);
+
+            function addSearch(req, res) {
+                // console.log(req);
+                //console.log(res);
+            }
+        }
+    }
+
+
+    ////sticker query
+    if (req.params.collection == 'stickers') {
+
+        db.collection('stickers').find({
+            worldID: req.query.worldID
+        }).toArray(fn(req, res));
+
+    }
+
+
+    //querying tweets (social media and internal comments too, eventually)
+    if (req.params.collection == 'tweets') {
+
+        if (req.query.tag) { //hashtag filtering
+            //has limit
+            if (req.query.limit) {
+                var Twlimit = parseInt(req.query.limit);
+                var qw = {
+                    'hashtags': {
+                        '$in': [req.query.tag]
+                    }
+                };
+                db.collection('tweets').find(qw).limit(Twlimit).sort({
+                    _id: -1
+                }).toArray(fn(req, res));
+            }
+            //no limit
+            else {
+                var qw = {
+                    'hashtags': {
+                        '$in': [req.query.tag]
+                    }
+                };
+                db.collection('tweets').find(qw).sort({
+                    _id: -1
+                }).toArray(fn(req, res));
+            }
+        } else {
+            if (req.query.limit) { //limited tweet query
+                limit = parseInt(req.query.limit);
+                db.collection(req.params.collection).find(qw).limit(limit).sort({
+                    _id: -1
+                }).toArray(fn(req, res));
+            } else {
+                db.collection(req.params.collection).find(qw).sort({
+                    _id: -1
+                }).toArray(fn(req, res));
+            }
+        }
+    }
+
+    //querying instagrams
+    // if (req.params.collection == 'instagrams') {
+
+    //     if (req.query.tag) { //hashtag filtering
+    //         //has limit
+    //         if (req.query.limit) {
+    //             var Inlimit = parseInt(req.query.limit);
+    //             var qw = {
+    //                 'tags': {
+    //                     $in: [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('instagrams').find(qw).limit(Inlimit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //         //no limit
+    //         else {
+    //             var qw = {
+    //                 'tags': {
+    //                     $in: [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('instagrams').find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+
+    //     } else {
+    //         if (req.query.limit) { //limited tweet query
+    //             limit = parseInt(req.query.limit);
+    //             db.collection(req.params.collection).find(qw).limit(limit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         } else {
+    //             db.collection(req.params.collection).find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     }
+    // }
+
+
+
+    //querying worldchat
+    if (req.params.collection == 'worldchat') {
+
+        if (req.query.sinceID == 'none' || !req.query.sinceID) {
+            var qw = {
+                roomID: req.query.roomID
+            }
+        } else {
+            var qw = {
+                roomID: req.query.roomID,
+                _id: {
+                    $gt: mongoose.Types.ObjectId(req.query.sinceID)
+                }
+            }
+        }
+
+        if (req.query.limit == 1) {
+            db.collection('worldchats').find(qw).sort({
+                _id: -1
+            }).limit(1).toArray(function(err, data) {
+                if (err) {
+                    console.log(err)
+                    res.send(err);
+                } else if (data) {
+                    res.send(data);
+                } else {
+                    res.send(500, ['error']);
+                }
+            });
+        } else {
+            db.collection('worldchats').find(qw).limit(30).sort({
+                _id: 1
+            }).toArray(fn(req, res));
+        }
+    }
+
+
+
+    //querying visits
+    if (req.params.collection == 'visit') {
+
+        //query for user history
+        if (req.query.option == 'userHistory') {
+            //logged in
+            if (req.user) {
+                if (req.user._id) {
+                    var userString = req.user._id.toString();
+                    var qw = {
+                        userID: userString
+                    }
+                    console.log(qw);
+                    db.collection('visits').find(qw).sort({
+                        _id: -1
+                    }).toArray(fn(req, res));
+                }
+            } else {
+                res.send(403, ['need to be logged in']);
+            }
+        }
+        //query for visits to world within one hour
+        else {
+
+            var d = new Date(Date.now() - 60 * 60 * 1000);
+            // var n = d.toISOString();
+
+            var qw = {
+                timestamp: { // 1 hour ago (from now)
+                    $gt: d
+                },
+                worldID: req.query.worldID
+            }
+            db.collection('visits').find(qw).sort({
+                _id: -1
+            }).toArray(fn(req, res));
+        }
+    }
+
+});
+// rewrite it specifying collectoin to look in
+
+//Read Stickers
+app.get('/api/stickers/:id', function(req, res) {
+
+    db.collection('stickers').findOne({
+        _id: objectId(req.params.id)
+    }, function(err, data) {
+
+        if (data) {
+            ///what do to here
+            console.log(data);
+            res.send(data);
+        } else {
+            console.log('540 : Sticker doesn not exist.');
+            console.log(err);
+            res.send({
+                err: '540: Sticker does not exist.'
+            });
+        }
+    })
+
+});
+
+
+// Read World
+app.get('/api/worlds/:id', function(req, res) {
+
+    if (req.query.m == "true") {
+        db.collection('landmarks').findOne({
+            _id: objectId(req.params.id),
+            world: true
+        }, function(err, data) {
+            if (data) {
+                combineQuery(data, res);
+            } else {
+                console.log('540: world doesnt exist');
+                console.log(err);
+                res.send({
+                    err: '540: world doesnt exist'
+                });
+            }
+        });
+    }
+    //return by IF id
+    else {
+        db.collection('landmarks').findOne({
+            id: req.params.id.toLowerCase(),
+            world: true
+        }, function(err, data) {
+            if (data) {
+                combineQuery(data, res);
+            } else {
+                console.log('552: world doesnt exist');
+                res.send({
+                    err: '552: world doesnt exist'
+                });
+            }
+        });
+    }
 
 
 
 
-                //if world, query for style and return
-                function combineQuery(data, res) {
-                    //look up style associated with world
+    //if world, query for style and return
+    function combineQuery(data, res) {
+            //look up style associated with world
 
-                    if (data.style) {
-                        if (data.style.styleID) {
-                            styleSchema.findById(data.style.styleID, function(err, style) {
-                                if (!style) {
-                                    console.log(err);
-                                }
-                                if (style) {
-
-             
-                                    //IS THIS BUBBLE RETAIL?
-                                    if (data.category == 'Retail') {
-
-                                        contestSchema.findOne({
-                                            live: true
-                                        }, function(err, contest) {
-
-                                            if (err) console.log(err)
-
-                                            //IS USER LOGGED IN?
-                                            if (req.user) {
-
-                                                if (req.user.submissions) {
-                                                    var contestSubmissions = [];
-                                                    req.user.submissions.forEach(function(el) {
-                                                        if (el.worldID == data._id && el.contestID == contest._id) {
-                                                            contestSubmissions.push(el);
-                                                        }
-                                                    })
-
-                                                    //DOES USER HAVE RELEVANT SUBMISSIONS?
-                                                    if (contestSubmissions.length < 1) {
-                                                        // console.log('hitting')
-                                                        res.send({
-                                                            contest: contest,
-                                                            submissions: null,
-                                                            style: style,
-                                                            world: data
-                                                        });
-                                                        // console.log('no submissions yet.', contestSubmissions);
-                                                    } else {
-                                                        var newestSubmission = [];
-
-                                                        if (contestSubmissions.length == 1) {
-                                                            newestSubmission.push(contestSubmissions[0])
-                                                        } else {
-
-                                                            var latestDate = contestSubmissions.reduce(function(a, b) {
-                                                                return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
-                                                            })
-
-                                                            newestSubmission = contestSubmissions.filter(function(submission) {
-                                                                if (submission.timestamp == latestDate) {
-                                                                    return submission;
-                                                                }
-                                                            })
-                                                        }
+            if (data.style) {
+                if (data.style.styleID) {
+                    styleSchema.findById(data.style.styleID, function(err, style) {
+                        if (!style) {
+                            console.log(err);
+                        }
+                        if (style) {
 
 
-                                                        // console.log('newestSubmission is: ', newestSubmission)
-                                                        var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
-                                                                if (submission.hashtag !== newestSubmission[0].hashtag) {
-                                                                    return submission;
-                                                                }
-                                                            })
-                                                            // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
+                            //IS THIS BUBBLE RETAIL?
+                            if (data.category == 'Retail') {
 
-                                                        var otherNewestSubmission = [];
-                                                        if (otherHashTagSubmissions.length == 0) {
-                                                            otherNewestSubmission.push(null);
-                                                        } else if (otherHashTagSubmissions.length == 1) {
-                                                            otherNewestSubmission.push(otherHashTagSubmissions[0])
-                                                        } else {
-                                                            var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
-                                                                    return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
-                                                                })
-                                                                // console.log('otherLatestDate is: ', otherLatestDate)
-                                                            otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
-                                                                if (submission.timestamp == otherLatestDate) {
-                                                                    return submission;
-                                                                }
-                                                            })
-                                                        }
-                                                        // console.log('otherNewestSubmission is: ', otherNewestSubmission)
-                                                        var latestTwoUniqueSubmissions = [];
+                                contestSchema.findOne({
+                                    live: true
+                                }, function(err, contest) {
 
-                                                        if (otherNewestSubmission[0] !== null) {
-                                                            latestTwoUniqueSubmissions.push(newestSubmission[0]);
-                                                            latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
-                                                            // console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
-                                                            var submits = latestTwoUniqueSubmissions.map(function(el) {
-                                                                return {
-                                                                    hashtag: el.hashtag,
-                                                                    imgURL: el.imgURL
-                                                                }
-                                                            })
-                                                        } else {
-                                                            var submits = newestSubmission.map(function(el) {
-                                                                return {
-                                                                    hashtag: el.hashtag,
-                                                                    imgURL: el.imgURL
-                                                                }
-                                                            })
-                                                        }
+                                    if (err) console.log(err)
 
-                                                        // console.log('hitting user logged in and latest two submissions is: ', submits)
+                                    //IS USER LOGGED IN?
+                                    if (req.user) {
 
-                                                        res.send({
-                                                            contest: contest,
-                                                            submissions: submits,
-                                                            style: style,
-                                                            world: data
-                                                        });
-
-                                                    } //end of if contestSubmissions not empty
-                                                } //end of if user has submissions field
-
-                                                //if user logged in but no submissions
-                                                if (req.user && !req.user.submissions) {
-                                                    // console.log('hitting user logged in but NO submissions: ', req.user.submissions)
-                                                    res.send({
-                                                        contest: contest,
-                                                        submissions: null,
-                                                        style: style,
-                                                        world: data
-                                                    });
+                                        if (req.user.submissions) {
+                                            var contestSubmissions = [];
+                                            req.user.submissions.forEach(function(el) {
+                                                if (el.worldID == data._id && el.contestID == contest._id) {
+                                                    contestSubmissions.push(el);
                                                 }
-                                            } //END OF USER LOGGED IN
+                                            })
 
-                                            //If user not logged in and world is retail
-                                            if (!req.user && data.category == 'Retail') {
-                                                // console.log('hitting user NOT logged in but retail store ', contest)
+                                            //DOES USER HAVE RELEVANT SUBMISSIONS?
+                                            if (contestSubmissions.length < 1) {
+                                                // console.log('hitting')
                                                 res.send({
                                                     contest: contest,
                                                     submissions: null,
                                                     style: style,
                                                     world: data
                                                 });
-                                            }
-                                        })
-                                    } //END OF IF RETAIL
-                                    else {
-                                        // console.log('hitting user NOT logged and NOT retail store ', data)
+                                                // console.log('no submissions yet.', contestSubmissions);
+                                            } else {
+                                                var newestSubmission = [];
+
+                                                if (contestSubmissions.length == 1) {
+                                                    newestSubmission.push(contestSubmissions[0])
+                                                } else {
+
+                                                    var latestDate = contestSubmissions.reduce(function(a, b) {
+                                                        return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                    })
+
+                                                    newestSubmission = contestSubmissions.filter(function(submission) {
+                                                        if (submission.timestamp == latestDate) {
+                                                            return submission;
+                                                        }
+                                                    })
+                                                }
+
+
+                                                // console.log('newestSubmission is: ', newestSubmission)
+                                                var otherHashTagSubmissions = contestSubmissions.filter(function(submission) {
+                                                        if (submission.hashtag !== newestSubmission[0].hashtag) {
+                                                            return submission;
+                                                        }
+                                                    })
+                                                    // console.log('otherHashTagSubmissions is: ', otherHashTagSubmissions)
+
+                                                var otherNewestSubmission = [];
+                                                if (otherHashTagSubmissions.length == 0) {
+                                                    otherNewestSubmission.push(null);
+                                                } else if (otherHashTagSubmissions.length == 1) {
+                                                    otherNewestSubmission.push(otherHashTagSubmissions[0])
+                                                } else {
+                                                    var otherLatestDate = otherHashTagSubmissions.reduce(function(a, b) {
+                                                            return a.timestamp > b.timestamp ? a.timestamp : b.timestamp;
+                                                        })
+                                                        // console.log('otherLatestDate is: ', otherLatestDate)
+                                                    otherNewestSubmission = otherHashTagSubmissions.filter(function(submission) {
+                                                        if (submission.timestamp == otherLatestDate) {
+                                                            return submission;
+                                                        }
+                                                    })
+                                                }
+                                                // console.log('otherNewestSubmission is: ', otherNewestSubmission)
+                                                var latestTwoUniqueSubmissions = [];
+
+                                                if (otherNewestSubmission[0] !== null) {
+                                                    latestTwoUniqueSubmissions.push(newestSubmission[0]);
+                                                    latestTwoUniqueSubmissions.push(otherNewestSubmission[0]);
+                                                    // console.log('  latestTwoUniqueSubmissions is: ', latestTwoUniqueSubmissions)
+                                                    var submits = latestTwoUniqueSubmissions.map(function(el) {
+                                                        return {
+                                                            hashtag: el.hashtag,
+                                                            imgURL: el.imgURL
+                                                        }
+                                                    })
+                                                } else {
+                                                    var submits = newestSubmission.map(function(el) {
+                                                        return {
+                                                            hashtag: el.hashtag,
+                                                            imgURL: el.imgURL
+                                                        }
+                                                    })
+                                                }
+
+                                                // console.log('hitting user logged in and latest two submissions is: ', submits)
+
+                                                res.send({
+                                                    contest: contest,
+                                                    submissions: submits,
+                                                    style: style,
+                                                    world: data
+                                                });
+
+                                            } //end of if contestSubmissions not empty
+                                        } //end of if user has submissions field
+
+                                        //if user logged in but no submissions
+                                        if (req.user && !req.user.submissions) {
+                                            // console.log('hitting user logged in but NO submissions: ', req.user.submissions)
+                                            res.send({
+                                                contest: contest,
+                                                submissions: null,
+                                                style: style,
+                                                world: data
+                                            });
+                                        }
+                                    } //END OF USER LOGGED IN
+
+                                    //If user not logged in and world is retail
+                                    if (!req.user && data.category == 'Retail') {
+                                        // console.log('hitting user NOT logged in but retail store ', contest)
                                         res.send({
-                                            contest: null,
+                                            contest: contest,
                                             submissions: null,
                                             style: style,
                                             world: data
                                         });
-
                                     }
-                                }
-                            }); //END OF STYLESCHEMA FIND
+                                })
+                            } //END OF IF RETAIL
+                            else {
+                                // console.log('hitting user NOT logged and NOT retail store ', data)
+                                res.send({
+                                    contest: null,
+                                    submissions: null,
+                                    style: style,
+                                    world: data
+                                });
 
-                            landmarkSchema.update({
-                                _id: data._id
-                            }, {
-                                $inc: {
-                                    views: 1
-                                }
-                            }, function(err) {
-                                if (err) {
-                                    console.log('view update failed');
-                                } else {
-                                    console.log('view update succes');
-                                }
-                            });
-                        }
-                    } else {
-                        console.log('world doesnt have a styleID');
-                    }
-
-                }
-
-            });
-
-
-            // Save 
-            app.post('/api/:collection/create', isLoggedIn, function(req, res) {
-
-                if (req.url == "/api/styles/create") {
-
-
-                    editStyle(); //edit style
-                }
-
-                if (req.url == "/api/projects/create") {
-                    editProject(); //edit project info
-                }
-
-                if (req.url == "/api/worldchat/create") {
-
-                    //console.log('image '+req.body.img);
-
-                    var wc = new worldchatSchema({
-                        userID: req.body.userID,
-                        roomID: req.body.roomID,
-                        nick: req.body.nick,
-                        kind: req.body.kind,
-                        msg: req.body.msg,
-                        pic: req.body.pic,
-                        href: req.body.href,
-                        avatar: req.body.avatar
-                    });
-
-                    if (req.body.sticker) {
-                        wc.sticker = {
-                            img: req.body.sticker.img,
-                            _id: req.body.sticker._id
-                        }
-                    }
-
-                    console.log(wc);
-                    wc.save(function(err, data) {
-                        if (err) {
-                            console.log(err);
-                            res.send(err);
-                        } else {
-                            //console.log(data);
-                            //console.log('SAVED new message');
-                            res.status(200).send([data]);
-                        }
-                    });
-                }
-
-                if ((req.url == "/api/stickers/create") && req.body.roomID
-                    //&& req.user._id
-                    && req.body.name) {
-
-                    var sticker = new stickerSchema({
-                        name: req.body.name,
-                        ownerID: req.body.userID,
-                        roomID: req.body.roomID
-                    });
-
-                    if (req.body.loc) {
-                        sticker.loc = {
-                            type: 'Point',
-                            coordinates: [req.body.loc.coordinates[0],
-                                req.body.loc.coordinates[1]
-                            ]
-                        }
-                    }
-                    if (req.body.message) {
-                        sticker.message = req.body.message;
-                    }
-                    if (req.body.stickerKind) {
-                        sticker.stickerKind = req.body.stickerKind;
-                    }
-                    if (req.body.stickerAction) {
-                        sticker.stickerAction = req.body.stickerAction;
-                    }
-                    if (req.body.href) {
-                        sticker.href = req.body.href;
-                    }
-                    if (req.body.stats) {
-                        sticker.stats.alive = true; //should it start true? 
-                        if (req.body.stats.age) {
-                            sticker.stats.age = req.body.stats.age;
-                        }
-                        if (req.body.stats.important) {
-                            sticker.stats.important = req.body.stats.important;
-                        }
-                        if (req.body.stats.clicks) {
-                            sticker = req.body.stats.clicks; // or should it start at zero?
-                        }
-                    }
-                    if (req.body.stickerID) {
-                        sticker.stickerID = req.body.stickerID;
-                    }
-                    if (req.user.name) {
-                        sticker.ownerName = req.user.name;
-                    }
-                    sticker.avatar = req.body.avatar;
-
-                    if (req.body.iconInfo) {
-                        if (req.body.iconInfo.iconUrl) {
-                            sticker.iconInfo.iconUrl = req.body.iconInfo.iconUrl;
-                        }
-                        if (req.body.iconInfo.iconRetinaUrl) {
-                            sticker.iconInfo.iconRetinaUrl = req.body.iconInfo.iconRetinaUrl;
-                        }
-                        if (req.body.iconInfo.iconSize) {
-                            sticker.iconInfo.iconSize = req.body.iconInfo.iconSize;
-                        }
-                        if (req.body.iconInfo.iconAnchor) {
-                            sticker.iconInfo.iconAnchor = req.body.iconInfo.iconAnchor;
-                        }
-                        if (req.body.iconInfo.popupAnchor) {
-                            sticker.iconInfo.popupAnchor = req.body.iconInfo.popupAnchor;
-                        }
-                        if (req.body.iconInfo.iconOrientation) {
-                            sticker.iconInfo.iconOrientation = req.body.iconInfo.iconOrientation;
-                        }
-                    }
-
-                    sticker.save(function(err, data) {
-                        if (err) {
-                            console.log(data);
-                            console.log(err);
-                            res.send(err);
-                        } else {
-                            res.status(200).send(data);
-                        }
-                    })
-                }
-
-
-                //edit a world
-                if (req.url == "/api/worlds/create") {
-                    var worldVal = true;
-
-                    if (req.body.editMap) { //adding map options to world
-                        worldMapEdit();
-                    } else {
-                        contSaveLandmark();
-                    }
-                }
-                //a landmark
-                else if (req.url == "/api/landmarks/create") {
-                    var worldVal = false;
-                    contSaveLandmark();
-                }
-
-                //adding/editing map to world
-                function worldMapEdit() {
-
-
-                    landmarkSchema.findById(req.body.worldID, function(err, lm) {
-                        if (!lm) {
-                            console.log(err);
-                        } else if (req.user._id == lm.permissions.ownerID) { //check permissions to edit
-
-                            lm.style.maps.type = req.body.type; //local, cloud or both
-                            lm.style.maps.cloudMapID = req.body.mapThemeSelect.cloudMapID;
-                            lm.style.maps.cloudMapName = req.body.mapThemeSelect.cloudMapName;
-
-
-
-                            //NEED TO CHANGE TO ARRAY to push new marker types, eventually (???)
-                            lm.style.markers = {
-                                name: req.body.markerSelect.name,
-                                category: 'all'
-                            };
-
-                            lm.save(function(err, landmark) {
-                                if (err) {
-                                    console.log('error');
-                                } else {
-                                    //console.log(landmark);
-                                    console.log('success');
-                                }
-                            });
-                        } else {
-                            console.log('unauthorized user'); //no permissions
-                        }
-                    });
-                }
-
-
-                function contSaveLandmark() {
-
-                    //new landmark, no name
-                    if (!req.body.name) {
-                        console.log('generating number id');
-                        idGen(crypto.randomBytes(15).toString('hex'));
-                    }
-
-                    //landmark already has name
-                    else {
-
-                        //not a new landmark
-                        if (!req.body.newStatus) {
-
-                            if (req.body.worldID) {
-                                var lookupID = req.body.worldID;
                             }
-
-                            if (req.body._id) {
-                                var lookupID = req.body._id;
-                            }
-
-                            landmarkSchema.findById(lookupID, function(err, lm) {
-                                //same name, so dont gen new id
-                                if (!lm) {
-                                    console.log(err);
-                                } else {
-                                    if (lm.name == req.body.name) {
-                                        saveLandmark(lm.id);
-                                    }
-                                    //a new name was used
-                                    else {
-                                        idGen(req.body.name);
-                                    }
-                                }
-                            });
                         }
+                    }); //END OF STYLESCHEMA FIND
 
-                        //new landmark
+                    landmarkSchema.update({
+                        _id: data._id
+                    }, {
+                        $inc: {
+                            views: 1
+                        }
+                    }, function(err) {
+                        if (err) {
+                            console.log('view update failed');
+                        } else {
+                            console.log('view update succes');
+                        }
+                    });
+
+
+
+
+                }
+            } else {
+                console.log('world doesnt have a styleID');
+            }
+        } //END OF COMBINE QUERY
+});
+
+
+// Save 
+app.post('/api/:collection/create', isLoggedIn, function(req, res) {
+
+    if (req.body.worldID) {
+        req.body.worldID = req.body.worldID.toLowerCase();
+    }
+
+    if (req.url == "/api/styles/create") {
+
+
+        editStyle(); //edit style
+    }
+
+    if (req.url == "/api/projects/create") {
+        editProject(); //edit project info
+    }
+
+    if (req.url == "/api/worldchat/create") {
+
+        //console.log('image '+req.body.img);
+
+        var wc = new worldchatSchema({
+            userID: req.body.userID,
+            roomID: req.body.roomID,
+            nick: req.body.nick,
+            kind: req.body.kind,
+            msg: req.body.msg,
+            pic: req.body.pic,
+            href: req.body.href,
+            avatar: req.body.avatar
+        });
+
+        if (req.body.sticker) {
+            wc.sticker = {
+                img: req.body.sticker.img,
+                _id: req.body.sticker._id
+            }
+        }
+
+        console.log(wc);
+        wc.save(function(err, data) {
+            if (err) {
+                console.log(err);
+                res.send(err);
+            } else {
+                //console.log(data);
+                //console.log('SAVED new message');
+                res.status(200).send([data]);
+            }
+        });
+    }
+
+    if ((req.url == "/api/stickers/create") && req.body.roomID
+        //&& req.user._id
+        && req.body.name) {
+
+        var sticker = new stickerSchema({
+            name: req.body.name,
+            ownerID: req.body.userID,
+            roomID: req.body.roomID
+        });
+
+        if (req.body.loc) {
+            sticker.loc = {
+                type: 'Point',
+                coordinates: [req.body.loc.coordinates[0],
+                    req.body.loc.coordinates[1]
+                ]
+            }
+        }
+        if (req.body.message) {
+            sticker.message = req.body.message;
+        }
+        if (req.body.stickerKind) {
+            sticker.stickerKind = req.body.stickerKind;
+        }
+        if (req.body.stickerAction) {
+            sticker.stickerAction = req.body.stickerAction;
+        }
+        if (req.body.href) {
+            sticker.href = req.body.href;
+        }
+        if (req.body.stats) {
+            sticker.stats.alive = true; //should it start true? 
+            if (req.body.stats.age) {
+                sticker.stats.age = req.body.stats.age;
+            }
+            if (req.body.stats.important) {
+                sticker.stats.important = req.body.stats.important;
+            }
+            if (req.body.stats.clicks) {
+                sticker = req.body.stats.clicks; // or should it start at zero?
+            }
+        }
+        if (req.body.stickerID) {
+            sticker.stickerID = req.body.stickerID;
+        }
+        if (req.user.name) {
+            sticker.ownerName = req.user.name;
+        }
+        sticker.avatar = req.body.avatar;
+
+        if (req.body.iconInfo) {
+            if (req.body.iconInfo.iconUrl) {
+                sticker.iconInfo.iconUrl = req.body.iconInfo.iconUrl;
+            }
+            if (req.body.iconInfo.iconRetinaUrl) {
+                sticker.iconInfo.iconRetinaUrl = req.body.iconInfo.iconRetinaUrl;
+            }
+            if (req.body.iconInfo.iconSize) {
+                sticker.iconInfo.iconSize = req.body.iconInfo.iconSize;
+            }
+            if (req.body.iconInfo.iconAnchor) {
+                sticker.iconInfo.iconAnchor = req.body.iconInfo.iconAnchor;
+            }
+            if (req.body.iconInfo.popupAnchor) {
+                sticker.iconInfo.popupAnchor = req.body.iconInfo.popupAnchor;
+            }
+            if (req.body.iconInfo.iconOrientation) {
+                sticker.iconInfo.iconOrientation = req.body.iconInfo.iconOrientation;
+            }
+        }
+
+        sticker.save(function(err, data) {
+            if (err) {
+                console.log(data);
+                console.log(err);
+                res.send(err);
+            } else {
+                res.status(200).send(data);
+            }
+        })
+    }
+
+
+    //edit a world
+    if (req.url == "/api/worlds/create") {
+        var worldVal = true;
+
+        if (req.body.editMap) { //adding map options to world
+            worldMapEdit();
+        } else {
+            contSaveLandmark();
+        }
+    }
+    //a landmark
+    else if (req.url == "/api/landmarks/create") {
+        var worldVal = false;
+        contSaveLandmark();
+    }
+
+    //adding/editing map to world
+    function worldMapEdit() {
+
+
+        landmarkSchema.findById(req.body.worldID, function(err, lm) {
+            if (!lm) {
+                console.log(err);
+            } else if (req.user._id == lm.permissions.ownerID) { //check permissions to edit
+
+                lm.style.maps.type = req.body.type; //local, cloud or both
+                lm.style.maps.cloudMapID = req.body.mapThemeSelect.cloudMapID;
+                lm.style.maps.cloudMapName = req.body.mapThemeSelect.cloudMapName;
+
+
+
+                //NEED TO CHANGE TO ARRAY to push new marker types, eventually (???)
+                lm.style.markers = {
+                    name: req.body.markerSelect.name,
+                    category: 'all'
+                };
+
+                lm.save(function(err, landmark) {
+                    if (err) {
+                        console.log('error');
+                    } else {
+                        //console.log(landmark);
+                        console.log('success');
+                    }
+                });
+            } else {
+                console.log('unauthorized user'); //no permissions
+            }
+        });
+    }
+
+
+    function contSaveLandmark() {
+
+        //new landmark, no name
+        if (!req.body.name) {
+            console.log('generating number id');
+            idGen(crypto.randomBytes(15).toString('hex'));
+        }
+
+        //landmark already has name
+        else {
+
+            //not a new landmark
+            if (!req.body.newStatus) {
+
+                if (req.body.worldID) {
+                    var lookupID = req.body.worldID;
+                }
+
+                if (req.body._id) {
+                    var lookupID = req.body._id;
+                }
+
+                landmarkSchema.findById(lookupID, function(err, lm) {
+                    //same name, so dont gen new id
+                    if (!lm) {
+                        console.log(err);
+                    } else {
+                        if (lm.name == req.body.name) {
+                            saveLandmark(lm.id);
+                        }
+                        //a new name was used
                         else {
                             idGen(req.body.name);
                         }
                     }
+                });
+            }
 
-                    //generating a unique id for world/landmark
-                    function idGen(input) {
-                        var uniqueIDer = urlify(input);
-                        urlify(uniqueIDer, function() {
-                            db.collection('landmarks').findOne({
-                                'id': uniqueIDer,
-                                'world': worldVal
-                            }, function(err, data) {
-                                if (data) {
-                                    var uniqueNumber = 1;
-                                    var newUnique;
+            //new landmark
+            else {
+                idGen(req.body.name);
+            }
+        }
 
-                                    async.forever(function(next) {
-                                            var uniqueNum_string = uniqueNumber.toString();
-                                            newUnique = data.id + uniqueNum_string;
+        //generating a unique id for world/landmark
+        function idGen(input) {
+            input = input.toLowerCase();
+            var uniqueIDer = urlify(input);
+            urlify(uniqueIDer, function() {
+                db.collection('landmarks').findOne({
+                    'id': uniqueIDer,
+                    'world': worldVal
+                }, function(err, data) {
+                    if (data) {
+                        var uniqueNumber = 1;
+                        var newUnique;
 
-                                            db.collection('landmarks').findOne({
-                                                'id': newUnique,
-                                                'world': worldVal
-                                            }, function(err, data) {
-                                                if (data) {
-                                                    console.log('entry found!');
-                                                    uniqueNumber++;
-                                                    next();
-                                                } else {
-                                                    console.log('entry not found!');
-                                                    next('unique!'); // This is where the looping is stopped
-                                                }
-                                            });
-                                        },
-                                        function() {
-                                            saveLandmark(newUnique);
-                                        });
-                                } else {
-                                    saveLandmark(uniqueIDer);
-                                }
-                            });
-                        });
-                    }
+                        async.forever(function(next) {
+                                var uniqueNum_string = uniqueNumber.toString();
+                                newUnique = data.id + uniqueNum_string;
 
-                    //unique id found, now save/ update
-                    function saveLandmark(finalID) {
-
-                        //an edit
-                        if (!req.body.newStatus) {
-
-                            if (req.body.worldID) {
-                                var lookupID = req.body.worldID;
-                            }
-                            if (req.body._id) {
-                                var lookupID = req.body._id;
-                            }
-                            console.log('lookupID', lookupID);
-
-                            landmarkSchema.findById(lookupID, function(err, lm) {
-                                if (!lm) {
-                                    console.log(err);
-                                } else if (req.user._id == lm.permissions.ownerID) { //checking if logged in user is owner
-
-                                    lm.name = req.body.name;
-                                    lm.id = finalID;
-                                    lm.valid = 1;
-                                    lm.status = req.body.status || 'draft';
-
-                                    if (req.body.hasOwnProperty('loc')) {
-                                        if (req.body.loc.hasOwnProperty('coordinates')) {
-                                            lm.loc = {
-                                                type: 'Point',
-                                                coordinates: [req.body.loc.coordinates[0], req.body.loc.coordinates[1]]
-                                            };
-                                        }
-                                    }
-
-                                    lm.hasLoc = req.body.hasLoc || false;
-
-                                    if (req.body.avatar) {
-                                        lm.avatar = req.body.avatar;
-                                    }
-
-                                    if (req.body.parentID) {
-                                        lm.parentID = req.body.parentID;
-                                    }
-
-                                    if (req.body.description) {
-                                        lm.description = req.body.description;
-                                    }
-                                    if (req.body.summary) {
-                                        lm.summary = req.body.summary;
-                                    }
-                                    if (req.body.category) {
-                                        lm.category = req.body.category;
-                                    }
-                                    if (req.body.landmarkCategories) {
-                                        lm.landmarkCategories = req.body.landmarkCategories;
-                                    }
-
-                                    if (req.body.resources) {
-                                        if (req.body.resources.hashtag) {
-                                            lm.resources.hashtag = req.body.resources.hashtag;
-                                        }
-                                    }
-
-                                    if (req.body.widgets) {
-                                        /*if (req.body.widgets.twitter) {lm.widgets.twitter = req.body.widgets.twitter;}
-                                        if (req.body.widgets.instagram) {lm.widgets.instagram = req.body.widgets.instagram;}
-                                        if (req.body.widgets.upcoming) {lm.widgets.upcoming = req.body.widgets.upcoming;}
-                                        if (req.body.widgets.category) {lm.widgets.category = req.body.widgets.category;}*/
-                                    }
-
-                                    //if user checks box to activate time 
-
-                                    //ADDING / UPDATING CLOUD MAP INFO
-                                    if (req.body.style) {
-                                        if (req.body.style.styleID) {
-                                            lm.style.styleID = req.body.style.styleID;
-                                        }
-                                        if (req.body.style.maps) {
-                                            if (req.body.style.maps.type) {
-                                                lm.style.maps.type = req.body.style.maps.type;
-                                            }
-                                            if (req.body.style.maps.cloudMapID) {
-                                                lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
-                                            }
-                                            if (req.body.style.maps.cloudMapName) {
-                                                lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
-                                            }
-                                        }
-                                    }
-
-                                    if (req.body.hasOwnProperty('time')) {
-                                        lm.time.start = req.body.time.start;
-                                        lm.time.end = req.body.time.end;
-                                    }
-
-                                    //adding map location info
-                                    if (req.body.hasOwnProperty('loc_info')) {
-
-                                        if (req.body.loc_info.hasOwnProperty('floor_num')) {
-
-                                            lm.loc_info.floor_num = req.body.loc_info.floor_num;
-                                        }
-
-                                        if (req.body.loc_info.hasOwnProperty('room_name')) {
-
-                                            lm.loc_info.room_name = req.body.loc_info.room_name;
-                                        }
-
-                                    }
-
-                                    //---------- TAG HANDLING -----------//
-
-                                    if (req.body.tags && lm.tags) { //init check of objs
-                                        if (req.body.tags.length > 0) { //actually content
-                                            var count = 0;
-                                            for (var i = 0; i < req.body.tags.length; i++) { //loop content
-
-                                                var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
-
-                                                if (lm.tags.indexOf(newTag) > -1) { //check if tag already in saved arr
-                                                    //exists dont add tag again
-                                                } else {
-                                                    lm.tags.push(newTag); //else add to array
-                                                }
-                                                if (count == req.body.tags.length - 1) { //stop on final loop     
-                                                    checktoRemove(); //on loop end check to remove anything
-                                                }
-                                                count++;
-                                            }
-                                        } else {
-                                            checktoRemove(); //no new tags, check for removes
-                                        }
-
-                                        //check if we should really remove tags or go to save
-                                        function checktoRemove() {
-                                            if (req.body.landmarkTagsRemoved) {
-                                                if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
-                                                    removeTags();
-                                                } else {
-                                                    saveLandmark();
-                                                }
-                                            } else {
-                                                saveLandmark();
-                                            }
-                                        }
-                                    } else if (req.body.landmarkTagsRemoved && lm.tags) { //no tags to add but remove tags plz
-                                        if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
-                                            removeTags();
-                                        } else {
-                                            saveLandmark();
-                                        }
+                                db.collection('landmarks').findOne({
+                                    'id': newUnique,
+                                    'world': worldVal
+                                }, function(err, data) {
+                                    if (data) {
+                                        console.log('entry found!');
+                                        uniqueNumber++;
+                                        next();
                                     } else {
-                                        saveLandmark(); //nm, just save everything else
+                                        console.log('entry not found!');
+                                        next('unique!'); // This is where the looping is stopped
                                     }
-
-                                    //remove tags 
-                                    function removeTags() {
-                                        var count = 0;
-                                        for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
-                                            console.log(count);
-
-                                            var position = lm.tags.indexOf(req.body.landmarkTagsRemoved[i]); //find string position
-                                            if (~position) { //if exists remove it
-                                                lm.tags.splice(position, 1);
-                                            }
-                                            if (count == req.body.landmarkTagsRemoved.length - 1) { //stop on final loop
-                                                saveLandmark();
-                                            }
-                                            count++;
-
-                                        }
-                                    }
-
-                                    //---------- END HANDLING -----------//
-
-                                    function saveLandmark() {
-
-                                        lm.save(function(err, landmark) {
-                                            if (err) {
-                                                console.log(err);
-                                                console.log('lm.save error');
-                                            } else {
-                                                console.log(landmark);
-                                                console.log('success');
-                                                res.status(200).send([landmark]);
-
-                                                //update serverwidget object for world
-                                                if (req.body.world_id && req.body.hashtag) {
-                                                    manageServerWidgets(req.body.world_id, req.body.hashtag, lm.widgets); //add/remove server tags
-                                                }
-                                            }
-                                        });
-                                    }
-
-                                } else {
-                                    console.log('unauthorized user');
-                                }
+                                });
+                            },
+                            function() {
+                                saveLandmark(newUnique);
                             });
+                    } else {
+                        saveLandmark(uniqueIDer);
+                    }
+                });
+            });
+        }
+
+        //unique id found, now save/ update
+        function saveLandmark(finalID) {
+
+
+            //normalized!
+            finalID = finalID.toLowerCase();
+
+            //an edit
+            if (!req.body.newStatus) {
+
+                if (req.body.worldID) {
+                    var lookupID = req.body.worldID;
+                }
+                if (req.body._id) {
+                    var lookupID = req.body._id;
+                }
+                console.log('lookupID', lookupID);
+
+                landmarkSchema.findById(lookupID, function(err, lm) {
+                    if (!lm) {
+                        console.log(err);
+                    } else if (req.user._id == lm.permissions.ownerID) { //checking if logged in user is owner
+
+                        lm.name = req.body.name;
+                        lm.id = finalID;
+                        lm.valid = 1;
+                        lm.status = req.body.status || 'draft';
+
+                        if (req.body.hasOwnProperty('loc')) {
+                            if (req.body.loc.hasOwnProperty('coordinates')) {
+                                lm.loc = {
+                                    type: 'Point',
+                                    coordinates: [req.body.loc.coordinates[0], req.body.loc.coordinates[1]]
+                                };
+                            }
+                        }
+
+                        lm.hasLoc = req.body.hasLoc || false;
+
+                        if (req.body.avatar) {
+                            lm.avatar = req.body.avatar;
+                        }
+
+                        if (req.body.parentID) {
+                            lm.parentID = req.body.parentID;
+                        }
+
+                        if (req.body.description) {
+                            lm.description = req.body.description;
+                        }
+                        if (req.body.summary) {
+                            lm.summary = req.body.summary;
+                        }
+                        if (req.body.category) {
+                            lm.category = req.body.category;
+                        }
+                        if (req.body.landmarkCategories) {
+                            lm.landmarkCategories = req.body.landmarkCategories;
+                        }
+
+                        if (req.body.resources) {
+                            if (req.body.resources.hashtag) {
+                                lm.resources.hashtag = req.body.resources.hashtag;
+                            }
+                        }
+
+                        if (req.body.widgets) {
+                            /*if (req.body.widgets.twitter) {lm.widgets.twitter = req.body.widgets.twitter;}
+                            if (req.body.widgets.instagram) {lm.widgets.instagram = req.body.widgets.instagram;}
+                            if (req.body.widgets.upcoming) {lm.widgets.upcoming = req.body.widgets.upcoming;}
+                            if (req.body.widgets.category) {lm.widgets.category = req.body.widgets.category;}*/
+                        }
+
+                        //if user checks box to activate time 
+
+                        //ADDING / UPDATING CLOUD MAP INFO
+                        if (req.body.style) {
+                            if (req.body.style.styleID) {
+                                lm.style.styleID = req.body.style.styleID;
+                            }
+                            if (req.body.style.maps) {
+                                if (req.body.style.maps.type) {
+                                    lm.style.maps.type = req.body.style.maps.type;
+                                }
+                                if (req.body.style.maps.cloudMapID) {
+                                    lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
+                                }
+                                if (req.body.style.maps.cloudMapName) {
+                                    lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
+                                }
+                            }
+                        }
+
+                        if (req.body.hasOwnProperty('time')) {
+                            lm.time.start = req.body.time.start;
+                            lm.time.end = req.body.time.end;
+                        }
+
+                        //adding map location info
+                        if (req.body.hasOwnProperty('loc_info')) {
+
+                            if (req.body.loc_info.hasOwnProperty('floor_num')) {
+
+                                lm.loc_info.floor_num = req.body.loc_info.floor_num;
+                            }
+
+                            if (req.body.loc_info.hasOwnProperty('room_name')) {
+
+                                lm.loc_info.room_name = req.body.loc_info.room_name;
+                            }
 
                         }
 
-                        //not an edit
-                        else {
+                        //---------- TAG HANDLING -----------//
 
-                            //new world
-                            if (worldVal) {
-                                saveStyle(req.body.name, function(styleRes) { //creating new style to add to landmark
-                                    saveNewLandmark(styleRes);
-                                });
+                        if (req.body.tags && lm.tags) { //init check of objs
+                            if (req.body.tags.length > 0) { //actually content
+                                var count = 0;
+                                for (var i = 0; i < req.body.tags.length; i++) { //loop content
+
+                                    var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
+
+                                    if (lm.tags.indexOf(newTag) > -1) { //check if tag already in saved arr
+                                        //exists dont add tag again
+                                    } else {
+                                        lm.tags.push(newTag); //else add to array
+                                    }
+                                    if (count == req.body.tags.length - 1) { //stop on final loop     
+                                        checktoRemove(); //on loop end check to remove anything
+                                    }
+                                    count++;
+                                }
+                            } else {
+                                checktoRemove(); //no new tags, check for removes
                             }
 
-                            //new landmark
-                            else {
-
-                                //checking for auth of parent ID (world) to add new landmarks...bad security if attacker changes world val?? idk!
-
-                                landmarkSchema.findById(req.body.parentID, function(err, lm) {
-                                    if (!lm) {
-                                        console.log(err);
-                                    } else if (req.user._id == lm.permissions.ownerID) { //checking if logged in user is owner
-                                        saveNewLandmark();
-                                    } else {
-                                        console.log('unauthorized user');
-                                    }
-                                });
-                            }
-
-                            function saveNewLandmark(styleRes) {
-                                var lm = new landmarkSchema({
-                                    name: req.body.name,
-                                    id: finalID,
-                                    world: worldVal,
-                                    valid: 1,
-                                    views: 0,
-                                    avatar: req.body.avatar,
-                                    status: 'draft',
-                                    permissions: {
-                                        ownerID: req.user._id //from auth user ID
-                                    },
-                                    style: {
-                                        maps: {
-                                            cloudMapID: 'interfacefoundry.jh58g2al',
-                                            cloudMapName: 'forum'
-                                        }
-                                    },
-                                    resources: {}
-                                });
-
-                                if (req.body.loc) {
-                                    lm.loc = {
-                                        type: 'Point',
-                                        coordinates: [req.body.loc.coordinates[0],
-                                            req.body.loc.coordinates[1]
-                                        ]
-                                    }
-                                    lm.hasLoc = true;
-                                } else {
-                                    //fake location
-                                    lm.loc = {
-                                        type: 'Point',
-                                        coordinates: [-74.0059, 40.7127]
-                                    }
-                                    lm.hasLoc = false;
-                                }
-
-                                if (styleRes !== undefined) { //if new styleID created for world
-                                    lm.style.styleID = styleRes;
-                                }
-
-                                if (req.body.parentID) {
-                                    lm.parentID = req.body.parentID;
-                                }
-
-                                if (req.body.description) {
-                                    lm.description = req.body.description;
-                                }
-                                if (req.body.summary) {
-                                    lm.summary = req.body.summary;
-                                }
-                                if (req.body.category) {
-                                    lm.category = req.body.category;
-                                }
-
-                                if (req.body.landmarkCategories) {
-                                    lm.landmarkCategories = req.body.landmarkCategories;
-                                }
-
-                                if (req.body.resources) {
-                                    if (req.body.resources.hashtag) {
-                                        lm.resources.hashtag = req.body.resources.hashtag;
-                                    }
-                                }
-
-                                if (!req.body.avatar) {
-                                    lm.avatar = "img/tidepools/default.jpg";
-                                }
-
-                                //if user checks box to activate time 
-                                if (req.body.hasTime == true) {
-                                    lm.time.start = req.body.time.start || null;
-                                    lm.time.end = req.body.time.end || null;
-                                    lm.hasTime = true;
-                                }
-
-                                //ADDING / UPDATING CLOUD MAP INFO
-                                if (req.body.style) {
-                                    if (req.body.style.styleID) {
-                                        lm.style.styleID = req.body.style.styleID;
-                                    }
-                                    if (req.body.style.maps) {
-                                        if (req.body.style.maps.type) {
-                                            lm.style.maps.type = req.body.style.maps.type;
-                                        }
-                                        if (req.body.style.maps.cloudMapID) {
-                                            lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
-                                        }
-                                        if (req.body.style.maps.cloudMapName) {
-                                            lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
-                                        }
-                                    }
-                                }
-
-
-                                //adding map location info
-                                if (req.body.hasOwnProperty('loc_info')) {
-
-                                    if (req.body.loc_info.hasOwnProperty('floor_num')) {
-                                        lm.loc_info.floor_num = req.body.loc_info.floor_num || null;
-                                    }
-
-                                    if (req.body.loc_info.hasOwnProperty('room_name')) {
-                                        lm.loc_info.room_name = req.body.loc_info.room_name || null;
-                                    }
-                                }
-
-                                //---------- TAG HANDLING -----------//
-
-                                if (req.body.tags && lm.tags) { //init check of objs
-                                    if (req.body.tags.length > 0) { //actually content
-                                        var count = 0;
-                                        for (var i = 0; i < req.body.tags.length; i++) { //loop content
-
-                                            var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
-
-                                            newTag = newTag.toLowerCase();
-
-                                            if (lm.tags.indexOf(newTag) > -1) { //check if tag already in saved arr
-                                                //exists dont add tag again
-                                            } else {
-                                                lm.tags.push(newTag); //else add to array
-                                            }
-                                            if (count == req.body.tags.length - 1) { //stop on final loop     
-                                                checktoRemove(); //on loop end check to remove anything
-                                            }
-                                            count++;
-                                        }
-                                    } else {
-                                        checktoRemove(); //no new tags, check for removes
-                                    }
-
-                                    //check if we should really remove tags or go to save
-                                    function checktoRemove() {
-                                        if (req.body.landmarkTagsRemoved) {
-                                            if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
-                                                removeTags();
-                                            } else {
-                                                saveLandmark();
-                                            }
-                                        } else {
-                                            saveLandmark();
-                                        }
-                                    }
-                                } else if (req.body.landmarkTagsRemoved && lm.tags) { //no tags to add but remove tags plz
+                            //check if we should really remove tags or go to save
+                            function checktoRemove() {
+                                if (req.body.landmarkTagsRemoved) {
                                     if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
                                         removeTags();
                                     } else {
                                         saveLandmark();
                                     }
                                 } else {
-                                    saveLandmark(); //nm, just save everything else
+                                    saveLandmark();
                                 }
-
-                                //remove tags 
-                                function removeTags() {
-                                    var count = 0;
-                                    for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
-                                        console.log(count);
-
-                                        var position = lm.tags.indexOf(req.body.landmarkTagsRemoved[i]); //find string position
-                                        if (~position) { //if exists remove it
-                                            lm.tags.splice(position, 1);
-                                        }
-                                        if (count == req.body.landmarkTagsRemoved.length - 1) { //stop on final loop
-                                            saveLandmark();
-                                        }
-                                        count++;
-
-                                    }
-                                }
-
-                                //---------- END HANDLING -----------//
-
-                                function saveLandmark() {
-                                    lm.save(function(err, landmark) {
-                                        if (err)
-                                            console.log(err);
-                                        else {
-                                            console.log(landmark);
-                                            //world created
-                                            if (worldVal == true) {
-                                                saveProject(landmark._id, styleRes, req.user._id, function(projectRes) {
-
-                                                    var idArray = [{
-                                                        'worldID': landmark._id,
-                                                        'projectID': projectRes,
-                                                        'styleID': styleRes,
-                                                        'worldURL': landmark.id
-                                                    }];
-                                                    res.status(200).send(idArray);
-                                                });
-                                            }
-
-                                            //landmark created
-                                            else {
-                                                res.status(200).send([{
-                                                    "_id": landmark._id
-                                                }]);
-                                            }
-                                        }
-                                    });
-                                }
-
-
                             }
-                        }
-                    }
-
-                    function saveStyle(inputName, callback) {
-                        var st = new styleSchema({
-                            name: inputName,
-                            bodyBG_color: "#eceff1",
-                            titleBG_color: "#ff7043",
-                            navBG_color: "rgba(244,81,30,.8)",
-
-                            landmarkTitle_color: "#455a64", // RGB Hex
-                            categoryTitle_color: "#ff5722", // RGB Hex
-
-                            widgets: {
-                                twitter: false,
-                                instagram: false,
-                                upcoming: false,
-                                category: false,
-                                messages: true,
-                                presents: false,
-                                streetview: false,
-                                nearby: true
+                        } else if (req.body.landmarkTagsRemoved && lm.tags) { //no tags to add but remove tags plz
+                            if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
+                                removeTags();
+                            } else {
+                                saveLandmark();
                             }
-                        });
-
-                        saveIt(function(res) {
-                            callback(res);
-                        });
-
-                        function saveIt(callback) {
-                            st.save(function(err, style) {
-                                if (err)
-                                    console.log(err);
-                                else {
-                                    callback(style._id);
-                                }
-                            });
-                        }
-                    }
-
-                    function saveProject(world, style, owner, callback) {
-                        var pr = new projectSchema({
-                            worldID: world,
-                            styleID: style,
-                            permissions: {
-                                ownerID: owner
-                            }
-                        });
-
-                        saveIt(function(res) {
-                            callback(res);
-                        });
-
-                        function saveIt(callback) {
-                            pr.save(function(err, project) {
-                                if (err)
-                                    console.log(err);
-                                else {
-                                    callback(project._id);
-                                }
-                            });
-                        }
-                    }
-
-                }
-
-                function editProject(input) {
-                    projectSchema.findById(req.body.projectID, function(err, lm) {
-                        if (!lm) {
-                            console.log(err);
-                        } else if (req.user._id == lm.permissions.ownerID) {
-
-                            lm.save(function(err, style) {
-                                if (err) {
-                                    console.log('error');
-                                } else {
-                                    //console.log(style);
-                                    console.log('success');
-                                }
-                            });
-                        }
-                    });
-                }
-
-                function editStyle(input) {
-
-                    styleSchema.findById(req.body._id, function(err, lm) {
-                        if (!lm) {
-                            console.log(err);
                         } else {
+                            saveLandmark(); //nm, just save everything else
+                        }
 
-                            lm.bodyBG_color = req.body.bodyBG_color; // RGB Hex
-                            lm.cardBG_color = req.body.cardBG_color; // RGB Hex
-                            lm.titleBG_color = req.body.titleBG_color; //RGB Hex
-                            lm.navBG_color = req.body.navBG_color;
+                        //remove tags 
+                        function removeTags() {
+                            var count = 0;
+                            for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
+                                console.log(count);
 
-                            lm.cardBorder = req.body.cardBorder; // off by default
-                            lm.cardBorder_color = req.body.cardBorder_color; // RGB Hex
-                            lm.cardBorder_corner = req.body.cardBorder_corner; // px to round
+                                var position = lm.tags.indexOf(req.body.landmarkTagsRemoved[i]); //find string position
+                                if (~position) { //if exists remove it
+                                    lm.tags.splice(position, 1);
+                                }
+                                if (count == req.body.landmarkTagsRemoved.length - 1) { //stop on final loop
+                                    saveLandmark();
+                                }
+                                count++;
 
-                            lm.worldTitle_color = req.body.worldTitle_color; // RGB Hex
-                            lm.landmarkTitle = req.body.landmarkTitle; // off by default
-                            lm.landmarkTitle_color = req.body.landmarkTitle_color; // RGB Hex
-                            lm.categoryTitle = req.body.categoryTitle; // off by default
-                            lm.categoryTitle_color = req.body.categoryTitle_color; // RGB Hex
-                            lm.accent = req.body.accent; // off by default
-                            lm.accent_color = req.body.accent_color; // RGB Hex
-                            lm.bodyText = req.body.bodyText; // off by default
-                            lm.bodyText_color = req.body.bodyText_color; // RGB Hex
-
-                            lm.bodyFontName = req.body.bodyFontName; // font name
-                            lm.bodyFontFamily = req.body.bodyFontFamily; // font family
-                            lm.themeFont = req.body.themeFont; // off by default
-                            lm.themeFontName = req.body.themeFontName; // font name
-
-                            //console.log(req.body.widgets);
-
-                            if (req.body.widgets) {
-                                lm.widgets.twitter = req.body.widgets.twitter;
-                                lm.widgets.instagram = req.body.widgets.instagram;
-                                lm.widgets.upcoming = req.body.widgets.upcoming;
-                                lm.widgets.category = req.body.widgets.category;
-                                lm.widgets.messages = req.body.widgets.messages;
-                                lm.widgets.presents = req.body.widgets.presents;
-                                lm.widgets.streetview = req.body.widgets.streetview;
-                                lm.widgets.nearby = req.body.widgets.nearby;
                             }
+                        }
 
-                            lm.save(function(err, style) {
+                        //---------- END HANDLING -----------//
+
+                        function saveLandmark() {
+
+                            lm.save(function(err, landmark) {
                                 if (err) {
-                                    console.log('error');
+                                    console.log(err);
+                                    console.log('lm.save error');
                                 } else {
-                                    //console.log(style);
+                                    console.log(landmark);
                                     console.log('success');
+                                    res.status(200).send([landmark]);
 
-                                    if (res) {
-                                        res.status(200).send([style]);
-                                    }
-
-                                    //if parameters from world passed to style, then add to serverwidget object
+                                    //update serverwidget object for world
                                     if (req.body.world_id && req.body.hashtag) {
                                         manageServerWidgets(req.body.world_id, req.body.hashtag, lm.widgets); //add/remove server tags
                                     }
                                 }
                             });
                         }
+
+                    } else {
+                        console.log('unauthorized user');
+                    }
+                });
+
+            }
+
+            //not an edit
+            else {
+
+                //new world
+                if (worldVal) {
+                    saveStyle(req.body.name, function(styleRes) { //creating new style to add to landmark
+                        saveNewLandmark(styleRes);
                     });
-
                 }
 
-            });
+                //new landmark
+                else {
 
+                    //checking for auth of parent ID (world) to add new landmarks...bad security if attacker changes world val?? idk!
 
-            // Delete
-            app.delete('/api/:collection/:id', function(req, res) {
-                db.collection(req.params.collection).remove({
-                    _id: objectId(req.params.id)
-                }, {
-                    safe: true
-                }, fn(req, res));
-            });
-
-            //Group
-            app.put('/api/:collection/group', function(req, res) {
-                db.collection(req.params.collection).group(req.body, fn(req, res));
-            })
-
-            // MapReduce
-            app.put('/api/:collection/mapReduce', function(req, res) {
-                if (!req.body.options) {
-                    req.body.options = {}
-                };
-                req.body.options.out = {
-                    inline: 1
-                };
-                req.body.options.verbose = false;
-                db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));
-            })
-
-            // Command (count, distinct, find, aggregate)
-            app.put('/api/:collection/:cmd', function(req, res) {
-                if (req.params.cmd === 'distinct') {
-                    req.body = req.body.key
-                }
-                db.collection(req.params.collection)[req.params.cmd](req.body, fn(req, res));
-            })
-
-
-            // //for routing auth to passport
-            // var router = express.Router();
-            // router.get('/auth/*', function (req, res, next) {
-            //   next();
-            // })
-            // app.use(router);
-
-            // app.all('/w/*', function(req, res) {
-            //   console.log('asdf '+req.url);
-            // });
-
-
-
-            //for routing all else to angular
-            app.all('/*', function(req, res, next) {
-
-                function endsWith(str, suffix) {
-                    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-                }
-
-                //if file path, then add file to end
-                if (req.url.indexOf('.') != -1) {
-                    res.sendFile(req.url, {
-                        root: __dirname + '/app/dist'
-                    }, function(err) {
-                        if (err) {
+                    landmarkSchema.findById(req.body.parentID, function(err, lm) {
+                        if (!lm) {
                             console.log(err);
-                            res.status(err.status).end();
+                        } else if (req.user._id == lm.permissions.ownerID) { //checking if logged in user is owner
+                            saveNewLandmark();
                         } else {
-                            console.log('Sent:', req.url);
+                            console.log('unauthorized user');
                         }
                     });
-                } else if (req.url.indexOf('api') > -1) {
-                    return next();
-                } else {
-                    res.sendFile('index.html', {
-                        root: __dirname + '/app/dist'
+                }
+
+                function saveNewLandmark(styleRes) {
+                    var lm = new landmarkSchema({
+                        name: req.body.name,
+                        id: finalID,
+                        world: worldVal,
+                        valid: 1,
+                        views: 0,
+                        avatar: req.body.avatar,
+                        status: 'draft',
+                        permissions: {
+                            ownerID: req.user._id //from auth user ID
+                        },
+                        style: {
+                            maps: {
+                                cloudMapID: 'interfacefoundry.jh58g2al',
+                                cloudMapName: 'forum'
+                            }
+                        },
+                        resources: {}
                     });
+
+                    if (req.body.loc) {
+                        lm.loc = {
+                            type: 'Point',
+                            coordinates: [req.body.loc.coordinates[0],
+                                req.body.loc.coordinates[1]
+                            ]
+                        }
+                        lm.hasLoc = true;
+                    } else {
+                        //fake location
+                        lm.loc = {
+                            type: 'Point',
+                            coordinates: [-74.0059, 40.7127]
+                        }
+                        lm.hasLoc = false;
+                    }
+
+                    if (styleRes !== undefined) { //if new styleID created for world
+                        lm.style.styleID = styleRes;
+                    }
+
+                    if (req.body.parentID) {
+                        lm.parentID = req.body.parentID;
+                    }
+
+                    if (req.body.description) {
+                        lm.description = req.body.description;
+                    }
+                    if (req.body.summary) {
+                        lm.summary = req.body.summary;
+                    }
+                    if (req.body.category) {
+                        lm.category = req.body.category;
+                    }
+
+                    if (req.body.landmarkCategories) {
+                        lm.landmarkCategories = req.body.landmarkCategories;
+                    }
+
+                    if (req.body.resources) {
+                        if (req.body.resources.hashtag) {
+                            lm.resources.hashtag = req.body.resources.hashtag;
+                        }
+                    }
+
+                    if (!req.body.avatar) {
+                        lm.avatar = "img/tidepools/default.jpg";
+                    }
+
+                    //if user checks box to activate time 
+                    if (req.body.hasTime == true) {
+                        lm.time.start = req.body.time.start || null;
+                        lm.time.end = req.body.time.end || null;
+                        lm.hasTime = true;
+                    }
+
+                    //ADDING / UPDATING CLOUD MAP INFO
+                    if (req.body.style) {
+                        if (req.body.style.styleID) {
+                            lm.style.styleID = req.body.style.styleID;
+                        }
+                        if (req.body.style.maps) {
+                            if (req.body.style.maps.type) {
+                                lm.style.maps.type = req.body.style.maps.type;
+                            }
+                            if (req.body.style.maps.cloudMapID) {
+                                lm.style.maps.cloudMapID = req.body.style.maps.cloudMapID;
+                            }
+                            if (req.body.style.maps.cloudMapName) {
+                                lm.style.maps.cloudMapName = req.body.style.maps.cloudMapName;
+                            }
+                        }
+                    }
+
+
+                    //adding map location info
+                    if (req.body.hasOwnProperty('loc_info')) {
+
+                        if (req.body.loc_info.hasOwnProperty('floor_num')) {
+                            lm.loc_info.floor_num = req.body.loc_info.floor_num || null;
+                        }
+
+                        if (req.body.loc_info.hasOwnProperty('room_name')) {
+                            lm.loc_info.room_name = req.body.loc_info.room_name || null;
+                        }
+                    }
+
+                    //---------- TAG HANDLING -----------//
+
+                    if (req.body.tags && lm.tags) { //init check of objs
+                        if (req.body.tags.length > 0) { //actually content
+                            var count = 0;
+                            for (var i = 0; i < req.body.tags.length; i++) { //loop content
+
+                                var newTag = req.body.tags[i].replace(/[^\w\s]/gi, ''); //removing all but alphanumeric and spaces
+
+                                newTag = newTag.toLowerCase();
+
+                                if (lm.tags.indexOf(newTag) > -1) { //check if tag already in saved arr
+                                    //exists dont add tag again
+                                } else {
+                                    lm.tags.push(newTag); //else add to array
+                                }
+                                if (count == req.body.tags.length - 1) { //stop on final loop     
+                                    checktoRemove(); //on loop end check to remove anything
+                                }
+                                count++;
+                            }
+                        } else {
+                            checktoRemove(); //no new tags, check for removes
+                        }
+
+                        //check if we should really remove tags or go to save
+                        function checktoRemove() {
+                            if (req.body.landmarkTagsRemoved) {
+                                if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
+                                    removeTags();
+                                } else {
+                                    saveLandmark();
+                                }
+                            } else {
+                                saveLandmark();
+                            }
+                        }
+                    } else if (req.body.landmarkTagsRemoved && lm.tags) { //no tags to add but remove tags plz
+                        if (req.body.landmarkTagsRemoved.length > 0) { //actually contents
+                            removeTags();
+                        } else {
+                            saveLandmark();
+                        }
+                    } else {
+                        saveLandmark(); //nm, just save everything else
+                    }
+
+                    //remove tags 
+                    function removeTags() {
+                        var count = 0;
+                        for (var i = 0; i < req.body.landmarkTagsRemoved.length; i++) {
+                            console.log(count);
+
+                            var position = lm.tags.indexOf(req.body.landmarkTagsRemoved[i]); //find string position
+                            if (~position) { //if exists remove it
+                                lm.tags.splice(position, 1);
+                            }
+                            if (count == req.body.landmarkTagsRemoved.length - 1) { //stop on final loop
+                                saveLandmark();
+                            }
+                            count++;
+
+                        }
+                    }
+
+                    //---------- END HANDLING -----------//
+
+                    function saveLandmark() {
+                        lm.save(function(err, landmark) {
+                            if (err)
+                                console.log(err);
+                            else {
+                                console.log(landmark);
+                                //world created
+                                if (worldVal == true) {
+                                    saveProject(landmark._id, styleRes, req.user._id, function(projectRes) {
+
+                                        var idArray = [{
+                                            'worldID': landmark._id,
+                                            'projectID': projectRes,
+                                            'styleID': styleRes,
+                                            'worldURL': landmark.id
+                                        }];
+                                        res.status(200).send(idArray);
+                                    });
+                                }
+
+                                //landmark created
+                                else {
+                                    res.status(200).send([{
+                                        "_id": landmark._id
+                                    }]);
+                                }
+                            }
+                        });
+                    }
+
+
+                }
+            }
+        }
+
+        function saveStyle(inputName, callback) {
+            var st = new styleSchema({
+                name: inputName,
+                bodyBG_color: "#eceff1",
+                titleBG_color: "#ff7043",
+                navBG_color: "rgba(244,81,30,.8)",
+
+                landmarkTitle_color: "#455a64", // RGB Hex
+                categoryTitle_color: "#ff5722", // RGB Hex
+
+                widgets: {
+                    twitter: false,
+                    instagram: false,
+                    upcoming: false,
+                    category: false,
+                    messages: true,
+                    presents: false,
+                    streetview: false,
+                    nearby: true
                 }
             });
 
-
-
-
-
-
-            //3 Hour checkup on size of image directories, emails if over 10gb
-            //from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
-            // async.whilst(
-            //     function () { return true }, 
-            //     function (callback) {
-
-            //         var spawn = require('child_process').spawn,
-            //         size = spawn('du', ['-sh', './app/dist/img/instagram/']);
-
-            //         size.stdout.on('data', function (data) {
-
-            //           if (parseFloat(data.toString('utf8')) > 10000){ //size is 10gb send email warning!
-
-            //             var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
-            //             var feedbackTo = 'jrbaldwin@interfacefoundry.com';
-
-            //             var mailOptions = {
-            //                 to: feedbackTo,
-            //                 from: 'IF Bubbl <mail@bubbl.li>',
-            //                 subject: 'INSTAGRAM SIZE WARNING, exceeded 10gb',
-            //                 text: 'help me'
-            //               };
-            //               mailerTransport.sendMail(mailOptions, function(err) {
-            //                 console.log('warning size message sent');
-            //               });  
-            //           }
-
-            //         });
-
-            //         setTimeout(callback, 10800000); // every 3 hour check
-            //     },
-            //     function (err) {
-            //     }
-            // );
-
-            // function generate_xml_sitemap(){
-            //     var root_path = 'http://www.bubbl.li/';
-            //     var priority = 0.5;
-            //     var freq = 'monthly';
-
-            //   landmarkSchema.find({}, {'id':1}, function (err, docs) {
-            //     if (err) {
-            //       console.log("Error Occured: ", err);
-            //     } else { 
-
-            //       var xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-            //       for (var i in docs) {
-            //         xml += '<url>';
-            //         xml += '<loc>'+ root_path + '/w/' + docs[i].id + '</loc>';
-            //         xml += '<changefreq>'+ freq +'</changefreq>';
-            //         xml += '<priority>'+ priority +'</priority>';
-            //         xml += '</url>';
-            //         i++;
-            //       }
-            //       xml += '</urlset>';
-            //       console.log(xml);
-            //       return xml;
-            //     }
-            //     });
-            // }
-
-            // app.get('/sitemap.xml', function(req, res) {
-            //     res.header('Content-Type', 'text/xml');
-            //     res.send(generate_xml_sitemap());     
-            // })
-
-            server.listen(2997, function() {
-                console.log('Running in ', process.env.NODE_ENV, 'mode.')
-                console.log("Illya casting magic on 2997 ~ ~ ♡");
+            saveIt(function(res) {
+                callback(res);
             });
+
+            function saveIt(callback) {
+                st.save(function(err, style) {
+                    if (err)
+                        console.log(err);
+                    else {
+                        callback(style._id);
+                    }
+                });
+            }
+        }
+
+        function saveProject(world, style, owner, callback) {
+            var pr = new projectSchema({
+                worldID: world,
+                styleID: style,
+                permissions: {
+                    ownerID: owner
+                }
+            });
+
+            saveIt(function(res) {
+                callback(res);
+            });
+
+            function saveIt(callback) {
+                pr.save(function(err, project) {
+                    if (err)
+                        console.log(err);
+                    else {
+                        callback(project._id);
+                    }
+                });
+            }
+        }
+
+    }
+
+    function editProject(input) {
+        projectSchema.findById(req.body.projectID, function(err, lm) {
+            if (!lm) {
+                console.log(err);
+            } else if (req.user._id == lm.permissions.ownerID) {
+
+                lm.save(function(err, style) {
+                    if (err) {
+                        console.log('error');
+                    } else {
+                        //console.log(style);
+                        console.log('success');
+                    }
+                });
+            }
+        });
+    }
+
+    function editStyle(input) {
+
+        styleSchema.findById(req.body._id, function(err, lm) {
+            if (!lm) {
+                console.log(err);
+            } else {
+
+                lm.bodyBG_color = req.body.bodyBG_color; // RGB Hex
+                lm.cardBG_color = req.body.cardBG_color; // RGB Hex
+                lm.titleBG_color = req.body.titleBG_color; //RGB Hex
+                lm.navBG_color = req.body.navBG_color;
+
+                lm.cardBorder = req.body.cardBorder; // off by default
+                lm.cardBorder_color = req.body.cardBorder_color; // RGB Hex
+                lm.cardBorder_corner = req.body.cardBorder_corner; // px to round
+
+                lm.worldTitle_color = req.body.worldTitle_color; // RGB Hex
+                lm.landmarkTitle = req.body.landmarkTitle; // off by default
+                lm.landmarkTitle_color = req.body.landmarkTitle_color; // RGB Hex
+                lm.categoryTitle = req.body.categoryTitle; // off by default
+                lm.categoryTitle_color = req.body.categoryTitle_color; // RGB Hex
+                lm.accent = req.body.accent; // off by default
+                lm.accent_color = req.body.accent_color; // RGB Hex
+                lm.bodyText = req.body.bodyText; // off by default
+                lm.bodyText_color = req.body.bodyText_color; // RGB Hex
+
+                lm.bodyFontName = req.body.bodyFontName; // font name
+                lm.bodyFontFamily = req.body.bodyFontFamily; // font family
+                lm.themeFont = req.body.themeFont; // off by default
+                lm.themeFontName = req.body.themeFontName; // font name
+
+                //console.log(req.body.widgets);
+
+                if (req.body.widgets) {
+                    lm.widgets.twitter = req.body.widgets.twitter;
+                    lm.widgets.instagram = req.body.widgets.instagram;
+                    lm.widgets.upcoming = req.body.widgets.upcoming;
+                    lm.widgets.category = req.body.widgets.category;
+                    lm.widgets.messages = req.body.widgets.messages;
+                    lm.widgets.presents = req.body.widgets.presents;
+                    lm.widgets.streetview = req.body.widgets.streetview;
+                    lm.widgets.nearby = req.body.widgets.nearby;
+                }
+
+                lm.save(function(err, style) {
+                    if (err) {
+                        console.log('error');
+                    } else {
+                        //console.log(style);
+                        console.log('success');
+
+                        if (res) {
+                            res.status(200).send([style]);
+                        }
+
+                        //if parameters from world passed to style, then add to serverwidget object
+                        if (req.body.world_id && req.body.hashtag) {
+                            manageServerWidgets(req.body.world_id, req.body.hashtag, lm.widgets); //add/remove server tags
+                        }
+                    }
+                });
+            }
+        });
+
+    }
+
+});
+
+
+// Delete
+app.delete('/api/:collection/:id', function(req, res) {
+    db.collection(req.params.collection).remove({
+        _id: objectId(req.params.id)
+    }, {
+        safe: true
+    }, fn(req, res));
+});
+
+//Group
+app.put('/api/:collection/group', function(req, res) {
+    db.collection(req.params.collection).group(req.body, fn(req, res));
+})
+
+// MapReduce
+app.put('/api/:collection/mapReduce', function(req, res) {
+    if (!req.body.options) {
+        req.body.options = {}
+    };
+    req.body.options.out = {
+        inline: 1
+    };
+    req.body.options.verbose = false;
+    db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));
+})
+
+// Command (count, distinct, find, aggregate)
+app.put('/api/:collection/:cmd', function(req, res) {
+    if (req.params.cmd === 'distinct') {
+        req.body = req.body.key
+    }
+    db.collection(req.params.collection)[req.params.cmd](req.body, fn(req, res));
+})
+
+
+// //for routing auth to passport
+// var router = express.Router();
+// router.get('/auth/*', function (req, res, next) {
+//   next();
+// })
+// app.use(router);
+
+// app.all('/w/*', function(req, res) {
+//   console.log('asdf '+req.url);
+// });
+
+
+
+//for routing all else to angular
+app.all('/*', function(req, res, next) {
+
+    function endsWith(str, suffix) {
+        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+    }
+
+    //if file path, then add file to end
+    if (req.url.indexOf('.') != -1) {
+        res.sendFile(req.url, {
+            root: __dirname + '/app/dist'
+        }, function(err) {
+            if (err) {
+                console.log(err);
+                res.status(err.status).end();
+            } else {
+                console.log('Sent:', req.url);
+            }
+        });
+    } else if (req.url.indexOf('api') > -1) {
+        return next();
+    } else {
+        res.sendFile('index.html', {
+            root: __dirname + '/app/dist'
+        });
+    }
+});
+
+
+
+
+
+
+//3 Hour checkup on size of image directories, emails if over 10gb
+//from: http://stackoverflow.com/questions/7529228/how-to-get-totalsize-of-files-in-directory
+// async.whilst(
+//     function () { return true }, 
+//     function (callback) {
+
+//         var spawn = require('child_process').spawn,
+//         size = spawn('du', ['-sh', './app/dist/img/instagram/']);
+
+//         size.stdout.on('data', function (data) {
+
+//           if (parseFloat(data.toString('utf8')) > 10000){ //size is 10gb send email warning!
+
+//             var sText = req.body.emailText.replace(/[^\w\s\.\@]/gi, '');
+//             var feedbackTo = 'jrbaldwin@interfacefoundry.com';
+
+//             var mailOptions = {
+//                 to: feedbackTo,
+//                 from: 'IF Bubbl <mail@bubbl.li>',
+//                 subject: 'INSTAGRAM SIZE WARNING, exceeded 10gb',
+//                 text: 'help me'
+//               };
+//               mailerTransport.sendMail(mailOptions, function(err) {
+//                 console.log('warning size message sent');
+//               });  
+//           }
+
+//         });
+
+//         setTimeout(callback, 10800000); // every 3 hour check
+//     },
+//     function (err) {
+//     }
+// );
+
+// function generate_xml_sitemap(){
+//     var root_path = 'http://www.bubbl.li/';
+//     var priority = 0.5;
+//     var freq = 'monthly';
+
+//   landmarkSchema.find({}, {'id':1}, function (err, docs) {
+//     if (err) {
+//       console.log("Error Occured: ", err);
+//     } else { 
+
+//       var xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+//       for (var i in docs) {
+//         xml += '<url>';
+//         xml += '<loc>'+ root_path + '/w/' + docs[i].id + '</loc>';
+//         xml += '<changefreq>'+ freq +'</changefreq>';
+//         xml += '<priority>'+ priority +'</priority>';
+//         xml += '</url>';
+//         i++;
+//       }
+//       xml += '</urlset>';
+//       console.log(xml);
+//       return xml;
+//     }
+//     });
+// }
+
+// app.get('/sitemap.xml', function(req, res) {
+//     res.header('Content-Type', 'text/xml');
+//     res.send(generate_xml_sitemap());     
+// })
+
+server.listen(2997, function() {
+    console.log('Running in ', process.env.NODE_ENV, 'mode.')
+    console.log("Illya casting magic on 2997 ~ ~ ♡");
+});

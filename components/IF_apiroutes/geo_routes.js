@@ -104,17 +104,17 @@ router.get('/', function(req, res) {
                                 req.geoloc.lng = parseFloat(req.query.lng);
                             }
                             req.geoloc.src = 'mapquest';
-                            console.log('hitting mapquest data.address.city', data)
+                            // console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
                         } else if (data.address.village) {
                             req.geoloc.cityName = data.address.village;
-                            console.log('hitting mapquest data.address.village', data)
+                            // console.log('hitting mapquest data.address.village', data)
                             req.geoloc.src = 'mapquest';
                             req.geoloc.lat = parseFloat(req.query.lat);
                             req.geoloc.lng = parseFloat(req.query.lng);
                         } else if (data.address.town) {
                             req.geoloc.cityName = data.address.town;
-                            console.log('hitting mapquest data.address.town', data)
+                            // console.log('hitting mapquest data.address.town', data)
                             req.geoloc.src = 'mapquest';
                             req.geoloc.lat = parseFloat(req.query.lat);
                             req.geoloc.lng = parseFloat(req.query.lng);
