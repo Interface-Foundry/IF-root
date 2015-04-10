@@ -22,12 +22,13 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
 	map.loadBubble(data.world);
-	getLandmark();
+	getLandmark(data.world);
 }, function(error) {
 	console.log(error);
+	$location.path('/404');
 });
 
-function getLandmark() {
+function getLandmark(world) {
 	worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 		$scope.landmark = landmark;
 		console.log(landmark); 
@@ -142,7 +143,8 @@ function getLandmark() {
 			}				
 		}
 	}, function(error) {
-		console.log(error);
+		console.log(error, 'redirecting to world');
+		$location.path('/w/' + world.id);
 	});
 }
 
