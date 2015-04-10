@@ -110,8 +110,8 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 style.navBG_color = $scope.style.navBG_color;
 
 		 //show edit buttons if user is world owner
-		 if ($rootScope.userID && $scope.world.permissions){
-			 if ($rootScope.userID == $scope.world.permissions.ownerID){
+		 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
+			 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
 			 }
 			 else {

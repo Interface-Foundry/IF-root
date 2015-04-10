@@ -171,6 +171,7 @@ userManager.logout = function() {
 	userManager.loginStatus = false;
 	userManager.adminStatus = false;
 	userManager._user = {};
+	$rootScope.user = {};
 	$location.path('/');
 	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
