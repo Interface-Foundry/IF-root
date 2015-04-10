@@ -29,7 +29,7 @@ router.use(function(req, res, next) {
         if (err) console.log(err);
         var data = JSON.parse(body);
 
-        console.log('data is..', data)
+        // console.log('data is..', data)
         if (!data.city) {
             req.geoloc.cityName = 'My Location'
             console.log('ip-based data.city does not exist, data is: ', data)

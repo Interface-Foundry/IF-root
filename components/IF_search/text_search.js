@@ -21,6 +21,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                     $text: {
                         $search: sText
                     },
+                    world: true,
                     loc: {
                         $geoWithin: {
                             $centerSphere: [
