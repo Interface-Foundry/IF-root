@@ -23640,6 +23640,9 @@ $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 
 $scope.select = function(bubble) {
+	if (!bubble) {
+		return;
+	}
 	$location.path('w/'+bubble.id);
 }
 
