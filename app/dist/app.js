@@ -20978,7 +20978,7 @@ angular.module('tidepoolsServices')
 
 			return dialogs;
 		}]);
-app.controller('feedbackController', ['$http', '$location', '$scope', 'alertManager', 'dialogs', function($http, $location, $scope, alertManager, dialogs) {
+app.controller('feedbackController', ['$http', '$location', '$scope', 'alertManager', 'analyticsService', 'dialogs', function($http, $location, $scope, alertManager, analyticsService, dialogs) {
 
   $scope.feedbackCategories = [
     {category: "map request"},
@@ -20992,6 +20992,9 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
     {emotion: "angry"},
     {emotion: "confused"}
   ];
+
+  $scope.feedbackCategory = {};
+  $scope.feedbackEmotion = {};
 
   $scope.sendFeedback = function($event) { //sends feedback email. move to dialog directive
 
@@ -21010,6 +21013,8 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
       error(function(err){
         console.log('there was a problem');
       });
+
+	analyticsService.log("feedback", data);
 
     dialogs.show = false;
     $scope.feedbackCategory = null;

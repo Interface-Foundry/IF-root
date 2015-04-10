@@ -207,7 +207,8 @@ app.post('/feedback', function(req, res) {
 	var s = /(<([^>]+)>)/ig; // just strip out HTML stuff
 	var emailSubject = "Feedback - " + req.body.feedbackCategory.replace(s, '');
 	var emailBody = "from: $user\n\nemotion: $emotion\n\nurl: $url\n\ntext: $text"
-		.replace('$user', req.user._id)
+		.replace('$user', req.user ? req.user._id : "not logged in")
+		.replace('$anonuser', req.body.anonuserid)
 		.replace('$url', req.body.currentUrl)
 		.replace('$emotion', req.body.feedbackEmotion)
 		.replace('$text', req.body.feedbackText)
