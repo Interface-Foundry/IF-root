@@ -25313,7 +25313,7 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 	}
 
 }]);
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', 'analyticsService', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter, analyticsService) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;

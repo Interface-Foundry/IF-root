@@ -25,6 +25,8 @@ router.use(function(req, res, next) {
         if (err) console.log(err);
         // console.log('body is..', body)
         var data = JSON.parse(body);
+
+        console.log('data is..', data)
         if (!data.city) {
             req.geoloc.cityName = 'My Location'
         } else {
@@ -86,7 +88,7 @@ router.get('/', function(req, res) {
                                 data.address.city = 'New York City'
                             }
                             req.geoloc.src = 'mapquest';
-                            // console.log('hitting mapquest data.address.city', data)
+                            console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
                         } else if (data.address.village) {
                             req.geoloc.cityName = data.address.village;
