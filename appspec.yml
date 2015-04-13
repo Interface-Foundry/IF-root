@@ -3,8 +3,3 @@ os: linux
 files:
   - source: /
     destination: /opt/IF-Root
-permissions:
-  - object: /opt/IF-Root
-    owner: kip
-    type:
-      - directory
