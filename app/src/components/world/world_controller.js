@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -87,131 +87,116 @@ function uploadPicture(file, hashtag, data) {
 		worldTree.cacheSubmission($scope.world._id, hashtag, data);
 		$scope.wtgt.images[hashtag] = data;
 		$scope.wtgt.building[hashtag] = false;
-
 	});
 }
-
-// function checkUserForSubmissions() {
-// 	if (!$rootScope.user || !$rootScope.user.submissions) {
-// 		return;
-// 	}
-// 	_.chain($rootScope.user.submissions)
-// 		.groupBy(function(sub) {
-// 			return sub.hashtag;
-// 		})
-// 		.sortBy(function(sub) {
-// 			return sub.timestamp;
-// 		})
-// 		.value()
-// 		.forEach(function(sub) {
-// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-// 		});
-// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
-	  $scope.world = data.world;
-		$scope.style = data.style;
-		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
-		if (!(_.isEmpty(data.submissions))) {
-			data.submissions.forEach(function(s) {
-				if (!s) {
-					return;
-				}
-				$scope.wtgt.images[s.hashtag] = s.imgURL;
-			});
-		// } else {
-		// 	checkUserForSubmissions();
-		}
+	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
+		hideContentService.hide();
+		$scope.hide = true;
+		return;
+	}
 
-
-
-
-		analyticsService.log('bubble.visit', {
-			id: $scope.world._id
+  $scope.world = data.world;
+	$scope.style = data.style;
+	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+	if (!(_.isEmpty(data.submissions))) {
+		data.submissions.forEach(function(s) {
+			if (!s) {
+				return;
+			}
+			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
+	// } else {
+	// 	checkUserForSubmissions();
+	}
 
-		 if (bubbleTypeService.get() == 'Retail') {
+	analyticsService.log('bubble.visit', {
+		id: $scope.world._id
+	});
 
-		 	$scope.isRetail = true;
+	 if (bubbleTypeService.get() == 'Retail') {
+
+	 	$scope.isRetail = true;
+	}
+
+	 style.navBG_color = $scope.style.navBG_color;
+
+	 //show edit buttons if user is world owner
+	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
+		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
+		 	$scope.showEdit = true;
+		}
+		else {
+		 	$scope.showEdit = false;
+		}
+	} 
+
+	//console.log($scope.world);
+	//console.log($scope.style);
+	 
+	 if ($scope.world.name) {
+		 angular.extend($rootScope, {globalTitle: $scope.world.name});
+	 }
+
+	//switching between descrip and summary for descrip card
+	if ($scope.world.description || $scope.world.summary) {
+		$scope.description = true;
+		if ($scope.world.description){
+			$scope.descriptionType = "description";
+		}
+		else {
+			$scope.descriptionType = "summary";
+		}
+	}
+	
+	// set appropriate zoom level based on local maps
+	var zoomLevel = 18;
+
+	if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+		if ($scope.world.style.maps.localMapArray){
+			if ($scope.world.style.maps.localMapArray.length > 0) {
+				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+			} 
+		}
+		else {
+			zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
 		}
 
-		 style.navBG_color = $scope.style.navBG_color;
+	};
 
-		 //show edit buttons if user is world owner
-		 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-			 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-			 	$scope.showEdit = true;
-			}
-			else {
-			 	$scope.showEdit = false;
-			}
-		} 
+	//map setup
+	if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
+		console.log('setcenter');
 
-		//console.log($scope.world);
-		//console.log($scope.style);
-		 
-		 if ($scope.world.name) {
-			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 }
-
-		//switching between descrip and summary for descrip card
-		if ($scope.world.description || $scope.world.summary) {
-			$scope.description = true;
-			if ($scope.world.description){
-				$scope.descriptionType = "description";
-			}
-			else {
-				$scope.descriptionType = "summary";
-			}
+		// if bubble has local maps then do not show world marker
+		if (!map.localMapArrayExists($scope.world)) {
+			addWorldMarker();
 		}
-		
-		// set appropriate zoom level based on local maps
-		var zoomLevel = 18;
 
-		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-			if ($scope.world.style.maps.localMapArray){
-				if ($scope.world.style.maps.localMapArray.length > 0) {
-					zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
-				} 
-			}
-			else {
-				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
-			}
+	} else {
+		console.error('No center found! Error!');
+	}
 
-		};
+	var worldStyle = $scope.world.style;
+	map.groupFloorMaps(worldStyle);
 
-		//map setup
-		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
-			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
-			console.log('setcenter');
+		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+		}
 
-			// if bubble has local maps then do not show world marker
-			if (!map.localMapArrayExists($scope.world)) {
-				addWorldMarker();
-			}
-
+		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+			map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 		} else {
-			console.error('No center found! Error!');
+			console.warn('No base layer found! Defaulting to forum.');
+			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 		}
-
-		var worldStyle = $scope.world.style;
-		map.groupFloorMaps(worldStyle);
-
-			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
-			}
-
-			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
-				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
-			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
-			} else {
-				console.warn('No base layer found! Defaulting to forum.');
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
-			}
-		// }
-		
-		$scope.loadLandmarks();
+	// }
+	
+	$scope.loadLandmarks();
 }
 
 function addWorldMarker() {

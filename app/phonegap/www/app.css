@@ -5303,6 +5303,27 @@ button:active,
 button:focus {
   outline: none;
 }
+/* temp class for splash that hides world */
+.splash-img {
+  background-color: grey;
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  margin: auto auto;
+  position: absolute;
+  right: 0;
+  top: -70%;
+  width: 100%;
+  z-index: 1001;
+}
+.splash-img img {
+  opacity: 0;
+  -webkit-transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
+}
+.splash-img img.splash-fade-in {
+  opacity: 1;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;
