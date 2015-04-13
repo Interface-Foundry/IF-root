@@ -18558,7 +18558,9 @@ mapManager.groupFloorMaps = function(worldStyle) {
 			mapManager.addOverlayGroup(overlayGroup, groupName);
 		}
 	} else {
-		mapManager.addOverlay(localMap.localMapID, localMap.localMapName, localMap.localMapOptions);
+		if (localMap.localMapID && localMap.localMapName && localMap.localMapOptions) {
+			mapManager.addOverlay(localMap.localMapID, localMap.localMapName, localMap.localMapOptions);
+		}
 	}
 }
 
