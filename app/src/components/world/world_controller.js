@@ -37,7 +37,7 @@ $scope.verifyUpload = function(event, state) {
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
 			dialogs.showDialog('authDialog.html');
-			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+			contest.set($scope.wtgt.hashtags[state]);
 		}, 1500);
 		
 	}
