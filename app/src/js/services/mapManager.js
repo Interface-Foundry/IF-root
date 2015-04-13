@@ -7,7 +7,7 @@ var mapManager = {
 	center: {
 		lat: 42,
 		lng: -83,
-		zoom: 14
+		zoom: 17
 	},
 	markers: {},
 	layers: {
@@ -151,6 +151,9 @@ mapManager.adjustHeightByAperture = function(aperture, height) {
 		case 'aperture-full':
 			return 110;
 			break;
+		case 'aperture-off':
+			return height * 0.78; 
+			break;
 	}
 }
 
@@ -178,10 +181,10 @@ mapManager.resetMap = function() {
 /* MARKER METHODS */
 
 mapManager.markerFromLandmark = function(landmark, world, $scope) {
-	var landmarkIcon = 'img/marker/bubble-marker-50.png',
-			popupAnchorValues = [0, -40],
-			iconAnchor = [17, 67],
-			iconSize = [35, 67],
+	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+			popupAnchorValues = [0, -4],
+			iconAnchor = [11, 11],
+			iconSize = [23, 23],
 			layerGroup = getLayerGroup(landmark) + '-landmarks',
 			alt = null;
 
@@ -285,9 +288,15 @@ mapManager.removeMarker = function(key) {
 	}
 }
 
-mapManager.removeAllMarkers = function() {
+mapManager.removeAllMarkers = function(hardRemove) {
 	console.log('--removeAllMarkers--');
+	var trackMarker = mapManager.getMarker('track');
 	mapManager.markers = {};
+
+	// re-add user location marker
+	if (!hardRemove && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
+	}
 }
 
 mapManager.moveMarker = function(key, pos) {
@@ -299,13 +308,21 @@ mapManager.moveMarker = function(key, pos) {
 	mapManager.refresh();
 };
 
-mapManager.setMarkers = function(markers) {
+mapManager.setMarkers = function(markers, hardSet) {
+	var trackMarker = mapManager.getMarker('track');
+	
 	if (_.isArray(markers)) {
 		mapManager.markers = _.indexBy(markers, function(marker) {
 			return marker._id;
-		})
+		});
 	} else {
 		mapManager.markers = markers;
+
+	}
+
+	// re-add user location marker
+	if (!hardSet && trackMarker) {
+		mapManager.addMarker('track', trackMarker);
 	}
 }
 
@@ -340,6 +357,7 @@ mapManager.setMarkerFocus = function(key) {
 }
 
 mapManager.setMarkerSelected = function(key) {
+	// deprecated becaue bubbles and landmarks now have different representations
 	console.log('--setMarkerSelected()--');
 	
 	// reset all marker images to default
@@ -702,7 +720,7 @@ mapManager.groupFloorMaps = function(worldStyle) {
 	}
 
 	// legacy maps
-	var localMaps = [worldStyle.maps];
+	var localMap = worldStyle.maps;
 	
 	// if localMapArray exists, replace local map with sorted array
 	if (hasLocalMapArray(worldStyle.maps)) {
@@ -716,6 +734,8 @@ mapManager.groupFloorMaps = function(worldStyle) {
 			var groupName = mapGroup + '-maps';
 			mapManager.addOverlayGroup(overlayGroup, groupName);
 		}
+	} else {
+		mapManager.addOverlay(localMap.localMapID, localMap.localMapName, localMap.localMapOptions);
 	}
 }
 
@@ -807,11 +827,11 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
+					iconUrl: 'img/marker/bubbleMarker_24.png',
 					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
+					iconSize: [24, 24], 
+					iconAnchor: [11, 11],
+					popupAnchor:[0, -12]
 				},
 				message:'<a href="#/w/'+bubble.id+'/">'+bubble.name+'</a>',
 		});}

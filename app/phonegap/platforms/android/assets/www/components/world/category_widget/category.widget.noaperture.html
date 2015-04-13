@@ -1,0 +1,22 @@
+<article class="marble-page-content">
+	<div class="category-list">
+		<div class="category-widget-item" 
+				 ng-repeat="category in groupedCategories track by $index"
+				 ng-click="search(category[0].name, $index)">
+			<img ng-if="category[0].avatar" 
+					 ng-src="{{category[0].avatar}}"/>
+			<div ng-if="!category[0].avatar" 
+					 class="category-letter"
+					 ng-style="{color: style.titleBG_color}">
+				{{category[0].name[0].toUpperCase()}}
+			</div>
+			<p>{{category[0].name}}</p>
+		</div>
+	</div>
+</article>
+<div class="fold-btn category-widget-directory-btn" 
+		 ng-click="searchAll()"
+		 ng-style="{color: style.titleBG_color}">
+	Directory
+
+</div>

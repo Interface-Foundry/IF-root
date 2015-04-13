@@ -87,4 +87,23 @@ angular.module('tidepoolsFilters', []).filter('hashtag', function() {
   return _date.toUpperCase();
 
  };
-});
+})
+
+.filter('capitalizeFirst', capitalizeFirst);
+
+function capitalizeFirst() {
+  return function(input) {
+    return input[0].toUpperCase() + input.slice(1);
+  }
+}
+
+angular.module('tidepoolsFilters')
+.filter('floorNumToName', floorNumToName);
+
+floorNumToName.$inject = ['currentWorldService'];
+
+function floorNumToName(currentWorldService) {
+  return function(input) {
+    return currentWorldService.floorNumToName(input);
+  }
+}

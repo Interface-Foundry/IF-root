@@ -57,8 +57,6 @@ var processTagMediaRecent = function(err, data, limit) {
 }
 
 
-
-
 // setInterval(function() {
 
 //   instagram.tag_media_recent(strings.TAG_FOR_IMAGES, processTagMediaRecent);
@@ -188,13 +186,14 @@ async.whilst(
                   return console.error(err);
                 }
                 now = new Date().getTime();
-                endTime = new Date(stat.ctime).getTime() + 604800000; //if file is older than 1 week, remove
+                endTime = new Date(stat.ctime).getTime() + 30000; //if file is older than 1 minute, remove
                 if (now > endTime) {
+                    
                   return rimraf(path.join(strings.IMAGE_SAVE_DESTINATION, file), function(err) {
                     if (err) {
                       return console.error(err);
                     }
-                    //console.log('successfully deleted');
+                    console.log('REMOVED FILE!')
                   });
                 }
               });
@@ -202,7 +201,7 @@ async.whilst(
           }
         });
 
-        setTimeout(callback, 43200000); // every 12 hours check
+        setTimeout(callback, 300000); // Check every 5 minutes
         
     },
     function (err) {

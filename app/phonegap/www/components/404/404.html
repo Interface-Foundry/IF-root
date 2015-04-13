@@ -1,0 +1,18 @@
+<div class="aperture-pop u-pointer" ng-click="aperture.set('full')" ng-show="aperture.state=='aperture-third'"></div>
+
+<div id="shelf" ng-class="[aperture.state]">
+	<div id='top-shelf' class="noPreventDefault"
+		ng-class="[aperture.navfix, aperture.state]" 
+		ng-style="::{'background-color': 'rgba(62, 82, 181, 0.960784)'}" 
+		world-shelf>
+		<div class="world-title noPreventDefault" fit-font>
+			<span class="vertical-middle noPreventDefault">404 This is not the Bubble you are looking for.</span>
+		</div>
+
+	</div>
+	<div>
+	</div>
+
+	<!-- bubbleBody directive controls aperture change on scroll -->
+	<div class="shelf-surface wrap" ng-style="::{'background-color': style.bodyBG_color}" bubble-body>
+		<div class="surface bg-clear">

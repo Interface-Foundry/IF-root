@@ -1,0 +1,41 @@
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12" ng-init="style.widgets.instagram=style.widgets.twiter=false">
+			<div class="form-group">
+				<label for="hashtag">Hashtag</label>
+				<div class="hashtag">
+					<input type="text"
+						class="form-control" 
+						style="width: 96%"
+						name="hashtag"
+						ng-model="world.resources.hashtag">
+				</div>
+			</div>
+			<!-- <div class="checkbox">
+			    <label>
+			      <input type="checkbox" ng-model="style.widgets.instagram">Enable Instagram
+			    </label>
+			</div>
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" ng-model="style.widgets.twitter">Enable Twitter
+				</label>
+			</div> -->
+			<div class="hashtagButtons">
+				<button class="btn buttonToggle buttonToggle--instagram"
+					ng-class="{'on': style.widgets.instagram, 'off': !style.widgets.instagram}"
+					ng-click="style.widgets.instagram=!style.widgets.instagram">
+					Instagram
+					<img>
+				</button>
+				<button class="btn buttonToggle buttonToggle--twitter"
+					ng-class="{'on': style.widgets.twitter, 'off': !style.widgets.twitter}"
+					ng-click="style.widgets.twitter=!style.widgets.twitter">
+					Twitter
+					<img>
+				</button>
+			</div>
+			
+		</div>
+	</div>
+</div>

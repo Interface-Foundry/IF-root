@@ -13,6 +13,7 @@ var userManager = {
 	//@IFDEF PHONEGAP
 	userRes: $resource('http://45.55.182.139:2997/api/updateuser'),
 	//@ENDIF
+	adminStatus: false,
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -23,7 +24,7 @@ userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
 
 	var user = userManager._user; //user cached in memory 
-	if (user) {  
+	if (!(_.isEmpty(user))) {  
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -81,6 +82,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	userManager.getUser().then(function(user) {
 	  	console.log('getting user');
 		  userManager.loginStatus = true;
+		  userManager.adminStatus = user.admin ? true : false;
 		  $rootScope.user = user;
 		  if (user._id){
 			  $rootScope.userID = user._id;
@@ -91,6 +93,7 @@ userManager.checkLogin = function() { //checks if user is logged in with side ef
 	  }, function(reason) {
 		  console.log(reason);
 		  userManager.loginStatus = false;
+		  userManager.adminStatus = false;
 		  deferred.reject(0);
 	});
 	
@@ -111,6 +114,7 @@ userManager.signin = function(username, password) { //given a username and passw
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -125,8 +129,8 @@ userManager.signin = function(username, password) { //given a username and passw
 	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
 			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
-			
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -194,6 +198,10 @@ userManager.fbLogin = function() { //login based on facebook approval
 userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
+	userManager.adminStatus = false;
+	userManager._user = {};
+	$rootScope.user = {};
+	worldTree.submissionCache.removeAll();
 	$location.path('/');
 	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
@@ -236,11 +244,18 @@ userManager.signup.signup = function() { //signup based on signup form
 	    dialogs.show = false;
 		userManager.checkLogin();
 		alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = undefined;	
+		userManager.signup.error = false;		
+
+		// send confirmation email
+		$http.post('/email/confirm').then(function(success) {
+			console.log('confirmation email sent');
+		}, function(error) {
+			console.log('error :', error);
+		});
 	})
 	.error(function(err) {
 	if (err) {
-		userManager.signup.error = "Error signing up!";
+		userManager.signup.error = err || "Error signing up!";
         alertManager.addAlert('danger',err, true);   
 	}
 	});
@@ -248,6 +263,23 @@ userManager.signup.signup = function() { //signup based on signup form
 
 userManager.saveToKeychain = function() { 
 	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+}
+
+userManager.checkAdminStatus = function() {
+	var deferred = $q.defer();
+
+	userManager.getUser().then(function(user) {
+	  if (user.admin) {
+		  deferred.resolve(true);
+		  userManager.adminStatus = true;
+	  } else {
+	  	deferred.reject(false);
+	  }
+	}, function(error) {
+		deferred.reject(false);
+	});
+
+	return deferred.promise;
 }
 
 return userManager;

@@ -50,7 +50,7 @@
 			</div>
 
 			<!---want this got this -->
-			<div ng-include="isRetail ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
+			<div ng-include="isRetail && contest ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
 
 			<!---yelp-->
 			<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
@@ -85,11 +85,19 @@
 				<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
 			</div>
 
-
-			<div ng-show="showEdit">
+			<!-- bubble admin actions -->
+			<div ng-show="showEdit" class="marble-contain-width">
 				<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest</a>
 			<a class="btn btn-default" if-href="#edit/w/{{worldURL}}">Edit your Bubble</a>
 			</div>
+
+			<!-- Feedback -->
+			<div class="marble-contain-width">
+				<a class="btn btn-default" href="#" ng-click="dialog.showDialog('feedbackDialog.html')">
+					<span class="glyphicon glyphicon-pencil"></span> Send Us Feedback
+				</a>
+			</div>
+
 			<div class="col-xs-12">
 				<div style="height:300px;"></div>
 			</div>

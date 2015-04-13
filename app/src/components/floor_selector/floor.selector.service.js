@@ -10,7 +10,7 @@ function floorSelectorService() {
 			floors = [],
 			selectedIndex,
 			showFloors,
-			showLandmarks = true;
+			showLandmarks = false;
 
 	return {
 		currentFloor: currentFloor,

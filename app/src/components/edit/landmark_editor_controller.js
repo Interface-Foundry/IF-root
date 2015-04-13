@@ -38,24 +38,18 @@ var landmarksLoaded = false;
 			
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
-			
-			var landmarkIcon = 'img/marker/bubble-marker-50.png',
-					popupAnchorValues = [0, -50],
-					shadowUrl = '',
-					// shadowAnchor = [12, 20],
-					iconAnchor = [25, 100];
 
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: landmarkIcon,
-					shadowUrl: shadowUrl,
+					iconUrl: 'img/marker/landmarkMarker_23.png',
+					shadowUrl: '',
 					// shadowAnchor: shadowAnchor,
-					iconSize: [50, 95],
-					iconAnchor: [25, 100],
-					popupAnchor: popupAnchorValues,
+					iconSize: [23, 23],
+					iconAnchor: [11, 11],
+					popupAnchor: [0, -4],
 				},
 				draggable:true,
 				message:'Drag to location on map',
@@ -161,19 +155,19 @@ if ($scope.landmark.hasTime) {
 			console.log($scope.landmarks[i].name);
 			map.setMarkerMessage($scope.landmarks[i]._id, $scope.landmarks[i].name);
 			map.bringMarkerToFront($scope.landmarks[i]._id);
-			map.setMarkerSelected($scope.landmarks[i]._id);
+			// map.setMarkerSelected($scope.landmarks[i]._id);
 			map.setMarkerFocus($scope.landmarks[i]._id);
 			console.log('Complete select');
 		}
 	}
 	
 	$scope.addLandmarkMarker = function(landmark) {
-		var landmarkIcon = 'img/marker/bubble-marker-50.png',
-				popupAnchorValues = [0, -40],
+		var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+				popupAnchorValues = [0, -4],
 				shadowUrl = '',
-				shadowAnchor = [4, -3],
-				iconAnchor = [17, 67],
-				iconSize = [35, 67],
+				shadowAnchor = [1, -1],
+				iconAnchor = [11, 11],
+				iconSize = [23, 23],
 				layerGroup = getLayerGroup(landmark) + '-landmarks',
 				alt = null;
 
@@ -311,7 +305,7 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 		if ($scope.landmarks.length) {
 			map.setMarkerFocus($scope.landmarks[0]._id);
-			map.setMarkerSelected($scope.landmarks[0]._id);
+			// map.setMarkerSelected($scope.landmarks[0]._id);
 		}
 
 		landmarksLoaded = true;

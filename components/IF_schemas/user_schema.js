@@ -1,19 +1,28 @@
 // load the things we need
 var mongoose = require('mongoose');
-var bcrypt   = require('bcrypt-nodejs');
+var bcrypt = require('bcrypt-nodejs');
 
-var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
+var Schema = mongoose.Schema,
+    ObjectID = Schema.ObjectID;
 
 
 // define the schema for our user model
 var userSchema = mongoose.Schema({
 
-    local            : {
-        email        : { type: String, index: true },
-        password     : { type: String },
+    local: {
+        email: {
+            type: String,
+            index: true
+        },
+        password: {
+            type: String
+        },
         resetPasswordToken: String,
         resetPasswordExpires: Date,
-        confirmedEmail: { type: Boolean, default: false },
+        confirmedEmail: {
+            type: Boolean,
+            default: false
+        },
         confirmEmailToken: String,
         confirmEmailExpires: Date
     },
@@ -27,20 +36,20 @@ var userSchema = mongoose.Schema({
         timezone     : Number,
         bio          : String
     },
-    twitter          : {
-        id           : String,
-        token        : String,
-        displayName  : String,
-        username     : String
+    twitter: {
+        id: String,
+        token: String,
+        displayName: String,
+        username: String
     },
-    meetup           : {
-        id           : String,
-        token        : String,
-        displayName  : String,
-        raw          : String
+    meetup: {
+        id: String,
+        token: String,
+        displayName: String,
+        raw: String
     },
     auth: {
-        confirmedEmail : Boolean,
+        confirmedEmail: Boolean,
         lastLogin: Date,
         loginCount: Number
     },
@@ -53,12 +62,6 @@ var userSchema = mongoose.Schema({
     avatar: String,
     name: String,
     note: String,
-    // org: [{
-    //     label: String,
-    //     name: String,
-    //     P: Number,
-    // }],
-    //org: [Schema.Types.Mixed],
     social: {
         linkedIn: String,
         linkedInP: Number,
@@ -72,34 +75,43 @@ var userSchema = mongoose.Schema({
         githubP: Number,
     },
     contact: [Schema.Types.Mixed],
-    // contact: [{
-    //     fauserID: String,
-    //     permission: Number
-    // }],
-    // email: [{
-    //     label: String,
-    //     addr: String,
-    //     P: Number
-    // }],
-    // email: [Schema.Types.Mixed],
-    email: String,
-    // tel: [{
-    
-    //     label: String,
-    //     number: String,
-    //     P: Number
-    // }],
-    //tel: [Schema.Types.Mixed],
+    email: {
+        type: String,
+        unique: true,
+        lowercase: true
+    }, //FORCE LOWERCASE
+    emailConfirmed: Boolean,
     tel: String,
     presents: {
-        collected:[Schema.Types.Mixed]
+        collected: [Schema.Types.Mixed]
     },
-    profileID: { type: String, index: true},
+    profileID: {
+        type: String,
+        unique: true,
+        lowercase: true,
+        index: true
+    },
     permissions: [{
-        
+
+    }],
+    submissions: [{
+        worldID: String,
+        contestID: String,
+        entryID: String,
+        imgURL: String,
+        timestamp: Date,
+        hashtag: String
+    }],
+    admin: Boolean,
+    bubbleRole: [{
+        worldId: {
+            type: String
+        },
+        role: {
+            type: String,
+            default: 'user'
+        }
     }]
-
-
 });
 
 // generating a hash

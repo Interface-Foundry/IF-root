@@ -1,0 +1,15 @@
+<img class="announcement-chevron"
+		 ng-if="!(index === announcements.length - 1)"
+		 ng-click="nextCard($event)"
+		 src="img/icons/ic_chevron_right_blue_48dp.png" />
+
+<div class="announcements-card-container">
+	<div ng-repeat="announcement in announcements track by $index"
+			 class="announcements-card announcements-animate if-animate" 
+			 ng-show="$index === index"
+			 ng-swipe-left="nextCard()">
+		<h3>{{announcement.headline}}</h3>
+		<p class="announcement-body">{{announcement.body}}</p>
+		<p class="announcement-link"><a ng-href="{{announcement.urlPath}}">{{announcement.urlName}}</a></p>
+	</div>
+</div>

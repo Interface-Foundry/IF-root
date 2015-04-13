@@ -1,0 +1,29 @@
+
+
+  <button class="btn" ng-click="goBack()">< BACK </button>
+  
+<br><br>
+   <h4><span style="color:#63b3fb; margin-left:15px;">VOTE FOR YOUR FAVORITE</span></h4>
+
+
+
+      <ul class="landmarks">
+          <!--Looping through data-->
+          <li ng-repeat="landmark in landmarks | filter:query | orderBy:orderProp" class="thumbnail"  style="padding-bottom:20px; border:0px;" >  
+            
+            <input type="checkbox">
+      
+
+              <a ng-href="#/landmark/{{landmark.id}}" class="thumb"><img ng-src="{{landmark.stats.avatar}}"></a> 
+              <h4><a ng-href="#/landmark/{{landmark.id}}" style="color:#63b3fb; text-decoration: none;">{{landmark.name}}</a></h4>
+              <p style="color:#929292;">{{landmark.shortDescription}}</p>
+              <p style="font-size:12px;"><strong> {{landmark.time.start | date:'h:mm a EEEE d MMMM'}} </strong> </p>
+           
+          </li>
+      </ul>
+
+       <li ng-show="!landmarks.length"> Nothing here :( </li>
+
+
+
+

@@ -1,4 +1,4 @@
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -44,40 +44,31 @@ $scope.search = function() {
 
 $scope.wtgtLogin = function() {
 	contest.login(new Date);
-} 
+}
+
+logSearchClick = function(path) {
+	analyticsService.log('search.general.clickthrough', {
+		path: path,
+		searchText: $scope.searchText || $('.search-bar').val()
+	});
+};
 	
 $scope.go = function(path) {
+	logSearchClick(path);
 	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
 	navService.reset();
-	$window.history.back();
+	// $window.history.back();
+	$window.history.go(navService.backPages);
 }
 
 $scope.logout = function() {
-      $http.get('/api/user/logout', {server:true});
-      userManager.loginStatus = false;
-      //$location.url('/');
-} //switch to userManager method
+	userManager.logout();
+}
 
-$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
-
-    var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
-    }
-
-    $http.post('feedback', data).
-      success(function(data){
-        console.log('feedback sent');
-        alert('Feedback sent, thanks!');
-
-      }).
-      error(function(err){
-        console.log('there was a problem');
-    });
-};
 
 /*
 $scope.sessionSearch = function() { 

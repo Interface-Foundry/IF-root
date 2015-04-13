@@ -185,4 +185,3 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
-

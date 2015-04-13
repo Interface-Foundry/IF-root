@@ -20,11 +20,6 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 		}
 
 		currentWorldId = world._id;	
-
-		//local storage
-		if (!userManager.loginStatus && !localStore.getID()) {
-	 		localStore.createID();
-	 	}
 		
 		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
@@ -79,11 +74,11 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 			lat: world.loc.coordinates[1],
 			lng: world.loc.coordinates[0],
 			icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
+				iconUrl: 'img/marker/bubbleMarker_24.png',
 				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17, 67],
-				popupAnchor:[0, -40]
+				iconSize: [24, 24],
+				iconAnchor: [11, 11],
+				popupAnchor:[0, -12]
 			},
 			message:'<a href="#/w/'+world.id+'/">'+world.name+'</a>',
 		});

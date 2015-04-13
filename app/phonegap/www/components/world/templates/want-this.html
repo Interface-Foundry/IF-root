@@ -2,108 +2,116 @@
 	<div class="marble-page-header-icon">
 		<img style="display:block;" src="img/icons/ic_redeem_black_18dp.png" width="16" height="16">
 	</div>
-	Post Pics, Win Prizes!
+	{{contest.name}}
+
 </header>
 
 <article class="marble-page-content">
 	<div class="wtgt col-xs-11">
-		<h4>Win a $50 gift card</h4>
-		<span class="glyphicon glyphicon-info-sign info"></span>
-		<p>Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.</p>
+		<a href="/contest/global">
+			<h4>{{contest.headline}}</h4>
+			<span class="glyphicon glyphicon-info-sign info"></span>
+		</a>
+		<p>{{contest.body}}</p>
 
 		<div class="upload col-xs-5">
 			<div class="head"
 				ng-style="{background: style.titleBG_color}">
-				<span>WANT THIS</span>
+				<span>{{contest.contestTags[0].title}}</span>
 			</div>
 
 			<div class="body">
 				<div class="wrapper col-xs-10 col-xs-offset-1"
-					ng-show="wtgt.images.want && !wtgt.building.want">
-					<a ng-href="/w/{{worldURL}}/contest/{{ wtgt.hashtags.want }}"
-						target="_self">
+					ng-show="wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]">
+					<a ng-href="/w/{{worldURL}}/contestentries/{{contest.contestTags[0].tag.slice(1)}}">
 						<div class="more">
 							See More
 						</div>
-						<img ng-src="{{ wtgt.images.want }}">
+						<img ng-src="{{ wtgt.images[contest.contestTags[0].tag] }}">
 					</a>
 				</div>
 				
 				<div class="want"
-					ng-show="!wtgt.images.want && !wtgt.building.want"
+					ng-show="!wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]"
 					ng-file-select
-					ng-file-change="uploadWTGT($files, 'want')"
+					ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
 					ng-file-drop
 					data-accept="image/*">
-					<div class="verifyUpload" ng-click="verifyUpload($event, 'want')"></div>
+					<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[0].tag)"></div>
 				</div>
 
 				<div class="loading-spinner u-centerY"
-					ng-show="wtgt.building.want">
+					ng-show="wtgt.building[contest.contestTags[0].tag]">
 					<div class="lspin1"></div>
 					<div class="lspin2"></div>
 				</div>
 
 			</div>
 
+			<span class="plus-one"
+						ng-show="wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]">+</span>
 			<div class="camera"
+				ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]}"
 				ng-file-select
-				ng-file-change="uploadWTGT($files, 'want')"
+				ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
 				ng-file-drop
 				data-accept="image/*">
-				<div class="verifyUpload" ng-click="verifyUpload($event, 'want')"></div>
+				<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[0].tag)"></div>
 			</div>
 
 			<div class="hashtag--upload">
-				<span>#{{ wtgt.hashtags.want }}</span>
+				<span>{{contest.contestTags[0].tag}}</span>
 			</div>
 		</div>
 
 		<div class="upload col-xs-5 col-xs-offset-2">
 			<div class="head"
-				ng-style="{background: 'rgba(0, 0, 0, 0.23)'}">
-				<span>GOT THIS</span>
+				ng-style="{background: 'rgba(0, 0, 0, 0.3)'}">
+				<span>{{contest.contestTags[1].title}}</span>
 			</div>
 
 			<div class="body">
 				<div class="wrapper col-xs-10 col-xs-offset-1"
-					ng-show="wtgt.images.got && !wtgt.building.got">
-					<a ng-href="/w/{{worldURL}}/contest/{{ wtgt.hashtags.got }}"
-						target="_self">
+					ng-show="wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]">
+					<a ng-href="/w/{{worldURL}}/contestentries/{{contest.contestTags[1].tag.slice(1)}}">
 						<div class="more">
 							See More
 						</div>
-						<img ng-src="{{ wtgt.images.got }}">
+						<img ng-src="{{ wtgt.images[contest.contestTags[1].tag] }}">
 					</a>
 				</div>
 				
 				<div class="got"
-					ng-show="!wtgt.images.got && !wtgt.building.got"
+					ng-show="!wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]"
 					ng-file-select
-					ng-file-change="uploadWTGT($files, 'got')"
+					ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
 					ng-file-drop
 					data-accept="image/*">
-					<div class="verifyUpload" ng-click="verifyUpload($event, 'got')"></div>
+					<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[1].tag)"></div>
 				</div>
 
 				<div class="loading-spinner u-centerY"
-					ng-show="wtgt.building.got">
+					ng-show="wtgt.building[contest.contestTags[1].tag]">
 					<div class="lspin1"></div>
 					<div class="lspin2"></div>
 				</div>
 
 			</div>
 
+			<span class="plus-one"
+						ng-show="wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]">+</span>
 			<div class="camera"
+						ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]}"
 				ng-file-select
-				ng-file-change="uploadWTGT($files, 'got')"
+				ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
 				ng-file-drop
 				data-accept="image/*">
-				<div class="verifyUpload" ng-click="verifyUpload($event, 'got')"></div>
+				<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[1].tag)"></div>
+
 			</div>
 
 			<div class="hashtag--upload">
-				<span>#{{ wtgt.hashtags.got }}</span>
+				<span>{{contest.contestTags[1].tag}}</span>
 			</div>
 		</div>
 
@@ -111,5 +119,5 @@
 </article>
 
 <div class="marble-page-footer tag col-xs-12">
-	<p>Or tag your photos on our Facebook or Instagram to enter to win!</p>
+	<p>{{contest.subheading}}</p>
 </div>
