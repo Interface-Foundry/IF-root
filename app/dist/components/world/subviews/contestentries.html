@@ -8,7 +8,7 @@
       <li ng-repeat="entry in entries track by $index" class="instagram marble-page">
         <img ng-src="{{entry.imgURL}}">
         <footer>
-          <p>{{::entry.userTime | date:'medium'}}</p>
+          <p>{{::entry.userTime | date:"MMM d, y h:mm a"}}</p>
         </footer>
 
       </li>
