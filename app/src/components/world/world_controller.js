@@ -537,6 +537,10 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 	}
 })
 
+$scope.$on('$destroy', function() {
+	angular.element('.main-nav').css('display', 'block');
+});
+
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log('worldtree success');

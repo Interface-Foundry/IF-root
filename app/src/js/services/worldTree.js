@@ -30,7 +30,8 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 				if (world.category === 'Retail') {
 					var contest = worldTree.contestCache.get('active');
 					if (!contest) {
-						return askServer();
+						askServer();
+						return deferred.promise;
 					}
 					var submissions = [];
 					var worldSubs = worldTree.submissionCache.get(world._id);

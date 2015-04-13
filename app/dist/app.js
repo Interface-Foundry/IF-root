@@ -19370,7 +19370,8 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 				if (world.category === 'Retail') {
 					var contest = worldTree.contestCache.get('active');
 					if (!contest) {
-						return askServer();
+						askServer();
+						return deferred.promise;
 					}
 					var submissions = [];
 					var worldSubs = worldTree.submissionCache.get(world._id);
@@ -27992,6 +27993,10 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 		return landmark.category === landmarkCategoryName;
 	}
 })
+
+$scope.$on('$destroy', function() {
+	angular.element('.main-nav').css('display', 'block');
+});
 
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
