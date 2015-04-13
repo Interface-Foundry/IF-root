@@ -2498,8 +2498,8 @@ li.alert {
   height: 16px;
   line-height: 1;
   position: absolute;
-  right: -11px;
-  top: 169px;
+  right: 5px;
+  top: 24px;
   font-size: 1.1em;
   width: 16px;
   z-index: 1;
