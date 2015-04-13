@@ -4854,7 +4854,7 @@ var updateTitle = function($rootScope) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'http://45.55.182.139:2997' + request.url;
+		    			request.url = 'https://kipapp.co' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5761,7 +5761,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'http://45.55.182.139:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19083,7 +19083,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('http://45.55.182.139:2997/api/updateuser'),
+	userRes: $resource('https://kipapp.co/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19214,7 +19214,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('http://45.55.182.139:1337/auth/facebook/mobile_sigin', data).then(
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;

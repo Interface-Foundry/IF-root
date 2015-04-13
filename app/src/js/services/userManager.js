@@ -11,7 +11,7 @@ var userManager = {
 	userRes: $resource('/api/updateuser'),
 	//@ENDIF
 	//@IFDEF PHONEGAP
-	userRes: $resource('http://45.55.182.139:2997/api/updateuser'),
+	userRes: $resource('https://kipapp.co/api/updateuser'),
 	//@ENDIF
 	adminStatus: false,
 	loginStatus: false,
@@ -158,7 +158,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('http://45.55.182.139:1337/auth/facebook/mobile_sigin', data).then(
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
