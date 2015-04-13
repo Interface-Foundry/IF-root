@@ -123,10 +123,12 @@ angular.module('tidepoolsServices')
 					// marker
 					var iconUrl = 'img/marker/userLocMarker_noArrow.png';
 					var iconSize = [18, 18];
+					var iconAnchor = [9, 9];
 					if (geoService.mobileCheck()) {
 						// add arrow to user location marker if mobile device
 						iconUrl = 'img/marker/userLocMarker_arrow.png';
-						iconSize = [18, 23];
+						iconSize = [24, 30];
+						iconAnchor = [12, 12];
 					}
 
 					mapManager.addMarker('track', {
@@ -135,7 +137,7 @@ angular.module('tidepoolsServices')
 						icon: {
 							iconUrl: iconUrl,
 							iconSize: iconSize, 
-							iconAnchor: [9, 9]
+							iconAnchor: iconAnchor
 
 						},
 						alt: 'track' // used for tracking marker DOM element

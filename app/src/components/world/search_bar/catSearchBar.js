@@ -154,7 +154,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						if (geoService.location.cityName) {
 							$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
 						} else {
-							goToLocationFromIP();
+							goToLocationFromIP(true);
 						}
 					} else {
 						if (inSearchView()) {
@@ -204,7 +204,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 				// else in world view
 			}
 
-			function goToLocationFromIP() {
+			function goToLocationFromIP(locationBool) {
 				var data = {
 					params: {
 						hasLoc: false
@@ -219,8 +219,12 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 							timestamp: locInfo.timestamp
 						};
 						geoService.updateLocation(locationData);
-						$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-						scope.populateCitySearchView(scope.text, 'text', locationData);
+						if (locationBool) {
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
+						} else {
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+							scope.populateCitySearchView(scope.text, 'text', locationData);
+						}
 						scope.loading = false;
 					}).
 					error(function(err) {
