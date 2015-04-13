@@ -13,7 +13,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
-			// scope.mapmanager = mapManager;
+			var offset = $('.search-cat').offset().top;
 
 			var defaultText = bubbleSearchService.defaultText;
 			var noResultsText = bubbleSearchService.noResultsText;
@@ -88,7 +88,6 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 				// set aperture or scroll
 				if (scope.mode === 'home' && !scrollState) {
-					var offset = $('.search-cat').offset().top;
 					var navHeight = parseInt($('.main-nav').css('height'));
 					var marginTop = parseInt($('.search-cat').css('margin-top'));
 					$('.wrap').animate({
