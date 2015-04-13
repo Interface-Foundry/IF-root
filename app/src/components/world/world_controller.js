@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'contestUploadService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, contestUploadService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -46,34 +46,39 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	var file = $files[0];
+	contestUploadService.uploadWTGT($files[0], $scope.world, hashtag)
+	.then(function(data) {
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
+	})
+	// var file = $files[0];
 
 	// get time
-	var time = new Date();
+	// var time = new Date();
 
-	// get hashtag
-	// var hashtag = null;
-	// hashtag = $scope.wtgt.hashtags[hashtag];
+	// // get hashtag
+	// // var hashtag = null;
+	// // hashtag = $scope.wtgt.hashtags[hashtag];
 
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
+	// var data = {
+	// 	world_id: $scope.world._id,
+	// 	worldID: $scope.world.id,
+	// 	hashtag: hashtag,
+	// 	userTime: time,
+	// 	userLat: null,
+	// 	userLon: null,
+	// 	type: 'retail_campaign'
+	// };
 
 	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, hashtag, data);
-	}, function(err) {
-		uploadPicture(file, hashtag, data);
-	});
+	// geoService.getLocation().then(function(coords) {
+	// 	// console.log('coords: ', coords);
+	// 	data.userLat = coords.lat;
+	// 	data.userLon = coords.lng;
+	// 	uploadPicture(file, hashtag, data);
+	// }, function(err) {
+	// 	uploadPicture(file, hashtag, data);
+	// });
 };
 
 function uploadPicture(file, hashtag, data) {
@@ -90,23 +95,6 @@ function uploadPicture(file, hashtag, data) {
 
 	});
 }
-
-// function checkUserForSubmissions() {
-// 	if (!$rootScope.user || !$rootScope.user.submissions) {
-// 		return;
-// 	}
-// 	_.chain($rootScope.user.submissions)
-// 		.groupBy(function(sub) {
-// 			return sub.hashtag;
-// 		})
-// 		.sortBy(function(sub) {
-// 			return sub.timestamp;
-// 		})
-// 		.value()
-// 		.forEach(function(sub) {
-// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-// 		});
-// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;

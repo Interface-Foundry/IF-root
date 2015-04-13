@@ -25863,6 +25863,7 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
 	$scope.entries = [];
 	$scope.region = 'global';
 	$scope.style;
+	$scope.world;
 	$scope.worldId = $routeParams.worldURL;
 
 	activate();
@@ -25872,8 +25873,8 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
 
     worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.style = data.style;
+			$scope.world = data.world;
 			styleManager.navBG_color = $scope.style.navBG_color;
-			// $rootScope.hideBack = false;
 		});
 	}
 
@@ -25888,6 +25889,104 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
     }, function(error) {
     	console.log('Error:', error);
     });
+	}
+
+	$scope.uploadWTGT = function($files) {
+		// $scope.wtgt.building[hashtag] = true;
+
+		var file = $files[0];
+
+		// get time
+		var time = new Date();
+
+		var data = {
+			world_id: $scope.world._id,
+			worldID: $scope.world.id,
+			hashtag: $scope.hashtag,
+			userTime: time,
+			userLat: null,
+			userLon: null,
+			type: 'retail_campaign'
+		};
+
+		// get location
+		geoService.getLocation().then(function(coords) {
+			// console.log('coords: ', coords);
+			data.userLat = coords.lat;
+			data.userLon = coords.lng;
+			uploadPicture(file, $scope.hashtag, data);
+		}, function(err) {
+			uploadPicture(file, $scope.hashtag, data);
+		});
+	};
+
+	function uploadPicture(file, hashtag, data) {
+
+	$scope.upload = $upload.upload({
+		url: '/api/uploadPicture/',
+		file: file,
+		data: JSON.stringify(data)
+	}).progress(function(e) {
+	}).success(function(data) {
+		worldTree.cacheSubmission($scope.world._id, hashtag, data);
+		loadEntries();
+	});
+}
+}
+'use strict';
+
+app.factory('contestUploadService', contestUploadService);
+
+contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree'];
+
+function contestUploadService($upload, $q, geoService, worldTree) {
+
+	return {
+		uploadWTGT: uploadWTGT
+	};
+
+	function uploadWTGT(file, world, hashtag) {
+		var deferred = $q.defer();
+
+		// get time
+		var time = new Date();
+
+		var data = {
+			world_id: world._id,
+			worldID: world.id,
+			hashtag: hashtag,
+			userTime: time,
+			userLat: null,
+			userLon: null,
+			type: 'retail_campaign'
+		};
+
+		// get location
+		geoService.getLocation().then(function(coords) {
+			data.userLat = coords.lat;
+			data.userLon = coords.lng;
+			return deferred.resolve(uploadPicture(file, world, data));
+		}, function(err) {
+			return deferred.resolve(uploadPicture(file, data));
+		});
+
+		return deferred.promise;
+	};
+
+	function uploadPicture(file, world, data) {
+		var deferred = $q.defer();
+
+		$upload.upload({
+			url: '/api/uploadPicture/',
+			file: file,
+			data: JSON.stringify(data)
+		}).progress(function(e) {
+		}).success(function(data) {
+			worldTree.cacheSubmission(world._id, data.hashtag, data);
+			deferred.resolve(data);
+		});
+
+		return deferred.promise;
 	}
 }
 app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
@@ -27331,7 +27430,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'contestUploadService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, contestUploadService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -27379,34 +27478,39 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	var file = $files[0];
+	contestUploadService.uploadWTGT($files[0], $scope.world, hashtag)
+	.then(function(data) {
+		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.building[hashtag] = false;
+	})
+	// var file = $files[0];
 
 	// get time
-	var time = new Date();
+	// var time = new Date();
 
-	// get hashtag
-	// var hashtag = null;
-	// hashtag = $scope.wtgt.hashtags[hashtag];
+	// // get hashtag
+	// // var hashtag = null;
+	// // hashtag = $scope.wtgt.hashtags[hashtag];
 
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
+	// var data = {
+	// 	world_id: $scope.world._id,
+	// 	worldID: $scope.world.id,
+	// 	hashtag: hashtag,
+	// 	userTime: time,
+	// 	userLat: null,
+	// 	userLon: null,
+	// 	type: 'retail_campaign'
+	// };
 
 	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, hashtag, data);
-	}, function(err) {
-		uploadPicture(file, hashtag, data);
-	});
+	// geoService.getLocation().then(function(coords) {
+	// 	// console.log('coords: ', coords);
+	// 	data.userLat = coords.lat;
+	// 	data.userLon = coords.lng;
+	// 	uploadPicture(file, hashtag, data);
+	// }, function(err) {
+	// 	uploadPicture(file, hashtag, data);
+	// });
 };
 
 function uploadPicture(file, hashtag, data) {
@@ -27423,23 +27527,6 @@ function uploadPicture(file, hashtag, data) {
 
 	});
 }
-
-// function checkUserForSubmissions() {
-// 	if (!$rootScope.user || !$rootScope.user.submissions) {
-// 		return;
-// 	}
-// 	_.chain($rootScope.user.submissions)
-// 		.groupBy(function(sub) {
-// 			return sub.hashtag;
-// 		})
-// 		.sortBy(function(sub) {
-// 			return sub.timestamp;
-// 		})
-// 		.value()
-// 		.forEach(function(sub) {
-// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-// 		});
-// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;

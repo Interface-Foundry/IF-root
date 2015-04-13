@@ -2491,6 +2491,9 @@ li.alert {
   width: 100%;
   height: 100%;
 }
+.message-nav .wtgt .camera {
+  margin-left: -24px;
+}
 .plus-one {
   border-radius: 50%;
   cursor: pointer;
