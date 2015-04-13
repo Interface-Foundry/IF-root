@@ -47,7 +47,7 @@ function contestUploadService($upload, $q, geoService, worldTree) {
 			data: JSON.stringify(data)
 		}).progress(function(e) {
 		}).success(function(data) {
-			worldTree.cacheSubmission(world._id, data.hashtag, data);
+			worldTree.cacheSubmission(world._id, data.hashtag, data.imgURL);
 			deferred.resolve(data);
 		});
 

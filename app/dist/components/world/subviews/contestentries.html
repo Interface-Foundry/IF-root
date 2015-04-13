@@ -5,10 +5,10 @@
       <div class="wtgt">
         <div class="camera"
              ng-file-select
-             ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
+             ng-file-change="uploadWTGT($files)"
              ng-file-drop
              data-accept="image/*">
-          <div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[0].tag)">
+          <div class="verifyUpload" ng-click="verifyUpload($event)">
           </div>
         </div>
       </div>
