@@ -70,8 +70,6 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
         ],
         function(err, results) {
             if (err) console.log(err);
-
-
             //Retreive parent IDs to query for parent world names for each landmark
 
             var parentIDs = results[results.length - 1].map(function(el) {
