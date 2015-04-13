@@ -109,6 +109,10 @@ var express = require('express'),
     // cors = require('cors'),
     db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
 
+// add in health check before sessions
+app.get('/api/healthcheck', function(req, res) { 
+	res.send(200);
+});
 
 //express compression
 var oneDay = 86400000;
