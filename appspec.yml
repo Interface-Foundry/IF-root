@@ -1,13 +1,8 @@
 version: 0.0
 os: linux
 files:
-  - source: /
-    destination: /opt/IF-Root
-permissions:
-  - object: /opt/IF-Root
-    owner: kip
-    type:
-      - directory
+  - source: /README.md
+    destination: /opt/IF-Root/
 hooks:
   BeforeInstall:
     - location: codedeploy-scripts/cleanup
