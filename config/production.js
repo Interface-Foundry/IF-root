@@ -4,7 +4,7 @@
 // =================================
 module.exports = {
 
-  geoipURL: 'http://127.0.0.1:8080/json/',
+  //geoipURL: 'http://127.0.0.1:8080/json/',
   mongodb: {
 	  url: 'mongodb://username:password@mongodb-r1,mongodb-r2/if'
   }
