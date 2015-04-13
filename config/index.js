@@ -2,18 +2,15 @@
 
 var path = require('path');
 var _ = require('underscore');
-
-function requiredProcessEnv(name) {
-  if(!process.env[name]) {
-    throw new Error('You must set the ' + name + ' environment variable');
-  }
-  return process.env[name];
-}
+var env = process.env.NODE_ENV || 'development'
 
 // All configurations will extend these options
 // ============================================
 var all = {
-  env: process.env.NODE_ENV
+  env: env,
+  mongodb: {
+	  url: 'mongodb://localhost:27017/if'
+  }
 
   //EXAMPLE DEFAULT CONFIG SETTINGS (ACROSS ALL ENVIRONMENTS)
 
@@ -70,7 +67,7 @@ var all = {
 // ==============================================
 module.exports = _.extend(
   all,
-  require('./' + process.env.NODE_ENV + '.js') || {});
+  require('./' + env + '.js') || {});
 
 
 

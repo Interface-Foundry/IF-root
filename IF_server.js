@@ -26,7 +26,8 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'),
     Magic = mmm.Magic;
-var configDB = require('./components/IF_auth/database.js');
+
+global.config = require('./config'); // pulls in config/index.js
 
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var submitContestEntry = require('./components/IF_contests/IF_contests.js');
@@ -87,7 +88,7 @@ var mongoose = require('mongoose'),
 var env = process.env.NODE_ENV || 'development';
 console.log("running in $env mode".replace('$env', env));
 
-mongoose.connect(configDB.url);
+mongoose.connect(global.config.mongodb.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
@@ -108,12 +109,6 @@ var express = require('express'),
     // cors = require('cors'),
     db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
 
-
-//===== SET UP ENVIRONMENT =====//
-
-// Set default node environment to development
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-var config = require('./config');
 
 //express compression
 var oneDay = 86400000;
