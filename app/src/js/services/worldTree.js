@@ -27,14 +27,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		}
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
-				var contest = worldTree.contestCache.get('active');
-				var submissions = [];
-				var worldSubs = worldTree.submissionCache.get(world._id);
-				if (worldSubs) {
-					submissions.push(worldSubs[contest.contestTags[0].tag]);
-					submissions.push(worldSubs[contest.contestTags[1].tag]);
+				if (world.category === 'Retail') {
+					var contest = worldTree.contestCache.get('active');
+					if (!contest) {
+						return askServer();
+					}
+					var submissions = [];
+					var worldSubs = worldTree.submissionCache.get(world._id);
+					if (worldSubs) {
+						submissions.push(worldSubs[contest.contestTags[0].tag]);
+						submissions.push(worldSubs[contest.contestTags[1].tag]);
+					}
 				}
-
+				
 				deferred.resolve({
 					world: world,
 					style: style,

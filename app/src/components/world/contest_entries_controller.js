@@ -6,7 +6,7 @@ ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', '$ti
 
 function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, Entries, worldTree, styleManager, contestUploadService, userManager, alertManager, dialogs, contest) {
 
-	$scope.hashTag = $routeParams.hashTag;
+	$scope.hashtag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
 	$scope.region = 'global';
@@ -54,7 +54,8 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 	}
 
 	function uploadWTGT($files) {
-		contestUploadService.uploadImage($files[0], $scope.world, $scope.hashtag)
+		var hashtag = '#' + $scope.hashtag;
+		contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 		.then(function(data) {
 			$scope.entries.unshift(data);
 		});

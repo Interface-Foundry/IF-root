@@ -19478,14 +19478,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		}
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
-				var contest = worldTree.contestCache.get('active');
-				var submissions = [];
-				var worldSubs = worldTree.submissionCache.get(world._id);
-				if (worldSubs) {
-					submissions.push(worldSubs[contest.contestTags[0].tag]);
-					submissions.push(worldSubs[contest.contestTags[1].tag]);
+				if (world.category === 'Retail') {
+					var contest = worldTree.contestCache.get('active');
+					if (!contest) {
+						return askServer();
+					}
+					var submissions = [];
+					var worldSubs = worldTree.submissionCache.get(world._id);
+					if (worldSubs) {
+						submissions.push(worldSubs[contest.contestTags[0].tag]);
+						submissions.push(worldSubs[contest.contestTags[1].tag]);
+					}
 				}
-
+				
 				deferred.resolve({
 					world: world,
 					style: style,
@@ -26007,7 +26012,7 @@ ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', '$ti
 
 function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, Entries, worldTree, styleManager, contestUploadService, userManager, alertManager, dialogs, contest) {
 
-	$scope.hashTag = $routeParams.hashTag;
+	$scope.hashtag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
 	$scope.region = 'global';
@@ -26055,7 +26060,8 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 	}
 
 	function uploadWTGT($files) {
-		contestUploadService.uploadImage($files[0], $scope.world, $scope.hashtag)
+		var hashtag = '#' + $scope.hashtag;
+		contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 		.then(function(data) {
 			$scope.entries.unshift(data);
 		});
@@ -26109,9 +26115,9 @@ function contestUploadService($upload, $q, geoService, worldTree) {
 			file: file,
 			data: JSON.stringify(data)
 		}).progress(function(e) {
-		}).success(function(data) {
-			worldTree.cacheSubmission(world._id, data.hashtag, data.imgURL);
-			deferred.resolve(data);
+		}).success(function(result) {
+			worldTree.cacheSubmission(world._id, data.hashtag, result.imgURL);
+			deferred.resolve(result);
 		});
 
 		return deferred.promise;
