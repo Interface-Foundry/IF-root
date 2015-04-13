@@ -2,9 +2,9 @@
 
 app.factory('contestUploadService', contestUploadService);
 
-contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree'];
+contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree', 'alertManager'];
 
-function contestUploadService($upload, $q, geoService, worldTree) {
+function contestUploadService($upload, $q, geoService, worldTree, alertManager) {
 
 	return {
 		uploadImage: uploadImage
@@ -47,10 +47,15 @@ function contestUploadService($upload, $q, geoService, worldTree) {
 			data: JSON.stringify(data)
 		}).progress(function(e) {
 		}).success(function(result) {
+			showConfirmationMessage();
 			worldTree.cacheSubmission(world._id, data.hashtag, result.imgURL);
 			deferred.resolve(result);
 		});
 
 		return deferred.promise;
+	}
+
+	function showConfirmationMessage() {
+		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
 	}
 }
