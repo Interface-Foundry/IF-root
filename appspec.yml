@@ -41,6 +41,10 @@ hooks:
     - location: codedeploy-scripts/install_dependencies
       timeout: 300
       runas: kip
+  ApplicationStart:
+    - location: codedeploy-scripts/start_server
+      timeout: 300
+      runas: kip
   ApplicationStop:
     - location: codedeploy-scripts/stop_server
       timeout: 300
