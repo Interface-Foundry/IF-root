@@ -34,6 +34,13 @@ hooks:
     - location: codedeploy-scripts/cleanup
       timeout: 300
       runas: root
+  AfterInstall: 
+    - location: codedeploy-scripts/app-owner
+      timeout: 300
+      runas: root
+    - location: codedeploy-scripts/install-dependencies
+      timeout: 300
+      runas: kip
   ApplicationStop:
     - location: codedeploy-scripts/stop_server
       timeout: 300
