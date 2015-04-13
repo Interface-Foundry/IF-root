@@ -7,10 +7,10 @@ contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree'];
 function contestUploadService($upload, $q, geoService, worldTree) {
 
 	return {
-		uploadWTGT: uploadWTGT
+		uploadImage: uploadImage
 	};
 
-	function uploadWTGT(file, world, hashtag) {
+	function uploadImage(file, world, hashtag) {
 		var deferred = $q.defer();
 
 		// get time

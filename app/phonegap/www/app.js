@@ -26003,9 +26003,9 @@ function categoryWidgetService() {
 
 app.controller('ContestEntriesController', ContestEntriesController);
 
-ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', 'Entries', 'worldTree', 'styleManager'];
+ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', 'Entries', 'worldTree', 'styleManager', 'contestUploadService'];
 
-function ContestEntriesController($scope, $routeParams, $rootScope, Entries, worldTree, styleManager) {
+function ContestEntriesController($scope, $routeParams, $rootScope, Entries, worldTree, styleManager, contestUploadService) {
 
 	$scope.hashTag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
@@ -26041,46 +26041,11 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
 	}
 
 	$scope.uploadWTGT = function($files) {
-		// $scope.wtgt.building[hashtag] = true;
-
-		var file = $files[0];
-
-		// get time
-		var time = new Date();
-
-		var data = {
-			world_id: $scope.world._id,
-			worldID: $scope.world.id,
-			hashtag: $scope.hashtag,
-			userTime: time,
-			userLat: null,
-			userLon: null,
-			type: 'retail_campaign'
-		};
-
-		// get location
-		geoService.getLocation().then(function(coords) {
-			// console.log('coords: ', coords);
-			data.userLat = coords.lat;
-			data.userLon = coords.lng;
-			uploadPicture(file, $scope.hashtag, data);
-		}, function(err) {
-			uploadPicture(file, $scope.hashtag, data);
+		contestUploadService.uploadImage($files[0], $scope.world, $scope.hashtag)
+		.then(function(data) {
+			$scope.entries.unshift(data);
 		});
-	};
-
-	function uploadPicture(file, hashtag, data) {
-
-	$scope.upload = $upload.upload({
-		url: '/api/uploadPicture/',
-		file: file,
-		data: JSON.stringify(data)
-	}).progress(function(e) {
-	}).success(function(data) {
-		worldTree.cacheSubmission($scope.world._id, hashtag, data);
-		loadEntries();
-	});
-}
+	}
 }
 'use strict';
 
@@ -26091,10 +26056,10 @@ contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree'];
 function contestUploadService($upload, $q, geoService, worldTree) {
 
 	return {
-		uploadWTGT: uploadWTGT
+		uploadImage: uploadImage
 	};
 
-	function uploadWTGT(file, world, hashtag) {
+	function uploadImage(file, world, hashtag) {
 		var deferred = $q.defer();
 
 		// get time
@@ -27623,11 +27588,11 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	contestUploadService.uploadWTGT($files[0], $scope.world, hashtag)
+	contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 	.then(function(data) {
-		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.images[hashtag] = data.imgURL;
 		$scope.wtgt.building[hashtag] = false;
-	})
+	});
 	// var file = $files[0];
 
 	// get time
@@ -27658,20 +27623,20 @@ $scope.uploadWTGT = function($files, hashtag) {
 	// });
 };
 
-function uploadPicture(file, hashtag, data) {
+// function uploadPicture(file, hashtag, data) {
 
-	$scope.upload = $upload.upload({
-		url: '/api/uploadPicture/',
-		file: file,
-		data: JSON.stringify(data)
-	}).progress(function(e) {
-	}).success(function(data) {
-		worldTree.cacheSubmission($scope.world._id, hashtag, data);
-		$scope.wtgt.images[hashtag] = data;
-		$scope.wtgt.building[hashtag] = false;
+// 	$scope.upload = $upload.upload({
+// 		url: '/api/uploadPicture/',
+// 		file: file,
+// 		data: JSON.stringify(data)
+// 	}).progress(function(e) {
+// 	}).success(function(data) {
+// 		worldTree.cacheSubmission($scope.world._id, hashtag, data);
+// 		$scope.wtgt.images[hashtag] = data;
+// 		$scope.wtgt.building[hashtag] = false;
 
-	});
-}
+// 	});
+// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;

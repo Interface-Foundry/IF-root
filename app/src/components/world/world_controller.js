@@ -46,11 +46,11 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	contestUploadService.uploadWTGT($files[0], $scope.world, hashtag)
+	contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 	.then(function(data) {
-		$scope.wtgt.images[hashtag] = data;
+		$scope.wtgt.images[hashtag] = data.imgURL;
 		$scope.wtgt.building[hashtag] = false;
-	})
+	});
 	// var file = $files[0];
 
 	// get time
@@ -81,20 +81,20 @@ $scope.uploadWTGT = function($files, hashtag) {
 	// });
 };
 
-function uploadPicture(file, hashtag, data) {
+// function uploadPicture(file, hashtag, data) {
 
-	$scope.upload = $upload.upload({
-		url: '/api/uploadPicture/',
-		file: file,
-		data: JSON.stringify(data)
-	}).progress(function(e) {
-	}).success(function(data) {
-		worldTree.cacheSubmission($scope.world._id, hashtag, data);
-		$scope.wtgt.images[hashtag] = data;
-		$scope.wtgt.building[hashtag] = false;
+// 	$scope.upload = $upload.upload({
+// 		url: '/api/uploadPicture/',
+// 		file: file,
+// 		data: JSON.stringify(data)
+// 	}).progress(function(e) {
+// 	}).success(function(data) {
+// 		worldTree.cacheSubmission($scope.world._id, hashtag, data);
+// 		$scope.wtgt.images[hashtag] = data;
+// 		$scope.wtgt.building[hashtag] = false;
 
-	});
-}
+// 	});
+// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
