@@ -1,8 +1,34 @@
 version: 0.0
 os: linux
 files:
-  - source: /
-    destination: /opt/kip/App/
+  - source: IF_services
+    destination: /opt/kip/App/IF_services
+  - source: app
+    destination: /opt/kip/App/app
+  - source: components
+    destination: /opt/kip/App/components
+  - source: conf
+    destination: /opt/kip/App/conf
+  - source: config
+    destination: /opt/kip/App/config
+  - source: logs
+    destination: /opt/kip/App/logs
+  - source: node_modules
+    destination: /opt/kip/App/node_modules
+  - source: priority_test
+    destination: /opt/kip/App/priority_test
+  - source: IF_bashrc
+    destination: /opt/kip/App/IF_bashrc
+  - source: IF_server.js
+    destination: /opt/kip/App/IF_server.js
+  - source: datarange_mongoQuery.js
+    destination: /opt/kip/App/datarange_mongoQuery.js
+  - source: package.json
+    destination: /opt/kip/App/package.json
+  - source: redis.js
+    destination: /opt/kip/App/redis.js
+  - source: scan
+    destination: /opt/kip/App/scan
 hooks:
   BeforeInstall:
     - location: codedeploy-scripts/cleanup
