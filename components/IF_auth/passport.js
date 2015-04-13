@@ -5,6 +5,7 @@ var TwitterStrategy  = require('passport-twitter').Strategy;
 var MeetupStrategy = require('passport-meetup').Strategy;
 var BasicStrategy = require('passport-http').BasicStrategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
+var CustomFBStrategy = require('./custom_fb_strategy/custom_strategy').Strategy;
 
 // load up the user model
 var User       = require('../IF_schemas/user_schema.js');
@@ -201,9 +202,22 @@ module.exports = function(passport) {
                         // if there is a user id already but no token (user was linked at one point and then removed)
                         if (!user.facebook.token) {
                             user.facebook.token = token;
-                            user.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName;
-                            if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
-                                user.facebook.email = profile.emails[0].value;
+                            user.facebook.name  = profile.name;
+
+                            if (profile.email){
+                                user.facebook.email = profile.email;
+                            }
+
+                            if (profile.verified){
+                                user.facebook.verified = profile.verified;
+                            }
+
+                            if (profile.locale){
+                                user.facebook.locale = profile.locale;
+                            }
+
+                            if (profile.timezone){
+                                user.facebook.timezone = profile.timezone;
                             }
 
                             user.save(function(err) {
@@ -221,8 +235,21 @@ module.exports = function(passport) {
                         newUser.facebook.id    = profile.id;
                         newUser.facebook.token = token;
                         newUser.facebook.name  = profile.displayName;
-                        if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
-                            newUser.facebook.email = profile.emails[0].value; 
+
+                        if (profile.email){
+                            newUser.facebook.email = profile.email;
+                        }
+
+                        if (profile.verified){
+                            newUser.facebook.verified = profile.verified;
+                        }
+
+                        if (profile.locale){
+                            newUser.facebook.locale = profile.locale;
+                        }
+
+                        if (profile.timezone){
+                            newUser.facebook.timezone = profile.timezone;
                         }
                         
 
@@ -241,8 +268,21 @@ module.exports = function(passport) {
                 user.facebook.id    = profile.id;
                 user.facebook.token = token;
                 user.facebook.name  = profile.displayName;
-                if (profile.emails[0].value !== undefined || profile.emails[0].value !== null){
-                    user.facebook.email = profile.emails[0].value;
+                
+                if (profile.email){
+                    user.facebook.email = profile.email;
+                }
+
+                if (profile.verified){
+                    user.facebook.verified = profile.verified;
+                }
+
+                if (profile.locale){
+                    user.facebook.locale = profile.locale;
+                }
+
+                if (profile.timezone){
+                    user.facebook.timezone = profile.timezone;
                 }
 
                 user.save(function(err) {
@@ -255,6 +295,93 @@ module.exports = function(passport) {
         });
 
     }));
+
+    // =========================================================================
+    // FACEBOOK for Mobile =====================================================
+    // =========================================================================
+    // Use local strategy
+    passport.use(new CustomFBStrategy({
+            userId: 'userId',
+            accessToken: 'accessToken'
+        },
+        function(userId, accessToken, response, done) {
+            console.log('in the authentication function');
+            if (response.error){
+                return done(null, false, {
+                    message: response.error.message
+                });
+            }
+
+
+            console.log(userId);
+
+            //parse response
+            var profile = JSON.parse(response);
+            
+            console.log(profile.id);
+
+            if (userId !== profile.id){
+                return done(null, false, {
+                    message: 'Incorrect Access Token'
+                });
+            }
+
+            User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
+                if (err)
+                    return done(err);
+                console.log(response);
+                if (user) {
+
+                    // if there is a user id already but no token (user was linked at one point and then removed)
+                    if (!user.facebook.token) {
+                        user.facebook.token = accessToken;
+                        user.facebook.name  = profile.name;
+                        
+                        if (profile.email){
+                            user.facebook.email = profile.email;
+                        }
+
+                        if (profile.verified){
+                            user.facebook.verified = profile.verified;
+                        }
+
+                        if (profile.locale){
+                            user.facebook.locale = profile.locale;
+                        }
+
+                        if (profile.timezone){
+                            user.facebook.timezone = profile.timezone;
+                        }
+
+                        user.save(function(err) {
+                            if (err)
+                                throw err;
+                            return done(null, user);
+                        });
+                    }
+
+                    return done(null, user); // user found, return that user
+                } else {
+                    // if there is no user, create them
+                    var newUser            = new User();
+
+                    newUser.facebook.id    = profile.id;
+                    newUser.facebook.token = accessToken;
+                    newUser.facebook.name  = profile.name;
+                    if (profile.email){
+                        newUser.facebook.email = profile.email; 
+                    }
+                    
+
+                    newUser.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, newUser);
+                    });
+                }
+            });
+        } 
+    ));
 
     // =========================================================================
     // TWITTER =================================================================

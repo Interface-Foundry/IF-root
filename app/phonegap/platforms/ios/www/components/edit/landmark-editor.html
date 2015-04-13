@@ -20,7 +20,7 @@
 		ng-controller="LandmarkEditorItemController" 
 		class="panel panel-default" 
 		ng-class="{active: $index === selectedIndex}"
-		ng-click="selectLandmark($event)">
+		ng-click="selectLandmark($index)">
 		<div class="panel-heading">
 		<span class="panel-title" ng-cloak>{{landmark.name}} 
 			<button type="button" class="close" ng-click="deleteLandmark()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -54,6 +54,20 @@
 			<label>Category</label> 
 			<select class="form-control" ng-model="landmark.category" ng-options="category.name as category.name for category in world.landmarkCategories"></select>
 		</div>
+
+		<div class="form-group">
+			<label>Tags</label> 
+			<input type="text" ng-model="addTagName" ng-keypress="tagDetect($event)" class="form-control">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" ng-click="addTag()">Add</button>
+			</span>
+
+			<div ng-repeat="tag in landmark.tags" class="alert">
+ 				<h4><span style="display: inline-block;" class="label label-default">{{tag}} <button type="button" class="close" data-dismiss="alert" ng-click="closeTag($index)" aria-label="Close"><span aria-hidden="true"> &times;</span></button></h4></span>
+			</div>
+		</div>
+
+		<hr>
 	
 		<button class="btn btn-info btn-sm" ng-click="setStartTime()" ng-hide="landmark.time.start">Add a Start Time</button>
 <div ng-show="landmark.time.start">
@@ -89,7 +103,7 @@
 	<br><br>
 
 	<div class="form-group">
-		<button class="btn btn-info btn-sm" ng-click="setLocation()" ng-hide="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">Add Location Details</button>
+		<button class="btn btn-info btn-sm"  ng-click="setLocation()" ng-hide="landmark.loc_info.floor_num || landmark.loc_info.floor_num === 1 || landmark.loc_info.room_name">Add Location Details</button>
 	</div>
 
 
@@ -105,9 +119,19 @@
 
 				<label>Floor Number</label>
 				<br>
-				<button type="button" class="btn btn-default" data-html="1" ng-model="landmark.loc_info.floor_num" ng-options="floor.val as floor.label for floor in floors" bs-select>
-				  Action <span class="caret"></span>
-				</button>
+
+				<div class="btn-group" dropdown>
+		      <button type="button" 
+		      				class="btn btn-default dropdown-toggle" 
+		      				dropdown-toggle>{{floorNumber}}&nbsp;<span class="caret"></span>
+		      </button>
+		      <ul class="dropdown-menu" role="menu">
+		        <li ng-repeat="floor in floors" 
+		        		ng-click="chooseNewFloor($index)">
+		        	<a href="#">{{floor.label}}</a>
+		        </li>
+		      </ul>
+		    </div>
 
 			</div>
 

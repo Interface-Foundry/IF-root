@@ -4854,7 +4854,7 @@ var updateTitle = function($rootScope) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://bubbl.li' + request.url;
+		    			request.url = 'http://45.55.182.139:2997' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5761,7 +5761,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://bubbl.li/'+value;
+					value = 'http://45.55.182.139:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19083,7 +19083,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('http://45.55.182.139:2997/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19205,15 +19205,36 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
-			var authHeader = 'Bearer ' + fbToken;
-			console.log(success);
-			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-				lockerManager.saveFBToken(fbToken)
-				ifGlobals.fbToken = fbToken;
-				deferred.resolve(success);
-			}, function(failure) {
-				deferred.reject(failure);
-			})
+
+
+			
+			
+			var data = {
+            	userId: success.authResponse.userID,
+           		accessToken: success.authResponse.accessToken 
+          	};
+
+          	$http.post('http://45.55.182.139:1337/auth/facebook/mobile_sigin', data).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+					deferred.resolve(success);
+	            },
+
+	            function(res){
+	              deferred.reject(failure);
+	            }
+          	);      
+
+			// var authHeader = 'Bearer ' + fbToken;
+			// console.log(success);
+			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+			// 	lockerManager.saveFBToken(fbToken)
+			// 	ifGlobals.fbToken = fbToken;
+			// 	deferred.resolve(success);
+			// }, function(failure) {
+			// 	deferred.reject(failure);
+			// })
 		}, 
 		function(failure) {
 			alerts.addAlert('warning', "Please allow access to Facebook!", true);

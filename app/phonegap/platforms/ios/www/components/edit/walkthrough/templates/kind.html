@@ -1,8 +1,9 @@
 <ul class="kind walkthrough-grid">
-	<li ng-repeat="kind in global.kinds" 
+	<li class="u-pointer"
+		ng-repeat="kind in global.kinds" 
 		ng-click="world.category = kind.name; slowNext();"
 		ng-class="{'active': world.category==kind.name}">
-		<label ng-bind="kind.name"></label>
+		<label ng-bind="kind.name" class="u-pointer"></label>
 		<img ng-src="img/walkthrough/kind/{{kind.img}}" ng-show="kind.img">
 	</li>
 </ul>

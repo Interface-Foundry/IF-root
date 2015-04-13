@@ -19113,15 +19113,17 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
-			var authHeader = 'Bearer ' + fbToken;
-			console.log(success);
-			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-				lockerManager.saveFBToken(fbToken)
-				ifGlobals.fbToken = fbToken;
-				deferred.resolve(success);
-			}, function(failure) {
-				deferred.reject(failure);
-			})
+
+
+			// var authHeader = 'Bearer ' + fbToken;
+			// console.log(success);
+			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+			// 	lockerManager.saveFBToken(fbToken)
+			// 	ifGlobals.fbToken = fbToken;
+			// 	deferred.resolve(success);
+			// }, function(failure) {
+			// 	deferred.reject(failure);
+			// })
 		}, 
 		function(failure) {
 			alerts.addAlert('warning', "Please allow access to Facebook!", true);
