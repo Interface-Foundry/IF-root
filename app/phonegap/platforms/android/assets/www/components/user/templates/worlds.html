@@ -1,0 +1,58 @@
+<div class="wrap">
+<div class="surface profile-surface subnavfix">
+	<div class="col-xs-12" ng-if="fromMeetup">
+		<div class="meetup-well well">
+			<span ng-show="waitingforMeetup">We're pulling in your Meetups, this might take some time <img width="50" height="50" src="img/IF/718.gif"></span>
+			<span ng-if="bubbles.length > 0">We found your Meetups! Start customizing them below. Click on any Meetup then click <b>Set Up Meetup</b></span>
+			<span ng-if="bubbles.length < 0">Welcome to Bubbl.li! We couldn't find any of your Meetups, check back later. Or, create a new bubble ---> </span>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+
+	<button class="profile-add-new" ng-click="newWorld()" ng-hide="waitingforMeetup">
+		<div class="profile-add-new-plus"></div>
+		<span>Create New Bubble</span>
+	</button>
+	
+<div class="bubble-group" ng-repeat="group in ::groups track by group.order">
+	<header class="bubble-group-label">{{group.label}}</header>
+	<ul class="bubble-list">
+	<li class="bubble-list-item" ng-repeat="bubble in ::group.bubbles track by bubble._id" 
+		ng-click="inspect(bubble)"
+		ng-class="{'selected': selected == bubble}">
+		<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+		<span>{{::bubble.name}}</span>
+	</li>
+	</ul>
+</div>
+
+</div>
+
+<div class="calendar-view if-animate" ng-class="{'active': calendarActive}" ng-if="calendarLoaded">
+	<div ui-calendar="calConfig" ng-model="calendar"></div>
+	<button class="bubble-inspector-close" ng-click="calendarActive = false">x</button>
+</div>
+
+<div class="bubble-inspector" ng-class="{'selected': selected}">
+	<div class="bubble-inspector-wrap">
+	<header class="bubble-inspector-header">
+		<a if-href="#w/{{selected.id}}" class="bubble-inspector-title">{{selected.name}}</a>
+		<button class="bubble-inspector-close" ng-click="inspect()">x</button>
+	</header>
+	<img class="bubble-inspector-avatar" if-src="{{selected.avatar}}">
+	<div class="bubble-inspector-info">
+		<a class="bubble-inspector-btn" style="float:left;" if-href="#w/{{selected.id}}">View</a>
+		<a class="bubble-inspector-btn" style="float:right;" if-href="#edit/w/{{selected.id}}">Edit</a>
+		<a class="bubble-inspector-btn-walkthrough" if-href="#edit/walkthrough/{{selected._id}}">Walkthrough</a>
+		<div class="bubble-inspector-info-data">
+			<div><label>Views: {{selected.views}}</label>
+			<div><label>Summary</label></div>
+			<p>{{selected.summary || 'No summary'}}</p>
+			<div ng-if="selected.time.start"><label>Starts on {{selected.time.start | date: 'short'}}</label></div>
+			<div ng-if="selected.time.end"><label>Ends {{selected.time.end | date: 'short'}}</label></div>
+		</div>
+		<button class="bubble-inspector-btn-delete" ng-click="deleteBubble(selected._id); selected = undefined">Delete</button> 
+	</div>
+	</div>
+</div>
+</div>

@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.if.bubblli" version="0.8.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <preference name="loglevel" value="DEBUG" />
+    <feature name="FacebookConnectPlugin">
+        <param name="android-package" value="org.apache.cordova.facebook.ConnectPlugin" />
+    </feature>
+    <access origin="https://m.facebook.com" />
+    <access origin="https://graph.facebook.com" />
+    <access origin="https://api.facebook.com" />
+    <access origin="https://*.fbcdn.net" />
+    <access origin="https://*.akamaihd.net" />
+    <feature name="SplashScreen">
+        <param name="android-package" value="org.apache.cordova.splashscreen.SplashScreen" />
+    </feature>
+    <name>Bubbl.li</name>
+    <description>
+        Internet of Places.
+    </description>
+    <author email="hello@interfacefoundry.com" href="http://interfacefoundry.com">
+        Interface Foundry
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <access origin="https://bubbl.li" />
+    <preference name="UIWebViewBounce" value="false" />
+    <preference name="EnableLocation" value="true" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="AutoHideSplashScreen" value="false" />
+    <plugin name="Geolocation" value="CDVLocation" />
+</widget>

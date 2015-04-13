@@ -1,0 +1,203 @@
+
+<!-- INDEX CARD -->
+<span ng-switch="landmark.subType">
+
+
+  <span ng-switch-when="lecture">
+    <div class="row index_card lecture_index" onclick="shelfPan('full');" ng-click="refreshMap();">
+      <div class="col-lg-12">
+        <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
+        
+        <h1>{{landmark.name}}</h1>
+        <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
+        <h3>{{landmark.loc_nickname}}</h3>
+      </div>
+    </div>
+  </span>
+
+
+  <span ng-switch-when="award">
+    <div class="row index_card award_index" onclick="shelfPan('full');" ng-click="refreshMap();">
+      <div class="col-lg-12">
+        <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
+        
+        <h1>{{landmark.name}}</h1>
+        <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
+        <h3>{{landmark.loc_nickname}}</h3>
+      </div>
+    </div>
+  </span>
+
+
+  <span ng-switch-default>
+    <div class="row index_card show_index" onclick="shelfPan('full');" ng-click="refreshMap(); showMapNav();">
+      <div class="col-lg-12">
+        <img src="img/AICP/AICP_week_logo.svg" class="img-responsive index-logo" alt="2014 AICP WEEK">
+        
+        <h1>{{landmark.name}}</h1>
+        <span ng-show="landmark.time.start"><h2>{{landmark.time.start | date:'MMMM d h:mm a'}} - {{landmark.time.end | date:'h:mm a'}}</h2></span>
+        <h3>{{landmark.loc_nickname}}</h3>
+      </div>
+    </div>
+  </span>
+
+
+</span>
+
+
+
+
+
+<div class="landmark-detail">
+<!--   <span ng-hide="option == 'new' "><button class="btn" ng-click="goBack()">< BACK </button></span>
+ -->  <span ng-show="option == 'new' "><button class="btn" ng-click="edit()"> EDIT <i class="fui-new"></i></button></span>
+
+
+
+
+    <!-- 4 COL CARDS -->
+    <div class="row 4-col">
+          <div class="col-xs-12">
+
+            <div class="row">
+              <!-- HAPPENING NOW -->
+              <div class="col-xs-12 card">
+                <h1><!-- Happening Now --></h1>
+                <div class="container">
+                  
+
+                  <span ng-show="landmark.extraURL"><a target="_blank" href="{{landmark.extraURL}}"><p class="title" style="font-size:1.8rem;"><span ng-show="landmark.type == 'event'">Flickr Photos</span></p></a> <br></span>
+
+                  
+
+                  <span ng-hide="businessBootcamp"><p class="title" ng-bind-html="description"></p></span>
+                  <br>
+                    <span ng-show="mainImageUrl"><img ng-src="{{mainImageUrl}}"  style="width:70px; height:70px;"><br></span>
+
+
+                  <span ng-show="landmark.people"><span ng-hide="businessBootcamp"><span ng-hide="landmark.type=='place'"><p class="title" style="font-size:1.8rem; color:black; padding:0px;">Presenters</p></span></span></span>
+                  <br>
+
+                  <span ng-hide="lectureHeadshots || businessBootcamp"><p class="title" ng-bind-html="people"></p></span>
+
+                  <span ng-show="lectureHeadshots">
+
+                    <div class="director"><img ng-src="img/AICP/directors/Ringan_Ledwidge.jpg"><p class="title">Ringan Ledwidge [Rattling Stick]</p></div>
+                    <br>
+                    <div class="director"><img ng-src="img/AICP/directors/Murro_DGA_DSC3920.jpg"><p class="title">Noam Murro [Biscuit Filmworks]</p></div>
+                    <br>
+                    <div class="director"><img ng-src="img/AICP/directors/Keith_Schofield_Headshot.jpg"><p class="title">Keith Schofield  [Caviar]</p></div>
+                  </span>
+
+                  <span ng-show="businessBootcamp">
+
+                        <!-- 4 COL CARDS -->
+                      <div class="row 4-col">
+                            <div class="col-xs-12" style="margin-top:-37px; margin-bottom:-36px;">
+
+                              <div class="row">         
+                                <div class="col-xs-12 card">
+                               
+                                    <div class="container more">
+                                      <div class="header">8:30 AM - 9:15 AM</div>
+                                      
+                                      <p class="title">Check-in, Breakfast & Networking</p>
+
+                                      <br>
+                                      <div class="header">9:15 AM - 10:00 AM</div>
+                                      <p class="title" style="font-size:1.7rem; color:black; padding:0px;">Can Cooperative Guidelines Lead To True Efficiency?</p>
+                                      <br>
+                                      <p class="title">
+                                        Members of AICP’s leadership and production executives from Leo Burnett discuss the benefits of laying out the “terms of engagement” on the table as transparent business practices. 
+                                        Panelists Include:
+                                        <br><br>
+                                        Vincent Geraghty <br>
+                                        • Executive VP/Executive Director of Production, Leo Burnett
+                                        <br><br>
+                                        Eriks Krumins <br>
+                                        • Executive Producer, Gorgeous
+                                        <br><br>
+                                        Jerry Solomon <br>
+                                        • Managing Partner, Persuade Content
+                                        <br><br>
+                                        Matt Miller <br>
+                                        • President/CEO of The AICP
+                                      </p>
+                                      <br>
+                                      <br>
+                                      <div class="header">10:00 AM - 10:15 AM</div>
+                                      
+                                      <p class="title">Coffee Break (featuring premium Hawaiian coffee)</p>
+
+                                      <br>
+
+                                      <br>
+                                      <div class="header">10:15 AM - 11:00 AM</div>
+                                      <p class="title" style="font-size:1.7rem; color:black; padding:0px;">The State of Production Insurance. Are you covered or exposed?</p>
+                                      <br>
+                                      <p class="title">
+                                        From Wrap-up to E&O, everyone needs to be a risk management specialist these days.  ProSight Specialty Insurance will host a discussion with other insurance experts regarding the complexities that lurk behind every set. Panelists include:
+                                        <br><br>
+                                        Joe Finnegan <br>
+                                        • President of Program Underwriting, ProSight Specialty Insurance
+                                        <br><br>
+                                        A. LeConte Moore<br> 
+                                        • Managing Director, DeWitt Stern
+                                        <br><br>
+                                        Scott Taylor <br>
+                                        • President, Taylor & Taylor
+                                        <br><br>
+                                        Matt Miller <br>
+                                        • President/CEO of The AICP
+                                        <br>
+                                      </p>
+
+                                      <br><br>
+                                      <div class="header">11:15 AM - 12:00 PM</div>
+                                      <p class="title" style="font-size:1.7rem; color:black; padding:0px;">Can you say “Lawsuit”? Everyone Else Can…</p>
+                                      <br>
+                                      <p class="title">
+                                        Some of the best "Legal Eagles" in the industry discuss the parameters of what everyone needs to know regarding intellectual property, copyright, trademarks and patents in today’s litigious media business. Get out your notebooks and take some tips from the following experts:
+                                        <br><br>
+                                        Tamany Bentz <br>
+                                        • Attorney, Venable
+                                        <br><br>
+                                        Jeffrey Greenbaum <br>
+                                        • Managing Partner, Frankfurt Kurnit Klein & Selz
+                                        <br><br>
+                                        Brendan McFeely <br>
+                                        • Senior Associate, Kane Kessler
+                                      </p>                                                                            
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        
+                          </div>
+                      </div>
+    
+
+
+                  </span>
+
+                  <br>
+
+
+                </div>
+                <!-- <div class="footer">MORE ></div> -->
+              </div>
+
+          </div>
+        </div>
+    </div>
+
+
+    <div id="gapfill" style="height:900px;"></div>
+
+</div>
+
+
+
+
+

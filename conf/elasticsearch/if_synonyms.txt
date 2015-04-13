@@ -1,0 +1,5 @@
+# map multiple words to a single word like this
+# good about this: better performance (faster!)
+# bad about this: lose specificity
+donut, doughnut => donut
+

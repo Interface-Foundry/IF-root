@@ -1,0 +1,87 @@
+<!-- template for explore widget on bubble view -->
+<!-- TODO: Make this way more DRY -->
+<div ng-if="now.length>0">
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/time_16.png" width="16px" height="16px" style="display: block;"></div>
+	Now <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;" ng-show="now.length>0">See Full Schedule</a>
+</header>
+<article>
+	<div class="explore-media clearfix" ng-repeat="landmark in now track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
+		<div class="explore-media-body">
+		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
+		<h6>{{::landmark.time.start | date: 'shortTime'}} - {{landmark.time.end | date: 'shortTime'}}</h6>
+		{{::landmark.summary}}
+		</div>
+		<div class="bottom-right">
+		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
+		</div>
+	</div>
+	</article>
+</div>
+<div ng-if="upcoming.length>0">
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/time_16.png" width="16px" height="16px" style="display: block;"></div>
+	Upcoming <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;" ng-hide="now.length>0">See Full Schedule</a>
+</header>
+<article ng-init="foldSize = 3">
+	<div class="explore-media clearfix" ng-repeat="landmark in upcoming | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
+		<div class="explore-media-body">
+		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
+		<h6>{{::landmark.time.start | date: 'shortTime'}}- {{landmark.time.end | date: 'shortTime'}}</h6>
+		{{::landmark.summary}}
+		</div>
+		<div class="bottom-right">
+		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
+		</div>
+	</div>
+	<div class="fold-btn" ng-click="foldSize = foldSize + 3" ng-style="{color: style.titleBG_color}" ng-show="foldSize<upcoming.length">
+		See More
+	</div>
+</article>
+</div>
+<div ng-if="upcoming.length===0&&now.length===0&&past.length>0">
+	<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/time_16.png" width="16px" height="16px" style="display: block;"></div>
+	Past <a if-href="#w/{{world.id}}/schedule" class="pull-right" style="padding-right:8px;">See Full Schedule</a>
+	</header>
+<article ng-init="foldSize = 3">
+	<div class="explore-media clearfix" ng-repeat="landmark in past | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
+		<div class="explore-media-body">
+		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
+		<h6>{{::landmark.time.start | date: 'shortTime'}} - {{landmark.time.end | date: 'shortTime'}}</h6>
+		{{::landmark.summary}}
+		</div>
+		<div class="bottom-right">
+		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
+		</div>
+	</div>
+	<div class="fold-btn" ng-click="foldSize = foldSize + 3" ng-style="{color: style.titleBG_color}" ng-show="foldSize<past.length">
+		See More
+	</div>
+</article>
+</div>
+<div ng-if="places.length>0">
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/map_16.png" width="16px" height="16px" style="display: block;"></div>
+	Places
+</header>
+<article ng-init="foldSize = 3">
+	<div class="explore-media clearfix" ng-repeat="landmark in places | limitTo:foldSize track by landmark._id" ng-click="go('w/'+world.id+'/'+landmark.id)">
+		<img if-src="{{::landmark.avatar}}" class="media-object">
+		<div class="explore-media-body">
+		<h3 class="explore-media-heading">{{::landmark.name}}</h3>
+		<h6>{{::landmark.time.start | date: 'shortTime'}} - {{landmark.time.end | date: 'shortTime'}}</h6>
+		{{::landmark.summary}}
+		</div>
+		<div class="bottom-right">
+		<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
+		</div>
+	</div>
+	<div class="fold-btn" ng-click="foldSize = foldSize + 3" ng-style="{color: style.titleBG_color}" ng-show="foldSize<landmarks.length">
+		See More
+	</div>
+</article>
+</div>

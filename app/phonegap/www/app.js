@@ -4841,6 +4841,10 @@ var checkAdminStatus = function(userManager, $location) {
 	});
 }
 
+var updateTitle = function($rootScope) {
+  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+}
+
     //================================================
     
     //================================================
@@ -4850,7 +4854,7 @@ var checkAdminStatus = function(userManager, $location) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://bubbl.li' + request.url;
+		    			request.url = 'https://kipapp.co' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -4881,61 +4885,63 @@ var checkAdminStatus = function(userManager, $location) {
     //================================================
 $routeProvider.
 
-      when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-      when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-      when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
-      when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
-      when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
-      when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
-      when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
-      when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+  when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
+  when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
+  when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
+  when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
+  when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
+  when('/reset/:token', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/signup', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
+  when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
-      when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-      when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-      
-      when('/profile', {redirectTo:'/profile/worlds'}).
-      when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-      when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
-      when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
-      when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
-      when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
+  when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+  when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+  
+  when('/profile', {redirectTo:'/profile/worlds'}).
+  when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+  when('/profile/:tab/:incoming', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
+  when('/w/:worldURL', {templateUrl: 'components/world/world.html', controller: 'WorldController'}).
+  when('/w/:worldURL/upcoming', {templateUrl: 'components/world/upcoming.html', controller: 'WorldController'}).
+  when('/w/:worldURL/messages', {templateUrl: 'components/world/messages/messages.html', controller: 'MessagesController'}).
 
-	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
-	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
-	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
-	  when('/w/:worldURL/contestentries/:hashTag', {templateUrl: 'components/world/subviews/contestentries.html', controller: 'ContestEntriesController'}).
+  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
+  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
+  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
+  when('/w/:worldURL/contestentries/:hashTag', {templateUrl: 'components/world/subviews/contestentries.html', controller: 'ContestEntriesController'}).
 
-	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
-	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
-	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
-	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 
-    when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
-    when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
+  when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
+  when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
+  
+  when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
+  when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
+
+  when('/c/:cityName/search/:latLng', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+  when('/c/:cityName/search/:latLng/category/:category', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+  when('/c/:cityName/search/:latLng/text/:text', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
     
-    when('/edit/w/:worldURL/landmarks', {templateUrl: 'components/edit/landmark-editor.html', controller: 'LandmarkEditorController', resolve: {loggedin: checkLoggedin}}).
-    when('/edit/w/:worldURL/', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
+  when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
+  when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
+  
+  when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
-	  when('/c/:cityName/search/:latLng', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
-	  when('/c/:cityName/search/:latLng/category/:category', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
-	  when('/c/:cityName/search/:latLng/text/:text', {templateUrl: 'components/world/citySearch.html', controller: 'SearchController'}).
+	when('/su/announcements/:region', {templateUrl: 'components/super_user/announcements/superuser_announcements.html', controller: 'SuperuserAnnouncementController', resolve: {isAdmin: checkAdminStatus} }).
+	when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
+	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
+	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
 
-	  when('/edit/w/:worldURL/:view', {templateUrl: 'components/edit/edit_world.html', controller: 'EditController', resolve: {loggedin: checkLoggedin}}).
-	  when('/edit/walkthrough/:_id', {templateUrl: 'components/edit/walkthrough/walkthrough.html', controller: 'WalkthroughController', resolve: {loggedin: checkLoggedin}}).
-      
-    when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
-    when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-    
-    when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
+  when('/404', {templateUrl: '/components/404/404.html', controller: 'FourOhFourController'}).
 
-		when('/su/announcements/:region', {templateUrl: 'components/super_user/announcements/superuser_announcements.html', controller: 'SuperuserAnnouncementController', resolve: {isAdmin: checkAdminStatus} }).
-		when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
-		when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
-		when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
-      //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
+  otherwise({redirectTo: '/404'});
+    //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
-      otherwise({redirectTo: '/'});
       
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
@@ -5755,7 +5761,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://bubbl.li/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -17251,27 +17257,6 @@ function currentWorldService() {
 	}
 }
 angular.module('tidepoolsServices')
-	.factory('dialogs', ['$rootScope', '$compile', 'contest',
-		function($rootScope, $compile, contest) {
-			var dialogs = {
-				dialogTemplate: null
-			} //used to manage different popup dialogs and modals
-
-			dialogs.showDialog = function(name) {
-				dialogs.template = "templates/"+name;
-				dialogs.show = true;
-			}
-
-			dialogs.close = function($event) {
-				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
-					dialogs.show = false;
-					contest.close(new Date); // for wtgt contest
-				}
-			}
-
-			return dialogs;
-		}]);
-angular.module('tidepoolsServices')
 
 	.factory('geoService', [ '$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
 		function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
@@ -17827,7 +17812,9 @@ function locationAnalyticsService($http, $interval, analyticsService, localStore
     }
     
   $interval(function() {
-	  flushBuffer();
+	  if (localStore.locationBuffer.getLength() > 1) {
+		flushBuffer();
+	  }
   }, maxBufferAge);
     
   return {
@@ -19096,7 +19083,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('https://kipapp.co/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19218,15 +19205,36 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
-			var authHeader = 'Bearer ' + fbToken;
-			console.log(success);
-			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-				lockerManager.saveFBToken(fbToken)
-				ifGlobals.fbToken = fbToken;
-				deferred.resolve(success);
-			}, function(failure) {
-				deferred.reject(failure);
-			})
+
+
+			
+			
+			var data = {
+            	userId: success.authResponse.userID,
+           		accessToken: success.authResponse.accessToken 
+          	};
+
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+					deferred.resolve(success);
+	            },
+
+	            function(res){
+	              deferred.reject(failure);
+	            }
+          	);      
+
+			// var authHeader = 'Bearer ' + fbToken;
+			// console.log(success);
+			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+			// 	lockerManager.saveFBToken(fbToken)
+			// 	ifGlobals.fbToken = fbToken;
+			// 	deferred.resolve(success);
+			// }, function(failure) {
+			// 	deferred.reject(failure);
+			// })
 		}, 
 		function(failure) {
 			alerts.addAlert('warning', "Please allow access to Facebook!", true);
@@ -19241,6 +19249,7 @@ userManager.logout = function() {
 	userManager.loginStatus = false;
 	userManager.adminStatus = false;
 	userManager._user = {};
+	$rootScope.user = {};
 	worldTree.submissionCache.removeAll();
 	$location.path('/');
 	navService.reset();
@@ -19497,6 +19506,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		World.get({id: id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
+				$location.path('/404');
 	 		} else {
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
@@ -21255,6 +21265,23 @@ ShowCtrl.$inject = [ '$location', '$scope', 'db', '$timeout','leafletData','$roo
 
 'use strict';
 
+app.controller('FourOhFourController', FourOhFourController);
+
+FourOhFourController.$inject = ['$scope', 'mapManager', 'apertureService', 'navService'];
+
+function FourOhFourController($scope, mapManager, apertureService, navService) {
+	mapManager.center.zoom = 2;
+	mapManager.center.lat = 0;
+	apertureService.set('full');
+
+	navService.backPages = -2;
+
+	$scope.$on('$destroy', function() {
+		navService.backPages = -1;
+	});
+}
+'use strict';
+
 app.directive('announcements', announcements);
 
 announcements.$inject = ['$timeout', 'announcementsService'];
@@ -21350,6 +21377,72 @@ function ContestController($scope, $routeParams, Contests) {
     });
 	}
 }
+angular.module('tidepoolsServices')
+	.factory('dialogs', ['$rootScope', '$compile', 'contest',
+		function($rootScope, $compile, contest) {
+			var dialogs = {
+				dialogTemplate: null
+			} //used to manage different popup dialogs and modals
+
+			dialogs.showDialog = function(name) {
+				dialogs.template = 'components/dialogs/' + name;
+				dialogs.show = true;
+			}
+
+			dialogs.close = function($event) {
+				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
+					dialogs.show = false;
+					contest.close(new Date); // for wtgt contest
+				}
+			}
+
+			return dialogs;
+		}]);
+app.controller('feedbackController', ['$http', '$location', '$scope', 'alertManager', 'analyticsService', 'dialogs', function($http, $location, $scope, alertManager, analyticsService, dialogs) {
+
+  $scope.feedbackCategories = [
+    {category: "map request"},
+    {category: "complaint"},
+    {category: "feature idea"},
+    {category: "other suggestion"}
+  ];
+
+  $scope.feedbackEmotions = [
+    {emotion: "excited"},
+    {emotion: "angry"},
+    {emotion: "confused"}
+  ];
+
+  $scope.feedbackCategory = {};
+  $scope.feedbackEmotion = {};
+
+  $scope.sendFeedback = function($event) { //sends feedback email. move to dialog directive
+
+    var data = {
+      feedbackCategory: $scope.feedbackCategory.category || "no category",
+      feedbackEmotion: $scope.feedbackEmotion.emotion || "no emotion",
+      feedbackText: $scope.feedbackText || null,
+	  currentUrl: $location.absUrl()
+    };
+
+    $http.post('feedback', data).
+      success(function(data){
+        console.log('feedback sent');
+		alertManager.addAlert('success', "Feedback sent, thanks!", true);
+      }).
+      error(function(err){
+        console.log('there was a problem');
+      });
+
+	analyticsService.log("feedback", data);
+
+    dialogs.show = false;
+    $scope.feedbackCategory = null;
+    $scope.feedbackEmotion = null;
+    $scope.feedbackText = null;
+  };
+}]);
+
 app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
 	return {
 		restrict: 'EA',
@@ -23574,6 +23667,9 @@ $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 
 $scope.select = function(bubble) {
+	if (!bubble) {
+		return;
+	}
 	$location.path('w/'+bubble.id);
 }
 
@@ -23704,29 +23800,14 @@ $scope.go = function(path) {
 	
 $scope.goBack = function() {
 	navService.reset();
-	$window.history.back();
+	// $window.history.back();
+	$window.history.go(navService.backPages);
 }
 
 $scope.logout = function() {
 	userManager.logout();
 }
 
-$scope.sendFeedback = function(text) { //sends feedback email. move to dialog directive
-
-    var data = {
-      emailText: ('FEEDBACK:\n' + $sanitize(text) + '\n===\n===\n' + $rootScope.userName)
-    }
-
-    $http.post('feedback', data).
-      success(function(data){
-        console.log('feedback sent');
-        alert('Feedback sent, thanks!');
-
-      }).
-      error(function(err){
-        console.log('there was a problem');
-    });
-};
 
 /*
 $scope.sessionSearch = function() { 
@@ -23830,7 +23911,10 @@ app.factory('navService', [function() {
 		searchWithinBubble: false // search within a bubble (all, text, category)
 	};
 
+	var backPages = -1; // for back button, num pages to go back. useful for 404 page
+
 	return {
+		backPages: backPages,
 		status: status,
 		reset: reset,
 		show: show
@@ -25978,135 +26062,135 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
+	if ($scope.world.name) {
+		angular.extend($rootScope, {globalTitle: $scope.world.name});
+	}
 	map.loadBubble(data.world);
-		
-worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
-	$scope.landmark = landmark;
-	console.log(landmark); 
+	getLandmark(data.world);
+}, function(error) {
+	console.log(error);
+	$location.path('/404');
+});
 
+function getLandmark(world) {
+	worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
+		$scope.landmark = landmark;
+		console.log(landmark); 
+		goToMark();
 
-	goToMark();
-
-	// add local maps for current floor
-	addLocalMapsForCurrentFloor($scope.world, landmark);
+		// add local maps for current floor
+		addLocalMapsForCurrentFloor($scope.world, landmark);
 	
-console.log($scope.style.widgets.presents);
+		console.log($scope.style.widgets.presents);
 
-console.log($scope.landmark.category);
+		console.log($scope.landmark.category);
 
-				//present collecting enabled and landmark has present
-				if ($scope.style.widgets.presents && $scope.landmark.category){
+		//present collecting enabled and landmark has present
+		if ($scope.style.widgets.presents && $scope.landmark.category){
 
-					if ($scope.landmark.category.hiddenPresent && $scope.landmark.category.name){
+			if ($scope.landmark.category.hiddenPresent && $scope.landmark.category.name){
 
-						// userManager.getUser({},function(user){
-						// 	console.log(userManager);
-						// });
-						$scope.temp = {
-							showInitialPresent: true,
-							presentCollected: false,
-							presentAlreadyCollected: false,
-							showPresentCard: true
-						}
-						// $scope.showPresentCard = true;
-						// $scope.showInitialPresent = true;
-						// $scope.presentCollected = false;
-						// $scope.presentAlreadyCollected = false;
-
-						$http.get('/api/user/loggedin', {server: true}).success(function(user){
-							if (user !== '0'){
-								userManager.getUser().then(
-									function(response) {
-
-									$scope.user = response;
-
-									if(!$scope.user.presents){
-										$scope.user.presents = {
-											collected:[]
-										};
-									}
-									
-									//check if present already collected
-									var found = false;	
-									for(var i = 0; i < $scope.user.presents.collected.length; i++) {
-									    if ($scope.user.presents.collected[i].landmarkID == $scope.landmark._id || $scope.user.presents.collected[i].categoryname == $scope.landmark.category.name) {
-									    	if ($scope.user.presents.collected[i].worldID == $scope.world._id){
-										        found = true;
-										        $scope.temp.presentAlreadyCollected = true;
-										        $scope.temp.showInitialPresent = false;
-										        break;						    		
-									    	}
-									    }
-									}
-									//new present
-									if (!found){
-										savePresent();
-									}
-									else {
-										checkFinalState();
-									}
-
-									function savePresent(){
-										$scope.user.presents.collected.unshift({
-											avatar: $scope.landmark.category.avatar, 
-											landmarkID: $scope.landmark._id,
-											landmarkName: $scope.landmark.name,
-											worldID: $scope.world._id,
-											worldName: $scope.world.name,
-											categoryname: $scope.landmark.category.name
-										});
-										userManager.saveUser($scope.user);
-										// display card with avatar + name
-
-										$scope.temp.presentCollected = true;
-										$scope.temp.showIntialPresent = false;
-										alerts.addAlert('success', 'You found a present!', true);
-
-										checkFinalState();
-									}
-
-									//showing collected presents in this world
-									for(var i = 0; i < $scope.user.presents.collected.length; i++) {
-									    if ($scope.user.presents.collected[i].worldID == $scope.world._id){
-											$scope.collectedPresents.push($scope.user.presents.collected[i].categoryname);
-									    }
-									}
-
-									//to see if user reached world collect goal for final present
-									function checkFinalState(){
-
-										var numPresents = $scope.world.landmarkCategories.filter(function(x){return x.present == true}).length;
-										var numCollected = $scope.user.presents.collected.filter(function(x){return x.worldID == $scope.world._id}).length;
-
-										//are # of present user collected in the world == to number of presents available in the world?
-										if (numPresents == numCollected){
-											console.log('final state!');
-											//DISPLAY THANK YOU MESSAGE TO USER, collected all
-											$scope.temp.finalPresent = true;
-											$scope.temp.showInitialPresent = false;
-											$scope.temp.presentCollected = false;
-											$scope.temp.presentAlreadyCollected = false;
-										}
-										else{
-											$scope.presentsLeft = numPresents - numCollected;
-											console.log('presents left '+ $scope.presentsLeft);
-										}
-									}	
-
-								});
-							}
-							else {
-								$scope.temp.signupCollect = true;
-								
-							}
-						});
-
-					}				
+				$scope.temp = {
+					showInitialPresent: true,
+					presentCollected: false,
+					presentAlreadyCollected: false,
+					showPresentCard: true
 				}
 
+				$http.get('/api/user/loggedin', {server: true}).success(function(user){
+					if (user !== '0'){
+						userManager.getUser().then(function(response) {
 
-})
-});
+							$scope.user = response;
+
+							if(!$scope.user.presents){
+								$scope.user.presents = {
+									collected:[]
+								};
+							}
+							
+							//check if present already collected
+							var found = false;	
+							for(var i = 0; i < $scope.user.presents.collected.length; i++) {
+						    if ($scope.user.presents.collected[i].landmarkID == $scope.landmark._id || $scope.user.presents.collected[i].categoryname == $scope.landmark.category.name) {
+						    	if ($scope.user.presents.collected[i].worldID == $scope.world._id){
+						        found = true;
+						        $scope.temp.presentAlreadyCollected = true;
+						        $scope.temp.showInitialPresent = false;
+						        break;						    		
+						    	}
+						    }
+							}
+							//new present
+							if (!found){
+								savePresent();
+							}
+							else {
+								checkFinalState();
+							}
+
+							function savePresent(){
+								$scope.user.presents.collected.unshift({
+									avatar: $scope.landmark.category.avatar, 
+									landmarkID: $scope.landmark._id,
+									landmarkName: $scope.landmark.name,
+									worldID: $scope.world._id,
+									worldName: $scope.world.name,
+									categoryname: $scope.landmark.category.name
+								});
+								userManager.saveUser($scope.user);
+								// display card with avatar + name
+
+								$scope.temp.presentCollected = true;
+								$scope.temp.showIntialPresent = false;
+								alerts.addAlert('success', 'You found a present!', true);
+
+								checkFinalState();
+							}
+
+							//showing collected presents in this world
+							for(var i = 0; i < $scope.user.presents.collected.length; i++) {
+						    if ($scope.user.presents.collected[i].worldID == $scope.world._id){
+								$scope.collectedPresents.push($scope.user.presents.collected[i].categoryname);
+						    }
+							}
+
+							//to see if user reached world collect goal for final present
+							function checkFinalState(){
+
+								var numPresents = $scope.world.landmarkCategories.filter(function(x){return x.present == true}).length;
+								var numCollected = $scope.user.presents.collected.filter(function(x){return x.worldID == $scope.world._id}).length;
+
+								//are # of present user collected in the world == to number of presents available in the world?
+								if (numPresents == numCollected){
+									console.log('final state!');
+									//DISPLAY THANK YOU MESSAGE TO USER, collected all
+									$scope.temp.finalPresent = true;
+									$scope.temp.showInitialPresent = false;
+									$scope.temp.presentCollected = false;
+									$scope.temp.presentAlreadyCollected = false;
+								}
+								else{
+									$scope.presentsLeft = numPresents - numCollected;
+									console.log('presents left '+ $scope.presentsLeft);
+								}
+							}	
+
+						});
+					}
+					else {
+						$scope.temp.signupCollect = true;
+						
+					}
+				});
+
+			}				
+		}
+	}, function(error) {
+		console.log(error, 'redirecting to world');
+		$location.path('/w/' + world.id);
+	});
+}
 
 function goToMark() {
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
@@ -27531,10 +27615,9 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 style.navBG_color = $scope.style.navBG_color;
 
-
-		//show edit buttons if user is world owner
-		if ($rootScope.userID && $scope.world.permissions){
-			if ($rootScope.userID == $scope.world.permissions.ownerID){
+		 //show edit buttons if user is world owner
+		 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
+			 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
 			}
 			else {
@@ -27545,10 +27628,10 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		//console.log($scope.world);
 		//console.log($scope.style);
 		 
-		if ($scope.world.name) {
-			angular.extend($rootScope, {globalTitle: $scope.world.name});
-		} //TODO: cleanup on $destroy
-		 
+		 if ($scope.world.name) {
+			 angular.extend($rootScope, {globalTitle: $scope.world.name});
+		 }
+
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
 			$scope.description = true;

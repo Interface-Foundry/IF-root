@@ -1,0 +1,25 @@
+<div class="surface">
+	<form ng-submit="userManager.login.login()" name="loginForm">
+		<h4 class="auth-title">Bubbl.li</h4>
+		<div class="closeWrapper closeElement" ng-click="dialog.close($event)">
+			<img class="closeImg closeElement nav-icon" src="img/icons/ic_clear_black_24dp.png">
+		</div>
+		<input name="email" type="email" 
+			placeholder="Email" class="auth-input" ng-model="userManager.login.email" required />		
+		<input name="password" type="password" 
+			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
+		
+		<button type="submit" class="auth-submit" ng-click="wtgtLogin()">Log In</button>
+		
+<button type="button" class="auth-submit" ng-click="fbLogin()">Log in with Facebook</button>
+		<div ng-if="userManager.login.error">
+			Login failed!
+		</div>
+		<!-- <a if-href="#forgot">Forgot your password?</a> -->
+		<a ng-click="dialog.showDialog('forgotDialog.html')" href="">Forgot your password?</a>
+
+		
+		<button type="button" class="auth-create" ng-click="dialog.showDialog('createAccountDialog.html'); wtgtLogin()">Create Account</button>
+		
+	</form>
+</div>

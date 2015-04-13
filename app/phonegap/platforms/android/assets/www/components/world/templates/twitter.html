@@ -1,0 +1,20 @@
+<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon"><img src="img/icons/twitter_16.png" width="16px" height="16px" style="display: block;"></div>
+	Twitter #{{world.resources.hashtag}}
+</header>
+<article>
+	<a if-href="#w/{{world.id}}/twitter">
+		<li ng-repeat="tweet in tweets" class="tweet">
+			<div ng-if="tweet.user.name">
+				<img if-src="{{tweet.user.profile_image_url}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong>
+				<hr class="divider">
+			</div>
+				<img if-src="{{tweet.media.media_url | httpsify}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
+				<footer>{{tweet.text || 'No one has tweeted yet! Tweet at #'+world.resources.hashtag+' to start the conversation.'}}</footer>
+				<hr class="divider">
+				<div class="fold-btn" ng-style="{color: style.titleBG_color}">
+					See More
+			</div>
+		</li>
+	</a>
+ </article>

@@ -137,10 +137,9 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 		 style.navBG_color = $scope.style.navBG_color;
 
-
-		//show edit buttons if user is world owner
-		if ($rootScope.userID && $scope.world.permissions){
-			if ($rootScope.userID == $scope.world.permissions.ownerID){
+		 //show edit buttons if user is world owner
+		 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
+			 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
 			 	$scope.showEdit = true;
 			}
 			else {
@@ -151,10 +150,10 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		//console.log($scope.world);
 		//console.log($scope.style);
 		 
-		if ($scope.world.name) {
-			angular.extend($rootScope, {globalTitle: $scope.world.name});
-		} //TODO: cleanup on $destroy
-		 
+		 if ($scope.world.name) {
+			 angular.extend($rootScope, {globalTitle: $scope.world.name});
+		 }
+
 		//switching between descrip and summary for descrip card
 		if ($scope.world.description || $scope.world.summary) {
 			$scope.description = true;

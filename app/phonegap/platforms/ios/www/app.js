@@ -936,19 +936,19 @@ angular.module("leaflet-directive", []).directive('leaflet', ["$q", "leafletData
         restrict: "EA",
         replace: true,
         scope: {
-            center         : '=center',
-            defaults       : '=defaults',
-            maxbounds      : '=maxbounds',
-            bounds         : '=bounds',
-            markers        : '=markers',
-            legend         : '=legend',
-            geojson        : '=geojson',
-            paths          : '=paths',
-            tiles          : '=tiles',
-            layers         : '=layers',
-            controls       : '=controls',
-            decorations    : '=decorations',
-            eventBroadcast : '=eventBroadcast'
+            center         : '=',
+            defaults       : '=',
+            maxbounds      : '=',
+            bounds         : '=',
+            markers        : '=',
+            legend         : '=',
+            geojson        : '=',
+            paths          : '=',
+            tiles          : '=',
+            layers         : '=',
+            controls       : '=',
+            decorations    : '=',
+            eventBroadcast : '='
         },
         transclude: true,
         template: '<div class="angular-leaflet-map"><div ng-transclude></div></div>',
@@ -1071,8 +1071,8 @@ angular.module("leaflet-directive", []).directive('leaflet', ["$q", "leafletData
             });
 
             //Handle request to invalidate the map size
-	        //Up scope using $scope.$emit('invalidateSize')
-	        //Down scope using $scope.$broadcast('invalidateSize')
+            //Up scope using $scope.$emit('invalidateSize')
+            //Down scope using $scope.$broadcast('invalidateSize')
             scope.$on('invalidateSize', function() {
                 map.invalidateSize();
             });
@@ -1088,11 +1088,11 @@ angular.module("leaflet-directive").directive('center',
         isSameCenterOnMap = leafletHelpers.isSameCenterOnMap,
         safeApply     = leafletHelpers.safeApply,
         isValidCenter = leafletHelpers.isValidCenter,
-        isEmpty       = leafletHelpers.isEmpty,
+        isValidBounds = leafletBoundsHelpers.isValidBounds,
         isUndefinedOrEmpty = leafletHelpers.isUndefinedOrEmpty;
 
     var shouldInitializeMapWithBounds = function(bounds, center) {
-        return (isDefined(bounds) && !isEmpty(bounds)) && isUndefinedOrEmpty(center);
+        return isDefined(bounds) && isValidBounds(bounds) && isUndefinedOrEmpty(center);
     };
 
     var _leafletCenter;
@@ -1131,7 +1131,7 @@ angular.module("leaflet-directive").directive('center',
                     });
                     safeApply(leafletScope, function (scope) {
                         var mapBounds = map.getBounds();
-                        var newScopeBounds = {
+                        scope.bounds = {
                             northEast: {
                                 lat: mapBounds._northEast.lat,
                                 lng: mapBounds._northEast.lng
@@ -1141,7 +1141,6 @@ angular.module("leaflet-directive").directive('center',
                                 lng: mapBounds._southWest.lng
                             }
                         };
-                        scope.bounds = newScopeBounds;
                     });
                 } else if (!isDefined(centerModel)) {
                     $log.error('The "center" property is not defined in the main scope');
@@ -1337,64 +1336,116 @@ angular.module("leaflet-directive").directive('tiles', ["$log", "leafletData", "
 }]);
 
 angular.module("leaflet-directive").directive('legend', ["$log", "$http", "leafletHelpers", "leafletLegendHelpers", function ($log, $http, leafletHelpers, leafletLegendHelpers) {
-    return {
-        restrict: "A",
-        scope: false,
-        replace: false,
-        require: 'leaflet',
+        return {
+            restrict: "A",
+            scope: false,
+            replace: false,
+            require: 'leaflet',
 
-        link: function(scope, element, attrs, controller) {
-            var isArray      = leafletHelpers.isArray,
-                isDefined = leafletHelpers.isDefined,
-                isFunction = leafletHelpers.isFunction,
-                leafletScope = controller.getLeafletScope(),
-                legend       = leafletScope.legend;
+            link: function (scope, element, attrs, controller) {
 
-            var legendClass = legend.legendClass ? legend.legendClass : "legend";
-            var position = legend.position || 'bottomright';
-            var leafletLegend;
+                var isArray = leafletHelpers.isArray,
+                    isDefined = leafletHelpers.isDefined,
+                    isFunction = leafletHelpers.isFunction,
+                    leafletScope = controller.getLeafletScope(),
+                    legend = leafletScope.legend;
 
-            controller.getMap().then(function(map) {
-                leafletScope.$watch('legend', function (legend) {
-                    if (!isDefined(legend.url) && (!isArray(legend.colors) || !isArray(legend.labels) || legend.colors.length !== legend.labels.length)) {
-                        $log.warn("[AngularJS - Leaflet] legend.colors and legend.labels must be set.");
-                    } else if(isDefined(legend.url)){
-                        $log.info("[AngularJS - Leaflet] loading arcgis legend service.");
-                    } else {
+                var legendClass;
+                var position;
+                var leafletLegend;
+                var type;
+
+                leafletScope.$watch('legend', function (newLegend) {
+
+                    if (isDefined(newLegend)) {
+
+                        legendClass = newLegend.legendClass ? newLegend.legendClass : "legend";
+
+                        position = newLegend.position || 'bottomright';
+
+                        // default to arcgis
+                        type = newLegend.type || 'arcgis'; 
+                    }
+
+                }, true);
+
+                controller.getMap().then(function (map) {
+
+                    leafletScope.$watch('legend', function (newLegend) {
+
+                        if (!isDefined(newLegend)) {
+
+                            if (isDefined(leafletLegend)) {
+                                leafletLegend.removeFrom(map);
+                                leafletLegend= null;
+                            }
+
+                            return;
+                        }
+
+                        if (!isDefined(newLegend.url) && (type === 'arcgis') && (!isArray(newLegend.colors) || !isArray(newLegend.labels) || newLegend.colors.length !== newLegend.labels.length)) {
+
+                            $log.warn("[AngularJS - Leaflet] legend.colors and legend.labels must be set.");
+
+                            return;
+                        }
+
+                        if (isDefined(newLegend.url)) {
+
+                            $log.info("[AngularJS - Leaflet] loading legend service.");
+
+                            return;
+                        }
+
                         if (isDefined(leafletLegend)) {
-						    leafletLegend.removeFrom(map);
-						}
-                        leafletLegend = L.control({ position: position });
-                        leafletLegend.onAdd = leafletLegendHelpers.getOnAddArrayLegend(legend, legendClass);
-                        leafletLegend.addTo(map);
-                    }
-                });
+                            leafletLegend.removeFrom(map);
+                            leafletLegend= null;
+                        }
 
-                leafletScope.$watch('legend.url', function(newURL) {
-                    if(!isDefined(newURL)) {
-                        return;
-                    }
-                    $http.get(newURL)
-                        .success(function(legendData) {
-                            if(isDefined(leafletLegend)) {
-                                leafletLegendHelpers.updateArcGISLegend(leafletLegend.getContainer(),legendData);
-                            } else {
-                                leafletLegend = L.control({ position: position });
-                                leafletLegend.onAdd = leafletLegendHelpers.getOnAddArcGISLegend(legendData, legendClass);
-                                leafletLegend.addTo(map);
-                            }
-                            if(isDefined(legend.loadedData) && isFunction(legend.loadedData)) {
-                                legend.loadedData();
-                            }
-                        })
-                        .error(function() {
-                            $log.warn('[AngularJS - Leaflet] legend.url not loaded.');
+                        leafletLegend = L.control({
+                            position: position
                         });
+                        if (type === 'arcgis') {
+                            leafletLegend.onAdd = leafletLegendHelpers.getOnAddArrayLegend(newLegend, legendClass);
+                        }
+                        leafletLegend.addTo(map);
+
+                    });
+
+                    leafletScope.$watch('legend.url', function (newURL) {
+
+                        if (!isDefined(newURL)) {
+                            return;
+                        }
+                        $http.get(newURL)
+                            .success(function (legendData) {
+
+                                if (isDefined(leafletLegend)) {
+
+                                    leafletLegendHelpers.updateLegend(leafletLegend.getContainer(), legendData, type, newURL);
+
+                                } else {
+
+                                    leafletLegend = L.control({
+                                        position: position
+                                    });
+                                    leafletLegend.onAdd = leafletLegendHelpers.getOnAddLegend(legendData, legendClass, type, newURL);
+                                    leafletLegend.addTo(map);
+                                }
+
+                                if (isDefined(legend.loadedData) && isFunction(legend.loadedData)) {
+                                    legend.loadedData();
+                                }
+                            })
+                            .error(function () {
+                                $log.warn('[AngularJS - Leaflet] legend.url not loaded.');
+                            });
+                    });
+
                 });
-            });
-        }
-    };
-}]);
+            }
+        };
+    }]);
 
 angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", "leafletData", "leafletHelpers", function ($log, $rootScope, leafletData, leafletHelpers) {
     return {
@@ -1410,7 +1461,7 @@ angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", 
                 leafletGeoJSON = {};
 
             controller.getMap().then(function(map) {
-                leafletScope.$watch("geojson", function(geojson) {
+                leafletScope.$watchCollection("geojson", function(geojson) {
                     if (isDefined(leafletGeoJSON) && map.hasLayer(leafletGeoJSON)) {
                         map.removeLayer(leafletGeoJSON);
                     }
@@ -1419,22 +1470,12 @@ angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", 
                         return;
                     }
 
-                    var resetStyleOnMouseout = geojson.resetStyleOnMouseout,
+                    var resetStyleOnMouseout = geojson.resetStyleOnMouseout;
+                    var onEachFeature;
+
+                    if (angular.isFunction(geojson.onEachFeature)) {
                         onEachFeature = geojson.onEachFeature;
-
-
-                    geojson.options = {
-                        style: geojson.style,
-                        filter: geojson.filter,
-                        onEachFeature: onEachFeature,
-                        pointToLayer: geojson.pointToLayer
-                    };
-
-                    leafletGeoJSON = L.geoJson(geojson.data, geojson.options);
-                    leafletData.setGeoJSON(leafletGeoJSON, attrs.id);
-                    leafletGeoJSON.addTo(map);
-
-                    if (!onEachFeature) {
+                    } else {
                         onEachFeature = function(feature, layer) {
                             if (leafletHelpers.LabelPlugin.isLoaded() && isDefined(geojson.label)) {
                                 layer.bindLabel(feature.properties.description);
@@ -1443,8 +1484,7 @@ angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", 
                             layer.on({
                                 mouseover: function(e) {
                                     safeApply(leafletScope, function() {
-                                        geojson.selected = feature;
-                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseover', e);
+                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseover', feature, e);
                                     });
                                 },
                                 mouseout: function(e) {
@@ -1452,20 +1492,32 @@ angular.module("leaflet-directive").directive('geojson', ["$log", "$rootScope", 
                                         leafletGeoJSON.resetStyle(e.target);
                                     }
                                     safeApply(leafletScope, function() {
-                                        geojson.selected = undefined;
                                         $rootScope.$broadcast('leafletDirectiveMap.geojsonMouseout', e);
                                     });
                                 },
                                 click: function(e) {
                                     safeApply(leafletScope, function() {
-                                        geojson.selected = feature;
-                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonClick', geojson.selected, e);
+                                        $rootScope.$broadcast('leafletDirectiveMap.geojsonClick', feature, e);
                                     });
                                 }
                             });
                         };
                     }
-                }, true);
+
+                    if (!isDefined(geojson.options)) {
+                        geojson.options = {
+                            style: geojson.style,
+                            filter: geojson.filter,
+                            onEachFeature: onEachFeature,
+                            pointToLayer: geojson.pointToLayer
+                        };
+                    }
+
+                    leafletGeoJSON = L.geoJson(geojson.data, geojson.options);
+                    leafletData.setGeoJSON(leafletGeoJSON, attrs.id);
+                    leafletGeoJSON.addTo(map);
+
+                });
             });
         }
     };
@@ -1493,12 +1545,6 @@ angular.module("leaflet-directive").directive('layers', ["$log", "$q", "leafletD
                 isLayersControlVisible = false;
 
             controller.getMap().then(function(map) {
-                // Do we have a baselayers property?
-                if (!isDefined(layers) || !isDefined(layers.baselayers) || Object.keys(layers.baselayers).length === 0) {
-                    // No baselayers property
-                    $log.error('[AngularJS - Leaflet] At least one baselayer has to be defined');
-                    return;
-                }
 
                 // We have baselayers to add to the map
                 scope._leafletLayers.resolve(leafletLayers);
@@ -1571,11 +1617,13 @@ angular.module("leaflet-directive").directive('layers', ["$log", "$q", "leafletD
                                     map.addLayer(leafletLayers.baselayers[newName]);
                                 }
                             }
+                        } else {
+                            if (newBaseLayers[newName].top === true && !map.hasLayer(leafletLayers.baselayers[newName])) {
+                                map.addLayer(leafletLayers.baselayers[newName]);
+                            } else if (newBaseLayers[newName].top === false && map.hasLayer(leafletLayers.baselayers[newName])) {
+                                map.removeLayer(leafletLayers.baselayers[newName]);
+                            }
                         }
-                    }
-                    if (Object.keys(leafletLayers.baselayers).length === 0) {
-                        $log.error('[AngularJS - Leaflet] At least one baselayer has to be defined');
-                        return;
                     }
 
                     //we have layers, so we need to make, at least, one active
@@ -1588,7 +1636,7 @@ angular.module("leaflet-directive").directive('layers', ["$log", "$q", "leafletD
                         }
                     }
                     // If there is no active layer make one active
-                    if (!found) {
+                    if (!found && Object.keys(layers.baselayers).length > 0) {
                         map.addLayer(leafletLayers.baselayers[Object.keys(layers.baselayers)[0]]);
                     }
 
@@ -1628,6 +1676,12 @@ angular.module("leaflet-directive").directive('layers', ["$log", "$q", "leafletD
                         } else if (newOverlayLayers[newName].visible === false && map.hasLayer(leafletLayers.overlays[newName])) {
                             map.removeLayer(leafletLayers.overlays[newName]);
                         }
+
+                        //refresh heatmap data if present
+                        if (newOverlayLayers[newName].visible && map._loaded && newOverlayLayers[newName].data && newOverlayLayers[newName].type === "heatmap") {
+                            leafletLayers.overlays[newName].setData(newOverlayLayers[newName].data);
+                            leafletLayers.overlays[newName].update();
+                        }
                     }
 
                     // Only add the layers switch selector control if we have more than one baselayer + overlay
@@ -1652,10 +1706,8 @@ angular.module("leaflet-directive").directive('bounds', ["$log", "$timeout", "le
                 mapController = controller[0];
 
             var emptyBounds = function(bounds) {
-                if (bounds._southWest.lat === 0 && bounds._southWest.lng === 0 && bounds._northEast.lat === 0 && bounds._northEast.lng === 0) {
-                    return true;
-                }
-                return false;
+                return (bounds._southWest.lat === 0 && bounds._southWest.lng === 0 &&
+                        bounds._northEast.lat === 0 && bounds._northEast.lng === 0);
             };
 
             mapController.getMap().then(function (map) {
@@ -1749,12 +1801,16 @@ angular.module("leaflet-directive").directive('markers', ["$log", "$rootScope", 
                             }
                         }
 
+                        // Should we watch for every specific marker on the map?
+                        var shouldWatch = (!isDefined(attrs.watchMarkers) || attrs.watchMarkers === 'true');
+
                         // add new markers
                         for (var newName in newMarkers) {
                             if (newName.search("-") !== -1) {
                                 $log.error('The marker can\'t use a "-" on his key name: "' + newName + '".');
                                 continue;
                             }
+
 
                             if (!isDefined(leafletMarkers[newName])) {
                                 var markerData = newMarkers[newName];
@@ -1807,29 +1863,25 @@ angular.module("leaflet-directive").directive('markers', ["$log", "$rootScope", 
 
                                     // The marker is automatically added to the map depending on the visibility
                                     // of the layer, so we only have to open the popup if the marker is in the map
-                                    if (map.hasLayer(marker) && markerData.focus === true) {
-                                        marker.openPopup();
+                                    if (!shouldWatch && map.hasLayer(marker) && markerData.focus === true) {
+                                       leafletMarkersHelpers.manageOpenPopup(marker, markerData);
                                     }
 
                                 // Add the marker to the map if it hasn't been added to a layer or to a group
                                 } else if (!isDefined(markerData.group)) {
                                     // We do not have a layer attr, so the marker goes to the map layer
                                     map.addLayer(marker);
-                                    if (markerData.focus === true) {
-                                        marker.openPopup();
-                                    }
-                                    if (Helpers.LabelPlugin.isLoaded() && isDefined(markerData.label) && isDefined(markerData.label.options) && markerData.label.options.noHide === true) {
-                                        marker.showLabel();
+                                    if (!shouldWatch && markerData.focus === true) {
+                                       leafletMarkersHelpers.manageOpenPopup(marker, markerData);
                                     }
                                 }
 
-                                // Should we watch for every specific marker on the map?
-                                var shouldWatch = (!isDefined(attrs.watchMarkers) || attrs.watchMarkers === 'true');
 
                                 if (shouldWatch) {
                                     addMarkerWatcher(marker, newName, leafletScope, layers, map);
-                                    listenMarkerEvents(marker, markerData, leafletScope);
                                 }
+                                
+                                listenMarkerEvents(marker, markerData, leafletScope, shouldWatch);
                                 bindMarkerEvents(marker, newName, markerData, leafletScope);
                             }
                         }
@@ -1881,10 +1933,19 @@ angular.module("leaflet-directive").directive('paths', ["$log", "$q", "leafletDa
                     var leafletPaths = {};
                     leafletData.setPaths(leafletPaths, attrs.id);
 
+                    // Should we watch for every specific marker on the map?
+                    var shouldWatch = (!isDefined(attrs.watchPaths) || attrs.watchPaths === 'true');
+
                     // Function for listening every single path once created
                     var watchPathFn = function(leafletPath, name) {
-                        var clearWatch = leafletScope.$watch('paths.' + name, function(pathData) {
+                        var clearWatch = leafletScope.$watch("paths[\""+name+"\"]", function(pathData, old) {
                             if (!isDefined(pathData)) {
+                                if (isDefined(old.layer)) {
+                                    for (var i in layers.overlays) {
+                                        var overlay = layers.overlays[i];
+                                        overlay.removeLayer(leafletPath);
+                                    }
+                                }
                                 map.removeLayer(leafletPath);
                                 clearWatch();
                                 return;
@@ -1893,7 +1954,15 @@ angular.module("leaflet-directive").directive('paths', ["$log", "$q", "leafletDa
                         }, true);
                     };
 
-                    leafletScope.$watch("paths", function (newPaths) {
+                    leafletScope.$watchCollection("paths", function (newPaths) {
+
+                        // Delete paths (by name) from the array
+                        for (var name in leafletPaths) {
+                            if (!isDefined(newPaths[name])) {
+                                map.removeLayer(leafletPaths[name]);
+                                delete leafletPaths[name];
+                            }
+                        }
 
                         // Create the new paths
                         for (var newName in newPaths) {
@@ -1946,27 +2015,27 @@ angular.module("leaflet-directive").directive('paths', ["$log", "$q", "leafletDa
                                     // The path goes to a correct layer group, so first of all we add it
                                     layerGroup.addLayer(newPath);
 
-                                    watchPathFn(newPath, newName);
+                                    if (shouldWatch) {
+                                        watchPathFn(newPath, newName);
+                                    } else {
+                                        setPathOptions(newPath, pathData.type, pathData);
+                                    }
                                 } else if (isDefined(newPath)) {
                                     // Listen for changes on the new path
                                     leafletPaths[newName] = newPath;
                                     map.addLayer(newPath);
-                                    watchPathFn(newPath, newName);
+
+                                    if (shouldWatch) {
+                                        watchPathFn(newPath, newName);
+                                    } else {
+                                        setPathOptions(newPath, pathData.type, pathData);
+                                    }
                                 }
 
                                 bindPathEvents(newPath, newName, pathData, leafletScope);
                             }
                         }
-
-                        // Delete paths (by name) from the array
-                        for (var name in leafletPaths) {
-                            if (!isDefined(newPaths[name])) {
-                                delete leafletPaths[name];
-                            }
-                        }
-
-                    }, true);
-
+                    });
                 });
             });
         }
@@ -1991,21 +2060,22 @@ angular.module("leaflet-directive").directive('controls', ["$log", "leafletHelpe
 
             controller.getMap().then(function(map) {
                 if (isDefined(L.Control.Draw) && isDefined(controls.draw)) {
-                    var drawnItems = new L.FeatureGroup();
-                    var options = {
-                        edit: {
-                            featureGroup: drawnItems
-                        }
-                    };
-                    angular.extend(options, controls.draw);
-                    controls.draw = options;
-                    map.addLayer(options.edit.featureGroup);
 
-                    var drawControl = new L.Control.Draw(options);
+                    if (!isDefined(controls.edit)) {
+                        controls.edit = { featureGroup: new L.FeatureGroup() };
+                        map.addLayer(controls.edit.featureGroup);
+                    }
+
+                    var drawControl = new L.Control.Draw(controls);
                     map.addControl(drawControl);
                 }
 
-                if(isDefined(controls.custom)) {
+                if (isDefined(controls.scale)) {
+                    var scaleControl = new L.control.scale();
+                    map.addControl(scaleControl);
+                }
+
+                if (isDefined(controls.custom)) {
                     for(var i in controls.custom) {
                         map.addControl(controls.custom[i]);
                     }
@@ -2024,6 +2094,7 @@ angular.module("leaflet-directive").directive('eventBroadcast', ["$log", "$rootS
 
         link: function(scope, element, attrs, controller) {
             var isObject = leafletHelpers.isObject,
+                isDefined = leafletHelpers.isDefined,
                 leafletScope  = controller.getLeafletScope(),
                 eventBroadcast = leafletScope.eventBroadcast,
                 availableMapEvents = leafletEvents.getAvailableMapEvents(),
@@ -2036,91 +2107,43 @@ angular.module("leaflet-directive").directive('eventBroadcast', ["$log", "$rootS
                 var eventName;
                 var logic = "broadcast";
 
-                if (isObject(eventBroadcast)) {
-                    // We have a possible valid object
-                    if (eventBroadcast.map === undefined || eventBroadcast.map === null) {
-                        // We do not have events enable/disable do we do nothing (all enabled by default)
-                        mapEvents = availableMapEvents;
-                    } else if (typeof eventBroadcast.map !== 'object') {
-                        // Not a valid object
-                        $log.warn("[AngularJS - Leaflet] event-broadcast.map must be an object check your model.");
+                // We have a possible valid object
+                if (!isDefined(eventBroadcast.map)) {
+                    // We do not have events enable/disable do we do nothing (all enabled by default)
+                    mapEvents = availableMapEvents;
+                } else if (!isObject(eventBroadcast.map)) {
+                    // Not a valid object
+                    $log.warn("[AngularJS - Leaflet] event-broadcast.map must be an object check your model.");
+                } else {
+                    // We have a possible valid map object
+                    // Event propadation logic
+                    if (eventBroadcast.map.logic !== "emit" && eventBroadcast.map.logic !== "broadcast") {
+                        // This is an error
+                        $log.warn("[AngularJS - Leaflet] Available event propagation logic are: 'emit' or 'broadcast'.");
                     } else {
-                        // We have a possible valid map object
-                        // Event propadation logic
-                        if (eventBroadcast.map.logic !== undefined && eventBroadcast.map.logic !== null) {
-                            // We take care of possible propagation logic
-                            if (eventBroadcast.map.logic !== "emit" && eventBroadcast.map.logic !== "broadcast") {
-                                // This is an error
-                                $log.warn("[AngularJS - Leaflet] Available event propagation logic are: 'emit' or 'broadcast'.");
-                            } else if (eventBroadcast.map.logic === "emit") {
-                                logic = "emit";
-                            }
-                        }
-                        // Enable / Disable
-                        var mapEventsEnable = false, mapEventsDisable = false;
-                        if (eventBroadcast.map.enable !== undefined && eventBroadcast.map.enable !== null) {
-                            if (typeof eventBroadcast.map.enable === 'object') {
-                                mapEventsEnable = true;
-                            }
-                        }
-                        if (eventBroadcast.map.disable !== undefined && eventBroadcast.map.disable !== null) {
-                            if (typeof eventBroadcast.map.disable === 'object') {
-                                mapEventsDisable = true;
-                            }
-                        }
-                        if (mapEventsEnable && mapEventsDisable) {
-                            // Both are active, this is an error
-                            $log.warn("[AngularJS - Leaflet] can not enable and disable events at the time");
-                        } else if (!mapEventsEnable && !mapEventsDisable) {
-                            // Both are inactive, this is an error
-                            $log.warn("[AngularJS - Leaflet] must enable or disable events");
-                        } else {
-                            // At this point the map object is OK, lets enable or disable events
-                            if (mapEventsEnable) {
-                                // Enable events
-                                for (i = 0; i < eventBroadcast.map.enable.length; i++) {
-                                    eventName = eventBroadcast.map.enable[i];
-                                    // Do we have already the event enabled?
-                                    if (mapEvents.indexOf(eventName) !== -1) {
-                                        // Repeated event, this is an error
-                                        $log.warn("[AngularJS - Leaflet] This event " + eventName + " is already enabled");
-                                    } else {
-                                        // Does the event exists?
-                                        if (availableMapEvents.indexOf(eventName) === -1) {
-                                            // The event does not exists, this is an error
-                                            $log.warn("[AngularJS - Leaflet] This event " + eventName + " does not exist");
-                                        } else {
-                                            // All ok enable the event
-                                            mapEvents.push(eventName);
-                                        }
-                                    }
-                                }
-                            } else {
-                                // Disable events
-                                mapEvents = availableMapEvents;
-                                for (i = 0; i < eventBroadcast.map.disable.length; i++) {
-                                    eventName = eventBroadcast.map.disable[i];
-                                    var index = mapEvents.indexOf(eventName);
-                                    if (index === -1) {
-                                        // The event does not exist
-                                        $log.warn("[AngularJS - Leaflet] This event " + eventName + " does not exist or has been already disabled");
-                                    } else {
-                                        mapEvents.splice(index, 1);
-                                    }
-                                }
+                        logic = eventBroadcast.map.logic;
+                    }
+
+                    if (!(isObject(eventBroadcast.map.enable) && eventBroadcast.map.enable.length >= 0)) {
+                        $log.warn("[AngularJS - Leaflet] event-broadcast.map.enable must be an object check your model.");
+                    } else {
+                        // Enable events
+                        for (i = 0; i < eventBroadcast.map.enable.length; i++) {
+                            eventName = eventBroadcast.map.enable[i];
+                            // Do we have already the event enabled?
+                            if (mapEvents.indexOf(eventName) === -1 && availableMapEvents.indexOf(eventName) !== -1) {
+                                mapEvents.push(eventName);
                             }
                         }
                     }
 
-                    for (i = 0; i < mapEvents.length; i++) {
-                        eventName = mapEvents[i];
-                        map.on(eventName, genDispatchMapEvent(leafletScope, eventName, logic), {
-                            eventName: eventName
-                        });
-                    }
-                } else {
-                    // Not a valid object
-                    $log.warn("[AngularJS - Leaflet] event-broadcast must be an object, check your model.");
+                }
+
+                for (i = 0; i < mapEvents.length; i++) {
+                    eventName = mapEvents[i];
+                    map.on(eventName, genDispatchMapEvent(leafletScope, eventName, logic), {
+                        eventName: eventName
+                    });
                 }
             });
         }
@@ -2153,8 +2176,8 @@ angular.module("leaflet-directive").directive('maxbounds', ["$log", "leafletMapD
 
                     map.setMaxBounds(bounds);
                     if (!attrs.center) {
-                            map.fitBounds(bounds);
-                        }
+                        map.fitBounds(bounds);
+                    }
                 });
             });
         }
@@ -2162,63 +2185,63 @@ angular.module("leaflet-directive").directive('maxbounds', ["$log", "leafletMapD
 }]);
 
 angular.module("leaflet-directive").directive("decorations", ["$log", "leafletHelpers", function($log, leafletHelpers) {
-	return {
-		restrict: "A", 
-		scope: false,
-		replace: false,
-		require: 'leaflet',
+    return {
+        restrict: "A", 
+        scope: false,
+        replace: false,
+        require: 'leaflet',
 
-		link: function(scope, element, attrs, controller) {
-			var leafletScope = controller.getLeafletScope(),
-				PolylineDecoratorPlugin = leafletHelpers.PolylineDecoratorPlugin,
-				isDefined = leafletHelpers.isDefined,
-				leafletDecorations = {};
+        link: function(scope, element, attrs, controller) {
+            var leafletScope = controller.getLeafletScope(),
+                PolylineDecoratorPlugin = leafletHelpers.PolylineDecoratorPlugin,
+                isDefined = leafletHelpers.isDefined,
+                leafletDecorations = {};
 
-			/* Creates an "empty" decoration with a set of coordinates, but no pattern. */
-			function createDecoration(options) {
-				if (isDefined(options) && isDefined(options.coordinates)) {
-					if (!PolylineDecoratorPlugin.isLoaded()) {
-						$log.error('[AngularJS - Leaflet] The PolylineDecorator Plugin is not loaded.');
-					}
-				}
+            /* Creates an "empty" decoration with a set of coordinates, but no pattern. */
+            function createDecoration(options) {
+                if (isDefined(options) && isDefined(options.coordinates)) {
+                    if (!PolylineDecoratorPlugin.isLoaded()) {
+                        $log.error('[AngularJS - Leaflet] The PolylineDecorator Plugin is not loaded.');
+                    }
+                }
 
-				return L.polylineDecorator(options.coordinates);
-			}
+                return L.polylineDecorator(options.coordinates);
+            }
 
-			/* Updates the path and the patterns for the provided decoration, and returns the decoration. */
-			function setDecorationOptions(decoration, options) {
-				if (isDefined(decoration) && isDefined(options)) {
-					if (isDefined(options.coordinates) && isDefined(options.patterns)) {
-						decoration.setPaths(options.coordinates);
-						decoration.setPatterns(options.patterns);
-						return decoration;
-					}
-				}
-			}
+            /* Updates the path and the patterns for the provided decoration, and returns the decoration. */
+            function setDecorationOptions(decoration, options) {
+                if (isDefined(decoration) && isDefined(options)) {
+                    if (isDefined(options.coordinates) && isDefined(options.patterns)) {
+                        decoration.setPaths(options.coordinates);
+                        decoration.setPatterns(options.patterns);
+                        return decoration;
+                    }
+                }
+            }
 
-			controller.getMap().then(function(map) {
-				leafletScope.$watch("decorations", function(newDecorations) {
-					for (var name in leafletDecorations) {
-						if (!isDefined(newDecorations) || !isDefined(newDecorations[name])) {
-							delete leafletDecorations[name];
-						}
-						map.removeLayer(leafletDecorations[name]);
-					}
-					
-					for (var newName in newDecorations) {
-						var decorationData = newDecorations[newName],
-							newDecoration = createDecoration(decorationData);
+            controller.getMap().then(function(map) {
+                leafletScope.$watch("decorations", function(newDecorations) {
+                    for (var name in leafletDecorations) {
+                        if (!isDefined(newDecorations) || !isDefined(newDecorations[name])) {
+                            map.removeLayer(leafletDecorations[name]);
+                            delete leafletDecorations[name];
+                        }
+                    }
+                    
+                    for (var newName in newDecorations) {
+                        var decorationData = newDecorations[newName],
+                            newDecoration = createDecoration(decorationData);
 
-						if (isDefined(newDecoration)) {
-							leafletDecorations[newName] = newDecoration;
-							map.addLayer(newDecoration);
-							setDecorationOptions(newDecoration, decorationData);
-						}
-					}
-				}, true);
-			});
-		}
-	};
+                        if (isDefined(newDecoration)) {
+                            leafletDecorations[newName] = newDecoration;
+                            map.addLayer(newDecoration);
+                            setDecorationOptions(newDecoration, decorationData);
+                        }
+                    }
+                }, true);
+            });
+        }
+    };
 }]);
 angular.module("leaflet-directive").directive('layercontrol', ["$log", "leafletData", "leafletHelpers", function ($log, leafletData, leafletHelpers) {
   return {
@@ -2362,12 +2385,6 @@ angular.module("leaflet-directive").directive('layercontrol', ["$log", "leafletD
 
         scope.layers = layers;
         controller.getMap().then(function(map) {
-            // Do we have a baselayers property?
-            if (!isDefined(layers) || !isDefined(layers.baselayers) || Object.keys(layers.baselayers).length === 0) {
-                // No baselayers property
-                $log.error('[AngularJS - Leaflet] At least one baselayer has to be defined');
-                return;
-            }
 
             leafletScope.$watch('layers.baselayers', function(newBaseLayers) {
                 leafletData.getLayers().then(function(leafletLayers) {
@@ -2493,6 +2510,13 @@ angular.module("leaflet-directive").service('leafletData', ["$log", "$q", "leafl
     this.unresolveMap = function (scopeId) {
         var id = leafletHelpers.obtainEffectiveMapId(maps, scopeId);
         maps[id] = undefined;
+        tiles[id] = undefined;
+        layers[id] = undefined;
+        paths[id] = undefined;
+        markers[id] = undefined;
+        geoJSON[id] = undefined;
+        utfGrid[id] = undefined;
+        decorations[id] = undefined;
     };
 
     this.getPaths = function(scopeId) {
@@ -2527,12 +2551,12 @@ angular.module("leaflet-directive").service('leafletData', ["$log", "$q", "leafl
         defer.resolve(leafletLayers);
         setResolvedDefer(layers, scopeId);
     };
-    
+
     this.getUTFGrid = function(scopeId) {
         var defer = getDefer(utfGrid, scopeId);
         return defer.promise;
     };
-    
+
     this.setUTFGrid = function(leafletUTFGrid, scopeId) {
         var defer = getUnresolvedDefer(utfGrid, scopeId);
         defer.resolve(leafletUTFGrid);
@@ -2581,6 +2605,7 @@ angular.module("leaflet-directive").factory('leafletMapDefaults', ["$q", "leafle
             worldCopyJump: false,
             doubleClickZoom: true,
             scrollWheelZoom: true,
+            tap: true,
             touchZoom: true,
             zoomControl: true,
             zoomsliderControl: false,
@@ -2634,6 +2659,7 @@ angular.module("leaflet-directive").factory('leafletMapDefaults', ["$q", "leafle
                 zoomControl: d.zoomControl,
                 doubleClickZoom: d.doubleClickZoom,
                 scrollWheelZoom: d.scrollWheelZoom,
+                tap: d.tap,
                 touchZoom: d.touchZoom,
                 attributionControl: d.attributionControl,
                 worldCopyJump: d.worldCopyJump,
@@ -2671,6 +2697,7 @@ angular.module("leaflet-directive").factory('leafletMapDefaults', ["$q", "leafle
             if (isDefined(userDefaults)) {
                 newDefaults.doubleClickZoom = isDefined(userDefaults.doubleClickZoom) ? userDefaults.doubleClickZoom : newDefaults.doubleClickZoom;
                 newDefaults.scrollWheelZoom = isDefined(userDefaults.scrollWheelZoom) ? userDefaults.scrollWheelZoom : newDefaults.doubleClickZoom;
+                newDefaults.tap = isDefined(userDefaults.tap) ? userDefaults.tap : newDefaults.tap;
                 newDefaults.touchZoom = isDefined(userDefaults.touchZoom) ? userDefaults.touchZoom : newDefaults.doubleClickZoom;
                 newDefaults.zoomControl = isDefined(userDefaults.zoomControl) ? userDefaults.zoomControl : newDefaults.zoomControl;
                 newDefaults.zoomsliderControl = isDefined(userDefaults.zoomsliderControl) ? userDefaults.zoomsliderControl : newDefaults.zoomsliderControl;
@@ -2965,7 +2992,7 @@ angular.module("leaflet-directive").factory('leafletEvents', ["$rootScope", "$q"
             var markerEvents = [];
             var i;
             var eventName;
-            var logic = "broadcast";
+            var logic = "emit";
 
             if (!isDefined(leafletScope.eventBroadcast)) {
                 // Backward compatibility, if no event-broadcast attribute, all events are broadcasted
@@ -3164,7 +3191,6 @@ angular.module("leaflet-directive").factory('leafletEvents', ["$rootScope", "$q"
     };
 }]);
 
-
 angular.module("leaflet-directive").factory('leafletLayerHelpers', ["$rootScope", "$log", "leafletHelpers", function ($rootScope, $log, leafletHelpers) {
     var Helpers = leafletHelpers,
         isString = leafletHelpers.isString,
@@ -3275,8 +3301,12 @@ angular.module("leaflet-directive").factory('leafletLayerHelpers', ["$rootScope"
         },
         group: {
             mustHaveUrl: false,
-            createLayer: function () {
-                return L.layerGroup();
+            createLayer: function (params) {
+                var lyrs = [];
+                angular.forEach(params.options.layers, function(l){
+                  lyrs.push(createLayer(l));
+                });
+                return L.layerGroup(lyrs);
             }
         },
         featureGroup: {
@@ -3449,44 +3479,46 @@ angular.module("leaflet-directive").factory('leafletLayerHelpers', ["$rootScope"
         return true;
     }
 
-    return {
-        createLayer: function(layerDefinition) {
-            if (!isValidLayerType(layerDefinition)) {
-                return;
-            }
-
-            if (!isString(layerDefinition.name)) {
-                $log.error('[AngularJS - Leaflet] A base layer must have a name');
-                return;
-            }
-            if (!isObject(layerDefinition.layerParams)) {
-                layerDefinition.layerParams = {};
-            }
-            if (!isObject(layerDefinition.layerOptions)) {
-                layerDefinition.layerOptions = {};
-            }
-
-            // Mix the layer specific parameters with the general Leaflet options. Although this is an overhead
-            // the definition of a base layers is more 'clean' if the two types of parameters are differentiated
-            for (var attrname in layerDefinition.layerParams) {
-                layerDefinition.layerOptions[attrname] = layerDefinition.layerParams[attrname];
-            }
-
-            var params = {
-                url: layerDefinition.url,
-                data: layerDefinition.data,
-                options: layerDefinition.layerOptions,
-                layer: layerDefinition.layer,
-                type: layerDefinition.layerType,
-                bounds: layerDefinition.bounds,
-                key: layerDefinition.key,
-                pluginOptions: layerDefinition.pluginOptions,
-                user: layerDefinition.user
-            };
-
-            //TODO Add $watch to the layer properties
-            return layerTypes[layerDefinition.type].createLayer(params);
+    function createLayer(layerDefinition) {
+        if (!isValidLayerType(layerDefinition)) {
+            return;
         }
+
+        if (!isString(layerDefinition.name)) {
+            $log.error('[AngularJS - Leaflet] A base layer must have a name');
+            return;
+        }
+        if (!isObject(layerDefinition.layerParams)) {
+            layerDefinition.layerParams = {};
+        }
+        if (!isObject(layerDefinition.layerOptions)) {
+            layerDefinition.layerOptions = {};
+        }
+
+        // Mix the layer specific parameters with the general Leaflet options. Although this is an overhead
+        // the definition of a base layers is more 'clean' if the two types of parameters are differentiated
+        for (var attrname in layerDefinition.layerParams) {
+            layerDefinition.layerOptions[attrname] = layerDefinition.layerParams[attrname];
+        }
+
+        var params = {
+            url: layerDefinition.url,
+            data: layerDefinition.data,
+            options: layerDefinition.layerOptions,
+            layer: layerDefinition.layer,
+            type: layerDefinition.layerType,
+            bounds: layerDefinition.bounds,
+            key: layerDefinition.key,
+            pluginOptions: layerDefinition.pluginOptions,
+            user: layerDefinition.user
+        };
+
+        //TODO Add $watch to the layer properties
+        return layerTypes[layerDefinition.type].createLayer(params);
+    }
+
+    return {
+        createLayer: createLayer
     };
 }]);
 
@@ -3522,10 +3554,10 @@ angular.module("leaflet-directive").factory('leafletControlHelpers', ["$rootScop
 
         var control;
         if(defaults.controls.layers && isDefined(defaults.controls.layers.control)) {
-			control = defaults.controls.layers.control.apply(this, [[], [], controlOptions]);
-		} else {
-			control = new L.control.layers([], [], controlOptions);
-		}
+            control = defaults.controls.layers.control.apply(this, [[], [], controlOptions]);
+        } else {
+            control = new L.control.layers([], [], controlOptions);
+        }
 
         return control;
     };
@@ -3550,12 +3582,16 @@ angular.module("leaflet-directive").factory('leafletControlHelpers', ["$rootScop
             if (mustBeLoaded) {
                 _layersControl = _createLayersControl(mapId);
                 for (i in baselayers) {
-                    if (isDefined(leafletLayers.baselayers[i])) {
+                    var hideOnSelector = isDefined(baselayers[i].layerOptions) &&
+                                         baselayers[i].layerOptions.showOnSelector === false;
+                    if (!hideOnSelector && isDefined(leafletLayers.baselayers[i])) {
                         _layersControl.addBaseLayer(leafletLayers.baselayers[i], baselayers[i].name);
                     }
                 }
                 for (i in overlays) {
-                    if (isDefined(leafletLayers.overlays[i])) {
+                    var hideOverlayOnSelector = isDefined(overlays[i].layerOptions) &&
+                            overlays[i].layerOptions.showOnSelector === false;
+                    if (!hideOverlayOnSelector && isDefined(leafletLayers.overlays[i])) {
                         _layersControl.addOverlay(leafletLayers.overlays[i], overlays[i].name);
                     }
                 }
@@ -3567,62 +3603,67 @@ angular.module("leaflet-directive").factory('leafletControlHelpers', ["$rootScop
 }]);
 
 angular.module("leaflet-directive").factory('leafletLegendHelpers', function () {
-	var _updateArcGISLegend = function(div, legendData) {
-		div.innerHTML = '';
-		if(legendData.error) {
-			div.innerHTML += '<div class="info-title alert alert-danger">' + legendData.error.message + '</div>';
-		} else {
-			for (var i = 0; i < legendData.layers.length; i++) {
-				var layer = legendData.layers[i];
-				div.innerHTML += '<div class="info-title" data-layerid="' + layer.layerId + '">' + layer.layerName + '</div>';
-				for(var j = 0; j < layer.legend.length; j++) {
-					var leg = layer.legend[j];
-					div.innerHTML +=
-						'<div class="inline" data-layerid="' + layer.layerId + '"><img src="data:' + leg.contentType + ';base64,' + leg.imageData + '" /></div>' +
-						'<div class="info-label" data-layerid="' + layer.layerId + '">' + leg.label + '</div>';
-				}
-			}
-		}
-	};
+    var _updateLegend = function(div, legendData, type, url) {
+        div.innerHTML = '';
+        if(legendData.error) {
+            div.innerHTML += '<div class="info-title alert alert-danger">' + legendData.error.message + '</div>';
+        } else {
+            if (type === 'arcgis') {
+                for (var i = 0; i < legendData.layers.length; i++) {
+                    var layer = legendData.layers[i];
+                    div.innerHTML += '<div class="info-title" data-layerid="' + layer.layerId + '">' + layer.layerName + '</div>';
+                    for(var j = 0; j < layer.legend.length; j++) {
+                        var leg = layer.legend[j];
+                        div.innerHTML +=
+                            '<div class="inline" data-layerid="' + layer.layerId + '"><img src="data:' + leg.contentType + ';base64,' + leg.imageData + '" /></div>' +
+                            '<div class="info-label" data-layerid="' + layer.layerId + '">' + leg.label + '</div>';
+                    }
+                }
+            }
+            else if (type === 'image') {
+                div.innerHTML = '<img src="' + url + '"/>';
+            }
+        }
+    };
 
-	var _getOnAddArcGISLegend = function(legendData, legendClass) {
-		return function(/*map*/) {
-			var div = L.DomUtil.create('div', legendClass);
+    var _getOnAddLegend = function(legendData, legendClass, type, url) {
+        return function(/*map*/) {
+            var div = L.DomUtil.create('div', legendClass);
 
-			if (!L.Browser.touch) {
-				L.DomEvent.disableClickPropagation(div);
-				L.DomEvent.on(div, 'mousewheel', L.DomEvent.stopPropagation);
-			} else {
-				L.DomEvent.on(div, 'click', L.DomEvent.stopPropagation);
-			}
-			_updateArcGISLegend(div, legendData);
-			return div;
-		};
-	};
+            if (!L.Browser.touch) {
+                L.DomEvent.disableClickPropagation(div);
+                L.DomEvent.on(div, 'mousewheel', L.DomEvent.stopPropagation);
+            } else {
+                L.DomEvent.on(div, 'click', L.DomEvent.stopPropagation);
+            }
+            _updateLegend(div, legendData, type, url);
+            return div;
+        };
+    };
 
-	var _getOnAddArrayLegend = function(legend, legendClass) {
-		return function(/*map*/) {
-			var div = L.DomUtil.create('div', legendClass);
+    var _getOnAddArrayLegend = function(legend, legendClass) {
+        return function(/*map*/) {
+            var div = L.DomUtil.create('div', legendClass);
             for (var i = 0; i < legend.colors.length; i++) {
                 div.innerHTML +=
                     '<div class="outline"><i style="background:' + legend.colors[i] + '"></i></div>' +
                     '<div class="info-label">' + legend.labels[i] + '</div>';
             }
             if (!L.Browser.touch) {
-				L.DomEvent.disableClickPropagation(div);
-				L.DomEvent.on(div, 'mousewheel', L.DomEvent.stopPropagation);
-			} else {
-				L.DomEvent.on(div, 'click', L.DomEvent.stopPropagation);
-			}
+                L.DomEvent.disableClickPropagation(div);
+                L.DomEvent.on(div, 'mousewheel', L.DomEvent.stopPropagation);
+            } else {
+                L.DomEvent.on(div, 'click', L.DomEvent.stopPropagation);
+            }
             return div;
-		};
-	};
+        };
+    };
 
-	return {
-		getOnAddArcGISLegend: _getOnAddArcGISLegend,
-		getOnAddArrayLegend: _getOnAddArrayLegend,
-		updateArcGISLegend: _updateArcGISLegend,
-	};
+    return {
+        getOnAddLegend: _getOnAddLegend,
+        getOnAddArrayLegend: _getOnAddArrayLegend,
+        updateLegend: _updateLegend,
+    };
 });
 
 angular.module("leaflet-directive").factory('leafletPathsHelpers', ["$rootScope", "$log", "leafletHelpers", function ($rootScope, $log, leafletHelpers) {
@@ -3930,6 +3971,7 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
         MarkerClusterPlugin = leafletHelpers.MarkerClusterPlugin,
         AwesomeMarkersPlugin = leafletHelpers.AwesomeMarkersPlugin,
         MakiMarkersPlugin = leafletHelpers.MakiMarkersPlugin,
+        ExtraMarkersPlugin = leafletHelpers.ExtraMarkersPlugin,
         safeApply     = leafletHelpers.safeApply,
         Helpers = leafletHelpers,
         isString = leafletHelpers.isString,
@@ -3954,24 +3996,29 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
             return new L.MakiMarkers.icon(iconData);
         }
 
+        if (isDefined(iconData) && isDefined(iconData.type) && iconData.type === 'extraMarker') {
+            if (!ExtraMarkersPlugin.isLoaded()) {
+                $log.error('[AngularJS - Leaflet] The ExtraMarkers Plugin is not loaded.');
+            }
+            return new L.ExtraMarkers.icon(iconData);
+        }
+
         if (isDefined(iconData) && isDefined(iconData.type) && iconData.type === 'div') {
             return new L.divIcon(iconData);
         }
 
         var base64icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAApCAYAAADAk4LOAAAGmklEQVRYw7VXeUyTZxjvNnfELFuyIzOabermMZEeQC/OclkO49CpOHXOLJl/CAURuYbQi3KLgEhbrhZ1aDwmaoGqKII6odATmH/scDFbdC7LvFqOCc+e95s2VG50X/LLm/f4/Z7neY/ne18aANCmAr5E/xZf1uDOkTcGcWR6hl9247tT5U7Y6SNvWsKT63P58qbfeLJG8M5qcgTknrvvrdDbsT7Ml+tv82X6vVxJE33aRmgSyYtcWVMqX97Yv2JvW39UhRE2HuyBL+t+gK1116ly06EeWFNlAmHxlQE0OMiV6mQCScusKRlhS3QLeVJdl1+23h5dY4FNB3thrbYboqptEFlphTC1hSpJnbRvxP4NWgsE5Jyz86QNNi/5qSUTGuFk1gu54tN9wuK2wc3o+Wc13RCmsoBwEqzGcZsxsvCSy/9wJKf7UWf1mEY8JWfewc67UUoDbDjQC+FqK4QqLVMGGR9d2wurKzqBk3nqIT/9zLxRRjgZ9bqQgub+DdoeCC03Q8j+0QhFhBHR/eP3U/zCln7Uu+hihJ1+bBNffLIvmkyP0gpBZWYXhKussK6mBz5HT6M1Nqpcp+mBCPXosYQfrekGvrjewd59/GvKCE7TbK/04/ZV5QZYVWmDwH1mF3xa2Q3ra3DBC5vBT1oP7PTj4C0+CcL8c7C2CtejqhuCnuIQHaKHzvcRfZpnylFfXsYJx3pNLwhKzRAwAhEqG0SpusBHfAKkxw3w4627MPhoCH798z7s0ZnBJ/MEJbZSbXPhER2ih7p2ok/zSj2cEJDd4CAe+5WYnBCgR2uruyEw6zRoW6/DWJ/OeAP8pd/BGtzOZKpG8oke0SX6GMmRk6GFlyAc59K32OTEinILRJRchah8HQwND8N435Z9Z0FY1EqtxUg+0SO6RJ/mmXz4VuS+DpxXC3gXmZwIL7dBSH4zKE50wESf8qwVgrP1EIlTO5JP9Igu0aexdh28F1lmAEGJGfh7jE6ElyM5Rw/FDcYJjWhbeiBYoYNIpc2FT/SILivp0F1ipDWk4BIEo2VuodEJUifhbiltnNBIXPUFCMpthtAyqws/BPlEF/VbaIxErdxPphsU7rcCp8DohC+GvBIPJS/tW2jtvTmmAeuNO8BNOYQeG8G/2OzCJ3q+soYB5i6NhMaKr17FSal7GIHheuV3uSCY8qYVuEm1cOzqdWr7ku/R0BDoTT+DT+ohCM6/CCvKLKO4RI+dXPeAuaMqksaKrZ7L3FE5FIFbkIceeOZ2OcHO6wIhTkNo0ffgjRGxEqogXHYUPHfWAC/lADpwGcLRY3aeK4/oRGCKYcZXPVoeX/kelVYY8dUGf8V5EBRbgJXT5QIPhP9ePJi428JKOiEYhYXFBqou2Guh+p/mEB1/RfMw6rY7cxcjTrneI1FrDyuzUSRm9miwEJx8E/gUmqlyvHGkneiwErR21F3tNOK5Tf0yXaT+O7DgCvALTUBXdM4YhC/IawPU+2PduqMvuaR6eoxSwUk75ggqsYJ7VicsnwGIkZBSXKOUww73WGXyqP+J2/b9c+gi1YAg/xpwck3gJuucNrh5JvDPvQr0WFXf0piyt8f8/WI0hV4pRxxkQZdJDfDJNOAmM0Ag8jyT6hz0WGXWuP94Yh2jcfjmXAGvHCMslRimDHYuHuDsy2QtHuIavznhbYURq5R57KpzBBRZKPJi8eQg48h4j8SDdowifdIrEVdU+gbO6QNvRRt4ZBthUaZhUnjlYObNagV3keoeru3rU7rcuceqU1mJBxy+BWZYlNEBH+0eH4vRiB+OYybU2hnblYlTvkHinM4m54YnxSyaZYSF6R3jwgP7udKLGIX6r/lbNa9N6y5MFynjWDtrHd75ZvTYAPO/6RgF0k76mQla3FGq7dO+cH8sKn0Vo7nDllwAhqwLPkxrHwWmHJOo+AKJ4rab5OgrM7rVu8eWb2Pu0Dh4eDgXoOfvp7Y7QeqknRmvcTBEyq9m/HQQSCSz6LHq3z0yzsNySRfMS253wl2KyRDbcZPcfJKjZmSEOjcxyi+Y8dUOtsIEH6R2wNykdqrkYJ0RV92H0W58pkfQk7cKevsLK10Py8SdMGfXNXATY+pPbyJR/ET6n9nIfztNtZYRV9XniQu9IA2vOVgy4ir7GCLVmmd+zjkH0eAF9Po6K61pmCXHxU5rHMYd1ftc3owjwRSVRzLjKvqZEty6cRUD7jGqiOdu5HG6MdHjNcNYGqfDm5YRzLBBCCDl/2bk8a8gdbqcfwECu62Fg/HrggAAAABJRU5ErkJggg==";
-
         var base64shadow = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACkAAAApCAYAAACoYAD2AAAC5ElEQVRYw+2YW4/TMBCF45S0S1luXZCABy5CgLQgwf//S4BYBLTdJLax0fFqmB07nnQfEGqkIydpVH85M+NLjPe++dcPc4Q8Qh4hj5D/AaQJx6H/4TMwB0PeBNwU7EGQAmAtsNfAzoZkgIa0ZgLMa4Aj6CxIAsjhjOCoL5z7Glg1JAOkaicgvQBXuncwJAWjksLtBTWZe04CnYRktUGdilALppZBOgHGZcBzL6OClABvMSVIzyBjazOgrvACf1ydC5mguqAVg6RhdkSWQFj2uxfaq/BrIZOLEWgZdALIDvcMcZLD8ZbLC9de4yR1sYMi4G20S4Q/PWeJYxTOZn5zJXANZHIxAd4JWhPIloTJZhzMQduM89WQ3MUVAE/RnhAXpTycqys3NZALOBbB7kFrgLesQl2h45Fcj8L1tTSohUwuxhy8H/Qg6K7gIs+3kkaigQCOcyEXCHN07wyQazhrmIulvKMQAwMcmLNqyCVyMAI+BuxSMeTk3OPikLY2J1uE+VHQk6ANrhds+tNARqBeaGc72cK550FP4WhXmFmcMGhTwAR1ifOe3EvPqIegFmF+C8gVy0OfAaWQPMR7gF1OQKqGoBjq90HPMP01BUjPOqGFksC4emE48tWQAH0YmvOgF3DST6xieJgHAWxPAHMuNhrImIdvoNOKNWIOcE+UXE0pYAnkX6uhWsgVXDxHdTfCmrEEmMB2zMFimLVOtiiajxiGWrbU52EeCdyOwPEQD8LqyPH9Ti2kgYMf4OhSKB7qYILbBv3CuVTJ11Y80oaseiMWOONc/Y7kJYe0xL2f0BaiFTxknHO5HaMGMublKwxFGzYdWsBF174H/QDknhTHmHHN39iWFnkZx8lPyM8WHfYELmlLKtgWNmFNzQcC1b47gJ4hL19i7o65dhH0Negbca8vONZoP7doIeOC9zXm8RjuL0Gf4d4OYaU5ljo3GYiqzrWQHfJxA6ALhDpVKv9qYeZA8eM3EhfPSCmpuD0AAAAASUVORK5CYII=";
 
-        if (!isDefined(iconData)) {
+        if (!isDefined(iconData) || !isDefined(iconData.iconUrl)) {
             return new L.Icon.Default({
                 iconUrl: base64icon,
-                shadowUrl: base64shadow
+                shadowUrl: base64shadow,
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
             });
-        }
-
-        if (!isDefined(iconData.iconUrl)) {
-            iconData.iconUrl = base64icon;
-            iconData.shadowUrl = base64shadow;
         }
 
         return new L.Icon(iconData);
@@ -4015,12 +4062,52 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
         }
     };
 
+    var _manageOpenPopup = function(marker, markerData) {
+        marker.openPopup();
+
+        //the marker may have angular templates to compile
+        var popup = marker.getPopup(),
+            //the marker may provide a scope returning function used to compile the message
+            //default to $rootScope otherwise
+            markerScope = angular.isFunction(markerData.getMessageScope) ? markerData.getMessageScope() : $rootScope,
+            compileMessage = isDefined(markerData.compileMessage) ? markerData.compileMessage : true;
+
+        if (isDefined(popup)) {
+            var updatePopup = function(popup) {
+                popup._updateLayout();
+                popup._updatePosition();
+            };
+
+            if (compileMessage) {
+                $compile(popup._contentNode)(markerScope);
+                //in case of an ng-include, we need to update the content after template load
+                if (isDefined(popup._contentNode) && popup._contentNode.innerHTML.indexOf("ngInclude") > -1) {
+                    var unregister = markerScope.$on('$includeContentLoaded', function() {
+                        updatePopup(popup);
+                        unregister();
+                    });
+                }
+                else {
+                    updatePopup(popup);
+                }
+            }
+        }
+        if (Helpers.LabelPlugin.isLoaded() && isDefined(markerData.label) && isDefined(markerData.label.options) && markerData.label.options.noHide === true) {
+            if (compileMessage) {
+                $compile(marker.label._container)(markerScope);
+            }
+            marker.showLabel();
+        }
+    };
+
     return {
         resetMarkerGroup: _resetMarkerGroup,
 
         resetMarkerGroups: _resetMarkerGroups,
 
         deleteMarker: _deleteMarker,
+
+        manageOpenPopup: _manageOpenPopup,
 
         createMarker: function(markerData) {
             if (!isDefined(markerData)) {
@@ -4070,18 +4157,22 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
             groups[groupName].addLayer(marker);
         },
 
-        listenMarkerEvents: function(marker, markerData, leafletScope) {
+        listenMarkerEvents: function(marker, markerData, leafletScope, watching) {
             marker.on("popupopen", function(/* event */) {
-                //the marker may have angular templates to compile
-                $compile(marker.getPopup()._contentNode)($rootScope);
-                safeApply(leafletScope, function() {
-                    markerData.focus = true;
-                });
+                if (watching) {
+                    safeApply(leafletScope, function() {
+                        markerData.focus = true;
+                    });
+                } else {
+                    _manageOpenPopup(marker, markerData);
+                }
             });
             marker.on("popupclose", function(/* event */) {
-                safeApply(leafletScope, function() {
-                    markerData.focus = false;
-                });
+                if (watching) {
+                    safeApply(leafletScope, function() {
+                        markerData.focus = false;
+                    });
+                }
             });
         },
 
@@ -4104,6 +4195,14 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                     return;
                 }
 
+                // watch is being initialized if old and new object is the same
+                var isInitializing = markerData === oldMarkerData;
+
+                // Update marker rotation
+                if (isDefined(markerData.iconAngle) && oldMarkerData.iconAngle !== markerData.iconAngle) {
+                    marker.setIconAngle(markerData.iconAngle);
+                }
+
                 // It is possible that the layer has been removed or the layer marker does not exist
                 // Update the layer group if present or move it to the map if not
                 if (!isString(markerData.layer)) {
@@ -4119,6 +4218,11 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                             map.addLayer(marker);
                         }
                     }
+                }
+
+                if ((isNumber(markerData.opacity) || isNumber(parseFloat(markerData.opacity))) && markerData.opacity !== oldMarkerData.opacity) {
+                    // There was a different opacity so we update it
+                    marker.setOpacity(markerData.opacity);
                 }
 
                 if (isString(markerData.layer) && oldMarkerData.layer !== markerData.layer) {
@@ -4149,7 +4253,7 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                     // The marker is automatically added to the map depending on the visibility
                     // of the layer, so we only have to open the popup if the marker is in the map
                     if (map.hasLayer(marker) && markerData.focus === true) {
-                        marker.openPopup();
+                        _manageOpenPopup(marker, markerData);
                     }
                 }
 
@@ -4216,10 +4320,6 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                 if (isString(markerData.message) && !isString(oldMarkerData.message)) {
                     // There was no message before so we create it
                     marker.bindPopup(markerData.message, markerData.popupOptions);
-                    if (markerData.focus === true) {
-                        // If the focus is set, we must open the popup, because we do not know if it was opened before
-                        marker.openPopup();
-                    }
                 }
 
                 if (isString(markerData.message) && isString(oldMarkerData.message) && markerData.message !== oldMarkerData.message) {
@@ -4236,14 +4336,9 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                 }
 
                 // The markerData.focus property must be true so we update if there wasn't a previous value or it wasn't true
-                if (markerData.focus === true && oldMarkerData.focus !== true) {
-                    marker.openPopup();
-                    updatedFocus = true;
-                }
-
-                if(oldMarkerData.focus === true && markerData.focus === true){
+                if (markerData.focus === true && ( !isDefined(oldMarkerData.focus) || oldMarkerData.focus === false) || (isInitializing && markerData.focus === true)) {
                     // Reopen the popup when focus is still true
-                    marker.openPopup();
+                    _manageOpenPopup(marker, markerData);
                     updatedFocus = true;
                 }
 
@@ -4370,10 +4465,10 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
             return angular.isObject(value);
         },
 
-		// Determine if a reference is a function.
-		isFunction: function(value) {
-			return angular.isFunction(value);
-		},
+        // Determine if a reference is a function.
+        isFunction: function(value) {
+            return angular.isFunction(value);
+        },
 
         // Determine if two objects have the same properties
         equals: function(o1, o2) {
@@ -4516,6 +4611,32 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
                 }
             }
         },
+        ExtraMarkersPlugin: {
+            isLoaded: function () {
+                if (angular.isDefined(L.ExtraMarkers) && angular.isDefined(L.ExtraMarkers.Icon)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            is: function (icon) {
+                if (this.isLoaded()) {
+                    return icon instanceof L.ExtraMarkers.Icon;
+                } else {
+                    return false;
+                }
+            },
+            equal: function (iconA, iconB) {
+                if (!this.isLoaded()) {
+                    return false;
+                }
+                if (this.is(iconA)) {
+                    return angular.equals(iconA, iconB);
+                } else {
+                    return false;
+                }
+            }
+        },
         LabelPlugin: {
             isLoaded: function() {
                 return angular.isDefined(L.Label);
@@ -4610,17 +4731,17 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
                 }
             }
         },
-		DynamicMapLayerPlugin: {
-			isLoaded: function() {
-				return L.esri !== undefined && L.esri.dynamicMapLayer !== undefined;
-			},
-			is: function(layer) {
-				if (this.isLoaded()) {
-					return layer instanceof L.esri.dynamicMapLayer;
-				} else {
-					return false;
-				}
-			}
+        DynamicMapLayerPlugin: {
+            isLoaded: function() {
+                return L.esri !== undefined && L.esri.dynamicMapLayer !== undefined;
+            },
+            is: function(layer) {
+                if (this.isLoaded()) {
+                    return layer instanceof L.esri.dynamicMapLayer;
+                } else {
+                    return false;
+                }
+            }
         },
         GeoJSONPlugin: {
             isLoaded: function(){
@@ -4634,7 +4755,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
                 }
             }
         },
-		UTFGridPlugin: {
+        UTFGridPlugin: {
             isLoaded: function(){
                 return angular.isDefined(L.UtfGrid);
             },
@@ -4693,7 +4814,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }());
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular', 'ui.bootstrap'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -4716,7 +4837,7 @@ var checkLoggedin = function(userManager) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://bubbl.li' + request.url;
+		    			request.url = 'http://45.55.182.139:1337' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -4769,7 +4890,12 @@ $routeProvider.
 	  when('/w/:worldURL/schedule', {templateUrl: 'components/world/subviews/schedule.html', controller: 'ScheduleController'}).
 	  when('/w/:worldURL/instagram', {templateUrl: 'components/world/subviews/instagram.html', controller: 'InstagramListController'}).
 	  when('/w/:worldURL/twitter', {templateUrl: 'components/world/subviews/twitter.html', controller: 'TwitterListController'}).
+	  when('/w/:worldURL/contest/:hashTag', {templateUrl: 'components/world/subviews/contest.html', controller: 'ContestController'}).
 
+	  when('/w/:worldURL/search', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/all', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/category/:category', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
+	  when('/w/:worldURL/search/text/:text', {templateUrl: 'components/world/search.html', controller: 'SearchController'}).
 
       when('/w/:worldURL/:landmarkURL', {templateUrl: 'components/world/landmark.html', controller: 'LandmarkController'}).
       when('/w/:worldURL/category/:category', {templateUrl: 'components/world/category.html', controller: 'CategoryController'}).
@@ -4781,9 +4907,6 @@ $routeProvider.
       
       when('/meetup', {templateUrl: 'components/tour/meetup.html', controller: 'MeetupController'}).
       when('/welcome', {templateUrl: 'components/tour/welcome.html', controller: 'WelcomeController'}).
-
-      
-      when('/search/:searchQuery', {templateUrl: 'components/search/search.html', controller: 'SearchController'}).
       
       when('/twitter/:hashTag', {templateUrl: 'partials/tweet-list.html', controller: 'TweetlistCtrl'}).
 
@@ -4825,6 +4948,20 @@ function onDeviceReady() {
 		angular.bootstrap(document, ['IF']);
 	});
 }
+app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+    var original = $location.path;
+    $location.path = function (path, reload) {
+        if (reload === false) {
+            var lastRoute = $route.current;
+            var un = $rootScope.$on('$locationChangeSuccess', function () {
+                $route.current = lastRoute;
+                un();
+            });
+        }
+        return original.apply($location, [path]);
+    };
+}])
+
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -5567,7 +5704,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://bubbl.li/'+value;
+					value = 'http://45.55.182.139:1337/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -5635,6 +5772,40 @@ app.directive('ryFocus', function($rootScope, $timeout) {
 		}
 	}
 });
+app.directive('singleClick', ['$timeout', '$parse', function($timeout, $parse) {
+	// directive that replaces ngClick when you need to use ngClick and ngDblclick on the same element. This will make the element wait for some delay before carrying out the click callback, so use sparingly.
+
+	return {
+		restrict: 'EA',
+		link: link,
+		scope: {
+			callback: '=',
+			vars: '='
+		}
+	};
+
+	function link(scope, elem, attrs) {
+		var delay = 300;
+		var clicks = 0;
+		var timer;
+
+		elem.on('click', function(event) {
+			clicks++;
+			if (clicks === 1) {
+				timer = $timeout(function() {
+					scope.$apply(function() {
+						scope.callback.apply(scope.callback, scope.vars); // apply lets you call the callback function, where the parameters are the elements of the vars array
+					});
+					clicks = 0;
+				}, delay);
+			} else { // double-click, don't execute callback above
+				$timeout.cancel(timer);
+				clicks = 0;
+			}
+		});
+	}
+
+}]);
 app.directive('stickers', function(apertureService) { //NOT USED
 	return {
 		restrict: 'A',
@@ -5795,21 +5966,83 @@ angular.module('IF-directives', [])
 	}
 		
 }]);
-app.directive('worldShelf', ['$document', 'apertureService', function($document, apertureService) {
+app.directive('worldShelf', ['$document', 'apertureService','$rootScope','$location', function($document, apertureService,$rootScope,$location) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
-/*
-			$document.on('keydown', function(e) {
-				if (e.keyCode===8 && apertureService.state==='aperture-full') {
-					e.stopPropagation();
-					e.preventDefault();
-					scope.$apply(function() {
-						apertureService.toggle('full');
-					});
-				}	
-			})	
-*/
+
+			// window.onpopstate = function(event) {
+			// 	if (apertureService.state==='aperture-full') {
+			// 		e.stopPropagation();
+			// 		e.preventDefault();
+			// 		scope.$apply(function() {
+			// 			apertureService.toggle('full');
+			// 		});
+			// 	}	
+			// }
+
+			// DETECT KEYPRESS!!!!!!!!!!!!!!!!
+
+
+
+			
+
+		  //  $rootScope.$on('$locationChangeStart', function(event,next,current) {
+
+		  //  		if (apertureService.state==='aperture-full') {
+
+			 //   		if ($rootScope.watchPastLoc && $rootScope.watchPastLoc !== ''){ //we're not on first loaded page
+
+				// 		console.log('next',next);
+				// 		console.log('current',current);
+				// 		console.log('watchpast',$rootScope.watchPastLoc);
+
+				// 		if ($rootScope.watchPastLoc == next){ //detect switch to previous page
+
+				// 			console.log('FIRING');
+				// 			event.preventDefault();
+				// 			apertureService.toggle('full');
+
+				// 		}			
+			 //   		}
+			 //   		else {
+						
+			 //   		}
+		  //  		}
+
+				// $rootScope.watchPastLoc = current; //recording previous state before loc change
+
+		  //   });      
+
+
+
+
+
+
+		  //  $rootScope.$watch(function () {return $location.path()}, function (newLocation, oldLocation) {
+
+		  //  		console.log('asdf!!!!');
+				// if (apertureService.state==='aperture-full') {
+				// 	closeMap();
+				// }	
+		  //   });
+
+			// $document.on('keydown', function(e) {
+			// 	if (e.keyCode===8 && apertureService.state==='aperture-full') {
+			// 		closeMap();
+			// 	}	
+			// })
+
+			// function closeMap(){
+			// 	// e.stopPropagation();
+			// 	// e.preventDefault();
+			// 	scope.$apply(function() {
+			// 		apertureService.toggle('full');
+			// 	});
+			// }
+
+	
+
 		}
 	}
 }]);
@@ -16597,7 +16830,9 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
-   			var alertClass;
+   			
+            var alertClass;
+
    			switch (alertType) {
 	   			case 'success':
 	   				alertClass = 'alert-success';
@@ -16612,14 +16847,19 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
 	   				alertClass = 'alert-danger';
 	   				break;
    			}
-   			var len = alerts.list.push(
- {class: alertClass, msg: alertMsg, id: alertMsg});
+
+   			var len = alerts.list.push({
+               class: alertClass, 
+               msg: alertMsg, 
+               id: alertMsg
+            });
+
    			if (timeout) {
-   			$timeout(function () {
-	   			alerts.list.splice(len-1, 1);
-   			}, 1500);
-   			
+   			   $timeout(function () {
+	   			  alerts.list.splice(len-1, 1);
+   			   }, 1500);
    			}
+
    		}
 
    		alerts.closeAlert = function(index) {
@@ -16631,145 +16871,571 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		}
 
    		return alerts;
+         
    }])
-angular.module('tidepoolsServices')
-	.factory('dialogs', ['$rootScope', '$compile', 
-function($rootScope, $compile) {
-var dialogs = {
-	dialogTemplate: null
-} //used to manage different popup dialogs and modals
+'use strict';
 
-dialogs.showDialog = function(name) {
-	dialogs.template = "templates/"+name;
-	dialogs.show = true;
-}
+app.factory('bubbleSearchService', bubbleSearchService);
 
-dialogs.close = function($event) {
-	if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
-		dialogs.show = false;
+bubbleSearchService.$inject = ['$http'];
+
+function bubbleSearchService($http) {
+	
+	var data = [];
+
+	return {
+		data: data,
+		search: search,
+		defaultText: 'What are you looking for?',
+		noResultsText: 'No results'
+	};
+	
+	function search(searchType, bubbleID, input) {
+		var params = {
+			worldID: bubbleID,
+			catName: input,
+			textSearch: input
+		};
+
+		return $http.get('/api/bubblesearch/' + searchType, {params:params})
+			.then(function(response) {
+				angular.copy(response.data, data);
+				return data;
+			}, function(error) {
+				console.log(error);
+			});
 	}
-}
 
-return dialogs;
+}
+'use strict';
+// keep track of which type of bubble user is currently viewing
+app
+	.factory('bubbleTypeService', [
+		function() {
+			
+			var currentBubbleType;
+
+			return {
+				set: set,
+				get: get
+			}
+
+			function set(type) {
+				currentBubbleType = type;
+			}
+
+			function get() {
+				return currentBubbleType;
+			}
+}]);
+app.factory('contest', ['$http', 'localStore', function($http, localStore) {
+	// manages want this got this contest
+
+	var isContest = false; // determines whether or not a process involves the wtgt contest
+	var hashtag;
+	var id;
+	var startTime;
+
+	return {
+		set: set,
+		login: login,
+		close: close
+	}
+
+	function set(setID, setHashtag) {
+		isContest = true;
+		id = setID;
+		hashtag = setHashtag;
+		startTime = new Date();
+	}
+
+	function login(endTime) {
+		// call if user logs in after login prompt on photo upload (wtgt)
+		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
+		if (isContest) {
+			timeDuration = getTimeDuration(startTime, endTime);
+			var data = {
+				anonID: id,
+				selectedUploadType: hashtag,
+				signedUp: true,
+				userTimeDuration: timeDuration
+			}
+			$http.post('/api/anon_user/update', data).
+				success(function(data) {
+					// console.log('success: ', data);
+				}).
+				error(function(data) {
+					// console.log('error: ', data);
+				});
+			reset();
+		}
+	}
+
+	function close(endTime) {
+		// call if user closes modal after login prompt on photo upload (wtgt)
+		if (isContest) {
+			var response;
+			timeDuration = getTimeDuration(startTime, endTime);
+			var data = {
+				anonID: id,
+				selectedUploadType: hashtag,
+				closedNoLogin: true,
+				userTimeDuration: timeDuration
+			}
+			$http.post('/api/anon_user/update', data).
+				success(function(data, status, headers, config) {
+					response = data[0];
+					// console.log('response: ', response);
+				}).
+				error(function(data, status, headers, config) {
+					// console.log('error: ', data);
+				});
+			compare(response, id);
+			reset();
+		}
+	}
+
+	function reset() {
+		isContest = false;
+		id = null;
+		hashtag = null;
+		startTime = null;
+	}
+
+	function getTimeDuration(start, end) {
+		var start = start.getTime();
+		var end = end.getTime();
+		return end - start; // in ms
+	}
+
+	function compare(response, id) {
+		// if the id returned from api is different from id passed into api, then update the id
+		if (response && response!== id) {
+			localStore.setID(response);
+		}
+	}
+
 }]);
 angular.module('tidepoolsServices')
-    .factory('geoService', [ '$q', 'alertManager',
-    	function($q, alertManager) {
-//abstract & promisify geolocation, queue requests.
-var geoService = {
-	location: {
-		//lat,
-		//lng
-		//timestamp  
-	},
-	inProgress: false,
-	requestQueue: [] 
-}	
- 
-geoService.getLocation = function(maxAge) {
-	var deferred = $q.defer();
-	
-	geoService.requestQueue.push(deferred);
+	.factory('dialogs', ['$rootScope', '$compile', 'contest',
+		function($rootScope, $compile, contest) {
+			var dialogs = {
+				dialogTemplate: null
+			} //used to manage different popup dialogs and modals
 
-	if (geoService.inProgress) {
-		// inprog
-	} else if (navigator.geolocation) {
-		geoService.inProgress = true;
-		console.log('geo: using navigator');
-		
-		function geolocationSuccess(position) {
-			geoService.location.lat = position.coords.latitude;
-			geoService.location.lng = position.coords.longitude;
-			geoService.location.timestamp = Date.now();
-			geoService.resolveQueue({
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			})
-		}
+			dialogs.showDialog = function(name) {
+				dialogs.template = "templates/"+name;
+				dialogs.show = true;
+			}
 
-		function geolocationError(error) {
-			geoService.resolveQueue({err: error.code});
-		}
-		
-		navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-			geolocationError);
+			dialogs.close = function($event) {
+				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
+					dialogs.show = false;
+					contest.close(new Date); // for wtgt contest
+				}
+			}
 
-	} else {
-		//browser update message
-		alerts.addAlert('warning', 'Your browser does not support location services.')
-	}
-	
-	return deferred.promise;
-}
+			return dialogs;
+		}]);
+angular.module('tidepoolsServices')
+    .factory('geoService', [ '$q', '$rootScope', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService',
+    	function($q, $rootScope, alertManager, mapManager, bubbleTypeService, apertureService) {
+			//abstract & promisify geolocation, queue requests.
+			var geoService = {
+				location: {
+					//lat,
+					//lng
+					//timestamp  
+				},
+				inProgress: false,
+				requestQueue: [],
+				tracking: false // bool indicating whether or not geolocation is being tracked
+			};	
 
-geoService.resolveQueue = function (position) {
-	while (geoService.requestQueue.length > 0) {
-		var request = geoService.requestQueue.pop();
-		if (position.err) {
-			request.reject(position.err);
-		} else {
-			request.resolve(position);
-		}
-	}
-	geoService.inProgress = false;
-}
+			var marker = [];
+			var pos = {
+				lat: 0,
+				lng: 0
+			};
+			var watchID;
+			$rootScope.aperture = apertureService;
 
-return geoService;
+			// start tracking when in full aperture (and retail bubble) and stop otherwise
+			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
+				if (bubbleTypeService.get() === 'Retail') { // only track on retail bubbles
+					if (newVal === 'aperture-full' && oldVal !== 'aperture-full') {
+						geoService.trackStart();
+					} else if (newVal !== 'aperture-full' && oldVal === 'aperture-full') {
+						geoService.trackStop();
+					}
+				}
+			});	
+			 
+			geoService.getLocation = function(maxAge) {
+				var deferred = $q.defer();
+				
+				geoService.requestQueue.push(deferred);
+
+				if (geoService.inProgress) {
+					// inprog
+				} else if (navigator.geolocation) {
+					geoService.inProgress = true;
+					console.log('geo: using navigator');
+					
+					function geolocationSuccess(position) {
+						geoService.location.lat = position.coords.latitude;
+						geoService.location.lng = position.coords.longitude;
+						geoService.location.timestamp = Date.now();
+						geoService.resolveQueue({
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						})
+					}
+
+					function geolocationError(error) {
+						geoService.resolveQueue({err: error.code});
+					}
+					
+					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+						geolocationError);
+
+				} else {
+					//browser update message
+					alerts.addAlert('warning', 'Your browser does not support location services.')
+				}
+				
+				return deferred.promise;
+			}
+
+			geoService.resolveQueue = function (position) {
+				while (geoService.requestQueue.length > 0) {
+					var request = geoService.requestQueue.pop();
+					if (position.err) {
+						request.reject(position.err);
+					} else {
+						request.resolve(position);
+					}
+				}
+				geoService.inProgress = false;
+			}
+
+			geoService.trackStart = function() {
+				// used to start showing user's location on map
+
+				// if we are already tracking, stop current session before starting new one
+				if (geoService.tracking) {
+					geoService.trackStop();
+				}
+				if (navigator.geolocation && window.DeviceOrientationEvent) {
+
+					// marker
+					mapManager.addMarker('track', {
+						lat: pos.lat,
+						lng: pos.lng,
+						icon: {
+							iconUrl: 'img/marker/user-marker-50.png',
+							shadowUrl: '',
+							iconSize: [35, 43], 
+							iconAnchor: [17, 43],
+							popupAnchor:[0, -40]
+						},
+						alt: 'track' // used for tracking marker DOM element
+					});
+					mapManager.bringMarkerToFront('track');
+
+					// movement XY
+					watchID = navigator.geolocation.watchPosition(function(position) {
+						pos = {
+							lat: position.coords.latitude,
+							lng: position.coords.longitude
+						};
+						mapManager.moveMarker('track', pos);
+					}, function() {
+						// console.log('location error');
+					}, {
+						// enableHighAccuracy: true
+					});
+
+					// movement rotation
+					window.addEventListener('deviceorientation', rotateMarker);
+				}
+				geoService.tracking = true;
+				
+			};
+
+			geoService.trackStop = function() {
+				// used to stop showing user's location on map
+
+				if (geoService.tracking) { // only stop tracking if already tracking
+					// movement: clear watch
+					if (watchID) {
+						navigator.geolocation.clearWatch(watchID);
+						watchID = undefined;
+					}
+
+					// rotation: remove event listener
+					window.removeEventListener('deviceorientation', rotateMarker);
+
+					// remove marker
+					mapManager.removeMarker('track');
+					marker = [];
+				}
+				geoService.tracking = false;
+
+			};
+
+			function rotateMarker(data) {
+				// make sure new marker is loaded in DOM
+				if (marker.length > 0) {
+					var alpha = data.webkitCompassHeading || data.alpha;
+					var matrix = marker.css('transform');
+
+					// account for the fact that marker is initially facing south
+					var adjust = 180 + Math.round(alpha);
+
+					marker.css('transform', getNewTransformMatrix(matrix, adjust));
+				} else {
+					marker = $('img[alt="track"]');
+				}
+			}
+
+			function getNewTransformMatrix(matrix, angle) {
+				// convert from form 'matrix(a, c, b, d, tx, ty)'' to ['a', 'c', 'b', 'd', 'tx', 'ty']
+				var newMatrix = matrix.slice(7, matrix.length - 1).split(', ');
+				
+				if (newMatrix.length !== 6) { // not 2D matrix
+					return matrix;
+				}
+				
+				// get translation and don't change
+				var tx = newMatrix[4];
+				var ty = newMatrix[5];
+				
+				// set new values for rotation matrix
+				var a = Math.cos(angle * Math.PI / 180);
+				var b = -Math.sin(angle * Math.PI / 180);
+				var c = -b;
+				var d = a;
+				
+				return 'matrix(' + a + ', ' + c + ', ' + b + ', ' + d + ', ' + tx + ', ' + ty + ')';
+			}
+
+			return geoService;
 }]);
+
 'use strict';
 //maintain globals across app, centralize some constants
 angular.module('tidepoolsServices')
 	.factory('ifGlobals', [
-function() {
-var ifGlobals = {
-	kinds: {
-		Convention: {name: 'Convention', hasTime: true, img: 'convention.png', icon: 'convention.svg'},
-		Event: {name: 'Event', hasTime: true, img: 'event.png', icon: 'event.svg'},
-		Neighborhood: {name: 'Neighborhood', hasTime: false, img: 'neighborhood.png', icon: 'neighborhood.svg'},
-		Venue: {name: 'Venue', hasTime: false, img: 'venue.png', icon: 'venue.svg'},
-		Park: {name: 'Park', hasTime: false, img: 'park.png', icon: 'park.svg'},
-		Retail: {name: 'Retail', hasTime: false, img: 'retail.png', icon: 'retail.svg'},
-		Campus: {name: 'Campus', hasTime: false, img: 'campus.png', icon: 'campus.svg'},
-		Home: {name: 'Home', hasTime: false, img: 'home.png', icon: 'home.svg'},
-		Other: {name: 'Other', hasTime: false, img: 'other.png'}
-	},
-	stickers: {
-		Favorite: {name: 'Favorite', img: 'img/stickers/favorite.png', iconInfo: {
-			iconUrl: 'img/stickers/favorite.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		FixThis: {name: 'Fix This', img: 'img/stickers/fixthis.png', iconInfo: {
-			iconUrl: 'img/stickers/fixthis.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		Food: {name: 'Food', img: 'img/stickers/food.png', iconInfo: {
-			iconUrl: 'img/stickers/food.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		ImHere: {name: "I'm Here", img: 'img/stickers/im_here.png', iconInfo: {
-			iconUrl: 'img/stickers/im_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		Interesting: {name: 'Interesting', img: 'img/stickers/interesting.png', iconInfo: {
-			iconUrl: 'img/stickers/interesting.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}},
-		WereHere: {name: "We're Here", img: 'img/stickers/were_here.png', iconInfo: {
-			iconUrl: 'img/stickers/were_here.png', iconSize: [100,100], iconAnchor: [50, 100], popupAnchor: [0, -80]}}
-	},
-	mapThemes: {
-		arabesque: {name: 'Arabesque', cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb', img: 'img/mapbox/arabesque_small.png'},
-		fairy: {name: 'Fairy', cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b', img: 'img/mapbox/fairy_small.png'},
-		sunset: {name: 'Sunset', cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e', img: 'img/mapbox/sunset_small.png'},
-		urban: {name: 'Urban', cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn', img: 'img/mapbox/urban_small.png'},
-		haze: {name: 'Haze', cloudMapName:'purple haze', cloudMapID:'interfacefoundry.ig1oichl', img: 'img/mapbox/haze_small.png'},
-		mimis: {name: 'Mimis', cloudMapName: 'mimis', cloudMapID: 'interfacefoundry.b28f1c55', img: 'img/mapbox/mimis_small.png'}
+		function() {
+			var ifGlobals = {
+				kinds: {
+					Convention: {
+						name: 'Convention', 
+						hasTime: true, 
+						img: 'convention.png', 
+						icon: 'convention.svg'
+					},
+					Event: {
+						name: 'Event', 
+						hasTime: true, 
+						img: 'event.png', 
+						icon: 'event.svg'
+					},
+					Neighborhood: {
+						name: 'Neighborhood', 
+						hasTime: false, 
+						img: 'neighborhood.png', 
+						icon: 'neighborhood.svg'
+					},
+					Venue: {
+						name: 'Venue', 
+						hasTime: false, 
+						img: 'venue.png', 
+						icon: 'venue.svg'
+					},
+					Park: {
+						name: 'Park', 
+						hasTime: false, 
+						img: 'park.png', 
+						icon: 'park.svg'
+					},
+					Retail: {
+						name: 'Retail', 
+						hasTime: false, 
+						img: 'retail.png', 
+						icon: 'retail.svg'
+					},
+					Campus: {
+						name: 'Campus', 
+						hasTime: false, 
+						img: 'campus.png', 
+						icon: 'campus.svg'
+					},
+					Home: {
+						name: 'Home', 
+						hasTime: false, 
+						img: 'home.png', 
+						icon: 'home.svg'
+					},
+					Other: {
+						name: 'Other', 
+						hasTime: true, 
+						img: 'other.png'
+					}
+				},
+				stickers: {
+					Favorite: {
+						name: 'Favorite', 
+						img: 'img/stickers/favorite.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/favorite.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					FixThis: {
+						name: 'Fix This', 
+						img: 'img/stickers/fixthis.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/fixthis.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					Food: {
+						name: 'Food', 
+						img: 'img/stickers/food.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/food.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					ImHere: {
+						name: "I'm Here", 
+						img: 'img/stickers/im_here.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/im_here.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					Interesting: {
+						name: 'Interesting', 
+						img: 'img/stickers/interesting.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/interesting.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					},
+					WereHere: {
+						name: "We're Here", 
+						img: 'img/stickers/were_here.png', 
+						iconInfo: {
+							iconUrl: 'img/stickers/were_here.png', 
+							iconSize: [100,100], 
+							iconAnchor: [50, 100], 
+							popupAnchor: [0, -80]
+						}
+					}
+				},
+				mapThemes: {
+					arabesque: {
+						name: 'Arabesque', 
+						cloudMapName:'arabesque', 
+						cloudMapID:'interfacefoundry.ig67e7eb', 
+						img: 'img/mapbox/arabesque_small.png'
+					},
+					fairy: {
+						name: 'Fairy', 
+						cloudMapName:'fairy', 
+						cloudMapID:'interfacefoundry.ig9jd86b', 
+						img: 'img/mapbox/fairy_small.png'
+					},
+					sunset: {
+						name: 'Sunset', 
+						cloudMapName:'sunset', 
+						cloudMapID:'interfacefoundry.ig6f6j6e', 
+						img: 'img/mapbox/sunset_small.png'
+					},
+					urban: {
+						name: 'Urban', 
+						cloudMapName:'urban', 
+						cloudMapID:'interfacefoundry.ig6a7dkn', 
+						img: 'img/mapbox/urban_small.png'
+					},
+					haze: {
+						name: 'Haze', 
+						cloudMapName:'purple haze', 
+						cloudMapID:'interfacefoundry.ig1oichl', 
+						img: 'img/mapbox/haze_small.png'
+					},
+					mimis: {
+						name: 'Mimis', 
+						cloudMapName: 'mimis', 
+						cloudMapID: 'interfacefoundry.b28f1c55', 
+						img: 'img/mapbox/mimis_small.png'
+					}
+				}
+			}
+
+			ifGlobals.getBasicHeader = function() {
+				var string = ifGlobals.username+":"+ifGlobals.password;
+				var encodedString = window.btoa(string);
+				return "Basic "+encodedString;
+			}
+
+		return ifGlobals;
+}]);
+app.factory('localStore', ['$http', function($http) {
+	// used for localStorage (to track anon users)
+	
+	return {
+		getID: getID,
+		setID: setID,
+		createID: createID
 	}
-}
 
-ifGlobals.getBasicHeader = function() {
-	var string = ifGlobals.username+":"+ifGlobals.password;
-	var encodedString = window.btoa(string);
-	return "Basic "+encodedString;
-}
+	function getID() {
+		if (typeof Storage !== 'undefined') {
+			return localStorage.id || undefined;
+		}
+		return undefined;
+	}
 
-return ifGlobals;
+	function setID(id) {
+		if (typeof Storage !== 'undefined') {
+			localStorage.id = id;
+		}
+	}
+
+	function createID() {
+		var data = {
+			userTime: new Date()
+		}
+		$http.post('/api/anon_user/create', data).
+			success(function(data) {
+				setID(data[0]);
+				// console.log('success: ', data);
+			}).
+			error(function(data) {
+				// console.log('error: ', data);
+			});
+	}
+
 }]);
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 
-		function(leafletData, $rootScope) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
+		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -16803,7 +17469,7 @@ worldBounds: {
 		controls: {
 			layers: {
 				visible: false,
-				position: 'bottomright',
+				position: 'topleft',
 				collapsed: true
 			}
 		},
@@ -16811,11 +17477,14 @@ worldBounds: {
 	}
 };
 
+															//latlng should be array [lng, lat]
 mapManager.setCenter = function(latlng, z, state) { //state is aperture state
+	z = z || mapManager.center.zoom;
 	console.log('--mapManager--');
 	console.log('--setCenter--', latlng, z, state);
 	mapManager._actualCenter = latlng;
 	mapManager._z = z;
+
 	
 	switch (state) {
 		case 'aperture-half':
@@ -16873,16 +17542,59 @@ mapManager.apertureUpdate = function(state) {
 }
 
 //use bounds from array of markers to set more accruate center
-mapManager.setCenterFromMarkers = function(markers) {
+mapManager.setCenterFromMarkers = function(markers, done) {
 	leafletData.getMap().then(function(map) {
 		map.fitBounds(
 			L.latLngBounds(markers.map(latLngFromMarker)),
 			{maxZoom: 20}
 		)
+		if (done) {
+			done();
+		}
 	});
 	
 	function latLngFromMarker(marker) {
 		return [marker.lat, marker.lng];
+	}
+}
+
+mapManager.setCenterFromMarkersWithAperture = function(markers, aperture) {
+
+	var bottom = mapManager.adjustHeightByAperture(aperture, mapManager.windowSize().h);
+	var top = aperture === 'aperture-full' ? 140 : 60;
+
+	leafletData.getMap().then(function(map) {
+		map.fitBounds(
+			L.latLngBounds(markers.map(mapManager.latLngFromMarker)),
+			{maxZoom: 20,
+			paddingTopLeft: [0, top],
+			paddingBottomRight: [0, bottom]}
+		)
+	});
+}
+
+mapManager.adjustHeightByAperture = function(aperture, height) {
+	switch (aperture) {
+		case 'aperture-half':
+			return height * 0.5;
+			break;
+		case 'aperture-third': 
+			return height * 0.78;
+			break;
+		case 'aperture-full':
+			return 110;
+			break;
+	}
+}
+
+mapManager.latLngFromMarker = function(marker) {
+	return [marker.lat, marker.lng];
+}
+
+mapManager.windowSize = function() {
+	return {
+		h: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+		w: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
 	}
 }
 
@@ -16893,6 +17605,46 @@ mapManager.resetMap = function() {
 	mapManager.removeCircleMask();
 	mapManager.removePlaceImage();
 	mapManager.refresh();
+}
+
+
+/* MARKER METHODS */
+
+mapManager.markerFromLandmark = function(landmark, world, $scope) {
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks',
+			alt = null;
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		iconAnchor = [25, 25];
+		iconSize = [50, 50];
+		alt = 'store';
+	}
+
+	return {
+		lat:landmark.loc.coordinates[1],
+		lng:landmark.loc.coordinates[0],
+		draggable:false,
+		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+		icon: {
+			iconUrl: landmarkIcon,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
+		},
+		_id: landmark._id,
+		layer: layerGroup,
+		alt: alt,
+		getMessageScope: function() { return $scope; }
+	}
+	function getLayerGroup(landmark) {
+		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	}
 }
 
 /* addMarker
@@ -16928,6 +17680,19 @@ mapManager.addMarkers = function(markers) {
 	}
 }
 
+mapManager.newMarkerOverlay = function(landmark) {
+	var layer = landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	if (mapManager.layers.overlays[layer + '-landmarks']) {
+		return;
+	} else {
+		mapManager.layers.overlays[layer + '-landmarks'] = {
+			type: 'group',
+			name: layer + '-landmarks',
+			visible: false,
+			groupType: 'landmarks'
+		};
+	}
+}
 
 mapManager.getMarker = function(key) {
 	console.log('--getMarker('+key+')--');
@@ -16957,6 +17722,15 @@ mapManager.removeAllMarkers = function() {
 	console.log('--removeAllMarkers--');
 	mapManager.markers = {};
 }
+
+mapManager.moveMarker = function(key, pos) {
+	var marker = mapManager.getMarker(key);
+	if (marker) {
+		marker.lat = pos.lat;
+		marker.lng = pos.lng;
+	}
+	mapManager.refresh();
+};
 
 mapManager.setMarkers = function(markers) {
 	if (_.isArray(markers)) {
@@ -17003,19 +17777,29 @@ mapManager.setMarkerSelected = function(key) {
 	
 	// reset all marker images to default
 	angular.forEach(mapManager.markers, function(marker) {
-		marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		if (bubbleTypeService.get() !== 'Retail') {
+			marker.icon.iconUrl = 'img/marker/bubble-marker-50.png';
+		}
 	});
 
 	// set new image for selected marker
 	if (mapManager.markers.hasOwnProperty(key)) {
 		console.log('setting marker as selected');
-		mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		if (bubbleTypeService.get() !== 'Retail' ||	mapManager.markers[key].icon.iconUrl === 'img/marker/bubble-marker-50.png') {
+			mapManager.markers[key].icon.iconUrl = 'img/marker/bubble-marker-50_selected.png';
+		}
 		return true;
 	} else {
 		console.log('Key not found in markers');
 		return false;
 	}
 };
+
+mapManager.setNewIcon = function(landmark) {
+	mapManager.markers[landmark._id].icon.iconUrl = landmark.avatar;
+	mapManager.markers[landmark._id].icon.iconAnchor = [25, 25];
+	mapManager.markers[landmark._id].icon.iconSize = [50, 50];
+}
 
 mapManager.bringMarkerToFront = function(key) {
 	console.log('--bringMarkerToFront--');
@@ -17035,6 +17819,13 @@ mapManager.bringMarkerToFront = function(key) {
 		return false;
 	}
 };
+
+mapManager.changeMarkerLayerGroup = function(markerId, newGroup) {
+	if (!mapManager.markers[markerId]) {
+		return false;
+	}
+	return mapManager.markers[markerId].layer = newGroup;
+}
 
 /* addPath
 Key: Name of path to be added
@@ -17122,8 +17913,9 @@ function refreshMap() {
     });
 }
 
-mapManager.setBaseLayer = function(layerURL) {
+mapManager.setBaseLayer = function(layerURL, localMaps) {
 	console.log('new base layer');
+
 	mapManager.layers.baselayers = {};
 	mapManager.layers.baselayers[layerURL] = {
 		name: 'newBaseMap',
@@ -17137,6 +17929,25 @@ mapManager.setBaseLayer = function(layerURL) {
 	};	
 }
 
+mapManager.findZoomLevel = function(localMaps) {
+	if (!localMaps) {
+		return;
+	}
+	var zooms = _.chain(localMaps)
+		.map(function(m) {
+			if (m.localMapOptions){
+				return m.localMapOptions.minZoom;
+			}
+		})
+		.filter(function(m) {
+			return m;
+		})
+		.value();
+	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
+
+	return lowestZoom;
+}
+
 mapManager.setBaseLayerFromID = function(ID) {
 	mapManager.setBaseLayer(
 	'https://{s}.tiles.mapbox.com/v3/'+
@@ -17144,44 +17955,205 @@ mapManager.setBaseLayerFromID = function(ID) {
 	'/{z}/{x}/{y}.png');
 }
 
+mapManager.findMapFromArray = function(mapArray) {
+	var sortedFloors = _.chain(mapArray)
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+
+	return sortedFloors;
+}
+
+
 mapManager.addOverlay = function(localMapID, localMapName, localMapOptions) {
 	console.log('addOverlay');
+
 	var newOverlay = {};
 	// if (localMapOptions.maxZoom>19) {
 	// 	localMapOptions.maxZoom = 19;
 	// }
+
+	localMapOptions = localMapOptions || {};
+
 	localMapOptions.zIndex = 10;
-	mapManager.layers.overlays[localMapName] = {
+	console.log('requesting new overlay')
+	mapManager.layers.overlays[localMapID] = {
 		name: localMapName,
 		type: 'xyz',
 		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
 		layerOptions: localMapOptions,
 		visible: true,
-		opacity: 0.8,
+		opacity: 0.8
 	};/*
 	
 
 	mapManager.layers.overlays = newOverlay;
 */
+
+
 	console.log(mapManager);
 	console.log(newOverlay);
+	// mapManager.refresh();
 };
 
-mapManager.removeOverlays = function() {
-	mapManager.layers.overlays = {};
-	mapManager.refresh();
+/* OVERLAY METHODS */
+
+mapManager.addManyOverlays = function(localMapID, localMapName, localMapOptions) {
+
+	var newOverlay = {};
+	// if (localMapOptions.maxZoom>19) {
+	// 	localMapOptions.maxZoom = 19;
+	// }
+
+	localMapOptions = localMapOptions || {};
+
+	localMapOptions.zIndex = 10;
+
+	newOverlay = {
+		name: localMapName,
+		type: 'xyz',
+		url: 'https://bubbl.io/maps/'+localMapID+'/{z}/{x}/{y}.png',
+		layerOptions: localMapOptions,
+		visible: true,
+		opacity: 0.8
+	};
+	return newOverlay;
 }
 
+mapManager.addOverlayGroup = function(overlays, groupName) {
+	if (mapManager.layers.overlays.hasOwnProperty(groupName)) {
+		// mapManager.layers.overlays[groupName].layers = mapManager.layers.overlays[groupName].layers.concat(overlays);
+		return
+	} else {
+		var group = {
+			type: 'group',
+			name: groupName,
+			layerOptions: {
+				layers: []
+			},
+			visible: false
+		};
+		overlays.forEach(function(overlay) {
+			group.layerOptions.layers.push(overlay);
+		})
+
+		mapManager.layers.overlays[groupName] = group;
+	}
+}
+
+mapManager.overlayExists = function(layerName) {
+	return mapManager.layers.overlays.hasOwnProperty(layerName);
+}
+
+
+mapManager.removeOverlays = function(type) {
+	if (type) {
+		var temp = mapManager.layers.overlays;
+		mapManager.layers.overlays = {};
+		for (var p in temp) {
+			if (temp[p].type !== type) {
+				mapManager.layers.overlays[p] = temp[p];
+			}
+		}
+	} else {
+		mapManager.layers.overlays = {};
+		mapManager.refresh();
+	}
+}
+
+mapManager.toggleOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = !mapManager.layers.overlays[layer].visible;
+}
+
+mapManager.turnOffOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = false;
+}
+
+mapManager.turnOnOverlay = function(layer) {
+	if (!mapManager.layers.overlays.hasOwnProperty(layer)) {
+		return;
+	}
+	return mapManager.layers.overlays[layer].visible = true;
+}
+
+mapManager.findVisibleLayers = function() {
+	return _.filter(mapManager.layers.overlays, function(l) {
+		return l.visible === true;
+	});
+}
+
+mapManager.groupOverlays = function(groupType) {
+	return _.filter(mapManager.layers.overlays, function(o) {
+		return o.hasOwnProperty('groupType') && o.groupType === groupType;
+	});
+}
 
 mapManager.addCircleMaskToMarker = function(key, radius, state) {
 	console.log('addCircleMaskToMarker');
 	mapManager.circleMaskLayer = new L.IFCircleMask(mapManager.markers[key], 120, state);
 	leafletData.getMap().then(function(map) {
-	map.addLayer(mapManager.circleMaskLayer);
-	mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
-		mapManager.circleMaskLayer._draw();
+		map.addLayer(mapManager.circleMaskLayer);
+		mapManager._cMLdereg = $rootScope.$on('leafletDirectiveMarker.dragend', function(event) {
+			mapManager.circleMaskLayer._draw();
+		});
 	});
+}
+
+mapManager.localMapArrayExists = function(world) {
+	return world && world.style && world.style.maps 
+		&& world.style.maps.localMapArray && world.style.maps.localMapArray.length > 0;
+}
+
+mapManager.filterToCurrentFloor = function(sortedFloors, currentFloor) {
+	return sortedFloors.filter(function(f) {
+		return f.floor_num === currentFloor;
 	});
+}
+
+mapManager.sortFloors = function(mapArray) {
+	// sort floors low to high and get rid of null floor_nums
+	return _.chain(mapArray)
+		.filter(function(floor) {
+			return floor.floor_num;
+		})
+		.sortBy(function(floor) {
+			return floor.floor_num;
+		})
+		.value();
+}
+
+mapManager.groupFloorMaps = function(worldStyle) {
+	if (!worldStyle.hasOwnProperty('maps')) {
+		return;
+	}
+
+	// legacy maps
+	var localMaps = [worldStyle.maps];
+	
+	// if localMapArray exists, replace local map with sorted array
+	if (hasLocalMapArray(worldStyle.maps)) {
+		localMaps = _.groupBy(worldStyle.maps.localMapArray, function(m) {
+			return m.floor_num
+		});
+		for (mapGroup in localMaps) {
+			var overlayGroup = localMaps[mapGroup].map(function(m) {
+				return mapManager.addManyOverlays(m.localMapID, m.localMapName, m.localMapOptions);
+			});
+			var groupName = mapGroup + '-maps';
+			mapManager.addOverlayGroup(overlayGroup, groupName);
+		}
+	}
+}
+
+function hasLocalMapArray(maps) {
+	return maps.localMapArray && maps.localMapArray.length;
 }
 
 mapManager.setCircleMaskState = function(state) {
@@ -17264,7 +18236,6 @@ mapManager.loadBubble = function(bubble, config) {
 		config = config || {};
 	if (bubble.hasOwnProperty('loc') && bubble.loc.hasOwnProperty('coordinates')) {
 		if (config.center) {mapManager.setCenter([bubble.loc.coordinates[0], bubble.loc.coordinates[1]], zoomLevel, apertureService.state);}
-		
 		if (config.marker) {mapManager.addMarker('c', {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
@@ -17692,15 +18663,15 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree',  
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('http://45.55.182.139:1337/api/updateuser'),
 	loginStatus: false,
 	login: {},
 	signup: {}
@@ -17819,15 +18790,36 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
-			var authHeader = 'Bearer ' + fbToken;
-			console.log(success);
-			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-				lockerManager.saveFBToken(fbToken)
-				ifGlobals.fbToken = fbToken;
-				deferred.resolve(success);
-			}, function(failure) {
-				deferred.reject(failure);
-			})
+
+
+			
+			
+			var data = {
+            	userId: success.authResponse.userID,
+           		accessToken: success.authResponse.accessToken 
+          	};
+
+          	$http.post('http://45.55.182.139:1337/auth/facebook/mobile_sigin', data).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+					deferred.resolve(success);
+	            },
+
+	            function(res){
+	              deferred.reject(failure);
+	            }
+          	);      
+
+			// var authHeader = 'Bearer ' + fbToken;
+			// console.log(success);
+			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+			// 	lockerManager.saveFBToken(fbToken)
+			// 	ifGlobals.fbToken = fbToken;
+			// 	deferred.resolve(success);
+			// }, function(failure) {
+			// 	deferred.reject(failure);
+			// })
 		}, 
 		function(failure) {
 			alerts.addAlert('warning', "Please allow access to Facebook!", true);
@@ -17841,6 +18833,7 @@ userManager.logout = function() {
 	$http.get('/api/user/logout', {server: true});
 	userManager.loginStatus = false;
 	$location.path('/');
+	navService.reset();
 	alerts.addAlert('success', "You're signed out!", true);
 }
 
@@ -17856,6 +18849,7 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 		dialogs.showDialog('keychainDialog.html');
+		contest.login(new Date); // for wtgt contest
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -17891,9 +18885,134 @@ userManager.saveToKeychain = function() {
 
 return userManager;
 }]);
+'use strict';
+
+app.factory('worldBuilderService', worldBuilderService);
+
+worldBuilderService.$inject = ['mapManager', 'userManager', 'localStore', 'apertureService'];
+
+function worldBuilderService(mapManager, userManager, localStore, apertureService) {
+
+	var currentWorldId;
+
+	return {
+		createMapLayer: createMapLayer,
+		currentWorldId: currentWorldId,
+		loadWorld: loadWorld
+	};
+	
+	function loadWorld(world) {
+		if (currentWorldId && world._id === currentWorldId) {
+			return;
+		}
+
+		currentWorldId = world._id;	
+
+		//local storage
+		if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	}
+		
+		// set appropriate zoom level based on local maps
+		var zoomLevel = 18;
+
+		if (world.style.hasOwnProperty('maps') && world.style.maps.hasOwnProperty('localMapOptions')) {
+			if (world.style.maps.localMapArray){
+				if (world.style.maps.localMapArray.length > 0) {
+					zoomLevel = mapManager.findZoomLevel(world.style.maps.localMapArray);
+				} 
+			}
+			else {
+				zoomLevel = world.style.maps.localMapOptions.minZoom || 18;
+			}
+		};
+
+		//map setup
+		if (world.hasOwnProperty('loc') && world.loc.hasOwnProperty('coordinates')) {
+			mapManager.setCenter([world.loc.coordinates[0], world.loc.coordinates[1]], zoomLevel, apertureService.state);
+			console.log('setcenter');
+
+			// if bubble has local maps then do not show world marker
+			if (!mapManager.localMapArrayExists(world)) {
+				addWorldMarker();
+			}
+
+		} else {
+			console.error('No center found! Error!');
+		}
+
+		var worldStyle = world.style;
+		mapManager.groupFloorMaps(worldStyle);
+
+		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+		}
+
+		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+			mapManager.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+			mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
+		} else {
+			console.warn('No base layer found! Defaulting to forum.');
+			mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+		}
+
+		var mapLayer = createMapLayer(world);
+		mapManager.toggleOverlay(mapLayer);
+
+	}
+	function addWorldMarker() {
+		mapManager.addMarker('c', {
+			lat: world.loc.coordinates[1],
+			lng: world.loc.coordinates[0],
+			icon: {
+				iconUrl: 'img/marker/bubble-marker-50.png',
+				shadowUrl: '',
+				iconSize: [35, 67],
+				iconAnchor: [17, 67],
+				popupAnchor:[0, -40]
+			},
+			message:'<a href="#/w/'+world.id+'/">'+world.name+'</a>',
+		});
+	}
+
+	function createMapLayer(world) {
+		var lowestFloor = 1,
+				mapLayer;
+		if (mapManager.localMapArrayExists(world)) {
+			sortedFloorNums = mapManager.sortFloors(world.style.maps.localMapArray)
+				.map(function(f) {
+					return f.floor_num;
+				});
+			lowestFloor = lowestPositiveNumber(sortedFloorNums);
+		}
+		return mapLayer = lowestFloor + '-maps';
+	}
+
+	function lowestPositiveNumber(array) {
+		var highestNegative;
+	
+		for (var i = 0, len = array.length; i < len; i++) {
+			if (array[i] > 0) {
+				return array[i];
+			} else {
+				highestNegative = Math.max(highestNegative, array[i]);
+			}
+		}
+
+		// if no positive floor numbers, return floor closest to 0
+		if (highestNegative) {
+			return highestNegative;
+		}
+
+		// if the above fails - which it shouldn't - return floor 1
+		return 1;
+	}
+
+}
 angular.module('tidepoolsServices')
-	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 
-	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager) {
+	.factory('worldTree', ['$cacheFactory', '$q', 'World', 'db', 'geoService', '$http', '$location', 'alertManager', 'bubbleTypeService', 'navService',
+	function($cacheFactory, $q, World, db, geoService, $http, $location, alertManager, bubbleTypeService, navService) {
 
 var worldTree = {
 	worldCache: $cacheFactory('worlds'),
@@ -17905,9 +19024,11 @@ var alert = alertManager;
 
 worldTree.getWorld = function(id) { //returns a promise with a world and corresponding style object
 	var deferred = $q.defer();
-	
+
 	var world = worldTree.worldCache.get(id);
 	if (world && world.style) {
+		console.log('world and world style');
+		bubbleTypeService.set(world.category);
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
 				deferred.resolve({world: world, style: style});
@@ -17921,6 +19042,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	}
 		
 	function askServer() {
+		console.log('ask server')
 		World.get({id: id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
@@ -17928,6 +19050,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 		 		deferred.resolve(data);
+		 		bubbleTypeService.set(data.world.category);
 		 	}
 		 });
 	}
@@ -18061,6 +19184,7 @@ worldTree.createWorld = function() {
 		console.log('##Create##');
 		console.log('response', response);
 		$location.path('/edit/walkthrough/'+response[0].worldID);
+		navService.reset();
 	});
 }
 
@@ -19672,7 +20796,7 @@ scope.logout = userManager.logout;
 		templateUrl: 'components/drawer/drawer.html' 
 	}
 }])
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', 'dialogs', '$window', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, dialogs, $window, ifGlobals) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
@@ -19744,7 +20868,7 @@ $scope.initView = function() {
 		map.setCircleMaskState('mask');
 			break;
 		case 'styles':
-		console.log('switching to styles');
+		// console.log('switching to styles');
 		map.setCircleMaskState('cover');
 			break;
 	}
@@ -19757,7 +20881,7 @@ $scope.onWorldIconSelect = function($files) {
 		url: '/api/upload/',
 		file: file,
 	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		// console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
 		$scope.world.avatar = data;
 		$scope.uploadFinished = true;
@@ -19771,9 +20895,9 @@ $scope.onLandmarkCategoryIconSelect = function($files) {
 		url: '/api/upload/',
 		file: file,
 	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
+		// console.log('%' + parseInt(100.0 * e.loaded/e.total));
 	}).success(function(data, status, headers, config) {
-		console.log(data);
+		// console.log(data);
 		$scope.temp.LandmarkCatAvatar = data;
 		$scope.uploadFinishedLandmark = true;
 	});
@@ -19800,20 +20924,58 @@ $scope.setUploadFinished = function(bool, type) {
 	}
 };
 
-$scope.onLocalMapSelect = function($files) {
-	//local map image upload, then places image on map
-	var file = $files[0];
-	$scope.upload = $upload.upload({
-		url: '/api/upload_maps',
-		file: file
-	}).progress(function(e) {
-		console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		if (!$scope.temp) {$scope.temp = {}}
-		$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
-	}).success(function(data, status, headers, config) {
-		$scope.mapImage = data;
-		map.placeImage(markerID, data);
-	})
+$scope.onLocalMapSelect = function($files, floor_num, floor_name) {
+	if (validateFloorNum(floor_num)) {
+		//local map image upload, then places image on map
+		var file = $files[0];
+		$scope.upload = $upload.upload({
+			url: '/api/upload_maps',
+			file: file
+		}).progress(function(e) {
+			// console.log('%' + parseInt(100.0 * e.loaded/e.total));
+			if (!$scope.temp) {$scope.temp = {}}
+			$scope.temp.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
+		}).success(function(data, status, headers, config) {
+			$scope.mapImage = data;
+			map.placeImage(markerID, data);
+			// post details to /api/temp_map_upload
+			// will update floor_num and floor_name
+			var newData = {
+				worldID: $scope.world._id,
+				map_marker_viewID: markerID,
+				temp_upload_path: data,
+				floor_num: parseFloat(floor_num),
+				floor_name: floor_name
+			};
+			$http.post('/api/temp_map_upload', newData).
+				success(function(data, status, headers, config) {
+					// console.log('success: ', data);
+					$scope.world = data;
+					$scope.selectLastMap();
+				}).
+				error(function(data, status, headers, config) {
+					// console.log('error: ', data);
+				});
+			});
+		scrollToBottom(300);
+	}
+}
+
+function validateFloorNum(floor_num) {
+	if (floor_num === 0 || floor_num === '0') {
+		alerts.addAlert('info', "The floor number can't be 0", true);
+		return false;
+	} else if (floor_num == '') {
+		alerts.addAlert('info', "Please enter a floor number", true);
+		return false;
+	} else if (isNaN(floor_num)) {
+		alerts.addAlert('info', "The floor number must be a number", true);
+		return false;
+	} else if ((String(floor_num).split('.')[1] || []).length > 1) { // get number of decimal places
+		alerts.addAlert('info', "Too many decimal places", true);
+		return false;
+	}
+	return true;
 }
 
 $scope.selectMapTheme = function(key) {
@@ -19831,23 +20993,23 @@ $scope.selectMapTheme = function(key) {
 }
 
 $scope.setThemeFromMap = function() {
-switch ($scope.world.style.maps.cloudMapName) {
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-	case 'purple haze': 
-		angular.extend($scope.style, themeDict['haze']);
-		break;
-}
+	switch ($scope.world.style.maps.cloudMapName) {
+		case 'urban':
+			angular.extend($scope.style, themeDict['urban']);
+			break;
+		case 'sunset':
+			angular.extend($scope.style, themeDict['sunset']);
+			break;
+		case 'fairy':
+			angular.extend($scope.style, themeDict['fairy']);
+			break;
+		case 'arabesque':
+			angular.extend($scope.style, themeDict['arabesque']);
+			break;
+		case 'purple haze': 
+			angular.extend($scope.style, themeDict['haze']);
+			break;
+	}
 }
 
 $scope.addLandmarkCategory = function() {
@@ -19869,9 +21031,160 @@ $scope.removeLandmarkCategory = function(index) {
 	$scope.world.landmarkCategories.splice(index, 1);
 }
 
+$scope.removeAllMaps = function() {
+	map.removePlaceImage();
+	map.removeOverlays();
+};
+
+$scope.getHighestFloor = function() {
+	// gets the highest floor_num in array of map objects
+	var array = $scope.world.style.maps.localMapArray;
+	array = $.map(array, function(obj) {
+		return obj.floor_num;
+	});
+	return Math.max.apply(this, array);
+};
+
+$scope.increaseFloor = function(map) {
+	if (!$scope.mapIsUploaded(map)) {
+		map.floor_num++;
+	}
+};
+
+$scope.decreaseFloor = function(map) {
+	if (!$scope.mapIsUploaded(map)) {
+		map.floor_num--;
+	}
+};
+
+$scope.mapIsUploaded = function(map) {
+	return map.temp_upload_path || map.localMapName;
+};
+
+$scope.mapIsBuilt = function(map) {
+	if (map) {
+		return map.localMapName;
+	}
+	else {
+		// check if the last map in the array is built
+		if ($scope.world) {
+			if ($scope.world.style.maps.localMapArray &&
+				$scope.world.style.maps.localMapArray.length>0) {
+				var len = $scope.world.style.maps.localMapArray.length;
+				return $scope.world.style.maps.localMapArray[len-1].hasOwnProperty('localMapName');
+			}
+		}
+		// no localMapArrat
+		return true;
+	}
+}
+
+$scope.selectMap = function(clickedMap) {
+	// show panel body
+	$scope.selectedMap = clickedMap;
+	// clickedMap.isSelected = true;
+
+	// remove any maps showing (built or unbuilt)
+	$scope.removeAllMaps();
+
+	// add new maps
+	if (clickedMap.temp_upload_path == '') { // map has been built
+		// the timeout is necessary (for some reason)
+		var showMapDelay = $timeout(function() {
+			map.addOverlay(clickedMap.localMapID,
+						clickedMap.localMapName,
+						clickedMap.localMapOptions); // populate this correctly
+		}, 100);
+	} else { // map has not been built
+		var showMapDelay = $timeout(function() {
+			map.placeImage(clickedMap.map_marker_viewID, clickedMap.temp_upload_path);
+		}, 100);
+	}
+};
+
+$scope.selectLastMap = function() {
+	var len = $scope.world.style.maps.localMapArray.length;
+	$scope.selectMap($scope.world.style.maps.localMapArray[len-1]);
+};
+
+$scope.addMapPlaceholder = function() {
+	// creates new temporary li in edit/maps.html
+	if ($scope.world.style.maps.localMapArray && $scope.world.style.maps.localMapArray.length>0) {
+		$scope.world.style.maps.localMapArray.push({
+			floor_num: $scope.getHighestFloor()+1,
+			floor_name: 'Floor ' + ($scope.getHighestFloor()+1)
+		});
+	} else { // first map to upload
+		$scope.world.style.maps.localMapArray = [{
+			floor_num: 1,
+			floor_name: 'Lobby'
+		}];
+	}
+	//scroll to bottom
+	scrollToBottom(100);
+
+	// select li
+	$scope.selectLastMap();
+};
+
+$scope.removeMap = function(map) {
+	if (window.confirm('Are you sure you want to delete this local map?')) {
+		if ($scope.mapIsUploaded(map)) {
+			deleteMap(map);
+		}
+		else {
+			// remove last object in map array
+			$scope.world.style.maps.localMapArray.pop();
+		}
+		
+	}
+};
+
+function deleteMap(map) {
+	var data = {
+		worldID: $scope.world._id,
+		map_marker_viewID: map.map_marker_viewID
+	};
+	$http.post('/api/delete_map', data).
+		success(function(data) {
+			// console.log('success: ', data);
+			$scope.world = data;
+		}).
+		error(function(data) {
+			// console.log('error', data);
+		});
+}
+
+function scrollToBottom(timeout) {
+	$location.hash('scrollToBottom');
+	if (timeout) {
+		var scroll = $timeout(function() {
+			// give ngRepeat time to add new DOM element
+			$anchorScroll();
+			// console.log('scrolled with timeout');
+		}, timeout);
+	}
+	else {
+		$anchorScroll;
+		// console.log('scrolled without timeout');
+	}
+}
+
 $scope.loadWorld = function(data) { 
 	// initialize world
 	  	$scope.world = data.world;
+		// console.log('$scope.world: ', $scope.world);
+
+	  	// don't load unbuilt maps (can only be last map in array)
+	  	if ($scope.world.style.maps.localMapArray && 
+	  		$scope.world.style.maps.localMapArray.length>0) {
+			var len = $scope.world.style.maps.localMapArray.length;
+			if ($scope.world.style.maps.localMapArray[len-1].temp_upload_path != '') {
+				// delete unbuilt map
+				deleteMap($scope.world.style.maps.localMapArray[len-1]);
+			}
+	  	}
+
 		$scope.style = data.style;
 		style.navBG_color = $scope.style.navBG_color;
 		if ($scope.world.hasLoc) {
@@ -19903,17 +21216,59 @@ $scope.loadWorld = function(data) {
 			map.refresh();
 		}*/
 		
-		if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
-		}
 
+		// var theseMaps = [$scope.world.style.maps];
+
+		// if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
+		// 	theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
+		// }
+
+		// theseMaps.forEach(function(thisMap) {
+		// 	if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+		// 		map.addOverlay(thisMap.localMapID, 
+		// 						thisMap.localMapName, 
+		// 						thisMap.localMapOptions);
+		// 	}
+		// })
+
+		turnOnFloorMaps();
 		
 		if (!$scope.style.bodyBG_color) {
 			$scope.style.bodyBG_color = "#FFFFFF";
 			$scope.style.cardBG_color = "#FFFFFF";
 		}		
+}
+
+function turnOnFloorMaps() {
+	if (!map.localMapArrayExists($scope.world)) {
+		return;
+	}
+
+	var lowestFloor = mapManager.sortFloors($scope.world.style.maps.localMapArray)[0].floor_num;
+	var groupName = lowestFloor ? lowestFloor + '-maps' : '1-maps';
+
+	// turn off any visible layers
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
+
+	if (mapManager.overlayExists(groupName)) {
+		mapManager.toggleOverlay(groupName);
+	} else {
+		overlayGroup = findMapsOnThisFloor($scope.world, lowestFloor).map(function(thisMap) {
+			if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+				return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+			}
+		});
+		map.addOverlayGroup(overlayGroup, groupName);
+		mapManager.toggleOverlay(groupName);
+	}
+}
+
+function findMapsOnFloor(world, floor) {
+	world.style.maps.localMapArray.filter(function(m) {
+		return m.floor_num === floor;
+	});
 }
 
 $scope.saveWorld = function() {
@@ -20023,6 +21378,7 @@ $scope.removePlaceImage = function () {
 
 $scope.buildLocalMap = function () {
 	console.log('--buildLocalMap--');
+	$scope.building = true;
 	//get image geo coordinates, add to var to send
 	var bounds = map.getPlaceImageBounds(),
 		southEast = bounds.getSouthEast(),
@@ -20031,6 +21387,7 @@ $scope.buildLocalMap = function () {
 		northEast = bounds.getNorthEast(),
 		coordBox = {
 			worldID: $scope.world._id,
+			localMapID: $scope.world._id + '_' + markerID,
 			nw_loc_lng: northWest.lng,
 		    nw_loc_lat: northWest.lat,
 		    sw_loc_lng: southWest.lng,
@@ -20040,34 +21397,43 @@ $scope.buildLocalMap = function () {
 			se_loc_lng: southEast.lng,
 			se_loc_lat: southEast.lat 
 		};
-	console.log('bounds', bounds);
-	console.log('coordBox', coordBox);
+	// console.log('bounds', bounds);
+	// console.log('coordBox', coordBox);
 	var coords_text = JSON.stringify(coordBox);
 		var data = {
-		      mapIMG: $scope.mapImage,
-		      coords: coords_text
-		    }
+		    mapIMG: $scope.mapImage,
+		    coords: coords_text,
+		    map_marker_viewID: markerID
+		}
 	//build map
 	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
 	$http.post('/api/build_map', data).success(function(response){
 		//response = JSON.parse(response);
 		alerts.addAlert('success', 'Map built!', true);
-		console.log(response);
+		// console.log(response);
 		if (!$scope.world.hasOwnProperty('style')){$scope.world.style={}}
 		if (!$scope.world.style.hasOwnProperty('maps')){$scope.world.style.maps={}} 
 		//remove this when world objects arent fd up
 		if (response[0]) {
 			
 			 //the server sends back whatever it wants. sometimes an array, sometimes not. :(99
-			$scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
-			$scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
-			$scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
+			$scope.world = response[0];
+			// $scope.world.style.maps.localMapID = response[0].style.maps.localMapID;
+			// $scope.world.style.maps.localMapName = response[0].style.maps.localMapName;
+			// $scope.world.style.maps.localMapOptions = response[0].style.maps.localMapOptions;
 		} else {
-			$scope.world.style.maps.localMapID = response.style.maps.localMapID;
-			$scope.world.style.maps.localMapName = response.style.maps.localMapName;
-			$scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
+			$scope.world = response;
+			// $scope.world.style.maps.localMapID = response.style.maps.localMapID;
+			// $scope.world.style.maps.localMapName = response.style.maps.localMapName;
+			// $scope.world.style.maps.localMapOptions = response.style.maps.localMapOptions;
 		}
-		$scope.saveWorld();
+		$scope.building = false;
+		// reload to reset markerID, etc.
+		$route.reload();
+		scrollToBottom(1000);
+		// $scope.saveWorld();
+		}).error(function(response) {
+			$scope.building = false;
 		});
 }
 
@@ -20079,11 +21445,11 @@ function findLoc() {
 }
 
 function showPosition(position) {
-	console.log('--showPosition--');
+	// console.log('--showPosition--');
 	userLat = position.coords.latitude;
 	userLng = position.coords.longitude;
 	
-	console.log(userLng);
+	// console.log(userLng);
 	map.setCenter([userLng, userLat], 18, 'editor');
  
 	markerID = tempID();
@@ -20105,7 +21471,7 @@ function showPosition(position) {
 	});
 	
 	var state;
-	console.log('$scope.view', $scope.view);
+	// console.log('$scope.view', $scope.view);
 	switch ($scope.view) {
 		case 'details':
 		state = 'mask';
@@ -20126,7 +21492,7 @@ function showPosition(position) {
 }
 
 function locError(){
-        console.log('no loc');
+        // console.log('no loc');
 }
 
 
@@ -20208,25 +21574,25 @@ function locError(){
 ////////////////////////////////////////////////////////////
 $scope.$on('$locationChangeSuccess', function (event, args) {
 	//stops route from changing if just changing subview
-	console.log(event, args);
-	console.log($route.current.$$route);
+	// console.log(event, args);
+	// console.log($route.current.$$route);
 	
     if (lastRoute.$$route.originalPath === $route.current.$$route.originalPath) {
         $scope.view = $route.current.params.view;
         $route.current = lastRoute;
-        console.log($scope.view);
+        // console.log($scope.view);
     }
     $scope.initView();
 });
 
 $scope.$on('$destroy', function (event) { //controller cleanup
-	console.log('$destroy event', event);
+	// console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
 	map.removePlaceImage();
 	if (zoomControl.style) {
-		zoomControl.style.top = "";
-		zoomControl.style.left = "";
+		zoomControl.style.top = "60px";
+		zoomControl.style.left = "1%";
 	}
 	}
 	
@@ -20247,7 +21613,7 @@ $scope.$watch('world.name', function(current, old) {
 $scope.$watch('temp.scale', function(current, old) {
 	if (current!=old) {
 		map.setPlaceImageScale(current);
-		console.log(map.getPlaceImageBounds());
+		// console.log(map.getPlaceImageBounds());
 	}
 });
 
@@ -20257,7 +21623,7 @@ $scope.$watchCollection('world', function (newCol, oldCol) {
 		if (saveTimer) {
 			$timeout.cancel(saveTimer);
 		}
-		saveTimer = $timeout($scope.saveWorld, 5000);
+		saveTimer = $timeout($scope.saveWorld, 1500);
 	}
 });
 
@@ -20267,8 +21633,8 @@ $scope.$watchCollection('world', function (newCol, oldCol) {
 ////////////////////////////////////////////////////////////
 World.get({id: $routeParams.worldURL}, function(data) {
 	if (data.err) {
-		 console.log('World not found!');
-		 console.log(data.err);
+		 // console.log('World not found!');
+		 // console.log(data.err);
 	} else {
 		$scope.loadWorld(data);
 	}
@@ -20278,7 +21644,7 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
@@ -20286,10 +21652,10 @@ $window.history.back();
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
 	var map = mapManager;
-	
+
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-	zoomControl.style.top = "50px";
-	zoomControl.style.left = "40%";
+zoomControl.style.top = "50px";
+zoomControl.style.left = "40%";
 
 var worldLoaded = false;
 var landmarksLoaded = false;
@@ -20316,21 +21682,29 @@ var landmarksLoaded = false;
 			//add to array 
 			$scope.landmarks.unshift(tempLandmark);		
 			
+			var landmarkIcon = 'img/marker/bubble-marker-50.png',
+					popupAnchorValues = [0, -50],
+					shadowUrl = '',
+					// shadowAnchor = [12, 20],
+					iconAnchor = [25, 100];
+
 			//add marker
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					// shadowAnchor: shadowAnchor,
 					iconSize: [50, 95],
 					iconAnchor: [25, 100],
-					popupAnchor: [0, -50]
+					popupAnchor: popupAnchorValues,
 				},
 				draggable:true,
 				message:'Drag to location on map',
 				focus:true
-			});				
+			});
+
 		});
 		}
 	}
@@ -20436,23 +21810,50 @@ if ($scope.landmark.hasTime) {
 		}
 	}
 	
-	function addLandmarkMarker(landmark) {
+	$scope.addLandmarkMarker = function(landmark) {
+		var landmarkIcon = 'img/marker/bubble-marker-50.png',
+				popupAnchorValues = [0, -40],
+				shadowUrl = '',
+				shadowAnchor = [4, -3],
+				iconAnchor = [17, 67],
+				iconSize = [35, 67],
+				layerGroup = getLayerGroup(landmark) + '-landmarks',
+				alt = null;
+
+		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+			landmarkIcon = landmark.avatar;
+			popupAnchorValues = [0, -14];
+			iconAnchor = [25, 25];
+			iconSize = [50, 50];
+			alt = 'store';
+		}
+		
+
+		mapManager.newMarkerOverlay(landmark);
+
 		map.addMarker(landmark._id, {
 				lat:landmark.loc.coordinates[1],
 				lng:landmark.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [35, 67],
-					iconAnchor: [17.5, 60],
-					popupAnchor: [0, -40]
+					iconUrl: landmarkIcon,
+					shadowUrl: shadowUrl,
+					shadowAnchor: shadowAnchor,
+					iconSize: iconSize,
+					iconAnchor: iconAnchor,
+					popupAnchor: popupAnchorValues
 				},
 				draggable:true,
 				message:landmark.name || 'Drag to location on map',
-				focus:true
+				focus:true,
+				layer: layerGroup,
+				_id: landmark._id,
+				alt: alt
 			});
 	}
-	
+	function getLayerGroup(landmark) {
+		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+	}
+
 	function landmarkDefaults() {
 		console.log('--landmarkDefaults()--');
 		var defaults = {
@@ -20474,6 +21875,8 @@ if ($scope.landmark.hasTime) {
 		return defaults;
 	}
 
+
+
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -20482,11 +21885,11 @@ $scope.$on('$destroy', function (event) {
 	console.log('$destroy event', event);
 	if (event.targetScope===$scope) {
 	map.removeCircleMask();
-	
-	if (zoomControl.style) {
-	zoomControl.style.top = "";
-	zoomControl.style.left = "";
-	}
+
+		if (zoomControl.style) {
+			zoomControl.style.top = "";
+			zoomControl.style.left = "";
+		}
 	}
 });
 
@@ -20494,69 +21897,102 @@ $scope.$on('$destroy', function (event) {
 /////////////////////////EXECUTING//////////////////////////
 ////////////////////////////////////////////////////////////
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
-		$scope.style = data.style;
-		
-		$scope.worldURL = $routeParams.worldURL;
-		//initialize map with world settings
-		map.setCenter($scope.world.loc.coordinates, 18, 'editor');
+	$scope.world = data.world;
+	$scope.style = data.style;
+	
+	$scope.worldURL = $routeParams.worldURL;
+	//initialize map with world settings
+	map.setCenter($scope.world.loc.coordinates, 18, 'editor');
 
-		if ($scope.world.style) {
-			if ($scope.world.style.maps) {
-			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)}}
-			map.removeAllMarkers();
-		
-			map.addMarker('m', {
-				lat: $scope.world.loc.coordinates[1],
-				lng: $scope.world.loc.coordinates[0],
-				focus: false,
-				draggable: false,
-				icon: {
-					iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
-					shadowUrl: '',
-					iconSize: [0,0],
-					shadowSize: [0,0],
-					iconAnchor: [0,0],
-					shadowAnchor: [0,0]
-				}
-			});
+	if ($scope.world.style) {
+		if ($scope.world.style.maps) {
+			map.setBaseLayerFromID($scope.world.style.maps.cloudMapID)
+		}
+	}
+	map.removeAllMarkers();
 
-			map.removeCircleMask();
-			map.addCircleMaskToMarker('m', 150, 'mask');
-		
-			map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
-		
-			if ($scope.world.style.maps.localMapID) {
-				map.addOverlay($scope.world.style.maps.localMapID, 
-								$scope.world.style.maps.localMapName, 
-								$scope.world.style.maps.localMapOptions);
-			}
-			
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
-			}
-		map.refresh();
-		
-		//world is finished loading
-		worldLoaded = true;
-		
-		//begin loading landmarks
+	// marker for world
+	map.addMarker('m', {
+		lat: $scope.world.loc.coordinates[1],
+		lng: $scope.world.loc.coordinates[0],
+		focus: false,
+		draggable: false,
+		icon: {
+			iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+			shadowUrl: '',
+			iconSize: [0,0],
+			shadowSize: [0,0],
+			iconAnchor: [0,0],
+			shadowAnchor: [0,0]
+		}
+	});
+
+	map.removeCircleMask();
+	map.addCircleMaskToMarker('m', 150, 'mask');
+
+	map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
+
+	
+	if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+		zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
+	}
+	map.refresh();
+	
+	//world is finished loading
+	worldLoaded = true;
+	
+	//begin loading landmarks
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
-					
-		//add markers to map
+
+		// var filtered = filterLandmarks($scope.landmarks);
+
 		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
-			addLandmarkMarker(value);
+			$scope.addLandmarkMarker(value);
 		});
+
+		if ($scope.landmarks.length) {
+			map.setMarkerFocus($scope.landmarks[0]._id);
+			map.setMarkerSelected($scope.landmarks[0]._id);
+		}
+
 		landmarksLoaded = true;
+		addFloorMaps();
 			
 	});
-	});	
-	
+});
+
+	function addFloorMaps() {
+		var initialFloor;
+
+		if ($scope.landmarks.length) {
+			initialFloor = $scope.landmarks[0].loc_info ? $scope.landmarks[0].loc_info.floor_num : 1;
+		} else {
+			initialFloor = 1;
+		}
+		var mapLayer = initialFloor + '-maps',
+				landmarkLayer = initialFloor + '-landmarks';
+
+		map.groupFloorMaps($scope.world.style);
+		
+		mapManager.findVisibleLayers().forEach(function(l) {
+			mapManager.toggleOverlay(l.name);
+		});
+		
+		map.toggleOverlay(mapLayer);
+		map.toggleOverlay(landmarkLayer);
+	}
+
+	function filterMaps(maps, floor) {
+		return maps.filter(function(m) {
+			return m.floor_num === floor;
+		});
+	}
+
 }])
 
-app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', function ($scope, db, Landmark, mapManager, $upload) {
+app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'mapManager', '$upload', 'bubbleTypeService', 'worldTree', '$q', '$log', function ($scope, db, Landmark, mapManager, $upload, bubbleTypeService, worldTree, $q, $log) {
 	console.log('LandmarkEditorItemController', $scope);
 	$scope.time = false;
 	
@@ -20568,8 +22004,13 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		$scope.$parent.saveItem($scope.$index);
 	}
 	
-	$scope.selectLandmark = function($event) {
-		$scope.$parent.selectItem($scope.$index);
+	$scope.selectLandmark = function(index) {
+		if (index === $scope.$parent.selectedIndex) {
+			return;
+		}
+
+		$scope.updateFloor()
+		$scope.$parent.selectItem($scope.$index);		
 	}
 	
 	$scope.setStartTime = function() {
@@ -20622,11 +22063,50 @@ app.controller('LandmarkEditorItemController', ['$scope', 'db', 'Landmark', 'map
 		addLocInfo();
 	}
 
-	function addLocInfo() {
+	function populateFloorsDropdown(localMap) {
+		var newFloor = {};
+		newFloor.val = localMap.floor_num;
+		newFloor.label = localMap.floor_name;
+		return newFloor;
+	}
 
+	// $scope.$on('leafletDirectiveMarker.dragend',function (marker, ev) {
+	// 	mapManager.markers[ev.markerName].lat = ev.leafletEvent.target._latlng.lat;
+	// 	mapManager.markers[ev.markerName].lng = ev.leafletEvent.target._latlng.lng;
+ //  });
+
+	function addLocInfo() {
 		//read landmark floor array, cp to $scope
 
-		$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"},{"val":3,"label":"3rd Floor"},{"val":4,"label":"4th Floor"},{"val":5,"label":"5th Floor"},{"val":6,"label":"6th Floor"},{"val":7,"label":"7th Floor"},{"val":8,"label":"8th Floor"},{"val":9,"label":"9th Floor"},{"val":10,"label":"10th Floor"}];  
+		if (mapManager.localMapArrayExists($scope.world)) {
+			var floors = [];
+			var localMaps = _.chain($scope.world.style.maps.localMapArray)
+				.filter(function(m) {
+					return m.floor_num;
+				})
+				.sortBy(function(m) {
+					return m.floor_num;
+				})
+				.uniq(function(m) {
+					return m.floor_num;
+				})
+				.value();
+
+			localMaps.forEach(function(m) {
+				floors.push(populateFloorsDropdown(m));
+			});
+
+			$scope.$parent.floors = floors;
+		} else {
+			$scope.$parent.floors = [{"val":1,"label":"1st Floor"}];  
+		}
+		
+		if (!$scope.$parent.landmark.loc_info || $scope.$parent.landmark.loc_info.floor_num === null) {
+			$scope.floorNumber = $scope.$parent.floors[0].label;
+		} else {
+			var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
+			$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;	
+		}
 
 		//IF no loc_info, then floor_num = 0
 		if (!$scope.$parent.landmark.loc_info){
@@ -20644,7 +22124,36 @@ $scope.clearLoc = function(){
 }
 	//--------------------------//
 
+$scope.chooseNewFloor = function(index) {
+	$scope.floorNumber = $scope.$parent.floors[index].label;
+	$scope.$parent.landmark.loc_info.floor_num = $scope.$parent.floors[index].val;
+	$scope.updateFloor();
+}
+
+$scope.updateFloor = function() {
+	if (!$scope.$parent.landmark.loc_info || $scope.$parent.landmark.loc_info.floor_num === null) {
+		addLocInfo();
+		$scope.floorNumber = $scope.$parent.floors[0].label;
+	} else {
+		var i = _.pluck($scope.$parent.floors, 'val').indexOf($scope.$parent.landmark.loc_info.floor_num);
+		$scope.floorNumber = $scope.$parent.floors[i] ? $scope.$parent.floors[i].label : $scope.$parent.floors[0].label;	
+	}
+
+	var currentFloor = $scope.landmark.loc_info && $scope.landmark.loc_info.floor_num !== null ? $scope.landmark.loc_info.floor_num : 1;
+	var mapLayer = currentFloor + '-maps';
+	var landmarkLayer = currentFloor + '-landmarks';
+
+
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
 	
+	mapManager.toggleOverlay(mapLayer);
+	mapManager.toggleOverlay(landmarkLayer);
+	mapManager.changeMarkerLayerGroup($scope.landmark._id, landmarkLayer);
+	// mapManager.setMarkerFocus($scope.landmark._id);
+}
+
 $scope.onUploadAvatar = function($files) {
 	console.log('uploadAvatar');
 	var file = $files[0];
@@ -20656,9 +22165,48 @@ $scope.onUploadAvatar = function($files) {
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 	$scope.$parent.landmark.avatar = data;
+	if (bubbleTypeService.get() === 'Retail') {
+		mapManager.setNewIcon($scope.$parent.landmark);
+	}
 	$scope.uploadFinished = true;
 	});
 }		
+	
+	//------- TAGGING -------//
+
+	$scope.$parent.landmark.landmarkTagsRemoved = [];
+
+	$scope.tagDetect = function(keyEvent) {
+		if (keyEvent.which === 13){
+			$scope.addTag();
+		}
+	}
+
+	$scope.addTag = function() {
+		if($scope.addTagName !== ''){
+			if (!$scope.$parent.landmark.tags){
+				$scope.$parent.landmark.tags = []; //if no array, then add
+			}
+			$scope.addTagName = $scope.addTagName.replace(/[^\w\s]/gi, '');
+
+			$scope.addTagName = $scope.addTagName.toLowerCase();
+
+			if($scope.$parent.landmark.tags.indexOf($scope.addTagName) > -1){ 
+				//check for dupes, if dupe dont added
+			}
+			else {
+				$scope.$parent.landmark.tags.push($scope.addTagName);
+			}
+			$scope.addTagName = '';			
+		}
+	};
+
+	$scope.closeTag = function(index) {
+		$scope.$parent.landmark.landmarkTagsRemoved.push($scope.$parent.landmark.tags[index]); //add remove to tags removed arr
+		$scope.$parent.landmark.tags.splice(index, 1);
+	};
+
+	//--------------------------//
 	
 }]);
 
@@ -20678,10 +22226,12 @@ $scope.world.time.end = new Date();
 $scope.world.style = {};
 $scope.world.style.maps = {};
 $scope.temp = {};
-var map = mapManager;
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+$scope.location = $location;
 
-zoomControl.style.display = 'none'; 
+var map = mapManager;
+
+
+
 
 $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
@@ -20733,47 +22283,48 @@ $scope.pictureSelect = function($files) {
 }
 
 $scope.selectMapTheme = function(name) {
-		var mapThemes = {
-			arabesque: {cloudMapName:'arabesque', cloudMapID:'interfacefoundry.ig67e7eb'},
-			fairy: {cloudMapName:'fairy', cloudMapID:'interfacefoundry.ig9jd86b'},
-			sunset: {cloudMapName:'sunset', cloudMapID:'interfacefoundry.ig6f6j6e'},
-			urban: {cloudMapName:'urban', cloudMapID:'interfacefoundry.ig6a7dkn'}
-		};
-	
-		if (typeof name === 'string') {
-			$scope.mapThemeSelect = name;
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
-			
-			$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
-			$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
-			
-			//if ($scope.style.hasOwnProperty('navBG_color')==false) {
-			//	$scope.setThemeFromMap();
-			$scope.setThemeFromMap(name);
-			//}
-		}
+	var mapThemes = $scope.global.mapThemes;
+
+	if (typeof name === 'string') {
+		$scope.mapThemeSelect = name;
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+mapThemes[name].cloudMapID+'/{z}/{x}/{y}.png');
+		
+		$scope.world.style.maps.cloudMapName = mapThemes[name].cloudMapName;
+		$scope.world.style.maps.cloudMapID = mapThemes[name].cloudMapID;
+		
+		//if ($scope.style.hasOwnProperty('navBG_color')==false) {
+		//	$scope.setThemeFromMap();
+		$scope.setThemeFromMap(name);
+		//}
+	}
 }
 
 $scope.setThemeFromMap = function(name) {
-switch (name) { 
-	case 'urban':
-		angular.extend($scope.style, themeDict['urban']);
-		break;
-	case 'sunset':
-		angular.extend($scope.style, themeDict['sunset']);
-		break;
-	case 'fairy':
-		angular.extend($scope.style, themeDict['fairy']);
-		break;
-	case 'arabesque':
-		angular.extend($scope.style, themeDict['arabesque']);
-		break;
-}
-console.log($scope.style)
+	switch (name) { 
+		case 'urban':
+			angular.extend($scope.style, themeDict['urban']);
+			break;
+		case 'sunset':
+			angular.extend($scope.style, themeDict['sunset']);
+			break;
+		case 'fairy':
+			angular.extend($scope.style, themeDict['fairy']);
+			break;
+		case 'arabesque':
+			angular.extend($scope.style, themeDict['arabesque']);
+			break;
+		case 'haze':
+			angular.extend($scope.style, themeDict['haze']);
+			break;
+		case 'mimis':
+			angular.extend($scope.style, themeDict['mimis']);
+			break;
+	}
+	console.log($scope.style)
 
-    db.styles.create($scope.style, function(response){
-        console.log(response);
-    });
+	    db.styles.create($scope.style, function(response){
+	        console.log(response);
+	    });
 }	
 	
 $scope.saveAndExit = function() {
@@ -20796,7 +22347,8 @@ $scope.saveAndExit = function() {
 		// 	}
 		// }
 
-		$location.path("/edit/w/"+$scope.world.id);
+		$location.path("/w/"+$scope.world.id);
+		$window.location.reload();
 		map.refresh();
 	} else {
 		//console
@@ -20832,110 +22384,138 @@ $scope.save = function() {
 }
 
 var firstWalk = [
-	{title: 'Need a hand?',
-	caption: 'If you haven’t built a bubble before, we can walk you through it.',
-	height: 0,
-	view: '0.html',
-	valid: function() {return true},
-	skip: false},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Location', 
-	caption: 'Find its location',
-	view: 'location.html',
-	height: 290,
-	valid: function() {return $scope.world.hasLoc},
-	skip: false},
-	{title: 'Name',
-	caption: 'What\'s your bubble named?',
-	view: 'name.html',
-	height: 62,
-	valid: function() {return $scope.form.worldName.$valid},
-	skip: false},
-	{title: 'Time',
-	caption: 'Give it a start and end time',
-	view: 'time.html',
-	height: 88,
-	valid: function() {return $scope.form.time.$valid},
-	jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
-	skip: true},
-	{title: 'Picture',
-	caption: 'Upload a picture for your bubble',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
+	{
+		title: 'Need a hand?',
+		caption: 'If you haven’t built a bubble before, we can walk you through it.',
+		height: 0,
+		view: '0.html',
+		valid: function() {return true},
+		skip: false
 	},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done.html',
-	height: 200,
-	skip: false}
+	{
+		title: 'Kind',
+		caption: 'What kind of bubble is it?',
+		view: 'kind.html',
+		height: 220,
+		valid: function() {return typeof $scope.world.category == "string"},
+		skip: true
+	},
+	{
+		title: 'Location', 
+		caption: 'Find its location',
+		view: 'location.html',
+		height: 290,
+		valid: function() {return $scope.world.hasLoc},
+		skip: false
+	},
+	{
+		title: 'Name',
+		caption: 'What\'s your bubble named?',
+		view: 'name.html',
+		height: 62,
+		valid: function() {return $scope.form.worldName.$valid},
+		skip: false
+	},
+	{
+		title: 'Time',
+		caption: 'Give it a start and end time',
+		view: 'time.html',
+		height: 288,
+		valid: function() {return $scope.form.time.$valid},
+		jump: function() {return !$scope.global.kinds[$scope.world.category].hasTime;},
+		skip: true
+	},
+	{
+		title: 'Picture',
+		caption: 'Upload a picture for your bubble',
+		view: 'picture.html',
+		height: 194,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Maps',
+		caption: 'Choose a map',
+		view: 'maptheme.html',
+		height: 426,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Hashtag',
+		caption: 'Connect your bubble\'s social media',
+		view: 'hashtag.html',
+		height: 132,
+		valid: function() {return true},
+		skip: true,
+	},
+	{
+		title: 'Done!',
+		caption: 'Now spread the word :)',
+		view: 'done.html',
+		height: 200,
+		skip: false
+	}
 ];
 
 var meetupWalk = [
 	//0 intro
-	{title: 'Claim your Meetup',
-	caption: "We'll use your Meetup group to create a bubble.",
-	view:'0.html',
-	height: 0,
-	valid: function() {return true},
-	skip: false
+	{
+		title: 'Claim your Meetup',
+		caption: "We'll use your Meetup group to create a bubble.",
+		view:'0.html',
+		height: 0,
+		valid: function() {return true},
+		skip: false
 	},
 	//1 
-	{title: 'Confirm',
-	caption: 'Make sure this information from Meetup.com is correct',
-	view: 'meetup_confirm.html',
-	height: 300,
-	valid: function() {return true},
-	skip: false
+	{
+		title: 'Confirm',
+		caption: 'Make sure this information from Meetup.com is correct',
+		view: 'meetup_confirm.html',
+		height: 300,
+		valid: function() {return true},
+		skip: false
 	},
-	{title: 'Kind',
-	caption: 'What kind of bubble is it?',
-	view: 'kind.html',
-	height: 220,
-	valid: function() {return typeof $scope.world.category == "string"},
-	skip: false},
-	{title: 'Hashtag',
-	caption: 'Connect your bubble\'s social media',
-	view: 'hashtag.html',
-	height: 132,
-	valid: function() {return true},
-	skip: true,
+	{
+		title: 'Kind',
+		caption: 'What kind of bubble is it?',
+		view: 'kind.html',
+		height: 220,
+		valid: function() {return typeof $scope.world.category == "string"},
+		skip: false
 	},
-	{title: 'Picture',
-	caption: 'Upload a picture',
-	view: 'picture.html',
-	height: 194,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Maps',
-	caption: 'Choose a map',
-	view: 'maptheme.html',
-	height: 426,
-	valid: function() {return true},
-	skip: true},
-	{title: 'Done!',
-	caption: 'Now spread the word :)',
-	view: 'done_meetup.html',
-	height: 200,
-	skip: false}
+	{
+		title: 'Hashtag',
+		caption: 'Connect your bubble\'s social media',
+		view: 'hashtag.html',
+		height: 132,
+		valid: function() {return true},
+		skip: true,
+	},
+	{
+		title: 'Picture',
+		caption: 'Upload a picture',
+		view: 'picture.html',
+		height: 194,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Maps',
+		caption: 'Choose a map',
+		view: 'maptheme.html',
+		height: 426,
+		valid: function() {return true},
+		skip: true
+	},
+	{
+		title: 'Done!',
+		caption: 'Now spread the word :)',
+		view: 'done_meetup.html',
+		height: 200,
+		skip: false
+	}
 ];
 
 $scope.walk = firstWalk;
@@ -20946,13 +22526,19 @@ function setUpProgress() {
 	var i = 0;
 	if ($scope.walk) {
 		while (i < $scope.walk.length) {
-		$scope.progress[i] = {status: ''};
-		i++;
-	}
+			$scope.progress[i] = {status: ''};
+			i++;
+		}
 	}
 	
-$scope.progress[$scope.position].status = 'active';
+	$scope.progress[$scope.position].status = 'active';
 
+}
+
+$scope.getProgress = function() {
+	return {
+		'width': (100*$scope.position)/($scope.walk.length-1) + '%'
+	};
 }
 
 ////////////////////////////////////////////////////////////
@@ -21016,7 +22602,11 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 							m: {
 								lat: tempLat,
 								lng: tempLng,
-								draggable: false
+								icon: {
+									iconUrl: 'img/marker/bubble-marker-50.png',
+									iconSize: [35, 67]
+								},
+								draggable: true
 							}}});		
 		$scope.center.lat = tempLat;
 		$scope.center.lng = tempLng;
@@ -21076,6 +22666,246 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 
 }]);
 
+'use strict';
+
+app.directive('floorSelector', floorSelector);
+
+floorSelector.$inject = ['mapManager', 'floorSelectorService'];
+
+function floorSelector(mapManager, floorSelectorService) {
+	return {
+		restrict: 'E',
+		scope: {
+			world: '=world',
+			style: '=style',
+			landmarks: '=landmarks'
+		},
+		templateUrl: 'components/floor_selector/floor.selector.html',
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+		activate(elem);
+		
+		// make sure floor selector is closed if switching to a new bubble
+		scope.$on('$destroy', function(ev) {
+			floorSelectorService.showFloors = false;
+		});
+
+		function activate(elem) {
+			scope.floors = floorSelectorService.getFloors(scope.world.style.maps.localMapArray)
+
+			scope.floorSelectorService = floorSelectorService;
+
+			scope.selectedIndex = floorSelectorService.getSelectedIndex(1);
+
+			scope.currentFloor = findCurrentFloor(scope.floors);
+			floorSelectorService.setCurrentFloor(scope.currentFloor);
+
+			checkCategories(elem);
+		}
+
+		function checkCategories(elem) {
+			if (scope.style.widgets.category === true) {
+				scope.category = true;
+				// adjust bottom property of all floor selector elements
+				angular.forEach(elem.children(), function(el) {
+					// get current bottom property pixels
+					var bottom = parseInt($(el).css('bottom'));
+					// raise 60px to account for category bar
+					$(el).css('bottom', bottom + 40 + 'px');
+				});
+			} else {
+				floorSelectorService.showLandmarks = true;
+			}
+		}
+
+		function findCurrentFloor(floors) {
+			var tempFiltered = floors.filter(function(f) {
+				return f[0].floor_num > 0;
+			});
+			return tempFiltered.length ? tempFiltered.slice(-1)[0][0] : floors[0][0];
+		}
+
+		scope.selectFloor = function(index) {
+			scope.selectedIndex = floorSelectorService.setSelectedIndex(index);
+			scope.currentFloor = scope.floors[index][0];
+			floorSelectorService.setCurrentFloor(scope.currentFloor);
+			turnOffFloorLayers();
+			turnOnFloorMaps();
+			updateIndicator();
+			adjustZoom(index);
+			
+			if (floorSelectorService.showLandmarks) {
+				turnOnFloorLandmarks();
+			}
+		}
+
+		scope.openFloorMenu = function() {
+			floorSelectorService.showFloors = !floorSelectorService.showFloors;
+			updateIndicator();
+		}
+
+		function adjustZoom(index) {
+			// get current zoom
+			var currentZoom = mapManager.center.zoom,
+					lowestMinZoom,
+					highestMaxZoom,
+					floors = scope.floors[index];
+			// checkout zoom levels of all maps on current floor
+			for (var i = 0, len = floors.length; i < len; i++) {
+				if (zoomInRange(currentZoom, floors[i].localMapOptions)) {
+				return;
+				} else {
+					// if zoom not in range hold on to highest and lowest zooms
+					lowestMinZoom = lowestMinZoom ? Math.min(lowestMinZoom, floors[i].localMapOptions.minZoom) : floors[i].localMapOptions.minZoom;
+					highestMaxZoom = highestMaxZoom ? Math.max(highestMaxZoom, floors[i].localMapOptions.maxZoom) : floors[i].localMapOptions.maxZoom;
+				}
+			}
+
+			// adjust zoom to nearest in map range
+			if (currentZoom < lowestMinZoom) {
+				mapManager.center.zoom = Number(lowestMinZoom);
+			} else if (currentZoom > highestMaxZoom) {
+				mapManager.center.zoom = Number(highestMaxZoom);
+			}
+			// if no maps on floor, it should keep current zoom
+		}
+
+		function zoomInRange(currentZoom, floorOptions) {
+			if (floorOptions.minZoom <= currentZoom && currentZoom <= floorOptions.maxZoom) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		function turnOffFloorLayers() {
+			var layers = scope.floors.map(function(f) {
+				return f[0].floor_num || 1;
+			});
+
+			mapManager.findVisibleLayers().forEach(function(l) {
+				mapManager.toggleOverlay(l.name);			
+			});
+		}
+
+		function turnOnFloorMaps() {
+			var currentMapLayer = scope.currentFloor.floor_num + '-maps';
+			mapManager.toggleOverlay(currentMapLayer);
+		}
+
+		function turnOnFloorLandmarks() {
+			var currentLandmarkLayer = scope.currentFloor.floor_num + '-landmarks';
+			mapManager.toggleOverlay(currentLandmarkLayer);
+		}
+
+		function updateIndicator() {
+			floorSelectorService.updateIndicator(scope.category, scope.floors, scope.selectedIndex);
+		}
+	}
+}
+
+app.filter('floorNumberFilter', floorNumberFilter);
+
+function floorNumberFilter() {
+	return function(floor) {
+		if (!floor) {
+			return;
+		}
+		if (floor.floor_num <= 1) {
+			return floor.floor_name[0];
+		} else {
+			return floor.floor_num;
+		}
+	}
+}
+'use strict';
+
+app.factory('floorSelectorService', floorSelectorService);
+
+floorSelectorService.$inject = [];
+
+function floorSelectorService() {
+	
+	var currentFloor = {floor_num: 1},
+			floors = [],
+			selectedIndex,
+			showFloors,
+			showLandmarks = true;
+
+	return {
+		currentFloor: currentFloor,
+		getFloors: getFloors,
+		getSelectedIndex: getSelectedIndex,
+		floors: floors,
+		landmarksToFloors: landmarksToFloors,
+		selectedIndex: selectedIndex,
+		setCurrentFloor: setCurrentFloor,
+		setSelectedIndex: setSelectedIndex,
+		showFloors: showFloors,
+		showLandmarks: showLandmarks,
+		updateIndicator: updateIndicator
+	};
+
+	function landmarksToFloors(landmarks) {
+		return _.chain(landmarks)
+			.map(function(l) {
+				return l.loc_info ? l.loc_info.floor_num : 1;
+			})
+			.uniq()
+			.sort()
+			.value()
+	}
+
+	function setCurrentFloor(floor) {
+		angular.copy(floor, currentFloor);
+		var nums = floors.map(function(f) {
+			return f[0].floor_num;
+		});
+		var i = nums.indexOf(currentFloor.floor_num);
+		setSelectedIndex(i);
+	}
+
+	function updateIndicator(categoryMode) {
+		selectedIndex = selectedIndex >= 0 ? selectedIndex : getSelectedIndex();
+		if (this.showFloors) {
+			// 42 is height of floor, 20 is margin-bottom on bottom floor, selected index adds pixels for floor-tile:after border
+			var top = (42 * (selectedIndex + 1) - 48 + 20) + selectedIndex + 'px';
+			$('.floor-indicator').css({top: top, opacity: 1});
+		} else {
+			$('.floor-indicator').css({opacity: 0});
+		}
+	}
+
+	function getFloors(localMapArray) {
+
+		var sorted = _.chain(localMapArray)
+			.filter(function(f) {
+				return f.floor_num;
+			})
+			.groupBy('floor_num')
+			.toArray()
+			.sortBy(function(arr) {
+				return arr[0].floor_num;
+			})
+			.reverse()
+			.value()
+
+		angular.copy(sorted, floors);
+		return floors;
+	}
+
+	function getSelectedIndex() {
+		selectedIndex = floors.length - 1;
+		return selectedIndex;
+	}
+
+	function setSelectedIndex(index) {
+		selectedIndex = index;
+		return selectedIndex;
+	}
+}
 app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals) {
 var map = mapManager, style = styleManager;
 
@@ -21176,13 +23006,14 @@ worldTree.getNearby().then(function(data) {
 });
 
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
 $scope.style = styleManager;
 $scope.alerts = alertManager;
 $scope.userManager = userManager;
+$scope.navService = navService;
 
 $scope.dialog = dialogs;
     
@@ -21196,10 +23027,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	$rootScope.hideBack = false;
 	deregFirstShow();
 }))
-
-$scope.$on('viewTabSwitch', function(event, tab) {
-	$scope.viewTab = tab;
-})  //for home/explore/search tabs
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -21221,15 +23048,20 @@ $scope.search = function() {
 	} else {
 		$scope.searchOn = true;
 	}
+}
+
+$scope.wtgtLogin = function() {
+	contest.login(new Date);
 } 
 	
 $scope.go = function(path) {
+	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
+	navService.reset();
 	$window.history.back();
-	$scope.$emit('viewTabSwitch', 'home');
 }
 
 $scope.logout = function() {
@@ -21333,32 +23165,58 @@ app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(w
 			scope.loadState = 'loading';
 			scope.kinds = ifGlobals.kinds;
 
-			
-			$rootScope.$on('viewTabSwitch', function(event, tab) {
-				if (tab === 'explore') {
-					scope.loadState = 'loading';
-					worldTree.getNearby().then(function(data) {
-						scope.homeBubbles = data['150m'] || [];
-						scope.nearbyBubbles = data['2.5km'] || [];			
-						scope.loadState = 'success';
-					}, function(reason) {
-						scope.loadState = 'failure'; 
-					});
-				}
+			// ng-if in index.html will recompile link function everytime the explore-view DOM element is loaded
+			worldTree.getNearby().then(function(data) {
+				scope.homeBubbles = data['150m'] || [];
+				scope.nearbyBubbles = data['2.5km'] || [];			
+				scope.loadState = 'success';
+			}, function(reason) {
+				scope.loadState = 'failure'; 
 			});
 	
 		},
 		templateUrl: 'components/nav/exploreView.html' 
 	}
 }])
-app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  function($rootScope, $routeParams, $location, worldTree, $document) {
+app.factory('navService', [function() {
+	// used for displaying correct selection on nav icons, as well as showing and hiding explore-view and search-view directives in index.html
+
+	var status = {
+		home: true, // default home nav selected
+		explore: false,
+		search: false, // main bubblli search
+		searchWithinBubble: false // search within a bubble (all, text, category)
+	};
+
+	return {
+		status: status,
+		reset: reset,
+		show: show
+	};
+
+	function reset() {
+		// set all values in status to false, except home
+		_.each(status, function(value, key) {
+			status[key] = false;
+		});
+		status.home = true;
+	}
+
+	function show(key) {
+		// sets one navShow to true, sets others to false
+		reset();
+		status.home = false;
+		status[key] = true;
+	}
+
+}]);
+app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', function($rootScope, $routeParams, $location, worldTree, $document, apertureService, navService, bubbleTypeService) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
-			scope.selected = 'home';
 			scope.select = function (tab) {
-				if (scope.selected===tab && tab === 'home') {
+				if (tab === 'home') {
 					if ($routeParams.worldURL) {
 						var wRoute = "/w/"+$routeParams.worldURL;
 						$location.path() === wRoute ? $location.path("/") : $location.path(wRoute);
@@ -21367,30 +23225,21 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 						$location.path('/');
 					}
 				}
-				scope.$emit('viewTabSwitch', tab);
+				else if (tab === 'search') {
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
+						tab = 'searchWithinBubble';
+						apertureService.set('third');
+						$location.path('/w/' + $routeParams.worldURL + '/search');
+					}
+				}
+				navService.show(tab);
 			}
-			
-			scope.$on('$locationChangeSuccess', function(event) {
-				scope.$emit('viewTabSwitch', 'home');
-			});
-			
-			$rootScope.$on('viewTabSwitch', function(event, tab) {
-				scope.selected=tab;
-			});
-			
-/*
-			$document.on('keydown', function(e) {
-				console.log('keydown', e, scope.selected)
-			if (e.keyCode===8 && scope.selected !== 'home') {
-				console.log('keycode 8 & selected not home')
-				e.stopPropagation();
-				e.preventDefault();
-				scope.$apply(function() {
-					scope.$emit('viewTabSwitch', 'home');
-				});
-			}
-			});
-*/
+
+			scope.hardSearch = function() {
+				$location.path('/');
+				navService.show('search');
+			};
 			
 			scope.nearbiesLength = function() {
 				if (worldTree._nearby) {
@@ -21401,31 +23250,41 @@ app.directive('navTabs', ['$rootScope', '$routeParams', '$location', 'worldTree'
 			}
 		},
 		template: 
-'<button class="view-tab home-tab" ng-class="{selected: selected==\'home\'}" ng-click="select(\'home\')"></button>'+
-'<button class="view-tab explore-tab" ng-class="{selected: selected==\'explore\'}" ng-click="select(\'explore\')">'+
+'<button class="view-tab home-tab" ng-class="{selected: navService.status.home}" ng-click="select(\'home\')"></button>'+
+'<button class="view-tab explore-tab" ng-class="{selected: navService.status.explore}" ng-click="select(\'explore\')">'+
 '<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
-'<button class="view-tab search-tab" ng-class="{selected: selected==\'search\'}" ng-click="select(\'search\')"></button>'
+'<button class="view-tab search-tab" ng-class="{selected: navService.status.search || navService.status.searchWithinBubble}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
 	}
 }])
-app.directive('searchView', ['$http', 'geoService', function($http, geoService) {
+app.directive('searchView', ['$http', '$routeParams', 'geoService', function($http, $routeParams, geoService) {
 	return {
 		restrict: 'EA',
 		scope: true,
 		link: function(scope, element, attrs) {
+
+			scope.routeParams = $routeParams;
+			scope.loading = false; // for showing loading animation
+
 			scope.search = function(searchText) {
 				scope.lastSearch = searchText;
+				scope.loading = true;
+				scope.searchResult = []; // clear last results
+
 				geoService.getLocation().then(function(coords) {
-				
-				scope.searching = $http.get('/api/textsearch', {server: true, params: 
-					{textQuery: searchText, userLat: coords.lat, userLat: coords.lng, localTime: new Date()}})
-					.success(function(result) {
-						if (!result.err) {
-							scope.searchResult = result;
-						} else {
-							scope.searchResult = [];
-						}
-					})
-					.error(function(err) {console.log(err)});
+					scope.searching = $http.get('/api/textsearch', {server: true, params: 
+						{textQuery: searchText, userLat: coords.lat, userLng: coords.lng, localTime: new Date()}})
+						.success(function(result) {
+							if (!result.err) {
+								scope.searchResult = result;
+							} else {
+								scope.searchResult = [];
+							}
+							scope.loading = false;
+						})
+						.error(function(err) {
+							console.log(err)
+							scope.loading = false;
+						});
 				});		
 			}
 			
@@ -22079,6 +23938,314 @@ userManager.getUser().then(
 
 }]);
 
+app.directive('userLocation', ['geoService', 'mapManager', function(geoService, mapManager) {
+	
+	return {
+		restrict: 'E',
+		scope: {
+			style: '='
+		},
+		templateUrl: 'components/userLocation/userLocation.html',
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		
+		if (scope.style.widgets.category) {
+			// raise button from 80px to 120px to account for category widget
+			$('.userLocation').css('bottom', '120px');
+		}
+
+		scope.locateAndPan = function() {
+			geoService.trackStart();
+			var marker = mapManager.getMarker('track');
+			if (marker.lng !== 0 && marker.lat!== 0) {
+				mapManager.setCenter([marker.lng, marker.lat], mapManager.center.zoom);
+			}
+		};
+
+	}
+
+}]);
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', function($scope, $location, $routeParams, $timeout, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService) {
+
+	$scope.aperture = apertureService;
+	$scope.bubbleTypeService = bubbleTypeService;
+	$scope.currentFloor = floorSelectorService.currentFloor;
+	$scope.populateSearchView = populateSearchView;
+	$scope.go = go;
+	$scope.groups;
+	$scope.loading = false; // for loading animation on searchbar
+	$scope.world;
+	$scope.style;
+	$scope.searchBarText;
+	$scope.show;
+
+	var map = mapManager;
+
+	if ($scope.aperture.state !== 'aperture-full') {
+		$scope.aperture.set('third');
+	}
+
+	navService.show('searchWithinBubble');
+
+	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+		$scope.world = data.world;
+		$scope.style = data.style;
+		// set nav color using styleManager
+		styleManager.navBG_color = $scope.style.navBG_color;
+
+		worldBuilderService.loadWorld($scope.world);
+
+		// call populateSearchView with the right parameters
+		if ($routeParams.category) {
+			populateSearchView($routeParams.category, 'category');
+		} else if ($routeParams.text) {
+			populateSearchView($routeParams.text, 'text');
+		} else if ($location.path().slice(-3) === 'all') {
+			populateSearchView('All', 'all');
+		} else {
+			populateSearchView(bubbleSearchService.defaultText, 'generic');
+		}
+	
+	});
+
+	$scope.$on('$destroy', function(ev) {
+		categoryWidgetService.selectedIndex = null;
+	});
+
+	$scope.apertureSet = function(newState) {
+		adjustMapCenter();
+		apertureService.set(newState);
+	}
+
+	$scope.apertureToggle = function(newState) {
+		adjustMapCenter();
+		apertureService.toggle(newState);
+	}
+
+	function adjustMapCenter() {
+		if ($scope.aperture.state === 'aperture-third') {
+			return;
+		}
+		mapManager._z = mapManager.center.zoom;
+		mapManager._actualCenter.length = 0;
+		mapManager._actualCenter.push(mapManager.center.lng);
+		mapManager._actualCenter.push(mapManager.center.lat);		
+	}
+
+	function go(path) {
+		$location.path(path);
+	}
+
+	function groupResults(data, searchType) {
+		// groups array of landmarks correctly, such that they are sorted properly for the view (ng-repeat)
+		if (searchType === 'all') {
+			// group landmarks by category, then first letter, then sort
+			var groups = _.chain(data)
+				// group landmarks by category
+				.groupBy(function(landmark) {
+					return landmark.category || 'Other';
+				})
+				.each(function(value, key, list) {
+					list[key] = _.chain(value)
+						// 1st sort puts landamrks in order
+						.sortBy(function(result) {
+							return result.name.toLowerCase();
+						})
+						// group landmarks by first letter
+						.groupBy(function(result) {
+							var firstChar = result.name[0];
+							if (firstChar.toUpperCase() !== firstChar.toLowerCase()) { // not a letter (regex might be better here)
+								return firstChar.toUpperCase();
+							} else { // number, #, ., etc...
+								return '#';
+							}
+						})
+						// map from object {A: [landmark1, landmark2], B: [landmark3, landmark4]} to array of objects [{letter: 'A', results: [landmark1, landmark2]}, {letter: 'B', results: [landmark3, landmark4]}], which enables sorting
+						.map(function(group, key) {
+							return {
+								letter: key,
+								results: group
+							}
+						})
+						.sortBy('letter')
+						.value();
+				})
+				.map(function(group, key) {
+					return {
+						catName: key,
+						// avatar: _.findWhere($scope.world.landmarkCategories, {
+						// 	name: key
+						// }).avatar,
+						results: group
+					}
+				})
+				.sortBy(function(result) {
+					return result.catName.toLowerCase();
+				})
+				.value()
+		} else {
+			// group landmarks by first letter, then sort
+			// same as above, without grouping by category
+			var groups = _.chain(data)
+				.sortBy(function(result) {
+					return result.name.toLowerCase();
+				})
+				.groupBy(function(result) {
+					var firstChar = result.name[0];
+					if (firstChar.toUpperCase() !== firstChar.toLowerCase()) { 
+						return firstChar.toUpperCase();
+					} else { 
+						return '#';
+					}
+				})
+				.map(function(group, key) {
+					return {
+						letter: key,
+						results: group
+					}
+				})
+				.sortBy('letter')
+				.value();
+		}
+		return groups;
+	}
+
+	function populateSearchView(input, searchType) {
+		var decodedInput = decodeURIComponent(input);
+		// set text in catSearchBar
+		$scope.searchBarText = decodedInput;
+		$scope.show = { // used for displaying different views
+			all: false,
+			category: false,
+			text: false,
+			generic: false
+		};
+		$scope.show[searchType] = true;
+		if (!$scope.show.generic) { // don't call bubbleservice search when we aren't requesting any data
+			
+			// show loading animation if search query is taking a long time
+			$scope.loading = 'delay';
+
+			$timeout(function() {
+				if ($scope.loading === 'delay') {
+					$scope.loading = true;
+				}
+			}, 300);
+
+			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
+				.then(function(response) {
+					$scope.groups = groupResults(bubbleSearchService.data, searchType);
+					$scope.loading = false;
+
+					updateMap(bubbleSearchService.data);
+					if (bubbleSearchService.data.length === 0) { // no results
+						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+					}
+				});
+		} else { // generic search
+			map.removeAllMarkers();
+		}
+	}
+
+	function updateMap() {
+		var landmarks = bubbleSearchService.data;
+
+		// check if results on more than 1 floor and if so open selector
+		if (floorSelectorService.landmarksToFloors(landmarks).length > 1) {
+			floorSelectorService.showFloors = true;
+		} else {
+			floorSelectorService.showFloors = false;
+		}
+
+		// if no results, return
+		if (!landmarks.length) {
+			mapManager.removeAllMarkers();
+			return;
+		}
+
+		mapManager.findVisibleLayers().forEach(function(l) {
+			mapManager.toggleOverlay(l.name);			
+		});
+		// if no results on current floor, update floor map to nearest floor
+		updateFloorMaps(landmarks);
+
+		// create landmarks for all that match search, but only show landmarks on current floor
+		updateLandmarks(landmarks);
+
+		updateFloorIndicator(landmarks);
+
+		// if we were already showing userLocation, continute showing (since updating map removes all markers, including userLocation marker)
+		if (geoService.tracking) {
+			geoService.trackStart();
+		}
+	}
+
+	function updateFloorMaps(landmarks) {
+
+		var floor = floorSelectorService.currentFloor.floor_num || floorSelectorService.currentFloor.loc_info.floor_num,
+				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
+
+		if (resultFloors.indexOf(floor) < 0) {
+			var sortedMarks = _.chain(landmarks)
+				.filter(function(l) {
+					return l.loc_info;
+				})
+				.sortBy(function(l) {
+					return l.loc_info.floor_num;
+				})
+				.value();
+
+			$scope.currentFloor = _.filter(floorSelectorService.floors, function(f) {
+				return f[0].floor_num === sortedMarks[0].loc_info.floor_num;
+			})[0][0];
+
+			floorSelectorService.setCurrentFloor($scope.currentFloor);
+			floor = floorSelectorService.currentFloor.floor_num;
+		}
+		mapManager.turnOnOverlay(String(floor).concat('-maps'));
+	}
+
+	function updateLandmarks(landmarks) {
+		var markers = landmarks.map(function(l) {
+			return mapManager.markerFromLandmark(l, $scope.world, $scope)
+		});
+		var floor = floorSelectorService.currentFloor.floor_num ? 
+								String(floorSelectorService.currentFloor.floor_num) :
+								String(floorSelectorService.currentFloor.loc_info.floor_num);
+
+		landmarks.forEach(function(m) {
+			mapManager.newMarkerOverlay(m);
+		});
+		
+		mapManager.setCenterFromMarkersWithAperture(markers, $scope.aperture.state);
+
+		mapManager.removeAllMarkers();
+
+		// defer waits until call stack is empty so we won't run into leaflet bug
+		// where adding a marker with the same key as an existing marker breaks the directive
+		_.defer(function() {
+			mapManager.setMarkers(markers);
+		});
+
+		mapManager.turnOnOverlay(floor.concat('-landmarks'));
+
+	}
+
+	function updateFloorIndicator(landmarks) {
+		var floor = floorSelectorService.currentFloor.floor_num,
+				resultFloors = floorSelectorService.landmarksToFloors(landmarks);
+		var floors = floorSelectorService.floors.map(function(f) {
+			return f[0].floor_num;
+		})
+		var i = floors.indexOf(floor);
+
+		floorSelectorService.setSelectedIndex(i);
+		floorSelectorService.updateIndicator(true);
+	}
+
+}]);
 function CategoryController( World, db, $route, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager) {
    	var map = mapManager;
   	var style = styleManager;
@@ -22148,24 +24315,139 @@ $scope.$on('$locationChangeSuccess', function (event) {
  	});
  	   
 }
-app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 
-function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree) {
+'use strict';
 
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-zoomControl.style.top = "100px";
-zoomControl.style.left = "1%";
+app.directive('categoryWidget', categoryWidget);
+
+categoryWidget.$inject = ['bubbleSearchService', '$location', 'mapManager', '$route',
+												  	'floorSelectorService', 'categoryWidgetService'];
+
+function categoryWidget(bubbleSearchService, $location, mapManager, $route,
+													floorSelectorService, categoryWidgetService) {
+	return {
+		restrict: 'E',
+		scope: {
+			aperture: '=aperture',
+			categories: '=categories',
+			style: '=style',
+			populateSearchView: '=',
+			world: '=world'
+		},
+		templateUrl: function(elem, attrs) {
+			if (attrs.aperture === 'full') {
+				return 'components/world/category_widget/category.widget.fullaperture.html';
+			} else {
+				return 'components/world/category_widget/category.widget.noaperture.html';
+			}
+		},
+		link: function(scope, elem, attrs) {
+			scope.bubbleId = scope.world._id;
+			scope.bubbleName = scope.world.id;
+			scope.groupedCategories = _.groupBy(scope.categories, 'name');
+			scope.mapManager = mapManager;
+			scope.categoryWidgetService = categoryWidgetService;
+
+			function updateIndex(index) {
+				if (index === categoryWidgetService.selectedIndex) {
+					// hide landmarks
+					mapManager.groupOverlays('landmarks').forEach(function(o) {
+						mapManager.turnOffOverlay(o.name)
+					});
+
+					floorSelectorService.showLandmarks = false;
+					floorSelectorService.showFloors = false;
+					// unselect category
+					categoryWidgetService.selectedIndex = null;
+					// do not run search
+					return false;
+				}
+
+				if (index !== null) {
+					categoryWidgetService.selectedIndex = index;
+				}
+				return true;
+			}
+
+			scope.search = function(category, index) {
+
+				if (!updateIndex(index)) {
+					return;
+				}
+				// show landmarks
+				floorSelectorService.showLandmarks = true;
+				if ($location.path().indexOf('search') > 0) {
+					scope.populateSearchView(category, 'category');
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + encodeURIComponent(category), false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/category/' + encodeURIComponent(category), true);
+				}
+			}
+
+			scope.searchAll = function() {
+				if (!updateIndex('all')) {
+					return;
+				}
+
+				floorSelectorService.showLandmarks = true;
+
+				if ($location.path().indexOf('search') > 0) {
+					scope.populateSearchView('All', 'all');
+					$location.path('/w/' + scope.bubbleName + '/search/all', false);
+				} else {
+					$location.path('/w/' + scope.bubbleName + '/search/all', true);
+				}
+			}
+
+			scope.getStyle = function(index) {
+				if (index === categoryWidgetService.selectedIndex) {
+					if (index === 'all') {
+						return {
+							'border-top': '4px solid ' + scope.style.titleBG_color,
+							'margin-top': '-3px'
+						};
+					} else {
+						return {
+							'border-top': '4px solid ' + scope.style.titleBG_color,
+							'margin-top': '3px'
+						};
+					}
+				}
+			}
+		}
+	};
+}
+'use strict';
+
+app.factory('categoryWidgetService', categoryWidgetService);
+
+categoryWidgetService.$inject = [];
+
+function categoryWidgetService() {
+	
+	var selectedIndex = null;
+
+	return {
+		selectedIndex: selectedIndex
+	}
+	
+}
+app.controller('LandmarkController', ['World', 'Landmark', 'db', '$routeParams', '$scope', '$location', '$window', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'userManager', 'alertManager', '$http', 'worldTree', 'bubbleTypeService', 'geoService',
+function (World, Landmark, db, $routeParams, $scope, $location, $window, leafletData, $rootScope, apertureService, mapManager, styleManager, userManager, alertManager, $http, worldTree, bubbleTypeService, geoService) {
+
 
 console.log('--Landmark Controller--');
+
+$scope.aperture = apertureService;
+$scope.bubbleTypeService = bubbleTypeService;
+$scope.worldURL = $routeParams.worldURL;
+$scope.landmarkURL = $routeParams.landmarkURL;
+$scope.collectedPresents = [];
+
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-//$scope.aperture = apertureService;
 var aperture = apertureService;
 
-$scope.worldURL = $routeParams.worldURL;
-$scope.landmarkURL = $routeParams.landmarkURL;
-	
-$scope.collectedPresents = [];
 
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
@@ -22177,8 +24459,12 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
 	$scope.landmark = landmark;
 	console.log(landmark); 
-	
+
+
 	goToMark();
+
+	// add local maps for current floor
+	addLocalMapsForCurrentFloor($scope.world, landmark);
 	
 console.log($scope.style.widgets.presents);
 
@@ -22294,41 +24580,107 @@ console.log($scope.landmark.category);
 					}				
 				}
 
+
 })
 });
-		
-		
 
 function goToMark() {
-	map.setCenter($scope.landmark.loc.coordinates, 18, 'aperture-half'); 
-	aperture.set('half');
-  	// var markers = map.markers;
-  	// angular.forEach(markers, function(marker) {
-  	// 	console.log(marker);
-	  // 	map.removeMarker(marker._id);
-  	// });
-	map.removeAllMarkers();
-  	
 
-  	map.addMarker($scope.landmark._id, {
-  			lat: $scope.landmark.loc.coordinates[1],
-  			lng: $scope.landmark.loc.coordinates[0],
-  			draggable:false,
-  			message:$scope.landmark.name,
-		  	icon: {
-				iconUrl: 'img/marker/bubble-marker-50.png',
-				shadowUrl: '',
-				iconSize: [35, 67],
-				iconAnchor: [17.5, 60],
-				popupAnchor: [0, -40]
-			},
-  			_id: $scope.landmark._id
-  			});
-  	map.setMarkerFocus($scope.landmark._id);
-  	
-  	map.refresh();
+	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
+	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
+	aperture.set('third');
+	map.removeAllMarkers();
+
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			iconAnchor = [17.5, 60],
+			iconSize = [35, 67],
+			alt = null;
+
+	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = $scope.landmark.avatar;
+		popupAnchorValues = [0, -14];
+		iconAnchor = [25, 25];
+		iconSize = [50, 50];
+		alt = 'store';
+	}
+
+	map.addMarker($scope.landmark._id, {
+		lat: $scope.landmark.loc.coordinates[1],
+		lng: $scope.landmark.loc.coordinates[0],
+		draggable:false,
+		message:$scope.landmark.name,
+  	icon: {
+			iconUrl: landmarkIcon,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
+		},
+		_id: $scope.landmark._id,
+		alt: alt
+	});
+
+	map.setMarkerFocus($scope.landmark._id);
+	
+	map.refresh();
+
 };
-		 
+
+function addLocalMapsForCurrentFloor(world, landmark) {
+	if (!map.localMapArrayExists(world)) {
+		return;
+	}
+	mapManager.findVisibleLayers().forEach(function(l) {
+		mapManager.toggleOverlay(l.name);
+	});
+
+		var groupName = landmark.loc_info && landmark.loc_info.floor_num ? 
+										landmark.loc_info.floor_num + '-maps' : '1-maps';
+
+		if (mapManager.overlayExists(groupName)) {
+			mapManager.toggleOverlay(groupName);
+		} else {
+			overlayGroup = findMapsOnThisFloor(world, landmark).map(function(thisMap) {
+				if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
+					return map.addManyOverlays(thisMap.localMapID, thisMap.localMapName, thisMap.localMapOptions);
+				}
+			});
+			map.addOverlayGroup(overlayGroup, groupName);
+			mapManager.toggleOverlay(groupName);
+		}
+}
+
+function findMapsOnThisFloor(world, landmark) {
+	if (!map.localMapArrayExists(world)) {
+		return;
+	}
+	var localMaps = $scope.world.style.maps.localMapArray;
+
+	var currentFloor;
+	if (landmark.loc_info && landmark.loc_info.floor_num) {
+		currentFloor = landmark.loc_info.floor_num;
+	} else {
+		lowestFloor = _.chain(localMaps)
+			.map(function(m) {
+				return m.floor_num;
+			})
+			.sortBy(function(m) {
+				return m;
+			})
+			.filter(function(m) {
+				return m;
+			})
+			.value();
+
+		currentFloor = lowestFloor[0] || 1;
+	}
+
+	var mapsOnThisFloor = localMaps.filter(function(localMap) {
+		return localMap.floor_num === currentFloor;
+	});
+	return mapsOnThisFloor;
+}
 		
 }]);
 app.directive('messageView', function() {
@@ -22770,6 +25122,135 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+app.directive('catSearchBar', ['$location', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', function($location, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService) {
+
+	return {
+		restrict: 'E',
+		scope: {
+			text: '=',
+			color: '=',
+			world: '=',
+			populateSearchView: '=',
+			loading: '='
+		},
+		templateUrl: 'components/world/search_bar/catSearchBar.html',
+		link: function(scope, elem, attrs) {
+			// scope.mapmanager = mapManager;
+
+			var defaultText = bubbleSearchService.defaultText;
+			var noResultsText = bubbleSearchService.noResultsText;
+
+			// change text in search bar whenever $scope.searchBarTet changes in searchController
+			if (inSearchView()) {
+				scope.$parent.$parent.$watch('searchBarText', function(newValue, oldValue) {
+					// 1st parent scope is ngIf scope, next parent is searchController scope
+					scope.text = newValue;
+				});
+			}
+
+			scope.clearTextSearch = function() {
+				if (inSearchView()) {
+					scope.populateSearchView(defaultText, 'generic');
+					$location.path('/w/' + scope.world.id + '/search', false);
+					mapManager.removeAllMarkers();
+				}
+				scope.text = defaultText;
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
+				categoryWidgetService.selectedIndex = null;
+				floorSelectorService.showFloors = false;
+			}
+
+			scope.resetDefaultSearch = function() {
+				if (scope.text === '') {
+					scope.text = defaultText;
+				}
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('third');
+				}
+			}
+
+			scope.select = function() {
+				if (scope.text === defaultText) {
+					scope.text = '';
+				} else if (scope.text.indexOf(noResultsText) > -1) {
+					// remove "(No results)" part of input
+					scope.text = scope.text.slice(0, scope.text.length - 13);
+				}
+
+				if (apertureService.state !== 'aperture-full') {
+					apertureService.set('off');
+				}
+				$('.search-cat input').focus();
+
+				// close floor selector
+				floorSelectorService.showFloors = false;
+			}
+
+			scope.search = function(keyEvent) {
+				if (keyEvent.which === 13 && scope.text) { // pressed enter and input isn't empty
+					if (apertureService.state !== 'aperture-full') {
+						apertureService.set('third');
+					}
+					if (inSearchView()) {
+						scope.populateSearchView(scope.text, 'text');
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text), false);
+					} else {
+						$location.path('/w/' + scope.world.id + '/search/text/' + encodeURIComponent(scope.text));
+					}
+					$('.search-cat input').blur();
+
+					// deselect active category
+					categoryWidgetService.selectedIndex = null;
+				}
+			}
+
+			scope.showX = function() {
+				return scope.text && scope.text !== defaultText;
+			}
+
+			scope.getColor = function() {
+				var result;
+
+				// set style based on input
+				if (scope.text === defaultText) {
+					result = {
+						'color': scope.color
+					};
+				} else if (scope.text.indexOf(noResultsText) > -1) {
+					result = {
+						'color': 'gray',
+						'font-style': 'italic'
+					};
+				} else {
+					result = {
+						'color': 'black'
+					};
+				}
+
+				return result;
+			}
+
+			function inSearchView() {
+				return $location.path().indexOf('search') > -1;
+				// else in world view
+			}
+			
+		}
+	};
+}]);
+// app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+// 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
+// 		$scope.world = data.world;
+// 		$scope.style = data.style;
+// 		styleManager.navBG_color = $scope.style.navBG_color; 
+		
+// 		$scope.instagrams = db.instagrams.query({limit:30, tag:$scope.world.resources.hashtag}); // make infinite scroll?	
+// 	})
+// }])
+
+// model after above
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		$scope.world = data.world;
@@ -23212,93 +25693,170 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //	"__v": 0}....]
 
 }])
-app.directive('categoryWidget', [function() {
-return {
-	restrict: 'E',
-	link: function(scope, element, attrs) {
-		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
-			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
-		}) //rerenders on category selection
-		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
+// app.directive('categoryWidget', [function() {
+// return {
+// 	restrict: 'E',
+// 	link: function(scope, element, attrs) {
+// 		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
+// 			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
+// 		}) //rerenders on category selection
+// 		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
 		
-		function categoryWidget(landmarkCategories) {
-			return m('.category-widget', 
-				groupCategories(landmarkCategories))
-		} //groupCategories handles mapping
+// 		function categoryWidget(landmarkCategories) {
+// 			return m('.category-widget', 
+// 				groupCategories(landmarkCategories))
+// 		} //groupCategories handles mapping
 		
-		function groupCategories(landmarkCategories) {
-			 //separates landmark categories into button groups in place of mapping
-			if (landmarkCategories.length < 4) {
-				return buttonGroup(landmarkCategories); //3x1 grid
-			} else if (landmarkCategories.length === 4) { //2x2 grid
-				return [
-					buttonGroup(landmarkCategories.slice(0, 2)),
-					buttonGroup(landmarkCategories.slice(2))
-				]
-			} else { 
-				return [ //3x2, 3x3 grid
-					buttonGroup(landmarkCategories.slice(0, 3)),
-					buttonGroup(landmarkCategories.slice(3))
-				]
-			}
-		}
+// 		function groupCategories(landmarkCategories) {
+// 			 //separates landmark categories into button groups in place of mapping
+// 			if (landmarkCategories.length < 4) {
+// 				return buttonGroup(landmarkCategories); //3x1 grid
+// 			} else if (landmarkCategories.length === 4) { //2x2 grid
+// 				return [
+// 					buttonGroup(landmarkCategories.slice(0, 2)),
+// 					buttonGroup(landmarkCategories.slice(2))
+// 				]
+// 			} else { 
+// 				return [ //3x2, 3x3 grid
+// 					buttonGroup(landmarkCategories.slice(0, 3)),
+// 					buttonGroup(landmarkCategories.slice(3))
+// 				]
+// 			}
+// 		}
 		
-		function buttonGroup(categoryList) { //from a category list, create each button.
-			return m('.category-btn-group', categoryList.map(categoryButton));
-		}
+// 		function buttonGroup(categoryList) { //from a category list, create each button.
+// 			return m('.category-btn-group', categoryList.map(categoryButton));
+// 		}
 		
-		function categoryButton(category, index, categoryList) { //create category button, needs list length
-			return m('.category-btn', {
-				style: {width: 100 / categoryList.length + '%'}, 
-				colspan: 6/categoryList.length, //table display attribute
-				onclick: emitCategory(category.name), //emits selection on scope
-				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
-			}, [
-			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
-			category.name]);
-		}
+// 		function categoryButton(category, index, categoryList) { //create category button, needs list length
+// 			return m('.category-btn', {
+// 				style: {width: 100 / categoryList.length + '%'}, 
+// 				colspan: 6/categoryList.length, //table display attribute
+// 				onclick: emitCategory(category.name), //emits selection on scope
+// 				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
+// 			}, [
+// 			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
+// 			category.name]);
+// 		}
 		
-		function emitCategory(landmarkCategoryName) {
-			return function (event) {
-				event.stopPropagation();
-				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
-			}
-		}
-	}
-}
-}])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', 'userManager', 'stickerManager', 'geoService', function (World, db, $routeParams, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, userManager, stickerManager, geoService) {
+// 		function emitCategory(landmarkCategoryName) {
+// 			return function (event) {
+// 				event.stopPropagation();
+// 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
+// 			}
+// 		}
+// 	}
+// }
+// }])
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager) {
 
-var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-zoomControl.style.top = "60px";
-zoomControl.style.left = "1%";
-zoomControl.style.display = 'none';
+// var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
+// zoomControl.style.top = "60px";
+// zoomControl.style.left = "1%";
+// zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
+$scope.defaultText = bubbleSearchService.defaultText;
 $scope.aperture.set('third');
+navService.show('home');
 
 $scope.world = {};
 $scope.landmarks = [];
 $scope.lookup = {};
+$scope.wtgt = {
+	hashtags: {
+		want: 'hashtag1',
+		got: 'hashtag2'
+	},
+	images: {},
+	building: {}
+};
+$scope.isRetail = false;
 
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
 	
 var landmarksLoaded;
-  	
-$scope.zoomOn = function() {
-	  	zoomControl.style.display = "block";
+
+$scope.verifyUpload = function(event, state) {
+	// stops user from uploading wtgt photo if they aren't logged in
+	if (!userManager.loginStatus) {
+		event.stopPropagation();
+		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
+		$timeout(function() {
+			dialogs.showDialog('authDialog.html');
+			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+		}, 1500);
+		
+	}
+}
+
+$scope.uploadWTGT = function($files, state) {
+	$scope.wtgt.building[state] = true;
+
+	var file = $files[0];
+
+	// get time
+	var time = new Date();
+
+	// get hashtag
+	var hashtag = null;
+	hashtag = $scope.wtgt.hashtags[state];
+
+	var data = {
+		world_id: $scope.world._id,
+		worldID: $scope.world.id,
+		hashtag: hashtag,
+		userTime: time,
+		userLat: null,
+		userLon: null,
+		type: 'retail_campaign'
+	};
+
+	// get location
+	geoService.getLocation().then(function(coords) {
+		// console.log('coords: ', coords);
+		data.userLat = coords.lat;
+		data.userLon = coords.lng;
+		uploadPicture(file, state, data);
+	}, function(err) {
+		uploadPicture(file, state, data);
+	});
+
+}
+
+function uploadPicture(file, state, data) {
+	$scope.upload = $upload.upload({
+		url: '/api/uploadPicture/',
+		file: file,
+		data: JSON.stringify(data)
+	}).progress(function(e) {
+	}).success(function(data) {
+		$scope.wtgt.images[state] = data;
+		$scope.wtgt.building[state] = false;
+	});
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  	 $scope.world = data.world;
 		 $scope.style = data.style;
-		 style.navBG_color = $scope.style.navBG_color;
+
+		 if (bubbleTypeService.get() == 'Retail') {
+		 	$scope.isRetail = true;
+		 }
+
+		 //local storage
+		 if (!userManager.loginStatus && !localStore.getID()) {
+	 		localStore.createID();
+	 	 }
 		 
+
+		 style.navBG_color = $scope.style.navBG_color;
+
 		 //show edit buttons if user is world owner
 		 if ($rootScope.userID && $scope.world.permissions){
 			 if ($rootScope.userID == $scope.world.permissions.ownerID){
@@ -23327,51 +25885,69 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 		}
 		
+		// set appropriate zoom level based on local maps
 		var zoomLevel = 18;
-		
+
+		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+			if ($scope.world.style.maps.localMapArray){
+				if ($scope.world.style.maps.localMapArray.length > 0) {
+					zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+				} 
+			}
+			else {
+				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
+			}
+
+		};
+
 		//map setup
 		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
 			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
 			console.log('setcenter');
-			map.addMarker('c', {
-				lat: $scope.world.loc.coordinates[1],
-				lng: $scope.world.loc.coordinates[0],
-				icon: {
-					iconUrl: 'img/marker/bubble-marker-50.png',
-					shadowUrl: '',
-					iconSize: [35, 67], 
-					iconAnchor: [17, 67],
-					popupAnchor:[0, -40]
-				},
-				message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
 
-			});
+			// if bubble has local maps then do not show world marker
+			if (!map.localMapArrayExists($scope.world)) {
+				addWorldMarker();
+			}
+
 		} else {
 			console.error('No center found! Error!');
 		}
-		
-		if ($scope.world.style.hasOwnProperty('maps')) {
-			if ($scope.world.style.maps.localMapID) {
-			map.addOverlay($scope.world.style.maps.localMapID, 
-							$scope.world.style.maps.localMapName, 
-							$scope.world.style.maps.localMapOptions);
+
+		var worldStyle = $scope.world.style;
+		map.groupFloorMaps(worldStyle);
+
+			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
 			}
-			if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
-			}
-		
-			if (tilesDict.hasOwnProperty($scope.world.style.maps.cloudMapName)) {
-				map.setBaseLayer(tilesDict[$scope.world.style.maps.cloudMapName]['url']);
-			} else if ($scope.world.style.maps.hasOwnProperty('cloudMapID')) {
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.world.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
+
+			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 			} else {
 				console.warn('No base layer found! Defaulting to forum.');
 				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 			}
-		}
+		// }
 		
 		$scope.loadLandmarks();
-  	}
+}
+
+function addWorldMarker() {
+	map.addMarker('c', {
+		lat: $scope.world.loc.coordinates[1],
+		lng: $scope.world.loc.coordinates[0],
+		icon: {
+			iconUrl: 'img/marker/bubble-marker-50.png',
+			shadowUrl: '',
+			iconSize: [35, 67],
+			iconAnchor: [17, 67],
+			popupAnchor:[0, -40]
+		},
+		message:'<a href="#/w/'+$scope.world.id+'/">'+$scope.world.name+'</a>',
+	});
+}
   	
 function loadWidgets() { //needs to be generalized
 	console.log($scope.world);
@@ -23656,26 +26232,81 @@ function initLandmarks(data) {
 	//markers should contain now + places, if length of now is 0, 
 	// upcoming today + places
 
+	var lowestFloor = lowestLandmarkFloor(tempMarkers);
+
+	createMarkerLayer(tempMarkers, lowestFloor);
+
+	var mapLayer = worldBuilderService.createMapLayer($scope.world);
+	mapManager.toggleOverlay(mapLayer);
+}
+
+function createMarkerLayer(tempMarkers, lowestFloor) {
+	tempMarkers.forEach(function(m) {
+		mapManager.newMarkerOverlay(m);
+	});
+
 	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var landmarkLayer = lowestFloor + '-landmarks';
+	
+	if (bubbleTypeService.get() !== 'Retail') {
+		mapManager.toggleOverlay(landmarkLayer);
+	}
+}
+
+function lowestLandmarkFloor(tempMarkers) {
+	var sorted = _.chain(tempMarkers)
+		.filter(function(m) {
+			return m.loc_info;
+		})
+		.sortBy(function(m) {
+			return m.loc_info.floor_num;
+		})
+		.value();
+	return sorted.length ? sorted[0].loc_info.floor_num : 1;
 }
 
 function markerFromLandmark(landmark) {
+
+	var landmarkIcon = 'img/marker/bubble-marker-50.png',
+			popupAnchorValues = [0, -40],
+			shadowUrl = '',
+			shadowAnchor = [4, -3],
+			iconAnchor = [17, 67],
+			iconSize = [35, 67],
+			layerGroup = getLayerGroup(landmark) + '-landmarks',
+			alt = null;
+
+	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+		landmarkIcon = landmark.avatar;
+		popupAnchorValues = [0, -14];
+		// shadowUrl = 'img/marker/blue-pointer.png';
+		iconAnchor = [25, 25];
+		iconSize = [50, 50];
+		alt = 'store';
+	}
+
 	return {
 		lat:landmark.loc.coordinates[1],
 		lng:landmark.loc.coordinates[0],
 		draggable:false,
-		message: '<a if-href="#w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
+		message: '<a if-href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
 		icon: {
-			iconUrl: 'img/marker/bubble-marker-50.png',
-			shadowUrl: '',
-			iconSize: [35, 67],
-			iconAnchor: [17, 67],
-			popupAnchor: [0, -40] 
+			iconUrl: landmarkIcon,
+			shadowUrl: shadowUrl,
+			shadowAnchor: shadowAnchor,
+			iconSize: iconSize,
+			iconAnchor: iconAnchor,
+			popupAnchor: popupAnchorValues
 		},
-		_id: landmark._id
+		_id: landmark._id,
+		layer: layerGroup,
+		alt: alt
 	}
 }
 
+function getLayerGroup(landmark) {
+	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+}
 
 $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);
@@ -23703,5 +26334,6 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	//handle this better
 });
+
 
 }]);

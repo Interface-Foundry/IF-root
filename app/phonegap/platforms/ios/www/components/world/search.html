@@ -1,0 +1,116 @@
+<div class="aperture-pop u-pointer" ng-click="apertureSet('full')" ng-show="aperture.state=='aperture-third'"></div>
+<div id="shelf" class="search--retail" ng-class="[aperture.state]">
+	<div id='top-shelf' class="noPreventDefault"
+		ng-class="[aperture.navfix, aperture.state]" 
+		ng-style="::{'background-color': style.titleBG_color}" 
+		ng-click="apertureToggle('full')"
+		ng-swipe-up="apertureSet('off')"
+		ng-swipe-down="apertureSet('full')"
+		world-shelf>
+		<div class="world-title noPreventDefault" fit-font>
+			<span class="vertical-middle noPreventDefault">{{world.name}}</span>
+		</div>
+	</div>
+
+	<div class="shelf-surface wrap" bubble-body>		
+		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
+
+			<cat-search-bar ng-if="searchBarText && aperture.state !== 'aperture-full'" 
+				color="style.landmarkTitle_color"
+				text="searchBarText"
+				world="world"
+				populate-search-view="populateSearchView"
+				loading="loading"></cat-search-bar>
+
+			<!-- category widget -->
+			<div class="marble-page" 
+				ng-if="style.widgets.category && show.generic">
+				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">
+					<div class="marble-page-header-icon"><img src="img/icons/widgets_16.png" width="16px" height="16px" style="display: block;"></div>
+				Categories
+				</header>
+				<category-widget ng-if="::style.widgets.category"
+					aperture="off"
+					categories="world.landmarkCategories"
+					style="style"
+					populate-search-view="populateSearchView"
+					world="world"></category-widget>
+			</div>
+
+			<!-- grouped landmarks (category or text search) -->
+			<div class="bubble-group" 
+				ng-repeat="group in groups"
+				ng-if="show.category || show.text">
+				<header class="bubble-group-label">{{::group.letter}}</header>
+				<ul class="bubble-list">
+					<li class="bubble-list-item" 
+						ng-repeat="landmark in group.results track by $index"
+						ng-click="go('w/' + world.id + '/' + landmark.id)">
+							<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
+							<span>{{::landmark.name}}</span>
+					</li>
+				</ul>
+			</div>
+
+			<!-- grouped landmarks (all) -->
+			<div class="bubble-group-directory"
+				ng-repeat="cat in groups"
+				ng-if="show.all">
+				<header class="bubble-group-label bubble-group-label-directory">
+					<!-- <img ng-src="{{ ::cat.avatar }}"> -->
+					{{::cat.catName}}
+				</header>
+				<div class="bubble-group" 
+					ng-repeat="group in cat.results"
+					ng-if="show.all">
+					<header class="bubble-group-label">{{::group.letter}}</header>
+					<ul class="bubble-list">
+						<li class="bubble-list-item" 
+							ng-repeat="landmark in group.results track by $index"
+							ng-click="go('w/' + world.id + '/' + landmark.id)">
+								<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
+								<span>{{::landmark.name}}</span>
+						</li>
+					</ul>
+				</div>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+
+<category-widget ng-if="::style.widgets.category"
+	ng-show="aperture.state === 'aperture-full'"
+	class="category-map-view-scroll"
+	aperture="full"
+	categories="world.landmarkCategories"
+	style="style"
+	populate-search-view="populateSearchView"
+	world="world"></category-widget>
+
+<div ng-if="world.style.maps.localMapArray.length">
+	<floor-selector class="if-animate" ng-class="[aperture.state]"
+		world="world" 
+		style="style"
+		landmarks="landmarks"
+		load-landmarks="loadLandmarks(upperFloors)"
+		show-floors="showFloors"></floor-selector>
+</div>
+
+<<<<<<< HEAD
+<user-location class="if-animate"
+	style="style" 
+	ng-if="bubbleTypeService.get() === 'Retail'"
+	ng-class="[aperture.state]">
+</user-location>
+
+=======
+>>>>>>> Bubblli
+<cat-search-bar class="search-aperture" 
+	ng-if="searchBarText && aperture.state === 'aperture-full'" 
+	color="style.landmarkTitle_color"
+	text="searchBarText"
+	world="world"
+	populate-search-view="populateSearchView"
+	loading="loading"></cat-search-bar>

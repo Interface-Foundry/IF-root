@@ -11,7 +11,7 @@ var userManager = {
 	userRes: $resource('/api/updateuser'),
 	//@ENDIF
 	//@IFDEF PHONEGAP
-	userRes: $resource('https://bubbl.li/api/updateuser'),
+	userRes: $resource('https://kipapp.co/api/updateuser'),
 	//@ENDIF
 	adminStatus: false,
 	loginStatus: false,
@@ -148,15 +148,44 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
-			var authHeader = 'Bearer ' + fbToken;
-			console.log(success);
-			$http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-				lockerManager.saveFBToken(fbToken)
-				ifGlobals.fbToken = fbToken;
-				deferred.resolve(success);
-			}, function(failure) {
-				deferred.reject(failure);
-			})
+
+
+			//@IFDEF PHONEGAP
+			
+			
+			var data = {
+            	userId: success.authResponse.userID,
+           		accessToken: success.authResponse.accessToken 
+          	};
+
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+					deferred.resolve(success);
+	            },
+
+	            function(res){
+	              deferred.reject(failure);
+	            }
+          	);      
+
+			//@ENDIF
+
+
+
+
+
+
+			// var authHeader = 'Bearer ' + fbToken;
+			// console.log(success);
+			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+			// 	lockerManager.saveFBToken(fbToken)
+			// 	ifGlobals.fbToken = fbToken;
+			// 	deferred.resolve(success);
+			// }, function(failure) {
+			// 	deferred.reject(failure);
+			// })
 		}, 
 		function(failure) {
 			alerts.addAlert('warning', "Please allow access to Facebook!", true);
@@ -171,6 +200,7 @@ userManager.logout = function() {
 	userManager.loginStatus = false;
 	userManager.adminStatus = false;
 	userManager._user = {};
+	$rootScope.user = {};
 	worldTree.submissionCache.removeAll();
 	$location.path('/');
 	navService.reset();

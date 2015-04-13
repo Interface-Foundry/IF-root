@@ -27,11 +27,15 @@ var userSchema = mongoose.Schema({
         confirmEmailToken: String,
         confirmEmailExpires: Date
     },
-    facebook: {
-        id: String,
-        token: String,
-        email: String,
-        name: String
+    facebook         : {
+        id           : String,
+        token        : String,
+        email        : String,
+        name         : String,
+        verified     : Boolean,
+        locale       : String,
+        timezone     : Number,
+        bio          : String
     },
     twitter: {
         id: String,

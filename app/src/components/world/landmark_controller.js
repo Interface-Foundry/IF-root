@@ -21,135 +21,135 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
 	style.navBG_color = $scope.style.navBG_color;
+	if ($scope.world.name) {
+		angular.extend($rootScope, {globalTitle: $scope.world.name});
+	}
 	map.loadBubble(data.world);
-		
-worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
-	$scope.landmark = landmark;
-	console.log(landmark); 
+	getLandmark(data.world);
+}, function(error) {
+	console.log(error);
+	$location.path('/404');
+});
 
+function getLandmark(world) {
+	worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
+		$scope.landmark = landmark;
+		console.log(landmark); 
+		goToMark();
 
-	goToMark();
-
-	// add local maps for current floor
-	addLocalMapsForCurrentFloor($scope.world, landmark);
+		// add local maps for current floor
+		addLocalMapsForCurrentFloor($scope.world, landmark);
 	
-console.log($scope.style.widgets.presents);
+		console.log($scope.style.widgets.presents);
 
-console.log($scope.landmark.category);
+		console.log($scope.landmark.category);
 
-				//present collecting enabled and landmark has present
-				if ($scope.style.widgets.presents && $scope.landmark.category){
+		//present collecting enabled and landmark has present
+		if ($scope.style.widgets.presents && $scope.landmark.category){
 
-					if ($scope.landmark.category.hiddenPresent && $scope.landmark.category.name){
+			if ($scope.landmark.category.hiddenPresent && $scope.landmark.category.name){
 
-						// userManager.getUser({},function(user){
-						// 	console.log(userManager);
-						// });
-						$scope.temp = {
-							showInitialPresent: true,
-							presentCollected: false,
-							presentAlreadyCollected: false,
-							showPresentCard: true
-						}
-						// $scope.showPresentCard = true;
-						// $scope.showInitialPresent = true;
-						// $scope.presentCollected = false;
-						// $scope.presentAlreadyCollected = false;
-
-						$http.get('/api/user/loggedin', {server: true}).success(function(user){
-							if (user !== '0'){
-								userManager.getUser().then(
-									function(response) {
-
-									$scope.user = response;
-
-									if(!$scope.user.presents){
-										$scope.user.presents = {
-											collected:[]
-										};
-									}
-									
-									//check if present already collected
-									var found = false;	
-									for(var i = 0; i < $scope.user.presents.collected.length; i++) {
-									    if ($scope.user.presents.collected[i].landmarkID == $scope.landmark._id || $scope.user.presents.collected[i].categoryname == $scope.landmark.category.name) {
-									    	if ($scope.user.presents.collected[i].worldID == $scope.world._id){
-										        found = true;
-										        $scope.temp.presentAlreadyCollected = true;
-										        $scope.temp.showInitialPresent = false;
-										        break;						    		
-									    	}
-									    }
-									}
-									//new present
-									if (!found){
-										savePresent();
-									}
-									else {
-										checkFinalState();
-									}
-
-									function savePresent(){
-										$scope.user.presents.collected.unshift({
-											avatar: $scope.landmark.category.avatar, 
-											landmarkID: $scope.landmark._id,
-											landmarkName: $scope.landmark.name,
-											worldID: $scope.world._id,
-											worldName: $scope.world.name,
-											categoryname: $scope.landmark.category.name
-										});
-										userManager.saveUser($scope.user);
-										// display card with avatar + name
-
-										$scope.temp.presentCollected = true;
-										$scope.temp.showIntialPresent = false;
-										alerts.addAlert('success', 'You found a present!', true);
-
-										checkFinalState();
-									}
-
-									//showing collected presents in this world
-									for(var i = 0; i < $scope.user.presents.collected.length; i++) {
-									    if ($scope.user.presents.collected[i].worldID == $scope.world._id){
-											$scope.collectedPresents.push($scope.user.presents.collected[i].categoryname);
-									    }
-									}
-
-									//to see if user reached world collect goal for final present
-									function checkFinalState(){
-
-										var numPresents = $scope.world.landmarkCategories.filter(function(x){return x.present == true}).length;
-										var numCollected = $scope.user.presents.collected.filter(function(x){return x.worldID == $scope.world._id}).length;
-
-										//are # of present user collected in the world == to number of presents available in the world?
-										if (numPresents == numCollected){
-											console.log('final state!');
-											//DISPLAY THANK YOU MESSAGE TO USER, collected all
-											$scope.temp.finalPresent = true;
-											$scope.temp.showInitialPresent = false;
-											$scope.temp.presentCollected = false;
-											$scope.temp.presentAlreadyCollected = false;
-										}
-										else{
-											$scope.presentsLeft = numPresents - numCollected;
-											console.log('presents left '+ $scope.presentsLeft);
-										}
-									}	
-
-								});
-							}
-							else {
-								$scope.temp.signupCollect = true;
-								
-							}
-						});
-
-					}				
+				$scope.temp = {
+					showInitialPresent: true,
+					presentCollected: false,
+					presentAlreadyCollected: false,
+					showPresentCard: true
 				}
 
+				$http.get('/api/user/loggedin', {server: true}).success(function(user){
+					if (user !== '0'){
+						userManager.getUser().then(function(response) {
 
-})
-});
+							$scope.user = response;
+
+							if(!$scope.user.presents){
+								$scope.user.presents = {
+									collected:[]
+								};
+							}
+							
+							//check if present already collected
+							var found = false;	
+							for(var i = 0; i < $scope.user.presents.collected.length; i++) {
+						    if ($scope.user.presents.collected[i].landmarkID == $scope.landmark._id || $scope.user.presents.collected[i].categoryname == $scope.landmark.category.name) {
+						    	if ($scope.user.presents.collected[i].worldID == $scope.world._id){
+						        found = true;
+						        $scope.temp.presentAlreadyCollected = true;
+						        $scope.temp.showInitialPresent = false;
+						        break;						    		
+						    	}
+						    }
+							}
+							//new present
+							if (!found){
+								savePresent();
+							}
+							else {
+								checkFinalState();
+							}
+
+							function savePresent(){
+								$scope.user.presents.collected.unshift({
+									avatar: $scope.landmark.category.avatar, 
+									landmarkID: $scope.landmark._id,
+									landmarkName: $scope.landmark.name,
+									worldID: $scope.world._id,
+									worldName: $scope.world.name,
+									categoryname: $scope.landmark.category.name
+								});
+								userManager.saveUser($scope.user);
+								// display card with avatar + name
+
+								$scope.temp.presentCollected = true;
+								$scope.temp.showIntialPresent = false;
+								alerts.addAlert('success', 'You found a present!', true);
+
+								checkFinalState();
+							}
+
+							//showing collected presents in this world
+							for(var i = 0; i < $scope.user.presents.collected.length; i++) {
+						    if ($scope.user.presents.collected[i].worldID == $scope.world._id){
+								$scope.collectedPresents.push($scope.user.presents.collected[i].categoryname);
+						    }
+							}
+
+							//to see if user reached world collect goal for final present
+							function checkFinalState(){
+
+								var numPresents = $scope.world.landmarkCategories.filter(function(x){return x.present == true}).length;
+								var numCollected = $scope.user.presents.collected.filter(function(x){return x.worldID == $scope.world._id}).length;
+
+								//are # of present user collected in the world == to number of presents available in the world?
+								if (numPresents == numCollected){
+									console.log('final state!');
+									//DISPLAY THANK YOU MESSAGE TO USER, collected all
+									$scope.temp.finalPresent = true;
+									$scope.temp.showInitialPresent = false;
+									$scope.temp.presentCollected = false;
+									$scope.temp.presentAlreadyCollected = false;
+								}
+								else{
+									$scope.presentsLeft = numPresents - numCollected;
+									console.log('presents left '+ $scope.presentsLeft);
+								}
+							}	
+
+						});
+					}
+					else {
+						$scope.temp.signupCollect = true;
+						
+					}
+				});
+
+			}				
+		}
+	}, function(error) {
+		console.log(error, 'redirecting to world');
+		$location.path('/w/' + world.id);
+	});
+}
 
 function goToMark() {
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click

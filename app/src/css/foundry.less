@@ -805,17 +805,11 @@ a.bubble-inspector-title {
 	pointer-events: none;
 }
 
-.marble-page {
+.marble-contain-width {
 	position: relative; 
 	width: 100%;
-	min-height: 120px;
 	height: auto;
 	margin: 12px auto 24px auto;
-	
-	background: #FFF;
-	border-radius: 3px;
-	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
-	
 	
 	overflow: hidden;
 	@media only screen and (min-width: 480px) {
@@ -824,6 +818,16 @@ a.bubble-inspector-title {
 	@media only screen and (min-width: 768px) {
 		width: 600px;
 	}
+}
+
+.marble-page {
+	min-height: 120px;
+
+	background: #FFF;
+	border-radius: 3px;
+	box-shadow: 0px 2px 2px rgba(0,0,0,.2);
+
+	.marble-contain-width;
 
 }
 

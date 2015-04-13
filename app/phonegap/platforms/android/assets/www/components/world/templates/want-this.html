@@ -1,0 +1,107 @@
+<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon">
+		<img style="display:block;" src="img/icons/textsms_16.png" width="16" height="16">
+	</div>
+	Post Pics, Win Prizes!
+</header>
+
+<article class="marble-page-content">
+	<div class="wtgt col-xs-11">
+		<h4>Win a $50 gift card</h4>
+		<span class="glyphicon glyphicon-info-sign info"></span>
+		<p>Phasellus accumsan odio ipsum, at mollis felis consequat in. Tap a category to upload a pic and enter.</p>
+
+		<div class="upload col-xs-5">
+			<div class="head"
+				ng-style="{background: style.titleBG_color}">
+				<span>WANT THIS</span>
+			</div>
+
+			<div class="body">
+				<div class="wrapper col-xs-10 col-xs-offset-1"
+					ng-show="wtgt.images.want && !wtgt.building.want">
+					<a ng-href="/w/{{worldURL}}/contest/{{ wtgt.hashtags.want }}"
+						target="_self">
+						<div class="more">
+							See More
+						</div>
+						<img ng-src="{{ wtgt.images.want }}">
+					</a>
+				</div>
+				
+				<div class="want"
+					ng-show="!wtgt.images.want && !wtgt.building.want"
+					ng-file-select
+					ng-file-change="uploadWTGT($files, 'want')"
+					ng-file-drop
+					data-accept="image/*"></div>
+
+				<div class="loading-spinner u-centerY"
+					ng-show="wtgt.building.want">
+					<div class="lspin1"></div>
+					<div class="lspin2"></div>
+				</div>
+
+			</div>
+
+			<div class="camera"
+				ng-file-select
+				ng-file-change="uploadWTGT($files, 'want')"
+				ng-file-drop
+				data-accept="image/*"></div>
+
+			<div class="hashtag--upload">
+				<span>#{{ wtgt.hashtags.want }}</span>
+			</div>
+		</div>
+
+		<div class="upload col-xs-5 col-xs-offset-2">
+			<div class="head"
+				ng-style="{background: 'rgba(0, 0, 0, 0.23)'}">
+				<span>GOT THIS</span>
+			</div>
+
+			<div class="body">
+				<div class="wrapper col-xs-10 col-xs-offset-1"
+					ng-show="wtgt.images.got && !wtgt.building.got">
+					<a ng-href="/w/{{worldURL}}/contest/{{ wtgt.hashtags.got }}"
+						target="_self">
+						<div class="more">
+							See More
+						</div>
+						<img ng-src="{{ wtgt.images.got }}">
+					</a>
+				</div>
+				
+				<div class="got"
+					ng-show="!wtgt.images.got && !wtgt.building.got"
+					ng-file-select
+					ng-file-change="uploadWTGT($files, 'got')"
+					ng-file-drop
+					data-accept="image/*"></div>
+
+				<div class="loading-spinner u-centerY"
+					ng-show="wtgt.building.got">
+					<div class="lspin1"></div>
+					<div class="lspin2"></div>
+				</div>
+
+			</div>
+
+			<div class="camera"
+				ng-file-select
+				ng-file-change="uploadWTGT($files, 'got')"
+				ng-file-drop
+				data-accept="image/*"></div>
+
+			<div class="hashtag--upload">
+				<span>#{{ wtgt.hashtags.got }}</span>
+			</div>
+		</div>
+
+	</div>
+</article>
+
+<div class="marble-page-footer tag col-xs-12">
+	<p>Or tag your photos on our Facebook or Instagram to enter to win!</p>
+</div>
