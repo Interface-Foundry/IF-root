@@ -19083,12 +19083,8 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-<<<<<<< HEAD
 	userRes: $resource('http://45.55.182.139:2997/api/updateuser'),
-=======
-	userRes: $resource('https://bubbl.li/api/updateuser'),
 	adminStatus: false,
->>>>>>> Bubblli
 	loginStatus: false,
 	login: {},
 	signup: {}
