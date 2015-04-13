@@ -1,4 +1,4 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService) {
 
 // var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 // zoomControl.style.top = "60px";
@@ -86,30 +86,32 @@ function uploadPicture(file, state, data) {
 		data: JSON.stringify(data)
 	}).progress(function(e) {
 	}).success(function(data) {
-		console.log('DATA IZZZ',data);
 		$scope.wtgt.images[state] = data;
-	
 		$scope.wtgt.building[state] = false;
 	});
 }
 
-function splashPage() {
-	angular.element('.main-nav').addClass('ng-hide');
+// function splashPage() {
+// 	// hide elements we don't want to see
+// 	angular.element('.main-nav').css('display', 'none');
+// 	angular.element('.marble-page').css('display', 'none');
+// 	angular.element('.marble-contain-width').css('display', 'none');
+// 	angular.element('.world-title').css('display', 'none');
+// 	var splash = angular.element('#splash');
+// 	var img = document.createElement('img');
+// 	img.src = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Temp_plate.svg/601px-Temp_plate.svg.png';
+// 	splash.addClass('splash-img');
+// 	splash.append(img);
 
-	var splash = angular.element('#splash');
-	var img = document.createElement('img');
-	img.src = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Temp_plate.svg/601px-Temp_plate.svg.png';
-	splash.addClass('splash-img');
-	splash.append(img);
-
-	map.center.zoom = 2;
-	map.center.lat = 0;
-}
+// 	map.center.zoom = 2;
+// 	map.center.lat = 0;
+// }
 
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
-		splashPage();
+		hideContentService.hide();
+		$scope.hide = true;
 		return;
 	}
 
