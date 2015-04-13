@@ -3,16 +3,18 @@
 var express = require('express'),
     router = express.Router(),
     request = require('request'),
-    _ = require('underscore'),
-    config = require('../../config');
+    _ = require('underscore');
 
 var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
-    mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw',
-    geoipURL = config.geoipURL //local freegeoip server, will change based on current IP;
+    mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
 
 router.use(function(req, res, next) {
-    var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+	if (req.header('x-forwarded-for')) {
+		var ip = req.header('x-forwarded-for').split(',')[0]; // could be "99.12.2.222, 10.0.4.20"
+	} else {
+		ip = req.connection.remoteAddress;
+	}
     req.geoloc = {};
 
     //Because the request library also uses 'res' we'll rename the response here
@@ -21,7 +23,7 @@ router.use(function(req, res, next) {
     //if hasLoc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
     //for now use the less accurate ip based cityName
     request({
-        url: geoipURL,
+        url: global.config.geoipURL,
         qs: {
             q: ip
         }
@@ -32,7 +34,7 @@ router.use(function(req, res, next) {
 		} catch (e) {
 			console.error(e);
 			console.error(body);
-			response.send(500);
+			response.send(200);
 			return;
 		}
 
