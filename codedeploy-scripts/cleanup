@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ -d /opt/kip/App ]
 then 
-rm -rf /opt/IF-root/App
+rm -rf /opt/kip/App
 fi
-mkdir /opt/IF-root/App
-chown kip:kip /opt/IF-root/App
+mkdir /opt/kip/App
+chown kip:kip /opt/kip/App
