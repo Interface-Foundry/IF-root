@@ -4928,9 +4928,7 @@ $routeProvider.
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
 
-  when('/404', {templateUrl: '/components/404/404.html', controller: 'FourOhFourController'}).
-
-  otherwise({redirectTo: '/404'});
+  otherwise({redirectTo: '/w/404'});
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       
@@ -19395,7 +19393,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		World.get({id: id}, function(data) {
 			if (data.err) {
 				deferred.reject(data.err);
-				$location.path('/404');
+				// $location.path('/w/404');
 	 		} else {
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
@@ -27423,23 +27421,6 @@ function uploadPicture(file, hashtag, data) {
 
 	});
 }
-
-// function checkUserForSubmissions() {
-// 	if (!$rootScope.user || !$rootScope.user.submissions) {
-// 		return;
-// 	}
-// 	_.chain($rootScope.user.submissions)
-// 		.groupBy(function(sub) {
-// 			return sub.hashtag;
-// 		})
-// 		.sortBy(function(sub) {
-// 			return sub.timestamp;
-// 		})
-// 		.value()
-// 		.forEach(function(sub) {
-// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-// 		});
-// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
@@ -27452,12 +27433,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				}
 				$scope.wtgt.images[s.hashtag] = s.imgURL;
 			});
-		// } else {
-		// 	checkUserForSubmissions();
 		}
-
-
-
 
 		analyticsService.log('bubble.visit', {
 			id: $scope.world._id

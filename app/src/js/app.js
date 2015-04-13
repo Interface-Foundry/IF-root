@@ -125,9 +125,7 @@ $routeProvider.
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
 
-  when('/404', {templateUrl: '/components/404/404.html', controller: 'FourOhFourController'}).
-
-  otherwise({redirectTo: '/404'});
+  otherwise({redirectTo: '/w/404'});
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       

@@ -90,23 +90,6 @@ function uploadPicture(file, hashtag, data) {
 
 	});
 }
-
-// function checkUserForSubmissions() {
-// 	if (!$rootScope.user || !$rootScope.user.submissions) {
-// 		return;
-// 	}
-// 	_.chain($rootScope.user.submissions)
-// 		.groupBy(function(sub) {
-// 			return sub.hashtag;
-// 		})
-// 		.sortBy(function(sub) {
-// 			return sub.timestamp;
-// 		})
-// 		.value()
-// 		.forEach(function(sub) {
-// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-// 		});
-// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	  $scope.world = data.world;
@@ -119,12 +102,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 				}
 				$scope.wtgt.images[s.hashtag] = s.imgURL;
 			});
-		// } else {
-		// 	checkUserForSubmissions();
 		}
-
-
-
 
 		analyticsService.log('bubble.visit', {
 			id: $scope.world._id
