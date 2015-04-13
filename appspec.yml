@@ -27,6 +27,11 @@ files:
     destination: /opt/kip/App
   - source: scan
     destination: /opt/kip/App
+permissions:
+  - object: /opt/kip/app
+    owner: kip
+    type:
+      - directory
 hooks:
   BeforeInstall:
     - location: codedeploy-scripts/cleanup
