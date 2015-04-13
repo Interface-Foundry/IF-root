@@ -24,13 +24,15 @@ var mapManager = {
 		overlays: {
 		}
 	},
-	paths: {/*
-worldBounds: {
-			type: 'circle',
-			radius: 150,
-			latlngs: {lat:40, lng:20}
-		}
-*/},
+	paths: {
+	/*
+	worldBounds: {
+		type: 'circle',
+		radius: 150,
+		latlngs: {lat:40, lng:20}
+	}
+	*/
+	},
 	maxbounds: {},
 	defaults: {
 		controls: {
@@ -110,15 +112,17 @@ mapManager.apertureUpdate = function(state) {
 
 //use bounds from array of markers to set more accruate center
 mapManager.setCenterFromMarkers = function(markers, done) {
-	leafletData.getMap().then(function(map) {
-		map.fitBounds(
-			L.latLngBounds(markers.map(latLngFromMarker)),
-			{maxZoom: 20}
-		)
-		if (done) {
-			done();
-		}
-	});
+	if (markers.length > 0) {
+		leafletData.getMap().then(function(map) {
+			map.fitBounds(
+				L.latLngBounds(markers.map(latLngFromMarker)),
+				{maxZoom: 20}
+			)
+			if (done) {
+				done();
+			}
+		});
+	}
 	
 	function latLngFromMarker(marker) {
 		return [marker.lat, marker.lng];
@@ -829,7 +833,7 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubbleMarker_24.png',
+					iconUrl: 'img/marker/bubbleMarker_30.png',
 					shadowUrl: '',
 					iconSize: [24, 24], 
 					iconAnchor: [11, 11],

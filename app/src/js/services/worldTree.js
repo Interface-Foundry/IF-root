@@ -187,26 +187,25 @@ worldTree.getNearby = function() {
 	
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
-	var respondedToLocationRequest = false;
-	var respondedToLocationRequestTime = 7*1000;
+
+	var useIP = true;
+	var useIPTimeout = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
 
-		// if user doesn't respond (accept or deny) to request for geolocation, use their IP after respondedToLocationRequestTime time
+		// use IP after 7s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 		$timeout(function() {
-			if (!respondedToLocationRequest) {
+			if (useIP) {
 				getLocationInfoFromIP(deferred);
 			}
-		}, respondedToLocationRequestTime);
+		}, useIPTimeout);
 
 		// cache location for 23s. wait for 7s before resorting to IP based location
-		geoService.getLocation(23*1000, 7*1000).then(function(location) {
-			
-			// user accepted geo request
-			respondedToLocationRequest = true;
+		geoService.getLocation(23*1000).then(function(location) {
+			useIP = false;
 
 			// get city info
 			var data = {
@@ -243,9 +242,7 @@ worldTree.getNearby = function() {
 				});
 
 		}, function(reason) {
-
-			// user denied geo request (or accepted request, but system took too long to get location)
-			respondedToLocationRequest = true;
+			useIP = false;
 
 			// get city info and query world using IP
 			getLocationInfoFromIP(deferred);

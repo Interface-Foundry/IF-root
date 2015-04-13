@@ -13,7 +13,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
-			// scope.mapmanager = mapManager;
+			var offset = $('.search-cat').offset().top;
 
 			var defaultText = bubbleSearchService.defaultText;
 			var noResultsText = bubbleSearchService.noResultsText;
@@ -28,6 +28,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			}
 
 			scope.clearTextSearch = function() {
+				// on click X
 				if (scope.mode === 'city') {
 					var indexText = $location.path().indexOf('/text/');
 					var indexCategory = $location.path().indexOf('/category/');
@@ -53,6 +54,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			}
 
 			scope.resetDefaultSearch = function() {
+				// on blur
 				/**
 				 * timeout allows clearTextSearch() to be called 1st on click X. that way, the text is * changed to default before scroll or aperture change (in which case the click event * to clearTextSearch() might not be recognized) 
 				 */
@@ -81,12 +83,11 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					scope.text = '';
 				} else if (scope.text.indexOf(noResultsText) > -1) {
 					// remove "(No results)" part of input
-					scope.text = scope.text.slice(0, scope.text.length - 13);
+					scope.text = scope.text.slice(0, scope.text.length - (noResultsText.length + 3));
 				}
 
 				// set aperture or scroll
 				if (scope.mode === 'home' && !scrollState) {
-					var offset = $('.search-cat').offset().top;
 					var navHeight = parseInt($('.main-nav').css('height'));
 					var marginTop = parseInt($('.search-cat').css('margin-top'));
 					$('.wrap').animate({
@@ -114,12 +115,23 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					}
 
 					if (scope.mode === 'city') {
-
-						// get user's current location on every search
 						scope.loading = true;
+						
+						var useIP = true;
+						var useIPTimeout = 2*1000;
 
-						// cache of 23s and timeout of 3s
-						geoService.getLocation(23*1000, 3*1000).then(function(location) {
+						// use IP after 2s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+						$timeout(function() {
+							if (useIP) {
+								goToLocationFromIP();
+							}
+						}, useIPTimeout);
+
+						// get user's current location on every search cache of 23s and timeout of 3s
+						geoService.getLocation(23*1000).then(function(location) {
+							useIP = false;
+
+							// get city info
 							var data = {
 								params: {
 									hasLoc: true,
@@ -145,16 +157,17 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 									scope.loading = false;
 								})
 						}, function(err) {
+							useIP = false;
+
 							// get location from IP
 							goToLocationFromIP();
 						})
 						
 					} else if (scope.mode == 'home') {
-						// route to city search toks. get IP location of no?
 						if (geoService.location.cityName) {
 							$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
 						} else {
-							goToLocationFromIP();
+							goToLocationFromIP(true);
 						}
 					} else {
 						if (inSearchView()) {
@@ -204,7 +217,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 				// else in world view
 			}
 
-			function goToLocationFromIP() {
+			function goToLocationFromIP(locationBool) {
 				var data = {
 					params: {
 						hasLoc: false
@@ -219,8 +232,12 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 							timestamp: locInfo.timestamp
 						};
 						geoService.updateLocation(locationData);
-						$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-						scope.populateCitySearchView(scope.text, 'text', locationData);
+						if (locationBool) {
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
+						} else {
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+							scope.populateCitySearchView(scope.text, 'text', locationData);
+						}
 						scope.loading = false;
 					}).
 					error(function(err) {

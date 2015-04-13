@@ -5,6 +5,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
+	$scope.apertureToggleThenCenterMap = apertureToggleThenCenterMap;
 	$scope.go = go;
 	$scope.citySearchResults = {};
 	$scope.groups;
@@ -45,10 +46,10 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		});
 	} else if ($routeParams.cityName) {
+		apertureService.set('third');
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
-		map.setCenter([latLng.lng, latLng.lat], 14, 'aperture-third');
 		$scope.cityName = $routeParams.cityName;
 
 		if ($routeParams.category) {
@@ -75,6 +76,37 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		apertureService.toggle(newState);
 	}
 
+	function apertureToggleThenCenterMap(newState) {
+		// centers map on all markers including tracking marker, if it exists
+		
+		apertureService.toggle(newState);
+
+		if (apertureService.state !== 'aperture-off') {
+			var updated = false
+
+			// don't watch forever
+			$timeout(function() {
+				if (!updated) {
+					updateCenter(); // clear watch
+				}
+			}, 10*1000);
+
+			// watch if we are tracking
+			var updateCenter = $scope.$watch(function() {
+				return geoService.tracking;
+			}, function(newVal) {
+				if (newVal) {
+					mapManager.setCenterFromMarkers(_.toArray(mapManager.markers));
+					updated = true;
+					updateCenter(); // clear watch
+				}
+			});
+
+			// center on other markers
+			mapManager.setCenterFromMarkers(_.toArray(mapManager.markers));
+		}
+	}
+
 	function getLatLngFromURLString(urlString) {
 		var latLng = {};
 		var startIndexLat = urlString.indexOf('lat') + 3;
@@ -92,9 +124,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			return;
 		}
 		mapManager._z = mapManager.center.zoom;
-		mapManager._actualCenter.length = 0;
-		mapManager._actualCenter.push(mapManager.center.lng);
-		mapManager._actualCenter.push(mapManager.center.lat);		
+		mapManager._actualCenter = [mapManager.center.lng, mapManager.center.lat];
 	}
 
 	function logSearchClick(path) {
@@ -267,7 +297,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								draggable: false,
 								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconUrl: 'img/marker/bubbleMarker_30.png',
 									iconSize: [24, 24],
 									iconAnchor: [11, 11],
 									popupAnchor: [0, -12]
@@ -278,23 +308,23 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						});
 
 						// landmark markers
-						_.each($scope.citySearchResults.landmarks, function(landmark) {
-							var marker = {
-								lat: landmark.loc.coordinates[1],
-								lng: landmark.loc.coordinates[0],
-								draggable: false,
-								message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-								icon: {
-									iconUrl: 'img/marker/landmarkMarker_23.png',
-									iconSize: [23, 23],
-									iconAnchor: [11, 11],
-									popupAnchor: [0, -4]
-								},
-								// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
-								_id: landmark._id + (new Date().getTime())
-							}
-							markers.push(marker);
-						});
+						// _.each($scope.citySearchResults.landmarks, function(landmark) {
+						// 	var marker = {
+						// 		lat: landmark.loc.coordinates[1],
+						// 		lng: landmark.loc.coordinates[0],
+						// 		draggable: false,
+						// 		message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+						// 		icon: {
+						// 			iconUrl: 'img/marker/landmarkMarker_23.png',
+						// 			iconSize: [23, 23],
+						// 			iconAnchor: [11, 11],
+						// 			popupAnchor: [0, -4]
+						// 		},
+						// 		// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
+						// 		_id: landmark._id + (new Date().getTime())
+						// 	}
+						// 	markers.push(marker);
+						// });
 
 						// add markers and set aperture
 						mapManager.addMarkers(markers);
@@ -302,8 +332,21 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 							mapManager.setCenterFromMarkersWithAperture(markers, apertureService.state);
 						}
 
+						if (!$scope.citySearchResults.bubbles || $scope.citySearchResults.bubbles.length === 0) {
+							$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+						}
+
 					} else {
 						$scope.citySearchResults = [];
+						if (!latLng) {
+							latLng = {
+								lat: geoService.location.lat,
+								lng: geoService.location.lng
+							};
+						}
+						if (latLng.lat) {
+							map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+						}
 					}
 					// loading stuff here
 				}).
@@ -313,6 +356,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		} else {
 			map.removeAllMarkers();
+			if (!latLng) {
+				latLng = {
+					lat: geoService.location.lat,
+					lng: geoService.location.lng
+				};
+			}
+			if (latLng.lat) {
+				map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+			}
 		}
 
 	}

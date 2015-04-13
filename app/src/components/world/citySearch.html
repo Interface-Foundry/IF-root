@@ -3,7 +3,7 @@
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
 		ng-style="::{'background-color': style.navBG_color}" 
-		ng-click="apertureToggle('full')"
+		ng-click="apertureToggleThenCenterMap('full')"
 		ng-swipe-up="apertureSet('off')"
 		ng-swipe-down="apertureSet('full')"
 		world-shelf>
@@ -24,26 +24,12 @@
 
 			<!-- bubbles -->
 			<div class="bubble-group" ng-if="cityShow.text || cityShow.category">
-				<header class="bubble-group-label">Bubbles: {{ citySearchResults.bubbles.length || 'no' }} results</header>
 				<ul class="bubble-list">
 					<li class="bubble-list-item" 
 						ng-repeat="bubble in citySearchResults.bubbles track by $index"
 						ng-click="go('w/' + bubble.id)">
 							<img if-src="{{ bubble.avatar }}" class="bubble-list-item-img">
 							<span>{{ bubble.name }}</span> 
-					</li>
-				</ul>
-			</div>
-			
-			<!-- landmarks -->
-			<div class="bubble-group" ng-if="cityShow.text || cityShow.category">
-				<header class="bubble-group-label">Landmarks: {{ citySearchResults.landmarks.length || 'no' }} results</header>
-				<ul class="bubble-list">
-					<li class="bubble-list-item" 
-						ng-repeat="landmark in citySearchResults.landmarks track by $index"
-						ng-click="go('w/' + landmark.parentName + '/' + landmark.id)">
-							<img if-src="{{ landmark.avatar }}" class="bubble-list-item-img">
-							<span>{{ landmark.name }}</span> 
 					</li>
 				</ul>
 			</div>
