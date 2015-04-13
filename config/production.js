@@ -6,7 +6,7 @@ module.exports = {
 
   //geoipURL: 'http://127.0.0.1:8080/json/',
   mongodb: {
-	  url: 'mongodb://username:password@mongodb-r1,mongodb-r2/if'
+	  url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/if'.replace('password', process.env.MONGOPW)
   }
 
   // // Server IP
