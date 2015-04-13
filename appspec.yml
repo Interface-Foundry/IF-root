@@ -2,19 +2,12 @@ version: 0.0
 os: linux
 files:
   - source: /README.md
-    destination: /opt/IF-Root/
+    destination: /opt/kip/App/
 hooks:
   BeforeInstall:
     - location: codedeploy-scripts/cleanup
       timeout: 300
       runas: root
-  AfterInstall:
-    - location: codedeploy-scripts/install_dependencies
-      timeout: 300
-      runas: kip
-    - location: codedeploy-scripts/start_server
-      timeout: 300
-      runas: kip
   ApplicationStop:
     - location: codedepploy-scripts/stop_server
       timeout: 300

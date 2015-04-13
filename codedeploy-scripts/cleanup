@@ -1,2 +1,4 @@
 #!/bin/bash
-rm -rf /opt/IF-root/*
+rm -rf /opt/IF-root/App
+mkdir /opt/IF-root/App
+chown kip:kip /opt/IF-root/App
