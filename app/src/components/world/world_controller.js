@@ -1,9 +1,5 @@
 app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService) {
 
-// var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-// zoomControl.style.top = "60px";
-// zoomControl.style.left = "1%";
-// zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
@@ -37,7 +33,7 @@ $scope.verifyUpload = function(event, state) {
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
 			dialogs.showDialog('authDialog.html');
-			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+			contest.set($scope.wtgt.hashtags[state]);
 		}, 1500);
 		
 	}
@@ -46,49 +42,12 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	var file = $files[0];
-
-	// get time
-	var time = new Date();
-
-	// get hashtag
-	// var hashtag = null;
-	// hashtag = $scope.wtgt.hashtags[hashtag];
-
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
-
-	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, hashtag, data);
-	}, function(err) {
-		uploadPicture(file, hashtag, data);
-	});
-};
-
-function uploadPicture(file, hashtag, data) {
-
-	$scope.upload = $upload.upload({
-		url: '/api/uploadPicture/',
-		file: file,
-		data: JSON.stringify(data)
-	}).progress(function(e) {
-	}).success(function(data) {
-		worldTree.cacheSubmission($scope.world._id, hashtag, data);
-		$scope.wtgt.images[hashtag] = data;
+	contestUploadService.uploadImage($files[0], $scope.world, hashtag)
+	.then(function(data) {
+		$scope.wtgt.images[hashtag] = data.imgURL;
 		$scope.wtgt.building[hashtag] = false;
 	});
-}
+};
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
@@ -107,8 +66,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
-	// } else {
-	// 	checkUserForSubmissions();
 	}
 
 	analyticsService.log('bubble.visit', {
@@ -131,9 +88,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 	$scope.showEdit = false;
 		}
 	} 
-
-	//console.log($scope.world);
-	//console.log($scope.style);
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});

@@ -19367,14 +19367,19 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 		}
 		var style = worldTree.styleCache.get(world.style.styleID);
 			if (style) {
-				var contest = worldTree.contestCache.get('active');
-				var submissions = [];
-				var worldSubs = worldTree.submissionCache.get(world._id);
-				if (worldSubs) {
-					submissions.push(worldSubs[contest.contestTags[0].tag]);
-					submissions.push(worldSubs[contest.contestTags[1].tag]);
+				if (world.category === 'Retail') {
+					var contest = worldTree.contestCache.get('active');
+					if (!contest) {
+						return askServer();
+					}
+					var submissions = [];
+					var worldSubs = worldTree.submissionCache.get(world._id);
+					if (worldSubs) {
+						submissions.push(worldSubs[contest.contestTags[0].tag]);
+						submissions.push(worldSubs[contest.contestTags[1].tag]);
+					}
 				}
-
+				
 				deferred.resolve({
 					world: world,
 					style: style,
@@ -25854,15 +25859,18 @@ function categoryWidgetService() {
 
 app.controller('ContestEntriesController', ContestEntriesController);
 
-ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', 'Entries', 'worldTree', 'styleManager'];
+ContestEntriesController.$inject = ['$scope', '$routeParams', '$rootScope', '$timeout', 'Entries', 'worldTree', 'styleManager', 'contestUploadService', 'userManager', 'alertManager', 'dialogs', 'contest'];
 
-function ContestEntriesController($scope, $routeParams, $rootScope, Entries, worldTree, styleManager) {
+function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, Entries, worldTree, styleManager, contestUploadService, userManager, alertManager, dialogs, contest) {
 
-	$scope.hashTag = $routeParams.hashTag;
+	$scope.hashtag = $routeParams.hashTag;
 	$scope.loadEntries = loadEntries;
 	$scope.entries = [];
 	$scope.region = 'global';
 	$scope.style;
+	$scope.uploadWTGT = uploadWTGT;
+	$scope.verifyUpload = verifyUpload;
+	$scope.world;
 	$scope.worldId = $routeParams.worldURL;
 
 	activate();
@@ -25872,8 +25880,8 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
 
     worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.style = data.style;
+			$scope.world = data.world;
 			styleManager.navBG_color = $scope.style.navBG_color;
-			// $rootScope.hideBack = false;
 		});
 	}
 
@@ -25888,6 +25896,26 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
     }, function(error) {
     	console.log('Error:', error);
     });
+	}
+
+	function verifyUpload(event) {
+		// stops user from uploading wtgt photo if they aren't logged in
+		if (!userManager.loginStatus) {
+			event.stopPropagation();
+			alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
+			$timeout(function() {
+				dialogs.showDialog('authDialog.html');
+				contest.set($scope.hashtag);
+			}, 1500);	
+		}
+	}
+
+	function uploadWTGT($files) {
+		var hashtag = '#' + $scope.hashtag;
+		contestUploadService.uploadImage($files[0], $scope.world, hashtag)
+		.then(function(data) {
+			$scope.entries.unshift(data);
+		});
 	}
 }
 'use strict';
@@ -27428,10 +27456,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // }])
 app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService) {
 
-// var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-// zoomControl.style.top = "60px";
-// zoomControl.style.left = "1%";
-// zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
@@ -27465,7 +27489,7 @@ $scope.verifyUpload = function(event, state) {
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
 			dialogs.showDialog('authDialog.html');
-			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+			contest.set($scope.wtgt.hashtags[state]);
 		}, 1500);
 		
 	}
@@ -27474,49 +27498,12 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	var file = $files[0];
-
-	// get time
-	var time = new Date();
-
-	// get hashtag
-	// var hashtag = null;
-	// hashtag = $scope.wtgt.hashtags[hashtag];
-
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
-
-	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, hashtag, data);
-	}, function(err) {
-		uploadPicture(file, hashtag, data);
-	});
-};
-
-function uploadPicture(file, hashtag, data) {
-
-	$scope.upload = $upload.upload({
-		url: '/api/uploadPicture/',
-		file: file,
-		data: JSON.stringify(data)
-	}).progress(function(e) {
-	}).success(function(data) {
-		worldTree.cacheSubmission($scope.world._id, hashtag, data);
-		$scope.wtgt.images[hashtag] = data;
+	contestUploadService.uploadImage($files[0], $scope.world, hashtag)
+	.then(function(data) {
+		$scope.wtgt.images[hashtag] = data.imgURL;
 		$scope.wtgt.building[hashtag] = false;
 	});
-}
+};
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
@@ -27535,8 +27522,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
-	// } else {
-	// 	checkUserForSubmissions();
 	}
 
 	analyticsService.log('bubble.visit', {
@@ -27559,9 +27544,6 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		 	$scope.showEdit = false;
 		}
 	} 
-
-	//console.log($scope.world);
-	//console.log($scope.style);
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});

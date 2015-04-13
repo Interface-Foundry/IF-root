@@ -2456,8 +2456,8 @@ li.alert {
 }
 .wtgt .body img {
   cursor: pointer;
-  max-height: 100%;
-  max-width: 100%;
+  max-height: 87%;
+  max-width: 87%;
 }
 .wtgt .camera {
   border-radius: 50%;
@@ -2491,6 +2491,9 @@ li.alert {
   width: 100%;
   height: 100%;
 }
+.message-nav .wtgt .camera {
+  margin-left: -24px;
+}
 .plus-one {
   border-radius: 50%;
   cursor: pointer;
@@ -2498,16 +2501,11 @@ li.alert {
   height: 16px;
   line-height: 1;
   position: absolute;
-  right: -11px;
-  top: 169px;
+  right: 5px;
+  top: 24px;
   font-size: 1.1em;
   width: 16px;
   z-index: 1;
-}
-@media only screen and (max-width: 768px) {
-  .plus-one {
-    top: 129px;
-  }
 }
 .marble-page-footer.tag {
   background: #eeeeee;

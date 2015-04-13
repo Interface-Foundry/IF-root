@@ -945,7 +945,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                     if (err)
                                         console.log(err);
                                     else {
-                                        res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                                        // res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
 
@@ -963,7 +963,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 // uploadContents.description = newString;
                                                 submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
                                                     //Retrieve new saved contest entry ID
-                                                    newentryID = data
+                                                    console.log('submitted data is..', data)
+                                                    res.send(data)
+                                                    // res.send(data)
                                                 }); //contest entry, send to bac
                                             }
                                         }

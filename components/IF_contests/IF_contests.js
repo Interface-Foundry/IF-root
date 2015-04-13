@@ -84,7 +84,7 @@ var route = function(imgUpload, uploadContents, userID, cb) {
                     console.log(err);
                 } else {
                     //Send back new contest id to the server via callback
-                    cb(data._id)
+                    cb(data)
 
                     userSchema.findOneAndUpdate({
                         _id: data.userID
