@@ -1,6 +1,7 @@
 // load the things we need
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
+var fs = require('fs');
 
 var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
@@ -11,14 +12,17 @@ function getRandomInt(min, max) {
 }
 
 function getRandomAvatar() {
-    var avatars = ['http://portraitdrawer.com/wp-admin/images/Justavatar_9147/AVATARsample14.jpg',
-        'http://www.niksebastian.com/wp-content/uploads/2014/05/sample-2-sm.jpg',
-        'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQ5W6gu6zhgD9Oj9_3VGZrx_G3xGyqmfq_9If_0yAnwoYovT-V3f4spuA',
-        'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRIE427i4fX08SSIIbbRwDozyadeldQ5W8kDGAbPXkOgzKb1lHkoA',
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQh3L5LU5g-AKDRhCje_my0LRaaf90vFrelaD3fQyE5TQQAzfUshg'
+    var avatars = ['../../assets/user_icon1.png',
+        '../../assets/user_icon2.png',
+        '../../assets/user_icon3.png',
+        '../../assets/user_icon4.png',
+        '../../assets/user_icon5.png'
     ]
-    var avatar = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
-    return avatar
+    var path = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
+    
+    var avatar = {}
+    avatar.contentType = 'image/png';
+    avatar.data = fs.readFileSync(path)
 }
 
 
@@ -76,7 +80,8 @@ var userSchema = mongoose.Schema({
     bdayP: Number,
     lang: String, // ex: ‘EN-us’ 
     avatar: {
-        type: String,
+        data: Buffer,
+        contentType: String,
         default: getRandomAvatar()
     },
     name: String,

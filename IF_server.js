@@ -552,6 +552,7 @@ app.use('/api/announcements', require('./components/IF_superuser/announcement_ro
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
 app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
 //--- INSTAGRAM / TWITTER ROUTER ----//
+app.use('/api/tweets', require('./components/IF_apiroutes/twitter_routes'));
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
