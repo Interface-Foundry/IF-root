@@ -25400,6 +25400,67 @@ function ContestEntriesController($scope, $routeParams, $rootScope, Entries, wor
 }
 'use strict';
 
+app.factory('contestUploadService', contestUploadService);
+
+contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree', 'alertManager'];
+
+function contestUploadService($upload, $q, geoService, worldTree, alertManager) {
+
+	return {
+		uploadImage: uploadImage
+	};
+
+	function uploadImage(file, world, hashtag) {
+		var deferred = $q.defer();
+
+		// get time
+		var time = new Date();
+
+		var data = {
+			world_id: world._id,
+			worldID: world.id,
+			hashtag: hashtag,
+			userTime: time,
+			userLat: null,
+			userLon: null,
+			type: 'retail_campaign'
+		};
+
+		// get location
+		geoService.getLocation().then(function(coords) {
+			data.userLat = coords.lat;
+			data.userLon = coords.lng;
+			return deferred.resolve(uploadPicture(file, world, data));
+		}, function(err) {
+			return deferred.resolve(uploadPicture(file, data));
+		});
+
+		return deferred.promise;
+	};
+
+	function uploadPicture(file, world, data) {
+		var deferred = $q.defer();
+
+		$upload.upload({
+			url: '/api/uploadPicture/',
+			file: file,
+			data: JSON.stringify(data)
+		}).progress(function(e) {
+		}).success(function(result) {
+			showConfirmationMessage();
+			worldTree.cacheSubmission(world._id, data.hashtag, result.imgURL);
+			deferred.resolve(result);
+		});
+
+		return deferred.promise;
+	}
+
+	function showConfirmationMessage() {
+		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
+	}
+}
+'use strict';
+
 app.factory('hideContentService', hideContentService);
 
 hideContentService.$inject = ['mapManager'];
@@ -25423,6 +25484,9 @@ function hideContentService(mapManager) {
 		img.src = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Temp_plate.svg/601px-Temp_plate.svg.png';
 		splash.addClass('splash-img');
 		splash.append(img);
+		_.defer(function() {
+			img.classList.add('splash-fade-in');
+		});
 
 		// zoom map way out
 		mapManager.center.zoom = 2;

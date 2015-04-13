@@ -5016,6 +5016,14 @@ div.marker-popup-click {
   width: 100%;
   z-index: 1001;
 }
+.splash-img img {
+  opacity: 0;
+  -webkit-transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
+}
+.splash-img img.splash-fade-in {
+  opacity: 1;
+}
 
 .leaflet-areaselect-shade {
     position: absolute;

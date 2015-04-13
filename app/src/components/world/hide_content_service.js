@@ -23,6 +23,9 @@ function hideContentService(mapManager) {
 		img.src = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Temp_plate.svg/601px-Temp_plate.svg.png';
 		splash.addClass('splash-img');
 		splash.append(img);
+		_.defer(function() {
+			img.classList.add('splash-fade-in');
+		});
 
 		// zoom map way out
 		mapManager.center.zoom = 2;

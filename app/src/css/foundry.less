@@ -1757,4 +1757,14 @@ div.marker-popup-click {
   top: -70%;
   width: 100%;
   z-index: 1001;
+
+  img {
+  	opacity: 0;
+		-webkit-transition: 1s cubic-bezier(.5,.1,0,1) all;
+		transition: 1s cubic-bezier(.5,.1,0,1) all;
+		
+		&.splash-fade-in {
+			opacity: 1;
+		}
+  }
 }
