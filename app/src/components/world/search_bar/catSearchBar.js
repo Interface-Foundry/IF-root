@@ -150,7 +150,6 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						})
 						
 					} else if (scope.mode == 'home') {
-						// route to city search toks. get IP location of no?
 						if (geoService.location.cityName) {
 							$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
 						} else {

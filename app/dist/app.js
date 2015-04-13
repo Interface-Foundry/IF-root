@@ -25314,7 +25314,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
-		map.setCenter([latLng.lng, latLng.lat], 14, 'aperture-third');
 		$scope.cityName = $routeParams.cityName;
 
 		if ($routeParams.category) {
@@ -25574,6 +25573,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 					} else {
 						$scope.citySearchResults = [];
+						map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
 					}
 					// loading stuff here
 				}).
@@ -25583,6 +25583,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		} else {
 			map.removeAllMarkers();
+			map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
 		}
 
 	}
@@ -26752,7 +26753,6 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						})
 						
 					} else if (scope.mode == 'home') {
-						// route to city search toks. get IP location of no?
 						if (geoService.location.cityName) {
 							$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
 						} else {
