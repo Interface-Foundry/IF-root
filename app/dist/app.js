@@ -17238,8 +17238,8 @@ function currentWorldService() {
 }
 angular.module('tidepoolsServices')
 
-	.factory('geoService', ['$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
-		function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+	.factory('geoService', ['$location', '$q', '$rootScope', '$routeParams', '$timeout', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+		function($location, $q, $rootScope, $routeParams, $timeout, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
 
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
@@ -17276,6 +17276,16 @@ angular.module('tidepoolsServices')
 					}
 				}
 			});	
+
+			// don't track across pages unless we need to. saves battery and prevents user location marker from showing up on non-full aperture
+			$rootScope.$on('$locationChangeSuccess', function() {
+				$timeout(function() {
+					if (apertureService.state !== 'aperture-full' ||
+						$location.path() === '/') {
+						geoService.trackStop();
+					}
+				}, 5 * 1000);
+			});
 
 			geoService.updateLocation = function(locationData) {
 				geoService.location.lat = locationData.lat;
