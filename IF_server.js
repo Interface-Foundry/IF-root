@@ -107,7 +107,8 @@ var socket = require('./components/IF_chat/socket.js');
 var express = require('express'),
     app = module.exports.app = express(),
     // cors = require('cors'),
-    db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+	//db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+	db = db_mongoose; // TODO refactor this... i don't really know where it came from
 
 // add in health check before sessions
 app.get('/api/healthcheck', function(req, res) { 
