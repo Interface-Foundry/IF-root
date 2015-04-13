@@ -623,21 +623,12 @@ app.get('/api/bubblesearch/:type', function(req, res) {
 
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
-
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
     redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
         res.send('(=^･ｪ･^=)');
-
     });
-
-
-
     // DONE!  then a separate node process dumps the redis cache to db
-
-
 });
-
-
 
 
 // Save world visitor anonymously
@@ -755,7 +746,6 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
             if (req.headers['content-length'] > 10000000) {
                 console.log("Filesize too large.");
             } else {
-
                 var stuff_to_hash = filename + (new Date().toString());
                 var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
                 var fileType = filename.split('.').pop();
@@ -984,6 +974,8 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                                 },
                                                                 function(err, result) {
                                                                     if (err) console.log(err);
+
+                                            
                                                                     console.log('contest updated with cloudsight', result)
                                                                 })
 
@@ -1871,7 +1863,7 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                 // }
                 // //or just save if no unique userID
                 // else {
-                    saveUser();
+                saveUser();
                 // }
 
                 function saveUser() {

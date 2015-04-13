@@ -5,6 +5,7 @@ var bcrypt = require('bcrypt-nodejs');
 var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
 
+var avatars = ['link1', 'link2', 'link3', 'link4', 'link5']
 
 // define the schema for our user model
 var userSchema = mongoose.Schema({
@@ -55,7 +56,12 @@ var userSchema = mongoose.Schema({
     bday: Number, //birthday
     bdayP: Number,
     lang: String, // ex: ‘EN-us’ 
-    avatar: String,
+    avatar: {
+        type: String,
+        default: function getRandomAvatar() {
+            return avatars[Math.random() * (5 - 1) + 1];
+        }
+    },
     name: String,
     note: String,
     social: {
