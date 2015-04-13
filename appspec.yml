@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: /README.md
+  - source: /
     destination: /opt/kip/App/
 hooks:
   BeforeInstall:
