@@ -4,6 +4,10 @@ files:
   - source: /README.md
     destination: /opt/kip/App/
 hooks:
+  BeforeInstall:
+    - location: codedeploy-scripts/cleanup
+      timeout: 300
+      runas: root
   ApplicationStop:
     - location: codedepploy-scripts/stop_server
       timeout: 300
