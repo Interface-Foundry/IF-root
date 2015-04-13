@@ -27,7 +27,14 @@ router.use(function(req, res, next) {
         }
     }, function(err, res, body) {
         if (err) console.log(err);
-        var data = JSON.parse(body);
+		try {
+			var data = JSON.parse(body);
+		} catch (e) {
+			console.error(e);
+			console.error(body);
+			res.send(500);
+			return;
+		}
 
         // console.log('data is..', data)
         if (!data.city) {
