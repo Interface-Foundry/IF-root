@@ -18,7 +18,6 @@ function getRandomAvatar() {
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQh3L5LU5g-AKDRhCje_my0LRaaf90vFrelaD3fQyE5TQQAzfUshg'
     ]
     var avatar = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
-    console.log(avatar.toString());
     return avatar
 }
 

@@ -18,7 +18,7 @@ router.get('/', function(req, res) {
      console.log('hitting twittrs', req.query.tags);
 
     twitterSchema.find({
-        tags: req.query.tags
+        hashtags: req.query.tags
     }).sort({
         created: -1
     }).skip(req.query.number).limit(25).exec(function(err, tweets) {
