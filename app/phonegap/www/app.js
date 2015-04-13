@@ -25691,28 +25691,32 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						});
 
 						// landmark markers
-						_.each($scope.citySearchResults.landmarks, function(landmark) {
-							var marker = {
-								lat: landmark.loc.coordinates[1],
-								lng: landmark.loc.coordinates[0],
-								draggable: false,
-								message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-								icon: {
-									iconUrl: 'img/marker/landmarkMarker_23.png',
-									iconSize: [23, 23],
-									iconAnchor: [11, 11],
-									popupAnchor: [0, -4]
-								},
-								// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
-								_id: landmark._id + (new Date().getTime())
-							}
-							markers.push(marker);
-						});
+						// _.each($scope.citySearchResults.landmarks, function(landmark) {
+						// 	var marker = {
+						// 		lat: landmark.loc.coordinates[1],
+						// 		lng: landmark.loc.coordinates[0],
+						// 		draggable: false,
+						// 		message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+						// 		icon: {
+						// 			iconUrl: 'img/marker/landmarkMarker_23.png',
+						// 			iconSize: [23, 23],
+						// 			iconAnchor: [11, 11],
+						// 			popupAnchor: [0, -4]
+						// 		},
+						// 		// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
+						// 		_id: landmark._id + (new Date().getTime())
+						// 	}
+						// 	markers.push(marker);
+						// });
 
 						// add markers and set aperture
 						mapManager.addMarkers(markers);
 						if (markers.length > 0) {
 							mapManager.setCenterFromMarkersWithAperture(markers, apertureService.state);
+						}
+
+						if (!$scope.citySearchResults.bubbles || $scope.citySearchResults.bubbles.length === 0) {
+							$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
 						}
 
 					} else {
@@ -26826,7 +26830,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					scope.text = '';
 				} else if (scope.text.indexOf(noResultsText) > -1) {
 					// remove "(No results)" part of input
-					scope.text = scope.text.slice(0, scope.text.length - 13);
+					scope.text = scope.text.slice(0, scope.text.length - (noResultsText.length + 3));
 				}
 
 				// set aperture or scroll

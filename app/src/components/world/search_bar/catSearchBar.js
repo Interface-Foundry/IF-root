@@ -81,7 +81,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					scope.text = '';
 				} else if (scope.text.indexOf(noResultsText) > -1) {
 					// remove "(No results)" part of input
-					scope.text = scope.text.slice(0, scope.text.length - 13);
+					scope.text = scope.text.slice(0, scope.text.length - (noResultsText.length + 3));
 				}
 
 				// set aperture or scroll
