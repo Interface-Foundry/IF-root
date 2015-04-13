@@ -1,0 +1,23 @@
+version: 0.1
+os: linux
+files:
+  - source: /
+    destination: /opt/IF-Root
+permissions:
+  - object: /opt/IF-Root
+    owner: kip
+    type:
+      - directory
+hooks:
+  BeforeInstall:
+    - location: codedeploy-scripts/install_dependencies
+      timeout: 300
+      runas: kip
+    - location: codedeploy-scripts/start_server
+      timeout: 300
+      runas: kip
+  ApplicationStop:
+    - location: codedepploy-scripts/stop_server
+      timeout: 300
+      runas: kip
+
