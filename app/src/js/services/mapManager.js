@@ -827,7 +827,7 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubbleMarker_24.png',
+					iconUrl: 'img/marker/bubbleMarker_30.png',
 					shadowUrl: '',
 					iconSize: [24, 24], 
 					iconAnchor: [11, 11],

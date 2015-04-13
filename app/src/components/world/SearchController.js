@@ -267,7 +267,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								draggable: false,
 								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconUrl: 'img/marker/bubbleMarker_30.png',
 									iconSize: [24, 24],
 									iconAnchor: [11, 11],
 									popupAnchor: [0, -12]

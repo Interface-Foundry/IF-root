@@ -16442,7 +16442,7 @@ function noWorlds(lat,lon) {
 		  	draggable:false,
 		  	message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
 		  	icon: {
-	            iconUrl: 'img/marker/bubbleMarker_24.png',
+	            iconUrl: 'img/marker/bubbleMarker_30.png',
 	            shadowUrl: '',
 	            iconSize: [24, 24],
 	            iconAnchor: [11, 11]
@@ -16551,7 +16551,7 @@ function NearbyCtrl($location, $scope, $routeParams, db, $rootScope, apertureSer
                   draggable:false,
                   message:'<a href="#/w/'+landmark.id+'">'+landmark.name+'</a>',
                   icon: {
-                    iconUrl: 'img/marker/bubbleMarker_24.png',
+                    iconUrl: 'img/marker/bubbleMarker_30.png',
                     shadowUrl: '',
                     iconSize: [24, 24],
                     iconAnchor: [11, 11]
@@ -18666,7 +18666,7 @@ mapManager.loadBubble = function(bubble, config) {
 				lat: bubble.loc.coordinates[1],
 				lng: bubble.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubbleMarker_24.png',
+					iconUrl: 'img/marker/bubbleMarker_30.png',
 					shadowUrl: '',
 					iconSize: [24, 24], 
 					iconAnchor: [11, 11],
@@ -19418,7 +19418,7 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 			lat: world.loc.coordinates[1],
 			lng: world.loc.coordinates[0],
 			icon: {
-				iconUrl: 'img/marker/bubbleMarker_24.png',
+				iconUrl: 'img/marker/bubbleMarker_30.png',
 				shadowUrl: '',
 				iconSize: [24, 24],
 				iconAnchor: [11, 11],
@@ -22224,7 +22224,7 @@ function showPosition(position) {
 		focus: true,
 		draggable: true,
 		icon: {
-			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconUrl: 'img/marker/bubbleMarker_30.png',
 			iconSize: [24, 24],
 			iconAnchor: [11, 11],
 			popupAnchor:  [0, -12]
@@ -23358,7 +23358,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 								lat: tempLat,
 								lng: tempLng,
 								icon: {
-									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconUrl: 'img/marker/bubbleMarker_30.png',
 									iconSize: [24, 24]
 								},
 								draggable: true
@@ -23698,7 +23698,7 @@ function initMarkers() {
 			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
 			enable: 'leafletDirectiveMarker.click',
 			icon: {
-				iconUrl: 'img/marker/bubbleMarker_24.png',
+				iconUrl: 'img/marker/bubbleMarker_30.png',
 				shadowUrl: '',
 				iconSize: [24, 24],
 				iconAnchor: [11, 11],
@@ -25680,7 +25680,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 								draggable: false,
 								message: '<a if-href="#/w/' + bubble.id + '"><div class="marker-popup-click"></div></a><a>' + bubble.name + '</a>',
 								icon: {
-									iconUrl: 'img/marker/bubbleMarker_24.png',
+									iconUrl: 'img/marker/bubbleMarker_30.png',
 									iconSize: [24, 24],
 									iconAnchor: [11, 11],
 									popupAnchor: [0, -12]
@@ -26633,7 +26633,7 @@ function loadWorld() {
 				lat: $scope.world.loc.coordinates[1],
 				lng: $scope.world.loc.coordinates[0],
 				icon: {
-					iconUrl: 'img/marker/bubbleMarker_24.png',
+					iconUrl: 'img/marker/bubbleMarker_30.png',
 					shadowUrl: '',
 					iconSize: [24, 24], 
 					iconAnchor: [11, 11],
@@ -27711,7 +27711,7 @@ function addWorldMarker() {
 		lat: $scope.world.loc.coordinates[1],
 		lng: $scope.world.loc.coordinates[0],
 		icon: {
-			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconUrl: 'img/marker/bubbleMarker_30.png',
 			shadowUrl: '',
 			iconSize: [24, 24],
 			iconAnchor: [11, 11],

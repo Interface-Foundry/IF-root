@@ -668,7 +668,7 @@ function showPosition(position) {
 		focus: true,
 		draggable: true,
 		icon: {
-			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconUrl: 'img/marker/bubbleMarker_30.png',
 			iconSize: [24, 24],
 			iconAnchor: [11, 11],
 			popupAnchor:  [0, -12]

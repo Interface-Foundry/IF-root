@@ -26,7 +26,7 @@ function initMarkers() {
 			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
 			enable: 'leafletDirectiveMarker.click',
 			icon: {
-				iconUrl: 'img/marker/bubbleMarker_24.png',
+				iconUrl: 'img/marker/bubbleMarker_30.png',
 				shadowUrl: '',
 				iconSize: [24, 24],
 				iconAnchor: [11, 11],
