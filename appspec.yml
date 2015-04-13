@@ -10,6 +10,10 @@ permissions:
       - directory
 hooks:
   BeforeInstall:
+    - location: codedeploy-scripts/cleanup
+      timeout: 300
+      runas: root
+  AfterInstall:
     - location: codedeploy-scripts/install_dependencies
       timeout: 300
       runas: kip
