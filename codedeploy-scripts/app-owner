@@ -1,0 +1,3 @@
+#!/bin/bash
+chown -R kip:kip /opt/kip/App
+

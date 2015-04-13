@@ -1,2 +1,3 @@
 #!/bin/bash
+cd /opt/kip/App
 pm2 start IF_server.js
