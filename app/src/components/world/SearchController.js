@@ -5,6 +5,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
+	$scope.apertureToggleThenCenterMap = apertureToggleThenCenterMap;
 	$scope.go = go;
 	$scope.citySearchResults = {};
 	$scope.groups;
@@ -45,6 +46,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		});
 	} else if ($routeParams.cityName) {
+		apertureService.set('third');
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
@@ -74,6 +76,37 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		apertureService.toggle(newState);
 	}
 
+	function apertureToggleThenCenterMap(newState) {
+		// centers map on all markers including tracking marker, if it exists
+		
+		apertureService.toggle(newState);
+
+		if (apertureService.state !== 'aperture-off') {
+			var updated = false
+
+			// don't watch forever
+			$timeout(function() {
+				if (!updated) {
+					updateCenter(); // clear watch
+				}
+			}, 10*1000);
+
+			// watch if we are tracking
+			var updateCenter = $scope.$watch(function() {
+				return geoService.tracking;
+			}, function(newVal) {
+				if (newVal) {
+					mapManager.setCenterFromMarkers(_.toArray(mapManager.markers));
+					updated = true;
+					updateCenter(); // clear watch
+				}
+			});
+
+			// center on other markers
+			mapManager.setCenterFromMarkers(_.toArray(mapManager.markers));
+		}
+	}
+
 	function getLatLngFromURLString(urlString) {
 		var latLng = {};
 		var startIndexLat = urlString.indexOf('lat') + 3;
@@ -91,9 +124,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			return;
 		}
 		mapManager._z = mapManager.center.zoom;
-		mapManager._actualCenter.length = 0;
-		mapManager._actualCenter.push(mapManager.center.lng);
-		mapManager._actualCenter.push(mapManager.center.lat);		
+		mapManager._actualCenter = [mapManager.center.lng, mapManager.center.lat];
 	}
 
 	function logSearchClick(path) {
@@ -307,7 +338,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 					} else {
 						$scope.citySearchResults = [];
-						map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+						if (!latLng) {
+							latLng = {
+								lat: geoService.location.lat,
+								lng: geoService.location.lng
+							};
+						}
+						if (latLng.lat) {
+							map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+						}
 					}
 					// loading stuff here
 				}).
@@ -317,7 +356,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		} else {
 			map.removeAllMarkers();
-			map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+			if (!latLng) {
+				latLng = {
+					lat: geoService.location.lat,
+					lng: geoService.location.lng
+				};
+			}
+			if (latLng.lat) {
+				map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+			}
 		}
 
 	}

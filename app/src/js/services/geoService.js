@@ -1,6 +1,6 @@
 angular.module('tidepoolsServices')
 
-	.factory('geoService', [ '$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+	.factory('geoService', ['$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
 		function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
 
 			//abstract & promisify geolocation, queue requests.
@@ -37,7 +37,6 @@ angular.module('tidepoolsServices')
 						geoService.trackStop();
 					}
 				}
-
 			});	
 
 			geoService.updateLocation = function(locationData) {

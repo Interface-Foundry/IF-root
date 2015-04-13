@@ -28,6 +28,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			}
 
 			scope.clearTextSearch = function() {
+				// on click X
 				if (scope.mode === 'city') {
 					var indexText = $location.path().indexOf('/text/');
 					var indexCategory = $location.path().indexOf('/category/');
@@ -53,6 +54,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			}
 
 			scope.resetDefaultSearch = function() {
+				// on blur
 				/**
 				 * timeout allows clearTextSearch() to be called 1st on click X. that way, the text is * changed to default before scroll or aperture change (in which case the click event * to clearTextSearch() might not be recognized) 
 				 */

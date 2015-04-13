@@ -17238,7 +17238,7 @@ function currentWorldService() {
 }
 angular.module('tidepoolsServices')
 
-	.factory('geoService', [ '$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+	.factory('geoService', ['$q', '$rootScope', '$routeParams', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
 		function($q, $rootScope, $routeParams, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
 
 			//abstract & promisify geolocation, queue requests.
@@ -17275,7 +17275,6 @@ angular.module('tidepoolsServices')
 						geoService.trackStop();
 					}
 				}
-
 			});	
 
 			geoService.updateLocation = function(locationData) {
@@ -17845,13 +17844,15 @@ var mapManager = {
 		overlays: {
 		}
 	},
-	paths: {/*
-worldBounds: {
-			type: 'circle',
-			radius: 150,
-			latlngs: {lat:40, lng:20}
-		}
-*/},
+	paths: {
+	/*
+	worldBounds: {
+		type: 'circle',
+		radius: 150,
+		latlngs: {lat:40, lng:20}
+	}
+	*/
+	},
 	maxbounds: {},
 	defaults: {
 		controls: {
@@ -17931,15 +17932,17 @@ mapManager.apertureUpdate = function(state) {
 
 //use bounds from array of markers to set more accruate center
 mapManager.setCenterFromMarkers = function(markers, done) {
-	leafletData.getMap().then(function(map) {
-		map.fitBounds(
-			L.latLngBounds(markers.map(latLngFromMarker)),
-			{maxZoom: 20}
-		)
-		if (done) {
-			done();
-		}
-	});
+	if (markers.length > 0) {
+		leafletData.getMap().then(function(map) {
+			map.fitBounds(
+				L.latLngBounds(markers.map(latLngFromMarker)),
+				{maxZoom: 20}
+			)
+			if (done) {
+				done();
+			}
+		});
+	}
 	
 	function latLngFromMarker(marker) {
 		return [marker.lat, marker.lng];
@@ -25268,6 +25271,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
+	$scope.apertureToggleThenCenterMap = apertureToggleThenCenterMap;
 	$scope.go = go;
 	$scope.citySearchResults = {};
 	$scope.groups;
@@ -25308,6 +25312,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		
 		});
 	} else if ($routeParams.cityName) {
+		apertureService.set('third');
 		navService.show('search');
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
@@ -25337,6 +25342,37 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		apertureService.toggle(newState);
 	}
 
+	function apertureToggleThenCenterMap(newState) {
+		// centers map on all markers including tracking marker, if it exists
+		
+		apertureService.toggle(newState);
+
+		if (apertureService.state !== 'aperture-off') {
+			var updated = false
+
+			// don't watch forever
+			$timeout(function() {
+				if (!updated) {
+					updateCenter(); // clear watch
+				}
+			}, 10*1000);
+
+			// watch if we are tracking
+			var updateCenter = $scope.$watch(function() {
+				return geoService.tracking;
+			}, function(newVal) {
+				if (newVal) {
+					mapManager.setCenterFromMarkers(_.toArray(mapManager.markers));
+					updated = true;
+					updateCenter(); // clear watch
+				}
+			});
+
+			// center on other markers
+			mapManager.setCenterFromMarkers(_.toArray(mapManager.markers));
+		}
+	}
+
 	function getLatLngFromURLString(urlString) {
 		var latLng = {};
 		var startIndexLat = urlString.indexOf('lat') + 3;
@@ -25354,9 +25390,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			return;
 		}
 		mapManager._z = mapManager.center.zoom;
-		mapManager._actualCenter.length = 0;
-		mapManager._actualCenter.push(mapManager.center.lng);
-		mapManager._actualCenter.push(mapManager.center.lat);		
+		mapManager._actualCenter = [mapManager.center.lng, mapManager.center.lat];
 	}
 
 	function logSearchClick(path) {
@@ -25570,7 +25604,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 					} else {
 						$scope.citySearchResults = [];
-						map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+						if (!latLng) {
+							latLng = {
+								lat: geoService.location.lat,
+								lng: geoService.location.lng
+							};
+						}
+						if (latLng.lat) {
+							map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+						}
 					}
 					// loading stuff here
 				}).
@@ -25580,7 +25622,15 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 		} else {
 			map.removeAllMarkers();
-			map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+			if (!latLng) {
+				latLng = {
+					lat: geoService.location.lat,
+					lng: geoService.location.lng
+				};
+			}
+			if (latLng.lat) {
+				map.setCenter([latLng.lng, latLng.lat], 14, apertureService.state);
+			}
 		}
 
 	}
@@ -26628,6 +26678,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			}
 
 			scope.clearTextSearch = function() {
+				// on click X
 				if (scope.mode === 'city') {
 					var indexText = $location.path().indexOf('/text/');
 					var indexCategory = $location.path().indexOf('/category/');
@@ -26653,6 +26704,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			}
 
 			scope.resetDefaultSearch = function() {
+				// on blur
 				/**
 				 * timeout allows clearTextSearch() to be called 1st on click X. that way, the text is * changed to default before scroll or aperture change (in which case the click event * to clearTextSearch() might not be recognized) 
 				 */
