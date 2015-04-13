@@ -16,17 +16,17 @@ files:
   - source: priority_test
     destination: /opt/kip/App/priority_test
   - source: IF_bashrc
-    destination: /opt/kip/App/IF_bashrc
+    destination: /opt/kip/App
   - source: IF_server.js
-    destination: /opt/kip/App/IF_server.js
+    destination: /opt/kip/App
   - source: datarange_mongoQuery.js
-    destination: /opt/kip/App/datarange_mongoQuery.js
+    destination: /opt/kip/App
   - source: package.json
-    destination: /opt/kip/App/package.json
+    destination: /opt/kip/App
   - source: redis.js
-    destination: /opt/kip/App/redis.js
+    destination: /opt/kip/App
   - source: scan
-    destination: /opt/kip/App/scan
+    destination: /opt/kip/App
 hooks:
   BeforeInstall:
     - location: codedeploy-scripts/cleanup
