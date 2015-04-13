@@ -114,12 +114,23 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					}
 
 					if (scope.mode === 'city') {
-
-						// get user's current location on every search
 						scope.loading = true;
+						
+						var useIP = true;
+						var useIPTimeout = 3*1000;
 
-						// cache of 23s and timeout of 3s
-						geoService.getLocation(23*1000, 3*1000).then(function(location) {
+						// use IP after 3s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+						$timeout(function() {
+							if (useIP) {
+								goToLocationFromIP();
+							}
+						}, useIPTimeout);
+
+						// get user's current location on every search cache of 23s and timeout of 3s
+						geoService.getLocation(23*1000).then(function(location) {
+							useIP = false;
+
+							// get city info
 							var data = {
 								params: {
 									hasLoc: true,
@@ -145,6 +156,8 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 									scope.loading = false;
 								})
 						}, function(err) {
+							useIP = false;
+
 							// get location from IP
 							goToLocationFromIP();
 						})
