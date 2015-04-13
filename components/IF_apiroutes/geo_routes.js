@@ -32,7 +32,7 @@ router.use(function(req, res, next) {
 		} catch (e) {
 			console.error(e);
 			console.error(body);
-			res.send(500);
+			response.send(500);
 			return;
 		}
 
