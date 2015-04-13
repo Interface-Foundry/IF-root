@@ -41,16 +41,16 @@ function initMarkers() {
 
 //LISTENERS// 
 
-$rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
-	var bubble = $scope.bubbles.find(function(element, index, array) {
-		if (element._id==args.markerName) {
-			return true;
-		} else { 
-			return false;
-		}
-	});
-	$scope.select(bubble);
-});
+// $rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
+// 	var bubble = $scope.bubbles.find(function(element, index, array) {
+// 		if (element._id==args.markerName) {
+// 			return true;
+// 		} else { 
+// 			return false;
+// 		}
+// 	});
+// 	$scope.select(bubble);
+// });
 
 //INIT
 
