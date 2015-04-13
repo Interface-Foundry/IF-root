@@ -5,7 +5,23 @@ var bcrypt = require('bcrypt-nodejs');
 var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
 
-var avatars = ['link1', 'link2', 'link3', 'link4', 'link5']
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomAvatar() {
+    var avatars = ['http://portraitdrawer.com/wp-admin/images/Justavatar_9147/AVATARsample14.jpg',
+        'http://www.niksebastian.com/wp-content/uploads/2014/05/sample-2-sm.jpg',
+        'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQ5W6gu6zhgD9Oj9_3VGZrx_G3xGyqmfq_9If_0yAnwoYovT-V3f4spuA',
+        'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRIE427i4fX08SSIIbbRwDozyadeldQ5W8kDGAbPXkOgzKb1lHkoA',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQh3L5LU5g-AKDRhCje_my0LRaaf90vFrelaD3fQyE5TQQAzfUshg'
+    ]
+    var avatar = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
+    console.log(avatar.toString());
+    return avatar
+}
+
 
 // define the schema for our user model
 var userSchema = mongoose.Schema({
@@ -27,15 +43,15 @@ var userSchema = mongoose.Schema({
         confirmEmailToken: String,
         confirmEmailExpires: Date
     },
-    facebook         : {
-        id           : String,
-        token        : String,
-        email        : String,
-        name         : String,
-        verified     : Boolean,
-        locale       : String,
-        timezone     : Number,
-        bio          : String
+    facebook: {
+        id: String,
+        token: String,
+        email: String,
+        name: String,
+        verified: Boolean,
+        locale: String,
+        timezone: Number,
+        bio: String
     },
     twitter: {
         id: String,
@@ -62,9 +78,7 @@ var userSchema = mongoose.Schema({
     lang: String, // ex: ‘EN-us’ 
     avatar: {
         type: String,
-        default: function getRandomAvatar() {
-            return avatars[Math.random() * (5 - 1) + 1];
-        }
+        default: getRandomAvatar()
     },
     name: String,
     note: String,
