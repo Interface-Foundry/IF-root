@@ -9,6 +9,6 @@ hooks:
       timeout: 300
       runas: root
   ApplicationStop:
-    - location: codedepploy-scripts/stop_server
+    - location: codedeploy-scripts/stop_server
       timeout: 300
       runas: kip
