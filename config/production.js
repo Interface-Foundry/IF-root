@@ -8,8 +8,10 @@ module.exports = {
   geoipURL: 'http://www.freegeoip.net/json/',
   mongodb: {
 	  url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/if'.replace('password', process.env.MONGOPW)
+  },
+  redis: {
+	  url: 'redis-thunder.kipapp.co'
   }
-
   // // Server IP
   // ip:       process.env.OPENSHIFT_NODEJS_IP ||
   //           process.env.IP ||

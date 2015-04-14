@@ -10,6 +10,11 @@ var all = {
   env: env,
   mongodb: {
 	  url: 'mongodb://localhost:27017/if'
+  },
+  redis: {
+	  port: 6379,
+	  url: 'localhost',
+	  options: {}
   }
 
   //EXAMPLE DEFAULT CONFIG SETTINGS (ACROSS ALL ENVIRONMENTS)

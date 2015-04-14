@@ -44,7 +44,6 @@ var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
-var redis = require('redis');
 var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');
 var readChunk = require('read-chunk');
