@@ -1,8 +1,7 @@
 <button class="view-tab home-tab" 
 	ng-class="{selected: navService.status.home}" 
-	ng-click="select('home')"></button>
+	ng-click="goHome()"></button>
 
 <button class="view-tab search-tab" 
-	ng-class="{selected: navService.status.search || navService.status.searchWithinBubble}" 
-	single-click callback="select" vars="['search']" 
-	ng-dblclick="hardSearch()"></button>
+	ng-class="{selected: navService.status.search}" 
+	ng-click="goSearch()"></button>

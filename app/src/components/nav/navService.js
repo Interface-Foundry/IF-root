@@ -3,8 +3,7 @@ app.factory('navService', [function() {
 
 	var status = {
 		home: true, // default home nav selected
-		search: false, // main bubblli search
-		searchWithinBubble: false // search within a bubble (all, text, category)
+		search: false // global search or world search
 	};
 
 	var backPages = -1; // for back button, num pages to go back. useful for 404 page
