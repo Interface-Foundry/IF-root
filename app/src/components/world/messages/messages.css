@@ -34,28 +34,31 @@
 
 .message-nav-map {
 	position: absolute;
-	width: 48px;
-	height: 48px;
-	right: 0px;
-	top: 40px;
-	/*@IFDEF PHONEGAP*/
-	top: 56px;
-	/*@ENDIF*/
+	width: 64px;
+	height: 64px;
+	right: 4px;
 	border: none;
 	outline: none;
-	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
+	/*background: center / 64px 64px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);*/
 	z-index: 10;
-	border-radius: 24px;
+	border-radius: 50%;
 	background-clip: padding-box;
 	box-sizing: border-box;
 	border: 4px solid transparent;
+	display: none;
 }
 
 .aperture-full .message-nav-map {
-	background: center / 24px 24px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
+	display: inline-block;
+	bottom: 91px;
+	background: center / 52px 52px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+.aperture-full .message-nav-map.sticker-open {
+	bottom: 280px;
 }
 
 .message-surface {
@@ -144,17 +147,17 @@
 	overflow: auto;
 }
 
-.message-input {
-	width: 100%;
-	resize: none;
+.message-input.form-control {
+	background: #FFF;
+	display: block;
+	margin: 4px 1%;
 	min-height: 16px;
 	padding: 4px 12px;
-	background: #FFF;
-	border: 0;
 	outline: none;
+	resize: none;
 	-webkit-appearance: none;
 	overflow: hidden;
-	display: block;
+	width: 98%;
 	-webkit-transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 }
@@ -492,5 +495,14 @@
 	float: left;
 	height: 24px;
 	width: 24px;
-	margin: 4px;
+}
+
+.message-body.kipbot-chat {
+	background-color: rgba(10,10,110, .2);
+  font-style: italic;
+  opacity: .7;
+}
+
+.divider.chat {
+	border-bottom: none;
 }

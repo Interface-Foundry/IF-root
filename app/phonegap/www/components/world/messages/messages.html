@@ -1,52 +1,19 @@
-<button class="message-nav-map" ng-click='toggleMap()'></button>
+<button class="message-nav-map" 
+				ng-class="{'sticker-open': editing}"
+				ng-click='toggleMap()'></button>
 
 <div class="message-shelf" ng-style="::{'background-color': style.bodyBG_color}">
 	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">
 		<h4 class="subnav-header">Messages</h4>
 	</nav>
-
-
-<!--
-	<div class="message-room-col hidden-xs">
-		<div class="nickname-info">
-			<h4 class="inner-nickname">You're chatting as</h4>
-			<p><img style="border-radius:50%;" width="50" height="50" if-src="{{user.avatar || 'img/icons/profile.png'}}" src="/img/icons/profile.png">{{nick}}</p>
-			<a if-href="#profile/me/messages">
-				<button type="button" class="lightblue500 btn btn-default btn-xs edit-nickname"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
-			</a>
-
-			</div>
-	</div>
--->
-	
 	<div class="wrap">
 		<message-view class="message-list"></message-view>
-<!--
-		<ul class="message-list">
-			<li class="if-animate message " ng-repeat="msg in messages track by msg._id" ng-class="::{'message-self': msg.userID==userID, 'message-sticker': msg.sticker}" ng-click="messageLink(msg)">
-				<picture class="msg-avatar">
-					<img width="32px" height="32px" class="small-avatar" if-src="{{::msg.avatar || 'img/icons/profile.png'}}" ng-cloak>
-				</picture>
-				<div class="message-content" ng-style="::{'background-color': msg.userID==userID&&!msg.sticker ? style.titleBG_color : 'FFF'}">
-					<div class="message-corner" 
-						ng-style="::{'border-bottom': '6px solid ' + style.titleBG_color}"></div>
-					<h6 class="message-heading message-self" ng-bind="::msg.nick">Visitor</h6>
-					<img class="img-responsive" if-src="{{::msg.pic}}">
-					<div class="message-sticker-background" ng-if="::msg.sticker">
-						<img class="message-sticker-img" if-src="{{::msg.sticker.img}}">
-						<img class="message-sticker-link" src="img/icons/ic_map_48px.svg">
-					</div>
-					<div class="message-body" ng-bind="::msg.msg"></div>
-				</div>
-			</li>
-		</ul>
--->
 	</div>
 </div>
 
 <div class="view-footer" ng-class="{'message-logged-out-footer': !userManager.loginStatus, 'editing': editing}" ng-cloak>
 	<div class="uploading-progress if-animate" ng-show="uploading" ng-style="{'width': uploadProgress+'%'}"></div>
-		<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input" 
+	<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input form-control" 
 		ng-model="msg.text" 
 		ng-class="{'textarea-highlight': stickerChange}"
 		ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" 
@@ -54,7 +21,6 @@
 		
 	<div class="msg-action-bar">
 		<button class="msg-action-bar-item pull-left" ng-file-select ng-file-change="onImageSelect($files)" accept="image/*">
-			<!--<div class="message-photo" ng-file-select="onImageSelect($files)" data-accept="image/*"></div>-->
 			<img src="img/icons/msg/ic_photo_camera_24px.png" width="24" height="24">
 		</button>
 		<button class="msg-action-bar-item pull-left" ng-click="showStickers()"> 

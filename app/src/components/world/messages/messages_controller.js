@@ -1,4 +1,4 @@
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData', 'stickerManager', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData, stickerManager) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData', 'stickerManager', 'messagesService', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData, stickerManager, messagesService) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -80,7 +80,21 @@ $scope.toggleMap = function() {
 	if ($scope.editing) {
 		$scope.editing = false;
 	}
+	var url = $location.path();
+	if (url.indexOf('#') > -1) {
+		$location.path(url.slice(0, url.indexOf('#')));
+	}
 	aperture.toggle('full');
+
+}
+
+function checkStickerUrl(url) {
+	var url = $location.path();
+	if (url.indexOf('#') === -1) {
+		// changing the url allows user to click back button to return to chat
+		url = $location.url() + '#stickers';
+		$location.path(url, false);
+	}
 }
 
 $scope.sendMsg = function (e) {
@@ -134,6 +148,11 @@ $scope.onImageSelect = function($files) {
 }	
 
 $scope.showStickers = function() {
+	if ($scope.editing) {
+		return;
+	}
+	checkStickerUrl();
+
 	$scope.editing = true;
 	aperture.set('full');
 }
@@ -159,13 +178,17 @@ $scope.messageLink = function(message) {
 			} else {
 				addStickerToMap(sticker);
 			}
-		})
+			checkStickerUrl();
+		});
 	} else if (message.href) {
 		$location.path(message.href);
 	}
 }
 
 $scope.pinSticker = function() {
+	if (!$scope.selected) {
+		return;
+	}
 	//getStickerLoc//
 	var sticker = angular.copy($scope.selected),
 		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
@@ -219,28 +242,12 @@ function getAvatar() {
 
 //add welcome message 
 function welcomeMessage() {
-	var newChat = {
-	    roomID: $scope.world._id,
-	    nick: 'BubblyBot',
-	    msg: 'Hey there, this is a Bubble chat created just for '+$scope.world.name+'. Chat, share pictures & leave notes with others here!',
-	    avatar: $scope.world.avatar || 'img/tidepools/default.png',
-	    userID: 'chatbot',
-	    _id: 'welcomeMessage'
-	};
+	var newChat = messagesService.createWelcomeMessage($scope.world);
 	$scope.messages.push(newChat);
 }
 
 function profileEditMessage() {
-	var newChat = {
-		roomID: $scope.world._id,
-		nick: 'BubblyBot',
-		kind: 'editUser',
-		msg: 'You are currently using the name '+ $scope.nick + '. Click here to edit it.',
-		avatar: $scope.world.avatar || 'img/tidepools/default.png',
-		userID: 'chatbot',
-		_id: 'profileEditMessage',
-		href: 'profile/me/messages'
-	}
+	var newChat = messagesService.createProfileEditMessage($scope.world, $scope.nick);
 	$scope.messages.push(newChat);
 }
 
