@@ -3695,7 +3695,7 @@ app.all('/*', function(req, res, next) {
 
     //if file path, then add file to end
     if (req.url.indexOf('.') != -1) {
-          console.log('backend console log 1');
+     
         res.sendFile(req.url, {
             root: __dirname + '/app/dist'
         }, function(err) {
@@ -3708,10 +3708,10 @@ app.all('/*', function(req, res, next) {
             }
         });
     } else if (req.url.indexOf('api') > -1) {
-          console.log('backend console log 2');
+      
         return next();
     } else {
-             console.log('backend console log3');
+            
         res.sendFile('index.html', {
             root: __dirname + '/app/dist'
         });
