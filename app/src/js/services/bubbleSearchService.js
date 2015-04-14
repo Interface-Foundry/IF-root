@@ -24,7 +24,7 @@ function bubbleSearchService($http, analyticsService) {
 		
 		analyticsService.log('search.' + searchType, params);
 
-		return $http.get('/api/bubblesearch/' + searchType, {params:params})
+		return $http.get('/api/bubblesearch/' + searchType, {server: true, params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
 				return data;

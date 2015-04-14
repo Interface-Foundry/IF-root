@@ -42,6 +42,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
 				} else { // use IP
 					var data = {
+						server: true,
 						params: {
 							hasLoc: false
 						}

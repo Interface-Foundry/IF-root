@@ -51,7 +51,7 @@ $scope.temp = {
 }
  //Used for local map scaling
 
-$http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
+$http.get('/components/edit/edit.locale-en-us.json', {server: true}).success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
 }); 

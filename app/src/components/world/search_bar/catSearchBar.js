@@ -219,6 +219,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 			function goToLocationFromIP(locationBool) {
 				var data = {
+					server: true,
 					params: {
 						hasLoc: false
 					}

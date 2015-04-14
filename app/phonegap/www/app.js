@@ -1417,7 +1417,7 @@ angular.module("leaflet-directive").directive('legend', ["$log", "$http", "leafl
                         if (!isDefined(newURL)) {
                             return;
                         }
-                        $http.get(newURL)
+                        $http.get(newURL, {server: true})
                             .success(function (legendData) {
 
                                 if (isDefined(leafletLegend)) {
@@ -4812,6 +4812,7 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }]);
 
 }());
+
 'use strict';
 
 var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'dbaq.emoji', 'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular', 'ui.bootstrap'])
@@ -17111,7 +17112,7 @@ function bubbleSearchService($http, analyticsService) {
 		
 		analyticsService.log('search.' + searchType, params);
 
-		return $http.get('/api/bubblesearch/' + searchType, {params:params})
+		return $http.get('/api/bubblesearch/' + searchType, {server: true, params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
 				return data;
@@ -19628,6 +19629,7 @@ worldTree.getUpcoming = function(_id) {
 
 function getLocationInfoFromIP(deferredObj) {
 	var data = {
+		server: true,
 		params: {
 			hasLoc: false
 		}
@@ -19691,6 +19693,7 @@ worldTree.getNearby = function() {
 
 			// get city info
 			var data = {
+				server: true,
 				params: {
 					hasLoc: true,
 					lat: location.lat,
@@ -19784,6 +19787,7 @@ worldTree.createWorld = function() {
 return worldTree;
 }
 ]);
+
 var themeDict = {
 	urban: {
 		name: 'urban',
@@ -21380,7 +21384,7 @@ function announcementsService($http) {
 	};
 
 	function get() {
-		return $http.get('api/announcements/global');
+		return $http.get('api/announcements/global', {server: true});
 	}
 }
 
@@ -21629,7 +21633,7 @@ $scope.temp = {
 }
  //Used for local map scaling
 
-$http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
+$http.get('/components/edit/edit.locale-en-us.json', {server: true}).success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
 }); 
@@ -24007,6 +24011,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
 				} else { // use IP
 					var data = {
+						server: true,
 						params: {
 							hasLoc: false
 						}
@@ -24034,6 +24039,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 	}
 
 }]);
+
 // DEPRACATED
 app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
@@ -27139,6 +27145,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 			function goToLocationFromIP(locationBool) {
 				var data = {
+					server: true,
 					params: {
 						hasLoc: false
 					}
@@ -27169,6 +27176,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		}
 	};
 }]);
+
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		

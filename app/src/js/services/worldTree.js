@@ -146,6 +146,7 @@ worldTree.getUpcoming = function(_id) {
 
 function getLocationInfoFromIP(deferredObj) {
 	var data = {
+		server: true,
 		params: {
 			hasLoc: false
 		}
@@ -209,6 +210,7 @@ worldTree.getNearby = function() {
 
 			// get city info
 			var data = {
+				server: true,
 				params: {
 					hasLoc: true,
 					lat: location.lat,
