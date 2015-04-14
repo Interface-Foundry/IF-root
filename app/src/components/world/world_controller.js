@@ -80,14 +80,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 style.navBG_color = $scope.style.navBG_color;
 
 	 //show edit buttons if user is world owner
-	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-		 	$scope.showEdit = true;
+	userManager.getUser()
+	.then(function(user) {
+		if (user && user._id && $scope.world.permissions && user._id === $scope.world.permissions.ownerID) {
+
+		 	$scope.showEdit = true;	
+		} else {
+			$scope.showEdit = false;
 		}
-		else {
-		 	$scope.showEdit = false;
-		}
-	} 
+	});
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});
