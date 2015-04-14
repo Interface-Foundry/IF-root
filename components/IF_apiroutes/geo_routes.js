@@ -29,7 +29,7 @@ router.use(function(req, res, next) {
 		} catch (e) {
 			console.error(e);
 			console.error(body);
-			response.send(200);
+			response.sendStatus(200);
 			return;
 		}
 
