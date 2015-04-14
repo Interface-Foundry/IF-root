@@ -51,7 +51,7 @@ $scope.temp = {
 }
  //Used for local map scaling
 
-$http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
+$http.get('/components/edit/edit.locale-en-us.json', {server: true}).success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
 }); 
@@ -801,7 +801,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {

@@ -369,12 +369,7 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
-	
-	//@IFDEF PHONEGAP
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
-	//@ENDIF
-	
+		
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){

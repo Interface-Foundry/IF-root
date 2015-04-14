@@ -11,6 +11,6 @@ function announcementsService($http) {
 	};
 
 	function get() {
-		return $http.get('api/announcements/global');
+		return $http.get('api/announcements/global', {server: true});
 	}
 }

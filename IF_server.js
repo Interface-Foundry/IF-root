@@ -224,7 +224,7 @@ app.post('/feedback', function(req, res) {
 
     var mailOptions = {
         to: feedbackTo,
-        from: 'IF Bubbl <mail@bubbl.li>',
+        from: 'Kip Feedback <feedback@kipapp.co>',
         subject: emailSubject,
         text: emailBody
     };
@@ -386,8 +386,8 @@ app.post('/forgot', function(req, res, next) {
             if (req.headers.host) {
                 var mailOptions = {
                     to: user.local.email,
-                    from: 'IF Bubbl <mail@bubbl.li>',
-                    subject: 'Bubbl Password Reset',
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip Password Reset',
                     text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
                         'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
                         'https://' + req.headers.host + '/reset/' + token + '\n\n' +
@@ -461,8 +461,8 @@ app.post('/reset/:token', function(req, res) {
 
             var mailOptions = {
                 to: user.local.email,
-                from: 'IF Bubbl <mail@bubbl.li>',
-                subject: 'Your Bubbl Password was reset',
+                from: 'Kip <noreply@kipapp.co>',
+                subject: 'Your Kip Password was reset',
                 text: 'Hello,\n\n' +
                     'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed. If this is an error, please contact: hello@interfacefoundry.com\n'
             };
@@ -3688,13 +3688,14 @@ app.put('/api/:collection/:cmd', function(req, res) {
 
 //for routing all else to angular
 app.all('/*', function(req, res, next) {
-
+  console.log('hitting the weird route');
     function endsWith(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
     //if file path, then add file to end
     if (req.url.indexOf('.') != -1) {
+          console.log('backend console log 1');
         res.sendFile(req.url, {
             root: __dirname + '/app/dist'
         }, function(err) {
@@ -3702,12 +3703,15 @@ app.all('/*', function(req, res, next) {
                 console.log(err);
                 res.status(err.status).end();
             } else {
+
                 console.log('Sent:', req.url);
             }
         });
     } else if (req.url.indexOf('api') > -1) {
+          console.log('backend console log 2');
         return next();
     } else {
+             console.log('backend console log3');
         res.sendFile('index.html', {
             root: __dirname + '/app/dist'
         });

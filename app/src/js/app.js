@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular', 'ui.bootstrap'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'dbaq.emoji', 'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular', 'ui.bootstrap'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -28,7 +28,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================
@@ -75,7 +75,7 @@ $routeProvider.
 
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-  when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -124,8 +124,8 @@ $routeProvider.
 	when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
-
-  otherwise({redirectTo: '/w/404'});
+ when('/#', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
+  otherwise({redirectTo: '/'});
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       

@@ -11,7 +11,7 @@ module.exports = {
   },
   redis: {
 	  port: 6379,
-	  url: 'redis-thunder.kipapp.co',
+	  url: 'redis-thunder.internal.kipapp.co',
 	  options: {}
   }
   // // Server IP

@@ -30,21 +30,21 @@ lockerManager.getCredentials = function() {
 	}, function(error) {
 		username.resolve(undefined);
 		console.log(error);
-	}, 'username', 'Bubbl.li');
+	}, 'username', 'Kip');
 
 	lockerManager.keychain.getForKey(function(value) {
 		password.resolve(value);
 	}, function(error) {
 		password.resolve(undefined);
 		console.log(error);
-	}, 'password', 'Bubbl.li');
+	}, 'password', 'Kip');
 	
 	lockerManager.keychain.getForKey(function(value) {
 		fbToken.resolve(value);
 	}, function(error) {
 		fbToken.resolve(undefined);
 		console.log(error);
-	}, 'fbToken', 'Bubbl.li');
+	}, 'fbToken', 'Kip');
 	
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
@@ -59,14 +59,14 @@ lockerManager.saveCredentials = function(username, password) {
 	}, function(error) {
 		usernameSuccess.reject(error);
 	},
-	'username', 'Bubbl.li', username);
+	'username', 'Kip', username);
 	
 	lockerManager.keychain.setForKey(function(success) {
 		passwordSuccess.resolve(success);
 	}, function(error) {
 		passwordSuccess.reject(error);
 	},
-	'password', 'Bubbl.li', password);
+	'password', 'Kip', password);
 	
 	return $q.all([usernameSuccess, passwordSuccess]);
 }
@@ -80,7 +80,7 @@ lockerManager.saveFBToken = function(fbToken) {
 	}, function(error) {
 		deferred.reject(error);
 	},
-	'fbToken', 'Bubbl.li', fbToken);
+	'fbToken', 'Kip', fbToken);
 	
 	return deferred;
 }

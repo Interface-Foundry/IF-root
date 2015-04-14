@@ -181,7 +181,7 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
           coords: coords_text
         }
 
-        $http.post('/api/build_map', data).success(function(response){
+        $http.post('/api/build_map', data, {server: true}).success(function(response){
             console.log(response);
         });
 
@@ -4842,7 +4842,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================
@@ -4887,7 +4887,7 @@ $routeProvider.
 
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-  when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -17051,7 +17051,7 @@ function analyticsService($http, $injector, $rootScope, $timeout, $location, loc
 			
 		}).finally(function() {
 			// dude trust me, this is gonna work. no need for a response
-			$http.post('/api/analytics/' + action, doc);
+			$http.post('/api/analytics/' + action, doc, {server: true});
 		});
     }
     
@@ -17176,7 +17176,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			localStore.getID().then(function(id) {
 				data.anonID = id;
 			}).then(function() {
-				$http.post('/api/anon_user/update', data).
+				$http.post('/api/anon_user/update', data, {server: true}).
 					success(function(data) {
 						// console.log('success: ', data);
 					}).
@@ -17202,7 +17202,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			localStore.getID().then(function(id) {
 				data.anonID = id;
 			}).then(function() {
-				$http.post('/api/anon_user/update', data).
+				$http.post('/api/anon_user/update', data, {server: true}).
 					success(function(data, status, headers, config) {
 						// console.log('response: ', response);
 					}).
@@ -17392,7 +17392,7 @@ angular.module('tidepoolsServices')
 					if (geoService.mobileCheck()) {
 						// add arrow to user location marker if mobile device
 						iconUrl = 'img/marker/userLocMarker_arrow.png';
-						iconSize = [24, 30];
+						iconSize = [24, 28];
 						iconAnchor = [12, 12];
 					}
 
@@ -17718,7 +17718,7 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 		var data = {
 			userTime: new Date()
 		}
-		return $http.post('/api/anon_user/create', data)
+		return $http.post('/api/anon_user/create', data, {server: true})
 			.then(function(res) {
 				return res.data[0];
 			});
@@ -18824,21 +18824,21 @@ lockerManager.getCredentials = function() {
 	}, function(error) {
 		username.resolve(undefined);
 		console.log(error);
-	}, 'username', 'Bubbl.li');
+	}, 'username', 'Kip');
 
 	lockerManager.keychain.getForKey(function(value) {
 		password.resolve(value);
 	}, function(error) {
 		password.resolve(undefined);
 		console.log(error);
-	}, 'password', 'Bubbl.li');
+	}, 'password', 'Kip');
 	
 	lockerManager.keychain.getForKey(function(value) {
 		fbToken.resolve(value);
 	}, function(error) {
 		fbToken.resolve(undefined);
 		console.log(error);
-	}, 'fbToken', 'Bubbl.li');
+	}, 'fbToken', 'Kip');
 	
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
@@ -18853,14 +18853,14 @@ lockerManager.saveCredentials = function(username, password) {
 	}, function(error) {
 		usernameSuccess.reject(error);
 	},
-	'username', 'Bubbl.li', username);
+	'username', 'Kip', username);
 	
 	lockerManager.keychain.setForKey(function(success) {
 		passwordSuccess.resolve(success);
 	}, function(error) {
 		passwordSuccess.reject(error);
 	},
-	'password', 'Bubbl.li', password);
+	'password', 'Kip', password);
 	
 	return $q.all([usernameSuccess, passwordSuccess]);
 }
@@ -18874,7 +18874,7 @@ lockerManager.saveFBToken = function(fbToken) {
 	}, function(error) {
 		deferred.reject(error);
 	},
-	'fbToken', 'Bubbl.li', fbToken);
+	'fbToken', 'Kip', fbToken);
 	
 	return deferred;
 }
@@ -19104,8 +19104,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -19243,7 +19243,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
@@ -19298,6 +19298,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.login.error = false;
 		dialogs.showDialog('keychainDialog.html');
 		contest.login(new Date); // for wtgt contest
+		$route.reload();
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -19320,7 +19321,7 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.signup.error = false;		
 
 		// send confirmation email
-		$http.post('/email/confirm').then(function(success) {
+		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
 		}, function(error) {
 			console.log('error :', error);
@@ -19357,6 +19358,7 @@ userManager.checkAdminStatus = function() {
 
 return userManager;
 }]);
+
 'use strict';
 
 app.factory('worldBuilderService', worldBuilderService);
@@ -19768,8 +19770,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	var world = {newStatus: true};
 	
@@ -21457,7 +21457,7 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
 	  currentUrl: $location.absUrl()
     };
 
-    $http.post('feedback', data).
+    $http.post('feedback', data, {server: true}).
       success(function(data){
         console.log('feedback sent');
 		alertManager.addAlert('success', "Feedback sent, thanks!", true);
@@ -21727,7 +21727,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 				floor_num: parseFloat(floor_num),
 				floor_name: floor_name
 			};
-			$http.post('/api/temp_map_upload', newData).
+			$http.post('/api/temp_map_upload', newData, {server: true}).
 				success(function(data, status, headers, config) {
 					// console.log('success: ', data);
 					$scope.world = data;
@@ -21925,7 +21925,7 @@ function deleteMap(map) {
 		worldID: $scope.world._id,
 		map_marker_viewID: map.map_marker_viewID
 	};
-	$http.post('/api/delete_map', data).
+	$http.post('/api/delete_map', data, {server: true}).
 		success(function(data) {
 			// console.log('success: ', data);
 			$scope.world = data;
@@ -22187,7 +22187,7 @@ $scope.buildLocalMap = function () {
 		}
 	//build map
 	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
-	$http.post('/api/build_map', data).success(function(response){
+	$http.post('/api/build_map', data, {server: true}).success(function(response){
 		//response = JSON.parse(response);
 		alerts.addAlert('success', 'Map built!', true);
 		// console.log(response);
@@ -22375,7 +22375,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
@@ -23780,7 +23780,7 @@ $scope.navService = navService;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
+angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
 
@@ -23870,10 +23870,10 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://kipapp.co'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+    link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
   window.open(
     link,
@@ -23985,7 +23985,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					}
 				}
 				else if (tab === 'search') {
-					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general kip search
 					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
@@ -24129,7 +24129,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(15);
 
-            $http.post('/email/request_confirm/' + token).
+            $http.post('/email/request_confirm/' + token, {}, {server: true}).
             success(function(data) {
                 $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
             }).
@@ -24146,7 +24146,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(7);
 
-            $http.post('/resetConfirm/' + token).
+            $http.post('/resetConfirm/' + token, {}, {server: true}).
             success(function(data) {
 
             }).
@@ -24175,10 +24175,15 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.splash = true;
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
-            $scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
-            $scope.show.confirm = userManager.loginStatus &&
-                !userManager._user.local.confirmedEmail &&
-                !userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+            // don't show confirm dialog for fb authenticated users
+            if (userManager._user.facebook) {
+                $scope.show.splash = false;
+                $scope.show.confirm = false;
+            } else {
+                $scope.show.splash = !userManager._user.local.confirmedEmail;
+                $scope.show.confirm = !userManager._user.local.confirmedEmail;
+            }
+            
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
@@ -24240,7 +24245,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var data = {
                 updatedEmail: $scope.user.newEmail
             };
-            $http.post('api/user/emailUpdate', data).
+            $http.post('api/user/emailUpdate', data, {server: true}).
             success(function(data) {
                 if (data.err) {
                     addErrorMsg(data.err, 3000);
@@ -24255,7 +24260,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
     function sendEmailConfirmation() {
-        $http.post('/email/confirm').then(function(sucess) {}, function(error) {});
+        $http.post('/email/confirm', {}, {server: true}).then(function(sucess) {}, function(error) {});
     }
 
     function sendPasswordForgot() {
@@ -24263,7 +24268,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             email: $scope.user.email
         };
 
-        $http.post('/forgot', data).
+        $http.post('/forgot', data, {server: true}).
         success(function(data) {
             $scope.user.email = '';
         }).
@@ -24279,7 +24284,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             password: $scope.user.newPassword
         }
 
-        $http.post('/reset/' + $location.path().slice(7), data).
+        $http.post('/reset/' + $location.path().slice(7), data, {server: true}).
         success(function(data) {
             if (data.err) {
                 addErrorMsg(data.err, 3000);
@@ -24306,6 +24311,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
 }]);
+
 'use strict';
 
 angular.module('IF')
@@ -24837,7 +24843,7 @@ $scope.socialLogin = function(type){
 
     $location.url('/auth/'+type);
 
-    $http.post('/auth/'+type).
+    $http.post('/auth/'+type, {}, {server: true}).
       success(function(user){
   
       }).
@@ -24856,7 +24862,7 @@ $scope.socialLogin = function(type){
       password: $scope.user.password
     }
 
-    $http.post('/api/user/login', data).
+    $http.post('/api/user/login', data, {server: true}).
       success(function(user){
           if (user){
             $location.url('/profile');
@@ -24892,7 +24898,7 @@ function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
       password: $scope.user.password
     }
 
-    $http.post('/api/user/signup', data).
+    $http.post('/api/user/signup', data, {server: true}).
       success(function(user){
           if (user){
 
@@ -24934,7 +24940,7 @@ app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService',
       email: $scope.user.email
     }
 
-    $http.post('/forgot', data).
+    $http.post('/forgot', data, {server: true}).
       success(function(data){
           // console.log(data);
           $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
@@ -24959,7 +24965,7 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 
   $scope.aperture.set('off');
 
-  $http.post('/resetConfirm/'+$routeParams.token).
+  $http.post('/resetConfirm/'+$routeParams.token, {}, {server: true}).
     success(function(data){
         
     }).
@@ -24977,7 +24983,7 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
       password: $scope.user.password
     }
 
-    $http.post('/reset/'+$routeParams.token, data).
+    $http.post('/reset/'+$routeParams.token, data, {server: true}).
       success(function(data){
         $location.path('/profile');
       }).
@@ -24998,6 +25004,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
+
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});
@@ -25141,7 +25148,7 @@ if ($routeParams.incoming == 'meetup'){
 	$scope.fromMeetup = true;
 	$scope.waitingforMeetup = true;
 
-	$http.post('/api/process_meetups').success(function(response){
+	$http.post('/api/process_meetups', {}, {server: true}).success(function(response){
 		checkProfileUpdates(); //now wait until meetup bubbles come in
 		// $http.get('/api/user/profile').success(function(user){
 		// 	$scope.worlds = user;		
@@ -25369,10 +25376,7 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
-	
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
-	
+		
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){
@@ -26556,7 +26560,7 @@ link: function(scope, element, attrs) {
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {
-			return 'https://bubbl.li/'+string;
+			return 'https://kipapp.co/'+string;
 		}
 	}
 	
@@ -26997,10 +27001,10 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					}
 
 					if (scope.mode === 'home' && scrollState) {
-						$('.wrap').animate({
-							scrollTop: 0
-						}, 400);
-						scrollState = false;
+						// $('.wrap').animate({
+						// 	scrollTop: 0
+						// }, 400);
+						// scrollState = false;
 					} else {
 						if (apertureService.state !== 'aperture-full') {
 							apertureService.set('third');
@@ -27021,13 +27025,13 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 				// set aperture or scroll
 				if (scope.mode === 'home' && !scrollState) {
-					var navHeight = parseInt($('.main-nav').css('height'));
-					var marginTop = parseInt($('.search-cat').css('margin-top'));
-					$('.wrap').animate({
-						// subtract nav bar height and searchbar's margin-top
-						scrollTop: offset - (navHeight + marginTop)
-					}, 400);
-					scrollState = true;
+					// var navHeight = parseInt($('.main-nav').css('height'));
+					// var marginTop = parseInt($('.search-cat').css('margin-top'));
+					// $('.wrap').animate({
+					// 	// subtract nav bar height and searchbar's margin-top
+					// 	scrollTop: offset - (navHeight + marginTop)
+					// }, 400);
+					// scrollState = true;
 				} else {
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('off');
@@ -27205,8 +27209,11 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				console.log('Error:', error);
 			});
 		}
-	})
-}])
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadInstagrams = _.throttle(loadInstagrams, 5000);
+	});
+}]);
 
 //instagrams is an array of form
 // [{"objectID":string,
@@ -27617,13 +27624,33 @@ app.filter('httpsify', function() {
 }) 
 
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		$scope.loadTweets = loadTweets;
+		$scope.tweets = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
-	})
+
+		loadTweets();
+
+		function loadTweets() {
+			db.tweets.query({
+				number: $scope.tweets.length, 
+				tag:$scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = $scope.tweets.concat(response);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadTweets = _.throttle(loadTweets, 5000);
+	});
+}]);
 
 //tweets is an array of form
 // [{"text": string,
@@ -27638,8 +27665,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-
-}])
 // app.directive('categoryWidget', [function() {
 // return {
 // 	restrict: 'E',
@@ -27777,14 +27802,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 style.navBG_color = $scope.style.navBG_color;
 
 	 //show edit buttons if user is world owner
-	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-		 	$scope.showEdit = true;
+	userManager.getUser()
+	.then(function(user) {
+		if (user && user._id && $scope.world.permissions && user._id === $scope.world.permissions.ownerID) {
+
+		 	$scope.showEdit = true;	
+		} else {
+			$scope.showEdit = false;
 		}
-		else {
-		 	$scope.showEdit = false;
-		}
-	} 
+	});
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});
@@ -28028,7 +28054,13 @@ function loadWidgets() { //needs to be generalized
 		}
 		
 	  if ($scope.world.resources) {
-			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+			db.tweets.query({
+				number: 0,
+				tag: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = response;
+			});
 	  }
 
 	  if ($scope.style.widgets.nearby == true) {

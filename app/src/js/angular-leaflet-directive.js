@@ -489,7 +489,7 @@ angular.module("leaflet-directive").directive('legend', ["$log", "$http", "leafl
                         if (!isDefined(newURL)) {
                             return;
                         }
-                        $http.get(newURL)
+                        $http.get(newURL, {server: true})
                             .success(function (legendData) {
 
                                 if (isDefined(leafletLegend)) {

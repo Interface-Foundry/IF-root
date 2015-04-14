@@ -146,6 +146,7 @@ worldTree.getUpcoming = function(_id) {
 
 function getLocationInfoFromIP(deferredObj) {
 	var data = {
+		server: true,
 		params: {
 			hasLoc: false
 		}
@@ -209,6 +210,7 @@ worldTree.getNearby = function() {
 
 			// get city info
 			var data = {
+				server: true,
 				params: {
 					hasLoc: true,
 					lat: location.lat,
@@ -288,10 +290,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	//@IFDEF PHONEGAP
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
-	//@ENDIF
 	
 	var world = {newStatus: true};
 	

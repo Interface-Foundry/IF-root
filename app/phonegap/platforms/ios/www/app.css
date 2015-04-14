@@ -3768,6 +3768,7 @@ span.subnav-back-chevron {
   border-radius: 50%;
 }
 .profile-card-pic {
+  cursor: pointer;
   width: 96px;
   height: 96px;
   float: left;
@@ -5218,6 +5219,15 @@ div.marker-popup-click {
 }
 .fullPage-close:active {
   background-color: rgba(0, 0, 0, 0.4);
+}
+.fullPage-back {
+  background: url('img/icons/ic_chevron_left_grey600_48dp.png') center center / 50px 50px no-repeat;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+}
+.fullPage-back:active {
+  background: url('img/icons/ic_chevron_left_black_48dp.png') center center / 50px 50px no-repeat;
 }
 .btnMain {
   min-width: 150px;

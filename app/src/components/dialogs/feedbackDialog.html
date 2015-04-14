@@ -7,7 +7,13 @@
 		I have a <select ng-options="item.category for item in feedbackCategories" ng-model="feedbackCategory" />
 	</div>
 	<div>
-		I feel <select ng-options="item.emotion for item in feedbackEmotions" ng-model="feedbackEmotion" />
+		I feel 
+		<div ng-repeat="item in feedbackEmotions"
+			 ng-click="selectEmoji(item)"
+			 class="emoji-selector"
+			 ng-class="{selected: feedbackEmotion.emotion == item.emotion}"
+			 ng-bind-html="item.emoji | emoji">
+		</div>
 	</div>
 	<textarea class="form-control" rows="3" ng-model="feedbackText" style="margin-bottom: 8px;"></textarea>
 	<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>

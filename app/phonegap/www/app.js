@@ -1417,7 +1417,7 @@ angular.module("leaflet-directive").directive('legend', ["$log", "$http", "leafl
                         if (!isDefined(newURL)) {
                             return;
                         }
-                        $http.get(newURL)
+                        $http.get(newURL, {server: true})
                             .success(function (legendData) {
 
                                 if (isDefined(leafletLegend)) {
@@ -4812,9 +4812,10 @@ angular.module("leaflet-directive").factory('leafletHelpers', ["$q", "$log", fun
 }]);
 
 }());
+
 'use strict';
 
-var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular', 'ui.bootstrap'])
+var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'ngMessages', 'tidepoolsFilters','tidepoolsServices','leaflet-directive','angularFileUpload', 'IF-directives',  'dbaq.emoji', 'mgcrea.ngStrap', 'angularSpectrumColorpicker', 'ui.slider', 'swipe', 'monospaced.elastic', 'ui.calendar', 'textAngular', 'ui.bootstrap'])
   .config(function($routeProvider, $locationProvider, $httpProvider, $animateProvider, $tooltipProvider, $provide) {
   // $httpProvider.defaults.useXDomain = true;
 	var reg = $animateProvider.classNameFilter(/if-animate/i);
@@ -4842,7 +4843,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================
@@ -4853,6 +4854,15 @@ var updateTitle = function($rootScope) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
+	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
+		    			request.url = 'https://kipapp.co' + request.url;
+		    			if (ifGlobals.username&&ifGlobals.password) {
+							request.headers['Authorization'] = ifGlobals.getBasicHeader();
+							//console.log(request);
+						} else if (ifGlobals.fbToken) {
+							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
+						}
+	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4878,7 +4888,7 @@ $routeProvider.
 
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-  when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -4927,14 +4937,11 @@ $routeProvider.
 	when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
-
-  otherwise({redirectTo: '/w/404'});
+ when('/#', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
+  otherwise({redirectTo: '/'});
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       
-$locationProvider.html5Mode({
-	enabled: true
-});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4944,16 +4951,31 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
-	userManager.checkLogin();
 	
 	
+	navigator.splashscreen.hide();
 	
+/*
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+*/
 });
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-
-});
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
 app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5355,7 +5377,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 4;
+					var topOffset = 19;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5719,10 +5741,6 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
-			var firstHash = value.indexOf('#');
-			if (firstHash > -1) {
-				value = value.slice(0, firstHash) + value.slice(firstHash+1);
-			}
 			$attr.$set('href', value);
 			
 			});
@@ -5741,6 +5759,9 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
+				if (value.indexOf('http')<0) {
+					value = 'https://kipapp.co/'+value;
+				}
 				
 				$attr.$set('src', value);
 			
@@ -17091,7 +17112,7 @@ function bubbleSearchService($http, analyticsService) {
 		
 		analyticsService.log('search.' + searchType, params);
 
-		return $http.get('/api/bubblesearch/' + searchType, {params:params})
+		return $http.get('/api/bubblesearch/' + searchType, {server: true, params:params})
 			.then(function(response) {
 				angular.copy(response.data, data);
 				return data;
@@ -18788,8 +18809,77 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: false
+	supported: true,
+	keychain: new Keychain()
 }
+
+//getCredentials returns a promise->map of the available credentials. 
+//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+//	because all will return rejected if you do.
+
+lockerManager.getCredentials = function() {
+	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
+	
+	lockerManager.keychain.getForKey(function(value) {
+		username.resolve(value);
+	}, function(error) {
+		username.resolve(undefined);
+		console.log(error);
+	}, 'username', 'Kip');
+
+	lockerManager.keychain.getForKey(function(value) {
+		password.resolve(value);
+	}, function(error) {
+		password.resolve(undefined);
+		console.log(error);
+	}, 'password', 'Kip');
+	
+	lockerManager.keychain.getForKey(function(value) {
+		fbToken.resolve(value);
+	}, function(error) {
+		fbToken.resolve(undefined);
+		console.log(error);
+	}, 'fbToken', 'Kip');
+	
+	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
+}
+
+//saves username and password. Should be changed to use a map instead of args?
+
+lockerManager.saveCredentials = function(username, password) {
+	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
+	
+	lockerManager.keychain.setForKey(function(success) {
+		usernameSuccess.resolve(success);
+	}, function(error) {
+		usernameSuccess.reject(error);
+	},
+	'username', 'Kip', username);
+	
+	lockerManager.keychain.setForKey(function(success) {
+		passwordSuccess.resolve(success);
+	}, function(error) {
+		passwordSuccess.reject(error);
+	},
+	'password', 'Kip', password);
+	
+	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
+
+//saves the FB token
+lockerManager.saveFBToken = function(fbToken) {
+	var deferred = $q.defer();
+	lockerManager.keychain.setForKey(function(success) {
+		deferred.resolve(success);
+	}, function(error) {
+		deferred.reject(error);
+	},
+	'fbToken', 'Kip', fbToken);
+	
+	return deferred;
+}
+
 	 
 return lockerManager;
 	   
@@ -19023,7 +19113,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('/api/updateuser'),
+	userRes: $resource('https://kipapp.co/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19121,18 +19211,20 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	$http.post('/api/user/login', data, {server: true})
+	
+	ifGlobals.username = username;
+	ifGlobals.password = password;
+	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
-			userManager._user = data;
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
+			ifGlobals.loginStatus = true;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
-	
 	
 	return deferred.promise;
 }
@@ -19144,6 +19236,25 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 
+
+			
+			
+			var data = {
+            	userId: success.authResponse.userID,
+           		accessToken: success.authResponse.accessToken 
+          	};
+
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+					deferred.resolve(success);
+	            },
+
+	            function(res){
+	              deferred.reject(failure);
+	            }
+          	);      
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
@@ -19186,7 +19297,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.show = false;
+		dialogs.showDialog('keychainDialog.html');
 		contest.login(new Date); // for wtgt contest
 		$route.reload();
 	}, function (err) {
@@ -19518,6 +19629,7 @@ worldTree.getUpcoming = function(_id) {
 
 function getLocationInfoFromIP(deferredObj) {
 	var data = {
+		server: true,
 		params: {
 			hasLoc: false
 		}
@@ -19581,6 +19693,7 @@ worldTree.getNearby = function() {
 
 			// get city info
 			var data = {
+				server: true,
 				params: {
 					hasLoc: true,
 					lat: location.lat,
@@ -19674,6 +19787,7 @@ worldTree.createWorld = function() {
 return worldTree;
 }
 ]);
+
 var themeDict = {
 	urban: {
 		name: 'urban',
@@ -21270,7 +21384,7 @@ function announcementsService($http) {
 	};
 
 	function get() {
-		return $http.get('api/announcements/global');
+		return $http.get('api/announcements/global', {server: true});
 	}
 }
 
@@ -21330,13 +21444,17 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
   ];
 
   $scope.feedbackEmotions = [
-    {emotion: "excited"},
-    {emotion: "angry"},
-    {emotion: "confused"}
+    {emotion: "happy", emoji: ":smile:"},
+    {emotion: "angry", emoji: ":angry:"},
+    {emotion: "confused", emoji: ":confused:"}
   ];
 
   $scope.feedbackCategory = {};
   $scope.feedbackEmotion = {};
+
+  $scope.selectEmoji = function(emotion) {
+	  $scope.feedbackEmotion = emotion;
+  };
 
   $scope.sendFeedback = function($event) { //sends feedback email. move to dialog directive
 
@@ -21468,6 +21586,9 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//isnt ready for mobile yet
 var aperture = apertureService,
 	map = mapManager,
 	style = styleManager,
@@ -21512,7 +21633,7 @@ $scope.temp = {
 }
  //Used for local map scaling
 
-$http.get('/components/edit/edit.locale-en-us.json').success(function(data) { 
+$http.get('/components/edit/edit.locale-en-us.json', {server: true}).success(function(data) { 
 	$scope.locale = angular.fromJson(data);
 	$scope.tooltips = $scope.locale.tooltips;
 }); 
@@ -22262,7 +22383,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
@@ -22312,6 +22433,8 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -22869,6 +22992,8 @@ $scope.onUploadAvatar = function($files) {
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -23629,21 +23754,13 @@ function initMarkers() {
 
 worldTree.getNearby().then(function(data) { 
 	$scope.$evalAsync(function($scope) {
-		$scope.homeBubbles = data['150m'] || [];
-		$scope.nearbyBubbles = data['2.5km'] || [];
-		
-		if ($scope.nearbyBubbles.length>0 && $scope.homeBubbles.length>0) {
-			$scope.bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
-		} else if ($scope.nearbyBubbles.length>0) {
-			$scope.bubbles = $scope.nearbyBubbles;
-		} else if ($scope.homeBubbles.length>0) {
-			$scope.bubbles = $scope.homeBubbles;
-		} else {
-			$scope.bubbles = [];
-		}
+		nearbyBubbles = data['150m'] || []; // nearby
+		aroundMeBubbles = data['2.5km'] || []; // around me
+
+		$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
 		
 		$scope.loadState = 'success';
-		initMarkers();
+		// initMarkers();
 	});
 }, function(reason) {
 	//failure
@@ -23663,7 +23780,7 @@ $scope.navService = navService;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
+angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
 
@@ -23753,20 +23870,49 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://kipapp.co'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+    link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
   window.open(
     link,
-    'Bubbl.li',
+    'Kip',
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
   );
 };
 
+$scope.fbLogin = function() {
+	userManager.fbLogin().then(
+		function (success) {
+			console.log(success);
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
+		})
+}
+//On Phonegap startup, try to login with either saved username/pw or facebook
+lockerManager.getCredentials().then(function(credentials) {
+	if (credentials.username, credentials.password) {
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
+			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
+		});
+	} else if (credentials.fbToken) {
+		ifGlobals.fbToken = credentials.fbToken;
+		userManager.checkLogin().then(function(success) {
+			console.log(success);	
+		})
+	}
+}, function(err) {
+	console.log('credential error', error); 
+});
 }]);
 
+// DEPRACATED
 app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(worldTree, $rootScope, ifGlobals) {
 	return {
 		restrict: 'EA',
@@ -23789,13 +23935,11 @@ app.directive('exploreView', ['worldTree', '$rootScope', 'ifGlobals', function(w
 	}
 }])
 app.factory('navService', [function() {
-	// used for displaying correct selection on nav icons, as well as showing and hiding explore-view and search-view directives in index.html
+	// used for displaying correct selection on nav icons, and managing back button
 
 	var status = {
 		home: true, // default home nav selected
-		explore: false,
-		search: false, // main bubblli search
-		searchWithinBubble: false // search within a bubble (all, text, category)
+		search: false // global search or world search
 	};
 
 	var backPages = -1; // for back button, num pages to go back. useful for 404 page
@@ -23824,89 +23968,79 @@ app.factory('navService', [function() {
 
 }]);
 app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($routeParams, $location, $http, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
+	
 	return {
 		restrict: 'EA',
 		scope: true,
-		link: function(scope, element, attrs) {
+		templateUrl: 'components/nav/navTabs.html',
+		link: link
+	};
 
-			scope.select = function (tab) {
-				if (tab === 'home') {
-					if ($routeParams.worldURL) {
-						var wRoute = "/w/"+$routeParams.worldURL;
-						$location.path() === wRoute ? $location.path("/") : $location.path(wRoute);
+	function link(scope, element, attrs) {
 
-					} else {
-						$location.path('/');
-					}
-				}
-				else if (tab === 'search') {
-					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
-					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
-						tab = 'searchWithinBubble';	
-						$location.path('/w/' + $routeParams.worldURL + '/search');
-					} else {
-						if (geoService.location.cityName) {
-							var locationData = {
-								lat: geoService.location.lat,
-								lng: geoService.location.lng,
-								cityName: geoService.location.cityName
-							};
-							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
-						} else { // use IP
-							var data = {
-								params: {
-									hasLoc: false
-								}
-							};
-							$http.get('/api/geolocation', data).
-								success(function(locInfo) {
-									var locationData = {
-										lat: locInfo.lat,
-										lng: locInfo.lng,
-										cityName: locInfo.cityName,
-										timestamp: Date.now()
-									};
-									geoService.updateLocation(locationData);
-									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
-								}).
-								error(function(err) {
-									console.log('err: ', err);
-								});
-						}
-						
-					}
-					apertureService.set('third');
-				}
-				navService.show(tab);
+		scope.goHome = goHome;
+		scope.goSearch = goSearch;
+
+		function goHome() {
+			// go to world home if in world but not already in world home. go to kip home otherwise
+
+			if ($routeParams.worldURL && $location.path() !== '/w/' + $routeParams.worldURL) {
+				$location.path('/w/' + $routeParams.worldURL);
+			} else {
+				$location.path('/');
 			}
 
-			scope.hardSearch = function() {
+			navService.show('home');
+		}
+
+		function goSearch() {
+			// go to world search if in retail world but not already in world search home. go to global search otherwise
+
+			if ($routeParams.worldURL &&
+				bubbleTypeService.get() === 'Retail' && 
+				$location.path() !== '/w/' + $routeParams.worldURL + '/search') {
+				$location.path('/w/' + $routeParams.worldURL + '/search');
+			} else {
+				// get location. use IP if we don't have it stored
 				if (geoService.location.cityName) {
-					navService.show('search');
 					var locationData = {
 						lat: geoService.location.lat,
 						lng: geoService.location.lng,
 						cityName: geoService.location.cityName
 					};
 					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
-				}
-			};
-			
-			scope.nearbiesLength = function() {
-				if (worldTree._nearby) {
-					return _.reduce(worldTree._nearby, function(memo, value) {return memo+_.size(value)}, 0);
-				} else {
-					return 0;
+				} else { // use IP
+					var data = {
+						server: true,
+						params: {
+							hasLoc: false
+						}
+					};
+					$http.get('/api/geolocation', data).
+						success(function(locInfo) {
+							var locationData = {
+								lat: locInfo.lat,
+								lng: locInfo.lng,
+								cityName: locInfo.cityName,
+								timestamp: Date.now()
+							};
+							geoService.updateLocation(locationData);
+							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
+						}).
+						error(function(err) {
+							console.log('err: ', err);
+						});
 				}
 			}
-		},
-		template: 
-'<button class="view-tab home-tab" ng-class="{selected: navService.status.home}" ng-click="select(\'home\')"></button>'+
-'<button class="view-tab explore-tab" ng-class="{selected: navService.status.explore}" ng-click="select(\'explore\')">'+
-'<span ng-show="nearbiesLength()>0" class="compass-badge badge" ng-cloak>{{nearbiesLength()}}</span></button>'+
-'<button class="view-tab search-tab" ng-class="{selected: navService.status.search || navService.status.searchWithinBubble}" single-click callback="select" vars="[\'search\']" ng-dblclick="hardSearch()"></button>'
+
+			navService.show('search');
+		}
+
 	}
-}])
+
+}]);
+
+// DEPRACATED
 app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
 		restrict: 'EA',
@@ -24030,10 +24164,15 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.splash = true;
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
-            $scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
-            $scope.show.confirm = userManager.loginStatus &&
-                !userManager._user.local.confirmedEmail &&
-                !userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+            // don't show confirm dialog for fb authenticated users
+            if (userManager._user.facebook) {
+                $scope.show.splash = false;
+                $scope.show.confirm = false;
+            } else {
+                $scope.show.splash = !userManager._user.local.confirmedEmail;
+                $scope.show.confirm = !userManager._user.local.confirmedEmail;
+            }
+            
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
@@ -24042,7 +24181,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
         }
 
-        $scope.show.close = true; // only show close button (home, not confirm) on web
         $scope.show.signin = false;
         $scope.show.register = false;
     }
@@ -25227,8 +25365,7 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
-	
-	
+		
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){
@@ -25310,7 +25447,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	if ($routeParams.worldURL) {
-		navService.show('searchWithinBubble');
+		navService.show('search');
 
 		worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.world = data.world;
@@ -26420,7 +26557,7 @@ link: function(scope, element, attrs) {
 		if (string.indexOf('http') > -1 || string.indexOf('img/IF/kipbot_icon.png') > -1) {
 			return string;
 		} else {
-			return 'https://bubbl.li/'+string;
+			return 'https://kipapp.co/'+string;
 		}
 	}
 	
@@ -27061,6 +27198,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 			function goToLocationFromIP(locationBool) {
 				var data = {
+					server: true,
 					params: {
 						hasLoc: false
 					}
@@ -27091,6 +27229,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		}
 	};
 }]);
+
 app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
 		
@@ -27236,10 +27375,6 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
-		var firstHash = url.indexOf('#');
-		if (firstHash > -1) {
-			return url.slice(0, firstHash) + url.slice(firstHash+1);
-		} else {return url}
 		return url;
 	}
 }
@@ -27629,7 +27764,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService) {
 
 var map = mapManager;
 	map.resetMap();
