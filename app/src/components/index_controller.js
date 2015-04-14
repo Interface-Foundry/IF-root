@@ -9,7 +9,7 @@ $scope.navService = navService;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
+angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
 
@@ -99,10 +99,10 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://kipapp.co'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+    link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
   window.open(
     link,

@@ -4842,7 +4842,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================
@@ -4878,8 +4878,7 @@ $routeProvider.
 
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-
-  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController').
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -22263,7 +22262,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
@@ -23664,7 +23663,7 @@ $scope.navService = navService;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
+angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
 
@@ -23754,10 +23753,10 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://kipapp.co'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+    link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
   window.open(
     link,
@@ -23841,7 +23840,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					}
 				}
 				else if (tab === 'search') {
-					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general kip search
 					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
@@ -25233,8 +25232,7 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
-	
-	
+		
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){
@@ -26418,7 +26416,7 @@ link: function(scope, element, attrs) {
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {
-			return 'https://bubbl.li/'+string;
+			return 'https://kipapp.co/'+string;
 		}
 	}
 	

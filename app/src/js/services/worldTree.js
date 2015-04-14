@@ -288,10 +288,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	//@IFDEF PHONEGAP
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
-	//@ENDIF
 	
 	var world = {newStatus: true};
 	
