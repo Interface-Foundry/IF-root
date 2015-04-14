@@ -3,7 +3,6 @@
 // Production specific configuration
 // =================================
 module.exports = {
-
   geoipURL: 'http://127.0.0.1:8080/json/',
   // geoipURL: 'http://www.freegeoip.net/json/',
   mongodb: {
