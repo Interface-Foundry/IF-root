@@ -48,6 +48,7 @@
 						ng-click="go('w/' + world.id + '/' + landmark.id)">
 							<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
 							<span>{{::landmark.name}}</span>
+							<span class="floor-num">{{::landmark.loc_info.floor_num | floorNumToName }}</span>
 					</li>
 				</ul>
 			</div>
@@ -70,6 +71,7 @@
 							ng-click="go('w/' + world.id + '/' + landmark.id)">
 								<img if-src="{{ ::landmark.avatar }}" class="bubble-list-item-img">
 								<span>{{::landmark.name}}</span>
+								<span class="floor-num">{{::landmark.loc_info.floor_num | floorNumToName }}</span>
 						</li>
 					</ul>
 				</div>
@@ -98,15 +100,12 @@
 		show-floors="showFloors"></floor-selector>
 </div>
 
-<<<<<<< HEAD
 <user-location class="if-animate"
 	style="style" 
 	ng-if="bubbleTypeService.get() === 'Retail'"
 	ng-class="[aperture.state]">
 </user-location>
 
-=======
->>>>>>> Bubblli
 <cat-search-bar class="search-aperture" 
 	ng-if="searchBarText && aperture.state === 'aperture-full'" 
 	color="style.landmarkTitle_color"

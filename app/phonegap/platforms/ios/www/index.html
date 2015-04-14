@@ -1,26 +1,18 @@
 <!doctype html>
-
 <!--
 
-_|_|_|              _|                              _|_|                              
-  _|    _|_|_|    _|_|_|_|    _|_|    _|  _|_|    _|        _|_|_|    _|_|_|    _|_|  
-  _|    _|    _|    _|      _|_|_|_|  _|_|      _|_|_|_|  _|    _|  _|        _|_|_|_|
-  _|    _|    _|    _|      _|        _|          _|      _|    _|  _|        _|      
-_|_|_|  _|    _|      _|_|    _|_|_|  _|          _|        _|_|_|    _|_|_|    _|_|_|
-                                                                                      
-_|_|_|_|                                    _|                    
-_|        _|_|    _|    _|  _|_|_|      _|_|_|  _|  _|_|  _|    _|
-_|_|_|  _|    _|  _|    _|  _|    _|  _|    _|  _|_|      _|    _|
-_|      _|    _|  _|    _|  _|    _|  _|    _|  _|        _|    _|
-_|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
-                                                                _|
-                                                            _|_|  
+   ▄█   ▄█▄  ▄█     ▄███████▄ 
+  ███ ▄███▀ ███    ███    ███ 
+  ███▐██▀   ███▌   ███    ███ 
+ ▄█████▀    ███▌   ███    ███ 
+▀▀█████▄    ███▌ ▀█████████▀  
+  ███▐██▄   ███    ███        
+  ███ ▀███▄ ███    ███        
+  ███   ▀█▀ █▀    ▄████▀      
+  ▀                           
 
-  v0.3 Illya 
+  v0.9 Illya 
   interfacefoundry.com ♥ ♥ ♥  
-
-  Other contributors: Open Technology Institute, Lisa J. Lovchik, Nicholas Frota, Hilal Koyuncu
-
   -->
 
 <html lang="en" ng-controller="indexIF">
@@ -28,17 +20,40 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-	<title ng-bind="globalTitle">Bubbl.li</title>
+	<title ng-bind="globalTitle">Kip</title>
 	<meta name="description" content="powered by Interface Foundry">
 
-	<meta property="og:title" content="Bubbl.li" />
-	<meta property="og:url" content="http://bubbl.li" />
-	<meta property="og:description" content="powered by Interface Foundry" />
-	<meta property="og:image" content="http://interfacefoundry.com/img/IF/IF_box_250_250.png" />
-	<meta property="og:site_name" content="IF Bubbl.li"/>
+	<meta property="og:title" content="Kip" />
+	<meta property="og:url" content="https://kipapp.co" />
+	<meta property="og:description" content="It's all in the Kip" />
+	<meta property="og:image" content="http://interfacefoundry.com/kip_250_250.png" />
+	<meta property="og:site_name" content="Kip"/>
 	<meta property="og:type" content="website" /> 
 
 	<link rel="stylesheet" href="app.css">
+
+	<!-- favicons -->
+
+	<link rel="apple-touch-icon" sizes="57x57" href="img/favicons/apple-touch-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="img/favicons/apple-touch-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="img/favicons/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="img/favicons/apple-touch-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="img/favicons/apple-touch-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="img/favicons/apple-touch-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="img/favicons/apple-touch-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="img/favicons/apple-touch-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="img/favicons/apple-touch-icon-180x180.png">
+	<link rel="icon" type="image/png" href="img/favicons/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="img/favicons/android-chrome-192x192.png" sizes="192x192">
+	<link rel="icon" type="image/png" href="img/favicons/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="img/favicons/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="img/favicons/manifest.json">
+	<meta name="msapplication-TileColor" content="#f43b1c">
+	<meta name="msapplication-TileImage" content="img/favicons/mstile-144x144.png">
+	<meta name="theme-color" content="#f43b1c">
+
+	<!-- end favicons -->
+
 		
 	<script src="cordova.js"></script>
 	<script src="$.js"></script>
@@ -67,7 +82,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <nav role="navigation" class="main-nav" 
 	ng-style="{'background-color': style.navBG_color}">
 	<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
-	<span class="nav-title">Bubbl.li</span>
+	<span class="nav-title">Kip</span>
 	<div class="user-chip" user-chip></div>
 	<nav-tabs class="view-tabs"></nav-tabs>
 </nav>
@@ -75,6 +90,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
 
 <div class="feedbackWindow" ng-show="feedback.on" ng-init="feedback.on=false">
+	<div>sup</div>
 	<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
 	<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
 	<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -96,7 +112,7 @@ _|        _|_|      _|_|_|  _|    _|    _|_|_|  _|          _|_|_|
 <drawer ng-if="userManager.loginStatus"></drawer>
 
 <script>
-    ga_storage._setAccount('UA-51752546-1'); //Replace with your own
+    ga_storage._setAccount('UA-51752546-3'); //using Kip WWW GA
     ga_storage._trackPageview('/index.html');
 /*
 

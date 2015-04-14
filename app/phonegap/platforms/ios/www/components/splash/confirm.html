@@ -1,0 +1,26 @@
+<div class="fullPage">
+	<div class="fullPage-content u-centerXY">
+		<h3>Please Confirm Your Email</h3>
+		<p>Email you signed up with:</p>
+		<p>
+			<input type="text" 
+				class="inputEdit u-textAlignCenter u-relative"
+				style="left: 16px; color: rgb(100, 100, 100); padding-right: 22px" 
+				size="24"
+				ng-model="user.newEmail"
+				initial-val="{{ user.newEmail }}"
+				click-to-edit>
+			<img src="img/icons/ic_edit_grey600.png" 
+				class="u-relative u-inlineBlock" 
+				style="width: 24px; top: -2px; left: -12px; z-index:-1">
+		</p>
+
+		<span class="errorMsg u-absolute u-centerX" 
+			ng-if="errorMsg">{{ errorMsg }}</span>
+
+		<button class="btnMain btnMain--blue u-centerX" 
+			style="margin-top: 80px"
+			ng-click="resendEmail()">RESEND EMAIL</button>
+	</div>
+	<div class="fullPage-close" ng-click="setShowSplash('splash', false)"></div>
+</div>
