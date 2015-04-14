@@ -2584,7 +2584,7 @@ app.get('/api/worlds/:id', function(req, res) {
                 landmarkSchema.findOne({
                     id: '404'
                 }, function(err, world) {
-                    if (err) res.send({
+                    if (err) return res.send({
                         err: '552: cannot find world.'
                     })
                     combineQuery(world, res);
@@ -2600,6 +2600,11 @@ app.get('/api/worlds/:id', function(req, res) {
     //if world, query for style and return
     function combineQuery(data, res) {
             //look up style associated with world
+		//
+		if (!data) {
+			console.log("world doesn't exist");
+			return;
+		}
 
             if (data.style) {
                 if (data.style.styleID) {
