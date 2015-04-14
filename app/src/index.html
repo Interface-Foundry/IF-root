@@ -12,7 +12,8 @@
   ▀                           
 
   v0.9 Illya 
-  interfacefoundry.com ♥ ♥ ♥  
+  interfacefoundry.com ♥ ♥ ♥ 
+
   -->
 
 <html lang="en" ng-controller="indexIF">
@@ -85,65 +86,70 @@
 
 <body ng-class="[aperture.state]" ng-click="closeOverlays()">
 
-<ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
-	<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
-		<a if-href="#{{::alert.href}}" ng-click="$parent.compassOverlay = false" class="alert-link">
-			<h5 class="alert-title">{{alert.title}}</h5>
-			<span ng-bind-html="alert.msg"></span>
-		</a>
-		<button ng-click="alerts.closeAlert($index)" class="alert-close">
-			<img src="img/icons/ic_clear_grey600_24dp.png" width="24px" height="24px">
-		</button>
-	</li>
-</ul>
+	<div ng-controller="SplashController">
+		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
-<nav role="navigation" class="main-nav" 
-	ng-style="{'background-color': style.navBG_color}">
-	<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
-	<span class="nav-title">Kip</span>
-	<div class="user-chip" user-chip></div>
-	<nav-tabs class="view-tabs"></nav-tabs>
-</nav>
+		<div ng-if="show.splash === false">
+			<ul id="alerts" class="alert-container" ng-class="{'tuck': compassOverlay}" ng-style="{top: compassOverlay || alerts.list.length*8+24+'px'}">
+				<li ng-repeat="alert in alerts.list" class="alert if-animate" role="alert" ng-click="$parent.compassOverlay = false">
+					<a if-href="#{{::alert.href}}" ng-click="$parent.compassOverlay = false" class="alert-link">
+						<h5 class="alert-title">{{alert.title}}</h5>
+						<span ng-bind-html="alert.msg"></span>
+					</a>
+					<button ng-click="alerts.closeAlert($index)" class="alert-close">
+						<img src="img/icons/ic_clear_grey600_24dp.png" width="24px" height="24px">
+					</button>
+				</li>
+			</ul>
 
-<!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
+			<nav role="navigation" class="main-nav" 
+				ng-style="{'background-color': style.navBG_color}">
+				<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
+				<span class="nav-title">Kip</span>
+				<div class="user-chip" user-chip></div>
+				<nav-tabs class="view-tabs"></nav-tabs>
+			</nav>
 
-<div class="feedbackWindow" ng-show="feedback.on" ng-init="feedback.on=false">
-	<div>sup</div>
-	<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
-	<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
-	<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-</div>
+			<!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
 
-<section id="aperture" ng-class="[aperture.state]">
-	<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers"></leaflet>
-</section>
-	
-<section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>
-</section>
- 
-<div class="dialog-bg" ng-if="dialog.show" ng-click="dialog.close($event)">
-	<div ng-include="dialog.template" class="dialog"></div>
-</div>
+			<div class="feedbackWindow" ng-show="feedback.on" ng-init="feedback.on=false">
+				<div>sup</div>
+				<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
+				<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
+				<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			</div>
 
-<explore-view class="explore-view" ng-if="navService.status.explore"></explore-view>
-<search-view class="search-view" ng-if="navService.status.search"></search-view>
-<drawer ng-if="userManager.loginStatus"></drawer>
+			<section id="aperture" ng-class="[aperture.state]">
+				<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers"></leaflet>
+			</section>
+				
+			<section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>
+			</section>
+			 
+			<div class="dialog-bg" ng-if="dialog.show" ng-click="dialog.close($event)">
+				<div ng-include="dialog.template" class="dialog"></div>
+			</div>
 
-<script>
-    ga_storage._setAccount('UA-51752546-3'); //using Kip WWW GA
-    ga_storage._trackPageview('/index.html');
-/*
+			<explore-view class="explore-view" ng-if="navService.status.explore"></explore-view>
+			<!-- <search-view class="search-view" ng-if="navService.status.search"></search-view> -->
+			<drawer ng-if="userManager.loginStatus"></drawer>
 
-	
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		</div>
+	</div>
 
-  ga('create', 'UA-51752546-1', 'bubbl.li');
-  ga('send', 'pageview');
-*/
-</script>
+	<script>
+	    ga_storage._setAccount('UA-51752546-3'); //Replace with your own
+	    ga_storage._trackPageview('/index.html');
+	/*
+		
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	  ga('create', 'UA-51752546-1', 'bubbl.li');
+	  ga('send', 'pageview');
+	*/
+	</script>
 
 </body>
 </html>

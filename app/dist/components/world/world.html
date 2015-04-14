@@ -19,7 +19,7 @@
 		</div>
 
 	</div>
-	<div>
+	<div id="splash">
 	</div>
 
 	<!-- bubbleBody directive controls aperture change on scroll -->
@@ -50,7 +50,8 @@
 			</div>
 
 			<!---want this got this -->
-			<div ng-include="isRetail && contest ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
+
+			<div ng-show="!hide" ng-include="isRetail ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
 
 			<!---yelp-->
 			<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>

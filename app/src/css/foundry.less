@@ -1464,8 +1464,8 @@ margin-bottom: 4px;
 		}
 		img {
 			cursor: pointer;
-			max-height: 100%;
-			max-width: 100%;
+			max-height: 87%;
+			max-width: 87%;
 		}
 	}
 
@@ -1509,6 +1509,10 @@ margin-bottom: 4px;
 	}
 }
 
+.message-nav .wtgt .camera {
+	margin-left: -24px;
+}
+
 .plus-one {
   border-radius: 50%;
   cursor: pointer;
@@ -1516,15 +1520,11 @@ margin-bottom: 4px;
   height: 16px;
   line-height: 1;
   position: absolute;
-  right: -11px;
-  top: 169px;
+  right: 5px;
+  top: 24px;
   font-size: 1.1em;
   width: 16px;
   z-index: 1;
-
-	@media only screen and (max-width: 768px) {
-		top: 129px;
-	}
 }
 
 .marble-page-footer.tag {
@@ -1982,3 +1982,26 @@ button:focus {
 	outline: none;
 }
 
+/* temp class for splash that hides world */
+.splash-img {
+	background-color: grey;
+  bottom: 0;
+	height: 100%;
+  left: 0;
+  margin: auto auto;
+	position: absolute;
+  right: 0;
+  top: -70%;
+  width: 100%;
+  z-index: 1001;
+
+  img {
+  	opacity: 0;
+		-webkit-transition: 1s cubic-bezier(.5,.1,0,1) all;
+		transition: 1s cubic-bezier(.5,.1,0,1) all;
+		
+		&.splash-fade-in {
+			opacity: 1;
+		}
+  }
+}

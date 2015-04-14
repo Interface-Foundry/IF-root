@@ -26,7 +26,7 @@ function initMarkers() {
 			message: '<a if-href="#w/'+bubble.id+'">'+bubble.name+'</a>',
 			enable: 'leafletDirectiveMarker.click',
 			icon: {
-				iconUrl: 'img/marker/bubbleMarker_24.png',
+				iconUrl: 'img/marker/bubbleMarker_30.png',
 				shadowUrl: '',
 				iconSize: [24, 24],
 				iconAnchor: [11, 11],
@@ -41,16 +41,16 @@ function initMarkers() {
 
 //LISTENERS// 
 
-$rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
-	var bubble = $scope.bubbles.find(function(element, index, array) {
-		if (element._id==args.markerName) {
-			return true;
-		} else { 
-			return false;
-		}
-	});
-	$scope.select(bubble);
-});
+// $rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
+// 	var bubble = $scope.bubbles.find(function(element, index, array) {
+// 		if (element._id==args.markerName) {
+// 			return true;
+// 		} else { 
+// 			return false;
+// 		}
+// 	});
+// 	$scope.select(bubble);
+// });
 
 //INIT
 

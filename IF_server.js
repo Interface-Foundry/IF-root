@@ -21,7 +21,8 @@ var http = require('http');
 var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'),
     Magic = mmm.Magic;
-var configDB = require('./components/IF_auth/database.js');
+
+global.config = require('./config'); // pulls in config/index.js
 
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var submitContestEntry = require('./components/IF_contests/IF_contests.js');
@@ -82,7 +83,7 @@ var mongoose = require('mongoose'),
 var env = process.env.NODE_ENV || 'development';
 console.log("running in $env mode".replace('$env', env));
 
-mongoose.connect(configDB.url);
+mongoose.connect(global.config.mongodb.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
@@ -101,14 +102,13 @@ var socket = require('./components/IF_chat/socket.js');
 var express = require('express'),
     app = module.exports.app = express(),
     // cors = require('cors'),
-    db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+	//db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+	db = db_mongoose; // TODO refactor this... i don't really know where it came from
 
-
-//===== SET UP ENVIRONMENT =====//
-
-// Set default node environment to development
-process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-var config = require('./config');
+// add in health check before sessions
+app.get('/api/healthcheck', function(req, res) { 
+	res.send(200);
+});
 
 //express compression
 var oneDay = 86400000;
@@ -204,22 +204,22 @@ require('./components/IF_auth/auth_routes.js')(app, passport, landmarkSchema); /
 //---- Sending Feedback via Email -----//
 //-------------------------------------//
 app.post('/feedback', function(req, res) {
-	if (!req.body.feedbackText) {
-		// nohing to report
-		return res.send(200);
-	}
+    if (!req.body.feedbackText) {
+        // nohing to report
+        return res.send(200);
+    }
 
-	// sanitize inputs
-	//var s = /[^\w\s\,\.\@\?\!]/gi;
-	var s = /(<([^>]+)>)/ig; // just strip out HTML stuff
-	var emailSubject = "Feedback - " + req.body.feedbackCategory.replace(s, '');
-	var emailBody = "from: $user\n\nemotion: $emotion\n\nurl: $url\n\ntext: $text"
-		.replace('$user', req.user ? req.user._id : "not logged in")
-		.replace('$anonuser', req.body.anonuserid)
-		.replace('$url', req.body.currentUrl)
-		.replace('$emotion', req.body.feedbackEmotion)
-		.replace('$text', req.body.feedbackText)
-		.replace(s, '');
+    // sanitize inputs
+    //var s = /[^\w\s\,\.\@\?\!]/gi;
+    var s = /(<([^>]+)>)/ig; // just strip out HTML stuff
+    var emailSubject = "Feedback - " + req.body.feedbackCategory.replace(s, '');
+    var emailBody = "from: $user\n\nemotion: $emotion\n\nurl: $url\n\ntext: $text"
+        .replace('$user', req.user ? req.user._id : "not logged in")
+        .replace('$anonuser', req.body.anonuserid)
+        .replace('$url', req.body.currentUrl)
+        .replace('$emotion', req.body.feedbackEmotion)
+        .replace('$text', req.body.feedbackText)
+        .replace(s, '');
 
     var feedbackTo = 'hello@interfacefoundry.com';
 
@@ -231,9 +231,9 @@ app.post('/feedback', function(req, res) {
     };
 
     mailerTransport.sendMail(mailOptions, function(err) {
-		if (err) { 
-			console.error(err);
-		}
+        if (err) {
+            console.error(err);
+        }
         res.send('email sent');
     });
 });
@@ -253,12 +253,7 @@ function puts(error, stdout, stderr) {
     sys.puts(stdout)
 }
 
-if (process.env.NODE_ENV == 'production') {
-    console.log('Running in production mode, running production freegeoip server', process.env.NODE_ENV)
-    exec("freegeoip", puts);
-}
-
-
+console.log('using greegeoip server', global.config.geoipURL);
 
 
 //---------------------------------------//
@@ -634,25 +629,28 @@ var elasticsearch_up = false; // health status
 setInterval(function() {
     elasticsearch.healthcheck(function(err) {
         if (err) {
-            elasticsearch_up = false;
-            if (env == 'production') {
-                console.error('elasticsearch down');
+			if (elasticsearch_up) {
+				elasticsearch_up = false;
+                console.error('elasticsearch is down');
                 console.error(err);
             }
         } else {
-            elasticsearch_up = true;
+			if (!elasticsearch_up) {
+				elasticsearch_up = true;
+				console.log('elasticsearch is back up');
+			}
         }
     });
 }, 15000);
 
 // Search route
 app.get('/api/textsearch', function(req, res, next) {
-	if (elasticsearch_up) {
-		console.log('using elasticsearch');
-		elasticsearch.search(req, res, next);
-	} else {
-		text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
-	}
+    if (elasticsearch_up) {
+        console.log('using elasticsearch');
+        elasticsearch.search(req, res, next);
+    } else {
+        text_search(req.query.textQuery, req.query.userLat, req.query.userLng, req.query.localTime, res);
+    }
 });
 //In Bubble Search
 app.get('/api/bubblesearch/:type', function(req, res, next) {
@@ -945,7 +943,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                     if (err)
                                         console.log(err);
                                     else {
-                                        res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                                        // res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
 
 
@@ -963,7 +961,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 // uploadContents.description = newString;
                                                 submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
                                                     //Retrieve new saved contest entry ID
-                                                    newentryID = data
+                                                    console.log('submitted data is..', data)
+                                                    res.send(data)
+                                                    // res.send(data)
                                                 }); //contest entry, send to bac
                                             }
                                         }
@@ -1313,235 +1313,221 @@ app.post('/api/upload_maps', isLoggedIn, function(req, res) {
 
 
 //after map upload, the front end calls to this API to save world ID with temp URL and map ID for front end tracking
-app.post('/api/temp_map_upload', isLoggedIn, function(req,res){
+app.post('/api/temp_map_upload', isLoggedIn, function(req, res) {
 
-    if (req.body.worldID){
-      landmarkSchema.findById(req.body.worldID, function(err, lm) {
-        if (!lm){
-          console.log(err);
-        }
-        else if (req.user._id == lm.permissions.ownerID){
-          //NEED TO ADD CHECKS FOR INCOMING DATA HERE
-          var newMap = {
-            map_marker_viewID: req.body.map_marker_viewID,
-            floor_num: req.body.floor_num,
-            floor_name: req.body.floor_name,
-            temp_upload_path: req.body.temp_upload_path
-          };
+    if (req.body.worldID) {
+        landmarkSchema.findById(req.body.worldID, function(err, lm) {
+            if (!lm) {
+                console.log(err);
+            } else if (req.user._id == lm.permissions.ownerID) {
+                //NEED TO ADD CHECKS FOR INCOMING DATA HERE
+                var newMap = {
+                    map_marker_viewID: req.body.map_marker_viewID,
+                    floor_num: req.body.floor_num,
+                    floor_name: req.body.floor_name,
+                    temp_upload_path: req.body.temp_upload_path
+                };
 
-          //CHECK HERE IF OBJECT EXISTS BEFORE PUSH!!
-          function mapExists(callback){
-            callback(!_.isEmpty(_.where(lm.style.maps.localMapArray, {map_marker_viewID: req.body.map_marker_viewID})));
-          }
-          mapExists(function(d){
-            console.log('exist?',d);
-          });
+                //CHECK HERE IF OBJECT EXISTS BEFORE PUSH!!
+                function mapExists(callback) {
+                    callback(!_.isEmpty(_.where(lm.style.maps.localMapArray, {
+                        map_marker_viewID: req.body.map_marker_viewID
+                    })));
+                }
+                mapExists(function(d) {
+                    console.log('exist?', d);
+                });
 
-          lm.style.maps.localMapArray.push(newMap);
-          lm.save(function(err, landmark) {
-              if (err){
-                  console.log('error');
-              }
-              else {
-                  //console.log(landmark);
-                  console.log('success');
+                lm.style.maps.localMapArray.push(newMap);
+                lm.save(function(err, landmark) {
+                    if (err) {
+                        console.log('error');
+                    } else {
+                        //console.log(landmark);
+                        console.log('success');
 
-                  console.log(JSON.stringify(landmark));
-                  res.status(200).send(landmark);
-              }
-          });
-        }
-        else {
-          console.log('unauthorized user');
-        }
-      });  
+                        console.log(JSON.stringify(landmark));
+                        res.status(200).send(landmark);
+                    }
+                });
+            } else {
+                console.log('unauthorized user');
+            }
+        });
     }
 });
 
 //map send to tile server to build 
-app.post('/api/build_map', isLoggedIn, function (req, res) {
+app.post('/api/build_map', isLoggedIn, function(req, res) {
 
-  if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
-    
-      //this entire area hurts my eyes, i can't even D:
-      var map_text = JSON.stringify(req.body.coords); 
-      map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
+    if (fs.existsSync(__dirname + '/app/dist/' + req.body.mapIMG)) {
 
-      // after file saved locally, send to IF-Tiler server
-      //https://107.170.180.141:3000/api/upload
-      var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback (err, httpResponse, body) {
-        if (err) {
-            //deleting temp map upload
-            if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
-                //delete temp file
-                fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
-                  if (err) throw err;
-                  console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
-                });              
+        //this entire area hurts my eyes, i can't even D:
+        var map_text = JSON.stringify(req.body.coords);
+        map_text = map_text.replace(/\\"/g, '%22'); //ugh idk, just do it
+
+        // after file saved locally, send to IF-Tiler server
+        //https://107.170.180.141:3000/api/upload
+        var r = request.post('http://107.170.180.141:3000/api/upload', function optionalCallback(err, httpResponse, body) {
+            if (err) {
+                //deleting temp map upload
+                if (fs.existsSync(__dirname + '/app/dist/' + req.body.mapIMG)) {
+                    //delete temp file
+                    fs.unlink(__dirname + '/app/dist/' + req.body.mapIMG, function(err) {
+                        if (err) throw err;
+                        console.log('successfully deleted ' + __dirname + '/app/dist/' + req.body.mapIMG);
+                    });
+                } else {
+                    console.log('could not delete, file does not exist: ' + __dirname + '/app/dist/' + req.body.mapIMG);
+                }
+                return console.error('upload failed:', err);
+            } else {
+                console.log('Upload successful! Server responded with:', body);
+                worldMapTileUpdate(req, res, body, req.mapBuild);
+                //deleting temp map upload
+                if (fs.existsSync(__dirname + '/app/dist/' + req.body.mapIMG)) {
+                    //delete temp file
+                    fs.unlink(__dirname + '/app/dist/' + req.body.mapIMG, function(err) {
+                        if (err) throw err;
+                        console.log('successfully deleted ' + __dirname + '/app/dist/' + req.body.mapIMG);
+                    });
+                } else {
+                    console.log('could not delete, file does not exist: ' + __dirname + '/app/dist/' + req.body.mapIMG);
+                }
             }
-            else {
-                console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
-            }
-          return console.error('upload failed:', err);
-        }
-        else {
-          console.log('Upload successful! Server responded with:', body);
-          worldMapTileUpdate(req, res, body, req.mapBuild);
-            //deleting temp map upload
-            if (fs.existsSync(__dirname + '/app/dist/'+ req.body.mapIMG)) {
-                //delete temp file
-                fs.unlink(__dirname + '/app/dist/'+ req.body.mapIMG, function (err) {
-                  if (err) throw err;
-                  console.log('successfully deleted '+__dirname + '/app/dist/'+ req.body.mapIMG);
-                });
-            }
-            else {
-                console.log('could not delete, file does not exist: '+__dirname + '/app/dist/'+ req.body.mapIMG);
-            }
-         }
-      });
-  
+        });
+
         var form = r.form();
         form.append('my_buffer', new Buffer([1, 2, 3]));
-        form.append(map_text, fs.createReadStream(__dirname + '/app/dist/'+ req.body.mapIMG)); //passing fieldname as json cause ugh.
-    }
-    else {
-      console.log('map image doesnt exist');
+        form.append(map_text, fs.createReadStream(__dirname + '/app/dist/' + req.body.mapIMG)); //passing fieldname as json cause ugh.
+    } else {
+        console.log('map image doesnt exist');
     }
 
 });
 
 
 //updating world map with return from tile server
-function worldMapTileUpdate(req, res, data, mapBuild){ 
+function worldMapTileUpdate(req, res, data, mapBuild) {
 
     try {
-       var tileRes = JSON.parse(data); //incoming box coordinates
+        var tileRes = JSON.parse(data); //incoming box coordinates
+    } catch (err) {
+        console.log(err);
     }
-    catch(err){
-      console.log(err);
-    }
 
-    if (tileRes){
+    if (tileRes) {
 
-      if (tileRes.worldID){
+        if (tileRes.worldID) {
 
-         landmarkSchema.findById(tileRes.worldID, function(err, lm) {
-          if (!lm){
-            console.log(err);
-          }
-          else if (req.user._id == lm.permissions.ownerID){
+            landmarkSchema.findById(tileRes.worldID, function(err, lm) {
+                if (!lm) {
+                    console.log(err);
+                } else if (req.user._id == lm.permissions.ownerID) {
 
-            var min = tileRes.zooms[0];
-            var max = tileRes.zooms.slice(-1)[0];
+                    var min = tileRes.zooms[0];
+                    var max = tileRes.zooms.slice(-1)[0];
 
-            if (lm.style.maps.localMapArray){
-              for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+                    if (lm.style.maps.localMapArray) {
+                        for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
 
-                if (lm.style.maps.localMapArray[i].map_marker_viewID){
-                  if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
-                      lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
-                      lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
-                      lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
-                      lm.style.maps.localMapArray[i]['localMapOptions'] = {
-                          minZoom: min,
-                          maxZoom: max,
-                          attribution: "IF",
-                          reuseTiles: true,
-                          tms: true
-                      };
-                      saveMap();
-                      break;
-                  }
+                            if (lm.style.maps.localMapArray[i].map_marker_viewID) {
+                                if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) {
+                                    lm.style.maps.localMapArray[i]['temp_upload_path'] = '';
+                                    lm.style.maps.localMapArray[i]['localMapID'] = tileRes.mapURL;
+                                    lm.style.maps.localMapArray[i]['localMapName'] = tileRes.worldID;
+                                    lm.style.maps.localMapArray[i]['localMapOptions'] = {
+                                        minZoom: min,
+                                        maxZoom: max,
+                                        attribution: "IF",
+                                        reuseTiles: true,
+                                        tms: true
+                                    };
+                                    saveMap();
+                                    break;
+                                }
+                            }
+                        }
+
+                        function saveMap() {
+                            lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
+                            lm.save(function(err, landmark) {
+                                if (err) {
+                                    console.log('error');
+                                } else {
+                                    console.log('map updated');
+                                    res.status(200).send(landmark);
+                                }
+                            });
+                        }
+
+                    }
+
+                } else {
+                    console.log('unauthorized user');
                 }
-              }
+            });
 
-              function saveMap(){
-                  lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
-                  lm.save(function(err, landmark) {
-                      if (err){
-                          console.log('error');
-                      }
-                      else {
-                          console.log('map updated');
-                          res.status(200).send(landmark);                     
-                      }
-                  });            
-              }
-
-            }
-
-          }
-          else {
-            console.log('unauthorized user');
-          }
-        }); 
-
-      }
+        }
 
     }
 
-      
+
 }
 
 //updates the map floor number and floor name, eventually can replace the map layer too
-app.post('/api/update_map', isLoggedIn, function(req,res){
-  if (req.body.worldID){
-     landmarkSchema.findById(req.body.worldID, function(err, lm) {
-      if (!lm){
-        console.log(err);
-      }
-      else if (req.user._id == lm.permissions.ownerID){
+app.post('/api/update_map', isLoggedIn, function(req, res) {
+    if (req.body.worldID) {
+        landmarkSchema.findById(req.body.worldID, function(err, lm) {
+            if (!lm) {
+                console.log(err);
+            } else if (req.user._id == lm.permissions.ownerID) {
 
-        if (lm.style.maps.localMapArray){
+                if (lm.style.maps.localMapArray) {
 
-          for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
-            if (lm.style.maps.localMapArray[i].map_marker_viewID){
-                if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //finding right item in array
+                    for (var i = 0; i < lm.style.maps.localMapArray.length; i++) { //better way to do this with mongo $set 
+                        if (lm.style.maps.localMapArray[i].map_marker_viewID) {
+                            if (lm.style.maps.localMapArray[i].map_marker_viewID == req.body.map_marker_viewID) { //finding right item in array
 
-                    if (req.body.floor_num){
-                      if(!isNaN(parseFloat(req.body.floor_num)) && isFinite(req.body.floor_num)){ //real number
-                        lm.style.maps.localMapArray[i]['floor_num'] = req.body.floor_num;
-                      }
-                      else{
-                        console.log('not a real number');
-                      }
-                    }
-                    if (req.body.floor_name){
-                      lm.style.maps.localMapArray[i]['floor_name'] = req.body.floor_name;
+                                if (req.body.floor_num) {
+                                    if (!isNaN(parseFloat(req.body.floor_num)) && isFinite(req.body.floor_num)) { //real number
+                                        lm.style.maps.localMapArray[i]['floor_num'] = req.body.floor_num;
+                                    } else {
+                                        console.log('not a real number');
+                                    }
+                                }
+                                if (req.body.floor_name) {
+                                    lm.style.maps.localMapArray[i]['floor_name'] = req.body.floor_name;
+                                }
+
+                                if (req.body.floor_name || req.body.floor_num) { //ok update and save kthx
+                                    saveMap();
+                                    break;
+                                } else {
+                                    console.log('nothing to update');
+                                }
+                            }
+                        }
                     }
 
-                    if (req.body.floor_name || req.body.floor_num){ //ok update and save kthx
-                      saveMap();
-                      break;
+                    function saveMap() {
+                        lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
+                        lm.save(function(err, landmark) {
+                            if (err) {
+                                console.log('error');
+                            } else {
+                                console.log('map updated');
+                                res.status(200).send(landmark);
+                            }
+                        });
                     }
-                    else {
-                      console.log('nothing to update');
-                    }
+
                 }
+            } else {
+                console.log('unauthorized user');
             }
-          }
-
-          function saveMap(){
-              lm.markModified('style.maps.localMapArray'); //letting mongo know to update obj in arr
-              lm.save(function(err, landmark) {
-                  if (err){
-                      console.log('error');
-                  }
-                  else {
-                      console.log('map updated');
-                      res.status(200).send(landmark);                     
-                  }
-              });            
-          }
-
-        }
-      }
-      else {
-        console.log('unauthorized user');
-      }
-    });  
-  } 
+        });
+    }
 
 });
 
@@ -2594,9 +2580,16 @@ app.get('/api/worlds/:id', function(req, res) {
                 combineQuery(data, res);
             } else {
                 console.log('552: world doesnt exist');
-                res.send({
-                    err: '552: world doesnt exist'
-                });
+
+                landmarkSchema.findOne({
+                    id: '404'
+                }, function(err, world) {
+                    if (err) res.send({
+                        err: '552: cannot find world.'
+                    })
+                    combineQuery(world, res);
+                })
+
             }
         });
     }
@@ -3796,6 +3789,5 @@ app.all('/*', function(req, res, next) {
 // })
 
 server.listen(2997, function() {
-    console.log('Running in ', process.env.NODE_ENV, 'mode.')
     console.log("Illya casting magic on 2997 ~ ~ ♡");
 });

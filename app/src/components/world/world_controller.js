@@ -1,9 +1,5 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService) {
 
-// var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
-// zoomControl.style.top = "60px";
-// zoomControl.style.left = "1%";
-// zoomControl.style.display = 'none';
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
@@ -37,7 +33,7 @@ $scope.verifyUpload = function(event, state) {
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
 			dialogs.showDialog('authDialog.html');
-			contest.set(localStore.getID(), $scope.wtgt.hashtags[state]);
+			contest.set($scope.wtgt.hashtags[state]);
 		}, 1500);
 		
 	}
@@ -46,172 +42,115 @@ $scope.verifyUpload = function(event, state) {
 $scope.uploadWTGT = function($files, hashtag) {
 	$scope.wtgt.building[hashtag] = true;
 
-	var file = $files[0];
-
-	// get time
-	var time = new Date();
-
-	// get hashtag
-	// var hashtag = null;
-	// hashtag = $scope.wtgt.hashtags[hashtag];
-
-	var data = {
-		world_id: $scope.world._id,
-		worldID: $scope.world.id,
-		hashtag: hashtag,
-		userTime: time,
-		userLat: null,
-		userLon: null,
-		type: 'retail_campaign'
-	};
-
-	// get location
-	geoService.getLocation().then(function(coords) {
-		// console.log('coords: ', coords);
-		data.userLat = coords.lat;
-		data.userLon = coords.lng;
-		uploadPicture(file, hashtag, data);
-	}, function(err) {
-		uploadPicture(file, hashtag, data);
+	contestUploadService.uploadImage($files[0], $scope.world, hashtag)
+	.then(function(data) {
+		$scope.wtgt.images[hashtag] = data.imgURL;
+		$scope.wtgt.building[hashtag] = false;
 	});
 };
-
-function uploadPicture(file, hashtag, data) {
-
-	$scope.upload = $upload.upload({
-		url: '/api/uploadPicture/',
-		file: file,
-		data: JSON.stringify(data)
-	}).progress(function(e) {
-	}).success(function(data) {
-		worldTree.cacheSubmission($scope.world._id, hashtag, data);
-		$scope.wtgt.images[hashtag] = data;
-		$scope.wtgt.building[hashtag] = false;
-
-	});
-}
-
-// function checkUserForSubmissions() {
-// 	if (!$rootScope.user || !$rootScope.user.submissions) {
-// 		return;
-// 	}
-// 	_.chain($rootScope.user.submissions)
-// 		.groupBy(function(sub) {
-// 			return sub.hashtag;
-// 		})
-// 		.sortBy(function(sub) {
-// 			return sub.timestamp;
-// 		})
-// 		.value()
-// 		.forEach(function(sub) {
-// 			$scope.wtgt.images[sub.slice(-1)[0].hashtag] = sub.slice(-1)[0].imgURL;
-// 		});
-// }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
-	  $scope.world = data.world;
-		$scope.style = data.style;
-		$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
-		if (!(_.isEmpty(data.submissions))) {
-			data.submissions.forEach(function(s) {
-				if (!s) {
-					return;
-				}
-				$scope.wtgt.images[s.hashtag] = s.imgURL;
-			});
-		// } else {
-		// 	checkUserForSubmissions();
-		}
+	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
+		hideContentService.hide();
+		$scope.hide = true;
+		return;
+	}
 
-
-
-
-		analyticsService.log('bubble.visit', {
-			id: $scope.world._id
+  $scope.world = data.world;
+	$scope.style = data.style;
+	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+	if (!(_.isEmpty(data.submissions))) {
+		data.submissions.forEach(function(s) {
+			if (!s) {
+				return;
+			}
+			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
+	}
 
-		 if (bubbleTypeService.get() == 'Retail') {
+	analyticsService.log('bubble.visit', {
+		id: $scope.world._id
+	});
 
-		 	$scope.isRetail = true;
+	 if (bubbleTypeService.get() == 'Retail') {
+
+	 	$scope.isRetail = true;
+	}
+
+	 style.navBG_color = $scope.style.navBG_color;
+
+	 //show edit buttons if user is world owner
+	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
+		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
+		 	$scope.showEdit = true;
+		}
+		else {
+		 	$scope.showEdit = false;
+		}
+	} 
+	 
+	 if ($scope.world.name) {
+		 angular.extend($rootScope, {globalTitle: $scope.world.name});
+	 }
+
+	//switching between descrip and summary for descrip card
+	if ($scope.world.description || $scope.world.summary) {
+		$scope.description = true;
+		if ($scope.world.description){
+			$scope.descriptionType = "description";
+		}
+		else {
+			$scope.descriptionType = "summary";
+		}
+	}
+	
+	// set appropriate zoom level based on local maps
+	var zoomLevel = 18;
+
+	if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
+		if ($scope.world.style.maps.localMapArray){
+			if ($scope.world.style.maps.localMapArray.length > 0) {
+				zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
+			} 
+		}
+		else {
+			zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
 		}
 
-		 style.navBG_color = $scope.style.navBG_color;
+	};
 
-		 //show edit buttons if user is world owner
-		 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-			 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-			 	$scope.showEdit = true;
-			}
-			else {
-			 	$scope.showEdit = false;
-			}
-		} 
+	//map setup
+	if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
+		map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
+		console.log('setcenter');
 
-		//console.log($scope.world);
-		//console.log($scope.style);
-		 
-		 if ($scope.world.name) {
-			 angular.extend($rootScope, {globalTitle: $scope.world.name});
-		 }
-
-		//switching between descrip and summary for descrip card
-		if ($scope.world.description || $scope.world.summary) {
-			$scope.description = true;
-			if ($scope.world.description){
-				$scope.descriptionType = "description";
-			}
-			else {
-				$scope.descriptionType = "summary";
-			}
+		// if bubble has local maps then do not show world marker
+		if (!map.localMapArrayExists($scope.world)) {
+			addWorldMarker();
 		}
-		
-		// set appropriate zoom level based on local maps
-		var zoomLevel = 18;
 
-		if ($scope.world.style.hasOwnProperty('maps') && $scope.world.style.maps.hasOwnProperty('localMapOptions')) {
-			if ($scope.world.style.maps.localMapArray){
-				if ($scope.world.style.maps.localMapArray.length > 0) {
-					zoomLevel = mapManager.findZoomLevel($scope.world.style.maps.localMapArray);
-				} 
-			}
-			else {
-				zoomLevel = $scope.world.style.maps.localMapOptions.minZoom || 18;
-			}
+	} else {
+		console.error('No center found! Error!');
+	}
 
-		};
+	var worldStyle = $scope.world.style;
+	map.groupFloorMaps(worldStyle);
 
-		//map setup
-		if ($scope.world.hasOwnProperty('loc') && $scope.world.loc.hasOwnProperty('coordinates')) {
-			map.setCenter([$scope.world.loc.coordinates[0], $scope.world.loc.coordinates[1]], zoomLevel, $scope.aperture.state);
-			console.log('setcenter');
+		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+		}
 
-			// if bubble has local maps then do not show world marker
-			if (!map.localMapArrayExists($scope.world)) {
-				addWorldMarker();
-			}
-
+		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+			map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 		} else {
-			console.error('No center found! Error!');
+			console.warn('No base layer found! Defaulting to forum.');
+			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
 		}
-
-		var worldStyle = $scope.world.style;
-		map.groupFloorMaps(worldStyle);
-
-			if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-				zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
-			}
-
-			if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
-				map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
-			} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
-			} else {
-				console.warn('No base layer found! Defaulting to forum.');
-				map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
-			}
-		// }
-		
-		$scope.loadLandmarks();
+	// }
+	
+	$scope.loadLandmarks();
 }
 
 function addWorldMarker() {
@@ -219,7 +158,7 @@ function addWorldMarker() {
 		lat: $scope.world.loc.coordinates[1],
 		lng: $scope.world.loc.coordinates[0],
 		icon: {
-			iconUrl: 'img/marker/bubbleMarker_24.png',
+			iconUrl: 'img/marker/bubbleMarker_30.png',
 			shadowUrl: '',
 			iconSize: [24, 24],
 			iconAnchor: [11, 11],
@@ -597,6 +536,10 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 		return landmark.category === landmarkCategoryName;
 	}
 })
+
+$scope.$on('$destroy', function() {
+	angular.element('.main-nav').css('display', 'block');
+});
 
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
