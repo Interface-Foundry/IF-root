@@ -26508,7 +26508,10 @@ $scope.toggleMap = function() {
 	if ($scope.editing) {
 		$scope.editing = false;
 	}
+	var url = $location.path();
+	$location.path(url.slice(0, url.indexOf('#')));
 	aperture.toggle('full');
+
 }
 
 $scope.sendMsg = function (e) {
@@ -26577,6 +26580,7 @@ $scope.selectSticker = function(sticker) {
 	$scope.selected = sticker;
 	$scope.stickerChange = true;
 	$scope.msg.text = sticker.name;
+	$('.view-footer textarea').focus();
 	$timeout(function() {
 		$scope.stickerChange = false
 	}, 500);

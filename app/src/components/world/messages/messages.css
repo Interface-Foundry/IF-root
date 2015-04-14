@@ -34,25 +34,26 @@
 
 .message-nav-map {
 	position: absolute;
-	width: 48px;
-	height: 48px;
-	right: 0px;
-	top: 40px;
+	width: 64px;
+	height: 64px;
+	right: 4px;
+	top: 606px;
 	/*@IFDEF PHONEGAP*/
 	top: 56px;
 	/*@ENDIF*/
 	border: none;
 	outline: none;
-	background: center / 24px 24px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
+	background: center / 64px 64px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
 	z-index: 10;
-	border-radius: 24px;
+	border-radius: 50%;
 	background-clip: padding-box;
 	box-sizing: border-box;
 	border: 4px solid transparent;
 }
 
 .aperture-full .message-nav-map {
-	background: center / 24px 24px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
+	top: 606px;
+	background: center / 64px 64px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
