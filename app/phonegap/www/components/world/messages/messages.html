@@ -1,4 +1,6 @@
-<button class="message-nav-map" ng-click='toggleMap()'></button>
+<button class="message-nav-map" 
+				ng-class="{'sticker-open': editing}"
+				ng-click='toggleMap()'></button>
 
 <div class="message-shelf" ng-style="::{'background-color': style.bodyBG_color}">
 	<nav class="message-nav" ng-style="::{'background-color': style.titleBG_color}">

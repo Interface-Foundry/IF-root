@@ -26385,7 +26385,7 @@ link: function(scope, element, attrs) {
 				];
 				break;
 			case 'sticker': 
-				content =	[m('.message-sticker-background', [
+				content =	[m('.message-sticker-background.u-pointer', [
 								m('img.message-sticker-img', {src: message.sticker.img}),
 								m('img.message-sticker-link', {src: 'img/icons/ic_map_48px.svg'})
 							]),
@@ -26393,11 +26393,16 @@ link: function(scope, element, attrs) {
 				break;
 			case 'editUser': 
 				content = [
-					m('.message-body.kipbot-chat', message.msg),
-					m('hr.divider'),
-					m('img.msg-chip-img', {src: bubUrl(scope.user.avatar)}),
-					m('.msg-chip-label', scope.nick),
-					m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'})
+					m('.message-body.kipbot-chat.u-pointer', message.msg),
+					m('hr.divider.u-pointer'),
+					m('img.msg-chip-img.u-pointer', {src: bubUrl(scope.user.avatar)}),
+					m('.msg-chip-label.u-pointer', scope.nick),
+					m('hr.divider.chat.u-pointer'),
+					m('.message-body.kipbot-chat.u-pointer', 
+						[
+							m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'}),
+							m('', 'Edit my profile')
+						])
 				];
 				break;
 			case 'welcome':
@@ -26509,9 +26514,20 @@ $scope.toggleMap = function() {
 		$scope.editing = false;
 	}
 	var url = $location.path();
-	$location.path(url.slice(0, url.indexOf('#')));
+	if (url.indexOf('#') > -1) {
+		$location.path(url.slice(0, url.indexOf('#')));
+	}
 	aperture.toggle('full');
 
+}
+
+function checkStickerUrl(url) {
+	var url = $location.path();
+	if (url.indexOf('#') === -1) {
+		// changing the url allows user to click back button to return to chat
+		url = $location.url() + '#stickers';
+		$location.path(url, false);
+	}
 }
 
 $scope.sendMsg = function (e) {
@@ -26568,19 +26584,16 @@ $scope.showStickers = function() {
 	if ($scope.editing) {
 		return;
 	}
-	var url = $location.url() + '#stickers';
+	checkStickerUrl();
 
 	$scope.editing = true;
 	aperture.set('full');
-	// changing the url allows user to click back button to return to chat
-	$location.path(url, false);
 }
 
 $scope.selectSticker = function(sticker) {
 	$scope.selected = sticker;
 	$scope.stickerChange = true;
 	$scope.msg.text = sticker.name;
-	$('.view-footer textarea').focus();
 	$timeout(function() {
 		$scope.stickerChange = false
 	}, 500);
@@ -26598,13 +26611,17 @@ $scope.messageLink = function(message) {
 			} else {
 				addStickerToMap(sticker);
 			}
-		})
+			checkStickerUrl();
+		});
 	} else if (message.href) {
 		$location.path(message.href);
 	}
 }
 
 $scope.pinSticker = function() {
+	if (!$scope.selected) {
+		return;
+	}
 	//getStickerLoc//
 	var sticker = angular.copy($scope.selected),
 		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
@@ -26803,7 +26820,7 @@ function messagesService() {
 			roomID: world._id,
 			nick: 'KipBot',
 			kind: 'editUser',
-			msg: 'You are currently using the name '+ nickName + '. Click here to edit it.',
+			msg: 'You\'re chatting as:',
 			avatar: 'img/IF/kipbot_icon.png',
 			userID: 'chatbot',
 			_id: 'profileEditMessage',

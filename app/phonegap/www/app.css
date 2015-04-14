@@ -1283,7 +1283,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	padding: 104px 0px 76px 0px;
+	padding: 88px 0px 76px 0px;
 }
 
 .message-nav {
@@ -1292,7 +1292,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	margin-top: 64px;
+	margin-top: 48px;
 	color: #FFF;
 	z-index: 10;
 }
@@ -1302,24 +1302,28 @@ text-align: center;
 	width: 64px;
 	height: 64px;
 	right: 4px;
-	top: 606px;
-	top: 56px;
 	border: none;
 	outline: none;
-	background: center / 64px 64px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);
+	/*background: center / 64px 64px no-repeat url("img/icons/ic_map_white_24dp.png") rgba(0,0,0,0);*/
 	z-index: 10;
 	border-radius: 50%;
 	background-clip: padding-box;
 	box-sizing: border-box;
 	border: 4px solid transparent;
+	display: none;
 }
 
 .aperture-full .message-nav-map {
-	top: 606px;
-	background: center / 64px 64px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
+	display: inline-block;
+	bottom: 91px;
+	background: center / 52px 52px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+.aperture-full .message-nav-map.sticker-open {
+	bottom: 280px;
 }
 
 .message-surface {
@@ -1408,17 +1412,17 @@ text-align: center;
 	overflow: auto;
 }
 
-.message-input {
-	width: 100%;
-	resize: none;
+.message-input.form-control {
+	background: #FFF;
+	display: block;
+	margin: 4px 1%;
 	min-height: 16px;
 	padding: 4px 12px;
-	background: #FFF;
-	border: 0;
 	outline: none;
+	resize: none;
 	-webkit-appearance: none;
 	overflow: hidden;
-	display: block;
+	width: 98%;
 	-webkit-transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 }
@@ -1756,13 +1760,16 @@ text-align: center;
 	float: left;
 	height: 24px;
 	width: 24px;
-	margin: 4px;
 }
 
 .message-body.kipbot-chat {
 	background-color: rgba(10,10,110, .2);
   font-style: italic;
   opacity: .7;
+}
+
+.divider.chat {
+	border-bottom: none;
 }
 .instagram-wrap {
 	padding-top: 104px;
@@ -2102,7 +2109,7 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
-	padding-top: 104px;
+	padding-top: 88px;
 }
 /* app css stylesheet */
 
@@ -2146,7 +2153,6 @@ body {
 
 .navfix {
 	padding-top: 48px;
-	padding-top: 64px;
 }
 
 #scrim {
@@ -2469,9 +2475,6 @@ transform:translateX(100%);
   transform: translateY(116px);
   /*TODO toolbar height + nav height*/
   -webkit-transform: translateY(116px);
-  transform: translateY(132px);
-  /*TODO toolbar height + nav height*/
-  -webkit-transform: translateY(132px);
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);
@@ -2576,7 +2579,6 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
-  top: 15px;
   z-index: 1010;
 }
 .drawer-icon {
@@ -2759,8 +2761,6 @@ nav.main-nav {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
-  height: 64px;
-  padding-top: 16px;
 }
 .nav-title {
   display: none;
@@ -2824,7 +2824,6 @@ nav ul {
   opacity: 1;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  top: 16px;
 }
 .back-button.ng-hide.ng-hide-remove {
   opacity: 0;
@@ -2877,7 +2876,6 @@ nav ul {
   bottom: 0px;
   z-index: -1;
   left: 8px;
-  height: 64px;
 }
 .home-tab {
   background: center / 32px 32px url('img/icons/nav/home.png') no-repeat;
@@ -2904,7 +2902,6 @@ nav ul {
   bottom: 0px;
   padding-top: 96px;
   z-index: 100;
-  padding-top: 112px;
 }
 .search-bar {
   position: absolute;
@@ -2917,7 +2914,6 @@ nav ul {
   line-height: 48px;
   outline: none;
   border: none;
-  top: 64px;
 }
 .search-btn {
   position: absolute;
@@ -3564,10 +3560,10 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  margin-top: 64px;
+  margin-top: 48px;
 }
 .subnavfix {
-  padding-top: 112px !important;
+  padding-top: 96px !important;
 }
 .subnav-header {
   display: block;
@@ -9131,8 +9127,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('fonts/glyphicons-halflings-regular.eot');
-  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('/fonts/glyphicons-halflings-regular.eot');
+  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;

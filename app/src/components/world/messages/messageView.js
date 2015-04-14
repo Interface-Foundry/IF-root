@@ -35,7 +35,7 @@ link: function(scope, element, attrs) {
 				];
 				break;
 			case 'sticker': 
-				content =	[m('.message-sticker-background', [
+				content =	[m('.message-sticker-background.u-pointer', [
 								m('img.message-sticker-img', {src: message.sticker.img}),
 								m('img.message-sticker-link', {src: 'img/icons/ic_map_48px.svg'})
 							]),
@@ -43,11 +43,16 @@ link: function(scope, element, attrs) {
 				break;
 			case 'editUser': 
 				content = [
-					m('.message-body.kipbot-chat', message.msg),
-					m('hr.divider'),
-					m('img.msg-chip-img', {src: bubUrl(scope.user.avatar)}),
-					m('.msg-chip-label', scope.nick),
-					m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'})
+					m('.message-body.kipbot-chat.u-pointer', message.msg),
+					m('hr.divider.u-pointer'),
+					m('img.msg-chip-img.u-pointer', {src: bubUrl(scope.user.avatar)}),
+					m('.msg-chip-label.u-pointer', scope.nick),
+					m('hr.divider.chat.u-pointer'),
+					m('.message-body.kipbot-chat.u-pointer', 
+						[
+							m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'}),
+							m('', 'Edit my profile')
+						])
 				];
 				break;
 			case 'welcome':

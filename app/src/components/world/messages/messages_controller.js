@@ -81,9 +81,20 @@ $scope.toggleMap = function() {
 		$scope.editing = false;
 	}
 	var url = $location.path();
-	$location.path(url.slice(0, url.indexOf('#')));
+	if (url.indexOf('#') > -1) {
+		$location.path(url.slice(0, url.indexOf('#')));
+	}
 	aperture.toggle('full');
 
+}
+
+function checkStickerUrl(url) {
+	var url = $location.path();
+	if (url.indexOf('#') === -1) {
+		// changing the url allows user to click back button to return to chat
+		url = $location.url() + '#stickers';
+		$location.path(url, false);
+	}
 }
 
 $scope.sendMsg = function (e) {
@@ -140,19 +151,16 @@ $scope.showStickers = function() {
 	if ($scope.editing) {
 		return;
 	}
-	var url = $location.url() + '#stickers';
+	checkStickerUrl();
 
 	$scope.editing = true;
 	aperture.set('full');
-	// changing the url allows user to click back button to return to chat
-	$location.path(url, false);
 }
 
 $scope.selectSticker = function(sticker) {
 	$scope.selected = sticker;
 	$scope.stickerChange = true;
 	$scope.msg.text = sticker.name;
-	$('.view-footer textarea').focus();
 	$timeout(function() {
 		$scope.stickerChange = false
 	}, 500);
@@ -170,13 +178,17 @@ $scope.messageLink = function(message) {
 			} else {
 				addStickerToMap(sticker);
 			}
-		})
+			checkStickerUrl();
+		});
 	} else if (message.href) {
 		$location.path(message.href);
 	}
 }
 
 $scope.pinSticker = function() {
+	if (!$scope.selected) {
+		return;
+	}
 	//getStickerLoc//
 	var sticker = angular.copy($scope.selected),
 		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),

@@ -16,7 +16,7 @@ function messagesService() {
 			roomID: world._id,
 			nick: 'KipBot',
 			kind: 'editUser',
-			msg: 'You are currently using the name '+ nickName + '. Click here to edit it.',
+			msg: 'You\'re chatting as:',
 			avatar: 'img/IF/kipbot_icon.png',
 			userID: 'chatbot',
 			_id: 'profileEditMessage',
