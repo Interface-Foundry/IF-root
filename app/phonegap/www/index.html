@@ -87,7 +87,10 @@
 			<nav role="navigation" class="main-nav" 
 				ng-style="{'background-color': style.navBG_color}">
 				<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
-				<span class="nav-title">Kip</span>
+				<!-- <span class="nav-title">Kip</span> -->
+				<div class="nav-title u-pointer" style="width: 48px" ng-click="go('/')">
+					<img src="img/kip/kipLogo_navbar.svg" style="position: absolute; top: 3px; width: 42px">
+				</div>
 				<div class="user-chip" user-chip></div>
 				<nav-tabs class="view-tabs"></nav-tabs>
 			</nav>
