@@ -4,8 +4,8 @@
 // =================================
 module.exports = {
 
-  //geoipURL: 'http://127.0.0.1:8080/json/',
-  geoipURL: 'http://www.freegeoip.net/json/',
+  geoipURL: 'http://127.0.0.1:8080/json/',
+  // geoipURL: 'http://www.freegeoip.net/json/',
   mongodb: {
 	  url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/if'.replace('password', process.env.MONGOPW)
   },
