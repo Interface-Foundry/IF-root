@@ -494,8 +494,8 @@ app.post('/reset/:token', function(req, res) {
 //Parts (just a bit at this point) of express code from: https://github.com/dalcib/angular-phonecat-mongodb-rest
 //To allow use ObjectId or other any type of _id
 var objectId = function(_id) {
-    if (_id.length === 24 && parseInt(db.ObjectId(_id).getTimestamp().toISOString().slice(0, 4), 10) >= 2010) {
-        return db.ObjectId(_id);
+    if (_id.length === 24 && parseInt(mongoose.Types.ObjectId(_id).getTimestamp().toISOString().slice(0, 4), 10) >= 2010) {
+        return mongoose.Types.ObjectId(_id);
     }
     return _id;
 }
