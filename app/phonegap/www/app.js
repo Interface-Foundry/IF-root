@@ -19104,8 +19104,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -19298,6 +19298,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.login.error = false;
 		dialogs.showDialog('keychainDialog.html');
 		contest.login(new Date); // for wtgt contest
+		$route.reload();
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -27780,14 +27781,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 style.navBG_color = $scope.style.navBG_color;
 
 	 //show edit buttons if user is world owner
-	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-		 	$scope.showEdit = true;
+	userManager.getUser()
+	.then(function(user) {
+		if (user && user._id && $scope.world.permissions && user._id === $scope.world.permissions.ownerID) {
+
+		 	$scope.showEdit = true;	
+		} else {
+			$scope.showEdit = false;
 		}
-		else {
-		 	$scope.showEdit = false;
-		}
-	} 
+	});
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});
