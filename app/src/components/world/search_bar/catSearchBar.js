@@ -64,10 +64,10 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					}
 
 					if (scope.mode === 'home' && scrollState) {
-						$('.wrap').animate({
-							scrollTop: 0
-						}, 400);
-						scrollState = false;
+						// $('.wrap').animate({
+						// 	scrollTop: 0
+						// }, 400);
+						// scrollState = false;
 					} else {
 						if (apertureService.state !== 'aperture-full') {
 							apertureService.set('third');
@@ -88,13 +88,13 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 				// set aperture or scroll
 				if (scope.mode === 'home' && !scrollState) {
-					var navHeight = parseInt($('.main-nav').css('height'));
-					var marginTop = parseInt($('.search-cat').css('margin-top'));
-					$('.wrap').animate({
-						// subtract nav bar height and searchbar's margin-top
-						scrollTop: offset - (navHeight + marginTop)
-					}, 400);
-					scrollState = true;
+					// var navHeight = parseInt($('.main-nav').css('height'));
+					// var marginTop = parseInt($('.search-cat').css('margin-top'));
+					// $('.wrap').animate({
+					// 	// subtract nav bar height and searchbar's margin-top
+					// 	scrollTop: offset - (navHeight + marginTop)
+					// }, 400);
+					// scrollState = true;
 				} else {
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('off');

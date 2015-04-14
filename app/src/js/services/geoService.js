@@ -136,7 +136,7 @@ angular.module('tidepoolsServices')
 					if (geoService.mobileCheck()) {
 						// add arrow to user location marker if mobile device
 						iconUrl = 'img/marker/userLocMarker_arrow.png';
-						iconSize = [24, 30];
+						iconSize = [24, 28];
 						iconAnchor = [12, 12];
 					}
 
