@@ -2110,7 +2110,7 @@ app.post('/api/user/emailUpdate', isLoggedIn, function(req, res) {
         }, function(err, data) {
             if (data) {
                 res.send({
-                    err: 'Email already exists'
+                    err: 'This email address is already in use'
                 });
             } else {
                 User.findById(req.user._id, function(err, data) {
