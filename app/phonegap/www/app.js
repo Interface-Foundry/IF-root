@@ -23747,21 +23747,13 @@ function initMarkers() {
 
 worldTree.getNearby().then(function(data) { 
 	$scope.$evalAsync(function($scope) {
-		$scope.homeBubbles = data['150m'] || [];
-		$scope.nearbyBubbles = data['2.5km'] || [];
-		
-		if ($scope.nearbyBubbles.length>0 && $scope.homeBubbles.length>0) {
-			$scope.bubbles = $scope.homeBubbles.concat($scope.nearbyBubbles);
-		} else if ($scope.nearbyBubbles.length>0) {
-			$scope.bubbles = $scope.nearbyBubbles;
-		} else if ($scope.homeBubbles.length>0) {
-			$scope.bubbles = $scope.homeBubbles;
-		} else {
-			$scope.bubbles = [];
-		}
+		nearbyBubbles = data['150m'] || []; // nearby
+		aroundMeBubbles = data['2.5km'] || []; // around me
+
+		$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
 		
 		$scope.loadState = 'success';
-		initMarkers();
+		// initMarkers();
 	});
 }, function(reason) {
 	//failure
