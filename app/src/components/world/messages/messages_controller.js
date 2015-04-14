@@ -134,8 +134,12 @@ $scope.onImageSelect = function($files) {
 }	
 
 $scope.showStickers = function() {
+	var url = $location.url() + '#stickers';
+
 	$scope.editing = true;
 	aperture.set('full');
+	// changing the url allows user to click back button to return to chat
+	$location.path(url, false);
 }
 
 $scope.selectSticker = function(sticker) {
