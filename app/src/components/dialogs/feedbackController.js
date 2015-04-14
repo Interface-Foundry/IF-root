@@ -8,13 +8,17 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
   ];
 
   $scope.feedbackEmotions = [
-    {emotion: "excited"},
-    {emotion: "angry"},
-    {emotion: "confused"}
+    {emotion: "happy", emoji: ":smile:"},
+    {emotion: "angry", emoji: ":angry:"},
+    {emotion: "confused", emoji: ":confused:"}
   ];
 
   $scope.feedbackCategory = {};
   $scope.feedbackEmotion = {};
+
+  $scope.selectEmoji = function(emotion) {
+	  $scope.feedbackEmotion = emotion;
+  };
 
   $scope.sendFeedback = function($event) { //sends feedback email. move to dialog directive
 
