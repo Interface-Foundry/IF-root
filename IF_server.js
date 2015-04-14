@@ -3688,7 +3688,7 @@ app.put('/api/:collection/:cmd', function(req, res) {
 
 //for routing all else to angular
 app.all('/*', function(req, res, next) {
-  console.log('hitting the weird route');
+
     function endsWith(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
