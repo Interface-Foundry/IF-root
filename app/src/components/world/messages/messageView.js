@@ -62,7 +62,7 @@ link: function(scope, element, attrs) {
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {
-			return 'https://bubbl.li/'+string;
+			return 'https://kipapp.co/'+string;
 		}
 	}
 	

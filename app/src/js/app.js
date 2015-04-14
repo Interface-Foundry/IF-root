@@ -28,7 +28,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================

@@ -181,7 +181,7 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
           coords: coords_text
         }
 
-        $http.post('/api/build_map', data).success(function(response){
+        $http.post('/api/build_map', data, {server: true}).success(function(response){
             console.log(response);
         });
 
@@ -17051,7 +17051,7 @@ function analyticsService($http, $injector, $rootScope, $timeout, $location, loc
 			
 		}).finally(function() {
 			// dude trust me, this is gonna work. no need for a response
-			$http.post('/api/analytics/' + action, doc);
+			$http.post('/api/analytics/' + action, doc, {server: true});
 		});
     }
     
@@ -17176,7 +17176,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			localStore.getID().then(function(id) {
 				data.anonID = id;
 			}).then(function() {
-				$http.post('/api/anon_user/update', data).
+				$http.post('/api/anon_user/update', data, {server: true}).
 					success(function(data) {
 						// console.log('success: ', data);
 					}).
@@ -17202,7 +17202,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			localStore.getID().then(function(id) {
 				data.anonID = id;
 			}).then(function() {
-				$http.post('/api/anon_user/update', data).
+				$http.post('/api/anon_user/update', data, {server: true}).
 					success(function(data, status, headers, config) {
 						// console.log('response: ', response);
 					}).
@@ -17392,7 +17392,7 @@ angular.module('tidepoolsServices')
 					if (geoService.mobileCheck()) {
 						// add arrow to user location marker if mobile device
 						iconUrl = 'img/marker/userLocMarker_arrow.png';
-						iconSize = [24, 30];
+						iconSize = [24, 28];
 						iconAnchor = [12, 12];
 					}
 
@@ -17718,7 +17718,7 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 		var data = {
 			userTime: new Date()
 		}
-		return $http.post('/api/anon_user/create', data)
+		return $http.post('/api/anon_user/create', data, {server: true})
 			.then(function(res) {
 				return res.data[0];
 			});
@@ -19243,7 +19243,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
@@ -19320,7 +19320,7 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.signup.error = false;		
 
 		// send confirmation email
-		$http.post('/email/confirm').then(function(success) {
+		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
 		}, function(error) {
 			console.log('error :', error);
@@ -19357,6 +19357,7 @@ userManager.checkAdminStatus = function() {
 
 return userManager;
 }]);
+
 'use strict';
 
 app.factory('worldBuilderService', worldBuilderService);
@@ -21457,7 +21458,7 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
 	  currentUrl: $location.absUrl()
     };
 
-    $http.post('feedback', data).
+    $http.post('feedback', data, {server: true}).
       success(function(data){
         console.log('feedback sent');
 		alertManager.addAlert('success', "Feedback sent, thanks!", true);
@@ -21727,7 +21728,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 				floor_num: parseFloat(floor_num),
 				floor_name: floor_name
 			};
-			$http.post('/api/temp_map_upload', newData).
+			$http.post('/api/temp_map_upload', newData, {server: true}).
 				success(function(data, status, headers, config) {
 					// console.log('success: ', data);
 					$scope.world = data;
@@ -21925,7 +21926,7 @@ function deleteMap(map) {
 		worldID: $scope.world._id,
 		map_marker_viewID: map.map_marker_viewID
 	};
-	$http.post('/api/delete_map', data).
+	$http.post('/api/delete_map', data, {server: true}).
 		success(function(data) {
 			// console.log('success: ', data);
 			$scope.world = data;
@@ -22187,7 +22188,7 @@ $scope.buildLocalMap = function () {
 		}
 	//build map
 	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
-	$http.post('/api/build_map', data).success(function(response){
+	$http.post('/api/build_map', data, {server: true}).success(function(response){
 		//response = JSON.parse(response);
 		alerts.addAlert('success', 'Map built!', true);
 		// console.log(response);
@@ -24129,7 +24130,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(15);
 
-            $http.post('/email/request_confirm/' + token).
+            $http.post('/email/request_confirm/' + token, {}, {server: true}).
             success(function(data) {
                 $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
             }).
@@ -24146,7 +24147,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(7);
 
-            $http.post('/resetConfirm/' + token).
+            $http.post('/resetConfirm/' + token, {}, {server: true}).
             success(function(data) {
 
             }).
@@ -24240,7 +24241,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var data = {
                 updatedEmail: $scope.user.newEmail
             };
-            $http.post('api/user/emailUpdate', data).
+            $http.post('api/user/emailUpdate', data, {server: true}).
             success(function(data) {
                 if (data.err) {
                     addErrorMsg(data.err, 3000);
@@ -24255,7 +24256,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
     function sendEmailConfirmation() {
-        $http.post('/email/confirm').then(function(sucess) {}, function(error) {});
+        $http.post('/email/confirm', {}, {server: true}).then(function(sucess) {}, function(error) {});
     }
 
     function sendPasswordForgot() {
@@ -24263,7 +24264,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             email: $scope.user.email
         };
 
-        $http.post('/forgot', data).
+        $http.post('/forgot', data, {server: true}).
         success(function(data) {
             $scope.user.email = '';
         }).
@@ -24279,7 +24280,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             password: $scope.user.newPassword
         }
 
-        $http.post('/reset/' + $location.path().slice(7), data).
+        $http.post('/reset/' + $location.path().slice(7), data, {server: true}).
         success(function(data) {
             if (data.err) {
                 addErrorMsg(data.err, 3000);
@@ -24306,6 +24307,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
 }]);
+
 'use strict';
 
 angular.module('IF')
@@ -24837,7 +24839,7 @@ $scope.socialLogin = function(type){
 
     $location.url('/auth/'+type);
 
-    $http.post('/auth/'+type).
+    $http.post('/auth/'+type, {}, {server: true}).
       success(function(user){
   
       }).
@@ -24856,7 +24858,7 @@ $scope.socialLogin = function(type){
       password: $scope.user.password
     }
 
-    $http.post('/api/user/login', data).
+    $http.post('/api/user/login', data, {server: true}).
       success(function(user){
           if (user){
             $location.url('/profile');
@@ -24892,7 +24894,7 @@ function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
       password: $scope.user.password
     }
 
-    $http.post('/api/user/signup', data).
+    $http.post('/api/user/signup', data, {server: true}).
       success(function(user){
           if (user){
 
@@ -24934,7 +24936,7 @@ app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService',
       email: $scope.user.email
     }
 
-    $http.post('/forgot', data).
+    $http.post('/forgot', data, {server: true}).
       success(function(data){
           // console.log(data);
           $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
@@ -24959,7 +24961,7 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 
   $scope.aperture.set('off');
 
-  $http.post('/resetConfirm/'+$routeParams.token).
+  $http.post('/resetConfirm/'+$routeParams.token, {}, {server: true}).
     success(function(data){
         
     }).
@@ -24977,7 +24979,7 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
       password: $scope.user.password
     }
 
-    $http.post('/reset/'+$routeParams.token, data).
+    $http.post('/reset/'+$routeParams.token, data, {server: true}).
       success(function(data){
         $location.path('/profile');
       }).
@@ -24998,6 +25000,7 @@ app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootSc
   location.reload(true);
 
 }]); 
+
 app.controller('UserController', ['$scope', '$rootScope', '$http', '$location', '$route', '$routeParams', 'userManager', '$q', '$timeout', '$upload', 'Landmark', 'db', 'alertManager', '$interval', 'ifGlobals', 'userGrouping', function ($scope, $rootScope, $http, $location, $route, $routeParams, userManager, $q, $timeout, $upload, Landmark, db, alertManager, $interval, ifGlobals, userGrouping) {
 
 angular.extend($rootScope, {loading: false});
@@ -25141,7 +25144,7 @@ if ($routeParams.incoming == 'meetup'){
 	$scope.fromMeetup = true;
 	$scope.waitingforMeetup = true;
 
-	$http.post('/api/process_meetups').success(function(response){
+	$http.post('/api/process_meetups', {}, {server: true}).success(function(response){
 		checkProfileUpdates(); //now wait until meetup bubbles come in
 		// $http.get('/api/user/profile').success(function(user){
 		// 	$scope.worlds = user;		
@@ -26997,10 +27000,10 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 					}
 
 					if (scope.mode === 'home' && scrollState) {
-						$('.wrap').animate({
-							scrollTop: 0
-						}, 400);
-						scrollState = false;
+						// $('.wrap').animate({
+						// 	scrollTop: 0
+						// }, 400);
+						// scrollState = false;
 					} else {
 						if (apertureService.state !== 'aperture-full') {
 							apertureService.set('third');
@@ -27021,13 +27024,13 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 				// set aperture or scroll
 				if (scope.mode === 'home' && !scrollState) {
-					var navHeight = parseInt($('.main-nav').css('height'));
-					var marginTop = parseInt($('.search-cat').css('margin-top'));
-					$('.wrap').animate({
-						// subtract nav bar height and searchbar's margin-top
-						scrollTop: offset - (navHeight + marginTop)
-					}, 400);
-					scrollState = true;
+					// var navHeight = parseInt($('.main-nav').css('height'));
+					// var marginTop = parseInt($('.search-cat').css('margin-top'));
+					// $('.wrap').animate({
+					// 	// subtract nav bar height and searchbar's margin-top
+					// 	scrollTop: offset - (navHeight + marginTop)
+					// }, 400);
+					// scrollState = true;
 				} else {
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('off');

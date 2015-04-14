@@ -801,7 +801,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {

@@ -4842,7 +4842,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================
@@ -18824,21 +18824,21 @@ lockerManager.getCredentials = function() {
 	}, function(error) {
 		username.resolve(undefined);
 		console.log(error);
-	}, 'username', 'Bubbl.li');
+	}, 'username', 'Kip');
 
 	lockerManager.keychain.getForKey(function(value) {
 		password.resolve(value);
 	}, function(error) {
 		password.resolve(undefined);
 		console.log(error);
-	}, 'password', 'Bubbl.li');
+	}, 'password', 'Kip');
 	
 	lockerManager.keychain.getForKey(function(value) {
 		fbToken.resolve(value);
 	}, function(error) {
 		fbToken.resolve(undefined);
 		console.log(error);
-	}, 'fbToken', 'Bubbl.li');
+	}, 'fbToken', 'Kip');
 	
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
@@ -18853,14 +18853,14 @@ lockerManager.saveCredentials = function(username, password) {
 	}, function(error) {
 		usernameSuccess.reject(error);
 	},
-	'username', 'Bubbl.li', username);
+	'username', 'Kip', username);
 	
 	lockerManager.keychain.setForKey(function(success) {
 		passwordSuccess.resolve(success);
 	}, function(error) {
 		passwordSuccess.reject(error);
 	},
-	'password', 'Bubbl.li', password);
+	'password', 'Kip', password);
 	
 	return $q.all([usernameSuccess, passwordSuccess]);
 }
@@ -18874,7 +18874,7 @@ lockerManager.saveFBToken = function(fbToken) {
 	}, function(error) {
 		deferred.reject(error);
 	},
-	'fbToken', 'Bubbl.li', fbToken);
+	'fbToken', 'Kip', fbToken);
 	
 	return deferred;
 }
@@ -19769,8 +19769,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	var world = {newStatus: true};
 	
@@ -22376,7 +22374,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
@@ -23781,7 +23779,7 @@ $scope.navService = navService;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
+angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
 
@@ -23871,10 +23869,10 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://kipapp.co'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+    link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
   window.open(
     link,
@@ -23986,7 +23984,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					}
 				}
 				else if (tab === 'search') {
-					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general kip search
 					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
@@ -25372,10 +25370,7 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
-	
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
-	
+		
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){
@@ -26559,7 +26554,7 @@ link: function(scope, element, attrs) {
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {
-			return 'https://bubbl.li/'+string;
+			return 'https://kipapp.co/'+string;
 		}
 	}
 	

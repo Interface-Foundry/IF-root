@@ -15,7 +15,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					}
 				}
 				else if (tab === 'search') {
-					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general kip search
 					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');

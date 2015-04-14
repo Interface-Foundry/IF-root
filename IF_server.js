@@ -225,7 +225,7 @@ app.post('/feedback', function(req, res) {
 
     var mailOptions = {
         to: feedbackTo,
-        from: 'IF Bubbl <mail@bubbl.li>',
+        from: 'Kip Feedback <feedback@kipapp.co>',
         subject: emailSubject,
         text: emailBody
     };
@@ -387,8 +387,8 @@ app.post('/forgot', function(req, res, next) {
             if (req.headers.host) {
                 var mailOptions = {
                     to: user.local.email,
-                    from: 'IF Bubbl <mail@bubbl.li>',
-                    subject: 'Bubbl Password Reset',
+                    from: 'Kip <noreply@kipapp.co>',
+                    subject: 'Kip Password Reset',
                     text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
                         'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
                         'https://' + req.headers.host + '/reset/' + token + '\n\n' +
@@ -462,8 +462,8 @@ app.post('/reset/:token', function(req, res) {
 
             var mailOptions = {
                 to: user.local.email,
-                from: 'IF Bubbl <mail@bubbl.li>',
-                subject: 'Your Bubbl Password was reset',
+                from: 'Kip <noreply@kipapp.co>',
+                subject: 'Your Kip Password was reset',
                 text: 'Hello,\n\n' +
                     'This is a confirmation that the password for your account ' + user.local.email + ' has just been changed. If this is an error, please contact: hello@interfacefoundry.com\n'
             };
