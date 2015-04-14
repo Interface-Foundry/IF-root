@@ -44,7 +44,6 @@ var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
-var redis = require('redis');
 var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');
 var readChunk = require('read-chunk');
@@ -542,6 +541,7 @@ app.use('/api/announcements', require('./components/IF_superuser/announcement_ro
 app.use('/api/contests', require('./components/IF_superuser/contest_routes'));
 app.use('/api/entries', require('./components/IF_superuser/contestEntry_routes'));
 //--- INSTAGRAM / TWITTER ROUTER ----//
+app.use('/api/tweets', require('./components/IF_apiroutes/twitter_routes'));
 app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes'));
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
@@ -666,21 +666,12 @@ app.get('/api/bubblesearch/:type', function(req, res, next) {
 
 //Creates new analytics object 
 app.post('/api/analytics/:action', function(req, res) {
-
     //objects sent from front-end will be sent to redis as-is, with splitting occuring at a later point.
     redisClient.rpush('analytics', JSON.stringify(req.body), function(err, reply) {
         res.send('(=^･ｪ･^=)');
-
     });
-
-
-
     // DONE!  then a separate node process dumps the redis cache to db
-
-
 });
-
-
 
 
 // Save world visitor anonymously
@@ -798,7 +789,6 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
             if (req.headers['content-length'] > 10000000) {
                 console.log("Filesize too large.");
             } else {
-
                 var stuff_to_hash = filename + (new Date().toString());
                 var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
                 var fileType = filename.split('.').pop();
@@ -1029,6 +1019,8 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                                 },
                                                                 function(err, result) {
                                                                     if (err) console.log(err);
+
+                                            
                                                                     console.log('contest updated with cloudsight', result)
                                                                 })
 
@@ -1892,39 +1884,39 @@ app.post('/api/updateuser', isLoggedIn, function(req, res) {
                     us.presents = req.body.presents;
                 }
 
-                //check for unique profileID before save
-                if (req.body.profileID) {
+                // //check for unique profileID before save
+                // if (req.body.profileID) {
 
-                    //if missing profileID, try to fill it in using name
-                    if (req.body.profileID == 'undefined' && req.body.name) {
+                //     //if missing profileID, try to fill it in using name
+                //     if (req.body.profileID == 'undefined' && req.body.name) {
 
-                        uniqueProfileID(req.body.name, function(output) {
-                            us.profileID = output;
-                            saveUser();
-                        });
-                    } else if (req.body.profileID == 'undefined' && us.name) {
+                //         uniqueProfileID(req.body.name, function(output) {
+                //             us.profileID = output;
+                //             saveUser();
+                //         });
+                //     } else if (req.body.profileID == 'undefined' && us.name) {
 
-                        uniqueProfileID(us.name, function(output) {
-                            us.profileID = output;
-                            saveUser();
-                        });
-                    } else if (req.body.profileID == 'undefined') {
-                        req.body.profileID = 'user';
+                //         uniqueProfileID(us.name, function(output) {
+                //             us.profileID = output;
+                //             saveUser();
+                //         });
+                //     } else if (req.body.profileID == 'undefined') {
+                //         req.body.profileID = 'user';
 
-                        uniqueProfileID(req.body.profileID, function(output) {
-                            us.profileID = output;
-                            saveUser();
-                        });
-                    } else {
-                        us.profileID = req.body.profileID;
-                        saveUser();
-                    }
+                //         uniqueProfileID(req.body.profileID, function(output) {
+                //             us.profileID = output;
+                //             saveUser();
+                //         });
+                //     } else {
+                //         us.profileID = req.body.profileID;
+                //         saveUser();
+                //     }
 
-                }
-                //or just save if no unique userID
-                else {
-                    saveUser();
-                }
+                // }
+                // //or just save if no unique userID
+                // else {
+                saveUser();
+                // }
 
                 function saveUser() {
                     us.save(function(err) {
@@ -2360,45 +2352,45 @@ app.get('/api/:collection', function(req, res) {
 
 
     //querying tweets (social media and internal comments too, eventually)
-    if (req.params.collection == 'tweets') {
+    // if (req.params.collection == 'tweets') {
 
-        if (req.query.tag) { //hashtag filtering
-            //has limit
-            if (req.query.limit) {
-                var Twlimit = parseInt(req.query.limit);
-                var qw = {
-                    'hashtags': {
-                        '$in': [req.query.tag]
-                    }
-                };
-                db.collection('tweets').find(qw).limit(Twlimit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-            //no limit
-            else {
-                var qw = {
-                    'hashtags': {
-                        '$in': [req.query.tag]
-                    }
-                };
-                db.collection('tweets').find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-        } else {
-            if (req.query.limit) { //limited tweet query
-                limit = parseInt(req.query.limit);
-                db.collection(req.params.collection).find(qw).limit(limit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            } else {
-                db.collection(req.params.collection).find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-        }
-    }
+    //     if (req.query.tag) { //hashtag filtering
+    //         //has limit
+    //         if (req.query.limit) {
+    //             var Twlimit = parseInt(req.query.limit);
+    //             var qw = {
+    //                 'hashtags': {
+    //                     '$in': [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('tweets').find(qw).limit(Twlimit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //         //no limit
+    //         else {
+    //             var qw = {
+    //                 'hashtags': {
+    //                     '$in': [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('tweets').find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     } else {
+    //         if (req.query.limit) { //limited tweet query
+    //             limit = parseInt(req.query.limit);
+    //             db.collection(req.params.collection).find(qw).limit(limit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         } else {
+    //             db.collection(req.params.collection).find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     }
+    // }
 
     //querying instagrams
     // if (req.params.collection == 'instagrams') {

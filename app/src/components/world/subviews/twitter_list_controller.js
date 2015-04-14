@@ -6,13 +6,33 @@ app.filter('httpsify', function() {
 }) 
 
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		$scope.loadTweets = loadTweets;
+		$scope.tweets = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
-	})
+
+		loadTweets();
+
+		function loadTweets() {
+			db.tweets.query({
+				number: $scope.tweets.length, 
+				tag:$scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = $scope.tweets.concat(response);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadTweets = _.throttle(loadTweets, 5000);
+	});
+}]);
 
 //tweets is an array of form
 // [{"text": string,
@@ -27,5 +47,3 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-
-}])

@@ -77,10 +77,15 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.splash = true;
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
-            $scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
-            $scope.show.confirm = userManager.loginStatus &&
-                !userManager._user.local.confirmedEmail &&
-                !userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+            // don't show confirm dialog for fb authenticated users
+            if (userManager._user.facebook) {
+                $scope.show.splash = false;
+                $scope.show.confirm = false;
+            } else {
+                $scope.show.splash = !userManager._user.local.confirmedEmail;
+                $scope.show.confirm = !userManager._user.local.confirmedEmail;
+            }
+            
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in

@@ -4878,7 +4878,7 @@ $routeProvider.
 
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-  when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -19015,8 +19015,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -19123,6 +19123,7 @@ userManager.signin = function(username, password) { //given a username and passw
 	
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
+			userManager._user = data;
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			deferred.resolve(data);
@@ -19187,6 +19188,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.login.error = false;
 		dialogs.show = false;
 		contest.login(new Date); // for wtgt contest
+		$route.reload();
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -24028,10 +24030,15 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.splash = true;
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
-            $scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
-            $scope.show.confirm = userManager.loginStatus &&
-                !userManager._user.local.confirmedEmail &&
-                !userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+            // don't show confirm dialog for fb authenticated users
+            if (userManager._user.facebook) {
+                $scope.show.splash = false;
+                $scope.show.confirm = false;
+            } else {
+                $scope.show.splash = !userManager._user.local.confirmedEmail;
+                $scope.show.confirm = !userManager._user.local.confirmedEmail;
+            }
+            
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
@@ -27058,8 +27065,11 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				console.log('Error:', error);
 			});
 		}
-	})
-}])
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadInstagrams = _.throttle(loadInstagrams, 5000);
+	});
+}]);
 
 //instagrams is an array of form
 // [{"objectID":string,
@@ -27474,13 +27484,33 @@ app.filter('httpsify', function() {
 }) 
 
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		$scope.loadTweets = loadTweets;
+		$scope.tweets = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
-	})
+
+		loadTweets();
+
+		function loadTweets() {
+			db.tweets.query({
+				number: $scope.tweets.length, 
+				tag:$scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = $scope.tweets.concat(response);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadTweets = _.throttle(loadTweets, 5000);
+	});
+}]);
 
 //tweets is an array of form
 // [{"text": string,
@@ -27495,8 +27525,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-
-}])
 // app.directive('categoryWidget', [function() {
 // return {
 // 	restrict: 'E',
@@ -27634,14 +27662,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 style.navBG_color = $scope.style.navBG_color;
 
 	 //show edit buttons if user is world owner
-	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-		 	$scope.showEdit = true;
+	userManager.getUser()
+	.then(function(user) {
+		if (user && user._id && $scope.world.permissions && user._id === $scope.world.permissions.ownerID) {
+
+		 	$scope.showEdit = true;	
+		} else {
+			$scope.showEdit = false;
 		}
-		else {
-		 	$scope.showEdit = false;
-		}
-	} 
+	});
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});
@@ -27885,7 +27914,13 @@ function loadWidgets() { //needs to be generalized
 		}
 		
 	  if ($scope.world.resources) {
-			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+			db.tweets.query({
+				number: 0,
+				tag: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = response;
+			});
 	  }
 
 	  if ($scope.style.widgets.nearby == true) {
