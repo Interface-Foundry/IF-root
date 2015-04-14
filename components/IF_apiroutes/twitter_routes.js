@@ -6,8 +6,9 @@ var express = require('express'),
     _ = require('underscore');
 
 
-router.use(function (req, res, next) {
+router.use(function(req, res, next) {
     if (req.query.number || req.query.tag) {
+  
         next();
     }
 });
@@ -15,23 +16,36 @@ router.use(function (req, res, next) {
 //load tweets sorted newest and skips # already loaded on page (lazy load)
 router.get('/', function(req, res) {
 
-     console.log('hitting twittrs', req.query.tag);
+            var number = parseInt(req.query.number)
 
-    twitterSchema.find({
-        hashtags: req.query.tag
-    }).sort({
-        created: -1
-    }).skip(req.query.number).limit(25).exec(function(err, tweets) {
-        if (err) {
-            console.log(err);
-        }
-      
-        return res.send(tweets);
-    })
+              console.log('hitting twittrs', number);
 
-})
+            // twitterSchema.find({}, function(err, results) {
+
+            //         if (err) {
+            //                     console.log(err);
+            //                 }
+            //                 console.log('hitting lolol', results)
+
+            //                 return res.send(results);
+
+            //         })
+
+                twitterSchema.find({
+                    hashtags: req.query.tag.toString()
+                }).sort({
+                    created: -1
+                }).skip(number).limit(25).exec(function(err, tweets) {
+                    if (err) {
+                        console.log(err);
+                    }
+                     console.log('hitting lolol', tweets)
+                    return res.send(tweets);
+                })
+
+            })
 
 
 
 
-module.exports = router;
+        module.exports = router;
