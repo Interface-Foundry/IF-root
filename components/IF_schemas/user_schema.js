@@ -17,7 +17,7 @@ function getRandomAvatar() {
     ]
 
     var path = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
-    console.log('path is:', path)
+    // console.log('path is:', path)
     return path
 
 }
