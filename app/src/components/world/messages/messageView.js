@@ -43,12 +43,15 @@ link: function(scope, element, attrs) {
 				break;
 			case 'editUser': 
 				content = [
-					m('.message-body', message.msg),
+					m('.message-body.kipbot-chat', message.msg),
 					m('hr.divider'),
 					m('img.msg-chip-img', {src: bubUrl(scope.user.avatar)}),
 					m('.msg-chip-label', scope.nick),
 					m('img.msg-chip-edit', {src: 'img/icons/ic_edit_grey600.png'})
 				];
+				break;
+			case 'welcome':
+				content = m('.message-body.kipbot-chat', message.msg);
 				break;
 		}
 
@@ -59,7 +62,7 @@ link: function(scope, element, attrs) {
 		if (string === undefined) {
 			return '';	
 		}
-		if (string.indexOf('http') > -1) {
+		if (string.indexOf('http') > -1 || string.indexOf('img/IF/kipbot_icon.png') > -1) {
 			return string;
 		} else {
 			return 'https://bubbl.li/'+string;

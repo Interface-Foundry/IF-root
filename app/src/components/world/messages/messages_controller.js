@@ -1,4 +1,4 @@
-app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData', 'stickerManager', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData, stickerManager) {
+app.controller('MessagesController', ['$location', '$scope', '$sce', 'db', '$rootScope', '$routeParams', 'apertureService', '$http', '$timeout', 'worldTree', '$upload', 'styleManager', 'alertManager', 'dialogs', 'userManager', 'mapManager', 'ifGlobals', 'leafletData', 'stickerManager', 'messagesService', function ($location, $scope,  $sce, db, $rootScope, $routeParams, apertureService, $http, $timeout, worldTree, $upload, styleManager, alertManager, dialogs, userManager, mapManager, ifGlobals, leafletData, stickerManager, messagesService) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////////INITIALIZE///////////////////////////
@@ -134,6 +134,9 @@ $scope.onImageSelect = function($files) {
 }	
 
 $scope.showStickers = function() {
+	if ($scope.editing) {
+		return;
+	}
 	var url = $location.url() + '#stickers';
 
 	$scope.editing = true;
@@ -223,28 +226,12 @@ function getAvatar() {
 
 //add welcome message 
 function welcomeMessage() {
-	var newChat = {
-	    roomID: $scope.world._id,
-	    nick: 'BubblyBot',
-	    msg: 'Hey there, this is a Bubble chat created just for '+$scope.world.name+'. Chat, share pictures & leave notes with others here!',
-	    avatar: $scope.world.avatar || 'img/tidepools/default.png',
-	    userID: 'chatbot',
-	    _id: 'welcomeMessage'
-	};
+	var newChat = messagesService.createWelcomeMessage($scope.world);
 	$scope.messages.push(newChat);
 }
 
 function profileEditMessage() {
-	var newChat = {
-		roomID: $scope.world._id,
-		nick: 'BubblyBot',
-		kind: 'editUser',
-		msg: 'You are currently using the name '+ $scope.nick + '. Click here to edit it.',
-		avatar: $scope.world.avatar || 'img/tidepools/default.png',
-		userID: 'chatbot',
-		_id: 'profileEditMessage',
-		href: 'profile/me/messages'
-	}
+	var newChat = messagesService.createProfileEditMessage($scope.world, $scope.nick);
 	$scope.messages.push(newChat);
 }
 

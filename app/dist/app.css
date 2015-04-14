@@ -1756,6 +1756,12 @@ text-align: center;
 	width: 24px;
 	margin: 4px;
 }
+
+.message-body.kipbot-chat {
+	background-color: rgba(10,10,110, .2);
+  font-style: italic;
+  opacity: .7;
+}
 .instagram-wrap {
 	padding-top: 104px;
 	max-width: 456px;

@@ -494,3 +494,9 @@
 	width: 24px;
 	margin: 4px;
 }
+
+.message-body.kipbot-chat {
+	background-color: rgba(10,10,110, .2);
+  font-style: italic;
+  opacity: .7;
+}
