@@ -3,6 +3,10 @@
 	margin: auto;
 }
 
+.emoji-selector:hover {
+	cursor: pointer;
+}
+
 .emoji-selector.selected {
 	background-color: rgba(200, 200, 200, 0.5);
 }
