@@ -22,7 +22,6 @@ function getRandomAvatar() {
 
 }
 
-
 // define the schema for our user model
 var userSchema = mongoose.Schema({
 
