@@ -20,7 +20,7 @@ module.exports = {
 	'twitterAuth' : {
 		'consumerKey' 		: '79AqE2SPIW219Bx35So7KfTD1',
 		'consumerSecret' 	: 'N5SmhOhWzUJwPbofLpCi0BlJ8T4M3bACpiFBaB1nHdNIOQEu6R',
-		'callbackURL' 		: 'https://bubbl.li/auth/twitter/callback'
+		'callbackURL' 		: 'https://kipapp.co/auth/twitter/callback'
 	},
 
 	// Kip 

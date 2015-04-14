@@ -4888,6 +4888,7 @@ $routeProvider.
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
 
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
