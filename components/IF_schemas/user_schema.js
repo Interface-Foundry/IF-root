@@ -7,22 +7,19 @@ var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
 
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 function getRandomAvatar() {
-    var avatars = ['../../assets/user_icon1.png',
-        '../../assets/user_icon2.png',
-        '../../assets/user_icon3.png',
-        '../../assets/user_icon4.png',
-        '../../assets/user_icon5.png'
+
+    var avatars = ['https://s3.amazonaws.com/if-server-avatars/0',
+        'https://s3.amazonaws.com/if-server-avatars/1',
+        'https://s3.amazonaws.com/if-server-avatars/2',
+        'https://s3.amazonaws.com/if-server-avatars/3',
+        'https://s3.amazonaws.com/if-server-avatars/4'
     ]
+
     var path = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
-    
-    var avatar = {}
-    avatar.contentType = 'image/png';
-    avatar.data = fs.readFileSync(path)
+    console.log('path is:', path)
+    return path
+
 }
 
 
@@ -80,9 +77,8 @@ var userSchema = mongoose.Schema({
     bdayP: Number,
     lang: String, // ex: ‘EN-us’ 
     avatar: {
-        data: Buffer,
-        contentType: String,
-        default: getRandomAvatar()
+       type: String,
+       default: getRandomAvatar()
     },
     name: String,
     note: String,
