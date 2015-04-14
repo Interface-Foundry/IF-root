@@ -634,13 +634,16 @@ var elasticsearch_up = false; // health status
 setInterval(function() {
     elasticsearch.healthcheck(function(err) {
         if (err) {
-            elasticsearch_up = false;
-            if (env == 'production') {
-                console.error('elasticsearch down');
+			if (elasticsearch_up) {
+				elasticsearch_up = false;
+                console.error('elasticsearch is down');
                 console.error(err);
             }
         } else {
-            elasticsearch_up = true;
+			if (!elasticsearch_up) {
+				elasticsearch_up = true;
+				console.log('elasticsearch is back up');
+			}
         }
     });
 }, 15000);
