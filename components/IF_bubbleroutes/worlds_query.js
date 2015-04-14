@@ -35,7 +35,9 @@ var route = function(userCoord0, userCoord1, userTime, res) {
             }
         }],
         function(err, data) {
-            if (err) console.log(err);
+            if (err) return console.log(err);
+
+            if (!data) return console.log(data)
             //Remove entries with end time over one year ago...
             data.forEach(function(el) {
                 if (el.time.end && el.time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
