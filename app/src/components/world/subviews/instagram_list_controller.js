@@ -21,8 +21,8 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				console.log('Error:', error);
 			});
 		}
-	})
-}])
+	});
+}]);
 
 //instagrams is an array of form
 // [{"objectID":string,

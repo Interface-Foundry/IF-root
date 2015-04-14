@@ -27208,8 +27208,8 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				console.log('Error:', error);
 			});
 		}
-	})
-}])
+	});
+}]);
 
 //instagrams is an array of form
 // [{"objectID":string,
@@ -27620,13 +27620,30 @@ app.filter('httpsify', function() {
 }) 
 
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		$scope.loadTweets = loadTweets;
+		$scope.tweets = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
-	})
+
+		loadTweets();
+
+		function loadTweets() {
+			db.tweets.query({
+				number: $scope.tweets.length, 
+				tag:$scope.world.resources.hashtag
+			}).$promise()
+			.then(function(response) {
+				$scope.tweets = $scope.tweets.concat(response);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+	});
+}]);
 
 //tweets is an array of form
 // [{"text": string,
@@ -27641,8 +27658,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-
-}])
 // app.directive('categoryWidget', [function() {
 // return {
 // 	restrict: 'E',
@@ -28031,7 +28046,13 @@ function loadWidgets() { //needs to be generalized
 		}
 		
 	  if ($scope.world.resources) {
-			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+			db.tweets.query({
+				number: 0,
+				tag: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = response;
+			});
 	  }
 
 	  if ($scope.style.widgets.nearby == true) {
