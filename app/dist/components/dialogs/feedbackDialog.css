@@ -1,0 +1,13 @@
+.emoji-selector {
+	display: inline-block;
+	margin: auto;
+}
+
+.emoji-selector.selected {
+	background-color: rgba(200, 200, 200, 0.5);
+}
+
+.emoji-selector .emoji {
+	margin-right: 0;
+	margin-left: 0;
+}
