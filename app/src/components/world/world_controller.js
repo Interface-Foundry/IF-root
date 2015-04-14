@@ -332,7 +332,13 @@ function loadWidgets() { //needs to be generalized
 		}
 		
 	  if ($scope.world.resources) {
-			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+			db.tweets.query({
+				number: 0,
+				tag: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = response;
+			});
 	  }
 
 	  if ($scope.style.widgets.nearby == true) {

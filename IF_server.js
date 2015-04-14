@@ -2352,45 +2352,45 @@ app.get('/api/:collection', function(req, res) {
 
 
     //querying tweets (social media and internal comments too, eventually)
-    if (req.params.collection == 'tweets') {
+    // if (req.params.collection == 'tweets') {
 
-        if (req.query.tag) { //hashtag filtering
-            //has limit
-            if (req.query.limit) {
-                var Twlimit = parseInt(req.query.limit);
-                var qw = {
-                    'hashtags': {
-                        '$in': [req.query.tag]
-                    }
-                };
-                db.collection('tweets').find(qw).limit(Twlimit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-            //no limit
-            else {
-                var qw = {
-                    'hashtags': {
-                        '$in': [req.query.tag]
-                    }
-                };
-                db.collection('tweets').find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-        } else {
-            if (req.query.limit) { //limited tweet query
-                limit = parseInt(req.query.limit);
-                db.collection(req.params.collection).find(qw).limit(limit).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            } else {
-                db.collection(req.params.collection).find(qw).sort({
-                    _id: -1
-                }).toArray(fn(req, res));
-            }
-        }
-    }
+    //     if (req.query.tag) { //hashtag filtering
+    //         //has limit
+    //         if (req.query.limit) {
+    //             var Twlimit = parseInt(req.query.limit);
+    //             var qw = {
+    //                 'hashtags': {
+    //                     '$in': [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('tweets').find(qw).limit(Twlimit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //         //no limit
+    //         else {
+    //             var qw = {
+    //                 'hashtags': {
+    //                     '$in': [req.query.tag]
+    //                 }
+    //             };
+    //             db.collection('tweets').find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     } else {
+    //         if (req.query.limit) { //limited tweet query
+    //             limit = parseInt(req.query.limit);
+    //             db.collection(req.params.collection).find(qw).limit(limit).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         } else {
+    //             db.collection(req.params.collection).find(qw).sort({
+    //                 _id: -1
+    //             }).toArray(fn(req, res));
+    //         }
+    //     }
+    // }
 
     //querying instagrams
     // if (req.params.collection == 'instagrams') {

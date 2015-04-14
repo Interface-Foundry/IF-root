@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
 
-var twitterSchema = mongoose.Schema({
+var tweetSchema = mongoose.Schema({
     tweetID: {
         type: Number,
         index: {
@@ -38,6 +38,6 @@ var twitterSchema = mongoose.Schema({
     
 });
 
-twitterSchema.index({hashtags:1});
+tweetSchema.index({hashtags:1});
 
-module.exports = mongoose.model('twitter', twitterSchema);
+module.exports = mongoose.model('tweets', tweetSchema);
