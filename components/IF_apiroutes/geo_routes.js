@@ -22,12 +22,7 @@ router.use(function(req, res, next) {
     //query the local freegeoip server we are running 
     //if hasLoc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
     //for now use the less accurate ip based cityName
-    request({
-        url: global.config.geoipURL,
-        qs: {
-            q: ip
-        }
-    }, function(err, res, body) {
+    request(global.config.geoipURL + ip, function(err, res, body) {
         if (err) console.log(err);
 		try {
 			var data = JSON.parse(body);
