@@ -1,9 +1,26 @@
 // load the things we need
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt-nodejs');
+var fs = require('fs');
 
 var Schema = mongoose.Schema,
     ObjectID = Schema.ObjectID;
+
+
+function getRandomAvatar() {
+
+    var avatars = ['https://s3.amazonaws.com/if-server-avatars/0',
+        'https://s3.amazonaws.com/if-server-avatars/1',
+        'https://s3.amazonaws.com/if-server-avatars/2',
+        'https://s3.amazonaws.com/if-server-avatars/3',
+        'https://s3.amazonaws.com/if-server-avatars/4'
+    ]
+
+    var path = avatars[Math.floor(Math.random() * (4 - 0 + 1)) + 0];
+    console.log('path is:', path)
+    return path
+
+}
 
 
 // define the schema for our user model
@@ -26,15 +43,15 @@ var userSchema = mongoose.Schema({
         confirmEmailToken: String,
         confirmEmailExpires: Date
     },
-    facebook         : {
-        id           : String,
-        token        : String,
-        email        : String,
-        name         : String,
-        verified     : Boolean,
-        locale       : String,
-        timezone     : Number,
-        bio          : String
+    facebook: {
+        id: String,
+        token: String,
+        email: String,
+        name: String,
+        verified: Boolean,
+        locale: String,
+        timezone: Number,
+        bio: String
     },
     twitter: {
         id: String,
@@ -59,7 +76,10 @@ var userSchema = mongoose.Schema({
     bday: Number, //birthday
     bdayP: Number,
     lang: String, // ex: ‘EN-us’ 
-    avatar: String,
+    avatar: {
+       type: String,
+       default: getRandomAvatar()
+    },
     name: String,
     note: String,
     social: {
