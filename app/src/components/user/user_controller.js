@@ -141,7 +141,7 @@ if ($routeParams.incoming == 'meetup'){
 	$scope.fromMeetup = true;
 	$scope.waitingforMeetup = true;
 
-	$http.post('/api/process_meetups').success(function(response){
+	$http.post('/api/process_meetups', {}, {server: true}).success(function(response){
 		checkProfileUpdates(); //now wait until meetup bubbles come in
 		// $http.get('/api/user/profile').success(function(user){
 		// 	$scope.worlds = user;		

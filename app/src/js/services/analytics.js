@@ -49,7 +49,7 @@ function analyticsService($http, $injector, $rootScope, $timeout, $location, loc
 			
 		}).finally(function() {
 			// dude trust me, this is gonna work. no need for a response
-			$http.post('/api/analytics/' + action, doc);
+			$http.post('/api/analytics/' + action, doc, {server: true});
 		});
     }
     

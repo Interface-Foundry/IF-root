@@ -158,7 +158,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data).then(
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
@@ -247,7 +247,7 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.signup.error = false;		
 
 		// send confirmation email
-		$http.post('/email/confirm').then(function(success) {
+		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
 		}, function(error) {
 			console.log('error :', error);

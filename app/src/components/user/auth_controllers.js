@@ -24,7 +24,7 @@ $scope.socialLogin = function(type){
 
     $location.url('/auth/'+type);
 
-    $http.post('/auth/'+type).
+    $http.post('/auth/'+type, {}, {server: true}).
       success(function(user){
   
       }).
@@ -43,7 +43,7 @@ $scope.socialLogin = function(type){
       password: $scope.user.password
     }
 
-    $http.post('/api/user/login', data).
+    $http.post('/api/user/login', data, {server: true}).
       success(function(user){
           if (user){
             $location.url('/profile');
@@ -79,7 +79,7 @@ function ($scope, $rootScope, $http, $location, apertureService, alertManager) {
       password: $scope.user.password
     }
 
-    $http.post('/api/user/signup', data).
+    $http.post('/api/user/signup', data, {server: true}).
       success(function(user){
           if (user){
 
@@ -121,7 +121,7 @@ app.controller('ForgotCtrl', ['$scope', '$http', '$location', 'apertureService',
       email: $scope.user.email
     }
 
-    $http.post('/forgot', data).
+    $http.post('/forgot', data, {server: true}).
       success(function(data){
           // console.log(data);
           $scope.alerts.addAlert('success','Instructions for resetting your password were emailed to you');
@@ -146,7 +146,7 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 
   $scope.aperture.set('off');
 
-  $http.post('/resetConfirm/'+$routeParams.token).
+  $http.post('/resetConfirm/'+$routeParams.token, {}, {server: true}).
     success(function(data){
         
     }).
@@ -164,7 +164,7 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
       password: $scope.user.password
     }
 
-    $http.post('/reset/'+$routeParams.token, data).
+    $http.post('/reset/'+$routeParams.token, data, {server: true}).
       success(function(data){
         $location.path('/profile');
       }).

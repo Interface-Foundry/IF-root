@@ -181,7 +181,7 @@ function LandmarkNewCtrl($location, $scope, $routeParams, db, $rootScope) {
           coords: coords_text
         }
 
-        $http.post('/api/build_map', data).success(function(response){
+        $http.post('/api/build_map', data, {server: true}).success(function(response){
             console.log(response);
         });
 

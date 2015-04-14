@@ -42,7 +42,7 @@ app.factory('localStore', ['$http', '$q', function($http, $q) {
 		var data = {
 			userTime: new Date()
 		}
-		return $http.post('/api/anon_user/create', data)
+		return $http.post('/api/anon_user/create', data, {server: true})
 			.then(function(res) {
 				return res.data[0];
 			});

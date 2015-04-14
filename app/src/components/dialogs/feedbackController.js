@@ -25,7 +25,7 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
 	  currentUrl: $location.absUrl()
     };
 
-    $http.post('feedback', data).
+    $http.post('feedback', data, {server: true}).
       success(function(data){
         console.log('feedback sent');
 		alertManager.addAlert('success', "Feedback sent, thanks!", true);

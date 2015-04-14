@@ -31,7 +31,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			localStore.getID().then(function(id) {
 				data.anonID = id;
 			}).then(function() {
-				$http.post('/api/anon_user/update', data).
+				$http.post('/api/anon_user/update', data, {server: true}).
 					success(function(data) {
 						// console.log('success: ', data);
 					}).
@@ -57,7 +57,7 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 			localStore.getID().then(function(id) {
 				data.anonID = id;
 			}).then(function() {
-				$http.post('/api/anon_user/update', data).
+				$http.post('/api/anon_user/update', data, {server: true}).
 					success(function(data, status, headers, config) {
 						// console.log('response: ', response);
 					}).

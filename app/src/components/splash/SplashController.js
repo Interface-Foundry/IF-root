@@ -31,7 +31,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(15);
 
-            $http.post('/email/request_confirm/' + token).
+            $http.post('/email/request_confirm/' + token, {}, {server: true}).
             success(function(data) {
                 $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
             }).
@@ -48,7 +48,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(7);
 
-            $http.post('/resetConfirm/' + token).
+            $http.post('/resetConfirm/' + token, {}, {server: true}).
             success(function(data) {
 
             }).
@@ -146,7 +146,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var data = {
                 updatedEmail: $scope.user.newEmail
             };
-            $http.post('api/user/emailUpdate', data).
+            $http.post('api/user/emailUpdate', data, {server: true}).
             success(function(data) {
                 if (data.err) {
                     addErrorMsg(data.err, 3000);
@@ -161,7 +161,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
     function sendEmailConfirmation() {
-        $http.post('/email/confirm').then(function(sucess) {}, function(error) {});
+        $http.post('/email/confirm', {}, {server: true}).then(function(sucess) {}, function(error) {});
     }
 
     function sendPasswordForgot() {
@@ -169,7 +169,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             email: $scope.user.email
         };
 
-        $http.post('/forgot', data).
+        $http.post('/forgot', data, {server: true}).
         success(function(data) {
             $scope.user.email = '';
         }).
@@ -185,7 +185,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             password: $scope.user.newPassword
         }
 
-        $http.post('/reset/' + $location.path().slice(7), data).
+        $http.post('/reset/' + $location.path().slice(7), data, {server: true}).
         success(function(data) {
             if (data.err) {
                 addErrorMsg(data.err, 3000);

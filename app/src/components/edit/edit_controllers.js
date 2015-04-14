@@ -153,7 +153,7 @@ $scope.onLocalMapSelect = function($files, floor_num, floor_name) {
 				floor_num: parseFloat(floor_num),
 				floor_name: floor_name
 			};
-			$http.post('/api/temp_map_upload', newData).
+			$http.post('/api/temp_map_upload', newData, {server: true}).
 				success(function(data, status, headers, config) {
 					// console.log('success: ', data);
 					$scope.world = data;
@@ -351,7 +351,7 @@ function deleteMap(map) {
 		worldID: $scope.world._id,
 		map_marker_viewID: map.map_marker_viewID
 	};
-	$http.post('/api/delete_map', data).
+	$http.post('/api/delete_map', data, {server: true}).
 		success(function(data) {
 			// console.log('success: ', data);
 			$scope.world = data;
@@ -613,7 +613,7 @@ $scope.buildLocalMap = function () {
 		}
 	//build map
 	alerts.addAlert('warning', 'Building local map, this may take some time!', true);
-	$http.post('/api/build_map', data).success(function(response){
+	$http.post('/api/build_map', data, {server: true}).success(function(response){
 		//response = JSON.parse(response);
 		alerts.addAlert('success', 'Map built!', true);
 		// console.log(response);
