@@ -21,13 +21,16 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 			db.tweets.query({
 				number: $scope.tweets.length, 
 				tag:$scope.world.resources.hashtag
-			}).$promise()
+			}).$promise
 			.then(function(response) {
 				$scope.tweets = $scope.tweets.concat(response);
 			}, function(error) {
 				console.log('Error', error);
 			});
 		}
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadTweets = _.throttle(loadTweets, 5000);
 	});
 }]);
 

@@ -17,20 +17,6 @@ router.use(function(req, res, next) {
 router.get('/', function(req, res) {
 
             var number = parseInt(req.query.number)
-
-              console.log('hitting twittrs', number);
-
-            // twitterSchema.find({}, function(err, results) {
-
-            //         if (err) {
-            //                     console.log(err);
-            //                 }
-            //                 console.log('hitting lolol', results)
-
-            //                 return res.send(results);
-
-            //         })
-
                 twitterSchema.find({
                     hashtags: req.query.tag.toString()
                 }).sort({
@@ -39,7 +25,6 @@ router.get('/', function(req, res) {
                     if (err) {
                         console.log(err);
                     }
-                     console.log('hitting lolol', tweets)
                     return res.send(tweets);
                 })
 

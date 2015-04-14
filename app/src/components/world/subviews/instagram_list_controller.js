@@ -21,6 +21,9 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				console.log('Error:', error);
 			});
 		}
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadInstagrams = _.throttle(loadInstagrams, 5000);
 	});
 }]);
 

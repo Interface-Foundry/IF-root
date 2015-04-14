@@ -3,7 +3,7 @@
 		<h4 class="subnav-header">Twitter <em>#{{world.resources.hashtag}}</em></h4>
 	</nav>
 	
-	<div class="twitter-wrap wrap" lazy-load load-more="loadTweets()">
+	<div class="twitter-wrap wrap" lazy-load load-more="throttledLoadTweets()">
 		<ul>
 			<li ng-repeat="tweet in tweets track by $index" class="tweet marble-page">
 				<a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}">
