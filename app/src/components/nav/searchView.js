@@ -1,3 +1,4 @@
+// DEPRACATED
 app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsService', function($http, $routeParams, geoService, analyticsService) {
 	return {
 		restrict: 'EA',

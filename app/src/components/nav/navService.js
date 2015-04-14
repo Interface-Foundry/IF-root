@@ -1,9 +1,8 @@
 app.factory('navService', [function() {
-	// used for displaying correct selection on nav icons, as well as showing and hiding explore-view and search-view directives in index.html
+	// used for displaying correct selection on nav icons, and managing back button
 
 	var status = {
 		home: true, // default home nav selected
-		explore: false,
 		search: false, // main bubblli search
 		searchWithinBubble: false // search within a bubble (all, text, category)
 	};
