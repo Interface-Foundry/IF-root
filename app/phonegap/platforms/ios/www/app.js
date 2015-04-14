@@ -4842,7 +4842,7 @@ var checkAdminStatus = function(userManager, $location) {
 }
 
 var updateTitle = function($rootScope) {
-  angular.extend($rootScope, {globalTitle: 'Bubbl.li'});
+  angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
     //================================================
@@ -4887,7 +4887,7 @@ $routeProvider.
 
   when('/', {templateUrl: 'components/home/home.html', controller: 'HomeController', resolve: {'updateTitle': updateTitle}}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'NearbyCtrl'}).
-  when('home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
+  when('/home', {templateUrl: 'components/home/home.html', controller: 'HomeController'}).
   when('/nearby', {templateUrl: 'components/nearby/nearby.html', controller: 'WorldRouteCtrl'}).
   when('/login', {templateUrl: 'components/user/login.html', controller: 'LoginCtrl'}).
   when('/forgot', {templateUrl: 'components/user/forgot.html', controller: 'ForgotCtrl'}).
@@ -18824,21 +18824,21 @@ lockerManager.getCredentials = function() {
 	}, function(error) {
 		username.resolve(undefined);
 		console.log(error);
-	}, 'username', 'Bubbl.li');
+	}, 'username', 'Kip');
 
 	lockerManager.keychain.getForKey(function(value) {
 		password.resolve(value);
 	}, function(error) {
 		password.resolve(undefined);
 		console.log(error);
-	}, 'password', 'Bubbl.li');
+	}, 'password', 'Kip');
 	
 	lockerManager.keychain.getForKey(function(value) {
 		fbToken.resolve(value);
 	}, function(error) {
 		fbToken.resolve(undefined);
 		console.log(error);
-	}, 'fbToken', 'Bubbl.li');
+	}, 'fbToken', 'Kip');
 	
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
@@ -18853,14 +18853,14 @@ lockerManager.saveCredentials = function(username, password) {
 	}, function(error) {
 		usernameSuccess.reject(error);
 	},
-	'username', 'Bubbl.li', username);
+	'username', 'Kip', username);
 	
 	lockerManager.keychain.setForKey(function(success) {
 		passwordSuccess.resolve(success);
 	}, function(error) {
 		passwordSuccess.reject(error);
 	},
-	'password', 'Bubbl.li', password);
+	'password', 'Kip', password);
 	
 	return $q.all([usernameSuccess, passwordSuccess]);
 }
@@ -18874,7 +18874,7 @@ lockerManager.saveFBToken = function(fbToken) {
 	}, function(error) {
 		deferred.reject(error);
 	},
-	'fbToken', 'Bubbl.li', fbToken);
+	'fbToken', 'Kip', fbToken);
 	
 	return deferred;
 }
@@ -19104,8 +19104,8 @@ return userGrouping;
 
 }]);
 angular.module('tidepoolsServices')
-    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
-    	function($rootScope, $http, $resource, $q, $location, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
+    .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
+    	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
    
@@ -19298,6 +19298,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.login.error = false;
 		dialogs.showDialog('keychainDialog.html');
 		contest.login(new Date); // for wtgt contest
+		$route.reload();
 	}, function (err) {
 		if (err) {
 			console.log('failure', err);
@@ -19769,8 +19770,6 @@ worldTree.getUserWorlds = function(_id) {
 }
 
 worldTree.createWorld = function() {
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
 	
 	var world = {newStatus: true};
 	
@@ -22376,7 +22375,7 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 	}
 	}
 	
-	angular.extend($rootScope, {navTitle: "Bubbl.li"});
+	angular.extend($rootScope, {navTitle: "Kip"});
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
@@ -23781,7 +23780,7 @@ $scope.navService = navService;
 
 $scope.dialog = dialogs;
     
-angular.extend($rootScope, {globalTitle: "Bubbl.li"}); 
+angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
 
@@ -23871,10 +23870,10 @@ $scope.share = function(platform) {
   var top = (screen.height - height)/2;
   
   if (platform == 'facebook') {
-    link = 'https://www.facebook.com/sharer/sharer.php?u=https://bubbl.li'+$location.url();
+    link = 'https://www.facebook.com/sharer/sharer.php?u=https://kipapp.co'+$location.url();
   }
   else if (platform == 'twitter') {
-    link = 'https://twitter.com/intent/tweet?url=https://bubbl.li'+$location.url();
+    link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
   window.open(
     link,
@@ -23986,7 +23985,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 					}
 				}
 				else if (tab === 'search') {
-					// if in retail bubble, search takes you to search within bubble. else, search takes you general bubbl.li search
+					// if in retail bubble, search takes you to search within bubble. else, search takes you general kip search
 					if ($routeParams.worldURL && bubbleTypeService.get() === 'Retail') {
 						tab = 'searchWithinBubble';	
 						$location.path('/w/' + $routeParams.worldURL + '/search');
@@ -24176,10 +24175,15 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.splash = true;
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
-            $scope.show.splash = !userManager.loginStatus || !userManager._user.local.confirmedEmail;
-            $scope.show.confirm = userManager.loginStatus &&
-                !userManager._user.local.confirmedEmail &&
-                !userManager._user.facebook; // don't show confirm dialog for fb authenticated users
+            // don't show confirm dialog for fb authenticated users
+            if (userManager._user.facebook) {
+                $scope.show.splash = false;
+                $scope.show.confirm = false;
+            } else {
+                $scope.show.splash = !userManager._user.local.confirmedEmail;
+                $scope.show.confirm = !userManager._user.local.confirmedEmail;
+            }
+            
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
@@ -25372,10 +25376,7 @@ $scope.deleteBubble = function(_id) {
 
 $scope.newWorld = function() {
 	console.log('newWorld()');
-	
-	alert.addAlert('warning', "Creating New Bubbles coming soon to the iOS app. For now, login to build through https://bubbl.li", true);
-	return;
-	
+		
 	$scope.world = {};
 	$scope.world.newStatus = true; //new
 	db.worlds.create($scope.world, function(response){
@@ -26559,7 +26560,7 @@ link: function(scope, element, attrs) {
 		if (string.indexOf('http') > -1) {
 			return string;
 		} else {
-			return 'https://bubbl.li/'+string;
+			return 'https://kipapp.co/'+string;
 		}
 	}
 	
@@ -27208,8 +27209,11 @@ app.controller('InstagramListController', ['$scope', '$routeParams', 'styleManag
 				console.log('Error:', error);
 			});
 		}
-	})
-}])
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadInstagrams = _.throttle(loadInstagrams, 5000);
+	});
+}]);
 
 //instagrams is an array of form
 // [{"objectID":string,
@@ -27620,13 +27624,33 @@ app.filter('httpsify', function() {
 }) 
 
 app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager', 'worldTree', 'db', function($scope, $routeParams, styleManager, worldTree, db) {
+
 	worldTree.getWorld($routeParams.worldURL).then(function(data) {
-		$scope.world = data.world;
+		$scope.loadTweets = loadTweets;
+		$scope.tweets = [];
 		$scope.style = data.style;
+		$scope.world = data.world;
+
 		styleManager.navBG_color = $scope.style.navBG_color; 
-		
-		$scope.tweets = db.tweets.query({limit:50, tag:$scope.world.resources.hashtag});
-	})
+
+		loadTweets();
+
+		function loadTweets() {
+			db.tweets.query({
+				number: $scope.tweets.length, 
+				tag:$scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = $scope.tweets.concat(response);
+			}, function(error) {
+				console.log('Error', error);
+			});
+		}
+
+		// throttle will prevent calling the db multiple times
+		$scope.throttledLoadTweets = _.throttle(loadTweets, 5000);
+	});
+}]);
 
 //tweets is an array of form
 // [{"text": string,
@@ -27641,8 +27665,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-
-}])
 // app.directive('categoryWidget', [function() {
 // return {
 // 	restrict: 'E',
@@ -27780,14 +27802,15 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 style.navBG_color = $scope.style.navBG_color;
 
 	 //show edit buttons if user is world owner
-	 if ($rootScope.user && $rootScope.user._id && $scope.world.permissions){
-		 if ($rootScope.user && $rootScope.user._id == $scope.world.permissions.ownerID){
-		 	$scope.showEdit = true;
+	userManager.getUser()
+	.then(function(user) {
+		if (user && user._id && $scope.world.permissions && user._id === $scope.world.permissions.ownerID) {
+
+		 	$scope.showEdit = true;	
+		} else {
+			$scope.showEdit = false;
 		}
-		else {
-		 	$scope.showEdit = false;
-		}
-	} 
+	});
 	 
 	 if ($scope.world.name) {
 		 angular.extend($rootScope, {globalTitle: $scope.world.name});
@@ -28031,7 +28054,13 @@ function loadWidgets() { //needs to be generalized
 		}
 		
 	  if ($scope.world.resources) {
-			$scope.tweets = db.tweets.query({limit:1, tag:$scope.world.resources.hashtag});
+			db.tweets.query({
+				number: 0,
+				tag: $scope.world.resources.hashtag
+			}).$promise
+			.then(function(response) {
+				$scope.tweets = response;
+			});
 	  }
 
 	  if ($scope.style.widgets.nearby == true) {

@@ -23877,7 +23877,7 @@ $scope.share = function(platform) {
   }
   window.open(
     link,
-    'Bubbl.li',
+    'Kip',
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
   );
 };

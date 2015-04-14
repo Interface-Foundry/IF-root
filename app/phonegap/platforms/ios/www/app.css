@@ -3768,6 +3768,7 @@ span.subnav-back-chevron {
   border-radius: 50%;
 }
 .profile-card-pic {
+  cursor: pointer;
   width: 96px;
   height: 96px;
   float: left;
