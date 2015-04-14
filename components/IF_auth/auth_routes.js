@@ -119,7 +119,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.get('/auth/facebook/callback', passport.authenticate('facebook', {
 		  failureRedirect: '/login'
 		}), function (req, res) {
-		  res.redirect(req.session.redirect || '/index');
+		  res.redirect(req.session.redirect || '/home');
 		  delete req.session.redirect;
 		});
 
@@ -134,7 +134,7 @@ module.exports = function(app, passport, landmarkSchema) {
 		app.get('/auth/twitter/callback', passport.authenticate('twitter', {
 		  failureRedirect: '/login'
 		}), function (req, res) {
-		  res.redirect(req.session.redirect || '/index');
+		  res.redirect(req.session.redirect || '/home');
 		  delete req.session.redirect;
 		});
 
@@ -202,7 +202,7 @@ module.exports = function(app, passport, landmarkSchema) {
 			res.send(200,'authing');
 		});
 		app.post('/connect/local', passport.authenticate('local-signup', {
-			successRedirect : '/index', // redirect to the secure profile section
+			successRedirect : '/home', // redirect to the secure profile section
 			failureRedirect : '/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
@@ -216,8 +216,8 @@ module.exports = function(app, passport, landmarkSchema) {
 		// handle the callback after facebook has authorized the user
 		app.get('/connect/facebook/callback',
 			passport.authorize('facebook', {
-				successRedirect : '/index',
-				failureRedirect : '/'
+				successRedirect : '/home',
+				failureRedirect : '/home'
 			}));
 
 	// twitter --------------------------------
@@ -228,8 +228,8 @@ module.exports = function(app, passport, landmarkSchema) {
 		// handle the callback after twitter has authorized the user
 		app.get('/connect/twitter/callback',
 			passport.authorize('twitter', {
-				successRedirect : '/index',
-				failureRedirect : '/'
+				successRedirect : '/home',
+				failureRedirect : '/home'
 			}));
 
 
@@ -241,8 +241,8 @@ module.exports = function(app, passport, landmarkSchema) {
 		// handle the callback after meetup has authorized the user
 		app.get('/connect/meetup/callback',
 			passport.authorize('meetup', {
-				successRedirect : '/index/',
-				failureRedirect : '/'
+				successRedirect : '/home',
+				failureRedirect : '/home'
 			}));
 
 
