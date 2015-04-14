@@ -23,7 +23,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	if ($routeParams.worldURL) {
-		navService.show('searchWithinBubble');
+		navService.show('search');
 
 		worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.world = data.world;
