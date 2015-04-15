@@ -22,7 +22,6 @@ $scope.stickers = ifGlobals.stickers;
 $scope.editing = false;
 
 var sinceID = 'none';
-var firstScroll = true;
 
 function scrollToBottom() {
 	// if new message-view is created before old one is destroyed, it will cause annoying scroll-to-top. grabbing the second item in messageList (if it exists) protects against this. if it doesn't exist, falls back to first item
@@ -30,15 +29,15 @@ function scrollToBottom() {
 	$timeout(function() {
 		messageList.animate({scrollTop: list.scrollHeight * 2}, 300); //JQUERY USED HERE
 	},0);
-	if (firstScroll==true) {
-		firstScroll = false;
+	if (messagesService.firstScroll==true) {
+		messagesService.firstScroll = false;
 		profileEditMessage();
 	}
 }
 
 //Initiates message checking loop, calls itself. 
 function checkMessages() {
-	var doScroll = firstScroll;
+	var doScroll = messagesService.firstScroll;
 	// if new message-view is created before old one is destroyed, it will cause annoying scroll-to-top. grabbing the second item in messageList (if it exists) protects against this. if it doesn't exist, falls back to first item
 	var list = messageList[1] || messageList[0];
 db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
@@ -184,6 +183,7 @@ $scope.messageLink = function(message) {
 			if (map.hasMarker(sticker._id)) {
 				map.setMarkerFocus(sticker._id);
 			} else {
+				mapManager.removeAllMarkers();
 				addStickerToMap(sticker);
 			}
 			checkStickerUrl();
