@@ -1,3 +1,26 @@
 #!/bin/bash
-cd /opt/kip/App
-NODE_ENV=production pm2 start IF_server.js
+IF_ROOT=/opt/kip/App
+
+# kipapp.co
+cd "$IF_ROOT"
+pm2 start IF_server.js
+
+# instagram service
+cd "$IF_ROOT"/IF_services/IF_instagram_REST_processer
+pm2 start IF_instagram_server.js
+
+# twitter service
+cd "$IF_ROOT"/IF_services/IF_tweet_REST_processer
+pm2 start IF_tweet_server.js
+
+# shmelp service
+cd "$IF_ROOT"/IF_services/IF_forage/yelp
+pm2 start IF_forage_yelp.js
+
+# google
+cd "$IF_ROOT"/IF_services/IF_forage/yelp
+pm2 start IF_subforage_google.js
+
+# meetup
+cd "$IF_ROOT"/IF_services/IF_forage/meetup
+pm2 start IF_forage_meetup.js
