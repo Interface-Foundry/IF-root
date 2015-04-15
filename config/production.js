@@ -6,12 +6,12 @@ module.exports = {
   geoipURL: 'http://127.0.0.1:8080/json/',
   // geoipURL: 'http://www.freegeoip.net/json/',
   mongodb: {
-	  url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/if'.replace('password', process.env.MONGOPW)
+    url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/if'.replace('password', process.env.MONGOPW)
   },
   redis: {
-	  port: 6379,
-	  url: 'redis-thunder.internal.kipapp.co',
-	  options: {}
+    port: 6379,
+    url: 'redis-thunder.internal.kipapp.co',
+    options: {}
   }
   // // Server IP
   // ip:       process.env.OPENSHIFT_NODEJS_IP ||
@@ -23,11 +23,11 @@ module.exports = {
   //           process.env.PORT ||
   //           8080,
 
-  // // MongoDB connection options
-  // mongo: {
-  //   uri:    process.env.MONGOLAB_URI ||
-  //           process.env.MONGOHQ_URL ||
-  //           process.env.OPENSHIFT_MONGODB_DB_URL+process.env.OPENSHIFT_APP_NAME ||
-  //           'mongodb://localhost/app'
-  // }
+// // MongoDB connection options
+// mongo: {
+//   uri:    process.env.MONGOLAB_URI ||
+//           process.env.MONGOHQ_URL ||
+//           process.env.OPENSHIFT_MONGODB_DB_URL+process.env.OPENSHIFT_APP_NAME ||
+//           'mongodb://localhost/app'
+// }
 };

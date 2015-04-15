@@ -4,7 +4,10 @@
 // ==================================
 module.exports = {
 
-  geoipURL: 'http://www.freegeoip.net/json/' 
+  geoipURL: 'http://www.freegeoip.net/json/',
+  facebookAuth: {
+    callbackURL: 'http://localhost.kipapp.co/auth/facebook/callback'
+  }
 
   // FACEBOOK_ID:      'app-id',
   // FACEBOOK_SECRET:  'secret',
@@ -14,5 +17,5 @@ module.exports = {
   //   uri: 'mongodb://localhost/app'
   // },
 
-  // seedDB: true
+// seedDB: true
 };
