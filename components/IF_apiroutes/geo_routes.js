@@ -39,54 +39,58 @@ router.use(function(req, res, next) {
 
     //Because the request library also uses 'res' we'll rename the response here
     var response = res;
-    //query the local freegeoip server we are running 
-    //if hasLoc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
-    //for now use the less accurate ip based cityName
 
-    request(global.config.geoipURL + ip, function(err, res, body) {
-        if (err) console.log(err);
+    //IF not in dev mode 
 
-        try {
-            var data = JSON.parse(body);
-        } catch (e) {
-            console.error("Could not parse response from geoip server");
-            console.error("server: " + global.config.geoipURL + ip);
-            console.error(e);
-            console.error(body);
-            response.sendStatus(200);
-            return;
-        }
+    if (global.config.env !== 'development') {
+        //query the local freegeoip server we are running 
+        request(global.config.geoipURL + ip, function(err, res, body) {
+            if (err) console.log(err);
 
-        // console.log('data is..', data)
+            try {
+                var data = JSON.parse(body);
+            } catch (e) {
+                console.error("Could not parse response from geoip server");
+                console.error("server: " + global.config.geoipURL + ip);
+                console.error(e);
+                console.error(body);
+                response.sendStatus(200);
+                return;
+            }
 
-
-        console.log('IP is..', ip)
-
-        if (!data.city) {
-            req.geoloc.cityName = 'New York City';
-            req.geoloc.lat = 40.7393083;
-            req.geoloc.lng = -73.9894285;
-            console.log('ip-based data.city does not exist, data is: ', data, 'defaulting to NYC Flatiron.')
-        } else {
-            req.geoloc.cityName = data.city;
-            // console.log('data.city is working properly, data is: ', data)
-        }
+            // console.log('data is..', data)
 
 
-        if (data.latitude && data.longitude) {
-            if (data.latitude == 0 && data.longitude == 0) {
-                console.log('incorrect lat lng supplied, data is: ', data, 'defaulting to NYC Flatiron.')
+            console.log('IP is..', ip)
+
+            if (!data.city) {
                 req.geoloc.cityName = 'New York City';
                 req.geoloc.lat = 40.7393083;
                 req.geoloc.lng = -73.9894285;
+                console.log('ip-based data.city does not exist, data is: ', data, 'defaulting to NYC Flatiron.')
             } else {
-                req.geoloc.lat = data.latitude;
-                req.geoloc.lng = data.longitude;
+                req.geoloc.cityName = data.city;
+                // console.log('data.city is working properly, data is: ', data)
             }
-        }
-        console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
-        return next();
-    })
+
+
+            if (data.latitude && data.longitude) {
+                if (data.latitude == 0 && data.longitude == 0) {
+                    console.log('incorrect lat lng supplied, data is: ', data, 'defaulting to NYC Flatiron.')
+                    req.geoloc.cityName = 'New York City';
+                    req.geoloc.lat = 40.7393083;
+                    req.geoloc.lng = -73.9894285;
+                } else {
+                    req.geoloc.lat = data.latitude;
+                    req.geoloc.lng = data.longitude;
+                }
+            }
+            console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
+            return next();
+        })
+    }
+
+    return next();
 
 
 });
