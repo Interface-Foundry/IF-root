@@ -5,4 +5,9 @@ client.on('connect', function() {
     console.log('connected to redis server');
 });
 
+client.on('error', function(err) {
+	console.error('redis error');
+	console.error(err);
+});
+
 module.exports = client;
