@@ -1159,6 +1159,9 @@ img.announcement-chevron {
   background-color: white;
   position: absolute;
   top: 0px;
+  /*@IFDEF PHONEGAP*/
+  top: 18px;
+  /*@ENDIF*/
 }
 .fullPage-p {
   font-size: 15px;
