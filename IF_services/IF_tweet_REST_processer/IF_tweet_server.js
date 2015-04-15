@@ -20,8 +20,9 @@ var T = new Twit({
     , access_token_secret: credentials.access_token_secret
 });
 
+global.config = require('../../config');
 
-mongoose.connect('mongodb://localhost/if');
+mongoose.connect(global.config.mongodb.url);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
