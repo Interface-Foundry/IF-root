@@ -1,10 +1,17 @@
 'use strict';
 
+// find the local ip address
+var request = require('sync-request');
+var res = request('GET', 'http://icanhazip.com');
+
 // Development specific configuration
 // ==================================
 module.exports = {
-
-  geoipURL: 'http://www.freegeoip.net/json/' 
+  ip: res.body.toString().replace(/\s/g, ''),
+  geoipURL: 'http://www.freegeoip.net/json/',
+  facebookAuth: {
+    callbackURL: 'http://localhost.kipapp.co/auth/facebook/callback'
+  }
 
   // FACEBOOK_ID:      'app-id',
   // FACEBOOK_SECRET:  'secret',
@@ -14,5 +21,5 @@ module.exports = {
   //   uri: 'mongodb://localhost/app'
   // },
 
-  // seedDB: true
+// seedDB: true
 };

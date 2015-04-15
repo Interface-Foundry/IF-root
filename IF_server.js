@@ -944,7 +944,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                             try {
                                                 uploadContents = JSON.parse(uploadContents);
                                             } catch (err) {
-                                                console.log(err);
+												console.error('could not parse uploadContents json');
+                                                console.error(err);
+												console.error(uploadContents);
                                             }
                                             if (uploadContents.type == 'retail_campaign') {
                                                 // var newString = description.replace(/[^A-Z0-9]/ig, "");
@@ -974,8 +976,13 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         }
 
                                         request.post(options, function(err, res, body) {
-                                            if (err) console.log(err);
-                                            var data = JSON.parse(body);
+                                            if (err) console.error(err);
+											try {
+												var data = JSON.parse(body);
+											} catch (e) {
+												console.error('could not parse cloudsight response');
+												console.error(body);
+											}
 
                                             var results = {
                                                 status: 'not completed'
@@ -998,9 +1005,15 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                     }
 
                                                     request(options, function(err, res, body) {
-                                                        if (err) console.log(err);
+                                                        if (err) console.error(err);
                                                         console.log('cloudsight status is..', body)
-                                                        body = JSON.parse(body);
+														try {
+															var body_parsed = JSON.parse(body);
+														} catch (e) {
+															console.error('could not parse some cloudsight api call');
+															console.error(body);
+														}
+														body = body_parsed;
                                                         if (body.status == 'completed') {
                                                             results.status = 'completed';
                                                             description = body.name;
@@ -1405,7 +1418,9 @@ function worldMapTileUpdate(req, res, data, mapBuild) {
     try {
         var tileRes = JSON.parse(data); //incoming box coordinates
     } catch (err) {
-        console.log(err);
+		console.error('could not parse world map tile update data');
+		console.error(data);
+        console.error(err);
     }
 
     if (tileRes) {
@@ -1414,7 +1429,7 @@ function worldMapTileUpdate(req, res, data, mapBuild) {
 
             landmarkSchema.findById(tileRes.worldID, function(err, lm) {
                 if (!lm) {
-                    console.log(err);
+                    console.error(err);
                 } else if (req.user._id == lm.permissions.ownerID) {
 
                     var min = tileRes.zooms[0];
@@ -1749,7 +1764,14 @@ function findNewMeetups(meetupID, userID, callback) {
                 console.log(err);
             }
             var roleArray = [];
-            var results = JSON.parse(body).results;
+
+			try {
+	            var results = JSON.parse(body).results;
+			} catch (e) {
+				console.error('could not parse meetup json');
+				console.error(e);
+				console.error(body);
+			}
 
             //adding only groups where member has a role value (are all roles admin though?)
             async.forEach(results, function(obj, done) {

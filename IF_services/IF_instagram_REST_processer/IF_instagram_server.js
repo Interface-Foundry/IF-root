@@ -25,7 +25,9 @@ var instagram = instagramNode.instagram();
 helper.applyCredentials(instagram);
 
 
-mongoose.connect('mongodb://localhost/if');
+global.config = require('../../config');
+
+mongoose.connect(global.config.mongodb.url);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 

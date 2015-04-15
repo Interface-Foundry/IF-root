@@ -30,7 +30,9 @@ var mongoose = require('mongoose'),
 var styles = require('./style_schema.js');
 var landmarks = require('./landmark_schema.js');
 
-mongoose.connect('mongodb://localhost/if');
+global.config = require('../../../config');
+
+mongoose.connect(global.config.mongodb.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
