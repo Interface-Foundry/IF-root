@@ -5,24 +5,29 @@ var express = require('express'),
     announcementSchema = require('../IF_schemas/announcements_schema.js'),
     _ = require('underscore');
 
-    //load all announcements for that region as a a regular user
+//load all announcements for that region as a a regular user
 router.get('/:id', function(req, res) {
-        //find all announcements for given region, then sort by priority
-        announcementSchema.aggregate({
-            $match: {
-                region: req.params.id.toString().toLowerCase(),
-                live:true
-            }
-        }, {
-            $sort: {
-                priority: 1
-            }
-        }, function(err, announcements) {
-            if (err) {
-                return handleError(res, err);
-            }
-            return res.send(announcements);
-        });
+    //find all announcements for given region, then sort by priority
+    announcementSchema.aggregate({
+        $match: {
+            region: req.params.id.toString().toLowerCase(),
+            live: true
+        }
+    }, {
+        $sort: {
+            priority: 1
+        }
+    }, function(err, announcements) {
+        if (err) {
+            return handleError(res, err);
+        }
+        if (!announcements) {
+            console.log('No announcements found.')
+            return [];
+        }
+
+        return res.send(announcements);
+    });
 })
 
 //load all announcements for that region as an admin
@@ -40,6 +45,10 @@ router.get('/su/:id', function(req, res) {
         }, function(err, announcements) {
             if (err) {
                 return handleError(res, err);
+            }
+            if (!announcements) {
+                console.log('No announcements found.')
+                return [];
             }
             return res.send(announcements);
         });
@@ -62,6 +71,7 @@ router.post('/su', function(req, res) {
             }, function(err, result) {
                 if (err) {
                     console.log(err)
+                    return handleError(res, err);
                 }
                 console.log('documents incremented', result)
             })
@@ -74,6 +84,7 @@ router.post('/su', function(req, res) {
             function(err, announcement) {
                 if (err) {
                     console.log(err)
+                    return handleError(res, err);
                 }
                 console.log('saved!', announcement)
                     //Re-sort all announcements, then send to front-end
@@ -83,6 +94,10 @@ router.post('/su', function(req, res) {
                     console.log('announcements is..', announcements)
                     if (err) {
                         console.log(err)
+                    }
+                    if (!announcements) {
+                        console.log('No announcements found.')
+                        return [];
                     }
                     return res.send(announcements)
                 })

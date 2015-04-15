@@ -8,7 +8,7 @@ var express = require('express'),
 //load current contest for that region
 router.get('/:id', function(req, res) {
     if (req.user && req.user.admin) {
-            //find current contest
+        //find current contest
         contestSchema.findOne({
             region: req.params.id.toString().toLowerCase(),
             live: true
@@ -16,16 +16,25 @@ router.get('/:id', function(req, res) {
             if (err) {
                 console.log(err);
             }
+            if (!contest) {
+                console.log('No contest found.')
+                return {};
+            }
             return res.send(contest);
         });
 
     } else {
+
         contestSchema.findOne({
             region: req.params.id.toString().toLowerCase(),
             live: true
-        }).select('htmlBody').exec(function(err, result) {
+        }).exec(function(err, result) {
             if (err) {
                 console.log(err);
+            }
+            if (!contest) {
+                console.log('No contest found.')
+                return {};
             }
             console.log('hitting this', result)
             return res.send(result);
@@ -74,6 +83,10 @@ router.put('/:id', function(req, res) {
         }, function(err, result) {
             if (err) {
                 console.log(err);
+            }
+            if (!result) {
+                console.log('No contest found.')
+                return {};
             }
             console.log('found a contest! -->', result)
             console.log('req.body is..', req.body.endDate)

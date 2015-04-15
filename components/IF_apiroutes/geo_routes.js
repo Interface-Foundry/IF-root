@@ -10,6 +10,7 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
 
 router.use(function(req, res, next) {
+
 	console.log('using geoip in route ' + req.originalUrl);
 	if (req.header('x-forwarded-for')) {
 		var ip = req.header('x-forwarded-for').split(',')[0]; // could be "99.12.2.222, 10.0.4.20"
@@ -30,6 +31,7 @@ router.use(function(req, res, next) {
     //for now use the less accurate ip based cityName
     request(global.config.geoipURL + ip, function(err, res, body) {
         if (err) console.log(err);
+
 		try {
 			var data = JSON.parse(body);
 		} catch (e) {
@@ -42,15 +44,32 @@ router.use(function(req, res, next) {
 		}
 
         // console.log('data is..', data)
+
+
+        console.log('IP is..', ip)
+
         if (!data.city) {
-            req.geoloc.cityName = 'My Location'
-            console.log('ip-based data.city does not exist, data is: ', data)
+            req.geoloc.cityName = 'New York City';
+            req.geoloc.lat = 40.7393083;
+            req.geoloc.lng = -73.9894285;
+            console.log('ip-based data.city does not exist, data is: ', data, 'defaulting to NYC Flatiron.')
         } else {
             req.geoloc.cityName = data.city;
             // console.log('data.city is working properly, data is: ', data)
         }
-        req.geoloc.lat = data.latitude;
-        req.geoloc.lng = data.longitude;
+
+
+        if (data.latitude && data.longitude) {
+            if ((data.latitude == 0 && data.longitude == 0) || data.latitude.isNaN() || data.longitude.isNaN()) {
+                console.log('incorrect lat lng supplied, data is: ', data, 'defaulting to NYC Flatiron.')
+                req.geoloc.cityName = 'New York City';
+                req.geoloc.lat = 40.7393083;
+                req.geoloc.lng = -73.9894285;
+            } else {
+                req.geoloc.lat = data.latitude;
+                req.geoloc.lng = data.longitude;
+            }
+        } 
         // console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
         return next();
     })
