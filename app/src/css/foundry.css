@@ -1089,24 +1089,26 @@ img.announcement-chevron {
   transition: all cubic-bezier(0, 1, 0.56, 0.96) 0.4s;
 }
 .announcements-card h3 {
+  color: #FFF9BC;
   height: 26px;
   margin-top: 10px;
   text-align: center;
 }
 .announcements-card p.announcement-body {
   clear: right;
+  color: #FFF9BC;
   height: 40px;
   overflow: hidden;
   margin: 0;
   padding: 0 30px;
   text-overflow: ellipsis;
 }
-.announcements-card p.announcement-link a {
+.announcements-card p.announcement-link {
   color: #52b9f2;
   margin-top: 2px;
   padding: 0 30px;
 }
-.announcements-card p.announcement-link a:hover {
+.announcements-card p.announcement-link:hover {
   color: #52b9f2;
 }
 .announcements-card.ng-hide {
