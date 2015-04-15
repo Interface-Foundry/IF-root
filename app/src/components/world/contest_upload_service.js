@@ -44,7 +44,8 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 		$upload.upload({
 			url: '/api/uploadPicture/',
 			file: file,
-			data: JSON.stringify(data)
+			data: JSON.stringify(data),
+			server: true
 		}).progress(function(e) {
 		}).success(function(result) {
 			showConfirmationMessage();

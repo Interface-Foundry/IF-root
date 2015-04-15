@@ -21288,7 +21288,7 @@ function announcementsService($http) {
 	};
 
 	function get() {
-		return $http.get('api/announcements/global', {server: true});
+		return $http.get('/api/announcements/global', {server: true});
 	}
 }
 
@@ -26061,7 +26061,8 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 		$upload.upload({
 			url: '/api/uploadPicture/',
 			file: file,
-			data: JSON.stringify(data)
+			data: JSON.stringify(data),
+			server: true
 		}).progress(function(e) {
 		}).success(function(result) {
 			showConfirmationMessage();
@@ -26076,6 +26077,7 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
 	}
 }
+
 'use strict';
 
 app.factory('hideContentService', hideContentService);
@@ -26573,7 +26575,8 @@ $scope.onImageSelect = function($files) {
 	$scope.uploadProgress = 0;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
-		file: $files[0]
+		file: $files[0],
+		server: true
 	}).progress(function(e) {
 		console.log(e);
 		$scope.uploadProgress = parseInt(100.0 * e.loaded / e.total);
@@ -26815,6 +26818,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+
 'use strict';
 
 app.factory('messagesService', messagesService);
@@ -26988,6 +26992,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 							// get city info
 							var data = {
+								server: true,
 								params: {
 									hasLoc: true,
 									lat: location.lat,

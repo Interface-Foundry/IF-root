@@ -127,7 +127,8 @@ $scope.onImageSelect = function($files) {
 	$scope.uploadProgress = 0;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
-		file: $files[0]
+		file: $files[0],
+		server: true
 	}).progress(function(e) {
 		console.log(e);
 		$scope.uploadProgress = parseInt(100.0 * e.loaded / e.total);
