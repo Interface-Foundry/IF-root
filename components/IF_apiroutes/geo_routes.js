@@ -60,7 +60,7 @@ router.use(function(req, res, next) {
 
 
         if (data.latitude && data.longitude) {
-            if ((data.latitude == 0 && data.longitude == 0) || data.latitude.isNaN() || data.longitude.isNaN()) {
+            if ((data.latitude == 0 && data.longitude == 0) || Number.isNaN(data.latitude) || Number.isNaN(data.longitude)) {
                 console.log('incorrect lat lng supplied, data is: ', data, 'defaulting to NYC Flatiron.')
                 req.geoloc.cityName = 'New York City';
                 req.geoloc.lat = 40.7393083;
