@@ -1781,7 +1781,7 @@ text-align: center;
 }
 
 .message-body.kipbot-chat {
-	background-color: rgba(10,10,110, .2);
+	background-color: rgba(221,221,235,1);
   font-style: italic;
   opacity: .7;
 }

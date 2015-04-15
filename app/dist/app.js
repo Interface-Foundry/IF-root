@@ -26345,7 +26345,7 @@ app.directive('messageView', function() {
 	return {
 restrict: 'E',
 link: function(scope, element, attrs) {
-	
+
 	scope.$watchCollection('messages', function (newCollection, oldCollection, scope) {
 		m.render(element[0], newCollection.map(messageTemplate));
 	})
@@ -26358,7 +26358,7 @@ link: function(scope, element, attrs) {
 			onclick: function(e) {scope.messageLink(message)}}, //for stickers currently
 			[
 				m('picture.message-avatar',
-					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
+				m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
 				messageContent(message) //message object passed to next function to switch content templates
 			]);
@@ -26451,8 +26451,10 @@ var sinceID = 'none';
 var firstScroll = true;
 
 function scrollToBottom() {
+	// if new message-view is created before old one is destroyed, it will cause annoying scroll-to-top. grabbing the second item in messageList (if it exists) protects against this. if it doesn't exist, falls back to first item
+	var list = messageList[1] || messageList[0];
 	$timeout(function() {
-		messageList.animate({scrollTop: messageList[0].scrollHeight * 2}, 300); //JQUERY USED HERE
+		messageList.animate({scrollTop: list.scrollHeight * 2}, 300); //JQUERY USED HERE
 	},0);
 	if (firstScroll==true) {
 		firstScroll = false;
@@ -26463,8 +26465,10 @@ function scrollToBottom() {
 //Initiates message checking loop, calls itself. 
 function checkMessages() {
 	var doScroll = firstScroll;
+	// if new message-view is created before old one is destroyed, it will cause annoying scroll-to-top. grabbing the second item in messageList (if it exists) protects against this. if it doesn't exist, falls back to first item
+	var list = messageList[1] || messageList[0];
 db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
-	if (messageList[0].scrollHeight - messageList.scrollTop() - messageList.outerHeight() < 50) {
+	if (list.scrollHeight - messageList.scrollTop() - messageList.outerHeight() < 65) {
 		doScroll = true;
 	}
 
@@ -26528,8 +26532,12 @@ $scope.sendMsg = function (e) {
 		$scope.pinSticker();
 		return;
 	}
-	if (e) {e.preventDefault()}
-	if ($scope.msg.text == null) {return;}
+	if (e) {
+		e.preventDefault();
+	}
+	if (!$scope.msg.text || !$scope.msg.text.length) {
+		return;
+	}
 	if (userManager.loginStatus) {
 		var newChat = {
 		    roomID: $scope.world._id,
