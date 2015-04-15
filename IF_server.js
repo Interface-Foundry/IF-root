@@ -938,7 +938,6 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                         fs.unlink(tempPath);
 
 
-
                                         //additional content was passed with the image, handle it here
                                         //Then save the contest entry
                                         if (uploadContents) {
@@ -959,7 +958,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                         // res.send(data)
                                                 }); //contest entry, send to bac
                                             }
-                                        }
+                                        } else { 
+											return res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+										}
 
 
                                         //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
