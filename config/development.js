@@ -1,9 +1,13 @@
 'use strict';
 
+// find the local ip address
+var request = require('sync-request');
+var res = request('GET', 'http://icanhazip.com');
+
 // Development specific configuration
 // ==================================
 module.exports = {
-
+  ip: res.body.toString().replace(/\s/g, ''),
   geoipURL: 'http://www.freegeoip.net/json/',
   facebookAuth: {
     callbackURL: 'http://localhost.kipapp.co/auth/facebook/callback'
