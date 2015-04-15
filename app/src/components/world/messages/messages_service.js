@@ -6,9 +6,12 @@ messagesService.$inject = [];
 
 function messagesService() {
 
+	var firstScroll = true;
+	
 	return {
 		createProfileEditMessage: createProfileEditMessage,
-		createWelcomeMessage: createWelcomeMessage
+		createWelcomeMessage: createWelcomeMessage,
+		firstScroll: firstScroll
 	};
 
 	function createProfileEditMessage(world, nickName) {
