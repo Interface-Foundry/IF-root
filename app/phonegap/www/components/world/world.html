@@ -51,7 +51,7 @@
 
 			<!---want this got this -->
 
-			<div ng-show="!hide" ng-include="isRetail ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
+			<div ng-show="!hide" ng-include="isRetail && contest._id ? 'components/world/templates/want-this.html' : null" class="marble-page"></div>
 
 			<!---yelp-->
 			<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
