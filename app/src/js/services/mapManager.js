@@ -518,6 +518,27 @@ mapManager.setBaseLayer = function(layerURL, localMaps) {
 	};	
 }
 
+mapManager.setBaseLayerFromID = function(ID) {
+	mapManager.setBaseLayer(
+	'https://{s}.tiles.mapbox.com/v3/'+
+	ID+
+	'/{z}/{x}/{y}.png');
+}
+
+mapManager.resetBaseLayer = function() {
+	// resets the base layer to default (Urban)
+	console.log('--resetBaseLayer()');
+	mapManager.layers.baselayers = {};
+	mapManager.layers.baselayers.baseMap = {
+		name: "Urban",
+		url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+		type: 'xyz',
+		top: true,
+		maxZoom: 23,
+		maxNativeZoom: 23
+	}
+}
+
 mapManager.findZoomLevel = function(localMaps) {
 	if (!localMaps) {
 		return;
@@ -535,13 +556,6 @@ mapManager.findZoomLevel = function(localMaps) {
 	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
 
 	return lowestZoom;
-}
-
-mapManager.setBaseLayerFromID = function(ID) {
-	mapManager.setBaseLayer(
-	'https://{s}.tiles.mapbox.com/v3/'+
-	ID+
-	'/{z}/{x}/{y}.png');
 }
 
 mapManager.findMapFromArray = function(mapArray) {

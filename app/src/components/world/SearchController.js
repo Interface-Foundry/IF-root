@@ -48,6 +48,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	} else if ($routeParams.cityName) {
 		apertureService.set('third');
 		navService.show('search');
+
+		// reset nav bar color and default map
+		styleManager.resetNavBG();
+		mapManager.resetBaseLayer();
+		mapManager.removeOverlays();
+
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
 		$scope.cityName = $routeParams.cityName;
