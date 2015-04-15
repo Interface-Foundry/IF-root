@@ -87,7 +87,10 @@
 			<nav role="navigation" class="main-nav" 
 				ng-style="{'background-color': style.navBG_color}">
 				<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
-				<span class="nav-title">Kip</span>
+				<!-- <span class="nav-title">Kip</span> -->
+				<div class="navLogo-wrapper u-pointer" ng-click="go('/')">
+					<img src="img/kip/kipLogo_navbar.svg" class="navLogo u-centerXY">
+				</div>
 				<div class="user-chip" user-chip></div>
 				<nav-tabs class="view-tabs"></nav-tabs>
 			</nav>
@@ -112,8 +115,6 @@
 				<div ng-include="dialog.template" class="dialog"></div>
 			</div>
 
-			<explore-view class="explore-view" ng-if="navService.status.explore"></explore-view>
-			<!-- <search-view class="search-view" ng-if="navService.status.search"></search-view> -->
 			<drawer ng-if="userManager.loginStatus"></drawer>
 
 		</div>

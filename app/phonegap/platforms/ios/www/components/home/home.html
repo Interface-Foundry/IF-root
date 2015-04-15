@@ -7,11 +7,11 @@
 				<announcements></announcements>
 			</div>
 
-			<div class="home-nearby-bar">
+			<!-- <div class="home-nearby-bar">
 				<div class="home-header-content">
 					<h4>Nearby</h4>
 				</div>
-			</div>
+			</div> -->
 		</header>
 
 		<div class="surface">
@@ -23,59 +23,15 @@
 				mode="'home'"></cat-search-bar>
 
 			<div class="marble-page">
+
 				<header class="marble-page-header">
-				<div class="marble-page-header-icon"><img if-src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px"></div>
-				Nearby
+					<div class="marble-page-header-icon"><img if-src="img/icons/view_nearby_16.png" style="display: block;" width="16px" height="16px"></div>
+					Nearby Places and Events
 				</header>
 				
 				<ul class="nearby-list" 
 						style="padding-top:0px;">
-					<li ng-if="loadState=='loading'" class="text-center">
-					<div class="loading-spinner">
-						<div class="lspin1"></div>
-						<div class="lspin2"></div>
-					</div>
-					<span class="lightblue500">Loading...</span>
-					</li>
-					<li ng-repeat="bubble in homeBubbles track by bubble._id" 
-						ng-if="loadState=='success' && homeBubbles.length>0"
-						ng-click="select(bubble)"
-						class="bubble-list-item if-animate">
-						<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
-						<a class="bubble-list-item-link"  href="">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
-						<div class="bubble-list-item-go if-animate" ng-show="selected==bubble">
-							Go
-						</div>
-					</li>
-					<li ng-if="loadState=='success'&& !(homeBubbles.length > 0)" class="text-center"> 
-						No bubbles found. <a if-href="#profile/worlds">Create a new one?</a>
-					</li>
-					<li ng-if="loadState=='failure'" class="text-center">
-						<!-- Server connection lost -->
-						<span>
-							<h4>Sorry, we need your location before entering Kip</h4>
-							
-							<h5>
-								We know privacy is important, so we understand :)
-								<br>
-						    	You can re-enable Location Sharing in your browser settings
-							</h5>
-							<img width="160" ng-src="img/IF/failfairy.png"/>
-							<br><br>
-						</span>
-					</li>
-				</ul>
-			</div>
-			<div class="marble-page">
-				<header class="marble-page-header">
-					<div class="marble-page-header-icon">
-						<img if-src="img/icons/view_list_16.png" style="display: block;" width="16px" height="16px">
-					</div>
-				Around Me
-				</header>
-			
-				<ul class="nearby-list" 
-						style="padding-top:0px;">
+
 					<li ng-if="loadState=='loading'" class="text-center">
 						<div class="loading-spinner">
 							<div class="lspin1"></div>
@@ -83,24 +39,23 @@
 						</div>
 						<span class="lightblue500">Loading...</span>
 					</li>
-					<li ng-repeat="bubble in nearbyBubbles track by bubble._id" 
-						ng-if="loadState=='success' && nearbyBubbles.length>0"
+
+					<li ng-repeat="bubble in bubbles track by bubble._id" 
+						ng-if="loadState=='success' && bubbles.length>0"
 						ng-click="select(bubble)"
 						class="bubble-list-item if-animate">
 						<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 						<a class="bubble-list-item-link"  href="">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
-						<div class="bubble-list-item-go if-animate" ng-show="selected==bubble">
-							Go
-						</div>
 					</li>
-					<li ng-if="loadState=='success'&& !(nearbyBubbles.length > 0)" class="text-center"> 
+
+					<li ng-if="loadState=='success'&& !(bubbles.length > 0)" class="text-center"> 
 						No bubbles found. <a if-href="#profile/worlds">Create a new one?</a>
 					</li>
+
 					<li ng-if="loadState=='failure'" class="text-center">
 						<!-- Server connection lost -->
 						<span>
-							<h4>Sorry, we need your location before entering Kip</h4>
-							
+							<h4>Sorry, we need your location before entering Kip</h4>			
 							<h5>
 								We know privacy is important, so we understand :)
 								<br>
@@ -110,7 +65,9 @@
 							<br><br>
 						</span>
 					</li>
+
 				</ul>
+
 			</div>
 
 		</div>

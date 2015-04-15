@@ -1,4 +1,4 @@
-<div class="fullPage">
+<div class="fullPage fullPage--adjust">
 
 	<div class="fullPage-header">
 		<div class="fullPage-back u-pointer" 
@@ -17,7 +17,7 @@
 		<div class="divider divider--short" style="top: 42px"></div>
 		<div class="divider divider--short" style="top: 40px; float: right"></div>
 
-		<p>OR</p>
+		<p class="fullPage-p">OR</p>
 		
 		<form onSubmit="return false">
 			<!-- email and password inputs for login -->
@@ -28,7 +28,7 @@
 			<input type="text" placeholder="Email" class="u-100X" ng-if="show.register" ng-model="userManager.signup.email">
 			<input type="password" placeholder="Password" class="u-100X" ng-if="show.register" ng-model="userManager.signup.password">
 
-			<p class="inputFooter" ng-if="show.signin">
+			<p class="fullPage-p inputFooter" ng-if="show.signin">
 				<a href="" ng-click="setShowSplash('passwordForgot', true)">FORGOT PASSWORD?</a>
 			</p>
 

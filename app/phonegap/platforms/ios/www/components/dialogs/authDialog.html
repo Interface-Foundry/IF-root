@@ -10,21 +10,18 @@
 			placeholder="Password" class="auth-input" ng-model="userManager.login.password" required>
 		
 		<button type="submit" class="auth-submit">Log In</button>
+
 		<!-- @ifdef WEB -->
 		<div class="text-center" style="margin:4px 0px;">or</div>
 		
 		<div class="btn-group btn-group-justified" style="margin-bottom:20px;">
 		  <div class="btn-group">
 		    <button type="button" class="btn fb-btn" ng-click="go('auth/facebook')">
-		    	<img if-src="img/icons/facebook-16.png" width="16px" height="16px"> CONNECT WITH FACEBOOK
+		    	<img if-src="img/icons/facebook-16.png" width="16px" height="16px"> Connect with Facebook
 		    </button>
 		  </div>
 
 		</div>
-		<!-- @endif -->
-		
-		<!-- @ifdef PHONEGAP -->
-		<button type="button" class="auth-submit" ng-click="fbLogin()"><img if-src="img/icons/facebook-16.png" width="16px" height="16px"> CONNECT WITH FACEBOOK</button>
 		<!-- @endif -->
 
 		<div ng-if="userManager.login.error">
