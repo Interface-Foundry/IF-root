@@ -4937,7 +4937,6 @@ $routeProvider.
 	when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
- when('/#', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
   otherwise({redirectTo: '/'});
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -18856,7 +18855,6 @@ lockerManager.getCredentials = function() {
 	}, 'fbToken', 'Kip');
 	
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-<<<<<<< HEAD
 }
 
 //saves username and password. Should be changed to use a map instead of args?
@@ -18881,32 +18879,6 @@ lockerManager.saveCredentials = function(username, password) {
 	return $q.all([usernameSuccess, passwordSuccess]);
 }
 
-=======
-}
-
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Kip', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Kip', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
-
->>>>>>> origin/Bubblli
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
