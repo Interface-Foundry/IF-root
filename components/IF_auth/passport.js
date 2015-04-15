@@ -60,7 +60,7 @@ module.exports = function(passport) {
 
                     //process.nextTick(function() {
                     User.findOne({
-                        'local.email': email
+                        'local.email': email.toString().toLowerCase()
                     }, function(err, user) {
                         // if there are any errors, return the error
                         if (err) {
@@ -109,7 +109,7 @@ module.exports = function(passport) {
                         //  Whether we're signing up or connecting an account, we'll need
                         //  to know if the email address is in use.
                         User.findOne({
-                            'local.email': email
+                            'local.email': email.toString().toLowerCase()
                         }, function(err, existingUser) {
 
                             // if there are any errors, return the error
@@ -123,14 +123,17 @@ module.exports = function(passport) {
                             //  If we're logged in via facebook, we're connecting a new local account.
                             if (req.user) {
                                 var user = req.user;
-                                user.local.email = email;
+                                user.local.email = email.toString().toLowerCase();
                                 user.local.password = user.generateHash(password);
                                 if (!user.profileID) {
 
-                                    if (user.facebook.name.indexOf(" ") > -1) {
+                                    if (user.facebook.name && user.facebook.name.indexOf(" ") > -1) {
                                         var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
-                                    } else {
+                                    } else if (user.facebook.name){
                                         var input = user.facebook.name
+                                    } else if (!user.facebook.name) {
+                                        console.log('logged in facebook user doesnt have name property. using email to generate profileID instead.', user)
+                                        var input = user.local.email.slice(0, email.indexOf("@"))
                                     }
 
                                     uniqueProfileID(input, function(output) {
@@ -156,7 +159,7 @@ module.exports = function(passport) {
                                 // create the user
                                 var newUser = new User();
 
-                                newUser.local.email = email;
+                                newUser.local.email = email.toString().toLowerCase();
                                 newUser.local.password = newUser.generateHash(password);
                                 uniqueProfileID(email.slice(0, email.indexOf("@")), function(output) {
                                     newUser.profileID = output;
@@ -190,7 +193,7 @@ module.exports = function(passport) {
     passport.use('local-basic', new BasicStrategy({},
         function(email, password, done) {
             User.findOne({
-                'local.email': email
+                'local.email': email.toString().toLowerCase()
             }, function(err, user) {
                 if (user && user.validPassword(password)) {
                     return done(null, user);
