@@ -26236,7 +26236,7 @@ function hideContentService(mapManager) {
 	
 	function hide(cb) {
 		// hide elements we don't want to see
-		angular.element('.main-nav').css('display', 'none');
+		// angular.element('.main-nav').css('display', 'none');
 		angular.element('.marble-page').css('display', 'none');
 		angular.element('.world-title').css('display', 'none');
 		angular.element('.marble-contain-width').css('display', 'none');
