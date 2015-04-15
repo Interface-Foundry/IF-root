@@ -24248,7 +24248,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var data = {
                 updatedEmail: $scope.user.newEmail
             };
-            $http.post('api/user/emailUpdate', data, {server: true}).
+            $http.post('/api/user/emailUpdate', data, {server: true}).
             success(function(data) {
                 if (data.err) {
                     addErrorMsg(data.err, 3000);
