@@ -17678,6 +17678,15 @@ angular.module('tidepoolsServices')
 app.factory('localStore', ['$http', '$q', function($http, $q) {
 	
 	var hasLocalStorage = (typeof localStorage !== 'undefined');
+
+	// aaaand another check just to make absolutely sure they have local storage
+	if (hasLocalStorage) {
+		try {
+			localStorage.author = "interfacefoundry.com ♥ ♥ ♥";
+		} catch (e) {
+			hasLocalStorage = false;
+		}
+	}
 	
 	var id; // id for when the user doesn't have localStorage
 
@@ -18856,7 +18865,6 @@ lockerManager.getCredentials = function() {
 	}, 'fbToken', 'Kip');
 	
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-<<<<<<< HEAD
 }
 
 //saves username and password. Should be changed to use a map instead of args?
@@ -18881,32 +18889,6 @@ lockerManager.saveCredentials = function(username, password) {
 	return $q.all([usernameSuccess, passwordSuccess]);
 }
 
-=======
-}
-
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Kip', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Kip', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
-
->>>>>>> origin/Bubblli
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {

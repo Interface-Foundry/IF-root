@@ -17658,6 +17658,15 @@ angular.module('tidepoolsServices')
 app.factory('localStore', ['$http', '$q', function($http, $q) {
 	
 	var hasLocalStorage = (typeof localStorage !== 'undefined');
+
+	// aaaand another check just to make absolutely sure they have local storage
+	if (hasLocalStorage) {
+		try {
+			localStorage.author = "interfacefoundry.com ♥ ♥ ♥";
+		} catch (e) {
+			hasLocalStorage = false;
+		}
+	}
 	
 	var id; // id for when the user doesn't have localStorage
 
