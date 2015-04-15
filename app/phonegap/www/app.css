@@ -2468,6 +2468,7 @@ transform:translateX(100%);
   width: 100%;
   height: 100%;
   /* color: white; */
+  margin-top: 16px;
   z-index: 10;
 }
 #aperture.aperture-off {
@@ -2772,6 +2773,7 @@ span.nearby-list-icon.loading {
   border-top: 1px solid #ccc;
 }
 /* *NAV* Navigation Bar */
+/*pg-offset for iOS native navbar (battery, carrier, etc.) elements that have offset include: [text search for @pg-offset]*/
 nav.main-nav {
   position: fixed;
   top: 0;
@@ -2826,7 +2828,7 @@ nav ul {
 }
 .navLogo-wrapper {
   float: left;
-  margin-left: 60px;
+  margin-left: 10px;
   width: 48px;
   height: 48px;
 }
@@ -2850,10 +2852,7 @@ nav ul {
   background: #0091EA;
 }
 .back-button {
-  position: absolute;
-  top: 0px;
-  top: 16px;
-  left: 0px;
+  float: left;
   width: 48px;
   height: 48px;
   border: none;
@@ -3154,6 +3153,7 @@ nav ul {
   height: 100%;
   overflow: hidden;
   padding-top: 48px;
+  padding-top: 64px;
   pointer-events: none;
 }
 .home > .wrap {
@@ -3564,6 +3564,9 @@ img.announcement-chevron {
   text-align: center;
   width: 100%;
   height: 100%;
+}
+.fullPage--adjust {
+  top: 16px;
 }
 .fullPage--splashImg {
   background: url('img/cover/splash.jpg') center center / cover no-repeat;
@@ -5295,6 +5298,7 @@ li.alert {
 .search-aperture {
   position: relative;
   top: 45px;
+  top: 61px;
 }
 @media only screen and (min-width: 0px) and (max-width: 480px) {
   .search-aperture .search-cat {

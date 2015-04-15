@@ -9,6 +9,12 @@
 	height: 100%;
 }
 
+.fullPage--adjust {
+	/*@IFDEF PHONEGAP*/
+	top: 0px + @pg-offset;
+	/*@ENDIF*/
+}
+
 .fullPage--splashImg {
 	background: url('img/cover/splash.jpg') center center / cover no-repeat;
 }

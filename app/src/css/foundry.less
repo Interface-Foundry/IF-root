@@ -1741,6 +1741,9 @@ margin-bottom: 4px;
 .search-aperture {
 	position: relative;
 	top: 45px;
+	/*@IFDEF PHONEGAP*/
+	top: 45px + @pg-offset;
+	/*@ENDIF*/
 }
 
 .search-aperture .search-cat {
