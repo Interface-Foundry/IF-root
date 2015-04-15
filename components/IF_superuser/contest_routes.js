@@ -32,7 +32,7 @@ router.get('/:id', function(req, res) {
             if (err) {
                 console.log(err);
             }
-            if (!contest) {
+            if (!result) {
                 console.log('No contest found.')
                 return {};
             }
