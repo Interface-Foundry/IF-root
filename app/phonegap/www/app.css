@@ -3162,9 +3162,14 @@ nav ul {
 .home-header {
   top: 0px;
   left: 0px;
-  height: 350px;
+  height: 276px;
   width: 100%;
   z-index: 1;
+}
+@media only screen and (min-width: 768px) {
+  .home-header {
+    height: 350px;
+  }
 }
 .home-background {
   top: 0px;
@@ -3480,7 +3485,12 @@ nav ul {
   height: 120px;
   position: absolute;
   pointer-events: auto;
-  top: 230px;
+  top: 156px;
+}
+@media only screen and (min-width: 768px) {
+  .announcements-card-background {
+    top: 230px;
+  }
 }
 .announcements-card-container {
   color: #FFF9BC;
