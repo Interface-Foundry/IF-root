@@ -17,7 +17,8 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
     function searchWorlds(callback, distance) {
         console.log('searchWorlds being called with distance: ', distance)
-        landmarkSchema.aggregate({
+
+		var query = {
                 $match: {
                     $text: {
                         $search: sText
@@ -31,7 +32,10 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                         }
                     }
                 }
-            }, {
+            };
+		console.log(query);
+
+		landmarkSchema.aggregate(query, {
                 $sort: {
                     score: {
                         $meta: "textScore"
@@ -42,7 +46,8 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
             },
             function(err, data) {
                 if (err) {
-                    return console.log(err)
+					console.error('error in text_search');
+                    return console.error(err)
                 }
                 //If results are less than 20, increase radius of search distance
                 if (data.length >= 20) {
@@ -69,7 +74,10 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
             }
         ],
         function(err, results) {
-            if (err) console.log(err);
+            if (err) {
+				console.error('error in text_search async.series');
+				console.error(err);
+			}
             //Retreive parent IDs to query for parent world names for each landmark
 
             var parentIDs = results[results.length - 1].map(function(el) {
