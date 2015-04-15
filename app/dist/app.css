@@ -1334,7 +1334,7 @@ text-align: center;
 .aperture-full .message-nav-map {
 	display: inline-block;
 	bottom: 91px;
-	background: center / 52px 52px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
+	background: center / 24px 24px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
@@ -1781,7 +1781,7 @@ text-align: center;
 }
 
 .message-body.kipbot-chat {
-	background-color: rgba(10,10,110, .2);
+	background-color: rgba(221,221,235,1);
   font-style: italic;
   opacity: .7;
 }
@@ -2817,6 +2817,18 @@ nav ul {
   float: right;
   margin: 0px 4px 0px 0px;
 }
+.navLogo-wrapper {
+  float: left;
+  margin-left: 60px;
+  width: 48px;
+  height: 48px;
+}
+.navLogo-wrapper:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+.navLogo {
+  width: 42px;
+}
 .compass {
   position: relative;
   display: block;
@@ -2838,34 +2850,10 @@ nav ul {
   height: 48px;
   border: none;
   outline: none;
-  background: center / 32px 32px no-repeat url('img/icons/back-arrow.png');
-  opacity: 1;
-  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  background: url('img/icons/ic_chevron_left_white_48dp.png') center center / 48px 48px no-repeat;
 }
-.back-button.ng-hide.ng-hide-remove {
-  opacity: 0;
-  -webkit-transform: translateX(-12px);
-  transform: translateX(-12px);
-}
-.back-button.ng-hide.ng-hide-remove.ng-hide-remove-active {
-  opacity: 1;
-  -webkit-transform: translateX(0px);
-  transform: translateX(0px);
-}
-.back-button:before {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  top: 18px;
-  left: -6px;
-}
-.back-button.ng-click-active {
-  -webkit-transform: translateX(-6px);
-  transform: translateX(-6px);
+.back-button:active {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .view-tabs {
   display: block;
@@ -3555,6 +3543,190 @@ img.announcement-chevron {
 .announcements-card.ng-hide-remove {
   -webkit-transform: translate3d(110%, 0, 0);
   transform: translate3d(110%, 0, 0);
+}
+.fullPage {
+  /*border: 1px solid black;*/
+  background: #e6e6e6;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+.fullPage--splashImg {
+  background: url('img/cover/splash.jpg') center center / cover no-repeat;
+}
+.fullPage-logo {
+  width: 200px;
+  position: relative;
+  left: -19px;
+}
+.fullPage-tagline {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  color: white;
+  font-size: 21px;
+}
+.fullPage-tagline span {
+  display: block;
+}
+.fullPage-content {
+  /*border: 1px solid black;*/
+  height: 420px;
+  width: 250px;
+}
+.fullPage-body {
+  /*border: 1px solid black;*/
+  width: 95%;
+  max-width: 460px;
+  /*height: 280px;*/
+  position: absolute;
+  top: 50px;
+}
+.fullPage-header {
+  /*border: 1px solid black;*/
+  height: 50px;
+  width: 100%;
+  line-height: 50px;
+  background-color: white;
+  position: absolute;
+  top: 0px;
+}
+.fullPage-p {
+  font-size: 15px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+.fullPage-content .btnMain,
+.fullPage-body .btnMain {
+  margin-top: 20px;
+  display: block;
+}
+.fullPage-header span {
+  font-size: 18px;
+}
+.fullPage-body input {
+  height: 40px;
+  margin-top: 20px;
+  display: block;
+  padding-left: 6px;
+  border: none;
+}
+.fullPage-close {
+  /*border: 1px solid black;*/
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin-top: 20px;
+  margin-right: 20px;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.3) url('img/icons/ic_clear_white_24dp.png') center center / 22px 22px no-repeat;
+  cursor: pointer;
+}
+.fullPage-close:hover {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+.fullPage-close:active {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.fullPage-back {
+  background: url('img/icons/ic_chevron_left_grey600_48dp.png') center center / 50px 50px no-repeat;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+}
+.fullPage-back:active {
+  background: url('img/icons/ic_chevron_left_black_48dp.png') center center / 50px 50px no-repeat;
+}
+.btnMain {
+  min-width: 150px;
+  height: 40px;
+  line-height: 36px;
+  /*should be 40px (same as height), but there is padding on the button somehow*/
+  border: none;
+  background-color: white;
+  color: black;
+  text-align: center;
+  border-radius: 3px;
+  padding: 0px;
+  position: relative;
+}
+.btnMain:hover {
+  background-color: #f2f2f2;
+}
+.btnMain:active {
+  background-color: #e6e6e6;
+}
+.btnMain--blue {
+  background-color: #2196f3;
+  color: white;
+}
+.btnMain--blue:hover {
+  background-color: #0d8aee;
+}
+.btnMain--blue:active {
+  background-color: #0c7cd5;
+}
+.btnMain--redKip {
+  background-color: #ed4023;
+  color: white;
+}
+.btnMain--redKip:hover {
+  background-color: #e43113;
+}
+.btnMain--redKip:active {
+  background-color: #cc2c11;
+}
+.btnMain--fb {
+  background-color: #3b5998;
+  color: white;
+}
+.btnMain--fb:hover {
+  background-color: #344e86;
+}
+.btnMain--fb:active {
+  background-color: #2d4373;
+}
+.btnMain-img {
+  /*border: 1px solid red;*/
+  width: 20px;
+  position: absolute;
+  left: 10px;
+  /*=(buttonHeight-imageHeight)/2*/
+  top: 10px;
+}
+.btnMain-img--right {
+  right: 10px;
+  left: auto;
+}
+.fullPage .inputFooter {
+  font-size: 13px;
+  margin-top: 10px;
+}
+.divider {
+  width: 100%;
+  height: 0px;
+  position: relative;
+  border-top: 1px solid #b4b4b4;
+  border-bottom: 1px solid #f6f6f6;
+}
+.divider--short {
+  width: 40%;
+}
+.inputEdit {
+  background-color: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.inputEdit:focus {
+  outline: none;
+}
+.errorMsg {
+  color: red;
 }
 /*VARIABLES*/
 nav {
@@ -5168,181 +5340,6 @@ div.marker-popup-click {
   top: 1px;
   cursor: pointer;
 }
-/*SPLASH*/
-.fullPage {
-  /*border: 1px solid black;*/
-  background: #e6e6e6;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  text-align: center;
-  width: 100%;
-  height: 100%;
-}
-.fullPage--splashImg {
-  background: url('img/cover/splash.jpg') center center / cover no-repeat;
-}
-.fullPage-logo {
-  width: 200px;
-  position: relative;
-  left: -19px;
-}
-.fullPage-tagline {
-  margin-top: 0px;
-  margin-bottom: 0px;
-  color: white;
-  font-size: 21px;
-}
-.fullPage-tagline span {
-  display: block;
-}
-.fullPage-content {
-  /*border: 1px solid black;*/
-  height: 420px;
-  width: 250px;
-}
-.fullPage-body {
-  /*border: 1px solid black;*/
-  width: 95%;
-  max-width: 460px;
-  /*height: 280px;*/
-  position: absolute;
-  top: 50px;
-}
-.fullPage-header {
-  /*border: 1px solid black;*/
-  height: 50px;
-  width: 100%;
-  line-height: 50px;
-  background-color: white;
-  position: absolute;
-  top: 0px;
-}
-.fullPage-p {
-  font-size: 15px;
-  margin-top: 30px;
-  margin-bottom: 30px;
-}
-.fullPage-content .btnMain,
-.fullPage-body .btnMain {
-  margin-top: 20px;
-  display: block;
-}
-.fullPage-header span {
-  font-size: 18px;
-}
-.fullPage-body input {
-  height: 40px;
-  margin-top: 20px;
-  display: block;
-  padding-left: 6px;
-  border: none;
-}
-.fullPage-close {
-  /*border: 1px solid black;*/
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  margin-top: 20px;
-  margin-right: 20px;
-  height: 30px;
-  width: 30px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.3) url('img/icons/ic_clear_white_24dp.png') center center / 22px 22px no-repeat;
-  cursor: pointer;
-}
-.fullPage-close:hover {
-  background-color: rgba(0, 0, 0, 0.35);
-}
-.fullPage-close:active {
-  background-color: rgba(0, 0, 0, 0.4);
-}
-.fullPage-back {
-  background: url('img/icons/ic_chevron_left_grey600_48dp.png') center center / 50px 50px no-repeat;
-  width: 50px;
-  height: 50px;
-  position: absolute;
-}
-.fullPage-back:active {
-  background: url('img/icons/ic_chevron_left_black_48dp.png') center center / 50px 50px no-repeat;
-}
-.btnMain {
-  min-width: 150px;
-  height: 40px;
-  line-height: 36px;
-  /*should be 40px (same as height), but there is padding on the button somehow*/
-  border: none;
-  background-color: white;
-  color: black;
-  text-align: center;
-  border-radius: 3px;
-  padding: 0px;
-  position: relative;
-}
-.btnMain:hover {
-  background-color: #f2f2f2;
-}
-.btnMain:active {
-  background-color: #e6e6e6;
-}
-.btnMain--blue {
-  background-color: #2196f3;
-  color: white;
-}
-.btnMain--blue:hover {
-  background-color: #0d8aee;
-}
-.btnMain--blue:active {
-  background-color: #0c7cd5;
-}
-.btnMain--fb {
-  background-color: #3b5998;
-  color: white;
-}
-.btnMain--fb:hover {
-  background-color: #344e86;
-}
-.btnMain--fb:active {
-  background-color: #2d4373;
-}
-.btnMain-img {
-  /*border: 1px solid red;*/
-  width: 20px;
-  position: absolute;
-  left: 10px;
-  /*=(buttonHeight-imageHeight)/2*/
-  top: 10px;
-}
-.btnMain-img--right {
-  right: 10px;
-  left: auto;
-}
-.fullPage .inputFooter {
-  font-size: 13px;
-  margin-top: 10px;
-}
-.divider {
-  width: 100%;
-  height: 0px;
-  position: relative;
-  border-top: 1px solid #b4b4b4;
-  border-bottom: 1px solid #f6f6f6;
-}
-.divider--short {
-  width: 40%;
-}
-.inputEdit {
-  background-color: transparent;
-  border: none;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.inputEdit:focus {
-  outline: none;
-}
-.errorMsg {
-  color: red;
-}
 /*remove the irritating blue border*/
 button:active,
 button:focus {
@@ -5362,7 +5359,11 @@ button:focus {
   z-index: 1001;
 }
 .splash-img img {
+  max-width: 500px;
   opacity: 0;
+  position: absolute;
+  top: 10%;
+  width: 100%;
   -webkit-transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
 }

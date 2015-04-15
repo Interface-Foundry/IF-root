@@ -17079,7 +17079,7 @@ function bubbleSearchService($http, analyticsService) {
 	return {
 		data: data,
 		search: search,
-		defaultText: 'What are you looking for?',
+		defaultText: 'Search around me',
 		noResultsText: 'No results'
 	};
 	
@@ -18347,6 +18347,27 @@ mapManager.setBaseLayer = function(layerURL, localMaps) {
 	};	
 }
 
+mapManager.setBaseLayerFromID = function(ID) {
+	mapManager.setBaseLayer(
+	'https://{s}.tiles.mapbox.com/v3/'+
+	ID+
+	'/{z}/{x}/{y}.png');
+}
+
+mapManager.resetBaseLayer = function() {
+	// resets the base layer to default (Urban)
+	console.log('--resetBaseLayer()');
+	mapManager.layers.baselayers = {};
+	mapManager.layers.baselayers.baseMap = {
+		name: "Urban",
+		url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+		type: 'xyz',
+		top: true,
+		maxZoom: 23,
+		maxNativeZoom: 23
+	}
+}
+
 mapManager.findZoomLevel = function(localMaps) {
 	if (!localMaps) {
 		return;
@@ -18364,13 +18385,6 @@ mapManager.findZoomLevel = function(localMaps) {
 	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
 
 	return lowestZoom;
-}
-
-mapManager.setBaseLayerFromID = function(ID) {
-	mapManager.setBaseLayer(
-	'https://{s}.tiles.mapbox.com/v3/'+
-	ID+
-	'/{z}/{x}/{y}.png');
 }
 
 mapManager.findMapFromArray = function(mapArray) {
@@ -21274,7 +21288,7 @@ function announcementsService($http) {
 	};
 
 	function get() {
-		return $http.get('api/announcements/global', {server: true});
+		return $http.get('/api/announcements/global', {server: true});
 	}
 }
 
@@ -24090,7 +24104,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var data = {
                 updatedEmail: $scope.user.newEmail
             };
-            $http.post('api/user/emailUpdate', data, {server: true}).
+            $http.post('/api/user/emailUpdate', data, {server: true}).
             success(function(data) {
                 if (data.err) {
                     addErrorMsg(data.err, 3000);
@@ -25328,6 +25342,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	} else if ($routeParams.cityName) {
 		apertureService.set('third');
 		navService.show('search');
+
+		// reset nav bar color and default map
+		styleManager.resetNavBG();
+		mapManager.resetBaseLayer();
+		mapManager.removeOverlays();
+
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
 		$scope.cityName = $routeParams.cityName;
@@ -26041,7 +26061,8 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 		$upload.upload({
 			url: '/api/uploadPicture/',
 			file: file,
-			data: JSON.stringify(data)
+			data: JSON.stringify(data),
+			server: true
 		}).progress(function(e) {
 		}).success(function(result) {
 			showConfirmationMessage();
@@ -26056,6 +26077,7 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
 	}
 }
+
 'use strict';
 
 app.factory('hideContentService', hideContentService);
@@ -26070,7 +26092,7 @@ function hideContentService(mapManager) {
 	
 	function hide(cb) {
 		// hide elements we don't want to see
-		angular.element('.main-nav').css('display', 'none');
+		// angular.element('.main-nav').css('display', 'none');
 		angular.element('.marble-page').css('display', 'none');
 		angular.element('.world-title').css('display', 'none');
 		angular.element('.marble-contain-width').css('display', 'none');
@@ -26345,7 +26367,7 @@ app.directive('messageView', function() {
 	return {
 restrict: 'E',
 link: function(scope, element, attrs) {
-	
+
 	scope.$watchCollection('messages', function (newCollection, oldCollection, scope) {
 		m.render(element[0], newCollection.map(messageTemplate));
 	})
@@ -26358,7 +26380,7 @@ link: function(scope, element, attrs) {
 			onclick: function(e) {scope.messageLink(message)}}, //for stickers currently
 			[
 				m('picture.message-avatar',
-					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
+				m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
 				messageContent(message) //message object passed to next function to switch content templates
 			]);
@@ -26448,23 +26470,26 @@ $scope.stickers = ifGlobals.stickers;
 $scope.editing = false;
 
 var sinceID = 'none';
-var firstScroll = true;
 
 function scrollToBottom() {
+	// if new message-view is created before old one is destroyed, it will cause annoying scroll-to-top. grabbing the second item in messageList (if it exists) protects against this. if it doesn't exist, falls back to first item
+	var list = messageList[1] || messageList[0];
 	$timeout(function() {
-		messageList.animate({scrollTop: messageList[0].scrollHeight * 2}, 300); //JQUERY USED HERE
+		messageList.animate({scrollTop: list.scrollHeight * 2}, 300); //JQUERY USED HERE
 	},0);
-	if (firstScroll==true) {
-		firstScroll = false;
+	if (messagesService.firstScroll==true) {
+		messagesService.firstScroll = false;
 		profileEditMessage();
 	}
 }
 
 //Initiates message checking loop, calls itself. 
 function checkMessages() {
-	var doScroll = firstScroll;
+	var doScroll = messagesService.firstScroll;
+	// if new message-view is created before old one is destroyed, it will cause annoying scroll-to-top. grabbing the second item in messageList (if it exists) protects against this. if it doesn't exist, falls back to first item
+	var list = messageList[1] || messageList[0];
 db.messages.query({roomID:$scope.world._id, sinceID:sinceID}, function(data){
-	if (messageList[0].scrollHeight - messageList.scrollTop() - messageList.outerHeight() < 50) {
+	if (list.scrollHeight - messageList.scrollTop() - messageList.outerHeight() < 65) {
 		doScroll = true;
 	}
 
@@ -26528,8 +26553,12 @@ $scope.sendMsg = function (e) {
 		$scope.pinSticker();
 		return;
 	}
-	if (e) {e.preventDefault()}
-	if ($scope.msg.text == null) {return;}
+	if (e) {
+		e.preventDefault();
+	}
+	if (!$scope.msg.text || !$scope.msg.text.length) {
+		return;
+	}
 	if (userManager.loginStatus) {
 		var newChat = {
 		    roomID: $scope.world._id,
@@ -26553,7 +26582,8 @@ $scope.onImageSelect = function($files) {
 	$scope.uploadProgress = 0;
 	$scope.upload = $upload.upload({
 		url: '/api/uploadPicture',
-		file: $files[0]
+		file: $files[0],
+		server: true
 	}).progress(function(e) {
 		console.log(e);
 		$scope.uploadProgress = parseInt(100.0 * e.loaded / e.total);
@@ -26602,6 +26632,7 @@ $scope.messageLink = function(message) {
 			if (map.hasMarker(sticker._id)) {
 				map.setMarkerFocus(sticker._id);
 			} else {
+				mapManager.removeAllMarkers();
 				addStickerToMap(sticker);
 			}
 			checkStickerUrl();
@@ -26795,6 +26826,7 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+
 'use strict';
 
 app.factory('messagesService', messagesService);
@@ -26803,9 +26835,12 @@ messagesService.$inject = [];
 
 function messagesService() {
 
+	var firstScroll = true;
+	
 	return {
 		createProfileEditMessage: createProfileEditMessage,
-		createWelcomeMessage: createWelcomeMessage
+		createWelcomeMessage: createWelcomeMessage,
+		firstScroll: firstScroll
 	};
 
 	function createProfileEditMessage(world, nickName) {
@@ -26968,6 +27003,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 							// get city info
 							var data = {
+								server: true,
 								params: {
 									hasLoc: true,
 									lat: location.lat,

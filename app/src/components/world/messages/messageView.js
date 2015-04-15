@@ -2,7 +2,7 @@ app.directive('messageView', function() {
 	return {
 restrict: 'E',
 link: function(scope, element, attrs) {
-	
+
 	scope.$watchCollection('messages', function (newCollection, oldCollection, scope) {
 		m.render(element[0], newCollection.map(messageTemplate));
 	})
@@ -15,7 +15,7 @@ link: function(scope, element, attrs) {
 			onclick: function(e) {scope.messageLink(message)}}, //for stickers currently
 			[
 				m('picture.message-avatar',
-					m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
+				m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
 				messageContent(message) //message object passed to next function to switch content templates
 			]);

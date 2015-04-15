@@ -133,6 +133,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 							// get city info
 							var data = {
+								server: true,
 								params: {
 									hasLoc: true,
 									lat: location.lat,
