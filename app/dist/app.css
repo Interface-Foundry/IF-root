@@ -2819,9 +2819,12 @@ nav ul {
 }
 .navLogo-wrapper {
   float: left;
-  margin-left: 50px;
+  margin-left: 60px;
   width: 48px;
   height: 48px;
+}
+.navLogo-wrapper:active {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .navLogo {
   width: 42px;
@@ -2847,34 +2850,10 @@ nav ul {
   height: 48px;
   border: none;
   outline: none;
-  background: center / 32px 32px no-repeat url('img/icons/back-arrow.png');
-  opacity: 1;
-  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  background: url('img/icons/ic_chevron_left_white_48dp.png') center center / 48px 48px no-repeat;
 }
-.back-button.ng-hide.ng-hide-remove {
-  opacity: 0;
-  -webkit-transform: translateX(-12px);
-  transform: translateX(-12px);
-}
-.back-button.ng-hide.ng-hide-remove.ng-hide-remove-active {
-  opacity: 1;
-  -webkit-transform: translateX(0px);
-  transform: translateX(0px);
-}
-.back-button:before {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  top: 18px;
-  left: -6px;
-}
-.back-button.ng-click-active {
-  -webkit-transform: translateX(-6px);
-  transform: translateX(-6px);
+.back-button:active {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .view-tabs {
   display: block;
