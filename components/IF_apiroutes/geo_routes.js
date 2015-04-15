@@ -9,11 +9,10 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
     mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
 
-var env = process.env.NODE_ENV || 'development';
 
 router.use(function(req, res, next) {
 
-    if (env == 'development' && req.query.hasLoc == 'false') {
+    if (global.config.env == 'development' && req.query.hasLoc == 'false') {
         req.geoloc = {};
         console.log('In development mode, defaulting to NYC (hardcoded)')
         req.geoloc.cityName = 'New York City';
