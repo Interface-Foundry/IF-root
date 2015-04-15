@@ -8,7 +8,8 @@ var res = request('GET', 'http://icanhazip.com');
 // ==================================
 module.exports = {
   ip: res.body.toString().replace(/\s/g, ''),
-  geoipURL: 'web-server-charmander.kipapp.co:8080/',
+  // geoipURL: 'http://web-server-charmander.kipapp.co:8080/',
+  geoipURL: 'http://www.freegeoip.net/',
   facebookAuth: {
     callbackURL: 'http://localhost.kipapp.co/auth/facebook/callback'
   }

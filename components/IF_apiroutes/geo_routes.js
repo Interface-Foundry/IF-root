@@ -9,18 +9,31 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
     mapqURL = 'http://open.mapquestapi.com/nominatim/v1/reverse.php?format=json',
     mapboxKey = 'pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
 
+var env = process.env.NODE_ENV || 'development';
+
 router.use(function(req, res, next) {
 
-	console.log('using geoip in route ' + req.originalUrl);
-	if (req.header('x-forwarded-for')) {
-		var ip = req.header('x-forwarded-for').split(',')[0]; // could be "99.12.2.222, 10.0.4.20"
-	} else {
-		ip = req.connection.remoteAddress;
-	}
+    if (env == 'development' && req.query.hasLoc == 'false') {
+        req.geoloc = {};
+        console.log('In development mode, defaulting to NYC (hardcoded)')
+        req.geoloc.cityName = 'New York City';
+        req.geoloc.lat = 40.7393083;
+        req.geoloc.lng = -73.9894285;
+        res.send(req.geoloc)
+        res.end()
+        return
+    }
 
-	if (global.config.env === 'development') {
-		ip = global.config.ip; // use local real ip address in dev
-	}
+    console.log('using geoip in route ' + req.originalUrl);
+    if (req.header('x-forwarded-for')) {
+        var ip = req.header('x-forwarded-for').split(',')[0]; // could be "99.12.2.222, 10.0.4.20"
+    } else {
+        ip = req.connection.remoteAddress;
+    }
+
+    if (global.config.env === 'development') {
+        ip = global.config.ip; // use local real ip address in dev
+    }
 
     req.geoloc = {};
 
@@ -29,19 +42,20 @@ router.use(function(req, res, next) {
     //query the local freegeoip server we are running 
     //if hasLoc=true, geoloc.cityName will be overwritten using the more accurate lat lng 
     //for now use the less accurate ip based cityName
+
     request(global.config.geoipURL + ip, function(err, res, body) {
         if (err) console.log(err);
 
-		try {
-			var data = JSON.parse(body);
-		} catch (e) {
-			console.error("Could not parse response from geoip server");
-			console.error("server: " + global.config.geoipURL + ip);
-			console.error(e);
-			console.error(body);
-			response.sendStatus(200);
-			return;
-		}
+        try {
+            var data = JSON.parse(body);
+        } catch (e) {
+            console.error("Could not parse response from geoip server");
+            console.error("server: " + global.config.geoipURL + ip);
+            console.error(e);
+            console.error(body);
+            response.sendStatus(200);
+            return;
+        }
 
         // console.log('data is..', data)
 
@@ -60,7 +74,7 @@ router.use(function(req, res, next) {
 
 
         if (data.latitude && data.longitude) {
-            if ((data.latitude == 0 && data.longitude == 0) || Number.isNaN(data.latitude) || Number.isNaN(data.longitude)) {
+            if (data.latitude == 0 && data.longitude == 0) {
                 console.log('incorrect lat lng supplied, data is: ', data, 'defaulting to NYC Flatiron.')
                 req.geoloc.cityName = 'New York City';
                 req.geoloc.lat = 40.7393083;
@@ -69,8 +83,8 @@ router.use(function(req, res, next) {
                 req.geoloc.lat = data.latitude;
                 req.geoloc.lng = data.longitude;
             }
-        } 
-        // console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
+        }
+        console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
         return next();
     })
 
@@ -91,22 +105,22 @@ router.get('/', function(req, res) {
                     lon: req.query.lng
                 }
             }, function(err, res, body) {
-				try {
-					var data = JSON.parse(body);
-				} catch (e) {
-					console.error('could not parse response from mapquest');
-					console.error('server: ' + mapqURL);
-					console.error('lat: ' + req.query.lat + ' lng: ' + req.query.lng);
-					console.log(e);
-					console.log(body);
-				}
+                try {
+                    var data = JSON.parse(body);
+                } catch (e) {
+                    console.error('could not parse response from mapquest');
+                    console.error('server: ' + mapqURL);
+                    console.error('lat: ' + req.query.lat + ' lng: ' + req.query.lng);
+                    console.log(e);
+                    console.log(body);
+                }
 
                 //MAPBOX SECTION
                 if (err || res.statusCode !== 200) {
                     if (err) console.error(err);
                     console.error('Mapquest didnt work. Querying Mapbox instead..');
                     // console.log('Mapbox URL is: ', mapboxURL + req.query.lng + ',' + req.query.lat + '.json');
-					var url = mapboxURL + req.query.lng + ',' + req.query.lat + '.json';
+                    var url = mapboxURL + req.query.lng + ',' + req.query.lat + '.json';
                     request({
                         url: url,
                         qs: {
@@ -114,14 +128,14 @@ router.get('/', function(req, res) {
                         }
                     }, function(err, res, body) {
                         if (err) console.error('Mapbox err is:', err);
-						try {
-							var	data = JSON.parse(body);
-						} catch (e) {
-							console.error("could not parse mapbox json");
-							console.error("server: " + url);
-							console.error(e);
-							console.error(body);
-						}
+                        try {
+                            var data = JSON.parse(body);
+                        } catch (e) {
+                            console.error("could not parse mapbox json");
+                            console.error("server: " + url);
+                            console.error(e);
+                            console.error(body);
+                        }
 
                         if (data.features.length == 0) {
                             console.log('mapbox could not find location name, using ip-based location.', req.geoloc)
