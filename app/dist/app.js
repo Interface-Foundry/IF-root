@@ -18347,6 +18347,27 @@ mapManager.setBaseLayer = function(layerURL, localMaps) {
 	};	
 }
 
+mapManager.setBaseLayerFromID = function(ID) {
+	mapManager.setBaseLayer(
+	'https://{s}.tiles.mapbox.com/v3/'+
+	ID+
+	'/{z}/{x}/{y}.png');
+}
+
+mapManager.resetBaseLayer = function() {
+	// resets the base layer to default (Urban)
+	console.log('--resetBaseLayer()');
+	mapManager.layers.baselayers = {};
+	mapManager.layers.baselayers.baseMap = {
+		name: "Urban",
+		url: 'https://{s}.tiles.mapbox.com/v3/interfacefoundry.ig6a7dkn/{z}/{x}/{y}.png',
+		type: 'xyz',
+		top: true,
+		maxZoom: 23,
+		maxNativeZoom: 23
+	}
+}
+
 mapManager.findZoomLevel = function(localMaps) {
 	if (!localMaps) {
 		return;
@@ -18364,13 +18385,6 @@ mapManager.findZoomLevel = function(localMaps) {
 	var lowestZoom = _.isEmpty(zooms) ? null : _.min(zooms);
 
 	return lowestZoom;
-}
-
-mapManager.setBaseLayerFromID = function(ID) {
-	mapManager.setBaseLayer(
-	'https://{s}.tiles.mapbox.com/v3/'+
-	ID+
-	'/{z}/{x}/{y}.png');
 }
 
 mapManager.findMapFromArray = function(mapArray) {
@@ -25328,6 +25342,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	} else if ($routeParams.cityName) {
 		apertureService.set('third');
 		navService.show('search');
+
+		// reset nav bar color and default map
+		styleManager.resetNavBG();
+		mapManager.resetBaseLayer();
+		mapManager.removeOverlays();
+
 		latLng.lat = getLatLngFromURLString($routeParams.latLng).lat;
 		latLng.lng = getLatLngFromURLString($routeParams.latLng).lng;
 		$scope.cityName = $routeParams.cityName;
