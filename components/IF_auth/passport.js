@@ -387,7 +387,12 @@ module.exports = function(passport) {
             console.log(userId);
 
             //parse response
-            var profile = JSON.parse(response);
+			try {
+				var profile = JSON.parse(response);
+			} catch (e) {
+				console.error('could not parse profile json from facebook');
+				console.error(response);
+			}
 
             console.log(profile.id);
 
@@ -686,7 +691,13 @@ module.exports = function(passport) {
 
                         console.log(body);
 
-                        var parsed = JSON.parse(body);
+						try {
+	                        var parsed = JSON.parse(body);
+						} catch (e) {
+							console.error('could not parse bearer facebook json');
+							console.error('server: ' + options.host + options.path);
+							console.error(body);
+						}
 
                         console.log('fbook parsed', parsed);
 

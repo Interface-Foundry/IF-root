@@ -27,6 +27,8 @@ router.use(function(req, res, next) {
 		try {
 			var data = JSON.parse(body);
 		} catch (e) {
+			console.error("Could not parse response from geoip server");
+			console.error("server: " + global.config.geoipURL + ip);
 			console.error(e);
 			console.error(body);
 			response.sendStatus(200);
@@ -64,21 +66,37 @@ router.get('/', function(req, res) {
                     lon: req.query.lng
                 }
             }, function(err, res, body) {
-                var data = JSON.parse(body);
+				try {
+					var data = JSON.parse(body);
+				} catch (e) {
+					console.error('could not parse response from mapquest');
+					console.error('server: ' + mapqURL);
+					console.error('lat: ' + req.query.lat + ' lng: ' + req.query.lng);
+					console.log(e);
+					console.log(body);
+				}
 
                 //MAPBOX SECTION
                 if (err || res.statusCode !== 200) {
-                    if (err) console.log(err);
-                    console.log('Mapquest didnt work. Querying Mapbox instead..');
+                    if (err) console.error(err);
+                    console.error('Mapquest didnt work. Querying Mapbox instead..');
                     // console.log('Mapbox URL is: ', mapboxURL + req.query.lng + ',' + req.query.lat + '.json');
+					var url = mapboxURL + req.query.lng + ',' + req.query.lat + '.json';
                     request({
-                        url: mapboxURL + req.query.lng + ',' + req.query.lat + '.json',
+                        url: url,
                         qs: {
                             access_token: mapboxKey
                         }
                     }, function(err, res, body) {
-                        if (err) console.log('Mapbox err is:', err);
-                        var data = JSON.parse(body);
+                        if (err) console.error('Mapbox err is:', err);
+						try {
+							var	data = JSON.parse(body);
+						} catch (e) {
+							console.error("could not parse mapbox json");
+							console.error("server: " + url);
+							console.error(e);
+							console.error(body);
+						}
 
                         if (data.features.length == 0) {
                             console.log('mapbox could not find location name, using ip-based location.', req.geoloc)

@@ -26,7 +26,12 @@ module.exports = function() {
 
 			console.log(userId);
 
-			var userObject = JSON.parse(response);
+			try {
+				var userObject = JSON.parse(response);
+			} catch (e) {
+				console.error('could not parse facebook json in client strategy');
+				console.error(response);
+			}
 			console.log(userObject.id);
 
 			if (userId !== userObject.id){
