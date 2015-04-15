@@ -101,12 +101,12 @@ var socket = require('./components/IF_chat/socket.js');
 var express = require('express'),
     app = module.exports.app = express(),
     // cors = require('cors'),
-	//db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
-	db = db_mongoose; // TODO refactor this... i don't really know where it came from
+    //db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
+    db = db_mongoose; // TODO refactor this... i don't really know where it came from
 
 // add in health check before sessions
-app.get('/api/healthcheck', function(req, res) { 
-	res.send(200);
+app.get('/api/healthcheck', function(req, res) {
+    res.send(200);
 });
 
 //express compression
@@ -250,6 +250,7 @@ var exec = require('child_process').exec;
 
 function puts(error, stdout, stderr) {
     sys.puts(stdout)
+
 }
 
 console.log('using greegeoip server', global.config.geoipURL);
@@ -629,16 +630,16 @@ var elasticsearch_up = false; // health status
 setInterval(function() {
     elasticsearch.healthcheck(function(err) {
         if (err) {
-			if (elasticsearch_up) {
-				elasticsearch_up = false;
+            if (elasticsearch_up) {
+                elasticsearch_up = false;
                 console.error('elasticsearch is down');
                 console.error(err);
             }
         } else {
-			if (!elasticsearch_up) {
-				elasticsearch_up = true;
-				console.log('elasticsearch is back up');
-			}
+            if (!elasticsearch_up) {
+                elasticsearch_up = true;
+                console.log('elasticsearch is back up');
+            }
         }
     });
 }, 15000);
@@ -953,7 +954,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                     //Retrieve new saved contest entry ID
                                                     console.log('submitted data is..', data)
                                                     res.send(data)
-                                                    // res.send(data)
+                                                        // res.send(data)
                                                 }); //contest entry, send to bac
                                             }
                                         }
@@ -1020,7 +1021,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                                 function(err, result) {
                                                                     if (err) console.log(err);
 
-                                            
+
                                                                     console.log('contest updated with cloudsight', result)
                                                                 })
 
@@ -2592,11 +2593,11 @@ app.get('/api/worlds/:id', function(req, res) {
     //if world, query for style and return
     function combineQuery(data, res) {
             //look up style associated with world
-		//
-		if (!data) {
-			console.log("world doesn't exist");
-			return;
-		}
+            //
+            if (!data) {
+                console.log("world doesn't exist");
+                return;
+            }
 
             if (data.style) {
                 if (data.style.styleID) {
@@ -2622,8 +2623,10 @@ app.get('/api/worlds/:id', function(req, res) {
                                         if (req.user.submissions) {
                                             var contestSubmissions = [];
                                             req.user.submissions.forEach(function(el) {
-                                                if (el.worldID == data._id && el.contestID == contest._id) {
-                                                    contestSubmissions.push(el);
+                                                if (contest._id) {
+                                                    if (el.worldID == data._id && el.contestID == contest._id) {
+                                                        contestSubmissions.push(el);
+                                                    }
                                                 }
                                             })
 
@@ -3695,7 +3698,7 @@ app.all('/*', function(req, res, next) {
 
     //if file path, then add file to end
     if (req.url.indexOf('.') != -1) {
-     
+
         res.sendFile(req.url, {
             root: __dirname + '/app/dist'
         }, function(err) {
@@ -3708,10 +3711,10 @@ app.all('/*', function(req, res, next) {
             }
         });
     } else if (req.url.indexOf('api') > -1) {
-      
+
         return next();
     } else {
-            
+
         res.sendFile('index.html', {
             root: __dirname + '/app/dist'
         });
