@@ -11,7 +11,7 @@ function bubbleSearchService($http, analyticsService) {
 	return {
 		data: data,
 		search: search,
-		defaultText: 'What are you looking for?',
+		defaultText: 'Search around me',
 		noResultsText: 'No results'
 	};
 	
