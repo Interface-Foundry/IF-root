@@ -1,14 +1,19 @@
 <div class="fullPage fullPage--splashImg">
 	<div class="fullPage-content u-centerXY">
+
 		<img src="img/kip/kipLogo.svg" class="fullPage-logo" alt="Logo">
+
 		<p class="fullPage-tagline">
 			<span style="margin-bottom: 8px; font-weight: 600">Never miss a moment</span>
 			<span style="font-size: 17px; font-weight: 500">Sign in and find out what's happening around you</span>
 		</p>
+
+		<button class="btnMain btnMain--redKip u-centerX"
+			ng-click="setShowSplash('register', true)">SIGN UP</button>
 		<button class="btnMain u-centerX"
 			ng-click="setShowSplash('signin', true)">SIGN IN</button>
-		<button class="btnMain btnMain--blue u-centerX"
-			ng-click="setShowSplash('register', true)">REGISTER</button>
+		
+
 	</div>
 	<div class="fullPage-close" ng-if="show.close" ng-click="setShowSplash('splash', false)"></div>
 </div>
