@@ -968,21 +968,6 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 											return res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
 										}
 
-
-                                        //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
-
-                                        var options = {
-                                            url: "https://api.cloudsightapi.com/image_requests",
-                                            headers: {
-                                                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-                                            },
-                                            qs: {
-                                                'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
-                                                'image_request[locale]': 'en-US',
-                                                'image_request[language]': 'en'
-
-                                            }
-
                                             //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
 
                                             var options = {
