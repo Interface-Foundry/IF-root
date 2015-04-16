@@ -19230,7 +19230,7 @@ userManager.signup.signup = function() { //signup based on signup form
     .success(function(user) {
 	    dialogs.show = false;
 		userManager.checkLogin();
-		alertManager.addAlert('success', "You're logged in!", true);
+		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
 
 		// send confirmation email
@@ -19243,7 +19243,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	.error(function(err) {
 	if (err) {
 		userManager.signup.error = err || "Error signing up!";
-        alertManager.addAlert('danger',err, true);   
+        // alertManager.addAlert('danger',err, true);
 	}
 	});
 }
@@ -23739,6 +23739,8 @@ $scope.goBack = function() {
 
 $scope.logout = function() {
 	userManager.logout();
+	userManager.login.email = '';
+	userManager.login.password = '';
 }
 
 
@@ -26127,6 +26129,7 @@ $scope.aperture = apertureService;
 $scope.bubbleTypeService = bubbleTypeService;
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
+$scope.goToWorld = goToWorld;
 $scope.collectedPresents = [];
 
 var map = mapManager;
@@ -26149,6 +26152,10 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	$location.path('/404');
 });
+
+function goToWorld() {
+	$location.path('/w/' + $routeParams.worldURL);
+}
 
 function getLandmark(world) {
 	worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {

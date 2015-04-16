@@ -1,6 +1,7 @@
 /* *NAV* Navigation Bar */
 @nav-height: 48px;
-@pg-offset: 16px;
+@pg-offset: 20px;
+/*pg-offset for iOS native navbar (battery, carrier, etc.) elements that have offset include: [text search for @pg-offset]*/
 
 nav.main-nav {
 	position: fixed;
@@ -65,7 +66,7 @@ nav ul {
 
 .navLogo-wrapper {
 	float: left;
-	margin-left: 60px;
+	margin-left: 10px;
 	width: 48px;
 	height: 48px;
 	&:active {
@@ -94,12 +95,7 @@ nav ul {
 }
 
 .back-button {
-	position: absolute;
-	top: 0px;
-	/* @IFDEF PHONEGAP */
-	top: @pg-offset;
-	/* @ENDIF */
-	left: 0px;
+	float: left;
 	width: 48px;
 	height: 48px;
 	border: none;
