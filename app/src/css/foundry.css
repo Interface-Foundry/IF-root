@@ -452,6 +452,9 @@ nav ul {
 .back-button:active {
   background-color: rgba(0, 0, 0, 0.2);
 }
+.back-button.is-invisible {
+  visibility: hidden;
+}
 .view-tabs {
   display: block;
   float: right;
