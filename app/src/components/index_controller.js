@@ -6,9 +6,16 @@ $scope.style = styleManager;
 $scope.alerts = alertManager;
 $scope.userManager = userManager;
 $scope.navService = navService;
-
 $scope.dialog = dialogs;
     
+// global bools indicate phonegap vs web
+$rootScope.if_web = true;
+$rootScope.if_phonegap = false;
+//@IFDEF PHONEGAP
+$rootScope.if_web = false;
+$rootScope.if_phonegap = true;
+//@ENDIF
+
 angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
