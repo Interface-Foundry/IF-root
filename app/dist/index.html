@@ -79,7 +79,7 @@
 
 <body ng-class="[aperture.state]" ng-click="closeOverlays()">
 
-	<div ng-controller="SplashController">
+	<div ng-cloak ng-controller="SplashController">
 		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
 		<div ng-if="show.splash === false">

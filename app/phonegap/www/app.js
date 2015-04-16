@@ -4858,15 +4858,6 @@ var setWelcome = function(welcomeService) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
-	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://kipapp.co' + request.url;
-		    			if (ifGlobals.username&&ifGlobals.password) {
-							request.headers['Authorization'] = ifGlobals.getBasicHeader();
-							//console.log(request);
-						} else if (ifGlobals.fbToken) {
-							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
-						}
-	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4945,6 +4936,9 @@ $routeProvider.
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       
+$locationProvider.html5Mode({
+	enabled: true
+});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4954,31 +4948,16 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
+	userManager.checkLogin();
 	
 	
-	navigator.splashscreen.hide();
 	
-/*
-lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
-			console.log(success);
-		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
-}, function(err) {
-	console.log('credential error', error); 
-});
-*/
 });
 
-document.addEventListener('deviceready', onDeviceReady, true);
-function onDeviceReady() {
-	angular.element(document).ready(function() {
-		angular.bootstrap(document, ['IF']);
-	});
-}
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+
+});
 app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5386,7 +5365,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 19;
+					var topOffset = 4;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5750,6 +5729,10 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
+			var firstHash = value.indexOf('#');
+			if (firstHash > -1) {
+				value = value.slice(0, firstHash) + value.slice(firstHash+1);
+			}
 			$attr.$set('href', value);
 			
 			});
@@ -5768,9 +5751,6 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
-				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
-				}
 				
 				$attr.$set('src', value);
 			
@@ -18841,77 +18821,8 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: true,
-	keychain: new Keychain()
+	supported: false
 }
-
-//getCredentials returns a promise->map of the available credentials. 
-//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-//	because all will return rejected if you do.
-
-lockerManager.getCredentials = function() {
-	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
-	
-	lockerManager.keychain.getForKey(function(value) {
-		username.resolve(value);
-	}, function(error) {
-		username.resolve(undefined);
-		console.log(error);
-	}, 'username', 'Kip');
-
-	lockerManager.keychain.getForKey(function(value) {
-		password.resolve(value);
-	}, function(error) {
-		password.resolve(undefined);
-		console.log(error);
-	}, 'password', 'Kip');
-	
-	lockerManager.keychain.getForKey(function(value) {
-		fbToken.resolve(value);
-	}, function(error) {
-		fbToken.resolve(undefined);
-		console.log(error);
-	}, 'fbToken', 'Kip');
-	
-	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-}
-
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Kip', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Kip', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
-
-
-//saves the FB token
-lockerManager.saveFBToken = function(fbToken) {
-	var deferred = $q.defer();
-	lockerManager.keychain.setForKey(function(success) {
-		deferred.resolve(success);
-	}, function(error) {
-		deferred.reject(error);
-	},
-	'fbToken', 'Kip', fbToken);
-	
-	return deferred;
-}
-
 	 
 return lockerManager;
 	   
@@ -19145,7 +19056,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('https://kipapp.co/api/updateuser'),
+	userRes: $resource('/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19243,20 +19154,18 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	
-	ifGlobals.username = username;
-	ifGlobals.password = password;
-	$http.post('/api/user/login-basic', data, {server: true})
+	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
+			userManager._user = data;
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
-			ifGlobals.loginStatus = true;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	
 	
 	return deferred.promise;
 }
@@ -19268,25 +19177,6 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 
-
-			
-			
-			var data = {
-            	userId: success.authResponse.userID,
-           		accessToken: success.authResponse.accessToken 
-          	};
-
-          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
-	            function(res){
-	   				lockerManager.saveFBToken(success.authResponse.accessToken )
-					ifGlobals.fbToken = success.authResponse.accessToken ;
-					deferred.resolve(success);
-	            },
-
-	            function(res){
-	              deferred.reject(failure);
-	            }
-          	);      
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
@@ -19329,7 +19219,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.showDialog('keychainDialog.html');
+		dialogs.show = false;
 		contest.login(new Date); // for wtgt contest
 		$route.reload();
 	}, function (err) {
@@ -21614,9 +21504,6 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
-//isnt ready for mobile yet
 var aperture = apertureService,
 	map = mapManager,
 	style = styleManager,
@@ -22461,8 +22348,6 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -23020,8 +22905,6 @@ $scope.onUploadAvatar = function($files) {
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -23924,34 +23807,6 @@ $scope.share = function(platform) {
   );
 };
 
-$scope.fbLogin = function() {
-	userManager.fbLogin().then(
-		function (success) {
-			console.log(success);
-			userManager.checkLogin();
-		}, function (failure) {
-			console.log(failure);	
-		})
-}
-//On Phonegap startup, try to login with either saved username/pw or facebook
-lockerManager.getCredentials().then(function(credentials) {
-	if (credentials.username, credentials.password) {
-		userManager.signin(credentials.username, credentials.password).then(function(success) {
-			userManager.checkLogin().then(function(success) {
-			console.log(success);
-			});
-		}, function (reason) {
-			console.log('credential signin error', reason)
-		});
-	} else if (credentials.fbToken) {
-		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log(success);	
-		})
-	}
-}, function(err) {
-	console.log('credential error', error); 
-});
 }]);
 
 // DEPRACATED
@@ -24223,6 +24078,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
         }
 
+        $scope.show.close = true; // only show close button (home, not confirm) on web
         $scope.show.signin = false;
         $scope.show.register = false;
     }
@@ -27462,6 +27318,10 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
+		var firstHash = url.indexOf('#');
+		if (firstHash > -1) {
+			return url.slice(0, firstHash) + url.slice(firstHash+1);
+		} else {return url}
 		return url;
 	}
 }
