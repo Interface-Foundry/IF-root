@@ -245,7 +245,7 @@ userManager.signup.signup = function() { //signup based on signup form
     .success(function(user) {
 	    dialogs.show = false;
 		userManager.checkLogin();
-		alertManager.addAlert('success', "You're logged in!", true);
+		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
 
 		// send confirmation email
@@ -258,7 +258,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	.error(function(err) {
 	if (err) {
 		userManager.signup.error = err || "Error signing up!";
-        alertManager.addAlert('danger',err, true);   
+        // alertManager.addAlert('danger',err, true);
 	}
 	});
 }

@@ -24,6 +24,7 @@ router.use(function(req, res, next) {
     }
 
     console.log('using geoip in route ' + req.originalUrl);
+
     if (req.header('x-forwarded-for')) {
         var ip = req.header('x-forwarded-for').split(',')[0]; // could be "99.12.2.222, 10.0.4.20"
     } else {
@@ -87,10 +88,9 @@ router.use(function(req, res, next) {
             console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
             return next();
         })
+    } else {
+        return next();
     }
-
-    return next();
-
 
 });
 

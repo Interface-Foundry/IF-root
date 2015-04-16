@@ -1,3 +1,47 @@
+.u-pointer {
+  cursor: pointer;
+}
+.u-centerX {
+  position: relative;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+}
+.u-centerY {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+.u-centerXY {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+.u-100X {
+  width: 100%;
+}
+.u-100XY {
+  width: 100%;
+  height: 100%;
+}
+.u-textAlignCenter {
+  text-align: center;
+}
+.u-relative {
+  position: relative;
+}
+.u-absolute {
+  position: absolute;
+}
+.u-inlineBlock {
+  display: inline-block;
+}
+.u-colorLinkBlue {
+  color: #428bca;
+}
 #aperture {
   overflow: hidden;
   position: absolute;
@@ -6,6 +50,9 @@
   width: 100%;
   height: 100%;
   /* color: white; */
+  /*@IFDEF PHONEGAP*/
+  margin-top: 20px;
+  /*@ENDIF*/
   z-index: 10;
 }
 #aperture.aperture-off {
@@ -33,9 +80,9 @@
   /*TODO toolbar height + nav height*/
   -webkit-transform: translateY(116px);
   /*@IFDEF PHONEGAP*/
-  transform: translateY(132px);
+  transform: translateY(136px);
   /*TODO toolbar height + nav height*/
-  -webkit-transform: translateY(132px);
+  -webkit-transform: translateY(136px);
   /*@ENDIF*/
 }
 #shelf.aperture-half {
@@ -314,6 +361,7 @@ span.nearby-list-icon.loading {
   border-top: 1px solid #ccc;
 }
 /* *NAV* Navigation Bar */
+/*pg-offset for iOS native navbar (battery, carrier, etc.) elements that have offset include: [text search for @pg-offset]*/
 nav.main-nav {
   position: fixed;
   top: 0;
@@ -327,8 +375,8 @@ nav.main-nav {
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
   /*@IFDEF PHONEGAP*/
-  height: 64px;
-  padding-top: 16px;
+  height: 68px;
+  padding-top: 20px;
   /*@ENDIF*/
 }
 .nav-title {
@@ -370,7 +418,7 @@ nav ul {
 }
 .navLogo-wrapper {
   float: left;
-  margin-left: 60px;
+  margin-left: 10px;
   width: 48px;
   height: 48px;
 }
@@ -394,12 +442,7 @@ nav ul {
   background: #0091EA;
 }
 .back-button {
-  position: absolute;
-  top: 0px;
-  /* @IFDEF PHONEGAP */
-  top: 16px;
-  /* @ENDIF */
-  left: 0px;
+  float: left;
   width: 48px;
   height: 48px;
   border: none;
@@ -408,6 +451,9 @@ nav ul {
 }
 .back-button:active {
   background-color: rgba(0, 0, 0, 0.2);
+}
+.back-button.is-invisible {
+  visibility: hidden;
 }
 .view-tabs {
   display: block;
@@ -437,7 +483,7 @@ nav ul {
   z-index: -1;
   left: 8px;
   /*@IFDEF PHONEGAP */
-  height: 64px;
+  height: 68px;
   /*@ENDIF*/
 }
 .home-tab {
@@ -466,7 +512,7 @@ nav ul {
   padding-top: 96px;
   z-index: 100;
   /*@IFDEF PHONEGAP*/
-  padding-top: 112px;
+  padding-top: 116px;
   /*@ENDIF*/
 }
 .search-bar {
@@ -481,7 +527,7 @@ nav ul {
   outline: none;
   border: none;
   /*@IFDEF PHONEGAP*/
-  top: 64px;
+  top: 68px;
   /*@ENDIF*/
 }
 .search-btn {
@@ -1137,6 +1183,11 @@ img.announcement-chevron {
   position: relative;
   left: -19px;
 }
+.fullPage-adjust {
+  width: 100%;
+  height: 20px;
+  background-color: #888888;
+}
 .fullPage-tagline {
   margin-top: 0px;
   margin-bottom: 0px;
@@ -1157,7 +1208,7 @@ img.announcement-chevron {
   max-width: 460px;
   /*height: 280px;*/
   position: absolute;
-  top: 50px;
+  top: 64px;
 }
 .fullPage-header {
   /*border: 1px solid black;*/
@@ -1167,6 +1218,9 @@ img.announcement-chevron {
   background-color: white;
   position: absolute;
   top: 0px;
+  /*@IFDEF PHONEGAP*/
+  top: 20px;
+  /*@ENDIF*/
 }
 .fullPage-p {
   font-size: 15px;
@@ -2701,48 +2755,6 @@ li.alert {
   top: 4px;
   font-size: 0.9em;
 }
-/*UTILITIES*/
-.u-pointer {
-  cursor: pointer;
-}
-.u-centerX {
-  position: relative;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
-}
-.u-centerY {
-  position: relative;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-}
-.u-centerXY {
-  position: relative;
-  left: 50%;
-  top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
-.u-100X {
-  width: 100%;
-}
-.u-100XY {
-  width: 100%;
-  height: 100%;
-}
-.u-textAlignCenter {
-  text-align: center;
-}
-.u-relative {
-  position: relative;
-}
-.u-absolute {
-  position: absolute;
-}
-.u-inlineBlock {
-  display: inline-block;
-}
 /* CATEGORY WIDGET */
 .category-list-shadow {
   position: absolute;
@@ -2869,6 +2881,9 @@ li.alert {
 .search-aperture {
   position: relative;
   top: 45px;
+  /*@IFDEF PHONEGAP*/
+  top: 65px;
+  /*@ENDIF*/
 }
 @media only screen and (min-width: 0px) and (max-width: 480px) {
   .search-aperture .search-cat {

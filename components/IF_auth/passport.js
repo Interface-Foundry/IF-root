@@ -105,7 +105,7 @@ module.exports = function(passport) {
                 if (password.length >= 6) {
                     // asynchronous
                     process.nextTick(function() {
-
+                       
                         //  Whether we're signing up or connecting an account, we'll need
                         //  to know if the email address is in use.
                         User.findOne({
@@ -113,23 +113,27 @@ module.exports = function(passport) {
                         }, function(err, existingUser) {
 
                             // if there are any errors, return the error
-                            if (err)
+                            if (err){
+                                console.log('hitting error in here',err)
                                 return done(err);
-
+                            }
                             // check to see if there's already a user with that email
-                            if (existingUser)
+                            if (existingUser) {
+                                console.log('This email address is already in use')
                                 return done('This email address is already in use');
-
+                            }
                             //  If we're logged in via facebook, we're connecting a new local account.
                             if (req.user) {
                                 var user = req.user;
                                 user.local.email = email.toString().toLowerCase();
                                 user.local.password = user.generateHash(password);
+  console.log('Logged in via facebook, req.user is', req.user)
                                 if (!user.profileID) {
 
                                     if (user.facebook.name && user.facebook.name.indexOf(" ") > -1) {
+                                        user.name = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
                                         var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
-                                    } else if (user.facebook.name){
+                                    } else if (user.facebook.name) {
                                         var input = user.facebook.name
                                     } else if (!user.facebook.name) {
                                         console.log('logged in facebook user doesnt have name property. using email to generate profileID instead.', user)
@@ -156,9 +160,10 @@ module.exports = function(passport) {
                             }
                             //  We're not logged in, so we're creating a brand new user.
                             else {
+                                console.log('Not logged in, creating a brand new user.')
                                 // create the user
                                 var newUser = new User();
-
+                                newUser.name = email.slice(0, email.indexOf("@"));
                                 newUser.local.email = email.toString().toLowerCase();
                                 newUser.local.password = newUser.generateHash(password);
                                 uniqueProfileID(email.slice(0, email.indexOf("@")), function(output) {
@@ -260,6 +265,14 @@ module.exports = function(passport) {
                                     user.facebook.id = profile.id;
                                 }
 
+                                if (!user.name) {
+                                    if (user.facebook.name.indexOf(" ") > -1) {
+                                        user.name = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
+                                    } else {
+                                        user.name = user.facebook.name
+                                    }
+                                }
+
                                 if (user.facebook.name.indexOf(" ") > -1) {
                                     var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
                                 } else {
@@ -305,8 +318,10 @@ module.exports = function(passport) {
                             }
 
                             if (newUser.facebook.name.indexOf(" ") > -1) {
-                                var input = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "))
+                                newUser.name = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "));
+                                var input = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "));
                             } else {
+                                newUser.name = newUser.facebook.name;
                                 var input = newUser.facebook.name
                             }
 
@@ -390,12 +405,12 @@ module.exports = function(passport) {
             console.log(userId);
 
             //parse response
-			try {
-				var profile = JSON.parse(response);
-			} catch (e) {
-				console.error('could not parse profile json from facebook');
-				console.error(response);
-			}
+            try {
+                var profile = JSON.parse(response);
+            } catch (e) {
+                console.error('could not parse profile json from facebook');
+                console.error(response);
+            }
 
             console.log(profile.id);
 
@@ -432,6 +447,14 @@ module.exports = function(passport) {
 
                         if (profile.timezone) {
                             user.facebook.timezone = profile.timezone;
+                        }
+
+                        if (!user.name) {
+                            if (profile.name.indexOf(" ") > -1) {
+                                user.name = profile.name.slice(0, profile.name.indexOf(" "))
+                            } else {
+                                user.name = profile.name
+                            }
                         }
 
                         if (!user.profileID) {
@@ -475,8 +498,10 @@ module.exports = function(passport) {
                     }
 
                     if (newUser.facebook.name.indexOf(" ") > -1) {
+                        newUser.name = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "));
                         var input = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "))
                     } else {
+                        newUser.name = newUser.facebook.name
                         var input = newUser.facebook.name
                     }
 
@@ -694,13 +719,13 @@ module.exports = function(passport) {
 
                         console.log(body);
 
-						try {
-	                        var parsed = JSON.parse(body);
-						} catch (e) {
-							console.error('could not parse bearer facebook json');
-							console.error('server: ' + options.host + options.path);
-							console.error(body);
-						}
+                        try {
+                            var parsed = JSON.parse(body);
+                        } catch (e) {
+                            console.error('could not parse bearer facebook json');
+                            console.error('server: ' + options.host + options.path);
+                            console.error(body);
+                        }
 
                         console.log('fbook parsed', parsed);
 
@@ -722,6 +747,14 @@ module.exports = function(passport) {
                                         // if (parsed.emails[0].value !== undefined || parsed.emails[0].value !== null){
                                         //     user.facebook.email = profile.emails[0].value;
                                         // }
+
+                                        if (!user.name) {
+                                            if (user.facebook.name.indexOf(" ") > -1) {
+                                                user.name = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
+                                            } else {
+                                                user.name = user.facebook.name
+                                            }
+                                        }
 
                                         if (!user.profileID) {
 
@@ -763,8 +796,10 @@ module.exports = function(passport) {
                                     // }
 
                                     if (newUser.facebook.name.indexOf(" ") > -1) {
+                                        newUser.name = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "));
                                         var input = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "))
                                     } else {
+                                        newUser.name = newUser.facebook.name;
                                         var input = newUser.facebook.name
                                     }
 
@@ -1434,13 +1469,13 @@ function uniqueProfileID(input, callback) {
                                 console.log('user exists, new uniqueNumber is..', uniqueNumber)
                                 next();
                             } else {
-                                console.log('is this hitting wtf?')
+                                // console.log('is this hitting?')
                                 next('unique!'); // This is where the looping is stopped
                             }
                         });
                     },
                     function() {
-                        console.log('hitting async forever end', newUnique)
+                        // console.log('hitting async forever end', newUnique)
                         callback(newUnique);
                     });
 

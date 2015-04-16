@@ -1,81 +1,84 @@
 <div class="wrap">
 	<div class="surface profile-surface subnavfix">
 		
-		<div class="profile-sort">
-			<div class="profile-card">
-				<span class="sort-heading indigo700">ME</span>
-					<div class="profile-card-pic" ng-file-select 
-							accept="image/*" ng-capture="'camera'" 
-							ng-model="files.avatar">
-						<!-- <div progress-circle top="'6'" left="'22'" full-width="'99'" spin-left="spinLeft" spin-left-long="spinLeftLong"></div> -->
-						<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar">
-						<span class="profile-card-pic-upload">upload</span>
-					</div>
-				<div class="profile-card-body">
-					<div class="form-group">
-						<label class="marble-label">Name</label>
-						<input type="text" class="marble-control" placeholder="Enter your Name" ng-model="user.name">
-					</div>
-					<span>{{user.title}}</span>
-					<hr>
+		<div style="max-width: 500px; height: 100%">
+			<div class="profile-sort">
+				<div class="profile-card">
+					<span class="sort-heading indigo700">ME</span>
+						<div class="profile-card-pic" ng-file-select 
+								accept="image/*" ng-capture="'camera'" 
+								ng-model="files.avatar">
+							<!-- <div progress-circle top="'6'" left="'22'" full-width="'99'" spin-left="spinLeft" spin-left-long="spinLeftLong"></div> -->
+							<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar">
+							<span class="profile-card-pic-upload">upload</span>
+						</div>
+					<div class="profile-card-body">
+						<div class="form-group">
+							<label class="marble-label">Name</label>
+							<input type="text" class="marble-control" placeholder="Enter your Name" ng-model="user.name">
+						</div>
+						<span>{{user.title}}</span>
+						<hr>
 
-					
+						
 
+					</div>
 				</div>
 			</div>
-		</div>
 
-		<div class="profile-contact-sort">
-			<div class="profile-contact-card">
-				<span class="sort-heading indigo700">CONTACT</span>
-				<form role="form">
-					<div class="form-group">
-						<label for="userEmail" class="marble-label">Email</label>
-						<input type="text" class="marble-control" ng-model="user.email" placeholder="Enter your contact email.">
-						<div class="marble-privacy-bit-container hidden">
-
-						<select class="marble-privacy-bit">
-							<option>on card</option>
-							<option>private</option>
-						</select>
-						<span class="caret"></span>
-						</div>
-						<div class="clearfix"></div>
-					</div>
-					<!-- <div class="form-group">
-						<label for="userAddress" class="marble-label">Address</label>
-						<input type="text" class="marble-control" ng-model="user.addr" placeholder="Street Address">
-						<input type="text" class="marble-control" ng-model="user.addr2" placeholder="City, State, ZIP">
-						<div class="clearfix"></div>
-					</div> -->
-
-					<div class="form-group">
-						<label for="userPhone" class="marble-label">Phone</label>
-						<input type="text" class="marble-control" ng-model="user.tel" placeholder="Phone">
-						<div class="clearfix"></div>
-					</div>
-
-				</form>
-			</div>
-		</div>
-
-		<div ng-class="{'inactive': user.meetup}">
 			<div class="profile-contact-sort">
 				<div class="profile-contact-card">
-					<span class="sort-heading indigo700">Connect Meetup account to add<br>
-						your meetups as bubbles</span>
-				  <button type="button" class="btn meetup-btn" ng-click="go('auth/meetup')">
-				  	<span class="grey-block"></span>
-				  	<img ng-if="!user.meetup" src="img/icons/meetup-16.png" width="16px" height="16px"> Connect
-				  </button>
+					<span class="sort-heading indigo700">CONTACT</span>
+					<form role="form">
+						<div class="form-group">
+							<label for="userEmail" class="marble-label">Email</label>
+							<input type="text" class="marble-control" ng-model="user.email" placeholder="Enter your contact email.">
+							<div class="marble-privacy-bit-container hidden">
+
+							<select class="marble-privacy-bit">
+								<option>on card</option>
+								<option>private</option>
+							</select>
+							<span class="caret"></span>
+							</div>
+							<div class="clearfix"></div>
+						</div>
+						<!-- <div class="form-group">
+							<label for="userAddress" class="marble-label">Address</label>
+							<input type="text" class="marble-control" ng-model="user.addr" placeholder="Street Address">
+							<input type="text" class="marble-control" ng-model="user.addr2" placeholder="City, State, ZIP">
+							<div class="clearfix"></div>
+						</div> -->
+
+						<div class="form-group">
+							<label for="userPhone" class="marble-label">Phone</label>
+							<input type="text" class="marble-control" ng-model="user.tel" placeholder="Phone">
+							<div class="clearfix"></div>
+						</div>
+
+					</form>
 				</div>
+			</div>
+
+			<div ng-class="{'inactive': user.meetup}">
+				<div class="profile-contact-sort">
+					<div class="profile-contact-card">
+						<span class="sort-heading indigo700">Connect Meetup account to add<br>
+							your meetups as bubbles</span>
+					  <button type="button" class="btn meetup-btn" ng-click="go('auth/meetup')">
+					  	<span class="grey-block"></span>
+					  	<img ng-if="!user.meetup" src="img/icons/meetup-16.png" width="16px" height="16px"> Connect
+					  </button>
+					</div>
+				</div>
+			</div>
+
+			<div class="profile-sort">
+				<button type="button" class="btn" ng-click="logout()">
+					Log out
+				</button>
 			</div>
 		</div>
 
-		<div class="profile-sort">
-			<button type="button" class="btn" ng-click="logout()">
-				Log out
-			</button>
-		</div>
 	</div>
 </div>
