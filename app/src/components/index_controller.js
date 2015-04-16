@@ -20,6 +20,18 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	deregFirstShow();
 }))
 
+$rootScope.$on('routeChangeStart', function() {
+	console.log('ROUTE CHANGE START')
+})
+
+
+$rootScope.$on('routeChangeSuccess', function() {
+	console.log('ROUTE CHANGE SUCCESS')
+})
+
+
+
+
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
