@@ -8,6 +8,7 @@ $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 $scope.welcomeService = welcomeService;
+$scope.init = init;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -46,22 +47,22 @@ function initMarkers() {
 
 
 //INIT
+init();
+function init() {
+	worldTree.getNearby().then(function(data) { 
+		$scope.$evalAsync(function($scope) {
+			nearbyBubbles = data['150m'] || []; // nearby
+			aroundMeBubbles = data['2.5km'] || []; // around me
 
-
-worldTree.getNearby().then(function(data) { 
-	$scope.$evalAsync(function($scope) {
-		nearbyBubbles = data['150m'] || []; // nearby
-		aroundMeBubbles = data['2.5km'] || []; // around me
-
-		$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
-		
-		$scope.loadState = 'success';
-		// initMarkers();
+			$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
+			
+			$scope.loadState = 'success';
+			// initMarkers();
+		});
+	}, function(reason) {
+		//failure
+		console.log(reason);
+		$scope.loadState = 'failure';
 	});
-}, function(reason) {
-	//failure
-	console.log(reason);
-	$scope.loadState = 'failure';
-});
-
+}
 }]);

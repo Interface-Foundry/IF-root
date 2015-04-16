@@ -2462,6 +2462,11 @@ li.alert {
   -webkit-transform: translate3D(0%, 0px, 0);
   transform: translate3D(0%, 0, 0);
 }
+.refresh-button {
+  right: 8px;
+  bottom: 8px;
+  background: url('img/icons/ic_refresh_white_48dp.png') center / 24px 24px no-repeat rgba(62, 82, 181, 0.96);
+}
 /*map stuff*/
 .fadeMarkers .leaflet-marker-icon {
   opacity: .5;
