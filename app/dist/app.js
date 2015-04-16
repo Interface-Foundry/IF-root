@@ -4826,7 +4826,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 
 
 var checkLoggedin = function(userManager) {
-    return userManager.checkLogin();
+  return userManager.checkLogin();
 }
 
 var checkAdminStatus = function(userManager, $location) {
@@ -4844,6 +4844,10 @@ var checkAdminStatus = function(userManager, $location) {
 
 var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
+}
+
+var setWelcome = function(welcomeService) {
+  welcomeService.needsWelcome = true;
 }
 
     //================================================
@@ -4888,7 +4892,7 @@ $routeProvider.
   when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
   when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-  when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+  when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth', resolve: {setWelcome: setWelcome}}).
   
   when('/profile', {redirectTo:'/profile/worlds'}).
   when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
