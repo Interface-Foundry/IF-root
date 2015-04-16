@@ -120,7 +120,7 @@ module.exports = function(passport) {
                             // check to see if there's already a user with that email
                             if (existingUser) {
                                 console.log('This email address is already in use')
-                                return done('This email address is already in use');
+                                return done('Email already exists.\ Do you want to sign in?');
                             }
                             //  If we're logged in via facebook, we're connecting a new local account.
                             if (req.user) {
