@@ -24534,12 +24534,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var token = $location.path().slice(15);
 
             $http.post('/email/request_confirm/' + token, {}, {server: true}).
-            success(function(data) {
-                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-            }).
-            error(function(err) {
-                $scope.confirmThanksText = 'There was a problem confirming your email';
-            });
+                success(function(data) {
+                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+                }).
+                error(function(err) {
+                    $scope.confirmThanksText = 'There was a problem confirming your email';
+                });
 
             // redirect to home page
             $location.path('/');
@@ -24551,14 +24551,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var token = $location.path().slice(7);
 
             $http.post('/resetConfirm/' + token, {}, {server: true}).
-            success(function(data) {
-
-            }).
-            error(function(err) {
-                if (err) {
-                    console.log('err: ', err);
-                }
-            });
+                success(function(data) {}).
+                error(function(err) {
+                    if (err) {
+                        console.log('err: ', err);
+                    }
+                });
         } else {
             userManager.getUser().then(function(success) {
                 createShowSplash(true);
@@ -24571,8 +24569,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
 
-      
-
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
             $scope.show.confirm = false;
@@ -24584,12 +24580,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // don't show confirm dialog for fb authenticated users
             
             console.log('SPLASH CONDITION ',condition);
-
-                console.log('facebook ',userManager._user.facebook);
-                console.log('userManager._user',userManager._user);
+            console.log('facebook ',userManager._user.facebook);
+            console.log('userManager._user',userManager._user);
 
             if (userManager._user.facebook) {
-
                 console.log(userManager._user.facebook);
 
                 $scope.show.splash = false;
