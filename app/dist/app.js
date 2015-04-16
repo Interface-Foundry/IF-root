@@ -23308,7 +23308,14 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 		});
 		}
 	});
-	
+
+	// handle marker drags
+	$scope.savePosition = function() {
+		$scope.world.loc.coordinates = [ $scope.markers.m.lng, $scope.markers.m.lat ];
+	};
+	$scope.$on('leafletDirectiveMarker.dragend', $scope.savePosition);
+
+
 	$scope.showPosition = function(lat, lng) {
 		var tempLat = lat.valueOf(),
 			tempLng = lng.valueOf();
