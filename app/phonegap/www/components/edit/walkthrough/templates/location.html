@@ -1,4 +1,7 @@
 <div ng-controller="WalkLocationController">
+
+	<!-- initial choices: current location or address -->
+	<div ng-hide="world.hasLoc">
 	<div class="walk-location-btn" ng-click="locationSearch=!locationSearch;
 											temp.MapActive=true;
 											searchByLocation()"
@@ -23,7 +26,12 @@
 			<span class="sr-only">Close</span>
 		</button>
 	</div>
-	<div class="walk-location-container" ng-show="locationSearch || addressSearch">
+	</div>
+
+
+	<!-- update/move/review your choice -->
+	<div class="walk-location-container" 
+		ng-show="locationSearch || addressSearch || world.hasLoc">
 		<div class="input-group" ng-show="addressSearch">
 			<input type="text" class="form-control" placeholder="Address or Name..."
 				ng-model="temp.address"
@@ -36,7 +44,7 @@
 							$event.stopPropagation()">Find</button>
 			</span>
 		</div>
-		<div ng-show="temp.MapActive" style="position:relative;">
+		<div ng-show="temp.MapActive || world.hasLoc" style="position:relative;">
 			<leaflet id="locMap"
 				height="172px" 
 				center="center"

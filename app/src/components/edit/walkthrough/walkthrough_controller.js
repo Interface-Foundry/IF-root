@@ -31,36 +31,36 @@ $scope.hardGo = function(path) {
 }
 
 $scope.next = function() {
-	if ($scope.position < $scope.walk.length-1) {
-		$scope.position++; 
-		//check if new position has 'jump'
-		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
-			if ($scope.walk[$scope.position].jump()) {
-				$scope.next();
+	$scope.save().then(function() {
+		if ($scope.position < $scope.walk.length-1) {
+			$scope.position++; 
+			//check if new position has 'jump'
+			if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+				if ($scope.walk[$scope.position].jump()) {
+					$scope.next();
+				}
 			}
 		}
-	}
-	$scope.save();
+	});
 }
 
 $scope.prev = function() {
-	if ($scope.position > 0) {
-		$scope.position--;
-		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
-			if ($scope.walk[$scope.position].jump()) {
-				$scope.prev();
+	$scope.save().then(function() {
+		if ($scope.position > 0) {
+			$scope.position--;
+			if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+				if ($scope.walk[$scope.position].jump()) {
+					$scope.prev();
+				}
 			}
 		}
-	}
-	$scope.save();
+	});
 }
 
 $scope.slowNext = function() {
 	$timeout(function() {
 		$scope.next();
 	}, 200);
-	// was this here for a reason?
-	//$scope.save();
 }
 
 $scope.pictureSelect = function($files) {
@@ -381,6 +381,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 									lng: -83,
 									zoom: 15}});
 	angular.extend($scope, {markers: {}});
+
 	
 	$scope.$watch('temp.MapActive', function(current, old) {
 		console.log('scopewatch');
@@ -422,7 +423,11 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 		});
 		console.log('showPosition done', $scope.locLoading);
 	}
-	
+
+	if ($scope.world.hasLoc) {
+		$scope.showPosition($scope.world.loc.coordinates[1], $scope.world.loc.coordinates[0]);
+	}
+
 	$scope.searchByAddress = function() {
 		console.log('--searchByAddress()--');
 		var geocoder = new google.maps.Geocoder();
