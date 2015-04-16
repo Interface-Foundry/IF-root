@@ -17860,8 +17860,8 @@ function locationAnalyticsService($http, $interval, analyticsService, localStore
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['$timeout', 'leafletData', '$rootScope', 'bubbleTypeService',
+		function($timeout, leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -18340,7 +18340,7 @@ mapManager.setMaxBounds = function(sWest, nEast) {
 */ 
 mapManager.setMaxBoundsFromPoint = function(point, distance) {
 	leafletData.getMap().then(function(map) {
-		setTimeout(function() {map.setMaxBounds([
+		$timeout(function() {map.setMaxBounds([
 			[point[0]-distance, point[1]-distance],
 			[point[0]+distance, point[1]+distance]
 		])}, 400);
@@ -18357,7 +18357,7 @@ function refreshMap() {
 	console.log('--refreshMap()--');
     console.log('invalidateSize() called');
     leafletData.getMap().then(function(map){
-   	 setTimeout(function(){ map.invalidateSize()}, 400);
+   	 $timeout(function(){ map.invalidateSize()}, 400);
     });
 }
 
@@ -23145,20 +23145,8 @@ $scope.saveAndExit = function() {
 
 	$scope.save();
 	if ($scope.world.id) {
-
-		// console.log('corrd');
-		// console.log($scope.world);
-		// so it goes to the right map area on exit
-		// if ($scope.world.loc){
-		// 	if($scope.world.loc.coordinates){
-		// 		console.log('asfasdf');
-		// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
-		// 	}
-		// }
-
-		$location.path("/w/"+$scope.world.id);
-		$window.location.reload();
-		map.refresh();
+		// map breaks without full page reload (for some reason)
+		$window.location.href = '/w/' + $scope.world.id;
 	} else {
 		//console
 		console.log('no world id'); 

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['$timeout', 'leafletData', '$rootScope', 'bubbleTypeService',
+		function($timeout, leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -481,7 +481,7 @@ mapManager.setMaxBounds = function(sWest, nEast) {
 */ 
 mapManager.setMaxBoundsFromPoint = function(point, distance) {
 	leafletData.getMap().then(function(map) {
-		setTimeout(function() {map.setMaxBounds([
+		$timeout(function() {map.setMaxBounds([
 			[point[0]-distance, point[1]-distance],
 			[point[0]+distance, point[1]+distance]
 		])}, 400);
@@ -498,7 +498,7 @@ function refreshMap() {
 	console.log('--refreshMap()--');
     console.log('invalidateSize() called');
     leafletData.getMap().then(function(map){
-   	 setTimeout(function(){ map.invalidateSize()}, 400);
+   	 $timeout(function(){ map.invalidateSize()}, 400);
     });
 }
 
