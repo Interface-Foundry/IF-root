@@ -27220,7 +27220,7 @@ userManager.getUser().then(function(user) {
 		$scope.user = user;
 		$scope.nick = userManager.getDisplayName();	
 	}, function(reason) {
-	dialogs.showDialog('messageAuthDialog.html');
+		dialogs.showDialog('messageAuthDialog.html');
 });
 
 
