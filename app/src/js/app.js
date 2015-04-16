@@ -198,6 +198,7 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
+                $rootScope.pageLoading = false;
             });
         }
         return original.apply($location, [path]);
