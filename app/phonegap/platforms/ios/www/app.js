@@ -4979,7 +4979,7 @@ function onDeviceReady() {
 		angular.bootstrap(document, ['IF']);
 	});
 }
-app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $timeout, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
         if (reload === false) {
@@ -4987,7 +4987,9 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
-                $rootScope.pageLoading = false;
+                $timeout(function() {
+                  $rootScope.pageLoading = false;
+                }, 0.5 * 1000);
             });
         }
         return original.apply($location, [path]);
@@ -23441,7 +23443,14 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 		});
 		}
 	});
-	
+
+	// handle marker drags
+	$scope.savePosition = function() {
+		$scope.world.loc.coordinates = [ $scope.markers.m.lng, $scope.markers.m.lat ];
+	};
+	$scope.$on('leafletDirectiveMarker.dragend', $scope.savePosition);
+
+
 	$scope.showPosition = function(lat, lng) {
 		var tempLat = lat.valueOf(),
 			tempLng = lng.valueOf();
@@ -24227,7 +24236,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             });
         } else {
             userManager.getUser().then(function(success) {
-                createShowSplash(false);
+                createShowSplash(true);
             }, function(err) {
                 createShowSplash(false);
             });
