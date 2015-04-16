@@ -26264,6 +26264,7 @@ $scope.aperture = apertureService;
 $scope.bubbleTypeService = bubbleTypeService;
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
+$scope.goToWorld = goToWorld;
 $scope.collectedPresents = [];
 
 var map = mapManager;
@@ -26286,6 +26287,10 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	$location.path('/404');
 });
+
+function goToWorld() {
+	$location.path('/w/' + $routeParams.worldURL);
+}
 
 function getLandmark(world) {
 	worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {

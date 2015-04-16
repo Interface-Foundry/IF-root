@@ -29,9 +29,8 @@
 									<span ng-show="landmark.time.end">-</span>
 									{{::landmark.time.end | date: 'h:mm a'}}
 								</h6>
-								<p>
-
-									<span ng-show="world.name"> In {{ ::world.name }}</span>
+								<p ng-show="world.name">
+									Located in<span class="u-colorLinkBlue u-pointer" ng-click="goToWorld()"> {{ ::world.name }}</span>
 								</p>
 								<p>
 									<span ng-show="landmark.loc_info.floor_num">Floor: {{::landmark.loc_info.floor_num}}</span>
