@@ -36,11 +36,13 @@ var route = function(userCoord0, userCoord1, userTime, res) {
         }],
         function(err, data) {
             if (err) return console.log(err);
-
+            console.log('hitting worlds query, there are ', data.length, ' worlds')
             if (!data) return console.log(data)
             //Remove entries with end time over one year ago...
             data.forEach(function(el) {
+                // console.log('el.time.end is', el.time.end)
                 if (el.time.end && el.time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
+                    console.log('removing old worlds' )
                     data.splice(data.indexOf(el), 1);
                 }
             })

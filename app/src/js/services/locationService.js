@@ -1,7 +1,22 @@
 angular.module('tidepoolsServices')
 
-	.factory('geoService', ['$location', '$q', '$rootScope', '$routeParams', '$timeout', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
+	.factory('locationService', ['$location', '$q', '$rootScope', '$routeParams', '$timeout', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService',
 		function($location, $q, $rootScope, $routeParams, $timeout, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService) {
+
+
+			// API is as simple as it can possibly be.
+			var locationService = {
+				getCurrentLocation: getCurrentLocation,
+				watchLocation: watchLocation
+			};
+
+			var __locationService = {
+				constants: {
+					// 
+					cacheTime: 3.24 * 60 * 1000,
+
+				}
+			}
 
 			//abstract & promisify geolocation, queue requests.
 			var geoService = {
@@ -21,12 +36,7 @@ angular.module('tidepoolsServices')
 				// @IFDEF WEB
 				cacheTime: 30 * 1000, // 30s
 				// @ENDIF
-				// @IFDEF PHONEGAP
-				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
-				// @ENDIF
-				// @IFDEF WEB
-				geoTimeout: 7 * 1000, // time before resorting to old location, or IP
-				// @ENDIF
+				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 

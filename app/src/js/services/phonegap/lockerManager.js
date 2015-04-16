@@ -54,6 +54,15 @@ lockerManager.getCredentials = function() {
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
 	
+	//clear keys
+	try {
+		console.log('attempt to wipe other keys');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
+	}
+	catch(e) {
+		console.log(e);
+	}
+
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
 	}, function(error) {
@@ -74,10 +83,29 @@ lockerManager.saveCredentials = function(username, password) {
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
+
+	//clear keys
+	try {
+		console.log('attempt to wipe other keys');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
+	}
+
+	catch(e) {
+		console.log(e);
+	}
+
+	console.log('saving token',fbToken)
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
+		console.log('SUCCESS SET FBOOK TOKEN');
+		console.log(success);
+
 		deferred.resolve(success);
 	}, function(error) {
+		console.log('ERROR SET FBOOK TOKEN');
+		console.log(error);
+		
 		deferred.reject(error);
 	},
 	'fbToken', 'Kip', fbToken);

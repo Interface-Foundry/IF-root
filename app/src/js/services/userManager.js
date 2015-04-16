@@ -2,9 +2,12 @@ angular.module('tidepoolsServices')
     .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
-   
-   
-   //deals with loading, saving, managing user info. 
+ 
+//@IFDEF PHONEGAP 
+window.handleOpenURL = function() {};
+//@ENDIF
+
+//deals with loading, saving, managing user info. 
    
 var userManager = {
 	//@IFDEF WEB
@@ -18,6 +21,7 @@ var userManager = {
 	login: {},
 	signup: {}
 }
+
 
 
 userManager.getUser = function() { //gets the user object
@@ -155,40 +159,41 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 
-
 			//@IFDEF PHONEGAP
 			
-			var data = {
-            	userId: success.authResponse.userID,
-           		accessToken: success.authResponse.accessToken 
-          	};
+				var data = {
+	            	userId: success.authResponse.userID,
+	           		accessToken: success.authResponse.accessToken 
+	          	};
 
-          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
-	            function(res){
-	   				lockerManager.saveFBToken(success.authResponse.accessToken )
-					ifGlobals.fbToken = success.authResponse.accessToken ;
-					userManager.loginStatus = true;
-					userManager.adminStatus = data.admin ? true : false;
-					ifGlobals.loginStatus = true;
-					deferred.resolve(success);
-	            },
+	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
+		            function(res){
 
-	            function(res){
-	              deferred.reject(failure);
-	            }
-          	);      
+
+		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
+		   				lockerManager.saveFBToken(fbToken);
+						ifGlobals.fbToken = fbToken;
+						
+						
+						userManager.loginStatus = true;
+						//userManager.adminStatus = data.admin ? true : false;
+						ifGlobals.loginStatus = true;
+
+						deferred.resolve(success);
+		            },
+
+		            function(res){
+		              deferred.reject(failure);
+		            }
+	          	);      
 
 			//@ENDIF
-
-
-
-
 
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
 			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-			// 	lockerManager.saveFBToken(fbToken)
+			// 	lockerManager.saveFBToken(fbToken);
 			// 	ifGlobals.fbToken = fbToken;
 			// 	deferred.resolve(success);
 			// }, function(failure) {
@@ -196,7 +201,7 @@ userManager.fbLogin = function() { //login based on facebook approval
 			// })
 		}, 
 		function(failure) {
-			alerts.addAlert('warning', "Please allow access to Facebook!", true);
+			alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
 			deferred.reject(failure);
 		})
 	
@@ -230,7 +235,9 @@ userManager.login.login = function() { //login based on login form
 		dialogs.show = false;
 		//@ENDIF
 		//@IFDEF KEYCHAIN
-		dialogs.showDialog('keychainDialog.html');
+		//dialogs.showDialog('keychainDialog.html');
+		userManager.saveToKeychain();
+		dialogs.show = false;
 		//@ENDIF
 		contest.login(new Date); // for wtgt contest
 		$route.reload();

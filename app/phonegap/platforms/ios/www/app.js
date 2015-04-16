@@ -4826,7 +4826,7 @@ var app = angular.module('IF', ['ngRoute','ngSanitize','ngAnimate','ngTouch', 'n
 
 
 var checkLoggedin = function(userManager) {
-    return userManager.checkLogin();
+  return userManager.checkLogin();
 }
 
 var checkAdminStatus = function(userManager, $location) {
@@ -4844,6 +4844,10 @@ var checkAdminStatus = function(userManager, $location) {
 
 var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
+}
+
+var setWelcome = function(welcomeService) {
+  welcomeService.needsWelcome = true;
 }
 
     //================================================
@@ -4897,7 +4901,7 @@ $routeProvider.
   when('/signup/:incoming', {templateUrl: 'components/user/signup.html', controller: 'SignupCtrl'}).
 
   when('/auth/:type', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
-  when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth'}).
+  when('/auth/:type/:callback', {templateUrl: 'components/user/loading.html', controller: 'resolveAuth', resolve: {setWelcome: setWelcome}}).
   
   when('/profile', {redirectTo:'/profile/worlds'}).
   when('/profile/:tab', {templateUrl: 'components/user/user.html', controller: 'UserController'}).
@@ -4975,7 +4979,7 @@ function onDeviceReady() {
 		angular.bootstrap(document, ['IF']);
 	});
 }
-app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $timeout, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
         if (reload === false) {
@@ -4983,6 +4987,9 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
+                $timeout(function() {
+                  $rootScope.pageLoading = false;
+                }, 0.5 * 1000);
             });
         }
         return original.apply($location, [path]);
@@ -17277,6 +17284,8 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
+				cacheTime: 3.25 * 60 * 1000, // 3.25m
+				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -17864,8 +17873,8 @@ function locationAnalyticsService($http, $interval, analyticsService, localStore
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['$timeout', 'leafletData', '$rootScope', 'bubbleTypeService',
+		function($timeout, leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -18344,7 +18353,7 @@ mapManager.setMaxBounds = function(sWest, nEast) {
 */ 
 mapManager.setMaxBoundsFromPoint = function(point, distance) {
 	leafletData.getMap().then(function(map) {
-		setTimeout(function() {map.setMaxBounds([
+		$timeout(function() {map.setMaxBounds([
 			[point[0]-distance, point[1]-distance],
 			[point[0]+distance, point[1]+distance]
 		])}, 400);
@@ -18361,7 +18370,7 @@ function refreshMap() {
 	console.log('--refreshMap()--');
     console.log('invalidateSize() called');
     leafletData.getMap().then(function(map){
-   	 setTimeout(function(){ map.invalidateSize()}, 400);
+   	 $timeout(function(){ map.invalidateSize()}, 400);
     });
 }
 
@@ -18877,6 +18886,14 @@ lockerManager.getCredentials = function() {
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
 	
+	//clear keys
+	try {
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
+	}
+	catch(e) {
+		console.log(e);
+	}
+
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
 	}, function(error) {
@@ -18897,10 +18914,28 @@ lockerManager.saveCredentials = function(username, password) {
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
+
+	//clear keys
+	try {
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
+	}
+
+	catch(e) {
+		console.log(e);
+	}
+
+	console.log('saving token',fbToken)
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
+		console.log('SUCCESS SET FBOOK TOKEN');
+		console.log(success);
+
 		deferred.resolve(success);
 	}, function(error) {
+		console.log('ERROR SET FBOOK TOKEN');
+		console.log(error);
+		
 		deferred.reject(error);
 	},
 	'fbToken', 'Kip', fbToken);
@@ -19136,9 +19171,9 @@ angular.module('tidepoolsServices')
     .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
-   
-   
-   //deals with loading, saving, managing user info. 
+ 
+window.handleOpenURL = function() {};
+//deals with loading, saving, managing user info. 
    
 var userManager = {
 	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
@@ -19147,6 +19182,7 @@ var userManager = {
 	login: {},
 	signup: {}
 }
+
 
 
 userManager.getUser = function() { //gets the user object
@@ -19269,35 +19305,37 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 
-
 			
-			
-			var data = {
-            	userId: success.authResponse.userID,
-           		accessToken: success.authResponse.accessToken 
-          	};
+				var data = {
+	            	userId: success.authResponse.userID,
+	           		accessToken: success.authResponse.accessToken 
+	          	};
 
-          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
-	            function(res){
-	   				lockerManager.saveFBToken(success.authResponse.accessToken )
-					ifGlobals.fbToken = success.authResponse.accessToken ;
+	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
+		            function(res){
 
-					userManager.loginStatus = true;
-					userManager.adminStatus = data.admin ? true : false;
-					ifGlobals.loginStatus = true;
-			
-					deferred.resolve(success);
-	            },
 
-	            function(res){
-	              deferred.reject(failure);
-	            }
-          	);      
+		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
+		   				lockerManager.saveFBToken(fbToken);
+						ifGlobals.fbToken = fbToken;
+						
+						
+						userManager.loginStatus = true;
+						//userManager.adminStatus = data.admin ? true : false;
+						ifGlobals.loginStatus = true;
+
+						deferred.resolve(success);
+		            },
+
+		            function(res){
+		              deferred.reject(failure);
+		            }
+	          	);      
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
 			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-			// 	lockerManager.saveFBToken(fbToken)
+			// 	lockerManager.saveFBToken(fbToken);
 			// 	ifGlobals.fbToken = fbToken;
 			// 	deferred.resolve(success);
 			// }, function(failure) {
@@ -19305,7 +19343,7 @@ userManager.fbLogin = function() { //login based on facebook approval
 			// })
 		}, 
 		function(failure) {
-			alerts.addAlert('warning', "Please allow access to Facebook!", true);
+			alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
 			deferred.reject(failure);
 		})
 	
@@ -19335,7 +19373,9 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.showDialog('keychainDialog.html');
+		//dialogs.showDialog('keychainDialog.html');
+		userManager.saveToKeychain();
+		dialogs.show = false;
 		contest.login(new Date); // for wtgt contest
 		$route.reload();
 	}, function (err) {
@@ -19700,33 +19740,41 @@ function getLocationInfoFromIP(deferredObj) {
 }
 
 worldTree.getNearby = function() {
-	
-	//current nearby format
-	//{150m: [worlds],
-	// 150mPast: [worlds],
-	// 2.5k: [worlds],
-	// 2.5kPast: [worlds]}
-	
+
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
 
 	var useIP = true;
-	var useIPTimeout = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
 
-		// use IP after 7s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+		// use IP after geoService.geoTimeout time if for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 		$timeout(function() {
 			if (useIP) {
-				getLocationInfoFromIP(deferred);
+				// use last known location if we have it, before resorting to IP
+				if (geoService.location.cityName && geoService.location.lat) {
+					db.worlds.query({
+						localTime: new Date(), 
+						userCoordinate: [geoService.location.lng, geoService.location.lat]
+					}, function(data) {
+						worldTree._nearby = data[0];
+						worldTree._nearby.timestamp = now;
+						deferred.resolve(data[0]);
+						
+						worldTree.cacheWorlds(data[0]['150m']);
+						worldTree.cacheWorlds(data[0]['2.5km']);
+					});
+				} else {
+					getLocationInfoFromIP(deferred);
+				}
 			}
-		}, useIPTimeout);
+		}, geoService.geoTimeout);
 
-		// cache location for 23s. wait for 7s before resorting to IP based location
-		geoService.getLocation(23*1000).then(function(location) {
+		// cache location for geoService.cacheTime. wait for geoService.geoTimeout before resorting to IP based location
+		geoService.getLocation(geoService.cacheTime).then(function(location) {
 			useIP = false;
 
 			// get city info
@@ -19782,6 +19830,14 @@ worldTree.cacheWorlds = function(worlds) {
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
 	});
+}
+
+worldTree.clearCacheWorlds = function(worlds) {
+	// if (!worlds) {return}
+	// worlds.forEach(function(world) {
+	// 	worldTree.worldCache.put(world.id, world);
+	// });
+	worldTree.landmarkCache.removeAll();
 }
 
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
@@ -23051,37 +23107,41 @@ var map = mapManager;
 $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
+$scope.hardGo = function(path) {
+	$window.location.href = path;
+}
+
 $scope.next = function() {
-	if ($scope.position < $scope.walk.length-1) {
-		$scope.position++; 
-		//check if new position has 'jump'
-		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
-			if ($scope.walk[$scope.position].jump()) {
-				$scope.next();
+	$scope.save().then(function() {
+		if ($scope.position < $scope.walk.length-1) {
+			$scope.position++; 
+			//check if new position has 'jump'
+			if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+				if ($scope.walk[$scope.position].jump()) {
+					$scope.next();
+				}
 			}
 		}
-	}
-	$scope.save();
+	});
 }
 
 $scope.prev = function() {
-	if ($scope.position > 0) {
-		$scope.position--;
-		if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
-			if ($scope.walk[$scope.position].jump()) {
-				$scope.prev();
+	$scope.save().then(function() {
+		if ($scope.position > 0) {
+			$scope.position--;
+			if ($scope.walk[$scope.position].hasOwnProperty('jump')) {
+				if ($scope.walk[$scope.position].jump()) {
+					$scope.prev();
+				}
 			}
 		}
-	}
-	$scope.save();
+	});
 }
 
 $scope.slowNext = function() {
 	$timeout(function() {
 		$scope.next();
 	}, 200);
-	// was this here for a reason?
-	//$scope.save();
 }
 
 $scope.pictureSelect = function($files) {
@@ -23152,29 +23212,15 @@ $scope.saveAndExit = function() {
 
 	$scope.save().then(function() {
 		if ($scope.world.id) {
-
-			// console.log('corrd');
-			// console.log($scope.world);
-			// so it goes to the right map area on exit
-			// if ($scope.world.loc){
-			// 	if($scope.world.loc.coordinates){
-			// 		console.log('asfasdf');
-			// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
-			// 	}
-			// }
-
-			$location.path("/w/"+$scope.world.id);
-			$window.location.reload();
-			map.refresh();
+			// map breaks without full page reload (for some reason)
+			$window.location.href = '/w/' + $scope.world.id;
 		} else {
 			//console
 			console.log('no world id'); 
 		}
 	}, function() {
 		if ($scope.world.id) {
-			$location.path("/w/" + $scope.world.id);
-			$window.location.reload();
-			map.refresh();
+			$window.location.href = '/w/' + $scope.world.id;
 		}
 	});
 }
@@ -23270,7 +23316,7 @@ var firstWalk = [
 		title: 'Maps',
 		caption: 'Choose a map',
 		view: 'maptheme.html',
-		height: 426,
+		height: 290,
 		valid: function() {return true},
 		skip: true
 	},
@@ -23278,7 +23324,7 @@ var firstWalk = [
 		title: 'Hashtag',
 		caption: 'Connect your bubble\'s social media',
 		view: 'hashtag.html',
-		height: 132,
+		height: 220,
 		valid: function() {return true},
 		skip: true,
 	},
@@ -23416,6 +23462,7 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 									lng: -83,
 									zoom: 15}});
 	angular.extend($scope, {markers: {}});
+
 	
 	$scope.$watch('temp.MapActive', function(current, old) {
 		console.log('scopewatch');
@@ -23427,7 +23474,14 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 		});
 		}
 	});
-	
+
+	// handle marker drags
+	$scope.savePosition = function() {
+		$scope.world.loc.coordinates = [ $scope.markers.m.lng, $scope.markers.m.lat ];
+	};
+	$scope.$on('leafletDirectiveMarker.dragend', $scope.savePosition);
+
+
 	$scope.showPosition = function(lat, lng) {
 		var tempLat = lat.valueOf(),
 			tempLng = lng.valueOf();
@@ -23457,7 +23511,11 @@ app.controller('WalkLocationController', ['$scope', '$rootScope', '$timeout', 'l
 		});
 		console.log('showPosition done', $scope.locLoading);
 	}
-	
+
+	if ($scope.world.hasLoc) {
+		$scope.showPosition($scope.world.loc.coordinates[1], $scope.world.loc.coordinates[0]);
+	}
+
 	$scope.searchByAddress = function() {
 		console.log('--searchByAddress()--');
 		var geocoder = new google.maps.Geocoder();
@@ -23758,6 +23816,7 @@ $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 $scope.welcomeService = welcomeService;
+$scope.init = init;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -23794,26 +23853,32 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
+$scope.refreshButton = function(){
+	$scope.loadState = 'loading';
+	worldTree.clearCacheWorlds();
+	init();
+}
+
 
 //INIT
+init();
+function init() {
+	worldTree.getNearby().then(function(data) { 
+		$scope.$evalAsync(function($scope) {
+			nearbyBubbles = data['150m'] || []; // nearby
+			aroundMeBubbles = data['2.5km'] || []; // around me
 
-
-worldTree.getNearby().then(function(data) { 
-	$scope.$evalAsync(function($scope) {
-		nearbyBubbles = data['150m'] || []; // nearby
-		aroundMeBubbles = data['2.5km'] || []; // around me
-
-		$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
-		
-		$scope.loadState = 'success';
-		// initMarkers();
+			$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
+			
+			$scope.loadState = 'success';
+			// initMarkers();
+		});
+	}, function(reason) {
+		//failure
+		console.log(reason);
+		$scope.loadState = 'failure';
 	});
-}, function(reason) {
-	//failure
-	console.log(reason);
-	$scope.loadState = 'failure';
-});
-
+}
 }]);
 app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService) {
 console.log('init controller-indexIF');
@@ -23835,7 +23900,15 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	console.log(arguments);
 	$rootScope.hideBack = false;
 	deregFirstShow();
-}))
+}));
+
+$scope.$on('$routeChangeStart', function() {
+	$rootScope.pageLoading = true;
+});
+
+$scope.$on('$routeChangeSuccess', function() {
+	$rootScope.pageLoading = false;
+});
 
 $scope.newWorld = function() {
     console.log('newWorld()');
@@ -23941,17 +24014,23 @@ $scope.fbLogin = function() {
 }
 //On Phonegap startup, try to login with either saved username/pw or facebook
 lockerManager.getCredentials().then(function(credentials) {
+
+	console.log('STARTING getCredentials()',credentials);
+
 	if (credentials.username, credentials.password) {
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
+			console.log('userManager.checkLogin() LOCAL LOGIN',success);
 			console.log(success);
 			});
 		}, function (reason) {
 			console.log('credential signin error', reason)
 		});
 	} else if (credentials.fbToken) {
+
 		ifGlobals.fbToken = credentials.fbToken;
 		userManager.checkLogin().then(function(success) {
+			console.log('userManager.checkLogin() PHONEGAP',success);
 			console.log(success);	
 		})
 	}
@@ -24050,7 +24129,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 				$location.path('/w/' + $routeParams.worldURL + '/search');
 			} else {
 				// get location. use IP if we don't have it stored
-				if (geoService.location.cityName) {
+				if (geoService.location.cityName && geoService.location.lat) {
 					var locationData = {
 						lat: geoService.location.lat,
 						lng: geoService.location.lng,
@@ -24204,6 +24283,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
 
+      
+
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
             $scope.show.confirm = false;
@@ -24213,7 +24294,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
+            
+            console.log('SPLASH CONDITION ',condition);
+
+                console.log('facebook ',userManager._user.facebook);
+                console.log('userManager._user',userManager._user);
+
             if (userManager._user.facebook) {
+
+                console.log(userManager._user.facebook);
+
                 $scope.show.splash = false;
                 $scope.show.confirm = false;
             } else {
@@ -26666,6 +26756,10 @@ $scope.localMessages = [];
 $scope.stickers = ifGlobals.stickers;
 $scope.editing = false;
 
+$scope.$on('$destroy', function() {
+	messagesService.firstScroll = true;
+});
+
 var sinceID = 'none';
 
 function scrollToBottom() {
@@ -27185,17 +27279,26 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						scope.loading = true;
 						
 						var useIP = true;
-						var useIPTimeout = 2*1000;
 
-						// use IP after 2s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+						// use IP after geoService.geoTimeout is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 						$timeout(function() {
 							if (useIP) {
-								goToLocationFromIP();
+								// use last known location if we have it, before resorting to IP
+								if (geoService.location.cityName && geoService.location.lat) {
+									$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', {
+										lat: geoService.location.lat,
+										lng: geoService.location.lng
+									});
+									scope.loading = false;
+								} else {
+									goToLocationFromIP();
+								}
 							}
-						}, useIPTimeout);
+						}, geoService.geoTimeout);
 
-						// get user's current location on every search cache of 23s and timeout of 3s
-						geoService.getLocation(23*1000).then(function(location) {
+						// get user's current location on every search cache of geoService.cacheTime and timeout of geoService.geoTimeout
+						geoService.getLocation(geoService.cacheTime).then(function(location) {
 							useIP = false;
 
 							// get city info

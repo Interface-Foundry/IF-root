@@ -11,24 +11,20 @@
 
 	<div class="fullPage-body u-centerX">
 
-		<!-- @ifdef WEB -->
-		<button class="btnMain btnMain--fb u-100X" 
+		<button class="btnMain btnMain--fb u-100X"
+			ng-show="if_web"
 			ng-click="setShowSplash('splash', false); go('auth/facebook')">
 			<img class="btnMain-img" src="img/icons/facebook_white_50.png">
 			CONNECT WITH FACEBOOK
 		</button>
-		<!-- @endif -->
 
-
-		<!-- @ifdef PHONEGAP -->
 
 		<button class="btnMain btnMain--fb u-100X" 
+			ng-show="if_phonegap"
 			ng-click="setShowSplash('splash', false); fbLogin()">
 			<img class="btnMain-img" src="img/icons/facebook_white_50.png">
 			CONNECT WITH FACEBOOK
 		</button>
-	
-		<!-- @endif -->
 
 		<div class="divider divider--short" style="top: 42px"></div>
 		<div class="divider divider--short" style="top: 40px; float: right"></div>

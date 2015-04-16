@@ -69,6 +69,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
 
+      
+
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
             $scope.show.confirm = false;
@@ -78,7 +80,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
+            
+            console.log('SPLASH CONDITION ',condition);
+
+                console.log('facebook ',userManager._user.facebook);
+                console.log('userManager._user',userManager._user);
+
             if (userManager._user.facebook) {
+
+                console.log(userManager._user.facebook);
+
                 $scope.show.splash = false;
                 $scope.show.confirm = false;
             } else {
