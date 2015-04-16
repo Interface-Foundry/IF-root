@@ -19902,17 +19902,13 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					var locationData = {
-						lat: locInfo.lat,
-						lng: locInfo.lng,
-						cityName: locInfo.cityName,
-						timestamp: Date.now()
-					};
+					location.cityName = locInfo.cityName;
+					location.timestamp = Date.now();
 
-					geoService.updateLocation(locationData);
+					geoService.updateLocation(location);
 
 					db.worlds.query({localTime: new Date(), 
-						userCoordinate: [locationData.lng, locationData.lat]},
+						userCoordinate: [location.lng, location.lat]},
 						function(data) {
 							worldTree._nearby = data[0];
 							worldTree._nearby.timestamp = now;
