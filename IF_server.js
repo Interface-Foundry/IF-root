@@ -827,26 +827,30 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                             gravity: "Center"
                         }, function(err, stdout, stderr) {
 
-                            fs.readFile(tempPath, function(err, fileData) {
+                            //AUTO-REORIENT
+                            im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+                                if (err) console.log(err)
 
-                                var s3 = new AWS.S3();
+                                fs.readFile(tempPath, function(err, fileData) {
 
-                                s3.putObject({
-                                    Bucket: 'if-server-avatar-images',
-                                    Key: awsKey,
-                                    Body: fileData,
-                                    ACL: 'public-read'
-                                }, function(err, data) {
-                                    if (err) {
-                                        console.log(err);
-                                    } else {
-                                        res.write("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
-                                        res.end();
-                                        fs.unlink(tempPath);
-                                    }
-                                });
-                            });
+                                    var s3 = new AWS.S3();
 
+                                    s3.putObject({
+                                        Bucket: 'if-server-avatar-images',
+                                        Key: awsKey,
+                                        Body: fileData,
+                                        ACL: 'public-read'
+                                    }, function(err, data) {
+                                        if (err) {
+                                            console.log(err);
+                                        } else {
+                                            res.write("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
+                                            res.end();
+                                            fs.unlink(tempPath);
+                                        }
+                                    });
+                                }); //END OF FS READFILE
+                            }) //END OF IM CONVERT
                         });
                     }
                 });
@@ -920,6 +924,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+
                             if (err) console.log(err)
 
                             fs.readFile(tempPath, function(err, fileData) {
@@ -954,6 +959,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
                                                     //Retrieve new saved contest entry ID
                                                     console.log('submitted data is..', data)
+                                                     newentryID = data._id;
                                                     res.send(data)
                                                         // res.send(data)
                                                 }); //contest entry, send to bac
@@ -974,89 +980,100 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
                                                 'image_request[locale]': 'en-US',
                                                 'image_request[language]': 'en'
+
                                             }
-                                        }
 
-                                        request.post(options, function(err, res, body) {
-                                            if (err) console.error(err);
-											try {
-												var data = JSON.parse(body);
-											} catch (e) {
-												console.error('could not parse cloudsight response');
-												console.error(body);
-											}
+                                            //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
 
-                                            var results = {
-                                                status: 'not completed'
-                                            };
-                                            var description = '';
-
-                                            var tries = 0;
-
-                                            async.whilst(
-                                                function() {
-                                                    return (results.status == 'not completed' && tries < 10);
+                                            var options = {
+                                                url: "https://api.cloudsightapi.com/image_requests",
+                                                headers: {
+                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
                                                 },
-                                                function(callback) {
+                                                qs: {
+                                                    'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                                    'image_request[locale]': 'en-US',
+                                                    'image_request[language]': 'en'
+                                                }
+                                            }
 
-                                                    var options = {
-                                                        url: "https://api.cloudsightapi.com/image_responses/" + data.token,
-                                                        headers: {
-                                                            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-                                                        }
+                                            request.post(options, function(err, res, body) {
+                                                    if (err) console.error(err);
+                                                    try {
+                                                        var data = JSON.parse(body);
+                                                    } catch (e) {
+                                                        console.error('could not parse cloudsight response');
+                                                        console.error(body);
                                                     }
 
-                                                    request(options, function(err, res, body) {
-                                                        if (err) console.error(err);
-                                                        console.log('cloudsight status is..', body)
-														try {
-															var body_parsed = JSON.parse(body);
-														} catch (e) {
-															console.error('could not parse some cloudsight api call');
-															console.error(body);
-														}
-														body = body_parsed;
-                                                        if (body.status == 'completed') {
-                                                            results.status = 'completed';
-                                                            description = body.name;
+                                                    var results = {
+                                                        status: 'not completed'
+                                                    };
+                                                    var description = '';
 
-                                                            var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                            uploadContents.description = newString;
+                                                    var tries = 0;
 
-                                                            contestEntrySchema.findOneAndUpdate({
-                                                                    _id: newentryID
-                                                                }, {
-                                                                    $push: {
-                                                                        contestTag: {
-                                                                            tag: uploadContents.description
-                                                                        }
-                                                                    }
-                                                                },
-                                                                function(err, result) {
-                                                                    if (err) console.log(err);
+                                                    async.whilst(
+                                                        function() {
+                                                            return (results.status == 'not completed' && tries < 10);
+                                                        },
+                                                        function(callback) {
+
+                                                            var options = {
+                                                                url: "https://api.cloudsightapi.com/image_responses/" + data.token,
+                                                                headers: {
+                                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                                                }
+                                                            }
+
+                                                            request(options, function(err, res, body) {
+                                                                if (err) console.error(err);
+                                                                console.log('cloudsight status is..', body)
+                                                                try {
+                                                                    var body_parsed = JSON.parse(body);
+                                                                } catch (e) {
+                                                                    console.error('could not parse some cloudsight api call');
+                                                                    console.error(body);
+                                                                }
+                                                                body = body_parsed;
+                                                                if (body.status == 'completed') {
+                                                                    results.status = 'completed';
+                                                                    description = body.name;
+
+                                                                    var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                                    uploadContents.description = newString;
+
+                                                                    contestEntrySchema.findOneAndUpdate({
+                                                                            _id: newentryID
+                                                                        }, {
+                                                                            $push: {
+                                                                                contestTag: {
+                                                                                    tag: uploadContents.description
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        function(err, result) {
+                                                                            if (err) console.log(err);
 
 
-                                                                    console.log('contest updated with cloudsight', result)
-                                                                })
+                                                                            console.log('contest updated with cloudsight', result)
+                                                                        })
 
-                                                        } //END OF BODY.STATUS COMPLETED
-                                                    })
+                                                                } //END OF BODY.STATUS COMPLETED
+                                                            })
 
-                                                    tries++;
-                                                    setTimeout(callback, 5000);
-                                                },
-                                                function(err) {
+                                                            tries++;
+                                                            setTimeout(callback, 5000);
+                                                        },
+                                                        function(err) {
 
-                                                }
-                                            );
+                                                        }); //END OF ASYNC WHILST
+                                                }) //END OF CLOUDSIGHT REQUEST
 
-
-                                        })
-
-                                    }
-                                });
-                            });
-                        })
+                                        } //END OF ELSE
+                                    }); //END OF S3 PUT OBJECT
+                                }); // END OF FS READFILE
+                            }) //END OF IM CONVERT
 
                         // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
                         //     if (err) throw err;
@@ -1420,8 +1437,8 @@ function worldMapTileUpdate(req, res, data, mapBuild) {
     try {
         var tileRes = JSON.parse(data); //incoming box coordinates
     } catch (err) {
-		console.error('could not parse world map tile update data');
-		console.error(data);
+        console.error('could not parse world map tile update data');
+        console.error(data);
         console.error(err);
     }
 
@@ -1767,13 +1784,13 @@ function findNewMeetups(meetupID, userID, callback) {
             }
             var roleArray = [];
 
-			try {
-	            var results = JSON.parse(body).results;
-			} catch (e) {
-				console.error('could not parse meetup json');
-				console.error(e);
-				console.error(body);
-			}
+            try {
+                var results = JSON.parse(body).results;
+            } catch (e) {
+                console.error('could not parse meetup json');
+                console.error(e);
+                console.error(body);
+            }
 
             //adding only groups where member has a role value (are all roles admin though?)
             async.forEach(results, function(obj, done) {
