@@ -26516,6 +26516,10 @@ $scope.localMessages = [];
 $scope.stickers = ifGlobals.stickers;
 $scope.editing = false;
 
+$scope.$on('$destroy', function() {
+	messagesService.firstScroll = true;
+});
+
 var sinceID = 'none';
 
 function scrollToBottom() {
