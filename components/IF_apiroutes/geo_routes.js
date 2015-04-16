@@ -168,6 +168,8 @@ router.get('/', function(req, res) {
                                 req.geoloc.lng = parseFloat(req.query.lng);
                             }
                             req.geoloc.src = 'mapquest';
+                            req.geoloc.lat = parseFloat(req.query.lat);
+                            req.geoloc.lng = parseFloat(req.query.lng);
                             // console.log('hitting mapquest data.address.city', data)
                             req.geoloc.cityName = data.address.city;
                         } else if (data.address.village) {
