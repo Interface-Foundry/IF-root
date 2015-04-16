@@ -227,17 +227,13 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					var locationData = {
-						lat: locInfo.lat,
-						lng: locInfo.lng,
-						cityName: locInfo.cityName,
-						timestamp: Date.now()
-					};
+					location.cityName = locInfo.cityName;
+					location.timestamp = Date.now();
 
-					geoService.updateLocation(locationData);
+					geoService.updateLocation(location);
 
 					db.worlds.query({localTime: new Date(), 
-						userCoordinate: [locationData.lng, locationData.lat]},
+						userCoordinate: [location.lng, location.lat]},
 						function(data) {
 							worldTree._nearby = data[0];
 							worldTree._nearby.timestamp = now;
@@ -269,6 +265,14 @@ worldTree.cacheWorlds = function(worlds) {
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
 	});
+}
+
+worldTree.clearCacheWorlds = function(worlds) {
+	// if (!worlds) {return}
+	// worlds.forEach(function(world) {
+	// 	worldTree.worldCache.put(world.id, world);
+	// });
+	worldTree.landmarkCache.removeAll();
 }
 
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {

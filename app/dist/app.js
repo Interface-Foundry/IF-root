@@ -17265,7 +17265,7 @@ angular.module('tidepoolsServices')
 				inProgress: false,
 				requestQueue: [],
 				cacheTime: 30 * 1000, // 30s
-				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
+				geoTimeout: 7 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -19322,11 +19322,8 @@ angular.module('tidepoolsServices')
     .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
-   
-   			window.handleOpenURL = function() {};
-
-   
-   //deals with loading, saving, managing user info. 
+ 
+//deals with loading, saving, managing user info. 
    
 var userManager = {
 	userRes: $resource('/api/updateuser'),
@@ -19905,17 +19902,13 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					var locationData = {
-						lat: locInfo.lat,
-						lng: locInfo.lng,
-						cityName: locInfo.cityName,
-						timestamp: Date.now()
-					};
+					location.cityName = locInfo.cityName;
+					location.timestamp = Date.now();
 
-					geoService.updateLocation(locationData);
+					geoService.updateLocation(location);
 
 					db.worlds.query({localTime: new Date(), 
-						userCoordinate: [locationData.lng, locationData.lat]},
+						userCoordinate: [location.lng, location.lat]},
 						function(data) {
 							worldTree._nearby = data[0];
 							worldTree._nearby.timestamp = now;
@@ -19947,6 +19940,14 @@ worldTree.cacheWorlds = function(worlds) {
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
 	});
+}
+
+worldTree.clearCacheWorlds = function(worlds) {
+	// if (!worlds) {return}
+	// worlds.forEach(function(world) {
+	// 	worldTree.worldCache.put(world.id, world);
+	// });
+	worldTree.landmarkCache.removeAll();
 }
 
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
@@ -21783,7 +21784,12 @@ scope.logout = userManager.logout;
 		templateUrl: 'components/drawer/drawer.html' 
 	}
 }])
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', 'geoService', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals, geoService) {
+
+if (geoService.mobileCheck()) {
+	dialogs.showDialog('mobileDialog.html');
+	$window.history.back();
+}
 
 var aperture = apertureService,
 	map = mapManager,
@@ -22627,8 +22633,13 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', 'geoService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService, geoService) {
 	
+if (geoService.mobileCheck()) {
+	dialogs.showDialog('mobileDialog.html');
+	$window.history.back();
+}
+
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -23185,8 +23196,8 @@ $scope.onUploadAvatar = function($files) {
 	
 }]);
 
-app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
-	
+app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', 'geoService', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs, geoService) {
+
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -23908,17 +23919,18 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
 map.resetMap();
 
+$scope.bubbles = [];
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 $scope.welcomeService = welcomeService;
-$scope.init = init;
+$scope.refresh = refresh;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -23929,6 +23941,17 @@ $scope.select = function(bubble) {
 
 $scope.go = function(path) {
 	$location.path(path);
+}
+
+function refresh() {
+	$scope.loadState = false;
+	$scope.bubbles.length = 0;
+	$timeout(function() {
+		$scope.loadState = 'loading';
+	}, 350)
+	$timeout(function() {
+		init();
+	}, 700);
 }
 
 function initMarkers() {
@@ -23953,6 +23976,12 @@ function initMarkers() {
 		}
 	});
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
+}
+
+$scope.refreshButton = function(){
+	$scope.loadState = 'loading';
+	worldTree.clearCacheWorlds();
+	init();
 }
 
 
@@ -24310,12 +24339,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var token = $location.path().slice(15);
 
             $http.post('/email/request_confirm/' + token, {}, {server: true}).
-            success(function(data) {
-                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-            }).
-            error(function(err) {
-                $scope.confirmThanksText = 'There was a problem confirming your email';
-            });
+                success(function(data) {
+                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+                }).
+                error(function(err) {
+                    $scope.confirmThanksText = 'There was a problem confirming your email';
+                });
 
             // redirect to home page
             $location.path('/');
@@ -24327,14 +24356,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var token = $location.path().slice(7);
 
             $http.post('/resetConfirm/' + token, {}, {server: true}).
-            success(function(data) {
-
-            }).
-            error(function(err) {
-                if (err) {
-                    console.log('err: ', err);
-                }
-            });
+                success(function(data) {}).
+                error(function(err) {
+                    if (err) {
+                        console.log('err: ', err);
+                    }
+                });
         } else {
             userManager.getUser().then(function(success) {
                 createShowSplash(true);
@@ -24356,7 +24383,14 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
+            
+            console.log('SPLASH CONDITION ',condition);
+            console.log('facebook ',userManager._user.facebook);
+            console.log('userManager._user',userManager._user);
+
             if (userManager._user.facebook) {
+                console.log(userManager._user.facebook);
+
                 $scope.show.splash = false;
                 $scope.show.confirm = false;
             } else {
@@ -25582,6 +25616,11 @@ $scope.newWorld = function() {
 
 $scope.go = function(url) {
 	$location.path(url);
+	// to prevent page-loading animation from running indefinitely
+	// this function emits a routeChangeStart but NOT a routeChangeSuccess
+	_.defer(function() {
+		$rootScope.pageLoading = false;
+	});
 }
 
 userManager.getUser().then(

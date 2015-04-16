@@ -1,4 +1,4 @@
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', 'geoService', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals, geoService) {
 
 //@IFDEF PHONEGAP
 dialogs.showDialog('mobileDialog.html');
@@ -6,6 +6,10 @@ $window.history.back();
 //isnt ready for mobile yet
 //@ENDIF
 
+if (geoService.mobileCheck()) {
+	dialogs.showDialog('mobileDialog.html');
+	$window.history.back();
+}
 
 var aperture = apertureService,
 	map = mapManager,
