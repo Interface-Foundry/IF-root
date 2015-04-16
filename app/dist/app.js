@@ -25626,6 +25626,11 @@ $scope.newWorld = function() {
 
 $scope.go = function(url) {
 	$location.path(url);
+	// to prevent page-loading animation from running indefinitely
+	// this function emits a routeChangeStart but NOT a routeChangeSuccess
+	_.defer(function() {
+		$rootScope.pageLoading = false;
+	});
 }
 
 userManager.getUser().then(
