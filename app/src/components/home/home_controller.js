@@ -1,14 +1,15 @@
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
 map.resetMap();
 
+$scope.bubbles = [];
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 $scope.welcomeService = welcomeService;
-$scope.init = init;
+$scope.refresh = refresh;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -19,6 +20,17 @@ $scope.select = function(bubble) {
 
 $scope.go = function(path) {
 	$location.path(path);
+}
+
+function refresh() {
+	$scope.loadState = false;
+	$scope.bubbles.length = 0;
+	$timeout(function() {
+		$scope.loadState = 'loading';
+	}, 350)
+	$timeout(function() {
+		init();
+	}, 700);
 }
 
 function initMarkers() {

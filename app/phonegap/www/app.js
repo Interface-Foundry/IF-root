@@ -19148,7 +19148,11 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
+<<<<<<< HEAD
 	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
+=======
+	userRes: $resource('https://kipapp.co/api/updateuser'),
+>>>>>>> mobile-edit
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19249,6 +19253,7 @@ userManager.signin = function(username, password) { //given a username and passw
 	
 	ifGlobals.username = username;
 	ifGlobals.password = password;
+<<<<<<< HEAD
 
 	console.log(ifGlobals.username);
 	console.log(ifGlobals.password);
@@ -19256,6 +19261,10 @@ userManager.signin = function(username, password) { //given a username and passw
 		.success(function(data) {
 			console.log('SUCCESS');
 			userManager._user = data;
+=======
+	$http.post('/api/user/login-basic', data, {server: true})
+		.success(function(data) {
+>>>>>>> mobile-edit
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
@@ -19278,11 +19287,16 @@ userManager.fbLogin = function() { //login based on facebook approval
 
 
 			
+<<<<<<< HEAD
+=======
+			
+>>>>>>> mobile-edit
 			var data = {
             	userId: success.authResponse.userID,
            		accessToken: success.authResponse.accessToken 
           	};
 
+<<<<<<< HEAD
           	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
@@ -19290,6 +19304,12 @@ userManager.fbLogin = function() { //login based on facebook approval
 					userManager.loginStatus = true;
 					userManager.adminStatus = data.admin ? true : false;
 					ifGlobals.loginStatus = true;
+=======
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+>>>>>>> mobile-edit
 					deferred.resolve(success);
 	            },
 
@@ -21630,7 +21650,15 @@ scope.logout = userManager.logout;
 		templateUrl: 'components/drawer/drawer.html' 
 	}
 }])
-app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
+app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', 'geoService', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals, geoService) {
+
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//isnt ready for mobile yet
+if (geoService.mobileCheck()) {
+	dialogs.showDialog('mobileDialog.html');
+	$window.history.back();
+}
 
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
@@ -22477,10 +22505,18 @@ World.get({id: $routeParams.worldURL}, function(data) {
 //end editcontroller
 }]);
 
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', 'geoService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService, geoService) {
 	
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
+<<<<<<< HEAD
+=======
+if (geoService.mobileCheck()) {
+	dialogs.showDialog('mobileDialog.html');
+	$window.history.back();
+}
+
+>>>>>>> mobile-edit
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -23037,10 +23073,15 @@ $scope.onUploadAvatar = function($files) {
 	
 }]);
 
+<<<<<<< HEAD
 app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
 dialogs.showDialog('mobileDialog.html');
 $window.history.back();
 	
+=======
+app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', 'geoService', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs, geoService) {
+
+>>>>>>> mobile-edit
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -23755,17 +23796,18 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
 map.resetMap();
 
+$scope.bubbles = [];
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
 $scope.welcomeService = welcomeService;
-$scope.init = init;
+$scope.refresh = refresh;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -23776,6 +23818,17 @@ $scope.select = function(bubble) {
 
 $scope.go = function(path) {
 	$location.path(path);
+}
+
+function refresh() {
+	$scope.loadState = false;
+	$scope.bubbles.length = 0;
+	$timeout(function() {
+		$scope.loadState = 'loading';
+	}, 350)
+	$timeout(function() {
+		init();
+	}, 700);
 }
 
 function initMarkers() {
