@@ -76,8 +76,14 @@ lockerManager.saveCredentials = function(username, password) {
 lockerManager.saveFBToken = function(fbToken) {
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
+		console.log('SUCCESS');
+		console.log(success);
+
 		deferred.resolve(success);
 	}, function(error) {
+		console.log('ERROR');
+		console.log(error);
+		
 		deferred.reject(error);
 	},
 	'fbToken', 'Kip', fbToken);

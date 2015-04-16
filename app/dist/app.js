@@ -19055,6 +19055,8 @@ angular.module('tidepoolsServices')
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
    
+   			window.handleOpenURL = function() {};
+
    
    //deals with loading, saving, managing user info. 
    
@@ -19065,6 +19067,7 @@ var userManager = {
 	login: {},
 	signup: {}
 }
+
 
 
 userManager.getUser = function() { //gets the user object
@@ -19180,11 +19183,10 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 
-
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
 			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-			// 	lockerManager.saveFBToken(fbToken)
+			// 	lockerManager.saveFBToken(fbToken);
 			// 	ifGlobals.fbToken = fbToken;
 			// 	deferred.resolve(success);
 			// }, function(failure) {
@@ -19192,7 +19194,7 @@ userManager.fbLogin = function() { //login based on facebook approval
 			// })
 		}, 
 		function(failure) {
-			alerts.addAlert('warning', "Please allow access to Facebook!", true);
+			alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
 			deferred.reject(failure);
 		})
 	
@@ -24058,7 +24060,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             });
         } else {
             userManager.getUser().then(function(success) {
-                createShowSplash(true);
+                createShowSplash(false);
             }, function(err) {
                 createShowSplash(false);
             });
