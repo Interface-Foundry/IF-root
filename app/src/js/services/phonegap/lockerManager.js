@@ -54,14 +54,14 @@ lockerManager.getCredentials = function() {
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
 	
-	//clear keys
-	try {
-		console.log('attempt to wipe other keys');
-		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
-	}
-	catch(e) {
-		console.log(e);
-	}
+	// //clear keys
+	// try {
+	// 	console.log('attempt to wipe other keys');
+	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
+	// }
+	// catch(e) {
+	// 	console.log(e);
+	// }
 
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
@@ -84,16 +84,16 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-	//clear keys
-	try {
-		console.log('attempt to wipe other keys');
-		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
-		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
-	}
+	// //clear keys
+	// try {
+	// 	console.log('attempt to wipe other keys');
+	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
+	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
+	// }
 
-	catch(e) {
-		console.log(e);
-	}
+	// catch(e) {
+	// 	console.log(e);
+	// }
 
 	console.log('saving token',fbToken)
 	var deferred = $q.defer();

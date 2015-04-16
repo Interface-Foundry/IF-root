@@ -19489,6 +19489,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
+
 		dialogs.show = false;
 		contest.login(new Date); // for wtgt contest
 		$route.reload();
@@ -24411,7 +24412,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
-            $scope.show.splash = true;
+            $scope.show.splash = false;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
         }

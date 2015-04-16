@@ -100,7 +100,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
-            $scope.show.splash = true;
+            $scope.show.splash = false;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
         }
