@@ -11,7 +11,7 @@ var userManager = {
 	userRes: $resource('/api/updateuser'),
 	//@ENDIF
 	//@IFDEF PHONEGAP
-	userRes: $resource('https://kipapp.co/api/updateuser'),
+	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
 	//@ENDIF
 	adminStatus: false,
 	loginStatus: false,
@@ -159,7 +159,7 @@ userManager.fbLogin = function() { //login based on facebook approval
            		accessToken: success.authResponse.accessToken 
           	};
 
-          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
+          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
