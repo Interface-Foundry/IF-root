@@ -26110,6 +26110,7 @@ function hideContentService(mapManager) {
 		splash.append(img);
 		_.defer(function() {
 			img.classList.add('splash-fade-in');
+			cb();
 		});
 
 		// zoom map way out
@@ -27718,8 +27719,12 @@ $scope.uploadWTGT = function($files, hashtag) {
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
-		hideContentService.hide();
-		$scope.hide = true;
+		$timeout(function() {
+			hideContentService.hide(function() {
+				$scope.$apply();
+			});
+			$scope.hide = true;
+		}, 500);
 		return;
 	}
 
