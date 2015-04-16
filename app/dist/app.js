@@ -4967,7 +4967,13 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
         }
         return original.apply($location, [path]);
     };
-}])
+}]);
+
+
+  app.run(function() {
+      FastClick.attach(document.body);
+  });
+
 
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
@@ -24664,7 +24670,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 	var style = styleManager;
 
-	style.navBG_color = "#3d66ca";
+	style.navBG_color = "#ed4023";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);

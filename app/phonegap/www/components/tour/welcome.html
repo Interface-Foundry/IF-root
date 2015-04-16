@@ -1,81 +1,50 @@
-<div class="wrap">
+<div class="wrap" style="background-color:#fff;">
 <ul class="tour">
 
-	<li class="tour-page">
-		<div class="tour-panel container-fluid">
-			<img if-src="../img/kip/kipLogo.svg" style="max-width:100%;">
+	<li class="tour-page small-tour-page" >
+
+		<div class="container-fluid tour-panel">
+
+			<div class="row">
+				<img src="img/kip/kipLogo.svg" style="max-width:40%; margin-left:-31px;">
+			</div>
+
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="tour-features center-block" style="padding-top:31px;">
+						<h1>For every part of your life.</h1>
+						<small>Use Kip to create data bubbles: for your home, shopping, events, and public spaces. Personalize your bubbles and share them with friends.</small>
+					</div>
+				</div>
+			</div>
+			<br><br>
+			<div class="row">
+				<div class="col-xs-4" style="cursor:pointer;">
+                           <img class="centered" src="img/stickers/were_here.png">
+                            <h5 class="section-title">Real People</h5>
+                            <p>Find others like you by creating new hot spots and events. Drop a pin, add some notes and put a time to meet up. Kip makes it easy to create and share with others.</p>
+				</div>
+				<div class="col-xs-4" style="cursor:pointer;">
+           <img class="centered" src="img/stickers/im_here.png">
+                            <h5 class="section-title">Real Places</h5>
+                            <p>Want those cool shoes you saw on the street?  Kip lets you search within malls, pulling up a directory to look through different brands to find exactly what you want.</p>
+				</div>
+				<div class="col-xs-4" style="cursor:pointer;">
+      <img class="centered" src="img/stickers/interesting.png">
+                            <h5 class="section-title">Real Time</h5>
+                            <p> From the best shopping deals to that hot new club, Kip will give you the inside scoop about what’s happening around you with real time updates based on where, when and what you're doing. 
+				</div>
+			</div>
 		</div>
 	</li>
 
-    <div class="container">
-        <div class="large margin">
-            <h1 class="section-title">
-                For every part of your life.
-                <small>
-                    Use Kip to create data bubbles: for your home, shopping, events, and public spaces.<br class="hidden-on-phones">Personalize your bubbles and share them with friends.
-                </small>
-            </h1>
-
-        </div>
-
-        <div class="large margin">
-
-            <div class="description grid">
-                    <div class="tablet-6 desktop-4">
-                        <div class="description object">
-                            <img class="centered" if-src="../img/stickers/were_here.png">
-                            <h5 class="section-title">Real People</h5>
-                            <p>Find others like you by creating new hot spots and events. Drop a pin, add some notes and put a time to meet up. Kip makes it easy to create and share with others.</p>
-                        </div>
-                    </div>
-                    <div class="tablet-6 desktop-4">
-                        <div class="description object">
-                            <img class="centered" if-src="../img/stickers/im_here.png">
-                            <h5 class="section-title">Real Places</h5>
-                            <p>Want those cool shoes you saw on the street?  Kip lets you search within malls, pulling up a directory to look through different brands to find exactly what you want.</p>
-                        </div>
-                    </div>
-                    <div class="tablet-6 desktop-4">
-                        <div class="description object">
-                            <img class="centered" if-src="../img/stickers/interesting.png">
-                            <h5 class="section-title">Real Time</h5>
-                            <p> From the best shopping deals to that hot new club, Kip will give you the inside scoop about what’s happening around you with real time updates based on where, when and what you . 
-                        </div>
-                    </div>
-             </div><!-- .grid -->       
-        </div><!-- .large margin -->
-
-    </div><!-- .container -->
-
-    <div id="personality" class="background-image section">
-
-        <div class="container">
-
-            <div class="large margin">
-
-                <h1 class="section-title">
-                    With Kip, the world revolves around you.
-                    <small>
-                        Your work, home, and social life<br class="hidden-on-phones">
-                        all in one place.
-                    </small>
-                </h1>
-                <img class="centered" src="assets/img/slide_walk.gif">
-
-            </div>
-
-            
-        </div><!-- .container -->
-
-    </div><!-- .section -->
 
 
-
-
-	<li class="tour-page small-tour-page" >
+	<li class="tour-page small-tour-page">
 		<div class="container-fluid tour-panel" style="margin-top:21px;">
 			<div class="row">
 				<div class="col-xs-12">
+					<br><br>
 					<div class="tour-features center-block" style="padding-top:31px;">
 						<h1>Built with Kip</h1>
 						<h4>Bubbles used by thousands through our platform</h4>
@@ -106,14 +75,35 @@
 		</div>
 	</li>
 
+
+	<li class="tour-page small-tour-page" >
+		<div class="container-fluid tour-panel" style="margin-top:21px;">
+			<div class="row">
+				<div class="col-xs-12">
+					<div class="tour-features center-block" style="padding-top:31px;">
+						<h1>With Kip, the world revolves around you.</h1>
+						<small>Your work, home, and social life all in one place.</small>
+					</div>
+				</div>
+			</div>
+			<br>
+			<img class="centered" src="img/tour/slide_walk.gif">
+		</div>
+	</li>
+
+
 	<li class="tour-page">
 		<div class="tour-panel container-fluid">
-			<img src="img/tour/bubblli_logo.svg" style="max-width:100%;">
-			<br>
-			<h4>Use Kip at your next event to help bring everyone together and get the conversation going!</h4>
-			<button ng-click="openSignup()" class="btn btn-lg btn-primary btn-signup-tour center-block">Sign Up</button>
+			
+			<!-- Feedback -->
+			<div class="marble-contain-width">
+				<a class="btn btn-default" href="#" ng-click="dialog.showDialog('feedbackDialog.html')">
+					<span class="glyphicon glyphicon-pencil"></span> or Send Us Feedback
+				</a>
+			</div>
 
-			<p><strong>Questions?</strong> Email us at <a href="mailto:hello@interfacefoundry.com">hello@interfacefoundry.com</a>
+			<p><strong>Questions?</strong> Email Us At <a href="mailto:hello@interfacefoundry.com">hello@interfacefoundry.com</a>
+
 		</div>
 		<div class="tour-credits">
 			<b>Kip</b> is a product of 

@@ -4988,7 +4988,13 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
         }
         return original.apply($location, [path]);
     };
-}])
+}]);
+
+
+  app.run(function() {
+      FastClick.attach(document.body);
+  });
+
 
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
@@ -17678,6 +17684,15 @@ angular.module('tidepoolsServices')
 app.factory('localStore', ['$http', '$q', function($http, $q) {
 	
 	var hasLocalStorage = (typeof localStorage !== 'undefined');
+
+	// aaaand another check just to make absolutely sure they have local storage
+	if (hasLocalStorage) {
+		try {
+			localStorage.author = "interfacefoundry.com ♥ ♥ ♥";
+		} catch (e) {
+			hasLocalStorage = false;
+		}
+	}
 	
 	var id; // id for when the user doesn't have localStorage
 
@@ -24799,7 +24814,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 	var style = styleManager;
 
-	style.navBG_color = "#3d66ca";
+	style.navBG_color = "#ed4023";
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);

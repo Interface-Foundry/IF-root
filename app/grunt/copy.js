@@ -5,6 +5,7 @@ module.exports = {
 			{expand: true, cwd: 'src/', src: ['partials/**'], dest: 'dist/'},
 			{expand: true, cwd: 'src/', src: ['fonts/**'], dest: 'dist/'},
 			{expand: true, cwd: 'src/', src: ['components/**', '!**/*.js'], dest: 'dist/'},
+			{expand: true, cwd: 'src/', src: ['fastclick/**'], dest: 'dist/'},
 			{expand: true, flatten: true, cwd: 'src/', src: ['js/directives/templates/*'], dest: 'dist/templates'}
 			]
 		},
@@ -14,6 +15,7 @@ module.exports = {
 			{expand: true, cwd: 'src/', src: ['partials/**'], dest: 'phonegap/www/'},
 			{expand: true, cwd: 'src/', src: ['fonts/**'], dest: 'phonegap/www/'},
 			{expand: true, cwd: 'src/', src: ['components/**', '!**/*.js'], dest: 'phonegap/www/'},
+			{expand: true, cwd: 'src/', src: ['fastclick/**'], dest: 'phonegap/www/'},
 			{expand: true, flatten: true, cwd: 'src/', src: ['js/directives/templates/*'], dest: 'phonegap/www/templates'}
 			]
 		}

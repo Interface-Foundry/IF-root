@@ -199,4 +199,10 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
         }
         return original.apply($location, [path]);
     };
-}])
+}]);
+
+
+  app.run(function() {
+      FastClick.attach(document.body);
+  });
+
