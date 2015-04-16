@@ -45,6 +45,12 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
+$scope.refreshButton = function(){
+	$scope.loadState = 'loading';
+	worldTree.clearCacheWorlds();
+	init();
+}
+
 
 //INIT
 init();

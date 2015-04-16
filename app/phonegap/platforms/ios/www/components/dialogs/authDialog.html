@@ -24,6 +24,12 @@
 		</div>
 		<!-- @endif -->
 
+		<!-- @ifdef PHONEGAP -->
+	
+		<button type="button" class="btn fb-btn" ng-click="fbLogin()"><img if-src="img/icons/facebook-16.png" width="16px" height="16px"> Connect with Facebook</button>
+
+		<!-- @endif -->
+		
 		<div ng-if="userManager.login.error">
 			Login failed!
 		</div>

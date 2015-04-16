@@ -2,11 +2,12 @@ angular.module('tidepoolsServices')
     .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
-   
-   			window.handleOpenURL = function() {};
+ 
+//@IFDEF PHONEGAP 
+window.handleOpenURL = function() {};
+//@ENDIF
 
-   
-   //deals with loading, saving, managing user info. 
+//deals with loading, saving, managing user info. 
    
 var userManager = {
 	//@IFDEF WEB
@@ -167,12 +168,15 @@ userManager.fbLogin = function() { //login based on facebook approval
 
 	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
 		            function(res){
-		   				lockerManager.saveFBToken(success.authResponse.accessToken);
-						ifGlobals.fbToken = success.authResponse.accessToken;
-						lockerManager.saveFBToken(fbToken);
+
+
+		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
+		   				lockerManager.saveFBToken(fbToken);
+						ifGlobals.fbToken = fbToken;
+						
 						
 						userManager.loginStatus = true;
-						userManager.adminStatus = data.admin ? true : false;
+						//userManager.adminStatus = data.admin ? true : false;
 						ifGlobals.loginStatus = true;
 
 						deferred.resolve(success);
@@ -231,7 +235,9 @@ userManager.login.login = function() { //login based on login form
 		dialogs.show = false;
 		//@ENDIF
 		//@IFDEF KEYCHAIN
-		dialogs.showDialog('keychainDialog.html');
+		//dialogs.showDialog('keychainDialog.html');
+		userManager.saveToKeychain();
+		dialogs.show = false;
 		//@ENDIF
 		contest.login(new Date); // for wtgt contest
 		$route.reload();

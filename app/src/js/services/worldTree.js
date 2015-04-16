@@ -271,6 +271,14 @@ worldTree.cacheWorlds = function(worlds) {
 	});
 }
 
+worldTree.clearCacheWorlds = function(worlds) {
+	// if (!worlds) {return}
+	// worlds.forEach(function(world) {
+	// 	worldTree.worldCache.put(world.id, world);
+	// });
+	worldTree.landmarkCache.removeAll();
+}
+
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
 	var worldSubmissions = worldTree.submissionCache.get(worldId) || {};
 	worldSubmissions[hashtag] = {

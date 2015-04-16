@@ -17285,7 +17285,7 @@ angular.module('tidepoolsServices')
 				inProgress: false,
 				requestQueue: [],
 				cacheTime: 3.25 * 60 * 1000, // 3.25m
-				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
+				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -18886,6 +18886,14 @@ lockerManager.getCredentials = function() {
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
 	
+	//clear keys
+	try {
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
+	}
+	catch(e) {
+		console.log(e);
+	}
+
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
 	}, function(error) {
@@ -18906,14 +18914,26 @@ lockerManager.saveCredentials = function(username, password) {
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
+
+	//clear keys
+	try {
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
+	}
+
+	catch(e) {
+		console.log(e);
+	}
+
+	console.log('saving token',fbToken)
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
-		console.log('SUCCESS');
+		console.log('SUCCESS SET FBOOK TOKEN');
 		console.log(success);
 
 		deferred.resolve(success);
 	}, function(error) {
-		console.log('ERROR');
+		console.log('ERROR SET FBOOK TOKEN');
 		console.log(error);
 		
 		deferred.reject(error);
@@ -19151,11 +19171,9 @@ angular.module('tidepoolsServices')
     .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
-   
-   			window.handleOpenURL = function() {};
-
-   
-   //deals with loading, saving, managing user info. 
+ 
+window.handleOpenURL = function() {};
+//deals with loading, saving, managing user info. 
    
 var userManager = {
 	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
@@ -19295,12 +19313,15 @@ userManager.fbLogin = function() { //login based on facebook approval
 
 	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
 		            function(res){
-		   				lockerManager.saveFBToken(success.authResponse.accessToken);
-						ifGlobals.fbToken = success.authResponse.accessToken;
-						lockerManager.saveFBToken(fbToken);
+
+
+		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
+		   				lockerManager.saveFBToken(fbToken);
+						ifGlobals.fbToken = fbToken;
+						
 						
 						userManager.loginStatus = true;
-						userManager.adminStatus = data.admin ? true : false;
+						//userManager.adminStatus = data.admin ? true : false;
 						ifGlobals.loginStatus = true;
 
 						deferred.resolve(success);
@@ -19352,7 +19373,9 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.showDialog('keychainDialog.html');
+		//dialogs.showDialog('keychainDialog.html');
+		userManager.saveToKeychain();
+		dialogs.show = false;
 		contest.login(new Date); // for wtgt contest
 		$route.reload();
 	}, function (err) {
@@ -19807,6 +19830,14 @@ worldTree.cacheWorlds = function(worlds) {
 	worlds.forEach(function(world) {
 		worldTree.worldCache.put(world.id, world);
 	});
+}
+
+worldTree.clearCacheWorlds = function(worlds) {
+	// if (!worlds) {return}
+	// worlds.forEach(function(world) {
+	// 	worldTree.worldCache.put(world.id, world);
+	// });
+	worldTree.landmarkCache.removeAll();
 }
 
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
@@ -23822,6 +23853,12 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
+$scope.refreshButton = function(){
+	$scope.loadState = 'loading';
+	worldTree.clearCacheWorlds();
+	init();
+}
+
 
 //INIT
 init();
@@ -24246,6 +24283,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
 
+      
+
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
             $scope.show.confirm = false;
@@ -24255,7 +24294,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
+            
+            console.log('SPLASH CONDITION ',condition);
+
+                console.log('facebook ',userManager._user.facebook);
+                console.log('userManager._user',userManager._user);
+
             if (userManager._user.facebook) {
+
+                console.log(userManager._user.facebook);
+
                 $scope.show.splash = false;
                 $scope.show.confirm = false;
             } else {

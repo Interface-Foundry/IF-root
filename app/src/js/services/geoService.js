@@ -21,7 +21,12 @@ angular.module('tidepoolsServices')
 				// @IFDEF WEB
 				cacheTime: 30 * 1000, // 30s
 				// @ENDIF
-				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
+				// @IFDEF PHONEGAP
+				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
+				// @ENDIF
+				// @IFDEF WEB
+				geoTimeout: 7 * 1000, // time before resorting to old location, or IP
+				// @ENDIF
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
