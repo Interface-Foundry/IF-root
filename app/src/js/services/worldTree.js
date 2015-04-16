@@ -179,33 +179,41 @@ function getLocationInfoFromIP(deferredObj) {
 }
 
 worldTree.getNearby = function() {
-	
-	//current nearby format
-	//{150m: [worlds],
-	// 150mPast: [worlds],
-	// 2.5k: [worlds],
-	// 2.5kPast: [worlds]}
-	
+
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
 
 	var useIP = true;
-	var useIPTimeout = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
 
-		// use IP after 7s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+		// use IP after geoService.geoTimeout time if for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 		$timeout(function() {
 			if (useIP) {
-				getLocationInfoFromIP(deferred);
+				// use last known location if we have it, before resorting to IP
+				if (geoService.location.cityName && geoService.location.lat) {
+					db.worlds.query({
+						localTime: new Date(), 
+						userCoordinate: [geoService.location.lng, geoService.location.lat]
+					}, function(data) {
+						worldTree._nearby = data[0];
+						worldTree._nearby.timestamp = now;
+						deferred.resolve(data[0]);
+						
+						worldTree.cacheWorlds(data[0]['150m']);
+						worldTree.cacheWorlds(data[0]['2.5km']);
+					});
+				} else {
+					getLocationInfoFromIP(deferred);
+				}
 			}
-		}, useIPTimeout);
+		}, geoService.geoTimeout);
 
-		// cache location for 23s. wait for 7s before resorting to IP based location
-		geoService.getLocation(23*1000).then(function(location) {
+		// cache location for geoService.cacheTime. wait for geoService.geoTimeout before resorting to IP based location
+		geoService.getLocation(geoService.cacheTime).then(function(location) {
 			useIP = false;
 
 			// get city info

@@ -118,17 +118,26 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						scope.loading = true;
 						
 						var useIP = true;
-						var useIPTimeout = 2*1000;
 
-						// use IP after 2s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+						// use IP after geoService.geoTimeout is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 						$timeout(function() {
 							if (useIP) {
-								goToLocationFromIP();
+								// use last known location if we have it, before resorting to IP
+								if (geoService.location.cityName && geoService.location.lat) {
+									$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', {
+										lat: geoService.location.lat,
+										lng: geoService.location.lng
+									});
+									scope.loading = false;
+								} else {
+									goToLocationFromIP();
+								}
 							}
-						}, useIPTimeout);
+						}, geoService.geoTimeout);
 
-						// get user's current location on every search cache of 23s and timeout of 3s
-						geoService.getLocation(23*1000).then(function(location) {
+						// get user's current location on every search cache of geoService.cacheTime and timeout of geoService.geoTimeout
+						geoService.getLocation(geoService.cacheTime).then(function(location) {
 							useIP = false;
 
 							// get city info

@@ -4854,6 +4854,15 @@ var updateTitle = function($rootScope) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
+	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
+		    			request.url = 'https://kipapp.co' + request.url;
+		    			if (ifGlobals.username&&ifGlobals.password) {
+							request.headers['Authorization'] = ifGlobals.getBasicHeader();
+							//console.log(request);
+						} else if (ifGlobals.fbToken) {
+							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
+						}
+	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -4932,9 +4941,6 @@ $routeProvider.
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       
-$locationProvider.html5Mode({
-	enabled: true
-});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -4944,16 +4950,31 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
-	userManager.checkLogin();
 	
 	
+	navigator.splashscreen.hide();
 	
+/*
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+*/
 });
 
-angular.element(document).ready(function() {
-	angular.bootstrap(document, ['IF']);
-
-});
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
 app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5355,7 +5376,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 4;
+					var topOffset = 19;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5719,10 +5740,6 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
-			var firstHash = value.indexOf('#');
-			if (firstHash > -1) {
-				value = value.slice(0, firstHash) + value.slice(firstHash+1);
-			}
 			$attr.$set('href', value);
 			
 			});
@@ -5741,6 +5758,9 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
+				if (value.indexOf('http')<0) {
+					value = 'https://kipapp.co/'+value;
+				}
 				
 				$attr.$set('src', value);
 			
@@ -17251,6 +17271,8 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
+				cacheTime: 3.25 * 60 * 1000, // 3.25m
+				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -18811,8 +18833,77 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: false
+	supported: true,
+	keychain: new Keychain()
 }
+
+//getCredentials returns a promise->map of the available credentials. 
+//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+//	because all will return rejected if you do.
+
+lockerManager.getCredentials = function() {
+	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
+	
+	lockerManager.keychain.getForKey(function(value) {
+		username.resolve(value);
+	}, function(error) {
+		username.resolve(undefined);
+		console.log(error);
+	}, 'username', 'Kip');
+
+	lockerManager.keychain.getForKey(function(value) {
+		password.resolve(value);
+	}, function(error) {
+		password.resolve(undefined);
+		console.log(error);
+	}, 'password', 'Kip');
+	
+	lockerManager.keychain.getForKey(function(value) {
+		fbToken.resolve(value);
+	}, function(error) {
+		fbToken.resolve(undefined);
+		console.log(error);
+	}, 'fbToken', 'Kip');
+	
+	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
+}
+
+//saves username and password. Should be changed to use a map instead of args?
+
+lockerManager.saveCredentials = function(username, password) {
+	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
+	
+	lockerManager.keychain.setForKey(function(success) {
+		usernameSuccess.resolve(success);
+	}, function(error) {
+		usernameSuccess.reject(error);
+	},
+	'username', 'Kip', username);
+	
+	lockerManager.keychain.setForKey(function(success) {
+		passwordSuccess.resolve(success);
+	}, function(error) {
+		passwordSuccess.reject(error);
+	},
+	'password', 'Kip', password);
+	
+	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
+
+//saves the FB token
+lockerManager.saveFBToken = function(fbToken) {
+	var deferred = $q.defer();
+	lockerManager.keychain.setForKey(function(success) {
+		deferred.resolve(success);
+	}, function(error) {
+		deferred.reject(error);
+	},
+	'fbToken', 'Kip', fbToken);
+	
+	return deferred;
+}
+
 	 
 return lockerManager;
 	   
@@ -19046,7 +19137,7 @@ var alerts = alertManager;
    //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('/api/updateuser'),
+	userRes: $resource('https://kipapp.co/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19144,18 +19235,20 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	$http.post('/api/user/login', data, {server: true})
+	
+	ifGlobals.username = username;
+	ifGlobals.password = password;
+	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
-			userManager._user = data;
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
+			ifGlobals.loginStatus = true;
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
-	
 	
 	return deferred.promise;
 }
@@ -19167,6 +19260,25 @@ userManager.fbLogin = function() { //login based on facebook approval
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
 
+
+			
+			
+			var data = {
+            	userId: success.authResponse.userID,
+           		accessToken: success.authResponse.accessToken 
+          	};
+
+          	$http.post('https://kipapp.co/auth/facebook/mobile_sigin', data, {server: true}).then(
+	            function(res){
+	   				lockerManager.saveFBToken(success.authResponse.accessToken )
+					ifGlobals.fbToken = success.authResponse.accessToken ;
+					deferred.resolve(success);
+	            },
+
+	            function(res){
+	              deferred.reject(failure);
+	            }
+          	);      
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
@@ -19209,7 +19321,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
-		dialogs.show = false;
+		dialogs.showDialog('keychainDialog.html');
 		contest.login(new Date); // for wtgt contest
 		$route.reload();
 	}, function (err) {
@@ -19574,33 +19686,41 @@ function getLocationInfoFromIP(deferredObj) {
 }
 
 worldTree.getNearby = function() {
-	
-	//current nearby format
-	//{150m: [worlds],
-	// 150mPast: [worlds],
-	// 2.5k: [worlds],
-	// 2.5kPast: [worlds]}
-	
+
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
 
 	var useIP = true;
-	var useIPTimeout = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
 
-		// use IP after 7s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+		// use IP after geoService.geoTimeout time if for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 		$timeout(function() {
 			if (useIP) {
-				getLocationInfoFromIP(deferred);
+				// use last known location if we have it, before resorting to IP
+				if (geoService.location.cityName && geoService.location.lat) {
+					db.worlds.query({
+						localTime: new Date(), 
+						userCoordinate: [geoService.location.lng, geoService.location.lat]
+					}, function(data) {
+						worldTree._nearby = data[0];
+						worldTree._nearby.timestamp = now;
+						deferred.resolve(data[0]);
+						
+						worldTree.cacheWorlds(data[0]['150m']);
+						worldTree.cacheWorlds(data[0]['2.5km']);
+					});
+				} else {
+					getLocationInfoFromIP(deferred);
+				}
 			}
-		}, useIPTimeout);
+		}, geoService.geoTimeout);
 
-		// cache location for 23s. wait for 7s before resorting to IP based location
-		geoService.getLocation(23*1000).then(function(location) {
+		// cache location for geoService.cacheTime. wait for geoService.geoTimeout before resorting to IP based location
+		geoService.getLocation(geoService.cacheTime).then(function(location) {
 			useIP = false;
 
 			// get city info
@@ -21494,6 +21614,9 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals) {
 
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//isnt ready for mobile yet
 var aperture = apertureService,
 	map = mapManager,
 	style = styleManager,
@@ -22338,6 +22461,8 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService) {
 	
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
 ////////////////////////////////////////////////////////////
@@ -22895,6 +23020,8 @@ $scope.onUploadAvatar = function($files) {
 }]);
 
 app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -23785,6 +23912,34 @@ $scope.share = function(platform) {
   );
 };
 
+$scope.fbLogin = function() {
+	userManager.fbLogin().then(
+		function (success) {
+			console.log(success);
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
+		})
+}
+//On Phonegap startup, try to login with either saved username/pw or facebook
+lockerManager.getCredentials().then(function(credentials) {
+	if (credentials.username, credentials.password) {
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
+			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
+		});
+	} else if (credentials.fbToken) {
+		ifGlobals.fbToken = credentials.fbToken;
+		userManager.checkLogin().then(function(success) {
+			console.log(success);	
+		})
+	}
+}, function(err) {
+	console.log('credential error', error); 
+});
 }]);
 
 // DEPRACATED
@@ -23877,7 +24032,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 				$location.path('/w/' + $routeParams.worldURL + '/search');
 			} else {
 				// get location. use IP if we don't have it stored
-				if (geoService.location.cityName) {
+				if (geoService.location.cityName && geoService.location.lat) {
 					var locationData = {
 						lat: geoService.location.lat,
 						lng: geoService.location.lng,
@@ -24056,7 +24211,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
         }
 
-        $scope.show.close = true; // only show close button (home, not confirm) on web
         $scope.show.signin = false;
         $scope.show.register = false;
     }
@@ -27000,17 +27154,26 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						scope.loading = true;
 						
 						var useIP = true;
-						var useIPTimeout = 2*1000;
 
-						// use IP after 2s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+						// use IP after geoService.geoTimeout is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 						$timeout(function() {
 							if (useIP) {
-								goToLocationFromIP();
+								// use last known location if we have it, before resorting to IP
+								if (geoService.location.cityName && geoService.location.lat) {
+									$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', {
+										lat: geoService.location.lat,
+										lng: geoService.location.lng
+									});
+									scope.loading = false;
+								} else {
+									goToLocationFromIP();
+								}
 							}
-						}, useIPTimeout);
+						}, geoService.geoTimeout);
 
-						// get user's current location on every search cache of 23s and timeout of 3s
-						geoService.getLocation(23*1000).then(function(location) {
+						// get user's current location on every search cache of geoService.cacheTime and timeout of geoService.geoTimeout
+						geoService.getLocation(geoService.cacheTime).then(function(location) {
 							useIP = false;
 
 							// get city info
@@ -27279,10 +27442,6 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
-		var firstHash = url.indexOf('#');
-		if (firstHash > -1) {
-			return url.slice(0, firstHash) + url.slice(firstHash+1);
-		} else {return url}
 		return url;
 	}
 }

@@ -33,7 +33,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 				$location.path('/w/' + $routeParams.worldURL + '/search');
 			} else {
 				// get location. use IP if we don't have it stored
-				if (geoService.location.cityName) {
+				if (geoService.location.cityName && geoService.location.lat) {
 					var locationData = {
 						lat: geoService.location.lat,
 						lng: geoService.location.lng,

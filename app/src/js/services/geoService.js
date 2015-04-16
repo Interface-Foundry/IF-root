@@ -15,6 +15,13 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
+				// @IFDEF PHONEGAP
+				cacheTime: 3.25 * 60 * 1000, // 3.25m
+				// @ENDIF
+				// @IFDEF WEB
+				cacheTime: 30 * 1000, // 30s
+				// @ENDIF
+				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
