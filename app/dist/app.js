@@ -4958,7 +4958,7 @@ angular.element(document).ready(function() {
 	angular.bootstrap(document, ['IF']);
 
 });
-app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $timeout, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
         if (reload === false) {
@@ -4966,7 +4966,9 @@ app.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $loc
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
-                $rootScope.pageLoading = false;
+                $timeout(function() {
+                  $rootScope.pageLoading = false;
+                }, 0.5 * 1000);
             });
         }
         return original.apply($location, [path]);
