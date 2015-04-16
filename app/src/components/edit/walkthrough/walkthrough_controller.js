@@ -26,6 +26,10 @@ var map = mapManager;
 $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
+$scope.hardGo = function(path) {
+	$window.location.href = path;
+}
+
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
 		$scope.position++; 
