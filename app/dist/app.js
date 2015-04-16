@@ -22894,7 +22894,7 @@ $scope.onUploadAvatar = function($files) {
 	
 }]);
 
-app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -22947,7 +22947,8 @@ $scope.slowNext = function() {
 	$timeout(function() {
 		$scope.next();
 	}, 200);
-	$scope.save();
+	// was this here for a reason?
+	//$scope.save();
 }
 
 $scope.pictureSelect = function($files) {
@@ -23016,53 +23017,70 @@ $scope.saveAndExit = function() {
 		$scope.world.name = "bubble";
 	}
 
-	$scope.save();
-	if ($scope.world.id) {
+	$scope.save().then(function() {
+		if ($scope.world.id) {
 
-		// console.log('corrd');
-		// console.log($scope.world);
-		// so it goes to the right map area on exit
-		// if ($scope.world.loc){
-		// 	if($scope.world.loc.coordinates){
-		// 		console.log('asfasdf');
-		// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
-		// 	}
-		// }
+			// console.log('corrd');
+			// console.log($scope.world);
+			// so it goes to the right map area on exit
+			// if ($scope.world.loc){
+			// 	if($scope.world.loc.coordinates){
+			// 		console.log('asfasdf');
+			// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
+			// 	}
+			// }
 
-		$location.path("/w/"+$scope.world.id);
-		$window.location.reload();
-		map.refresh();
-	} else {
-		//console
-		console.log('no world id'); 
-	}
+			$location.path("/w/"+$scope.world.id);
+			$window.location.reload();
+			map.refresh();
+		} else {
+			//console
+			console.log('no world id'); 
+		}
+	}, function() {
+		if ($scope.world.id) {
+			$location.path("/w/" + $scope.world.id);
+			$window.location.reload();
+			map.refresh();
+		}
+	});
 }
 
+/**
+ * Returns a promise.  promise resolves with... nothing.
+ * Promise lets you know the world is updated
+ */
 $scope.save = function() {
+	var defer = $q.defer();
+
 	$scope.world.newStatus = false;
 	console.log($scope.world);
 	db.worlds.create($scope.world, function(response) {
     	console.log('--db.worlds.create response--');
-    	console.log(response);
-    	$scope.world.id = response[0].id; //updating world id with server new ID
-    });
-    
-    if ($scope.style) {
-	    
-	    if ($scope.world.resources){
-    		if ($scope.world.resources.hashtag){
-    			$scope.style.hashtag = $scope.world.resources.hashtag;
-    		}
-    	}
-		if ($scope.world._id){
-    		$scope.style.world_id = $scope.world._id;
-    	}
-	    
-    	console.log('saving style');
-	    db.styles.create($scope.style, function(response){
-      		console.log(response);
-		});
-    }
+		console.log(response);
+		$scope.world.id = response[0].id; //updating world id with server new ID
+
+		if ($scope.style) {
+
+			if ($scope.world.resources){
+				if ($scope.world.resources.hashtag){
+					$scope.style.hashtag = $scope.world.resources.hashtag;
+				}
+			}
+			if ($scope.world._id){
+				$scope.style.world_id = $scope.world._id;
+			}
+
+			console.log('saving style');
+			db.styles.create($scope.style, function(response){
+				console.log(response);
+			});
+		}
+
+		defer.resolve();
+	});
+
+	return defer.promise;
 }
 
 var firstWalk = [
