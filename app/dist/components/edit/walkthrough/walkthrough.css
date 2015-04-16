@@ -25,7 +25,7 @@
 	/*display: inline-block;*/
 	/*vertical-align: middle;*/
 	width: 496px;
-	top: 50%;
+	top: 55%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	-webkit-transform: translate(-50%, -50%);
@@ -366,12 +366,6 @@ ul.walkthrough-grid > li > img {
 	background-color: #b0bec5;
 }
 
-.walkthrough-maps {
-	/*width: 496px;*/
-	overflow: auto;
-	text-align: center;
-}
-
 .walkthrough-maps-item {
 	width: 224px;
 	/*float: left;*/
@@ -385,7 +379,7 @@ ul.walkthrough-grid > li > img {
 }
 
 .walkthrough-maps-img {
-	width: 224px;
+	width: 180px;
 	height: auto;
 	
 	padding: 4px;

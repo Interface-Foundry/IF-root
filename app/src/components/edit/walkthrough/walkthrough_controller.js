@@ -219,7 +219,7 @@ var firstWalk = [
 		title: 'Maps',
 		caption: 'Choose a map',
 		view: 'maptheme.html',
-		height: 426,
+		height: 290,
 		valid: function() {return true},
 		skip: true
 	},
@@ -227,7 +227,7 @@ var firstWalk = [
 		title: 'Hashtag',
 		caption: 'Connect your bubble\'s social media',
 		view: 'hashtag.html',
-		height: 132,
+		height: 220,
 		valid: function() {return true},
 		skip: true,
 	},
