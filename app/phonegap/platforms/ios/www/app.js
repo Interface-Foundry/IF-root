@@ -19152,6 +19152,7 @@ lockerManager.getCredentials = function() {
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
 	
+<<<<<<< HEAD
 	// //clear keys
 	// try {
 	// 	console.log('attempt to wipe other keys');
@@ -19160,6 +19161,16 @@ lockerManager.saveCredentials = function(username, password) {
 	// catch(e) {
 	// 	console.log(e);
 	// }
+=======
+	//clear keys
+	try {
+		console.log('attempt to wipe other keys');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
+	}
+	catch(e) {
+		console.log(e);
+	}
+>>>>>>> origin/Bubblli
 
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
@@ -19182,12 +19193,21 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
+<<<<<<< HEAD
 	// //clear keys
 	// try {
 	// 	console.log('attempt to wipe other keys');
 	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
 	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
 	// }
+=======
+	//clear keys
+	try {
+		console.log('attempt to wipe other keys');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
+		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
+	}
+>>>>>>> origin/Bubblli
 
 	// catch(e) {
 	// 	console.log(e);
@@ -20058,17 +20078,13 @@ worldTree.getNearby = function() {
 			};
 			$http.get('/api/geolocation', data).
 				success(function(locInfo) {
-					var locationData = {
-						lat: locInfo.lat,
-						lng: locInfo.lng,
-						cityName: locInfo.cityName,
-						timestamp: Date.now()
-					};
+					location.cityName = locInfo.cityName;
+					location.timestamp = Date.now();
 
-					geoService.updateLocation(locationData);
+					geoService.updateLocation(location);
 
 					db.worlds.query({localTime: new Date(), 
-						userCoordinate: [locationData.lng, locationData.lat]},
+						userCoordinate: [location.lng, location.lat]},
 						function(data) {
 							worldTree._nearby = data[0];
 							worldTree._nearby.timestamp = now;
@@ -24540,12 +24556,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var token = $location.path().slice(15);
 
             $http.post('/email/request_confirm/' + token, {}, {server: true}).
-            success(function(data) {
-                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-            }).
-            error(function(err) {
-                $scope.confirmThanksText = 'There was a problem confirming your email';
-            });
+                success(function(data) {
+                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+                }).
+                error(function(err) {
+                    $scope.confirmThanksText = 'There was a problem confirming your email';
+                });
 
             // redirect to home page
             $location.path('/');
@@ -24557,14 +24573,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var token = $location.path().slice(7);
 
             $http.post('/resetConfirm/' + token, {}, {server: true}).
-            success(function(data) {
-
-            }).
-            error(function(err) {
-                if (err) {
-                    console.log('err: ', err);
-                }
-            });
+                success(function(data) {}).
+                error(function(err) {
+                    if (err) {
+                        console.log('err: ', err);
+                    }
+                });
         } else {
             userManager.getUser().then(function(success) {
                 createShowSplash(true);
@@ -24577,8 +24591,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
 
-      
-
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
             $scope.show.confirm = false;
@@ -24590,12 +24602,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // don't show confirm dialog for fb authenticated users
             
             console.log('SPLASH CONDITION ',condition);
-
-                console.log('facebook ',userManager._user.facebook);
-                console.log('userManager._user',userManager._user);
+            console.log('facebook ',userManager._user.facebook);
+            console.log('userManager._user',userManager._user);
 
             if (userManager._user.facebook) {
-
                 console.log(userManager._user.facebook);
 
                 $scope.show.splash = false;
@@ -25822,6 +25832,11 @@ $scope.newWorld = function() {
 
 $scope.go = function(url) {
 	$location.path(url);
+	// to prevent page-loading animation from running indefinitely
+	// this function emits a routeChangeStart but NOT a routeChangeSuccess
+	_.defer(function() {
+		$rootScope.pageLoading = false;
+	});
 }
 
 userManager.getUser().then(
@@ -27064,7 +27079,12 @@ function scrollToBottom() {
 	},0);
 	if (messagesService.firstScroll==true) {
 		messagesService.firstScroll = false;
-		profileEditMessage();
+		userManager.checkLogin()
+		.then(function(loggedIn) {
+			if (loggedIn) {
+				profileEditMessage();		
+			}
+		});
 	}
 }
 
@@ -27406,7 +27426,7 @@ userManager.getUser().then(function(user) {
 		$scope.user = user;
 		$scope.nick = userManager.getDisplayName();	
 	}, function(reason) {
-	dialogs.showDialog('messageAuthDialog.html');
+		dialogs.showDialog('messageAuthDialog.html');
 });
 
 
