@@ -18,24 +18,24 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
     function searchWorlds(callback, distance) {
         console.log('searchWorlds being called with distance: ', distance)
 
-		var query = {
-                $match: {
-                    $text: {
-                        $search: sText
-                    },
-                    world: true,
-                    loc: {
-                        $geoWithin: {
-                            $centerSphere: [
-                                [parseFloat(userCoord1), parseFloat(userCoord0)], distance / 3963.2
-                            ]
-                        }
+        var query = {
+            $match: {
+                $text: {
+                    $search: sText
+                },
+                world: true,
+                loc: {
+                    $geoWithin: {
+                        $centerSphere: [
+                            [parseFloat(userCoord1), parseFloat(userCoord0)], distance / 3963.2
+                        ]
                     }
                 }
-            };
-		console.log(query);
+            }
+        };
+        console.log(query);
 
-		landmarkSchema.aggregate(query, {
+        landmarkSchema.aggregate(query, {
                 $sort: {
                     score: {
                         $meta: "textScore"
@@ -46,10 +46,20 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
             },
             function(err, data) {
                 if (err) {
-					console.error('error in text_search');
+                    console.error('error in text_search');
                     return console.error(err)
                 }
-                //If results are less than 20, increase radius of search distance
+
+                // Remove entries with end time over one year ago...
+                data.forEach(function(el) {
+                   
+                        if (el.time.end && el.time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
+                            console.log('removing old worlds from results..')
+                            data.splice(data.indexOf(el), 1);
+                        }
+                    })
+
+                    //If results are less than 20, increase radius of search distance
                 if (data.length >= 20) {
                     callback(true, data);
                 } else {
@@ -75,9 +85,9 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
         ],
         function(err, results) {
             if (err) {
-				console.error('error in text_search async.series');
-				console.error(err);
-			}
+                console.error('error in text_search async.series');
+                console.error(err);
+            }
             //Retreive parent IDs to query for parent world names for each landmark
 
             var parentIDs = results[results.length - 1].map(function(el) {
