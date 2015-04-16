@@ -19249,8 +19249,13 @@ userManager.signin = function(username, password) { //given a username and passw
 	
 	ifGlobals.username = username;
 	ifGlobals.password = password;
+
+	console.log(ifGlobals.username);
+	console.log(ifGlobals.password);
 	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
+			console.log('SUCCESS');
+			userManager._user = data;
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
@@ -19273,7 +19278,6 @@ userManager.fbLogin = function() { //login based on facebook approval
 
 
 			
-			
 			var data = {
             	userId: success.authResponse.userID,
            		accessToken: success.authResponse.accessToken 
@@ -19283,6 +19287,9 @@ userManager.fbLogin = function() { //login based on facebook approval
 	            function(res){
 	   				lockerManager.saveFBToken(success.authResponse.accessToken )
 					ifGlobals.fbToken = success.authResponse.accessToken ;
+					userManager.loginStatus = true;
+					userManager.adminStatus = data.admin ? true : false;
+					ifGlobals.loginStatus = true;
 					deferred.resolve(success);
 	            },
 

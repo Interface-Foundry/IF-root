@@ -396,33 +396,27 @@ module.exports = function(passport) {
         },
         function(userId, accessToken, response, done) {
             console.log('in the authentication function');
-            if (response.error) {
+            if (response.error){
                 return done(null, false, {
                     message: response.error.message
                 });
             }
 
+
             console.log(userId);
 
             //parse response
-            try {
-                var profile = JSON.parse(response);
-            } catch (e) {
-                console.error('could not parse profile json from facebook');
-                console.error(response);
-            }
-
+            var profile = JSON.parse(response);
+            
             console.log(profile.id);
 
-            if (userId !== profile.id) {
+            if (userId !== profile.id){
                 return done(null, false, {
                     message: 'Incorrect Access Token'
                 });
             }
 
-            User.findOne({
-                'facebook.id': profile.id
-            }, function(err, user) {
+            User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
                 if (err)
                     return done(err);
                 console.log(response);
@@ -431,93 +425,52 @@ module.exports = function(passport) {
                     // if there is a user id already but no token (user was linked at one point and then removed)
                     if (!user.facebook.token) {
                         user.facebook.token = accessToken;
-                        user.facebook.name = profile.name;
-
-                        if (profile.email) {
+                        user.facebook.name  = profile.name;
+                        
+                        if (profile.email){
                             user.facebook.email = profile.email;
                         }
 
-                        if (profile.verified) {
+                        if (profile.verified){
                             user.facebook.verified = profile.verified;
                         }
 
-                        if (profile.locale) {
+                        if (profile.locale){
                             user.facebook.locale = profile.locale;
                         }
 
-                        if (profile.timezone) {
+                        if (profile.timezone){
                             user.facebook.timezone = profile.timezone;
                         }
 
-                        if (!user.name) {
-                            if (profile.name.indexOf(" ") > -1) {
-                                user.name = profile.name.slice(0, profile.name.indexOf(" "))
-                            } else {
-                                user.name = profile.name
-                            }
-                        }
-
-                        if (!user.profileID) {
-
-                            if (user.facebook.name.indexOf(" ") > -1) {
-                                var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
-                            } else {
-                                var input = user.facebook.name
-                            }
-
-                            uniqueProfileID(input, function(output) {
-                                user.profileID = output;
-                                user.save(function(err) {
-                                    if (err)
-                                        throw err;
-                                    return done(null, user);
-                                    //NEW USER CREATED
-                                });
-                            });
-
-                        } else {
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
-                                //ADDED TO YOUR ACCOUNT
-                            });
-                        }
+                        user.save(function(err) {
+                            if (err)
+                                throw err;
+                            return done(null, user);
+                        });
                     }
 
                     return done(null, user); // user found, return that user
                 } else {
                     // if there is no user, create them
-                    var newUser = new User();
+                    var newUser            = new User();
 
-                    newUser.facebook.id = profile.id;
+                    newUser.facebook.id    = profile.id;
                     newUser.facebook.token = accessToken;
-                    newUser.facebook.name = profile.name;
-                    if (profile.email) {
-                        newUser.facebook.email = profile.email;
+                    newUser.facebook.name  = profile.name;
+                    if (profile.email){
+                        newUser.facebook.email = profile.email; 
                     }
+                    
 
-                    if (newUser.facebook.name.indexOf(" ") > -1) {
-                        newUser.name = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "));
-                        var input = newUser.facebook.name.slice(0, newUser.facebook.name.indexOf(" "))
-                    } else {
-                        newUser.name = newUser.facebook.name
-                        var input = newUser.facebook.name
-                    }
-
-                    uniqueProfileID(input, function(output) {
-                        newUser.profileID = output;
-                        newUser.save(function(err) {
-                            if (err)
-                                throw err;
-
-                            return done(null, newUser);
-                            //NEW USER CREATED
-                        });
+                    newUser.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, newUser);
                     });
                 }
             });
-        }
+        } 
     ));
 
     // =========================================================================
