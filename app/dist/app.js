@@ -17261,6 +17261,8 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
+				cacheTime: 30 * 1000, // 30s
+				geoTimeout: 6 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -17848,8 +17850,8 @@ function locationAnalyticsService($http, $interval, analyticsService, localStore
 'use strict';
 
 angular.module('tidepoolsServices')
-    .factory('mapManager', ['leafletData', '$rootScope', 'bubbleTypeService',
-		function(leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
+    .factory('mapManager', ['$timeout', 'leafletData', '$rootScope', 'bubbleTypeService',
+		function($timeout, leafletData, $rootScope, bubbleTypeService) { //manages and abstracts interfacing to leaflet directive
 var mapManager = {
 	center: {
 		lat: 42,
@@ -18328,7 +18330,7 @@ mapManager.setMaxBounds = function(sWest, nEast) {
 */ 
 mapManager.setMaxBoundsFromPoint = function(point, distance) {
 	leafletData.getMap().then(function(map) {
-		setTimeout(function() {map.setMaxBounds([
+		$timeout(function() {map.setMaxBounds([
 			[point[0]-distance, point[1]-distance],
 			[point[0]+distance, point[1]+distance]
 		])}, 400);
@@ -18345,7 +18347,7 @@ function refreshMap() {
 	console.log('--refreshMap()--');
     console.log('invalidateSize() called');
     leafletData.getMap().then(function(map){
-   	 setTimeout(function(){ map.invalidateSize()}, 400);
+   	 $timeout(function(){ map.invalidateSize()}, 400);
     });
 }
 
@@ -19584,33 +19586,41 @@ function getLocationInfoFromIP(deferredObj) {
 }
 
 worldTree.getNearby = function() {
-	
-	//current nearby format
-	//{150m: [worlds],
-	// 150mPast: [worlds],
-	// 2.5k: [worlds],
-	// 2.5kPast: [worlds]}
-	
+
 	var deferred = $q.defer();
 	var now = Date.now() / 1000;
 
 	var useIP = true;
-	var useIPTimeout = 7*1000;
 
 	if (worldTree._nearby && (worldTree._nearby.timestamp + 30) > now) {
 		deferred.resolve(worldTree._nearby);
 	} else {
 		console.log('nearbies not cached');
 
-		// use IP after 7s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+		// use IP after geoService.geoTimeout time if for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 		$timeout(function() {
 			if (useIP) {
-				getLocationInfoFromIP(deferred);
+				// use last known location if we have it, before resorting to IP
+				if (geoService.location.cityName && geoService.location.lat) {
+					db.worlds.query({
+						localTime: new Date(), 
+						userCoordinate: [geoService.location.lng, geoService.location.lat]
+					}, function(data) {
+						worldTree._nearby = data[0];
+						worldTree._nearby.timestamp = now;
+						deferred.resolve(data[0]);
+						
+						worldTree.cacheWorlds(data[0]['150m']);
+						worldTree.cacheWorlds(data[0]['2.5km']);
+					});
+				} else {
+					getLocationInfoFromIP(deferred);
+				}
 			}
-		}, useIPTimeout);
+		}, geoService.geoTimeout);
 
-		// cache location for 23s. wait for 7s before resorting to IP based location
-		geoService.getLocation(23*1000).then(function(location) {
+		// cache location for geoService.cacheTime. wait for geoService.geoTimeout before resorting to IP based location
+		geoService.getLocation(geoService.cacheTime).then(function(location) {
 			useIP = false;
 
 			// get city info
@@ -22928,6 +22938,10 @@ var map = mapManager;
 $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
+$scope.hardGo = function(path) {
+	$window.location.href = path;
+}
+
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
 		$scope.position++; 
@@ -23029,29 +23043,15 @@ $scope.saveAndExit = function() {
 
 	$scope.save().then(function() {
 		if ($scope.world.id) {
-
-			// console.log('corrd');
-			// console.log($scope.world);
-			// so it goes to the right map area on exit
-			// if ($scope.world.loc){
-			// 	if($scope.world.loc.coordinates){
-			// 		console.log('asfasdf');
-			// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
-			// 	}
-			// }
-
-			$location.path("/w/"+$scope.world.id);
-			$window.location.reload();
-			map.refresh();
+			// map breaks without full page reload (for some reason)
+			$window.location.href = '/w/' + $scope.world.id;
 		} else {
 			//console
 			console.log('no world id'); 
 		}
 	}, function() {
 		if ($scope.world.id) {
-			$location.path("/w/" + $scope.world.id);
-			$window.location.reload();
-			map.refresh();
+			$window.location.href = '/w/' + $scope.world.id;
 		}
 	});
 }
@@ -23147,7 +23147,7 @@ var firstWalk = [
 		title: 'Maps',
 		caption: 'Choose a map',
 		view: 'maptheme.html',
-		height: 426,
+		height: 290,
 		valid: function() {return true},
 		skip: true
 	},
@@ -23155,7 +23155,7 @@ var firstWalk = [
 		title: 'Hashtag',
 		caption: 'Connect your bubble\'s social media',
 		view: 'hashtag.html',
-		height: 132,
+		height: 220,
 		valid: function() {return true},
 		skip: true,
 	},
@@ -23911,7 +23911,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 				$location.path('/w/' + $routeParams.worldURL + '/search');
 			} else {
 				// get location. use IP if we don't have it stored
-				if (geoService.location.cityName) {
+				if (geoService.location.cityName && geoService.location.lat) {
 					var locationData = {
 						lat: geoService.location.lat,
 						lng: geoService.location.lng,
@@ -27051,17 +27051,26 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						scope.loading = true;
 						
 						var useIP = true;
-						var useIPTimeout = 2*1000;
 
-						// use IP after 2s is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
+						// use IP after geoService.geoTimeout is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
 						$timeout(function() {
 							if (useIP) {
-								goToLocationFromIP();
+								// use last known location if we have it, before resorting to IP
+								if (geoService.location.cityName && geoService.location.lat) {
+									$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+									scope.populateCitySearchView(scope.text, 'text', {
+										lat: geoService.location.lat,
+										lng: geoService.location.lng
+									});
+									scope.loading = false;
+								} else {
+									goToLocationFromIP();
+								}
 							}
-						}, useIPTimeout);
+						}, geoService.geoTimeout);
 
-						// get user's current location on every search cache of 23s and timeout of 3s
-						geoService.getLocation(23*1000).then(function(location) {
+						// get user's current location on every search cache of geoService.cacheTime and timeout of geoService.geoTimeout
+						geoService.getLocation(geoService.cacheTime).then(function(location) {
 							useIP = false;
 
 							// get city info

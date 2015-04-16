@@ -26,6 +26,10 @@ var map = mapManager;
 $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
+$scope.hardGo = function(path) {
+	$window.location.href = path;
+}
+
 $scope.next = function() {
 	if ($scope.position < $scope.walk.length-1) {
 		$scope.position++; 
@@ -127,29 +131,15 @@ $scope.saveAndExit = function() {
 
 	$scope.save().then(function() {
 		if ($scope.world.id) {
-
-			// console.log('corrd');
-			// console.log($scope.world);
-			// so it goes to the right map area on exit
-			// if ($scope.world.loc){
-			// 	if($scope.world.loc.coordinates){
-			// 		console.log('asfasdf');
-			// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
-			// 	}
-			// }
-
-			$location.path("/w/"+$scope.world.id);
-			$window.location.reload();
-			map.refresh();
+			// map breaks without full page reload (for some reason)
+			$window.location.href = '/w/' + $scope.world.id;
 		} else {
 			//console
 			console.log('no world id'); 
 		}
 	}, function() {
 		if ($scope.world.id) {
-			$location.path("/w/" + $scope.world.id);
-			$window.location.reload();
-			map.refresh();
+			$window.location.href = '/w/' + $scope.world.id;
 		}
 	});
 }
@@ -245,7 +235,7 @@ var firstWalk = [
 		title: 'Maps',
 		caption: 'Choose a map',
 		view: 'maptheme.html',
-		height: 426,
+		height: 290,
 		valid: function() {return true},
 		skip: true
 	},
@@ -253,7 +243,7 @@ var firstWalk = [
 		title: 'Hashtag',
 		caption: 'Connect your bubble\'s social media',
 		view: 'hashtag.html',
-		height: 132,
+		height: 220,
 		valid: function() {return true},
 		skip: true,
 	},
