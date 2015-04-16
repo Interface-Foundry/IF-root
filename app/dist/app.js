@@ -26873,7 +26873,12 @@ function scrollToBottom() {
 	},0);
 	if (messagesService.firstScroll==true) {
 		messagesService.firstScroll = false;
-		profileEditMessage();
+		userManager.checkLogin()
+		.then(function(loggedIn) {
+			if (loggedIn) {
+				profileEditMessage();		
+			}
+		});
 	}
 }
 
