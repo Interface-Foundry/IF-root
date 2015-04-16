@@ -21413,7 +21413,11 @@ function announcementsService($http) {
 	};
 
 	function get() {
+<<<<<<< HEAD
 		return $http.get('/api/announcements/global', {server: true});
+=======
+		return $http.get('api/announcements/global', {server: true});
+>>>>>>> fixes
 	}
 }
 
@@ -26985,7 +26989,10 @@ userManager.getUser().then(function(user) {
 
 
 } ]);
+<<<<<<< HEAD
 
+=======
+>>>>>>> fixes
 'use strict';
 
 app.factory('messagesService', messagesService);
@@ -26994,12 +27001,18 @@ messagesService.$inject = [];
 
 function messagesService() {
 
+<<<<<<< HEAD
 	var firstScroll = true;
 	
 	return {
 		createProfileEditMessage: createProfileEditMessage,
 		createWelcomeMessage: createWelcomeMessage,
 		firstScroll: firstScroll
+=======
+	return {
+		createProfileEditMessage: createProfileEditMessage,
+		createWelcomeMessage: createWelcomeMessage
+>>>>>>> fixes
 	};
 
 	function createProfileEditMessage(world, nickName) {

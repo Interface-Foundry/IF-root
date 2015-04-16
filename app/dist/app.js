@@ -4928,7 +4928,6 @@ $routeProvider.
 	when('/su/contests/:region', {templateUrl: 'components/super_user/contests/superuser_contests.html', controller: 'SuperuserContestController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/su/entries/:region', {templateUrl: 'components/super_user/entries/superuser_entries.html', controller: 'SuperuserEntriesController', resolve: {isAdmin: checkAdminStatus} }).
 	when('/contest/:region', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
- when('/#', {templateUrl: 'components/contest/contest.html', controller: 'ContestController'}).
   otherwise({redirectTo: '/'});
     //when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
@@ -19237,7 +19236,7 @@ userManager.signup.signup = function() { //signup based on signup form
     .success(function(user) {
 	    dialogs.show = false;
 		userManager.checkLogin();
-		alertManager.addAlert('success', "You're logged in!", true);
+		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
 
 		// send confirmation email
@@ -19250,7 +19249,7 @@ userManager.signup.signup = function() { //signup based on signup form
 	.error(function(err) {
 	if (err) {
 		userManager.signup.error = err || "Error signing up!";
-        alertManager.addAlert('danger',err, true);   
+        // alertManager.addAlert('danger',err, true);
 	}
 	});
 }
@@ -21251,42 +21250,34 @@ function announcements($timeout, announcementsService) {
 
 	function link(scope, elem, attr) {
 
-		scope.allCaughtUp = {
-			headline: 'All caught up!',
-			body: ':)'
-		};
 		scope.announcements = [];
-		scope.chevron = angular.element('.announcement-chevron');
-		scope.end = false;
+		// scope.chevron = angular.element('.announcement-chevron');
 		scope.index = 0;
-		scope.nextCard = nextCard;
+		// scope.nextCard = nextCard;
 		scope.region = 'global';
 
 		activate();
 
 		function activate() {
-			// Announcements.query({
-			// 	id: scope.region
-			// }).$promise
 			announcementsService.get()
 			.then(function(response) {
 				scope.announcements = scope.announcements.concat(response.data);
-				scope.announcements.push(scope.allCaughtUp);
+				// scope.announcements.push(scope.allCaughtUp);
 			}, function(error) {
 				console.log('Error', error);
 			});
 		}
 
-		function nextCard() {
-			scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
-			scope.chevron.animate({opacity: 0}, 350);
-			if (scope.index < scope.announcements.length - 1) {
-				scope.index++;
-				$timeout(function() {
-					scope.chevron.animate({opacity: 1}, 400);
-				}, 650);
-			}
-		}
+		// function nextCard() {
+			// scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
+			// scope.chevron.animate({opacity: 0}, 350);
+			// if (scope.index < scope.announcements.length - 1) {
+			// 	scope.index++;
+				// $timeout(function() {
+				// 	scope.chevron.animate({opacity: 1}, 400);
+				// }, 650);
+			// }
+		// }
 	}
 }
 
@@ -21372,7 +21363,11 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
   $scope.feedbackEmotion = {};
 
   $scope.selectEmoji = function(emotion) {
-	  $scope.feedbackEmotion = emotion;
+	  if ($scope.feedbackEmotion === emotion) {
+		  $scope.feedbackEmotion = {}
+	  } else {
+		  $scope.feedbackEmotion = emotion;
+	  }
   };
 
   $scope.sendFeedback = function($event) { //sends feedback email. move to dialog directive
@@ -22905,7 +22900,7 @@ $scope.onUploadAvatar = function($files) {
 	
 }]);
 
-app.controller('WalkthroughController', ['$scope', '$location', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
+app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs) {
 	
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -22958,7 +22953,8 @@ $scope.slowNext = function() {
 	$timeout(function() {
 		$scope.next();
 	}, 200);
-	$scope.save();
+	// was this here for a reason?
+	//$scope.save();
 }
 
 $scope.pictureSelect = function($files) {
@@ -23027,53 +23023,70 @@ $scope.saveAndExit = function() {
 		$scope.world.name = "bubble";
 	}
 
-	$scope.save();
-	if ($scope.world.id) {
+	$scope.save().then(function() {
+		if ($scope.world.id) {
 
-		// console.log('corrd');
-		// console.log($scope.world);
-		// so it goes to the right map area on exit
-		// if ($scope.world.loc){
-		// 	if($scope.world.loc.coordinates){
-		// 		console.log('asfasdf');
-		// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
-		// 	}
-		// }
+			// console.log('corrd');
+			// console.log($scope.world);
+			// so it goes to the right map area on exit
+			// if ($scope.world.loc){
+			// 	if($scope.world.loc.coordinates){
+			// 		console.log('asfasdf');
+			// 		map.setCenter([$scope.world.loc.coordinates[0],$scope.world.loc.coordinates[1]], 17);
+			// 	}
+			// }
 
-		$location.path("/w/"+$scope.world.id);
-		$window.location.reload();
-		map.refresh();
-	} else {
-		//console
-		console.log('no world id'); 
-	}
+			$location.path("/w/"+$scope.world.id);
+			$window.location.reload();
+			map.refresh();
+		} else {
+			//console
+			console.log('no world id'); 
+		}
+	}, function() {
+		if ($scope.world.id) {
+			$location.path("/w/" + $scope.world.id);
+			$window.location.reload();
+			map.refresh();
+		}
+	});
 }
 
+/**
+ * Returns a promise.  promise resolves with... nothing.
+ * Promise lets you know the world is updated
+ */
 $scope.save = function() {
+	var defer = $q.defer();
+
 	$scope.world.newStatus = false;
 	console.log($scope.world);
 	db.worlds.create($scope.world, function(response) {
     	console.log('--db.worlds.create response--');
-    	console.log(response);
-    	$scope.world.id = response[0].id; //updating world id with server new ID
-    });
-    
-    if ($scope.style) {
-	    
-	    if ($scope.world.resources){
-    		if ($scope.world.resources.hashtag){
-    			$scope.style.hashtag = $scope.world.resources.hashtag;
-    		}
-    	}
-		if ($scope.world._id){
-    		$scope.style.world_id = $scope.world._id;
-    	}
-	    
-    	console.log('saving style');
-	    db.styles.create($scope.style, function(response){
-      		console.log(response);
-		});
-    }
+		console.log(response);
+		$scope.world.id = response[0].id; //updating world id with server new ID
+
+		if ($scope.style) {
+
+			if ($scope.world.resources){
+				if ($scope.world.resources.hashtag){
+					$scope.style.hashtag = $scope.world.resources.hashtag;
+				}
+			}
+			if ($scope.world._id){
+				$scope.style.world_id = $scope.world._id;
+			}
+
+			console.log('saving style');
+			db.styles.create($scope.style, function(response){
+				console.log(response);
+			});
+		}
+
+		defer.resolve();
+	});
+
+	return defer.promise;
 }
 
 var firstWalk = [
@@ -23608,7 +23621,7 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
@@ -23617,12 +23630,17 @@ map.resetMap();
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
+$scope.welcomeService = welcomeService;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
 		return;
 	}
 	$location.path('w/'+bubble.id);
+}
+
+$scope.go = function(path) {
+	$location.path(path);
 }
 
 function initMarkers() {
@@ -23649,20 +23667,9 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
-//LISTENERS// 
-
-// $rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
-// 	var bubble = $scope.bubbles.find(function(element, index, array) {
-// 		if (element._id==args.markerName) {
-// 			return true;
-// 		} else { 
-// 			return false;
-// 		}
-// 	});
-// 	$scope.select(bubble);
-// });
 
 //INIT
+
 
 worldTree.getNearby().then(function(data) { 
 	$scope.$evalAsync(function($scope) {
@@ -23750,6 +23757,8 @@ $scope.goBack = function() {
 
 $scope.logout = function() {
 	userManager.logout();
+	userManager.login.email = '';
+	userManager.login.password = '';
 }
 
 
@@ -23969,7 +23978,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService) {
 
     $scope.setShowSplash = setShowSplash;
     $scope.splashNext = splashNext;
@@ -24089,6 +24098,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
+                welcomeService.needsWelcome = true;
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })
@@ -24099,6 +24109,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     $scope.show.splash = false;
                     watchSignupError(); // clear watch
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
+                    welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
                     addErrorMsg(newValue, 3000);
                     watchSignupError(); // clear watch
@@ -24691,6 +24702,17 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 	// }
 
 }]);
+'use strict';
+
+app.factory('welcomeService', welcomeService);
+
+function welcomeService() {
+	var needsWelcome = false;
+
+	return {
+		needsWelcome: needsWelcome
+	}
+}
 /**********************************************************************
  * Login controller
  **********************************************************************/
@@ -26120,6 +26142,7 @@ function hideContentService(mapManager) {
 		splash.append(img);
 		_.defer(function() {
 			img.classList.add('splash-fade-in');
+			cb();
 		});
 
 		// zoom map way out
@@ -26137,6 +26160,7 @@ $scope.aperture = apertureService;
 $scope.bubbleTypeService = bubbleTypeService;
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
+$scope.goToWorld = goToWorld;
 $scope.collectedPresents = [];
 
 var map = mapManager;
@@ -26159,6 +26183,10 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	console.log(error);
 	$location.path('/404');
 });
+
+function goToWorld() {
+	$location.path('/w/' + $routeParams.worldURL);
+}
 
 function getLandmark(world) {
 	worldTree.getLandmark($scope.world._id, $routeParams.landmarkURL).then(function(landmark) {
@@ -27728,8 +27756,12 @@ $scope.uploadWTGT = function($files, hashtag) {
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
-		hideContentService.hide();
-		$scope.hide = true;
+		$timeout(function() {
+			hideContentService.hide(function() {
+				$scope.$apply();
+			});
+			$scope.hide = true;
+		}, 500);
 		return;
 	}
 

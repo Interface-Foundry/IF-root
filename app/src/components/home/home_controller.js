@@ -1,4 +1,4 @@
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
@@ -7,12 +7,17 @@ map.resetMap();
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText;
+$scope.welcomeService = welcomeService;
 
 $scope.select = function(bubble) {
 	if (!bubble) {
 		return;
 	}
 	$location.path('w/'+bubble.id);
+}
+
+$scope.go = function(path) {
+	$location.path(path);
 }
 
 function initMarkers() {
@@ -39,20 +44,9 @@ function initMarkers() {
 	map.setCenterWithFixedAperture([geoService.location.lng, geoService.location.lat], 18, 0, 240);
 }
 
-//LISTENERS// 
-
-// $rootScope.$on('leafletDirectiveMarker.click', function(event, args) { //marker clicks beget list selection
-// 	var bubble = $scope.bubbles.find(function(element, index, array) {
-// 		if (element._id==args.markerName) {
-// 			return true;
-// 		} else { 
-// 			return false;
-// 		}
-// 	});
-// 	$scope.select(bubble);
-// });
 
 //INIT
+
 
 worldTree.getNearby().then(function(data) { 
 	$scope.$evalAsync(function($scope) {

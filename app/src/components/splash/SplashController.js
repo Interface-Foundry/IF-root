@@ -1,4 +1,4 @@
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService) {
 
     $scope.setShowSplash = setShowSplash;
     $scope.splashNext = splashNext;
@@ -121,6 +121,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
+                welcomeService.needsWelcome = true;
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })
@@ -131,6 +132,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     $scope.show.splash = false;
                     watchSignupError(); // clear watch
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
+                    welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
                     addErrorMsg(newValue, 3000);
                     watchSignupError(); // clear watch

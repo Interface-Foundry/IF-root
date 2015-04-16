@@ -25,6 +25,7 @@ function hideContentService(mapManager) {
 		splash.append(img);
 		_.defer(function() {
 			img.classList.add('splash-fade-in');
+			cb();
 		});
 
 		// zoom map way out

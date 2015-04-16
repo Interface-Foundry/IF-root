@@ -14,41 +14,33 @@ function announcements($timeout, announcementsService) {
 
 	function link(scope, elem, attr) {
 
-		scope.allCaughtUp = {
-			headline: 'All caught up!',
-			body: ':)'
-		};
 		scope.announcements = [];
-		scope.chevron = angular.element('.announcement-chevron');
-		scope.end = false;
+		// scope.chevron = angular.element('.announcement-chevron');
 		scope.index = 0;
-		scope.nextCard = nextCard;
+		// scope.nextCard = nextCard;
 		scope.region = 'global';
 
 		activate();
 
 		function activate() {
-			// Announcements.query({
-			// 	id: scope.region
-			// }).$promise
 			announcementsService.get()
 			.then(function(response) {
 				scope.announcements = scope.announcements.concat(response.data);
-				scope.announcements.push(scope.allCaughtUp);
+				// scope.announcements.push(scope.allCaughtUp);
 			}, function(error) {
 				console.log('Error', error);
 			});
 		}
 
-		function nextCard() {
-			scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
-			scope.chevron.animate({opacity: 0}, 350);
-			if (scope.index < scope.announcements.length - 1) {
-				scope.index++;
-				$timeout(function() {
-					scope.chevron.animate({opacity: 1}, 400);
-				}, 650);
-			}
-		}
+		// function nextCard() {
+			// scope.chevron = !!scope.chevron.length ? scope.chevron : angular.element('.announcement-chevron');
+			// scope.chevron.animate({opacity: 0}, 350);
+			// if (scope.index < scope.announcements.length - 1) {
+			// 	scope.index++;
+				// $timeout(function() {
+				// 	scope.chevron.animate({opacity: 1}, 400);
+				// }, 650);
+			// }
+		// }
 	}
 }

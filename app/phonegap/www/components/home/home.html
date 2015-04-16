@@ -1,8 +1,16 @@
 <div class="home">
 	<div class="wrap gray-e6e6e6">
 		<header class="home-header">
-			<div class="home-background"></div>
-
+			<div class="home-background"
+					 ng-class="{'u-pointer': welcomeService.needsWelcome}"
+					 ng-click="welcomeService.needsWelcome && go('/welcome')"></div>
+			<div ng-if="welcomeService.needsWelcome" 
+					 class="welcome-circle-outer u-pointer"
+					 ng-click="go('/welcome')">
+				<div class="welcome-circle-inner u-pointer">
+					<p>What is <span>Kip?</span></p>
+				</div>
+			</div>
 			<div class="announcements-card-background">
 				<announcements></announcements>
 			</div>
