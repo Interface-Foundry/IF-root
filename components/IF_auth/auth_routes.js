@@ -141,7 +141,7 @@ module.exports = function(app, passport, landmarkSchema) {
 
 
 	// iOS Facebook Auth --------------------------------
-		app.route('/auth/facebook/mobile_sigin').post(function(req, res, next){
+		app.route('/auth/facebook/mobile_signin').post(function(req, res, next){
 			console.log('f_sign in');
 
 			passport.authenticate('client_facebook', function(err, user, info){
