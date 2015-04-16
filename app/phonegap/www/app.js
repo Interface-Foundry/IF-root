@@ -23852,6 +23852,8 @@ $scope.goBack = function() {
 
 $scope.logout = function() {
 	userManager.logout();
+	userManager.login.email = '';
+	userManager.login.password = '';
 }
 
 
