@@ -88,9 +88,7 @@ router.use(function(req, res, next) {
             console.log('router.use: req.query is: ', req.query, 'req.geoloc is.. ', req.geoloc)
             return next();
         })
-    }
-
-    if (global.config.env == 'development') {
+    } else {
         return next();
     }
 
