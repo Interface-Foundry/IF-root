@@ -86,10 +86,10 @@
         "com.shazron.cordova.plugin.keychainutil": {
             "PACKAGE_NAME": "com.if.bubblli"
         },
-        "org.apache.cordova.geolocation": {
+        "org.apache.cordova.splashscreen": {
             "PACKAGE_NAME": "com.if.bubblli"
         },
-        "org.apache.cordova.splashscreen": {
+        "org.apache.cordova.geolocation": {
             "PACKAGE_NAME": "com.if.bubblli"
         }
     },

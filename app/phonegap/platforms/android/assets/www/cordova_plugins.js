@@ -27,8 +27,8 @@ module.exports.metadata =
 {
     "com.phonegap.plugins.facebookconnect": "0.11.0",
     "com.shazron.cordova.plugin.keychainutil": "2.0.0",
-    "org.apache.cordova.geolocation": "0.3.10",
-    "org.apache.cordova.splashscreen": "0.3.4"
+    "org.apache.cordova.splashscreen": "0.3.4",
+    "org.apache.cordova.geolocation": "0.3.12"
 }
 // BOTTOM OF METADATA
 });
