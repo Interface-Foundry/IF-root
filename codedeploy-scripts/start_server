@@ -23,4 +23,4 @@ pm2 start IF_forage_meetup.js
 
 # geoip
 cd "$IF_ROOT"/../go/bin
-nohup ./freegeoip &
+setsid ./freegeoip >freegeoip.log 2>freegeoip.err.log
