@@ -19,12 +19,10 @@ function hideContentService(mapManager) {
 		
 		// add grey splash to page with img
 		var splash = angular.element('#splash');
-		var img = document.createElement('img');
-		img.src = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Temp_plate.svg/601px-Temp_plate.svg.png';
-		splash.addClass('splash-img');
-		splash.append(img);
+		var imgs = angular.element('#splash img');
 		_.defer(function() {
-			img.classList.add('splash-fade-in');
+			imgs[0].classList.add('splash-fade-in');
+			imgs[1].classList.add('splash-fade-in');
 			cb();
 		});
 

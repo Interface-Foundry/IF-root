@@ -1774,23 +1774,26 @@ button:focus {
 }
 
 /* temp class for splash that hides world */
-.splash-img {
-	background-color: grey;
+#splash {
+	background-color: rgb(0,0,0);
   bottom: 0;
 	height: 100%;
   left: 0;
   margin: auto auto;
+  overflow: scroll;
+  padding-top: 46px;
 	position: absolute;
   right: 0;
-  top: -70%;
   width: 100%;
-  z-index: 1001;
+  z-index: 101;
 
-  img {
+  .splash-img-container {
+  	margin: auto;
+  	max-width: 500px;
+  }
+  .splash-img {
   	max-width: 500px;
   	opacity: 0;
-  	position: absolute;
-  	top: 10%;
   	width: 100%;
 		-webkit-transition: 1s cubic-bezier(.5,.1,0,1) all;
 		transition: 1s cubic-bezier(.5,.1,0,1) all;
@@ -1800,6 +1803,7 @@ button:focus {
 		}
   }
 }
+
 
 .loading-animation {
 	position: absolute;

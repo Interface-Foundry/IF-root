@@ -5412,28 +5412,31 @@ button:focus {
   outline: none;
 }
 /* temp class for splash that hides world */
-.splash-img {
-  background-color: grey;
+#splash {
+  background-color: #000000;
   bottom: 0;
   height: 100%;
   left: 0;
   margin: auto auto;
+  overflow: scroll;
+  padding-top: 46px;
   position: absolute;
   right: 0;
-  top: -70%;
   width: 100%;
-  z-index: 1001;
+  z-index: 101;
 }
-.splash-img img {
+#splash .splash-img-container {
+  margin: auto;
+  max-width: 500px;
+}
+#splash .splash-img {
   max-width: 500px;
   opacity: 0;
-  position: absolute;
-  top: 10%;
   width: 100%;
   -webkit-transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
-.splash-img img.splash-fade-in {
+#splash .splash-img.splash-fade-in {
   opacity: 1;
 }
 .loading-animation {
