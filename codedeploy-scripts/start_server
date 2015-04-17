@@ -17,10 +17,10 @@ pm2 start IF_tweet_server.js
 cd "$IF_ROOT"/IF_services/IF_forage/yelp
 pm2 start IF_forage_yelp.js
 
-# google
-cd "$IF_ROOT"/IF_services/IF_forage/yelp
-pm2 start IF_subforage_google.js
-
 # meetup
 cd "$IF_ROOT"/IF_services/IF_forage/meetup
 pm2 start IF_forage_meetup.js
+
+# geoip
+cd "$IF_ROOT"/../go/bin
+nohup ./freegeoip &
