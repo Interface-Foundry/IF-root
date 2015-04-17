@@ -17953,14 +17953,10 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 	
 	leafletData.getMap().then(function(map) {
 			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart-(68/2)]); // where 68px is the height of #top-shelf
-			console.log('targetPt', targetPt);
+			console.log(targetPt);
 			targetLatLng = map.unproject(targetPt, z);
 			console.log(targetLatLng);
-			_.defer(function() {
-
-				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
-				console.log('map center moved to', mapManager.center)
-			})
+			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
 			console.log(mapManager.center);
 			mapManager.refresh();
 	});
@@ -24269,6 +24265,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     init();
 
     function init() {
+        // special case for aicp to prevent splash page
+        if ($location.path().indexOf('aicpweek2015') > -1) {
+            $scope.show.splash = false;
+            return;
+        }
+
         if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
 
             createShowSplash('confirmThanks');
@@ -26410,12 +26412,10 @@ function hideContentService(mapManager) {
 		
 		// add grey splash to page with img
 		var splash = angular.element('#splash');
-		var img = document.createElement('img');
-		img.src = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Temp_plate.svg/601px-Temp_plate.svg.png';
-		splash.addClass('splash-img');
-		splash.append(img);
+		var imgs = angular.element('#splash img');
 		_.defer(function() {
-			img.classList.add('splash-fade-in');
+			imgs[0].classList.add('splash-fade-in');
+			imgs[1].classList.add('splash-fade-in');
 			cb();
 		});
 
@@ -28044,11 +28044,11 @@ $scope.uploadWTGT = function($files, hashtag) {
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
+		$rootScope.hide = true;
 		$timeout(function() {
 			hideContentService.hide(function() {
 				$scope.$apply();
 			});
-			$scope.hide = true;
 		}, 500);
 		return;
 	}
@@ -28542,7 +28542,7 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 })
 
 $scope.$on('$destroy', function() {
-	angular.element('.main-nav').css('display', 'block');
+	$rootScope.hide = false;
 });
 
 

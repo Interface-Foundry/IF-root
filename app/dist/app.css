@@ -5416,6 +5416,7 @@ button:focus {
   right: 0;
   width: 100%;
   z-index: 101;
+  -webkit-overflow-scrolling: touch;
 }
 #splash .splash-img-container {
   margin: auto;
