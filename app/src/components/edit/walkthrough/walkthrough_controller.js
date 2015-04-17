@@ -128,7 +128,7 @@ $scope.saveAndExit = function() {
 	$scope.save().then(function() {
 		if ($scope.world.id) {
 			// map breaks without full page reload (for some reason)
-			$window.location.href = '/w/' + $scope.world.id;
+			$window.location.href = '#w/' + $scope.world.id;
 		} else {
 			//console
 			console.log('no world id'); 
