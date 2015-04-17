@@ -330,4 +330,49 @@ text-align: center;
 		font-size: 20px;
 	}
 }
+.welcome-circle-outer {
+  left:0;
+  right:0;
+  margin-left:auto;
+  margin-right:auto;
+  padding: 0 8px;
+  position:absolute;
+	top: 20px;
+	width: 100%;
+}
 
+.welcome-circle-inner {
+	box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2);
+	background-color: white;
+	border-radius: 50%;
+	float: right;
+	height: 55px;
+	overflow: hidden;
+	width: 55px;
+
+}
+
+.welcome-circle-inner p {
+	color: #ed4023;
+	font-size: .7em;
+	font-weight: 500;
+	padding-top: 12px;
+	text-align: center;
+}
+
+.welcome-circle-inner p span {
+	font-size: 1.3em;
+}
+
+@media only screen and (min-width: 480px) {
+	.welcome-circle-outer {
+		padding: 0;
+		width: 456px;
+	}
+}
+@media only screen and (min-width: 768px) {
+	.welcome-circle-outer {
+		padding: 0;
+		width: 600px;
+	}
+}

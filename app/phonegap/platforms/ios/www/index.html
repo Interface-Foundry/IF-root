@@ -69,7 +69,7 @@
 
 <body ng-class="[aperture.state]" ng-click="closeOverlays()">
 
-	<div ng-controller="SplashController">
+	<div ng-cloak ng-controller="SplashController">
 		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
 		<div ng-if="show.splash === false">
@@ -87,14 +87,19 @@
 
 			<nav role="navigation" class="main-nav" 
 				ng-style="{'background-color': style.navBG_color}">
-				<button class="back-button if-animate" ng-hide="hideBack" ng-click="goBack()"></button>
-				<!-- <span class="nav-title">Kip</span> -->
+
+				<button class="back-button if-animate" ng-class="{'is-invisible': hideBack}" ng-click="goBack()"></button>
+
 				<div class="navLogo-wrapper u-pointer" ng-click="go('/')">
 					<img src="img/kip/kipLogo_navbar.svg" class="navLogo u-centerXY">
 				</div>
+
 				<div class="user-chip" user-chip></div>
+
 				<nav-tabs class="view-tabs"></nav-tabs>
 			</nav>
+
+			<img ng-show="pageLoading" src="/img/IF/loading5.gif" class="loading-animation" />
 
 			<!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
 

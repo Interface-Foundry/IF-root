@@ -5,7 +5,11 @@
   height: 120px;
   position: absolute;
   pointer-events: auto;
-  top: 230px;
+  top: 156px;
+
+  @media only screen and (min-width: 768px) {
+    top: 230px;
+  }
 }
 
 .announcements-card-container {
@@ -50,6 +54,7 @@ img.announcement-chevron {
   transition:all cubic-bezier(0,1,.56,.96) 0.4s;
 
   h3 {
+    color: #FFF9BC;
     height: 26px;
     margin-top: 10px;
     text-align: center;
@@ -57,6 +62,7 @@ img.announcement-chevron {
 
   p.announcement-body {
     clear: right;
+    color: #FFF9BC;
     height: 40px;
     overflow: hidden;
     margin: 0;
@@ -66,7 +72,7 @@ img.announcement-chevron {
 
 
 
-  p.announcement-link a {
+  p.announcement-link {
     color: rgb(82, 185, 242);
     margin-top: 2px;
     padding: 0 30px;

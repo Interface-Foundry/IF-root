@@ -51,11 +51,7 @@
 .aperture-full .message-nav-map {
 	display: inline-block;
 	bottom: 91px;
-<<<<<<< HEAD
 	background: center / 24px 24px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
-=======
-	background: center / 52px 52px no-repeat url("img/icons/ic_clear_white_24dp.png") rgba(0,0,0,.6);
->>>>>>> fixes
 	background-clip: padding-box;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
@@ -502,11 +498,7 @@
 }
 
 .message-body.kipbot-chat {
-<<<<<<< HEAD
 	background-color: rgba(221,221,235,1);
-=======
-	background-color: rgba(10,10,110, .2);
->>>>>>> fixes
   font-style: italic;
   opacity: .7;
 }
