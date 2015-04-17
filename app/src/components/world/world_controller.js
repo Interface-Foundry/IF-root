@@ -51,11 +51,11 @@ $scope.uploadWTGT = function($files, hashtag) {
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
+		$rootScope.hide = true;
 		$timeout(function() {
 			hideContentService.hide(function() {
 				$scope.$apply();
 			});
-			$scope.hide = true;
 		}, 500);
 		return;
 	}
@@ -549,7 +549,7 @@ $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
 })
 
 $scope.$on('$destroy', function() {
-	angular.element('.main-nav').css('display', 'block');
+	$rootScope.hide = false;
 });
 
 

@@ -25,6 +25,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     init();
 
     function init() {
+        // special case for aicp to prevent splash page
+        if ($location.path().indexOf('aicpweek2015') > -1) {
+            $scope.show.splash = false;
+            return;
+        }
+
         if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
 
             createShowSplash('confirmThanks');
