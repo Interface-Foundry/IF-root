@@ -30,23 +30,40 @@ var route = function(userCoord0, userCoord1, userTime, res) {
                 world: true
             }
         }, {
+            $match: {
+                $or: [{
+                    'time.end': {
+                        $gt: new Date().setYear(new Date().getFullYear() - 20)
+                    }
+                }, {
+                    'time.end': null
+                }, {
+                    'time.end': {
+                        $lt: new Date().setYear(new Date().getFullYear() - 20)
+                    }
+                }, {
+                    'time.end': {
+                        $exists: true
+                    }
+                }]
+            }
+        }, {
             $sort: {
                 distance: -1
             }
         }],
         function(err, data) {
             if (err) return console.log(err);
-            console.log('hitting worlds query, there are ', data.length, ' worlds')
+            // console.log('hitting worlds query, there are ', data.length, ' worlds')
             if (!data) return console.log(data)
-            //Remove entries with end time over one year ago...
-            data.forEach(function(el) {
-                // console.log('el.time.end is', el.time.end)
-                if (el.time.end && el.time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
-                    console.log('removing old worlds' )
-                    data.splice(data.indexOf(el), 1);
+                // Remove entries with end time over one year ago...
+            var i = data.length;
+            while (i--) {
+                if (data[i].time.end && data[i].time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
+                    console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
+                    data.splice(i, 1);
                 }
-            })
-            
+            }
             var four_groups = _.groupBy(data, function(world) {
 
                 if (world.distance <= 150) {
@@ -66,7 +83,7 @@ var route = function(userCoord0, userCoord1, userTime, res) {
                 }
             });
             for (var key in four_groups) {
-    
+
                 four_groups[key] = _(four_groups[key]).chain().sortBy(function(world) {
                     return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
                 }).sortBy(function(world) {
