@@ -25,14 +25,10 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 },
                 $or: [{
                     'time.end': {
-                        $gt: new Date().setYear(new Date().getFullYear() - 20)
+                        $gt: new Date().setYear(new Date().getFullYear() - 1)
                     }
                 }, {
                     'time.end': null
-                }, {
-                    'time.end': {
-                        $lt: new Date().setYear(new Date().getFullYear() - 20)
-                    }
                 }, {
                     'time.end': {
                         $exists: true
