@@ -33,12 +33,12 @@
 		
 		<form onSubmit="return false">
 			<!-- email and password inputs for login -->
-			<input type="text" placeholder="Email" class="u-100X" ng-if="show.signin" ng-model="userManager.login.email">
-			<input type="password" placeholder="Password" class="u-100X" ng-if="show.signin" ng-model="userManager.login.password">
+			<input name="email" type="email" placeholder="Email" class="u-100X" ng-if="show.signin" ng-model="userManager.login.email">
+			<input name="password" type="password" placeholder="Password" class="u-100X" ng-if="show.signin" ng-model="userManager.login.password">
 
 			<!-- email and password inputs for signup -->
-			<input type="text" placeholder="Email" class="u-100X" ng-if="show.register" ng-model="userManager.signup.email">
-			<input type="password" placeholder="Password" class="u-100X" ng-if="show.register" ng-model="userManager.signup.password">
+			<input name="email" type="email" placeholder="Email" class="u-100X" ng-if="show.register" ng-model="userManager.signup.email">
+			<input name="password" type="password" placeholder="Password" class="u-100X" ng-if="show.register" ng-model="userManager.signup.password">
 
 			<p class="fullPage-p inputFooter" ng-if="show.signin">
 				<a href="" ng-click="setShowSplash('passwordForgot', true)">FORGOT PASSWORD?</a>
