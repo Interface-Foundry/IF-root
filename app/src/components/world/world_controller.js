@@ -32,9 +32,9 @@ $scope.verifyUpload = function(event, state) {
 		event.stopPropagation();
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
-			dialogs.showDialog('authDialog.html');
+			$scope.setShowSplash('splash', true);
 			contest.set($scope.wtgt.hashtags[state]);
-		}, 1500);
+		}, 2000);
 		
 	}
 }

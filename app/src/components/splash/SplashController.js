@@ -1,5 +1,6 @@
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest) {
 
+    $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
     $scope.splashNext = splashNext;
     $scope.resendEmail = resendEmail;

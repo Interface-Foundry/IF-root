@@ -3,7 +3,7 @@
 		<img class="user-chip-img" if-src="{{userManager._user.avatar || 'img/icons/profile.png'}}">
 		<span class="user-chip-label auth show-480" ng-bind="userManager.getDisplayName()">Me</span>
 	</div>
-	<div class="user-chip-wrap" ng-switch-default ng-click="login()">
+	<div class="user-chip-wrap" ng-switch-default ng-click="setShowSplash('splash', true)">
 		<span class="user-chip-label" id="login">Sign In</span>
 	</div>
 </div>

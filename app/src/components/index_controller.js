@@ -57,6 +57,7 @@ $scope.search = function() {
 	}
 }
 
+// DEPRACATED
 $scope.wtgtLogin = function() {
 	contest.login(new Date);
 }

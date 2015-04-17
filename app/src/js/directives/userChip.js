@@ -9,6 +9,7 @@ angular.module('IF-directives', [])
 				scope.$emit('toggleDrawer');
 			}
 			
+			// DEPRACATED
 			scope.login = function() {
 				dialogs.showDialog('authDialog.html');
 			}

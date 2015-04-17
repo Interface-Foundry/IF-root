@@ -9,11 +9,13 @@
 		</p>
 
 		<button class="btnMain btnMain--redKip u-centerX"
-			ng-click="setShowSplash('register', true)">SIGN UP</button>
+			ng-click="setShowSplash('register', true); contest.login();">SIGN UP</button>
 		<button class="btnMain u-centerX"
 			ng-click="setShowSplash('signin', true)">SIGN IN</button>
 		
 
 	</div>
-	<div class="fullPage-close" ng-if="show.close" ng-click="setShowSplash('splash', false)"></div>
+	<div class="fullPage-close" 
+		ng-if="show.close" 
+		ng-click="setShowSplash('splash', false); contest.close();"></div>
 </div>

@@ -15,7 +15,7 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		}, 20));
 
 	$scope.openSignup = function(){
-		dialogs.showDialog('authDialog.html');
+		$scope.setShowSplash('splash', true);
 	}
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');

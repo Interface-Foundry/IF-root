@@ -17,11 +17,11 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		startTime = new Date();
 	}
 
-	function login(endTime) {
+	function login() {
 		// call if user logs in after login prompt on photo upload (wtgt)
-		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
+		// tracking login by logging in (userManager.login.login) or clicking "sign up" on splash
 		if (isContest) {
-			timeDuration = getTimeDuration(startTime, endTime);
+			timeDuration = getTimeDuration(startTime, new Date);
 			var data = {
 				selectedUploadType: hashtag,
 				signedUp: true,
@@ -43,11 +43,11 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		}
 	}
 
-	function close(endTime) {
-		// call if user closes modal after login prompt on photo upload (wtgt)
+	function close() {
+		// call if user closes splash after login prompt on photo upload (wtgt)
 		if (isContest) {
 			var response;
-			timeDuration = getTimeDuration(startTime, endTime);
+			timeDuration = getTimeDuration(startTime, new Date);
 			var data = {
 				selectedUploadType: hashtag,
 				closedNoLogin: true,

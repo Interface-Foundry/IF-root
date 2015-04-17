@@ -6037,6 +6037,7 @@ angular.module('IF-directives', [])
 				scope.$emit('toggleDrawer');
 			}
 			
+			// DEPRACATED
 			scope.login = function() {
 				dialogs.showDialog('authDialog.html');
 			}
@@ -17155,11 +17156,11 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		startTime = new Date();
 	}
 
-	function login(endTime) {
+	function login() {
 		// call if user logs in after login prompt on photo upload (wtgt)
-		// tracking login by logging in (userManager.login.login) or clicking "create account" on auth dialog
+		// tracking login by logging in (userManager.login.login) or clicking "sign up" on splash
 		if (isContest) {
-			timeDuration = getTimeDuration(startTime, endTime);
+			timeDuration = getTimeDuration(startTime, new Date);
 			var data = {
 				selectedUploadType: hashtag,
 				signedUp: true,
@@ -17181,11 +17182,11 @@ app.factory('contest', ['$http', 'localStore', function($http, localStore) {
 		}
 	}
 
-	function close(endTime) {
-		// call if user closes modal after login prompt on photo upload (wtgt)
+	function close() {
+		// call if user closes splash after login prompt on photo upload (wtgt)
 		if (isContest) {
 			var response;
-			timeDuration = getTimeDuration(startTime, endTime);
+			timeDuration = getTimeDuration(startTime, new Date);
 			var data = {
 				selectedUploadType: hashtag,
 				closedNoLogin: true,
@@ -19224,7 +19225,7 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 		dialogs.show = false;
-		contest.login(new Date); // for wtgt contest
+		contest.login(); // for wtgt contest
 		$route.reload();
 	}, function (err) {
 		if (err) {
@@ -21358,7 +21359,7 @@ angular.module('tidepoolsServices')
 			dialogs.close = function($event) {
 				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
 					dialogs.show = false;
-					contest.close(new Date); // for wtgt contest
+					// contest.close(new Date); // DEPRACATED for wtgt contest
 				}
 			}
 
@@ -23793,6 +23794,7 @@ $scope.search = function() {
 	}
 }
 
+// DEPRACATED
 $scope.wtgtLogin = function() {
 	contest.login(new Date);
 }
@@ -24039,8 +24041,9 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest) {
 
+    $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
     $scope.splashNext = splashNext;
     $scope.resendEmail = resendEmail;
@@ -24735,7 +24738,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 		}, 20));
 
 	$scope.openSignup = function(){
-		dialogs.showDialog('authDialog.html');
+		$scope.setShowSplash('splash', true);
 	}
 	
 	// $scope.loadmeetup = function() {
@@ -24761,7 +24764,7 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		}, 20));
 
 	$scope.openSignup = function(){
-		dialogs.showDialog('authDialog.html');
+		$scope.setShowSplash('splash', true);
 	}
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
@@ -26109,9 +26112,9 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 			event.stopPropagation();
 			alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 			$timeout(function() {
-				dialogs.showDialog('authDialog.html');
+				$scope.setShowSplash('splash', true);
 				contest.set($scope.hashtag);
-			}, 1500);	
+			}, 2000);	
 		}
 	}
 
@@ -27826,9 +27829,9 @@ $scope.verifyUpload = function(event, state) {
 		event.stopPropagation();
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
-			dialogs.showDialog('authDialog.html');
+			$scope.setShowSplash('splash', true);
 			contest.set($scope.wtgt.hashtags[state]);
-		}, 1500);
+		}, 2000);
 		
 	}
 }

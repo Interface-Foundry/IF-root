@@ -239,7 +239,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.saveToKeychain();
 		dialogs.show = false;
 		//@ENDIF
-		contest.login(new Date); // for wtgt contest
+		contest.login(); // for wtgt contest
 		$route.reload();
 	}, function (err) {
 		if (err) {

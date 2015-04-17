@@ -13,7 +13,7 @@ angular.module('tidepoolsServices')
 			dialogs.close = function($event) {
 				if($event.target.className.indexOf('dialog-bg')>-1 || $event.target.className.indexOf('closeElement')>-1){ 
 					dialogs.show = false;
-					contest.close(new Date); // for wtgt contest
+					// contest.close(new Date); // DEPRACATED for wtgt contest
 				}
 			}
 
