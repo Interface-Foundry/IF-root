@@ -1340,7 +1340,7 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	padding: 88px 0px 76px 0px;
+	padding: 104px 0px 76px 0px;
 }
 
 .message-nav {
@@ -1349,7 +1349,7 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	margin-top: 48px;
+	margin-top: 64px;
 	color: #FFF;
 	z-index: 10;
 }
@@ -2166,7 +2166,7 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
-	padding-top: 88px;
+	padding-top: 104px;
 }
 /* app css stylesheet */
 
@@ -2210,6 +2210,7 @@ body {
 
 .navfix {
 	padding-top: 48px;
+	padding-top: 64px;
 }
 
 #scrim {
@@ -2577,6 +2578,9 @@ transform:translateX(100%);
   transform: translateY(116px);
   /*TODO toolbar height + nav height*/
   -webkit-transform: translateY(116px);
+  transform: translateY(136px);
+  /*TODO toolbar height + nav height*/
+  -webkit-transform: translateY(136px);
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);
@@ -2681,6 +2685,7 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
+  top: 15px;
   z-index: 1010;
 }
 .drawer-icon {
@@ -2864,6 +2869,8 @@ nav.main-nav {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
+  height: 68px;
+  padding-top: 20px;
 }
 .nav-title {
   display: none;
@@ -2998,6 +3005,7 @@ nav ul {
   line-height: 48px;
   outline: none;
   border: none;
+  top: 68px;
 }
 .search-btn {
   position: absolute;
@@ -3687,6 +3695,7 @@ img.announcement-chevron {
   background-color: white;
   position: absolute;
   top: 0px;
+  top: 20px;
 }
 .fullPage-p {
   font-size: 15px;
@@ -3845,10 +3854,10 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
-  margin-top: 48px;
+  margin-top: 64px;
 }
 .subnavfix {
-  padding-top: 96px !important;
+  padding-top: 112px !important;
 }
 .subnav-header {
   display: block;
@@ -5342,6 +5351,7 @@ li.alert {
 .search-aperture {
   position: relative;
   top: 45px;
+  top: 65px;
 }
 @media only screen and (min-width: 0px) and (max-width: 480px) {
   .search-aperture .search-cat {
@@ -5362,6 +5372,7 @@ li.alert {
     top: 60px;
     left: 1%;
     display: block;
+    top: 80px;
   }
   .aperture-third .leaflet-bottom.leaflet-left,
   .aperture-half .leaflet-bottom.leaflet-left,
@@ -5404,28 +5415,31 @@ button:focus {
   outline: none;
 }
 /* temp class for splash that hides world */
-.splash-img {
-  background-color: grey;
+#splash {
+  background-color: #000000;
   bottom: 0;
   height: 100%;
   left: 0;
   margin: auto auto;
+  overflow: scroll;
+  padding-top: 46px;
   position: absolute;
   right: 0;
-  top: -70%;
   width: 100%;
-  z-index: 1001;
+  z-index: 101;
 }
-.splash-img img {
+#splash .splash-img-container {
+  margin: auto;
+  max-width: 500px;
+}
+#splash .splash-img {
   max-width: 500px;
   opacity: 0;
-  position: absolute;
-  top: 10%;
   width: 100%;
   -webkit-transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 1s cubic-bezier(0.5, 0.1, 0, 1) all;
 }
-.splash-img img.splash-fade-in {
+#splash .splash-img.splash-fade-in {
   opacity: 1;
 }
 .loading-animation {
@@ -9227,8 +9241,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('/fonts/glyphicons-halflings-regular.eot');
-  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('fonts/glyphicons-halflings-regular.eot');
+  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;
