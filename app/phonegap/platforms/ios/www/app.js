@@ -17953,10 +17953,14 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 	
 	leafletData.getMap().then(function(map) {
 			targetPt = map.project([latlng[1], latlng[0]], z).add([w*xpart,h*ypart-(68/2)]); // where 68px is the height of #top-shelf
-			console.log(targetPt);
+			console.log('targetPt', targetPt);
 			targetLatLng = map.unproject(targetPt, z);
 			console.log(targetLatLng);
-			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+			_.defer(function() {
+
+				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+				console.log('map center moved to', mapManager.center)
+			})
 			console.log(mapManager.center);
 			mapManager.refresh();
 	});
