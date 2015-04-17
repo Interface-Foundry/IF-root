@@ -3,5 +3,5 @@ cd /opt/kip/App
 #pm2 stop server.js will fail if it is not running.
 #This is will return a proper exit code no matter what
 pm2 stop all
-killall freegeoip
+#killall freegeoip
 exit 0
