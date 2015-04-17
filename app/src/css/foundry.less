@@ -1721,6 +1721,9 @@ and (min-width : 768px) {
 		top: 60px;
 		left: 1%;
 		display: block;
+		/*@IFDEF PHONEGAP*/
+		top: 60px + @pg-offset;
+		/*@ENDIF*/
 	}
 
 	.aperture-third .leaflet-bottom.leaflet-left,
