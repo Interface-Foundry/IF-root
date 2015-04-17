@@ -83,7 +83,10 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 			console.log(targetPt);
 			targetLatLng = map.unproject(targetPt, z);
 			console.log(targetLatLng);
-			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+			_.defer(function() {
+
+				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+			})
 			console.log(mapManager.center);
 			mapManager.refresh();
 	});

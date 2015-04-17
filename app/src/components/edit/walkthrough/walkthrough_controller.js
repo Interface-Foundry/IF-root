@@ -23,7 +23,12 @@ $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
 $scope.hardGo = function(path) {
-	$window.location.href = path;
+	//@IFDEF PHONEGAP
+	$window.location.href = '#/' + path;
+	//@ENDIF
+	//@IFDEF WEB
+	$window.location.href = '/' + path;
+	//@ENDIF
 }
 
 $scope.next = function() {
@@ -128,7 +133,12 @@ $scope.saveAndExit = function() {
 	$scope.save().then(function() {
 		if ($scope.world.id) {
 			// map breaks without full page reload (for some reason)
+			//@IFDEF PHONEGAP
 			$window.location.href = '#w/' + $scope.world.id;
+			//@ENDIF
+			//@IFDEF WEB
+			$window.location.href = 'w/' + $scope.world.id;
+			//@ENDIF
 		} else {
 			//console
 			console.log('no world id'); 

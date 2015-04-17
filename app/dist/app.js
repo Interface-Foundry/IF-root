@@ -17936,7 +17936,10 @@ mapManager.setCenterWithAperture = function(latlng, z, xpart, ypart) {
 			console.log(targetPt);
 			targetLatLng = map.unproject(targetPt, z);
 			console.log(targetLatLng);
-			angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+			_.defer(function() {
+
+				angular.extend(mapManager.center, {lat: targetLatLng.lat, lng: targetLatLng.lng, zoom: z});
+			})
 			console.log(mapManager.center);
 			mapManager.refresh();
 	});
@@ -22957,7 +22960,7 @@ $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
 $scope.hardGo = function(path) {
-	$window.location.href = path;
+	$window.location.href = '/' + path;
 }
 
 $scope.next = function() {
@@ -23062,7 +23065,7 @@ $scope.saveAndExit = function() {
 	$scope.save().then(function() {
 		if ($scope.world.id) {
 			// map breaks without full page reload (for some reason)
-			$window.location.href = '#w/' + $scope.world.id;
+			$window.location.href = 'w/' + $scope.world.id;
 		} else {
 			//console
 			console.log('no world id'); 
@@ -24139,7 +24142,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
-            $scope.show.splash = false;
+            $scope.show.splash = true;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
         }

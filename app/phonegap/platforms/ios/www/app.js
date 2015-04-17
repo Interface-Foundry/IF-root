@@ -23117,7 +23117,7 @@ $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
 $scope.hardGo = function(path) {
-	$window.location.href = path;
+	$window.location.href = '#/' + path;
 }
 
 $scope.next = function() {
@@ -24335,7 +24335,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
-            $scope.show.splash = false;
+            $scope.show.splash = true;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
         }
