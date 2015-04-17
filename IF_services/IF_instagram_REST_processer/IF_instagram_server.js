@@ -12,9 +12,6 @@ app.use(logger('dev'));
 var mongoose = require('mongoose'),
     monguurl = require('monguurl');
 
-
-
-
 var strings = require('./constants/strings');
 var integers = require('./constants/integers');
 var helper = require('./constants/helper');
@@ -39,8 +36,11 @@ var twitterTags = []; //tags to search
 var twitterRemovals = []; //tags to remove from search
 var twitterFalseTags=[]; //via tahir
 
-
-
+// make sure the tempimages directory exists
+console.log(strings.IMAGE_SAVE_DESTINATION);
+if (!fs.existsSync(strings.IMAGE_SAVE_DESTINATION)) {
+	fs.mkdirSync(strings.IMAGE_SAVE_DESTINATION);
+}
 
 var processTagMediaRecent = function(err, data, limit) {
 
