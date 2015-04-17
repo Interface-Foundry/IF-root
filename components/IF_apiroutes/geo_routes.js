@@ -11,13 +11,22 @@ var mapboxURL = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places/',
 
 
 router.use(function(req, res, next) {
+	// this middleware populates req.geoloc
+	req.geoloc = {};
+	var hasLoc = req.query.hasLoc === 'true';
+	if (hasLoc) {
+		req.geoloc.lat = req.query.lat;
+		req.geoloc.lng = req.query.lng;
+	}
 
-    if (global.config.env == 'development' && req.query.hasLoc == 'false') {
-        req.geoloc = {};
+    if (global.config.env === 'development') {
         console.log('In development mode, defaulting to NYC (hardcoded)')
         req.geoloc.cityName = 'New York City';
-        req.geoloc.lat = 40.7393083;
-        req.geoloc.lng = -73.9894285;
+		req.geoloc.src = 'ip-based';
+		if (!hasLoc) {
+	        req.geoloc.lat = 40.7393083;
+		    req.geoloc.lng = -73.9894285;
+		}
         res.send(req.geoloc)
         res.end()
         return
@@ -34,8 +43,6 @@ router.use(function(req, res, next) {
     if (global.config.env === 'development') {
         ip = global.config.ip; // use local real ip address in dev
     }
-
-    req.geoloc = {};
 
     //Because the request library also uses 'res' we'll rename the response here
     var response = res;
@@ -65,8 +72,10 @@ router.use(function(req, res, next) {
 
             if (!data.city) {
                 req.geoloc.cityName = 'New York City';
-                req.geoloc.lat = 40.7393083;
-                req.geoloc.lng = -73.9894285;
+				if (!hasLoc) {
+	                req.geoloc.lat = 40.7393083;
+	                req.geoloc.lng = -73.9894285;
+				}
                 console.log('ip-based data.city does not exist, data is: ', data, 'defaulting to NYC Flatiron.')
             } else {
                 req.geoloc.cityName = data.city;
@@ -78,9 +87,11 @@ router.use(function(req, res, next) {
                 if (data.latitude == 0 && data.longitude == 0) {
                     console.log('incorrect lat lng supplied, data is: ', data, 'defaulting to NYC Flatiron.')
                     req.geoloc.cityName = 'New York City';
-                    req.geoloc.lat = 40.7393083;
-                    req.geoloc.lng = -73.9894285;
-                } else {
+					if (!hasLoc) {
+	                    req.geoloc.lat = 40.7393083;
+	                    req.geoloc.lng = -73.9894285;
+					}
+                } else if (!hasLoc) {
                     req.geoloc.lat = data.latitude;
                     req.geoloc.lng = data.longitude;
                 }
