@@ -17265,7 +17265,7 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
-				cacheTime: 30 * 1000, // 30s
+				cacheTime: 3.25 * 60 * 1000, // 3.25m
 				geoTimeout: 7 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};

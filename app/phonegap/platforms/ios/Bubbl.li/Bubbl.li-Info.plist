@@ -64,8 +64,6 @@
     <string>0.8.1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Bubbl.li needs your location to find nearby bubbles.</string>
     <key>NSLocationUsageDescription</key>
     <string>Bubbl.li needs your location to find nearby bubbles.</string>
     <key>NSMainNibFile</key>
