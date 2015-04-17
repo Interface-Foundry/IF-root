@@ -5727,7 +5727,6 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 		priority: 99, 
 		link: function($scope, $element, $attr) {
 			$attr.$observe('ifHref', function(value) {
-				console.log('value is.', value)
 				if (!value) {
 					$attr.$set('href', null);
 				return;
@@ -5738,6 +5737,7 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				value = value.slice(0, firstHash) + value.slice(firstHash+1);
 			}
 			$attr.$set('href', value);
+			
 			});
 				
 		}
@@ -21284,7 +21284,6 @@ function announcements($timeout, announcementsService) {
 			announcementsService.get()
 			.then(function(response) {
 				scope.announcements = scope.announcements.concat(response.data);
-				console.log('response data for announcements is..: ', response.data)
 				// scope.announcements.push(scope.allCaughtUp);
 			}, function(error) {
 				console.log('Error', error);

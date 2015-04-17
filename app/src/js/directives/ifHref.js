@@ -4,7 +4,6 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 		priority: 99, 
 		link: function($scope, $element, $attr) {
 			$attr.$observe('ifHref', function(value) {
-				console.log('value is.', value)
 				if (!value) {
 					$attr.$set('href', null);
 				return;
@@ -17,6 +16,7 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 			}
 			//@ENDIF
 			$attr.$set('href', value);
+			
 			});
 				
 		}

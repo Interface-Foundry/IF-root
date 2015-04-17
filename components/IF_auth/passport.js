@@ -646,7 +646,7 @@ module.exports = function(passport) {
         new BearerStrategy(
             function(token, done) {
 
-                console.log('Inside bearerstrateghy in passport.js, token is', token);
+                console.log('HELLO');
 
                 console.log(token);
 

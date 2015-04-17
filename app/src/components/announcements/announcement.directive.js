@@ -26,7 +26,6 @@ function announcements($timeout, announcementsService) {
 			announcementsService.get()
 			.then(function(response) {
 				scope.announcements = scope.announcements.concat(response.data);
-				console.log('response data for announcements is..: ', response.data)
 				// scope.announcements.push(scope.allCaughtUp);
 			}, function(error) {
 				console.log('Error', error);
