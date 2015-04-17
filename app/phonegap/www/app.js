@@ -18887,14 +18887,14 @@ lockerManager.getCredentials = function() {
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
 	
-	//clear keys
-	try {
-		console.log('attempt to wipe other keys');
-		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
-	}
-	catch(e) {
-		console.log(e);
-	}
+	// //clear keys
+	// try {
+	// 	console.log('attempt to wipe other keys');
+	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
+	// }
+	// catch(e) {
+	// 	console.log(e);
+	// }
 
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
@@ -18917,16 +18917,16 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-	//clear keys
-	try {
-		console.log('attempt to wipe other keys');
-		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
-		lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
-	}
+	// //clear keys
+	// try {
+	// 	console.log('attempt to wipe other keys');
+	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
+	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
+	// }
 
-	catch(e) {
-		console.log(e);
-	}
+	// catch(e) {
+	// 	console.log(e);
+	// }
 
 	console.log('saving token',fbToken)
 	var deferred = $q.defer();
@@ -19376,7 +19376,9 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
+
 		//dialogs.showDialog('keychainDialog.html');
+		alert('saved to keychain');
 		userManager.saveToKeychain();
 		dialogs.show = false;
 		contest.login(); // for wtgt contest
@@ -23899,7 +23901,7 @@ function init() {
 	});
 }
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', 'ifGlobals', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService, ifGlobals) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -24333,7 +24335,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
-            $scope.show.splash = true;
+            $scope.show.splash = false;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
         }

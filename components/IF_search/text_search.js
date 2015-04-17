@@ -23,6 +23,17 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 $text: {
                     $search: sText
                 },
+                $or: [{
+                    'time.end': {
+                        $gt: new Date().setYear(new Date().getFullYear() - 1)
+                    }
+                }, {
+                    'time.end': null
+                }, {
+                    'time.end': {
+                        $exists: true
+                    }
+                }],
                 world: true,
                 loc: {
                     $geoWithin: {
@@ -33,8 +44,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 }
             }
         };
-        console.log(query);
-
+  
         landmarkSchema.aggregate(query, {
                 $sort: {
                     score: {
@@ -49,17 +59,18 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                     console.error('error in text_search');
                     return console.error(err)
                 }
+                // console.log('Worlds found: ', data.length)
 
-                // Remove entries with end time over one year ago...
-                data.forEach(function(el) {
-                   
-                        if (el.time.end && el.time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
-                            console.log('removing old worlds from results..')
-                            data.splice(data.indexOf(el), 1);
-                        }
-                    })
+                 // Remove entries with end time over one year ago...
+                var i = data.length;
+                while (i--) {
+                   if (data[i].time.end && data[i].time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
+                        console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
+                        data.splice(i, 1);
+                    }
+                }
 
-                    //If results are less than 20, increase radius of search distance
+                //If results are less than 20, increase radius of search distance
                 if (data.length >= 20) {
                     callback(true, data);
                 } else {

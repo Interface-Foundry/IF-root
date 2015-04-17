@@ -231,11 +231,14 @@ userManager.login.login = function() { //login based on login form
 		userManager.checkLogin();
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
+
 		//@IFDEF WEB
 		dialogs.show = false;
 		//@ENDIF
+
 		//@IFDEF KEYCHAIN
 		//dialogs.showDialog('keychainDialog.html');
+		alert('saved to keychain');
 		userManager.saveToKeychain();
 		dialogs.show = false;
 		//@ENDIF

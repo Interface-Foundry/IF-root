@@ -8,7 +8,7 @@
 	<div ng-repeat="announcement in announcements track by $index"
 			 class="announcements-card announcements-animate if-animate u-pointer" 
 			 ng-show="$index === index">
-		<a ng-href="{{announcement.urlPath}}">
+		<a if-href="{{announcement.urlPath}}">
 			<h3>{{announcement.headline}}</h3>
 			<p class="announcement-body">{{announcement.body}}</p>
 			<p class="announcement-link">{{announcement.urlName}}</p>
