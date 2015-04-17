@@ -20,3 +20,7 @@ pm2 start IF_forage_yelp.js
 # meetup
 cd "$IF_ROOT"/IF_services/IF_forage/meetup
 pm2 start IF_forage_meetup.js
+
+# geoip
+cd "$IF_ROOT"/../go/bin
+nohup ./freegeoip &
