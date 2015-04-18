@@ -45,8 +45,8 @@
 
         <source-file src="platforms/android/res/values/facebookconnect.xml" target-dir="res/values" />
         <config-file target="res/values/facebookconnect.xml" parent="/*">
-            <string name="fb_app_id">559490587493744</string>
-            <string name="fb_app_name">Bubbl.li</string>
+            <string name="fb_app_id">1401271990193674</string>
+            <string name="fb_app_name">Kip</string>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="application">
@@ -80,11 +80,11 @@
         <source-file src="platforms/ios/HelloCordova/Plugins/com.phonegap.plugins.facebookconnect/FacebookConnectPlugin.m" />
 
         <config-file target="*-Info.plist" parent="FacebookAppID">
-            <string>559490587493744</string>
+            <string>1401271990193674</string>
         </config-file>
 
         <config-file target="*-Info.plist" parent="FacebookDisplayName">
-            <string>Bubbl.li</string>
+            <string>Kip</string>
         </config-file>
 
         <config-file target="*-Info.plist" parent="CFBundleURLTypes">
@@ -92,7 +92,7 @@
             <dict>
               <key>CFBundleURLSchemes</key>
               <array>
-                <string>fb559490587493744</string>
+                <string>fb1401271990193674</string>
               </array>
             </dict>
           </array>

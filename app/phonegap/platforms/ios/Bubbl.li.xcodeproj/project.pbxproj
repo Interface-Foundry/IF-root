@@ -50,6 +50,10 @@
 		E0F9E0CC1A13205000DD0B6B /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DE2F374E88F4F3C951C4063 /* CDVSplashScreen.m */; };
 		E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */ = {isa = PBXBuildFile; fileRef = BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */; };
 		F9F0F2F1736C4CE89A9A4737 /* FacebookConnectPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B7F79D80E4C4F06A021F2BC /* FacebookConnectPlugin.m */; };
+		28F18E968D0A48CA91FD534E /* UIImage+CropScaleOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BE08C95BCEE4B79A01676B9 /* UIImage+CropScaleOrientation.m */; };
+		5DCAE841FF144A778C879F4C /* CDVCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = AF852CA645B148A5846632A2 /* CDVCamera.m */; };
+		297ADC1C634F470D86C641E4 /* CDVJpegHeaderWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = C024860FE52141519FB7EDA4 /* CDVJpegHeaderWriter.m */; };
+		5B4ABF77318D455398DCFE22 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34CB88AAF02B4A8B9D6EE5E0 /* ImageIO.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -144,6 +148,14 @@
 		EE39824E3C4546DBBC84AE97 /* ESTBeaconFirmwareVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconFirmwareVO.h; path = pl.makingwaves.estimotebeacons/ESTBeaconFirmwareVO.h; sourceTree = "<group>"; };
 		F43F4F136454466B8087AE85 /* ESTBeacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeacon.h; path = pl.makingwaves.estimotebeacons/ESTBeacon.h; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = Bubbl.li/config.xml; sourceTree = "<group>"; };
+		7BE08C95BCEE4B79A01676B9 /* UIImage+CropScaleOrientation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIImage+CropScaleOrientation.m"; path = "org.apache.cordova.camera/UIImage+CropScaleOrientation.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		AF852CA645B148A5846632A2 /* CDVCamera.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVCamera.m"; path = "org.apache.cordova.camera/CDVCamera.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		C024860FE52141519FB7EDA4 /* CDVJpegHeaderWriter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVJpegHeaderWriter.m"; path = "org.apache.cordova.camera/CDVJpegHeaderWriter.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		A767F23C2B30486A9CBD43BE /* UIImage+CropScaleOrientation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIImage+CropScaleOrientation.h"; path = "org.apache.cordova.camera/UIImage+CropScaleOrientation.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		AC0E3BC5F558416794F5CAA9 /* CDVCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVCamera.h"; path = "org.apache.cordova.camera/CDVCamera.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		FB6929E719F64720AE0C7E66 /* CDVJpegHeaderWriter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVJpegHeaderWriter.h"; path = "org.apache.cordova.camera/CDVJpegHeaderWriter.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		2764C17AE25C46BEB617F0CE /* CDVExif.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVExif.h"; path = "org.apache.cordova.camera/CDVExif.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		34CB88AAF02B4A8B9D6EE5E0 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "ImageIO.framework"; path = "System/Library/Frameworks/ImageIO.framework"; sourceTree = SDKROOT; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +174,7 @@
 				8F713E585B784B9BAB23A9CC /* libsqlite3.dylib in Frameworks */,
 				17487074BED845FEA63CEC40 /* Social.framework in Frameworks */,
 				2227F83489E24624BFA23B86 /* Accounts.framework in Frameworks */,
+				5B4ABF77318D455398DCFE22 /* ImageIO.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +279,7 @@
 				1214CE040FB1439DA6495662 /* libsqlite3.dylib */,
 				01E67A5B6E0F41D7BDF926BF /* Social.framework */,
 				E5322126A02548ECAFDA2AC1 /* Accounts.framework */,
+				34CB88AAF02B4A8B9D6EE5E0 /* ImageIO.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -300,6 +314,13 @@
 				A260C20BEEA543CBA16A358B /* SFHFKeychainUtils.h */,
 				1B7F79D80E4C4F06A021F2BC /* FacebookConnectPlugin.m */,
 				BEF1F53DA45C403793681310 /* FacebookConnectPlugin.h */,
+				7BE08C95BCEE4B79A01676B9 /* UIImage+CropScaleOrientation.m */,
+				AF852CA645B148A5846632A2 /* CDVCamera.m */,
+				C024860FE52141519FB7EDA4 /* CDVJpegHeaderWriter.m */,
+				A767F23C2B30486A9CBD43BE /* UIImage+CropScaleOrientation.h */,
+				AC0E3BC5F558416794F5CAA9 /* CDVCamera.h */,
+				FB6929E719F64720AE0C7E66 /* CDVJpegHeaderWriter.h */,
+				2764C17AE25C46BEB617F0CE /* CDVExif.h */,
 			);
 			name = Plugins;
 			path = Bubbl.li/Plugins;
@@ -505,6 +526,9 @@
 				2EEF78E57E08494CBA9757C2 /* CDVKeychain.m in Sources */,
 				93A4F476C39349E595491E96 /* SFHFKeychainUtils.m in Sources */,
 				F9F0F2F1736C4CE89A9A4737 /* FacebookConnectPlugin.m in Sources */,
+				28F18E968D0A48CA91FD534E /* UIImage+CropScaleOrientation.m in Sources */,
+				5DCAE841FF144A778C879F4C /* CDVCamera.m in Sources */,
+				297ADC1C634F470D86C641E4 /* CDVJpegHeaderWriter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

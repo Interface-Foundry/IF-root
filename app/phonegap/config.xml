@@ -14,6 +14,11 @@
     <feature name="EstimoteBeacons">
     	<param name="ios-package" value="EstimoteBeacons" />
 	</feature>
+
+  <feature name="Camera">
+      <param name="ios-package" value="CDVCamera" />
+  </feature>
+
 	
 	<preference name="UIWebViewBounce" value="false" />
 	<preference name="EnableLocation" value="true" />
@@ -24,6 +29,9 @@
 	<preference name="AutoHideSplashScreen" value="false" />
 	
 	<plugin name="Geolocation" value="CDVLocation" />
+
+
+
 	
 	   <platform name="ios">
               <!-- iOS 8.0+ -->

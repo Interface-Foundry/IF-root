@@ -17,6 +17,10 @@
                         {
                             "xml": "false",
                             "count": 1
+                        },
+                        {
+                            "xml": false,
+                            "count": 1
                         }
                     ],
                     "SystemConfiguration.framework": [
@@ -30,6 +34,10 @@
                         {
                             "xml": "false",
                             "count": 1
+                        },
+                        {
+                            "xml": false,
+                            "count": 2
                         }
                     ],
                     "Security.framework": [
@@ -57,6 +65,24 @@
                     "Accounts.framework": [
                         {
                             "xml": "true",
+                            "count": 1
+                        }
+                    ],
+                    "ImageIO.framework": [
+                        {
+                            "xml": true,
+                            "count": 1
+                        }
+                    ],
+                    "AssetsLibrary.framework": [
+                        {
+                            "xml": false,
+                            "count": 1
+                        }
+                    ],
+                    "MobileCoreServices.framework": [
+                        {
+                            "xml": false,
                             "count": 1
                         }
                     ]
@@ -104,6 +130,14 @@
                         {
                             "xml": "<feature name=\"Geolocation\"><param name=\"ios-package\" value=\"CDVLocation\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Camera\"><param name=\"ios-package\" value=\"CDVCamera\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<preference name=\"CameraUsesGeolocation\" value=\"false\" />",
+                            "count": 1
                         }
                     ],
                     "/widget": [
@@ -119,7 +153,7 @@
                     "NSLocationWhenInUseUsageDescription": [
                         {
                             "xml": "<string />",
-                            "count": 1
+                            "count": 2
                         }
                     ],
                     "FacebookAppID": [
@@ -158,6 +192,9 @@
             "PACKAGE_NAME": "com.if.bubblli"
         },
         "org.apache.cordova.geolocation": {
+            "PACKAGE_NAME": "com.if.bubblli"
+        },
+        "org.apache.cordova.camera": {
             "PACKAGE_NAME": "com.if.bubblli"
         }
     },

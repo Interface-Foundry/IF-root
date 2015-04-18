@@ -28,4 +28,7 @@
     <preference name="webviewbounce" value="false" />
     <preference name="AutoHideSplashScreen" value="false" />
     <plugin name="Geolocation" value="CDVLocation" />
+    <feature name="Camera">
+        <param name="android-package" value="org.apache.cordova.camera.CameraLauncher" />
+    </feature>
 </widget>

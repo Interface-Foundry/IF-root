@@ -2170,6 +2170,10 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 /* app css stylesheet */
 
+/*html {
+-webkit-user-select: none;
+}
+*/
 /* 
 MAIN ELEMENTS & UX HOOKS
 */

@@ -139,6 +139,7 @@ $scope.alert = function (msg) {
 }
 
 $scope.onImageSelect = function($files) {
+
 	$scope.uploading = true;
 	$scope.uploadProgress = 0;
 	$scope.upload = $upload.upload({
@@ -339,6 +340,8 @@ function addStickerToMap(sticker) {
 		message: '<div class="avatarWrapper"><img class="user-chip-img user-map-img" src="' + getAvatar() + '"/>' + '<strong>' + $scope.nick + '</strong></div>' + '<p class="user-map-text">' + sticker.message + '</p>'
 	});
 }
+
+
 
 ////////////////////////////////////////////////////////////
 ///////////////////LISTENERS&INTERVALS//////////////////////
