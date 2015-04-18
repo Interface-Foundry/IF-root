@@ -959,7 +959,9 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                                 submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
                                                     //Retrieve new saved contest entry ID
                                                     console.log('submitted data is..', data)
-                                                     newentryID = data._id;
+													if (data && data._id) {
+														newentryID = data._id;
+													}
                                                     res.send(data)
                                                         // res.send(data)
                                                 }); //contest entry, send to bac
@@ -3316,7 +3318,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         avatar: req.body.avatar,
                         status: 'draft',
                         permissions: {
-                            ownerID: req.user._id //from auth user ID
+                            ownerID: req.user && req.user._id //from auth user ID
                         },
                         style: {
                             maps: {
