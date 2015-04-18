@@ -24617,7 +24617,8 @@ function Entries($http, $resource) {
       params: {
         number: '@number'
       },
-      isArray: true
+      isArray: true,
+	  server: true
     },
     update: {
       method: 'put'
@@ -24632,6 +24633,7 @@ function Entries($http, $resource) {
   };
 
 }
+
 'use strict';
 
 app.controller('SuperuserEntriesController', SuperuserEntriesController);
