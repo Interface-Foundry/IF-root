@@ -141,6 +141,7 @@ userManager.signin = function(username, password) { //given a username and passw
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
+			userManager.saveToKeychain();
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -238,7 +239,7 @@ userManager.login.login = function() { //login based on login form
 
 		//@IFDEF KEYCHAIN
 		//dialogs.showDialog('keychainDialog.html');
-		alert('saved to keychain');
+		//alert('saved to keychain');
 		userManager.saveToKeychain();
 		dialogs.show = false;
 		//@ENDIF

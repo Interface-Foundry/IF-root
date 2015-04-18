@@ -2170,10 +2170,9 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 /* app css stylesheet */
 
-/*html {
+html {
 -webkit-user-select: none;
 }
-*/
 /* 
 MAIN ELEMENTS & UX HOOKS
 */
@@ -5431,6 +5430,7 @@ button:focus {
   right: 0;
   width: 100%;
   z-index: 101;
+  -webkit-overflow-scrolling: touch;
 }
 #splash .splash-img-container {
   margin: auto;

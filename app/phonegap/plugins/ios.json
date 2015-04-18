@@ -158,19 +158,19 @@
                     ],
                     "FacebookAppID": [
                         {
-                            "xml": "<string>559490587493744</string>",
+                            "xml": "<string>1401271990193674</string>",
                             "count": 2
                         }
                     ],
                     "FacebookDisplayName": [
                         {
-                            "xml": "<string>Bubbl.li</string>",
+                            "xml": "<string>Kip</string>",
                             "count": 2
                         }
                     ],
                     "CFBundleURLTypes": [
                         {
-                            "xml": "<array><dict><key>CFBundleURLSchemes</key><array><string>fb559490587493744</string></array></dict></array>",
+                            "xml": "<array><dict><key>CFBundleURLSchemes</key><array><string>fb1401271990193674</string></array></dict></array>",
                             "count": 2
                         }
                     ]

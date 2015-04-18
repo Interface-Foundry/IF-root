@@ -21,4 +21,14 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 	// 	$location.path('/auth/meetup');
 	// }
 
+	$scope.newWorld = function() {			
+		$scope.world = {};
+		$scope.world.newStatus = true; //new
+		db.worlds.create($scope.world, function(response){
+			console.log('##Create##');
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
+		});
+	}
+
 }]);

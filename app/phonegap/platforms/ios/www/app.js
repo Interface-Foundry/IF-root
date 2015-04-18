@@ -18917,18 +18917,9 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-	// //clear keys
-	// try {
-	// 	console.log('attempt to wipe other keys');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
-	// }
 
-	// catch(e) {
-	// 	console.log(e);
-	// }
-
-	console.log('saving token',fbToken)
+	console.log('saving token',fbToken);
+	
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
 		console.log('SUCCESS SET FBOOK TOKEN');
@@ -19282,8 +19273,6 @@ userManager.signin = function(username, password) { //given a username and passw
 	ifGlobals.username = username;
 	ifGlobals.password = password;
 
-	console.log(ifGlobals.username);
-	console.log(ifGlobals.password);
 	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
 			console.log('SUCCESS');
@@ -19407,6 +19396,12 @@ userManager.signup.signup = function() { //signup based on signup form
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
+
+			userManager._user = data;
+			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
+			ifGlobals.loginStatus = true;
+
 		}, function(error) {
 			console.log('error :', error);
 		});
@@ -23158,6 +23153,7 @@ $scope.pictureSelect = function($files) {
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
 		file: file,
+		server: true
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
 		$scope.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
@@ -24054,6 +24050,8 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
+		//console.log('retrieved fbook key',credentials.fbToken);
+
 		ifGlobals.fbToken = credentials.fbToken;
 		userManager.checkLogin().then(function(success) {
 			console.log('userManager.checkLogin() PHONEGAP',success);
@@ -24366,7 +24364,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         userManager.signup.error = undefined;
 
         if ($scope.show.signin) {
-            userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
+            userManager.login.login(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
                 welcomeService.needsWelcome = true;
@@ -24971,6 +24969,16 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
 	// }
+
+	$scope.newWorld = function() {			
+		$scope.world = {};
+		$scope.world.newStatus = true; //new
+		db.worlds.create($scope.world, function(response){
+			console.log('##Create##');
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
+		});
+	}
 
 }]);
 'use strict';

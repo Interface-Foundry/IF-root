@@ -22998,6 +22998,7 @@ $scope.pictureSelect = function($files) {
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
 		file: file,
+		server: true
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
 		$scope.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
@@ -24789,6 +24790,16 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
 	// }
+
+	$scope.newWorld = function() {			
+		$scope.world = {};
+		$scope.world.newStatus = true; //new
+		db.worlds.create($scope.world, function(response){
+			console.log('##Create##');
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
+		});
+	}
 
 }]);
 'use strict';

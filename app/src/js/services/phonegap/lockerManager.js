@@ -84,17 +84,6 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-	// //clear keys
-	// try {
-	// 	console.log('attempt to wipe other keys');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
-	// }
-
-	// catch(e) {
-	// 	console.log(e);
-	// }
-
 	console.log('saving token',fbToken)
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {

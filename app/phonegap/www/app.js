@@ -18917,17 +18917,6 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-	// //clear keys
-	// try {
-	// 	console.log('attempt to wipe other keys');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'username', 'Kip');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'password', 'Kip');		
-	// }
-
-	// catch(e) {
-	// 	console.log(e);
-	// }
-
 	console.log('saving token',fbToken)
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
@@ -19291,6 +19280,7 @@ userManager.signin = function(username, password) { //given a username and passw
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
+			userManager.saveToKeychain();
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -19378,7 +19368,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.login.error = false;
 
 		//dialogs.showDialog('keychainDialog.html');
-		alert('saved to keychain');
+		//alert('saved to keychain');
 		userManager.saveToKeychain();
 		dialogs.show = false;
 		contest.login(); // for wtgt contest
@@ -23158,6 +23148,7 @@ $scope.pictureSelect = function($files) {
 	$scope.upload = $upload.upload({
 		url: '/api/upload/',
 		file: file,
+		server: true
 	}).progress(function(e) {
 		console.log('%' + parseInt(100.0 * e.loaded/e.total));
 		$scope.picProgress = parseInt(100.0 * e.loaded/e.total)+'%';
@@ -24053,6 +24044,8 @@ lockerManager.getCredentials().then(function(credentials) {
 			console.log('credential signin error', reason)
 		});
 	} else if (credentials.fbToken) {
+
+		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
 		userManager.checkLogin().then(function(success) {
@@ -24984,6 +24977,16 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
 	// }
+
+	$scope.newWorld = function() {			
+		$scope.world = {};
+		$scope.world.newStatus = true; //new
+		db.worlds.create($scope.world, function(response){
+			console.log('##Create##');
+			console.log('response', response);
+			$location.path('/edit/walkthrough/'+response[0].worldID);
+		});
+	}
 
 }]);
 'use strict';

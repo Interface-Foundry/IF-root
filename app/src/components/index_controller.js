@@ -165,6 +165,8 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
+		//console.log('retrieved fbook key',credentials.fbToken);
+
 		ifGlobals.fbToken = credentials.fbToken;
 		userManager.checkLogin().then(function(success) {
 			console.log('userManager.checkLogin() PHONEGAP',success);

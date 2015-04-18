@@ -60,12 +60,29 @@
     <string>0.8.1</string>
     <key>CFBundleSignature</key>
     <string>????</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>fb1401271990193674</string>
+        </array>
+      </dict>
+    </array>
     <key>CFBundleVersion</key>
     <string>0.8.1</string>
+    <key>FacebookAppID</key>
+    <string>1401271990193674</string>
+    <key>FacebookDisplayName</key>
+    <string>Kip</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSLocationUsageDescription</key>
-    <string>Bubbl.li needs your location to find nearby bubbles.</string>
+    <string>Kip needs your location to find nearby bubbles.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string></string>
     <key>NSMainNibFile</key>
     <string></string>
     <key>NSMainNibFile~ipad</key>
@@ -81,20 +98,5 @@
     </array>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
-    <key>FacebookAppID</key>
-    <string>559490587493744</string>
-    <key>FacebookDisplayName</key>
-    <string>Bubbl.li</string>
-    <key>CFBundleURLTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>fb559490587493744</string>
-        </array>
-      </dict>
-    </array>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string></string>
   </dict>
 </plist>
