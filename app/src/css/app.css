@@ -1,9 +1,11 @@
 /* app css stylesheet */
 
-/*html {
+/* @IFDEF PHONEGAP */
+html {
 -webkit-user-select: none;
 }
-*/
+/* @ENDIF */
+
 /* 
 MAIN ELEMENTS & UX HOOKS
 */
