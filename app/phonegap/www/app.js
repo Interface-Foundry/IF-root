@@ -24477,25 +24477,30 @@ angular.module('IF')
             id: '@id'
         }, {
             update: {
-                method: 'put'
+                method: 'put',
+				server: true
             },
             save: {
                 method: 'POST',
-                isArray:true
+                isArray:true,
+				server: true
             },
             sort: {
                 method: 'POST',
                 isArray: true,
                 params: {
                     option: 'sort'
-                }
+                },
+				server: true
             },
             remove: {
                 method: 'DELETE',
-                isArray:true
+                isArray:true,
+				server: true
             }
         });
     });
+
 'use strict';
 
 app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
@@ -24638,20 +24643,24 @@ angular.module('IF')
             id: '@id'
         }, {
             update: {
-                method: 'put'
+                method: 'put',
+				server: true
             },
             scan: {
                 method: 'POST',
                 isArray:true,
                 params: {
                     option: 'scan'
-                }
+                },
+				server: true
             },
             remove: {
-                method: 'DELETE'
+                method: 'DELETE',
+				server: true
             }
         });
     });
+
 'use strict';
 
 app.controller('SuperuserContestController', SuperuserContestController);
@@ -24816,10 +24825,12 @@ function Entries($http, $resource) {
 	  server: true
     },
     update: {
-      method: 'put'
+      method: 'put',
+	  server: true
     },
     remove: {
-      method: 'DELETE'
+      method: 'DELETE',
+	  server: true
     }
   });
 

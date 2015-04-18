@@ -7,22 +7,26 @@ angular.module('IF')
             id: '@id'
         }, {
             update: {
-                method: 'put'
+                method: 'put',
+				server: true
             },
             save: {
                 method: 'POST',
-                isArray:true
+                isArray:true,
+				server: true
             },
             sort: {
                 method: 'POST',
                 isArray: true,
                 params: {
                     option: 'sort'
-                }
+                },
+				server: true
             },
             remove: {
                 method: 'DELETE',
-                isArray:true
+                isArray:true,
+				server: true
             }
         });
     });

@@ -19,10 +19,12 @@ function Entries($http, $resource) {
 	  server: true
     },
     update: {
-      method: 'put'
+      method: 'put',
+	  server: true
     },
     remove: {
-      method: 'DELETE'
+      method: 'DELETE',
+	  server: true
     }
   });
 

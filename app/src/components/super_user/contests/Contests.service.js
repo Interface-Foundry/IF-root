@@ -7,17 +7,20 @@ angular.module('IF')
             id: '@id'
         }, {
             update: {
-                method: 'put'
+                method: 'put',
+				server: true
             },
             scan: {
                 method: 'POST',
                 isArray:true,
                 params: {
                     option: 'scan'
-                }
+                },
+				server: true
             },
             remove: {
-                method: 'DELETE'
+                method: 'DELETE',
+				server: true
             }
         });
     });
