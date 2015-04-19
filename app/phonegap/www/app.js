@@ -26395,7 +26395,7 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 			data.userLon = coords.lng;
 			return deferred.resolve(uploadPicture(file, world, data));
 		}, function(err) {
-			return deferred.resolve(uploadPicture(file, data));
+			return deferred.resolve(uploadPicture(file, world, data));
 		});
 
 		return deferred.promise;
