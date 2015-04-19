@@ -269,8 +269,9 @@ userManager.signup.signup = function() { //signup based on signup form
 		console.log('emailtoLocker', data.email);
 		console.log('passwordtoLocker', data.password);
 		
+		//@IFDEF KEYCHAIN
 		lockerManager.saveCredentials(data.email, data.password);
-
+		//@ENDIF
 
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {

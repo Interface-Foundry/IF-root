@@ -21,6 +21,9 @@ angular.module('IF')
             remove: {
                 method: 'DELETE',
 				server: true
+            },
+            get: {
+                server: true
             }
         });
     });

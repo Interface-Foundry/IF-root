@@ -1,5 +1,8 @@
 <div class="fullPage">
 	<div class="fullPage-content u-centerXY">
+		<div class="row">
+			<img src="img/kip/kipLogo.svg" style="max-width:49%; margin-left:-31px; margin-bottom:-10px; margin-top: -29px;">
+		</div>
 		<h3>Please Confirm Your Email</h3>
 		<p class="fullPage-p">Email you signed up with:</p>
 		<p class="fullPage-p">
@@ -18,9 +21,14 @@
 		<span class="errorMsg u-absolute u-centerX" 
 			ng-if="errorMsg">{{ errorMsg }}</span>
 
-		<button class="btnMain btnMain--blue u-centerX" 
+		<button class="btnMain btnMain--redKip u-centerX" 
 			style="margin-top: 80px"
 			ng-click="resendEmail()">RESEND EMAIL</button>
+
+
+
+
+
 	</div>
 	<div class="fullPage-close" ng-click="setShowSplash('splash', false)"></div>
 </div>

@@ -237,7 +237,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }, function(err) {
             createShowSplash(false);
         });
-    }, 450);
+    }, 1000);
 
   
     

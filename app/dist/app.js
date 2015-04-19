@@ -19252,9 +19252,6 @@ userManager.signup.signup = function() { //signup based on signup form
 		console.log('emailtoLocker', data.email);
 		console.log('passwordtoLocker', data.password);
 		
-		lockerManager.saveCredentials(data.email, data.password);
-
-
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
@@ -24278,19 +24275,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
-
+    //TEMP HACK to make splash page hide on special PHONEGAP logins
     $timeout(function() {
         userManager.getUser().then(function(success) {
             createShowSplash(true);
         }, function(err) {
             createShowSplash(false);
         });
-    }, 450);
+    }, 1000);
 
-    //timeout 10 seconds 
-    //check if logged in, if yes then { $scope.show.splash = false; }
-
-
+  
     
 
 }]);

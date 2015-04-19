@@ -79,12 +79,13 @@
 			<!---nearby -->
 			<div ng-include="nearby==true ? 'components/world/templates/nearby.html' : null" class="marble-page"></div>
 
-			<!--CLAIM WORLD-->
-			<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
-				<em class="center-block text-center">Are you an organizer for this Meetup? Claim it now!</em>
-				<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
-			</div>
 
+				<!--CLAIM WORLD-->
+				<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
+					<em class="center-block text-center">Are you an organizer for this Meetup? Claim it now!</em>
+					<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
+				</div>
+				
 			<!-- bubble admin actions -->
 			<div ng-show="showEdit" class="marble-contain-width">
 				<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest</a>

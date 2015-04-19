@@ -13,9 +13,9 @@
 	height: 800px;
 }
 
-.small-tour-page {
+/*.small-tour-page {
 	height: 400px;
-}
+}*/
 
 .tour-panel{
 
@@ -76,8 +76,9 @@ text-align: center;
 
 .tour-credits {
 	position: absolute;
-	bottom: 20px;
+	bottom: -34px;
 	width: 100%;
+	margin-left: -18px;
 }
 
 .tour-credits a{
@@ -315,21 +316,6 @@ text-align: center;
 
 
 
-@media (min-width: 416px) {
-	.tour-panel {
-		width: 80%;
-	}
-}
-
-@media (min-width: 768px) {
-	.tour-page h1 {
-		font-size: 30px;
-	}
-
-	.tour-page h4 {
-		font-size: 20px;
-	}
-}
 .welcome-circle-outer {
   left:0;
   right:0;
@@ -362,17 +348,4 @@ text-align: center;
 
 .welcome-circle-inner p span {
 	font-size: 1.3em;
-}
-
-@media only screen and (min-width: 480px) {
-	.welcome-circle-outer {
-		padding: 0;
-		width: 456px;
-	}
-}
-@media only screen and (min-width: 768px) {
-	.welcome-circle-outer {
-		padding: 0;
-		width: 600px;
-	}
 }

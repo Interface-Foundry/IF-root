@@ -2,8 +2,17 @@
 
 /* @IFDEF PHONEGAP */
 html {
--webkit-user-select: none;
+	-webkit-user-select: none;
 }
+
+.bubble-inspector { 
+	top:29px; 
+}
+
+.calendar-view {
+	top:17px  
+}
+
 /* @ENDIF */
 
 /* 
@@ -330,5 +339,7 @@ transform:translateX(100%);
 	width:80px;
 	margin: 0 auto;
 }
+
+
 
 
