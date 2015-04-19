@@ -18886,15 +18886,6 @@ lockerManager.getCredentials = function() {
 
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	// //clear keys
-	// try {
-	// 	console.log('attempt to wipe other keys');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
-	// }
-	// catch(e) {
-	// 	console.log(e);
-	// }
 
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
@@ -18917,9 +18908,6 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-
-	console.log('saving token',fbToken);
-	
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
 		console.log('SUCCESS SET FBOOK TOKEN');
@@ -19273,6 +19261,8 @@ userManager.signin = function(username, password) { //given a username and passw
 	ifGlobals.username = username;
 	ifGlobals.password = password;
 
+	console.log(ifGlobals.username);
+	console.log(ifGlobals.password);
 	$http.post('/api/user/login-basic', data, {server: true})
 		.success(function(data) {
 			console.log('SUCCESS');
@@ -19280,6 +19270,7 @@ userManager.signin = function(username, password) { //given a username and passw
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
+			//userManager.saveToKeychain();
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -19367,7 +19358,7 @@ userManager.login.login = function() { //login based on login form
 		userManager.login.error = false;
 
 		//dialogs.showDialog('keychainDialog.html');
-		alert('saved to keychain');
+		//alert('saved to keychain');
 		userManager.saveToKeychain();
 		dialogs.show = false;
 		contest.login(); // for wtgt contest
@@ -19393,15 +19384,15 @@ userManager.signup.signup = function() { //signup based on signup form
 		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
 
+		console.log('emailtoLocker', data.email);
+		console.log('passwordtoLocker', data.password);
+		
+		lockerManager.saveCredentials(data.email, data.password);
+
+
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
-
-			userManager._user = data;
-			userManager.loginStatus = true;
-			userManager.adminStatus = data.admin ? true : false;
-			ifGlobals.loginStatus = true;
-
 		}, function(error) {
 			console.log('error :', error);
 		});
@@ -24040,6 +24031,9 @@ lockerManager.getCredentials().then(function(credentials) {
 	console.log('STARTING getCredentials()',credentials);
 
 	if (credentials.username, credentials.password) {
+
+		console.log('LOCAL FROM LOCKER');
+
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
 			console.log('userManager.checkLogin() LOCAL LOGIN',success);
@@ -24050,6 +24044,8 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
+		console.log('LOCAL FROM LOCKER');
+
 		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
@@ -24057,6 +24053,9 @@ lockerManager.getCredentials().then(function(credentials) {
 			console.log('userManager.checkLogin() PHONEGAP',success);
 			console.log(success);	
 		})
+	}
+	else {
+		console.log('NONE OF THE THOSE');
 	}
 }, function(err) {
 	console.log('credential error', error); 
@@ -24364,7 +24363,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         userManager.signup.error = undefined;
 
         if ($scope.show.signin) {
-            userManager.login.login(userManager.login.email, userManager.login.password).then(function(success) {
+            userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
                 welcomeService.needsWelcome = true;
@@ -24464,6 +24463,21 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
+
+    $timeout(function() {
+        userManager.getUser().then(function(success) {
+            createShowSplash(true);
+        }, function(err) {
+            createShowSplash(false);
+        });
+    }, 450);
+
+    //timeout 10 seconds 
+    //check if logged in, if yes then { $scope.show.splash = false; }
+
+
+    
+
 }]);
 
 'use strict';
@@ -24475,25 +24489,30 @@ angular.module('IF')
             id: '@id'
         }, {
             update: {
-                method: 'put'
+                method: 'put',
+				server: true
             },
             save: {
                 method: 'POST',
-                isArray:true
+                isArray:true,
+				server: true
             },
             sort: {
                 method: 'POST',
                 isArray: true,
                 params: {
                     option: 'sort'
-                }
+                },
+				server: true
             },
             remove: {
                 method: 'DELETE',
-                isArray:true
+                isArray:true,
+				server: true
             }
         });
     });
+
 'use strict';
 
 app.controller('SuperuserAnnouncementController', SuperuserAnnouncementController);
@@ -24636,20 +24655,27 @@ angular.module('IF')
             id: '@id'
         }, {
             update: {
-                method: 'put'
+                method: 'put',
+				server: true
             },
             scan: {
                 method: 'POST',
                 isArray:true,
                 params: {
                     option: 'scan'
-                }
+                },
+				server: true
             },
             remove: {
-                method: 'DELETE'
+                method: 'DELETE',
+				server: true
+            },
+            get: {
+                server: true
             }
         });
     });
+
 'use strict';
 
 app.controller('SuperuserContestController', SuperuserContestController);
@@ -24810,13 +24836,16 @@ function Entries($http, $resource) {
       params: {
         number: '@number'
       },
-      isArray: true
+      isArray: true,
+	  server: true
     },
     update: {
-      method: 'put'
+      method: 'put',
+	  server: true
     },
     remove: {
-      method: 'DELETE'
+      method: 'DELETE',
+	  server: true
     }
   });
 
@@ -24825,6 +24854,7 @@ function Entries($http, $resource) {
   };
 
 }
+
 'use strict';
 
 app.controller('SuperuserEntriesController', SuperuserEntriesController);

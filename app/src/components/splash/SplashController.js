@@ -230,4 +230,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
+    //TEMP HACK to make splash page hide on special PHONEGAP logins
+    $timeout(function() {
+        userManager.getUser().then(function(success) {
+            createShowSplash(true);
+        }, function(err) {
+            createShowSplash(false);
+        });
+    }, 450);
+
+  
+    
+
 }]);

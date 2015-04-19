@@ -18886,15 +18886,6 @@ lockerManager.getCredentials = function() {
 
 lockerManager.saveCredentials = function(username, password) {
 	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-	
-	// //clear keys
-	// try {
-	// 	console.log('attempt to wipe other keys');
-	// 	lockerManager.keychain.removeForKey(successCallback, failureCallback, 'fbToken', 'Kip');
-	// }
-	// catch(e) {
-	// 	console.log(e);
-	// }
 
 	lockerManager.keychain.setForKey(function(success) {
 		usernameSuccess.resolve(success);
@@ -18917,7 +18908,6 @@ lockerManager.saveCredentials = function(username, password) {
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
 
-	console.log('saving token',fbToken)
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
 		console.log('SUCCESS SET FBOOK TOKEN');
@@ -19280,7 +19270,7 @@ userManager.signin = function(username, password) { //given a username and passw
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
-			userManager.saveToKeychain();
+			//userManager.saveToKeychain();
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -19393,6 +19383,12 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
+
+		console.log('emailtoLocker', data.email);
+		console.log('passwordtoLocker', data.password);
+		
+		lockerManager.saveCredentials(data.email, data.password);
+
 
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
@@ -24035,6 +24031,9 @@ lockerManager.getCredentials().then(function(credentials) {
 	console.log('STARTING getCredentials()',credentials);
 
 	if (credentials.username, credentials.password) {
+
+		console.log('LOCAL FROM LOCKER');
+
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
 			console.log('userManager.checkLogin() LOCAL LOGIN',success);
@@ -24045,6 +24044,8 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
+		console.log('LOCAL FROM LOCKER');
+
 		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
@@ -24052,6 +24053,9 @@ lockerManager.getCredentials().then(function(credentials) {
 			console.log('userManager.checkLogin() PHONEGAP',success);
 			console.log(success);	
 		})
+	}
+	else {
+		console.log('NONE OF THE THOSE');
 	}
 }, function(err) {
 	console.log('credential error', error); 
@@ -24459,6 +24463,21 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
+
+    $timeout(function() {
+        userManager.getUser().then(function(success) {
+            createShowSplash(true);
+        }, function(err) {
+            createShowSplash(false);
+        });
+    }, 450);
+
+    //timeout 10 seconds 
+    //check if logged in, if yes then { $scope.show.splash = false; }
+
+
+    
+
 }]);
 
 'use strict';
@@ -24650,6 +24669,9 @@ angular.module('IF')
             remove: {
                 method: 'DELETE',
 				server: true
+            },
+            get: {
+                server: true
             }
         });
     });

@@ -19249,6 +19249,12 @@ userManager.signup.signup = function() { //signup based on signup form
 		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
 
+		console.log('emailtoLocker', data.email);
+		console.log('passwordtoLocker', data.password);
+		
+		lockerManager.saveCredentials(data.email, data.password);
+
+
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
@@ -24272,6 +24278,21 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
+
+    $timeout(function() {
+        userManager.getUser().then(function(success) {
+            createShowSplash(true);
+        }, function(err) {
+            createShowSplash(false);
+        });
+    }, 450);
+
+    //timeout 10 seconds 
+    //check if logged in, if yes then { $scope.show.splash = false; }
+
+
+    
+
 }]);
 
 'use strict';
@@ -24463,6 +24484,9 @@ angular.module('IF')
             remove: {
                 method: 'DELETE',
 				server: true
+            },
+            get: {
+                server: true
             }
         });
     });

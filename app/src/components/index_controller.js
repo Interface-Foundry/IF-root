@@ -155,6 +155,9 @@ lockerManager.getCredentials().then(function(credentials) {
 	console.log('STARTING getCredentials()',credentials);
 
 	if (credentials.username, credentials.password) {
+
+		console.log('LOCAL FROM LOCKER');
+
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
 			console.log('userManager.checkLogin() LOCAL LOGIN',success);
@@ -165,6 +168,8 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
+		console.log('LOCAL FROM LOCKER');
+
 		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
@@ -172,6 +177,9 @@ lockerManager.getCredentials().then(function(credentials) {
 			console.log('userManager.checkLogin() PHONEGAP',success);
 			console.log(success);	
 		})
+	}
+	else {
+		console.log('NONE OF THE THOSE');
 	}
 }, function(err) {
 	console.log('credential error', error); 

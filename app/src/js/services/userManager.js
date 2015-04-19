@@ -141,7 +141,7 @@ userManager.signin = function(username, password) { //given a username and passw
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
 			ifGlobals.loginStatus = true;
-			userManager.saveToKeychain();
+			//userManager.saveToKeychain();
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
@@ -265,6 +265,12 @@ userManager.signup.signup = function() { //signup based on signup form
 		userManager.checkLogin();
 		// alertManager.addAlert('success', "You're logged in!", true);
 		userManager.signup.error = false;		
+
+		console.log('emailtoLocker', data.email);
+		console.log('passwordtoLocker', data.password);
+		
+		lockerManager.saveCredentials(data.email, data.password);
+
 
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {

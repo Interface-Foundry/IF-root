@@ -1,0 +1,16 @@
+{
+    "version": "1.0.0",
+    "name": "com.shazron.cordova.plugin.keychainutil",
+    "cordova_name": "KeyChain Plugin for Cordova iOS",
+    "description": "This plugin allows your app access to the iOS KeyChain from Cordova. See: https://developer.apple.com/library/mac/documentation/security/conceptual/keychainServConcepts/iPhoneTasks/iPhoneTasks.html",
+    "license": "Apache 2.0",
+    "keywords": [
+        "keychain"
+    ],
+    "engines": [
+        {
+            "name": "cordova",
+            "version": ">=2.2.0"
+        }
+    ]
+}
