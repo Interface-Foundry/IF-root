@@ -184,12 +184,12 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 require('./components/IF_auth/passport')(passport);
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
-app.use(connectBusboy({
-    highWaterMark: 10 * 1024 * 1024,
-    limits: {
-        fileSize: 1024 * 1024 * 10 // 
-    }
-}));
+// app.use(connectBusboy({
+//     highWaterMark: 10 * 1024 * 1024,
+//     limits: {
+//         fileSize: 1024 * 1024 * 10 // 
+//     }
+// }));
 
 
 
@@ -886,12 +886,12 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
     req.busboy.on('file', function(fieldname, file, filename, filesize, mimetype) {
 
         if (!mimetype == 'image/jpeg' || !mimetype == 'image/png' || !mimetype == 'image/gif' || !mimetype == 'image/jpg') {
-
             res.send(500, 'Please use .jpg .png or .gif');
-
         }
         if (req.headers['content-length'] > 10000000) {
+
             console.log("Filesize too large.");
+            res.sendStatus(500, 'File size is too large.')
         } else {
 
             var stuff_to_hash = filename + (new Date().toString());
@@ -915,18 +915,13 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             }).pipe(fstream);
 
             fstream.on('close', function() {
-
                     var buffer = readChunk.sync(tempPath, 0, 262);
-
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
-
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
-
                             if (err) console.log(err)
-
                             fs.readFile(tempPath, function(err, fileData) {
                                 var s3 = new AWS.S3();
                                 s3.putObject({
@@ -935,14 +930,11 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                     Body: fileData,
                                     ACL: 'public-read'
                                 }, function(err, data) {
-
                                     if (err)
                                         console.log(err);
                                     else {
                                         // res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
-
-
                                         //additional content was passed with the image, handle it here
                                         //Then save the contest entry
                                         if (uploadContents) {
