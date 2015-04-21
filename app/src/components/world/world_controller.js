@@ -46,6 +46,9 @@ $scope.uploadWTGT = function($files, hashtag) {
 	.then(function(data) {
 		$scope.wtgt.images[hashtag] = data.imgURL;
 		$scope.wtgt.building[hashtag] = false;
+	}, function(error) {
+		console.log('Photo not uploaded: ', error);
+		$scope.wtgt.building[hashtag] = false;
 	});
 };
  

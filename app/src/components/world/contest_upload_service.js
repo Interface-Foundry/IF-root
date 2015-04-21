@@ -51,8 +51,9 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 			showConfirmationMessage();
 			worldTree.cacheSubmission(world._id, data.hashtag, result.imgURL);
 			deferred.resolve(result);
+		}).error(function(error) {
+			deferred.reject(error);
 		});
-
 		return deferred.promise;
 	}
 
