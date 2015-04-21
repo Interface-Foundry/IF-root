@@ -3218,6 +3218,7 @@ nav ul {
   overflow: hidden;
   padding-top: 48px;
   pointer-events: none;
+  padding-top: 68px;
 }
 .home > .wrap {
   pointer-events: auto;

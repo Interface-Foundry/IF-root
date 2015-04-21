@@ -1,3 +1,5 @@
+@pg-offset: 20px;
+
 #view > .home {
 	position: relative;
 	width: 100%;
@@ -5,6 +7,9 @@
 	overflow: hidden;
 	padding-top: 48px;
 	pointer-events: none;
+	/*@IFDEF PHONEGAP*/
+	padding-top: 48px + @pg-offset;
+	/*@ENDIF*/
 }
 
 .home > .wrap {

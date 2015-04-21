@@ -736,6 +736,9 @@ nav ul {
   overflow: hidden;
   padding-top: 48px;
   pointer-events: none;
+  /*@IFDEF PHONEGAP*/
+  padding-top: 68px;
+  /*@ENDIF*/
 }
 .home > .wrap {
   pointer-events: auto;
