@@ -872,13 +872,15 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
-    console.log('Headers for upload',req.headers['content-type'])
+    // req.on('data', function(d) { console.log('Saw ' + d.length + ' request bytes') }) 
+
+    console.log('Headers for upload',req.headers)
 
     var uploadContents = '';
 
     //capturing incoming extra data in upload
     req.busboy.on('field', function(key, val) {
-            console.log("fieldname: " + fieldname); 
+            // console.log('Field [' + key + ']: value: ' + val);
         uploadContents += val;
     });
 
@@ -892,7 +894,10 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
     req.busboy.on('file', function(fieldname, file, filename, filesize, mimetype) {
 
+        console.log('hitting busboy file event: ', fieldname, filename, filesize, mimetype)
+
         if (!mimetype == 'image/jpeg' || !mimetype == 'image/png' || !mimetype == 'image/gif' || !mimetype == 'image/jpg') {
+            console.log("Incorrect mime type.");
             res.send(500, 'Please use .jpg .png or .gif');
         }
         if (req.headers['content-length'] > 100000000000) {
@@ -901,6 +906,8 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             res.sendStatus(500, 'File size is too large.')
         } else {
 
+
+        console.log('*Successfully passed busboy filters.')
             var stuff_to_hash = filename + (new Date().toString());
             var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
             var fileType = filename.split('.').pop();
