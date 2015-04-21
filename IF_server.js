@@ -184,12 +184,12 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 require('./components/IF_auth/passport')(passport);
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
-// app.use(connectBusboy({
-//     highWaterMark: 10 * 1024 * 1024,
-//     limits: {
-//         fileSize: 1024 * 1024 * 10 // 
-//     }
-// }));
+app.use(connectBusboy({
+    highWaterMark: 10 * 1024 * 1024,
+    limits: {
+        fileSize: 1024 * 1024 * 10 // 
+    }
+}));
 
 
 
