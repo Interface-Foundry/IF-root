@@ -878,6 +878,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
     //capturing incoming extra data in upload
     req.busboy.on('field', function(key, val) {
+            console.log("fieldname: " + fieldname); 
         uploadContents += val;
     });
 
