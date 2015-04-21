@@ -58,6 +58,8 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 		contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 		.then(function(data) {
 			$scope.entries.unshift(data);
+		}, function(error) {
+			console.log('Photo not uploaded: ', error);
 		});
 	}
 }
