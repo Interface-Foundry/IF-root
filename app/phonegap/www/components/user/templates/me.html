@@ -60,28 +60,6 @@
 				</div>
 			</div>
 
-			<!-- @ifdef WEB -->
-			<div ng-class="{'inactive': user.meetup}">
-				<div class="profile-contact-sort">
-					<div class="profile-contact-card">
-						<span class="sort-heading indigo700">Connect Meetup account to add<br>
-							your meetups as bubbles</span>
-					  <button type="button" class="btn meetup-btn" ng-click="go('auth/meetup')">
-					  	<span class="grey-block"></span>
-					  	<img ng-if="!user.meetup" src="img/icons/meetup-16.png" width="16px" height="16px"> Connect
-					  </button>
-					</div>
-				</div>
-			</div>
-			
-
-			<div class="profile-sort">
-				<button type="button" class="btn btn-default" 
-					ng-click="logout(); setShowSplash('splash', true)">
-					Log out
-				</button>
-			</div>
-			<!-- @endif -->
 		</div>
 
 	</div>

@@ -185,9 +185,9 @@ require('./components/IF_auth/passport')(passport);
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy({
-    highWaterMark: 100 * 1024 * 1024,
+    highWaterMark: 100000 * 1024 * 1024,
     limits: {
-        fileSize: 1024 * 1024 * 100 // 
+        fileSize: 1024 * 1024 * 100000 // 
     }
 }));
 
@@ -868,7 +868,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
-    console.log('REQ.HEADERS IS: '. req.headers)
+    // console.log('REQ.HEADERS IS: '. req.headers)
 
     var uploadContents = '';
 
@@ -890,7 +890,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
         if (!mimetype == 'image/jpeg' || !mimetype == 'image/png' || !mimetype == 'image/gif' || !mimetype == 'image/jpg') {
             res.send(500, 'Please use .jpg .png or .gif');
         }
-        if (req.headers['content-length'] > 10000000) {
+        if (req.headers['content-length'] > 100000000000) {
 
             console.log("Filesize too large.");
             res.sendStatus(500, 'File size is too large.')
