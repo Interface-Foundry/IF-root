@@ -868,6 +868,8 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
+    console.log('REQ.HEADERS IS: '. req.headers)
+
     var uploadContents = '';
 
     //capturing incoming extra data in upload

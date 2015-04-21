@@ -1314,7 +1314,12 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	/*@IFDEF WEB*/
 	padding: 88px 0px 76px 0px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	padding: 104px 0px 76px 0px;
+	/*@ENDIF*/
 }
 
 .message-nav {
@@ -1323,7 +1328,12 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
+	/*@IFDEF WEB*/
 	margin-top: 48px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	margin-top: 64px;
+	/*@ENDIF*/
 	color: #FFF;
 	z-index: 10;
 }
@@ -2140,9 +2150,29 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
+	/*@IFDEF WEB*/
 	padding-top: 88px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	padding-top: 104px;
+	/*@ENDIF*/
 }
 /* app css stylesheet */
+
+/* @IFDEF PHONEGAP */
+html {
+	-webkit-user-select: none;
+}
+
+.bubble-inspector { 
+	top:29px; 
+}
+
+.calendar-view {
+	top:17px  
+}
+
+/* @ENDIF */
 
 /* 
 MAIN ELEMENTS & UX HOOKS
@@ -2184,6 +2214,9 @@ body {
 
 .navfix {
 	padding-top: 48px;
+	/* @IFDEF PHONEGAP */
+	padding-top: 64px;
+	/* @ENDIF */
 }
 
 #scrim {
@@ -2553,6 +2586,11 @@ transform:translateX(100%);
   transform: translateY(116px);
   /*TODO toolbar height + nav height*/
   -webkit-transform: translateY(116px);
+  /*@IFDEF PHONEGAP*/
+  transform: translateY(136px);
+  /*TODO toolbar height + nav height*/
+  -webkit-transform: translateY(136px);
+  /*@ENDIF*/
 }
 #shelf.aperture-half {
   transform: translateY(50%) translateZ(0px);
@@ -2657,6 +2695,9 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
+  /* @IFDEF PHONEGAP */
+  top: 15px;
+  /* @ENDIF */
   z-index: 1010;
 }
 .drawer-icon {
@@ -2840,6 +2881,10 @@ nav.main-nav {
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
+  /*@IFDEF PHONEGAP*/
+  height: 68px;
+  padding-top: 20px;
+  /*@ENDIF*/
 }
 .nav-title {
   display: none;
@@ -2974,6 +3019,9 @@ nav ul {
   line-height: 48px;
   outline: none;
   border: none;
+  /*@IFDEF PHONEGAP*/
+  top: 68px;
+  /*@ENDIF*/
 }
 .search-btn {
   position: absolute;
@@ -3663,6 +3711,9 @@ img.announcement-chevron {
   background-color: white;
   position: absolute;
   top: 0px;
+  /*@IFDEF PHONEGAP*/
+  top: 20px;
+  /*@ENDIF*/
 }
 .fullPage-p {
   font-size: 15px;
@@ -3821,10 +3872,20 @@ nav {
   text-align: center;
   z-index: 30;
   position: absolute;
+  /* @ifdef WEB */
   margin-top: 48px;
+  /* @endif */
+  /* @ifdef PHONEGAP */
+  margin-top: 64px;
+  /* @endif */
 }
 .subnavfix {
+  /* @ifdef WEB */
   padding-top: 96px !important;
+  /* @endif */
+  /* @ifdef PHONEGAP */
+  padding-top: 112px !important;
+  /* @endif */
 }
 .subnav-header {
   display: block;
@@ -5318,6 +5379,9 @@ li.alert {
 .search-aperture {
   position: relative;
   top: 45px;
+  /*@IFDEF PHONEGAP*/
+  top: 65px;
+  /*@ENDIF*/
 }
 @media only screen and (min-width: 0px) and (max-width: 480px) {
   .search-aperture .search-cat {
@@ -5338,6 +5402,9 @@ li.alert {
     top: 60px;
     left: 1%;
     display: block;
+    /*@IFDEF PHONEGAP*/
+    top: 80px;
+    /*@ENDIF*/
   }
   .aperture-third .leaflet-bottom.leaflet-left,
   .aperture-half .leaflet-bottom.leaflet-left,
@@ -5412,6 +5479,9 @@ button:focus {
   position: absolute;
   z-index: 101;
   top: 48px;
+  /*@IFDEF PHONEGAP*/
+  top: 68px;
+  /*@ENDIF*/
   width: 100%;
   height: 3px;
 }
@@ -9205,11 +9275,22 @@ input[type="button"].btn-block {
           transition: height .35s ease;
 }
 
+//@IFDEF WEB
 @font-face {
   font-family: 'Glyphicons Halflings';
   src: url('/fonts/glyphicons-halflings-regular.eot');
   src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
+//@ENDIF
+
+//@IFDEF PHONEGAP
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('fonts/glyphicons-halflings-regular.eot');
+  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+}
+//@ENDIF 
+
 .glyphicon {
   position: relative;
   top: 1px;
