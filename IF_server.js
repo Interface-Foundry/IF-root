@@ -186,12 +186,12 @@ require('./components/IF_auth/passport')(passport);
 //LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy(
 
-// {
-//     highWaterMark: 100000 * 1024 * 1024,
-//     limits: {
-//         fileSize: 1024 * 1024 * 100000 // 
-//     }
-// }
+{
+    highWaterMark: 50 * 1024 * 1024,
+    limits: {
+        fileSize: 1024 * 1024 * 50  
+    }
+}
 
 ));
 
@@ -872,9 +872,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
-    // req.on('data', function(d) { console.log('Saw ' + d.length + ' request bytes') }) 
-
-    console.log('Headers for upload',req.headers)
+    // console.log('Headers for upload',req.headers)
 
     var uploadContents = '';
 
@@ -900,14 +898,14 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             console.log("Incorrect mime type.");
             res.send(500, 'Please use .jpg .png or .gif');
         }
-        if (parseFloat(req.headers['content-length']) > 100000000000) {
+        if (parseFloat(req.headers['content-length']) > 50000000) {
 
             console.log("Filesize too large.");
             res.sendStatus(500, 'File size is too large.')
         } else {
 
 
-        console.log('*Successfully passed busboy filters.')
+        // console.log('*Successfully passed busboy filters.')
             var stuff_to_hash = filename + (new Date().toString());
             var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
             var fileType = filename.split('.').pop();
