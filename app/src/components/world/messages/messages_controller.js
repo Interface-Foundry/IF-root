@@ -371,7 +371,7 @@ $scope.$watch('editing', function(newBool, oldBool) {
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		styleManager.setNavBG($scope.style.navBG_color);
 
 	$scope.world=data.world;
 

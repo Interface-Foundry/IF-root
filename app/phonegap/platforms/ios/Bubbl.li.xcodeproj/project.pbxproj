@@ -54,6 +54,7 @@
 		E0F9E0CC1A13205000DD0B6B /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DE2F374E88F4F3C951C4063 /* CDVSplashScreen.m */; };
 		E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */ = {isa = PBXBuildFile; fileRef = BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */; };
 		F9F0F2F1736C4CE89A9A4737 /* FacebookConnectPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B7F79D80E4C4F06A021F2BC /* FacebookConnectPlugin.m */; };
+		620EA80A2E7F485F828DF1AB /* CDVStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -157,6 +158,8 @@
 		F43F4F136454466B8087AE85 /* ESTBeacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeacon.h; path = pl.makingwaves.estimotebeacons/ESTBeacon.h; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = Bubbl.li/config.xml; sourceTree = "<group>"; };
 		FB6929E719F64720AE0C7E66 /* CDVJpegHeaderWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVJpegHeaderWriter.h; path = org.apache.cordova.camera/CDVJpegHeaderWriter.h; sourceTree = "<group>"; };
+		39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVStatusBar.m"; path = "org.apache.cordova.statusbar/CDVStatusBar.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		7EDF02509D1F49708014D520 /* CDVStatusBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVStatusBar.h"; path = "org.apache.cordova.statusbar/CDVStatusBar.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -323,6 +326,8 @@
 				AC0E3BC5F558416794F5CAA9 /* CDVCamera.h */,
 				FB6929E719F64720AE0C7E66 /* CDVJpegHeaderWriter.h */,
 				2764C17AE25C46BEB617F0CE /* CDVExif.h */,
+				39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */,
+				7EDF02509D1F49708014D520 /* CDVStatusBar.h */,
 			);
 			name = Plugins;
 			path = Bubbl.li/Plugins;
@@ -531,6 +536,7 @@
 				28F18E968D0A48CA91FD534E /* UIImage+CropScaleOrientation.m in Sources */,
 				5DCAE841FF144A778C879F4C /* CDVCamera.m in Sources */,
 				297ADC1C634F470D86C641E4 /* CDVJpegHeaderWriter.m in Sources */,
+				620EA80A2E7F485F828DF1AB /* CDVStatusBar.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

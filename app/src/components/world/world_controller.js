@@ -81,7 +81,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 	$scope.isRetail = true;
 	}
 
-	 style.navBG_color = $scope.style.navBG_color;
+	style.setNavBG($scope.style.navBG_color);
 
 	 //show edit buttons if user is world owner
 	userManager.getUser()

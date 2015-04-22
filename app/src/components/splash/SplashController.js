@@ -69,6 +69,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 createShowSplash(false);
             });
         }
+        // @IFDEF PHONEGAP
+        StatusBar.styleDefault();
+        StatusBar.backgroundColorByHexString('#F4F5F7');
+        // @ENDIF
     }
 
     function createShowSplash(condition) {

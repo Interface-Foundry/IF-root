@@ -396,7 +396,8 @@ $scope.loadWorld = function(data) {
 	  	}
 
 		$scope.style = data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		// style.navBG_color = $scope.style.navBG_color;
+		style.setNavBG($scope.style.navBG_color);
 		if ($scope.world.hasLoc) {
 			console.log('hasLoc');
 			showPosition({
@@ -809,7 +810,8 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
-	style.navBG_color = current;
+	// style.navBG_color = current;
+	style.setNavBG(current);
 });
 
 /*

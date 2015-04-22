@@ -1,4 +1,4 @@
-app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', 'geoService', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs, geoService) {
+app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', 'geoService', 'styleManager', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs, geoService, styleManager) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -371,6 +371,7 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		console.log(data);
 		angular.extend($scope.world, data.world);
 		angular.extend($scope.style, data.style);
+		styleManager.setNavBG($scope.style.navBG_color);
 		
 		if ($scope.world.source_meetup && $scope.world.source_meetup.id) {
 			$scope.walk = meetupWalk;

@@ -31,21 +31,11 @@ nav {
 .subnav-fixed {
 	.subnav(); 
 	position: absolute;
-	/* @ifdef WEB */
 	margin-top: @nav-height;
-	/* @endif */
-	/* @ifdef PHONEGAP */
-	margin-top: @nav-height + 16px;
-	/* @endif */
 }
 
 .subnavfix {
-	/* @ifdef WEB */
 	padding-top: 96px !important;
-	/* @endif */
-	/* @ifdef PHONEGAP */
-	padding-top: 112px !important;
-	/* @endif */ 
 }
 
 .subnav-header {
@@ -1693,9 +1683,6 @@ margin-bottom: 4px;
 .search-aperture {
 	position: relative;
 	top: 45px;
-	/*@IFDEF PHONEGAP*/
-	top: 45px + @pg-offset;
-	/*@ENDIF*/
 }
 
 .search-aperture .search-cat {
@@ -1721,9 +1708,6 @@ and (min-width : 768px) {
 		top: 60px;
 		left: 1%;
 		display: block;
-		/*@IFDEF PHONEGAP*/
-		top: 60px + @pg-offset;
-		/*@ENDIF*/
 	}
 
 	.aperture-third .leaflet-bottom.leaflet-left,
@@ -1813,9 +1797,6 @@ button:focus {
 	position: absolute;
 	z-index: 101;
 	top: 48px;
-	/*@IFDEF PHONEGAP*/
-	top: 48px + @pg-offset;
-	/*@ENDIF*/
 	width: 100%;
 	height: 3px;
 }
