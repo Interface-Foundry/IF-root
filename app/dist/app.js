@@ -26323,6 +26323,8 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 		contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 		.then(function(data) {
 			$scope.entries.unshift(data);
+		}, function(error) {
+			console.log('Photo not uploaded: ', error);
 		});
 	}
 }
@@ -26379,8 +26381,9 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 			showConfirmationMessage();
 			worldTree.cacheSubmission(world._id, data.hashtag, result.imgURL);
 			deferred.resolve(result);
+		}).error(function(error) {
+			deferred.reject(error);
 		});
-
 		return deferred.promise;
 	}
 
@@ -28043,6 +28046,9 @@ $scope.uploadWTGT = function($files, hashtag) {
 	contestUploadService.uploadImage($files[0], $scope.world, hashtag)
 	.then(function(data) {
 		$scope.wtgt.images[hashtag] = data.imgURL;
+		$scope.wtgt.building[hashtag] = false;
+	}, function(error) {
+		console.log('Photo not uploaded: ', error);
 		$scope.wtgt.building[hashtag] = false;
 	});
 };

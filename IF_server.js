@@ -184,12 +184,16 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 require('./components/IF_auth/passport')(passport);
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
-app.use(connectBusboy({
-    highWaterMark: 10 * 1024 * 1024,
+app.use(connectBusboy(
+
+{
+    highWaterMark: 50 * 1024 * 1024,
     limits: {
-        fileSize: 1024 * 1024 * 10 // 
+        fileSize: 1024 * 1024 * 50  
     }
-}));
+}
+
+));
 
 
 
@@ -868,10 +872,13 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
 //upload pictures not for avatars
 app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
+    // console.log('Headers for upload',req.headers)
+
     var uploadContents = '';
 
     //capturing incoming extra data in upload
     req.busboy.on('field', function(key, val) {
+            // console.log('Field [' + key + ']: value: ' + val);
         uploadContents += val;
     });
 
@@ -885,15 +892,20 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
     req.busboy.on('file', function(fieldname, file, filename, filesize, mimetype) {
 
+        console.log('hitting busboy file event: ', fieldname, filename, filesize, mimetype)
+
         if (!mimetype == 'image/jpeg' || !mimetype == 'image/png' || !mimetype == 'image/gif' || !mimetype == 'image/jpg') {
-
+            console.log("Incorrect mime type.");
             res.send(500, 'Please use .jpg .png or .gif');
-
         }
-        if (req.headers['content-length'] > 10000000) {
+        if (parseFloat(req.headers['content-length']) > 50000000) {
+
             console.log("Filesize too large.");
+            res.sendStatus(500, 'File size is too large.')
         } else {
 
+
+        // console.log('*Successfully passed busboy filters.')
             var stuff_to_hash = filename + (new Date().toString());
             var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
             var fileType = filename.split('.').pop();
@@ -915,18 +927,13 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
             }).pipe(fstream);
 
             fstream.on('close', function() {
-
                     var buffer = readChunk.sync(tempPath, 0, 262);
-
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
-
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
-
                             if (err) console.log(err)
-
                             fs.readFile(tempPath, function(err, fileData) {
                                 var s3 = new AWS.S3();
                                 s3.putObject({
@@ -935,14 +942,11 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                     Body: fileData,
                                     ACL: 'public-read'
                                 }, function(err, data) {
-
                                     if (err)
                                         console.log(err);
                                     else {
                                         // res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                         fs.unlink(tempPath);
-
-
                                         //additional content was passed with the image, handle it here
                                         //Then save the contest entry
                                         if (uploadContents) {
@@ -1062,199 +1066,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                 }); // END OF FS READFILE
                             }) //END OF IM CONVERT
 
-                        // im.identify(['-format', '%[exif:orientation]', tempPath], function(err, output) {
-                        //     if (err) throw err;
-                        //     console.log('orientation: ' + output);
-                        //     var picorientation = output.toString().trim();
-                        //     switch (picorientation) {
-                        //         case '1':
-                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', tempPath], function(err, stdout, stderr) {
-                        //                 if (err) console.log(err)
-                        //                 console.log('not flipped.')
-                        //                 fs.readFile(tempPath, function(err, fileData) {
-                        //                     var s3 = new AWS.S3();
-                        //                     s3.putObject({
-                        //                         Bucket: 'if-server-general-images',
-                        //                         Key: awsKey,
-                        //                         Body: fileData,
-                        //                         ACL: 'public-read'
-                        //                     }, function(err, data) {
-
-                        //                         if (err)
-                        //                             console.log(err);
-                        //                         else {
-                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                        //                             fs.unlink(tempPath);
-
-                        //                             //additional content was passed with the image, handle it here
-                        //                             if (uploadContents) {
-                        //                                 try {
-                        //                                     uploadContents = JSON.parse(uploadContents);
-                        //                                 } catch (err) {
-                        //                                     console.log(err);
-                        //                                 }
-                        //                                 if (uploadContents.type == 'retail_campaign') {
-                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                        //                                 }
-                        //                             }
-
-                        //                         }
-                        //                     });
-                        //                 });
-                        //             })
-                        //             break;
-                        //         case '3':
-                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '180', tempPath], function(err, stdout, stderr) {
-                        //                 if (err) console.log(err)
-                        //                 console.log('flipped')
-                        //                 fs.readFile(tempPath, function(err, fileData) {
-                        //                     var s3 = new AWS.S3();
-                        //                     s3.putObject({
-                        //                         Bucket: 'if-server-general-images',
-                        //                         Key: awsKey,
-                        //                         Body: fileData,
-                        //                         ACL: 'public-read'
-                        //                     }, function(err, data) {
-
-                        //                         if (err)
-                        //                             console.log(err);
-                        //                         else {
-                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                        //                             fs.unlink(tempPath);
-
-                        //                             //additional content was passed with the image, handle it here
-                        //                             if (uploadContents) {
-                        //                                 try {
-                        //                                     uploadContents = JSON.parse(uploadContents);
-                        //                                 } catch (err) {
-                        //                                     console.log(err);
-                        //                                 }
-                        //                                 if (uploadContents.type == 'retail_campaign') {
-                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                        //                                 }
-                        //                             }
-
-                        //                         }
-                        //                     });
-                        //                 });
-                        //             })
-                        //             break;
-                        //         case '6':
-                        //             console.log('hitting ', picorientation);
-                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '90', tempPath], function(err, stdout, stderr) {
-                        //                 if (err) console.log(err)
-                        //                 console.log('flipped!!!!!')
-                        //                 fs.readFile(tempPath, function(err, fileData) {
-                        //                     var s3 = new AWS.S3();
-                        //                     s3.putObject({
-                        //                         Bucket: 'if-server-general-images',
-                        //                         Key: awsKey,
-                        //                         Body: fileData,
-                        //                         ACL: 'public-read'
-                        //                     }, function(err, data) {
-
-                        //                         if (err)
-                        //                             console.log(err);
-                        //                         else {
-                        //                             console.log('front end link is https://s3.amazonaws.com/if-server-general-images/' + awsKey)
-                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                        //                             fs.unlink(tempPath);
-
-                        //                             //additional content was passed with the image, handle it here
-                        //                             if (uploadContents) {
-                        //                                 try {
-                        //                                     uploadContents = JSON.parse(uploadContents);
-                        //                                 } catch (err) {
-                        //                                     console.log(err);
-                        //                                 }
-                        //                                 if (uploadContents.type == 'retail_campaign') {
-                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                        //                                 }
-                        //                             }
-
-                        //                         }
-                        //                     });
-                        //                 });
-                        //             })
-                        //             break;
-                        //         case '8':
-                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', '-rotate', '270', tempPath], function(err, stdout, stderr) {
-                        //                 if (err) console.log(err)
-                        //                 console.log('flipped!!!!!')
-                        //                 fs.readFile(tempPath, function(err, fileData) {
-                        //                     var s3 = new AWS.S3();
-                        //                     s3.putObject({
-                        //                         Bucket: 'if-server-general-images',
-                        //                         Key: awsKey,
-                        //                         Body: fileData,
-                        //                         ACL: 'public-read'
-                        //                     }, function(err, data) {
-
-                        //                         if (err)
-                        //                             console.log(err);
-                        //                         else {
-                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                        //                             fs.unlink(tempPath);
-
-                        //                             //additional content was passed with the image, handle it here
-                        //                             if (uploadContents) {
-                        //                                 try {
-                        //                                     uploadContents = JSON.parse(uploadContents);
-                        //                                 } catch (err) {
-                        //                                     console.log(err);
-                        //                                 }
-                        //                                 if (uploadContents.type == 'retail_campaign') {
-                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                        //                                 }
-                        //                             }
-
-                        //                         }
-                        //                     });
-                        //                 });
-                        //             })
-                        //             break;
-                        //         default:
-                        //             im.convert([tempPath, '-resize', '600', '-quality', '0.8', tempPath], function(err, stdout, stderr) {
-                        //                 if (err) console.log(err)
-                        //                 console.log('not flipped.')
-                        //                 fs.readFile(tempPath, function(err, fileData) {
-                        //                     var s3 = new AWS.S3();
-                        //                     s3.putObject({
-                        //                         Bucket: 'if-server-general-images',
-                        //                         Key: awsKey,
-                        //                         Body: fileData,
-                        //                         ACL: 'public-read'
-                        //                     }, function(err, data) {
-
-                        //                         if (err)
-                        //                             console.log(err);
-                        //                         else {
-
-                        //                             res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                        //                             fs.unlink(tempPath);
-
-                        //                             //additional content was passed with the image, handle it here
-                        //                             if (uploadContents) {
-                        //                                 try {
-                        //                                     uploadContents = JSON.parse(uploadContents);
-                        //                                 } catch (err) {
-                        //                                     console.log(err);
-                        //                                 }
-                        //                                 if (uploadContents.type == 'retail_campaign') {
-                        //                                     submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id); //contest entry, send to bac
-                        //                                 }
-                        //                             }
-
-                        //                         }
-                        //                     });
-                        //                 });
-                        //             })
-                        //     } //END OF SWITCH
-                        // }); //END OF IM.IDENTIFY
-
-
-
-
+                       
                     } //END OF INNER ELSE
                 }) //END OF FS.STREAM ON
         } //END OF OUTER ELSE
