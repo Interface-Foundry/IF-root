@@ -56,7 +56,7 @@ body {
 .navfix {
 	padding-top: 48px;
 	/* @IFDEF PHONEGAP */
-	padding-top: 64px;
+	/*padding-top: 64px;*/
 	/* @ENDIF */
 }
 

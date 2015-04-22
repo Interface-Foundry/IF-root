@@ -3,7 +3,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 
 	var style = styleManager;
 
-	style.navBG_color = "#3d66ca";
+	style.setNavBG("#3d66ca");
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);

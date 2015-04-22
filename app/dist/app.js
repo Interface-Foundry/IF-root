@@ -19047,22 +19047,54 @@ angular.module('tidepoolsServices')
 
 	.factory('styleManager', [
 		function() {
-var styleManager = {
-	navBG_color: 'rgba(62, 82, 181, 0.96)' 
-	//---local settings---
-	/*bodyBG_color: '#FFF',
-	titleBG_color,
-	//text settings
-	title_color,
-	worldTitle_color,
-	landmarkTitle_color		*/
-}
+			var styleManager = {
+				navBG_color: 'rgba(62, 82, 181, 0.96)' 
+				//---local settings---
+				/*bodyBG_color: '#FFF',
+				titleBG_color,
+				//text settings
+				title_color,
+				worldTitle_color,
+				landmarkTitle_color		*/
+			}
 
-styleManager.resetNavBG = function() {
-	styleManager.navBG_color = 'rgba(62, 82, 181, 0.96)';
-}
+			styleManager.resetNavBG = function() {
+				styleManager.navBG_color = 'rgba(62, 82, 181, 0.96)';
+			}
 
-return styleManager;
+			styleManager.setNavBG = function(color) {
+				styleManager.navBG_color = color;
+			}
+
+			// update statusbar for ios. handles hex and rgba values
+			function updateStatusBar(color) {
+				if (color[0] !== '#') {
+					var rgb = getRgbValues(color);
+					color = rgbToHex(rgb.r, rgb.g, rgb.b)
+				}
+				StatusBar.backgroundColorByHexString(color);
+			}
+
+			function getRgbValues(color) {
+				var arr = color.slice(5, -1).split(',');
+				return {
+					r: Number(arr[0]),
+					g: Number(arr[1]),
+					b: Number(arr[2])
+				};
+			}
+
+			function componentToHex(c) {
+		    var hex = c.toString(16);
+		    return hex.length == 1 ? '0' + hex : hex;
+			}
+
+			function rgbToHex(r, g, b) {
+			  return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
+			}
+
+			return styleManager;
+
 		}
 	]);
 angular.module('tidepoolsServices')
@@ -22066,7 +22098,8 @@ $scope.loadWorld = function(data) {
 	  	}
 
 		$scope.style = data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		// style.navBG_color = $scope.style.navBG_color;
+		style.setNavBG($scope.style.navBG_color);
 		if ($scope.world.hasLoc) {
 			console.log('hasLoc');
 			showPosition({
@@ -22479,7 +22512,8 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
-	style.navBG_color = current;
+	// style.navBG_color = current;
+	style.setNavBG(current);
 });
 
 /*
@@ -23086,7 +23120,7 @@ $scope.onUploadAvatar = function($files) {
 	
 }]);
 
-app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', 'geoService', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs, geoService) {
+app.controller('WalkthroughController', ['$scope', '$location', '$q', '$route', '$routeParams', '$timeout', 'ifGlobals', 'leafletData', '$upload', 'mapManager', 'World', 'db', '$window', 'dialogs', 'geoService', 'styleManager', function($scope, $location, $q, $route, $routeParams, $timeout, ifGlobals, leafletData, $upload, mapManager, World, db, $window, dialogs, geoService, styleManager) {
 
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////
@@ -23449,6 +23483,7 @@ World.get({id: $routeParams._id, m: true}, function(data) {
 		console.log(data);
 		angular.extend($scope.world, data.world);
 		angular.extend($scope.style, data.style);
+		styleManager.setNavBG($scope.style.navBG_color);
 		
 		if ($scope.world.source_meetup && $scope.world.source_meetup.id) {
 			$scope.walk = meetupWalk;
@@ -24914,7 +24949,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 
 	var style = styleManager;
 
-	style.navBG_color = "#3d66ca";
+	style.setNavBG("#3d66ca");
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -24940,7 +24975,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 	var style = styleManager;
 
-	style.navBG_color = "#ed4023";
+	style.setNavBG("#ed4023")
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -26448,7 +26483,7 @@ var aperture = apertureService;
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
-	style.navBG_color = $scope.style.navBG_color;
+	styleManager.setNavBG($scope.style.navBG_color);
 	if ($scope.world.name) {
 		angular.extend($rootScope, {globalTitle: $scope.world.name});
 	}
@@ -27137,7 +27172,7 @@ $scope.$watch('editing', function(newBool, oldBool) {
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		styleManager.setNavBG($scope.style.navBG_color);
 
 	$scope.world=data.world;
 
@@ -28085,7 +28120,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	 	$scope.isRetail = true;
 	}
 
-	 style.navBG_color = $scope.style.navBG_color;
+	style.setNavBG($scope.style.navBG_color);
 
 	 //show edit buttons if user is world owner
 	userManager.getUser()
