@@ -227,7 +227,6 @@ module.exports = function(passport) {
     // FACEBOOK ================================================================
     // =========================================================================
 	function findExistingFacebookUser(profile, callback) {
-		debugger;
 		// need to look for users that match this app-specific id
 		// or users that match the profile email (legacy fb users from Bubbl.li)
 		Users.find({$or: [
@@ -267,9 +266,8 @@ module.exports = function(passport) {
 	 * effffff
 	 */
 	function mergeFacebookUsers(users, profile, callback) {
-		debugger;
-		if (!users || !users.length) { callback() }
-		if (users.length == 1) { callback(null, users[0]) }
+		if (!users || !users.length) { return callback() }
+		if (users.length == 1) { return callback(null, users[0]) }
 
 		console.log('LONG LOST USERS REUNITED AT LAST');
 		console.log(users.map(function(u) { return u._id.toString()}).join(', '));
@@ -279,14 +277,7 @@ module.exports = function(passport) {
 		var oldUsers = users.slice(1);
 
 		// And force the facebook stuff to be correct
-		kipUser.facebook.id = profile.id;
-		kipUser.facebook.email = profile.email;
-		kipUser.facebook.name = profile.name;
-		kipUser.facebook.token = profile.token;
-		kipUser.facebook.verified = !!profile.verified;
-		kipUser.facebook.locale = profile.locale;
-		kipUser.facebook.timezone = profile.timezone;
-		kipUser.facebook.bio = profile.bio;
+		lodash.merge(kipUser.facebook, profile);
 
 		var promises = [];
 
@@ -430,7 +421,7 @@ module.exports = function(passport) {
 
                             newUser.facebook.id = profile.id;
                             newUser.facebook.token = token;
-                            newUser.facebook.name = profile.displayName;
+                            newUser.facebook.name = profile.name;
 
                             if (profile.email) {
                                 newUser.facebook.email = profile.email;
