@@ -149,4 +149,8 @@ if (beaconManager.supported == true) {
 }
 //@ENDIF
 
+
+
+
+
 }]);
