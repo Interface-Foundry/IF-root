@@ -26,9 +26,10 @@ var userManager = {
 
 userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
-
+	console.log('getUser called, user is:', userManager._user)
 	var user = userManager._user; //user cached in memory 
 	if (!(_.isEmpty(user))) {  
+		console.log('should resolve')
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -175,7 +176,9 @@ userManager.fbLogin = function() { //login based on facebook approval
 		   				lockerManager.saveFBToken(fbToken);
 						ifGlobals.fbToken = fbToken;
 						
-						
+						userManager._user = res.data;
+						console.log('fbLogin: userManager._user: ', userManager._user)
+
 						userManager.loginStatus = true;
 						//userManager.adminStatus = data.admin ? true : false;
 						ifGlobals.loginStatus = true;
@@ -208,6 +211,9 @@ userManager.fbLogin = function() { //login based on facebook approval
 	
 	return deferred.promise;
 }
+
+//MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
+
 
 userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});

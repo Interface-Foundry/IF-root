@@ -154,9 +154,9 @@ lockerManager.getCredentials().then(function(credentials) {
 
 	console.log('STARTING getCredentials()',credentials);
 
-	if (credentials.username, credentials.password) {
+	if (credentials.username, credentials.password, !credentials.fbToken) {
 
-		console.log('LOCAL FROM LOCKER');
+		console.log('Local login');
 
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
@@ -168,15 +168,18 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
-		console.log('LOCAL FROM LOCKER');
+		console.log('Fb keychain exists.');
 
 		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() PHONEGAP',success);
-			console.log(success);	
+
+		userManager.fbLogin().then(function(success) {
+			console.log('userManager.fbLogin() PHONEGAP',success);
+			console.log('loaded facebook user: ',userManager._user);	
 		})
+
+
 	}
 	else {
 		console.log('NONE OF THE THOSE');
