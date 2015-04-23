@@ -215,6 +215,78 @@ module.exports = function(passport) {
     // =========================================================================
     // FACEBOOK ================================================================
     // =========================================================================
+	function findExistingFacebookUser(profile, callback) {
+		// need to look for users that match this app-specific id
+		// or users that match the profile email (legacy fb users from Bubbl.li)
+		Users.find({$or: [{'facebook.id': profile.id}, {'facebook.email': profile.email}])
+			.exec(function(err, users) {
+				if (err) { return callback(err); }
+				if (!users) { return callback(); }
+
+				var u;
+
+				// When there is only one user in the db, that user might be an old
+				// Bubbl.li user or just a kip user.  
+				if (users.length === 1) {
+					u = users[0];
+
+					// old bubbl.li user, update profile id
+					if (u.facebook.id !== profile.id) {
+						u.facebook.id = profile.id;
+						u.save(function(err, u) {
+							if (err) { return callback(err); }
+							callback(null, u);
+						}
+					} else {
+						callback(null, u);
+					}
+
+					return;
+				}
+
+				// When there are multiple users in the db, that means there are both Bubbl.li
+				// and kip users in the db.  we need to merge them.
+				mergeFacebookUsers(users, profile, callback);
+			}
+	}
+
+	/**
+	 * Merge Bubbl.li users into a kip user...
+	 * effffff
+	 */
+	function mergeFacebookUsers(users, profile, callback) {
+		if (!users || !users.length) { callback() }
+		if (users.length == 1) { callback(null, users[0]) }
+
+		// promote the first user to the kip user
+		var kipUser = users[0];
+
+		// And force the facebook stuff to be correct
+		kipUser.facebook.id = profile.id;
+		kipUser.facebook.email = profile.email;
+		kipUser.facebook.name = profile.name;
+		kipUser.facebook.token = profile.token;
+		kipUser.facebook.verified = !!profile.verified;
+		kipUser.facebook.locale = profile.locale;
+		kipUser.facebook.timezone = profile.timezone;
+
+		var promises = [];
+
+		promises.push(kipUser.save());
+
+		// Migrate all the other bubbles to this new id.  shit.  this gonna suck.
+		users.slice(1).forEach(function(u) {
+
+		});
+
+		q.all(promises).then(function() {
+			callback(null, kipUser);
+		}, function(err) {
+			callback(err);
+		});
+
+	}
+
     passport.use(new FacebookStrategy({
 
             clientID: global.config.facebookAuth.clientID,
@@ -228,15 +300,14 @@ module.exports = function(passport) {
             // asynchronous
             process.nextTick(function() {
 
-                // check if the user is already logged in
-                if (!req.user) {
+				// look for an existing facebook user for this profile in the db.
+				findExistingFacebookUser(profile, function(err, user) {
+					if (err) {
+						return done(err);
+					}
 
-                    User.findOne({
-                        'facebook.id': profile.id
-                    }, function(err, user) {
-                        if (err)
-                            return done(err);
-
+					// check if the user is already logged in
+					if (!req.user) {
                         if (user) {
 
                             // if there is a user id already but no token (user was linked at one point and then removed)
