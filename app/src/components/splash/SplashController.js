@@ -1,4 +1,4 @@
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
@@ -65,11 +65,53 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     }
                 });
         } else {
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+
+            //@IFDEF KEYCHAIN
+            //On Phonegap startup, try to login with either saved username/pw or facebook
+            lockerManager.getCredentials().then(function(credentials) {
+                // console.log('STARTING getCredentials()',credentials);
+                if (credentials.username, credentials.password) {
+                    // console.log('LOCAL FROM LOCKER');
+                    userManager.signin(credentials.username, credentials.password).then(function(success) {
+                        userManager.checkLogin().then(function(success) {
+                            // console.log('userManager.checkLogin() LOCAL LOGIN',success);
+                            // console.log(success);
+                            createShowSplash(true);
+                        });
+                    }, function(reason) {
+                        // console.log('credential signin error', reason);
+                        createShowSplash(false);
+                    });
+                } else if (credentials.fbToken) {
+                    // console.log('LOCAL FROM LOCKER');
+                    //console.log('retrieved fbook key',credentials.fbToken);
+                    ifGlobals.fbToken = credentials.fbToken;
+                    userManager.checkLogin().then(function(success) {
+                        // console.log('userManager.checkLogin() PHONEGAP',success);
+                        // console.log(success);   
+                        createShowSplash(true);
+                    }, function(reason) {
+                        createShowSplash(false);
+                    });
+                } else {
+                    // console.log('NONE OF THE THOSE');
+                    createShowSplash(false);
+                }
+            }, function(err) {
+                // console.log('credential error', error); 
+                createShowSplash(false);
+            });
+            //@ENDIF
+
+            // @IFDEF WEB
             userManager.getUser().then(function(success) {
                 createShowSplash(true);
             }, function(err) {
                 createShowSplash(false);
             });
+            // @ENDIF
+
         }
         // @IFDEF PHONEGAP
         StatusBar.styleDefault();
@@ -250,18 +292,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.errorMsg = '';
             }, time);
         }
-    }
-
-    //TEMP HACK to make splash page hide on special PHONEGAP logins
-    $timeout(function() {
-        userManager.getUser().then(function(success) {
-            createShowSplash(true);
-        }, function(err) {
-            createShowSplash(false);
-        });
-    }, 2600);
-
-  
-    
+    }    
 
 }]);

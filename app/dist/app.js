@@ -24233,7 +24233,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
@@ -24300,6 +24300,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     }
                 });
         } else {
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+
             userManager.getUser().then(function(success) {
                 createShowSplash(true);
             }, function(err) {
@@ -24478,19 +24480,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.errorMsg = '';
             }, time);
         }
-    }
-
-    //TEMP HACK to make splash page hide on special PHONEGAP logins
-    $timeout(function() {
-        userManager.getUser().then(function(success) {
-            createShowSplash(true);
-        }, function(err) {
-            createShowSplash(false);
-        });
-    }, 2600);
-
-  
-    
+    }    
 
 }]);
 
