@@ -45,6 +45,7 @@ var landmarksLoaded = false;
 			$scope.landmarks.unshift(tempLandmark);		
 
 			//add marker
+			var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
@@ -58,7 +59,8 @@ var landmarksLoaded = false;
 				},
 				draggable:true,
 				message:'Drag to location on map',
-				focus:true
+				focus:true,
+				alt: alt
 			});
 
 		});
