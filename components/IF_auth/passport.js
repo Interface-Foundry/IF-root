@@ -8,6 +8,15 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 var CustomFBStrategy = require('./custom_fb_strategy/custom_strategy').Strategy;
 // load up the user model
 var User = require('../IF_schemas/user_schema.js');
+var Users = User; // yay.
+
+// required for modifying userids across the platform
+var Landmarks = require('../IF_schemas/landmark_schema.js');
+var ContestEntries = require('../IF_schemas/contestEntry_schema.js');
+var Stickers = require('../IF_schemas/sticker_schema.js');
+var Worldchats = require('../IF_schemas/worldchat_schema.js');
+var Projects = require('../IF_schemas/project_schema.js');
+var Visits = require('../IF_schemas/visit_schema.js');
 var https = require('https');
 var urlify = require('urlify').create({
     addEToUmlauts: true,
@@ -17,6 +26,8 @@ var urlify = require('urlify').create({
     trim: true
 });
 
+var lodash = require('lodash');
+var q = require('q');
 var async = require('async');
 
 // load the auth variables
@@ -216,38 +227,39 @@ module.exports = function(passport) {
     // FACEBOOK ================================================================
     // =========================================================================
 	function findExistingFacebookUser(profile, callback) {
+		debugger;
 		// need to look for users that match this app-specific id
 		// or users that match the profile email (legacy fb users from Bubbl.li)
-		Users.find({$or: [{'facebook.id': profile.id}, {'facebook.email': profile.email}])
-			.exec(function(err, users) {
-				if (err) { return callback(err); }
-				if (!users) { return callback(); }
+		Users.find({$or: [
+			{'facebook.id': profile.id},
+			{'facebook.email': profile.email}
+		]}).exec(function(err, users) {
+			if (err) { return callback(err); }
+			if (!users) { return callback(); }
 
-				var u;
+			// When there is only one user in the db, that user might be an old
+			// Bubbl.li user or just a kip user.  
+			if (users.length === 1) {
+				var u = users[0];
 
-				// When there is only one user in the db, that user might be an old
-				// Bubbl.li user or just a kip user.  
-				if (users.length === 1) {
-					u = users[0];
-
-					// old bubbl.li user, update profile id
-					if (u.facebook.id !== profile.id) {
-						u.facebook.id = profile.id;
-						u.save(function(err, u) {
-							if (err) { return callback(err); }
-							callback(null, u);
-						}
-					} else {
+				// old bubbl.li user, update profile id
+				if (u.facebook.id !== profile.id) {
+					u.facebook.id = profile.id;
+					u.save(function(err, u) {
+						if (err) { return callback(err); }
 						callback(null, u);
-					}
-
-					return;
+					});
+				} else {
+					callback(null, u);
 				}
 
-				// When there are multiple users in the db, that means there are both Bubbl.li
-				// and kip users in the db.  we need to merge them.
-				mergeFacebookUsers(users, profile, callback);
+				return;
 			}
+
+			// When there are multiple users in the db, that means there are both Bubbl.li
+			// and kip users in the db.  we need to merge them.
+			mergeFacebookUsers(users, profile, callback);
+		});
 	}
 
 	/**
@@ -255,11 +267,16 @@ module.exports = function(passport) {
 	 * effffff
 	 */
 	function mergeFacebookUsers(users, profile, callback) {
+		debugger;
 		if (!users || !users.length) { callback() }
 		if (users.length == 1) { callback(null, users[0]) }
 
+		console.log('LONG LOST USERS REUNITED AT LAST');
+		console.log(users.map(function(u) { return u._id.toString()}).join(', '));
+
 		// promote the first user to the kip user
 		var kipUser = users[0];
+		var oldUsers = users.slice(1);
 
 		// And force the facebook stuff to be correct
 		kipUser.facebook.id = profile.id;
@@ -269,19 +286,59 @@ module.exports = function(passport) {
 		kipUser.facebook.verified = !!profile.verified;
 		kipUser.facebook.locale = profile.locale;
 		kipUser.facebook.timezone = profile.timezone;
+		kipUser.facebook.bio = profile.bio;
 
 		var promises = [];
 
-		promises.push(kipUser.save());
-
 		// Migrate all the other bubbles to this new id.  shit.  this gonna suck.
-		users.slice(1).forEach(function(u) {
+		var newId = kipUser._id.toString();
+		var oldIds = oldUsers.map(function(u) { return u._id.toString(); });
+		var inOldIds = {$in: oldIds};
 
+		// landmarks
+		promises.push(Landmarks.update({'permissions.ownerID': inOldIds}, {$set: {'permissions.ownerID': newId}}, {multi: true}));
+		// i checked and there were no landmarks with viewers or admins in the db :D HJFBSDFGHL:
+
+		// worldchats
+		promises.push(Worldchats.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}));
+
+		// contest entry
+		promises.push(ContestEntries.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}));
+
+		// projects
+		promises.push(Projects.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}));
+		// i checked and there are no projects with viewers or editors in the db :D THANK GAWDS
+		
+		// shtickersh
+		promises.push(Stickers.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}));
+
+		// visits
+		promises.push(Visits.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}));
+
+		// users fffffff
+		// merge might work..... we'll see.
+		console.dir(kipUser);
+		console.dir(oldUsers);
+		oldUsers.map(function(u) {
+			u = u.toObject();
+			delete u._id;
+			lodash.merge(kipUser, u);
 		});
-
+		console.log('merge finished');
+		console.dir(kipUser);
+		
+		// yay
 		q.all(promises).then(function() {
+			console.log("all promises succeeded");
 			callback(null, kipUser);
+
+			// BURN THE OLD USERS. BURN THEM TO THE GROUND.
+			oldUsers.map(function(u) {
+				u.remove();
+			});
 		}, function(err) {
+			console.log("failed a promise");
+			console.error(err);
 			callback(err);
 		});
 
@@ -296,6 +353,9 @@ module.exports = function(passport) {
 
         },
         function(req, token, refreshToken, profile, done) {
+			if (profile._json) {
+				profile = profile._json; // this is the actual data that we want
+			}
 
             // asynchronous
             process.nextTick(function() {
@@ -407,52 +467,51 @@ module.exports = function(passport) {
                             });
 
 
-                        }
-                    });
+						}
+					} else {
+						// user already exists and is logged in, we have to link accounts
+						var user = req.user; // pull the user out of the session
+						user.facebook.id = profile.id;
+						user.facebook.token = token;
+						user.facebook.name = profile.displayName;
+						if (profile.email) {
+							user.facebook.email = profile.email;
+						}
+						if (profile.verified) {
+							user.facebook.verified = profile.verified;
+						}
+						if (profile.locale) {
+							user.facebook.locale = profile.locale;
+						}
+						if (profile.timezone) {
+							user.facebook.timezone = profile.timezone;
+						}
 
-                } else {
-                    // user already exists and is logged in, we have to link accounts
-                    var user = req.user; // pull the user out of the session
-                    user.facebook.id = profile.id;
-                    user.facebook.token = token;
-                    user.facebook.name = profile.displayName;
-                    if (profile.email) {
-                        user.facebook.email = profile.email;
-                    }
-                    if (profile.verified) {
-                        user.facebook.verified = profile.verified;
-                    }
-                    if (profile.locale) {
-                        user.facebook.locale = profile.locale;
-                    }
-                    if (profile.timezone) {
-                        user.facebook.timezone = profile.timezone;
-                    }
-
-                    if (!user.profileID) {
-                        if (user.facebook.name.indexOf(" ") > -1) {
-                            var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
-                        } else {
-                            var input = user.facebook.name
-                        }
-                        uniqueProfileID(input, function(output) {
-                            user.profileID = output;
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
-                                //NEW USER CREATED
-                            });
-                        });
-                    } else {
-                        user.save(function(err) {
-                            if (err)
-                                throw err;
-                            return done(null, user);
-                            //ADDED TO YOUR ACCOUNT
-                        });
-                    }
-                }
+						if (!user.profileID) {
+							if (user.facebook.name.indexOf(" ") > -1) {
+								var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
+							} else {
+								var input = user.facebook.name
+							}
+							uniqueProfileID(input, function(output) {
+								user.profileID = output;
+								user.save(function(err) {
+									if (err)
+										throw err;
+									return done(null, user);
+									//NEW USER CREATED
+								});
+							});
+						} else {
+							user.save(function(err) {
+								if (err)
+									throw err;
+								return done(null, user);
+								//ADDED TO YOUR ACCOUNT
+							});
+						}
+					}
+				});
             });
 
         }));
