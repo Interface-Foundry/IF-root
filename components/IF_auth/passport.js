@@ -296,24 +296,24 @@ module.exports = function(passport) {
 		var inOldIds = {$in: oldIds};
 
 		// landmarks
-		promises.push(Landmarks.update({'permissions.ownerID': inOldIds}, {$set: {'permissions.ownerID': newId}}, {multi: true}));
+		promises.push(Landmarks.update({'permissions.ownerID': inOldIds}, {$set: {'permissions.ownerID': newId}}, {multi: true}).exec());
 		// i checked and there were no landmarks with viewers or admins in the db :D HJFBSDFGHL:
 
 		// worldchats
-		promises.push(Worldchats.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}));
+		promises.push(Worldchats.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}).exec());
 
 		// contest entry
-		promises.push(ContestEntries.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}));
+		promises.push(ContestEntries.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}).exec());
 
 		// projects
-		promises.push(Projects.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}));
+		promises.push(Projects.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}).exec());
 		// i checked and there are no projects with viewers or editors in the db :D THANK GAWDS
 		
 		// shtickersh
-		promises.push(Stickers.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}));
+		promises.push(Stickers.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}).exec());
 
 		// visits
-		promises.push(Visits.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}));
+		promises.push(Visits.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}).exec());
 
 		// users fffffff
 		// merge might work..... we'll see.
