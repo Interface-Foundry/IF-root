@@ -2854,7 +2854,6 @@ span.nearby-list-icon.loading {
   border-top: 1px solid #ccc;
 }
 /* *NAV* Navigation Bar */
-/*pg-offset for iOS native navbar (battery, carrier, etc.) elements that have offset include: [text search for @pg-offset]*/
 nav.main-nav {
   position: fixed;
   top: 0;
