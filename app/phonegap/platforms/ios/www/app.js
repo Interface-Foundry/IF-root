@@ -6758,14 +6758,14 @@ app.filter('encodeDotFilter', [function() {
 	 	if (direction === 'encode') {
 	 		input = String(input);
 	 		return input.replace('.', 'dot');
-	 	} else if (direction == 'decode') {
+	 	} else if (direction === 'decode') {
 	 		input = input.replace('dot', '.');
 	 		if (toFloat) {
 	 			return parseFloat(input);
 	 		}
 	 		return input;
 	 	}
-	 }
+	 };
 
 }]);
 /*!
@@ -24081,6 +24081,7 @@ $scope.alerts = alertManager;
 $scope.userManager = userManager;
 $scope.navService = navService;
 $scope.dialog = dialogs;
+$scope.routeParams = $routeParams;
     
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
@@ -24209,41 +24210,6 @@ $scope.fbLogin = function() {
 			console.log(failure);	
 		})
 }
-//On Phonegap startup, try to login with either saved username/pw or facebook
-lockerManager.getCredentials().then(function(credentials) {
-
-	console.log('STARTING getCredentials()',credentials);
-
-	if (credentials.username, credentials.password) {
-
-		console.log('LOCAL FROM LOCKER');
-
-		userManager.signin(credentials.username, credentials.password).then(function(success) {
-			userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() LOCAL LOGIN',success);
-			console.log(success);
-			});
-		}, function (reason) {
-			console.log('credential signin error', reason)
-		});
-	} else if (credentials.fbToken) {
-
-		console.log('LOCAL FROM LOCKER');
-
-		//console.log('retrieved fbook key',credentials.fbToken);
-
-		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() PHONEGAP',success);
-			console.log(success);	
-		})
-	}
-	else {
-		console.log('NONE OF THE THOSE');
-	}
-}, function(err) {
-	console.log('credential error', error); 
-});
 }]);
 
 // DEPRACATED
@@ -24419,10 +24385,12 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
+    $scope.setShowSplashFalse = setShowSplashFalse;
+    $scope.setShowSplashReset = setShowSplashReset;
     $scope.splashNext = splashNext;
     $scope.resendEmail = resendEmail;
     $scope.sendPasswordForgot = sendPasswordForgot;
@@ -24484,9 +24452,40 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     }
                 });
         } else {
-            userManager.getUser().then(function(success) {
-                createShowSplash(true);
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+
+            //On Phonegap startup, try to login with either saved username/pw or facebook
+            lockerManager.getCredentials().then(function(credentials) {
+                // console.log('STARTING getCredentials()',credentials);
+                if (credentials.username, credentials.password) {
+                    // console.log('LOCAL FROM LOCKER');
+                    userManager.signin(credentials.username, credentials.password).then(function(success) {
+                        userManager.checkLogin().then(function(success) {
+                            // console.log('userManager.checkLogin() LOCAL LOGIN',success);
+                            // console.log(success);
+                            createShowSplash(true);
+                        });
+                    }, function(reason) {
+                        // console.log('credential signin error', reason);
+                        createShowSplash(false);
+                    });
+                } else if (credentials.fbToken) {
+                    // console.log('LOCAL FROM LOCKER');
+                    //console.log('retrieved fbook key',credentials.fbToken);
+                    ifGlobals.fbToken = credentials.fbToken;
+                    userManager.checkLogin().then(function(success) {
+                        // console.log('userManager.checkLogin() PHONEGAP',success);
+                        // console.log(success);   
+                        createShowSplash(true);
+                    }, function(reason) {
+                        createShowSplash(false);
+                    });
+                } else {
+                    // console.log('NONE OF THE THOSE');
+                    createShowSplash(false);
+                }
             }, function(err) {
+                // console.log('credential error', error); 
                 createShowSplash(false);
             });
         }
@@ -24542,6 +24541,22 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show[property] = bool;
         }
     }
+
+    function setShowSplashFalse() {
+        // sets all $scope.show to false
+        _.each($scope.show, function(value, key) {
+            $scope.show[key] = false;
+        });
+    }
+
+    function setShowSplashReset() {
+        // sets all $scpe.show to false, except $scope.show.splash
+        _.each($scope.show, function(value, key) {
+            $scope.show[key] = false;
+        });
+        $scope.show.splash = true;
+    }
+
 
     function splashNext() {
         // login or create account, depending on context
@@ -24629,7 +24644,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             } else {
                 $location.path('/');
                 $timeout(function() {
-                    setShowSplash('splash', false);
+                    setShowSplashFalse();
                 }, 500);
                 alertManager.addAlert('info', 'Password changed successfully', true);
             }
@@ -24646,19 +24661,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.errorMsg = '';
             }, time);
         }
-    }
-
-    //TEMP HACK to make splash page hide on special PHONEGAP logins
-    $timeout(function() {
-        userManager.getUser().then(function(success) {
-            createShowSplash(true);
-        }, function(err) {
-            createShowSplash(false);
-        });
-    }, 2600);
-
-  
-    
+    }    
 
 }]);
 
@@ -25150,7 +25153,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 		}, 20));
 
 	$scope.openSignup = function(){
-		$scope.setShowSplash('splash', true);
+		$scope.setShowSplashReset();
 	}
 	
 	// $scope.loadmeetup = function() {
@@ -25173,10 +25176,10 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		console.log(this.scrollTop);
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
-		}, 20));
+	}, 20));
 
 	$scope.openSignup = function(){
-		$scope.setShowSplash('splash', true);
+		$scope.setShowSplashReset();
 	}
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
@@ -26534,7 +26537,7 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 			event.stopPropagation();
 			alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 			$timeout(function() {
-				$scope.setShowSplash('splash', true);
+				$scope.setShowSplashReset();
 				contest.set($scope.hashtag);
 			}, 2000);	
 		}
@@ -28251,7 +28254,7 @@ $scope.verifyUpload = function(event, state) {
 		event.stopPropagation();
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
-			$scope.setShowSplash('splash', true);
+			$scope.setShowSplashReset();
 			contest.set($scope.wtgt.hashtags[state]);
 		}, 2000);
 		

@@ -2532,6 +2532,13 @@ transform:translateX(100%);
 .u-colorLinkBlue {
   color: #428bca;
 }
+.u-textHighlight {
+  background-color: #d2d2d2;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 2px;
+  word-wrap: break-word;
+}
 #aperture {
   overflow: hidden;
   position: absolute;
@@ -2736,6 +2743,9 @@ transform:translateX(100%);
 }
 .drawer-share {
   background: center / 24px 24px url('img/icons/drawer/share_b.png') no-repeat;
+}
+.drawer-share--small {
+  background: center / 20px 20px url('img/icons/drawer/share_b.png') no-repeat;
 }
 .drawer-item:hover .drawer-share {
   background: center / 24px 24px url('img/icons/drawer/share_w.png') no-repeat;

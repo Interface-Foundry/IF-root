@@ -7,6 +7,7 @@ $scope.alerts = alertManager;
 $scope.userManager = userManager;
 $scope.navService = navService;
 $scope.dialog = dialogs;
+$scope.routeParams = $routeParams;
     
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
@@ -147,45 +148,5 @@ if (beaconManager.supported == true) {
 	beaconManager.startListening();
 }
 //@ENDIF
-
-//@IFDEF KEYCHAIN
-//On Phonegap startup, try to login with either saved username/pw or facebook
-lockerManager.getCredentials().then(function(credentials) {
-
-	console.log('STARTING getCredentials()',credentials);
-
-	if (credentials.username, credentials.password) {
-
-		console.log('LOCAL FROM LOCKER');
-
-		userManager.signin(credentials.username, credentials.password).then(function(success) {
-			userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() LOCAL LOGIN',success);
-			console.log(success);
-			});
-		}, function (reason) {
-			console.log('credential signin error', reason)
-		});
-	} else if (credentials.fbToken) {
-
-		console.log('LOCAL FROM LOCKER');
-
-		//console.log('retrieved fbook key',credentials.fbToken);
-
-		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() PHONEGAP',success);
-			console.log(success);	
-		})
-	}
-	else {
-		console.log('NONE OF THE THOSE');
-	}
-}, function(err) {
-	console.log('credential error', error); 
-});
-//@ENDIF
-
-
 
 }]);
