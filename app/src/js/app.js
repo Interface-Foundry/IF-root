@@ -31,9 +31,9 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-var setWelcome = function(welcomeService) {
-  welcomeService.needsWelcome = true;
-}
+// var setWelcome = function(welcomeService) {
+//   welcomeService.needsWelcome = true;
+// }
 
     //================================================
     
@@ -123,10 +123,7 @@ $routeProvider.
   }).
   when('/auth/:type/:callback', {
     templateUrl: 'components/user/loading.html', 
-    controller: 'resolveAuth', 
-    resolve: {
-      setWelcome: setWelcome
-    }
+    controller: 'resolveAuth'
   }).
   
   when('/profile', {

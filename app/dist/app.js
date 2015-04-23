@@ -4846,9 +4846,9 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-var setWelcome = function(welcomeService) {
-  welcomeService.needsWelcome = true;
-}
+// var setWelcome = function(welcomeService) {
+//   welcomeService.needsWelcome = true;
+// }
 
     //================================================
     
@@ -4927,10 +4927,7 @@ $routeProvider.
   }).
   when('/auth/:type/:callback', {
     templateUrl: 'components/user/loading.html', 
-    controller: 'resolveAuth', 
-    resolve: {
-      setWelcome: setWelcome
-    }
+    controller: 'resolveAuth'
   }).
   
   when('/profile', {
@@ -22572,7 +22569,7 @@ if (geoService.mobileCheck()) {
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
-
+apertureService.set('full');
 var worldLoaded = false;
 var landmarksLoaded = false;
 	
@@ -24364,7 +24361,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
-                welcomeService.needsWelcome = true;
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })
@@ -25197,10 +25193,10 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 }]);
 
 
-app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootScope) {
+app.controller('resolveAuth', ['$scope', '$rootScope', 'welcomeService', function ($scope, $rootScope, welcomeService) {
 
   angular.extend($rootScope, {loading: true});
-
+  welcomeService.needsWelcome = true;
   location.reload(true);
 
 }]); 

@@ -2854,7 +2854,7 @@ li.alert {
   width: 30px;
 }
 /* Map zoom controls positioning for Desktop only */
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 736px) {
   .aperture-full .leaflet-bottom.leaflet-left {
     top: 60px;
     left: 1%;
@@ -2866,7 +2866,7 @@ li.alert {
     display: none;
   }
 }
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 737px) {
   .leaflet-bottom.leaflet-left {
     display: none;
   }

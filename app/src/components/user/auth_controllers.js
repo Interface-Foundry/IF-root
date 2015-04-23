@@ -178,10 +178,10 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 }]);
 
 
-app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootScope) {
+app.controller('resolveAuth', ['$scope', '$rootScope', 'welcomeService', function ($scope, $rootScope, welcomeService) {
 
   angular.extend($rootScope, {loading: true});
-
+  welcomeService.needsWelcome = true;
   location.reload(true);
 
 }]); 

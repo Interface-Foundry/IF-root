@@ -137,7 +137,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
-                welcomeService.needsWelcome = true;
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })

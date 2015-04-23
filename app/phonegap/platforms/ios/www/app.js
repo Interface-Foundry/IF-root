@@ -4846,9 +4846,9 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-var setWelcome = function(welcomeService) {
-  welcomeService.needsWelcome = true;
-}
+// var setWelcome = function(welcomeService) {
+//   welcomeService.needsWelcome = true;
+// }
 
     //================================================
     
@@ -4936,10 +4936,7 @@ $routeProvider.
   }).
   when('/auth/:type/:callback', {
     templateUrl: 'components/user/loading.html', 
-    controller: 'resolveAuth', 
-    resolve: {
-      setWelcome: setWelcome
-    }
+    controller: 'resolveAuth'
   }).
   
   when('/profile', {
@@ -22240,7 +22237,8 @@ $scope.loadWorld = function(data) {
 	  	}
 
 		$scope.style = data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		// style.navBG_color = $scope.style.navBG_color;
+		style.setNavBG($scope.style.navBG_color);
 		if ($scope.world.hasLoc) {
 			console.log('hasLoc');
 			showPosition({
@@ -22653,7 +22651,8 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
-	style.navBG_color = current;
+	// style.navBG_color = current;
+	style.setNavBG(current);
 });
 
 /*
@@ -24553,7 +24552,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
-                welcomeService.needsWelcome = true;
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })
@@ -25138,7 +25136,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 
 	var style = styleManager;
 
-	style.navBG_color = "#3d66ca";
+	style.setNavBG("#3d66ca");
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -25164,7 +25162,6 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 	var style = styleManager;
 
-	// style.navBG_color = "#ed4023";
 	style.setNavBG("#ed4023")
 
 	angular.element('#view').bind("scroll", function () {
@@ -25387,10 +25384,10 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 }]);
 
 
-app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootScope) {
+app.controller('resolveAuth', ['$scope', '$rootScope', 'welcomeService', function ($scope, $rootScope, welcomeService) {
 
   angular.extend($rootScope, {loading: true});
-
+  welcomeService.needsWelcome = true;
   location.reload(true);
 
 }]); 
@@ -26673,7 +26670,7 @@ var aperture = apertureService;
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
-	style.navBG_color = $scope.style.navBG_color;
+	styleManager.setNavBG($scope.style.navBG_color);
 	if ($scope.world.name) {
 		angular.extend($rootScope, {globalTitle: $scope.world.name});
 	}
@@ -27362,7 +27359,7 @@ $scope.$watch('editing', function(newBool, oldBool) {
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		styleManager.setNavBG($scope.style.navBG_color);
 
 	$scope.world=data.world;
 

@@ -18,7 +18,7 @@ if (geoService.mobileCheck()) {
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
-
+apertureService.set('full');
 var worldLoaded = false;
 var landmarksLoaded = false;
 	
