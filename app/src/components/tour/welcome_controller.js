@@ -12,10 +12,10 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		console.log(this.scrollTop);
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
-		}, 20));
+	}, 20));
 
 	$scope.openSignup = function(){
-		$scope.setShowSplash('splash', true);
+		$scope.setShowSplashReset();
 	}
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');

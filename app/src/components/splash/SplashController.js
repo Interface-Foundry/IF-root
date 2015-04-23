@@ -2,6 +2,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
+    $scope.setShowSplashFalse = setShowSplashFalse;
+    $scope.setShowSplashReset = setShowSplashReset;
     $scope.splashNext = splashNext;
     $scope.resendEmail = resendEmail;
     $scope.sendPasswordForgot = sendPasswordForgot;
@@ -128,6 +130,22 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
+    function setShowSplashFalse() {
+        // sets all $scope.show to false
+        _.each($scope.show, function(value, key) {
+            $scope.show[key] = false;
+        });
+    }
+
+    function setShowSplashReset() {
+        // sets all $scpe.show to false, except $scope.show.splash
+        _.each($scope.show, function(value, key) {
+            $scope.show[key] = false;
+        });
+        $scope.show.splash = true;
+    }
+
+
     function splashNext() {
         // login or create account, depending on context
 
@@ -215,7 +233,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             } else {
                 $location.path('/');
                 $timeout(function() {
-                    setShowSplash('splash', false);
+                    setShowSplashFalse();
                 }, 500);
                 alertManager.addAlert('info', 'Password changed successfully', true);
             }
