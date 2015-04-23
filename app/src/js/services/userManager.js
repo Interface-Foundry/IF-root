@@ -26,10 +26,9 @@ var userManager = {
 
 userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
-	console.log('getUser called, user is:', userManager._user)
+	// console.log('getUser called, user is:', userManager._user)
 	var user = userManager._user; //user cached in memory 
 	if (!(_.isEmpty(user))) {  
-		console.log('should resolve')
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).

@@ -1314,7 +1314,12 @@ text-align: center;
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	/*@IFDEF WEB*/
 	padding: 88px 0px 76px 0px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	padding: 104px 0px 76px 0px;
+	/*@ENDIF*/
 }
 
 .message-nav {
@@ -1323,7 +1328,12 @@ text-align: center;
 	left: 0px;
 	width: 100%;
 	height: 48px;
+	/*@IFDEF WEB*/
 	margin-top: 48px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	margin-top: 64px;
+	/*@ENDIF*/
 	color: #FFF;
 	z-index: 10;
 }
@@ -2140,9 +2150,29 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
+	/*@IFDEF WEB*/
 	padding-top: 88px;
+	/*@ENDIF*/
+	/*@IFDEF PHONEGAP*/
+	padding-top: 104px;
+	/*@ENDIF*/
 }
 /* app css stylesheet */
+
+/* @IFDEF PHONEGAP */
+html {
+	-webkit-user-select: none;
+}
+
+.bubble-inspector { 
+	top:29px; 
+}
+
+.calendar-view {
+	top:17px  
+}
+
+/* @ENDIF */
 
 /* 
 MAIN ELEMENTS & UX HOOKS
@@ -2184,6 +2214,9 @@ body {
 
 .navfix {
 	padding-top: 48px;
+	/* @IFDEF PHONEGAP */
+	/*padding-top: 64px;*/
+	/* @ENDIF */
 }
 
 #scrim {
@@ -2657,6 +2690,9 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
+  /* @IFDEF PHONEGAP */
+  top: 15px;
+  /* @ENDIF */
   z-index: 1010;
 }
 .drawer-icon {
@@ -9200,11 +9236,22 @@ input[type="button"].btn-block {
           transition: height .35s ease;
 }
 
+//@IFDEF WEB
 @font-face {
   font-family: 'Glyphicons Halflings';
   src: url('/fonts/glyphicons-halflings-regular.eot');
   src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
+//@ENDIF
+
+//@IFDEF PHONEGAP
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('fonts/glyphicons-halflings-regular.eot');
+  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+}
+//@ENDIF 
+
 .glyphicon {
   position: relative;
   top: 1px;

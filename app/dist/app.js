@@ -4858,6 +4858,17 @@ var setWelcome = function(welcomeService) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
+	    			//@IFDEF PHONEGAP
+	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
+		    			request.url = 'http://192.168.1.6:2997' + request.url;
+		    			if (ifGlobals.username&&ifGlobals.password) {
+							request.headers['Authorization'] = ifGlobals.getBasicHeader();
+							//console.log(request);
+						} else if (ifGlobals.fbToken) {
+							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
+						}
+	    			}
+	    			//@ENDIF
 				return request;
     		},
 	    	'response': function(response) {
@@ -5087,9 +5098,12 @@ $routeProvider.
     // when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       
+//@IFDEF WEB
 $locationProvider.html5Mode({
 	enabled: true
 });
+//@ENDIF
+
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -5099,16 +5113,49 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
+	//@IFDEF WEB
 	userManager.checkLogin();
+	//@ENDIF
 	
 	
+	//@IFDEF PHONEGAP
+	navigator.splashscreen.hide();
+	//@ENDIF
 	
+//@IFDEF KEYCHAIN
+/*
+lockerManager.getCredentials().then(function(credentials) {
+userManager.signin(credentials.username, credentials.password).then(function(success) {
+		userManager.checkLogin().then(function(success) {
+			console.log(success);
+		});
+	}, function (reason) {
+		console.log('credential signin error', reason)
+	});
+}, function(err) {
+	console.log('credential error', error); 
+});
+*/
+//@ENDIF
+
 });
 
+//@ifdef PHONEGAP
+document.addEventListener('deviceready', onDeviceReady, true);
+function onDeviceReady() {
+	angular.element(document).ready(function() {
+		angular.bootstrap(document, ['IF']);
+	});
+}
+//@endif
+
+//@ifdef WEB
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['IF']);
 
 });
+//@endif
+
 app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $timeout, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5519,7 +5566,12 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
+					//@IFDEF WEB
 					var topOffset = 4;
+					//@ENDIF
+					//@IFDEF PHONEGAP
+					var topOffset = 19;
+					//@ENDIF
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5883,10 +5935,12 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
+			//@IFDEF WEB
 			var firstHash = value.indexOf('#');
 			if (firstHash > -1) {
 				value = value.slice(0, firstHash) + value.slice(firstHash+1);
 			}
+			//@ENDIF
 			$attr.$set('href', value);
 			
 			});
@@ -5905,6 +5959,11 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
+				//@IFDEF PHONEGAP
+				if (value.indexOf('http')<0) {
+					value = 'https://192.168.1.6:2997/'+value;
+				}
+				//@ENDIF	
 				
 				$attr.$set('src', value);
 			
@@ -17098,6 +17157,8 @@ angular.module('tidepoolsServices', ['ngResource'])
 app.factory('alertManager', ['$timeout', function ($timeout) {
    		var alerts = {
    			'list':[ 
+	   			//@IFDEF WEB
+	   			//@ENDIF
    			]
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
@@ -17416,8 +17477,18 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
+				// @IFDEF PHONEGAP
+				cacheTime: 30 * 1000, // 30s
+				// @ENDIF
+				// @IFDEF WEB
 				cacheTime: 3.25 * 60 * 1000, // 3.25m
+				// @ENDIF
+				// @IFDEF PHONEGAP
+				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
+				// @ENDIF
+				// @IFDEF WEB
 				geoTimeout: 7 * 1000, // time before resorting to old location, or IP
+				// @ENDIF
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -18894,12 +18965,100 @@ return mapManager;
 angular.module('tidepoolsServices')
     .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
     	function(alertManager, $interval, $timeout, beaconData) {
+//@IFNDEF IBEACON
 var beaconManager = {
 	supported: false
 }
 
 return beaconManager;
+//@ENDIF
 	    	
+//@IFDEF IBEACON
+var alerts = alertManager;
+
+var beaconManager = {
+	updateInterval: 5000, //ms
+	beacons: {},
+	sessionBeacons: {},
+	supported: true,
+	alertDistance: 25
+}
+
+beaconManager.startListening = function () {
+	// start looking for beacons
+
+	window.EstimoteBeacons.startRangingBeaconsInRegion(
+		{uuid: 'E3CA511F-B1F1-4AA6-A0F4-32081FBDD40D'},
+	function (result) {
+		beaconManager.updateBeacons(result.beacons);
+    }, function(error) {
+	    console.log(error);
+	});
+}
+
+beaconManager.updateBeacons = function(newBeacons) {
+	angular.forEach(newBeacons, function(beacon) {
+		var longID = getLongID(beacon);
+		if (beaconManager.sessionBeacons[longID]) {
+			//console.log('already seen', beacon);
+			//already seen 
+		} else if (beacon.distance < beaconManager.alertDistance) {
+			//add it to session beacon
+			beaconManager.sessionBeacons[longID] = beacon;
+			
+			//do something once
+			beaconManager.beaconAlert(beacon);
+		}
+	});
+/*
+	var tempMap = {}, addedBeacons = [], removedBeacons = [];
+	for (var i = 0, len = newBeacons.length; i < len; i++) {
+		var temp = getLongID(newBeacons[i]);
+		tempMap[temp] = newBeacons[i];
+	}
+	//REMOVE OLD BEACONS THAT ARE NO LONGER IN RANGE
+	angular.forEach(beaconManager.beacons, function(beacon, longId) {
+		if (Object.keys(tempMap).indexOf(longId) == -1) {
+			removedBeacons.push(beacon);
+		}
+	});
+	
+	//ADD NEW BEACONS;
+	angular.forEach(tempMap, function(beacon, longId) {
+		if (Object.keys(beaconManager).indexOf(longId) == -1) {
+			//not found in old beacon set
+			addedBeacons.push(beacon);
+		}
+	});
+	
+	console.log('Beacons added:', addedBeacons);
+	console.log('Beacons removed:', removedBeacons);
+	
+	beaconManager.beacons = tempMap;
+*/
+}
+
+beaconManager.beaconAlert = function(beacon) {
+	//console.log('beaconAlert', beacon);
+	var data = beaconData.fromBeacon(beacon);
+	
+	$timeout(function() {
+		alerts.notify({
+			title: data.title,
+			msg: "You found a beacon, visit it <strong>here</strong>!",
+			href: data.href,
+			id: getLongID(beacon)
+		});
+	});
+}
+
+function getLongID(beacon) {
+	return beacon.proximityUUID+beacon.major+beacon.minor;
+}
+
+return beaconManager;
+
+//@ENDIF
 }]);
 
 angular.module('tidepoolsServices')
@@ -18977,9 +19136,94 @@ return beaconData;
 
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
+//@IFDEF WEB
 var lockerManager = {
 	supported: false
 }
+//@ENDIF
+
+//@IFDEF KEYCHAIN
+var lockerManager = {
+	supported: true,
+	keychain: new Keychain()
+}
+
+//getCredentials returns a promise->map of the available credentials. 
+//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+//	because all will return rejected if you do.
+
+lockerManager.getCredentials = function() {
+	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
+	
+	lockerManager.keychain.getForKey(function(value) {
+		username.resolve(value);
+	}, function(error) {
+		username.resolve(undefined);
+		console.log(error);
+	}, 'username', 'Kip');
+
+	lockerManager.keychain.getForKey(function(value) {
+		password.resolve(value);
+	}, function(error) {
+		password.resolve(undefined);
+		console.log(error);
+	}, 'password', 'Kip');
+	
+	lockerManager.keychain.getForKey(function(value) {
+		fbToken.resolve(value);
+	}, function(error) {
+		fbToken.resolve(undefined);
+		console.log(error);
+	}, 'fbToken', 'Kip');
+	
+	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
+}
+
+//saves username and password. Should be changed to use a map instead of args?
+
+lockerManager.saveCredentials = function(username, password) {
+	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
+
+	lockerManager.keychain.setForKey(function(success) {
+		usernameSuccess.resolve(success);
+	}, function(error) {
+		usernameSuccess.reject(error);
+	},
+	'username', 'Kip', username);
+	
+	lockerManager.keychain.setForKey(function(success) {
+		passwordSuccess.resolve(success);
+	}, function(error) {
+		passwordSuccess.reject(error);
+	},
+	'password', 'Kip', password);
+	
+	return $q.all([usernameSuccess, passwordSuccess]);
+}
+
+
+//saves the FB token
+lockerManager.saveFBToken = function(fbToken) {
+
+	var deferred = $q.defer();
+	lockerManager.keychain.setForKey(function(success) {
+		console.log('SUCCESS SET FBOOK TOKEN');
+		console.log(success);
+
+		deferred.resolve(success);
+	}, function(error) {
+		console.log('ERROR SET FBOOK TOKEN');
+		console.log(error);
+		
+		deferred.reject(error);
+	},
+	'fbToken', 'Kip', fbToken);
+	
+	return deferred;
+}
+
+//@ENDIF
+
 	 
 return lockerManager;
 	   
@@ -19060,10 +19304,17 @@ angular.module('tidepoolsServices')
 
 			styleManager.resetNavBG = function() {
 				styleManager.navBG_color = 'rgba(62, 82, 181, 0.96)';
+				//@IFDEF PHONEGAP
+				updateStatusBar('rgba(67, 86, 180)');
+				StatusBar.styleLightContent();
+				//@ENDIF
 			}
 
 			styleManager.setNavBG = function(color) {
 				styleManager.navBG_color = color;
+				//@IFDEF PHONEGAP
+				updateStatusBar(color);
+				//@ENDIF
 			}
 
 			// update statusbar for ios. handles hex and rgba values
@@ -19241,10 +19492,19 @@ angular.module('tidepoolsServices')
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
  
+//@IFDEF PHONEGAP 
+window.handleOpenURL = function() {};
+//@ENDIF
+
 //deals with loading, saving, managing user info. 
    
 var userManager = {
+	//@IFDEF WEB
 	userRes: $resource('/api/updateuser'),
+	//@ENDIF
+	//@IFDEF PHONEGAP
+	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
+	//@ENDIF
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19255,10 +19515,9 @@ var userManager = {
 
 userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
-	console.log('getUser called, user is:', userManager._user)
+	// console.log('getUser called, user is:', userManager._user)
 	var user = userManager._user; //user cached in memory 
 	if (!(_.isEmpty(user))) {  
-		console.log('should resolve')
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -19344,6 +19603,7 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
+	//@IFDEF WEB
 	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
 			userManager._user = data;
@@ -19355,7 +19615,29 @@ userManager.signin = function(username, password) { //given a username and passw
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	//@ENDIF
 	
+	//@IFDEF PHONEGAP
+	ifGlobals.username = username;
+	ifGlobals.password = password;
+
+	console.log(ifGlobals.username);
+	console.log(ifGlobals.password);
+	$http.post('/api/user/login-basic', data, {server: true})
+		.success(function(data) {
+			console.log('SUCCESS');
+			userManager._user = data;
+			userManager.loginStatus = true;
+			userManager.adminStatus = data.admin ? true : false;
+			ifGlobals.loginStatus = true;
+			//userManager.saveToKeychain();
+			deferred.resolve(data);
+		})
+		.error(function(data, status, headers, config) {
+			console.error(data, status, headers, config);
+			deferred.reject(data); 
+		})
+	//@ENDIF
 	
 	return deferred.promise;
 }
@@ -19366,6 +19648,39 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
+
+			//@IFDEF PHONEGAP
+			
+				var data = {
+	            	userId: success.authResponse.userID,
+	           		accessToken: success.authResponse.accessToken 
+	          	};
+
+	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
+		            function(res){
+
+
+		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
+		   				lockerManager.saveFBToken(fbToken);
+						ifGlobals.fbToken = fbToken;
+						
+						userManager._user = res.data;
+						console.log('fbLogin: userManager._user: ', userManager._user)
+
+						userManager.loginStatus = true;
+						//userManager.adminStatus = data.admin ? true : false;
+						ifGlobals.loginStatus = true;
+
+						deferred.resolve(success);
+		            },
+
+		            function(res){
+		              deferred.reject(failure);
+		            }
+	          	);      
+
+			//@ENDIF
+
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
@@ -19412,7 +19727,16 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 
+		//@IFDEF WEB
 		dialogs.show = false;
+		//@ENDIF
+
+		//@IFDEF KEYCHAIN
+		//dialogs.showDialog('keychainDialog.html');
+		//alert('saved to keychain');
+		userManager.saveToKeychain();
+		dialogs.show = false;
+		//@ENDIF
 		contest.login(); // for wtgt contest
 		$route.reload();
 	}, function (err) {
@@ -19439,6 +19763,10 @@ userManager.signup.signup = function() { //signup based on signup form
 		console.log('emailtoLocker', data.email);
 		console.log('passwordtoLocker', data.password);
 		
+		//@IFDEF KEYCHAIN
+		lockerManager.saveCredentials(data.email, data.password);
+		//@ENDIF
+
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
@@ -21712,6 +22040,12 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', 'geoService', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals, geoService) {
 
+//@IFDEF PHONEGAP
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//isnt ready for mobile yet
+//@ENDIF
+
 if (geoService.mobileCheck()) {
 	dialogs.showDialog('mobileDialog.html');
 	$window.history.back();
@@ -22563,6 +22897,11 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', 'geoService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService, geoService) {
 	
+//@IFDEF PHONEGAP
+dialogs.showDialog('mobileDialog.html');
+$window.history.back();
+//@ENDIF
+
 if (geoService.mobileCheck()) {
 	dialogs.showDialog('mobileDialog.html');
 	$window.history.back();
@@ -23149,7 +23488,12 @@ $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
 $scope.hardGo = function(path) {
+	//@IFDEF PHONEGAP
+	$window.location.href = '#/' + path;
+	//@ENDIF
+	//@IFDEF WEB
 	$window.location.href = '/' + path;
+	//@ENDIF
 }
 
 $scope.next = function() {
@@ -23255,7 +23599,12 @@ $scope.saveAndExit = function() {
 	$scope.save().then(function() {
 		if ($scope.world.id) {
 			// map breaks without full page reload (for some reason)
+			//@IFDEF PHONEGAP
+			$window.location.href = '#w/' + $scope.world.id;
+			//@ENDIF
+			//@IFDEF WEB
 			$window.location.href = 'w/' + $scope.world.id;
+			//@ENDIF
 		} else {
 			//console
 			console.log('no world id'); 
@@ -23948,6 +24297,11 @@ $scope.dialog = dialogs;
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
 $rootScope.if_phonegap = false;
+//@IFDEF PHONEGAP
+$rootScope.if_web = false;
+$rootScope.if_phonegap = true;
+//@ENDIF
+
 angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
@@ -24060,6 +24414,68 @@ $scope.share = function(platform) {
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
   );
 };
+
+//@IFDEF PHONEGAP
+$scope.fbLogin = function() {
+	userManager.fbLogin().then(
+		function (success) {
+			console.log(success);
+			userManager.checkLogin();
+		}, function (failure) {
+			console.log(failure);	
+		})
+}
+//@ENDIF
+
+
+//@IFDEF IBEACON
+if (beaconManager.supported == true) {
+	beaconManager.startListening();
+}
+//@ENDIF
+
+//@IFDEF KEYCHAIN
+//On Phonegap startup, try to login with either saved username/pw or facebook
+lockerManager.getCredentials().then(function(credentials) {
+
+	// console.log('STARTING getCredentials()',credentials);
+
+	if (credentials.username, credentials.password, !credentials.fbToken) {
+
+		console.log('Local login');
+
+		userManager.signin(credentials.username, credentials.password).then(function(success) {
+			userManager.checkLogin().then(function(success) {
+			// console.log('userManager.checkLogin() LOCAL LOGIN',success);
+			console.log(success);
+			});
+		}, function (reason) {
+			console.log('credential signin error', reason)
+		});
+	} else if (credentials.fbToken) {
+
+		// console.log('Fb keychain exists.');
+
+		//console.log('retrieved fbook key',credentials.fbToken);
+
+		ifGlobals.fbToken = credentials.fbToken;
+
+		userManager.fbLogin().then(function(success) {
+			// console.log('userManager.fbLogin() PHONEGAP',success);
+			console.log('loaded facebook user: ',userManager._user);	
+		})
+
+
+	}
+	else {
+		console.log('NONE OF THE THOSE');
+	}
+}, function(err) {
+	console.log('credential error', error); 
+});
+//@ENDIF
+
+
 
 }]);
 
@@ -24314,6 +24730,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 createShowSplash(false);
             });
         }
+        // @IFDEF PHONEGAP
+        StatusBar.styleDefault();
+        StatusBar.backgroundColorByHexString('#F4F5F7');
+        // @ENDIF
     }
 
     function createShowSplash(condition) {
@@ -24352,7 +24772,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
         }
 
+        // @IFDEF WEB
         $scope.show.close = true; // only show close button (home, not confirm) on web
+        // @ENDIF
+
         $scope.show.signin = false;
         $scope.show.register = false;
     }
@@ -27654,10 +28077,12 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
+		//@IFDEF WEB
 		var firstHash = url.indexOf('#');
 		if (firstHash > -1) {
 			return url.slice(0, firstHash) + url.slice(firstHash+1);
 		} else {return url}
+		//@ENDIF
 		return url;
 	}
 }

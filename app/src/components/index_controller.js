@@ -152,7 +152,7 @@ if (beaconManager.supported == true) {
 //On Phonegap startup, try to login with either saved username/pw or facebook
 lockerManager.getCredentials().then(function(credentials) {
 
-	console.log('STARTING getCredentials()',credentials);
+	// console.log('STARTING getCredentials()',credentials);
 
 	if (credentials.username, credentials.password, !credentials.fbToken) {
 
@@ -160,7 +160,7 @@ lockerManager.getCredentials().then(function(credentials) {
 
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() LOCAL LOGIN',success);
+			// console.log('userManager.checkLogin() LOCAL LOGIN',success);
 			console.log(success);
 			});
 		}, function (reason) {
@@ -168,14 +168,14 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
-		console.log('Fb keychain exists.');
+		// console.log('Fb keychain exists.');
 
 		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
 
 		userManager.fbLogin().then(function(success) {
-			console.log('userManager.fbLogin() PHONEGAP',success);
+			// console.log('userManager.fbLogin() PHONEGAP',success);
 			console.log('loaded facebook user: ',userManager._user);	
 		})
 

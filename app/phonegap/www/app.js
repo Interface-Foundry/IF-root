@@ -19355,10 +19355,9 @@ var userManager = {
 
 userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
-	console.log('getUser called, user is:', userManager._user)
+	// console.log('getUser called, user is:', userManager._user)
 	var user = userManager._user; //user cached in memory 
 	if (!(_.isEmpty(user))) {  
-		console.log('should resolve')
 		deferred.resolve(user);
 	} else {
 		$http.get('/api/user/loggedin', {server: true}).
@@ -24221,7 +24220,7 @@ $scope.fbLogin = function() {
 //On Phonegap startup, try to login with either saved username/pw or facebook
 lockerManager.getCredentials().then(function(credentials) {
 
-	console.log('STARTING getCredentials()',credentials);
+	// console.log('STARTING getCredentials()',credentials);
 
 	if (credentials.username, credentials.password, !credentials.fbToken) {
 
@@ -24229,7 +24228,7 @@ lockerManager.getCredentials().then(function(credentials) {
 
 		userManager.signin(credentials.username, credentials.password).then(function(success) {
 			userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() LOCAL LOGIN',success);
+			// console.log('userManager.checkLogin() LOCAL LOGIN',success);
 			console.log(success);
 			});
 		}, function (reason) {
@@ -24237,14 +24236,14 @@ lockerManager.getCredentials().then(function(credentials) {
 		});
 	} else if (credentials.fbToken) {
 
-		console.log('Fb keychain exists.');
+		// console.log('Fb keychain exists.');
 
 		//console.log('retrieved fbook key',credentials.fbToken);
 
 		ifGlobals.fbToken = credentials.fbToken;
 
 		userManager.fbLogin().then(function(success) {
-			console.log('userManager.fbLogin() PHONEGAP',success);
+			// console.log('userManager.fbLogin() PHONEGAP',success);
 			console.log('loaded facebook user: ',userManager._user);	
 		})
 
