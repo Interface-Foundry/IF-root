@@ -10,6 +10,8 @@
 
 		<button class="btnMain btnMain--redKip u-centerX"
 			ng-click="setShowSplash('register', true); contest.login();">SIGN UP</button>
+
+		<!-- contest.login() not needed here, becasue it is in userManager.login.login() -->
 		<button class="btnMain u-centerX"
 			ng-click="setShowSplash('signin', true)">SIGN IN</button>
 		
@@ -17,5 +19,5 @@
 	</div>
 	<div class="fullPage-close" 
 		ng-if="show.close" 
-		ng-click="setShowSplash('splash', false); contest.close();"></div>
+		ng-click="setShowSplashFalse(); contest.close();"></div>
 </div>

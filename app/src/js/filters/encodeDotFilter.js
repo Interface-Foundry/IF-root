@@ -10,13 +10,13 @@ app.filter('encodeDotFilter', [function() {
 	 	if (direction === 'encode') {
 	 		input = String(input);
 	 		return input.replace('.', 'dot');
-	 	} else if (direction == 'decode') {
+	 	} else if (direction === 'decode') {
 	 		input = input.replace('dot', '.');
 	 		if (toFloat) {
 	 			return parseFloat(input);
 	 		}
 	 		return input;
 	 	}
-	 }
+	 };
 
 }]);

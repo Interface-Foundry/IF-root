@@ -45,7 +45,7 @@ var setWelcome = function(welcomeService) {
     		'request': function(request) {
 	    			//@IFDEF PHONEGAP
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'http://192.168.1.6:2997' + request.url;
+		    			request.url = 'https://kipapp.co' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
