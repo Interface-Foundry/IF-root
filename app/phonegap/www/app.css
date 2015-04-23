@@ -2745,6 +2745,9 @@ transform:translateX(100%);
 .drawer-share {
   background: center / 24px 24px url('img/icons/drawer/share_b.png') no-repeat;
 }
+.drawer-share--small {
+  background: center / 20px 20px url('img/icons/drawer/share_b.png') no-repeat;
+}
 .drawer-item:hover .drawer-share {
   background: center / 24px 24px url('img/icons/drawer/share_w.png') no-repeat;
 }
