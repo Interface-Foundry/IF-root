@@ -23940,6 +23940,7 @@ $scope.alerts = alertManager;
 $scope.userManager = userManager;
 $scope.navService = navService;
 $scope.dialog = dialogs;
+$scope.routeParams = $routeParams;
     
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;

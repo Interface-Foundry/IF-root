@@ -2532,6 +2532,13 @@ transform:translateX(100%);
 .u-colorLinkBlue {
   color: #428bca;
 }
+.u-textHighlight {
+  background-color: #d2d2d2;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 2px;
+  word-wrap: break-word;
+}
 #aperture {
   overflow: hidden;
   position: absolute;
