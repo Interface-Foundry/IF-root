@@ -79,7 +79,17 @@ module.exports = function(passport) {
                         }
 
                         if (!user) {
-                            return done('Incorrect username or password');
+							// look for a facebook user
+							User.findOne({
+								'facebook.email': email.toString().toLowerCase()
+							}, function(err, user) {
+								if (err) { return done(err) }
+								if (user) {
+									return done('That account appears to be a Facebook account without a password. Try using the Connect with Facebook button.');
+								}
+								return done('Incorrect username or password');
+							});
+							return;
                         }
 
                         if (!user.validPassword(password)) {
@@ -119,19 +129,36 @@ module.exports = function(passport) {
                        
                         //  Whether we're signing up or connecting an account, we'll need
                         //  to know if the email address is in use.
-                        User.findOne({
-                            'local.email': email.toString().toLowerCase()
-                        }, function(err, existingUser) {
+                        User.find({ $or: [
+							{ 'local.email': email.toString().toLowerCase() },
+							{ 'facebook.email': email.toString().toLowerCase() }
+						]}, function(err, users) {
 
                             // if there are any errors, return the error
                             if (err){
                                 console.log('hitting error in here',err)
                                 return done(err);
                             }
+
+							// check to see if facebook user already exists
+							var facebookMatches = users.filter(function(u) { 
+								return u.facebook && u.facebook.email === email.toString().toLowerCase(); 
+							});
+
+							if (facebookMatches.length >= 1)
+							{
+								console.log('This email address is already in use by a facebook user');
+								return done('That account appears to be a Facebook account without a password. Try using the Connect with Facebook button.');
+							}
+
+							var localMatches = users.filter(function(u) {
+								return u.local && u.local.email === email.toString().toLowerCase();
+							});
+
                             // check to see if there's already a user with that email
-                            if (existingUser) {
+                            if (localMatches >= 1) {
                                 console.log('This email address is already in use')
-                                return done('Email already exists.\ Do you want to sign in?');
+                                return done('This email address is already taken. Do you want to sign in?');
                             }
                             //  If we're logged in via facebook, we're connecting a new local account.
                             if (req.user) {
@@ -216,7 +243,17 @@ module.exports = function(passport) {
                 } else if (err) {
                     return done(err);
                 } else {
-                    return done(null, false);
+					// try looking for a facebook user
+					User.fineOne({
+						'facebook.email': email.toString().toLowerCase()
+					}, function(err, user) {
+						if (err) { return done(err) }
+						if (user) {
+							return done('That account appears to be a Facebook account without a password. Try using the Connect with Faceboook button.');
+						} else {
+							return (null, false);
+						}
+					})
                 }
             });
         }
