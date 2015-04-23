@@ -23,6 +23,11 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
+   
+        init();
+
+
+
     function init() {
         // special case for aicp to prevent splash page
         if ($location.path().indexOf('aicpweek2015') > -1) {

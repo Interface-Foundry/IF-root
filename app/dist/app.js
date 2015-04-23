@@ -24261,9 +24261,9 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
-    $timeout(function() {
+   
         init();
-    }, 8600);
+
 
 
     function init() {
