@@ -4859,7 +4859,9 @@ var updateTitle = function($rootScope) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://kipapp.co' + request.url;
+              // TODO use a environment-specific config
+              // http://stackoverflow.com/a/18343298
+		    			request.url = 'http://localhost.kipapp.co' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -24613,7 +24615,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-                addErrorMsg(err || 'Incorrect username or password', 3000);
+				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
         } else if ($scope.show.register) {
             var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
@@ -24624,7 +24626,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-                    addErrorMsg(newValue, 3000);
+					alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });

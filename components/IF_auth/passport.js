@@ -8,6 +8,15 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 var CustomFBStrategy = require('./custom_fb_strategy/custom_strategy').Strategy;
 // load up the user model
 var User = require('../IF_schemas/user_schema.js');
+var Users = User; // yay.
+
+// required for modifying userids across the platform
+var Landmarks = require('../IF_schemas/landmark_schema.js');
+var ContestEntries = require('../IF_schemas/contestEntry_schema.js');
+var Stickers = require('../IF_schemas/sticker_schema.js');
+var Worldchats = require('../IF_schemas/worldchat_schema.js');
+var Projects = require('../IF_schemas/project_schema.js');
+var Visits = require('../IF_schemas/visit_schema.js');
 var https = require('https');
 var urlify = require('urlify').create({
     addEToUmlauts: true,
@@ -17,6 +26,8 @@ var urlify = require('urlify').create({
     trim: true
 });
 
+var lodash = require('lodash');
+var q = require('q');
 var async = require('async');
 
 // load the auth variables
@@ -68,7 +79,17 @@ module.exports = function(passport) {
                         }
 
                         if (!user) {
-                            return done('Incorrect username or password');
+							// look for a facebook user
+							User.findOne({
+								'facebook.email': email.toString().toLowerCase()
+							}, function(err, user) {
+								if (err) { return done(err) }
+								if (user) {
+									return done('That account appears to be a Facebook account without a password. Try using the Connect with Facebook button.');
+								}
+								return done('Incorrect username or password');
+							});
+							return;
                         }
 
                         if (!user.validPassword(password)) {
@@ -108,19 +129,36 @@ module.exports = function(passport) {
                        
                         //  Whether we're signing up or connecting an account, we'll need
                         //  to know if the email address is in use.
-                        User.findOne({
-                            'local.email': email.toString().toLowerCase()
-                        }, function(err, existingUser) {
+                        User.find({ $or: [
+							{ 'local.email': email.toString().toLowerCase() },
+							{ 'facebook.email': email.toString().toLowerCase() }
+						]}, function(err, users) {
 
                             // if there are any errors, return the error
                             if (err){
                                 console.log('hitting error in here',err)
                                 return done(err);
                             }
+
+							// check to see if facebook user already exists
+							var facebookMatches = users.filter(function(u) { 
+								return u.facebook && u.facebook.email === email.toString().toLowerCase(); 
+							});
+
+							if (facebookMatches.length >= 1)
+							{
+								console.log('This email address is already in use by a facebook user');
+								return done('That account appears to be a Facebook account without a password. Try using the Connect with Facebook button.');
+							}
+
+							var localMatches = users.filter(function(u) {
+								return u.local && u.local.email === email.toString().toLowerCase();
+							});
+
                             // check to see if there's already a user with that email
-                            if (existingUser) {
+                            if (localMatches >= 1) {
                                 console.log('This email address is already in use')
-                                return done('Email already exists.\ Do you want to sign in?');
+                                return done('This email address is already taken. Do you want to sign in?');
                             }
                             //  If we're logged in via facebook, we're connecting a new local account.
                             if (req.user) {
@@ -205,7 +243,17 @@ module.exports = function(passport) {
                 } else if (err) {
                     return done(err);
                 } else {
-                    return done(null, false);
+					// try looking for a facebook user
+					User.findOne({
+						'facebook.email': email.toString().toLowerCase()
+					}, function(err, user) {
+						if (err) { return done(err) }
+						if (user) {
+							return done('That account appears to be a Facebook account without a password. Try using the Connect with Faceboook button.');
+						} else {
+							return (null, false);
+						}
+					})
                 }
             });
         }
@@ -215,6 +263,115 @@ module.exports = function(passport) {
     // =========================================================================
     // FACEBOOK ================================================================
     // =========================================================================
+	function findExistingFacebookUser(profile, callback) {
+		// need to look for users that match this app-specific id
+		// or users that match the profile email (legacy fb users from Bubbl.li)
+		Users.find({$or: [
+			{'facebook.id': profile.id},
+			{'facebook.email': profile.email}
+		]}).exec(function(err, users) {
+			if (err) { return callback(err); }
+			if (!users) { return callback(); }
+
+			// When there is only one user in the db, that user might be an old
+			// Bubbl.li user or just a kip user.  
+			if (users.length === 1) {
+				var u = users[0];
+
+				// old bubbl.li user, update profile id
+				if (u.facebook.id !== profile.id) {
+					u.facebook.id = profile.id;
+					u.save(function(err, u) {
+						if (err) { return callback(err); }
+						callback(null, u);
+					});
+				} else {
+					callback(null, u);
+				}
+
+				return;
+			}
+
+			// When there are multiple users in the db, that means there are both Bubbl.li
+			// and kip users in the db.  we need to merge them.
+			mergeFacebookUsers(users, profile, callback);
+		});
+	}
+
+	/**
+	 * Merge Bubbl.li users into a kip user...
+	 * effffff
+	 */
+	function mergeFacebookUsers(users, profile, callback) {
+		if (!users || !users.length) { return callback() }
+		if (users.length == 1) { return callback(null, users[0]) }
+
+		console.log('LONG LOST USERS REUNITED AT LAST');
+		console.log(users.map(function(u) { return u._id.toString()}).join(', '));
+
+		// promote the first user to the kip user
+		var kipUser = users[0];
+		var oldUsers = users.slice(1);
+
+		// And force the facebook stuff to be correct
+		lodash.merge(kipUser.facebook, profile);
+
+		var promises = [];
+
+		// Migrate all the other bubbles to this new id.  shit.  this gonna suck.
+		var newId = kipUser._id.toString();
+		var oldIds = oldUsers.map(function(u) { return u._id.toString(); });
+		var inOldIds = {$in: oldIds};
+
+		// landmarks
+		promises.push(Landmarks.update({'permissions.ownerID': inOldIds}, {$set: {'permissions.ownerID': newId}}, {multi: true}).exec());
+		// i checked and there were no landmarks with viewers or admins in the db :D HJFBSDFGHL:
+
+		// worldchats
+		promises.push(Worldchats.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}).exec());
+
+		// contest entry
+		promises.push(ContestEntries.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}).exec());
+
+		// projects
+		promises.push(Projects.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}).exec());
+		// i checked and there are no projects with viewers or editors in the db :D THANK GAWDS
+		
+		// shtickersh
+		promises.push(Stickers.update({'ownerID': inOldIds}, {$set: {'ownerID': newId}}, {multi: true}).exec());
+
+		// visits
+		promises.push(Visits.update({'userID': inOldIds}, {$set: {'userID': newId}}, {multi: true}).exec());
+
+		// users fffffff
+		// merge might work..... we'll see.
+		console.dir(kipUser);
+		console.dir(oldUsers);
+		oldUsers.map(function(u) {
+			u = u.toObject();
+			delete u._id;
+			lodash.merge(kipUser, u);
+		});
+		console.log('merge finished');
+		console.dir(kipUser);
+		
+		// yay
+		q.all(promises).then(function() {
+			console.log("all promises succeeded");
+			callback(null, kipUser);
+
+			// BURN THE OLD USERS. BURN THEM TO THE GROUND.
+			oldUsers.map(function(u) {
+				u.remove();
+			});
+		}, function(err) {
+			console.log("failed a promise");
+			console.error(err);
+			callback(err);
+		});
+
+	}
+
     passport.use(new FacebookStrategy({
 
             clientID: global.config.facebookAuth.clientID,
@@ -224,19 +381,21 @@ module.exports = function(passport) {
 
         },
         function(req, token, refreshToken, profile, done) {
+			if (profile._json) {
+				profile = profile._json; // this is the actual data that we want
+			}
 
             // asynchronous
             process.nextTick(function() {
 
-                // check if the user is already logged in
-                if (!req.user) {
+				// look for an existing facebook user for this profile in the db.
+				findExistingFacebookUser(profile, function(err, user) {
+					if (err) {
+						return done(err);
+					}
 
-                    User.findOne({
-                        'facebook.id': profile.id
-                    }, function(err, user) {
-                        if (err)
-                            return done(err);
-
+					// check if the user is already logged in
+					if (!req.user) {
                         if (user) {
 
                             // if there is a user id already but no token (user was linked at one point and then removed)
@@ -299,7 +458,7 @@ module.exports = function(passport) {
 
                             newUser.facebook.id = profile.id;
                             newUser.facebook.token = token;
-                            newUser.facebook.name = profile.displayName;
+                            newUser.facebook.name = profile.name;
 
                             if (profile.email) {
                                 newUser.facebook.email = profile.email;
@@ -336,52 +495,51 @@ module.exports = function(passport) {
                             });
 
 
-                        }
-                    });
+						}
+					} else {
+						// user already exists and is logged in, we have to link accounts
+						var user = req.user; // pull the user out of the session
+						user.facebook.id = profile.id;
+						user.facebook.token = token;
+						user.facebook.name = profile.displayName;
+						if (profile.email) {
+							user.facebook.email = profile.email;
+						}
+						if (profile.verified) {
+							user.facebook.verified = profile.verified;
+						}
+						if (profile.locale) {
+							user.facebook.locale = profile.locale;
+						}
+						if (profile.timezone) {
+							user.facebook.timezone = profile.timezone;
+						}
 
-                } else {
-                    // user already exists and is logged in, we have to link accounts
-                    var user = req.user; // pull the user out of the session
-                    user.facebook.id = profile.id;
-                    user.facebook.token = token;
-                    user.facebook.name = profile.displayName;
-                    if (profile.email) {
-                        user.facebook.email = profile.email;
-                    }
-                    if (profile.verified) {
-                        user.facebook.verified = profile.verified;
-                    }
-                    if (profile.locale) {
-                        user.facebook.locale = profile.locale;
-                    }
-                    if (profile.timezone) {
-                        user.facebook.timezone = profile.timezone;
-                    }
-
-                    if (!user.profileID) {
-                        if (user.facebook.name.indexOf(" ") > -1) {
-                            var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
-                        } else {
-                            var input = user.facebook.name
-                        }
-                        uniqueProfileID(input, function(output) {
-                            user.profileID = output;
-                            user.save(function(err) {
-                                if (err)
-                                    throw err;
-                                return done(null, user);
-                                //NEW USER CREATED
-                            });
-                        });
-                    } else {
-                        user.save(function(err) {
-                            if (err)
-                                throw err;
-                            return done(null, user);
-                            //ADDED TO YOUR ACCOUNT
-                        });
-                    }
-                }
+						if (!user.profileID) {
+							if (user.facebook.name.indexOf(" ") > -1) {
+								var input = user.facebook.name.slice(0, user.facebook.name.indexOf(" "))
+							} else {
+								var input = user.facebook.name
+							}
+							uniqueProfileID(input, function(output) {
+								user.profileID = output;
+								user.save(function(err) {
+									if (err)
+										throw err;
+									return done(null, user);
+									//NEW USER CREATED
+								});
+							});
+						} else {
+							user.save(function(err) {
+								if (err)
+									throw err;
+								return done(null, user);
+								//ADDED TO YOUR ACCOUNT
+							});
+						}
+					}
+				});
             });
 
         }));
