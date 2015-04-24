@@ -4862,10 +4862,14 @@ var updateTitle = function($rootScope) {
 <<<<<<< HEAD
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
+<<<<<<< HEAD
 		    			request.url = 'http://localhost.kipapp.co' + request.url;
 =======
 		    			request.url =   'http://kipapp.co'  + request.url;
 >>>>>>> keychainlogout
+=======
+		    			request.url = 'https://kipapp.co' + request.url;
+>>>>>>> small-pictures
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -24770,6 +24774,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
+
 'use strict';
 
 angular.module('IF')

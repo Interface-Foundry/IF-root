@@ -4645,6 +4645,10 @@ a.bubble-inspector-btn:hover {
   -ms-user-select: none;
   user-select: none;
 }
+.world-description img {
+  height: auto;
+  max-width: 100%;
+}
 .closeImg {
   position: relative;
   left: 12px;
