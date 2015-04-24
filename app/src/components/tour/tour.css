@@ -349,3 +349,16 @@ text-align: center;
 .welcome-circle-inner p span {
 	font-size: 1.3em;
 }
+
+@media only screen and (min-width: 480px) {
+	.welcome-circle-outer {
+		padding: 0;
+		width: 456px;
+	}
+}
+@media only screen and (min-width: 768px) {
+	.welcome-circle-outer {
+		padding: 0;
+		width: 600px;
+	}
+} 

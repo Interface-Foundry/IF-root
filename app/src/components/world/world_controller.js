@@ -32,7 +32,7 @@ $scope.verifyUpload = function(event, state) {
 		event.stopPropagation();
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
-			$scope.setShowSplash('splash', true);
+			$scope.setShowSplashReset();
 			contest.set($scope.wtgt.hashtags[state]);
 		}, 2000);
 		

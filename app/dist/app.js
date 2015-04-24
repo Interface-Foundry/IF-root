@@ -4846,9 +4846,9 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-var setWelcome = function(welcomeService) {
-  welcomeService.needsWelcome = true;
-}
+// var setWelcome = function(welcomeService) {
+//   welcomeService.needsWelcome = true;
+// }
 
     //================================================
     
@@ -4927,10 +4927,7 @@ $routeProvider.
   }).
   when('/auth/:type/:callback', {
     templateUrl: 'components/user/loading.html', 
-    controller: 'resolveAuth', 
-    resolve: {
-      setWelcome: setWelcome
-    }
+    controller: 'resolveAuth'
   }).
   
   when('/profile', {
@@ -6741,14 +6738,14 @@ app.filter('encodeDotFilter', [function() {
 	 	if (direction === 'encode') {
 	 		input = String(input);
 	 		return input.replace('.', 'dot');
-	 	} else if (direction == 'decode') {
+	 	} else if (direction === 'decode') {
 	 		input = input.replace('dot', '.');
 	 		if (toFloat) {
 	 			return parseFloat(input);
 	 		}
 	 		return input;
 	 	}
-	 }
+	 };
 
 }]);
 /*!
@@ -19255,7 +19252,7 @@ var userManager = {
 
 userManager.getUser = function() { //gets the user object
 	var deferred = $q.defer();
-
+	// console.log('getUser called, user is:', userManager._user)
 	var user = userManager._user; //user cached in memory 
 	if (!(_.isEmpty(user))) {  
 		deferred.resolve(user);
@@ -19383,6 +19380,9 @@ userManager.fbLogin = function() { //login based on facebook approval
 	
 	return deferred.promise;
 }
+
+//MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
+
 
 userManager.logout = function() { 
 	$http.get('/api/user/logout', {server: true});
@@ -22572,7 +22572,7 @@ if (geoService.mobileCheck()) {
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
-
+apertureService.set('full');
 var worldLoaded = false;
 var landmarksLoaded = false;
 	
@@ -22599,6 +22599,7 @@ var landmarksLoaded = false;
 			$scope.landmarks.unshift(tempLandmark);		
 
 			//add marker
+			var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
@@ -22612,7 +22613,8 @@ var landmarksLoaded = false;
 				},
 				draggable:true,
 				message:'Drag to location on map',
-				focus:true
+				focus:true,
+				alt: alt
 			});
 
 		});
@@ -23940,6 +23942,7 @@ $scope.alerts = alertManager;
 $scope.userManager = userManager;
 $scope.navService = navService;
 $scope.dialog = dialogs;
+$scope.routeParams = $routeParams;
     
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
@@ -24232,10 +24235,12 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
+    $scope.setShowSplashFalse = setShowSplashFalse;
+    $scope.setShowSplashReset = setShowSplashReset;
     $scope.splashNext = splashNext;
     $scope.resendEmail = resendEmail;
     $scope.sendPasswordForgot = sendPasswordForgot;
@@ -24255,8 +24260,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
+   
+        init();
 
-    init();
+
 
     function init() {
         // special case for aicp to prevent splash page
@@ -24272,13 +24279,15 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(15);
 
-            $http.post('/email/request_confirm/' + token, {}, {server: true}).
-                success(function(data) {
-                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-                }).
-                error(function(err) {
-                    $scope.confirmThanksText = 'There was a problem confirming your email';
-                });
+            $http.post('/email/request_confirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {
+                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+            }).
+            error(function(err) {
+                $scope.confirmThanksText = 'There was a problem confirming your email';
+            });
 
             // redirect to home page
             $location.path('/');
@@ -24289,24 +24298,34 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(7);
 
-            $http.post('/resetConfirm/' + token, {}, {server: true}).
-                success(function(data) {}).
-                error(function(err) {
-                    if (err) {
-                        console.log('err: ', err);
-                    }
-                });
-        } else {
-            userManager.getUser().then(function(success) {
-                createShowSplash(true);
-            }, function(err) {
-                createShowSplash(false);
+            $http.post('/resetConfirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {}).
+            error(function(err) {
+                if (err) {
+                    console.log('err: ', err);
+                }
             });
+        } else {
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+
+            //            //            // userManager.getUser().then(function(success) {
+            //     console.log('SplashController: getUser successful', success)
+            //     createShowSplash(true);
+            // }, function(err) {
+            //     createShowSplash(false);
+            // });
+            //            
         }
     }
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
+
+        console.log('SPLASH CONDITION ', condition);
+        console.log('facebook ', userManager._user.facebook);
+        console.log('userManager._user', userManager._user);
 
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
@@ -24317,10 +24336,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-            
-            console.log('SPLASH CONDITION ',condition);
-            console.log('facebook ',userManager._user.facebook);
-            console.log('userManager._user',userManager._user);
+
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
@@ -24331,7 +24347,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.splash = !userManager._user.local.confirmedEmail;
                 $scope.show.confirm = !userManager._user.local.confirmedEmail;
             }
-            
+
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
@@ -24355,6 +24371,22 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
         }
     }
 
+    function setShowSplashFalse() {
+        // sets all $scope.show to false
+        _.each($scope.show, function(value, key) {
+            $scope.show[key] = false;
+        });
+    }
+
+    function setShowSplashReset() {
+        // sets all $scpe.show to false, except $scope.show.splash
+        _.each($scope.show, function(value, key) {
+            $scope.show[key] = false;
+        });
+        $scope.show.splash = true;
+    }
+
+
     function splashNext() {
         // login or create account, depending on context
 
@@ -24364,7 +24396,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
                 $scope.show.splash = false;
-                welcomeService.needsWelcome = true;
             }, function(err) {
 				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
@@ -24396,7 +24427,9 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             var data = {
                 updatedEmail: $scope.user.newEmail
             };
-            $http.post('/api/user/emailUpdate', data, {server: true}).
+            $http.post('/api/user/emailUpdate', data, {
+                server: true
+            }).
             success(function(data) {
                 if (data.err) {
                     addErrorMsg(data.err, 3000);
@@ -24411,7 +24444,9 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
     function sendEmailConfirmation() {
-        $http.post('/email/confirm', {}, {server: true}).then(function(sucess) {}, function(error) {});
+        $http.post('/email/confirm', {}, {
+            server: true
+        }).then(function(sucess) {}, function(error) {});
     }
 
     function sendPasswordForgot() {
@@ -24419,7 +24454,9 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             email: $scope.user.email
         };
 
-        $http.post('/forgot', data, {server: true}).
+        $http.post('/forgot', data, {
+            server: true
+        }).
         success(function(data) {
             $scope.user.email = '';
         }).
@@ -24435,14 +24472,16 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             password: $scope.user.newPassword
         }
 
-        $http.post('/reset/' + $location.path().slice(7), data, {server: true}).
+        $http.post('/reset/' + $location.path().slice(7), data, {
+            server: true
+        }).
         success(function(data) {
             if (data.err) {
                 addErrorMsg(data.err, 3000);
             } else {
                 $location.path('/');
                 $timeout(function() {
-                    setShowSplash('splash', false);
+                    setShowSplashFalse();
                 }, 500);
                 alertManager.addAlert('info', 'Password changed successfully', true);
             }
@@ -24459,22 +24498,11 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.errorMsg = '';
             }, time);
         }
+
     }
 
-    //TEMP HACK to make splash page hide on special PHONEGAP logins
-    $timeout(function() {
-        userManager.getUser().then(function(success) {
-            createShowSplash(true);
-        }, function(err) {
-            createShowSplash(false);
-        });
-    }, 2600);
-
-  
-    
 
 }]);
-
 'use strict';
 
 angular.module('IF')
@@ -24963,7 +24991,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 		}, 20));
 
 	$scope.openSignup = function(){
-		$scope.setShowSplash('splash', true);
+		$scope.setShowSplashReset();
 	}
 	
 	// $scope.loadmeetup = function() {
@@ -24986,10 +25014,10 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		console.log(this.scrollTop);
 		$scope.scroll = this.scrollTop;
 		$scope.$apply();
-		}, 20));
+	}, 20));
 
 	$scope.openSignup = function(){
-		$scope.setShowSplash('splash', true);
+		$scope.setShowSplashReset();
 	}
 	// $scope.loadmeetup = function() {
 	// 	$location.path('/auth/meetup');
@@ -25197,10 +25225,10 @@ app.controller('ResetCtrl', ['$scope', '$http', '$location', 'apertureService', 
 }]);
 
 
-app.controller('resolveAuth', ['$scope', '$rootScope', function ($scope, $rootScope) {
+app.controller('resolveAuth', ['$scope', '$rootScope', 'welcomeService', function ($scope, $rootScope, welcomeService) {
 
   angular.extend($rootScope, {loading: true});
-
+  welcomeService.needsWelcome = true;
   location.reload(true);
 
 }]); 
@@ -26347,7 +26375,7 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 			event.stopPropagation();
 			alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 			$timeout(function() {
-				$scope.setShowSplash('splash', true);
+				$scope.setShowSplashReset();
 				contest.set($scope.hashtag);
 			}, 2000);	
 		}
@@ -28068,7 +28096,7 @@ $scope.verifyUpload = function(event, state) {
 		event.stopPropagation();
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
-			$scope.setShowSplash('splash', true);
+			$scope.setShowSplashReset();
 			contest.set($scope.wtgt.hashtags[state]);
 		}, 2000);
 		
