@@ -49,6 +49,30 @@ lockerManager.getCredentials = function() {
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
 
+/*
+ Removes a value for a key and servicename.
+
+ @param successCallback returns when successful
+ @param failureCallback returns the error string as the argument to the callback
+ @param key the key to remove
+ @param servicename the servicename to use
+ */
+// kc.removeForKey(successCallback, failureCallback, 'key', 'servicename');
+
+
+lockerManager.removeCredentials = function() {
+	var deferred = $q.defer();
+	
+	lockerManager.keychain.removeForKey(function(value) {
+		deferred.resolve(value);
+	}, function(error) {
+			deferred.reject(error);
+		console.log(error);
+	}, 'username', 'Kip');
+	
+	return deferred;
+}
+
 //saves username and password. Should be changed to use a map instead of args?
 
 lockerManager.saveCredentials = function(username, password) {
@@ -74,17 +98,14 @@ lockerManager.saveCredentials = function(username, password) {
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
-
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
 		console.log('SUCCESS SET FBOOK TOKEN');
 		console.log(success);
-
 		deferred.resolve(success);
 	}, function(error) {
 		console.log('ERROR SET FBOOK TOKEN');
 		console.log(error);
-		
 		deferred.reject(error);
 	},
 	'fbToken', 'Kip', fbToken);

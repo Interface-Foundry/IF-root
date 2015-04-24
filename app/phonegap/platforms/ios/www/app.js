@@ -4859,7 +4859,7 @@ var updateTitle = function($rootScope) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://kipapp.co' + request.url;
+		    			request.url =  'http://192.168.1.6:2997' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5920,7 +5920,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
+					value = 'https://192.168.1.6:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19030,6 +19030,30 @@ lockerManager.getCredentials = function() {
 	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
 }
 
+/*
+ Removes a value for a key and servicename.
+
+ @param successCallback returns when successful
+ @param failureCallback returns the error string as the argument to the callback
+ @param key the key to remove
+ @param servicename the servicename to use
+ */
+// kc.removeForKey(successCallback, failureCallback, 'key', 'servicename');
+
+
+lockerManager.removeCredentials = function() {
+	var deferred = $q.defer();
+	
+	lockerManager.keychain.removeForKey(function(value) {
+		deferred.resolve(value);
+	}, function(error) {
+			deferred.reject(error);
+		console.log(error);
+	}, 'username', 'Kip');
+	
+	return deferred;
+}
+
 //saves username and password. Should be changed to use a map instead of args?
 
 lockerManager.saveCredentials = function(username, password) {
@@ -19055,17 +19079,14 @@ lockerManager.saveCredentials = function(username, password) {
 
 //saves the FB token
 lockerManager.saveFBToken = function(fbToken) {
-
 	var deferred = $q.defer();
 	lockerManager.keychain.setForKey(function(success) {
 		console.log('SUCCESS SET FBOOK TOKEN');
 		console.log(success);
-
 		deferred.resolve(success);
 	}, function(error) {
 		console.log('ERROR SET FBOOK TOKEN');
 		console.log(error);
-		
 		deferred.reject(error);
 	},
 	'fbToken', 'Kip', fbToken);
@@ -22718,7 +22739,7 @@ if (geoService.mobileCheck()) {
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
-
+apertureService.set('full');
 var worldLoaded = false;
 var landmarksLoaded = false;
 	
@@ -22745,6 +22766,7 @@ var landmarksLoaded = false;
 			$scope.landmarks.unshift(tempLandmark);		
 
 			//add marker
+			var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
@@ -22758,7 +22780,8 @@ var landmarksLoaded = false;
 				},
 				draggable:true,
 				message:'Drag to location on map',
-				focus:true
+				focus:true,
+				alt: alt
 			});
 
 		});
@@ -24415,127 +24438,89 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
-   
-        init();
+
+    init();
 
 
 
     function init() {
-        // special case for aicp to prevent splash page
-        if ($location.path().indexOf('aicpweek2015') > -1) {
-            $scope.show.splash = false;
-            return;
-        }
+            // special case for aicp to prevent splash page
+            if ($location.path().indexOf('aicpweek2015') > -1) {
+                $scope.show.splash = false;
+                return;
+            }
 
-        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+            if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
 
-            createShowSplash('confirmThanks');
+                createShowSplash('confirmThanks');
 
-            // get token from url
-            var token = $location.path().slice(15);
+                // get token from url
+                var token = $location.path().slice(15);
 
-            $http.post('/email/request_confirm/' + token, {}, {
-                server: true
-            }).
-            success(function(data) {
-                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-            }).
-            error(function(err) {
-                $scope.confirmThanksText = 'There was a problem confirming your email';
-            });
+                $http.post('/email/request_confirm/' + token, {}, {
+                    server: true
+                }).
+                success(function(data) {
+                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+                }).
+                error(function(err) {
+                    $scope.confirmThanksText = 'There was a problem confirming your email';
+                });
 
-            // redirect to home page
-            $location.path('/');
-        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+                // redirect to home page
+                $location.path('/');
+            } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
 
-            createShowSplash('passwordReset');
+                createShowSplash('passwordReset');
 
-            // get token from url
-            var token = $location.path().slice(7);
+                // get token from url
+                var token = $location.path().slice(7);
 
-            $http.post('/resetConfirm/' + token, {}, {
-                server: true
-            }).
-            success(function(data) {}).
-            error(function(err) {
-                if (err) {
-                    console.log('err: ', err);
-                }
-            });
-        } else {
-            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
-
-            //            // //On Phonegap startup, try to login with either saved username/pw or facebook
-            // lockerManager.getCredentials().then(function(credentials) {
-            //     // console.log('STARTING getCredentials()',credentials);
-            //     if (credentials.username, credentials.password) {
-            //         // console.log('LOCAL FROM LOCKER');
-            //         userManager.signin(credentials.username, credentials.password).then(function(success) {
-            //             userManager.checkLogin().then(function(success) {
-            //                 // console.log('userManager.checkLogin() LOCAL LOGIN',success);
-            //                 // console.log(success);
-            //                 createShowSplash(true);
-            //             });
-            //         }, function(reason) {
-            //             // console.log('credential signin error', reason);
-            //             createShowSplash(false);
-            //         });
-            //     } else if (credentials.fbToken) {
-            //         // console.log('LOCAL FROM LOCKER');
-            //         //console.log('retrieved fbook key',credentials.fbToken);
-            //         ifGlobals.fbToken = credentials.fbToken;
-            //         userManager.checkLogin().then(function(success) {
-            //             // console.log('userManager.checkLogin() PHONEGAP',success);
-            //             // console.log(success);   
-            //             createShowSplash(true);
-            //         }, function(reason) {
-            //             createShowSplash(false);
-            //         });
-            //     } else {
-            //         // console.log('NONE OF THE THOSE');
-            //         createShowSplash(false);
-            //     }
-            // }, function(err) {
-            //     // console.log('credential error', error); 
-            //     createShowSplash(false);
-            // });
-            //            //            //On Phonegap startup, try to login with either saved username/pw or facebook
-            lockerManager.getCredentials().then(function(credentials) {
-
-                // console.log('STARTING getCredentials()',credentials);
-
-                if (credentials.username, credentials.password, !credentials.fbToken) {
-                    userManager.signin(credentials.username, credentials.password).then(function(success) {
-                        userManager.checkLogin().then(function(success) {
-                            createShowSplash(true);
-                            console.log(success);
+                $http.post('/resetConfirm/' + token, {}, {
+                    server: true
+                }).
+                success(function(data) {}).
+                error(function(err) {
+                    if (err) {
+                        console.log('err: ', err);
+                    }
+                });
+            } else {
+                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+                //On Phonegap startup, try to login with either saved username/pw or facebook
+                lockerManager.getCredentials().then(function(credentials) {
+                    if (credentials.username, credentials.password, !credentials.fbToken) {
+                        userManager.signin(credentials.username, credentials.password).then(function(success) {
+                            userManager.checkLogin().then(function(success) {
+                                createShowSplash(true);
+                                console.log(success);
+                            });
+                        }, function(reason) {
+                            createShowSplash(false);
+                            console.log('credential signin error', reason)
                         });
-                    }, function(reason) {
+                    } else if (credentials.fbToken) {
+                        ifGlobals.fbToken = credentials.fbToken;
+                        userManager.fbLogin().then(function(success) {
+                            createShowSplash(true);
+                            // console.log('loaded facebook user: ', userManager._user);
+                        }, function(err) {
+                            console.log('credential error', error);
+                            createShowSplash(false);
+                        });
+                    } else {
+                        // console.log('NONE OF THE THOSE');
                         createShowSplash(false);
-                        console.log('credential signin error', reason)
-                    });
-                } else if (credentials.fbToken) {
-                    ifGlobals.fbToken = credentials.fbToken;
-                    userManager.fbLogin().then(function(success) {
-                        createShowSplash(true);
-                        // console.log('loaded facebook user: ', userManager._user);
-                    }, function(err) {
-                        console.log('credential error', error);
-                        createShowSplash(false);
-                    });
-                } else {
-                    // console.log('NONE OF THE THOSE');
+                    }
+                }, function(err) {
+                    // console.log('credential error', error);
                     createShowSplash(false);
-                }
-            }, function(err) {
-                // console.log('credential error', error);
-                createShowSplash(false);
-            });
-            
-        }
-        StatusBar.styleDefault();
-        StatusBar.backgroundColorByHexString('#F4F5F7');
-    }
+                }); //END OF GET CREDENTIALS
+                StatusBar.styleDefault();
+                StatusBar.backgroundColorByHexString('#F4F5F7');
+            } //END OF OUTER ELSE
+
+        } //END OF INIT
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
