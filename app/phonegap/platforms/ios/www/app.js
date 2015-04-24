@@ -4861,7 +4861,7 @@ var updateTitle = function($rootScope) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'http://localhost.kipapp.co' + request.url;
+		    			request.url = 'https://kipapp.co' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -24723,6 +24723,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
+
 'use strict';
 
 angular.module('IF')
