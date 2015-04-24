@@ -24723,6 +24723,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
+
 'use strict';
 
 angular.module('IF')
