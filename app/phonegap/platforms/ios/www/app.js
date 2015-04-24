@@ -4863,6 +4863,7 @@ var updateTitle = function($rootScope) {
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
 <<<<<<< HEAD
+<<<<<<< HEAD
 		    			request.url = 'http://localhost.kipapp.co' + request.url;
 =======
 		    			request.url =   'http://kipapp.co'  + request.url;
@@ -4870,6 +4871,9 @@ var updateTitle = function($rootScope) {
 =======
 		    			request.url = 'https://kipapp.co' + request.url;
 >>>>>>> small-pictures
+=======
+		    			request.url = 'https://kipapp.co' + request.url;
+>>>>>>> img-feed-subnav
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
