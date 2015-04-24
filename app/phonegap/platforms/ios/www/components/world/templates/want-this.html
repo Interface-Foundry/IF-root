@@ -31,7 +31,7 @@
 					</a>
 				</div>
 				
-				<div class="want"
+				<div class="want needsclick"
 					ng-show="!wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]"
 					ng-file-select
 					ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
@@ -47,7 +47,7 @@
 				</div>
 			</div>
 
-			<div class="camera"
+			<div class="camera needsclick"
 				ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]}"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
@@ -81,7 +81,7 @@
 					</a>
 				</div>
 				
-				<div class="got"
+				<div class="got needsclick"
 					ng-show="!wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]"
 					ng-file-select
 					ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
@@ -97,7 +97,7 @@
 				</div>
 			</div>
 
-			<div class="camera"
+			<div class="camera needsclick"
 						ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]}"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
