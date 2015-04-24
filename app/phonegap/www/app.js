@@ -18994,111 +18994,131 @@ return beaconData;
 
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
-var lockerManager = {
-	supported: true,
-	keychain: new Keychain()
-}
+        var lockerManager = {
+            supported: true,
+            keychain: new Keychain()
+        }
 
-//getCredentials returns a promise->map of the available credentials. 
-//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-//	because all will return rejected if you do.
+        //getCredentials returns a promise->map of the available credentials. 
+        //	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+        //	because all will return rejected if you do.
 
-lockerManager.getCredentials = function() {
-	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
-	
-	lockerManager.keychain.getForKey(function(value) {
-		username.resolve(value);
-	}, function(error) {
-		username.resolve(undefined);
-		console.log(error);
-	}, 'username', 'Kip');
+        lockerManager.getCredentials = function() {
+            var username = $q.defer(),
+                password = $q.defer(),
+                fbToken = $q.defer();
 
-	lockerManager.keychain.getForKey(function(value) {
-		password.resolve(value);
-	}, function(error) {
-		password.resolve(undefined);
-		console.log(error);
-	}, 'password', 'Kip');
-	
-	lockerManager.keychain.getForKey(function(value) {
-		fbToken.resolve(value);
-	}, function(error) {
-		fbToken.resolve(undefined);
-		console.log(error);
-	}, 'fbToken', 'Kip');
-	
-	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-}
+            lockerManager.keychain.getForKey(function(value) {
+                username.resolve(value);
+            }, function(error) {
+                username.resolve(undefined);
+                console.log(error);
+            }, 'username', 'Kip');
 
-/*
- Removes a value for a key and servicename.
+            lockerManager.keychain.getForKey(function(value) {
+                password.resolve(value);
+            }, function(error) {
+                password.resolve(undefined);
+                console.log(error);
+            }, 'password', 'Kip');
 
- @param successCallback returns when successful
- @param failureCallback returns the error string as the argument to the callback
- @param key the key to remove
- @param servicename the servicename to use
- */
-// kc.removeForKey(successCallback, failureCallback, 'key', 'servicename');
+            lockerManager.keychain.getForKey(function(value) {
+                fbToken.resolve(value);
+            }, function(error) {
+                fbToken.resolve(undefined);
+                // console.log(error);
+            }, 'fbToken', 'Kip');
 
+            return $q.all({
+                username: username.promise,
+                password: password.promise,
+                fbToken: fbToken.promise
+            });
 
-lockerManager.removeCredentials = function() {
-	var deferred = $q.defer();
-	
-	lockerManager.keychain.removeForKey(function(value) {
-		deferred.resolve(value);
-	}, function(error) {
-			deferred.reject(error);
-		console.log(error);
-	}, 'username', 'Kip');
-	
-	return deferred;
-}
+        }
 
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Kip', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Kip', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
+   
+         // Removes a value for a key and servicename
 
 
-//saves the FB token
-lockerManager.saveFBToken = function(fbToken) {
-	var deferred = $q.defer();
-	lockerManager.keychain.setForKey(function(success) {
-		console.log('SUCCESS SET FBOOK TOKEN');
-		console.log(success);
-		deferred.resolve(success);
-	}, function(error) {
-		console.log('ERROR SET FBOOK TOKEN');
-		console.log(error);
-		deferred.reject(error);
-	},
-	'fbToken', 'Kip', fbToken);
-	
-	return deferred;
-}
+        lockerManager.removeCredentials = function(usertype) {
+            var username = $q.defer(),
+                password = $q.defer(),
+                fbToken = $q.defer();
+        
+            if (usertype == 'facebook') {
+                console.log('clearing keychain for facebook.')
+                lockerManager.keychain.removeForKey(function(success) {
+                    console.log('keychain cleared!', success)
+                    fbToken.resolve(success);
+                }, function(error) {
+                    console.log('faield clearing keychain', error);
+                    fbToken.reject(error);
+                }, 'fbToken', 'Kip');
+                return fbToken;
+            } else {
+                lockerManager.keychain.removeForKey(function(success) {
+                    console.log('keychain cleared!', success)
+                    username.resolve(success);
+                }, function(error) {
+                    console.log('faield clearing keychain', error);
+                    username.reject(error);
+                }, 'username', 'Kip');
+                lockerManager.keychain.removeForKey(function(success) {
+                    console.log('keychain cleared!', success)
+                    password.resolve(success);
+                }, function(error) {
+                    console.log('faield clearing keychain', error);
+                    password.reject(error);
+                }, 'password', 'Kip');
+                return username
+            }
+        }
 
-	 
-return lockerManager;
-	   
-}
-])
+        //saves username and password. Should be changed to use a map instead of args?
+
+        lockerManager.saveCredentials = function(username, password) {
+            var usernameSuccess = $q.defer(),
+                passwordSuccess = $q.defer();
+
+            lockerManager.keychain.setForKey(function(success) {
+                    usernameSuccess.resolve(success);
+                }, function(error) {
+                    usernameSuccess.reject(error);
+                },
+                'username', 'Kip', username);
+
+            lockerManager.keychain.setForKey(function(success) {
+                    passwordSuccess.resolve(success);
+                }, function(error) {
+                    passwordSuccess.reject(error);
+                },
+                'password', 'Kip', password);
+
+            return $q.all([usernameSuccess, passwordSuccess]);
+        }
+
+
+        //saves the FB token
+        lockerManager.saveFBToken = function(fbToken) {
+            var deferred = $q.defer();
+            lockerManager.keychain.setForKey(function(success) {
+                    console.log('SUCCESS SET FBOOK TOKEN');
+                    console.log(success);
+                    deferred.resolve(success);
+                }, function(error) {
+                    console.log('ERROR SET FBOOK TOKEN');
+                    console.log(error);
+                    deferred.reject(error);
+                },
+                'fbToken', 'Kip', fbToken);
+
+            return deferred;
+        }
+
+        return lockerManager;
+
+    }])
 app.factory('stickerManager', ['$http', '$q', function($http, $q) {
 var stickerManager = {
 	
@@ -19355,287 +19375,319 @@ return userGrouping;
 }]);
 angular.module('tidepoolsServices')
     .factory('userManager', ['$rootScope', '$http', '$resource', '$q', '$location', '$route', 'dialogs', 'alertManager', 'lockerManager', 'ifGlobals', 'worldTree', 'contest', 'navService',
-    	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
-var alerts = alertManager;
- 
-window.handleOpenURL = function() {};
-//deals with loading, saving, managing user info. 
-   
-var userManager = {
-	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
-	adminStatus: false,
-	loginStatus: false,
-	login: {},
-	signup: {}
-}
+        function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
+            var alerts = alertManager;
+
+            window.handleOpenURL = function() {};
+            //deals with loading, saving, managing user info. 
+
+            var userManager = {
+                userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
+                adminStatus: false,
+                loginStatus: false,
+                login: {},
+                signup: {}
+            }
 
 
 
-userManager.getUser = function() { //gets the user object
-	var deferred = $q.defer();
-	// console.log('getUser called, user is:', userManager._user)
-	var user = userManager._user; //user cached in memory 
-	if (!(_.isEmpty(user))) {  
-		deferred.resolve(user);
-	} else {
-		$http.get('/api/user/loggedin', {server: true}).
-		success(function(user){
-			if (user && user!=0) {
-				console.log(user);
-				userManager._user = user;
-				deferred.resolve(user);
-			} else {
-				deferred.reject(0);
-			}
-		}).
-		error(function(data, status, header, config) {
-			//failure
-			deferred.reject(data);
-		});
-	}
-	return deferred.promise;
-}
+            userManager.getUser = function() { //gets the user object
+                var deferred = $q.defer();
+                // console.log('getUser called, user is:', userManager._user)
+                var user = userManager._user; //user cached in memory 
+                if (!(_.isEmpty(user))) {
+                    deferred.resolve(user);
+                } else {
+                    $http.get('/api/user/loggedin', {
+                        server: true
+                    }).
+                    success(function(user) {
+                        if (user && user != 0) {
+                            console.log(user);
+                            userManager._user = user;
+                            deferred.resolve(user);
+                        } else {
+                            deferred.reject(0);
+                        }
+                    }).
+                    error(function(data, status, header, config) {
+                        //failure
+                        deferred.reject(data);
+                    });
+                }
+                return deferred.promise;
+            }
 
-userManager.saveUser = function(user) { //saves user object then updates memory cache
-	userManager.userRes.save(user, function() {
-		console.log('saveUser() succeeded');
-		userManager._user = user;
-	});
-}
+            userManager.saveUser = function(user) { //saves user object then updates memory cache
+                userManager.userRes.save(user, function() {
+                    console.log('saveUser() succeeded');
+                    userManager._user = user;
+                });
+            }
 
-userManager.getDisplayName = function() { //gets a first name to display in the UI from wherever.
-	if (userManager._user) {
-		var user = userManager._user;	
-		if (user.name) {displayName = user.name}
-		else if (user.facebook && user.facebook.name) {displayName = user.facebook.name}
-		else if (user.twitter && user.twitter.displayName) {displayName = user.twitter.displayName} 
-		else if (user.meetup && user.meetup.displayName) {displayName = user.meetup.displayName}
-		else if (user.local && user.local.email) {displayName = user.local.email.substring(0, user.local.email.indexOf("@"))}
-		else {displayName = "Me"; console.log("how did this happen???");}
-			
-		var i = displayName.indexOf(" ");
-		if (i > -1) {
-			var _displayName = displayName.substring(0, i);
-		} else {
-			var _displayName = displayName;
-		}
-		
-		return _displayName;
-	} else {
-		return undefined;
-	}
-}
+            userManager.getDisplayName = function() { //gets a first name to display in the UI from wherever.
+                if (userManager._user) {
+                    var user = userManager._user;
+                    if (user.name) {
+                        displayName = user.name
+                    } else if (user.facebook && user.facebook.name) {
+                        displayName = user.facebook.name
+                    } else if (user.twitter && user.twitter.displayName) {
+                        displayName = user.twitter.displayName
+                    } else if (user.meetup && user.meetup.displayName) {
+                        displayName = user.meetup.displayName
+                    } else if (user.local && user.local.email) {
+                        displayName = user.local.email.substring(0, user.local.email.indexOf("@"))
+                    } else {
+                        displayName = "Me";
+                        console.log("how did this happen???");
+                    }
 
-userManager.checkLogin = function() { //checks if user is logged in with side effects. would be better to redesign.
-	console.log('checklogin');
-    var deferred = $q.defer();
-      
-	userManager.getUser().then(function(user) {
-	  	console.log('getting user');
-		  userManager.loginStatus = true;
-		  userManager.adminStatus = user.admin ? true : false;
-		  $rootScope.user = user;
-		  if (user._id){
-			  $rootScope.userID = user._id;
-			  userManager._user = user;
-		  }
-		  worldTree.getUserWorlds();
-		  deferred.resolve(1);
-	  }, function(reason) {
-		  console.log(reason);
-		  userManager.loginStatus = false;
-		  userManager.adminStatus = false;
-		  deferred.reject(0);
-	});
-	
-	$rootScope.$broadcast('loginSuccess');
-		  
-    return deferred.promise;
-};
+                    var i = displayName.indexOf(" ");
+                    if (i > -1) {
+                        var _displayName = displayName.substring(0, i);
+                    } else {
+                        var _displayName = displayName;
+                    }
 
-userManager.signin = function(username, password) { //given a username and password, sign in 
-	console.log('signin');
-	var deferred = $q.defer();
-	var data = {
-		email: username,
-		password: password
-	}
-	
-	
-	ifGlobals.username = username;
-	ifGlobals.password = password;
+                    return _displayName;
+                } else {
+                    return undefined;
+                }
+            }
 
-	console.log(ifGlobals.username);
-	console.log(ifGlobals.password);
-	$http.post('/api/user/login-basic', data, {server: true})
-		.success(function(data) {
-			console.log('SUCCESS');
-			userManager._user = data;
-			userManager.loginStatus = true;
-			userManager.adminStatus = data.admin ? true : false;
-			ifGlobals.loginStatus = true;
-			//userManager.saveToKeychain();
-			deferred.resolve(data);
-		})
-		.error(function(data, status, headers, config) {
-			console.error(data, status, headers, config);
-			deferred.reject(data); 
-		})
-	
-	return deferred.promise;
-}
+            userManager.checkLogin = function() { //checks if user is logged in with side effects. would be better to redesign.
+                console.log('checklogin');
+                var deferred = $q.defer();
 
-userManager.fbLogin = function() { //login based on facebook approval
-	var deferred = $q.defer();
-	
-	facebookConnectPlugin.login(['public_profile', 'email'], 
-		function(success) {
-			var fbToken = success.authResponse.accessToken;
+                userManager.getUser().then(function(user) {
+                    console.log('getting user');
+                    userManager.loginStatus = true;
+                    userManager.adminStatus = user.admin ? true : false;
+                    $rootScope.user = user;
+                    if (user._id) {
+                        $rootScope.userID = user._id;
+                        userManager._user = user;
+                    }
+                    worldTree.getUserWorlds();
+                    deferred.resolve(1);
+                }, function(reason) {
+                    console.log(reason);
+                    userManager.loginStatus = false;
+                    userManager.adminStatus = false;
+                    deferred.reject(0);
+                });
 
-			
-				var data = {
-	            	userId: success.authResponse.userID,
-	           		accessToken: success.authResponse.accessToken 
-	          	};
+                $rootScope.$broadcast('loginSuccess');
 
-	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
-		            function(res){
+                return deferred.promise;
+            };
 
+            userManager.signin = function(username, password) { //given a username and password, sign in 
+                console.log('signin');
+                var deferred = $q.defer();
+                var data = {
+                    email: username,
+                    password: password
+                }
 
-		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
-		   				lockerManager.saveFBToken(fbToken);
-						ifGlobals.fbToken = fbToken;
-						
-						userManager._user = res.data;
-						console.log('fbLogin: userManager._user: ', userManager._user)
+                ifGlobals.username = username;
+                ifGlobals.password = password;
 
-						userManager.loginStatus = true;
-						//userManager.adminStatus = data.admin ? true : false;
-						ifGlobals.loginStatus = true;
+                console.log(ifGlobals.username);
+                console.log(ifGlobals.password);
+                $http.post('/api/user/login-basic', data, {
+                        server: true
+                    })
+                    .success(function(data) {
+                 
+                        lockerManager.saveCredentials(username, password);
+                      
+                        console.log('SUCCESS');
+                        userManager._user = data;
+                        userManager.loginStatus = true;
+                        userManager.adminStatus = data.admin ? true : false;
+                        ifGlobals.loginStatus = true;
+                        //userManager.saveToKeychain();
+                        deferred.resolve(data);
+                    })
+                    .error(function(data, status, headers, config) {
+                        console.error(data, status, headers, config);
+                        deferred.reject(data);
+                    })
+                return deferred.promise;
+            }
 
-						deferred.resolve(success);
-		            },
+            userManager.fbLogin = function() { //login based on facebook approval
+                var deferred = $q.defer();
 
-		            function(res){
-		              deferred.reject(failure);
-		            }
-	          	);      
+                facebookConnectPlugin.login(['public_profile', 'email'],
+                    function(success) {
+                        var fbToken = success.authResponse.accessToken;
 
-			// var authHeader = 'Bearer ' + fbToken;
-			// console.log(success);
-			// $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-			// 	lockerManager.saveFBToken(fbToken);
-			// 	ifGlobals.fbToken = fbToken;
-			// 	deferred.resolve(success);
-			// }, function(failure) {
-			// 	deferred.reject(failure);
-			// })
-		}, 
-		function(failure) {
-			alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-			deferred.reject(failure);
-		})
-	
-	return deferred.promise;
-}
+                        var data = {
+                            userId: success.authResponse.userID,
+                            accessToken: success.authResponse.accessToken
+                        };
 
-//MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
+                        $http.post('/auth/facebook/mobile_signin', data, {
+                            server: true
+                        }).then(
+                            function(res) {
 
 
-userManager.logout = function() { 
-	$http.get('/api/user/logout', {server: true});
-	userManager.loginStatus = false;
-	userManager.adminStatus = false;
-	userManager._user = {};
-	$rootScope.user = {};
-	worldTree.submissionCache.removeAll();
-	$location.path('/');
-	navService.reset();
-	alerts.addAlert('success', "You're signed out!", true);
-}
+                                //lockerManager.saveFBToken(success.authResponse.accessToken);
+                                lockerManager.saveFBToken(fbToken);
+                                ifGlobals.fbToken = fbToken;
 
-userManager.login.login = function() { //login based on login form
-	console.log('login');
-    var data = {
-      email: userManager.login.email,
-      password: userManager.login.password
-    }
-    userManager.signin(data.email, data.password).then(function(success) {
-	    console.log(success);
-		userManager.checkLogin();
-		alerts.addAlert('success', "You're signed in!", true);
-		userManager.login.error = false;
+                                userManager._user = res.data;
+                                console.log('fbLogin: userManager._user: ', userManager._user)
 
-		//dialogs.showDialog('keychainDialog.html');
-		//alert('saved to keychain');
-		userManager.saveToKeychain();
-		dialogs.show = false;
-		contest.login(); // for wtgt contest
-		$route.reload();
-	}, function (err) {
-		if (err) {
-			console.log('failure', err);
-		}
-		userManager.login.error = true;
-	});
-}
+                                userManager.loginStatus = true;
+                                //userManager.adminStatus = data.admin ? true : false;
+                                ifGlobals.loginStatus = true;
 
-userManager.signup.signup = function() { //signup based on signup form 
-	var data = {
-      email: userManager.signup.email,
-      password: userManager.signup.password
-    }
+                                deferred.resolve(success);
+                            },
 
-    $http.post('/api/user/signup', data, {server: true})
-    .success(function(user) {
-	    dialogs.show = false;
-		userManager.checkLogin();
-		// alertManager.addAlert('success', "You're logged in!", true);
-		userManager.signup.error = false;		
+                            function(res) {
+                                deferred.reject(failure);
+                            }
+                        );
 
-		console.log('emailtoLocker', data.email);
-		console.log('passwordtoLocker', data.password);
-		
-		lockerManager.saveCredentials(data.email, data.password);
-		// send confirmation email
-		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
-			console.log('confirmation email sent');
-		}, function(error) {
-			console.log('error :', error);
-		});
-	})
-	.error(function(err) {
-	if (err) {
-		userManager.signup.error = err || "Error signing up!";
-        // alertManager.addAlert('danger',err, true);
-	}
-	});
-}
+                        // var authHeader = 'Bearer ' + fbToken;
+                        // console.log(success);
+                        // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
+                        // 	lockerManager.saveFBToken(fbToken);
+                        // 	ifGlobals.fbToken = fbToken;
+                        // 	deferred.resolve(success);
+                        // }, function(failure) {
+                        // 	deferred.reject(failure);
+                        // })
+                    },
+                    function(failure) {
+                        alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                        deferred.reject(failure);
+                    })
 
-userManager.saveToKeychain = function() { 
-	lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
-}
+                return deferred.promise;
+            }
 
-userManager.checkAdminStatus = function() {
-	var deferred = $q.defer();
+            //MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
 
-	userManager.getUser().then(function(user) {
-	  if (user.admin) {
-		  deferred.resolve(true);
-		  userManager.adminStatus = true;
-	  } else {
-	  	deferred.reject(false);
-	  }
-	}, function(error) {
-		deferred.reject(false);
-	});
 
-	return deferred.promise;
-}
+            userManager.logout = function() {
+                // console.log('logging out, userManager._user is: ', userManager._user)
+                var usertype = '';
 
-return userManager;
-}]);
+                if (userManager._user.facebook) {
+                    usertype = 'facebook';
+                    lockerManager.removeCredentials(usertype);
+                } else {
+                    usertype = 'local';
+                    lockerManager.removeCredentials(usertype);
+                }
+                $http.get('/api/user/logout', {
+                    server: true
+                });
+                userManager.loginStatus = false;
+                userManager.adminStatus = false;
+                userManager._user = {};
+                $rootScope.user = {};
+                worldTree.submissionCache.removeAll();
+                $location.path('/');
+                navService.reset();
+                alerts.addAlert('success', "You're signed out!", true);
 
+
+            }
+
+            userManager.login.login = function() { //login based on login form
+                console.log('login');
+                var data = {
+                    email: userManager.login.email,
+                    password: userManager.login.password
+                }
+                userManager.signin(data.email, data.password).then(function(success) {
+                    console.log(success);
+                    userManager.checkLogin();
+                    alerts.addAlert('success', "You're signed in!", true);
+                    userManager.login.error = false;
+
+                    //dialogs.showDialog('keychainDialog.html');
+                    //alert('saved to keychain');
+                    userManager.saveToKeychain();
+                    dialogs.show = false;
+                    contest.login(); // for wtgt contest
+                    $route.reload();
+                }, function(err) {
+                    if (err) {
+                        console.log('failure', err);
+                    }
+                    userManager.login.error = true;
+                });
+            }
+
+            userManager.signup.signup = function() { //signup based on signup form 
+                var data = {
+                    email: userManager.signup.email,
+                    password: userManager.signup.password
+                }
+
+                $http.post('/api/user/signup', data, {
+                        server: true
+                    })
+                    .success(function(user) {
+                        dialogs.show = false;
+                        userManager.checkLogin();
+                        // alertManager.addAlert('success', "You're logged in!", true);
+                        userManager.signup.error = false;
+
+                        console.log('emailtoLocker', data.email);
+                        console.log('passwordtoLocker', data.password);
+
+                        lockerManager.saveCredentials(data.email, data.password);
+                        // send confirmation email
+                        $http.post('/email/confirm', {}, {
+                            server: true
+                        }).then(function(success) {
+                            console.log('confirmation email sent');
+                        }, function(error) {
+                            console.log('error :', error);
+                        });
+                    })
+                    .error(function(err) {
+                        if (err) {
+                            userManager.signup.error = err || "Error signing up!";
+                            // alertManager.addAlert('danger',err, true);
+                        }
+                    });
+            }
+
+            userManager.saveToKeychain = function() {
+                lockerManager.saveCredentials(userManager.login.email, userManager.login.password);
+            }
+
+            userManager.checkAdminStatus = function() {
+                var deferred = $q.defer();
+
+                userManager.getUser().then(function(user) {
+                    if (user.admin) {
+                        deferred.resolve(true);
+                        userManager.adminStatus = true;
+                    } else {
+                        deferred.reject(false);
+                    }
+                }, function(error) {
+                    deferred.reject(false);
+                });
+
+                return deferred.promise;
+            }
+
+            return userManager;
+        }
+    ]);
 'use strict';
 
 app.factory('worldBuilderService', worldBuilderService);
@@ -24489,7 +24541,13 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 // use keychain and facebook to set splash on phonegap. use login status to set splash on web
                 //On Phonegap startup, try to login with either saved username/pw or facebook
                 lockerManager.getCredentials().then(function(credentials) {
-                    if (credentials.username, credentials.password, !credentials.fbToken) {
+                    if(!credentials) {
+                        // console.log('no no credentials no here')
+                        createShowSplash(false);
+                    }
+                    // console.log('credentials are', credentials)
+                    if (credentials.username && credentials.password && !credentials.fbToken) {
+                        // console.log('hitting local login')
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
                             userManager.checkLogin().then(function(success) {
                                 createShowSplash(true);
@@ -24497,9 +24555,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             });
                         }, function(reason) {
                             createShowSplash(false);
-                            console.log('credential signin error', reason)
+                            // console.log('credential signin error', reason)
                         });
                     } else if (credentials.fbToken) {
+                         // console.log('hitting fblogin')
                         ifGlobals.fbToken = credentials.fbToken;
                         userManager.fbLogin().then(function(success) {
                             createShowSplash(true);
@@ -24513,9 +24572,11 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                         createShowSplash(false);
                     }
                 }, function(err) {
-                    // console.log('credential error', error);
+                    console.log('credential error', error);
                     createShowSplash(false);
                 }); //END OF GET CREDENTIALS
+
+                // console.log('splashcontroller init(), credentials are', credentials)
                 StatusBar.styleDefault();
                 StatusBar.backgroundColorByHexString('#F4F5F7');
             } //END OF OUTER ELSE
@@ -24524,7 +24585,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
-
 
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
@@ -24535,7 +24595,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-
+           // console.log('hitting splashcontroller loggedin')
         // console.log('SPLASH CONDITION ', condition);
         // console.log('facebook ', userManager._user.facebook);
         // console.log('userManager._user', userManager._user);
@@ -24553,6 +24613,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
+            console.log('hitting splashcontroller not loggedin')
             $scope.show.splash = true;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
@@ -24590,9 +24651,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
     function splashNext() {
         // login or create account, depending on context
-
         userManager.signup.error = undefined;
-
         if ($scope.show.signin) {
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
@@ -24600,6 +24659,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })
+
         } else if ($scope.show.register) {
             var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
                 if (newValue === false) { // signup success

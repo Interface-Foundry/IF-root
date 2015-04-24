@@ -83,7 +83,13 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 //@IFDEF KEYCHAIN
                 //On Phonegap startup, try to login with either saved username/pw or facebook
                 lockerManager.getCredentials().then(function(credentials) {
-                    if (credentials.username, credentials.password, !credentials.fbToken) {
+                    if(!credentials) {
+                        // console.log('no no credentials no here')
+                        createShowSplash(false);
+                    }
+                    // console.log('credentials are', credentials)
+                    if (credentials.username && credentials.password && !credentials.fbToken) {
+                        // console.log('hitting local login')
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
                             userManager.checkLogin().then(function(success) {
                                 createShowSplash(true);
@@ -91,9 +97,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             });
                         }, function(reason) {
                             createShowSplash(false);
-                            console.log('credential signin error', reason)
+                            // console.log('credential signin error', reason)
                         });
                     } else if (credentials.fbToken) {
+                         // console.log('hitting fblogin')
                         ifGlobals.fbToken = credentials.fbToken;
                         userManager.fbLogin().then(function(success) {
                             createShowSplash(true);
@@ -107,9 +114,11 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                         createShowSplash(false);
                     }
                 }, function(err) {
-                    // console.log('credential error', error);
+                    console.log('credential error', error);
                     createShowSplash(false);
                 }); //END OF GET CREDENTIALS
+
+                // console.log('splashcontroller init(), credentials are', credentials)
                 StatusBar.styleDefault();
                 StatusBar.backgroundColorByHexString('#F4F5F7');
                 // @ENDIF
@@ -120,7 +129,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
 
-
         if (condition === 'confirmThanks') {
             $scope.show.splash = true;
             $scope.show.confirm = false;
@@ -130,7 +138,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-
+           // console.log('hitting splashcontroller loggedin')
         // console.log('SPLASH CONDITION ', condition);
         // console.log('facebook ', userManager._user.facebook);
         // console.log('userManager._user', userManager._user);
@@ -148,6 +156,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
+            // console.log('hitting splashcontroller not loggedin')
             $scope.show.splash = true;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
@@ -189,9 +198,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
     function splashNext() {
         // login or create account, depending on context
-
         userManager.signup.error = undefined;
-
         if ($scope.show.signin) {
             userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
                 $scope.show.signin = false;
@@ -199,6 +206,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             }, function(err) {
                 addErrorMsg(err || 'Incorrect username or password', 3000);
             })
+
         } else if ($scope.show.register) {
             var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
                 if (newValue === false) { // signup success
