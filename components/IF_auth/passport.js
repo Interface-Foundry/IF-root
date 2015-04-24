@@ -244,7 +244,7 @@ module.exports = function(passport) {
                     return done(err);
                 } else {
 					// try looking for a facebook user
-					User.fineOne({
+					User.findOne({
 						'facebook.email': email.toString().toLowerCase()
 					}, function(err, user) {
 						if (err) { return done(err) }
