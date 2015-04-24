@@ -24260,7 +24260,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
-   
+   $scope.show.splash = false
         init();
 
 

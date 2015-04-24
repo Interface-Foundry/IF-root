@@ -4646,8 +4646,8 @@ a.bubble-inspector-btn:hover {
   user-select: none;
 }
 .world-description img {
-  height: 200px;
-  width: auto;
+  height: auto;
+  max-width: 100%;
 }
 .closeImg {
   position: relative;
