@@ -8,12 +8,7 @@
 	height: 100%;
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
-	/*@IFDEF WEB*/
 	padding: 88px 0px 76px 0px;
-	/*@ENDIF*/
-	/*@IFDEF PHONEGAP*/
-	padding: 104px 0px 76px 0px;
-	/*@ENDIF*/
 }
 
 .message-nav {
@@ -22,12 +17,7 @@
 	left: 0px;
 	width: 100%;
 	height: 48px;
-	/*@IFDEF WEB*/
 	margin-top: 48px;
-	/*@ENDIF*/
-	/*@IFDEF PHONEGAP*/
-	margin-top: 64px;
-	/*@ENDIF*/
 	color: #FFF;
 	z-index: 10;
 }
