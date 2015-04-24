@@ -24366,7 +24366,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.splash = false;
                 welcomeService.needsWelcome = true;
             }, function(err) {
-                addErrorMsg(err || 'Incorrect username or password', 3000);
+				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
         } else if ($scope.show.register) {
             var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
@@ -24377,7 +24377,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-                    addErrorMsg(newValue, 3000);
+					alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });

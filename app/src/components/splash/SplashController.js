@@ -139,7 +139,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.splash = false;
                 welcomeService.needsWelcome = true;
             }, function(err) {
-				debugger;
 				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
         } else if ($scope.show.register) {

@@ -4858,15 +4858,6 @@ var setWelcome = function(welcomeService) {
 	$httpProvider.interceptors.push(function($q, $location, lockerManager, ifGlobals) {
     	return {
     		'request': function(request) {
-	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url = 'https://kipapp.co' + request.url;
-		    			if (ifGlobals.username&&ifGlobals.password) {
-							request.headers['Authorization'] = ifGlobals.getBasicHeader();
-							//console.log(request);
-						} else if (ifGlobals.fbToken) {
-							request.headers['Authorization'] = 'Bearer '+ifGlobals.fbToken;
-						}
-	    			}
 				return request;
     		},
 	    	'response': function(response) {
@@ -5096,6 +5087,9 @@ $routeProvider.
     // when('/user/:userID', {templateUrl: 'partials/user-view.html', controller: UserCtrl, resolve: {loggedin: checkLoggedin}}).
 
       
+$locationProvider.html5Mode({
+	enabled: true
+});
 angular.extend($tooltipProvider.defaults, {
 	animation: 'am-fade',
 	placement: 'right',
@@ -5105,31 +5099,16 @@ angular.extend($tooltipProvider.defaults, {
 })
 .run(function($rootScope, $http, $location, userManager, lockerManager){
 	
+	userManager.checkLogin();
 	
 	
-	navigator.splashscreen.hide();
 	
-/*
-lockerManager.getCredentials().then(function(credentials) {
-userManager.signin(credentials.username, credentials.password).then(function(success) {
-		userManager.checkLogin().then(function(success) {
-			console.log(success);
-		});
-	}, function (reason) {
-		console.log('credential signin error', reason)
-	});
-}, function(err) {
-	console.log('credential error', error); 
-});
-*/
 });
 
-document.addEventListener('deviceready', onDeviceReady, true);
-function onDeviceReady() {
-	angular.element(document).ready(function() {
-		angular.bootstrap(document, ['IF']);
-	});
-}
+angular.element(document).ready(function() {
+	angular.bootstrap(document, ['IF']);
+
+});
 app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $timeout, $rootScope, $location) {
     var original = $location.path;
     $location.path = function (path, reload) {
@@ -5540,7 +5519,7 @@ app.directive('compassButton', function(worldTree, $templateRequest, $compile, u
 			function positionCompassMenu() {
 				if (scope.compassState == true) {
 					var offset = element.offset();
-					var topOffset = 19;
+					var topOffset = 4;
 					
 					var newOffset = {top: topOffset, left: offset.left-compassMenu.width()+40};
 					compassMenu.offset(newOffset);
@@ -5904,6 +5883,10 @@ app.directive('ifHref', function() { //used to make URLs safe for both phonegap 
 				return;
 				}
 			
+			var firstHash = value.indexOf('#');
+			if (firstHash > -1) {
+				value = value.slice(0, firstHash) + value.slice(firstHash+1);
+			}
 			$attr.$set('href', value);
 			
 			});
@@ -5922,9 +5905,6 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				return;
 				}
 			
-				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
-				}
 				
 				$attr.$set('src', value);
 			
@@ -17436,8 +17416,8 @@ angular.module('tidepoolsServices')
 				},
 				inProgress: false,
 				requestQueue: [],
-				cacheTime: 30 * 1000, // 30s
-				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
+				cacheTime: 3.25 * 60 * 1000, // 3.25m
+				geoTimeout: 7 * 1000, // time before resorting to old location, or IP
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -18998,84 +18978,8 @@ return beaconData;
 angular.module('tidepoolsServices')
     .factory('lockerManager', ['$q', function($q) {
 var lockerManager = {
-	supported: true,
-	keychain: new Keychain()
+	supported: false
 }
-
-//getCredentials returns a promise->map of the available credentials. 
-//	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-//	because all will return rejected if you do.
-
-lockerManager.getCredentials = function() {
-	var username = $q.defer(), password = $q.defer(), fbToken = $q.defer();
-	
-	lockerManager.keychain.getForKey(function(value) {
-		username.resolve(value);
-	}, function(error) {
-		username.resolve(undefined);
-		console.log(error);
-	}, 'username', 'Kip');
-
-	lockerManager.keychain.getForKey(function(value) {
-		password.resolve(value);
-	}, function(error) {
-		password.resolve(undefined);
-		console.log(error);
-	}, 'password', 'Kip');
-	
-	lockerManager.keychain.getForKey(function(value) {
-		fbToken.resolve(value);
-	}, function(error) {
-		fbToken.resolve(undefined);
-		console.log(error);
-	}, 'fbToken', 'Kip');
-	
-	return $q.all({username: username.promise, password: password.promise, fbToken: fbToken.promise});
-}
-
-//saves username and password. Should be changed to use a map instead of args?
-
-lockerManager.saveCredentials = function(username, password) {
-	var usernameSuccess = $q.defer(), passwordSuccess = $q.defer();
-
-	lockerManager.keychain.setForKey(function(success) {
-		usernameSuccess.resolve(success);
-	}, function(error) {
-		usernameSuccess.reject(error);
-	},
-	'username', 'Kip', username);
-	
-	lockerManager.keychain.setForKey(function(success) {
-		passwordSuccess.resolve(success);
-	}, function(error) {
-		passwordSuccess.reject(error);
-	},
-	'password', 'Kip', password);
-	
-	return $q.all([usernameSuccess, passwordSuccess]);
-}
-
-
-//saves the FB token
-lockerManager.saveFBToken = function(fbToken) {
-
-	var deferred = $q.defer();
-	lockerManager.keychain.setForKey(function(success) {
-		console.log('SUCCESS SET FBOOK TOKEN');
-		console.log(success);
-
-		deferred.resolve(success);
-	}, function(error) {
-		console.log('ERROR SET FBOOK TOKEN');
-		console.log(error);
-		
-		deferred.reject(error);
-	},
-	'fbToken', 'Kip', fbToken);
-	
-	return deferred;
-}
-
 	 
 return lockerManager;
 	   
@@ -19156,13 +19060,10 @@ angular.module('tidepoolsServices')
 
 			styleManager.resetNavBG = function() {
 				styleManager.navBG_color = 'rgba(62, 82, 181, 0.96)';
-				updateStatusBar('rgba(67, 86, 180)');
-				StatusBar.styleLightContent();
 			}
 
 			styleManager.setNavBG = function(color) {
 				styleManager.navBG_color = color;
-				updateStatusBar(color);
 			}
 
 			// update statusbar for ios. handles hex and rgba values
@@ -19340,11 +19241,10 @@ angular.module('tidepoolsServices')
     	function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
 var alerts = alertManager;
  
-window.handleOpenURL = function() {};
 //deals with loading, saving, managing user info. 
    
 var userManager = {
-	userRes: $resource('/api/updateuser'), // why wouldn't this work on phonegap?
+	userRes: $resource('/api/updateuser'),
 	adminStatus: false,
 	loginStatus: false,
 	login: {},
@@ -19443,26 +19343,18 @@ userManager.signin = function(username, password) { //given a username and passw
 		password: password
 	}
 	
-	
-	ifGlobals.username = username;
-	ifGlobals.password = password;
-
-	console.log(ifGlobals.username);
-	console.log(ifGlobals.password);
-	$http.post('/api/user/login-basic', data, {server: true})
+	$http.post('/api/user/login', data, {server: true})
 		.success(function(data) {
-			console.log('SUCCESS');
 			userManager._user = data;
 			userManager.loginStatus = true;
 			userManager.adminStatus = data.admin ? true : false;
-			ifGlobals.loginStatus = true;
-			//userManager.saveToKeychain();
 			deferred.resolve(data);
 		})
 		.error(function(data, status, headers, config) {
 			console.error(data, status, headers, config);
 			deferred.reject(data); 
 		})
+	
 	
 	return deferred.promise;
 }
@@ -19473,33 +19365,6 @@ userManager.fbLogin = function() { //login based on facebook approval
 	facebookConnectPlugin.login(['public_profile', 'email'], 
 		function(success) {
 			var fbToken = success.authResponse.accessToken;
-
-			
-				var data = {
-	            	userId: success.authResponse.userID,
-	           		accessToken: success.authResponse.accessToken 
-	          	};
-
-	          	$http.post('/auth/facebook/mobile_signin', data, {server: true}).then(
-		            function(res){
-
-
-		   				//lockerManager.saveFBToken(success.authResponse.accessToken);
-		   				lockerManager.saveFBToken(fbToken);
-						ifGlobals.fbToken = fbToken;
-						
-						
-						userManager.loginStatus = true;
-						//userManager.adminStatus = data.admin ? true : false;
-						ifGlobals.loginStatus = true;
-
-						deferred.resolve(success);
-		            },
-
-		            function(res){
-		              deferred.reject(failure);
-		            }
-	          	);      
 
 			// var authHeader = 'Bearer ' + fbToken;
 			// console.log(success);
@@ -19543,9 +19408,6 @@ userManager.login.login = function() { //login based on login form
 		alerts.addAlert('success', "You're signed in!", true);
 		userManager.login.error = false;
 
-		//dialogs.showDialog('keychainDialog.html');
-		//alert('saved to keychain');
-		userManager.saveToKeychain();
 		dialogs.show = false;
 		contest.login(); // for wtgt contest
 		$route.reload();
@@ -19573,7 +19435,6 @@ userManager.signup.signup = function() { //signup based on signup form
 		console.log('emailtoLocker', data.email);
 		console.log('passwordtoLocker', data.password);
 		
-		lockerManager.saveCredentials(data.email, data.password);
 		// send confirmation email
 		$http.post('/email/confirm', {}, {server: true}).then(function(success) {
 			console.log('confirmation email sent');
@@ -21847,9 +21708,6 @@ scope.logout = userManager.logout;
 }])
 app.controller('EditController', ['$scope', 'db', 'World', '$rootScope', '$route', '$routeParams', 'apertureService', 'mapManager', 'styleManager', 'alertManager', '$upload', '$http', '$timeout', '$interval', 'dialogs', '$window', '$location', '$anchorScroll', 'ifGlobals', 'geoService', function($scope, db, World, $rootScope, $route, $routeParams, apertureService, mapManager, styleManager, alertManager, $upload, $http, $timeout, $interval, dialogs, $window, $location, $anchorScroll, ifGlobals, geoService) {
 
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
-//isnt ready for mobile yet
 if (geoService.mobileCheck()) {
 	dialogs.showDialog('mobileDialog.html');
 	$window.history.back();
@@ -22240,7 +22098,8 @@ $scope.loadWorld = function(data) {
 	  	}
 
 		$scope.style = data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		// style.navBG_color = $scope.style.navBG_color;
+		style.setNavBG($scope.style.navBG_color);
 		if ($scope.world.hasLoc) {
 			console.log('hasLoc');
 			showPosition({
@@ -22653,7 +22512,8 @@ $scope.$on('$destroy', function (event) { //controller cleanup
 });
 
 $scope.$watch('style.navBG_color', function(current, old) {
-	style.navBG_color = current;
+	// style.navBG_color = current;
+	style.setNavBG(current);
 });
 
 /*
@@ -22699,8 +22559,6 @@ World.get({id: $routeParams.worldURL}, function(data) {
 
 app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', 'geoService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService, geoService) {
 	
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
 if (geoService.mobileCheck()) {
 	dialogs.showDialog('mobileDialog.html');
 	$window.history.back();
@@ -23287,7 +23145,7 @@ $scope.world.name = "bubble"; //make sure there's a default world name
 map.setCenter([-83,42], 15); //setting to blue coast on load so arrows show up on background
 
 $scope.hardGo = function(path) {
-	$window.location.href = '#/' + path;
+	$window.location.href = '/' + path;
 }
 
 $scope.next = function() {
@@ -23393,7 +23251,7 @@ $scope.saveAndExit = function() {
 	$scope.save().then(function() {
 		if ($scope.world.id) {
 			// map breaks without full page reload (for some reason)
-			$window.location.href = '#w/' + $scope.world.id;
+			$window.location.href = 'w/' + $scope.world.id;
 		} else {
 			//console
 			console.log('no world id'); 
@@ -24086,8 +23944,6 @@ $scope.dialog = dialogs;
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
 $rootScope.if_phonegap = false;
-$rootScope.if_web = false;
-$rootScope.if_phonegap = true;
 angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
@@ -24201,50 +24057,6 @@ $scope.share = function(platform) {
   );
 };
 
-$scope.fbLogin = function() {
-	userManager.fbLogin().then(
-		function (success) {
-			console.log(success);
-			userManager.checkLogin();
-		}, function (failure) {
-			console.log(failure);	
-		})
-}
-//On Phonegap startup, try to login with either saved username/pw or facebook
-lockerManager.getCredentials().then(function(credentials) {
-
-	console.log('STARTING getCredentials()',credentials);
-
-	if (credentials.username, credentials.password) {
-
-		console.log('LOCAL FROM LOCKER');
-
-		userManager.signin(credentials.username, credentials.password).then(function(success) {
-			userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() LOCAL LOGIN',success);
-			console.log(success);
-			});
-		}, function (reason) {
-			console.log('credential signin error', reason)
-		});
-	} else if (credentials.fbToken) {
-
-		console.log('LOCAL FROM LOCKER');
-
-		//console.log('retrieved fbook key',credentials.fbToken);
-
-		ifGlobals.fbToken = credentials.fbToken;
-		userManager.checkLogin().then(function(success) {
-			console.log('userManager.checkLogin() PHONEGAP',success);
-			console.log(success);	
-		})
-	}
-	else {
-		console.log('NONE OF THE THOSE');
-	}
-}, function(err) {
-	console.log('credential error', error); 
-});
 }]);
 
 // DEPRACATED
@@ -24491,8 +24303,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 createShowSplash(false);
             });
         }
-        StatusBar.styleDefault();
-        StatusBar.backgroundColorByHexString('#F4F5F7');
     }
 
     function createShowSplash(condition) {
@@ -24530,6 +24340,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
         }
 
+        $scope.show.close = true; // only show close button (home, not confirm) on web
         $scope.show.signin = false;
         $scope.show.register = false;
     }
@@ -24555,7 +24366,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.splash = false;
                 welcomeService.needsWelcome = true;
             }, function(err) {
-                addErrorMsg(err || 'Incorrect username or password', 3000);
+				debugger;
+				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
         } else if ($scope.show.register) {
             var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
@@ -24566,7 +24378,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-                    addErrorMsg(newValue, 3000);
+					alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });
@@ -25138,7 +24950,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 
 	var style = styleManager;
 
-	style.navBG_color = "#3d66ca";
+	style.setNavBG("#3d66ca");
 
 	angular.element('#view').bind("scroll", function () {
 		console.log(this.scrollTop);
@@ -25164,7 +24976,6 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
 	var style = styleManager;
 
-	// style.navBG_color = "#ed4023";
 	style.setNavBG("#ed4023")
 
 	angular.element('#view').bind("scroll", function () {
@@ -26673,7 +26484,7 @@ var aperture = apertureService;
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.world = data.world;
 	$scope.style = data.style;
-	style.navBG_color = $scope.style.navBG_color;
+	styleManager.setNavBG($scope.style.navBG_color);
 	if ($scope.world.name) {
 		angular.extend($rootScope, {globalTitle: $scope.world.name});
 	}
@@ -27362,7 +27173,7 @@ $scope.$watch('editing', function(newBool, oldBool) {
 
 worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	$scope.style=data.style;
-		style.navBG_color = $scope.style.navBG_color;
+		styleManager.setNavBG($scope.style.navBG_color);
 
 	$scope.world=data.world;
 
@@ -27831,6 +27642,10 @@ link: function(scope, element, attrs) {
 	}
 	
 	function ifURL(url) {
+		var firstHash = url.indexOf('#');
+		if (firstHash > -1) {
+			return url.slice(0, firstHash) + url.slice(firstHash+1);
+		} else {return url}
 		return url;
 	}
 }
