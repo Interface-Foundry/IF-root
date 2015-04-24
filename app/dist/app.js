@@ -5124,9 +5124,9 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
 }]);
 
 
-  // app.run(function() {
-  //     FastClick.attach(document.body);
-  // });
+  app.run(function() {
+      FastClick.attach(document.body);
+  });
 
 
 /*

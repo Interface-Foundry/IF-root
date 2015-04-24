@@ -5147,9 +5147,9 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
 }]);
 
 
-  // app.run(function() {
-  //     FastClick.attach(document.body);
-  // });
+  app.run(function() {
+      FastClick.attach(document.body);
+  });
 
 
 /*
@@ -22720,7 +22720,7 @@ if (geoService.mobileCheck()) {
 var zoomControl = angular.element('.leaflet-bottom.leaflet-left')[0];
 zoomControl.style.top = "50px";
 zoomControl.style.left = "40%";
-
+apertureService.set('full');
 var worldLoaded = false;
 var landmarksLoaded = false;
 	
@@ -22747,6 +22747,7 @@ var landmarksLoaded = false;
 			$scope.landmarks.unshift(tempLandmark);		
 
 			//add marker
+			var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
 			map.addMarker(tempLandmark._id, {
 				lat:tempLandmark.loc.coordinates[1],
 				lng:tempLandmark.loc.coordinates[0],
@@ -22760,7 +22761,8 @@ var landmarksLoaded = false;
 				},
 				draggable:true,
 				message:'Drag to location on map',
-				focus:true
+				focus:true,
+				alt: alt
 			});
 
 		});

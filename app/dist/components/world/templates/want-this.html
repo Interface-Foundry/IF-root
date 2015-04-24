@@ -31,13 +31,13 @@
 					</a>
 				</div>
 				
-				<div class="want"
+				<div class="want needsclick"
 					ng-show="!wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]"
 					ng-file-select
 					ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
 					ng-file-drop
 					data-accept="image/*">
-					<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[0].tag)"></div>
+					<div class="verifyUpload needsclick" ng-click="verifyUpload($event, contest.contestTags[0].tag)"></div>
 				</div>
 
 				<div class="loading-spinner u-centerY"
@@ -47,13 +47,13 @@
 				</div>
 			</div>
 
-			<div class="camera"
+			<div class="camera needsclick"
 				ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]}"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[0].tag)"
 				ng-file-drop
 				data-accept="image/*">
-				<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[0].tag)">
+				<div class="verifyUpload needsclick" ng-click="verifyUpload($event, contest.contestTags[0].tag)">
 					<span class="plus-one"
 								ng-show="wtgt.images[contest.contestTags[0].tag] && !wtgt.building[contest.contestTags[0].tag]">+</span>
 				</div>
@@ -81,13 +81,13 @@
 					</a>
 				</div>
 				
-				<div class="got"
+				<div class="got needsclick"
 					ng-show="!wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]"
 					ng-file-select
 					ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
 					ng-file-drop
 					data-accept="image/*">
-					<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[1].tag)"></div>
+					<div class="verifyUpload needsclick" ng-click="verifyUpload($event, contest.contestTags[1].tag)"></div>
 				</div>
 
 				<div class="loading-spinner u-centerY"
@@ -97,13 +97,13 @@
 				</div>
 			</div>
 
-			<div class="camera"
+			<div class="camera needsclick"
 						ng-class="{'plus-one-visible': wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]}"
 				ng-file-select
 				ng-file-change="uploadWTGT($files, contest.contestTags[1].tag)"
 				ng-file-drop
 				data-accept="image/*">
-				<div class="verifyUpload" ng-click="verifyUpload($event, contest.contestTags[1].tag)">
+				<div class="verifyUpload needsclick" ng-click="verifyUpload($event, contest.contestTags[1].tag)">
 					<span class="plus-one"
 								ng-show="wtgt.images[contest.contestTags[1].tag] && !wtgt.building[contest.contestTags[1].tag]">+</span>
 				</div>
