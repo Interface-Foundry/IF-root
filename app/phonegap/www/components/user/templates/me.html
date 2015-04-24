@@ -5,11 +5,11 @@
 			<div class="profile-sort">
 				<div class="profile-card">
 					<span class="sort-heading indigo700">ME</span>
-						<div class="profile-card-pic" ng-file-select 
+						<div class="profile-card-pic needsclick" ng-file-select 
 								accept="image/*" ng-capture="'camera'" 
 								ng-model="files.avatar">
 							<!-- <div progress-circle top="'6'" left="'22'" full-width="'99'" spin-left="spinLeft" spin-left-long="spinLeftLong"></div> -->
-							<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar">
+							<img style="width:95px;" ng-src="{{user.avatar}}" ng-show="user.avatar" class="needsclick">
 							<span class="profile-card-pic-upload">upload</span>
 						</div>
 					<div class="profile-card-body">
