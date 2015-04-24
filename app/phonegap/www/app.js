@@ -4859,7 +4859,7 @@ var updateTitle = function($rootScope) {
     	return {
     		'request': function(request) {
 	    			if (request.server) { //interceptor for requests that need auth--gives fb auth or basic auth
-		    			request.url =  'http://192.168.1.6:2997' + request.url;
+		    			request.url =   'http://kipapp.co'  + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5920,7 +5920,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://192.168.1.6:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -24613,7 +24613,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
-            console.log('hitting splashcontroller not loggedin')
+            // console.log('hitting splashcontroller not loggedin')
             $scope.show.splash = true;
             $scope.show.confirm = false;
             $scope.show.confirmThanks = false;
