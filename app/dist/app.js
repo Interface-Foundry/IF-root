@@ -19374,11 +19374,11 @@ angular.module('tidepoolsServices')
                         // var authHeader = 'Bearer ' + fbToken;
                         // console.log(success);
                         // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-                        // 	lockerManager.saveFBToken(fbToken);
-                        // 	ifGlobals.fbToken = fbToken;
-                        // 	deferred.resolve(success);
+                        //  lockerManager.saveFBToken(fbToken);
+                        //  ifGlobals.fbToken = fbToken;
+                        //  deferred.resolve(success);
                         // }, function(failure) {
-                        // 	deferred.reject(failure);
+                        //  deferred.reject(failure);
                         // })
                     },
                     function(failure) {

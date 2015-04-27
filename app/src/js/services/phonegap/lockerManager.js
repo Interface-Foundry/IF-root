@@ -30,28 +30,28 @@ angular.module('tidepoolsServices')
             lockerManager.keychain.getForKey(function(value) {
                 username.resolve(value);
             }, function(error) {
-                username.resolve(undefined);
-                console.log(error);
+                username.reject(error);
+                console.log('user name error',error);
             }, 'username', 'Kip');
 
             lockerManager.keychain.getForKey(function(value) {
                 password.resolve(value);
             }, function(error) {
-                password.resolve(undefined);
-                console.log(error);
+                password.reject(error);
+              console.log('password error',error);
             }, 'password', 'Kip');
 
-            lockerManager.keychain.getForKey(function(value) {
-                fbToken.resolve(value);
-            }, function(error) {
-                fbToken.resolve(undefined);
-                // console.log(error);
-            }, 'fbToken', 'Kip');
+            // lockerManager.keychain.getForKey(function(value) {
+            //     fbToken.resolve(value);
+            // }, function(error) {
+            //     fbToken.resolve(undefined);
+            //     // console.log(error);
+            // }, 'fbToken', 'Kip');
 
             return $q.all({
-                username: username.promise,
-                password: password.promise,
-                fbToken: fbToken.promise
+                username: username.$promise,
+                password: password.$promise
+                // ,fbToken: fbToken.promise
             });
 
         }

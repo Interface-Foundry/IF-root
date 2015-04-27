@@ -83,21 +83,21 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 //@IFDEF KEYCHAIN
                 //On Phonegap startup, try to login with either saved username/pw or facebook
                 lockerManager.getCredentials().then(function(credentials) {
-                    if(!credentials) {
-                        // console.log('no no credentials no here')
-                        createShowSplash(false);
-                    }
-                    // console.log('credentials are', credentials)
+                  
+                    console.log('credentials are', credentials)
                     if (credentials.username && credentials.password && !credentials.fbToken) {
-                        // console.log('hitting local login')
+                        console.log('hitting local login', credentials)
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
                             userManager.checkLogin().then(function(success) {
                                 createShowSplash(true);
                                 console.log(success);
+                            }, function(error) {
+                                createShowSplash(false);
+                                console.log('checkin error', error);
                             });
-                        }, function(reason) {
+                        }, function(err) {
+                            console.log('i mean, its hitting this right')
                             createShowSplash(false);
-                            // console.log('credential signin error', reason)
                         });
                     } else if (credentials.fbToken) {
                          // console.log('hitting fblogin')
@@ -114,7 +114,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                         createShowSplash(false);
                     }
                 }, function(err) {
-                    console.log('credential error', error);
+                    console.log('last credential error', err);
                     createShowSplash(false);
                 }); //END OF GET CREDENTIALS
 

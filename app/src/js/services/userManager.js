@@ -150,9 +150,7 @@ angular.module('tidepoolsServices')
                         server: true
                     })
                     .success(function(data) {
-                 
                         lockerManager.saveCredentials(username, password);
-                      
                         console.log('SUCCESS');
                         userManager._user = data;
                         userManager.loginStatus = true;
@@ -160,10 +158,10 @@ angular.module('tidepoolsServices')
                         ifGlobals.loginStatus = true;
                         //userManager.saveToKeychain();
                         deferred.resolve(data);
-                    })
-                    .error(function(data, status, headers, config) {
-                        console.error(data, status, headers, config);
-                        deferred.reject(data);
+                    }).error(function(error) {
+                        
+                        console.log('tokyo gangsta')
+                        deferred.reject(0);
                     })
                     //@ENDIF
 
@@ -215,11 +213,11 @@ angular.module('tidepoolsServices')
                         // var authHeader = 'Bearer ' + fbToken;
                         // console.log(success);
                         // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-                        // 	lockerManager.saveFBToken(fbToken);
-                        // 	ifGlobals.fbToken = fbToken;
-                        // 	deferred.resolve(success);
+                        //  lockerManager.saveFBToken(fbToken);
+                        //  ifGlobals.fbToken = fbToken;
+                        //  deferred.resolve(success);
                         // }, function(failure) {
-                        // 	deferred.reject(failure);
+                        //  deferred.reject(failure);
                         // })
                     },
                     function(failure) {
