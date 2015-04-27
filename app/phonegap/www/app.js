@@ -21746,7 +21746,6 @@ function ContestController($scope, $routeParams, $sce, Contests) {
     .then(function(response) {
     	if (response._id) {
       	$scope.contest = response;
-      	$scope.html = $sce.trustAsHtml($scope.contest.htmlBody)
     	}
     }, function(error) {
     	console.log('Error:', error);

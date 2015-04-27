@@ -4862,8 +4862,8 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'https://kipapp.co' + request.url;
-
+		    			// request.url = 'https://kipapp.co' + request.url;
+              request.url = 'http://192.168.1.2:2997' + request.url;
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5924,7 +5924,8 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
+					// value = 'https://kipapp.co/'+value;
+					value = 'http://192.168.1.2:2997'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -17407,6 +17408,9 @@ function currentWorldService() {
 	};
 	
 	function floorNumToName(floorNum) {
+		if (!floorNum) {
+			return '';
+		}
 		if (_.isEmpty(floorDirectory)) {
 			return floorNum;
 		} else {
@@ -21728,9 +21732,9 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
 
-function ContestController($scope, $routeParams, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
