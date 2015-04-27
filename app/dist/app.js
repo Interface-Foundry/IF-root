@@ -21530,9 +21530,9 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
 
-function ContestController($scope, $routeParams, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
@@ -21545,6 +21545,7 @@ function ContestController($scope, $routeParams, Contests) {
     .then(function(response) {
     	if (response._id) {
       	$scope.contest = response;
+      	$scope.html = $sce.trustAsHtml($scope.contest.htmlBody)
     	}
     }, function(error) {
     	console.log('Error:', error);
