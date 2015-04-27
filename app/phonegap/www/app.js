@@ -21731,9 +21731,9 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
 
-function ContestController($scope, $routeParams, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
