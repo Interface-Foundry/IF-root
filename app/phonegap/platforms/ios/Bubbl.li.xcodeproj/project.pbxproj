@@ -33,6 +33,7 @@
 		5B1594DD16A7569C00FEF299 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */; };
 		5B4ABF77318D455398DCFE22 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34CB88AAF02B4A8B9D6EE5E0 /* ImageIO.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		5DCAE841FF144A778C879F4C /* CDVCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = AF852CA645B148A5846632A2 /* CDVCamera.m */; };
+		620EA80A2E7F485F828DF1AB /* CDVStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */; };
 		7E7966DE1810823500FA85AD /* icon-40.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D41810823500FA85AD /* icon-40.png */; };
 		7E7966DF1810823500FA85AD /* icon-40@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D51810823500FA85AD /* icon-40@2x.png */; };
 		7E7966E01810823500FA85AD /* icon-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966D61810823500FA85AD /* icon-50.png */; };
@@ -43,6 +44,7 @@
 		7E7966E51810823500FA85AD /* icon-76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DB1810823500FA85AD /* icon-76@2x.png */; };
 		7E7966E61810823500FA85AD /* icon-small.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DC1810823500FA85AD /* icon-small.png */; };
 		7E7966E71810823500FA85AD /* icon-small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DD1810823500FA85AD /* icon-small@2x.png */; };
+		8220A1CD1AEEF55D0079A203 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8220A1CC1AEEF55D0079A203 /* Images.xcassets */; };
 		82A3FE631AE080FF004EA77D /* CDVLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 697ADC21C5474BD89BCAEE7B /* CDVLocation.m */; };
 		8F713E585B784B9BAB23A9CC /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1214CE040FB1439DA6495662 /* libsqlite3.dylib */; };
 		93A4F476C39349E595491E96 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 76B5788E71204B928F675DAB /* SFHFKeychainUtils.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -54,7 +56,6 @@
 		E0F9E0CC1A13205000DD0B6B /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DE2F374E88F4F3C951C4063 /* CDVSplashScreen.m */; };
 		E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */ = {isa = PBXBuildFile; fileRef = BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */; };
 		F9F0F2F1736C4CE89A9A4737 /* FacebookConnectPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B7F79D80E4C4F06A021F2BC /* FacebookConnectPlugin.m */; };
-		620EA80A2E7F485F828DF1AB /* CDVStatusBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +110,7 @@
 		30FC414816E50CA1004E6F35 /* icon-72@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-72@2x.png"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* Bubbl.li-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Bubbl.li-Prefix.pch"; sourceTree = "<group>"; };
 		34CB88AAF02B4A8B9D6EE5E0 /* ImageIO.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVStatusBar.m; path = org.apache.cordova.statusbar/CDVStatusBar.m; sourceTree = "<group>"; };
 		3F3108E840964D0BA01D3BD6 /* CDVNotification.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = CDVNotification.bundle; sourceTree = "<group>"; };
 		427E66F6F0C1412AA11D897D /* ESTBeaconFirmwareInfoVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconFirmwareInfoVO.h; path = pl.makingwaves.estimotebeacons/ESTBeaconFirmwareInfoVO.h; sourceTree = "<group>"; };
 		4EBB575D0A014A5D822F9ACB /* libEstimoteSDK.a */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = archive.ar; name = libEstimoteSDK.a; path = Bubbl.li/Plugins/pl.makingwaves.estimotebeacons/libEstimoteSDK.a; sourceTree = "<group>"; };
@@ -129,6 +131,8 @@
 		7E7966DB1810823500FA85AD /* icon-76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-76@2x.png"; sourceTree = "<group>"; };
 		7E7966DC1810823500FA85AD /* icon-small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-small.png"; sourceTree = "<group>"; };
 		7E7966DD1810823500FA85AD /* icon-small@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-small@2x.png"; sourceTree = "<group>"; };
+		7EDF02509D1F49708014D520 /* CDVStatusBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVStatusBar.h; path = org.apache.cordova.statusbar/CDVStatusBar.h; sourceTree = "<group>"; };
+		8220A1CC1AEEF55D0079A203 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Bubbl.li/Images.xcassets; sourceTree = SOURCE_ROOT; };
 		8CE1113D916F4ACC9E81E05C /* AudioToolbox.framework */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Bubbl.li-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "Bubbl.li-Info.plist"; path = "../Bubbl.li-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		8D8BB16A837B497FA0D414F3 /* ESTBeaconManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconManager.h; path = pl.makingwaves.estimotebeacons/ESTBeaconManager.h; sourceTree = "<group>"; };
@@ -158,8 +162,6 @@
 		F43F4F136454466B8087AE85 /* ESTBeacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeacon.h; path = pl.makingwaves.estimotebeacons/ESTBeacon.h; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = Bubbl.li/config.xml; sourceTree = "<group>"; };
 		FB6929E719F64720AE0C7E66 /* CDVJpegHeaderWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVJpegHeaderWriter.h; path = org.apache.cordova.camera/CDVJpegHeaderWriter.h; sourceTree = "<group>"; };
-		39D047BF57874F2C9D8F9AC7 /* CDVStatusBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVStatusBar.m"; path = "org.apache.cordova.statusbar/CDVStatusBar.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		7EDF02509D1F49708014D520 /* CDVStatusBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVStatusBar.h"; path = "org.apache.cordova.statusbar/CDVStatusBar.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -253,6 +255,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				8220A1CC1AEEF55D0079A203 /* Images.xcassets */,
 				30A0434214DC770100060A13 /* de.lproj */,
 				30A0434514DC770100060A13 /* se.lproj */,
 				1F766FDB13BBADB100FB74C0 /* en.lproj */,
@@ -473,6 +476,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7E7966E41810823500FA85AD /* icon-76.png in Resources */,
+				8220A1CD1AEEF55D0079A203 /* Images.xcassets in Resources */,
 				7E7966DF1810823500FA85AD /* icon-40@2x.png in Resources */,
 				308D05371370CCF300D202BF /* icon-72.png in Resources */,
 				308D05381370CCF300D202BF /* icon.png in Resources */,
@@ -590,6 +594,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -635,6 +641,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
