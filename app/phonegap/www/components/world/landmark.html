@@ -33,7 +33,7 @@
 									Located in<span class="u-colorLinkBlue u-pointer" ng-click="goToWorld()"> {{ ::world.name }}</span>
 								</p>
 								<p>
-									<span ng-show="landmark.loc_info.floor_num">Floor: {{::landmark.loc_info.floor_num}}</span>
+									<span ng-show="landmark.loc_info.floor_num">Floor: {{landmark.loc_info.floor_num | floorNumToName }}</span>
 
 									<span ng-show="landmark.loc_info.room_name">Room: {{::landmark.loc_info.room_name}}</span>
 								</p>

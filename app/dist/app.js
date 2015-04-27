@@ -17383,6 +17383,9 @@ function currentWorldService() {
 	};
 	
 	function floorNumToName(floorNum) {
+		if (!floorNum) {
+			return '';
+		}
 		if (_.isEmpty(floorDirectory)) {
 			return floorNum;
 		} else {
