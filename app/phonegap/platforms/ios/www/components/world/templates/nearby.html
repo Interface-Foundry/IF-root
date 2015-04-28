@@ -14,7 +14,7 @@
 
 	<ul ng-if="loadState=='success' && nearbyBubbles.length>0">
 		<li class="col-xs-4" ng-repeat="bubble in nearbyBubbles">
-			<a ng-href="/w/{{bubble.id}}"><img class="img-responsive nearby-widget-avatar text-center" ng-src="{{bubble.avatar}}"></a>
+			<a if-href="#/w/{{bubble.id}}"><img class="img-responsive nearby-widget-avatar text-center" ng-src="{{bubble.avatar}}"></a>
 			<h6 class="text-center">{{bubble.name}}</h6>
 		</li>
 	</ul>
