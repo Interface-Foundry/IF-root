@@ -27554,7 +27554,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
 			// var offset = $('.search-cat').offset().top;
-			// var scrollState = false;
+			var scrollState = false;
 			var noResultsText = bubbleSearchService.defaultText.none;
 			var defaultText;
 
