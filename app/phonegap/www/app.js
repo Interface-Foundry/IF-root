@@ -17407,6 +17407,9 @@ function currentWorldService() {
 	};
 	
 	function floorNumToName(floorNum) {
+		if (!floorNum) {
+			return '';
+		}
 		if (_.isEmpty(floorDirectory)) {
 			return floorNum;
 		} else {
@@ -21741,9 +21744,9 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
 
-function ContestController($scope, $routeParams, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
@@ -26780,6 +26783,8 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 console.log('--Landmark Controller--');
 
 $scope.aperture = apertureService;
+// aperture setting needs to happen early in controller init to avoid hidden elements on ios
+$scope.aperture.set('third');
 $scope.bubbleTypeService = bubbleTypeService;
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
@@ -26789,7 +26794,7 @@ $scope.collectedPresents = [];
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-var aperture = apertureService;
+
 
 
 
@@ -26934,7 +26939,6 @@ function getLandmark(world) {
 function goToMark() {
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
-	aperture.set('third');
 	map.removeAllMarkers();
 
 	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
@@ -26968,7 +26972,6 @@ function goToMark() {
 	});
 
 	map.setMarkerFocus($scope.landmark._id);
-	
 	map.refresh();
 
 };

@@ -4862,7 +4862,11 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
+<<<<<<< HEAD
 		    			request.url = 'http://kipapp.co' + request.url;
+=======
+		    			request.url = 'https://kipapp.co' + request.url;
+>>>>>>> 7bae95e3bf2e27cd80c5d9237b2b2a07ae6d0109
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -17407,6 +17411,9 @@ function currentWorldService() {
 	};
 	
 	function floorNumToName(floorNum) {
+		if (!floorNum) {
+			return '';
+		}
 		if (_.isEmpty(floorDirectory)) {
 			return floorNum;
 		} else {
@@ -21741,9 +21748,9 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
 
-function ContestController($scope, $routeParams, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
@@ -24788,6 +24795,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
+
 'use strict';
 
 angular.module('IF')
@@ -26780,6 +26788,8 @@ function (World, Landmark, db, $routeParams, $scope, $location, $window, leaflet
 console.log('--Landmark Controller--');
 
 $scope.aperture = apertureService;
+// aperture setting needs to happen early in controller init to avoid hidden elements on ios
+$scope.aperture.set('third');
 $scope.bubbleTypeService = bubbleTypeService;
 $scope.worldURL = $routeParams.worldURL;
 $scope.landmarkURL = $routeParams.landmarkURL;
@@ -26789,7 +26799,7 @@ $scope.collectedPresents = [];
 var map = mapManager;
 var style = styleManager;
 var alerts = alertManager;
-var aperture = apertureService;
+
 
 
 
@@ -26934,7 +26944,6 @@ function getLandmark(world) {
 function goToMark() {
 	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
-	aperture.set('third');
 	map.removeAllMarkers();
 
 	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
@@ -26968,7 +26977,6 @@ function goToMark() {
 	});
 
 	map.setMarkerFocus($scope.landmark._id);
-	
 	map.refresh();
 
 };

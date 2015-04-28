@@ -4511,6 +4511,31 @@ a.bubble-inspector-btn:hover {
 .bubble-inspector-btn-walkthrough:hover {
   color: #FFF;
 }
+@media only screen and (max-device-width: 568px) {
+  .bubble-inspector {
+    width: 180px;
+  }
+  .bubble-inspector-header {
+    height: 40px;
+    top: 48px;
+  }
+  .bubble-inspector-avatar {
+    top: 88px;
+    width: 100%;
+  }
+  a.bubble-inspector-btn {
+    width: 88px;
+  }
+  .bubble-list-item {
+    padding-left: 42px;
+  }
+  .bubble-list-item-img {
+    height: 26px;
+    left: 8px;
+    top: 23px;
+    width: 26px;
+  }
+}
 .marble-label {
   display: block;
   margin-bottom: 4px;
@@ -4645,6 +4670,10 @@ a.bubble-inspector-btn:hover {
   -ms-user-select: none;
   user-select: none;
 }
+.world-description img {
+  height: auto;
+  max-width: 100%;
+}
 .closeImg {
   position: relative;
   left: 12px;
@@ -4756,7 +4785,7 @@ li.alert {
   display: block;
   position: relative;
   width: 296px;
-  height: 72px;
+  min-height: 72px;
   margin: 0 auto -80px auto;
   padding: 8px 56px 8px 8px;
   background: #FFF;
