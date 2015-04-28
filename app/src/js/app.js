@@ -372,8 +372,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
  */
 function handleOpenURL(url) {
   setTimeout(function() {
-    localStorage.setItem('url', url)
+    localStorage.setItem('url', url);
   }) ;
-// @ENDIF
-
 }
+// @ENDIF

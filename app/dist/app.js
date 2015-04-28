@@ -5128,14 +5128,6 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
       FastClick.attach(document.body);
   });
 
-function handleOpenURL(url) {
-  setTimeout(function() {
-    console.log('HANDLE OPEN URL CALLED!!!!!!!!')
-    console.log("URL", url)
-    localStorage.setItem('url', url)
-  }) 
-
-}
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
