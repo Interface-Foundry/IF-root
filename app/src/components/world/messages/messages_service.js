@@ -2,15 +2,16 @@
 
 app.factory('messagesService', messagesService);
 
-messagesService.$inject = [];
+messagesService.$inject = ['$http'];
 
-function messagesService() {
+function messagesService($http) {
 
 	var firstScroll = true;
 	
 	return {
 		createProfileEditMessage: createProfileEditMessage,
 		createWelcomeMessage: createWelcomeMessage,
+		deleteMsg: deleteMsg,
 		firstScroll: firstScroll
 	};
 
@@ -37,5 +38,9 @@ function messagesService() {
 	    userID: 'chatbot',
 	    _id: 'welcomeMessage'
 		};
+	}
+
+	function deleteMsg(msg) {
+		return $http.delete('/api/worldchat/' + msg._id);
 	}
 }
