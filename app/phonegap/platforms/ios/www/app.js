@@ -4862,7 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'http://kipapp.co' + request.url;
+		    			request.url = 'http://192.168.1.6:2997' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5924,7 +5924,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
+					value = 'https://192.168.1.6:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -24516,287 +24516,324 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
     function init() {
-            // special case for aicp to prevent splash page
-            if ($location.path().indexOf('aicpweek2015') > -1) {
-                $scope.show.splash = false;
-                return;
-            }
-
-            if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
-
-                createShowSplash('confirmThanks');
-
-                // get token from url
-                var token = $location.path().slice(15);
-
-                $http.post('/email/request_confirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {
-                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-                }).
-                error(function(err) {
-                    $scope.confirmThanksText = 'There was a problem confirming your email';
-                });
-
-                // redirect to home page
-                $location.path('/');
-            } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
-
-                createShowSplash('passwordReset');
-
-                // get token from url
-                var token = $location.path().slice(7);
-
-                $http.post('/resetConfirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {}).
-                error(function(err) {
-                    if (err) {
-                        console.log('err: ', err);
-                    }
-                });
-            } else {
-                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
-                //On Phonegap startup, try to login with either saved username/pw or facebook
-
-                var localuser = false;
-                var fbuser = false;
-                lockerManager.getCredentials().then(function(credentials) {
-                    if (credentials.username && credentials.password) {
-                        userManager.signin(credentials.username, credentials.password).then(function(success) {
-                            localuser = true;
-                            userManager.checkLogin().then(function(success) {
-                                correct = true;
-                                return createShowSplash(true);
-                            }, function(error) {
-                                createShowSplash(false);
-                                console.log('checkin error', error);
-                            });
-                        })
-                    }
-                }, function(err) {
-                    console.log('keychain: local login failed');
-                    return;
-                }); //END OF GET LOCAL CREDENTIALS
-
-                //GET FB CREDENTIALS
-                if (!localuser) {
-                    // console.log('trying fb keychain login')
-
-                    lockerManager.getFBCredentials().then(function(credentials) {
-                        // console.log('Hitting fblogin')
-                        if (credentials.fbToken) {
-                            ifGlobals.fbToken = credentials.fbToken;
-                            userManager.fbLogin().then(function(success) {
-                                fbuser = true;
-                                createShowSplash(true);
-                                // console.log('loaded facebook user: ', userManager._user);
-                            }, function(err) {
-                                console.log('fb login error', err);
-                                 createShowSplash(false);
-                            });
-                        }
-                    }, function(err) {
-                        console.log('fbcredential error', err);
-                        // createShowSplash(false);
-                    })
-
-                    // if (!fbuser) {
-                    //     createShowSplash(false);
-                    // }
-
-                } else {
-                    // console.log('NO VALID CREDENTIALS');
-                    alert('hitting no valid credentials')
-                    createShowSplash(false);
-                }
-
-                StatusBar.styleDefault();
-                StatusBar.backgroundColorByHexString('#F4F5F7');
-            } //END OF OUTER ELSE
-
-        } //END OF INIT
-
-    function createShowSplash(condition) {
-        // $scope.show controls the logic for the splash pages
-
-        if (condition === 'confirmThanks') {
-            $scope.show.splash = true;
-            $scope.show.confirm = false;
-            $scope.show.confirmThanks = true;
-        } else if (condition == 'passwordReset') {
-            $scope.show.splash = true;
-            $scope.show.passwordReset = true;
-        } else if (condition) { // logged in
-            // don't show confirm dialog for fb authenticated users
-            // console.log('hitting splashcontroller loggedin')
-            // console.log('SPLASH CONDITION ', condition);
-            // console.log('facebook ', userManager._user.facebook);
-            // console.log('userManager._user', userManager._user);
-
-            if (userManager._user.facebook) {
-                console.log(userManager._user.facebook);
-
-                $scope.show.splash = false;
-                $scope.show.confirm = false;
-            } else {
-                $scope.show.splash = !userManager._user.local.confirmedEmail;
-                $scope.show.confirm = !userManager._user.local.confirmedEmail;
-            }
-
-            $scope.show.confirmThanks = false;
-            $scope.user.newEmail = userManager._user.local.email;
-        } else { // not logged in
-            // console.log('hitting splashcontroller not loggedin')
-            $scope.show.splash = true;
-            $scope.show.confirm = false;
-            $scope.show.confirmThanks = false;
-        }
-
-        $scope.show.signin = false;
-        $scope.show.register = false;
-    }
-
-    function setShowSplash(property, bool) {
-        if (property instanceof Array) {
-            _.each(property, function(prop) {
-                $scope.show[prop] = bool;
-            });
-        } else {
-            $scope.show[property] = bool;
-        }
-    }
-
-    function setShowSplashFalse() {
-        // sets all $scope.show to false
-        _.each($scope.show, function(value, key) {
-            $scope.show[key] = false;
-        });
-    }
-
-    function setShowSplashReset() {
-        // sets all $scpe.show to false, except $scope.show.splash
-        _.each($scope.show, function(value, key) {
-            $scope.show[key] = false;
-        });
-        $scope.show.splash = true;
-    }
-
-
-    function splashNext() {
-        // login or create account, depending on context
-        userManager.signup.error = undefined;
-        if ($scope.show.signin) {
-            userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
-                $scope.show.signin = false;
-                $scope.show.splash = false;
-            }, function(err) {
-                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
-            })
-
-        } else if ($scope.show.register) {
-            var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
-                if (newValue === false) { // signup success
-                    $scope.show.register = false;
-                    $scope.show.splash = false;
-                    watchSignupError(); // clear watch
-                    alertManager.addAlert('info', 'Welcome to Kip!', true);
-                    welcomeService.needsWelcome = true;
-                } else if (newValue) { // signup error
-                    alertManager.addAlert('danger', newValue, false);
-                    watchSignupError(); // clear watch
-                }
-            });
-            userManager.signup.signup();
-        }
-    }
-
-    function resendEmail() {
-        if ($scope.user.newEmail === userManager._user.local.email) {
-            sendEmailConfirmation();
+        // special case for aicp to prevent splash page
+        if ($location.path().indexOf('aicpweek2015') > -1) {
             $scope.show.splash = false;
-            $scope.show.confirm = false;
-            alertManager.addAlert('info', 'Confirmation email sent', true);
-        } else {
-            // update email 1st (user just edited email)
-            var data = {
-                updatedEmail: $scope.user.newEmail
-            };
-            $http.post('/api/user/emailUpdate', data, {
+            return;
+        }
+
+        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+
+            createShowSplash('confirmThanks');
+
+            // get token from url
+            var token = $location.path().slice(15);
+
+            $http.post('/email/request_confirm/' + token, {}, {
                 server: true
             }).
             success(function(data) {
-                if (data.err) {
-                    addErrorMsg(data.err, 3000);
-                } else {
-                    sendEmailConfirmation();
-                    $scope.show.splash = false;
-                    $scope.show.confirm = false;
-                    alertManager.addAlert('info', 'Email updated. Confirmation email sent', true);
+                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+            }).
+            error(function(err) {
+                $scope.confirmThanksText = 'There was a problem confirming your email';
+            });
+
+            // redirect to home page
+            $location.path('/');
+        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+
+            createShowSplash('passwordReset');
+
+            // get token from url
+            var token = $location.path().slice(7);
+
+            $http.post('/resetConfirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {}).
+            error(function(err) {
+                if (err) {
+                    console.log('err: ', err);
                 }
             });
+        } else {
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+            //On Phonegap startup, try to login with either saved username/pw or facebook
+
+            var localuser = false;
+            var fbuser = false;
+
+            var credentials = {
+                username: null,
+                password: null,
+                fbToken: null
+            };
+
+
+            lockerManager.getCredentials()
+                .then(function(localcredentials) {
+                    credentials.username = localcredentials.username;
+                    credentials.password = localcredentials.password;
+                    userManager.signin(credentials.username, credentials.password).then(function(success) {
+                        localuser = true;
+                        userManager.checkLogin().then(function(success) {
+                            correct = true;
+                            createShowSplash(true);
+                        }, function(error) {
+                            createShowSplash(false);
+                            return;
+                            console.log('checkin error', error);
+                        });
+                    }, function(err) {
+                        console.log('local signin error', error);
+                        return;
+                    })
+                }).then(function(err) {
+                    console.log('keychain: local login failed');
+                    //Local keychain failed. Now try fb keychain
+                    lockerManager.getFBCredentials().then(function(fbcredentials) {
+                        credentials.fbToken = fbcredentials.fbToken
+                        ifGlobals.fbToken = credentials.fbToken;
+                        userManager.fbLogin().then(function(success) {
+                            fbuser = true;
+                            createShowSplash(true);
+                        }, function(err) {
+                            console.log('fb login error', err);
+                            createShowSplash(false);
+                            return;
+                        });
+                    }, function(err) {
+                        console.log('fbcredential error', err);
+                        createShowSplash(false);
+                    })
+                }).then(function() {
+                    //If both failed
+                    if (!localuser && !fbuser) {
+                        createShowSplash(false);
+                    }
+                })
+
+
+
+
+
+
+
+
+
+
+
+    //     },
+    //     function(err) {
+    //         console.log('keychain: local login failed');
+    //         //GET FB CREDENTIALS
+    //         lockerManager.getFBCredentials().then(function(fbcredentials) {
+    //             credentials.fbToken = fbcredentials.fbToken
+    //             ifGlobals.fbToken = credentials.fbToken;
+    //             userManager.fbLogin().then(function(success) {
+    //                 fbuser = true;
+    //                 createShowSplash(true);
+    //             }, function(err) {
+    //                 console.log('fb login error', err);
+    //                 createShowSplash(false);
+    //             });
+    //         }, function(err) {
+    //             console.log('fbcredential error', err);
+    //             createShowSplash(false);
+    //         })
+    //     }).$promise.then(function() {
+    //     if (!localuser && !fbuser) {
+    //         createShowSplash(false);
+    //     }
+    // })
+
+
+
+
+
+    StatusBar.styleDefault();
+    StatusBar.backgroundColorByHexString('#F4F5F7');
+} //END OF OUTER ELSE
+
+} //END OF INIT
+
+function createShowSplash(condition) {
+// $scope.show controls the logic for the splash pages
+
+if (condition === 'confirmThanks') {
+    $scope.show.splash = true;
+    $scope.show.confirm = false;
+    $scope.show.confirmThanks = true;
+} else if (condition == 'passwordReset') {
+    $scope.show.splash = true;
+    $scope.show.passwordReset = true;
+} else if (condition) { // logged in
+    // don't show confirm dialog for fb authenticated users
+    // console.log('hitting splashcontroller loggedin')
+    // console.log('SPLASH CONDITION ', condition);
+    // console.log('facebook ', userManager._user.facebook);
+    // console.log('userManager._user', userManager._user);
+
+    if (userManager._user.facebook) {
+        console.log(userManager._user.facebook);
+        $scope.show.splash = false;
+        $scope.show.confirm = false;
+    } else {
+        $scope.show.splash = !userManager._user.local.confirmedEmail;
+        $scope.show.confirm = !userManager._user.local.confirmedEmail;
+    }
+    $scope.show.confirmThanks = false;
+    $scope.user.newEmail = userManager._user.local.email;
+} else { // not logged in
+    // console.log('hitting splashcontroller not loggedin')
+    $scope.show.splash = true;
+    $scope.show.confirm = false;
+    $scope.show.confirmThanks = false;
+}
+
+$scope.show.signin = false;
+$scope.show.register = false;
+}
+
+function setShowSplash(property, bool) {
+if (property instanceof Array) {
+    _.each(property, function(prop) {
+        $scope.show[prop] = bool;
+    });
+} else {
+    $scope.show[property] = bool;
+}
+}
+
+function setShowSplashFalse() {
+// sets all $scope.show to false
+_.each($scope.show, function(value, key) {
+    $scope.show[key] = false;
+});
+}
+
+function setShowSplashReset() {
+// sets all $scpe.show to false, except $scope.show.splash
+_.each($scope.show, function(value, key) {
+    $scope.show[key] = false;
+});
+$scope.show.splash = true;
+}
+
+
+function splashNext() {
+// login or create account, depending on context
+userManager.signup.error = undefined;
+if ($scope.show.signin) {
+    userManager.signin(userManager.login.email, userManager.login.password).then(function(success) {
+        $scope.show.signin = false;
+        $scope.show.splash = false;
+    }, function(err) {
+        alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+    })
+
+} else if ($scope.show.register) {
+    var watchSignupError = $scope.$watch('userManager.signup.error', function(newValue) {
+        if (newValue === false) { // signup success
+            $scope.show.register = false;
+            $scope.show.splash = false;
+            watchSignupError(); // clear watch
+            alertManager.addAlert('info', 'Welcome to Kip!', true);
+            welcomeService.needsWelcome = true;
+        } else if (newValue) { // signup error
+            alertManager.addAlert('danger', newValue, false);
+            watchSignupError(); // clear watch
         }
-    }
+    });
+    userManager.signup.signup();
+}
+}
 
-    function sendEmailConfirmation() {
-        $http.post('/email/confirm', {}, {
-            server: true
-        }).then(function(sucess) {}, function(error) {});
-    }
-
-    function sendPasswordForgot() {
-        var data = {
-            email: $scope.user.email
-        };
-
-        $http.post('/forgot', data, {
-            server: true
-        }).
-        success(function(data) {
-            $scope.user.email = '';
-        }).
-        error(function(err) {
-            if (err) {
-                addErrorMsg(err, 3000);
-            }
-        });
-    }
-
-    function sendPasswordReset() {
-        var data = {
-            password: $scope.user.newPassword
+function resendEmail() {
+if ($scope.user.newEmail === userManager._user.local.email) {
+    sendEmailConfirmation();
+    $scope.show.splash = false;
+    $scope.show.confirm = false;
+    alertManager.addAlert('info', 'Confirmation email sent', true);
+} else {
+    // update email 1st (user just edited email)
+    var data = {
+        updatedEmail: $scope.user.newEmail
+    };
+    $http.post('/api/user/emailUpdate', data, {
+        server: true
+    }).
+    success(function(data) {
+        if (data.err) {
+            addErrorMsg(data.err, 3000);
+        } else {
+            sendEmailConfirmation();
+            $scope.show.splash = false;
+            $scope.show.confirm = false;
+            alertManager.addAlert('info', 'Email updated. Confirmation email sent', true);
         }
+    });
+}
+}
 
-        $http.post('/reset/' + $location.path().slice(7), data, {
-            server: true
-        }).
-        success(function(data) {
-            if (data.err) {
-                addErrorMsg(data.err, 3000);
-            } else {
-                $location.path('/');
-                $timeout(function() {
-                    setShowSplashFalse();
-                }, 500);
-                alertManager.addAlert('info', 'Password changed successfully', true);
-            }
-        }).
-        error(function(err) {
-            console.log('err: ', err);
-        });
+function sendEmailConfirmation() {
+$http.post('/email/confirm', {}, {
+    server: true
+}).then(function(sucess) {}, function(error) {});
+}
+
+function sendPasswordForgot() {
+var data = {
+    email: $scope.user.email
+};
+
+$http.post('/forgot', data, {
+    server: true
+}).
+success(function(data) {
+    $scope.user.email = '';
+}).
+error(function(err) {
+    if (err) {
+        addErrorMsg(err, 3000);
     }
+});
+}
 
-    function addErrorMsg(message, time) {
-        $scope.errorMsg = message;
-        if (time) {
-            $timeout(function() {
-                $scope.errorMsg = '';
-            }, time);
-        }
+function sendPasswordReset() {
+var data = {
+    password: $scope.user.newPassword
+}
 
+$http.post('/reset/' + $location.path().slice(7), data, {
+    server: true
+}).
+success(function(data) {
+    if (data.err) {
+        addErrorMsg(data.err, 3000);
+    } else {
+        $location.path('/');
+        $timeout(function() {
+            setShowSplashFalse();
+        }, 500);
+        alertManager.addAlert('info', 'Password changed successfully', true);
     }
+}).
+error(function(err) {
+    console.log('err: ', err);
+});
+}
+
+function addErrorMsg(message, time) {
+$scope.errorMsg = message;
+if (time) {
+    $timeout(function() {
+        $scope.errorMsg = '';
+    }, time);
+}
+
+}
 
 
 }]);
