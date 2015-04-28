@@ -98,6 +98,8 @@
     if (!url) {
         return NO;
     }
+    
+
 
     // calls into javascript global function 'handleOpenURL'
     NSString* jsString = [NSString stringWithFormat:@"handleOpenURL(\"%@\");", url];

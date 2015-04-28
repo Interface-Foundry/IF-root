@@ -86,7 +86,8 @@
                             "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
                             "count": 1
                         }
-                    ]
+                    ],
+                    "/*/application/activity": []
                 }
             }
         }
