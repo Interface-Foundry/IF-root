@@ -4862,7 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'http://192.168.1.6:2997' + request.url;
+		    			request.url = 'http://kipapp.co' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5924,7 +5924,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://192.168.1.6:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -24562,86 +24562,47 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 //On Phonegap startup, try to login with either saved username/pw or facebook
 
                 var localuser = false;
-                var fbuser = false;
-
-                var credentials = {
-                    username: null,
-                    password: null,
-                    fbToken: null
-                };
-
-                $scope.$evalAsync(
-                    function($scope) {
-                        lockerManager.getCredentials()
-                            .then(function(localcredentials) {
-                                console.log('Trying local keychain login.', localcredentials)
-                                credentials.username = localcredentials.username;
-                                credentials.password = localcredentials.password;
-                                userManager.signin(credentials.username, credentials.password).then(function(success) {
-                                    localuser = true;
-                                    userManager.checkLogin().then(function(success) {
-                                        createShowSplash(true);
-                                    }, function(error) {
-                                        return createShowSplash(false);
-                                        console.log('checkin error', error);
-                                    });
-                                }, function(err) {
-                                    return console.log('local signin error', error);
-                                })
-                            }).then(function(err) {
-                                console.log('keychain: local login failed');
-                                //Local keychain failed. Now try fb keychain
-                                lockerManager.getFBCredentials().then(function(fbcredentials) {
-                                    credentials.fbToken = fbcredentials.fbToken
-                                    ifGlobals.fbToken = credentials.fbToken;
-                                    userManager.fbLogin().then(function(success) {
-                                        fbuser = true;
-                                        createShowSplash(true);
-                                    }, function(err) {
-                                        console.log('fb login error', err);
-                                        return createShowSplash(false);
-                                    });
-                                }, function(err) {
-                                    console.log('fbcredential error', err);
-                                    createShowSplash(false);
-                                })
-                            })
+                 var fbuser = false;
+                lockerManager.getCredentials().then(function(credentials) {
+                    if (credentials.username && credentials.password) {
+                        userManager.signin(credentials.username, credentials.password).then(function(success) {
+                            localuser = true;
+                            userManager.checkLogin().then(function(success) {
+                                correct = true;
+                                return createShowSplash(true);
+                            }, function(error) {
+                                createShowSplash(false);
+                                // console.log('checkin error', error);
+                            });
+                        })
                     }
-                );
+                }, function(err) {
+                    // return console.log('keychain: local login failed');
+                    // createShowSplash(false);
+                }); //END OF GET LOCAL CREDENTIALS
 
-                //If both failed
-                if (!localuser && !fbuser) {
+                //GET FB CREDENTIALS
+                if (!localuser) {
+                    // console.log('trying fb keychain login')
+                    lockerManager.getFBCredentials().then(function(credentials) {
+                        // console.log('Hitting fblogin')
+                        ifGlobals.fbToken = credentials.fbToken;
+                        userManager.fbLogin().then(function(success) {
+                            fbuser = true;
+                            return createShowSplash(true);
+                            // console.log('loaded facebook user: ', userManager._user);
+                        }, function(err) {
+                            // console.log('credential error', err);
+                            createShowSplash(false);
+                        });
+                    }, function (err) {
+                          // console.log('fbcredential error', err);
+                            createShowSplash(false);
+                    })
+                } else {
+                    // console.log('NO VALID CREDNEITALS');
                     createShowSplash(false);
                 }
-
-
-                //     },
-                //     function(err) {
-                //         console.log('keychain: local login failed');
-                //         //GET FB CREDENTIALS
-                //         lockerManager.getFBCredentials().then(function(fbcredentials) {
-                //             credentials.fbToken = fbcredentials.fbToken
-                //             ifGlobals.fbToken = credentials.fbToken;
-                //             userManager.fbLogin().then(function(success) {
-                //                 fbuser = true;
-                //                 createShowSplash(true);
-                //             }, function(err) {
-                //                 console.log('fb login error', err);
-                //                 createShowSplash(false);
-                //             });
-                //         }, function(err) {
-                //             console.log('fbcredential error', err);
-                //             createShowSplash(false);
-                //         })
-                //     }).$promise.then(function() {
-                //     if (!localuser && !fbuser) {
-                //         createShowSplash(false);
-                //     }
-                // })
-
-
-
-
 
                 StatusBar.styleDefault();
                 StatusBar.backgroundColorByHexString('#F4F5F7');
@@ -24668,12 +24629,14 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
+
                 $scope.show.splash = false;
                 $scope.show.confirm = false;
             } else {
                 $scope.show.splash = !userManager._user.local.confirmedEmail;
                 $scope.show.confirm = !userManager._user.local.confirmedEmail;
             }
+
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in

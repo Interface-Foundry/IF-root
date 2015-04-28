@@ -24357,12 +24357,14 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
+
                 $scope.show.splash = false;
                 $scope.show.confirm = false;
             } else {
                 $scope.show.splash = !userManager._user.local.confirmedEmail;
                 $scope.show.confirm = !userManager._user.local.confirmedEmail;
             }
+
             $scope.show.confirmThanks = false;
             $scope.user.newEmail = userManager._user.local.email;
         } else { // not logged in
