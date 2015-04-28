@@ -5153,7 +5153,14 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
       FastClick.attach(document.body);
   });
 
+function handleOpenURL(url) {
+  setTimeout(function() {
+    console.log('HANDLE OPEN URL CALLED!!!!!!!!')
+    console.log("URL", url)
+    localStorage.setItem('url', url)
+  }) 
 
+}
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -19385,7 +19392,7 @@ angular.module('tidepoolsServices')
         function($rootScope, $http, $resource, $q, $location, $route, dialogs, alertManager, lockerManager, ifGlobals, worldTree, contest, navService) {
             var alerts = alertManager;
 
-            window.handleOpenURL = function() {};
+            // window.handleOpenURL = function() {};
             //deals with loading, saving, managing user info. 
 
             var userManager = {
