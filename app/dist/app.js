@@ -17240,8 +17240,11 @@ function bubbleSearchService($http, analyticsService) {
 	return {
 		data: data,
 		search: search,
-		defaultText: 'Search around me',
-		noResultsText: 'No results'
+		defaultText: {
+			global: 'Search around me',
+			bubble: 'Search within ',
+			none: 'No results'
+		}
 	};
 	
 	function search(searchType, bubbleID, input) {
@@ -23876,7 +23879,7 @@ map.resetMap();
 $scope.bubbles = [];
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
-$scope.searchBarText = bubbleSearchService.defaultText;
+$scope.searchBarText = bubbleSearchService.defaultText.global;
 $scope.welcomeService = welcomeService;
 $scope.refresh = refresh;
 
@@ -25727,7 +25730,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			} else if ($location.path().slice(-3) === 'all') {
 				populateSearchView('All', 'all');
 			} else {
-				populateSearchView(bubbleSearchService.defaultText, 'generic');
+				populateSearchView(bubbleSearchService.defaultText.global, 'generic');
 			}
 		
 		});
@@ -25749,7 +25752,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($routeParams.text) {
 			populateCitySearchView($routeParams.text, 'text', latLng);
 		} else {
-			populateCitySearchView(bubbleSearchService.defaultText, 'generic', latLng);
+			populateCitySearchView(bubbleSearchService.defaultText.global, 'generic', latLng);
 		}
 	}
 
@@ -25936,7 +25939,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 					updateMap(bubbleSearchService.data);
 					if (bubbleSearchService.data.length === 0) { // no results
-						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.defaultText.none + ')';
 					}
 				});
 		} else { // generic search
@@ -26025,7 +26028,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						}
 
 						if (!$scope.citySearchResults.bubbles || $scope.citySearchResults.bubbles.length === 0) {
-							$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+							$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.defaultText.none + ')';
 						}
 
 					} else {
@@ -27294,11 +27297,11 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
-			var offset = $('.search-cat').offset().top;
-
-			var defaultText = bubbleSearchService.defaultText;
-			var noResultsText = bubbleSearchService.noResultsText;
-			var scrollState = false;
+			// var offset = $('.search-cat').offset().top;
+			// var scrollState = false;
+			var defaultText = bubbleSearchService.defaultText.global;
+			var noResultsText = bubbleSearchService.defaultText.none;
+			
 
 			// change text in search bar whenever $scope.searchBarText changes in searchController
 			if (inSearchView()) {
@@ -28087,7 +28090,7 @@ var map = mapManager;
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
-$scope.defaultText = bubbleSearchService.defaultText;
+$scope.defaultText = bubbleSearchService.defaultText.global;
 $scope.aperture.set('third');
 navService.show('home');
 

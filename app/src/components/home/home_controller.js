@@ -7,7 +7,7 @@ map.resetMap();
 $scope.bubbles = [];
 $scope.loadState = 'loading';
 $scope.kinds = ifGlobals.kinds;
-$scope.searchBarText = bubbleSearchService.defaultText;
+$scope.searchBarText = bubbleSearchService.defaultText.global;
 $scope.welcomeService = welcomeService;
 $scope.refresh = refresh;
 

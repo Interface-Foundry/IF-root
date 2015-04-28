@@ -41,7 +41,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			} else if ($location.path().slice(-3) === 'all') {
 				populateSearchView('All', 'all');
 			} else {
-				populateSearchView(bubbleSearchService.defaultText, 'generic');
+				populateSearchView(bubbleSearchService.defaultText.global, 'generic');
 			}
 		
 		});
@@ -63,7 +63,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($routeParams.text) {
 			populateCitySearchView($routeParams.text, 'text', latLng);
 		} else {
-			populateCitySearchView(bubbleSearchService.defaultText, 'generic', latLng);
+			populateCitySearchView(bubbleSearchService.defaultText.global, 'generic', latLng);
 		}
 	}
 
@@ -250,7 +250,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 					updateMap(bubbleSearchService.data);
 					if (bubbleSearchService.data.length === 0) { // no results
-						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.defaultText.none + ')';
 					}
 				});
 		} else { // generic search
@@ -339,7 +339,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						}
 
 						if (!$scope.citySearchResults.bubbles || $scope.citySearchResults.bubbles.length === 0) {
-							$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.noResultsText + ')';
+							$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.defaultText.none + ')';
 						}
 
 					} else {

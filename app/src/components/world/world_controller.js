@@ -5,7 +5,7 @@ var map = mapManager;
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
-$scope.defaultText = bubbleSearchService.defaultText;
+$scope.defaultText = bubbleSearchService.defaultText.global;
 $scope.aperture.set('third');
 navService.show('home');
 

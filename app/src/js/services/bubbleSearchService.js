@@ -11,8 +11,11 @@ function bubbleSearchService($http, analyticsService) {
 	return {
 		data: data,
 		search: search,
-		defaultText: 'Search around me',
-		noResultsText: 'No results'
+		defaultText: {
+			global: 'Search around me',
+			bubble: 'Search within ',
+			none: 'No results'
+		}
 	};
 	
 	function search(searchType, bubbleID, input) {
