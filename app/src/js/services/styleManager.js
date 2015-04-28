@@ -4,8 +4,12 @@ angular.module('tidepoolsServices')
 
 	.factory('styleManager', [
 		function() {
+			
+			var splashStatusBarColor = rgbToHex(244, 245, 247);
+
 			var styleManager = {
-				navBG_color: 'rgba(62, 82, 181, 0.96)' 
+				navBG_color: 'rgba(62, 82, 181, 0.96)',
+				splashStatusBarColor: splashStatusBarColor
 				//---local settings---
 				/*bodyBG_color: '#FFF',
 				titleBG_color,

@@ -1,4 +1,4 @@
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
@@ -118,7 +118,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
             // console.log('splashcontroller init(), credentials are', credentials)
             StatusBar.styleDefault();
-            StatusBar.backgroundColorByHexString('#F4F5F7');
+            StatusBar.backgroundColorByHexString(styleManager.splashStatusBarColor);
             // @ENDIF
         } //END OF OUTER ELSE
 

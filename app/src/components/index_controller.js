@@ -86,6 +86,10 @@ $scope.logout = function() {
 	userManager.logout();
 	userManager.login.email = '';
 	userManager.login.password = '';
+	if ($rootScope.if_phonegap) {
+		StatusBar.styleDefault();
+		StatusBar.backgroundColorByHexString(styleManager.splashStatusBarColor);
+	}
 }
 
 

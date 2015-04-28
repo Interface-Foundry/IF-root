@@ -19048,8 +19048,12 @@ angular.module('tidepoolsServices')
 
 	.factory('styleManager', [
 		function() {
+			
+			var splashStatusBarColor = rgbToHex(244, 245, 247);
+
 			var styleManager = {
-				navBG_color: 'rgba(62, 82, 181, 0.96)' 
+				navBG_color: 'rgba(62, 82, 181, 0.96)',
+				splashStatusBarColor: splashStatusBarColor
 				//---local settings---
 				/*bodyBG_color: '#FFF',
 				titleBG_color,
@@ -24039,6 +24043,10 @@ $scope.logout = function() {
 	userManager.logout();
 	userManager.login.email = '';
 	userManager.login.password = '';
+	if ($rootScope.if_phonegap) {
+		StatusBar.styleDefault();
+		StatusBar.backgroundColorByHexString(styleManager.splashStatusBarColor);
+	}
 }
 
 
@@ -24258,7 +24266,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
