@@ -19009,11 +19009,12 @@ angular.module('tidepoolsServices')
 
         lockerManager.getCredentials = function() {
             var username = $q.defer(),
-                password = $q.defer(),
-                fbToken = $q.defer();
+                password = $q.defer()
+                // ,fbToken = $q.defer();
 
             lockerManager.keychain.getForKey(function(value) {
                 username.resolve(value);
+                 // console.log('username: ', username.$promise)
             }, function(error) {
                 username.reject(error);
                 console.log('user name error',error);
@@ -19021,6 +19022,7 @@ angular.module('tidepoolsServices')
 
             lockerManager.keychain.getForKey(function(value) {
                 password.resolve(value);
+                 // console.log('password: ', password)
             }, function(error) {
                 password.reject(error);
               console.log('password error',error);
@@ -19028,15 +19030,18 @@ angular.module('tidepoolsServices')
 
             // lockerManager.keychain.getForKey(function(value) {
             //     fbToken.resolve(value);
+            //      console.log('fbToken', fbToken)
             // }, function(error) {
-            //     fbToken.resolve(undefined);
+            //     fbToken.reject(error);
             //     // console.log(error);
             // }, 'fbToken', 'Kip');
 
+
+
             return $q.all({
-                username: username.$promise,
-                password: password.$promise
-                // ,fbToken: fbToken.promise
+                username: username.promise,
+                password: password.promise
+                // ,fbToken: fbToken
             });
 
         }
@@ -19086,15 +19091,19 @@ angular.module('tidepoolsServices')
                 passwordSuccess = $q.defer();
 
             lockerManager.keychain.setForKey(function(success) {
+                    console.log('saveCredentials user: success')
                     usernameSuccess.resolve(success);
                 }, function(error) {
+                     console.log('saveCredentials user: fail')
                     usernameSuccess.reject(error);
                 },
                 'username', 'Kip', username);
 
             lockerManager.keychain.setForKey(function(success) {
+                console.log('saveCredentials pw: success')
                     passwordSuccess.resolve(success);
                 }, function(error) {
+                     console.log('saveCredentials pw: fail')
                     passwordSuccess.reject(error);
                 },
                 'password', 'Kip', password);
@@ -19505,17 +19514,17 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        console.log('SUCCESS');
+                        console.log('successful signin, credentials saved:', username, password)
+                        console.log('SUCCESS data is: ', data);
                         userManager._user = data;
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
                         ifGlobals.loginStatus = true;
-                        //userManager.saveToKeychain();
                         deferred.resolve(data);
+
                     }).error(function(error) {
-                        
-                        console.log('tokyo gangsta')
-                        deferred.reject(0);
+                        console.log('tokyo gangsta', error)
+                        deferred.reject(error);
                     })
                 return deferred.promise;
             }
@@ -19583,9 +19592,11 @@ angular.module('tidepoolsServices')
                 var usertype = '';
 
                 if (userManager._user.facebook) {
+                    console.log('removing fb credentials')
                     usertype = 'facebook';
                     lockerManager.removeCredentials(usertype);
                 } else {
+                    console.log('removing local credentials')
                     usertype = 'local';
                     lockerManager.removeCredentials(usertype);
                 }
@@ -24543,24 +24554,35 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 // use keychain and facebook to set splash on phonegap. use login status to set splash on web
                 //On Phonegap startup, try to login with either saved username/pw or facebook
                 lockerManager.getCredentials().then(function(credentials) {
-                  
+
                     console.log('credentials are', credentials)
+                    var correct = false;
                     if (credentials.username && credentials.password && !credentials.fbToken) {
                         console.log('hitting local login', credentials)
+
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
+                            correct = true;
                             userManager.checkLogin().then(function(success) {
-                                createShowSplash(true);
-                                console.log(success);
+                                correct = true;
+                                return createShowSplash(true);
+                                console.log('this should be skipped');
                             }, function(error) {
                                 createShowSplash(false);
                                 console.log('checkin error', error);
                             });
-                        }, function(err) {
-                            console.log('i mean, its hitting this right')
-                            createShowSplash(false);
-                        });
+                        })
+
+                        if (!correct) {
+                            console.log('credentials incorrect:', credentials)
+                         createShowSplash(false);
+                     }
+
+                        // , function(err) {
+                        //     console.log('i mean, its hitting this right')
+                        //     createShowSplash(false);
+                        // });
                     } else if (credentials.fbToken) {
-                         // console.log('hitting fblogin')
+                        console.log('hitting fblogin', credentials.fbLogin)
                         ifGlobals.fbToken = credentials.fbToken;
                         userManager.fbLogin().then(function(success) {
                             createShowSplash(true);
@@ -24570,7 +24592,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             createShowSplash(false);
                         });
                     } else {
-                        // console.log('NONE OF THE THOSE');
+                        console.log('NONE OF THE THOSE');
                         createShowSplash(false);
                     }
                 }, function(err) {
@@ -24597,10 +24619,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-           // console.log('hitting splashcontroller loggedin')
-        // console.log('SPLASH CONDITION ', condition);
-        // console.log('facebook ', userManager._user.facebook);
-        // console.log('userManager._user', userManager._user);
+            // console.log('hitting splashcontroller loggedin')
+            // console.log('SPLASH CONDITION ', condition);
+            // console.log('facebook ', userManager._user.facebook);
+            // console.log('userManager._user', userManager._user);
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
@@ -24659,7 +24681,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
 
         } else if ($scope.show.register) {
@@ -24671,7 +24693,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-					alertManager.addAlert('danger', newValue, false);
+                    alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });
@@ -24766,7 +24788,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
-
 'use strict';
 
 angular.module('IF')

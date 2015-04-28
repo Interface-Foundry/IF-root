@@ -24347,10 +24347,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-           // console.log('hitting splashcontroller loggedin')
-        // console.log('SPLASH CONDITION ', condition);
-        // console.log('facebook ', userManager._user.facebook);
-        // console.log('userManager._user', userManager._user);
+            // console.log('hitting splashcontroller loggedin')
+            // console.log('SPLASH CONDITION ', condition);
+            // console.log('facebook ', userManager._user.facebook);
+            // console.log('userManager._user', userManager._user);
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
@@ -24410,7 +24410,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
 
         } else if ($scope.show.register) {
@@ -24422,7 +24422,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-					alertManager.addAlert('danger', newValue, false);
+                    alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });
@@ -24517,7 +24517,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
-
 'use strict';
 
 angular.module('IF')

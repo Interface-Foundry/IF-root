@@ -83,24 +83,35 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 //@IFDEF KEYCHAIN
                 //On Phonegap startup, try to login with either saved username/pw or facebook
                 lockerManager.getCredentials().then(function(credentials) {
-                  
+
                     console.log('credentials are', credentials)
+                    var correct = false;
                     if (credentials.username && credentials.password && !credentials.fbToken) {
                         console.log('hitting local login', credentials)
+
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
+                            correct = true;
                             userManager.checkLogin().then(function(success) {
-                                createShowSplash(true);
-                                console.log(success);
+                                correct = true;
+                                return createShowSplash(true);
+                                console.log('this should be skipped');
                             }, function(error) {
                                 createShowSplash(false);
                                 console.log('checkin error', error);
                             });
-                        }, function(err) {
-                            console.log('i mean, its hitting this right')
-                            createShowSplash(false);
-                        });
+                        })
+
+                        if (!correct) {
+                            console.log('credentials incorrect:', credentials)
+                         createShowSplash(false);
+                     }
+
+                        // , function(err) {
+                        //     console.log('i mean, its hitting this right')
+                        //     createShowSplash(false);
+                        // });
                     } else if (credentials.fbToken) {
-                         // console.log('hitting fblogin')
+                        console.log('hitting fblogin', credentials.fbLogin)
                         ifGlobals.fbToken = credentials.fbToken;
                         userManager.fbLogin().then(function(success) {
                             createShowSplash(true);
@@ -110,7 +121,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             createShowSplash(false);
                         });
                     } else {
-                        // console.log('NONE OF THE THOSE');
+                        console.log('NONE OF THE THOSE');
                         createShowSplash(false);
                     }
                 }, function(err) {
@@ -138,10 +149,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-           // console.log('hitting splashcontroller loggedin')
-        // console.log('SPLASH CONDITION ', condition);
-        // console.log('facebook ', userManager._user.facebook);
-        // console.log('userManager._user', userManager._user);
+            // console.log('hitting splashcontroller loggedin')
+            // console.log('SPLASH CONDITION ', condition);
+            // console.log('facebook ', userManager._user.facebook);
+            // console.log('userManager._user', userManager._user);
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
@@ -204,7 +215,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
 
         } else if ($scope.show.register) {
@@ -216,7 +227,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-					alertManager.addAlert('danger', newValue, false);
+                    alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });

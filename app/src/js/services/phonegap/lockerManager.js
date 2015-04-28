@@ -24,11 +24,12 @@ angular.module('tidepoolsServices')
 
         lockerManager.getCredentials = function() {
             var username = $q.defer(),
-                password = $q.defer(),
-                fbToken = $q.defer();
+                password = $q.defer()
+                // ,fbToken = $q.defer();
 
             lockerManager.keychain.getForKey(function(value) {
                 username.resolve(value);
+                 // console.log('username: ', username.$promise)
             }, function(error) {
                 username.reject(error);
                 console.log('user name error',error);
@@ -36,6 +37,7 @@ angular.module('tidepoolsServices')
 
             lockerManager.keychain.getForKey(function(value) {
                 password.resolve(value);
+                 // console.log('password: ', password)
             }, function(error) {
                 password.reject(error);
               console.log('password error',error);
@@ -43,15 +45,18 @@ angular.module('tidepoolsServices')
 
             // lockerManager.keychain.getForKey(function(value) {
             //     fbToken.resolve(value);
+            //      console.log('fbToken', fbToken)
             // }, function(error) {
-            //     fbToken.resolve(undefined);
+            //     fbToken.reject(error);
             //     // console.log(error);
             // }, 'fbToken', 'Kip');
 
+
+
             return $q.all({
-                username: username.$promise,
-                password: password.$promise
-                // ,fbToken: fbToken.promise
+                username: username.promise,
+                password: password.promise
+                // ,fbToken: fbToken
             });
 
         }
@@ -101,15 +106,19 @@ angular.module('tidepoolsServices')
                 passwordSuccess = $q.defer();
 
             lockerManager.keychain.setForKey(function(success) {
+                    console.log('saveCredentials user: success')
                     usernameSuccess.resolve(success);
                 }, function(error) {
+                     console.log('saveCredentials user: fail')
                     usernameSuccess.reject(error);
                 },
                 'username', 'Kip', username);
 
             lockerManager.keychain.setForKey(function(success) {
+                console.log('saveCredentials pw: success')
                     passwordSuccess.resolve(success);
                 }, function(error) {
+                     console.log('saveCredentials pw: fail')
                     passwordSuccess.reject(error);
                 },
                 'password', 'Kip', password);

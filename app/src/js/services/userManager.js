@@ -151,17 +151,17 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        console.log('SUCCESS');
+                        console.log('successful signin, credentials saved:', username, password)
+                        console.log('SUCCESS data is: ', data);
                         userManager._user = data;
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
                         ifGlobals.loginStatus = true;
-                        //userManager.saveToKeychain();
                         deferred.resolve(data);
+
                     }).error(function(error) {
-                        
-                        console.log('tokyo gangsta')
-                        deferred.reject(0);
+                        console.log('tokyo gangsta', error)
+                        deferred.reject(error);
                     })
                     //@ENDIF
 
@@ -237,9 +237,11 @@ angular.module('tidepoolsServices')
                 var usertype = '';
 
                 if (userManager._user.facebook) {
+                    console.log('removing fb credentials')
                     usertype = 'facebook';
                     lockerManager.removeCredentials(usertype);
                 } else {
+                    console.log('removing local credentials')
                     usertype = 'local';
                     lockerManager.removeCredentials(usertype);
                 }
