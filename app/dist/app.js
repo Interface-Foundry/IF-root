@@ -24476,6 +24476,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             server: true
         }).
         success(function(data) {
+            alertManager.addAlert('info', 'Instructions have been sent to' + $scope.user.email, true);
             $scope.user.email = '';
         }).
         error(function(err) {
