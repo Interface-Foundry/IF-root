@@ -5,7 +5,6 @@ var map = mapManager;
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
-$scope.defaultText = bubbleSearchService.defaultText.global;
 $scope.aperture.set('third');
 navService.show('home');
 
@@ -23,6 +22,7 @@ $scope.isRetail = false;
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
+$scope.defaultText;
 
 var landmarksLoaded;
 
@@ -66,6 +66,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
   $scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
 	if (!(_.isEmpty(data.submissions))) {
 		data.submissions.forEach(function(s) {
 			if (!s) {

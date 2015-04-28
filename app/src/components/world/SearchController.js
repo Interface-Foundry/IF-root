@@ -17,6 +17,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	
 	var map = mapManager;
 	var latLng = {};
+	var defaultText;
 
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
@@ -28,6 +29,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.world = data.world;
 			$scope.style = data.style;
+			defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
 			// set nav color using styleManager
 			styleManager.navBG_color = $scope.style.navBG_color;
 
@@ -41,13 +43,14 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			} else if ($location.path().slice(-3) === 'all') {
 				populateSearchView('All', 'all');
 			} else {
-				populateSearchView(bubbleSearchService.defaultText.global, 'generic');
+				populateSearchView(defaultText, 'generic');
 			}
 		
 		});
 	} else if ($routeParams.cityName) {
 		apertureService.set('third');
 		navService.show('search');
+		defaultText = bubbleSearchService.defaultText.global;
 
 		// reset nav bar color and default map
 		styleManager.resetNavBG();
@@ -63,7 +66,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($routeParams.text) {
 			populateCitySearchView($routeParams.text, 'text', latLng);
 		} else {
-			populateCitySearchView(bubbleSearchService.defaultText.global, 'generic', latLng);
+			populateCitySearchView(defaultText, 'generic', latLng);
 		}
 	}
 

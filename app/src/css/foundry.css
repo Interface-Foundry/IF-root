@@ -2855,11 +2855,21 @@ li.alert {
   top: 2px;
 }
 .search-cat input {
-  width: 60%;
+  width: 65%;
   outline: 0;
   border: 0;
   height: 28px;
   line-height: 28px;
+}
+@media only screen and (min-width: 375px) {
+  .search-cat input {
+    width: 70%;
+  }
+}
+@media only screen and (min-width: 414px) {
+  .search-cat input {
+    width: 75%;
+  }
 }
 .search-cat .clearText {
   float: right;

@@ -15,8 +15,14 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		link: function(scope, elem, attrs) {
 			// var offset = $('.search-cat').offset().top;
 			// var scrollState = false;
-			var defaultText = bubbleSearchService.defaultText.global;
 			var noResultsText = bubbleSearchService.defaultText.none;
+			var defaultText;
+
+			if (scope.mode === 'city' || scope.mode === 'home') {
+				defaultText = bubbleSearchService.defaultText.global;
+			} else {
+				defaultText = bubbleSearchService.defaultText.bubble + scope.world.name;
+			}
 			
 
 			// change text in search bar whenever $scope.searchBarText changes in searchController

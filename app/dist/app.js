@@ -25706,6 +25706,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	
 	var map = mapManager;
 	var latLng = {};
+	var defaultText;
 
 	if ($scope.aperture.state !== 'aperture-full') {
 		$scope.aperture.set('third');
@@ -25717,6 +25718,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.world = data.world;
 			$scope.style = data.style;
+			defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
 			// set nav color using styleManager
 			styleManager.navBG_color = $scope.style.navBG_color;
 
@@ -25730,13 +25732,14 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 			} else if ($location.path().slice(-3) === 'all') {
 				populateSearchView('All', 'all');
 			} else {
-				populateSearchView(bubbleSearchService.defaultText.global, 'generic');
+				populateSearchView(defaultText, 'generic');
 			}
 		
 		});
 	} else if ($routeParams.cityName) {
 		apertureService.set('third');
 		navService.show('search');
+		defaultText = bubbleSearchService.defaultText.global;
 
 		// reset nav bar color and default map
 		styleManager.resetNavBG();
@@ -25752,7 +25755,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		} else if ($routeParams.text) {
 			populateCitySearchView($routeParams.text, 'text', latLng);
 		} else {
-			populateCitySearchView(bubbleSearchService.defaultText.global, 'generic', latLng);
+			populateCitySearchView(defaultText, 'generic', latLng);
 		}
 	}
 
@@ -27299,8 +27302,14 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		link: function(scope, elem, attrs) {
 			// var offset = $('.search-cat').offset().top;
 			// var scrollState = false;
-			var defaultText = bubbleSearchService.defaultText.global;
 			var noResultsText = bubbleSearchService.defaultText.none;
+			var defaultText;
+
+			if (scope.mode === 'city' || scope.mode === 'home') {
+				defaultText = bubbleSearchService.defaultText.global;
+			} else {
+				defaultText = bubbleSearchService.defaultText.bubble + scope.world.name;
+			}
 			
 
 			// change text in search bar whenever $scope.searchBarText changes in searchController
@@ -28090,7 +28099,6 @@ var map = mapManager;
 var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
-$scope.defaultText = bubbleSearchService.defaultText.global;
 $scope.aperture.set('third');
 navService.show('home');
 
@@ -28108,6 +28116,7 @@ $scope.isRetail = false;
 $scope.collectedPresents = [];
 	
 $scope.selectedIndex = 0;
+$scope.defaultText;
 
 var landmarksLoaded;
 
@@ -28151,6 +28160,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
   $scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
+	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
 	if (!(_.isEmpty(data.submissions))) {
 		data.submissions.forEach(function(s) {
 			if (!s) {
