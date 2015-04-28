@@ -498,6 +498,7 @@ img[alt="store"] {
 	border-bottom: 1px solid #e6e6e6;
 	transition: 0.5s cubic-bezier(.5,.1,0,1) all;
 	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 .walkthrough-view {
