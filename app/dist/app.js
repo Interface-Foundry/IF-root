@@ -25668,11 +25668,6 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 	};
 
 	function link(scope, elem, attrs) {
-		
-		if (scope.style.widgets && scope.style.widgets.category) {
-			// raise button from 80px to 120px to account for category widget
-			$('.userLocation').css('bottom', '120px');
-		}
 
 		scope.locateAndPan = function() {
 			if (!geoService.tracking) {
