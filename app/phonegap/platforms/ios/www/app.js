@@ -4862,11 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-<<<<<<< HEAD
-		    			request.url = 'http://kipapp.co' + request.url;
-=======
-		    			request.url = 'https://kipapp.co' + request.url;
->>>>>>> 7bae95e3bf2e27cd80c5d9237b2b2a07ae6d0109
+		    			request.url = 'http://192.168.1.6:2997' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5928,7 +5924,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
+					value = 'https://192.168.1.6:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -24795,7 +24791,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
-
 'use strict';
 
 angular.module('IF')
