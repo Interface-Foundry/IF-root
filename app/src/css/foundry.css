@@ -2025,10 +2025,10 @@ a.bubble-inspector-btn:hover {
   a.bubble-inspector-btn {
     width: 88px;
   }
-  .bubble-list-item {
+  .bubble-group.profile-worlds .bubble-list-item {
     padding-left: 42px;
   }
-  .bubble-list-item-img {
+  .bubble-group.profile-worlds .bubble-list-item-img {
     height: 26px;
     left: 8px;
     top: 23px;

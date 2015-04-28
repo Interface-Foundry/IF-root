@@ -14,15 +14,15 @@
 		<span>Create New Bubble</span>
 	</button>
 	
-<div class="bubble-group" ng-repeat="group in ::groups track by group.order">
+<div class="bubble-group profile-worlds" ng-repeat="group in ::groups track by group.order">
 	<header class="bubble-group-label">{{group.label}}</header>
 	<ul class="bubble-list">
-	<li class="bubble-list-item" ng-repeat="bubble in ::group.bubbles track by bubble._id" 
-		ng-click="inspect(bubble)"
-		ng-class="{'selected': selected == bubble}">
-		<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
-		<span>{{::bubble.name}}</span>
-	</li>
+		<li class="bubble-list-item" ng-repeat="bubble in ::group.bubbles track by bubble._id" 
+			ng-click="inspect(bubble)"
+			ng-class="{'selected': selected == bubble}">
+			<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+			<span>{{::bubble.name}}</span>
+		</li>
 	</ul>
 </div>
 
