@@ -50,7 +50,13 @@
 }
 
 .u-colorLinkBlue {
-	color: rgba(66, 139, 202, 1.0);
+	color: @color-linkBlue;
+	&:hover {
+		color: darken(@color-linkBlue, @darkenPctg-hover);
+	}
+	&:active {
+		color: darken(@color-linkBlue, @darkenPctg-active);
+	}
 }
 
 .u-textHighlight {

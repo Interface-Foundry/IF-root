@@ -24483,7 +24483,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
+app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
@@ -24493,6 +24493,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.resendEmail = resendEmail;
     $scope.sendPasswordForgot = sendPasswordForgot;
     $scope.sendPasswordReset = sendPasswordReset;
+    $scope.newWindowGo = newWindowGo;
     $scope.show = {
         /**
          * splash: for general splash
@@ -24776,7 +24777,11 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.errorMsg = '';
             }, time);
         }
+    }
 
+    function newWindowGo(path) {
+        // for opening phonegap links in mobile browser
+        $window.open(path, '_system');
     }
 
 

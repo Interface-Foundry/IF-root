@@ -2546,6 +2546,12 @@ transform:translateX(100%);
 .u-colorLinkBlue {
   color: #428bca;
 }
+.u-colorLinkBlue:hover {
+  color: #357ebd;
+}
+.u-colorLinkBlue:active {
+  color: #3071a9;
+}
 .u-textHighlight {
   background-color: #d2d2d2;
   font-size: 16px;

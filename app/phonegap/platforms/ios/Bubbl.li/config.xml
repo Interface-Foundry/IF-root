@@ -49,6 +49,9 @@
     </feature>
     <preference name="StatusBarOverlaysWebView" value="true" />
     <preference name="StatusBarStyle" value="lightcontent" />
+    <feature name="InAppBrowser">
+        <param name="ios-package" value="CDVInAppBrowser" />
+    </feature>
     <feature name="Keychain">
         <param name="ios-package" value="CDVKeychain" />
     </feature>
