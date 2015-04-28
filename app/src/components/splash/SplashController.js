@@ -26,105 +26,103 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
     init();
 
-
-
     function init() {
-            // special case for aicp to prevent splash page
-            if ($location.path().indexOf('aicpweek2015') > -1) {
-                $scope.show.splash = false;
-                return;
-            }
+        // special case for aicp to prevent splash page
+        if ($location.path().indexOf('aicpweek2015') > -1) {
+            $scope.show.splash = false;
+            return;
+        }
 
-            if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
 
-                createShowSplash('confirmThanks');
+            createShowSplash('confirmThanks');
 
-                // get token from url
-                var token = $location.path().slice(15);
+            // get token from url
+            var token = $location.path().slice(15);
 
-                $http.post('/email/request_confirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {
-                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-                }).
-                error(function(err) {
-                    $scope.confirmThanksText = 'There was a problem confirming your email';
-                });
+            $http.post('/email/request_confirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {
+                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+            }).
+            error(function(err) {
+                $scope.confirmThanksText = 'There was a problem confirming your email';
+            });
 
-                // redirect to home page
-                $location.path('/');
-            } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+            // redirect to home page
+            $location.path('/');
+        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
 
-                createShowSplash('passwordReset');
+            createShowSplash('passwordReset');
 
-                // get token from url
-                var token = $location.path().slice(7);
+            // get token from url
+            var token = $location.path().slice(7);
 
-                $http.post('/resetConfirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {}).
-                error(function(err) {
-                    if (err) {
-                        console.log('err: ', err);
-                    }
-                });
-            } else {
-                // @IFDEF WEB
-                userManager.getUser().then(function(success) {
-                    createShowSplash(true);
-                }, function(err) {
+            $http.post('/resetConfirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {}).
+            error(function(err) {
+                if (err) {
+                    console.log('err: ', err);
+                }
+            });
+        } else {
+            // @IFDEF WEB
+            userManager.getUser().then(function(success) {
+                createShowSplash(true);
+            }, function(err) {
+                createShowSplash(false);
+            });
+            //@ENDIF
+
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+            //@IFDEF KEYCHAIN
+            //On Phonegap startup, try to login with either saved username/pw or facebook
+            lockerManager.getCredentials().then(function(credentials) {
+                if(!credentials) {
+                    // console.log('no no credentials no here')
                     createShowSplash(false);
-                });
-                //@ENDIF
-
-                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
-                //@IFDEF KEYCHAIN
-                //On Phonegap startup, try to login with either saved username/pw or facebook
-                lockerManager.getCredentials().then(function(credentials) {
-                    if(!credentials) {
-                        // console.log('no no credentials no here')
-                        createShowSplash(false);
-                    }
-                    // console.log('credentials are', credentials)
-                    if (credentials.username && credentials.password && !credentials.fbToken) {
-                        // console.log('hitting local login')
-                        userManager.signin(credentials.username, credentials.password).then(function(success) {
-                            userManager.checkLogin().then(function(success) {
-                                createShowSplash(true);
-                                console.log(success);
-                            });
-                        }, function(reason) {
-                            createShowSplash(false);
-                            // console.log('credential signin error', reason)
-                        });
-                    } else if (credentials.fbToken) {
-                         // console.log('hitting fblogin')
-                        ifGlobals.fbToken = credentials.fbToken;
-                        userManager.fbLogin().then(function(success) {
+                }
+                // console.log('credentials are', credentials)
+                if (credentials.username && credentials.password && !credentials.fbToken) {
+                    // console.log('hitting local login')
+                    userManager.signin(credentials.username, credentials.password).then(function(success) {
+                        userManager.checkLogin().then(function(success) {
                             createShowSplash(true);
-                            // console.log('loaded facebook user: ', userManager._user);
-                        }, function(err) {
-                            console.log('credential error', error);
-                            createShowSplash(false);
+                            console.log(success);
                         });
-                    } else {
-                        // console.log('NONE OF THE THOSE');
+                    }, function(reason) {
                         createShowSplash(false);
-                    }
-                }, function(err) {
-                    console.log('credential error', error);
+                        // console.log('credential signin error', reason)
+                    });
+                } else if (credentials.fbToken) {
+                     // console.log('hitting fblogin')
+                    ifGlobals.fbToken = credentials.fbToken;
+                    userManager.fbLogin().then(function(success) {
+                        createShowSplash(true);
+                        // console.log('loaded facebook user: ', userManager._user);
+                    }, function(err) {
+                        console.log('credential error', error);
+                        createShowSplash(false);
+                    });
+                } else {
+                    // console.log('NONE OF THE THOSE');
                     createShowSplash(false);
-                }); //END OF GET CREDENTIALS
+                }
+            }, function(err) {
+                console.log('credential error', error);
+                createShowSplash(false);
+            }); //END OF GET CREDENTIALS
 
-                // console.log('splashcontroller init(), credentials are', credentials)
-                StatusBar.styleDefault();
-                StatusBar.backgroundColorByHexString('#F4F5F7');
-                // @ENDIF
-            } //END OF OUTER ELSE
+            // console.log('splashcontroller init(), credentials are', credentials)
+            StatusBar.styleDefault();
+            StatusBar.backgroundColorByHexString('#F4F5F7');
+            // @ENDIF
+        } //END OF OUTER ELSE
 
-        } //END OF INIT
+    } //END OF INIT
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
