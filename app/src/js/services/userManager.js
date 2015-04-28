@@ -94,7 +94,7 @@ angular.module('tidepoolsServices')
                 var deferred = $q.defer();
 
                 userManager.getUser().then(function(user) {
-                    console.log('getting user');
+                    // console.log('getting user');
                     userManager.loginStatus = true;
                     userManager.adminStatus = user.admin ? true : false;
                     $rootScope.user = user;
@@ -151,8 +151,8 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        console.log('successful signin, credentials saved:', username, password)
-                        console.log('SUCCESS data is: ', data);
+                        // console.log('successful signin, credentials saved:', username, password)
+                        // console.log('SUCCESS data is: ', data);
                         userManager._user = data;
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
@@ -160,7 +160,9 @@ angular.module('tidepoolsServices')
                         deferred.resolve(data);
 
                     }).error(function(error) {
-                        console.log('tokyo gangsta', error)
+                        // console.log('keychain signin failed, removing  credentials')
+                        usertype = 'local';
+                        lockerManager.removeCredentials(usertype);
                         deferred.reject(error);
                     })
                     //@ENDIF
@@ -187,22 +189,22 @@ angular.module('tidepoolsServices')
                         }).then(
                             function(res) {
 
-
                                 //lockerManager.saveFBToken(success.authResponse.accessToken);
                                 lockerManager.saveFBToken(fbToken);
                                 ifGlobals.fbToken = fbToken;
 
                                 userManager._user = res.data;
-                                console.log('fbLogin: userManager._user: ', userManager._user)
+                                // console.log('fbLogin: userManager._user: ', userManager._user)
 
                                 userManager.loginStatus = true;
                                 //userManager.adminStatus = data.admin ? true : false;
                                 ifGlobals.loginStatus = true;
-
                                 deferred.resolve(success);
                             },
-
                             function(res) {
+                                // console.log('fb login failed, removing fb credentials')
+                                usertype = 'facebook';
+                                lockerManager.removeCredentials(usertype);
                                 deferred.reject(failure);
                             }
                         );
@@ -237,11 +239,11 @@ angular.module('tidepoolsServices')
                 var usertype = '';
 
                 if (userManager._user.facebook) {
-                    console.log('removing fb credentials')
+                    // console.log('removing fb credentials')
                     usertype = 'facebook';
                     lockerManager.removeCredentials(usertype);
                 } else {
-                    console.log('removing local credentials')
+                    // console.log('removing local credentials')
                     usertype = 'local';
                     lockerManager.removeCredentials(usertype);
                 }

@@ -19004,80 +19004,82 @@ angular.module('tidepoolsServices')
         }
 
         //getCredentials returns a promise->map of the available credentials. 
-        //	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-        //	because all will return rejected if you do.
+        //  Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+        //  because all will return rejected if you do.
 
         lockerManager.getCredentials = function() {
             var username = $q.defer(),
-                password = $q.defer()
-                // ,fbToken = $q.defer();
+                password = $q.defer(),
+                fbToken = $q.defer();
 
             lockerManager.keychain.getForKey(function(value) {
                 username.resolve(value);
-                 // console.log('username: ', username.$promise)
+                // console.log('username: ', username.$promise)
             }, function(error) {
                 username.reject(error);
-                console.log('user name error',error);
+                // console.log('user name error', error);
             }, 'username', 'Kip');
 
             lockerManager.keychain.getForKey(function(value) {
                 password.resolve(value);
-                 // console.log('password: ', password)
+                // console.log('password: ', password)
             }, function(error) {
                 password.reject(error);
-              console.log('password error',error);
+                // console.log('password error', error);
             }, 'password', 'Kip');
-
-            // lockerManager.keychain.getForKey(function(value) {
-            //     fbToken.resolve(value);
-            //      console.log('fbToken', fbToken)
-            // }, function(error) {
-            //     fbToken.reject(error);
-            //     // console.log(error);
-            // }, 'fbToken', 'Kip');
-
-
 
             return $q.all({
                 username: username.promise,
                 password: password.promise
-                // ,fbToken: fbToken
             });
-
         }
 
-   
-         // Removes a value for a key and servicename
+        lockerManager.getFBCredentials = function() {
+            var fbToken = $q.defer();
+            lockerManager.keychain.getForKey(function(value) {
+                fbToken.resolve(value);
+                // console.log('fbToken', fbToken)
+            }, function(error) {
+                fbToken.reject(error);
+                // console.log(error);
+            }, 'fbToken', 'Kip');
+            return $q.all({
+                fbToken: fbToken.promise
+            });
+        }
+
+
+        // Removes a value for a key and servicename
 
 
         lockerManager.removeCredentials = function(usertype) {
             var username = $q.defer(),
                 password = $q.defer(),
                 fbToken = $q.defer();
-        
+
             if (usertype == 'facebook') {
-                console.log('clearing keychain for facebook.')
+                // console.log('clearing keychain for facebook.')
                 lockerManager.keychain.removeForKey(function(success) {
-                    console.log('keychain cleared!', success)
+                    // console.log('keychain cleared!', success)
                     fbToken.resolve(success);
                 }, function(error) {
-                    console.log('faield clearing keychain', error);
+                    // console.log('faield clearing keychain', error);
                     fbToken.reject(error);
                 }, 'fbToken', 'Kip');
                 return fbToken;
             } else {
                 lockerManager.keychain.removeForKey(function(success) {
-                    console.log('keychain cleared!', success)
+                    // console.log('keychain cleared!', success)
                     username.resolve(success);
                 }, function(error) {
-                    console.log('faield clearing keychain', error);
+                    // console.log('faield clearing keychain', error);
                     username.reject(error);
                 }, 'username', 'Kip');
                 lockerManager.keychain.removeForKey(function(success) {
-                    console.log('keychain cleared!', success)
+                    // console.log('keychain cleared!', success)
                     password.resolve(success);
                 }, function(error) {
-                    console.log('faield clearing keychain', error);
+                    // console.log('faield clearing keychain', error);
                     password.reject(error);
                 }, 'password', 'Kip');
                 return username
@@ -19094,16 +19096,16 @@ angular.module('tidepoolsServices')
                     console.log('saveCredentials user: success')
                     usernameSuccess.resolve(success);
                 }, function(error) {
-                     console.log('saveCredentials user: fail')
+                    console.log('saveCredentials user: fail')
                     usernameSuccess.reject(error);
                 },
                 'username', 'Kip', username);
 
             lockerManager.keychain.setForKey(function(success) {
-                console.log('saveCredentials pw: success')
+                    console.log('saveCredentials pw: success')
                     passwordSuccess.resolve(success);
                 }, function(error) {
-                     console.log('saveCredentials pw: fail')
+                    console.log('saveCredentials pw: fail')
                     passwordSuccess.reject(error);
                 },
                 'password', 'Kip', password);
@@ -19474,7 +19476,7 @@ angular.module('tidepoolsServices')
                 var deferred = $q.defer();
 
                 userManager.getUser().then(function(user) {
-                    console.log('getting user');
+                    // console.log('getting user');
                     userManager.loginStatus = true;
                     userManager.adminStatus = user.admin ? true : false;
                     $rootScope.user = user;
@@ -19514,8 +19516,8 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        console.log('successful signin, credentials saved:', username, password)
-                        console.log('SUCCESS data is: ', data);
+                        // console.log('successful signin, credentials saved:', username, password)
+                        // console.log('SUCCESS data is: ', data);
                         userManager._user = data;
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
@@ -19523,7 +19525,9 @@ angular.module('tidepoolsServices')
                         deferred.resolve(data);
 
                     }).error(function(error) {
-                        console.log('tokyo gangsta', error)
+                        // console.log('keychain signin failed, removing  credentials')
+                        usertype = 'local';
+                        lockerManager.removeCredentials(usertype);
                         deferred.reject(error);
                     })
                 return deferred.promise;
@@ -19546,22 +19550,22 @@ angular.module('tidepoolsServices')
                         }).then(
                             function(res) {
 
-
                                 //lockerManager.saveFBToken(success.authResponse.accessToken);
                                 lockerManager.saveFBToken(fbToken);
                                 ifGlobals.fbToken = fbToken;
 
                                 userManager._user = res.data;
-                                console.log('fbLogin: userManager._user: ', userManager._user)
+                                // console.log('fbLogin: userManager._user: ', userManager._user)
 
                                 userManager.loginStatus = true;
                                 //userManager.adminStatus = data.admin ? true : false;
                                 ifGlobals.loginStatus = true;
-
                                 deferred.resolve(success);
                             },
-
                             function(res) {
+                                // console.log('fb login failed, removing fb credentials')
+                                usertype = 'facebook';
+                                lockerManager.removeCredentials(usertype);
                                 deferred.reject(failure);
                             }
                         );
@@ -19592,11 +19596,11 @@ angular.module('tidepoolsServices')
                 var usertype = '';
 
                 if (userManager._user.facebook) {
-                    console.log('removing fb credentials')
+                    // console.log('removing fb credentials')
                     usertype = 'facebook';
                     lockerManager.removeCredentials(usertype);
                 } else {
-                    console.log('removing local credentials')
+                    // console.log('removing local credentials')
                     usertype = 'local';
                     lockerManager.removeCredentials(usertype);
                 }
@@ -24553,54 +24557,50 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             } else {
                 // use keychain and facebook to set splash on phonegap. use login status to set splash on web
                 //On Phonegap startup, try to login with either saved username/pw or facebook
+
+                var localuser = false;
+                 var fbuser = false;
                 lockerManager.getCredentials().then(function(credentials) {
-
-                    console.log('credentials are', credentials)
-                    var correct = false;
-                    if (credentials.username && credentials.password && !credentials.fbToken) {
-                        console.log('hitting local login', credentials)
-
+                    if (credentials.username && credentials.password) {
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
-                            correct = true;
+                            localuser = true;
                             userManager.checkLogin().then(function(success) {
                                 correct = true;
                                 return createShowSplash(true);
-                                console.log('this should be skipped');
                             }, function(error) {
                                 createShowSplash(false);
-                                console.log('checkin error', error);
+                                // console.log('checkin error', error);
                             });
                         })
-
-                        if (!correct) {
-                            console.log('credentials incorrect:', credentials)
-                         createShowSplash(false);
-                     }
-
-                        // , function(err) {
-                        //     console.log('i mean, its hitting this right')
-                        //     createShowSplash(false);
-                        // });
-                    } else if (credentials.fbToken) {
-                        console.log('hitting fblogin', credentials.fbLogin)
-                        ifGlobals.fbToken = credentials.fbToken;
-                        userManager.fbLogin().then(function(success) {
-                            createShowSplash(true);
-                            // console.log('loaded facebook user: ', userManager._user);
-                        }, function(err) {
-                            console.log('credential error', error);
-                            createShowSplash(false);
-                        });
-                    } else {
-                        console.log('NONE OF THE THOSE');
-                        createShowSplash(false);
                     }
                 }, function(err) {
-                    console.log('last credential error', err);
-                    createShowSplash(false);
-                }); //END OF GET CREDENTIALS
+                    // return console.log('keychain: local login failed');
+                    // createShowSplash(false);
+                }); //END OF GET LOCAL CREDENTIALS
 
-                // console.log('splashcontroller init(), credentials are', credentials)
+                //GET FB CREDENTIALS
+                if (!localuser) {
+                    // console.log('trying fb keychain login')
+                    lockerManager.getFBCredentials().then(function(credentials) {
+                        // console.log('Hitting fblogin')
+                        ifGlobals.fbToken = credentials.fbToken;
+                        userManager.fbLogin().then(function(success) {
+                            fbuser = true;
+                            return createShowSplash(true);
+                            // console.log('loaded facebook user: ', userManager._user);
+                        }, function(err) {
+                            // console.log('credential error', err);
+                            createShowSplash(false);
+                        });
+                    }, function (err) {
+                          // console.log('fbcredential error', err);
+                            createShowSplash(false);
+                    })
+                } else {
+                    // console.log('NO VALID CREDNEITALS');
+                    createShowSplash(false);
+                }
+
                 StatusBar.styleDefault();
                 StatusBar.backgroundColorByHexString('#F4F5F7');
             } //END OF OUTER ELSE

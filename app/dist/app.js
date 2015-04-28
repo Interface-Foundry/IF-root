@@ -19318,7 +19318,7 @@ angular.module('tidepoolsServices')
                 var deferred = $q.defer();
 
                 userManager.getUser().then(function(user) {
-                    console.log('getting user');
+                    // console.log('getting user');
                     userManager.loginStatus = true;
                     userManager.adminStatus = user.admin ? true : false;
                     $rootScope.user = user;

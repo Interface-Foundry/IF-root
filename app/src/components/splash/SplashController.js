@@ -82,54 +82,50 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 // use keychain and facebook to set splash on phonegap. use login status to set splash on web
                 //@IFDEF KEYCHAIN
                 //On Phonegap startup, try to login with either saved username/pw or facebook
+
+                var localuser = false;
+                 var fbuser = false;
                 lockerManager.getCredentials().then(function(credentials) {
-
-                    console.log('credentials are', credentials)
-                    var correct = false;
-                    if (credentials.username && credentials.password && !credentials.fbToken) {
-                        console.log('hitting local login', credentials)
-
+                    if (credentials.username && credentials.password) {
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
-                            correct = true;
+                            localuser = true;
                             userManager.checkLogin().then(function(success) {
                                 correct = true;
                                 return createShowSplash(true);
-                                console.log('this should be skipped');
                             }, function(error) {
                                 createShowSplash(false);
-                                console.log('checkin error', error);
+                                // console.log('checkin error', error);
                             });
                         })
-
-                        if (!correct) {
-                            console.log('credentials incorrect:', credentials)
-                         createShowSplash(false);
-                     }
-
-                        // , function(err) {
-                        //     console.log('i mean, its hitting this right')
-                        //     createShowSplash(false);
-                        // });
-                    } else if (credentials.fbToken) {
-                        console.log('hitting fblogin', credentials.fbLogin)
-                        ifGlobals.fbToken = credentials.fbToken;
-                        userManager.fbLogin().then(function(success) {
-                            createShowSplash(true);
-                            // console.log('loaded facebook user: ', userManager._user);
-                        }, function(err) {
-                            console.log('credential error', error);
-                            createShowSplash(false);
-                        });
-                    } else {
-                        console.log('NONE OF THE THOSE');
-                        createShowSplash(false);
                     }
                 }, function(err) {
-                    console.log('last credential error', err);
-                    createShowSplash(false);
-                }); //END OF GET CREDENTIALS
+                    // return console.log('keychain: local login failed');
+                    // createShowSplash(false);
+                }); //END OF GET LOCAL CREDENTIALS
 
-                // console.log('splashcontroller init(), credentials are', credentials)
+                //GET FB CREDENTIALS
+                if (!localuser) {
+                    // console.log('trying fb keychain login')
+                    lockerManager.getFBCredentials().then(function(credentials) {
+                        // console.log('Hitting fblogin')
+                        ifGlobals.fbToken = credentials.fbToken;
+                        userManager.fbLogin().then(function(success) {
+                            fbuser = true;
+                            return createShowSplash(true);
+                            // console.log('loaded facebook user: ', userManager._user);
+                        }, function(err) {
+                            // console.log('credential error', err);
+                            createShowSplash(false);
+                        });
+                    }, function (err) {
+                          // console.log('fbcredential error', err);
+                            createShowSplash(false);
+                    })
+                } else {
+                    // console.log('NO VALID CREDNEITALS');
+                    createShowSplash(false);
+                }
+
                 StatusBar.styleDefault();
                 StatusBar.backgroundColorByHexString('#F4F5F7');
                 // @ENDIF
