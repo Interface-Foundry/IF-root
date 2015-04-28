@@ -4,7 +4,7 @@ angular.module('tidepoolsServices')
             var alerts = alertManager;
 
             //@IFDEF PHONEGAP 
-            window.handleOpenURL = function() {};
+            // window.handleOpenURL = function() {};
             //@ENDIF
 
             //deals with loading, saving, managing user info. 

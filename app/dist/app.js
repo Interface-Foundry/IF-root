@@ -5128,7 +5128,6 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
       FastClick.attach(document.body);
   });
 
-
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/

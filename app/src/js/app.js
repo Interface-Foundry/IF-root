@@ -364,3 +364,15 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
       FastClick.attach(document.body);
   });
 
+// @IFDEF PHONEGAP
+/** 
+ * called when app is opened and saves url that opened app to localStorage.url
+ * useful for deep linking
+ * kipapp.co:// routes to homepage
+ */
+function handleOpenURL(url) {
+  setTimeout(function() {
+    localStorage.setItem('url', url);
+  }) ;
+}
+// @ENDIF
