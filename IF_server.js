@@ -551,6 +551,11 @@ app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes')
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
+
+//--- CHAT DELECT ----//
+app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
+
+
 // PROFILE SECTION =========================
 app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
@@ -3481,12 +3486,46 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
 
 // Delete
-app.delete('/api/:collection/:id', function(req, res) {
-    db.collection(req.params.collection).remove({
-        _id: objectId(req.params.id)
-    }, {
-        safe: true
-    }, fn(req, res));
+app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
+
+        if (req.params.collection == 'worldchat'){
+
+            worldchatSchema.findById(req.params.id, function(err, chat) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                if (!chat) {
+                    return res.sendStatus(404);
+                }
+
+                //is this your chat?
+                if (chat.userID == req.user._id) {
+
+                    worldchatSchema.remove({ _id: req.params.id }, function(err) {
+                        if (err) {
+                            res.sendStatus(500);
+                            console.log(err);
+                        }
+                        else {
+                            res.sendStatus(200);
+                        }
+                    });
+                }
+                else {
+                    res.sendStatus(403); //nope it's not!
+                }      
+            });
+
+        }
+        else {
+
+            // db.collection(req.params.collection).remove({
+            //     _id: objectId(req.params.id)
+            // }, {
+            //     safe: true
+            // }, fn(req, res));    
+                  
+        }
 });
 
 //Group
