@@ -94,14 +94,14 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                                 correct = true;
                                 return createShowSplash(true);
                             }, function(error) {
-                                createShowSplash(false);
-                                // console.log('checkin error', error);
+                                return createShowSplash(false);
                             });
+                        }, function(err) {
+                            createShowSplash(false);
                         })
                     }
                 }, function(err) {
-                    // return console.log('keychain: local login failed');
-                    // createShowSplash(false);
+                    createShowSplash(false);
                 }); //END OF GET LOCAL CREDENTIALS
 
                 //GET FB CREDENTIALS
@@ -117,12 +117,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                                 // console.log('loaded facebook user: ', userManager._user);
                             }, function(err) {
                                 // console.log('credential error', err);
-                                createShowSplash(false);
+                                return createShowSplash(false);
                             });
                         },
                         function(err) {
                             // console.log('fbcredential error', err);
-                            createShowSplash(false);
+                            return createShowSplash(false);
                         })
 
 
