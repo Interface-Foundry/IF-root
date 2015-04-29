@@ -17123,9 +17123,10 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
+               timeout = typeof timeout === 'number' ? timeout : 1500;
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
-   			   }, 1500);
+   			   }, timeout);
    			}
 
    		}
@@ -26484,7 +26485,7 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 	}
 
 	function showConfirmationMessage() {
-		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
+		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 3000);
 	}
 }
 

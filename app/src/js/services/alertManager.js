@@ -32,9 +32,10 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
+               timeout = typeof timeout === 'number' ? timeout : 1500;
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
-   			   }, 1500);
+   			   }, timeout);
    			}
 
    		}
