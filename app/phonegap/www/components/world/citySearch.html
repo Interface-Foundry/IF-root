@@ -15,6 +15,11 @@
 	<div class="shelf-surface wrap" bubble-body>		
 		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
 
+			<small class="u-centerX u-inlineBlock u-colorLinkBlue u-pointer"
+				ng-click="dialogs.showDialog('iosLocationServicesDialog.html')">
+				<span ng-show="geoService.location.src === 'ip-based' && if_phonegap">Not in {{ cityName }}?</span>
+			</small>
+
 			<cat-search-bar ng-if="searchBarText && aperture.state !== 'aperture-full'" 
 				color="style.navBG_color"
 				text="searchBarText"

@@ -9,8 +9,9 @@ angular.module('tidepoolsServices')
 					/**
 					 * lat:
 					 * lng:
-					 * timestamp:
 					 * cityName:
+					 * src:
+					 * timestamp:
 					 */ 
 				},
 				inProgress: false,
@@ -65,6 +66,7 @@ angular.module('tidepoolsServices')
 				geoService.location.lat = locationData.lat;
 				geoService.location.lng = locationData.lng;
 				geoService.location.cityName = locationData.cityName;
+				geoService.location.src = locationData.src;
 				geoService.location.timestamp = locationData.timestamp;
 			};
 			 

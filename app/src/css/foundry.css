@@ -2995,3 +2995,11 @@ button:focus {
   width: 100%;
   height: 3px;
 }
+/*DIALOG IN CITY SEARCH*/
+.dialogLi {
+  margin-bottom: 10px;
+}
+.dialogImg {
+  width: 40px;
+  margin-right: 10px;
+}

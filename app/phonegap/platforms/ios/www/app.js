@@ -17457,8 +17457,9 @@ angular.module('tidepoolsServices')
 					/**
 					 * lat:
 					 * lng:
-					 * timestamp:
 					 * cityName:
+					 * src:
+					 * timestamp:
 					 */ 
 				},
 				inProgress: false,
@@ -17503,6 +17504,7 @@ angular.module('tidepoolsServices')
 				geoService.location.lat = locationData.lat;
 				geoService.location.lng = locationData.lng;
 				geoService.location.cityName = locationData.cityName;
+				geoService.location.src = locationData.src;
 				geoService.location.timestamp = locationData.timestamp;
 			};
 			 
@@ -20041,6 +20043,7 @@ function getLocationInfoFromIP(deferredObj) {
 				lat: locInfo.lat,
 				lng: locInfo.lng,
 				cityName: locInfo.cityName,
+				src: locInfo.src,
 				timestamp: Date.now()
 			};
 
@@ -24479,6 +24482,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 								lat: locInfo.lat,
 								lng: locInfo.lng,
 								cityName: locInfo.cityName,
+								src: locInfo.src,
 								timestamp: Date.now()
 							};
 							geoService.updateLocation(locationData);
@@ -24542,7 +24546,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
+app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
@@ -24730,11 +24734,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
     function setShowSplashReset() {
-        // sets all $scpe.show to false, except $scope.show.splash
+        // sets all $scope.show to false, except $scope.show.splash
         _.each($scope.show, function(value, key) {
             $scope.show[key] = false;
         });
         $scope.show.splash = true;
+        if ($rootScope.if_web) $scope.show.close = true;
     }
 
 
@@ -26018,10 +26023,12 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 	}
 
 }]);
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', 'analyticsService', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter, analyticsService) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', 'analyticsService', 'dialogs', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter, analyticsService, dialogs) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
+	$scope.dialogs = dialogs;
+	$scope.geoService = geoService;
 	$scope.currentFloor = floorSelectorService.currentFloor;
 	$scope.populateSearchView = populateSearchView;
 	$scope.populateCitySearchView = populateCitySearchView;
@@ -27820,6 +27827,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 										lat: locInfo.lat,
 										lng: locInfo.lng,
 										cityName: locInfo.cityName,
+										src: locInfo.src,
 										timestamp: locInfo.timestamp
 									};
 									geoService.updateLocation(locationData);
@@ -27905,6 +27913,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 							lat: locInfo.lat,
 							lng: locInfo.lng,
 							cityName: locInfo.cityName,
+							src: locInfo.src,
 							timestamp: locInfo.timestamp
 						};
 						geoService.updateLocation(locationData);

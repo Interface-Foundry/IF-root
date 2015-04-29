@@ -157,6 +157,7 @@ function getLocationInfoFromIP(deferredObj) {
 				lat: locInfo.lat,
 				lng: locInfo.lng,
 				cityName: locInfo.cityName,
+				src: locInfo.src,
 				timestamp: Date.now()
 			};
 

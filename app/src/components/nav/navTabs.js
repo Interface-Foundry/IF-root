@@ -53,6 +53,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 								lat: locInfo.lat,
 								lng: locInfo.lng,
 								cityName: locInfo.cityName,
+								src: locInfo.src,
 								timestamp: Date.now()
 							};
 							geoService.updateLocation(locationData);

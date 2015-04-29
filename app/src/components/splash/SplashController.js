@@ -1,4 +1,4 @@
-app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
+app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
     $scope.setShowSplash = setShowSplash;
@@ -200,11 +200,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
     function setShowSplashReset() {
-        // sets all $scpe.show to false, except $scope.show.splash
+        // sets all $scope.show to false, except $scope.show.splash
         _.each($scope.show, function(value, key) {
             $scope.show[key] = false;
         });
         $scope.show.splash = true;
+        if ($rootScope.if_web) $scope.show.close = true;
     }
 
 

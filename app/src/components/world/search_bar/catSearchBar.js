@@ -161,6 +161,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 										lat: locInfo.lat,
 										lng: locInfo.lng,
 										cityName: locInfo.cityName,
+										src: locInfo.src,
 										timestamp: locInfo.timestamp
 									};
 									geoService.updateLocation(locationData);
@@ -246,6 +247,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 							lat: locInfo.lat,
 							lng: locInfo.lng,
 							cityName: locInfo.cityName,
+							src: locInfo.src,
 							timestamp: locInfo.timestamp
 						};
 						geoService.updateLocation(locationData);
