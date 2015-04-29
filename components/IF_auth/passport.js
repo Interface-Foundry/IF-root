@@ -251,7 +251,7 @@ module.exports = function(passport) {
 						if (user) {
 							return done('That account appears to be a Facebook account without a password. Try using the Connect with Faceboook button.');
 						} else {
-							return (null, false);
+							return (err);
 						}
 					})
                 }

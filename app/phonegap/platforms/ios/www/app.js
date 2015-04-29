@@ -4862,7 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'https://kipapp.co' + request.url;
+		    			request.url = 'http://web-server-squirtle.kipapp.co:2997' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5933,7 +5933,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
+					value = 'https://web-server-squirtle.kipapp.co:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19019,8 +19019,8 @@ angular.module('tidepoolsServices')
         }
 
         //getCredentials returns a promise->map of the available credentials. 
-        //	Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
-        //	because all will return rejected if you do.
+        //  Consider reimplementing this to propogate errors properly; currently it doesn't reject promises
+        //  because all will return rejected if you do.
 
         lockerManager.getCredentials = function() {
             var username = $q.defer(),
@@ -19029,65 +19029,72 @@ angular.module('tidepoolsServices')
 
             lockerManager.keychain.getForKey(function(value) {
                 username.resolve(value);
+                // console.log('username: ', username.$promise)
             }, function(error) {
-                username.resolve(undefined);
-                console.log(error);
+                username.reject(error);
+                // console.log('user name error', error);
             }, 'username', 'Kip');
 
             lockerManager.keychain.getForKey(function(value) {
                 password.resolve(value);
+                // console.log('password: ', password)
             }, function(error) {
-                password.resolve(undefined);
-                console.log(error);
+                password.reject(error);
+                // console.log('password error', error);
             }, 'password', 'Kip');
-
-            lockerManager.keychain.getForKey(function(value) {
-                fbToken.resolve(value);
-            }, function(error) {
-                fbToken.resolve(undefined);
-                // console.log(error);
-            }, 'fbToken', 'Kip');
 
             return $q.all({
                 username: username.promise,
-                password: password.promise,
-                fbToken: fbToken.promise
+                password: password.promise
             });
-
         }
 
-   
-         // Removes a value for a key and servicename
+        lockerManager.getFBCredentials = function() {
+            var fbToken = $q.defer();
+            lockerManager.keychain.getForKey(function(value) {
+                fbToken.resolve(value);
+                // console.log('fbToken', fbToken)
+            }, function(error) {
+                fbToken.reject(error);
+                // console.log(error);
+            }, 'fbToken', 'Kip');
+            return $q.all({
+                fbToken: fbToken.promise
+            });
+        }
+
+
+        // Removes a value for a key and servicename
 
 
         lockerManager.removeCredentials = function(usertype) {
             var username = $q.defer(),
                 password = $q.defer(),
                 fbToken = $q.defer();
-        
+
             if (usertype == 'facebook') {
-                console.log('clearing keychain for facebook.')
+                // console.log('clearing keychain for facebook.')
                 lockerManager.keychain.removeForKey(function(success) {
-                    console.log('keychain cleared!', success)
+                    // console.log('keychain cleared!', success)
                     fbToken.resolve(success);
                 }, function(error) {
-                    console.log('faield clearing keychain', error);
+                    // console.log('faield clearing keychain', error);
                     fbToken.reject(error);
                 }, 'fbToken', 'Kip');
                 return fbToken;
             } else {
                 lockerManager.keychain.removeForKey(function(success) {
-                    console.log('keychain cleared!', success)
+                    // console.log('keychain cleared!', success)
                     username.resolve(success);
                 }, function(error) {
-                    console.log('faield clearing keychain', error);
+                    // console.log('faield clearing keychain', error);
                     username.reject(error);
                 }, 'username', 'Kip');
                 lockerManager.keychain.removeForKey(function(success) {
-                    console.log('keychain cleared!', success)
+                    // console.log('keychain cleared!', success)
                     password.resolve(success);
                 }, function(error) {
-                    console.log('faield clearing keychain', error);
+                    // console.log('faield clearing keychain', error);
                     password.reject(error);
                 }, 'password', 'Kip');
                 return username
@@ -19101,15 +19108,19 @@ angular.module('tidepoolsServices')
                 passwordSuccess = $q.defer();
 
             lockerManager.keychain.setForKey(function(success) {
+                    console.log('saveCredentials user: success')
                     usernameSuccess.resolve(success);
                 }, function(error) {
+                    console.log('saveCredentials user: fail')
                     usernameSuccess.reject(error);
                 },
                 'username', 'Kip', username);
 
             lockerManager.keychain.setForKey(function(success) {
+                    console.log('saveCredentials pw: success')
                     passwordSuccess.resolve(success);
                 }, function(error) {
+                    console.log('saveCredentials pw: fail')
                     passwordSuccess.reject(error);
                 },
                 'password', 'Kip', password);
@@ -19484,7 +19495,7 @@ angular.module('tidepoolsServices')
                 var deferred = $q.defer();
 
                 userManager.getUser().then(function(user) {
-                    console.log('getting user');
+                    // console.log('getting user');
                     userManager.loginStatus = true;
                     userManager.adminStatus = user.admin ? true : false;
                     $rootScope.user = user;
@@ -19523,80 +19534,106 @@ angular.module('tidepoolsServices')
                         server: true
                     })
                     .success(function(data) {
-                 
                         lockerManager.saveCredentials(username, password);
-                      
-                        console.log('SUCCESS');
+                        // console.log('successful signin, credentials saved:', username, password)
+                        // console.log('SUCCESS data is: ', data);
                         userManager._user = data;
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
                         ifGlobals.loginStatus = true;
-                        //userManager.saveToKeychain();
                         deferred.resolve(data);
-                    })
-                    .error(function(data, status, headers, config) {
-                        console.error(data, status, headers, config);
-                        deferred.reject(data);
+
+                    }).error(function(error) {
+                        // console.log('keychain signin failed, removing  credentials')
+                        usertype = 'local';
+                        lockerManager.removeCredentials(usertype);
+                        deferred.reject(error);
                     })
                 return deferred.promise;
             }
 
             userManager.fbLogin = function() { //login based on facebook approval
                 var deferred = $q.defer();
-
-                facebookConnectPlugin.login(['public_profile', 'email'],
-                    function(success) {
-                        var fbToken = success.authResponse.accessToken;
-
-                        var data = {
-                            userId: success.authResponse.userID,
-                            accessToken: success.authResponse.accessToken
-                        };
-
-                        $http.post('/auth/facebook/mobile_signin', data, {
-                            server: true
-                        }).then(
-                            function(res) {
-
-
+                facebookConnectPlugin.getLoginStatus(function(success) {
+                    console.log('fbconnect loginstatus success')
+                    var fbToken = success.authResponse.accessToken;
+                    var data = {
+                        userId: success.authResponse.userID,
+                        accessToken: success.authResponse.accessToken
+                    };
+                    $http.post('/auth/facebook/mobile_signin', data, {
+                        server: true
+                    }).then(
+                        function(res) {
+                            console.log('fbconnect loginstatus mobile signin success', res)
                                 //lockerManager.saveFBToken(success.authResponse.accessToken);
-                                lockerManager.saveFBToken(fbToken);
-                                ifGlobals.fbToken = fbToken;
+                            lockerManager.saveFBToken(fbToken);
+                            ifGlobals.fbToken = fbToken;
+                            userManager._user = res.data;
+                            console.log('fbLogin: userManager._user: ', userManager._user)
+                            userManager.loginStatus = true;
+                            //userManager.adminStatus = data.admin ? true : false;
+                            ifGlobals.loginStatus = true;
+                            deferred.resolve(userManager._user);
+                        },
+                        function(err) {
+                            console.log('fb login failed, removing fb credentials')
+                            usertype = 'facebook';
+                            lockerManager.removeCredentials(usertype);
+                            deferred.reject();
+                        }
+                    );
+                    // console.log('getting here', deferred.promise)
+                    // return deferred.promise;
+                    // console.log('getting here too', deferred.promise)
+                         return deferred.promise;
+                }, function() {
 
-                                userManager._user = res.data;
-                                console.log('fbLogin: userManager._user: ', userManager._user)
+                    console.log('fbconnect loginstatus failed')
+                    facebookConnectPlugin.login(['public_profile', 'email'],
+                        function(success) {
+                            console.log('fbconnect login success')
+                            var fbToken = success.authResponse.accessToken;
 
-                                userManager.loginStatus = true;
-                                //userManager.adminStatus = data.admin ? true : false;
-                                ifGlobals.loginStatus = true;
+                            var data = {
+                                userId: success.authResponse.userID,
+                                accessToken: success.authResponse.accessToken
+                            };
+                            $http.post('/auth/facebook/mobile_signin', data, {
+                                server: true
+                            }).then(
+                                function(res) {
+                                    //lockerManager.saveFBToken(success.authResponse.accessToken);
+                                    lockerManager.saveFBToken(fbToken);
+                                    ifGlobals.fbToken = fbToken;
 
-                                deferred.resolve(success);
-                            },
+                                    userManager._user = res.data;
+                                    // console.log('fbLogin: userManager._user: ', userManager._user)
 
-                            function(res) {
-                                deferred.reject(failure);
-                            }
-                        );
+                                    userManager.loginStatus = true;
+                                    //userManager.adminStatus = data.admin ? true : false;
+                                    ifGlobals.loginStatus = true;
+                                    deferred.resolve(success);
+                                },
+                                function(res) {
+                                    // console.log('fb login failed, removing fb credentials')
+                                    usertype = 'facebook';
+                                    lockerManager.removeCredentials(usertype);
+                                    deferred.reject(failure);
+                                }
+                            );
+                        },
+                        function(failure) {
+                            console.log('fbconnect login failed')
+                            alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                            deferred.reject(failure);
+                        })
+                    // console.log('is it returning final promise?', deferred.promise)
+                    return deferred.promise;
+                })
 
-                        // var authHeader = 'Bearer ' + fbToken;
-                        // console.log(success);
-                        // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-                        // 	lockerManager.saveFBToken(fbToken);
-                        // 	ifGlobals.fbToken = fbToken;
-                        // 	deferred.resolve(success);
-                        // }, function(failure) {
-                        // 	deferred.reject(failure);
-                        // })
-                    },
-                    function(failure) {
-                        alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-                        deferred.reject(failure);
-                    })
-
-                return deferred.promise;
+    return deferred.promise;
             }
-
-            //MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
 
 
             userManager.logout = function() {
@@ -19604,9 +19641,11 @@ angular.module('tidepoolsServices')
                 var usertype = '';
 
                 if (userManager._user.facebook) {
+                    // console.log('removing fb credentials')
                     usertype = 'facebook';
                     lockerManager.removeCredentials(usertype);
                 } else {
+                    // console.log('removing local credentials')
                     usertype = 'local';
                     lockerManager.removeCredentials(usertype);
                 }
@@ -24554,6 +24593,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             // get token from url
             var token = $location.path().slice(7);
 
+<<<<<<< HEAD
             $http.post('/resetConfirm/' + token, {}, {
                 server: true
             }).
@@ -24606,6 +24646,89 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             StatusBar.styleDefault();
             StatusBar.backgroundColorByHexString(styleManager.splashStatusBarColor);
         } //END OF OUTER ELSE
+=======
+                $http.post('/resetConfirm/' + token, {}, {
+                    server: true
+                }).
+                success(function(data) {}).
+                error(function(err) {
+                    if (err) {
+                        console.log('err: ', err);
+                    }
+                });
+            } else {
+                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+                //On Phonegap startup, try to login with either saved username/pw or facebook
+
+                var localuser = false;
+                var fbuser = false;
+                lockerManager.getCredentials().then(function(credentials) {
+                    if (credentials.username && credentials.password) {
+                        userManager.signin(credentials.username, credentials.password).then(function(success) {
+                            localuser = true;
+                            userManager.checkLogin().then(function(success) {
+                                correct = true;
+                                return createShowSplash(true);
+                            }, function(error) {
+                                createShowSplash(false);
+                                // console.log('checkin error', error);
+                            });
+                        })
+                    }
+                }, function(err) {
+                    // return console.log('keychain: local login failed');
+                    // createShowSplash(false);
+                }); //END OF GET LOCAL CREDENTIALS
+
+                //GET FB CREDENTIALS
+                if (!localuser) {
+                    console.log('trying fb keychain login')
+                    lockerManager.getFBCredentials().then(function(credentials) {
+                            console.log('Hitting fblogin')
+                            ifGlobals.fbToken = credentials.fbToken;
+
+                            userManager.fbLogin().then(function(data) {
+                                        console.log('HITTING FB LOGIN SUCCESS',data)
+                                    fbuser = true;
+                                    return createShowSplash(true);
+                                        // console.log('loaded facebook user: ', userManager._user);
+                                }, function(err) {
+                                    console.log('credential error', err);
+                                    createShowSplash(false);
+                                });
+
+
+
+                            // .success(function(data) {
+                            //         console.log('HITTING FB LOGIN SUCCESS', data)
+                            //         fbuser = true;
+                            //         return createShowSplash(true);
+                            //         // console.log('loaded facebook user: ', userManager._user);
+                            //     })
+                            //     .error(function(data, status) {
+                            //         console.log('credential error', data, status);
+                            //         createShowSplash(false);
+                            //     })
+                            //     .finally(function() {
+                            //         console.log("finally finished repos");
+                            //     });
+
+                        },
+                        function(err) {
+                            console.log('fbcredential error', err);
+                            createShowSplash(false);
+                        })
+
+
+                } else {
+                    console.log('NO VALID CREDNEITALS');
+                    createShowSplash(false);
+                }
+
+                StatusBar.styleDefault();
+                StatusBar.backgroundColorByHexString('#F4F5F7');
+            } //END OF OUTER ELSE
+>>>>>>> ios-signin-merge
 
     } //END OF INIT
 
@@ -24621,10 +24744,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-           // console.log('hitting splashcontroller loggedin')
-        // console.log('SPLASH CONDITION ', condition);
-        // console.log('facebook ', userManager._user.facebook);
-        // console.log('userManager._user', userManager._user);
+            // console.log('hitting splashcontroller loggedin')
+            // console.log('SPLASH CONDITION ', condition);
+            // console.log('facebook ', userManager._user.facebook);
+            // console.log('userManager._user', userManager._user);
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
@@ -24683,7 +24806,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
 
         } else if ($scope.show.register) {
@@ -24695,7 +24818,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-					alertManager.addAlert('danger', newValue, false);
+                    alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });
@@ -24795,7 +24918,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
-
 'use strict';
 
 angular.module('IF')

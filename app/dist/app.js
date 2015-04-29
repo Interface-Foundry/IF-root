@@ -19327,7 +19327,7 @@ angular.module('tidepoolsServices')
                 var deferred = $q.defer();
 
                 userManager.getUser().then(function(user) {
-                    console.log('getting user');
+                    // console.log('getting user');
                     userManager.loginStatus = true;
                     userManager.adminStatus = user.admin ? true : false;
                     $rootScope.user = user;
@@ -19375,30 +19375,31 @@ angular.module('tidepoolsServices')
 
             userManager.fbLogin = function() { //login based on facebook approval
                 var deferred = $q.defer();
+                facebookConnectPlugin.getLoginStatus(function(success) {
+                    console.log('fbconnect loginstatus success')
+                    var fbToken = success.authResponse.accessToken;
+                    // console.log('getting here too', deferred.promise)
+                         return deferred.promise;
+                }, function() {
 
-                facebookConnectPlugin.login(['public_profile', 'email'],
-                    function(success) {
-                        var fbToken = success.authResponse.accessToken;
+                    // console.log('fbconnect loginstatus failed')
+                    facebookConnectPlugin.login(['public_profile', 'email'],
+                        function(success) {
+                            // console.log('fbconnect login success')
+                            var fbToken = success.authResponse.accessToken;
 
-                        // var authHeader = 'Bearer ' + fbToken;
-                        // console.log(success);
-                        // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-                        // 	lockerManager.saveFBToken(fbToken);
-                        // 	ifGlobals.fbToken = fbToken;
-                        // 	deferred.resolve(success);
-                        // }, function(failure) {
-                        // 	deferred.reject(failure);
-                        // })
-                    },
-                    function(failure) {
-                        alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-                        deferred.reject(failure);
-                    })
+                        },
+                        function(failure) {
+                            // console.log('fbconnect login failed')
+                            alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                            deferred.reject(failure);
+                        })
+                    // console.log('is it returning final promise?', deferred.promise)
+                    return deferred.promise;
+                })
 
-                return deferred.promise;
+    return deferred.promise;
             }
-
-            //MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
 
 
             userManager.logout = function() {
@@ -24294,58 +24295,60 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
     init();
 
+
+
     function init() {
-        // special case for aicp to prevent splash page
-        if ($location.path().indexOf('aicpweek2015') > -1) {
-            $scope.show.splash = false;
-            return;
-        }
+            // special case for aicp to prevent splash page
+            if ($location.path().indexOf('aicpweek2015') > -1) {
+                $scope.show.splash = false;
+                return;
+            }
 
-        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+            if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
 
-            createShowSplash('confirmThanks');
+                createShowSplash('confirmThanks');
 
-            // get token from url
-            var token = $location.path().slice(15);
+                // get token from url
+                var token = $location.path().slice(15);
 
-            $http.post('/email/request_confirm/' + token, {}, {
-                server: true
-            }).
-            success(function(data) {
-                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-            }).
-            error(function(err) {
-                $scope.confirmThanksText = 'There was a problem confirming your email';
-            });
+                $http.post('/email/request_confirm/' + token, {}, {
+                    server: true
+                }).
+                success(function(data) {
+                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+                }).
+                error(function(err) {
+                    $scope.confirmThanksText = 'There was a problem confirming your email';
+                });
 
-            // redirect to home page
-            $location.path('/');
-        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+                // redirect to home page
+                $location.path('/');
+            } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
 
-            createShowSplash('passwordReset');
+                createShowSplash('passwordReset');
 
-            // get token from url
-            var token = $location.path().slice(7);
+                // get token from url
+                var token = $location.path().slice(7);
 
-            $http.post('/resetConfirm/' + token, {}, {
-                server: true
-            }).
-            success(function(data) {}).
-            error(function(err) {
-                if (err) {
-                    console.log('err: ', err);
-                }
-            });
-        } else {
-            userManager.getUser().then(function(success) {
-                createShowSplash(true);
-            }, function(err) {
-                createShowSplash(false);
-            });
-            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
-        } //END OF OUTER ELSE
+                $http.post('/resetConfirm/' + token, {}, {
+                    server: true
+                }).
+                success(function(data) {}).
+                error(function(err) {
+                    if (err) {
+                        console.log('err: ', err);
+                    }
+                });
+            } else {
+                userManager.getUser().then(function(success) {
+                    createShowSplash(true);
+                }, function(err) {
+                    createShowSplash(false);
+                });
+                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+            } //END OF OUTER ELSE
 
-    } //END OF INIT
+        } //END OF INIT
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
@@ -24359,10 +24362,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             $scope.show.passwordReset = true;
         } else if (condition) { // logged in
             // don't show confirm dialog for fb authenticated users
-           // console.log('hitting splashcontroller loggedin')
-        // console.log('SPLASH CONDITION ', condition);
-        // console.log('facebook ', userManager._user.facebook);
-        // console.log('userManager._user', userManager._user);
+            // console.log('hitting splashcontroller loggedin')
+            // console.log('SPLASH CONDITION ', condition);
+            // console.log('facebook ', userManager._user.facebook);
+            // console.log('userManager._user', userManager._user);
 
             if (userManager._user.facebook) {
                 console.log(userManager._user.facebook);
@@ -24422,7 +24425,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-				alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
             })
 
         } else if ($scope.show.register) {
@@ -24434,7 +24437,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     alertManager.addAlert('info', 'Welcome to Kip!', true);
                     welcomeService.needsWelcome = true;
                 } else if (newValue) { // signup error
-					alertManager.addAlert('danger', newValue, false);
+                    alertManager.addAlert('danger', newValue, false);
                     watchSignupError(); // clear watch
                 }
             });
@@ -24533,8 +24536,8 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     }
 
 
-}]);
 
+}]);
 'use strict';
 
 angular.module('IF')
