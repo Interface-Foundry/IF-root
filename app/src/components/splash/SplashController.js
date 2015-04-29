@@ -1,6 +1,7 @@
 app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
+    $scope.userManager = userManager;
     $scope.setShowSplash = setShowSplash;
     $scope.setShowSplashFalse = setShowSplashFalse;
     $scope.setShowSplashReset = setShowSplashReset;
@@ -24,6 +25,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
+    $scope.fbSignIn = fbSignIn;
 
     init();
 
@@ -110,13 +112,18 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     lockerManager.getFBCredentials().then(function(credentials) {
                             // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
-                            userManager.fbLogin().then(function(data) {
-                                // console.log('HITTING FB LOGIN SUCCESS',data)
+                            userManager.fbLogin('onLoad').then(function(data) {
+                                console.log('HITTING FB LOGIN SUCCESS', data)
                                 fbuser = true;
                                 return createShowSplash(true);
                                 // console.log('loaded facebook user: ', userManager._user);
                             }, function(err) {
-                                // console.log('credential error', err);
+                                console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
+                                // hack for now
+                                if ($scope.show.signin) {
+                                    alertManager.addAlert('info', 'facebook login unsuccessful');
+                                }
+
                                 return createShowSplash(false);
                             });
                         },
@@ -137,6 +144,24 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             } //END OF OUTER ELSE
 
         } //END OF INIT
+
+    function fbSignIn() {
+        userManager.fbLogin('onSignIn').then(function(data) {
+            console.log('fbLogin success', data)
+            fbuser = true;
+            return createShowSplash(true);
+            // console.log('loaded facebook user: ', userManager._user);
+        }, function(err) {
+            console.log('fbLogin error', $scope.show.signin);
+            // hack for now
+            if ($scope.show.signin) {
+                alertManager.addAlert('info', 'facebook login unsuccessful');
+            }
+            return createShowSplash(false);
+        });
+    }
+
+
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages

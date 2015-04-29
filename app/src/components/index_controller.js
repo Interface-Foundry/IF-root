@@ -135,15 +135,16 @@ $scope.share = function(platform) {
 };
 
 //@IFDEF PHONEGAP
-$scope.fbLogin = function() {
-	userManager.fbLogin().then(
-		function (success) {
-			console.log(success);
-			userManager.checkLogin();
-		}, function (failure) {
-			console.log(failure);	
-		})
-}
+// $scope.fbLogin = function() {
+//   console.log('HAHAHAHAOMGGGREJJREREFJEFJ')
+// 	userManager.fbLogin().then(
+// 		function (success) {
+// 			console.log(success);
+// 			userManager.checkLogin();
+// 		}, function (failure) {
+// 			console.log(failure);	
+// 		})
+// }
 //@ENDIF
 
 

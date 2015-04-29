@@ -5933,7 +5933,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://web-server-squirtle.kipapp.co:2997/'+value;
+					value = 'http://web-server-squirtle.kipapp.co:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19552,87 +19552,160 @@ angular.module('tidepoolsServices')
                 return deferred.promise;
             }
 
-            userManager.fbLogin = function() { //login based on facebook approval
+            userManager.fbLogin = function(state) {
                 var deferred = $q.defer();
+                console.log('State in which fbLogin is called is: ', state)
                 facebookConnectPlugin.getLoginStatus(function(success) {
-                    console.log('fbconnect loginstatus success')
-                    var fbToken = success.authResponse.accessToken;
-                    var data = {
-                        userId: success.authResponse.userID,
-                        accessToken: success.authResponse.accessToken
-                    };
-                    $http.post('/auth/facebook/mobile_signin', data, {
-                        server: true
-                    }).then(
-                        function(res) {
-                            // console.log('fbconnect loginstatus mobile signin success', res)
-                                //lockerManager.saveFBToken(success.authResponse.accessToken);
-                            lockerManager.saveFBToken(fbToken);
-                            ifGlobals.fbToken = fbToken;
-                            userManager._user = res.data;
-                            // console.log('fbLogin: userManager._user: ', userManager._user)
-                            userManager.loginStatus = true;
-                            //userManager.adminStatus = data.admin ? true : false;
-                            ifGlobals.loginStatus = true;
-                            deferred.resolve(userManager._user);
-                        },
-                        function(err) {
-                            // console.log('fb login failed, removing fb credentials')
-                            usertype = 'facebook';
-                            lockerManager.removeCredentials(usertype);
+                    console.log('Success variable is:', success)
+                        //SITUATION: User loads app but has never logged in via FB before
+                        if (!success.authResponse && state == 'onLoad') {
+                            console.log('SITUATION: User loads app but has never logged in via FB before', success)
                             deferred.reject();
-                        }
-                    );
-                    // console.log('getting here', deferred.promise)
-                    // return deferred.promise;
-                    // console.log('getting here too', deferred.promise)
-                         return deferred.promise;
-                }, function() {
-
-                    // console.log('fbconnect loginstatus failed')
-                    facebookConnectPlugin.login(['public_profile', 'email'],
-                        function(success) {
-                            // console.log('fbconnect login success')
+                        } //SITUATION: User loads app AND HAS logged in via FB before
+                        else if (success.authResponse && state == 'onLoad') {
+                            console.log('SITUATION: User loads app AND HAS logged in via FB before', success)
                             var fbToken = success.authResponse.accessToken;
-
                             var data = {
                                 userId: success.authResponse.userID,
                                 accessToken: success.authResponse.accessToken
                             };
                             $http.post('/auth/facebook/mobile_signin', data, {
                                 server: true
-                            }).then(
-                                function(res) {
-                                    //lockerManager.saveFBToken(success.authResponse.accessToken);
+                            }).then(function(res) {
                                     lockerManager.saveFBToken(fbToken);
                                     ifGlobals.fbToken = fbToken;
-
                                     userManager._user = res.data;
-                                    // console.log('fbLogin: userManager._user: ', userManager._user)
-
                                     userManager.loginStatus = true;
                                     //userManager.adminStatus = data.admin ? true : false;
                                     ifGlobals.loginStatus = true;
-                                    deferred.resolve(success);
+                                    return deferred.resolve(res);
                                 },
-                                function(res) {
-                                    // console.log('fb login failed, removing fb credentials')
+                                function(err) {
+                                    console.log('fb login failed, removing fb credentials')
                                     usertype = 'facebook';
                                     lockerManager.removeCredentials(usertype);
-                                    deferred.reject(failure);
-                                }
-                            );
-                        },
-                        function(failure) {
-                            // console.log('fbconnect login failed')
-                            alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-                            deferred.reject(failure);
-                        })
-                    // console.log('is it returning final promise?', deferred.promise)
-                    return deferred.promise;
-                })
+                                    return deferred.reject();
+                                });
+                            return deferred.promise;
 
-    return deferred.promise;
+                            //SITUATION: User clicks CONNECT WITH FACEBOOK on SIGNIN page for the FIRST TIME
+                        } else if (!success.authResponse && state == 'onSignIn') {
+
+                            console.log('SITUATION: User clicks CONNECT WITH FACEBOOK on SIGNIN page for the FIRST TIME', success)
+                            facebookConnectPlugin.login(['public_profile', 'email'],
+                                function(success) {
+                                    console.log('fbconnect login success')
+                                    var fbToken = success.authResponse.accessToken;
+                                    var data = {
+                                        userId: success.authResponse.userID,
+                                        accessToken: success.authResponse.accessToken
+                                    };
+                                    $http.post('/auth/facebook/mobile_signin', data, {
+                                        server: true
+                                    }).then(function(res) {
+                                            console.log('mobile_signin successful', state)
+                                            lockerManager.saveFBToken(fbToken);
+                                            ifGlobals.fbToken = fbToken;
+                                            userManager._user = res.data;
+                                            userManager.loginStatus = true;
+                                            //userManager.adminStatus = data.admin ? true : false;
+                                            ifGlobals.loginStatus = true;
+                                            return deferred.resolve(res);
+                                        },
+                                        function(res) {
+                                            console.log('mobile_signin UNsuccessful', state)
+                                            usertype = 'facebook';
+                                            lockerManager.removeCredentials(usertype);
+                                            return deferred.reject();
+                                        });
+                                },
+                                function(failure) {
+                                    // console.log('fbconnect login failed')
+                                    alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                                    deferred.reject(failure);
+                                })
+                            return deferred.promise;
+
+
+
+                            //SITUATION: User clicks CONNECT WITH FACEBOOK on SIGNIN page and has signed in FB before
+                        } else if (success.authResponse.accessToken && state == 'onSignIn') {
+                            console.log('User clicks CONNECT WITH FACEBOOK on SIGNIN page and has signed in FB before', success)
+                            var fbToken = success.authResponse.accessToken;
+                            var data = {
+                                userId: success.authResponse.userID,
+                                accessToken: success.authResponse.accessToken
+                            };
+                            $http.post('/auth/facebook/mobile_signin', data, {
+                                server: true
+                            }).then(function(res) {
+                                    console.log('AHOY ', res)
+
+                                    lockerManager.saveFBToken(fbToken);
+                                    ifGlobals.fbToken = fbToken;
+                                    userManager._user = res.data;
+                                    userManager.loginStatus = true;
+                                    //userManager.adminStatus = data.admin ? true : false;
+                                    ifGlobals.loginStatus = true;
+                                    return deferred.resolve(res);
+                                },
+                                function(err) {
+                                    console.log('fb login failed, removing fb credentials')
+                                    usertype = 'facebook';
+                                    lockerManager.removeCredentials(usertype);
+                                    return deferred.reject();
+                                });
+                        }
+                        console.log('before the final return of promise: ', deferred.promise)
+                        return deferred.promise;
+
+                    },
+                    function() {
+
+                        console.log('fbconnect login using cache failed, now trying regular login..')
+                        facebookConnectPlugin.login(['public_profile', 'email'],
+                                function(success) {
+                                    // console.log('fbconnect login success')
+                                    var fbToken = success.authResponse.accessToken;
+
+                                    var data = {
+                                        userId: success.authResponse.userID,
+                                        accessToken: success.authResponse.accessToken
+                                    };
+                                    $http.post('/auth/facebook/mobile_signin', data, {
+                                        server: true
+                                    }).then(
+                                        function(res) {
+                                            //lockerManager.saveFBToken(success.authResponse.accessToken);
+                                            lockerManager.saveFBToken(fbToken);
+                                            ifGlobals.fbToken = fbToken;
+
+                                            userManager._user = res.data;
+                                            // console.log('fbLogin: userManager._user: ', userManager._user)
+
+                                            userManager.loginStatus = true;
+                                            //userManager.adminStatus = data.admin ? true : false;
+                                            ifGlobals.loginStatus = true;
+                                            deferred.resolve(success);
+                                        },
+                                        function(res) {
+                                            // console.log('fb login failed, removing fb credentials')
+                                            usertype = 'facebook';
+                                            lockerManager.removeCredentials(usertype);
+                                            deferred.reject(failure);
+                                        }
+                                    );
+                                },
+                                function(failure) {
+                                    // console.log('fbconnect login failed')
+                                    alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                                    deferred.reject(failure);
+                                })
+                            // console.log('is it returning final promise?', deferred.promise)
+                        return deferred.promise;
+                    })
+
+                return deferred.promise;
             }
 
 
@@ -24347,15 +24420,16 @@ $scope.share = function(platform) {
   );
 };
 
-$scope.fbLogin = function() {
-	userManager.fbLogin().then(
-		function (success) {
-			console.log(success);
-			userManager.checkLogin();
-		}, function (failure) {
-			console.log(failure);	
-		})
-}
+// $scope.fbLogin = function() {
+//   console.log('HAHAHAHAOMGGGREJJREREFJEFJ')
+// 	userManager.fbLogin().then(
+// 		function (success) {
+// 			console.log(success);
+// 			userManager.checkLogin();
+// 		}, function (failure) {
+// 			console.log(failure);	
+// 		})
+// }
 }]);
 
 // DEPRACATED
@@ -24534,6 +24608,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
+    $scope.userManager = userManager;
     $scope.setShowSplash = setShowSplash;
     $scope.setShowSplashFalse = setShowSplashFalse;
     $scope.setShowSplashReset = setShowSplashReset;
@@ -24557,6 +24632,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
+    $scope.fbSignIn = fbSignIn;
 
     init();
 
@@ -24632,15 +24708,20 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 if (!localuser) {
                     // console.log('trying fb keychain login')
                     lockerManager.getFBCredentials().then(function(credentials) {
-                            console.log('Hitting fblogin')
+                            // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
-                            userManager.fbLogin().then(function(data) {
-                                console.log('HITTING FB LOGIN SUCCESS',data)
+                            userManager.fbLogin('onLoad').then(function(data) {
+                                console.log('HITTING FB LOGIN SUCCESS', data)
                                 fbuser = true;
                                 return createShowSplash(true);
                                 // console.log('loaded facebook user: ', userManager._user);
                             }, function(err) {
-                                // console.log('credential error', err);
+                                console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
+                                // hack for now
+                                if ($scope.show.signin) {
+                                    alertManager.addAlert('info', 'facebook login unsuccessful');
+                                }
+
                                 return createShowSplash(false);
                             });
                         },
@@ -24660,6 +24741,24 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             } //END OF OUTER ELSE
 
         } //END OF INIT
+
+    function fbSignIn() {
+        userManager.fbLogin('onSignIn').then(function(data) {
+            console.log('fbLogin success', data)
+            fbuser = true;
+            return createShowSplash(true);
+            // console.log('loaded facebook user: ', userManager._user);
+        }, function(err) {
+            console.log('fbLogin error', $scope.show.signin);
+            // hack for now
+            if ($scope.show.signin) {
+                alertManager.addAlert('info', 'facebook login unsuccessful');
+            }
+            return createShowSplash(false);
+        });
+    }
+
+
 
     function createShowSplash(condition) {
         // $scope.show controls the logic for the splash pages
