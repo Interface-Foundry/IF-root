@@ -4862,8 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			// request.url = 'http://kipapp.co' + request.url;
-              request.url = 'http://web-server-squirtle.kipapp.co:2997' + request.url;
+		    			request.url = 'http://kipapp.co' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5934,8 +5933,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					// value = 'https://kipapp.co/'+value;
-					value = 'http://web-server-squirtle.kipapp.co:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
