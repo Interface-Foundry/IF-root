@@ -119,9 +119,9 @@ module.exports = function(app, passport, landmarkSchema) {
 
 
 		app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-		  failureRedirect: '/login'
+		  failureRedirect: '/'
 		}), function (req, res) {
-		  res.redirect(req.session.redirect || '/home');
+		  res.redirect(req.session.redirect || '/');
 		  delete req.session.redirect;
 		});
 
