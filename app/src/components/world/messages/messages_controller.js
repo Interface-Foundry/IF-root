@@ -136,7 +136,7 @@ $scope.sendMsg = function (e) {
 
 $scope.deleteMsg = function(msg) {
 	if ($scope.user && $scope.user._id === msg.userID) {
-		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		var deleteConfirm = confirm('Are you sure you want to delete this?\n\n"' + msg.msg + '"');
 		if (deleteConfirm) {
 			confirmDelete(msg);
 		}

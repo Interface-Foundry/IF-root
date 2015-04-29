@@ -27010,7 +27010,7 @@ $scope.sendMsg = function (e) {
 
 $scope.deleteMsg = function(msg) {
 	if ($scope.user && $scope.user._id === msg.userID) {
-		var deleteConfirm = confirm("Are you sure you want to delete this?");
+		var deleteConfirm = confirm('Are you sure you want to delete this?\n\n"' + msg.msg + '"');
 		if (deleteConfirm) {
 			confirmDelete(msg);
 		}
@@ -27329,7 +27329,7 @@ function messagesService($http) {
 	}
 
 	function deleteMsg(msg) {
-		return $http.delete('/api/worldchat/' + msg._id);
+		return $http.delete('/api/worldchat/' + msg._id, {server: true});
 	}
 }
 app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter) {

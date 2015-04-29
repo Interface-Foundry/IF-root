@@ -41,6 +41,6 @@ function messagesService($http) {
 	}
 
 	function deleteMsg(msg) {
-		return $http.delete('/api/worldchat/' + msg._id);
+		return $http.delete('/api/worldchat/' + msg._id, {server: true});
 	}
 }
