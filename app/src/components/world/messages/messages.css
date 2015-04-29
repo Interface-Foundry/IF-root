@@ -88,6 +88,11 @@
 	margin: 0;
 }
 
+.message {
+	/* To force messages to render when offscreen (iOS bug) */
+	-webkit-transform: translate3d(0,0,0);
+}
+
 .message-list:before {
 	content: ' ';
 	display: block;

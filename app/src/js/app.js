@@ -101,10 +101,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  when('/login', {
-    templateUrl: 'components/user/login.html', 
-    controller: 'LoginCtrl'
-  }).
+  // when('/login', {
+  //   templateUrl: 'components/user/login.html', 
+  //   controller: 'LoginCtrl'
+  // }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
