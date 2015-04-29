@@ -241,17 +241,22 @@ module.exports = function(passport) {
                 if (user && user.validPassword(password)) {
                     return done(null, user);
                 } else if (err) {
-                    return done(err);
+		    console.error('could not log in with basic auth');
+		    console.error(err);
+                    return done('Could not log in');
                 } else {
 					// try looking for a facebook user
 					User.findOne({
 						'facebook.email': email.toString().toLowerCase()
 					}, function(err, user) {
-						if (err) { return done(err) }
+						if (err) {
+							console.error(err);
+							return done(err) 
+						}
 						if (user) {
 							return done('That account appears to be a Facebook account without a password. Try using the Connect with Faceboook button.');
 						} else {
-							return (err);
+							return done('Incorrect username or password');
 						}
 					})
                 }
