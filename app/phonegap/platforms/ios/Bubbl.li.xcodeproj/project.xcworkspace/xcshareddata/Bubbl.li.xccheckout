@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>E2388797-AF3D-4BA2-A4D9-728488D173D5</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>Bubbl.li</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>FC9E9CDD02671F32293CE4C01E02A19A0EBD04CE</key>
 		<string>github.com:Interface-Foundry/IF-root.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>app/phonegap/platforms/ios/Bubbl.li.xcodeproj/project.xcworkspace</string>
+	<string>app/phonegap/platforms/ios/Bubbl.li.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>FC9E9CDD02671F32293CE4C01E02A19A0EBD04CE</key>

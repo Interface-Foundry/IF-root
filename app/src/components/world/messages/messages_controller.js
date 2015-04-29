@@ -134,6 +134,27 @@ $scope.sendMsg = function (e) {
 	}
 }
 
+$scope.deleteMsg = function(msg) {
+	if ($scope.user && $scope.user._id === msg.userID) {
+		var deleteConfirm = confirm('Are you sure you want to delete this?\n\n"' + msg.msg + '"');
+		if (deleteConfirm) {
+			confirmDelete(msg);
+		}
+	}
+}
+
+function confirmDelete(msg) {
+	var idx = $scope.messages.indexOf(msg);
+	if (idx > -1) {
+		messagesService.deleteMsg(msg)
+		.then(function(response) {
+			$scope.messages.splice(idx, 1);
+		}, function(error) {
+			console.log('Error deleting message', error.data);
+		});
+	}
+}
+
 $scope.alert = function (msg) {
 	alerts.addAlert('warning', msg, true);
 }
