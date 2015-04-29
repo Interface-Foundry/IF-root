@@ -17,8 +17,23 @@ link: function(scope, element, attrs) {
 				m('picture.message-avatar',
 				m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
+				deleteButton(message),
 				messageContent(message) //message object passed to next function to switch content templates
 			]);
+	}
+
+	function deleteButton(message) {
+		if (message.userID === scope.userID) {
+			return m('button',
+				{
+					class: 'message-delete-btn',
+					onclick: function(e) {
+						scope.deleteMsg(message);
+					}
+				}, 'x');
+		} else {
+			return null;
+		}
 	}
 	
 	function messageContent(message) { //content template switches based on message kind

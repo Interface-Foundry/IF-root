@@ -83,7 +83,7 @@
 	height: 100%;
 	float: right;
 	overflow: auto;
-	padding: 8px;
+	padding: 8px 8px 0px 8px;
 	z-index: 0;
 	margin: 0;
 }
@@ -141,17 +141,15 @@
 	background: #FFF;
 	display: block;
 	margin: 4px 1%;
-	max-height: 50px;
 	min-height: 16px;
 	padding: 4px 12px;
 	outline: none;
 	resize: none;
-	overflow-y: scroll;
-	width: 98%;
-	transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 	-webkit-appearance: none;
+	overflow: hidden;
+	width: 98%;
 	-webkit-transition: 0.2s cubic-bezier(.5,.1,0,1) all;
-	-webkit-overflow-scrolling: touch;
+	transition: 0.2s cubic-bezier(.5,.1,0,1) all;
 }
 
 .message-send {
@@ -183,7 +181,7 @@
 
 .message-heading {
 	position: absolute;
-	top: -16px;
+	top: -14px;
 	margin: 0;
 	color: #808080;
 }
@@ -214,7 +212,7 @@
 
 .message-body {
 	margin: 0;
-	padding: 4px 12px;
+	padding: 4px 12px 4px 18px;
 }
 
 .message-body:empty {
@@ -267,14 +265,14 @@
   border: none;
   border-radius: 50%;
   font-size: 12px;
-  left: -3px;
+  left: 2px;
   line-height: 0;
-  height: 20px;
+  height: 15px;
   opacity: .7;
   padding: 0 0 2px 0;
   position: absolute;
-  top: -3px;
-  width: 20px;
+  top: 7px;
+  width: 15px;
   z-index: 1;
 }
 

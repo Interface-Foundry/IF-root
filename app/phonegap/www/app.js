@@ -27106,8 +27106,23 @@ link: function(scope, element, attrs) {
 				m('picture.message-avatar',
 				m('img.small-avatar', {src: bubUrl(message.avatar) || 'img/icons/profile.png'})),
 				m('h6.message-heading', message.nick || 'Visitor'),
+				deleteButton(message),
 				messageContent(message) //message object passed to next function to switch content templates
 			]);
+	}
+
+	function deleteButton(message) {
+		if (message.userID === scope.userID) {
+			return m('button',
+				{
+					class: 'message-delete-btn',
+					onclick: function(e) {
+						scope.deleteMsg(message);
+					}
+				}, 'x');
+		} else {
+			return null;
+		}
 	}
 	
 	function messageContent(message) { //content template switches based on message kind
@@ -27303,6 +27318,27 @@ $scope.sendMsg = function (e) {
 		
 		sendMsgToServer(newChat);		
 		$scope.msg.text = "";
+	}
+}
+
+$scope.deleteMsg = function(msg) {
+	if ($scope.user && $scope.user._id === msg.userID) {
+		var deleteConfirm = confirm('Are you sure you want to delete this?\n\n"' + msg.msg + '"');
+		if (deleteConfirm) {
+			confirmDelete(msg);
+		}
+	}
+}
+
+function confirmDelete(msg) {
+	var idx = $scope.messages.indexOf(msg);
+	if (idx > -1) {
+		messagesService.deleteMsg(msg)
+		.then(function(response) {
+			$scope.messages.splice(idx, 1);
+		}, function(error) {
+			console.log('Error deleting message', error.data);
+		});
 	}
 }
 
@@ -27567,15 +27603,16 @@ userManager.getUser().then(function(user) {
 
 app.factory('messagesService', messagesService);
 
-messagesService.$inject = [];
+messagesService.$inject = ['$http'];
 
-function messagesService() {
+function messagesService($http) {
 
 	var firstScroll = true;
 	
 	return {
 		createProfileEditMessage: createProfileEditMessage,
 		createWelcomeMessage: createWelcomeMessage,
+		deleteMsg: deleteMsg,
 		firstScroll: firstScroll
 	};
 
@@ -27602,6 +27639,10 @@ function messagesService() {
 	    userID: 'chatbot',
 	    _id: 'welcomeMessage'
 		};
+	}
+
+	function deleteMsg(msg) {
+		return $http.delete('/api/worldchat/' + msg._id, {server: true});
 	}
 }
 app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter) {
