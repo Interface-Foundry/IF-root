@@ -26802,6 +26802,7 @@ link: function(scope, element, attrs) {
 		if (message.userID === scope.userID) {
 			return m('button',
 				{
+					class: 'message-delete-btn',
 					onclick: function(e) {
 						scope.deleteMsg(message);
 					}

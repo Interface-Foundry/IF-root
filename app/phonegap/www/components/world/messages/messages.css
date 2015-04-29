@@ -256,6 +256,26 @@
 	display: block;
 }
 
+.message-self .message-body {
+	padding: 4px 12px 4px 22px;
+}
+
+.message-delete-btn {
+	background-color: rgba(221,221,235,1);
+  border: none;
+  border-radius: 50%;
+  font-size: 12px;
+  left: 2px;
+  line-height: 0;
+  height: 15px;
+  opacity: .7;
+  padding: 0 0 2px 0;
+  position: absolute;
+  top: 7px;
+  width: 15px;
+  z-index: 1;
+}
+
 .message-corner {
 	display: none;
 	position: absolute;
