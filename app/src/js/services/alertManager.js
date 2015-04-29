@@ -6,6 +6,11 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    			]
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
+		/**
+		 * @param alrtType String css class ('danger' 'success' etc)
+		 * @param alertMsg String what you want to say
+		 * @param timeout Number|Boolean timeout duration in milliseconds, false for permanent, true for default
+		 */
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
    			
             var alertClass;
@@ -32,9 +37,12 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
+				if (typeof timeout === 'boolean') {
+					timeout = 2000;
+				}
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
-   			   }, 1500);
+   			   }, timeout);
    			}
 
    		}
