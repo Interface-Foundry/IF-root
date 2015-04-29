@@ -13,12 +13,15 @@
 
 <div class="view-footer" ng-class="{'message-logged-out-footer': !userManager.loginStatus, 'editing': editing}" ng-cloak>
 	<div class="uploading-progress if-animate" ng-show="uploading" ng-style="{'width': uploadProgress+'%'}"></div>
-	<textarea rows="1" placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" class="message-input form-control" 
+	<textarea rows="1" 
+		placeholder="{{userManager.loginStatus ? 'Type your message' : 'Sign in to send messages'}}" 
+		class="message-input form-control" 
 		ng-model="msg.text" 
 		ng-class="{'textarea-highlight': stickerChange}"
 		ng-keydown="$event.keyCode==13&&!$event.altKey ? sendMsg($event) : 0" 
 		msd-elastic
-		ng-disabled="!userManager.loginStatus"></textarea>
+		ng-disabled="!userManager.loginStatus"
+		maxlength="140"></textarea>
 		
 	<div class="msg-action-bar">
 		<button class="msg-action-bar-item pull-left" 
