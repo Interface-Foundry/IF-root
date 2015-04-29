@@ -19369,30 +19369,31 @@ angular.module('tidepoolsServices')
 
             userManager.fbLogin = function() { //login based on facebook approval
                 var deferred = $q.defer();
+                facebookConnectPlugin.getLoginStatus(function(success) {
+                    console.log('fbconnect loginstatus success')
+                    var fbToken = success.authResponse.accessToken;
+                    // console.log('getting here too', deferred.promise)
+                         return deferred.promise;
+                }, function() {
 
-                facebookConnectPlugin.login(['public_profile', 'email'],
-                    function(success) {
-                        var fbToken = success.authResponse.accessToken;
+                    console.log('fbconnect loginstatus failed')
+                    facebookConnectPlugin.login(['public_profile', 'email'],
+                        function(success) {
+                            console.log('fbconnect login success')
+                            var fbToken = success.authResponse.accessToken;
 
-                        // var authHeader = 'Bearer ' + fbToken;
-                        // console.log(success);
-                        // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-                        //  lockerManager.saveFBToken(fbToken);
-                        //  ifGlobals.fbToken = fbToken;
-                        //  deferred.resolve(success);
-                        // }, function(failure) {
-                        //  deferred.reject(failure);
-                        // })
-                    },
-                    function(failure) {
-                        alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-                        deferred.reject(failure);
-                    })
+                        },
+                        function(failure) {
+                            console.log('fbconnect login failed')
+                            alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                            deferred.reject(failure);
+                        })
+                    // console.log('is it returning final promise?', deferred.promise)
+                    return deferred.promise;
+                })
 
-                return deferred.promise;
+    return deferred.promise;
             }
-
-            //MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
 
 
             userManager.logout = function() {

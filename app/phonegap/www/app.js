@@ -19538,60 +19538,86 @@ angular.module('tidepoolsServices')
 
             userManager.fbLogin = function() { //login based on facebook approval
                 var deferred = $q.defer();
-
-                facebookConnectPlugin.login(['public_profile', 'email'],
-                    function(success) {
-                        var fbToken = success.authResponse.accessToken;
-
-                        var data = {
-                            userId: success.authResponse.userID,
-                            accessToken: success.authResponse.accessToken
-                        };
-
-                        $http.post('/auth/facebook/mobile_signin', data, {
-                            server: true
-                        }).then(
-                            function(res) {
-
+                facebookConnectPlugin.getLoginStatus(function(success) {
+                    console.log('fbconnect loginstatus success')
+                    var fbToken = success.authResponse.accessToken;
+                    var data = {
+                        userId: success.authResponse.userID,
+                        accessToken: success.authResponse.accessToken
+                    };
+                    $http.post('/auth/facebook/mobile_signin', data, {
+                        server: true
+                    }).then(
+                        function(res) {
+                            console.log('fbconnect loginstatus mobile signin success', res)
                                 //lockerManager.saveFBToken(success.authResponse.accessToken);
-                                lockerManager.saveFBToken(fbToken);
-                                ifGlobals.fbToken = fbToken;
+                            lockerManager.saveFBToken(fbToken);
+                            ifGlobals.fbToken = fbToken;
+                            userManager._user = res.data;
+                            console.log('fbLogin: userManager._user: ', userManager._user)
+                            userManager.loginStatus = true;
+                            //userManager.adminStatus = data.admin ? true : false;
+                            ifGlobals.loginStatus = true;
+                            deferred.resolve(userManager._user);
+                        },
+                        function(err) {
+                            console.log('fb login failed, removing fb credentials')
+                            usertype = 'facebook';
+                            lockerManager.removeCredentials(usertype);
+                            deferred.reject();
+                        }
+                    );
+                    // console.log('getting here', deferred.promise)
+                    // return deferred.promise;
+                    // console.log('getting here too', deferred.promise)
+                         return deferred.promise;
+                }, function() {
 
-                                userManager._user = res.data;
-                                // console.log('fbLogin: userManager._user: ', userManager._user)
+                    console.log('fbconnect loginstatus failed')
+                    facebookConnectPlugin.login(['public_profile', 'email'],
+                        function(success) {
+                            console.log('fbconnect login success')
+                            var fbToken = success.authResponse.accessToken;
 
-                                userManager.loginStatus = true;
-                                //userManager.adminStatus = data.admin ? true : false;
-                                ifGlobals.loginStatus = true;
-                                deferred.resolve(success);
-                            },
-                            function(res) {
-                                // console.log('fb login failed, removing fb credentials')
-                                usertype = 'facebook';
-                                lockerManager.removeCredentials(usertype);
-                                deferred.reject(failure);
-                            }
-                        );
+                            var data = {
+                                userId: success.authResponse.userID,
+                                accessToken: success.authResponse.accessToken
+                            };
+                            $http.post('/auth/facebook/mobile_signin', data, {
+                                server: true
+                            }).then(
+                                function(res) {
+                                    //lockerManager.saveFBToken(success.authResponse.accessToken);
+                                    lockerManager.saveFBToken(fbToken);
+                                    ifGlobals.fbToken = fbToken;
 
-                        // var authHeader = 'Bearer ' + fbToken;
-                        // console.log(success);
-                        // $http.get('/auth/bearer', {server: true, headers: {'Authorization': authHeader}}).then(function(success) {
-                        //  lockerManager.saveFBToken(fbToken);
-                        //  ifGlobals.fbToken = fbToken;
-                        //  deferred.resolve(success);
-                        // }, function(failure) {
-                        //  deferred.reject(failure);
-                        // })
-                    },
-                    function(failure) {
-                        alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-                        deferred.reject(failure);
-                    })
+                                    userManager._user = res.data;
+                                    // console.log('fbLogin: userManager._user: ', userManager._user)
 
-                return deferred.promise;
+                                    userManager.loginStatus = true;
+                                    //userManager.adminStatus = data.admin ? true : false;
+                                    ifGlobals.loginStatus = true;
+                                    deferred.resolve(success);
+                                },
+                                function(res) {
+                                    // console.log('fb login failed, removing fb credentials')
+                                    usertype = 'facebook';
+                                    lockerManager.removeCredentials(usertype);
+                                    deferred.reject(failure);
+                                }
+                            );
+                        },
+                        function(failure) {
+                            console.log('fbconnect login failed')
+                            alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                            deferred.reject(failure);
+                        })
+                    // console.log('is it returning final promise?', deferred.promise)
+                    return deferred.promise;
+                })
+
+    return deferred.promise;
             }
-
-            //MITSU: CREATE ANOTHER FBLIGIN WHICH USES EXISTING KECHAIN DATA
 
 
             userManager.logout = function() {
@@ -24562,7 +24588,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 //On Phonegap startup, try to login with either saved username/pw or facebook
 
                 var localuser = false;
-                 var fbuser = false;
+                var fbuser = false;
                 lockerManager.getCredentials().then(function(credentials) {
                     if (credentials.username && credentials.password) {
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
@@ -24583,24 +24609,46 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
                 //GET FB CREDENTIALS
                 if (!localuser) {
-                    // console.log('trying fb keychain login')
+                    console.log('trying fb keychain login')
                     lockerManager.getFBCredentials().then(function(credentials) {
-                        // console.log('Hitting fblogin')
-                        ifGlobals.fbToken = credentials.fbToken;
-                        userManager.fbLogin().then(function(success) {
-                            fbuser = true;
-                            return createShowSplash(true);
-                            // console.log('loaded facebook user: ', userManager._user);
-                        }, function(err) {
-                            // console.log('credential error', err);
+                            console.log('Hitting fblogin')
+                            ifGlobals.fbToken = credentials.fbToken;
+
+                            userManager.fbLogin().then(function(data) {
+                                        console.log('HITTING FB LOGIN SUCCESS',data)
+                                    fbuser = true;
+                                    return createShowSplash(true);
+                                        // console.log('loaded facebook user: ', userManager._user);
+                                }, function(err) {
+                                    console.log('credential error', err);
+                                    createShowSplash(false);
+                                });
+
+
+
+                            // .success(function(data) {
+                            //         console.log('HITTING FB LOGIN SUCCESS', data)
+                            //         fbuser = true;
+                            //         return createShowSplash(true);
+                            //         // console.log('loaded facebook user: ', userManager._user);
+                            //     })
+                            //     .error(function(data, status) {
+                            //         console.log('credential error', data, status);
+                            //         createShowSplash(false);
+                            //     })
+                            //     .finally(function() {
+                            //         console.log("finally finished repos");
+                            //     });
+
+                        },
+                        function(err) {
+                            console.log('fbcredential error', err);
                             createShowSplash(false);
-                        });
-                    }, function (err) {
-                          // console.log('fbcredential error', err);
-                            createShowSplash(false);
-                    })
+                        })
+
+
                 } else {
-                    // console.log('NO VALID CREDNEITALS');
+                    console.log('NO VALID CREDNEITALS');
                     createShowSplash(false);
                 }
 

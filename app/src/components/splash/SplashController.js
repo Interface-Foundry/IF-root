@@ -84,7 +84,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 //On Phonegap startup, try to login with either saved username/pw or facebook
 
                 var localuser = false;
-                 var fbuser = false;
+                var fbuser = false;
                 lockerManager.getCredentials().then(function(credentials) {
                     if (credentials.username && credentials.password) {
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
@@ -105,24 +105,46 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
                 //GET FB CREDENTIALS
                 if (!localuser) {
-                    // console.log('trying fb keychain login')
+                    console.log('trying fb keychain login')
                     lockerManager.getFBCredentials().then(function(credentials) {
-                        // console.log('Hitting fblogin')
-                        ifGlobals.fbToken = credentials.fbToken;
-                        userManager.fbLogin().then(function(success) {
-                            fbuser = true;
-                            return createShowSplash(true);
-                            // console.log('loaded facebook user: ', userManager._user);
-                        }, function(err) {
-                            // console.log('credential error', err);
+                            console.log('Hitting fblogin')
+                            ifGlobals.fbToken = credentials.fbToken;
+
+                            userManager.fbLogin().then(function(data) {
+                                        console.log('HITTING FB LOGIN SUCCESS',data)
+                                    fbuser = true;
+                                    return createShowSplash(true);
+                                        // console.log('loaded facebook user: ', userManager._user);
+                                }, function(err) {
+                                    console.log('credential error', err);
+                                    createShowSplash(false);
+                                });
+
+
+
+                            // .success(function(data) {
+                            //         console.log('HITTING FB LOGIN SUCCESS', data)
+                            //         fbuser = true;
+                            //         return createShowSplash(true);
+                            //         // console.log('loaded facebook user: ', userManager._user);
+                            //     })
+                            //     .error(function(data, status) {
+                            //         console.log('credential error', data, status);
+                            //         createShowSplash(false);
+                            //     })
+                            //     .finally(function() {
+                            //         console.log("finally finished repos");
+                            //     });
+
+                        },
+                        function(err) {
+                            console.log('fbcredential error', err);
                             createShowSplash(false);
-                        });
-                    }, function (err) {
-                          // console.log('fbcredential error', err);
-                            createShowSplash(false);
-                    })
+                        })
+
+
                 } else {
-                    // console.log('NO VALID CREDNEITALS');
+                    console.log('NO VALID CREDNEITALS');
                     createShowSplash(false);
                 }
 
