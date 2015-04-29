@@ -19549,19 +19549,19 @@ angular.module('tidepoolsServices')
                         server: true
                     }).then(
                         function(res) {
-                            console.log('fbconnect loginstatus mobile signin success', res)
+                            // console.log('fbconnect loginstatus mobile signin success', res)
                                 //lockerManager.saveFBToken(success.authResponse.accessToken);
                             lockerManager.saveFBToken(fbToken);
                             ifGlobals.fbToken = fbToken;
                             userManager._user = res.data;
-                            console.log('fbLogin: userManager._user: ', userManager._user)
+                            // console.log('fbLogin: userManager._user: ', userManager._user)
                             userManager.loginStatus = true;
                             //userManager.adminStatus = data.admin ? true : false;
                             ifGlobals.loginStatus = true;
                             deferred.resolve(userManager._user);
                         },
                         function(err) {
-                            console.log('fb login failed, removing fb credentials')
+                            // console.log('fb login failed, removing fb credentials')
                             usertype = 'facebook';
                             lockerManager.removeCredentials(usertype);
                             deferred.reject();
@@ -19573,10 +19573,10 @@ angular.module('tidepoolsServices')
                          return deferred.promise;
                 }, function() {
 
-                    console.log('fbconnect loginstatus failed')
+                    // console.log('fbconnect loginstatus failed')
                     facebookConnectPlugin.login(['public_profile', 'email'],
                         function(success) {
-                            console.log('fbconnect login success')
+                            // console.log('fbconnect login success')
                             var fbToken = success.authResponse.accessToken;
 
                             var data = {
@@ -19608,7 +19608,7 @@ angular.module('tidepoolsServices')
                             );
                         },
                         function(failure) {
-                            console.log('fbconnect login failed')
+                            // console.log('fbconnect login failed')
                             alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
                             deferred.reject(failure);
                         })
@@ -24609,46 +24609,28 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
                 //GET FB CREDENTIALS
                 if (!localuser) {
-                    console.log('trying fb keychain login')
+                    // console.log('trying fb keychain login')
                     lockerManager.getFBCredentials().then(function(credentials) {
-                            console.log('Hitting fblogin')
+                            // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
-
                             userManager.fbLogin().then(function(data) {
-                                        console.log('HITTING FB LOGIN SUCCESS',data)
+                                        // console.log('HITTING FB LOGIN SUCCESS',data)
                                     fbuser = true;
                                     return createShowSplash(true);
                                         // console.log('loaded facebook user: ', userManager._user);
                                 }, function(err) {
-                                    console.log('credential error', err);
+                                    // console.log('credential error', err);
                                     createShowSplash(false);
                                 });
-
-
-
-                            // .success(function(data) {
-                            //         console.log('HITTING FB LOGIN SUCCESS', data)
-                            //         fbuser = true;
-                            //         return createShowSplash(true);
-                            //         // console.log('loaded facebook user: ', userManager._user);
-                            //     })
-                            //     .error(function(data, status) {
-                            //         console.log('credential error', data, status);
-                            //         createShowSplash(false);
-                            //     })
-                            //     .finally(function() {
-                            //         console.log("finally finished repos");
-                            //     });
-
                         },
                         function(err) {
-                            console.log('fbcredential error', err);
+                            // console.log('fbcredential error', err);
                             createShowSplash(false);
                         })
 
 
                 } else {
-                    console.log('NO VALID CREDNEITALS');
+                    // console.log('NO VALID CREDNEITALS');
                     createShowSplash(false);
                 }
 

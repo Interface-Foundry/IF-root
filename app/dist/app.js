@@ -19376,15 +19376,15 @@ angular.module('tidepoolsServices')
                          return deferred.promise;
                 }, function() {
 
-                    console.log('fbconnect loginstatus failed')
+                    // console.log('fbconnect loginstatus failed')
                     facebookConnectPlugin.login(['public_profile', 'email'],
                         function(success) {
-                            console.log('fbconnect login success')
+                            // console.log('fbconnect login success')
                             var fbToken = success.authResponse.accessToken;
 
                         },
                         function(failure) {
-                            console.log('fbconnect login failed')
+                            // console.log('fbconnect login failed')
                             alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
                             deferred.reject(failure);
                         })
