@@ -273,7 +273,8 @@ module.exports = function(passport) {
 		// or users that match the profile email (legacy fb users from Bubbl.li)
 		Users.find({$or: [
 			{'facebook.id': profile.id},
-			{'facebook.email': profile.email}
+			{'facebook.email': profile.email},
+			{'local.email': profile.email}
 		]}).exec(function(err, users) {
 			if (err) { return callback(err); }
 			if (!users) { return callback(); }
@@ -283,9 +284,9 @@ module.exports = function(passport) {
 			if (users.length === 1) {
 				var u = users[0];
 
-				// old bubbl.li user, update profile id
+				// old bubbl.li user or email/pw user, update facebook profile
 				if (u.facebook.id !== profile.id) {
-					u.facebook.id = profile.id;
+					u.facebook = profile;
 					u.save(function(err, u) {
 						if (err) { return callback(err); }
 						callback(null, u);
