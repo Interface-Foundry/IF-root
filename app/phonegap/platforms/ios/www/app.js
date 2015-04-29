@@ -4862,8 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			// request.url = 'http://kipapp.co' + request.url;
-              request.url = 'http://web-server-squirtle.kipapp.co:2997' + request.url;
+		    			request.url = 'https://kipapp.co' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5934,8 +5933,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					// value = 'https://kipapp.co/'+value;
-					value = 'http://web-server-squirtle.kipapp.co:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -17133,6 +17131,11 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    			]
    		}; //Used to manage alerts posted to top of page. Needs better API 
 
+		/**
+		 * @param alrtType String css class ('danger' 'success' etc)
+		 * @param alertMsg String what you want to say
+		 * @param timeout Number|Boolean timeout duration in milliseconds, false for permanent, true for default
+		 */
    		alerts.addAlert = function(alertType, alertMsg, timeout) {
    			
             var alertClass;
@@ -17159,7 +17162,11 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
-               timeout = typeof timeout === 'number' ? timeout : 1500;
+
+   				if (typeof timeout === 'boolean') {
+   					timeout = 2000;
+   				}
+
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
    			   }, timeout);
@@ -17178,6 +17185,7 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
    		return alerts;
          
    }])
+
 'use strict';
 
 app.factory('analyticsService', analyticsService);
@@ -24800,7 +24808,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
             server: true
         }).
         success(function(data) {
-            alertManager.addAlert('info', 'Instructions have been sent to' + $scope.user.email, true);
+            alertManager.addAlert('info', 'Instructions have been sent to ' + $scope.user.email, 3000);
             $scope.user.email = '';
         }).
         error(function(err) {
@@ -24851,6 +24859,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
 }]);
+
 'use strict';
 
 angular.module('IF')
