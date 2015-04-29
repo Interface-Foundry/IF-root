@@ -4862,7 +4862,8 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'http://web-server-squirtle.kipapp.co:2997' + request.url;
+		    			// request.url = 'http://kipapp.co' + request.url;
+              request.url = 'http://web-server-squirtle.kipapp.co:2997' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -4913,10 +4914,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  when('/login', {
-    templateUrl: 'components/user/login.html', 
-    controller: 'LoginCtrl'
-  }).
+  // when('/login', {
+  //   templateUrl: 'components/user/login.html', 
+  //   controller: 'LoginCtrl'
+  // }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
@@ -5933,7 +5934,8 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://web-server-squirtle.kipapp.co:2997/'+value;
+					// value = 'https://kipapp.co/'+value;
+					value = 'http://web-server-squirtle.kipapp.co:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -17157,9 +17159,10 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
+               timeout = typeof timeout === 'number' ? timeout : 1500;
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
-   			   }, 1500);
+   			   }, timeout);
    			}
 
    		}
@@ -24632,10 +24635,10 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                 if (!localuser) {
                     // console.log('trying fb keychain login')
                     lockerManager.getFBCredentials().then(function(credentials) {
-                            console.log('Hitting fblogin')
+                            // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
                             userManager.fbLogin().then(function(data) {
-                                console.log('HITTING FB LOGIN SUCCESS',data)
+                                // console.log('HITTING FB LOGIN SUCCESS',data)
                                 fbuser = true;
                                 return createShowSplash(true);
                                 // console.log('loaded facebook user: ', userManager._user);
@@ -26794,7 +26797,7 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 	}
 
 	function showConfirmationMessage() {
-		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
+		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 3000);
 	}
 }
 

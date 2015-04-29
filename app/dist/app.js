@@ -4900,10 +4900,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  when('/login', {
-    templateUrl: 'components/user/login.html', 
-    controller: 'LoginCtrl'
-  }).
+  // when('/login', {
+  //   templateUrl: 'components/user/login.html', 
+  //   controller: 'LoginCtrl'
+  // }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
@@ -17128,9 +17128,11 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
-				if (typeof timeout === 'boolean') {
-					timeout = 2000;
-				}
+
+   				if (typeof timeout === 'boolean') {
+   					timeout = 2000;
+   				}
+
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
    			   }, timeout);
@@ -26494,7 +26496,7 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 	}
 
 	function showConfirmationMessage() {
-		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
+		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 3000);
 	}
 }
 

@@ -37,9 +37,11 @@ app.factory('alertManager', ['$timeout', function ($timeout) {
             });
 
    			if (timeout) {
-				if (typeof timeout === 'boolean') {
-					timeout = 2000;
-				}
+
+   				if (typeof timeout === 'boolean') {
+   					timeout = 2000;
+   				}
+
    			   $timeout(function () {
 	   			  alerts.list.splice(len-1, 1);
    			   }, timeout);

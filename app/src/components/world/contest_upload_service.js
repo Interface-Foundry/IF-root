@@ -58,6 +58,6 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 	}
 
 	function showConfirmationMessage() {
-		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 2500);
+		alertManager.addAlert('info', 'Your contest entry was received! Enter as many times as you like.', 3000);
 	}
 }
