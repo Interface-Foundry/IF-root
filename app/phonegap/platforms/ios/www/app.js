@@ -22053,6 +22053,12 @@ scope.feedback = function() {
 }
 //show feedback
 
+
+function newWindowGo(path) {
+    // for opening phonegap links in mobile browser
+    $window.open(path, '_system');
+}
+
 scope.logout = userManager.logout;
 //alias logout
 
@@ -25483,6 +25489,12 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 			$location.path('/edit/walkthrough/'+response[0].worldID);
 		});
 	}
+
+    function newWindowGo(path) {
+        // for opening phonegap links in mobile browser
+        $window.open(path, '_system');
+    }
+
 
 }]);
 'use strict';

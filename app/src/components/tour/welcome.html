@@ -87,7 +87,8 @@
 
 	<div class="row" style="margin-bottom:1700px">
 		<li class="tour-page small-tour-page" >
-			<div class="container-fluid tour-panel" style="margin-top:21px; top: 120%">
+
+			<div class="container-fluid tour-panel" style="margin-top:40px; top: 120%">
 				<div class="row">
 					<div class="col-xs-12">
 						<div class="tour-features center-block" style="padding-top:31px;">
@@ -102,9 +103,13 @@
 				<img class="" src="img/tour/slide_walk.gif" style="width: 100%; max-width: 600px">
 				<br><br>
 
+				<p>
+					<strong>For more info </strong> visit <span ng-click="newWindowGo('http://kipbubbles.com')">KipBubbles.com</span>
+				</p>
+
 				<!-- world bubble -->
 				<div class="marble-contain-width">
-					<a class="btn btn-default" href="/profile/worlds"  style="color:#fff; background-color:#ed4023;">
+					<a class="btn btn-default" if-href="/profile/worlds"  style="color:#fff; background-color:#ed4023;">
 						+ Create Your Own Bubble
 					</a>
 				</div>
@@ -125,7 +130,7 @@
 				<div class="tour-credits">
 					<b>Kip</b> is a product of 
 					<br>
-					<a href="http://interfacefoundry.com"><img width="20" src="img/IF/IF_mark.svg" target="_blank" style="padding-right:3px; color:#ed4023;">Interface Foundry PBC</a>
+					<span ng-click="newWindowGo('http://interfacefoundry.com')"><img width="20" src="img/IF/IF_mark.svg" style="padding-right:3px; color:#ed4023;">Interface Foundry PBC</span>
 				</div>
 
 

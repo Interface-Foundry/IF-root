@@ -34,7 +34,7 @@
 			<div class="marble-page">
 
 				<header class="marble-page-header">
-					<div class="marble-page-header-icon"><img if-src="img/icons/view_nearby_16.png" style="display: block;" width="16px" height="16px"></div>
+					<div class="marble-page-header-icon"><img src="img/icons/view_nearby_16.png" style="display: block;" width="16px" height="16px"></div>
 					Nearby Places and Events
 				</header>
 				
@@ -53,7 +53,7 @@
 						ng-if="loadState=='success' && bubbles.length>0"
 						ng-click="select(bubble)"
 						class="bubble-list-item if-animate">
-						<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+						<img src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 						<a class="bubble-list-item-link"  href="">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
 					</li>
 

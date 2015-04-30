@@ -92,6 +92,12 @@ scope.feedback = function() {
 }
 //show feedback
 
+
+function newWindowGo(path) {
+    // for opening phonegap links in mobile browser
+    $window.open(path, '_system');
+}
+
 scope.logout = userManager.logout;
 //alias logout
 

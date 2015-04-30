@@ -31,4 +31,10 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		});
 	}
 
+    function newWindowGo(path) {
+        // for opening phonegap links in mobile browser
+        $window.open(path, '_system');
+    }
+
+
 }]);
