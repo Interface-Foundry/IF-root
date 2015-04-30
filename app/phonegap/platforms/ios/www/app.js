@@ -5927,6 +5927,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				if (value.indexOf('http')<0) {
 					value = 'https://kipapp.co/'+value;
 					//value = 'http://web-server-squirtle.kipapp.co:2997/' + value;
+
 				}
 				
 				$attr.$set('src', value);
@@ -19497,22 +19498,21 @@ angular.module('tidepoolsServices')
             }
 
             userManager.checkLogin = function() { //checks if user is logged in with side effects. would be better to redesign.
-                console.log('checklogin');
                 var deferred = $q.defer();
 
                 userManager.getUser().then(function(user) {
-                    // console.log('getting user');
                     userManager.loginStatus = true;
                     userManager.adminStatus = user.admin ? true : false;
                     $rootScope.user = user;
                     if (user._id) {
                         $rootScope.userID = user._id;
                         userManager._user = user;
+                          console.log('checkLogin:', userManager._user);
                     }
                     worldTree.getUserWorlds();
                     deferred.resolve(1);
                 }, function(reason) {
-                    console.log(reason);
+                        console.log('checkLogin failed', reason);
                     userManager.loginStatus = false;
                     userManager.adminStatus = false;
                     deferred.reject(0);
@@ -19524,7 +19524,7 @@ angular.module('tidepoolsServices')
             };
 
             userManager.signin = function(username, password) { //given a username and password, sign in 
-                console.log('signin');
+                // console.log('signin');
                 var deferred = $q.defer();
                 var data = {
                     email: username,
@@ -19541,16 +19541,17 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        // console.log('successful signin, credentials saved:', username, password)
-                        // console.log('SUCCESS data is: ', data);
+                        console.log('successful signin, credentials saved:', username, password)
+                        console.log('SUCCESS data is: ', data);
                         userManager._user = data;
+                         console.log('userManager signin success', userManager._user);
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
                         ifGlobals.loginStatus = true;
                         deferred.resolve(data);
 
                     }).error(function(error) {
-                        // console.log('keychain signin failed, removing  credentials')
+                             console.log('userManager signin failed', error);
                         usertype = 'local';
                         lockerManager.removeCredentials(usertype);
                         deferred.reject(error);
@@ -19709,7 +19710,7 @@ angular.module('tidepoolsServices')
                                 })
                             // console.log('is it returning final promise?', deferred.promise)
                         return deferred.promise;
-                    })
+                    },true)
 
                 return deferred.promise;
             }
@@ -24703,14 +24704,18 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
                 lockerManager.getCredentials().then(function(credentials) {
                     if (credentials.username && credentials.password) {
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
+                              console.log('SplashController: userManager.signin success:', userManager._user);
                             localuser = true;
                             userManager.checkLogin().then(function(success) {
-                                correct = true;
+                                    console.log('SplashController: userManager.checkin success:', userManager._user);
+                                
                                 return createShowSplash(true);
                             }, function(error) {
+                                console.log('SplashController: userManager.signin faulire:', error);
                                 return createShowSplash(false);
                             });
                         }, function(err) {
+                            console.log('SplashController: lockerManager getCredentials faulire:', err);
                             createShowSplash(false);
                         })
                     }

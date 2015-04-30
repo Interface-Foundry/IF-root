@@ -589,31 +589,40 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     if (!req.isAuthenticated()) {
-
+        console.log('hitting not authenticated, req.headers is: ', req.headers)
         if (req.headers.authorization) {
-
+              console.log('hitting if req.headers.authorization')
             if (req.headers.authorization.indexOf('asic') > -1) {
+                 console.log('hitting if basic')
                 passport.authenticate('local-basic', function(err, user, info) {
                     if (err) {
+                        console.log('basic error', err)
                         res.sendStatus(401);
                     }
                     if (!user) {
                         res.sendStatus(401);
                     }
                     if (user) {
+                          // console.log('BASIC USER, REQ.USER IS ', req.user)
+                          req.user = user;
+                          // console.log('BASIC USER IS: ', req.user)
                         return next();
                     }
                 })(req, res, next)
             } else if (req.headers.authorization.indexOf('earer') > -1) {
+                console.log('hitting if bearer')
                 passport.authenticate('bearer', function(err, user, info) {
                     if (err) {
+                         console.log('bearer error', err)
                         res.sendStatus(401);
                     }
                     if (!user) {
                         res.sendStatus(401);
                     }
                     if (user) {
+                           console.log('BEARER USER IS: ', user)
                         return next();
+
                     }
                 })(req, res, next)
             }
