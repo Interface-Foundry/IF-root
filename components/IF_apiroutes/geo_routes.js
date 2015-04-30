@@ -14,6 +14,7 @@ router.use(function(req, res, next) {
 	// this middleware populates req.geoloc
 	req.geoloc = {};
 	var hasLoc = req.query.hasLoc === 'true';
+    req.geoloc.src = 'ip-based';
 	if (hasLoc) {
 		req.geoloc.lat = req.query.lat;
 		req.geoloc.lng = req.query.lng;
