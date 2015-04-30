@@ -131,8 +131,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             // console.log('fbcredential error', err);
                             return createShowSplash(false);
                         })
-
-
                 } else {
                     // console.log('NO VALID CREDNEITALS');
                     createShowSplash(false);
