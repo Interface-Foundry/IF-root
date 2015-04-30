@@ -91,14 +91,18 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
                 lockerManager.getCredentials().then(function(credentials) {
                     if (credentials.username && credentials.password) {
                         userManager.signin(credentials.username, credentials.password).then(function(success) {
+                              console.log('SplashController: userManager.signin success:', userManager._user);
                             localuser = true;
                             userManager.checkLogin().then(function(success) {
-                                correct = true;
+                                    console.log('SplashController: userManager.checkin success:', userManager._user);
+                                
                                 return createShowSplash(true);
                             }, function(error) {
+                                console.log('SplashController: userManager.signin faulire:', error);
                                 return createShowSplash(false);
                             });
                         }, function(err) {
+                            console.log('SplashController: lockerManager getCredentials faulire:', err);
                             createShowSplash(false);
                         })
                     }
