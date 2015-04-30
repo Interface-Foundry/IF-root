@@ -1,4 +1,4 @@
-<div class="surface">
+<div class="surface" ng-show="if_phonegap">
 	<p style="font-size: 15px">For more accurate search results, follow these steps to turn on location services:</p>
 	<ul>
 		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-settings.png">Open the Settings App</li>
@@ -8,4 +8,8 @@
 		<li class="dialogLi"><img class="dialogImg" src="img/location/ios-kip.png">Tap "Kip"</li>
 		<li class="dialogLi">Tap "While Using the App"</li>
 	</ul>
+</div>
+
+<div class="surface" ng-show="if_web">
+	<p style="font-size: 15px">For more accurate search results, turn on location services for kipapp.co in your broswer.</p>
 </div>
