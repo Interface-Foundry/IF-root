@@ -4900,10 +4900,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  // when('/login', {
-  //   templateUrl: 'components/user/login.html', 
-  //   controller: 'LoginCtrl'
-  // }).
+  when('/login', {
+    templateUrl: 'components/user/login.html', 
+    controller: 'LoginCtrl'
+  }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
@@ -5127,6 +5127,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
   app.run(function() {
       FastClick.attach(document.body);
   });
+
 
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
@@ -24417,6 +24418,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
     function createShowSplash(condition) {
+        // alertManager.addAlert('info', condition);
         // $scope.show controls the logic for the splash pages
 
         if (condition === 'confirmThanks') {

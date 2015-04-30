@@ -4862,7 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'https://kipapp.co' + request.url;
+		    			request.url = 'http://192.168.1.6:2997' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -4913,10 +4913,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  // when('/login', {
-  //   templateUrl: 'components/user/login.html', 
-  //   controller: 'LoginCtrl'
-  // }).
+  when('/login', {
+    templateUrl: 'components/user/login.html', 
+    controller: 'LoginCtrl'
+  }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
@@ -5153,16 +5153,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
       FastClick.attach(document.body);
   });
 
-/** 
- * called when app is opened and saves url that opened app to localStorage.url
- * useful for deep linking
- * kipapp.co:// routes to homepage
- */
-function handleOpenURL(url) {
-  setTimeout(function() {
-    localStorage.setItem('url', url);
-  }) ;
-}
+
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
 *  API @ http://arshaw.com/fullcalendar/
@@ -5933,11 +5924,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-<<<<<<< HEAD
-					value = 'https://kipapp.co/'+value;
-=======
-					value = 'http://web-server-squirtle.kipapp.co:2997/'+value;
->>>>>>> fbworking
+					value = 'https://http://192.168.1.6:2997/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19677,7 +19664,7 @@ angular.module('tidepoolsServices')
                     },
                     function() {
 
-                        console.log('fbconnect login using cache failed, now trying regular login..')
+                        // console.log('fbconnect login using cache failed, now trying regular login..')
                         facebookConnectPlugin.login(['public_profile', 'email'],
                                 function(success) {
                                     // console.log('fbconnect login success')
@@ -24716,7 +24703,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                         })
                     }
                 }, function(err) {
-                    createShowSplash(false);
+                    // createShowSplash(false);
                 }); //END OF GET LOCAL CREDENTIALS
 
                 //GET FB CREDENTIALS
@@ -24725,18 +24712,13 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                     lockerManager.getFBCredentials().then(function(credentials) {
                             // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
-<<<<<<< HEAD
-                            userManager.fbLogin().then(function(data) {
-                                // console.log('HITTING FB LOGIN SUCCESS',data)
-=======
                             userManager.fbLogin('onLoad').then(function(data) {
-                                console.log('HITTING FB LOGIN SUCCESS', data)
->>>>>>> fbworking
+                                // console.log('HITTING FB LOGIN SUCCESS', data)
                                 fbuser = true;
                                 return createShowSplash(true);
                                 // console.log('loaded facebook user: ', userManager._user);
                             }, function(err) {
-                                console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
+                                // console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
                                 // hack for now
                                 if ($scope.show.signin) {
                                     alertManager.addAlert('info', 'facebook login unsuccessful');
@@ -24749,8 +24731,6 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             // console.log('fbcredential error', err);
                             return createShowSplash(false);
                         })
-
-
                 } else {
                     // console.log('NO VALID CREDNEITALS');
                     createShowSplash(false);
@@ -24781,6 +24761,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
     function createShowSplash(condition) {
+        // alertManager.addAlert('info', condition);
         // $scope.show controls the logic for the splash pages
 
         if (condition === 'confirmThanks') {

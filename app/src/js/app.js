@@ -48,7 +48,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'https://kipapp.co' + request.url;
+		    			request.url = 'http://kipapp.co' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -100,10 +100,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  // when('/login', {
-  //   templateUrl: 'components/user/login.html', 
-  //   controller: 'LoginCtrl'
-  // }).
+  when('/login', {
+    templateUrl: 'components/user/login.html', 
+    controller: 'LoginCtrl'
+  }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
@@ -364,15 +364,3 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
       FastClick.attach(document.body);
   });
 
-// @IFDEF PHONEGAP
-/** 
- * called when app is opened and saves url that opened app to localStorage.url
- * useful for deep linking
- * kipapp.co:// routes to homepage
- */
-function handleOpenURL(url) {
-  setTimeout(function() {
-    localStorage.setItem('url', url);
-  }) ;
-}
-// @ENDIF

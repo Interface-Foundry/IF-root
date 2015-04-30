@@ -103,7 +103,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                         })
                     }
                 }, function(err) {
-                    createShowSplash(false);
+                    // createShowSplash(false);
                 }); //END OF GET LOCAL CREDENTIALS
 
                 //GET FB CREDENTIALS
@@ -162,6 +162,7 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
 
 
     function createShowSplash(condition) {
+        // alertManager.addAlert('info', condition);
         // $scope.show controls the logic for the splash pages
 
         if (condition === 'confirmThanks') {
