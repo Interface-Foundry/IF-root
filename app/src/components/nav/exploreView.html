@@ -19,7 +19,7 @@
 		<li ng-repeat="bubble in homeBubbles track by bubble._id" 
 			ng-if="loadState=='success' && homeBubbles.length>0"
 			class="bubble-list-item if-animate">
-			<img src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+			<img ng-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 			<a class="bubble-list-item-link"  if-href="#/w/{{bubble.id}}">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
 		</li>
 		<li ng-if="loadState=='success'&& !(homeBubbles.length > 0)" class="text-center"> 
@@ -59,7 +59,7 @@
 		<li ng-repeat="bubble in nearbyBubbles track by bubble._id" 
 			ng-if="loadState=='success' && nearbyBubbles.length>0"
 			class="bubble-list-item if-animate">
-			<img src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+			<img ng-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 			<a class="bubble-list-item-link"  if-href="#w/{{bubble.id}}">{{bubble.name || 'New Bubble'}} <small class="bubble-list-item-time">{{::bubble.time.start | date: 'short'}}</small></a>
 		</li>
 		<li ng-if="loadState=='success'&& !(nearbyBubbles.length > 0)" class="text-center"> 
