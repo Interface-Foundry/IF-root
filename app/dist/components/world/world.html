@@ -9,7 +9,7 @@
 <div id="shelf" ng-class="[aperture.state]">
 	<div id='top-shelf' class="noPreventDefault"
 		ng-class="[aperture.navfix, aperture.state]" 
-		ng-style="::{'background-color': style.titleBG_color}" 
+		ng-style="{'background-color': style.titleBG_color}" 
 		ng-click="aperture.toggle('full')"
 		ng-swipe-up="aperture.set('off')"
 		ng-swipe-down="aperture.set('full')"
@@ -80,17 +80,12 @@
 			<div ng-include="nearby==true ? 'components/world/templates/nearby.html' : null" class="marble-page"></div>
 
 
-			<!-- @ifdef WEB -->
-
 				<!--CLAIM WORLD-->
 				<div ng-show="world.source_meetup.id && !world.permissions.ownerID">
 					<em class="center-block text-center">Are you an organizer for this Meetup? Claim it now!</em>
 					<a href="/auth/meetup"><button class="btn btn-meetup center-block">Sign in with Meetup</button></a>
 				</div>
 				
-			<!-- @endif -->
-
-
 			<!-- bubble admin actions -->
 			<div ng-show="showEdit" class="marble-contain-width">
 				<a class="btn btn-default" if-href="#edit/w/{{worldURL}}/landmarks"><span class="glyphicon glyphicon-plus"></span> Add / Edit Points of Interest</a>
