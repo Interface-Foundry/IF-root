@@ -286,7 +286,7 @@ angular.module('tidepoolsServices')
                     },
                     function() {
 
-                        console.log('fbconnect login using cache failed, now trying regular login..')
+                        // console.log('fbconnect login using cache failed, now trying regular login..')
                         facebookConnectPlugin.login(['public_profile', 'email'],
                                 function(success) {
                                     // console.log('fbconnect login success')

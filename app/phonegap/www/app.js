@@ -4862,7 +4862,7 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'http://web-server-squirtle.kipapp.co:2997' + request.url;
+		    			request.url = 'http://kipapp.co' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5933,7 +5933,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'http://web-server-squirtle.kipapp.co:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19662,7 +19662,7 @@ angular.module('tidepoolsServices')
                     },
                     function() {
 
-                        console.log('fbconnect login using cache failed, now trying regular login..')
+                        // console.log('fbconnect login using cache failed, now trying regular login..')
                         facebookConnectPlugin.login(['public_profile', 'email'],
                                 function(success) {
                                     // console.log('fbconnect login success')
@@ -24711,12 +24711,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
                             userManager.fbLogin('onLoad').then(function(data) {
-                                console.log('HITTING FB LOGIN SUCCESS', data)
+                                // console.log('HITTING FB LOGIN SUCCESS', data)
                                 fbuser = true;
                                 return createShowSplash(true);
                                 // console.log('loaded facebook user: ', userManager._user);
                             }, function(err) {
-                                console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
+                                // console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
                                 // hack for now
                                 if ($scope.show.signin) {
                                     alertManager.addAlert('info', 'facebook login unsuccessful');

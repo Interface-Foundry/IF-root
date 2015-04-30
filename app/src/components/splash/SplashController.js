@@ -113,12 +113,12 @@ app.controller('SplashController', ['$scope', '$location', '$http', '$timeout', 
                             // console.log('Hitting fblogin')
                             ifGlobals.fbToken = credentials.fbToken;
                             userManager.fbLogin('onLoad').then(function(data) {
-                                console.log('HITTING FB LOGIN SUCCESS', data)
+                                // console.log('HITTING FB LOGIN SUCCESS', data)
                                 fbuser = true;
                                 return createShowSplash(true);
                                 // console.log('loaded facebook user: ', userManager._user);
                             }, function(err) {
-                                console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
+                                // console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
                                 // hack for now
                                 if ($scope.show.signin) {
                                     alertManager.addAlert('info', 'facebook login unsuccessful');
