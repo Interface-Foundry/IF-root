@@ -100,26 +100,13 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 console.error(err);
             }
 
-            console.log('original results', results)
-            for (var key in results) {
-                results[key] = _(results[key]).chain().sortBy(function(world) {
+            for (var i = 0; i < results.length; i++) {
+                results[i] = _(results[i]).chain().sortBy(function(world) {
+                    console.log('WORLD: ', world.permissions.ownerID)
                     return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
-                }).sortBy(function(world) {
-                    if (Object.keys(world.time).length == 1) {
-                        return -world.time.created // if the length of the time object is one (just the time created), return -time.created (descending order)
-                    } else if (Object.keys(world.time).length == 3) {
-                        return -world.time.start // if the length of the time object is three (start and end time and created), return -time.start (descending order)
-                    } else { // this is when the time object has two fields (start and created or end and created)
-                        if ((world.time).hasOwnProperty('start')) {
-                            return -world.time.start
-                        } // if it has time.start, return it
-                        else {
-                            return -world.time.created //otherwise, return time.created
-                        }
-                    }
                 }).value();
-                console.log('sorted results', results)
             }
+
 
             //Retreive parent IDs to query for parent world names for each landmark
 
