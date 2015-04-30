@@ -20,7 +20,7 @@
 		<li class="bubble-list-item" ng-repeat="bubble in ::group.bubbles track by bubble._id" 
 			ng-click="inspect(bubble)"
 			ng-class="{'selected': selected == bubble}">
-			<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+			<img src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 			<span>{{::bubble.name}}</span>
 		</li>
 	</ul>

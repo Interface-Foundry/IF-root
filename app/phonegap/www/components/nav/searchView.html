@@ -15,7 +15,7 @@
 			<ul class="bubble-list">
 				<li class="bubble-list-item" ng-repeat="bubble in searchResult track by bubble._id" 
 					ng-click="go('w/'+bubble.id)">
-					<img if-src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
+					<img src="img/icons/kind/{{::kinds[bubble.category]['icon'] || 'other.svg'}}" class="bubble-list-item-img">
 					<span>{{::bubble.name}}</span>
 				</li>
 			</ul>
