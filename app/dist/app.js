@@ -4900,10 +4900,10 @@ $routeProvider.
     templateUrl: 'components/nearby/nearby.html', 
     controller: 'WorldRouteCtrl'
   }).
-  // when('/login', {
-  //   templateUrl: 'components/user/login.html', 
-  //   controller: 'LoginCtrl'
-  // }).
+  when('/login', {
+    templateUrl: 'components/user/login.html', 
+    controller: 'LoginCtrl'
+  }).
   when('/forgot', {
     templateUrl: 'components/user/forgot.html', 
     controller: 'ForgotCtrl'
@@ -5127,6 +5127,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
   app.run(function() {
       FastClick.attach(document.body);
   });
+
 
 /*
 *  AngularJs Fullcalendar Wrapper for the JQuery FullCalendar
@@ -19386,32 +19387,67 @@ angular.module('tidepoolsServices')
                 return deferred.promise;
             }
 
-            userManager.fbLogin = function() { //login based on facebook approval
+            userManager.fbLogin = function(state) {
                 var deferred = $q.defer();
+                console.log('State in which fbLogin is called is: ', state)
                 facebookConnectPlugin.getLoginStatus(function(success) {
-                    console.log('fbconnect loginstatus success')
-                    var fbToken = success.authResponse.accessToken;
-                    // console.log('getting here too', deferred.promise)
-                         return deferred.promise;
-                }, function() {
-
-                    // console.log('fbconnect loginstatus failed')
-                    facebookConnectPlugin.login(['public_profile', 'email'],
-                        function(success) {
-                            // console.log('fbconnect login success')
+                    console.log('Success variable is:', success)
+                        //SITUATION: User loads app but has never logged in via FB before
+                        if (!success.authResponse && state == 'onLoad') {
+                            console.log('SITUATION: User loads app but has never logged in via FB before', success)
+                            deferred.reject();
+                        } //SITUATION: User loads app AND HAS logged in via FB before
+                        else if (success.authResponse && state == 'onLoad') {
+                            console.log('SITUATION: User loads app AND HAS logged in via FB before', success)
                             var fbToken = success.authResponse.accessToken;
+                            return deferred.promise;
 
-                        },
-                        function(failure) {
-                            // console.log('fbconnect login failed')
-                            alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
-                            deferred.reject(failure);
-                        })
-                    // console.log('is it returning final promise?', deferred.promise)
-                    return deferred.promise;
-                })
+                            //SITUATION: User clicks CONNECT WITH FACEBOOK on SIGNIN page for the FIRST TIME
+                        } else if (!success.authResponse && state == 'onSignIn') {
 
-    return deferred.promise;
+                            console.log('SITUATION: User clicks CONNECT WITH FACEBOOK on SIGNIN page for the FIRST TIME', success)
+                            facebookConnectPlugin.login(['public_profile', 'email'],
+                                function(success) {
+                                    console.log('fbconnect login success')
+                                    var fbToken = success.authResponse.accessToken;
+                                },
+                                function(failure) {
+                                    // console.log('fbconnect login failed')
+                                    alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                                    deferred.reject(failure);
+                                })
+                            return deferred.promise;
+
+
+
+                            //SITUATION: User clicks CONNECT WITH FACEBOOK on SIGNIN page and has signed in FB before
+                        } else if (success.authResponse.accessToken && state == 'onSignIn') {
+                            console.log('User clicks CONNECT WITH FACEBOOK on SIGNIN page and has signed in FB before', success)
+                            var fbToken = success.authResponse.accessToken;
+                        }
+                        console.log('before the final return of promise: ', deferred.promise)
+                        return deferred.promise;
+
+                    },
+                    function() {
+
+                        // console.log('fbconnect login using cache failed, now trying regular login..')
+                        facebookConnectPlugin.login(['public_profile', 'email'],
+                                function(success) {
+                                    // console.log('fbconnect login success')
+                                    var fbToken = success.authResponse.accessToken;
+
+                                },
+                                function(failure) {
+                                    // console.log('fbconnect login failed')
+                                    alerts.addAlert('warning', "Please allow access to Facebook. If you see this error often please email hello@interfacefoundry.com", true);
+                                    deferred.reject(failure);
+                                })
+                            // console.log('is it returning final promise?', deferred.promise)
+                        return deferred.promise;
+                    })
+
+                return deferred.promise;
             }
 
 
@@ -24284,6 +24320,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
     $scope.contest = contest;
+    $scope.userManager = userManager;
     $scope.setShowSplash = setShowSplash;
     $scope.setShowSplashFalse = setShowSplashFalse;
     $scope.setShowSplashReset = setShowSplashReset;
@@ -24307,6 +24344,7 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
     $scope.user = {};
     $scope.confirmThanksText;
     $scope.errorMsg;
+    $scope.fbSignIn = fbSignIn;
 
     init();
 
@@ -24365,7 +24403,26 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
         } //END OF INIT
 
+    function fbSignIn() {
+        userManager.fbLogin('onSignIn').then(function(data) {
+            console.log('fbLogin success', data)
+            fbuser = true;
+            return createShowSplash(true);
+            // console.log('loaded facebook user: ', userManager._user);
+        }, function(err) {
+            console.log('fbLogin error', $scope.show.signin);
+            // hack for now
+            if ($scope.show.signin) {
+                alertManager.addAlert('info', 'facebook login unsuccessful');
+            }
+            return createShowSplash(false);
+        });
+    }
+
+
+
     function createShowSplash(condition) {
+        // alertManager.addAlert('info', condition);
         // $scope.show controls the logic for the splash pages
 
         if (condition === 'confirmThanks') {
