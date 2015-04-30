@@ -26894,8 +26894,8 @@ link: function(scope, element, attrs) {
 			return m('button',
 				{
 					class: 'message-delete-btn',
-					onclick: function(e) {
-						scope.deleteMsg(message);
+					onclick: function(ev) {
+						scope.deleteMsg(ev, message);
 					}
 				}, 'x');
 		} else {
@@ -27099,7 +27099,8 @@ $scope.sendMsg = function (e) {
 	}
 }
 
-$scope.deleteMsg = function(msg) {
+$scope.deleteMsg = function(ev, msg) {
+	ev.stopPropagation();
 	if ($scope.user && $scope.user._id === msg.userID) {
 		var deleteConfirm = confirm('Are you sure you want to delete this?\n\n"' + msg.msg + '"');
 		if (deleteConfirm) {
@@ -27196,11 +27197,12 @@ $scope.pinSticker = function() {
 	}
 	//getStickerLoc//
 	var sticker = angular.copy($scope.selected),
-		h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-		w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
-		left = w/2,
-		top = (h-220-40)/2+40;
-	leafletData.getMap().then(function(map) {
+			h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
+			w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0), 
+			left = w/2,
+			top = (h-220-40)/2+40;
+
+	leafletData.getMap('leafletmap').then(function(map) {
 		var latlng = map.containerPointToLatLng([left, top]);
 		sticker.loc = {
 			coordinates: [latlng.lng, latlng.lat]
@@ -27216,16 +27218,16 @@ $scope.pinSticker = function() {
 
 			$timeout(function() {
 				sendMsgToServer({
-				roomID: $scope.world._id,
-				userID: $scope.userID,
-				nick: $scope.nick,
-				avatar: $scope.user.avatar || 'img/icons/profile.png',
-				msg: $scope.msg.text || sticker.name,
-				sticker: {
-					img: sticker.img,
-					_id: success._id
-				},
-				kind: 'sticker'
+					roomID: $scope.world._id,
+					userID: $scope.userID,
+					nick: $scope.nick,
+					avatar: $scope.user.avatar || 'img/icons/profile.png',
+					msg: $scope.msg.text || sticker.name,
+					sticker: {
+						img: sticker.img,
+						_id: success._id
+					},
+					kind: 'sticker'
 				});
 				$scope.msg.text = "";
 			}, 500);
@@ -27234,6 +27236,8 @@ $scope.pinSticker = function() {
 			console.log(error);
 			//handle error
 		})
+	}, function(error) {
+		console.log('Error retrieving map', error);
 	})
 	
 	$scope.selected = undefined;

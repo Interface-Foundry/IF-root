@@ -27,8 +27,8 @@ link: function(scope, element, attrs) {
 			return m('button',
 				{
 					class: 'message-delete-btn',
-					onclick: function(e) {
-						scope.deleteMsg(message);
+					onclick: function(ev) {
+						scope.deleteMsg(ev, message);
 					}
 				}, 'x');
 		} else {
