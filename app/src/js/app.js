@@ -49,7 +49,7 @@ var updateTitle = function($rootScope) {
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
 		    			request.url = 'https://kipapp.co' + request.url;
-        
+
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();

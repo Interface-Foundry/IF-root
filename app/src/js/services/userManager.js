@@ -150,17 +150,17 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        console.log('successful signin, credentials saved:', username, password)
-                        console.log('SUCCESS data is: ', data);
+                        // console.log('successful signin, credentials saved:', username, password)
+                        // console.log('SUCCESS data is: ', data);
                         userManager._user = data;
-                         console.log('userManager signin success', userManager._user);
+                         // console.log('userManager signin success', userManager._user);
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
                         ifGlobals.loginStatus = true;
                         deferred.resolve(data);
 
                     }).error(function(error) {
-                             console.log('userManager signin failed', error);
+                             // console.log('userManager signin failed', error);
                         usertype = 'local';
                         lockerManager.removeCredentials(usertype);
                         deferred.reject(error);

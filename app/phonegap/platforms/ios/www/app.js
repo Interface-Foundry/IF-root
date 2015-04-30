@@ -4862,8 +4862,8 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			// request.url = 'https://kipapp.co' + request.url;
-              request.url = 'http://192.168.1.6:2997' + request.url;
+		    			request.url = 'https://kipapp.co' + request.url;
+  
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5925,7 +5925,7 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://192.168.1.6:2997/'+value;
+					value = 'https://kipapp.co/'+value;
 				}
 				
 				$attr.$set('src', value);
@@ -19539,17 +19539,17 @@ angular.module('tidepoolsServices')
                     })
                     .success(function(data) {
                         lockerManager.saveCredentials(username, password);
-                        console.log('successful signin, credentials saved:', username, password)
-                        console.log('SUCCESS data is: ', data);
+                        // console.log('successful signin, credentials saved:', username, password)
+                        // console.log('SUCCESS data is: ', data);
                         userManager._user = data;
-                         console.log('userManager signin success', userManager._user);
+                         // console.log('userManager signin success', userManager._user);
                         userManager.loginStatus = true;
                         userManager.adminStatus = data.admin ? true : false;
                         ifGlobals.loginStatus = true;
                         deferred.resolve(data);
 
                     }).error(function(error) {
-                             console.log('userManager signin failed', error);
+                             // console.log('userManager signin failed', error);
                         usertype = 'local';
                         lockerManager.removeCredentials(usertype);
                         deferred.reject(error);

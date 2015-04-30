@@ -44,7 +44,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 }
             }
         };
-  
+
         landmarkSchema.aggregate(query, {
                 $sort: {
                     score: {
@@ -61,10 +61,10 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 }
                 // console.log('Worlds found: ', data.length)
 
-                 // Remove entries with end time over one year ago...
+                // Remove entries with end time over one year ago...
                 var i = data.length;
                 while (i--) {
-                   if (data[i].time.end && data[i].time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
+                    if (data[i].time.end && data[i].time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
                         console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
                         data.splice(i, 1);
                     }
@@ -99,6 +99,28 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 console.error('error in text_search async.series');
                 console.error(err);
             }
+
+            console.log('original results', results)
+            for (var key in results) {
+                results[key] = _(results[key]).chain().sortBy(function(world) {
+                    return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
+                }).sortBy(function(world) {
+                    if (Object.keys(world.time).length == 1) {
+                        return -world.time.created // if the length of the time object is one (just the time created), return -time.created (descending order)
+                    } else if (Object.keys(world.time).length == 3) {
+                        return -world.time.start // if the length of the time object is three (start and end time and created), return -time.start (descending order)
+                    } else { // this is when the time object has two fields (start and created or end and created)
+                        if ((world.time).hasOwnProperty('start')) {
+                            return -world.time.start
+                        } // if it has time.start, return it
+                        else {
+                            return -world.time.created //otherwise, return time.created
+                        }
+                    }
+                }).value();
+                console.log('sorted results', results)
+            }
+
             //Retreive parent IDs to query for parent world names for each landmark
 
             var parentIDs = results[results.length - 1].map(function(el) {
