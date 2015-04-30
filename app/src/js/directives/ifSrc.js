@@ -11,8 +11,8 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 			
 				//@IFDEF PHONEGAP
 				if (value.indexOf('http')<0) {
-					// value = 'https://kipapp.co/'+value;
-					value = 'http://web-server-squirtle.kipapp.co:2997/' + value;
+					value = 'https://kipapp.co/'+value;
+					//value = 'http://web-server-squirtle.kipapp.co:2997/' + value;
 				}
 				//@ENDIF	
 				
