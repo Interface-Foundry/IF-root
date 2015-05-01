@@ -120,14 +120,12 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
             var parentNames = [];
 
             async.eachSeries(parentIDs, function(id, callback) {
-
                 if (id) {
                     landmarkSchema.findOne({
                         _id: id
                     }, function(err, parent) {
                         if (err) console.log(err);
                         if (!parent) return console.log('parent not found', parent)
-
                         parentNames.push(parent.id);
                         callback();
                     })
