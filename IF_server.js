@@ -808,6 +808,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
             if (req.headers['content-length'] > 10000000) {
                 console.log("Filesize too large.");
             } else {
+
                 var stuff_to_hash = filename + (new Date().toString());
                 var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
                 var fileType = filename.split('.').pop();
@@ -831,11 +832,13 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                 file.pipe(fstream);
 
                 fstream.on('close', function() {
+        
                     var buffer = readChunk.sync(tempPath, 0, 262);
 
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
+                    
                         im.crop({
                             srcPath: tempPath,
                             dstPath: tempPath,
@@ -846,11 +849,11 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                         }, function(err, stdout, stderr) {
 
                             //AUTO-REORIENT
-                            im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+                            im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-rotate', '90','-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                                 if (err) console.log(err)
 
                                 fs.readFile(tempPath, function(err, fileData) {
-
+                                 
                                     var s3 = new AWS.S3();
 
                                     s3.putObject({
@@ -862,7 +865,9 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                                         if (err) {
                                             console.log(err);
                                         } else {
+                                             
                                             res.write("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
+
                                             res.end();
                                             fs.unlink(tempPath);
                                         }
