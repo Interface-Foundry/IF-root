@@ -3694,16 +3694,32 @@ img.announcement-chevron {
 .fullPage--splashImg {
   background: url('img/cover/splash.jpg') center center / cover no-repeat;
 }
+@media only screen and (min-height: 667px) {
+  .fullPage--splashImg .fullPage-content .btnMain {
+    margin-top: 40px;
+  }
+}
 .fullPage-logo {
   width: 200px;
   position: relative;
   left: -19px;
+}
+@media only screen and (min-height: 667px) {
+  .fullPage-logo {
+    width: 220px;
+    left: -21px;
+  }
 }
 .fullPage-tagline {
   margin-top: 0px;
   margin-bottom: 0px;
   color: white;
   font-size: 21px;
+}
+@media only screen and (min-height: 667px) {
+  .fullPage-tagline {
+    margin-top: 30px;
+  }
 }
 .fullPage-tagline span {
   display: block;
