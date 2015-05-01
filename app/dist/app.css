@@ -2600,22 +2600,23 @@ transform:translateX(100%);
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) -webkit-transform;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) transform;
   -webkit-overflow-scrolling: touch;
-  transform: translateY(88px);
-  -webkit-transform: translateY(88px);
+  transform: translate3d(0, 88px, 0);
+  -webkit-transform: translate3d(0, 88px, 0);
 }
 #shelf.aperture-off {
-  transform: translateY(116px);
+  transform: translate3d(0, 116px, 0);
   /*TODO toolbar height + nav height*/
-  -webkit-transform: translateY(116px);
+  -webkit-transform: translate3d(0, 116px, 0);
 }
 #shelf.aperture-half {
-  transform: translateY(50%) translateZ(0px);
-  -webkit-transform: translateY(50%) translateZ(0px);
-  -moz-transform: translateY(50%);
-  -ms-transform: translateY(50%);
-  -o-transform: translateY(50%);
+  transform: translate3d(0, 50%, 0);
+  -webkit-transform: translate3d(0, 50%, 0);
+  -moz-transform: translate3d(0, 50%, 0);
+  -ms-transform: translate3d(0, 50%, 0);
+  -o-transform: translate3d(0, 50%, 0);
 }
 .shelf-surface {
+  height: 100%;
   -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) height;
   transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) height;
 }
@@ -2623,18 +2624,15 @@ transform:translateX(100%);
   height: 50%;
 }
 #shelf.aperture-full {
-  transform: translateY(100%) translateZ(0px);
-  -webkit-transform: translateY(100%) translateZ(0px);
-  -moz-transform: translateY(100%);
-  -ms-transform: translateY(100%);
-  -o-transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
+  -webkit-transform: translate3d(0, 100%, 0);
+  -moz-transform: translate3d(0, 100%, 0);
+  -ms-transform: translate3d(0, 100%, 0);
+  -o-transform: translate3d(0, 100%, 0);
 }
 #shelf.aperture-third {
-  transform: translateY(35%) translateZ(0px);
-  -webkit-transform: translateY(35%) translateZ(0px);
-}
-.aperture-third .shelf-surface {
-  height: 65%;
+  transform: translate3d(0, 35%, 0);
+  -webkit-transform: translate3d(0, 35%, 0);
 }
 .aperture-pop {
   /*only shown on aperture pop*/
