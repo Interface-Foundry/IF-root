@@ -1,29 +1,13 @@
 app.factory('deviceManager', ['$window', function($window) {
-	/** 
-	 * stores properties of current device
-	 * note that for an iPad, deviceType.mobile is other, deviceType.mobile is true, deviceType.mobilePhone is false, deviceType.mobileTablet is true.
-	 * if including another browser, add property to both deviceManager.browser and getBrowser()
-	 */
+	// stores properties of current device
 
 	// deviceManager object is returned
 	var deviceManager = {
-		browser: {
-			chrome: false,
-			safari: false,
-			firefox: false,
-			ie: false,
-			other: false
-		},
-		deviceType: {
-			mobile: false, // either phone or tablet
-			mobilePhone: false, // only phone
-			mobileTablet: false, // only tablet
-			desktop: false // neither phone nor tablet
-		},
-		os: {
-			ios: false,
-			web: false
-		}
+		/**
+		 * browser: @value {String} one of [chrome, safari, firefox, ie, other]
+		 * deviceType: @value{String} one of [phone, tablet, desktop]
+		 * os: @value{String} one of [ios, web]
+		 */
 	};
 
 	init();
@@ -31,30 +15,24 @@ app.factory('deviceManager', ['$window', function($window) {
 	function init() {
 		// set browser
 		var browser = getBrowser();
-		if (browser) {
-			deviceManager.browser[browser] = true;
-		} else deviceManager.browser.other = true;
+		deviceManager.browser = browser ? browser : 'other';
 
 		// set device type
 		var isPhone = isMobilePhone();
 		var isTablet = isMobileTablet();
-		if (isTablet) {
-			deviceManager.deviceType.mobile = true;
-			if (isPhone) {
-				deviceManager.deviceType.mobilePhone = true;
-			} else {
-				deviceManager.deviceType.mobileTablet = true;
-			}
-		} else {
-			deviceManager.deviceType.desktop = true;
-		}
+		// note that a device that (isPhone: true) is always (isTablet: true), but not vice-versa
+		if (isTablet && !isPhone) {
+			deviceManager.deviceType = 'tablet';
+		} else if (isPhone) {
+			deviceManager.deviceType = 'phone';
+		} else deviceManager.deviceType = 'desktop';
 
 		// set OS 
 		//@IFDEF PHONEGAP
-		deviceManager.os.ios = true;
+		deviceManager.os = 'ios';
 		//@ENDIF
 		//@IFDEF WEB
-		deviceManager.os.web = true;
+		deviceManager.os = 'web';
 		//@ENDIF
 	}
 

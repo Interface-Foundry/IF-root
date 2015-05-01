@@ -11,5 +11,8 @@
 </div>
 
 <div class="surface" ng-show="if_web">
-	<p style="font-size: 15px">For more accurate search results, turn on location services for kipapp.co in your broswer.</p>
+	<p style="font-size: 15px">For more accurate search results, turn on location services for kipapp.co in your 
+		<span ng-class="{'u-colorLinkBlue u-pointer': deviceManager.browser !== 'other'}" 
+			ng-click="goLocationServices()">browser</span>.
+	</p>
 </div>

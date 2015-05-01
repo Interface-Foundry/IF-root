@@ -17414,31 +17414,15 @@ function currentWorldService() {
 	}
 }
 app.factory('deviceManager', ['$window', function($window) {
-	/** 
-	 * stores properties of current device
-	 * note that for an iPad, deviceType.mobile is other, deviceType.mobile is true, deviceType.mobilePhone is false, deviceType.mobileTablet is true.
-	 * if including another browser, add property to both deviceManager.browser and getBrowser()
-	 */
+	// stores properties of current device
 
 	// deviceManager object is returned
 	var deviceManager = {
-		browser: {
-			chrome: false,
-			safari: false,
-			firefox: false,
-			ie: false,
-			other: false
-		},
-		deviceType: {
-			mobile: false, // either phone or tablet
-			mobilePhone: false, // only phone
-			mobileTablet: false, // only tablet
-			desktop: false // neither phone nor tablet
-		},
-		os: {
-			ios: false,
-			web: false
-		}
+		/**
+		 * browser: @value {String} one of [chrome, safari, firefox, ie, other]
+		 * deviceType: @value{String} one of [phone, tablet, desktop]
+		 * os: @value{String} one of [ios, web]
+		 */
 	};
 
 	init();
@@ -17446,26 +17430,20 @@ app.factory('deviceManager', ['$window', function($window) {
 	function init() {
 		// set browser
 		var browser = getBrowser();
-		if (browser) {
-			deviceManager.browser[browser] = true;
-		} else deviceManager.browser.other = true;
+		deviceManager.browser = browser ? browser : 'other';
 
 		// set device type
 		var isPhone = isMobilePhone();
 		var isTablet = isMobileTablet();
-		if (isTablet) {
-			deviceManager.deviceType.mobile = true;
-			if (isPhone) {
-				deviceManager.deviceType.mobilePhone = true;
-			} else {
-				deviceManager.deviceType.mobileTablet = true;
-			}
-		} else {
-			deviceManager.deviceType.desktop = true;
-		}
+		// note that a device that (isPhone: true) is always (isTablet: true), but not vice-versa
+		if (isTablet && !isPhone) {
+			deviceManager.deviceType = 'tablet';
+		} else if (isPhone) {
+			deviceManager.deviceType = 'phone';
+		} else deviceManager.deviceType = 'desktop';
 
 		// set OS 
-		deviceManager.os.web = true;
+		deviceManager.os = 'web';
 	}
 
 	function isMobilePhone() {
@@ -24105,7 +24083,7 @@ function init() {
 	});
 }
 }]);
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', 'ifGlobals', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService, ifGlobals) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', 'ifGlobals', 'deviceManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService, ifGlobals, deviceManager) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -24115,6 +24093,7 @@ $scope.userManager = userManager;
 $scope.navService = navService;
 $scope.dialog = dialogs;
 $scope.routeParams = $routeParams;
+$scope.deviceManager = deviceManager;
     
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
@@ -24182,6 +24161,19 @@ $scope.goBack = function() {
 	navService.reset();
 	// $window.history.back();
 	$window.history.go(navService.backPages);
+}
+
+$scope.goLocationServices = function() {
+	var mapBrowserToLink = {
+		chrome: 'https://support.google.com/chrome/answer/142065?hl=en',
+		safari: 'https://support.apple.com/en-us/HT202355',
+		firefox: 'https://support.mozilla.org/en-US/questions/988163',
+		ie: 'http://windows.microsoft.com/en-us/internet-explorer/ie-security-privacy-settings'
+	}
+	var browser = deviceManager.browser;
+
+	// open link in new tab if we have it
+	if (_.has(mapBrowserToLink, browser)) $window.open(mapBrowserToLink[browser], '_blank');
 }
 
 $scope.logout = function() {

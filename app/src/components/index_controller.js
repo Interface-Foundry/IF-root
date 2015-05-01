@@ -1,4 +1,4 @@
-app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', 'ifGlobals', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService, ifGlobals) {
+app.controller('indexIF', ['$location', '$scope', 'db', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', 'alertManager', 'userManager', '$route', '$routeParams', '$location', '$timeout', '$http', '$q', '$sanitize', '$anchorScroll', '$window', 'dialogs', 'worldTree', 'beaconManager', 'lockerManager', 'contest', 'navService', 'analyticsService', 'ifGlobals', 'deviceManager', function($location, $scope, db, leafletData, $rootScope, apertureService, mapManager, styleManager, alertManager, userManager, $route, $routeParams, $location, $timeout, $http, $q, $sanitize, $anchorScroll, $window, dialogs, worldTree, beaconManager, lockerManager, contest, navService, analyticsService, ifGlobals, deviceManager) {
 console.log('init controller-indexIF');
 $scope.aperture = apertureService;
 $scope.map = mapManager;
@@ -8,6 +8,7 @@ $scope.userManager = userManager;
 $scope.navService = navService;
 $scope.dialog = dialogs;
 $scope.routeParams = $routeParams;
+$scope.deviceManager = deviceManager;
     
 // global bools indicate phonegap vs web
 $rootScope.if_web = true;
@@ -80,6 +81,19 @@ $scope.goBack = function() {
 	navService.reset();
 	// $window.history.back();
 	$window.history.go(navService.backPages);
+}
+
+$scope.goLocationServices = function() {
+	var mapBrowserToLink = {
+		chrome: 'https://support.google.com/chrome/answer/142065?hl=en',
+		safari: 'https://support.apple.com/en-us/HT202355',
+		firefox: 'https://support.mozilla.org/en-US/questions/988163',
+		ie: 'http://windows.microsoft.com/en-us/internet-explorer/ie-security-privacy-settings'
+	}
+	var browser = deviceManager.browser;
+
+	// open link in new tab if we have it
+	if (_.has(mapBrowserToLink, browser)) $window.open(mapBrowserToLink[browser], '_blank');
 }
 
 $scope.logout = function() {
