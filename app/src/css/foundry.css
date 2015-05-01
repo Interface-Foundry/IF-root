@@ -39,6 +39,9 @@
 .u-inlineBlock {
   display: inline-block;
 }
+.u-marginTop0 {
+  margin-top: 0;
+}
 .u-colorLinkBlue {
   color: #428bca;
 }
@@ -1178,16 +1181,12 @@ img.announcement-chevron {
 }
 .fullPage-content {
   /*border: 1px solid black;*/
-  height: 420px;
   width: 250px;
 }
 .fullPage-body {
   /*border: 1px solid black;*/
   width: 95%;
   max-width: 460px;
-  /*height: 280px;*/
-  position: absolute;
-  top: 64px;
 }
 .fullPage-header {
   /*border: 1px solid black;*/
@@ -2998,9 +2997,9 @@ button:focus {
 }
 /*DIALOG IN CITY SEARCH*/
 .dialogLi {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 .dialogImg {
-  width: 40px;
+  width: 30px;
   margin-right: 10px;
 }
