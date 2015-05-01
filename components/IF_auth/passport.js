@@ -156,7 +156,7 @@ module.exports = function(passport) {
 							});
 
                             // check to see if there's already a user with that email
-                            if (localMatches >= 1) {
+                            if (localMatches.length >= 1) {
                                 console.log('This email address is already in use')
                                 return done('This email address is already taken. Do you want to sign in?');
                             }
