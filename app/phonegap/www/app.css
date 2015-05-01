@@ -4657,6 +4657,9 @@ a.bubble-inspector-btn:hover {
   font-weight: 500;
   font-size: 15px;
   line-height: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .marble-page-header-icon {
   width: 24px;
