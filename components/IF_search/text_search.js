@@ -100,17 +100,58 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 console.error(err);
             }
 
-            for (var i = 0; i < results.length; i++) {
-                results[i] = _(results[i]).chain().sortBy(function(world) {
-                    console.log('WORLD: ', world.permissions.ownerID)
-                    return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
-                }).value();
-            }
+            results = results[results.length - 1]
 
+            console.log('ORIGINL TOP 2 results is: ', results[0], 'YOMAMA', results[1])
+
+
+            //trying new method
+            function compare(a, b) {
+            console.log('A: ', a.permissions, 'B: ', b.permissions)
+            if (!a.permissions.ownerID && b.permissions.ownerID)
+                return 1;
+            if (a.permissions.ownerID && !b.permissions.ownerID)
+                return -1;
+            return 0;
+        }
+
+        results.sort(compare);
+
+        
+
+            //trying world query method NOT WORKING CURRENTLY
+            // results = _(results).chain().sortBy(function(world) {
+            //     return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
+            // }).sortBy(function(world) {
+            //     if (Object.keys(world.time).length == 1) {
+            //         return -world.time.created // if the length of the time object is one (just the time created), return -time.created (descending order)
+            //     } else if (Object.keys(world.time).length == 3) {
+            //         return -world.time.start // if the length of the time object is three (start and end time and created), return -time.start (descending order)
+            //     } else { // this is when the time object has two fields (start and created or end and created)
+            //         if ((world.time).hasOwnProperty('start')) {
+            //             return -world.time.start
+            //         } // if it has time.start, return it
+            //         else {
+            //             return -world.time.created //otherwise, return time.created
+            //         }
+            //     }
+            // }).value();
+
+    console.log('NEW TOP 2 results is: ', results[0], 'YOMAMA', results[1])
+
+
+
+            //tempory sorting
+            // for (var i = 0; i < results.length; i++) {
+            //     results[i] = _(results[i]).chain().sortBy(function(world) {
+            //         console.log('WORLD: ', world.permissions.ownerID)
+            //         return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
+            //     }).value();
+            // }
 
             //Retreive parent IDs to query for parent world names for each landmark
 
-            var parentIDs = results[results.length - 1].map(function(el) {
+            var parentIDs = results.map(function(el) {
                 if (!el.parentID) {
                     return undefined
                 } else {
@@ -140,10 +181,10 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
                     // console.log('Parent names gathered', parentNames);
 
-                    console.log('Found ', results[results.length - 1].length, 'results.');
+                    console.log('Found ', results.length, 'results.');
 
                     var count = 0;
-                    async.eachSeries(results[results.length - 1], function(el, callback) {
+                    async.eachSeries(results, function(el, callback) {
                         //Set virtual property parentName
                         el.parentName = parentNames[count];
                         count++
@@ -151,7 +192,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                     }, function(err) {
                         // console.log('Virtual property: parentName added to results..',results[results.length - 1])
 
-                        res.send(results[results.length - 1]);
+                        res.send(results);
                     })
                 }
             })
