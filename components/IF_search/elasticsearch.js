@@ -64,6 +64,7 @@ module.exports.search = function(req, res, next) {
 	}
 
 	var fuzzyQuery = {
+		size: 30,
 		index: "if",
 		type: "landmarks",
 		body: {
@@ -176,6 +177,7 @@ module.exports.bubbleSearch = function(req, res, next) {
 			}
 
 			var fuzzyQuery = {
+				size: 30,
 				index: "if",
 				type: "landmarks",
 				body: {
