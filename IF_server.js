@@ -849,7 +849,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                         }, function(err, stdout, stderr) {
 
                             //AUTO-REORIENT
-                            im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-rotate', '90','-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+                            im.convert([tempPath, '-auto-orient', '-quality', '0.8','-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                                 if (err) console.log(err)
 
                                 fs.readFile(tempPath, function(err, fileData) {
