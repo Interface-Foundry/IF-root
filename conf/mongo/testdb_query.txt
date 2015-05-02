@@ -1,0 +1,3 @@
+{loc:{$near:{$geometry:{type:"Point",coordinates:[-73.9878042,40.7479261]},$maxDistance:10000}}
+,"loc.coordinates.0":{$ne:-74.0059}}
+

@@ -64,6 +64,7 @@ module.exports.search = function(req, res, next) {
 	}
 
 	var fuzzyQuery = {
+		size: 30,
 		index: "if",
 		type: "landmarks",
 		body: {
@@ -75,7 +76,7 @@ module.exports.search = function(req, res, next) {
 							fuzziness: fuzziness,
 							prefix_length: 1,
 							type: "best_fields",
-							fields: ["name^2", "summary"],
+							fields: ["name^2", "summary", "tags"],
 							tie_breaker: 0.2,
 							minimum_should_match: "30%"
 						}
@@ -121,6 +122,12 @@ module.exports.search = function(req, res, next) {
 		}).map(function(b) {
 			b._source.kip_score = 10*b.fuzzyScore;
 			b.kip_score = 10*b.fuzzyScore;
+			if (b.landmarkCategories && b.landmarkCategories.length) {
+				b.kip_score += 1000;
+			}
+			if (b.permissions && b.permissions.ownerID) {
+				b.kip_score += 100;
+			}
 			return b;
 		}).sort(function(a, b) {
 			return b.kip_score - a.kip_score;
@@ -170,6 +177,7 @@ module.exports.bubbleSearch = function(req, res, next) {
 			}
 
 			var fuzzyQuery = {
+				size: 30,
 				index: "if",
 				type: "landmarks",
 				body: {
@@ -181,7 +189,7 @@ module.exports.bubbleSearch = function(req, res, next) {
 									fuzziness: fuzziness,
 									prefix_length: 1,
 									type: "best_fields",
-									fields: ["name^2", "summary"],
+									fields: ["name^2", "summary", "tags"],
 									tie_breaker: 0.2,
 									minimum_should_match: "30%"
 								}

@@ -17,8 +17,8 @@ curl -XGET localhost:9200/if/landmarks/_search?pretty=t -d '{
 	"geo_distance": {
 		"distance": "100km",
 		"loc.coordinates": {
-			"lat": 33.7967606,
-			"lon": -117.8351974
+			"lat": 40.7479261,
+			"lon": -73.9878042
 		}
 	}
 }
