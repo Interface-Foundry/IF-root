@@ -47,6 +47,7 @@
 		8220A1CD1AEEF55D0079A203 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8220A1CC1AEEF55D0079A203 /* Images.xcassets */; };
 		82A3FE631AE080FF004EA77D /* CDVLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 697ADC21C5474BD89BCAEE7B /* CDVLocation.m */; };
 		8F713E585B784B9BAB23A9CC /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1214CE040FB1439DA6495662 /* libsqlite3.dylib */; };
+		9153B0BD77084885889D3842 /* CDVInAppBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = BD7474456AB14301A22DE4BD /* CDVInAppBrowser.m */; };
 		93A4F476C39349E595491E96 /* SFHFKeychainUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 76B5788E71204B928F675DAB /* SFHFKeychainUtils.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		C2A67B6715F04608AB5F9E80 /* libEstimoteSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4EBB575D0A014A5D822F9ACB /* libEstimoteSDK.a */; };
 		D45655341F35498FAB0DF3BC /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8D4DE77B08C4B5BBC51426A /* FacebookSDK.framework */; };
@@ -56,7 +57,6 @@
 		E0F9E0CC1A13205000DD0B6B /* CDVSplashScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 9DE2F374E88F4F3C951C4063 /* CDVSplashScreen.m */; };
 		E79F73B01FD24C7C9CB6A4F0 /* EstimoteBeacons.m in Sources */ = {isa = PBXBuildFile; fileRef = BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */; };
 		F9F0F2F1736C4CE89A9A4737 /* FacebookConnectPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B7F79D80E4C4F06A021F2BC /* FacebookConnectPlugin.m */; };
-		9153B0BD77084885889D3842 /* CDVInAppBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = BD7474456AB14301A22DE4BD /* CDVInAppBrowser.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,6 +121,7 @@
 		697ADC21C5474BD89BCAEE7B /* CDVLocation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVLocation.m; path = org.apache.cordova.geolocation/CDVLocation.m; sourceTree = "<group>"; };
 		6E44B679182948C1B7DE338E /* EstimoteBeacons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EstimoteBeacons.h; path = pl.makingwaves.estimotebeacons/EstimoteBeacons.h; sourceTree = "<group>"; };
 		76B5788E71204B928F675DAB /* SFHFKeychainUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SFHFKeychainUtils.m; path = com.shazron.cordova.plugin.keychainutil/SFHFKeychainUtils.m; sourceTree = "<group>"; };
+		794A2BC7B9304EB48C8A9588 /* CDVInAppBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVInAppBrowser.h; path = org.apache.cordova.inappbrowser/CDVInAppBrowser.h; sourceTree = "<group>"; };
 		7BE08C95BCEE4B79A01676B9 /* UIImage+CropScaleOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+CropScaleOrientation.m"; path = "org.apache.cordova.camera/UIImage+CropScaleOrientation.m"; sourceTree = "<group>"; };
 		7E7966D41810823500FA85AD /* icon-40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-40.png"; sourceTree = "<group>"; };
 		7E7966D51810823500FA85AD /* icon-40@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-40@2x.png"; sourceTree = "<group>"; };
@@ -146,6 +147,7 @@
 		B483D9BD4DEA4D808656D3E5 /* CDVKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVKeychain.h; path = com.shazron.cordova.plugin.keychainutil/CDVKeychain.h; sourceTree = "<group>"; };
 		B65D51E6923E4803BC8607F1 /* CDVLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVLocation.h; path = org.apache.cordova.geolocation/CDVLocation.h; sourceTree = "<group>"; };
 		BB00CDBE4CFC47C2B704382E /* EstimoteBeacons.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EstimoteBeacons.m; path = pl.makingwaves.estimotebeacons/EstimoteBeacons.m; sourceTree = "<group>"; };
+		BD7474456AB14301A22DE4BD /* CDVInAppBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVInAppBrowser.m; path = org.apache.cordova.inappbrowser/CDVInAppBrowser.m; sourceTree = "<group>"; };
 		BEF1F53DA45C403793681310 /* FacebookConnectPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FacebookConnectPlugin.h; path = com.phonegap.plugins.facebookconnect/FacebookConnectPlugin.h; sourceTree = "<group>"; };
 		C024860FE52141519FB7EDA4 /* CDVJpegHeaderWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVJpegHeaderWriter.m; path = org.apache.cordova.camera/CDVJpegHeaderWriter.m; sourceTree = "<group>"; };
 		C7731784E9DB41E0B86B0DFE /* ESTBeaconVO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeaconVO.h; path = pl.makingwaves.estimotebeacons/ESTBeaconVO.h; sourceTree = "<group>"; };
@@ -163,8 +165,6 @@
 		F43F4F136454466B8087AE85 /* ESTBeacon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ESTBeacon.h; path = pl.makingwaves.estimotebeacons/ESTBeacon.h; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = Bubbl.li/config.xml; sourceTree = "<group>"; };
 		FB6929E719F64720AE0C7E66 /* CDVJpegHeaderWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVJpegHeaderWriter.h; path = org.apache.cordova.camera/CDVJpegHeaderWriter.h; sourceTree = "<group>"; };
-		BD7474456AB14301A22DE4BD /* CDVInAppBrowser.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVInAppBrowser.m"; path = "org.apache.cordova.inappbrowser/CDVInAppBrowser.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		794A2BC7B9304EB48C8A9588 /* CDVInAppBrowser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVInAppBrowser.h"; path = "org.apache.cordova.inappbrowser/CDVInAppBrowser.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
