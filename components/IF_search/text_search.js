@@ -4,6 +4,8 @@ var _ = require('underscore'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
     async = require('async');
 
+var queenscenter = require('./queenscenter');
+
 var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
     var sText = sanitize(textQuery);
@@ -192,6 +194,14 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                     }, function(err) {
                         // console.log('Virtual property: parentName added to results..',results[results.length - 1])
 
+			// add queens center if not found
+			var found = false;
+			results.map(function(r) { 
+				if (r.id === 'queens_center_mall') { found = true; }
+			});
+			if (!found) {
+				results = [queenscenter].concat(results);
+			}
                         res.send(results);
                     })
                 }
