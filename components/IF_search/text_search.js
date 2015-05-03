@@ -5,6 +5,7 @@ var _ = require('underscore'),
     async = require('async');
 
 var queenscenter = require('./queenscenter');
+var atlanticterminal = require('./atlanticterminal');
 
 var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
@@ -199,9 +200,19 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 			results.map(function(r) { 
 				if (r.id === 'queens_center_mall') { found = true; }
 			});
-			if (!found) {
+			if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
 				results = [queenscenter].concat(results);
 			}
+
+			// add atlantic center if not found
+			found = false;
+			results.map(function(r) { 
+				if (r.id === 'atlantic_terminal_mall') { found = true; }
+			});
+			if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
+				results = [atlanticterminal].concat(results);
+			}
+
                         res.send(results);
                     })
                 }

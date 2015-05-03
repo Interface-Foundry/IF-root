@@ -5,8 +5,8 @@ var fs = require('fs');
 
 mongoose.connect(config.mongodb.url);
 
-Landmarks.find({id: 'queens_center_mall'}, function(err, landmarks) {
+Landmarks.find({id: 'atlantic_terminal_mall'}, function(err, landmarks) {
   var qc = landmarks[0];
-  fs.writeFileSync(__dirname + '/components/IF_search/queenscenter.js', "module.exports = " + JSON.stringify(qc));
+  fs.writeFileSync(__dirname + '/components/IF_search/atlanticterminal.js', "module.exports = " + JSON.stringify(qc));
   process.exit(0);
 });
