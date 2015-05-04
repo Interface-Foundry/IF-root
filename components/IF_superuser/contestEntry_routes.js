@@ -57,7 +57,7 @@ router.put('/:id', function(req, res) {
 })
 
 //delete a contest entry
-router.delete('/su/:id', function(req, res) {
+router.delete('/:id', function(req, res) {
     if (req.user.admin) {
         contestEntrySchema.findById(req.params.id, function(err, entry) {
             if (err) {
