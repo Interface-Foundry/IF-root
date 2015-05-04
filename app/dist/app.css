@@ -3948,162 +3948,6 @@ nav {
   line-height: 16px;
   font-weight: 500;
 }
-.profile-contact-sort:last-child {
-  padding: 32px 8px;
-}
-.profile-contact-sort:last-child .profile-contact-card {
-  background: inherit;
-  padding: 0;
-}
-.profile-contact-sort:last-child .sort-heading {
-  padding-left: 2px;
-  top: -32px;
-}
-.grey-block {
-  display: none;
-}
-.inactive span,
-.inactive button.btn.meetup-btn {
-  color: grey;
-}
-.inactive span:hover,
-.inactive button.btn.meetup-btn:hover {
-  cursor: default;
-  color: grey;
-}
-.inactive span .grey-block,
-.inactive button.btn.meetup-btn .grey-block {
-  height: 14px;
-  width: 16px;
-  background-color: grey;
-  border-radius: 3px;
-  display: inline-block;
-  vertical-align: middle;
-}
-.inactive span img,
-.inactive button.btn.meetup-btn img {
-  display: none;
-}
-.marble-smooth-card {
-  position: relative;
-  background: #FFF;
-  border-radius: 5px;
-}
-.profile-card {
-  width: 100%;
-  height: 128px;
-  float: left;
-  min-height: 1px;
-  position: relative;
-  background: #FFF;
-  border-radius: 5px;
-}
-@media only screen and (min-width: 768px) {
-  .profile-card {
-    /*card goes vertical*/
-    height: 208px;
-  }
-}
-.sort {
-  width: 100%;
-  float: left;
-  padding: 16px 8px;
-}
-.profile-sort {
-  max-width: 360px;
-  width: 100%;
-  float: left;
-  padding: 16px 8px;
-}
-@media only screen and (min-width: 768px) {
-  .profile-sort {
-    width: 160px;
-  }
-}
-.circle-pic {
-  border-radius: 50%;
-}
-.btn.circle-pic {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-}
-.img-responsive.circle-pic {
-  border-radius: 50%;
-}
-.profile-card-pic {
-  cursor: pointer;
-  width: 96px;
-  height: 96px;
-  float: left;
-  margin: 16px 16px 16px 24px;
-  border-radius: 50%;
-  background: #78909c;
-  overflow: hidden;
-}
-@media only screen and (min-width: 768px) {
-  .profile-card-pic {
-    margin: 8px auto;
-    float: none;
-  }
-}
-.profile-card-pic-upload {
-  display: block;
-  color: #fff;
-  text-align: center;
-  font-size: 12px;
-  line-height: 12px;
-  margin: 42px 0px;
-}
-.profile-card-body {
-  overflow: hidden;
-  height: 100%;
-  padding: 8px;
-}
-.profile-contact-card {
-  position: relative;
-  background: #FFF;
-  border-radius: 5px;
-  padding: 8px;
-}
-.profile-contact-sort {
-  width: 100%;
-  float: left;
-  padding: 16px 8px;
-  max-width: 500px;
-}
-.profile-add-new {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 72px;
-  margin: 0px -8px 16px -8px;
-  padding: 0px 8px 0px 72px;
-  color: #2196f3;
-  background: none;
-  border: none;
-  font-size: 16px;
-  line-height: 72px;
-  text-align: left;
-}
-@media only screen and (min-width: 600px) {
-  .profile-add-new {
-    width: 600px;
-    margin: 0px auto 16px auto;
-  }
-}
-.profile-add-new-plus {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 16px;
-  left: 16px;
-  border-radius: 20px;
-  line-height: 40px;
-  font-size: 20px;
-  color: #fff;
-  background: #2196f3 url('img/icons/ic_add_white_48dp.png') center / 24px 24px no-repeat;
-}
 .bubble-list {
   margin: 0px -8px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
@@ -4624,6 +4468,162 @@ a.bubble-inspector-btn:hover {
   height: auto;
   max-width: 100%;
 }
+.profile-contact-sort:last-child {
+  padding: 32px 8px;
+}
+.profile-contact-sort:last-child .profile-contact-card {
+  background: inherit;
+  padding: 0;
+}
+.profile-contact-sort:last-child .sort-heading {
+  padding-left: 2px;
+  top: -32px;
+}
+.grey-block {
+  display: none;
+}
+.inactive span,
+.inactive button.btn.meetup-btn {
+  color: grey;
+}
+.inactive span:hover,
+.inactive button.btn.meetup-btn:hover {
+  cursor: default;
+  color: grey;
+}
+.inactive span .grey-block,
+.inactive button.btn.meetup-btn .grey-block {
+  height: 14px;
+  width: 16px;
+  background-color: grey;
+  border-radius: 3px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.inactive span img,
+.inactive button.btn.meetup-btn img {
+  display: none;
+}
+.marble-smooth-card {
+  position: relative;
+  background: #FFF;
+  border-radius: 5px;
+}
+.profile-card {
+  width: 100%;
+  height: 128px;
+  float: left;
+  min-height: 1px;
+  position: relative;
+  background: #FFF;
+  border-radius: 5px;
+}
+@media only screen and (min-width: 768px) {
+  .profile-card {
+    /*card goes vertical*/
+    height: 208px;
+  }
+}
+.sort {
+  width: 100%;
+  float: left;
+  padding: 16px 8px;
+}
+.profile-sort {
+  max-width: 360px;
+  width: 100%;
+  float: left;
+  padding: 16px 8px;
+}
+@media only screen and (min-width: 768px) {
+  .profile-sort {
+    width: 160px;
+  }
+}
+.circle-pic {
+  border-radius: 50%;
+}
+.btn.circle-pic {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+.img-responsive.circle-pic {
+  border-radius: 50%;
+}
+.profile-card-pic {
+  cursor: pointer;
+  width: 96px;
+  height: 96px;
+  float: left;
+  margin: 16px 16px 16px 24px;
+  border-radius: 50%;
+  background: #78909c;
+  overflow: hidden;
+}
+@media only screen and (min-width: 768px) {
+  .profile-card-pic {
+    margin: 8px auto;
+    float: none;
+  }
+}
+.profile-card-pic-upload {
+  display: block;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  line-height: 12px;
+  margin: 42px 0px;
+}
+.profile-card-body {
+  overflow: hidden;
+  height: 100%;
+  padding: 8px;
+}
+.profile-contact-card {
+  position: relative;
+  background: #FFF;
+  border-radius: 5px;
+  padding: 8px;
+}
+.profile-contact-sort {
+  width: 100%;
+  float: left;
+  padding: 16px 8px;
+  max-width: 500px;
+}
+.profile-add-new {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 72px;
+  margin: 0px -8px 16px -8px;
+  padding: 0px 8px 0px 72px;
+  color: #2196f3;
+  background: none;
+  border: none;
+  font-size: 16px;
+  line-height: 72px;
+  text-align: left;
+}
+@media only screen and (min-width: 600px) {
+  .profile-add-new {
+    width: 600px;
+    margin: 0px auto 16px auto;
+  }
+}
+.profile-add-new-plus {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 16px;
+  left: 16px;
+  border-radius: 20px;
+  line-height: 40px;
+  font-size: 20px;
+  color: #fff;
+  background: #2196f3 url('img/icons/ic_add_white_48dp.png') center / 24px 24px no-repeat;
+}
 .closeImg {
   position: relative;
   left: 12px;
@@ -4660,6 +4660,14 @@ a.bubble-inspector-btn:hover {
 }
 .divider {
   margin: 0;
+}
+/*DIALOG IN CITY SEARCH*/
+.dialogLi {
+  margin-bottom: 15px;
+}
+.dialogImg {
+  width: 30px;
+  margin-right: 10px;
 }
 .auth-title {
   text-align: center;
@@ -5433,14 +5441,6 @@ button:focus {
   top: 48px;
   width: 100%;
   height: 3px;
-}
-/*DIALOG IN CITY SEARCH*/
-.dialogLi {
-  margin-bottom: 15px;
-}
-.dialogImg {
-  width: 30px;
-  margin-right: 10px;
 }
 
 .leaflet-areaselect-shade {
