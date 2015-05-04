@@ -405,3 +405,57 @@ nav ul {
 	border: none;
 	outline: none;
 }
+
+// SUBNAV
+.subnav {
+	/* height: 88px; */
+	width: 100%;
+	min-height: 48px;
+	background: #f5f5f5;
+	/* padding: 40px 0px 0px 0px; */
+	text-align: center;
+	z-index: 30;
+}
+
+.subnav-fixed {
+	.subnav(); 
+	position: absolute;
+	margin-top: @nav-height;
+}
+
+.subnavfix {
+	padding-top: 96px !important;
+}
+
+.subnav-header {
+	display: block;
+	font-size: 20px;
+	line-height: 48px;
+	height: 48px;
+	margin: 0px;
+	text-align: center;
+}
+
+.subnav-item {
+	display: block;
+	height: 48px;
+	min-width: 48px;
+}
+
+.subnav-back {
+	width: 48px;
+	height: 48px;
+	float:left;
+	border: none;
+	background: none;
+	outline: none;
+}
+
+span.subnav-back-chevron {
+	display: block;
+	top:0px;
+	float: left;
+	font-size: 24px;
+	margin: 12px 0px;
+	color: #808080;
+}

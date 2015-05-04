@@ -2,8 +2,9 @@
   background-color: white;
   border: none;
   border-radius: 28px;
-  bottom: 80px;
+  bottom: 140px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2), 0px -1px 0px rgba(0, 0, 0, 0.1);
+  color: #fff;
   font-size: 18px;
   font-weight: bold;
   height: 50px;
@@ -15,21 +16,26 @@
   width: 50px;
   z-index: 20;
 
-	&:hover {
-		cursor: pointer;
-	}
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) all;
 }
-
+#current-floor:hover {
+  cursor: pointer;
+}
 #floor-nums {
   background-color: white;
   border: none;
-  bottom: 114px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  bottom: 174px;
   box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2), 0px 6px 6px rgba(0, 0, 0, 0.2);
   font-size: 18px;
   font-weight: normal;
   line-height: 42px;
+  max-height: 30%;
   min-height: 0px;
   opacity: 1;
+  overflow-y: scroll;
   outline: none;
   position: absolute;
   right: 18px;
@@ -37,35 +43,113 @@
   width: 42px;
   z-index: 18;
 
-  &:hover {
-    cursor: pointer;
+  @media only screen and (min-height: 550px) {
+    max-height: 40%;
   }
+
+  @media only screen and (min-height: 680px) {
+    max-height: 50%;
+  }
+
+  -webkit-overflow-scrolling: touch;
+
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+}
+
+#floor-nums.ng-hide-add.ng-hide-add-active,
+#floor-nums.ng-hide-remove.ng-hide-remove-active {
+  -webkit-transition: line-height 0.35s cubic-bezier(0.5, 0.1, 0, 1), min-height 0.35s cubic-bezier(0.5, 0.1, 0, 1), padding 0.35s cubic-bezier(0.5, 0.1, 0, 1), opacity 0.3s cubic-bezier(0.5, 0.1, 0, 1);
+  transition: line-height 0.35s cubic-bezier(0.5, 0.1, 0, 1), min-height 0.35s cubic-bezier(0.5, 0.1, 0, 1), padding 0.35s cubic-bezier(0.5, 0.1, 0, 1), opacity 0.3s cubic-bezier(0.5, 0.1, 0, 1);
+}
+#floor-nums.ng-hide {
+  line-height: 0px;
+  min-height: 0px;
+  opacity: 0;
+  padding: 0 10px;
 }
 
 #floor-nums > div:last-child {
   margin-bottom: 20px;
 }
 
-#floor-nums.ng-hide-add.ng-hide-add-active,
-#floor-nums.ng-hide-remove.ng-hide-remove-active {
-  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+#floor-nums div:hover {
+  cursor: pointer;
 }
-
-#floor-nums.ng-hide {
-  line-height: 0px;
-  min-height: 0px;
-  opacity: .5;
-}
-
 .floor-indicator {
-  width: 0;
-  height: 0;
+  bottom: 100px;
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
   border-left: 8px solid blue;
   display: inline-block;
-  margin-left: -16px;
-  margin-right: 8px;
-  margin-bottom: -1px;
+  height: 0;
+  position: absolute;
+  right: 34px;
+  width: 0;
+  z-index: 20;
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+}
+
+#floor-selector-shadow {
+  position: absolute;
+  right: 33px;
+  bottom: 48px;
+  z-index: 19;
+  box-shadow: 0px -65px 40px 15px rgba(88,89,91,0.15);
+  height: 0;
+  width: 12px;
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
+}
+
+.floor-tile:after {
+  content: '';
+  height: 1px;
+  width: 42px;
+  display: block;
+  position: relative;
+  background: -webkit-linear-gradient(left, white 0%, rgba(240, 240, 240, 1) 50%, white 100%);
+  background: -moz-linear-gradient(right, white 0%, rgba(240, 240, 240, 1) 50%, white 100%);
+  background: -o-linear-gradient(right, white 0%, rgba(240, 240, 240, 1) 50%, white 100%);
+  background: linear-gradient(to right, white 0%, rgba(240, 240, 240, 1) 50%, white 100%);
+}
+
+.aperture-off #current-floor,
+.aperture-off .userLocation {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-off #floor-nums {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0); 
+}
+.aperture-third #current-floor,
+.aperture-third .userLocation {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-third #floor-selector-shadow {
+  right: -33px;
+}
+.aperture-off #floor-selector-shadow {
+  right: -33px;
+}
+.aperture-third #floor-nums {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0); 
+}
+.aperture-off .floor-indicator {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-third .floor-indicator {
+  -webkit-transform: translate3D(200%, 0px, 0);
+  transform: translate3D(200%, 0, 0);
+}
+.aperture-off .floor-indicator {
+  right: -44px;
+}
+.aperture-third .floor-indicator {
+  right: -44px;
 }

@@ -1,0 +1,40 @@
+.calendar-view {
+	position: absolute;
+	top: 0px;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	padding: 96px 8px 8px 8px;
+	background: #e6e6e6;
+	transform: translateX(100%);
+	-webkit-transform: translateX(100%);
+	
+	transition: 0.35s cubic-bezier(.5,.1,0,1) all;
+	z-index: 5;
+	overflow: auto;
+}
+
+.fc-view-container {
+	background: #FFF;
+	color: #777;
+}
+
+.fc-other-month {
+	background: #F2F2F2;
+}
+
+.calender-view.ng-enter {
+	transform: translateX(100%);
+	-webkit-transform: translateX(100%);
+}
+
+.calender-view.ng-enter.ng-enter-active {
+	transform: translateX(0%);
+	-webkit-transform: translateX(0%);
+}
+
+.calendar-view.active {
+	transform: translateX(0%);
+	-webkit-transform: translateX(0%);
+	
+}
