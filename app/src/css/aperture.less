@@ -68,11 +68,19 @@
 	-o-transform: translate3d(0, 100%, 0);
 	
 }
-
 #shelf.aperture-third {
 	transform: translate3d(0, 35%, 0);
 	-webkit-transform: translate3d(0, 35%, 0);
 }
+
+/* @IFDEF WEB */
+/*	changing the shelf-surface size leads to flickering on mobile 
+		but seems to be necessary on web to allow for scrolling the whole
+		bubble shelf */
+.aperture-third .shelf-surface {
+  height: 65%;
+}
+/* @ENDIF */
 
 .aperture-pop { /*only shown on aperture pop*/
 	height: 35%;

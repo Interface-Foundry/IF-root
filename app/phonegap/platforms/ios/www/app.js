@@ -5495,7 +5495,9 @@ app.directive('bubbleBody', function(apertureService) {
 				} else if (apertureService.state != 'aperture-off') {
 					apertureService.set('off');
 				}
-			}, 100);
+			}, 1000, {
+				trailing: false
+			});
 			
 			element.on('scroll', handleScroll);
 			
