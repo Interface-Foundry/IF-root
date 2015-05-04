@@ -44,7 +44,8 @@ angular.module('tidepoolsServices')
 			}
 
 			function getRgbValues(color) {
-				var arr = color.slice(5, -1).split(',');
+				var paren = color.indexOf('(');
+				var arr = color.slice(paren + 1, -1).split(',');
 				return {
 					r: Number(arr[0]),
 					g: Number(arr[1]),
