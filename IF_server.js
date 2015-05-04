@@ -838,16 +838,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
-                    
-                        im.crop({
-                            srcPath: tempPath,
-                            dstPath: tempPath,
-                            width: 300,
-                            height: 300,
-                            quality: 85,
-                            gravity: "Center"
-                        }, function(err, stdout, stderr) {
-
+                
                             //AUTO-REORIENT
                             im.convert([tempPath, '-auto-orient', '-quality', '0.8','-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                                 if (err) console.log(err)
@@ -874,7 +865,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                                     });
                                 }); //END OF FS READFILE
                             }) //END OF IM CONVERT
-                        });
+                  
                     }
                 });
             }
