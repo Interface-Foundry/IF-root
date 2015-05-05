@@ -24700,110 +24700,110 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
 
     function init() {
-            // special case for aicp to prevent splash page
-            if ($location.path().indexOf('aicpweek2015') > -1) {
-                $scope.show.splash = false;
-                return;
+        // special case for aicp to prevent splash page
+        if ($location.path().indexOf('aicpweek2015') > -1) {
+            $scope.show.splash = false;
+            return;
+        }
+
+        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+
+            createShowSplash('confirmThanks');
+
+            // get token from url
+            var token = $location.path().slice(15);
+
+            $http.post('/email/request_confirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {
+                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+            }).
+            error(function(err) {
+                $scope.confirmThanksText = 'There was a problem confirming your email';
+            });
+
+            // redirect to home page
+            $location.path('/');
+        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+
+            createShowSplash('passwordReset');
+
+            // get token from url
+            var token = $location.path().slice(7);
+
+            $http.post('/resetConfirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {}).
+            error(function(err) {
+                if (err) {
+                    console.log('err: ', err);
+                }
+            });
+        } else {
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+            //On Phonegap startup, try to login with either saved username/pw or facebook
+
+            var localuser = false;
+            var fbuser = false;
+            lockerManager.getCredentials().then(function(credentials) {
+                if (credentials.username && credentials.password) {
+                    userManager.signin(credentials.username, credentials.password).then(function(success) {
+                          console.log('SplashController: userManager.signin success:', userManager._user);
+                        localuser = true;
+                        userManager.checkLogin().then(function(success) {
+                                console.log('SplashController: userManager.checkin success:', userManager._user);
+                            
+                            return createShowSplash(true);
+                        }, function(error) {
+                            console.log('SplashController: userManager.signin faulire:', error);
+                            return createShowSplash(false);
+                        });
+                    }, function(err) {
+                        console.log('SplashController: lockerManager getCredentials faulire:', err);
+                        createShowSplash(false);
+                    })
+                }
+            }, function(err) {
+                // createShowSplash(false);
+            }); //END OF GET LOCAL CREDENTIALS
+
+            //GET FB CREDENTIALS
+            if (!localuser) {
+                // console.log('trying fb keychain login')
+                lockerManager.getFBCredentials().then(function(credentials) {
+                        // console.log('Hitting fblogin')
+                        ifGlobals.fbToken = credentials.fbToken;
+                        userManager.fbLogin('onLoad').then(function(data) {
+                            // console.log('HITTING FB LOGIN SUCCESS', data)
+                            fbuser = true;
+                            return createShowSplash(true);
+                            // console.log('loaded facebook user: ', userManager._user);
+                        }, function(err) {
+                            // console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
+                            // hack for now
+                            if ($scope.show.signin) {
+                                alertManager.addAlert('info', 'facebook login unsuccessful');
+                            }
+
+                            return createShowSplash(false);
+                        });
+                    },
+                    function(err) {
+                        // console.log('fbcredential error', err);
+                        return createShowSplash(false);
+                    })
+            } else {
+                // console.log('NO VALID CREDNEITALS');
+                createShowSplash(false);
             }
 
-            if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+            StatusBar.styleDefault();
+            StatusBar.backgroundColorByHexString(styleManager.splashStatusBarColor);
+        } //END OF OUTER ELSE
 
-                createShowSplash('confirmThanks');
-
-                // get token from url
-                var token = $location.path().slice(15);
-
-                $http.post('/email/request_confirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {
-                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-                }).
-                error(function(err) {
-                    $scope.confirmThanksText = 'There was a problem confirming your email';
-                });
-
-                // redirect to home page
-                $location.path('/');
-            } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
-
-                createShowSplash('passwordReset');
-
-                // get token from url
-                var token = $location.path().slice(7);
-
-                $http.post('/resetConfirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {}).
-                error(function(err) {
-                    if (err) {
-                        console.log('err: ', err);
-                    }
-                });
-            } else {
-                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
-                //On Phonegap startup, try to login with either saved username/pw or facebook
-
-                var localuser = false;
-                var fbuser = false;
-                lockerManager.getCredentials().then(function(credentials) {
-                    if (credentials.username && credentials.password) {
-                        userManager.signin(credentials.username, credentials.password).then(function(success) {
-                              console.log('SplashController: userManager.signin success:', userManager._user);
-                            localuser = true;
-                            userManager.checkLogin().then(function(success) {
-                                    console.log('SplashController: userManager.checkin success:', userManager._user);
-                                
-                                return createShowSplash(true);
-                            }, function(error) {
-                                console.log('SplashController: userManager.signin faulire:', error);
-                                return createShowSplash(false);
-                            });
-                        }, function(err) {
-                            console.log('SplashController: lockerManager getCredentials faulire:', err);
-                            createShowSplash(false);
-                        })
-                    }
-                }, function(err) {
-                    // createShowSplash(false);
-                }); //END OF GET LOCAL CREDENTIALS
-
-                //GET FB CREDENTIALS
-                if (!localuser) {
-                    // console.log('trying fb keychain login')
-                    lockerManager.getFBCredentials().then(function(credentials) {
-                            // console.log('Hitting fblogin')
-                            ifGlobals.fbToken = credentials.fbToken;
-                            userManager.fbLogin('onLoad').then(function(data) {
-                                // console.log('HITTING FB LOGIN SUCCESS', data)
-                                fbuser = true;
-                                return createShowSplash(true);
-                                // console.log('loaded facebook user: ', userManager._user);
-                            }, function(err) {
-                                // console.log('FBLOGIN ERROR OMGGGGG', $scope.show.signin);
-                                // hack for now
-                                if ($scope.show.signin) {
-                                    alertManager.addAlert('info', 'facebook login unsuccessful');
-                                }
-
-                                return createShowSplash(false);
-                            });
-                        },
-                        function(err) {
-                            // console.log('fbcredential error', err);
-                            return createShowSplash(false);
-                        })
-                } else {
-                    // console.log('NO VALID CREDNEITALS');
-                    createShowSplash(false);
-                }
-
-                StatusBar.styleDefault();
-                StatusBar.backgroundColorByHexString(styleManager.splashStatusBarColor);
-            } //END OF OUTER ELSE
-
-        } //END OF INIT
+    } //END OF INIT
 
     function fbSignIn() {
         userManager.fbLogin('onSignIn').then(function(data) {
