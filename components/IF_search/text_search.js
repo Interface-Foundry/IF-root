@@ -62,22 +62,30 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                     console.error('error in text_search');
                     return console.error(err)
                 }
-                // console.log('Worlds found: ', data.length)
+                //Check if result set has bubbles with ownerID... if not, increase radius in searchWorlds()
+                var i = data.length;
+                var found = false;
+                while (i--) {
+                    if (data[i].permissions && data[i].permissions.ownerID) {
+                        // console.log('Found world with ownerID: ', data[i].name, data[i].permissions)
+                        found = true;
+                    }
+                }
 
                 // Remove entries with end time over one year ago...
                 var i = data.length;
                 while (i--) {
                     if (data[i].time.end && data[i].time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
-                        console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
+                        // console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
                         data.splice(i, 1);
                     }
                 }
 
                 //If results are less than 20, increase radius of search distance
-                if (data.length >= 20) {
+                if (data.length > 20 && found == true) {
                     callback(true, data);
                 } else {
-                    console.log('Only ', data.length, ' results, increasing distance..')
+                    // console.log('Only ', data.length, ' results, increasing distance..')
                     callback(null, data)
                 }
             })
@@ -105,52 +113,17 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
             results = results[results.length - 1]
 
-            console.log('ORIGINL TOP 2 results is: ', results[0], 'YOMAMA', results[1])
-
-
             //trying new method
             function compare(a, b) {
-            console.log('A: ', a.permissions, 'B: ', b.permissions)
-            if (!a.permissions.ownerID && b.permissions.ownerID)
-                return 1;
-            if (a.permissions.ownerID && !b.permissions.ownerID)
-                return -1;
-            return 0;
-        }
+                console.log('A: ', a.permissions, 'B: ', b.permissions)
+                if (!a.permissions.ownerID && b.permissions.ownerID)
+                    return 1;
+                if (a.permissions.ownerID && !b.permissions.ownerID)
+                    return -1;
+                return 0;
+            }
 
-        results.sort(compare);
-
-        
-
-            //trying world query method NOT WORKING CURRENTLY
-            // results = _(results).chain().sortBy(function(world) {
-            //     return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
-            // }).sortBy(function(world) {
-            //     if (Object.keys(world.time).length == 1) {
-            //         return -world.time.created // if the length of the time object is one (just the time created), return -time.created (descending order)
-            //     } else if (Object.keys(world.time).length == 3) {
-            //         return -world.time.start // if the length of the time object is three (start and end time and created), return -time.start (descending order)
-            //     } else { // this is when the time object has two fields (start and created or end and created)
-            //         if ((world.time).hasOwnProperty('start')) {
-            //             return -world.time.start
-            //         } // if it has time.start, return it
-            //         else {
-            //             return -world.time.created //otherwise, return time.created
-            //         }
-            //     }
-            // }).value();
-
-    console.log('NEW TOP 2 results is: ', results[0], 'YOMAMA', results[1])
-
-
-
-            //tempory sorting
-            // for (var i = 0; i < results.length; i++) {
-            //     results[i] = _(results[i]).chain().sortBy(function(world) {
-            //         console.log('WORLD: ', world.permissions.ownerID)
-            //         return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
-            //     }).value();
-            // }
+            results.sort(compare);
 
             //Retreive parent IDs to query for parent world names for each landmark
 
@@ -195,23 +168,27 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                     }, function(err) {
                         // console.log('Virtual property: parentName added to results..',results[results.length - 1])
 
-			// add queens center if not found
-			var found = false;
-			results.map(function(r) { 
-				if (r.id === 'queens_center_mall') { found = true; }
-			});
-			if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
-				results = [queenscenter].concat(results);
-			}
+                        // add queens center if not found
+                        var found = false;
+                        results.map(function(r) {
+                            if (r.id === 'queens_center_mall') {
+                                found = true;
+                            }
+                        });
+                        if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
+                            results = [queenscenter].concat(results);
+                        }
 
-			// add atlantic center if not found
-			found = false;
-			results.map(function(r) { 
-				if (r.id === 'atlantic_terminal_mall') { found = true; }
-			});
-			if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
-				results = [atlanticterminal].concat(results);
-			}
+                        // add atlantic center if not found
+                        found = false;
+                        results.map(function(r) {
+                            if (r.id === 'atlantic_terminal_mall') {
+                                found = true;
+                            }
+                        });
+                        if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
+                            results = [atlanticterminal].concat(results);
+                        }
 
                         res.send(results);
                     })
