@@ -5495,9 +5495,7 @@ app.directive('bubbleBody', function(apertureService) {
 				} else if (apertureService.state != 'aperture-off') {
 					apertureService.set('off');
 				}
-			}, 1000, {
-				trailing: false
-			});
+			}, 100);
 			
 			element.on('scroll', handleScroll);
 			
@@ -24901,7 +24899,7 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
                 $scope.show.signin = false;
                 $scope.show.splash = false;
             }, function(err) {
-                alertManager.addAlert('danger', err || 'Incorrect username or password', false);
+                alertManager.addAlert('danger', 'Incorrect username or password', true);
             })
 
         } else if ($scope.show.register) {
