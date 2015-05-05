@@ -24398,60 +24398,63 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
     init();
 
-
-
     function init() {
-            // special case for aicp to prevent splash page
-            if ($location.path().indexOf('aicpweek2015') > -1) {
-                $scope.show.splash = false;
-                return;
-            }
+        // special case for aicp to prevent splash page
+        if ($location.path().indexOf('aicpweek2015') > -1) {
+            $scope.show.splash = false;
+            return;
+        }
 
-            if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
+        if ($location.path().indexOf('email/confirm') > -1) { // check if user is confirming email
 
-                createShowSplash('confirmThanks');
+            createShowSplash('confirmThanks');
 
-                // get token from url
-                var token = $location.path().slice(15);
+            // get token from url
+            var token = $location.path().slice(15);
 
-                $http.post('/email/request_confirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {
-                    $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
-                }).
-                error(function(err) {
-                    $scope.confirmThanksText = 'There was a problem confirming your email';
-                });
+            $http.post('/email/request_confirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {
+                $scope.confirmThanksText = data.err ? 'There was a problem confirming your email' : 'Thanks for confirming your email!';
+            }).
+            error(function(err) {
+                $scope.confirmThanksText = 'There was a problem confirming your email';
+            });
 
-                // redirect to home page
-                $location.path('/');
-            } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
+            // redirect to home page
+            $location.path('/');
+        } else if ($location.path().indexOf('/reset/') > -1) { // user is resetting password
 
-                createShowSplash('passwordReset');
+            createShowSplash('passwordReset');
 
-                // get token from url
-                var token = $location.path().slice(7);
+            // get token from url
+            var token = $location.path().slice(7);
 
-                $http.post('/resetConfirm/' + token, {}, {
-                    server: true
-                }).
-                success(function(data) {}).
-                error(function(err) {
-                    if (err) {
-                        console.log('err: ', err);
-                    }
-                });
-            } else {
+            $http.post('/resetConfirm/' + token, {}, {
+                server: true
+            }).
+            success(function(data) {}).
+            error(function(err) {
+                if (err) {
+                    console.log('err: ', err);
+                }
+            });
+        } else {
+            // only show splash on home page
+            if ($location.path() === '/') {
                 userManager.getUser().then(function(success) {
                     createShowSplash(true);
                 }, function(err) {
                     createShowSplash(false);
                 });
-                // use keychain and facebook to set splash on phonegap. use login status to set splash on web
-            } //END OF OUTER ELSE
+            } else {
+                $scope.show.splash = false;
+            }
+            // use keychain and facebook to set splash on phonegap. use login status to set splash on web
+        } //END OF OUTER ELSE
 
-        } //END OF INIT
+    } //END OF INIT
 
     function fbSignIn() {
         userManager.fbLogin('onSignIn').then(function(data) {
@@ -26560,9 +26563,9 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 
 app.factory('contestUploadService', contestUploadService);
 
-contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree', 'alertManager'];
+contestUploadService.$inject = ['$upload', '$q', '$http', 'geoService', 'worldTree', 'alertManager'];
 
-function contestUploadService($upload, $q, geoService, worldTree, alertManager) {
+function contestUploadService($upload, $q, $http, geoService, worldTree, alertManager) {
 
 	return {
 		uploadImage: uploadImage
@@ -26590,7 +26593,21 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 			data.userLon = coords.lng;
 			return deferred.resolve(uploadPicture(file, world, data));
 		}, function(err) {
-			return deferred.resolve(uploadPicture(file, world, data));
+			var newData = {
+				server: true,
+				params: {
+					hasLoc: false
+				}
+			}
+			$http.get('/api/geolocation', newData)
+				.success(function(locInfo) {
+					data.userLat = locInfo.lat;
+					data.userLon = locInfo.lng;
+					return deferred.resolve(uploadPicture(file, world, data));
+				})
+				.error(function() {
+					return deferred.resolve(uploadPicture(file, world, data));
+				})
 		});
 
 		return deferred.promise;
