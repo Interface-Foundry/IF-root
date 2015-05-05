@@ -24398,8 +24398,6 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
     init();
 
-
-
     function init() {
         // special case for aicp to prevent splash page
         if ($location.path().indexOf('aicpweek2015') > -1) {
@@ -24443,11 +24441,16 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
                 }
             });
         } else {
-            userManager.getUser().then(function(success) {
-                createShowSplash(true);
-            }, function(err) {
-                createShowSplash(false);
-            });
+            // only show splash on home page
+            if ($location.path() === '/') {
+                userManager.getUser().then(function(success) {
+                    createShowSplash(true);
+                }, function(err) {
+                    createShowSplash(false);
+                });
+            } else {
+                $scope.show.splash = false;
+            }
             // use keychain and facebook to set splash on phonegap. use login status to set splash on web
         } //END OF OUTER ELSE
 

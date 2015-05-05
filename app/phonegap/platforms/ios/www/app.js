@@ -24697,8 +24697,6 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
     init();
 
-
-
     function init() {
         // special case for aicp to prevent splash page
         if ($location.path().indexOf('aicpweek2015') > -1) {
