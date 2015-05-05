@@ -2,9 +2,9 @@
 
 app.factory('contestUploadService', contestUploadService);
 
-contestUploadService.$inject = ['$upload', '$q', 'geoService', 'worldTree', 'alertManager'];
+contestUploadService.$inject = ['$upload', '$q', '$http', 'geoService', 'worldTree', 'alertManager'];
 
-function contestUploadService($upload, $q, geoService, worldTree, alertManager) {
+function contestUploadService($upload, $q, $http, geoService, worldTree, alertManager) {
 
 	return {
 		uploadImage: uploadImage
@@ -32,7 +32,21 @@ function contestUploadService($upload, $q, geoService, worldTree, alertManager) 
 			data.userLon = coords.lng;
 			return deferred.resolve(uploadPicture(file, world, data));
 		}, function(err) {
-			return deferred.resolve(uploadPicture(file, world, data));
+			var newData = {
+				server: true,
+				params: {
+					hasLoc: false
+				}
+			}
+			$http.get('/api/geolocation', newData)
+				.success(function(locInfo) {
+					data.userLat = locInfo.lat;
+					data.userLon = locInfo.lng;
+					return deferred.resolve(uploadPicture(file, world, data));
+				})
+				.error(function() {
+					return deferred.resolve(uploadPicture(file, world, data));
+				})
 		});
 
 		return deferred.promise;
