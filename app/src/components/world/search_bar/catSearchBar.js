@@ -1,4 +1,4 @@
-app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter) {
+app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', 'deviceManager', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter, deviceManager) {
 
 	return {
 		restrict: 'E',
@@ -13,8 +13,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 		},
 		templateUrl: 'components/world/search_bar/catSearchBar.html',
 		link: function(scope, elem, attrs) {
-			// var offset = $('.search-cat').offset().top;
-			var scrollState = false;
+			var offset = $('.search-cat').offset().top;
 			var noResultsText = bubbleSearchService.defaultText.none;
 			var defaultText;
 
@@ -69,11 +68,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 						scope.text = defaultText;
 					}
 
-					if (scope.mode === 'home' && scrollState) {
-						// $('.wrap').animate({
-						// 	scrollTop: 0
-						// }, 400);
-						// scrollState = false;
+					if (scope.mode === 'home') {
 					} else {
 						if (apertureService.state !== 'aperture-full') {
 							apertureService.set('third');
@@ -93,14 +88,16 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 				}
 
 				// set aperture or scroll
-				if (scope.mode === 'home' && !scrollState) {
-					// var navHeight = parseInt($('.main-nav').css('height'));
-					// var marginTop = parseInt($('.search-cat').css('margin-top'));
-					// $('.wrap').animate({
-					// 	// subtract nav bar height and searchbar's margin-top
-					// 	scrollTop: offset - (navHeight + marginTop)
-					// }, 400);
-					// scrollState = true;
+				if (scope.mode === 'home') {
+					if (deviceManager.os === 'android') {
+						// fixes bug on andorid native browser where elements in focus don't scroll when keyboard pops up
+						var navHeight = parseInt($('.main-nav').css('height'));
+						var marginTop = parseInt($('.search-cat').css('margin-top'));
+						$('.wrap').animate({
+							// subtract nav bar height and searchbar's margin-top
+							scrollTop: offset - (navHeight + marginTop)
+						}, 400);
+					}
 				} else {
 					if (apertureService.state !== 'aperture-full') {
 						apertureService.set('off');
