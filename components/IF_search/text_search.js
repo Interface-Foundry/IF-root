@@ -55,8 +55,6 @@ var route = function(textQuery, lat, lng, userTime, res) {
                         $meta: "textScore"
                     }
                 }
-            }, {
-                $limit: 50
             },
             function(err, data) {
                 if (err) {
@@ -67,8 +65,8 @@ var route = function(textQuery, lat, lng, userTime, res) {
                 var i = data.length;
                 var found = false;
                 while (i--) {
-                    if (data[i].permissions && data[i].permissions.ownerID) {
-                        // console.log('Found world with ownerID: ', data[i].name, data[i].permissions)
+                    if (data[i].landmarkCategories && data[i].landmarkCategories.length > 0) {
+                        //console.log('Found world with ownerID: ', data[i].name, data[i].landmarkCategories.length)
                         found = true;
                     }
                 }
@@ -94,13 +92,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
 
     async.series([
             function(callback) {
-                searchWorlds(callback, 0.5)
-            },
-            function(callback) {
-                searchWorlds(callback, 2.5)
-            },
-            function(callback) {
-                searchWorlds(callback, 5)
+                searchWorlds(callback, 20)
             },
             function(callback) {
                 searchWorlds(callback, 50)
@@ -115,14 +107,22 @@ var route = function(textQuery, lat, lng, userTime, res) {
             results = results[results.length - 1]
 
             // :ﾟ・✧ special ranking stuff ✧・ﾟ:
-            var rankedResults = results.map(function(r) {
+            var rankedResults = results.map(function(r, i) {
+				var distance = geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat); // km
+				var distance_score = 0;
+				// all things 5km or more away get 0 for distance
+				// all things closer get scored linearly based on how close they are, with a max score of 10 (2*5)
+				if (distance < 5) {
+					distance_score = 2*(5 - distance); // 
+				}
+
                 return {
                     result: r,
                     ranking: {
-                        distance: geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat),
-                        text_ranking: 10, // todo
-                        has_ownerID: r.permissions.ownerID ? 100 : 0,
-                        has_categories: r.landmarkCategories & r.landmarkCategories.length > 0 ? 1000 : 0,
+                        distance: distance_score,
+                        text_ranking: 10/(i+1), // todo
+                        has_ownerID: r.permissions.ownerID ? 10 : 0,
+                        has_categories: (r.landmarkCategories && r.landmarkCategories.length) > 0 ? 1000 : 0,
                     }
                 };
             }).map(function(r) {
@@ -130,6 +130,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                 r.totalScore = Object.keys(r.ranking).reduce(function(value, k) {
                     return value + (r.ranking[k] || 0);
                 }, 0);
+				return r;
             })
 
             rankedResults.sort(function(a, b) {
@@ -138,12 +139,26 @@ var route = function(textQuery, lat, lng, userTime, res) {
             });
 
             // debug the sort if needed
-            //console.log(results);
+			/*
+            console.log(rankedResults.map(function(r) {
+				return {
+					ranking: r.ranking,
+					id: r.result.id,
+					totalScore: r.totalScore,
+					ownerID: r.result.permissions.ownerID
+				};
+			}).reverse());
+			*/
 
             // Results have been sorted, now convert back to regular array
             results = rankedResults.map(function(r){
                 return r.result; // the original mongodb object
             });
+
+			// limit results to 50
+			if (results.length > 50) {
+				results = results.slice(0,50);
+			}
 
             //Retreive parent IDs to query for parent world names for each landmark
 
@@ -196,7 +211,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                             }
                         });
                         if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
-                            results = [queenscenter].concat(results);
+                           // results = [queenscenter].concat(results);
                         }
 
                         // add atlantic center if not found
