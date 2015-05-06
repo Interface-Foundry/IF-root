@@ -3493,44 +3493,135 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 // Delete
 app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
 
-        if (req.params.collection == 'worldchat'){
+    var sID = sanitize(req.params.id);
 
-            worldchatSchema.findById(req.params.id, function(err, chat) {
-                if (err) {
-                    return handleError(res, err);
-                }
-                if (!chat) {
-                    return res.sendStatus(404);
-                }
+    switch (req.params.collection) {
+        case 'worldchat':
+                worldchatSchema.findById(sID, function(err, chat) {
+                    if (err) {
+                        return handleError(res, err);
+                    }
+                    if (!chat) {
+                        return res.sendStatus(404);
+                    }
 
-                //is this your chat?
-                if (chat.userID == req.user._id) {
+                    //is this your chat?
+                    if (chat.userID == req.user._id || req.user.admin) {
 
-                    worldchatSchema.remove({ _id: req.params.id }, function(err) {
-                        if (err) {
-                            res.sendStatus(500);
-                            console.log(err);
+                        worldchatSchema.remove({ _id: sID }, function(err) {
+                            if (err) {
+                                res.sendStatus(500);
+                                console.log(err);
+                            }
+                            else {
+                                res.sendStatus(200);
+                            }
+                        });
+                    }
+                    else {
+                        res.sendStatus(403); //nope it's not!
+                    }      
+                });
+        break;
+
+        case 'landmarks':
+                landmarkSchema.findById(sID, function(err, lm) {
+                    if (err) {
+                        return handleError(res, err);
+                    }
+                    if (!lm) {
+                        return res.sendStatus(404);
+                    }
+
+                    //is this your bubble?
+                    if (lm.permissions){
+                        if (lm.permissions.ownerID == req.user._id || req.user.admin) { 
+
+                            landmarkSchema.remove({ _id: sID }, function(err) {
+                                if (err) {
+                                    res.sendStatus(500);
+                                    console.log(err);
+                                }
+                                else {
+                                    res.sendStatus(200);
+                                }
+                            });
                         }
                         else {
-                            res.sendStatus(200);
-                        }
-                    });
-                }
-                else {
-                    res.sendStatus(403); //nope it's not!
-                }      
-            });
+                            res.sendStatus(403); //nope it's not!
+                        }                   
+                    }
+                    else {
+                        res.sendStatus(403); //nope it's not!
+                    }
+        
+                });
+            break;
 
-        }
-        else {
+            case 'user':
+                //suicide route
+                User.findById(sID, function(err, lm) {
+                    if (err) {
+                        return handleError(res, err);
+                    }
+                    if (!lm) {
+                        return res.sendStatus(404);
+                    }
 
-            // db.collection(req.params.collection).remove({
-            //     _id: objectId(req.params.id)
-            // }, {
-            //     safe: true
-            // }, fn(req, res));    
-                  
-        }
+                    console.log(lm._id);
+                    console.log(req.user._id);
+                    //is this you?
+                    if (req.user.admin) { 
+
+                        User.remove({ _id: sID }, function(err) {
+                            if (err) {
+                                res.sendStatus(500);
+                                console.log(err);
+                            }
+                            else {
+                                res.sendStatus(200);
+                            }
+                        });
+                    }
+                    else {
+                        res.sendStatus(403); //nope it's not!
+                    }                   
+                });
+            break;
+
+            case 'contestentry':
+                contestEntrySchema.findById(sID, function(err, lm) {
+                    if (err) {
+                        return handleError(res, err);
+                    }
+                    if (!lm) {
+                        return res.sendStatus(404);
+                    }
+
+                    //is this your contest entry?
+                    if (lm.userID == req.user._id || req.user.admin) { 
+
+                        contestEntrySchema.remove({ _id: sID }, function(err) {
+                            if (err) {
+                                res.sendStatus(500);
+                                console.log(err);
+                            }
+                            else {
+                                res.sendStatus(200);
+                            }
+                        });
+                    }
+                    else {
+                        res.sendStatus(403); //nope it's not!
+                    }                   
+                });
+            break;
+
+            default:
+                res.sendStatus(403); //not a valid collection
+                console.log('not a valid collection to delete from');
+    }
+
 });
 
 //Group
