@@ -6,7 +6,7 @@
 	<div class="twitter-wrap wrap" lazy-load load-more="throttledLoadTweets()">
 		<ul>
 			<li ng-repeat="tweet in tweets track by $index" class="tweet marble-page">
-				<a ng-href="https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}">
+				<a href="#" ng-click="newWindowGo('https://twitter.com/{{tweets[0].user.name}}/status/{{tweets[0].tweetID_str}}')">
 					<img if-src="{{tweet.user.profile_image_url | httpsify}}" class="twitter-avatar"> <strong>{{tweet.user.name || tweet.user.screen_name}}</strong> 
 					<hr class="divider">
 				</a>

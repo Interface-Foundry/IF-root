@@ -1,4 +1,4 @@
-app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', 'newWindowService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService, newWindowService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -93,9 +93,8 @@ scope.feedback = function() {
 //show feedback
 
 
-function newWindowGo(path) {
-    // for opening phonegap links in mobile browser
-    $window.open(path, '_system');
+scope.newWindowGo = function(path) {
+  newWindowService.go(path);
 }
 
 scope.logout = userManager.logout;

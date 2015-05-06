@@ -1,4 +1,4 @@
-app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
+app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', 'newWindowService', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager, newWindowService) {
 
     $scope.contest = contest;
     $scope.userManager = userManager;
@@ -351,10 +351,8 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
     }
 
     function newWindowGo(path) {
-        // for opening phonegap links in mobile browser
-        $window.open(path, '_system');
+        newWindowService.go(path);
     }
-
 
 
 }]);
