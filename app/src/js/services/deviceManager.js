@@ -6,7 +6,7 @@ app.factory('deviceManager', ['$window', function($window) {
 		/**
 		 * browser: @value {String} one of [chrome, safari, firefox, ie, other]
 		 * deviceType: @value{String} one of [phone, tablet, desktop]
-		 * os: @value{String} one of [ios, web]
+		 * os: @value{String} one of [ios, android, windows, blackberry, other]. doesn't have to be native (could be iOS safari, for example)
 		 */
 	};
 
@@ -28,12 +28,8 @@ app.factory('deviceManager', ['$window', function($window) {
 		} else deviceManager.deviceType = 'desktop';
 
 		// set OS 
-		//@IFDEF PHONEGAP
-		deviceManager.os = 'ios';
-		//@ENDIF
-		//@IFDEF WEB
-		deviceManager.os = 'web';
-		//@ENDIF
+		var os = getOs();
+		deviceManager.os = os ? os : 'other';
 	}
 
 	function isMobilePhone() {
@@ -64,8 +60,24 @@ app.factory('deviceManager', ['$window', function($window) {
 			if (browsers[key].test(userAgent)) {
 				return key;
 		    }
-		};
+		}
         return false;
+	}
+
+	function getOs() {
+		var userAgent = $window.navigator.userAgent;
+		var os = {
+			ios: /iPhone|iPad|iPod/i,
+			android: /Android/i,
+			windows: /IEMobile/i,
+			blackberry: /BlackBerry/i
+		};
+		for (var key in os) {
+			if (os[key].test(userAgent)) {
+				return key;
+			}
+		}
+		return false;
 	}
 
 	return deviceManager;
