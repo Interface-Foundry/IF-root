@@ -2,12 +2,13 @@ var _ = require('underscore'),
     mongoose = require('mongoose'),
     sanitize = require('mongo-sanitize'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
-    async = require('async');
+    async = require('async'),
+    geoDistance = require('./distance'); // calculates distance between two points
 
 var queenscenter = require('./queenscenter');
 var atlanticterminal = require('./atlanticterminal');
 
-var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
+var route = function(textQuery, lat, lng, userTime, res) {
 
     var sText = sanitize(textQuery);
 
@@ -41,7 +42,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
                 loc: {
                     $geoWithin: {
                         $centerSphere: [
-                            [parseFloat(userCoord1), parseFloat(userCoord0)], distance / 3963.2
+                            [parseFloat(lng), parseFloat(lat)], distance / 3963.2
                         ]
                     }
                 }
@@ -113,17 +114,36 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
             results = results[results.length - 1]
 
-            //trying new method
-            function compare(a, b) {
-                console.log('A: ', a.permissions, 'B: ', b.permissions)
-                if (!a.permissions.ownerID && b.permissions.ownerID)
-                    return 1;
-                if (a.permissions.ownerID && !b.permissions.ownerID)
-                    return -1;
-                return 0;
-            }
+            // :ﾟ・✧ special ranking stuff ✧・ﾟ:
+            var rankedResults = results.map(function(r) {
+                return {
+                    result: r,
+                    ranking: {
+                        distance: geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat),
+                        text_ranking: 10, // todo
+                        has_ownerID: r.permissions.ownerID ? 100 : 0,
+                        has_categories: r.landmarkCategories & r.landmarkCategories.length > 0 ? 1000 : 0,
+                    }
+                };
+            }).map(function(r) {
+                // add up all the different scores
+                r.totalScore = Object.keys(r.ranking).reduce(function(value, k) {
+                    return value + (r.ranking[k] || 0);
+                }, 0);
+            })
 
-            results.sort(compare);
+            rankedResults.sort(function(a, b) {
+                // sort descending on totalScore
+                return b.totalScore - a.totalScore;
+            });
+
+            // debug the sort if needed
+            //console.log(results);
+
+            // Results have been sorted, now convert back to regular array
+            results = rankedResults.map(function(r){
+                return r.result; // the original mongodb object
+            });
 
             //Retreive parent IDs to query for parent world names for each landmark
 
@@ -225,7 +245,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
     //                 loc: {
     //                     $geoWithin: {
     //                         $centerSphere: [
-    //                             [parseFloat(userCoord1), parseFloat(userCoord0)], 0.5 / 3963.2
+    //                             [parseFloat(lng), parseFloat(lat)], 0.5 / 3963.2
     //                         ]
     //                     }
     //                 }
@@ -254,7 +274,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
     //                             loc: {
     //                                 $geoWithin: {
     //                                     $centerSphere: [
-    //                                         [parseFloat(userCoord1), parseFloat(userCoord0)], 2.5 / 3963.2
+    //                                         [parseFloat(lng), parseFloat(lat)], 2.5 / 3963.2
     //                                     ]
     //                                 }
     //                             }
@@ -282,7 +302,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
     //                                         loc: {
     //                                             $geoWithin: {
     //                                                 $centerSphere: [
-    //                                                     [parseFloat(userCoord1), parseFloat(userCoord0)], 5 / 3963.2
+    //                                                     [parseFloat(lng), parseFloat(lat)], 5 / 3963.2
     //                                                 ]
     //                                             }
     //                                         }
@@ -310,7 +330,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
     //                                                     loc: {
     //                                                         $geoWithin: {
     //                                                             $centerSphere: [
-    //                                                                 [parseFloat(userCoord1), parseFloat(userCoord0)], 50 / 3963.2
+    //                                                                 [parseFloat(lng), parseFloat(lat)], 50 / 3963.2
     //                                                             ]
     //                                                         }
     //                                                     }
@@ -390,7 +410,7 @@ var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
     //     { "$geoNear": {
     //       "near": {
     //         "type": "Point",
-    //         "coordinates": [parseFloat(userCoord1), parseFloat(userCoord0)]
+    //         "coordinates": [parseFloat(lng), parseFloat(lat)]
     //       },
     //       "distanceField": "distance",
     //       "minDistance": 1,
