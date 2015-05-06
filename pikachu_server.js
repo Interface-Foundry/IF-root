@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 // use sync version of exec
+// TODO upgrade to node.js 0.12.0 in order for this to work
 var exec = require('child_process').execSync;
 
 app.use(bodyParser.json({extended: true}));
