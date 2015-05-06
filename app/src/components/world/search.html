@@ -16,7 +16,7 @@
 		<div class="surface" ng-style="::{'background-color': style.bodyBG_color}">
 
 			<cat-search-bar ng-if="searchBarText && aperture.state !== 'aperture-full'" 
-				color="style.landmarkTitle_color"
+				color="style.categoryTitle_color"
 				text="searchBarText"
 				world="world"
 				populate-search-view="populateSearchView"
@@ -108,7 +108,7 @@
 
 <cat-search-bar class="search-aperture" 
 	ng-if="searchBarText && aperture.state === 'aperture-full'" 
-	color="style.landmarkTitle_color"
+	color="style.categoryTitle_color"
 	text="searchBarText"
 	world="world"
 	populate-search-view="populateSearchView"
