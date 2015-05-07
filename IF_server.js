@@ -645,6 +645,7 @@ var elasticsearch = require('./components/IF_search/elasticsearch.js');
 var elasticsearch_up = false; // health status
 
 // check elasticsearch health every 5 seconds
+/*  TODO fix elasticsearch server
 setInterval(function() {
     elasticsearch.healthcheck(function(err) {
         if (err) {
@@ -661,7 +662,7 @@ setInterval(function() {
         }
     });
 }, 15000);
-
+*/
 // Search route
 app.get('/api/textsearch', function(req, res, next) {
     if (elasticsearch_up) {
