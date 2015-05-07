@@ -19002,7 +19002,10 @@ function newWindowService($window) {
 	};
 
   function go(path) {
-  	// location=no will hide location bar on inAppBrowser but messes up web
+  	/***
+      location=no will hide location bar on inAppBrowser but messes up web
+      toolbarposition=top moves the inapp toolbar to the top and protects the status bar
+    */
     $window.open(path, '_blank', 'location=no,toolbarposition=top');
   }
 }
