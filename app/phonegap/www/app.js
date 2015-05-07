@@ -22761,6 +22761,20 @@ $scope.removePlaceImage = function () {
 $scope.buildLocalMap = function () {
 	console.log('--buildLocalMap--');
 	$scope.building = true;
+	// make sure map is at zoom 18 for consistency
+	if (map.center.zoom === 18) {
+		buildMapOnTileServer();
+	} else {
+		// if it's not at zoom 18, set it and wait for zoom to finish before building
+		map.center.zoom = 18;
+		var zoomWatch = $scope.$on('leafletDirectiveMap.moveend', function() {
+			buildMapOnTileServer();
+			zoomWatch();
+		});
+	}
+}
+
+function buildMapOnTileServer() {
 	//get image geo coordinates, add to var to send
 	var bounds = map.getPlaceImageBounds(),
 		southEast = bounds.getSouthEast(),
