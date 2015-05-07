@@ -1,4 +1,4 @@
-app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
+app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', 'newWindowService', function ($scope, $window, $location, styleManager, $rootScope, dialogs, newWindowService) {
 	var style = styleManager;
 
 	style.setNavBG("#ed4023")
@@ -31,10 +31,9 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		});
 	}
 
-    function newWindowGo(path) {
-        // for opening phonegap links in mobile browser
-        $window.open(path, '_system');
-    }
+  $scope.newWindowGo = function(path) {
+  	newWindowService.go(path);
+  }
 
 
 }]);

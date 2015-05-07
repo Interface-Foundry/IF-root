@@ -5869,6 +5869,29 @@ app.directive('fitFont', function($rootScope) { //used to fit font size to large
 	}
 });
 
+'use strict';
+
+app
+.directive('hrefListener', hrefListener);
+
+hrefListener.$inject = ['newWindowService'];
+
+/***
+ *  User generated html that includes links (world descriptions, tweets, etc)
+ *  will break phonegap by opening a link in the webview with no way to return.
+ *  This directive listens for clicks on elements that could contain links.
+ *  On mobile it will force the link to open in the InAppBrowser so users can return to the app.
+ */
+function hrefListener(newWindowService) {	
+  return {
+    restrict: 'A',
+    link: link
+  };
+
+  function link(scope, elem, attrs) {
+    return;
+  }
+}
 app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
 	return {
 		restrict: 'A',
@@ -18954,6 +18977,24 @@ return mapManager;
     }]);
 'use strict';
 
+app.factory('newWindowService', newWindowService);
+
+newWindowService.$inject = ['$window'];
+
+// for opening phonegap links with inAppBrowser and web links in a new tab
+function newWindowService($window) {
+
+	return {
+		go: go
+	};
+
+  function go(path) {
+    $window.open(path, '_blank');
+  }
+}
+
+'use strict';
+
 angular.module('tidepoolsServices')
     .factory('beaconManager', [ 'alertManager', '$interval', '$timeout', 'beaconData',
     	function(alertManager, $interval, $timeout, beaconData) {
@@ -21634,15 +21675,17 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests', 'styleManager'];
 
-function ContestController($scope, $routeParams, $sce, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests, styleManager) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
 	activate();
 
 	function activate() {
+		styleManager.resetNavBG();
+
 		Contests.get({
 			id: $scope.region
 		}).$promise
@@ -21729,7 +21772,7 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
   };
 }]);
 
-app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService) {
+app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', 'newWindowService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService, newWindowService) {
 	return {
 		restrict: 'EA',
 		scope: true,
@@ -21824,9 +21867,8 @@ scope.feedback = function() {
 //show feedback
 
 
-function newWindowGo(path) {
-    // for opening phonegap links in mobile browser
-    $window.open(path, '_system');
+scope.newWindowGo = function(path) {
+  newWindowService.go(path);
 }
 
 scope.logout = userManager.logout;
@@ -24384,7 +24426,7 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 	}
 }])
 
-app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
+app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', 'newWindowService', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager, newWindowService) {
 
     $scope.contest = contest;
     $scope.userManager = userManager;
@@ -24674,10 +24716,8 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
     }
 
     function newWindowGo(path) {
-        // for opening phonegap links in mobile browser
-        $window.open(path, '_system');
+        newWindowService.go(path);
     }
-
 
 
 }]);
@@ -25179,7 +25219,7 @@ app.controller('MeetupController', ['$scope', '$window', '$location', 'styleMana
 
 }]);
 
-app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', function ($scope, $window, $location, styleManager, $rootScope, dialogs) {
+app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleManager', '$rootScope', 'dialogs', 'newWindowService', function ($scope, $window, $location, styleManager, $rootScope, dialogs, newWindowService) {
 	var style = styleManager;
 
 	style.setNavBG("#ed4023")
@@ -25212,10 +25252,9 @@ app.controller('WelcomeController', ['$scope', '$window', '$location', 'styleMan
 		});
 	}
 
-    function newWindowGo(path) {
-        // for opening phonegap links in mobile browser
-        $window.open(path, '_system');
-    }
+  $scope.newWindowGo = function(path) {
+  	newWindowService.go(path);
+  }
 
 
 }]);
@@ -28311,7 +28350,7 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService) {
 
 var map = mapManager;
 	map.resetMap();
@@ -28364,6 +28403,10 @@ $scope.uploadWTGT = function($files, hashtag) {
 		$scope.wtgt.building[hashtag] = false;
 	});
 };
+
+$scope.newWindowGo = function(path) {
+	newWindowService.go(path);
+}
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {

@@ -37,7 +37,7 @@
 									<span ng-show="landmark.loc_info.room_name">Room: {{::landmark.loc_info.room_name}}</span>
 								</p>
 								<p>{{::landmark.summary}}</p>
-								<span ng-bind-html="landmark.description"></span>
+								<span href-listener ng-bind-html="landmark.description"></span>
 							</div>
 						</div>
 					</article>
