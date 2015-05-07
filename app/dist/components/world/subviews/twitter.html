@@ -12,7 +12,7 @@
 				</a>
 					<img if-src="{{tweet.media.media_url | httpsify}}" ng-if="tweet.media.media_type!=='instagram'" class="img-responsive">
 					<footer>
-						<div ng-bind-html="tweet.text | linky"></div>
+						<div href-listener ng-bind-html="tweet.text | linky"></div>
 						<p>{{::tweet.created | date:"MMM d, y h:mm a"}}</p>
 					</footer>
 			</li>

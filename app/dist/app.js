@@ -5876,6 +5876,12 @@ app
 
 hrefListener.$inject = ['newWindowService'];
 
+/***
+ *  User generated html that includes links (world descriptions, tweets, etc)
+ *  will break phonegap by opening a link in the webview with no way to return.
+ *  This directive listens for clicks on elements that could contain links.
+ *  On mobile it will force the link to open in the InAppBrowser so users can return to the app.
+ */
 function hrefListener(newWindowService) {	
   return {
     restrict: 'A',
