@@ -29,14 +29,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	deregFirstShow();
 }));
 
-$scope.$on('$routeChangeStart', function() {
-	$rootScope.pageLoading = true;
-});
-
-$scope.$on('$routeChangeSuccess', function() {
-	$rootScope.pageLoading = false;
-});
-
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};

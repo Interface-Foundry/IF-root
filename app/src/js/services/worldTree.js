@@ -230,6 +230,7 @@ worldTree.getNearby = function() {
 				success(function(locInfo) {
 					location.cityName = locInfo.cityName;
 					location.timestamp = Date.now();
+					location.src = locInfo.src;
 
 					geoService.updateLocation(location);
 
