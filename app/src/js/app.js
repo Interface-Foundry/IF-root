@@ -352,9 +352,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
-                $timeout(function() {
-                  $rootScope.pageLoading = false;
-                }, 0.5 * 1000);
+                $rootScope.isRouteLoading = false;
             });
         }
         return original.apply($location, [path]);

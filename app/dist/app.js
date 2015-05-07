@@ -5114,9 +5114,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
-                $timeout(function() {
-                  $rootScope.pageLoading = false;
-                }, 0.5 * 1000);
+                $rootScope.isRouteLoading = false;
             });
         }
         return original.apply($location, [path]);
@@ -19950,6 +19948,7 @@ worldTree.getNearby = function() {
 				success(function(locInfo) {
 					location.cityName = locInfo.cityName;
 					location.timestamp = Date.now();
+					location.src = locInfo.src;
 
 					geoService.updateLocation(location);
 
@@ -24089,14 +24088,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	deregFirstShow();
 }));
 
-$scope.$on('$routeChangeStart', function() {
-	$rootScope.pageLoading = true;
-});
-
-$scope.$on('$routeChangeSuccess', function() {
-	$rootScope.pageLoading = false;
-});
-
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -24383,6 +24374,29 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+
+app.directive('routeLoadingIndicator', ['$rootScope', '$timeout', function($rootScope, $timeout) {
+
+	return {
+		restrict: 'E',
+		template: '<div ng-show="isRouteLoading"><div class="routeLoading routeLoading--left"></div><div class="routeLoading routeLoading--right"></div></div>',
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		$rootScope.isRouteLoading = false;
+
+		$rootScope.$on('$routeChangeStart', function() {
+			$rootScope.isRouteLoading = true;
+		});
+
+		$rootScope.$on('$routeChangeSuccess', function() {
+			$rootScope.isRouteLoading = false;
+		})
+	}
+
+}]);
+
 
 app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager) {
 
@@ -25433,9 +25447,6 @@ $scope.files = {
 
 $scope.kinds = ifGlobals.kinds;
 
-$scope.spinLeft = false;
-$scope.spinLeftLong = false;
-
 var saveTimer = null;
 var alert = alertManager;
 
@@ -25455,18 +25466,11 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 		console.log('progress');
 		console.log(e);
 		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		$scope.spinLeft = true;
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
-		$scope.uploadFinished = true;
-
-		$scope.spinLeftLong = true;
-		$timeout(function() {
-			$scope.spinLeft = false;
-			$scope.spinLeftLong = false;
-		}, 1000);		
+		$scope.uploadFinished = true;	
 	});
 });
 
@@ -25804,7 +25808,7 @@ $scope.go = function(url) {
 	// to prevent page-loading animation from running indefinitely
 	// this function emits a routeChangeStart but NOT a routeChangeSuccess
 	_.defer(function() {
-		$rootScope.pageLoading = false;
+		$rootScope.isRouteLoading = false;
 	});
 }
 

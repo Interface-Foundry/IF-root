@@ -25,10 +25,57 @@
   animation-delay: -1.0s;
 }
 
-.loading-animation {
-	position: absolute;
-	z-index: 101;
-	top: 48px;
-	width: 100%;
-	height: 3px;
+.routeLoading {
+  position: absolute;
+  z-index: 101;
+  top: 48px;
+  height: 5px;
+  // border: 1px solid black;
+  background-color: @color-blue--routeLoadingIndicator;
+}
+
+@-webkit-keyframes routeLoading--left {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 0%}
+  50% {width: 50%; left: 0%}
+  90% {width: 0%; left: 0%}
+  100% {width: 0%; left: 0%}
+}
+
+@keyframes routeLoading--left {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 0%}
+  50% {width: 50%; left: 0%}
+  90% {width: 0%; left: 0%}
+  100% {width: 0%; left: 0%}
+}
+
+@-webkit-keyframes routeLoading--right {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 50%}
+  50% {width: 50%; left: 50%}
+  90% {width: 0%; left: 100%}
+  100% {width: 0%; left: 100%}
+}
+
+@keyframes routeLoading--right {
+  0% {width: 0%; left: 50%}
+  40% {width: 50%; left: 50%}
+  50% {width: 50%; left: 50%}
+  90% {width: 0%; left: 100%}
+  100% {width: 0%; left: 100%}
+}
+
+.routeLoading--left {
+  left: 50%;
+  width: 0%;
+  -webkit-animation: routeLoading--left 3s ease-in-out infinite;
+  animation: routeLoading--left 3s ease-in-out infinite;
+}
+
+.routeLoading--right {
+  left: 50%;
+  width: 0%;
+  -webkit-animation: routeLoading--right 3s ease-in-out infinite;
+  animation: routeLoading--right 3s ease-in-out infinite;
 }
