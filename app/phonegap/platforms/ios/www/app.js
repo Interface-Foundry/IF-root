@@ -21952,15 +21952,17 @@ function announcementsService($http) {
 
 app.controller('ContestController', ContestController);
 
-ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests'];
+ContestController.$inject = ['$scope', '$routeParams', '$sce', 'Contests', 'styleManager'];
 
-function ContestController($scope, $routeParams, $sce, Contests) {
+function ContestController($scope, $routeParams, $sce, Contests, styleManager) {
 	$scope.contest = {};
 	$scope.region = $routeParams.region;
 
 	activate();
 
 	function activate() {
+		styleManager.resetNavBG();
+
 		Contests.get({
 			id: $scope.region
 		}).$promise
