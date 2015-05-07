@@ -5869,6 +5869,23 @@ app.directive('fitFont', function($rootScope) { //used to fit font size to large
 	}
 });
 
+'use strict';
+
+app
+.directive('hrefListener', hrefListener);
+
+hrefListener.$inject = ['newWindowService'];
+
+function hrefListener(newWindowService) {	
+  return {
+    restrict: 'A',
+    link: link
+  };
+
+  function link(scope, elem, attrs) {
+    return;
+  }
+}
 app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
 	return {
 		restrict: 'A',

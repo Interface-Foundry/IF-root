@@ -5896,6 +5896,31 @@ app.directive('fitFont', function($rootScope) { //used to fit font size to large
 	}
 });
 
+'use strict';
+
+app
+.directive('hrefListener', hrefListener);
+
+hrefListener.$inject = ['newWindowService'];
+
+function hrefListener(newWindowService) {	
+  return {
+    restrict: 'A',
+    link: link
+  };
+
+  function link(scope, elem, attrs) {
+    elem.bind('click', function (e) {
+      e = e ||  window.event;
+      var element = e.target || e.srcElement;
+
+      if (element.tagName == 'A') {
+        newWindowService.go(element.href);
+        return false;
+      }
+    });
+  }
+}
 app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
 	return {
 		restrict: 'A',
@@ -18978,7 +19003,7 @@ function newWindowService($window) {
 
   function go(path) {
   	// location=no will hide location bar on inAppBrowser but messes up web
-    $window.open(path, '_blank', 'location=no');
+    $window.open(path, '_blank', 'location=no,toolbarposition=top');
   }
 }
 

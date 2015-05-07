@@ -14,7 +14,7 @@ function newWindowService($window) {
   function go(path) {
   	// @IFDEF PHONEGAP
   	// location=no will hide location bar on inAppBrowser but messes up web
-    $window.open(path, '_blank', 'location=no');
+    $window.open(path, '_blank', 'location=no,toolbarposition=top');
     // @ENDIF
 
     // @IFDEF WEB
