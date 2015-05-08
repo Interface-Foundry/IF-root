@@ -5890,7 +5890,8 @@ function hrefListener(newWindowService) {
     return;
   }
 }
-app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
+app.directive('ifHref', function() { 
+	//used to make URLs safe for both phonegap and web. all hrefs should use if-href
 	return {
 		restrict: 'A',
 		priority: 99, 
