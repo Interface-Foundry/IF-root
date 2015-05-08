@@ -28461,6 +28461,8 @@ $scope.newWindowGo = function(path) {
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
+
+	// REMOVE AICP
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
 		$rootScope.hide = true;
 		$timeout(function() {
@@ -28470,6 +28472,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}, 500);
 		return;
 	}
+	//////////////
 
   $scope.world = data.world;
 	$scope.style = data.style;
@@ -28553,19 +28556,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	var worldStyle = $scope.world.style;
 	map.groupFloorMaps(worldStyle);
 
-		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
-		}
+	if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+		zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+	}
 
-		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
-			map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
-		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
-		} else {
-			console.warn('No base layer found! Defaulting to forum.');
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
-		}
-	// }
+	if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+		map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+	} else if (worldStyle.maps.cloudMapName === 'none') {
+		map.layers.baselayers = {};
+		angular.element('#leafletmap')[0].style['background-color'] = 'black';
+	} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
+	} else {
+		console.warn('No base layer found! Defaulting to forum.');
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+	}
 	
 	$scope.loadLandmarks();
 }
