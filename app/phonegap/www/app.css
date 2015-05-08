@@ -2181,9 +2181,21 @@ background: linear-gradient(to right,  #abd362 0%,#43c2e9 100%);
 }
 
 .schedule-wrap {
-	padding-top: 88px;
+	padding-top: 104px;
 }
 /* app css stylesheet */
+
+html {
+	-webkit-user-select: none;
+}
+
+.bubble-inspector { 
+	top:29px; 
+}
+
+.calendar-view {
+	top:17px  
+}
 
 /* 
 MAIN ELEMENTS & UX HOOKS
@@ -2225,6 +2237,7 @@ body {
 
 .navfix {
 	padding-top: 48px;
+	/*padding-top: 64px;*/
 }
 
 #scrim {
@@ -2637,12 +2650,6 @@ transform:translateX(100%);
   transform: translate3d(0, 35%, 0);
   -webkit-transform: translate3d(0, 35%, 0);
 }
-/*	changing the shelf-surface size leads to flickering on mobile 
-		but seems to be necessary on web to allow for scrolling the whole
-		bubble shelf */
-.aperture-third .shelf-surface {
-  height: 65%;
-}
 .aperture-pop {
   /*only shown on aperture pop*/
   height: 35%;
@@ -2718,6 +2725,7 @@ transform:translateX(100%);
   padding: 0px;
   margin: 0px;
   background: none;
+  top: 15px;
   z-index: 1010;
 }
 .drawer-icon {
@@ -5512,6 +5520,19 @@ div.marker-popup-click {
   height: 30px;
   top: 14px;
   width: 30px;
+}
+.nearby-widget-avatar--aicp.img-responsive {
+  height: 80px;
+}
+.marginBottom10--aicp {
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+.marginBottom10--aicp:hover {
+  opacity: 1;
+}
+.marginBottom10--aicp.opacity100 {
+  opacity: 1;
 }
 nav {
   pointer-events: auto;
@@ -9313,8 +9334,8 @@ input[type="button"].btn-block {
 
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('/fonts/glyphicons-halflings-regular.eot');
-  src: url('/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/fonts/glyphicons-halflings-regular.woff') format('woff'), url('/fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  src: url('fonts/glyphicons-halflings-regular.eot');
+  src: url('fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('fonts/glyphicons-halflings-regular.woff') format('woff'), url('fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;

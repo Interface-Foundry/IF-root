@@ -1,0 +1,32 @@
+<!-- REMOVE AICP -->
+<header class="marble-page-header" ng-style="{color: style.categoryTitle_color}">
+	<div class="marble-page-header-icon">
+		<img src="img/icons/view_nearby_16.png" style="display: block;" width="16px" height="16px">
+	</div>
+	Explore AICP Events
+</header>
+
+<article class="marble-page-content">
+	<ul>
+		<li class="col-xs-4 marginBottom10--aicp" ng-class="{'opacity100': worldURL.indexOf('tuesday') > -1}">
+			<a if-href="#/w/aicpweek2015_tuesday">
+				<img class="img-responsive nearby-widget-avatar nearby-widget-avatar--aicp text-center" src="img/mapbox/arabesque_small.png">
+			</a>
+			<h6 class="text-center">AICP Tuesday</h6>
+		</li>
+
+		<li class="col-xs-4 marginBottom10--aicp" ng-class="{'opacity100': worldURL.indexOf('wednesday') > -1}">
+			<a if-href="#/w/aicpweek2015_wednesday">
+				<img class="img-responsive nearby-widget-avatar nearby-widget-avatar--aicp text-center" src="img/mapbox/fairy_small.png">
+			</a>
+			<h6 class="text-center">AICP Wednesday</h6>
+		</li>
+
+		<li class="col-xs-4 marginBottom10--aicp" ng-class="{'opacity100': worldURL.indexOf('thursday') > -1}">
+			<a if-href="#/w/aicpweek2015_thursday">
+				<img class="img-responsive nearby-widget-avatar nearby-widget-avatar--aicp text-center" src="img/mapbox/haze_small.png">
+			</a>
+			<h6 class="text-center">AICP Thursday</h6>
+		</li>
+	</ul>
+</article>

@@ -5513,6 +5513,19 @@ div.marker-popup-click {
   top: 14px;
   width: 30px;
 }
+.nearby-widget-avatar--aicp.img-responsive {
+  height: 80px;
+}
+.marginBottom10--aicp {
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+.marginBottom10--aicp:hover {
+  opacity: 1;
+}
+.marginBottom10--aicp.opacity100 {
+  opacity: 1;
+}
 nav {
   pointer-events: auto;
 }
