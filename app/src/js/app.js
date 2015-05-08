@@ -31,9 +31,22 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-// var setWelcome = function(welcomeService) {
-//   welcomeService.needsWelcome = true;
-// }
+// REMOVE AICP
+var dayOfWeek = function($location) {
+  var today = moment().dayOfYear();
+  var path = $location.path();
+  switch (today) {
+    case 154:
+      $location.path(path + '_June3');
+      break;
+    case 155:
+      $location.path(path + '_June4');
+      break;
+    default:
+      $location.path(path + '_June2');
+  }
+}
+///////////////
 
     //================================================
     
@@ -83,6 +96,13 @@ var updateTitle = function($rootScope) {
     //================================================
 $routeProvider.
 
+  // REMOVE AICP
+  when('/w/aicpweek2015', {
+    resolve: {
+      'dayOfWeek': dayOfWeek
+    }
+  }).
+  ///////////////
   when('/', {
     templateUrl: 'components/home/home.html', 
     controller: 'HomeController', 
