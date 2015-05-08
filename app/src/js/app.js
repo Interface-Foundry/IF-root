@@ -31,22 +31,6 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-// REMOVE AICP
-var dayOfWeek = function($location) {
-  var today = moment().dayOfYear();
-  var path = $location.path();
-  switch (today) {
-    case 154:
-      $location.path(path + '_June3');
-      break;
-    case 155:
-      $location.path(path + '_June4');
-      break;
-    default:
-      $location.path(path + '_June2');
-  }
-}
-///////////////
 
     //================================================
     
@@ -99,7 +83,9 @@ $routeProvider.
   // REMOVE AICP
   when('/w/aicpweek2015', {
     resolve: {
-      'dayOfWeek': dayOfWeek
+      dayOfWeek: function(aicpRoutingService) {
+        return aicpRoutingService.route();
+      }
     }
   }).
   ///////////////
