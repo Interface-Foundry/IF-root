@@ -1,10 +1,18 @@
 <div class="row">
 	<div ng-repeat="(key, map) in mapThemes" class="col-xs-12 col-sm-6">
 		<label>{{::map.name}}</label>
-		<div class="edit-map-card"
+		<div class="edit-map-card u-pointer"
 			ng-class="{selected: mapThemeSelect == key}">
 			<img ng-src="{{map.img}}" class="img-responsive"
 				ng-click="selectMapTheme(key)">
+		</div>
+	</div>
+	<div class="col-xs-12 col-sm-6">
+		<label>None</label>
+		<div class="u-pointer edit-map-card"
+			ng-click="selectMapTheme('none')"
+			ng-class="{selected: mapThemeSelect == 'none'}">
+			<span>None</span>
 		</div>
 	</div>
 </div>
