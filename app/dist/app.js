@@ -18968,6 +18968,9 @@ mapManager.loadBubble = function(bubble, config) {
 		
 				if (tilesDict.hasOwnProperty(bubble.style.maps.cloudMapName)) {
 					mapManager.setBaseLayer(tilesDict[bubble.style.maps.cloudMapName]['url']);
+				} else if (bubble.style.maps.cloudMapName === 'none') {
+					mapManager.layers.baselayers = {};
+					angular.element('#leafletmap')[0].style['background-color'] = 'black';
 				} else if (bubble.style.maps.hasOwnProperty('cloudMapID')) {
 					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+bubble.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
 				} else {
@@ -22099,6 +22102,11 @@ function validateFloorNum(floor_num) {
 $scope.selectMapTheme = function(key) {
 	if (typeof name === 'string') {
 		$scope.mapThemeSelect = key;
+
+		if (key === 'none') {
+			hideMap();
+			return;
+		}
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.mapThemes[key].cloudMapID+'/{z}/{x}/{y}.png');
 		
 		$scope.world.style.maps.cloudMapName = $scope.mapThemes[key].cloudMapName;
@@ -22108,6 +22116,13 @@ $scope.selectMapTheme = function(key) {
 			$scope.setThemeFromMap();
 		}
 	}
+}
+
+function hideMap() {
+	map.layers.baselayers = {};
+	angular.element('#leafletmap')[0].style['background-color'] = 'black';
+	$scope.world.style.maps.cloudMapName = 'none';
+	$scope.world.style.maps.cloudMapID = 'none';
 }
 
 $scope.setThemeFromMap = function() {
@@ -22321,6 +22336,10 @@ $scope.loadWorld = function(data) {
 		
 		if ($scope.world.hasOwnProperty('style')==false) {$scope.world.style = {};}
 		if ($scope.world.style.hasOwnProperty('maps')==false) {$scope.world.style.maps = {};}
+		if ($scope.world.style.maps.cloudMapName === 'none') {
+			mapManager.layers.baselayers = {};
+			angular.element('#leafletmap')[0].style['background-color'] = 'black';
+		}
 		if ($scope.world.hasOwnProperty('landmarkCategories')==false) {$scope.world.landmarkCategories = [];}
 		
 		if ($scope.world.style.maps.cloudMapName) {
@@ -22330,26 +22349,6 @@ $scope.loadWorld = function(data) {
 			$scope.selectMapTheme('arabesque');
 		}
 		
-		/*if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
-			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
-			map.refresh();
-		}*/
-		
-
-		// var theseMaps = [$scope.world.style.maps];
-
-		// if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
-		// 	theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
-		// }
-
-		// theseMaps.forEach(function(thisMap) {
-		// 	if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-		// 		map.addOverlay(thisMap.localMapID, 
-		// 						thisMap.localMapName, 
-		// 						thisMap.localMapOptions);
-		// 	}
-		// })
-
 		turnOnFloorMaps();
 		
 		if (!$scope.style.bodyBG_color) {
@@ -22626,80 +22625,6 @@ function showPosition(position) {
 function locError(){
         // console.log('no loc');
 }
-
-
-
-
-
-	// //---- Adding Local Maps -----//
-
-	// $scope.addLandmarkCategory = function() {
-
-	// 	if ($scope.temp) {
-
-	// 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
-
-	// 		// console.log('----- TEST')
-	// 		// console.log($scope.world.landmarkCategories);
-
-	// 		console.log($scope.world);
-	// 		delete $scope.temp.LandmarkCatAvatar;
-	// 		delete $scope.temp.LandmarkCategory;
-	// 		$scope.temp.landmarkPresent = false;
-	// 		$scope.uploadFinishedLandmark = false;
-	// 		console.log($scope.temp.LandmarkCatAvatar);
-	// 	}
-	// }
-
-	// $scope.removeLandmarkCategory = function(index) {
-	// 	$scope.world.landmarkCategories.splice(index, 1);
-	// }
-
-
-
-	// $scope.newMap = function(){
-
-	// 	//check if there are floor numbers registered, default to 0
-	// 	//populate dropdown with registered floors
-
-	// 	//if loc_info already exists, add 1
-	// 	if ($scope.landmark.loc_info){		
-	// 		if ($scope.landmark.loc_info.floor_num == null){
-	// 			$scope.landmark.loc_info.floor_num = 1;
-	// 		}
-	// 	}
-
-	// 	addLocInfo();
-	// }
-
-	// //if loc info, then load floor numbers / room names
-	// if ($scope.$parent.landmark.loc_info){
-	// 	addLocInfo();
-	// }
-
-	// function addLocInfo() {
-
-	// 	//read landmark floor array, cp to $scope
-
-	// 	$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"}];  
-
-	// 	//IF no loc_info, then floor_num = 0
-	// 	if (!$scope.$parent.landmark.loc_info){
-	// 		$scope.$parent.landmark.loc_info = {
-	// 			floor_num: 1
-	// 		};  		
-	// 	}
-	// }
-	// //onclick hide location details
-	// $scope.clearMap = function(){
-
-	// 	//console.log('asdfasdfasdf');
-	// 	//delete $scope.$parent.landmark.loc_info;
-
-	// 	$scope.landmark.loc_info.floor_num = null;
-	// 	$scope.landmark.loc_info.room_name = null;
-	// }
-	// //--------------------------//
 
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
@@ -28462,6 +28387,8 @@ $scope.newWindowGo = function(path) {
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
+
+	// REMOVE AICP
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
 		$rootScope.hide = true;
 		$timeout(function() {
@@ -28471,6 +28398,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}, 500);
 		return;
 	}
+	//////////////
 
   $scope.world = data.world;
 	$scope.style = data.style;
@@ -28554,19 +28482,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	var worldStyle = $scope.world.style;
 	map.groupFloorMaps(worldStyle);
 
-		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
-		}
+	if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+		zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+	}
 
-		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
-			map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
-		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
-		} else {
-			console.warn('No base layer found! Defaulting to forum.');
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
-		}
-	// }
+	if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+		map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+	} else if (worldStyle.maps.cloudMapName === 'none') {
+		map.layers.baselayers = {};
+		angular.element('#leafletmap')[0].style['background-color'] = 'black';
+	} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
+	} else {
+		console.warn('No base layer found! Defaulting to forum.');
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+	}
 	
 	$scope.loadLandmarks();
 }

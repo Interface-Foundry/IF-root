@@ -873,6 +873,9 @@ mapManager.loadBubble = function(bubble, config) {
 		
 				if (tilesDict.hasOwnProperty(bubble.style.maps.cloudMapName)) {
 					mapManager.setBaseLayer(tilesDict[bubble.style.maps.cloudMapName]['url']);
+				} else if (bubble.style.maps.cloudMapName === 'none') {
+					mapManager.layers.baselayers = {};
+					angular.element('#leafletmap')[0].style['background-color'] = 'black';
 				} else if (bubble.style.maps.hasOwnProperty('cloudMapID')) {
 					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+bubble.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
 				} else {
