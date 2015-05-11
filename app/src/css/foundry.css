@@ -3013,6 +3013,9 @@ div.marker-popup-click {
 .marginBottom10--aicp.opacity100 {
   opacity: 1;
 }
+.blueRibbonHeight--aicp {
+  height: 200px;
+}
 nav {
   pointer-events: auto;
 }

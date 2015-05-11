@@ -4846,9 +4846,6 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-// var setWelcome = function(welcomeService) {
-//   welcomeService.needsWelcome = true;
-// }
 
     //================================================
     
@@ -4896,6 +4893,15 @@ var updateTitle = function($rootScope) {
     //================================================
 $routeProvider.
 
+  // REMOVE AICP
+  when('/w/aicpweek2015', {
+    resolve: {
+      dayOfWeek: function(aicpRoutingService) {
+        return aicpRoutingService.route();
+      }
+    }
+  }).
+  ///////////////
   when('/', {
     templateUrl: 'components/home/home.html', 
     controller: 'HomeController', 
@@ -5141,9 +5147,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
-                $timeout(function() {
-                  $rootScope.pageLoading = false;
-                }, 0.5 * 1000);
+                $rootScope.isRouteLoading = false;
             });
         }
         return original.apply($location, [path]);
@@ -5927,7 +5931,8 @@ function hrefListener(newWindowService) {
     });
   }
 }
-app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
+app.directive('ifHref', function() { 
+	//used to make URLs safe for both phonegap and web. all hrefs should use if-href
 	return {
 		restrict: 'A',
 		priority: 99, 
@@ -20285,6 +20290,7 @@ worldTree.getNearby = function() {
 				success(function(locInfo) {
 					location.cityName = locInfo.cityName;
 					location.timestamp = Date.now();
+					location.src = locInfo.src;
 
 					geoService.updateLocation(location);
 
@@ -21903,6 +21909,34 @@ function FourOhFourController($scope, mapManager, apertureService, navService) {
 }
 'use strict';
 
+app.factory('aicpRoutingService', aicpRoutingService);
+
+aicpRoutingService.$inject = ['$location'];
+
+function aicpRoutingService($location) {
+	return {
+		route: route
+	}
+
+  // reroutes /w/aicpweek2015 to specific AICP bubble based on the current day
+	function route() {
+		var today = moment().dayOfYear();
+    var path = $location.path();
+
+    switch (today) {
+      case 154:
+        $location.path(path + '_thursday');
+        break;
+      case 155:
+        $location.path(path + '_wednesday');
+        break;
+      default:
+        $location.path(path + '_tuesday');
+    }
+	}
+}
+'use strict';
+
 app.directive('announcements', announcements);
 
 announcements.$inject = ['$timeout', 'announcementsService'];
@@ -22761,6 +22795,20 @@ $scope.removePlaceImage = function () {
 $scope.buildLocalMap = function () {
 	console.log('--buildLocalMap--');
 	$scope.building = true;
+	// make sure map is at zoom 18 for consistency
+	if (map.center.zoom === 18) {
+		buildMapOnTileServer();
+	} else {
+		// if it's not at zoom 18, set it and wait for zoom to finish before building
+		map.center.zoom = 18;
+		var zoomWatch = $scope.$on('leafletDirectiveMap.moveend', function() {
+			buildMapOnTileServer();
+			zoomWatch();
+		});
+	}
+}
+
+function buildMapOnTileServer() {
 	//get image geo coordinates, add to var to send
 	var bounds = map.getPlaceImageBounds(),
 		southEast = bounds.getSouthEast(),
@@ -24432,14 +24480,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	deregFirstShow();
 }));
 
-$scope.$on('$routeChangeStart', function() {
-	$rootScope.pageLoading = true;
-});
-
-$scope.$on('$routeChangeSuccess', function() {
-	$rootScope.pageLoading = false;
-});
-
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -24736,6 +24776,29 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+
+app.directive('routeLoadingIndicator', ['$rootScope', '$timeout', function($rootScope, $timeout) {
+
+	return {
+		restrict: 'E',
+		template: '<div ng-show="isRouteLoading"><div class="routeLoading routeLoading--left"></div><div class="routeLoading routeLoading--right"></div></div>',
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		$rootScope.isRouteLoading = false;
+
+		$rootScope.$on('$routeChangeStart', function() {
+			$rootScope.isRouteLoading = true;
+		});
+
+		$rootScope.$on('$routeChangeSuccess', function() {
+			$rootScope.isRouteLoading = false;
+		})
+	}
+
+}]);
+
 
 app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', 'newWindowService', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager, newWindowService) {
 
@@ -25830,9 +25893,6 @@ $scope.files = {
 
 $scope.kinds = ifGlobals.kinds;
 
-$scope.spinLeft = false;
-$scope.spinLeftLong = false;
-
 var saveTimer = null;
 var alert = alertManager;
 
@@ -25852,18 +25912,11 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 		console.log('progress');
 		console.log(e);
 		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		$scope.spinLeft = true;
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
-		$scope.uploadFinished = true;
-
-		$scope.spinLeftLong = true;
-		$timeout(function() {
-			$scope.spinLeft = false;
-			$scope.spinLeftLong = false;
-		}, 1000);		
+		$scope.uploadFinished = true;	
 	});
 });
 
@@ -26201,7 +26254,7 @@ $scope.go = function(url) {
 	// to prevent page-loading animation from running indefinitely
 	// this function emits a routeChangeStart but NOT a routeChangeSuccess
 	_.defer(function() {
-		$rootScope.pageLoading = false;
+		$rootScope.isRouteLoading = false;
 	});
 }
 
@@ -28773,7 +28826,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		return;
 	}
 
-  $scope.world = data.world;
+	$scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
@@ -28784,6 +28837,16 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
+	}
+
+	// REMOVE AICP
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1) {
+		$scope.blueRibbonAicp = {
+			style: {
+				'background': 'url("img/stickers/haze_small.png") center center / cover no-repeat'
+			},
+			link: 'https://www.google.com'
+		};
 	}
 
 	analyticsService.log('bubble.visit', {

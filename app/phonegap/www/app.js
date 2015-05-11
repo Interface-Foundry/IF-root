@@ -28826,7 +28826,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		return;
 	}
 
-  $scope.world = data.world;
+	$scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
@@ -28837,6 +28837,16 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
+	}
+
+	// REMOVE AICP
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1) {
+		$scope.blueRibbonAicp = {
+			style: {
+				'background': 'url("img/stickers/haze_small.png") center center / cover no-repeat'
+			},
+			link: 'https://www.google.com'
+		};
 	}
 
 	analyticsService.log('bubble.visit', {
