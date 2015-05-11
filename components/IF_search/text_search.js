@@ -55,6 +55,8 @@ var route = function(textQuery, lat, lng, userTime, res) {
                         $meta: "textScore"
                     }
                 }
+            },{
+                $limit:50
             },
             function(err, data) {
                 if (err) {
