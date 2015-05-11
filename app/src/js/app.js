@@ -48,7 +48,6 @@ var updateTitle = function($rootScope) {
 		    			request.url = 'https://kipapp.co' + request.url;
 
 
-
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);

@@ -4862,7 +4862,6 @@ var updateTitle = function($rootScope) {
 		    			request.url = 'https://kipapp.co' + request.url;
 
 
-
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
 							//console.log(request);
@@ -5963,7 +5962,6 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 			
 				if (value.indexOf('http')<0) {
 					value = 'https://kipapp.co/'+value;
-					//value = 'http://web-server-squirtle.kipapp.co:2997/' + value;
 
 				}
 				
