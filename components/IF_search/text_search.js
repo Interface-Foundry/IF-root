@@ -2,13 +2,12 @@ var _ = require('underscore'),
     mongoose = require('mongoose'),
     sanitize = require('mongo-sanitize'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
-    async = require('async'),
-    geoDistance = require('./distance'); // calculates distance between two points
+    async = require('async');
 
 var queenscenter = require('./queenscenter');
 var atlanticterminal = require('./atlanticterminal');
 
-var route = function(textQuery, lat, lng, userTime, res) {
+var route = function(textQuery, userCoord0, userCoord1, userTime, res) {
 
     var sText = sanitize(textQuery);
 
@@ -42,7 +41,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                 loc: {
                     $geoWithin: {
                         $centerSphere: [
-                            [parseFloat(lng), parseFloat(lat)], distance / 3963.2
+                            [parseFloat(userCoord1), parseFloat(userCoord0)], distance / 3963.2
                         ]
                     }
                 }
@@ -55,36 +54,30 @@ var route = function(textQuery, lat, lng, userTime, res) {
                         $meta: "textScore"
                     }
                 }
+            }, {
+                $limit: 50
             },
             function(err, data) {
                 if (err) {
                     console.error('error in text_search');
                     return console.error(err)
                 }
-                //Check if result set has bubbles with ownerID... if not, increase radius in searchWorlds()
-                var i = data.length;
-                var found = false;
-                while (i--) {
-                    if (data[i].landmarkCategories && data[i].landmarkCategories.length > 0) {
-                        //console.log('Found world with ownerID: ', data[i].name, data[i].landmarkCategories.length)
-                        found = true;
-                    }
-                }
+                // console.log('Worlds found: ', data.length)
 
                 // Remove entries with end time over one year ago...
                 var i = data.length;
                 while (i--) {
                     if (data[i].time.end && data[i].time.end < new Date(new Date().setYear(new Date().getFullYear() - 1))) {
-                        // console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
+                        console.log('Old world found, deleting: ', data[i].name, data[i].time.end)
                         data.splice(i, 1);
                     }
                 }
 
                 //If results are less than 20, increase radius of search distance
-                if (data.length > 20 && found == true) {
+                if (data.length >= 20) {
                     callback(true, data);
                 } else {
-                    // console.log('Only ', data.length, ' results, increasing distance..')
+                    console.log('Only ', data.length, ' results, increasing distance..')
                     callback(null, data)
                 }
             })
@@ -92,7 +85,13 @@ var route = function(textQuery, lat, lng, userTime, res) {
 
     async.series([
             function(callback) {
-                searchWorlds(callback, 20)
+                searchWorlds(callback, 0.5)
+            },
+            function(callback) {
+                searchWorlds(callback, 2.5)
+            },
+            function(callback) {
+                searchWorlds(callback, 5)
             },
             function(callback) {
                 searchWorlds(callback, 50)
@@ -106,59 +105,52 @@ var route = function(textQuery, lat, lng, userTime, res) {
 
             results = results[results.length - 1]
 
-            // :ﾟ・✧ special ranking stuff ✧・ﾟ:
-            var rankedResults = results.map(function(r, i) {
-				var distance = geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat); // km
-				var distance_score = 0;
-				// all things 5km or more away get 0 for distance
-				// all things closer get scored linearly based on how close they are, with a max score of 10 (2*5)
-				if (distance < 5) {
-					distance_score = 2*(5 - distance); // 
-				}
+            console.log('ORIGINL TOP 2 results is: ', results[0], 'YOMAMA', results[1])
 
-                return {
-                    result: r,
-                    ranking: {
-                        distance: distance_score,
-                        text_ranking: 10/(i+1), // todo
-                        has_ownerID: r.permissions.ownerID ? 10 : 0,
-                        has_categories: (r.landmarkCategories && r.landmarkCategories.length) > 0 ? 1000 : 0,
-                    }
-                };
-            }).map(function(r) {
-                // add up all the different scores
-                r.totalScore = Object.keys(r.ranking).reduce(function(value, k) {
-                    return value + (r.ranking[k] || 0);
-                }, 0);
-				return r;
-            })
 
-            rankedResults.sort(function(a, b) {
-                // sort descending on totalScore
-                return b.totalScore - a.totalScore;
-            });
+            //trying new method
+            function compare(a, b) {
+            console.log('A: ', a.permissions, 'B: ', b.permissions)
+            if (!a.permissions.ownerID && b.permissions.ownerID)
+                return 1;
+            if (a.permissions.ownerID && !b.permissions.ownerID)
+                return -1;
+            return 0;
+        }
 
-            // debug the sort if needed
-			/*
-            console.log(rankedResults.map(function(r) {
-				return {
-					ranking: r.ranking,
-					id: r.result.id,
-					totalScore: r.totalScore,
-					ownerID: r.result.permissions.ownerID
-				};
-			}).reverse());
-			*/
+        results.sort(compare);
 
-            // Results have been sorted, now convert back to regular array
-            results = rankedResults.map(function(r){
-                return r.result; // the original mongodb object
-            });
+        
 
-			// limit results to 50
-			if (results.length > 50) {
-				results = results.slice(0,50);
-			}
+            //trying world query method NOT WORKING CURRENTLY
+            // results = _(results).chain().sortBy(function(world) {
+            //     return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
+            // }).sortBy(function(world) {
+            //     if (Object.keys(world.time).length == 1) {
+            //         return -world.time.created // if the length of the time object is one (just the time created), return -time.created (descending order)
+            //     } else if (Object.keys(world.time).length == 3) {
+            //         return -world.time.start // if the length of the time object is three (start and end time and created), return -time.start (descending order)
+            //     } else { // this is when the time object has two fields (start and created or end and created)
+            //         if ((world.time).hasOwnProperty('start')) {
+            //             return -world.time.start
+            //         } // if it has time.start, return it
+            //         else {
+            //             return -world.time.created //otherwise, return time.created
+            //         }
+            //     }
+            // }).value();
+
+    console.log('NEW TOP 2 results is: ', results[0], 'YOMAMA', results[1])
+
+
+
+            //tempory sorting
+            // for (var i = 0; i < results.length; i++) {
+            //     results[i] = _(results[i]).chain().sortBy(function(world) {
+            //         console.log('WORLD: ', world.permissions.ownerID)
+            //         return world.permissions.ownerID; // first we sort according to whether the bubble has an ownerID
+            //     }).value();
+            // }
 
             //Retreive parent IDs to query for parent world names for each landmark
 
@@ -203,27 +195,23 @@ var route = function(textQuery, lat, lng, userTime, res) {
                     }, function(err) {
                         // console.log('Virtual property: parentName added to results..',results[results.length - 1])
 
-                        // add queens center if not found
-                        var found = false;
-                        results.map(function(r) {
-                            if (r.id === 'queens_center_mall') {
-                                found = true;
-                            }
-                        });
-                        if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
-                           // results = [queenscenter].concat(results);
-                        }
+			// add queens center if not found
+			var found = false;
+			results.map(function(r) { 
+				if (r.id === 'queens_center_mall') { found = true; }
+			});
+			if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
+				results = [queenscenter].concat(results);
+			}
 
-                        // add atlantic center if not found
-                        found = false;
-                        results.map(function(r) {
-                            if (r.id === 'atlantic_terminal_mall') {
-                                found = true;
-                            }
-                        });
-                        if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
-                            results = [atlanticterminal].concat(results);
-                        }
+			// add atlantic center if not found
+			found = false;
+			results.map(function(r) { 
+				if (r.id === 'atlantic_terminal_mall') { found = true; }
+			});
+			if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
+				results = [atlanticterminal].concat(results);
+			}
 
                         res.send(results);
                     })
@@ -260,7 +248,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
     //                 loc: {
     //                     $geoWithin: {
     //                         $centerSphere: [
-    //                             [parseFloat(lng), parseFloat(lat)], 0.5 / 3963.2
+    //                             [parseFloat(userCoord1), parseFloat(userCoord0)], 0.5 / 3963.2
     //                         ]
     //                     }
     //                 }
@@ -289,7 +277,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
     //                             loc: {
     //                                 $geoWithin: {
     //                                     $centerSphere: [
-    //                                         [parseFloat(lng), parseFloat(lat)], 2.5 / 3963.2
+    //                                         [parseFloat(userCoord1), parseFloat(userCoord0)], 2.5 / 3963.2
     //                                     ]
     //                                 }
     //                             }
@@ -317,7 +305,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
     //                                         loc: {
     //                                             $geoWithin: {
     //                                                 $centerSphere: [
-    //                                                     [parseFloat(lng), parseFloat(lat)], 5 / 3963.2
+    //                                                     [parseFloat(userCoord1), parseFloat(userCoord0)], 5 / 3963.2
     //                                                 ]
     //                                             }
     //                                         }
@@ -345,7 +333,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
     //                                                     loc: {
     //                                                         $geoWithin: {
     //                                                             $centerSphere: [
-    //                                                                 [parseFloat(lng), parseFloat(lat)], 50 / 3963.2
+    //                                                                 [parseFloat(userCoord1), parseFloat(userCoord0)], 50 / 3963.2
     //                                                             ]
     //                                                         }
     //                                                     }
@@ -425,7 +413,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
     //     { "$geoNear": {
     //       "near": {
     //         "type": "Point",
-    //         "coordinates": [parseFloat(lng), parseFloat(lat)]
+    //         "coordinates": [parseFloat(userCoord1), parseFloat(userCoord0)]
     //       },
     //       "distanceField": "distance",
     //       "minDistance": 1,
