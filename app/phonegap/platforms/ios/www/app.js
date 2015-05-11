@@ -28752,7 +28752,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 	//////////////
 
-  $scope.world = data.world;
+	$scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
@@ -28763,6 +28763,16 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
+	}
+
+	// REMOVE AICP
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkSrc) {
+		$scope.blueRibbonAicp = {
+			style: {
+				'background': 'url(' + $scope.world.blueRibbon.imgSrc + ') center center / cover no-repeat'
+			},
+			link: $scope.world.blueRibbon.linkSrc
+		};
 	}
 
 	analyticsService.log('bubble.visit', {
