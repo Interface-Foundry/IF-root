@@ -2551,6 +2551,10 @@ transform:translateX(100%);
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
+.u-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .u-100X {
   width: 100%;
 }
@@ -4947,12 +4951,112 @@ li.alert {
   -webkit-animation-delay: -1s;
   animation-delay: -1s;
 }
-.loading-animation {
+.routeLoading {
   position: absolute;
   z-index: 101;
   top: 48px;
-  width: 100%;
-  height: 3px;
+  height: 5px;
+  background-color: #3fc3db;
+}
+@-webkit-keyframes routeLoading--left {
+  0% {
+    width: 0%;
+    left: 50%;
+  }
+  40% {
+    width: 50%;
+    left: 0%;
+  }
+  50% {
+    width: 50%;
+    left: 0%;
+  }
+  90% {
+    width: 0%;
+    left: 0%;
+  }
+  100% {
+    width: 0%;
+    left: 0%;
+  }
+}
+@keyframes routeLoading--left {
+  0% {
+    width: 0%;
+    left: 50%;
+  }
+  40% {
+    width: 50%;
+    left: 0%;
+  }
+  50% {
+    width: 50%;
+    left: 0%;
+  }
+  90% {
+    width: 0%;
+    left: 0%;
+  }
+  100% {
+    width: 0%;
+    left: 0%;
+  }
+}
+@-webkit-keyframes routeLoading--right {
+  0% {
+    width: 0%;
+    left: 50%;
+  }
+  40% {
+    width: 50%;
+    left: 50%;
+  }
+  50% {
+    width: 50%;
+    left: 50%;
+  }
+  90% {
+    width: 0%;
+    left: 100%;
+  }
+  100% {
+    width: 0%;
+    left: 100%;
+  }
+}
+@keyframes routeLoading--right {
+  0% {
+    width: 0%;
+    left: 50%;
+  }
+  40% {
+    width: 50%;
+    left: 50%;
+  }
+  50% {
+    width: 50%;
+    left: 50%;
+  }
+  90% {
+    width: 0%;
+    left: 100%;
+  }
+  100% {
+    width: 0%;
+    left: 100%;
+  }
+}
+.routeLoading--left {
+  left: 50%;
+  width: 0%;
+  -webkit-animation: routeLoading--left 3s ease-in-out infinite;
+  animation: routeLoading--left 3s ease-in-out infinite;
+}
+.routeLoading--right {
+  left: 50%;
+  width: 0%;
+  -webkit-animation: routeLoading--right 3s ease-in-out infinite;
+  animation: routeLoading--right 3s ease-in-out infinite;
 }
 .fadeMarkers .leaflet-marker-icon {
   opacity: .5;
@@ -5420,6 +5524,19 @@ div.marker-popup-click {
   height: 30px;
   top: 14px;
   width: 30px;
+}
+.nearby-widget-avatar--aicp.img-responsive {
+  height: 80px;
+}
+.marginBottom10--aicp {
+  margin-bottom: 10px;
+  opacity: 0.4;
+}
+.marginBottom10--aicp:hover {
+  opacity: 1;
+}
+.marginBottom10--aicp.opacity100 {
+  opacity: 1;
 }
 nav {
   pointer-events: auto;

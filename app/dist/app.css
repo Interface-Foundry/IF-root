@@ -2538,6 +2538,10 @@ transform:translateX(100%);
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
+.u-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .u-100X {
   width: 100%;
 }
