@@ -4846,9 +4846,6 @@ var updateTitle = function($rootScope) {
   angular.extend($rootScope, {globalTitle: 'Kip'});
 }
 
-// var setWelcome = function(welcomeService) {
-//   welcomeService.needsWelcome = true;
-// }
 
     //================================================
     
@@ -4896,6 +4893,15 @@ var updateTitle = function($rootScope) {
     //================================================
 $routeProvider.
 
+  // REMOVE AICP
+  when('/w/aicpweek2015', {
+    resolve: {
+      dayOfWeek: function(aicpRoutingService) {
+        return aicpRoutingService.route();
+      }
+    }
+  }).
+  ///////////////
   when('/', {
     templateUrl: 'components/home/home.html', 
     controller: 'HomeController', 
@@ -5141,9 +5147,7 @@ app.run(['$route', '$timeout', '$rootScope', '$location', function ($route, $tim
             var un = $rootScope.$on('$locationChangeSuccess', function () {
                 $route.current = lastRoute;
                 un();
-                $timeout(function() {
-                  $rootScope.pageLoading = false;
-                }, 0.5 * 1000);
+                $rootScope.isRouteLoading = false;
             });
         }
         return original.apply($location, [path]);
@@ -5927,7 +5931,8 @@ function hrefListener(newWindowService) {
     });
   }
 }
-app.directive('ifHref', function() { //used to make URLs safe for both phonegap and web.
+app.directive('ifHref', function() { 
+	//used to make URLs safe for both phonegap and web. all hrefs should use if-href
 	return {
 		restrict: 'A',
 		priority: 99, 
@@ -18999,6 +19004,9 @@ mapManager.loadBubble = function(bubble, config) {
 		
 				if (tilesDict.hasOwnProperty(bubble.style.maps.cloudMapName)) {
 					mapManager.setBaseLayer(tilesDict[bubble.style.maps.cloudMapName]['url']);
+				} else if (bubble.style.maps.cloudMapName === 'none') {
+					mapManager.layers.baselayers = {};
+					angular.element('#leafletmap')[0].style['background-color'] = 'black';
 				} else if (bubble.style.maps.hasOwnProperty('cloudMapID')) {
 					mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+bubble.style.maps.cloudMapID+'/{z}/{x}/{y}.png');
 				} else {
@@ -20285,6 +20293,7 @@ worldTree.getNearby = function() {
 				success(function(locInfo) {
 					location.cityName = locInfo.cityName;
 					location.timestamp = Date.now();
+					location.src = locInfo.src;
 
 					geoService.updateLocation(location);
 
@@ -21903,6 +21912,34 @@ function FourOhFourController($scope, mapManager, apertureService, navService) {
 }
 'use strict';
 
+app.factory('aicpRoutingService', aicpRoutingService);
+
+aicpRoutingService.$inject = ['$location'];
+
+function aicpRoutingService($location) {
+	return {
+		route: route
+	}
+
+  // reroutes /w/aicpweek2015 to specific AICP bubble based on the current day
+	function route() {
+		var today = moment().dayOfYear();
+    var path = $location.path();
+
+    switch (today) {
+      case 154:
+        $location.path(path + '_thursday');
+        break;
+      case 155:
+        $location.path(path + '_wednesday');
+        break;
+      default:
+        $location.path(path + '_tuesday');
+    }
+	}
+}
+'use strict';
+
 app.directive('announcements', announcements);
 
 announcements.$inject = ['$timeout', 'announcementsService'];
@@ -22362,6 +22399,11 @@ function validateFloorNum(floor_num) {
 $scope.selectMapTheme = function(key) {
 	if (typeof name === 'string') {
 		$scope.mapThemeSelect = key;
+
+		if (key === 'none') {
+			hideMap();
+			return;
+		}
 		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+$scope.mapThemes[key].cloudMapID+'/{z}/{x}/{y}.png');
 		
 		$scope.world.style.maps.cloudMapName = $scope.mapThemes[key].cloudMapName;
@@ -22371,6 +22413,13 @@ $scope.selectMapTheme = function(key) {
 			$scope.setThemeFromMap();
 		}
 	}
+}
+
+function hideMap() {
+	map.layers.baselayers = {};
+	angular.element('#leafletmap')[0].style['background-color'] = 'black';
+	$scope.world.style.maps.cloudMapName = 'none';
+	$scope.world.style.maps.cloudMapID = 'none';
 }
 
 $scope.setThemeFromMap = function() {
@@ -22584,6 +22633,10 @@ $scope.loadWorld = function(data) {
 		
 		if ($scope.world.hasOwnProperty('style')==false) {$scope.world.style = {};}
 		if ($scope.world.style.hasOwnProperty('maps')==false) {$scope.world.style.maps = {};}
+		if ($scope.world.style.maps.cloudMapName === 'none') {
+			mapManager.layers.baselayers = {};
+			angular.element('#leafletmap')[0].style['background-color'] = 'black';
+		}
 		if ($scope.world.hasOwnProperty('landmarkCategories')==false) {$scope.world.landmarkCategories = [];}
 		
 		if ($scope.world.style.maps.cloudMapName) {
@@ -22593,26 +22646,6 @@ $scope.loadWorld = function(data) {
 			$scope.selectMapTheme('arabesque');
 		}
 		
-		/*if ($scope.world.style.maps.type == "both" || $scope.world.style.maps.type == "local") {
-			map.addOverlay($scope.world.style.maps.localMapID, $scope.world.style.maps.localMapName, $scope.world.style.maps.localMapOptions);
-			map.refresh();
-		}*/
-		
-
-		// var theseMaps = [$scope.world.style.maps];
-
-		// if (theseMaps[0].localMapArray && theseMaps[0].localMapArray.length > 0) {
-		// 	theseMaps = map.findMapFromArray(theseMaps[0].localMapArray);
-		// }
-
-		// theseMaps.forEach(function(thisMap) {
-		// 	if (thisMap.localMapID !== undefined && thisMap.localMapID.length > 0) {
-		// 		map.addOverlay(thisMap.localMapID, 
-		// 						thisMap.localMapName, 
-		// 						thisMap.localMapOptions);
-		// 	}
-		// })
-
 		turnOnFloorMaps();
 		
 		if (!$scope.style.bodyBG_color) {
@@ -22761,6 +22794,20 @@ $scope.removePlaceImage = function () {
 $scope.buildLocalMap = function () {
 	console.log('--buildLocalMap--');
 	$scope.building = true;
+	// make sure map is at zoom 18 for consistency
+	if (map.center.zoom === 18) {
+		buildMapOnTileServer();
+	} else {
+		// if it's not at zoom 18, set it and wait for zoom to finish before building
+		map.center.zoom = 18;
+		var zoomWatch = $scope.$on('leafletDirectiveMap.moveend', function() {
+			buildMapOnTileServer();
+			zoomWatch();
+		});
+	}
+}
+
+function buildMapOnTileServer() {
 	//get image geo coordinates, add to var to send
 	var bounds = map.getPlaceImageBounds(),
 		southEast = bounds.getSouthEast(),
@@ -22875,80 +22922,6 @@ function showPosition(position) {
 function locError(){
         // console.log('no loc');
 }
-
-
-
-
-
-	// //---- Adding Local Maps -----//
-
-	// $scope.addLandmarkCategory = function() {
-
-	// 	if ($scope.temp) {
-
-	// 		$scope.world.landmarkCategories.unshift({name: $scope.temp.LandmarkCategory, avatar: $scope.temp.LandmarkCatAvatar, present: $scope.temp.landmarkPresent});
-
-	// 		// console.log('----- TEST')
-	// 		// console.log($scope.world.landmarkCategories);
-
-	// 		console.log($scope.world);
-	// 		delete $scope.temp.LandmarkCatAvatar;
-	// 		delete $scope.temp.LandmarkCategory;
-	// 		$scope.temp.landmarkPresent = false;
-	// 		$scope.uploadFinishedLandmark = false;
-	// 		console.log($scope.temp.LandmarkCatAvatar);
-	// 	}
-	// }
-
-	// $scope.removeLandmarkCategory = function(index) {
-	// 	$scope.world.landmarkCategories.splice(index, 1);
-	// }
-
-
-
-	// $scope.newMap = function(){
-
-	// 	//check if there are floor numbers registered, default to 0
-	// 	//populate dropdown with registered floors
-
-	// 	//if loc_info already exists, add 1
-	// 	if ($scope.landmark.loc_info){		
-	// 		if ($scope.landmark.loc_info.floor_num == null){
-	// 			$scope.landmark.loc_info.floor_num = 1;
-	// 		}
-	// 	}
-
-	// 	addLocInfo();
-	// }
-
-	// //if loc info, then load floor numbers / room names
-	// if ($scope.$parent.landmark.loc_info){
-	// 	addLocInfo();
-	// }
-
-	// function addLocInfo() {
-
-	// 	//read landmark floor array, cp to $scope
-
-	// 	$scope.$parent.floors = [{"val":-1,"label":"-1 Floor"},{"val":1,"label":"1st Floor"},{"val":2,"label":"2nd Floor"}];  
-
-	// 	//IF no loc_info, then floor_num = 0
-	// 	if (!$scope.$parent.landmark.loc_info){
-	// 		$scope.$parent.landmark.loc_info = {
-	// 			floor_num: 1
-	// 		};  		
-	// 	}
-	// }
-	// //onclick hide location details
-	// $scope.clearMap = function(){
-
-	// 	//console.log('asdfasdfasdf');
-	// 	//delete $scope.$parent.landmark.loc_info;
-
-	// 	$scope.landmark.loc_info.floor_num = null;
-	// 	$scope.landmark.loc_info.room_name = null;
-	// }
-	// //--------------------------//
 
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
@@ -24432,14 +24405,6 @@ var deregFirstShow = $scope.$on('$routeChangeSuccess', _.after(2, function() {
 	deregFirstShow();
 }));
 
-$scope.$on('$routeChangeStart', function() {
-	$rootScope.pageLoading = true;
-});
-
-$scope.$on('$routeChangeSuccess', function() {
-	$rootScope.pageLoading = false;
-});
-
 $scope.newWorld = function() {
     console.log('newWorld()');
     $scope.world = {};
@@ -24736,6 +24701,29 @@ app.directive('searchView', ['$http', '$routeParams', 'geoService', 'analyticsSe
 		templateUrl: 'components/nav/searchView.html' 
 	}
 }])
+
+app.directive('routeLoadingIndicator', ['$rootScope', '$timeout', function($rootScope, $timeout) {
+
+	return {
+		restrict: 'E',
+		template: '<div ng-show="isRouteLoading"><div class="routeLoading routeLoading--left"></div><div class="routeLoading routeLoading--right"></div></div>',
+		link: link
+	};
+
+	function link(scope, elem, attrs) {
+		$rootScope.isRouteLoading = false;
+
+		$rootScope.$on('$routeChangeStart', function() {
+			$rootScope.isRouteLoading = true;
+		});
+
+		$rootScope.$on('$routeChangeSuccess', function() {
+			$rootScope.isRouteLoading = false;
+		})
+	}
+
+}]);
+
 
 app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http', '$timeout', '$window', 'userManager', 'alertManager', 'dialogs', 'welcomeService', 'contest', 'lockerManager', 'ifGlobals', 'styleManager', 'newWindowService', function($scope, $rootScope, $location, $http, $timeout, $window, userManager, alertManager, dialogs, welcomeService, contest, lockerManager, ifGlobals, styleManager, newWindowService) {
 
@@ -25830,9 +25818,6 @@ $scope.files = {
 
 $scope.kinds = ifGlobals.kinds;
 
-$scope.spinLeft = false;
-$scope.spinLeftLong = false;
-
 var saveTimer = null;
 var alert = alertManager;
 
@@ -25852,18 +25837,11 @@ $scope.$watch('files.avatar', function(newValue, oldValue) {
 		console.log('progress');
 		console.log(e);
 		//console.log('%' + parseInt(100.0 * e.loaded/e.total));
-		$scope.spinLeft = true;
 	}).success(function(data, status, headers, config) {
 		console.log(data);
 		$scope.user.avatar = data;
 		$rootScope.avatar = data;
-		$scope.uploadFinished = true;
-
-		$scope.spinLeftLong = true;
-		$timeout(function() {
-			$scope.spinLeft = false;
-			$scope.spinLeftLong = false;
-		}, 1000);		
+		$scope.uploadFinished = true;	
 	});
 });
 
@@ -26201,7 +26179,7 @@ $scope.go = function(url) {
 	// to prevent page-loading animation from running indefinitely
 	// this function emits a routeChangeStart but NOT a routeChangeSuccess
 	_.defer(function() {
-		$rootScope.pageLoading = false;
+		$rootScope.isRouteLoading = false;
 	});
 }
 
@@ -28763,6 +28741,8 @@ $scope.newWindowGo = function(path) {
 }
  
 $scope.loadWorld = function(data) { //this doesn't need to be on the scope
+
+	// REMOVE AICP
 	if (data && data.world && data.world.id && data.world.id.toLowerCase() === "aicpweek2015") {
 		$rootScope.hide = true;
 		$timeout(function() {
@@ -28772,8 +28752,9 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 		}, 500);
 		return;
 	}
+	//////////////
 
-  $scope.world = data.world;
+	$scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
 	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
@@ -28784,6 +28765,16 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 			}
 			$scope.wtgt.images[s.hashtag] = s.imgURL;
 		});
+	}
+
+	// REMOVE AICP
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkSrc) {
+		$scope.blueRibbonAicp = {
+			style: {
+				'background': 'url(' + $scope.world.blueRibbon.imgSrc + ') center center / cover no-repeat'
+			},
+			link: $scope.world.blueRibbon.linkSrc
+		};
 	}
 
 	analyticsService.log('bubble.visit', {
@@ -28855,19 +28846,21 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	var worldStyle = $scope.world.style;
 	map.groupFloorMaps(worldStyle);
 
-		if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
-			zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
-		}
+	if (worldStyle.maps.hasOwnProperty('localMapOptions')) {
+		zoomLevel = Number(worldStyle.maps.localMapOptions.maxZoom) || 22;
+	}
 
-		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
-			map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
-		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
-		} else {
-			console.warn('No base layer found! Defaulting to forum.');
-			map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
-		}
-	// }
+	if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
+		map.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+	} else if (worldStyle.maps.cloudMapName === 'none') {
+		map.layers.baselayers = {};
+		angular.element('#leafletmap')[0].style['background-color'] = 'black';
+	} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
+	} else {
+		console.warn('No base layer found! Defaulting to forum.');
+		map.setBaseLayer('https://{s}.tiles.mapbox.com/v3/interfacefoundry.jh58g2al/{z}/{x}/{y}.png');
+	}
 	
 	$scope.loadLandmarks();
 }

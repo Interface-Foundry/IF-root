@@ -36,11 +36,15 @@
 				color="style.categoryTitle_color"
 				text="defaultText"
 				world="world"></cat-search-bar>
+
+			<!--- REMOVE AICP -->
+			<div ng-include="worldURL.indexOf('aicpweek2015') > -1 ? 'components/aicp/aicpSwitcher.html' : null" class="marble-page"></div>
+
+			<!-- REMOVE AICP -->
+			<div ng-include="worldURL.indexOf('aicpweek2015') > -1 ? 'components/aicp/blueRibbon.html': null" class="marble-page blueRibbonHeight--aicp"></div>
 		
 			<!--DESCRIPTION-->
-			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' :
-																	'components/world/templates/description.html'" 
-					 class="marble-page"></div>
+			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' : 'components/world/templates/description.html'" class="marble-page"></div>
 
 
 			<div class="marble-page" ng-if="category">
