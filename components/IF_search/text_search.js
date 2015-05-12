@@ -50,14 +50,16 @@ var route = function(textQuery, lat, lng, userTime, res) {
         };
 
         var aggregate = landmarkSchema.aggregate(query, {
-                $sort: {
-                    score: {
-                        $meta: "textScore"
-                    }
+            $sort: {
+                score: {
+                    $meta: "textScore"
                 }
-            }, {
-                allowDiskUse: true
-            },
+            }
+        })
+        aggregate.options = {
+            allowDiskUse: true
+        };
+        aggregate.exec(
             function(err, data) {
                 if (err) {
                     console.error('error in text_search');
@@ -90,384 +92,380 @@ var route = function(textQuery, lat, lng, userTime, res) {
                     callback(null, data)
                 }
             })
-
-        aggregate.options = {
-            allowDiskUse: true
-        };
-        aggregate.exec(function() {});
+    );
 
 
-    }
+}
 
-    async.series([
-            function(callback) {
-                searchWorlds(callback, 20)
-            },
-            function(callback) {
-                searchWorlds(callback, 50)
-            }
-        ],
-        function(err, results) {
-            if (err) {
-                console.error('error in text_search async.series');
-                console.error(err);
-            }
+async.series([
+        function(callback) {
+            searchWorlds(callback, 20)
+        },
+        function(callback) {
+            searchWorlds(callback, 50)
+        }
+    ],
+    function(err, results) {
+        if (err) {
+            console.error('error in text_search async.series');
+            console.error(err);
+        }
 
-            results = results[results.length - 1]
+        results = results[results.length - 1]
 
-            // :ﾟ・✧ special ranking stuff ✧・ﾟ:
-            var rankedResults = results.map(function(r, i) {
-                var distance = geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat); // km
-                var distance_score = 0;
-                // all things 5km or more away get 0 for distance
-                // all things closer get scored linearly based on how close they are, with a max score of 10 (2*5)
-                if (distance < 5) {
-                    distance_score = 2 * (5 - distance); // 
-                }
-
-                return {
-                    result: r,
-                    ranking: {
-                        distance: distance_score,
-                        text_ranking: 10 / (i + 1), // todo
-                        has_ownerID: r.permissions.ownerID ? 10 : 0,
-                        has_categories: (r.landmarkCategories && r.landmarkCategories.length) > 0 ? 1000 : 0,
-                    }
-                };
-            }).map(function(r) {
-                // add up all the different scores
-                r.totalScore = Object.keys(r.ranking).reduce(function(value, k) {
-                    return value + (r.ranking[k] || 0);
-                }, 0);
-                return r;
-            })
-
-            rankedResults.sort(function(a, b) {
-                // sort descending on totalScore
-                return b.totalScore - a.totalScore;
-            });
-
-            // debug the sort if needed
-            /*
-            console.log(rankedResults.map(function(r) {
-                return {
-                    ranking: r.ranking,
-                    id: r.result.id,
-                    totalScore: r.totalScore,
-                    ownerID: r.result.permissions.ownerID
-                };
-            }).reverse());
-            */
-
-            // Results have been sorted, now convert back to regular array
-            results = rankedResults.map(function(r) {
-                return r.result; // the original mongodb object
-            });
-
-            // limit results to 50
-            if (results.length > 50) {
-                results = results.slice(0, 50);
+        // :ﾟ・✧ special ranking stuff ✧・ﾟ:
+        var rankedResults = results.map(function(r, i) {
+            var distance = geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat); // km
+            var distance_score = 0;
+            // all things 5km or more away get 0 for distance
+            // all things closer get scored linearly based on how close they are, with a max score of 10 (2*5)
+            if (distance < 5) {
+                distance_score = 2 * (5 - distance); // 
             }
 
-            //Retreive parent IDs to query for parent world names for each landmark
-
-            var parentIDs = results.map(function(el) {
-                if (!el.parentID) {
-                    return undefined
-                } else {
-                    return el.parentID;
+            return {
+                result: r,
+                ranking: {
+                    distance: distance_score,
+                    text_ranking: 10 / (i + 1), // todo
+                    has_ownerID: r.permissions.ownerID ? 10 : 0,
+                    has_categories: (r.landmarkCategories && r.landmarkCategories.length) > 0 ? 1000 : 0,
                 }
-            });
-            var parentNames = [];
+            };
+        }).map(function(r) {
+            // add up all the different scores
+            r.totalScore = Object.keys(r.ranking).reduce(function(value, k) {
+                return value + (r.ranking[k] || 0);
+            }, 0);
+            return r;
+        })
 
-            async.eachSeries(parentIDs, function(id, callback) {
-                if (id) {
-                    landmarkSchema.findOne({
-                        _id: id
-                    }, function(err, parent) {
-                        if (err) console.log(err);
-                        if (!parent) return console.log('parent not found', parent)
-                        parentNames.push(parent.id);
-                        callback();
-                    })
-                } else {
-                    parentNames.push(undefined);
-                    callback();
-                }
-            }, function(err) {
-                if (err) {
-                    console.log('A parent failed to process');
-                } else {
-
-                    // console.log('Parent names gathered', parentNames);
-
-                    console.log('Found ', results.length, 'results.');
-
-                    var count = 0;
-                    async.eachSeries(results, function(el, callback) {
-                        //Set virtual property parentName
-                        el.parentName = parentNames[count];
-                        count++
-                        callback();
-                    }, function(err) {
-                        // console.log('Virtual property: parentName added to results..',results[results.length - 1])
-
-                        // add queens center if not found
-                        var found = false;
-                        results.map(function(r) {
-                            if (r.id === 'queens_center_mall') {
-                                found = true;
-                            }
-                        });
-                        if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
-                            // results = [queenscenter].concat(results);
-                        }
-
-                        // add atlantic center if not found
-                        found = false;
-                        results.map(function(r) {
-                            if (r.id === 'atlantic_terminal_mall') {
-                                found = true;
-                            }
-                        });
-                        if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
-                            results = [atlanticterminal].concat(results);
-                        }
-
-                        res.send(results);
-                    })
-                }
-            })
-
+        rankedResults.sort(function(a, b) {
+            // sort descending on totalScore
+            return b.totalScore - a.totalScore;
         });
 
+        // debug the sort if needed
+        /*
+        console.log(rankedResults.map(function(r) {
+            return {
+                ranking: r.ranking,
+                id: r.result.id,
+                totalScore: r.totalScore,
+                ownerID: r.result.permissions.ownerID
+            };
+        }).reverse());
+        */
 
-    // IF # ADD BEGINNING OF SEARCH, to tag search
+        // Results have been sorted, now convert back to regular array
+        results = rankedResults.map(function(r) {
+            return r.result; // the original mongodb object
+        });
 
-    //if BUBBLE WORLD added, search with world:false & search world:true outside of landmark search
-    //FOR MATCH GROUP:
+        // limit results to 50
+        if (results.length > 50) {
+            results = results.slice(0, 50);
+        }
 
-    // games.aggregate([
-    //     { $match: { 'game_user_id' : '12345789' } },
-    //     { $group: {
-    //         _id: '$id',
-    //         game_total: { $sum: '$game_amount'}, 
-    //         game_total_profit: { $sum: '$game_profit'}}
-    //     }}
-    // ]).exec(function ( e, d ) {
-    //     console.log( d )            
-    // });
+        //Retreive parent IDs to query for parent world names for each landmark
 
+        var parentIDs = results.map(function(el) {
+            if (!el.parentID) {
+                return undefined
+            } else {
+                return el.parentID;
+            }
+        });
+        var parentNames = [];
 
+        async.eachSeries(parentIDs, function(id, callback) {
+            if (id) {
+                landmarkSchema.findOne({
+                    _id: id
+                }, function(err, parent) {
+                    if (err) console.log(err);
+                    if (!parent) return console.log('parent not found', parent)
+                    parentNames.push(parent.id);
+                    callback();
+                })
+            } else {
+                parentNames.push(undefined);
+                callback();
+            }
+        }, function(err) {
+            if (err) {
+                console.log('A parent failed to process');
+            } else {
 
+                // console.log('Parent names gathered', parentNames);
 
-    // landmarkSchema.aggregate({
-    //             $match: {
-    //                 $text: {
-    //                     $search: sText
-    //                 },
-    //                 loc: {
-    //                     $geoWithin: {
-    //                         $centerSphere: [
-    //                             [parseFloat(lng), parseFloat(lat)], 0.5 / 3963.2
-    //                         ]
-    //                     }
-    //                 }
-    //             }
-    //         }, {
-    //             $sort: {
-    //                 score: {
-    //                     $meta: "textScore"
-    //                 }
-    //             }
-    //         }, {
-    //             $limit: 50
-    //         },
-    //         function(err, data) {
-    //             if (err) {
-    //                 return console.log(err)
-    //             }
+                console.log('Found ', results.length, 'results.');
 
-    //             if (data.length < 50) {
-    //                 console.log('Not enough results, increasing distance..')
-    //                 landmarkSchema.aggregate({
-    //                         $match: {
-    //                             $text: {
-    //                                 $search: sText
-    //                             },
-    //                             loc: {
-    //                                 $geoWithin: {
-    //                                     $centerSphere: [
-    //                                         [parseFloat(lng), parseFloat(lat)], 2.5 / 3963.2
-    //                                     ]
-    //                                 }
-    //                             }
-    //                         }
-    //                     }, {
-    //                         $sort: {
-    //                             score: {
-    //                                 $meta: "textScore"
-    //                             }
-    //                         }
-    //                     }, {
-    //                         $limit: 50
-    //                     },
-    //                     function(err, data) {
-    //                         if (err) {
-    //                             return console.log(err)
-    //                         }
-    //                         if (data.length < 50) {
-    //                             console.log('Not enough results, increasing distance..')
-    //                             landmarkSchema.aggregate({
-    //                                     $match: {
-    //                                         $text: {
-    //                                             $search: sText
-    //                                         },
-    //                                         loc: {
-    //                                             $geoWithin: {
-    //                                                 $centerSphere: [
-    //                                                     [parseFloat(lng), parseFloat(lat)], 5 / 3963.2
-    //                                                 ]
-    //                                             }
-    //                                         }
-    //                                     }
-    //                                 }, {
-    //                                     $sort: {
-    //                                         score: {
-    //                                             $meta: "textScore"
-    //                                         }
-    //                                     }
-    //                                 }, {
-    //                                     $limit: 50
-    //                                 },
-    //                                 function(err, data) {
-    //                                     if (err) {
-    //                                         return console.log(err)
-    //                                     }
-    //                                     if (data.length < 50) {
-    //                                         console.log('Not enough results, increasing distance..')
-    //                                         landmarkSchema.aggregate({
-    //                                                 $match: {
-    //                                                     $text: {
-    //                                                         $search: sText
-    //                                                     },
-    //                                                     loc: {
-    //                                                         $geoWithin: {
-    //                                                             $centerSphere: [
-    //                                                                 [parseFloat(lng), parseFloat(lat)], 50 / 3963.2
-    //                                                             ]
-    //                                                         }
-    //                                                     }
-    //                                                 }
-    //                                             }, {
-    //                                                 $sort: {
-    //                                                     score: {
-    //                                                         $meta: "textScore"
-    //                                                     }
-    //                                                 }
-    //                                             }, {
-    //                                                 $limit: 50
-    //                                             },
-    //                                             function(err, data) {
-    //                                                 if (err) {
-    //                                                     return console.log(err)
-    //                                                 }
-    //                                                 console.log('Not enough results, searching worldwide...')
-    //                                                 landmarkSchema.aggregate({
-    //                                                         $match: {
-    //                                                             $text: {
-    //                                                                 $search: sText
-    //                                                             }
-    //                                                         },
-    //                                                         {
-    //                                                             $sort: {
-    //                                                                 score: {
-    //                                                                     $meta: "textScore"
-    //                                                                 }
-    //                                                             }
-    //                                                         },
-    //                                                         {
-    //                                                             $limit: 50
-    //                                                         },
-    //                                                         function(err, data) {
-    //                                                             if (err) {
-    //                                                                 return console.log(err)
-    //                                                             }
-    //                                                             res.send(data);
-    //                                                         })
+                var count = 0;
+                async.eachSeries(results, function(el, callback) {
+                    //Set virtual property parentName
+                    el.parentName = parentNames[count];
+                    count++
+                    callback();
+                }, function(err) {
+                    // console.log('Virtual property: parentName added to results..',results[results.length - 1])
+
+                    // add queens center if not found
+                    var found = false;
+                    results.map(function(r) {
+                        if (r.id === 'queens_center_mall') {
+                            found = true;
+                        }
+                    });
+                    if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
+                        // results = [queenscenter].concat(results);
+                    }
+
+                    // add atlantic center if not found
+                    found = false;
+                    results.map(function(r) {
+                        if (r.id === 'atlantic_terminal_mall') {
+                            found = true;
+                        }
+                    });
+                    if (!found && sText.toLowerCase().indexOf('atlantic') >= 0) {
+                        results = [atlanticterminal].concat(results);
+                    }
+
+                    res.send(results);
+                })
+            }
+        })
+
+    });
 
 
-    //                                                 } else {
-    //                                                     res.send(data);
-    //                                                 }
-    //                                             } else {
-    //                                                 res.send(data);
-    //                                             }
-    //                                         });
-    //                                 })
-    //                         })
-    //                 })
+// IF # ADD BEGINNING OF SEARCH, to tag search
 
-    // OLD
-    // landmarkSchema.find(
-    //     { $text : { $search : sText } },
-    //     { score : { $meta: "textScore" } }
-    //   ).
-    //   sort({ score : { $meta : 'textScore' } }).
-    //   limit(50).
-    //   exec(function(err, data) {
-    //     if (data){
-    //         res.send(data);
-    //     }
-    //     else {
-    //         console.log('no results');
-    //         res.send({err:'no results'});            
-    //     }
-    //   });
+//if BUBBLE WORLD added, search with world:false & search world:true outside of landmark search
+//FOR MATCH GROUP:
 
-    // landmarkSchema.aggregate(
-    //  [
-
-    //     { $match: { $text: { $search: sText } } },
-    //     { $sort: { score: { $meta: "textScore" } } },
-    //     { $limit : 50 },
-    //     { "$geoNear": {
-    //       "near": {
-    //         "type": "Point",
-    //         "coordinates": [parseFloat(lng), parseFloat(lat)]
-    //       },
-    //       "distanceField": "distance",
-    //       "minDistance": 1,
-    //       "maxDistance": 5000,
-    //       "spherical": false,
-    //       "query": { "loc.type": "Point" }
-    //     } }
+// games.aggregate([
+//     { $match: { 'game_user_id' : '12345789' } },
+//     { $group: {
+//         _id: '$id',
+//         game_total: { $sum: '$game_amount'}, 
+//         game_total_profit: { $sum: '$game_profit'}}
+//     }}
+// ]).exec(function ( e, d ) {
+//     console.log( d )            
+// });
 
 
-    //   //{ "$sort": { "distance": -1 } 
-    // ],
-    // function(err,data) {
 
-    //   if (data){
-    //     res.send(data);
-    //   }
-    //   else {
-    //       console.log('no results');
-    //       res.send({err:'no results'});            
-    //   }
 
-    // //   // var nearby_and_alive = data.filter(function(world){
-    // //   //   return ( (!world.time.end && !world.time.start)  
-    // //   //   || (new Date(world.time.start) + 604800000 > new Date(userTime)) 
-    // //   //   || (new Date(world.time.end) > new Date(userTime)) ) 
-    // //   // });
+// landmarkSchema.aggregate({
+//             $match: {
+//                 $text: {
+//                     $search: sText
+//                 },
+//                 loc: {
+//                     $geoWithin: {
+//                         $centerSphere: [
+//                             [parseFloat(lng), parseFloat(lat)], 0.5 / 3963.2
+//                         ]
+//                     }
+//                 }
+//             }
+//         }, {
+//             $sort: {
+//                 score: {
+//                     $meta: "textScore"
+//                 }
+//             }
+//         }, {
+//             $limit: 50
+//         },
+//         function(err, data) {
+//             if (err) {
+//                 return console.log(err)
+//             }
 
-    // //   // var count = nearby_and_alive.length;
-    // //   // var random_number = Math.floor(Math.random() * count ); 
-    // //   // console.log("random item: " + JSON.stringify(nearby_and_alive[random_number]));
-    // //   // res.send([nearby_and_alive[random_number]]);
+//             if (data.length < 50) {
+//                 console.log('Not enough results, increasing distance..')
+//                 landmarkSchema.aggregate({
+//                         $match: {
+//                             $text: {
+//                                 $search: sText
+//                             },
+//                             loc: {
+//                                 $geoWithin: {
+//                                     $centerSphere: [
+//                                         [parseFloat(lng), parseFloat(lat)], 2.5 / 3963.2
+//                                     ]
+//                                 }
+//                             }
+//                         }
+//                     }, {
+//                         $sort: {
+//                             score: {
+//                                 $meta: "textScore"
+//                             }
+//                         }
+//                     }, {
+//                         $limit: 50
+//                     },
+//                     function(err, data) {
+//                         if (err) {
+//                             return console.log(err)
+//                         }
+//                         if (data.length < 50) {
+//                             console.log('Not enough results, increasing distance..')
+//                             landmarkSchema.aggregate({
+//                                     $match: {
+//                                         $text: {
+//                                             $search: sText
+//                                         },
+//                                         loc: {
+//                                             $geoWithin: {
+//                                                 $centerSphere: [
+//                                                     [parseFloat(lng), parseFloat(lat)], 5 / 3963.2
+//                                                 ]
+//                                             }
+//                                         }
+//                                     }
+//                                 }, {
+//                                     $sort: {
+//                                         score: {
+//                                             $meta: "textScore"
+//                                         }
+//                                     }
+//                                 }, {
+//                                     $limit: 50
+//                                 },
+//                                 function(err, data) {
+//                                     if (err) {
+//                                         return console.log(err)
+//                                     }
+//                                     if (data.length < 50) {
+//                                         console.log('Not enough results, increasing distance..')
+//                                         landmarkSchema.aggregate({
+//                                                 $match: {
+//                                                     $text: {
+//                                                         $search: sText
+//                                                     },
+//                                                     loc: {
+//                                                         $geoWithin: {
+//                                                             $centerSphere: [
+//                                                                 [parseFloat(lng), parseFloat(lat)], 50 / 3963.2
+//                                                             ]
+//                                                         }
+//                                                     }
+//                                                 }
+//                                             }, {
+//                                                 $sort: {
+//                                                     score: {
+//                                                         $meta: "textScore"
+//                                                     }
+//                                                 }
+//                                             }, {
+//                                                 $limit: 50
+//                                             },
+//                                             function(err, data) {
+//                                                 if (err) {
+//                                                     return console.log(err)
+//                                                 }
+//                                                 console.log('Not enough results, searching worldwide...')
+//                                                 landmarkSchema.aggregate({
+//                                                         $match: {
+//                                                             $text: {
+//                                                                 $search: sText
+//                                                             }
+//                                                         },
+//                                                         {
+//                                                             $sort: {
+//                                                                 score: {
+//                                                                     $meta: "textScore"
+//                                                                 }
+//                                                             }
+//                                                         },
+//                                                         {
+//                                                             $limit: 50
+//                                                         },
+//                                                         function(err, data) {
+//                                                             if (err) {
+//                                                                 return console.log(err)
+//                                                             }
+//                                                             res.send(data);
+//                                                         })
 
-    // });
+
+//                                                 } else {
+//                                                     res.send(data);
+//                                                 }
+//                                             } else {
+//                                                 res.send(data);
+//                                             }
+//                                         });
+//                                 })
+//                         })
+//                 })
+
+// OLD
+// landmarkSchema.find(
+//     { $text : { $search : sText } },
+//     { score : { $meta: "textScore" } }
+//   ).
+//   sort({ score : { $meta : 'textScore' } }).
+//   limit(50).
+//   exec(function(err, data) {
+//     if (data){
+//         res.send(data);
+//     }
+//     else {
+//         console.log('no results');
+//         res.send({err:'no results'});            
+//     }
+//   });
+
+// landmarkSchema.aggregate(
+//  [
+
+//     { $match: { $text: { $search: sText } } },
+//     { $sort: { score: { $meta: "textScore" } } },
+//     { $limit : 50 },
+//     { "$geoNear": {
+//       "near": {
+//         "type": "Point",
+//         "coordinates": [parseFloat(lng), parseFloat(lat)]
+//       },
+//       "distanceField": "distance",
+//       "minDistance": 1,
+//       "maxDistance": 5000,
+//       "spherical": false,
+//       "query": { "loc.type": "Point" }
+//     } }
+
+
+//   //{ "$sort": { "distance": -1 } 
+// ],
+// function(err,data) {
+
+//   if (data){
+//     res.send(data);
+//   }
+//   else {
+//       console.log('no results');
+//       res.send({err:'no results'});            
+//   }
+
+// //   // var nearby_and_alive = data.filter(function(world){
+// //   //   return ( (!world.time.end && !world.time.start)  
+// //   //   || (new Date(world.time.start) + 604800000 > new Date(userTime)) 
+// //   //   || (new Date(world.time.end) > new Date(userTime)) ) 
+// //   // });
+
+// //   // var count = nearby_and_alive.length;
+// //   // var random_number = Math.floor(Math.random() * count ); 
+// //   // console.log("random item: " + JSON.stringify(nearby_and_alive[random_number]));
+// //   // res.send([nearby_and_alive[random_number]]);
+
+// });
 
 };
 
