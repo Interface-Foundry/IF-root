@@ -3,6 +3,7 @@ app.factory('navService', [function() {
 
 	var status = {
 		home: true, // default home nav selected
+		world: false, // in world
 		search: false // global search or world search
 	};
 

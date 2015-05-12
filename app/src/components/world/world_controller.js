@@ -6,7 +6,7 @@ var style = styleManager;
 $scope.worldURL = $routeParams.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
-navService.show('home');
+navService.show('world');
 
 $scope.contest = {};
 $scope.world = {};
