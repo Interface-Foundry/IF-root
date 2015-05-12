@@ -439,8 +439,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function updateLandmarks(landmarks) {
+		var markerOptions = {
+			draggable: false,
+			worldId: $scope.world.id
+		};
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world, $scope)
+			return mapManager.markerFromLandmark(l, markerOptions);
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :

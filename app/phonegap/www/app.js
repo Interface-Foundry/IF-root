@@ -26718,8 +26718,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function updateLandmarks(landmarks) {
+		var markerOptions = {
+			draggable: false,
+			worldId: $scope.world.id
+		};
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world, $scope)
+			return mapManager.markerFromLandmark(l, markerOptions);
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :
@@ -29258,49 +29262,6 @@ function lowestLandmarkFloor(tempMarkers) {
 		})
 		.value();
 	return sorted.length ? sorted[0].loc_info.floor_num : 1;
-}
-
-function markerFromLandmark(landmark) {
-
-	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-			popupAnchorValues = [0, -4],
-			shadowUrl = '',
-			shadowAnchor = [1, -1],
-			iconAnchor = [11, 11],
-			iconSize = [23, 23],
-			layerGroup = getLayerGroup(landmark) + '-landmarks',
-			alt = null;
-
-	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-		landmarkIcon = landmark.avatar;
-		popupAnchorValues = [0, -14];
-		// shadowUrl = 'img/marker/blue-pointer.png';
-		iconAnchor = [25, 25];
-		iconSize = [50, 50];
-		alt = 'store';
-	}
-
-	return {
-		lat:landmark.loc.coordinates[1],
-		lng:landmark.loc.coordinates[0],
-		draggable:false,
-		message: '<a if-href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-		icon: {
-			iconUrl: landmarkIcon,
-			shadowUrl: shadowUrl,
-			shadowAnchor: shadowAnchor,
-			iconSize: iconSize,
-			iconAnchor: iconAnchor,
-			popupAnchor: popupAnchorValues
-		},
-		_id: landmark._id,
-		layer: layerGroup,
-		alt: alt
-	}
-}
-
-function getLayerGroup(landmark) {
-	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
 }
 
 $scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
