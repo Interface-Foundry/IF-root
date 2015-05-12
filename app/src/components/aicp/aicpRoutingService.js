@@ -2,9 +2,9 @@
 
 app.factory('aicpRoutingService', aicpRoutingService);
 
-aicpRoutingService.$inject = ['$location'];
+aicpRoutingService.$inject = ['$location', '$routeParams'];
 
-function aicpRoutingService($location) {
+function aicpRoutingService($location, $routeParams) {
 	return {
 		route: route
 	}
@@ -14,15 +14,17 @@ function aicpRoutingService($location) {
 		var today = moment().dayOfYear();
     var path = $location.path();
 
-    switch (today) {
-      case 154:
-        $location.path(path + '_thursday');
-        break;
-      case 155:
-        $location.path(path + '_wednesday');
-        break;
-      default:
-        $location.path(path + '_tuesday');
+    if (today < 138) {
+      $location.path(path + '');
+      return {worldURL: 'aicpweek2015'};
+    } else if (today === 156) {
+      $location.path(path + '_thursday');
+    } else if (today === 155) {
+      $location.path(path + '_wednesday');
+    } else {
+      $location.path(path + '_tuesday');
     }
-	}
+  }
 }
+
+app.constant('rerouteData', {worldURL: ''})

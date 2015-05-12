@@ -4895,10 +4895,12 @@ $routeProvider.
   // REMOVE AICP
   when('/w/aicpweek2015', {
     resolve: {
-      dayOfWeek: function(aicpRoutingService) {
+      rerouteData: function(aicpRoutingService) {
         return aicpRoutingService.route();
       }
-    }
+    },
+    templateUrl: 'components/world/world.html', 
+    controller: 'WorldController'
   }).
   ///////////////
   when('/', {
@@ -21912,9 +21914,9 @@ function FourOhFourController($scope, mapManager, apertureService, navService) {
 
 app.factory('aicpRoutingService', aicpRoutingService);
 
-aicpRoutingService.$inject = ['$location'];
+aicpRoutingService.$inject = ['$location', '$routeParams'];
 
-function aicpRoutingService($location) {
+function aicpRoutingService($location, $routeParams) {
 	return {
 		route: route
 	}
@@ -21924,18 +21926,20 @@ function aicpRoutingService($location) {
 		var today = moment().dayOfYear();
     var path = $location.path();
 
-    switch (today) {
-      case 154:
-        $location.path(path + '_thursday');
-        break;
-      case 155:
-        $location.path(path + '_wednesday');
-        break;
-      default:
-        $location.path(path + '_tuesday');
+    if (today < 138) {
+      $location.path(path + '');
+      return {worldURL: 'aicpweek2015'};
+    } else if (today === 156) {
+      $location.path(path + '_thursday');
+    } else if (today === 155) {
+      $location.path(path + '_wednesday');
+    } else {
+      $location.path(path + '_tuesday');
     }
-	}
+  }
 }
+
+app.constant('rerouteData', {worldURL: ''})
 'use strict';
 
 app.directive('announcements', announcements);
@@ -24755,7 +24759,7 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
     init();
 
     function init() {
-        // special case for aicp to prevent splash page
+        // REMOVE AICP
         if ($location.path().indexOf('aicpweek2015') > -1) {
             $scope.show.splash = false;
             return;
@@ -28680,12 +28684,12 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 // 	}
 // }
 // }])
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', 'rerouteData', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService, rerouteData) {
 
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
-$scope.worldURL = $routeParams.worldURL;  
+$scope.worldURL = $routeParams.worldURL || rerouteData.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
 navService.show('home');
@@ -29258,7 +29262,7 @@ $scope.$on('$destroy', function() {
 });
 
 
-worldTree.getWorld($routeParams.worldURL).then(function(data) {
+worldTree.getWorld($scope.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);
 	$scope.loadWorld(data);

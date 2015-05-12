@@ -1,9 +1,9 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', 'rerouteData', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService, rerouteData) {
 
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
-$scope.worldURL = $routeParams.worldURL;  
+$scope.worldURL = $routeParams.worldURL || rerouteData.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
 navService.show('home');
@@ -576,7 +576,7 @@ $scope.$on('$destroy', function() {
 });
 
 
-worldTree.getWorld($routeParams.worldURL).then(function(data) {
+worldTree.getWorld($scope.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);
 	$scope.loadWorld(data);

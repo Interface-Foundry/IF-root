@@ -82,10 +82,12 @@ $routeProvider.
   // REMOVE AICP
   when('/w/aicpweek2015', {
     resolve: {
-      dayOfWeek: function(aicpRoutingService) {
+      rerouteData: function(aicpRoutingService) {
         return aicpRoutingService.route();
       }
-    }
+    },
+    templateUrl: 'components/world/world.html', 
+    controller: 'WorldController'
   }).
   ///////////////
   when('/', {

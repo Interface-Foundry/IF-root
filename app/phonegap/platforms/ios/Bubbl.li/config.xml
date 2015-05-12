@@ -95,4 +95,5 @@
     <preference name="webviewbounce" value="false" />
     <preference name="AutoHideSplashScreen" value="false" />
     <preference name="StatusBarOverlaysWebView" value="false" />
+    <plugin name="Geolocation" value="CDVLocation" />
 </widget>
