@@ -22395,11 +22395,8 @@ function findMapsOnThisFloor(world, floor) {
 
 $scope.saveWorld = function() {
 	$scope.whenSaving = true;
-	console.log('saveWorld(edit)');
 	$scope.world.newStatus = false; //not new
-	//$scope.world.worldID = $scope.worldID;
 	$scope.world.hasLoc = true;
-	console.log($scope.world);
 	tempMarker = map.getMarker(markerID);
 	$scope.world.loc.coordinates[0] = tempMarker.lng;
 	$scope.world.loc.coordinates[1] = tempMarker.lat;
@@ -22408,9 +22405,6 @@ $scope.saveWorld = function() {
 		$scope.world.style.maps = {};
 	}
 	console.log($scope.mapThemeSelect);
-	//$scope.world.style.maps.cloudMapName = $scope.mapThemeSelect.cloudMapName;
-	//$scope.world.style.maps.cloudMapID = $scope.mapThemeSelect.cloudMapID;
-	
 	
 	console.log($scope.world);
     db.worlds.create($scope.world, function(response) {
