@@ -28414,12 +28414,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 
 	// REMOVE AICP
-	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkSrc) {
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkUrl) {
 		$scope.blueRibbonAicp = {
 			style: {
 				'background': 'url(' + $scope.world.blueRibbon.imgSrc + ') center center / cover no-repeat'
 			},
-			link: $scope.world.blueRibbon.linkSrc
+			link: $scope.world.blueRibbon.linkUrl
 		};
 	}
 
