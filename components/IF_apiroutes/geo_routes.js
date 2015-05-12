@@ -20,7 +20,7 @@ router.use(function(req, res, next) {
 		req.geoloc.lng = req.query.lng;
 	}
 
-    if (global.config.env === 'development') {
+    if (global.config.env === 'development' || global.config.env === 'test') {
         console.log('In development mode, defaulting to NYC (hardcoded)')
         req.geoloc.cityName = 'New York City';
 		req.geoloc.src = 'ip-based';
