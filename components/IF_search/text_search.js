@@ -92,7 +92,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                     callback(null, data)
                 }
             })
-    );
+
 
 
 }
