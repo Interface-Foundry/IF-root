@@ -73,7 +73,7 @@
 			<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
 			
 			<!--LANDMARKS-->
-			<div ng-include="landmarks.length>0 && !isRetail ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
+			<div ng-include="landmarks.length>0 && !isRetail && !category ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
 			
 			<!--MESSAGES-->
 			<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>

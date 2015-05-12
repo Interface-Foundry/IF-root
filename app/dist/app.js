@@ -23996,7 +23996,7 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', 'navService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout, navService) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
@@ -24008,6 +24008,7 @@ $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText.global;
 $scope.welcomeService = welcomeService;
 $scope.refresh = refresh;
+navService.show('home');
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -24144,13 +24145,10 @@ logSearchClick = function(path) {
 	
 $scope.go = function(path) {
 	logSearchClick(path);
-	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
-	navService.reset();
-	// $window.history.back();
 	$window.history.go(navService.backPages);
 }
 
@@ -24248,6 +24246,7 @@ app.factory('navService', [function() {
 
 	var status = {
 		home: true, // default home nav selected
+		world: false, // in world
 		search: false // global search or world search
 	};
 
@@ -24287,19 +24286,15 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 
 	function link(scope, element, attrs) {
 
-		scope.goHome = goHome;
+		scope.goWorld = goWorld;
 		scope.goSearch = goSearch;
 
-		function goHome() {
+		function goWorld() {
 			// go to world home if in world but not already in world home. go to kip home otherwise
-
 			if ($routeParams.worldURL && $location.path() !== '/w/' + $routeParams.worldURL) {
 				$location.path('/w/' + $routeParams.worldURL);
-			} else {
-				$location.path('/');
+				navService.show('world');
 			}
-
-			navService.show('home');
 		}
 
 		function goSearch() {
@@ -28340,7 +28335,7 @@ var style = styleManager;
 $scope.worldURL = $routeParams.worldURL || rerouteData.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
-navService.show('home');
+navService.show('world');
 
 $scope.contest = {};
 $scope.world = {};
