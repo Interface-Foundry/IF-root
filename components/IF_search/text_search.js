@@ -55,7 +55,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                         $meta: "textScore"
                     }
                 }
-            },
+            },{allowDiskUse: true},
             function(err, data) {
                 if (err) {
                     console.error('error in text_search');
