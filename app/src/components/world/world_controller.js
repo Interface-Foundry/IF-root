@@ -491,7 +491,16 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	// mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var markerOptions = {
+		draggable: false,
+		worldId: $scope.world.id
+	};
+	var mapMarkers = tempMarkers.map(function(landmark) {
+		return mapManager.markerFromLandmark(landmark, markerOptions);
+	});
+	mapManager.addMarkers(mapMarkers);
+
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
 	if (bubbleTypeService.get() !== 'Retail') {

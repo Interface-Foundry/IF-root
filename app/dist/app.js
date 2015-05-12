@@ -18279,42 +18279,100 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-mapManager.markerFromLandmark = function(landmark, world, $scope) {
-	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-			popupAnchorValues = [0, -4],
-			iconAnchor = [11, 11],
-			iconSize = [23, 23],
-			layerGroup = getLayerGroup(landmark) + '-landmarks',
-			alt = null;
+// mapManager.markerFromLandmark = function(landmark, world, $scope) {
+// 	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
+// 			popupAnchorValues = [0, -4],
+// 			iconAnchor = [11, 11],
+// 			iconSize = [23, 23],
+// 			layerGroup = getLayerGroup(landmark) + '-landmarks',
+// 			alt = null;
 
-	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-		landmarkIcon = landmark.avatar;
-		popupAnchorValues = [0, -14];
-		iconAnchor = [25, 25];
-		iconSize = [50, 50];
+// 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
+// 		landmarkIcon = landmark.avatar;
+// 		popupAnchorValues = [0, -14];
+// 		iconAnchor = [25, 25];
+// 		iconSize = [50, 50];
+// 		alt = 'store';
+// 	}
+
+// 	return {
+// 		lat:landmark.loc.coordinates[1],
+// 		lng:landmark.loc.coordinates[0],
+// 		draggable:false,
+// 		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
+// 		icon: {
+// 			iconUrl: landmarkIcon,
+// 			iconSize: iconSize,
+// 			iconAnchor: iconAnchor,
+// 			popupAnchor: popupAnchorValues
+// 		},
+// 		_id: landmark._id,
+// 		layer: layerGroup,
+// 		alt: alt,
+// 		getMessageScope: function() { return $scope; }
+// 	}
+// 	function getLayerGroup(landmark) {
+// 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+// 	}
+// }
+
+mapManager.markerFromLandmark = function(landmarkData, options) {
+	var retailBubble = bubbleTypeService.get() === 'Retail';
+	var customIcon = landmarkData.avatar !== 'img/tidepools/default.jpg';
+	var alt;
+	var icon;
+
+	if (retailBubble && customIcon) {
 		alt = 'store';
+		icon = makeCustomIcon(landmarkData);
+	} else {
+		alt = null;
+		icon = makeDefaultIcon();
 	}
 
 	return {
-		lat:landmark.loc.coordinates[1],
-		lng:landmark.loc.coordinates[0],
-		draggable:false,
-		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-		icon: {
-			iconUrl: landmarkIcon,
-			iconSize: iconSize,
-			iconAnchor: iconAnchor,
-			popupAnchor: popupAnchorValues
-		},
-		_id: landmark._id,
-		layer: layerGroup,
+		_id: landmarkData._id,
 		alt: alt,
-		getMessageScope: function() { return $scope; }
-	}
-	function getLayerGroup(landmark) {
-		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
-	}
+		draggable: options.draggable,
+		// group: ,
+		layer: makeLayerGroup(landmarkData) + '-landmarks',
+		lat:landmarkData.loc.coordinates[1],
+		lng:landmarkData.loc.coordinates[0],
+		icon: icon,
+		message: makeMarkerMessage(landmarkData, options),
+		opacity: landmarkData.opacity || 1
+	};
 }
+
+function makeLayerGroup(landmarkData) {
+	return landmarkData.loc_info ? String(landmarkData.loc_info.floor_num) || '1' : '1';
+}
+
+function makeCustomIcon(landmarkData) {
+	return {
+		iconAnchor: [25, 25],
+		iconSize: [50, 50],
+		iconUrl: landmarkData.avatar,
+		popupAnchorValues: [0, -14]
+	};
+}
+
+function makeDefaultIcon() {
+	return {
+		iconAnchor: [11, 11],
+		iconSize: [23, 23],
+		iconUrl: 'img/marker/landmarkMarker_23.png',
+		popupAnchorValues: [0, -4]
+	};
+}
+
+function makeMarkerMessage(landmarkData, options) {
+	return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
+					'"><div class="marker-popup-click"></div></a><a>' + 
+					landmarkData.name + '</a>';
+}
+
+
 
 /* addMarker
 Key: Name of marker to be added
@@ -28821,7 +28879,16 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	// mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var markerOptions = {
+		draggable: false,
+		worldId: $scope.world.id
+	};
+	var mapMarkers = tempMarkers.map(function(landmark) {
+		return mapManager.markerFromLandmark(landmark, markerOptions);
+	});
+	mapManager.addMarkers(mapMarkers);
+
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
 	if (bubbleTypeService.get() !== 'Retail') {
