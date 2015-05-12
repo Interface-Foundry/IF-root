@@ -117,7 +117,9 @@
 
 				<button class="back-button if-animate" ng-class="{'is-invisible': hideBack}" ng-click="goBack()"></button>
 
-				<div class="navLogo-wrapper u-pointer" ng-click="go('/')">
+				<div class="navLogo-wrapper u-pointer" 
+					ng-class="{'is-selected': navService.status.home}" 
+					ng-click="go('/')">
 					<img src="img/kip/kipLogo_navbar.svg" class="navLogo u-centerXY">
 				</div>
 
