@@ -272,9 +272,13 @@ function makeDefaultIcon() {
 }
 
 function makeMarkerMessage(landmarkData, options) {
-	return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
-					'"><div class="marker-popup-click"></div></a><a>' + 
-					landmarkData.name + '</a>';
+	if (options.messageLink) {
+		return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
+						'"><div class="marker-popup-click"></div></a><a>' + 
+						landmarkData.name + '</a>';
+	} else {
+		return landmarkData.name;
+	}
 }
 
 
@@ -308,7 +312,7 @@ mapManager.addMarkers = function(markers) {
 			return marker._id;
 		}))
 	} else {
-		angular.extend(mapManager.markers, markers);
+		mapManager.markers[markers._id] = markers;
 	}
 }
 

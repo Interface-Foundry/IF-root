@@ -18367,9 +18367,13 @@ function makeDefaultIcon() {
 }
 
 function makeMarkerMessage(landmarkData, options) {
-	return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
-					'"><div class="marker-popup-click"></div></a><a>' + 
-					landmarkData.name + '</a>';
+	if (options.messageLink) {
+		return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
+						'"><div class="marker-popup-click"></div></a><a>' + 
+						landmarkData.name + '</a>';
+	} else {
+		return landmarkData.name;
+	}
 }
 
 
@@ -18403,7 +18407,7 @@ mapManager.addMarkers = function(markers) {
 			return marker._id;
 		}))
 	} else {
-		angular.extend(mapManager.markers, markers);
+		mapManager.markers[markers._id] = markers;
 	}
 }
 
@@ -26364,6 +26368,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	function updateLandmarks(landmarks) {
 		var markerOptions = {
 			draggable: false,
+			messageLink: true,
 			worldId: $scope.world.id
 		};
 		var markers = landmarks.map(function(l) {
@@ -26927,41 +26932,21 @@ function getLandmark(world) {
 }
 
 function goToMark() {
-	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	map.removeAllMarkers();
 
-	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-			popupAnchorValues = [0, -4],
-			shadowUrl = '',
-			iconAnchor = [11, 11],
-			iconSize = [23, 23],
-			alt = null;
-
-	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
-		landmarkIcon = $scope.landmark.avatar;
-		popupAnchorValues = [0, -14];
-		iconAnchor = [25, 25];
-		iconSize = [50, 50];
-		alt = 'store';
-	}
-
-	map.addMarker($scope.landmark._id, {
-		lat: $scope.landmark.loc.coordinates[1],
-		lng: $scope.landmark.loc.coordinates[0],
-		draggable:false,
-		message:$scope.landmark.name,
-	  	icon: {
-			iconUrl: landmarkIcon,
-			iconSize: iconSize,
-			iconAnchor: iconAnchor,
-			popupAnchor: popupAnchorValues
-		},
-		_id: $scope.landmark._id,
-		alt: alt
+	var markerOptions = {
+		draggable: false,
+		messageLink: false,
+		worldId: $scope.world.id
+	};
+	var mapMarker = mapManager.markerFromLandmark($scope.landmark, markerOptions);
+	map.addMarkers([mapMarker]);
+	mapManager.newMarkerOverlay($scope.landmark);
+	_.defer(function() {
+		mapManager.turnOnOverlay(mapMarker.layer);
 	});
 
-	map.setMarkerFocus($scope.landmark._id);
 	map.refresh();
 
 };
@@ -28886,6 +28871,7 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 	// mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 	var markerOptions = {
 		draggable: false,
+		messageLink: true,
 		worldId: $scope.world.id
 	};
 	var mapMarkers = tempMarkers.map(function(landmark) {

@@ -494,6 +494,7 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 	// mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 	var markerOptions = {
 		draggable: false,
+		messageLink: true,
 		worldId: $scope.world.id
 	};
 	var mapMarkers = tempMarkers.map(function(landmark) {
