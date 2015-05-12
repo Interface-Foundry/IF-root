@@ -49,13 +49,15 @@ var route = function(textQuery, lat, lng, userTime, res) {
             }
         };
 
-        landmarkSchema.aggregate(query, {
+        var aggregate = landmarkSchema.aggregate(query, {
                 $sort: {
                     score: {
                         $meta: "textScore"
                     }
                 }
-            },{allowDiskUse: true},
+            }, {
+                allowDiskUse: true
+            },
             function(err, data) {
                 if (err) {
                     console.error('error in text_search');
@@ -88,6 +90,13 @@ var route = function(textQuery, lat, lng, userTime, res) {
                     callback(null, data)
                 }
             })
+
+        aggregate.options = {
+            allowDiskUse: true
+        };
+        aggregate.exec(function() {});
+
+
     }
 
     async.series([
@@ -108,19 +117,19 @@ var route = function(textQuery, lat, lng, userTime, res) {
 
             // :ﾟ・✧ special ranking stuff ✧・ﾟ:
             var rankedResults = results.map(function(r, i) {
-				var distance = geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat); // km
-				var distance_score = 0;
-				// all things 5km or more away get 0 for distance
-				// all things closer get scored linearly based on how close they are, with a max score of 10 (2*5)
-				if (distance < 5) {
-					distance_score = 2*(5 - distance); // 
-				}
+                var distance = geoDistance(r.loc.coordinates[0], r.loc.coordinates[1], lng, lat); // km
+                var distance_score = 0;
+                // all things 5km or more away get 0 for distance
+                // all things closer get scored linearly based on how close they are, with a max score of 10 (2*5)
+                if (distance < 5) {
+                    distance_score = 2 * (5 - distance); // 
+                }
 
                 return {
                     result: r,
                     ranking: {
                         distance: distance_score,
-                        text_ranking: 10/(i+1), // todo
+                        text_ranking: 10 / (i + 1), // todo
                         has_ownerID: r.permissions.ownerID ? 10 : 0,
                         has_categories: (r.landmarkCategories && r.landmarkCategories.length) > 0 ? 1000 : 0,
                     }
@@ -130,7 +139,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                 r.totalScore = Object.keys(r.ranking).reduce(function(value, k) {
                     return value + (r.ranking[k] || 0);
                 }, 0);
-				return r;
+                return r;
             })
 
             rankedResults.sort(function(a, b) {
@@ -139,26 +148,26 @@ var route = function(textQuery, lat, lng, userTime, res) {
             });
 
             // debug the sort if needed
-			/*
+            /*
             console.log(rankedResults.map(function(r) {
-				return {
-					ranking: r.ranking,
-					id: r.result.id,
-					totalScore: r.totalScore,
-					ownerID: r.result.permissions.ownerID
-				};
-			}).reverse());
-			*/
+                return {
+                    ranking: r.ranking,
+                    id: r.result.id,
+                    totalScore: r.totalScore,
+                    ownerID: r.result.permissions.ownerID
+                };
+            }).reverse());
+            */
 
             // Results have been sorted, now convert back to regular array
-            results = rankedResults.map(function(r){
+            results = rankedResults.map(function(r) {
                 return r.result; // the original mongodb object
             });
 
-			// limit results to 50
-			if (results.length > 50) {
-				results = results.slice(0,50);
-			}
+            // limit results to 50
+            if (results.length > 50) {
+                results = results.slice(0, 50);
+            }
 
             //Retreive parent IDs to query for parent world names for each landmark
 
@@ -211,7 +220,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
                             }
                         });
                         if (!found && sText.toLowerCase().indexOf('queen') >= 0) {
-                           // results = [queenscenter].concat(results);
+                            // results = [queenscenter].concat(results);
                         }
 
                         // add atlantic center if not found
