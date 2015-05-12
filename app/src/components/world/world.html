@@ -41,7 +41,7 @@
 			<div ng-include="worldURL.indexOf('aicpweek2015') > -1 ? 'components/aicp/aicpSwitcher.html' : null" class="marble-page"></div>
 
 			<!-- REMOVE AICP -->
-			<div ng-include="worldURL.indexOf('aicpweek2015') > -1 ? 'components/aicp/blueRibbon.html': null" class="marble-page blueRibbonHeight--aicp"></div>
+			<div ng-include="world.blueRibbon && world.blueRibbon.imgSrc && world.blueRibbon.linkUrl ? 'components/aicp/blueRibbon.html': null" class="marble-page blueRibbonHeight--aicp"></div>
 		
 			<!--DESCRIPTION-->
 			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' : 'components/world/templates/description.html'" class="marble-page"></div>
