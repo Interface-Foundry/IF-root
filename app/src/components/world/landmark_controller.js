@@ -168,7 +168,7 @@ function goToMark() {
 		worldId: $scope.world.id
 	};
 	var mapMarker = mapManager.markerFromLandmark($scope.landmark, markerOptions);
-	map.addMarkers([mapMarker]);
+	map.addMarkers(mapMarker);
 	mapManager.newMarkerOverlay($scope.landmark);
 	_.defer(function() {
 		mapManager.turnOnOverlay(mapMarker.layer);

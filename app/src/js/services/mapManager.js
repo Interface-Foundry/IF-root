@@ -184,43 +184,6 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-// mapManager.markerFromLandmark = function(landmark, world, $scope) {
-// 	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-// 			popupAnchorValues = [0, -4],
-// 			iconAnchor = [11, 11],
-// 			iconSize = [23, 23],
-// 			layerGroup = getLayerGroup(landmark) + '-landmarks',
-// 			alt = null;
-
-// 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-// 		landmarkIcon = landmark.avatar;
-// 		popupAnchorValues = [0, -14];
-// 		iconAnchor = [25, 25];
-// 		iconSize = [50, 50];
-// 		alt = 'store';
-// 	}
-
-// 	return {
-// 		lat:landmark.loc.coordinates[1],
-// 		lng:landmark.loc.coordinates[0],
-// 		draggable:false,
-// 		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-// 		icon: {
-// 			iconUrl: landmarkIcon,
-// 			iconSize: iconSize,
-// 			iconAnchor: iconAnchor,
-// 			popupAnchor: popupAnchorValues
-// 		},
-// 		_id: landmark._id,
-// 		layer: layerGroup,
-// 		alt: alt,
-// 		getMessageScope: function() { return $scope; }
-// 	}
-// 	function getLayerGroup(landmark) {
-// 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
-// 	}
-// }
-
 mapManager.markerFromLandmark = function(landmarkData, options) {
 	var retailBubble = bubbleTypeService.get() === 'Retail';
 	var customIcon = landmarkData.avatar !== 'img/tidepools/default.jpg';

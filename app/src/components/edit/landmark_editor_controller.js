@@ -91,57 +91,6 @@ var landmarksLoaded = false;
 			return false;}
 		$scope.landmarks[i].loc.coordinates = [tempMarker.lng, tempMarker.lat];
 
-		// if($scope.landmarks[i].hiddenPresent == true){
-		// 	$scope.landmarks[i].category.hiddenPresent = true;
-		// }
-		// else{
-		// 	$scope.landmarks[i].category.hiddenPresent = false;
-		// }
-		
-		/*
-if ($scope.landmark.hasTime) {
-	   
-	   	    //if no end date added, use start date
-	        if (!$scope.landmark[i].date.end) {
-	            $scope.landmark[i].date.end = $scope.landmark[i].date.start;
-	        }
-
-	        $scope.landmark[i].datetext = {
-	            start: $scope.landmark[i].date.start,
-	            end: $scope.landmark[i].date.end
-	        }
-	        //---- Date String converter to avoid timezone issues...could be optimized probably -----//
-	        $scope.landmark[i].date.start = new Date($scope.landmark[i].date.start).toISOString();
-	        $scope.landmark[i].date.end = new Date($scope.landmark[i].date.end).toISOString();
-
-	        $scope.landmark[i].date.start = dateConvert($scope.landmark[i].date.start);
-	        $scope.landmark[i].date.end = dateConvert($scope.landmark[i].date.end);
-
-	        $scope.landmark[i].date.start = $scope.landmark[i].date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
-	        $scope.landmark[i].date.end = $scope.landmark[i].date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
-
-	        function dateConvert(input){
-	            var s = input;
-	            var n = s.indexOf('T');
-	            return s.substring(0, n != -1 ? n : s.length);
-	        }
-	        //-----------//
-
-	        if (!$scope.landmark[i].time.start){
-	            $scope.landmark[i].time.start = "00:00";
-	        }
-
-	        if (!$scope.landmark[i].time.end){
-	            $scope.landmark[i].time.end = "23:59";
-	        }
-
-	        $scope.landmark[i].timetext = {
-	            start: $scope.landmark[i].time.start,
-	            end: $scope.landmark[i].time.end
-	        } 
-	        //------- END TIME --------//
-		}
-*/	
 		console.log('Saving...');
 		console.log($scope.landmarks[i]);
 		db.landmarks.create($scope.landmarks[i], function(response) {
@@ -169,44 +118,18 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	$scope.addLandmarkMarker = function(landmark) {
-		var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-				popupAnchorValues = [0, -4],
-				shadowUrl = '',
-				shadowAnchor = [1, -1],
-				iconAnchor = [11, 11],
-				iconSize = [23, 23],
-				layerGroup = getLayerGroup(landmark) + '-landmarks',
-				alt = null;
 
-		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-			landmarkIcon = landmark.avatar;
-			popupAnchorValues = [0, -14];
-			iconAnchor = [25, 25];
-			iconSize = [50, 50];
-			alt = 'store';
-		}
-		
+		var markerOptions = {
+			draggable: false,
+			messageLink: true,
+			worldId: $scope.world.id
+		};
+
+		var mapMarker = mapManager.markerFromLandmark(landmark, markerOptions);
 
 		mapManager.newMarkerOverlay(landmark);
 
-		map.addMarker(landmark._id, {
-				lat:landmark.loc.coordinates[1],
-				lng:landmark.loc.coordinates[0],
-				icon: {
-					iconUrl: landmarkIcon,
-					shadowUrl: shadowUrl,
-					shadowAnchor: shadowAnchor,
-					iconSize: iconSize,
-					iconAnchor: iconAnchor,
-					popupAnchor: popupAnchorValues
-				},
-				draggable:true,
-				message:landmark.name || 'Drag to location on map',
-				focus:true,
-				layer: layerGroup,
-				_id: landmark._id,
-				alt: alt
-			});
+		map.addMarkers(mapMarker);
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -303,12 +226,14 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
 
-		// var filtered = filterLandmarks($scope.landmarks);
 
 		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
 			$scope.addLandmarkMarker(value);
 		});
+
+
+
 
 		if ($scope.landmarks.length) {
 			map.setMarkerFocus($scope.landmarks[0]._id);

@@ -18279,43 +18279,6 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-// mapManager.markerFromLandmark = function(landmark, world, $scope) {
-// 	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-// 			popupAnchorValues = [0, -4],
-// 			iconAnchor = [11, 11],
-// 			iconSize = [23, 23],
-// 			layerGroup = getLayerGroup(landmark) + '-landmarks',
-// 			alt = null;
-
-// 	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-// 		landmarkIcon = landmark.avatar;
-// 		popupAnchorValues = [0, -14];
-// 		iconAnchor = [25, 25];
-// 		iconSize = [50, 50];
-// 		alt = 'store';
-// 	}
-
-// 	return {
-// 		lat:landmark.loc.coordinates[1],
-// 		lng:landmark.loc.coordinates[0],
-// 		draggable:false,
-// 		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-// 		icon: {
-// 			iconUrl: landmarkIcon,
-// 			iconSize: iconSize,
-// 			iconAnchor: iconAnchor,
-// 			popupAnchor: popupAnchorValues
-// 		},
-// 		_id: landmark._id,
-// 		layer: layerGroup,
-// 		alt: alt,
-// 		getMessageScope: function() { return $scope; }
-// 	}
-// 	function getLayerGroup(landmark) {
-// 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
-// 	}
-// }
-
 mapManager.markerFromLandmark = function(landmarkData, options) {
 	var retailBubble = bubbleTypeService.get() === 'Retail';
 	var customIcon = landmarkData.avatar !== 'img/tidepools/default.jpg';
@@ -22852,57 +22815,6 @@ var landmarksLoaded = false;
 			return false;}
 		$scope.landmarks[i].loc.coordinates = [tempMarker.lng, tempMarker.lat];
 
-		// if($scope.landmarks[i].hiddenPresent == true){
-		// 	$scope.landmarks[i].category.hiddenPresent = true;
-		// }
-		// else{
-		// 	$scope.landmarks[i].category.hiddenPresent = false;
-		// }
-		
-		/*
-if ($scope.landmark.hasTime) {
-	   
-	   	    //if no end date added, use start date
-	        if (!$scope.landmark[i].date.end) {
-	            $scope.landmark[i].date.end = $scope.landmark[i].date.start;
-	        }
-
-	        $scope.landmark[i].datetext = {
-	            start: $scope.landmark[i].date.start,
-	            end: $scope.landmark[i].date.end
-	        }
-	        //---- Date String converter to avoid timezone issues...could be optimized probably -----//
-	        $scope.landmark[i].date.start = new Date($scope.landmark[i].date.start).toISOString();
-	        $scope.landmark[i].date.end = new Date($scope.landmark[i].date.end).toISOString();
-
-	        $scope.landmark[i].date.start = dateConvert($scope.landmark[i].date.start);
-	        $scope.landmark[i].date.end = dateConvert($scope.landmark[i].date.end);
-
-	        $scope.landmark[i].date.start = $scope.landmark[i].date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
-	        $scope.landmark[i].date.end = $scope.landmark[i].date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
-
-	        function dateConvert(input){
-	            var s = input;
-	            var n = s.indexOf('T');
-	            return s.substring(0, n != -1 ? n : s.length);
-	        }
-	        //-----------//
-
-	        if (!$scope.landmark[i].time.start){
-	            $scope.landmark[i].time.start = "00:00";
-	        }
-
-	        if (!$scope.landmark[i].time.end){
-	            $scope.landmark[i].time.end = "23:59";
-	        }
-
-	        $scope.landmark[i].timetext = {
-	            start: $scope.landmark[i].time.start,
-	            end: $scope.landmark[i].time.end
-	        } 
-	        //------- END TIME --------//
-		}
-*/	
 		console.log('Saving...');
 		console.log($scope.landmarks[i]);
 		db.landmarks.create($scope.landmarks[i], function(response) {
@@ -22930,44 +22842,18 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	$scope.addLandmarkMarker = function(landmark) {
-		var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-				popupAnchorValues = [0, -4],
-				shadowUrl = '',
-				shadowAnchor = [1, -1],
-				iconAnchor = [11, 11],
-				iconSize = [23, 23],
-				layerGroup = getLayerGroup(landmark) + '-landmarks',
-				alt = null;
 
-		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-			landmarkIcon = landmark.avatar;
-			popupAnchorValues = [0, -14];
-			iconAnchor = [25, 25];
-			iconSize = [50, 50];
-			alt = 'store';
-		}
-		
+		var markerOptions = {
+			draggable: false,
+			messageLink: true,
+			worldId: $scope.world.id
+		};
+
+		var mapMarker = mapManager.markerFromLandmark(landmark, markerOptions);
 
 		mapManager.newMarkerOverlay(landmark);
 
-		map.addMarker(landmark._id, {
-				lat:landmark.loc.coordinates[1],
-				lng:landmark.loc.coordinates[0],
-				icon: {
-					iconUrl: landmarkIcon,
-					shadowUrl: shadowUrl,
-					shadowAnchor: shadowAnchor,
-					iconSize: iconSize,
-					iconAnchor: iconAnchor,
-					popupAnchor: popupAnchorValues
-				},
-				draggable:true,
-				message:landmark.name || 'Drag to location on map',
-				focus:true,
-				layer: layerGroup,
-				_id: landmark._id,
-				alt: alt
-			});
+		map.addMarkers(mapMarker);
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -23064,12 +22950,14 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
 
-		// var filtered = filterLandmarks($scope.landmarks);
 
 		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
 			$scope.addLandmarkMarker(value);
 		});
+
+
+
 
 		if ($scope.landmarks.length) {
 			map.setMarkerFocus($scope.landmarks[0]._id);
@@ -26941,7 +26829,7 @@ function goToMark() {
 		worldId: $scope.world.id
 	};
 	var mapMarker = mapManager.markerFromLandmark($scope.landmark, markerOptions);
-	map.addMarkers([mapMarker]);
+	map.addMarkers(mapMarker);
 	mapManager.newMarkerOverlay($scope.landmark);
 	_.defer(function() {
 		mapManager.turnOnOverlay(mapMarker.layer);
@@ -28320,61 +28208,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-// app.directive('categoryWidget', [function() {
-// return {
-// 	restrict: 'E',
-// 	link: function(scope, element, attrs) {
-// 		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
-// 			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
-// 		}) //rerenders on category selection
-// 		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
-		
-// 		function categoryWidget(landmarkCategories) {
-// 			return m('.category-widget', 
-// 				groupCategories(landmarkCategories))
-// 		} //groupCategories handles mapping
-		
-// 		function groupCategories(landmarkCategories) {
-// 			 //separates landmark categories into button groups in place of mapping
-// 			if (landmarkCategories.length < 4) {
-// 				return buttonGroup(landmarkCategories); //3x1 grid
-// 			} else if (landmarkCategories.length === 4) { //2x2 grid
-// 				return [
-// 					buttonGroup(landmarkCategories.slice(0, 2)),
-// 					buttonGroup(landmarkCategories.slice(2))
-// 				]
-// 			} else { 
-// 				return [ //3x2, 3x3 grid
-// 					buttonGroup(landmarkCategories.slice(0, 3)),
-// 					buttonGroup(landmarkCategories.slice(3))
-// 				]
-// 			}
-// 		}
-		
-// 		function buttonGroup(categoryList) { //from a category list, create each button.
-// 			return m('.category-btn-group', categoryList.map(categoryButton));
-// 		}
-		
-// 		function categoryButton(category, index, categoryList) { //create category button, needs list length
-// 			return m('.category-btn', {
-// 				style: {width: 100 / categoryList.length + '%'}, 
-// 				colspan: 6/categoryList.length, //table display attribute
-// 				onclick: emitCategory(category.name), //emits selection on scope
-// 				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
-// 			}, [
-// 			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
-// 			category.name]);
-// 		}
-		
-// 		function emitCategory(landmarkCategoryName) {
-// 			return function (event) {
-// 				event.stopPropagation();
-// 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
-// 			}
-// 		}
-// 	}
-// }
-// }])
 app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService) {
 
 var map = mapManager;
@@ -28868,7 +28701,6 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	// mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 	var markerOptions = {
 		draggable: false,
 		messageLink: true,
@@ -28897,23 +28729,6 @@ function lowestLandmarkFloor(tempMarkers) {
 		.value();
 	return sorted.length ? sorted[0].loc_info.floor_num : 1;
 }
-
-$scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
-	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);
-	console.log(markers);
-	if (markers.length>0) {
-		map.setCenterFromMarkers(markers);
-		map.setMarkers(markers);
-		$scope.aperture.set('full');
-		$scope.selectedCategory = landmarkCategoryName;
-	} else {
-		//handle no landmarks in category
-	}
-	
-	function testCategory (landmark, index, landmarks) {
-		return landmark.category === landmarkCategoryName;
-	}
-})
 
 $scope.$on('$destroy', function() {
 	$rootScope.hide = false;

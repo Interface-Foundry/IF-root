@@ -491,7 +491,6 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	// mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
 	var markerOptions = {
 		draggable: false,
 		messageLink: true,
@@ -520,23 +519,6 @@ function lowestLandmarkFloor(tempMarkers) {
 		.value();
 	return sorted.length ? sorted[0].loc_info.floor_num : 1;
 }
-
-$scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
-	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);
-	console.log(markers);
-	if (markers.length>0) {
-		map.setCenterFromMarkers(markers);
-		map.setMarkers(markers);
-		$scope.aperture.set('full');
-		$scope.selectedCategory = landmarkCategoryName;
-	} else {
-		//handle no landmarks in category
-	}
-	
-	function testCategory (landmark, index, landmarks) {
-		return landmark.category === landmarkCategoryName;
-	}
-})
 
 $scope.$on('$destroy', function() {
 	$rootScope.hide = false;
