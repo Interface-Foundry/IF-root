@@ -190,11 +190,11 @@ if (superGroups['This Week'].length > 0) {
 			
 			t = moment(landmark.time.start);
 
-			if (t.isBefore(now)) {
-				return 'Previous';
-			} else if (t.isSame(now, 'day')) {
+			if (t.isSame(now, 'day')) {
 				return 'Today';
-			} else if (t.isBefore(moment().add(7, 'days'))) {
+			} else if (t.isBefore(now)) {
+				return 'Previous';
+			} else if (t.isBefore(moment().add(6, 'days'))) {
 				return 'This Week';
 			} else {
 				return 'Upcoming'
