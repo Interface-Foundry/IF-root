@@ -84,7 +84,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 
 	// REMOVE AICP
-	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
+	if ($scope.worldURL.indexOf('aicp_2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
 		$scope.splashBannerAicp = {
 			style: {
 				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'

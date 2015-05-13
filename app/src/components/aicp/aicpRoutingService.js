@@ -18,11 +18,11 @@ function aicpRoutingService($location, $routeParams) {
       $location.path(path + '');
       return {worldURL: 'aicpweek2015'};
     } else if (today === 156) {
-      $location.path(path + '_thursday');
+      $location.path('aicp_2015_thursday');
     } else if (today === 155) {
-      $location.path(path + '_wednesday');
+      $location.path('aicp_2015_wednesday');
     } else {
-      $location.path(path + '_tuesday');
+      $location.path('aicp_2015_tuesday');
     }
   }
 }

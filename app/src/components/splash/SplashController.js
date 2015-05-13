@@ -31,7 +31,7 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
     function init() {
         // REMOVE AICP
-        if ($location.path().indexOf('aicpweek2015') > -1) {
+        if ($location.path().indexOf('aicp_2015') > -1) {
             $scope.show.splash = false;
             return;
         }

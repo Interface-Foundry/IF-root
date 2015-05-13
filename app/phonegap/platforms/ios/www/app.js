@@ -18333,42 +18333,69 @@ mapManager.resetMap = function() {
 
 /* MARKER METHODS */
 
-mapManager.markerFromLandmark = function(landmark, world, $scope) {
-	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-			popupAnchorValues = [0, -4],
-			iconAnchor = [11, 11],
-			iconSize = [23, 23],
-			layerGroup = getLayerGroup(landmark) + '-landmarks',
-			alt = null;
+mapManager.markerFromLandmark = function(landmarkData, options) {
+	var retailBubble = bubbleTypeService.get() === 'Retail';
+	var customIcon = landmarkData.avatar !== 'img/tidepools/default.jpg';
+	var alt;
+	var icon;
 
-	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-		landmarkIcon = landmark.avatar;
-		popupAnchorValues = [0, -14];
-		iconAnchor = [25, 25];
-		iconSize = [50, 50];
+	if (retailBubble && customIcon) {
 		alt = 'store';
+		icon = makeCustomIcon(landmarkData);
+	} else {
+		alt = null;
+		icon = makeDefaultIcon();
 	}
 
 	return {
-		lat:landmark.loc.coordinates[1],
-		lng:landmark.loc.coordinates[0],
-		draggable:false,
-		message: '<a if-href="#/w/'+world.id+'/'+landmark.id+'"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-		icon: {
-			iconUrl: landmarkIcon,
-			iconSize: iconSize,
-			iconAnchor: iconAnchor,
-			popupAnchor: popupAnchorValues
-		},
-		_id: landmark._id,
-		layer: layerGroup,
+		_id: landmarkData._id,
 		alt: alt,
-		getMessageScope: function() { return $scope; }
-	}
-	function getLayerGroup(landmark) {
-		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
+		draggable: options.draggable,
+		// group: ,
+		layer: makeLayerGroup(landmarkData) + '-landmarks',
+		lat:landmarkData.loc.coordinates[1],
+		lng:landmarkData.loc.coordinates[0],
+		icon: icon,
+		message: makeMarkerMessage(landmarkData, options),
+		opacity: landmarkData.opacity || 1
+	};
+}
+
+function makeLayerGroup(landmarkData) {
+	return landmarkData.loc_info ? String(landmarkData.loc_info.floor_num) || '1' : '1';
+}
+
+function makeCustomIcon(landmarkData) {
+	return {
+		iconAnchor: [25, 25],
+		iconSize: [50, 50],
+		iconUrl: landmarkData.avatar,
+		popupAnchorValues: [0, -14]
+	};
+}
+
+function makeDefaultIcon() {
+	return {
+		iconAnchor: [11, 11],
+		iconSize: [23, 23],
+		iconUrl: 'img/marker/landmarkMarker_23.png',
+		popupAnchorValues: [0, -4]
+	};
+}
+
+function makeMarkerMessage(landmarkData, options) {
+	if (options.message === 'link') {
+		return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
+						'"><div class="marker-popup-click"></div></a><a>' + 
+						landmarkData.name + '</a>';
+	} else if (options.message === 'nolink') {
+		return landmarkData.name;
+	} else if (options.message === 'drag') {
+		return 'Drag to location on map'
 	}
 }
+
+
 
 /* addMarker
 Key: Name of marker to be added
@@ -18399,7 +18426,7 @@ mapManager.addMarkers = function(markers) {
 			return marker._id;
 		}))
 	} else {
-		angular.extend(mapManager.markers, markers);
+		mapManager.markers[markers._id] = markers;
 	}
 }
 
@@ -20170,7 +20197,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 worldTree.getLandmarks = function(_id) { //takes world's _id
 	var deferred = $q.defer();
 	console.log('getLandmarks');
-	var landmarks = worldTree.landmarkCache.get(_id);
+	var landmarks = worldTree.landmarkCache.get(_id); // landmark cache not currently in use
 	if (landmarks) {
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
@@ -20180,8 +20207,9 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 				console.log(success);
 				deferred.resolve(success.landmarks)})
 			.error(function(err) {
-				console.log(success);
-				deferred.resolve(err)});
+				console.log(err);
+				deferred.resolve(err)
+		});
 	}
 	
 	return deferred.promise;
@@ -20192,7 +20220,7 @@ worldTree.getLandmark = function(_id, landmarkId) {
 	
 	worldTree.getLandmarks(_id).then(function(landmarks) {
 		result = landmarks.find(function(landmark, index, landmarks) {
-			return landmark.id === landmarkId;
+			return landmark.id.toLowerCase() === landmarkId.toLowerCase();
 		});
 		
 		if (result) {
@@ -20351,10 +20379,6 @@ worldTree.cacheWorlds = function(worlds) {
 }
 
 worldTree.clearCacheWorlds = function(worlds) {
-	// if (!worlds) {return}
-	// worlds.forEach(function(world) {
-	// 	worldTree.worldCache.put(world.id, world);
-	// });
 	worldTree.landmarkCache.removeAll();
 }
 
@@ -21948,11 +21972,11 @@ function aicpRoutingService($location, $routeParams) {
       $location.path(path + '');
       return {worldURL: 'aicpweek2015'};
     } else if (today === 156) {
-      $location.path(path + '_thursday');
+      $location.path('aicp_2015_thursday');
     } else if (today === 155) {
-      $location.path(path + '_wednesday');
+      $location.path('aicp_2015_wednesday');
     } else {
-      $location.path(path + '_tuesday');
+      $location.path('aicp_2015_tuesday');
     }
   }
 }
@@ -23045,53 +23069,52 @@ var landmarksLoaded = false;
 	
 	$scope.addLandmark = function() {
 		console.log('--addLandmark--');
-		if (!worldLoaded || !landmarksLoaded) {console.log('loading not complete');}
-		else {
-		var tempLandmark = landmarkDefaults();
-		db.landmarks.create(tempLandmark, function(response) {
-			console.log('--db.landmarks.create--');
-			console.log('Response ID:'+response[0]._id);
-			tempLandmark._id = response[0]._id;
-			
-			//add to array 
-			$scope.landmarks.unshift(tempLandmark);		
+		if (!worldLoaded || !landmarksLoaded) {
+			console.log('loading not complete');
+		} else {
+			var tempLandmark = landmarkDefaults();
+			db.landmarks.create(tempLandmark, function(response) {
+				console.log('--db.landmarks.create--');
+				console.log('Response ID:'+response[0]._id);
+				tempLandmark._id = response[0]._id;
+				
+				//add to array 
+				$scope.landmarks.unshift(tempLandmark);		
 
-			//add marker
-			var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
-			map.addMarker(tempLandmark._id, {
-				lat:tempLandmark.loc.coordinates[1],
-				lng:tempLandmark.loc.coordinates[0],
-				icon: {
-					iconUrl: 'img/marker/landmarkMarker_23.png',
-					shadowUrl: '',
-					// shadowAnchor: shadowAnchor,
-					iconSize: [23, 23],
-					iconAnchor: [11, 11],
-					popupAnchor: [0, -4],
-				},
-				draggable:true,
-				message:'Drag to location on map',
-				focus:true,
-				alt: alt
+				//add marker
+				var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
+				map.addMarker(tempLandmark._id, {
+					lat:tempLandmark.loc.coordinates[1],
+					lng:tempLandmark.loc.coordinates[0],
+					icon: {
+						iconUrl: 'img/marker/landmarkMarker_23.png',
+						shadowUrl: '',
+						// shadowAnchor: shadowAnchor,
+						iconSize: [23, 23],
+						iconAnchor: [11, 11],
+						popupAnchor: [0, -4],
+					},
+					draggable:true,
+					message:'Drag to location on map',
+					focus:true,
+					alt: alt
+				});
+
 			});
-
-		});
 		}
 	}
 	
 	$scope.removeItem = function(i) {		
 		var deleteItem = confirm('Are you sure you want to delete this item?'); 
 		
-	    if (deleteItem) {
-			//notify parent to remove from array with $index
-	    	console.log($scope.landmarks[i]._id);
-	        map.removeMarker($scope.landmarks[i]._id);
-	        Landmark.del({_id: $scope.landmarks[i]._id}, function(landmark) {
-	            //$location.path('/');
-	            console.log('Delete');
-	            $scope.landmarks.splice(i, 1); //Removes from local array
-	        });
-	    }
+    if (deleteItem) {
+		//notify parent to remove from array with $index
+    	console.log($scope.landmarks[i]._id);
+      map.removeMarker($scope.landmarks[i]._id);
+      Landmark.del({_id: $scope.landmarks[i]._id}, function(landmark) {
+        $scope.landmarks.splice(i, 1); //Removes from local array
+      });
+    }
 	}	
 	
 	$scope.saveItem = function(i) {
@@ -23103,57 +23126,6 @@ var landmarksLoaded = false;
 			return false;}
 		$scope.landmarks[i].loc.coordinates = [tempMarker.lng, tempMarker.lat];
 
-		// if($scope.landmarks[i].hiddenPresent == true){
-		// 	$scope.landmarks[i].category.hiddenPresent = true;
-		// }
-		// else{
-		// 	$scope.landmarks[i].category.hiddenPresent = false;
-		// }
-		
-		/*
-if ($scope.landmark.hasTime) {
-	   
-	   	    //if no end date added, use start date
-	        if (!$scope.landmark[i].date.end) {
-	            $scope.landmark[i].date.end = $scope.landmark[i].date.start;
-	        }
-
-	        $scope.landmark[i].datetext = {
-	            start: $scope.landmark[i].date.start,
-	            end: $scope.landmark[i].date.end
-	        }
-	        //---- Date String converter to avoid timezone issues...could be optimized probably -----//
-	        $scope.landmark[i].date.start = new Date($scope.landmark[i].date.start).toISOString();
-	        $scope.landmark[i].date.end = new Date($scope.landmark[i].date.end).toISOString();
-
-	        $scope.landmark[i].date.start = dateConvert($scope.landmark[i].date.start);
-	        $scope.landmark[i].date.end = dateConvert($scope.landmark[i].date.end);
-
-	        $scope.landmark[i].date.start = $scope.landmark[i].date.start.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1'); //rearranging so value still same in input field
-	        $scope.landmark[i].date.end = $scope.landmark[i].date.end.replace(/(\d+)-(\d+)-(\d+)/, '$2-$3-$1');
-
-	        function dateConvert(input){
-	            var s = input;
-	            var n = s.indexOf('T');
-	            return s.substring(0, n != -1 ? n : s.length);
-	        }
-	        //-----------//
-
-	        if (!$scope.landmark[i].time.start){
-	            $scope.landmark[i].time.start = "00:00";
-	        }
-
-	        if (!$scope.landmark[i].time.end){
-	            $scope.landmark[i].time.end = "23:59";
-	        }
-
-	        $scope.landmark[i].timetext = {
-	            start: $scope.landmark[i].time.start,
-	            end: $scope.landmark[i].time.end
-	        } 
-	        //------- END TIME --------//
-		}
-*/	
 		console.log('Saving...');
 		console.log($scope.landmarks[i]);
 		db.landmarks.create($scope.landmarks[i], function(response) {
@@ -23181,44 +23153,18 @@ if ($scope.landmark.hasTime) {
 	}
 	
 	$scope.addLandmarkMarker = function(landmark) {
-		var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-				popupAnchorValues = [0, -4],
-				shadowUrl = '',
-				shadowAnchor = [1, -1],
-				iconAnchor = [11, 11],
-				iconSize = [23, 23],
-				layerGroup = getLayerGroup(landmark) + '-landmarks',
-				alt = null;
 
-		if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-			landmarkIcon = landmark.avatar;
-			popupAnchorValues = [0, -14];
-			iconAnchor = [25, 25];
-			iconSize = [50, 50];
-			alt = 'store';
-		}
-		
+		var markerOptions = {
+			draggable: true,
+			message: 'drag',
+			worldId: $scope.world.id
+		};
+
+		var mapMarker = mapManager.markerFromLandmark(landmark, markerOptions);
 
 		mapManager.newMarkerOverlay(landmark);
 
-		map.addMarker(landmark._id, {
-				lat:landmark.loc.coordinates[1],
-				lng:landmark.loc.coordinates[0],
-				icon: {
-					iconUrl: landmarkIcon,
-					shadowUrl: shadowUrl,
-					shadowAnchor: shadowAnchor,
-					iconSize: iconSize,
-					iconAnchor: iconAnchor,
-					popupAnchor: popupAnchorValues
-				},
-				draggable:true,
-				message:landmark.name || 'Drag to location on map',
-				focus:true,
-				layer: layerGroup,
-				_id: landmark._id,
-				alt: alt
-			});
+		map.addMarkers(mapMarker);
 	}
 	function getLayerGroup(landmark) {
 		return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
@@ -23244,8 +23190,6 @@ if ($scope.landmark.hasTime) {
 		console.log(defaults);
 		return defaults;
 	}
-
-
 
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
@@ -23302,7 +23246,6 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 	map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 
-	
 	if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 		zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
 	}
@@ -23315,12 +23258,14 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 	worldTree.getLandmarks(data.world._id).then(function(data) {
 		$scope.landmarks = data;
 
-		// var filtered = filterLandmarks($scope.landmarks);
 
 		angular.forEach($scope.landmarks, function(value, key) {
 			//for each landmark add a marker
 			$scope.addLandmarkMarker(value);
 		});
+
+
+
 
 		if ($scope.landmarks.length) {
 			map.setMarkerFocus($scope.landmarks[0]._id);
@@ -24767,7 +24712,7 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
 
     function init() {
         // REMOVE AICP
-        if ($location.path().indexOf('aicpweek2015') > -1) {
+        if ($location.path().indexOf('aicp_2015') > -1) {
             $scope.show.splash = false;
             return;
         }
@@ -26671,8 +26616,13 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	}
 
 	function updateLandmarks(landmarks) {
+		var markerOptions = {
+			draggable: false,
+			message: 'link',
+			worldId: $scope.world.id
+		};
 		var markers = landmarks.map(function(l) {
-			return mapManager.markerFromLandmark(l, $scope.world, $scope)
+			return mapManager.markerFromLandmark(l, markerOptions);
 		});
 		var floor = floorSelectorService.currentFloor.floor_num ? 
 								String(floorSelectorService.currentFloor.floor_num) :
@@ -27232,41 +27182,21 @@ function getLandmark(world) {
 }
 
 function goToMark() {
-	// removed z value so landmark view will not zoom in or out, will stay at same zoom level as before click
 	map.setCenter($scope.landmark.loc.coordinates, null, 'aperture-third'); 
 	map.removeAllMarkers();
 
-	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-			popupAnchorValues = [0, -4],
-			shadowUrl = '',
-			iconAnchor = [11, 11],
-			iconSize = [23, 23],
-			alt = null;
-
-	if (bubbleTypeService.get() === 'Retail' && $scope.landmark.avatar !== 'img/tidepools/default.jpg') {
-		landmarkIcon = $scope.landmark.avatar;
-		popupAnchorValues = [0, -14];
-		iconAnchor = [25, 25];
-		iconSize = [50, 50];
-		alt = 'store';
-	}
-
-	map.addMarker($scope.landmark._id, {
-		lat: $scope.landmark.loc.coordinates[1],
-		lng: $scope.landmark.loc.coordinates[0],
-		draggable:false,
-		message:$scope.landmark.name,
-	  	icon: {
-			iconUrl: landmarkIcon,
-			iconSize: iconSize,
-			iconAnchor: iconAnchor,
-			popupAnchor: popupAnchorValues
-		},
-		_id: $scope.landmark._id,
-		alt: alt
+	var markerOptions = {
+		draggable: false,
+		message: 'nolink',
+		worldId: $scope.world.id
+	};
+	var mapMarker = mapManager.markerFromLandmark($scope.landmark, markerOptions);
+	map.addMarkers(mapMarker);
+	mapManager.newMarkerOverlay($scope.landmark);
+	_.defer(function() {
+		mapManager.turnOnOverlay(mapMarker.layer);
 	});
 
-	map.setMarkerFocus($scope.landmark._id);
 	map.refresh();
 
 };
@@ -28636,61 +28566,6 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-// app.directive('categoryWidget', [function() {
-// return {
-// 	restrict: 'E',
-// 	link: function(scope, element, attrs) {
-// 		scope.$watchGroup(['world.landmarkCategories', 'selectedCategory'], function (newValues, oldValues) {
-// 			m.render(element[0], categoryWidget(scope.world.landmarkCategories));
-// 		}) //rerenders on category selection
-// 		// kind of a weird way to do it but necessary to allow above scope to handle map stuff 
-		
-// 		function categoryWidget(landmarkCategories) {
-// 			return m('.category-widget', 
-// 				groupCategories(landmarkCategories))
-// 		} //groupCategories handles mapping
-		
-// 		function groupCategories(landmarkCategories) {
-// 			 //separates landmark categories into button groups in place of mapping
-// 			if (landmarkCategories.length < 4) {
-// 				return buttonGroup(landmarkCategories); //3x1 grid
-// 			} else if (landmarkCategories.length === 4) { //2x2 grid
-// 				return [
-// 					buttonGroup(landmarkCategories.slice(0, 2)),
-// 					buttonGroup(landmarkCategories.slice(2))
-// 				]
-// 			} else { 
-// 				return [ //3x2, 3x3 grid
-// 					buttonGroup(landmarkCategories.slice(0, 3)),
-// 					buttonGroup(landmarkCategories.slice(3))
-// 				]
-// 			}
-// 		}
-		
-// 		function buttonGroup(categoryList) { //from a category list, create each button.
-// 			return m('.category-btn-group', categoryList.map(categoryButton));
-// 		}
-		
-// 		function categoryButton(category, index, categoryList) { //create category button, needs list length
-// 			return m('.category-btn', {
-// 				style: {width: 100 / categoryList.length + '%'}, 
-// 				colspan: 6/categoryList.length, //table display attribute
-// 				onclick: emitCategory(category.name), //emits selection on scope
-// 				class: scope.selectedCategory === category.name ? 'selected-category' : null //category toggle classes
-// 			}, [
-// 			category.avatar ? m('img.category-btn-img', {src: category.avatar}) : null,
-// 			category.name]);
-// 		}
-		
-// 		function emitCategory(landmarkCategoryName) {
-// 			return function (event) {
-// 				event.stopPropagation();
-// 				scope.$emit('landmarkCategoryChange', landmarkCategoryName)	
-// 			}
-// 		}
-// 	}
-// }
-// }])
 app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', 'rerouteData', 'landmarkIsVisibleFilter', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService, rerouteData, landmarkIsVisibleFilter) {
 
 var map = mapManager;
@@ -28777,7 +28652,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 
 	// REMOVE AICP
-	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
+	if ($scope.worldURL.indexOf('aicp_2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
 		$scope.splashBannerAicp = {
 			style: {
 				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
@@ -29185,7 +29060,16 @@ function createMarkerLayer(tempMarkers, lowestFloor) {
 		mapManager.newMarkerOverlay(m);
 	});
 
-	mapManager.addMarkers(tempMarkers.map(markerFromLandmark));
+	var markerOptions = {
+		draggable: false,
+		message: 'link',
+		worldId: $scope.world.id
+	};
+	var mapMarkers = tempMarkers.map(function(landmark) {
+		return mapManager.markerFromLandmark(landmark, markerOptions);
+	});
+	mapManager.addMarkers(mapMarkers);
+
 	var landmarkLayer = lowestFloor + '-landmarks';
 	
 	if (bubbleTypeService.get() !== 'Retail') {
@@ -29204,66 +29088,6 @@ function lowestLandmarkFloor(tempMarkers) {
 		.value();
 	return sorted.length ? sorted[0].loc_info.floor_num : 1;
 }
-
-function markerFromLandmark(landmark) {
-
-	var landmarkIcon = 'img/marker/landmarkMarker_23.png',
-			popupAnchorValues = [0, -4],
-			shadowUrl = '',
-			shadowAnchor = [1, -1],
-			iconAnchor = [11, 11],
-			iconSize = [23, 23],
-			layerGroup = getLayerGroup(landmark) + '-landmarks',
-			alt = null;
-
-	if (bubbleTypeService.get() === 'Retail' && landmark.avatar !== 'img/tidepools/default.jpg') {
-		landmarkIcon = landmark.avatar;
-		popupAnchorValues = [0, -14];
-		// shadowUrl = 'img/marker/blue-pointer.png';
-		iconAnchor = [25, 25];
-		iconSize = [50, 50];
-		alt = 'store';
-	}
-
-	return {
-		lat:landmark.loc.coordinates[1],
-		lng:landmark.loc.coordinates[0],
-		draggable:false,
-		message: '<a if-href="#/w/'+$scope.world.id+'/'+landmark.id+'">'+landmark.name+'</a>',
-		icon: {
-			iconUrl: landmarkIcon,
-			shadowUrl: shadowUrl,
-			shadowAnchor: shadowAnchor,
-			iconSize: iconSize,
-			iconAnchor: iconAnchor,
-			popupAnchor: popupAnchorValues
-		},
-		_id: landmark._id,
-		layer: layerGroup,
-		alt: alt
-	}
-}
-
-function getLayerGroup(landmark) {
-	return landmark.loc_info ? String(landmark.loc_info.floor_num) || '1' : '1';
-}
-
-$scope.$on('landmarkCategoryChange', function(event, landmarkCategoryName) {
-	var markers = $scope.landmarks.filter(testCategory).map(markerFromLandmark);
-	console.log(markers);
-	if (markers.length>0) {
-		map.setCenterFromMarkers(markers);
-		map.setMarkers(markers);
-		$scope.aperture.set('full');
-		$scope.selectedCategory = landmarkCategoryName;
-	} else {
-		//handle no landmarks in category
-	}
-	
-	function testCategory (landmark, index, landmarks) {
-		return landmark.category === landmarkCategoryName;
-	}
-})
 
 $scope.$on('$destroy', function() {
 	$rootScope.hide = false;
