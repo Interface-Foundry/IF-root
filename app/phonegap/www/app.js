@@ -6740,6 +6740,24 @@ app.filter('encodeDotFilter', [function() {
 	 };
 
 }]);
+app.filter('landmarkIsVisible', [function() {
+	/**
+	 * if input is an array, returns new array with landmarks that are visible
+	 * if input is single landmark, returns landmark if visible and null otherwise
+	 */
+
+	return function(input) {
+		if (_.isArray(input)) {
+			var visibleLandmarks = _.filter(input, function(landmark) {
+				return !landmark.permissions.hidden
+			});
+			return visibleLandmarks;
+		} else {
+			return input.permissions.hidden ? null : input;
+		}
+	}
+
+}]);	
 /*!
  * FullCalendar v2.2.2
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -28407,12 +28425,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 
 	// REMOVE AICP
-	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkUrl) {
-		$scope.blueRibbonAicp = {
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
+		$scope.splashBannerAicp = {
 			style: {
-				'background': 'url(' + $scope.world.blueRibbon.imgSrc + ') center center / cover no-repeat'
+				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
 			},
-			link: $scope.world.blueRibbon.linkUrl
+			link: $scope.world.splash_banner.linkUrl
 		};
 	}
 
