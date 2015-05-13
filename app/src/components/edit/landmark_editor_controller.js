@@ -33,53 +33,52 @@ var landmarksLoaded = false;
 	
 	$scope.addLandmark = function() {
 		console.log('--addLandmark--');
-		if (!worldLoaded || !landmarksLoaded) {console.log('loading not complete');}
-		else {
-		var tempLandmark = landmarkDefaults();
-		db.landmarks.create(tempLandmark, function(response) {
-			console.log('--db.landmarks.create--');
-			console.log('Response ID:'+response[0]._id);
-			tempLandmark._id = response[0]._id;
-			
-			//add to array 
-			$scope.landmarks.unshift(tempLandmark);		
+		if (!worldLoaded || !landmarksLoaded) {
+			console.log('loading not complete');
+		} else {
+			var tempLandmark = landmarkDefaults();
+			db.landmarks.create(tempLandmark, function(response) {
+				console.log('--db.landmarks.create--');
+				console.log('Response ID:'+response[0]._id);
+				tempLandmark._id = response[0]._id;
+				
+				//add to array 
+				$scope.landmarks.unshift(tempLandmark);		
 
-			//add marker
-			var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
-			map.addMarker(tempLandmark._id, {
-				lat:tempLandmark.loc.coordinates[1],
-				lng:tempLandmark.loc.coordinates[0],
-				icon: {
-					iconUrl: 'img/marker/landmarkMarker_23.png',
-					shadowUrl: '',
-					// shadowAnchor: shadowAnchor,
-					iconSize: [23, 23],
-					iconAnchor: [11, 11],
-					popupAnchor: [0, -4],
-				},
-				draggable:true,
-				message:'Drag to location on map',
-				focus:true,
-				alt: alt
+				//add marker
+				var alt = bubbleTypeService.get() === 'Retail' ? 'store' : '';
+				map.addMarker(tempLandmark._id, {
+					lat:tempLandmark.loc.coordinates[1],
+					lng:tempLandmark.loc.coordinates[0],
+					icon: {
+						iconUrl: 'img/marker/landmarkMarker_23.png',
+						shadowUrl: '',
+						// shadowAnchor: shadowAnchor,
+						iconSize: [23, 23],
+						iconAnchor: [11, 11],
+						popupAnchor: [0, -4],
+					},
+					draggable:true,
+					message:'Drag to location on map',
+					focus:true,
+					alt: alt
+				});
+
 			});
-
-		});
 		}
 	}
 	
 	$scope.removeItem = function(i) {		
 		var deleteItem = confirm('Are you sure you want to delete this item?'); 
 		
-	    if (deleteItem) {
-			//notify parent to remove from array with $index
-	    	console.log($scope.landmarks[i]._id);
-	        map.removeMarker($scope.landmarks[i]._id);
-	        Landmark.del({_id: $scope.landmarks[i]._id}, function(landmark) {
-	            //$location.path('/');
-	            console.log('Delete');
-	            $scope.landmarks.splice(i, 1); //Removes from local array
-	        });
-	    }
+    if (deleteItem) {
+		//notify parent to remove from array with $index
+    	console.log($scope.landmarks[i]._id);
+      map.removeMarker($scope.landmarks[i]._id);
+      Landmark.del({_id: $scope.landmarks[i]._id}, function(landmark) {
+        $scope.landmarks.splice(i, 1); //Removes from local array
+      });
+    }
 	}	
 	
 	$scope.saveItem = function(i) {
@@ -156,8 +155,6 @@ var landmarksLoaded = false;
 		return defaults;
 	}
 
-
-
 ////////////////////////////////////////////////////////////
 /////////////////////////LISTENERS//////////////////////////
 ////////////////////////////////////////////////////////////
@@ -213,7 +210,6 @@ worldTree.getWorld($routeParams.worldURL).then(function(data) {
 
 	map.setMaxBoundsFromPoint([$scope.world.loc.coordinates[1],$scope.world.loc.coordinates[0]], 0.05);
 
-	
 	if ($scope.world.style.maps.hasOwnProperty('localMapOptions')) {
 		zoomLevel = $scope.world.style.maps.localMapOptions.maxZoom || 19;
 	}
