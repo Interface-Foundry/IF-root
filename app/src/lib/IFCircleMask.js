@@ -58,8 +58,8 @@ L.IFCircleMask = L.Layer.extend({
 		this._el
 		this._el.width = mapSize.x;
 		this._el.height = mapSize.y;
-		}
 		this._draw();
+		}
 	},
 	
 	_getLatRadius: function () {
