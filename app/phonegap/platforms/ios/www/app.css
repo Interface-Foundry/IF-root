@@ -4955,7 +4955,7 @@ li.alert {
   position: absolute;
   z-index: 101;
   top: 48px;
-  height: 5px;
+  height: 4px;
   background-color: #3fc3db;
 }
 @-webkit-keyframes routeLoading--left {
@@ -5049,14 +5049,14 @@ li.alert {
 .routeLoading--left {
   left: 50%;
   width: 0%;
-  -webkit-animation: routeLoading--left 3s ease-in-out infinite;
-  animation: routeLoading--left 3s ease-in-out infinite;
+  -webkit-animation: routeLoading--left 2s ease-in-out infinite;
+  animation: routeLoading--left 2s ease-in-out infinite;
 }
 .routeLoading--right {
   left: 50%;
   width: 0%;
-  -webkit-animation: routeLoading--right 3s ease-in-out infinite;
-  animation: routeLoading--right 3s ease-in-out infinite;
+  -webkit-animation: routeLoading--right 2s ease-in-out infinite;
+  animation: routeLoading--right 2s ease-in-out infinite;
 }
 .fadeMarkers .leaflet-marker-icon {
   opacity: .5;

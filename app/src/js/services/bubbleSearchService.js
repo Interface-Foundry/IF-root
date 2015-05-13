@@ -13,7 +13,7 @@ function bubbleSearchService($http, analyticsService) {
 		search: search,
 		defaultText: {
 			global: 'Search around me',
-			bubble: 'Search within ',
+			bubble: 'What are you looking for?',
 			none: 'No results'
 		}
 	};

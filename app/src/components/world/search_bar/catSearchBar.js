@@ -20,7 +20,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			if (scope.mode === 'city' || scope.mode === 'home') {
 				defaultText = bubbleSearchService.defaultText.global;
 			} else {
-				defaultText = bubbleSearchService.defaultText.bubble + scope.world.name;
+				defaultText = bubbleSearchService.defaultText.bubble;
 			}
 			
 
