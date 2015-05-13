@@ -89,7 +89,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 worldTree.getLandmarks = function(_id) { //takes world's _id
 	var deferred = $q.defer();
 	console.log('getLandmarks');
-	var landmarks = worldTree.landmarkCache.get(_id);
+	var landmarks = worldTree.landmarkCache.get(_id); // landmark cache not currently in use
 	if (landmarks) {
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
@@ -99,8 +99,9 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 				console.log(success);
 				deferred.resolve(success.landmarks)})
 			.error(function(err) {
-				console.log(success);
-				deferred.resolve(err)});
+				console.log(err);
+				deferred.resolve(err)
+		});
 	}
 	
 	return deferred.promise;
@@ -111,7 +112,7 @@ worldTree.getLandmark = function(_id, landmarkId) {
 	
 	worldTree.getLandmarks(_id).then(function(landmarks) {
 		result = landmarks.find(function(landmark, index, landmarks) {
-			return landmark.id === landmarkId;
+			return landmark.id.toLowerCase() === landmarkId.toLowerCase();
 		});
 		
 		if (result) {
@@ -270,10 +271,6 @@ worldTree.cacheWorlds = function(worlds) {
 }
 
 worldTree.clearCacheWorlds = function(worlds) {
-	// if (!worlds) {return}
-	// worlds.forEach(function(world) {
-	// 	worldTree.worldCache.put(world.id, world);
-	// });
 	worldTree.landmarkCache.removeAll();
 }
 
