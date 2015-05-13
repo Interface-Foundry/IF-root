@@ -164,7 +164,7 @@ function goToMark() {
 
 	var markerOptions = {
 		draggable: false,
-		messageLink: false,
+		message: 'nolink',
 		worldId: $scope.world.id
 	};
 	var mapMarker = mapManager.markerFromLandmark($scope.landmark, markerOptions);

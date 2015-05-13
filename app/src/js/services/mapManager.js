@@ -235,12 +235,14 @@ function makeDefaultIcon() {
 }
 
 function makeMarkerMessage(landmarkData, options) {
-	if (options.messageLink) {
+	if (options.message === 'link') {
 		return '<a if-href="#/w/' + options.worldId + '/' + landmarkData.id +
 						'"><div class="marker-popup-click"></div></a><a>' + 
 						landmarkData.name + '</a>';
-	} else {
+	} else if (options.message === 'nolink') {
 		return landmarkData.name;
+	} else if (options.message === 'drag') {
+		return 'Drag to location on map'
 	}
 }
 
