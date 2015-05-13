@@ -43,10 +43,12 @@
 			<!-- REMOVE AICP -->
 			<div ng-include="world.splash_banner && world.splash_banner.imgSrc && world.splash_banner.linkUrl ? 'components/aicp/splashBanner.html': null" class="marble-page splashBannerHeight--aicp"></div>
 		
-			<!--DESCRIPTION-->
-			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' : 'components/world/templates/description.html'" class="marble-page"></div>
+			<!--DESCRIPTION--> <!--- REMOVE AICP (parts) -->
+			<div ng-if="!(worldURL.indexOf('aicp_2015') > -1)">
+				<div ng-include="isRetail ? 'components/world/templates/description.retail.html' : 'components/world/templates/description.html'" class="marble-page"></div>
+			</div>
 
-
+			<!-- CATEGORY WIDGET -->
 			<div class="marble-page" ng-if="category">
 
 				<header class="marble-page-header" ng-style="::{color: style.categoryTitle_color}">

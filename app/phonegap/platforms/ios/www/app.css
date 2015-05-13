@@ -3581,8 +3581,10 @@ span.subnav-back-chevron {
   height: 90%;
   margin-top: -40px;
   padding-bottom: 60px;
-  padding-left: 10%;
-  padding-right: 10%;
+}
+.contest-background div {
+  background-color: white;
+  padding: 0 10%;
 }
 .announcements-card-background {
   background-color: rgba(62, 82, 181, 0.96);
@@ -5526,21 +5528,24 @@ div.marker-popup-click {
   width: 30px;
 }
 .nearby-widget-avatar--aicp.img-responsive {
-  height: 65px;
-  width: 65px;
+  height: 80px;
+  width: 80px;
 }
-.marginBottom10--aicp {
+.switcherCircle--aicp {
   margin-bottom: 10px;
+  margin-top: 12px;
   opacity: 0.4;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }
-.marginBottom10--aicp:hover {
+.switcherCircle--aicp:hover {
   opacity: 1;
 }
-.marginBottom10--aicp.opacity100 {
+.switcherCircle--aicp.opacity100 {
   opacity: 1;
 }
 .splashBannerHeight--aicp {
-  height: 200px;
+  height: 282px;
 }
 .fontLato {
   font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;

@@ -20029,7 +20029,7 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 			// if bubble has local maps then do not show world marker
 			if (!mapManager.localMapArrayExists(world)) {
-				addWorldMarker();
+				addWorldMarker(world);
 			}
 
 		} else {
@@ -20045,6 +20045,9 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 
 		if (tilesDict.hasOwnProperty(worldStyle.maps.cloudMapName)) {
 			mapManager.setBaseLayer(tilesDict[worldStyle.maps.cloudMapName]['url']);
+		} else if (worldStyle.maps.cloudMapName === 'none') {
+			mapManager.layers.baselayers = {};
+			angular.element('#leafletmap')[0].style['background-color'] = 'black';
 		} else if (worldStyle.maps.hasOwnProperty('cloudMapID')) {
 			mapManager.setBaseLayer('https://{s}.tiles.mapbox.com/v3/'+worldStyle.maps.cloudMapID+'/{z}/{x}/{y}.png');
 		} else {
@@ -20056,7 +20059,7 @@ function worldBuilderService(mapManager, userManager, localStore, apertureServic
 		mapManager.toggleOverlay(mapLayer);
 
 	}
-	function addWorldMarker() {
+	function addWorldMarker(world) {
 		mapManager.addMarker('c', {
 			lat: world.loc.coordinates[1],
 			lng: world.loc.coordinates[0],
@@ -28655,7 +28658,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if ($scope.worldURL.indexOf('aicp_2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
 		$scope.splashBannerAicp = {
 			style: {
-				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
+				'background': 'black url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
 			},
 			link: $scope.world.splash_banner.linkUrl
 		};

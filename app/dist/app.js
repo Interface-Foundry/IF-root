@@ -28306,7 +28306,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	if ($scope.worldURL.indexOf('aicp_2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
 		$scope.splashBannerAicp = {
 			style: {
-				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
+				'background': 'black url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
 			},
 			link: $scope.world.splash_banner.linkUrl
 		};
