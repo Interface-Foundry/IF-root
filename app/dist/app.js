@@ -4881,10 +4881,12 @@ $routeProvider.
   // REMOVE AICP
   when('/w/aicpweek2015', {
     resolve: {
-      dayOfWeek: function(aicpRoutingService) {
+      rerouteData: function(aicpRoutingService) {
         return aicpRoutingService.route();
       }
-    }
+    },
+    templateUrl: 'components/world/world.html', 
+    controller: 'WorldController'
   }).
   ///////////////
   when('/', {
@@ -6738,6 +6740,24 @@ app.filter('encodeDotFilter', [function() {
 	 };
 
 }]);
+app.filter('landmarkIsVisible', [function() {
+	/**
+	 * if input is an array, returns new array with landmarks that are visible
+	 * if input is single landmark, returns landmark if visible and null otherwise
+	 */
+
+	return function(input) {
+		if (_.isArray(input)) {
+			var visibleLandmarks = _.filter(input, function(landmark) {
+				return !landmark.permissions.hidden
+			});
+			return visibleLandmarks;
+		} else {
+			return input.permissions.hidden ? null : input;
+		}
+	}
+
+}]);	
 /*!
  * FullCalendar v2.2.2
  * Docs & License: http://arshaw.com/fullcalendar/
@@ -21644,9 +21664,9 @@ function FourOhFourController($scope, mapManager, apertureService, navService) {
 
 app.factory('aicpRoutingService', aicpRoutingService);
 
-aicpRoutingService.$inject = ['$location'];
+aicpRoutingService.$inject = ['$location', '$routeParams'];
 
-function aicpRoutingService($location) {
+function aicpRoutingService($location, $routeParams) {
 	return {
 		route: route
 	}
@@ -21656,18 +21676,20 @@ function aicpRoutingService($location) {
 		var today = moment().dayOfYear();
     var path = $location.path();
 
-    switch (today) {
-      case 154:
-        $location.path(path + '_thursday');
-        break;
-      case 155:
-        $location.path(path + '_wednesday');
-        break;
-      default:
-        $location.path(path + '_tuesday');
+    if (today < 138) {
+      $location.path(path + '');
+      return {worldURL: 'aicpweek2015'};
+    } else if (today === 156) {
+      $location.path(path + '_thursday');
+    } else if (today === 155) {
+      $location.path(path + '_wednesday');
+    } else {
+      $location.path(path + '_tuesday');
     }
-	}
+  }
 }
+
+app.constant('rerouteData', {worldURL: ''})
 'use strict';
 
 app.directive('announcements', announcements);
@@ -22415,11 +22437,8 @@ function findMapsOnThisFloor(world, floor) {
 
 $scope.saveWorld = function() {
 	$scope.whenSaving = true;
-	console.log('saveWorld(edit)');
 	$scope.world.newStatus = false; //not new
-	//$scope.world.worldID = $scope.worldID;
 	$scope.world.hasLoc = true;
-	console.log($scope.world);
 	tempMarker = map.getMarker(markerID);
 	$scope.world.loc.coordinates[0] = tempMarker.lng;
 	$scope.world.loc.coordinates[1] = tempMarker.lat;
@@ -22428,9 +22447,6 @@ $scope.saveWorld = function() {
 		$scope.world.style.maps = {};
 	}
 	console.log($scope.mapThemeSelect);
-	//$scope.world.style.maps.cloudMapName = $scope.mapThemeSelect.cloudMapName;
-	//$scope.world.style.maps.cloudMapID = $scope.mapThemeSelect.cloudMapID;
-	
 	
 	console.log($scope.world);
     db.worlds.create($scope.world, function(response) {
@@ -23937,7 +23953,7 @@ function floorSelectorService() {
 		return selectedIndex;
 	}
 }
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', 'navService', 'landmarkIsVisibleFilter', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout, navService, landmarkIsVisibleFilter) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
@@ -23949,6 +23965,7 @@ $scope.kinds = ifGlobals.kinds;
 $scope.searchBarText = bubbleSearchService.defaultText.global;
 $scope.welcomeService = welcomeService;
 $scope.refresh = refresh;
+navService.show('home');
 
 $scope.select = function(bubble) {
 	if (!bubble) {
@@ -24011,7 +24028,7 @@ function init() {
 			nearbyBubbles = data['150m'] || []; // nearby
 			aroundMeBubbles = data['2.5km'] || []; // around me
 
-			$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
+			$scope.bubbles = landmarkIsVisibleFilter(nearbyBubbles.concat(aroundMeBubbles));
 			
 			$scope.loadState = 'success';
 			// initMarkers();
@@ -24085,13 +24102,10 @@ logSearchClick = function(path) {
 	
 $scope.go = function(path) {
 	logSearchClick(path);
-	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
-	navService.reset();
-	// $window.history.back();
 	$window.history.go(navService.backPages);
 }
 
@@ -24189,6 +24203,7 @@ app.factory('navService', [function() {
 
 	var status = {
 		home: true, // default home nav selected
+		world: false, // in world
 		search: false // global search or world search
 	};
 
@@ -24228,19 +24243,15 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 
 	function link(scope, element, attrs) {
 
-		scope.goHome = goHome;
+		scope.goWorld = goWorld;
 		scope.goSearch = goSearch;
 
-		function goHome() {
+		function goWorld() {
 			// go to world home if in world but not already in world home. go to kip home otherwise
-
 			if ($routeParams.worldURL && $location.path() !== '/w/' + $routeParams.worldURL) {
 				$location.path('/w/' + $routeParams.worldURL);
-			} else {
-				$location.path('/');
+				navService.show('world');
 			}
-
-			navService.show('home');
 		}
 
 		function goSearch() {
@@ -24391,7 +24402,7 @@ app.controller('SplashController', ['$scope', '$rootScope', '$location', '$http'
     init();
 
     function init() {
-        // special case for aicp to prevent splash page
+        // REMOVE AICP
         if ($location.path().indexOf('aicpweek2015') > -1) {
             $scope.show.splash = false;
             return;
@@ -28066,11 +28077,11 @@ if (superGroups['This Week'].length > 0) {
 			
 			t = moment(landmark.time.start);
 
-			if (t.isBefore(now)) {
-				return 'Previous';
-			} else if (t.isSame(now, 'day')) {
+			if (t.isSame(now, 'day')) {
 				return 'Today';
-			} else if (t.isBefore(moment().add(7, 'days'))) {
+			} else if (t.isBefore(now)) {
+				return 'Previous';
+			} else if (t.isBefore(moment().add(6, 'days'))) {
 				return 'This Week';
 			} else {
 				return 'Upcoming'
@@ -28203,15 +28214,15 @@ app.controller('TwitterListController', ['$scope', '$routeParams', 'styleManager
 //			"screen_name": string,
 //			"name": string}
 //	"__v": 0}....]
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', 'rerouteData', 'landmarkIsVisibleFilter', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService, rerouteData, landmarkIsVisibleFilter) {
 
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
-$scope.worldURL = $routeParams.worldURL;  
+$scope.worldURL = $routeParams.worldURL || rerouteData.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
-navService.show('home');
+navService.show('world');
 
 $scope.contest = {};
 $scope.world = {};
@@ -28289,12 +28300,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 
 	// REMOVE AICP
-	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkSrc) {
-		$scope.blueRibbonAicp = {
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
+		$scope.splashBannerAicp = {
 			style: {
-				'background': 'url(' + $scope.world.blueRibbon.imgSrc + ') center center / cover no-repeat'
+				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
 			},
-			link: $scope.world.blueRibbon.linkSrc
+			link: $scope.world.splash_banner.linkUrl
 		};
 	}
 
@@ -28636,6 +28647,7 @@ $scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
 	worldTree.getLandmarks($scope.world._id).then(function(data) {
+		data = landmarkIsVisibleFilter(data);
 		console.log('landmarks', {landmarks: data});
   		
 		initLandmarks({landmarks: data});
@@ -28730,7 +28742,7 @@ $scope.$on('$destroy', function() {
 });
 
 
-worldTree.getWorld($routeParams.worldURL).then(function(data) {
+worldTree.getWorld($scope.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);
 	$scope.loadWorld(data);

@@ -65,13 +65,10 @@ logSearchClick = function(path) {
 	
 $scope.go = function(path) {
 	logSearchClick(path);
-	navService.reset();
 	$location.path(path);
 } 
 	
 $scope.goBack = function() {
-	navService.reset();
-	// $window.history.back();
 	$window.history.go(navService.backPages);
 }
 

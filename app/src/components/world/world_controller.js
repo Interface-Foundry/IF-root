@@ -1,12 +1,12 @@
-app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService) {
+app.controller('WorldController', ['World', 'db', '$routeParams', '$upload', '$scope', '$location', 'leafletData', '$rootScope', 'apertureService', 'mapManager', 'styleManager', '$sce', 'worldTree', '$q', '$http', '$timeout', 'userManager', 'stickerManager', 'geoService', 'bubbleTypeService', 'contest', 'dialogs', 'localStore', 'bubbleSearchService', 'worldBuilderService', 'navService', 'alertManager', 'analyticsService', 'hideContentService', 'contestUploadService', 'newWindowService', 'rerouteData', 'landmarkIsVisibleFilter', function (World, db, $routeParams, $upload, $scope, $location, leafletData, $rootScope, apertureService, mapManager, styleManager, $sce, worldTree, $q, $http, $timeout, userManager, stickerManager, geoService, bubbleTypeService, contest, dialogs, localStore, bubbleSearchService, worldBuilderService, navService, alertManager, analyticsService, hideContentService, contestUploadService, newWindowService, rerouteData, landmarkIsVisibleFilter) {
 
 var map = mapManager;
 	map.resetMap();
 var style = styleManager;
-$scope.worldURL = $routeParams.worldURL;  
+$scope.worldURL = $routeParams.worldURL || rerouteData.worldURL;  
 $scope.aperture = apertureService;	
 $scope.aperture.set('third');
-navService.show('home');
+navService.show('world');
 
 $scope.contest = {};
 $scope.world = {};
@@ -84,12 +84,12 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	}
 
 	// REMOVE AICP
-	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.blueRibbon && $scope.world.blueRibbon.imgSrc && $scope.world.blueRibbon.linkSrc) {
-		$scope.blueRibbonAicp = {
+	if ($scope.worldURL.indexOf('aicpweek2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
+		$scope.splashBannerAicp = {
 			style: {
-				'background': 'url(' + $scope.world.blueRibbon.imgSrc + ') center center / cover no-repeat'
+				'background': 'url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
 			},
-			link: $scope.world.blueRibbon.linkSrc
+			link: $scope.world.splash_banner.linkUrl
 		};
 	}
 
@@ -431,6 +431,7 @@ $scope.loadLandmarks = function() {
 	console.log('--loadLandmarks--');
 	//STATE: EXPLORE
 	worldTree.getLandmarks($scope.world._id).then(function(data) {
+		data = landmarkIsVisibleFilter(data);
 		console.log('landmarks', {landmarks: data});
   		
 		initLandmarks({landmarks: data});
@@ -525,7 +526,7 @@ $scope.$on('$destroy', function() {
 });
 
 
-worldTree.getWorld($routeParams.worldURL).then(function(data) {
+worldTree.getWorld($scope.worldURL).then(function(data) {
 	console.log('worldtree success');
 	console.log(data);
 	$scope.loadWorld(data);

@@ -1,4 +1,5 @@
 <!-- REMOVE AICP -->
-<div class="u-100X u-pointer blueRibbonHeight--aicp" 
-	ng-style="blueRibbonAicp.style"
-	ng-click="newWindowGo(blueRibbonAicp.link)"></div>
+<a if-href="#/{{ blueRibbonAicp.link }}">
+	<div class="u-100X blueRibbonHeight--aicp" 
+		ng-style="blueRibbonAicp.style"></div>
+</a>

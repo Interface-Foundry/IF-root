@@ -9,19 +9,15 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 
 	function link(scope, element, attrs) {
 
-		scope.goHome = goHome;
+		scope.goWorld = goWorld;
 		scope.goSearch = goSearch;
 
-		function goHome() {
+		function goWorld() {
 			// go to world home if in world but not already in world home. go to kip home otherwise
-
 			if ($routeParams.worldURL && $location.path() !== '/w/' + $routeParams.worldURL) {
 				$location.path('/w/' + $routeParams.worldURL);
-			} else {
-				$location.path('/');
+				navService.show('world');
 			}
-
-			navService.show('home');
 		}
 
 		function goSearch() {

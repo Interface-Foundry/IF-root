@@ -41,7 +41,7 @@
 			<div ng-include="worldURL.indexOf('aicpweek2015') > -1 ? 'components/aicp/aicpSwitcher.html' : null" class="marble-page"></div>
 
 			<!-- REMOVE AICP -->
-			<div ng-include="worldURL.indexOf('aicpweek2015') > -1 ? 'components/aicp/blueRibbon.html': null" class="marble-page blueRibbonHeight--aicp"></div>
+			<div ng-include="world.splash_banner && world.splash_banner.imgSrc && world.splash_banner.linkUrl ? 'components/aicp/splashBanner.html': null" class="marble-page splashBannerHeight--aicp"></div>
 		
 			<!--DESCRIPTION-->
 			<div ng-include="isRetail ? 'components/world/templates/description.retail.html' : 'components/world/templates/description.html'" class="marble-page"></div>
@@ -73,7 +73,7 @@
 			<div ng-include="world.source_yelp.id ? 'components/world/templates/yelp.html' : null" class="marble-page"></div>
 			
 			<!--LANDMARKS-->
-			<div ng-include="landmarks.length>0 && !isRetail ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
+			<div ng-include="landmarks.length>0 && !isRetail && !category ? 'components/world/templates/explore.html' : null" class="marble-page"></div>
 			
 			<!--MESSAGES-->
 			<div ng-include="messages==true ? 'components/world/templates/messages.html' : null" class="marble-page"></div>
