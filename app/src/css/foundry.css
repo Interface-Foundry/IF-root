@@ -1060,8 +1060,10 @@ span.subnav-back-chevron {
   height: 90%;
   margin-top: -40px;
   padding-bottom: 60px;
-  padding-left: 10%;
-  padding-right: 10%;
+}
+.contest-background div {
+  background-color: white;
+  padding: 0 10%;
 }
 .announcements-card-background {
   background-color: rgba(62, 82, 181, 0.96);
