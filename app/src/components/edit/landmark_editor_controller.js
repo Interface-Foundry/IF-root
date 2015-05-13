@@ -119,8 +119,8 @@ var landmarksLoaded = false;
 	$scope.addLandmarkMarker = function(landmark) {
 
 		var markerOptions = {
-			draggable: false,
-			messageLink: true,
+			draggable: true,
+			message: 'drag',
 			worldId: $scope.world.id
 		};
 
