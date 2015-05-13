@@ -2967,6 +2967,18 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             }
                         }
 
+                        if (req.body.permissions){
+                            if (req.body.permissions.hidden){
+                                lm.permissions.hidden = true;
+                            }   
+                            else {
+                                lm.permissions.hidden = false;
+                            }
+                        }
+                        else {
+                            lm.permissions.hidden = false;
+                        }
+
                         if (req.body.widgets) {
                             /*if (req.body.widgets.twitter) {lm.widgets.twitter = req.body.widgets.twitter;}
                             if (req.body.widgets.instagram) {lm.widgets.instagram = req.body.widgets.instagram;}
@@ -3196,6 +3208,19 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             lm.resources.hashtag = req.body.resources.hashtag;
                         }
                     }
+
+                    if (req.body.permissions){
+                        if (req.body.permissions.hidden){
+                            lm.permissions.hidden = true;
+                        }   
+                        else {
+                            lm.permissions.hidden = false;
+                        }
+                    }
+                    else {
+                        lm.permissions.hidden = false;
+                    }
+
 
                     if (!req.body.avatar) {
                         lm.avatar = "img/tidepools/default.jpg";

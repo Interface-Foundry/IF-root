@@ -124,6 +124,10 @@ var landmarkSchema = new Schema({
         etherpad: String,
         external_calendar: String
     },
+    splash_banner:{
+        imgSrc: String,
+        linkUrl: String
+    },
     permissions: {
         ownerID: {
             type: String,
