@@ -1,4 +1,4 @@
-app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', 'navService', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout, navService) {
+app.controller('HomeController', ['$scope', '$rootScope', '$location', 'worldTree', 'styleManager', 'mapManager', 'geoService', 'ifGlobals', 'bubbleSearchService', 'welcomeService', '$timeout', 'navService', 'landmarkIsVisibleFilter', function ($scope, $rootScope, $location, worldTree, styleManager, mapManager, geoService, ifGlobals, bubbleSearchService, welcomeService, $timeout, navService, landmarkIsVisibleFilter) {
 var map = mapManager, style = styleManager;
 
 style.resetNavBG();
@@ -73,7 +73,7 @@ function init() {
 			nearbyBubbles = data['150m'] || []; // nearby
 			aroundMeBubbles = data['2.5km'] || []; // around me
 
-			$scope.bubbles = nearbyBubbles.concat(aroundMeBubbles);
+			$scope.bubbles = landmarkIsVisibleFilter(nearbyBubbles.concat(aroundMeBubbles));
 			
 			$scope.loadState = 'success';
 			// initMarkers();
