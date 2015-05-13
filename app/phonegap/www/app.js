@@ -24521,7 +24521,7 @@ $scope.share = function(platform) {
   else if (platform == 'twitter') {
     link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
-  window.open(
+  $window.open(
     link,
     'Kip',
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
