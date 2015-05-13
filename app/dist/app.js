@@ -26262,7 +26262,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 	function updateLandmarks(landmarks) {
 		var markerOptions = {
 			draggable: false,
-			messageLink: true,
+			message: 'link',
 			worldId: $scope.world.id
 		};
 		var markers = landmarks.map(function(l) {
