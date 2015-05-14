@@ -4859,8 +4859,8 @@ var updateTitle = function($rootScope) {
 
               // TODO use a environment-specific config
               // http://stackoverflow.com/a/18343298
-		    			request.url = 'https://kipapp.co' + request.url;
-
+		    			// request.url = 'https://kipapp.co' + request.url;
+              request.url = 'http://192.168.1.2:2997' + request.url;
 
 		    			if (ifGlobals.username&&ifGlobals.password) {
 							request.headers['Authorization'] = ifGlobals.getBasicHeader();
@@ -5963,7 +5963,8 @@ app.directive('ifSrc', function() { //used to make srcs safe for phonegap and we
 				}
 			
 				if (value.indexOf('http')<0) {
-					value = 'https://kipapp.co/'+value;
+					// value = 'https://kipapp.co/'+value;
+					value = 'http://192.168.1.2:2997/' + value;
 
 				}
 				
@@ -21975,11 +21976,14 @@ function aicpRoutingService($location, $routeParams) {
       $location.path(path + '');
       return {worldURL: 'aicpweek2015'};
     } else if (today === 156) {
-      $location.path('aicp_2015_thursday');
+      $location.path('/w/aicp_2015_thursday');
+      return {worldURL: ''};
     } else if (today === 155) {
-      $location.path('aicp_2015_wednesday');
+      $location.path('/w/aicp_2015_wednesday');
+      return {worldURL: ''};
     } else {
-      $location.path('aicp_2015_tuesday');
+      $location.path('/w/aicp_2015_tuesday');
+      return {worldURL: ''};
     }
   }
 }

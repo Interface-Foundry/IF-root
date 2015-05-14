@@ -4,8 +4,32 @@
   margin-top: -40px;
   padding-bottom: 60px;
 
-  div {
+  > div {
   	background-color: white;
-  	padding: 0 10%;
+
+  	@media only screen and (min-width : 736px) {
+  		padding: 0 10%;
+  	}
+
+  	.contest-container {
+  		margin: auto;
+  		width: 95%;
+
+  	}
   }
+}
+.inline-block {
+	display: inline-block;
+  position: relative;
+  text-align: left;
+  vertical-align: top;
+  width: 300px;
+}
+
+.margin-auto {
+	margin: auto;
+}
+
+#legal {
+	padding: 0 4%;
 }
