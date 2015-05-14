@@ -1,14 +1,9 @@
-app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', 'geoService', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService, geoService) {
+app.controller('LandmarkEditorController', ['$scope', '$rootScope', '$location', '$route', '$routeParams', 'db', 'World', 'leafletData', 'apertureService', 'mapManager', 'Landmark', 'alertManager', '$upload', '$http', '$window', 'dialogs', 'worldTree', 'bubbleTypeService', 'geoService', 'deviceManager', function ($scope, $rootScope, $location, $route, $routeParams, db, World, leafletData, apertureService, mapManager, Landmark, alertManager, $upload, $http, $window, dialogs, worldTree, bubbleTypeService, geoService, deviceManager) {
 	
-//@IFDEF PHONEGAP
-dialogs.showDialog('mobileDialog.html');
-$window.history.back();
-//@ENDIF
-
-if (geoService.mobileCheck()) {
-	dialogs.showDialog('mobileDialog.html');
-	$window.history.back();
-}
+	if (deviceManager.deviceType !== 'desktop') {
+		dialogs.showDialog('mobileDialog.html');
+		$window.history.back();
+	}
 
 ////////////////////////////////////////////////////////////
 ///////////////////INITIALIZING VARIABLES///////////////////

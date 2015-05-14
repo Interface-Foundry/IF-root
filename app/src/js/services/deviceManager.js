@@ -6,7 +6,7 @@ app.factory('deviceManager', ['$window', function($window) {
 		/**
 		 * browser: @value {String} one of [chrome, safari, firefox, ie, other]
 		 * deviceType: @value{String} one of [phone, tablet, desktop]
-		 * os: @value{String} one of [ios, android, windows, blackberry, other]. doesn't have to be native (could be iOS safari, for example)
+		 * os: @value{String} one of [ios, android, windows, blackberry, other]. doesn't have to be native (could be iOS safari web, for example)
 		 */
 	};
 
