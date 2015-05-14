@@ -25825,7 +25825,7 @@ app.directive('userLocation', ['geoService', 'mapManager', function(geoService, 
 	}
 
 }]);
-app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', 'analyticsService', 'dialogs', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter, analyticsService, dialogs) {
+app.controller('SearchController', ['$scope', '$location', '$routeParams', '$timeout', '$http', 'apertureService', 'worldTree', 'mapManager', 'bubbleTypeService', 'worldBuilderService', 'bubbleSearchService', 'floorSelectorService', 'categoryWidgetService', 'styleManager', 'navService', 'geoService', 'encodeDotFilterFilter', 'analyticsService', 'dialogs', 'landmarkIsVisibleFilter', function($scope, $location, $routeParams, $timeout, $http, apertureService, worldTree, mapManager, bubbleTypeService, worldBuilderService, bubbleSearchService, floorSelectorService, categoryWidgetService, styleManager, navService, geoService, encodeDotFilterFilter, analyticsService, dialogs, landmarkIsVisibleFilter) {
 
 	$scope.aperture = apertureService;
 	$scope.bubbleTypeService = bubbleTypeService;
@@ -26077,11 +26077,12 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 
 			bubbleSearchService.search(searchType, $scope.world._id, decodedInput)
 				.then(function(response) {
-					$scope.groups = groupResults(bubbleSearchService.data, searchType);
+					var data = landmarkIsVisibleFilter(bubbleSearchService.data);
+					$scope.groups = groupResults(data, searchType);
 					$scope.loading = false;
 
-					updateMap(bubbleSearchService.data);
-					if (bubbleSearchService.data.length === 0) { // no results
+					updateMap(data);
+					if (data.length === 0) { // no results
 						$scope.searchBarText = $scope.searchBarText + ' (' + bubbleSearchService.defaultText.none + ')';
 					}
 				});
@@ -26122,7 +26123,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 						map.removeAllMarkers();
 			
 						// separate bubbles from landmarks
-						result = _.groupBy(result, 'world');
+						result = _.groupBy(landmarkIsVisibleFilter(result), 'world');
 						$scope.citySearchResults.bubbles = result.true;
 						$scope.citySearchResults.landmarks = result.false;
 						var markers = [];
@@ -26144,25 +26145,6 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 							};
 							markers.push(marker);
 						});
-
-						// landmark markers
-						// _.each($scope.citySearchResults.landmarks, function(landmark) {
-						// 	var marker = {
-						// 		lat: landmark.loc.coordinates[1],
-						// 		lng: landmark.loc.coordinates[0],
-						// 		draggable: false,
-						// 		message: '<a if-href="#/w/' + landmark.parentName + '/' + landmark.id + '"><div class="marker-popup-click"></div></a><a>' + landmark.name + '</a>',
-						// 		icon: {
-						// 			iconUrl: 'img/marker/landmarkMarker_23.png',
-						// 			iconSize: [23, 23],
-						// 			iconAnchor: [11, 11],
-						// 			popupAnchor: [0, -4]
-						// 		},
-						// 		// adding date to make _id unique. making unique because cliking to landmark from searh view was breaking alt attribute (and therefore css class)
-						// 		_id: landmark._id + (new Date().getTime())
-						// 	}
-						// 	markers.push(marker);
-						// });
 
 						// add markers and set aperture
 						mapManager.addMarkers(markers);
@@ -27891,7 +27873,7 @@ link: function(scope, element, attrs) {
 }
 	}
 }); 
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', function($scope, worldTree, $routeParams, styleManager, $window, $location) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', 'landmarkIsVisibleFilter', function($scope, worldTree, $routeParams, styleManager, $window, $location, landmarkIsVisibleFilter) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -27950,6 +27932,7 @@ windowEl.on('resize', handleWindowResize);
 		return $scope.world._id;
 	}).then(function(_id) {return worldTree.getLandmarks(_id)})
 	.then(function(landmarks) {
+		landmarks = landmarkIsVisibleFilter(landmarks);
 		$scope.landmarks = landmarks;
 		
 		setUpCalendar(landmarks);

@@ -1,4 +1,4 @@
-app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', function($scope, worldTree, $routeParams, styleManager, $window, $location) {
+app.controller('ScheduleController', ['$scope', 'worldTree', '$routeParams', 'styleManager', '$window', '$location', 'landmarkIsVisibleFilter', function($scope, worldTree, $routeParams, styleManager, $window, $location, landmarkIsVisibleFilter) {
 	$scope.schedule = [];
 	var timeMap = {
 		'Upcoming': 0,
@@ -57,6 +57,7 @@ windowEl.on('resize', handleWindowResize);
 		return $scope.world._id;
 	}).then(function(_id) {return worldTree.getLandmarks(_id)})
 	.then(function(landmarks) {
+		landmarks = landmarkIsVisibleFilter(landmarks);
 		$scope.landmarks = landmarks;
 		
 		setUpCalendar(landmarks);
