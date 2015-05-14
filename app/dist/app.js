@@ -17263,7 +17263,7 @@ function bubbleSearchService($http, analyticsService) {
 		search: search,
 		defaultText: {
 			global: 'Search around me',
-			bubble: 'Search within ',
+			bubble: 'What are you looking for?',
 			none: 'No results'
 		}
 	};
@@ -24173,7 +24173,7 @@ $scope.share = function(platform) {
   else if (platform == 'twitter') {
     link = 'https://twitter.com/intent/tweet?url=https://kipapp.co'+$location.url();
   }
-  window.open(
+  $window.open(
     link,
     'Kip',
     'height=450,width=558,top='+top+',left='+left+'scrollbars'
@@ -25858,7 +25858,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.world = data.world;
 			$scope.style = data.style;
-			defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
+			defaultText = bubbleSearchService.defaultText.bubble;
 			// set nav color using styleManager
 			styleManager.navBG_color = $scope.style.navBG_color;
 
@@ -27491,7 +27491,7 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			if (scope.mode === 'city' || scope.mode === 'home') {
 				defaultText = bubbleSearchService.defaultText.global;
 			} else {
-				defaultText = bubbleSearchService.defaultText.bubble + scope.world.name;
+				defaultText = bubbleSearchService.defaultText.bubble;
 			}
 			
 
@@ -28295,7 +28295,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	$scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
-	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
+	$scope.defaultText = bubbleSearchService.defaultText.bubble;
 	if (!(_.isEmpty(data.submissions))) {
 		data.submissions.forEach(function(s) {
 			if (!s) {

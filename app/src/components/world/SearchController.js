@@ -31,7 +31,7 @@ app.controller('SearchController', ['$scope', '$location', '$routeParams', '$tim
 		worldTree.getWorld($routeParams.worldURL).then(function(data) {
 			$scope.world = data.world;
 			$scope.style = data.style;
-			defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
+			defaultText = bubbleSearchService.defaultText.bubble;
 			// set nav color using styleManager
 			styleManager.navBG_color = $scope.style.navBG_color;
 

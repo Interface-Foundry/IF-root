@@ -73,7 +73,7 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 	$scope.world = data.world;
 	$scope.style = data.style;
 	$scope.contest = _.isEmpty(data.contest) ? false : data.contest;
-	$scope.defaultText = bubbleSearchService.defaultText.bubble + $scope.world.name;
+	$scope.defaultText = bubbleSearchService.defaultText.bubble;
 	if (!(_.isEmpty(data.submissions))) {
 		data.submissions.forEach(function(s) {
 			if (!s) {
