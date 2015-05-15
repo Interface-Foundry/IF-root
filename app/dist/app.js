@@ -27813,7 +27813,7 @@ app.directive('scheduleView', function() {
 				}
 			}
 			
-			var toggle = {'Upcoming': true, 'Places': true, 'Previous': true}; //default toggle states
+			var toggle = {'Upcoming': false, 'Places': true, 'Previous': true}; //default toggle states
 			
 			function toggleSuperGroup(title) {
 				toggle[title] = !toggle[title];	
@@ -28296,9 +28296,14 @@ $scope.loadWorld = function(data) { //this doesn't need to be on the scope
 
 	// REMOVE AICP
 	if ($scope.worldURL.indexOf('aicp_2015') > -1 && $scope.world.splash_banner && $scope.world.splash_banner.imgSrc && $scope.world.splash_banner.linkUrl) {
+		var imgSrc = $scope.world.splash_banner.imgSrc;
+		var imgSrc2 = $scope.world.splash_banner.imgSrc2;
 		$scope.splashBannerAicp = {
 			style: {
 				'background': 'black url(' + $scope.world.splash_banner.imgSrc + ') center center / cover no-repeat'
+			},
+			style2: {
+				'background': 'black url(' + $scope.world.splash_banner.imgSrc2 + ') center center / cover no-repeat'
 			},
 			link: $scope.world.splash_banner.linkUrl
 		};

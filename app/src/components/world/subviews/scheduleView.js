@@ -51,7 +51,7 @@ app.directive('scheduleView', function() {
 				}
 			}
 			
-			var toggle = {'Upcoming': true, 'Places': true, 'Previous': true}; //default toggle states
+			var toggle = {'Upcoming': false, 'Places': true, 'Previous': true}; //default toggle states
 			
 			function toggleSuperGroup(title) {
 				toggle[title] = !toggle[title];	
