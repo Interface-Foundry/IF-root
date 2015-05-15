@@ -15,9 +15,6 @@
 					{{landmark.time.end | date: 'shortTime'}}</h6>
 			{{::landmark.summary}}
 			</div>
-			<div class="bottom-right">
-			<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
-			</div>
 		</div>
 	</article>
 </div>
@@ -36,9 +33,6 @@
 					<span ng-show="landmark.time.end">-</span>
 					{{landmark.time.end | date: 'shortTime'}}</h6>
 				{{::landmark.summary}}
-			</div>
-			<div class="bottom-right">
-				<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
 			</div>
 		</div>
 		<div class="fold-btn" ng-click="foldSize = foldSize + 3" ng-style="{color: style.titleBG_color}" ng-show="foldSize<upcoming.length">
@@ -62,9 +56,6 @@
 					{{landmark.time.end | date: 'shortTime'}}</h6>
 				{{::landmark.summary}}
 			</div>
-			<div class="bottom-right">
-				<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
-			</div>
 		</div>
 		<div class="fold-btn" ng-click="foldSize = foldSize + 3" ng-style="{color: style.titleBG_color}" ng-show="foldSize<past.length">
 			See More
@@ -86,9 +77,6 @@
 					<span ng-show="landmark.time.end">-</span>
 					{{landmark.time.end | date: 'shortTime'}}</h6>
 				{{::landmark.summary}}
-			</div>
-			<div class="bottom-right">
-				<a if-href="#w/{{::world.id}}/{{::landmark.id}}" class="marble-btn" style="float: right;" ng-style="::{'background': style.titleBG_color}">More Info</a>
 			</div>
 		</div>
 		<div class="fold-btn" ng-click="foldSize = foldSize + 3" ng-style="{color: style.titleBG_color}" ng-show="foldSize<landmarks.length">
