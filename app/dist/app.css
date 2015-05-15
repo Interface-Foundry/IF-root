@@ -3574,9 +3574,30 @@ span.subnav-back-chevron {
   margin-top: -40px;
   padding-bottom: 60px;
 }
-.contest-background div {
+.contest-background > div {
   background-color: white;
-  padding: 0 10%;
+}
+@media only screen and (min-width: 736px) {
+  .contest-background > div {
+    padding: 0 10%;
+  }
+}
+.contest-background > div .contest-container {
+  margin: auto;
+  width: 95%;
+}
+.inline-block {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  vertical-align: top;
+  width: 300px;
+}
+.margin-auto {
+  margin: auto;
+}
+#legal {
+  padding: 0 4%;
 }
 .announcements-card-background {
   background-color: rgba(62, 82, 181, 0.96);
@@ -3863,7 +3884,7 @@ img.announcement-chevron {
 .errorMsg {
   color: red;
 }
-.tab-group {
+css.tab-group {
   text-align: center;
 }
 .tab {
@@ -4089,6 +4110,22 @@ img.announcement-chevron {
   position: absolute;
   line-height: 16px;
   top: 14px;
+  width: 382px;
+}
+@media (min-width: 320px) and (max-width: 374px) {
+  .bubble-list-item-label {
+    width: 256px;
+  }
+}
+@media (min-width: 375px) and (max-width: 413px) {
+  .bubble-list-item-label {
+    width: 312px;
+  }
+}
+@media (min-width: 414px) and (max-width: 431px) {
+  .bubble-list-item-label {
+    width: 350px;
+  }
 }
 .bubble-list-item-label small {
   padding-left: 12px;
@@ -4107,9 +4144,6 @@ img.announcement-chevron {
   color: #AAA;
 }
 .bubble-list-item-room-info span {
-  padding-right: 20px;
-}
-.bubble-list-item-detail span {
   padding-right: 20px;
 }
 .bubble-list-item-img {
