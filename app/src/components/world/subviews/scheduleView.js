@@ -83,8 +83,8 @@ link: function(scope, element, attrs) {
 	
 	function landmarkDetail(landmark) {
 		return [
-			m('span', landmark.time.start && ('Starts ' + moment(landmark.time.start).format('ddd, MMM Do, hA'))),
-			m('span', landmark.time.end && ('Ends ' + moment(landmark.time.end).format("ddd, MMM Do, hA")))
+			m('span', landmark.time.start && (moment(landmark.time.start).format('ddd, MMM Do, hA')) + ' - '),
+			m('span', landmark.time.end && (moment(landmark.time.end).format("ddd, MMM Do, hA")))
 		]
 	}
 	

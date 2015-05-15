@@ -3892,7 +3892,7 @@ img.announcement-chevron {
 .errorMsg {
   color: red;
 }
-.tab-group {
+css.tab-group {
   text-align: center;
 }
 .tab {
@@ -4136,9 +4136,6 @@ img.announcement-chevron {
   color: #AAA;
 }
 .bubble-list-item-room-info span {
-  padding-right: 20px;
-}
-.bubble-list-item-detail span {
   padding-right: 20px;
 }
 .bubble-list-item-img {
