@@ -88,6 +88,9 @@
 
 			<!---meetup-->
 			<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null" class="marble-page"></div>
+
+			<!-- REMOVE AICP -->
+			<div ng-include="world.splash_banner && world.splash_banner.imgSrc2 ? 'components/aicp/splashBanner2.html': null" class="marble-page splashBannerHeight--aicp"></div>
 			
 			<!--TWITTER-->
 			<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page" class="marble-page"></div>
