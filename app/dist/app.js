@@ -27832,7 +27832,7 @@ link: function(scope, element, attrs) {
 		return m('li.bubble-list-item', 
 			m('a.bubble-list-item-link', {href: ifURL('#w/'+scope.world.id+'/'+landmark.id)}, //safe if hrefs for phonegap
 				[m('img.bubble-list-item-img', {src: landmark.avatar}), 
-				m('span.bubble-list-item-label', [landmark.name, m('small', landmark.category)]), 
+				m('span.bubble-list-item-label.u-ellipsis', [landmark.name, m('small', landmark.category)]), 
 				m('footer.bubble-list-item-detail', landmarkDetail(landmark)), 
 				m('footer.bubble-list-item-room-info', landmarkRoomDetail(landmark))
 			]));

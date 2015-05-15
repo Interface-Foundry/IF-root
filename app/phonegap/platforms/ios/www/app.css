@@ -3892,7 +3892,7 @@ img.announcement-chevron {
 .errorMsg {
   color: red;
 }
-.tab-group {
+css.tab-group {
   text-align: center;
 }
 .tab {
@@ -4118,6 +4118,22 @@ img.announcement-chevron {
   position: absolute;
   line-height: 16px;
   top: 14px;
+  width: 100%;
+}
+@media (min-width: 320px) and (max-width: 568px) {
+  .bubble-list-item-label {
+    width: 256px;
+  }
+}
+@media (min-width: 375px) and (max-width: 667px) {
+  .bubble-list-item-label {
+    width: 312px;
+  }
+}
+@media (min-width: 414px) and (max-width: 736px) {
+  .bubble-list-item-label {
+    width: 350px;
+  }
 }
 .bubble-list-item-label small {
   padding-left: 12px;
@@ -4136,9 +4152,6 @@ img.announcement-chevron {
   color: #AAA;
 }
 .bubble-list-item-room-info span {
-  padding-right: 20px;
-}
-.bubble-list-item-detail span {
   padding-right: 20px;
 }
 .bubble-list-item-img {

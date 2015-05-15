@@ -1,4 +1,4 @@
-.tab-group {
+css.tab-group {
 	text-align: center;
 }
 
@@ -252,7 +252,24 @@
 .bubble-list-item-label {
 	position: absolute;
 	line-height: 16px;
-	top: 14px;	
+	top: 14px;
+	width: 100%;
+
+  @media (min-width: 320px) 
+	  and (max-width: 568px) {
+	  	width: 256px;
+  }
+
+  @media (min-width: 375px) 
+	  and (max-width: 667px) {
+	  	width: 312px;
+  }
+
+  @media (min-width: 414px) 
+	  and (max-width: 736px) {
+	  	width: 350px;
+	}
+
 }
 
 .bubble-list-item-label small {
@@ -275,10 +292,6 @@
 }
 
 .bubble-list-item-room-info span {
-	padding-right: 20px;
-}
-
-.bubble-list-item-detail span {
 	padding-right: 20px;
 }
 
