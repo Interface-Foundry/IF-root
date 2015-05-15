@@ -3,7 +3,7 @@
 app
 .directive('hrefListener', hrefListener);
 
-hrefListener.$inject = ['newWindowService'];
+hrefListener.$inject = ['$location', 'newWindowService', 'navService'];
 
 /***
  *  User generated html that includes links (world descriptions, tweets, etc)
@@ -11,7 +11,7 @@ hrefListener.$inject = ['newWindowService'];
  *  This directive listens for clicks on elements that could contain links.
  *  On mobile it will force the link to open in the InAppBrowser so users can return to the app.
  */
-function hrefListener(newWindowService) {	
+function hrefListener($location, newWindowService, navService) {	
   return {
     restrict: 'A',
     link: link
@@ -28,10 +28,20 @@ function hrefListener(newWindowService) {
       var element = e.target || e.srcElement;
 
       if (element.tagName == 'A') {
-        newWindowService.go(element.href);
-        return false;
+        if (isOutsideLink(element.href)) {
+          newWindowService.go(element.href);
+          return false;
+        } else {
+          $location.path(element.href);
+          navService.backPages = -2;
+        }
       }
     });
     // @ENDIF
+  }
+
+  function isOutsideLink(link) {
+    var httpExp = /(ftp|http|https)/i;
+    return httpExp.test(link);
   }
 }
