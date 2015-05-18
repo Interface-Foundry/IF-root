@@ -1,4 +1,4 @@
-app.directive('scheduleView', function() {
+app.directive('scheduleView', ['$location', function($location) {
 	return {
 		restrict: 'E',
 		link: function(scope, element, attrs) {
@@ -37,7 +37,8 @@ app.directive('scheduleView', function() {
 			function superGroupTemplate(superGroup) { //template built once for each supergroup
 				//{'title': [{group}, {group}]}
 				var pair = _.pairs(superGroup)[0],
-					title = pair[0],
+					// REMOVE AICP
+					title = (pair[0] === 'Places' && $location.path().indexOf('aicp_2015') > -1) ? 'Speakers' : pair[0],
 					groups = pair[1];		
 				if (_.isEmpty(groups)) {
 					return;
@@ -63,7 +64,7 @@ app.directive('scheduleView', function() {
 				//{'title': [landmarks...]}
 				var pair = _.pairs(group)[0],
 					title = pair[0],
-					landmarks = pair[1];
+					landmarks = _.sortBy(pair[1], 'name');
 				
 				return m('div.bubble-group', [
 					m('header.bubble-group-label', title),
@@ -118,4 +119,4 @@ app.directive('scheduleView', function() {
 			}
 		}
 	}
-}); 
+}]); 
