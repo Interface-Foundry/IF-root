@@ -5929,8 +5929,9 @@ function hrefListener($location, newWindowService, navService) {
           newWindowService.go(element.href);
           return false;
         } else {
-          $location.path(element.href);
-          navService.backPages = -2;
+          // translate relative url to mobile safe format
+          var path = element.href.split('file:///')[1];
+          $location.path(path);
         }
       }
     });
@@ -20210,11 +20211,13 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
 			.success(function(success) {
 				console.log(success);
-				deferred.resolve(success.landmarks)})
+				worldTree.landmarkCache.put(_id, success.landmarks);
+				deferred.resolve(success.landmarks);
+			})
 			.error(function(err) {
 				console.log(err);
 				deferred.resolve(err)
-		});
+			});
 	}
 	
 	return deferred.promise;

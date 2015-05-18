@@ -19914,11 +19914,13 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
 			.success(function(success) {
 				console.log(success);
-				deferred.resolve(success.landmarks)})
+				worldTree.landmarkCache.put(_id, success.landmarks);
+				deferred.resolve(success.landmarks);
+			})
 			.error(function(err) {
 				console.log(err);
 				deferred.resolve(err)
-		});
+			});
 	}
 	
 	return deferred.promise;
