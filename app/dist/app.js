@@ -21859,6 +21859,39 @@ app.controller('feedbackController', ['$http', '$location', '$scope', 'alertMana
   };
 }]);
 
+'use strict';
+
+app.directive('downloadBanner', downloadBanner);
+
+downloadBanner.$inject = ['$window'];
+
+function downloadBanner($window) {
+	return {
+		restrict: 'E',
+		templateUrl: 'components/download_banner/downloadBanner.html',
+		scope: {
+
+		},
+		link: link
+	};
+
+	function link(scope, elem, attr) {
+		scope.openApp = openApp;
+
+		function openApp() {
+			try {
+				console.log('trying co.kipapp://')
+				$window.open('co.kipapp://');
+			}
+			catch(err) {
+				console.log('Caught error', err)
+				// $location.path()
+			}
+		}
+		
+	}
+}
+
 app.directive('drawer', ['worldTree', '$rootScope', '$routeParams', 'userManager', 'dialogs', 'superuserService', 'newWindowService', function(worldTree, $rootScope, $routeParams, userManager, dialogs, superuserService, newWindowService) {
 	return {
 		restrict: 'EA',

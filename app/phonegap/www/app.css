@@ -5271,6 +5271,44 @@ div.marker-popup-click {
 .aperture-third .floor-indicator {
   right: -44px;
 }
+#download-banner {
+  background-color: #e6e6e6;
+  height: 80px;
+  position: relative;
+  z-index: 20;
+}
+#download-banner .x-button {
+  height: 20px;
+  float: left;
+  margin-top: 30px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+.banner-inline-block {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  vertical-align: top;
+}
+.banner-inline-block img {
+  background-color: white;
+  border: 1px solid #d1d0c7;
+  border-radius: 10px;
+  height: 60px;
+  margin-top: 10px;
+}
+.banner-inline-block.kip-description {
+  margin-left: 10px;
+  margin-top: 10px;
+}
+.banner-inline-block.action {
+  color: blue;
+  float: right;
+  font-size: 16px;
+  font-weight: 400;
+  margin-right: 10px;
+  margin-top: 29px;
+}
 .userLocation {
   background: #ffffff url('img/icons/ic_my_location_grey600_24dp.png') center center / 22px 22px no-repeat;
   height: 50px;
