@@ -17556,7 +17556,10 @@ angular.module('tidepoolsServices')
 	.factory('geoService', ['$location', '$q', '$rootScope', '$routeParams', '$timeout', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService', 'deviceManager',
 		function($location, $q, $rootScope, $routeParams, $timeout, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService, deviceManager) {
 
-			//abstract & promisify geolocation, queue requests.
+			var cacheTime = 3.25 * 60 * 1000; // 3.25m
+			var geoTimeout = 7 * 1000; // 7s time before resorting to old location, or IP
+			var cacheTime = 30 * 1000; // 30s
+			var geoTimeout = 30 * 1000; // 30s
 			var geoService = {
 				location: {
 					/**
@@ -17568,9 +17571,8 @@ angular.module('tidepoolsServices')
 					 */ 
 				},
 				inProgress: false,
-				requestQueue: [],
-				cacheTime: 30 * 1000, // 30s
-				geoTimeout: 30 * 1000, // time before resorting to old location, or IP
+				cacheTime: cacheTime,
+				geoTimeout: geoTimeout,
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -17617,64 +17619,56 @@ angular.module('tidepoolsServices')
 
 				var deferred = $q.defer();
 
-				geoService.requestQueue.push(deferred);
+				if (!geoService.inProgress) {
+					if (navigator.geolocation) {
+						geoService.inProgress = true;
+						console.log('geo: using navigator');
 
-				if (geoService.inProgress) {
-					// inprog
-				} else if (navigator.geolocation) {
-					geoService.inProgress = true;
-					console.log('geo: using navigator');
+						function geolocationSuccess(position) {
+							geoService.location.lat = position.coords.latitude;
+							geoService.location.lng = position.coords.longitude;
+							geoService.location.timestamp = Date.now();
 
-					function geolocationSuccess(position) {
-						geoService.location.lat = position.coords.latitude;
-						geoService.location.lng = position.coords.longitude;
-						geoService.location.timestamp = Date.now();
-						geoService.resolveQueue({
-							lat: position.coords.latitude,
-							lng: position.coords.longitude
-						});
+							deferred.resolve({
+								lat: position.coords.latitude,
+								lng: position.coords.longitude
+							});
 
-						locationAnalyticsService.log({
-							type: 'GPS',
-							loc: {
-								type: 'Point',
-								coordinates: [position.coords.latitude, position.coords.longitude]
-							}
-						});
+							geoService.inProgress = false;
+
+							locationAnalyticsService.log({
+								type: 'GPS',
+								loc: {
+									type: 'Point',
+									coordinates: [position.coords.latitude, position.coords.longitude]
+								}
+							});
+						}
+
+						function geolocationError(error) {
+							deferred.reject(error.code);
+							geoService.inProgress = false;
+						}
+
+						var options = {
+							maximumAge: maxAge || 0,
+							timeout: timeout || Infinity
+						};
+						
+						navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+							geolocationError, options);
+
+
+					} else {
+						//browser update message
+						alerts.addAlert('warning', 'Your browser does not support location services.');
+						deferred.reject('Your browser does not support location services.');
 					}
-
-					function geolocationError(error) {
-						geoService.resolveQueue({err: error.code});
-					}
-
-
-					var options = {
-						maximumAge: maxAge || 0,
-						timeout: timeout || Infinity
-					};
-					
-					navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-						geolocationError, options);
-
-
 				} else {
-					//browser update message
-					alerts.addAlert('warning', 'Your browser does not support location services.')
-				}
+					deferred.reject('Already trying to get location');
+				} 
 
 				return deferred.promise;
-			}
-
-			geoService.resolveQueue = function (position) {
-				while (geoService.requestQueue.length > 0) {
-					var request = geoService.requestQueue.pop();
-					if (position.err) {
-						request.reject(position.err);
-					} else {
-						request.resolve(position);
-					}
-				}
-				geoService.inProgress = false;
 			}
 
 			geoService.trackStart = function() {			
