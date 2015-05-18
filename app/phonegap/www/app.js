@@ -5905,7 +5905,7 @@ app.directive('fitFont', function($rootScope) { //used to fit font size to large
 app
 .directive('hrefListener', hrefListener);
 
-hrefListener.$inject = ['$location', 'newWindowService', 'navService'];
+hrefListener.$inject = ['$location', '$timeout', 'newWindowService', 'navService'];
 
 /***
  *  User generated html that includes links (world descriptions, tweets, etc)
@@ -5913,25 +5913,27 @@ hrefListener.$inject = ['$location', 'newWindowService', 'navService'];
  *  This directive listens for clicks on elements that could contain links.
  *  On mobile it will force the link to open in the InAppBrowser so users can return to the app.
  */
-function hrefListener($location, newWindowService, navService) {	
+function hrefListener($location, $timeout, newWindowService, navService) {	
   return {
     restrict: 'A',
     link: link
   };
 
   function link(scope, elem, attrs) {
-    elem.bind('click', function (e) {
+    elem.bind('touchstart', function (e) {
+      console.log('HIT TOUCHSTART')
       e = e ||  window.event;
       var element = e.target || e.srcElement;
-
+      console.log('TOUCHED', element.tagName)
       if (element.tagName == 'A') {
         if (isOutsideLink(element.href)) {
           newWindowService.go(element.href);
-          return false;
+          return false; // must return false to prevent propagation of anchor link click
         } else {
           // translate relative url to mobile safe format
           var path = element.href.split('file:///')[1];
           $location.path(path);
+          return false; // must return false to prevent propagation of anchor link click
         }
       }
     });
@@ -20177,6 +20179,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 				deferred.reject(data.err);
 				// $location.path('/w/404');
 	 		} else {
+	 			// TODO: decide if we need a time limit or space limit on cached worlds
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 	 			worldTree.contestCache.put('active', data.contest);
@@ -20211,6 +20214,7 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
 			.success(function(success) {
 				console.log(success);
+				worldTree.clearCache('landmarkCache');
 				worldTree.landmarkCache.put(_id, success.landmarks);
 				deferred.resolve(success.landmarks);
 			})
@@ -20386,8 +20390,8 @@ worldTree.cacheWorlds = function(worlds) {
 	});
 }
 
-worldTree.clearCacheWorlds = function(worlds) {
-	worldTree.landmarkCache.removeAll();
+worldTree.clearCache = function(cache) {
+	worldTree[cache].removeAll();
 }
 
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
@@ -24318,7 +24322,7 @@ function initMarkers() {
 
 $scope.refreshButton = function(){
 	$scope.loadState = 'loading';
-	worldTree.clearCacheWorlds();
+	worldTree.clearCache('worldCache');
 	init();
 }
 

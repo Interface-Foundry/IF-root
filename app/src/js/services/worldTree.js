@@ -63,6 +63,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 				deferred.reject(data.err);
 				// $location.path('/w/404');
 	 		} else {
+	 			// TODO: decide if we need a time limit or space limit on cached worlds
 	 			worldTree.worldCache.put(data.world.id, data.world);
 	 			worldTree.styleCache.put(data.style._id, data.style);
 	 			worldTree.contestCache.put('active', data.contest);
@@ -97,6 +98,7 @@ worldTree.getLandmarks = function(_id) { //takes world's _id
 		$http.get('/api/landmarks', {params: {parentID: _id}, server: true})
 			.success(function(success) {
 				console.log(success);
+				worldTree.clearCache('landmarkCache');
 				worldTree.landmarkCache.put(_id, success.landmarks);
 				deferred.resolve(success.landmarks);
 			})
@@ -272,8 +274,8 @@ worldTree.cacheWorlds = function(worlds) {
 	});
 }
 
-worldTree.clearCacheWorlds = function(worlds) {
-	worldTree.landmarkCache.removeAll();
+worldTree.clearCache = function(cache) {
+	worldTree[cache].removeAll();
 }
 
 worldTree.cacheSubmission = function(worldId, hashtag, imgURL) {
