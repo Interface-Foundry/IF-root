@@ -63,7 +63,8 @@ app.directive('scheduleView', ['$location', function($location) {
 			function groupTemplate(group) { //built for each group in each supergroup
 				//{'title': [landmarks...]}
 				var pair = _.pairs(group)[0],
-					title = pair[0],
+				// REMOVE AICP
+					title = (pair[0] === 'Places' && $location.path().indexOf('aicp_2015') > -1) ? '' : pair[0],
 					landmarks = _.sortBy(pair[1], 'name');
 				
 				return m('div.bubble-group', [
