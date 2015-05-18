@@ -5570,8 +5570,11 @@ div.marker-popup-click {
 .switcherCircle--aicp.opacity100 {
   opacity: 1;
 }
-.splashBannerHeight--aicp {
+.bannerAicp {
   height: 282px;
+}
+.bannerAicp--small {
+  height: 220px;
 }
 .fontLato {
   font-family: Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;

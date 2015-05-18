@@ -41,7 +41,7 @@
 			<div ng-include="worldURL.indexOf('aicp_2015') > -1 ? 'components/aicp/aicpSwitcher.html' : null" class="marble-page"></div>
 
 			<!-- REMOVE AICP -->
-			<div ng-include="world.splash_banner && world.splash_banner.imgSrc && world.splash_banner.linkUrl ? 'components/aicp/splashBanner.html': null" class="marble-page splashBannerHeight--aicp"></div>
+			<div ng-include="world.splash_banner && world.splash_banner.imgSrc && world.splash_banner.linkUrl ? 'components/aicp/splashBanner.html': null" class="marble-page bannerAicp"></div>
 		
 			<!--DESCRIPTION--> <!--- REMOVE AICP (parts) -->
 			<div ng-if="!(worldURL.indexOf('aicp_2015') > -1)">
@@ -90,7 +90,7 @@
 			<div ng-include="world.source_meetup.id ? 'components/world/templates/meetup.html' : null" class="marble-page"></div>
 
 			<!-- REMOVE AICP -->
-			<div ng-include="world.splash_banner && world.splash_banner.imgSrc2 ? 'components/aicp/splashBanner2.html': null" class="marble-page splashBannerHeight--aicp"></div>
+			<div ng-include="world.splash_banner && world.splash_banner.imgSrc2 ? 'components/aicp/splashBanner2.html': null" class="marble-page bannerAicp bannerAicp--small"></div>
 			
 			<!--TWITTER-->
 			<div ng-include="twitter ? 'components/world/templates/twitter.html' : null" class="marble-page" class="marble-page"></div>
