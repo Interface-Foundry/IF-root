@@ -28181,7 +28181,7 @@ app.directive('scheduleView', ['$location', function($location) {
 				var pair = _.pairs(group)[0],
 				// REMOVE AICP
 					title = (pair[0] === 'Places' && $location.path().indexOf('aicp_2015') > -1) ? '' : pair[0],
-					landmarks = _.sortBy(pair[1], 'name');
+					landmarks = (pair[0] === 'Places') ? _.sortBy(pair[1], 'name') : pair[1];
 				
 				return m('div.bubble-group', [
 					m('header.bubble-group-label', title),
