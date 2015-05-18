@@ -19906,7 +19906,7 @@ worldTree.getWorld = function(id) { //returns a promise with a world and corresp
 worldTree.getLandmarks = function(_id) { //takes world's _id
 	var deferred = $q.defer();
 	console.log('getLandmarks');
-	var landmarks = worldTree.landmarkCache.get(_id); // landmark cache not currently in use
+	var landmarks = worldTree.landmarkCache.get(_id);
 	if (landmarks) {
 		deferred.resolve(landmarks);
 		console.log('landmarks in cache!');
@@ -22785,7 +22785,7 @@ var landmarksLoaded = false;
 			db.landmarks.create(tempLandmark, function(response) {
 				console.log('--db.landmarks.create--');
 				console.log('Response ID:'+response[0]._id);
-				tempLandmark._id = response[0]._id;
+				tempLandmark = response[0];
 				
 				//add to array 
 				$scope.landmarks.unshift(tempLandmark);		
