@@ -5921,10 +5921,9 @@ function hrefListener($location, $timeout, newWindowService, navService) {
 
   function link(scope, elem, attrs) {
     elem.bind('touchstart', function (e) {
-      console.log('HIT TOUCHSTART')
       e = e ||  window.event;
       var element = e.target || e.srcElement;
-      console.log('TOUCHED', element.tagName)
+      
       if (element.tagName == 'A') {
         if (isOutsideLink(element.href)) {
           newWindowService.go(element.href);
