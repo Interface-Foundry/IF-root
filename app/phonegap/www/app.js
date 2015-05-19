@@ -17584,12 +17584,12 @@ angular.module('tidepoolsServices')
 			var watchID;
 			$rootScope.aperture = apertureService;
 
-			// start tracking when in full aperture (and retail bubble or world search) and stop otherwise
+			// start tracking when in full aperture (and world view or global search) and stop otherwise
 			$rootScope.$watch('aperture.state', function(newVal, oldVal) {
-				if (bubbleTypeService.get() === 'Retail' || $routeParams.cityName) {
-					if (newVal === 'aperture-full' && !geoService.tracking) {
+				if ($routeParams.worldURL || $routeParams.cityName) {
+					if (newVal === 'aperture-full') {
 						geoService.trackStart();
-					} else if (newVal !== 'aperture-full' && geoService.tracking) {
+					} else if (newVal !== 'aperture-full') {
 						geoService.trackStop();
 					}
 				}
@@ -17680,11 +17680,8 @@ angular.module('tidepoolsServices')
 			geoService.trackStart = function() {			
 				// used to start showing user's location on map
 
-				// if we are already tracking, stop current session before starting new one
-				if (geoService.tracking) {
-					geoService.trackStop();
-				}
-				if (navigator.geolocation && window.DeviceOrientationEvent) {
+				// only start tracking if not already tracking
+				if (!geoService.tracking && navigator.geolocation && window.DeviceOrientationEvent) {
 					
 					// marker
 					var iconUrl = 'img/marker/userLocMarker_noArrow.png';
