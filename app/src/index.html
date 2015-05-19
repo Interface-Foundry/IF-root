@@ -111,7 +111,7 @@
 		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
 		<div ng-if="show.splash === false">
-			<download-banner></download-banner>
+			
 			<nav role="navigation" class="main-nav" 
 				ng-style="{'background-color': style.navBG_color}">
 
@@ -142,7 +142,7 @@
 			<section id="aperture" ng-class="[aperture.state]">
 				<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers"></leaflet>
 			</section>
-				
+			
 			<section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>
 			</section>
 			 
