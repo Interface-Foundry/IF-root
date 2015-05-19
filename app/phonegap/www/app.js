@@ -24554,6 +24554,7 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 
 		scope.goWorld = goWorld;
 		scope.goSearch = goSearch;
+		scope.routeParams = $routeParams;
 
 		function goWorld() {
 			// go to world home if in world but not already in world home. go to kip home otherwise
