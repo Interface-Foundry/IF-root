@@ -85,8 +85,11 @@ app.directive('scheduleView', ['$location', function($location) {
 			
 			function landmarkDetail(landmark) {
 				return [
-					m('span', landmark.time.start && (moment(landmark.time.start).format('ddd, MMM Do, hA')) + ' - '),
-					m('span', landmark.time.end && (moment(landmark.time.end).format("ddd, MMM Do, hA")))
+					m('span', landmark.time.start && (moment(landmark.time.start).format('ddd, MMM Do, hA'))),
+					m('span', landmark.time.end && (' - ' + 
+						(moment(landmark.time.end).isSame(landmark.time.start, 'day') ? 
+							moment(landmark.time.end).format('hA') : 
+							moment(landmark.time.end).format("ddd, MMM Do, hA"))))
 				]
 			}
 			
