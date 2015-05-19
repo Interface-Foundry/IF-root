@@ -15,15 +15,65 @@ function downloadBanner($window, $rootScope) {
 	};
 
 	function link(scope, elem, attr) {
+		var wrap;
+		var nav;
+		var banner;
+		var home;
+		var shelf;
+		var routeListener;
+
 		scope.closeBanner = closeBanner;
 		scope.openApp = openApp;
 
-		elem.on('scroll', function(e) {
-			console.log(this.scrollTop)
-		})
+		_.defer(activate);
+
+		function activate() {
+			wrap = angular.element('.wrap');
+			nav = angular.element('.main-nav');
+			banner = angular.element('#download-banner');
+			home = angular.element('.home');
+			shelf = angular.element('#shelf');
+
+			setScroll(wrap);
+			nav.addClass('banner-offset');
+		}
+
+		routeListener = $rootScope.$on('$routeChangeSuccess', function() {
+			wrap.off('scroll');
+			_.defer(function() {
+				activate();
+			});
+		});
+
+		function setScroll(el) {
+			el.on('scroll', throttledScroll);
+		}
+
+		var throttledScroll = _.throttle(function() {
+			var st = this.scrollTop;
+			if (st > 0) {
+				nav.removeClass('banner-offset');
+				banner.removeClass('banner-offset');
+				home.addClass('banner-adjust-up');
+				shelf.addClass('banner-adjust-up');
+			} else {
+				nav.addClass('banner-offset');
+				banner.addClass('banner-offset');
+				home.removeClass('banner-adjust-up');
+				shelf.removeClass('banner-adjust-up');
+			}
+		}, 100);
 
 		function closeBanner() {
 			$rootScope.showBanner = false;
+			cleanup();
+		}
+
+		function cleanup() {
+			nav.removeClass('banner-offset');
+			home.addClass('banner-adjust-up');
+			wrap.off('scroll', throttledScroll);
+			routeListener();
 		}
 
 		// this does not work yet. possible option: https://github.com/philbot5000/CanOpen

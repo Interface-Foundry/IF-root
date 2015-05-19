@@ -3325,6 +3325,8 @@ span.subnav-back-chevron {
   overflow: hidden;
   padding-top: 48px;
   pointer-events: none;
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) -webkit-transform;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) transform;
 }
 .home > .wrap {
   pointer-events: auto;
@@ -5276,7 +5278,10 @@ div.marker-popup-click {
   border-bottom: 1px solid grey;
   height: 80px;
   position: relative;
+  top: -80px;
   z-index: 20;
+  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) -webkit-transform;
+  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) transform;
 }
 #download-banner .x-button {
   height: 20px;
@@ -5309,6 +5314,14 @@ div.marker-popup-click {
   font-weight: 400;
   margin-right: 10px;
   margin-top: 29px;
+}
+.banner-offset {
+  transform: translate3d(0, 80px, 0);
+  -webkit-transform: translate3d(0, 80px, 0);
+}
+.banner-adjust-up {
+  transform: translate3d(0, -80px, 0);
+  -webkit-transform: translate3d(0, -80px, 0);
 }
 .userLocation {
   background: #ffffff url('img/icons/ic_my_location_grey600_24dp.png') center center / 22px 22px no-repeat;

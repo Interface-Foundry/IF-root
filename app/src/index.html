@@ -111,7 +111,7 @@
 		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
 		<div ng-if="show.splash === false">
-			
+			<download-banner ng-if="showBanner"></download-banner>
 			<nav role="navigation" class="main-nav" 
 				ng-style="{'background-color': style.navBG_color}">
 
