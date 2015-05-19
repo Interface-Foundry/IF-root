@@ -1,14 +1,7 @@
 angular.module('tidepoolsServices')
 
-	.factory('geoService', ['$location', '$q', '$rootScope', '$routeParams', '$timeout', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService', 'deviceManager',
-		function($location, $q, $rootScope, $routeParams, $timeout, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService, deviceManager) {
-
-			var cacheTime = 3.25 * 60 * 1000; // 3.25m
-			var geoTimeout = 7 * 1000; // 7s time before resorting to old location, or IP
-			// @IFDEF PHONEGAP
-			var cacheTime = 30 * 1000; // 30s
-			var geoTimeout = 30 * 1000; // 30s
-			// @ENDIF
+	.factory('geoService', ['$location', '$http', '$q', '$rootScope', '$routeParams', '$timeout', 'alertManager', 'mapManager', 'bubbleTypeService', 'apertureService', 'locationAnalyticsService', 'deviceManager',
+		function($location, $http, $q, $rootScope, $routeParams, $timeout, alertManager, mapManager, bubbleTypeService, apertureService, locationAnalyticsService, deviceManager) {
 
 			var geoService = {
 				location: {
@@ -21,8 +14,6 @@ angular.module('tidepoolsServices')
 					 */ 
 				},
 				inProgress: false,
-				cacheTime: cacheTime,
-				geoTimeout: geoTimeout,
 				tracking: false // bool indicating whether or not geolocation is being tracked
 			};
 
@@ -65,48 +56,101 @@ angular.module('tidepoolsServices')
 				geoService.location.timestamp = locationData.timestamp;
 			};
 			 
-			geoService.getLocation = function(maxAge, timeout) {
-
+			geoService.getLocation = function(maximumAge, timeout) {
+				// note: maximumAge and timeout are optional. you should not be passing these arguments in most of the time; consider changing (carefully selected) defaults instead
+				// @IFDEF WEB
+				var maximumAge = maximumAge || 3.25 * 60 * 1000; // 3.25m
+				var timeout = timeout || 7 * 1000; // 7s time before resorting to old location, or IP
+				// @ ENDIF
+				// @IFDEF PHONEGAP
+				var maximumAge = maximumAge || 30 * 1000; // 30s
+				var timeout = timeout || 7 * 1000; // 30s
+				// @ENDIF
+				
 				var deferred = $q.defer();
 
 				if (!geoService.inProgress) {
 					if (navigator.geolocation) {
-						geoService.inProgress = true;
 						console.log('geo: using navigator');
 
+						geoService.inProgress = true;
+
 						function geolocationSuccess(position) {
-							geoService.location.lat = position.coords.latitude;
-							geoService.location.lng = position.coords.longitude;
-							geoService.location.timestamp = Date.now();
-
-							deferred.resolve({
-								lat: position.coords.latitude,
-								lng: position.coords.longitude
-							});
-
-							geoService.inProgress = false;
-
-							locationAnalyticsService.log({
-								type: 'GPS',
-								loc: {
-									type: 'Point',
-									coordinates: [position.coords.latitude, position.coords.longitude]
-								}
+							console.log('geo success. onto retrieving city name :)');
+							// get cityName now
+							getLocationFromIP(true, position.coords.latitude, position.coords.longitude).then(function(locInfo) {
+								console.log('got city name :)');
+								var newLocInfo = {
+									lat: position.coords.latitude,
+									lng: position.coords.longitude,
+									cityName: locInfo.cityName,
+									src: locInfo.src,
+									timestamp: Date.now()
+								};
+								deferred.resolve(newLocInfo);
+								geoService.updateLocation(newLocInfo);
+								locationAnalyticsService.log({
+									type: 'GPS',
+									loc: {
+										type: 'Point',
+										coordinates: [position.coords.latitude, position.coords.longitude]
+									}
+								});
+							}, function(err) {
+								console.log('did not get city name :( (but initial geolocation query was successful)');
+								deferred.reject(err);
+							}).finally(function() {
+								console.log('finally done getting location. I promise (for now)');
+								geoService.inProgress = false;
 							});
 						}
 
-						function geolocationError(error) {
-							deferred.reject(error.code);
-							geoService.inProgress = false;
+						function geolocationError(err) {
+							console.log('geo not successful :(, possibly becasue ', err, '. going to try and get geo from IP now');
+							
+							// get both cityName AND lat,lng from IP
+							getLocationFromIP(false).then(function(locInfo) {
+								console.log('got city name :)');
+								var newLocInfo = {
+									lat: locInfo.lat,
+									lng: locInfo.lng,
+									cityName: locInfo.cityName,
+									src: locInfo.src,
+									timestamp: Date.now()
+								};
+								deferred.resolve(newLocInfo);
+								geoService.updateLocation(newLocInfo);
+								// TODO should this be type: GPS?
+								locationAnalyticsService.log({
+									type: 'GPS',
+									loc: {
+										type: 'Point',
+										coordinates: [newLocInfo.latitude, newLocInfo.longitude]
+									}
+								});
+							}, function(err) {
+								console.log('did not get city name :( (and initial geolocation query was also unsuccessful)');
+								deferred.reject(err);
+							}).finally(function() {
+								console.log('finally done getting location. I promise (for now)');
+								geoService.inProgress = false;
+							});
 						}
 
+						// note that we are implementing the timeout feature internally. this is becasue the geolocation API doesn't take the time that is spent obtaining the user's permission into account (only the time actually spent obtaining location), and we do.
 						var options = {
-							maximumAge: maxAge || 0,
-							timeout: timeout || Infinity
+							maximumAge: maximumAge
 						};
 						
 						navigator.geolocation.getCurrentPosition(geolocationSuccess, 
 							geolocationError, options);
+
+						$timeout(function() {
+							// force get location from IP after timeout if we still don't have a location. could be that user accepted prompt and geo is taking too long. or could be that user didn't accept or reject prompt (but if user rejected prompt, it'd auto geolocationError()).
+							if (geoService.inProgress) {
+								geolocationError('manual timeout');
+							}
+						}, timeout);
 
 
 					} else {
@@ -118,6 +162,31 @@ angular.module('tidepoolsServices')
 					deferred.reject('Already trying to get location');
 				} 
 
+				return deferred.promise;
+			}
+
+			function getLocationFromIP(hasLoc, lat, lng) {
+				// this function name is a misnomer, because sometimes it will be used to get only the city name, which uses the same api as getting location from IP
+				console.log('in geoService.getLocationFromIP()');
+				var deferred = $q.defer();
+				var data = {
+					server: true,
+					params: {
+						hasLoc: hasLoc
+					}
+				};
+				if (lat && lng) { // optional params (if hasLoc:true)
+					data.params.lat = lat;
+					data.params.lng = lng;
+				}
+				$http.get('/api/geolocation', data)
+					.success(function(locInfo) {
+						// locInfo should have src, lat, lng, cityName
+						deferred.resolve(locInfo);
+					})
+					.error(function(err) {
+						deferred.reject(err);
+					});
 				return deferred.promise;
 			}
 
@@ -148,7 +217,6 @@ angular.module('tidepoolsServices')
 							iconUrl: iconUrl,
 							iconSize: iconSize, 
 							iconAnchor: iconAnchor
-
 						},
 						alt: 'track' // used for tracking marker DOM element
 					});
