@@ -6,7 +6,7 @@
 	<div class="media">
 		<img class="media-object" if-src="{{::world.avatar}}">
 		<div class="media-body">
-			<h4 class="media-heading">{{::world.name}}</h4>
+			<!-- <h4 class="media-heading">{{::world.name}}</h4> -->
 			<p ng-if="::world.time.start">Starts at {{::world.time.start | date: 'short'}}</p>
 			<p ng-if="::world.time.end">Ends at {{::world.time.end | date: 'short'}}</p>
 		</div>
