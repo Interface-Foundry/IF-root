@@ -17562,14 +17562,6 @@ angular.module('tidepoolsServices')
 					}
 				}, 5 * 1000);
 			});
-
-			geoService.updateLocation = function(locationData) {
-				geoService.location.lat = locationData.lat;
-				geoService.location.lng = locationData.lng;
-				geoService.location.cityName = locationData.cityName;
-				geoService.location.src = locationData.src;
-				geoService.location.timestamp = locationData.timestamp;
-			};
 			 
 			geoService.getLocation = function(maximumAge, timeout) {
 				// note: maximumAge and timeout are optional. you should not be passing these arguments in most of the time; consider changing (carefully selected) defaults instead
@@ -17590,30 +17582,16 @@ angular.module('tidepoolsServices')
 
 						function geolocationSuccess(position) {
 							console.log('geo success. onto retrieving city name :)');
+							
 							// get cityName now
 							getLocationFromIP(true, position.coords.latitude, position.coords.longitude).then(function(locInfo) {
 								console.log('got city name :)');
-								var newLocInfo = {
-									lat: position.coords.latitude,
-									lng: position.coords.longitude,
-									cityName: locInfo.cityName,
-									src: locInfo.src,
-									timestamp: Date.now()
-								};
-								deferred.resolve(newLocInfo);
-								geoService.updateLocation(newLocInfo);
-								locationAnalyticsService.log({
-									type: 'GPS',
-									loc: {
-										type: 'Point',
-										coordinates: [position.coords.latitude, position.coords.longitude]
-									}
-								});
+								deferred.resolve(locInfo);
 							}, function(err) {
 								console.log('did not get city name :( (but initial geolocation query was successful)');
 								deferred.reject(err);
 							}).finally(function() {
-								console.log('finally done getting location. I promise (for now)');
+								console.log('finally leaving getLocation(). I promise (for now)');
 								geoService.inProgress = false;
 							});
 						}
@@ -17624,28 +17602,12 @@ angular.module('tidepoolsServices')
 							// get both cityName AND lat,lng from IP
 							getLocationFromIP(false).then(function(locInfo) {
 								console.log('got city name and IP location :)');
-								var newLocInfo = {
-									lat: locInfo.lat,
-									lng: locInfo.lng,
-									cityName: locInfo.cityName,
-									src: locInfo.src,
-									timestamp: Date.now()
-								};
-								deferred.resolve(newLocInfo);
-								geoService.updateLocation(newLocInfo);
-								// TODO should this be type: GPS?
-								locationAnalyticsService.log({
-									type: 'GPS',
-									loc: {
-										type: 'Point',
-										coordinates: [newLocInfo.latitude, newLocInfo.longitude]
-									}
-								});
+								deferred.resolve(locInfo);
 							}, function(err) {
 								console.log('did not get city name :( (and initial geolocation query was also unsuccessful)');
 								deferred.reject(err);
 							}).finally(function() {
-								console.log('finally done getting location. I promise (for now)');
+								console.log('finally leaving getLocation(). I promise (for now)');
 								geoService.inProgress = false;
 							});
 						}
@@ -17667,9 +17629,7 @@ angular.module('tidepoolsServices')
 
 
 					} else {
-						//browser update message
-						alerts.addAlert('warning', 'Your browser does not support location services.');
-						deferred.reject('Your browser does not support location services.');
+						geoLocationError('browser does not support location services');
 					}
 				} else {
 					// return last known location
@@ -17690,14 +17650,29 @@ angular.module('tidepoolsServices')
 						hasLoc: hasLoc
 					}
 				};
-				if (lat && lng) { // optional params (if hasLoc:true)
+				if (lat && lng) { // optional params (if hasLoc: true)
 					data.params.lat = lat;
 					data.params.lng = lng;
 				}
 				$http.get('/api/geolocation', data)
 					.success(function(locInfo) {
 						// locInfo should have src, lat, lng, cityName
-						deferred.resolve(locInfo);
+						var newLocInfo = {
+							lat: lat || locInfo.lat,
+							lng: lng || locInfo.lng,
+							cityName: locInfo.cityName,
+							src: locInfo.src,
+							timestamp: Date.now()
+						};
+						geoService.location = newLocInfo;
+						locationAnalyticsService.log({
+							type: 'GPS',
+							loc: {
+								type: 'Point',
+								coordinates: [newLocInfo.lat, newLocInfo.lng]
+							}
+						});
+						deferred.resolve(newLocInfo);
 					})
 					.error(function(err) {
 						deferred.reject(err);
