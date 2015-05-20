@@ -20,6 +20,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		var nav = angular.element('.main-nav');
 		var wrap;
 		var banner;
+		var routeLoadingIndicators;
 		var viewContainer;
 		var apertureWatch
 		var routeListener;
@@ -50,6 +51,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		function activate() {
 			wrap = angular.element('.wrap');
 			banner = angular.element('#download-banner');
+			routeLoadingIndicators = angular.element('.routeLoading');
 			viewContainer = angular.element('#view-container');
 			setScroll(wrap);
 		}
@@ -88,7 +90,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 
 		function cleanup() {
 			nav.removeClass('nav-animations');
-			nav.removeClass('banner-offset');
+			hideBanner();
 			if (wrap) {
 				wrap.off('scroll', throttledScroll);
 				routeListener();
@@ -102,7 +104,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 			viewContainer.css('margin-top', '-80px');
 			nav.removeClass('banner-offset');
 			banner.removeClass('banner-offset');
-			banner.removeClass('banner-adjust-up');
+			routeLoadingIndicators.removeClass('banner-offset');
 		}
 
 		function isBannerAppropriate() {
@@ -118,6 +120,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 			viewContainer.css('margin-top', '0px');
 			nav.addClass('banner-offset');
 			banner.addClass('banner-offset');
+			routeLoadingIndicators.addClass('banner-offset');
 		}
 
 

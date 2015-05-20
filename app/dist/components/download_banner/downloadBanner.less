@@ -6,8 +6,8 @@
   top: -80px;
   z-index: 20;
 
-  -webkit-transition: 0.35s linear -webkit-transform;
-  transition: 0.35s linear transform;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) -webkit-transform;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) transform;
 
   .x-button {
   	height: 20px;
@@ -65,21 +65,16 @@
   -webkit-transform: translate3d(0, 80px, 0); 
 }
 
-.banner-adjust-up {
-  transform: translate3d(0, -80px, 0);
-  -webkit-transform: translate3d(0, -80px, 0); 
-}
-
 #view-container {
   height: 100vh;
   margin-top: 0px;
   overflow: hidden;
 
-  -webkit-transition: 0.35s linear -webkit-transform;
-  transition: 0.35s linear transform;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) -webkit-transform;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) transform;
 }
 
 .nav-animations {
-  -webkit-transition: 0.35s linear -webkit-transform;
-  transition: 0.35s linear transform;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) -webkit-transform;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) transform;
 }
