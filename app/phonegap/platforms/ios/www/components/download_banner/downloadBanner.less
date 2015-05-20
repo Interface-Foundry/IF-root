@@ -6,25 +6,26 @@
   top: -80px;
   z-index: 20;
 
-  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) -webkit-transform;
-  transition: 0.35s cubic-bezier(.5,.1,0,1) transform;
+  -webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
 
   .x-button {
   	height: 20px;
 	  float: left;
 	  margin-top: 30px;
-	  margin-right: 5px;
-	  margin-left: 5px;
+	  margin-right: 10px;
+	  margin-left: 10px;
   }
 }
 
 .banner-inline-block {
   display: inline-block;
+  height: 100%;
   position: relative;
   text-align: left;
   vertical-align: top;
 
-  img {
+  .kip-icon {
 	  background-color: white;
 	  border: 1px solid rgb(209, 208, 199);
 	  border-radius: 10px;
@@ -33,8 +34,10 @@
   }
 
   &.kip-description {
-  	margin-left: 10px;
-  	margin-top: 10px;
+    font-weight: 500;
+  	padding-left: 10px;
+  	padding-top: 10px;
+    width: 45vw;
   }
 
   &.action {
@@ -42,8 +45,8 @@
 		float: right;
 	  font-size: 16px;
 	  font-weight: 400;
-	  margin-right: 10px;
-	  margin-top: 29px;
+	  padding-right: 10px;
+	  padding-top: 29px;
   }
 }
 
@@ -55,4 +58,13 @@
 .banner-adjust-up {
   transform: translate3d(0, -80px, 0);
   -webkit-transform: translate3d(0, -80px, 0); 
+}
+
+#view-container {
+  height: 100vh;
+  margin-top: 0px;
+  overflow: hidden;
+
+  -webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
 }

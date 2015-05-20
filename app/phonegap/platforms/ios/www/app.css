@@ -2299,8 +2299,8 @@ body {
   z-index: 100;
   pointer-events: none;
   touch-action: none; 
-  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
-  transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) opacity, 0.35s cubic-bezier(.5,.1,0,1) height;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) opacity, 0.35s cubic-bezier(.5,.1,0,1) height;
   -webkit-backface-visibility: hidden;
 
 }
@@ -2912,8 +2912,6 @@ nav.main-nav {
   margin: 0;
   padding: 0;
   background-color: rgba(62, 82, 181, 0.96);
-  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
-  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) all;
   z-index: 1000;
 }
 .nav-title {
@@ -3325,6 +3323,8 @@ span.subnav-back-chevron {
   overflow: hidden;
   padding-top: 48px;
   pointer-events: none;
+  -webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
 }
 .home > .wrap {
   pointer-events: auto;
@@ -5278,23 +5278,24 @@ div.marker-popup-click {
   position: relative;
   top: -80px;
   z-index: 20;
-  -webkit-transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) -webkit-transform;
-  transition: 0.35s cubic-bezier(0.5, 0.1, 0, 1) transform;
+  -webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
 }
 #download-banner .x-button {
   height: 20px;
   float: left;
   margin-top: 30px;
-  margin-right: 5px;
-  margin-left: 5px;
+  margin-right: 10px;
+  margin-left: 10px;
 }
 .banner-inline-block {
   display: inline-block;
+  height: 100%;
   position: relative;
   text-align: left;
   vertical-align: top;
 }
-.banner-inline-block img {
+.banner-inline-block .kip-icon {
   background-color: white;
   border: 1px solid #d1d0c7;
   border-radius: 10px;
@@ -5302,16 +5303,18 @@ div.marker-popup-click {
   margin-top: 10px;
 }
 .banner-inline-block.kip-description {
-  margin-left: 10px;
-  margin-top: 10px;
+  font-weight: 500;
+  padding-left: 10px;
+  padding-top: 10px;
+  width: 45vw;
 }
 .banner-inline-block.action {
   color: blue;
   float: right;
   font-size: 16px;
   font-weight: 400;
-  margin-right: 10px;
-  margin-top: 29px;
+  padding-right: 10px;
+  padding-top: 29px;
 }
 .banner-offset {
   transform: translate3d(0, 80px, 0);
@@ -5320,6 +5323,13 @@ div.marker-popup-click {
 .banner-adjust-up {
   transform: translate3d(0, -80px, 0);
   -webkit-transform: translate3d(0, -80px, 0);
+}
+#view-container {
+  height: 100vh;
+  margin-top: 0px;
+  overflow: hidden;
+  -webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
 }
 .userLocation {
   background: #ffffff url('img/icons/ic_my_location_grey600_24dp.png') center center / 22px 22px no-repeat;

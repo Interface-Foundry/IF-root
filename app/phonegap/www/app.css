@@ -5306,15 +5306,24 @@ div.marker-popup-click {
   font-weight: 500;
   padding-left: 10px;
   padding-top: 10px;
-  width: 45vw;
+  width: 40vw;
 }
 .banner-inline-block.action {
   color: blue;
   float: right;
   font-size: 16px;
-  font-weight: 400;
   padding-right: 10px;
-  padding-top: 29px;
+  padding-top: 25px;
+}
+.banner-inline-block.action button {
+  background-color: #f43a1c;
+  border: 2px solid white;
+  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.4) inset, 1px 1px 1px 0px rgba(0, 0, 0, 0.4);
+  color: white;
+  font-weight: 500;
+  height: 30px;
+  padding: 0 10px;
+  width: 100%;
 }
 .banner-offset {
   transform: translate3d(0, 80px, 0);
@@ -5328,6 +5337,10 @@ div.marker-popup-click {
   height: 100vh;
   margin-top: 0px;
   overflow: hidden;
+  -webkit-transition: 0.35s linear -webkit-transform;
+  transition: 0.35s linear transform;
+}
+.nav-animations {
   -webkit-transition: 0.35s linear -webkit-transform;
   transition: 0.35s linear transform;
 }

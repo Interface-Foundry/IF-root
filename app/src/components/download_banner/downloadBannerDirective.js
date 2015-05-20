@@ -65,8 +65,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		});
 
 		function setNavbarAnimation() {
-			nav.css('webkitTransition', '0.35s linear all');
-			nav.css('transition', '0.35s linear all');
+			nav.addClass('nav-animations');
 		}
 
 		function setScroll(el) {
@@ -88,6 +87,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		}
 
 		function cleanup() {
+			nav.removeClass('nav-animations');
 			nav.removeClass('banner-offset');
 			if (wrap) {
 				wrap.off('scroll', throttledScroll);

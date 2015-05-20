@@ -92,7 +92,9 @@
 		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
 		<div ng-if="show.splash === false">
-			<download-banner></download-banner>
+			<download-banner aperture="aperture" ng-if="showBanner"></download-banner>
+				<div id="view-container">
+
 			<nav role="navigation" class="main-nav" 
 				ng-style="{'background-color': style.navBG_color}">
 
@@ -132,6 +134,8 @@
 			</div>
 
 			<drawer ng-if="userManager.loginStatus"></drawer>
+				</div>
+
 
 		</div>
 	</div>
