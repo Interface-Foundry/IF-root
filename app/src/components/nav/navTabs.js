@@ -1,4 +1,4 @@
-app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', function($routeParams, $location, $http, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter) {
+app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$document',  'apertureService', 'navService', 'bubbleTypeService', 'geoService', 'encodeDotFilterFilter', 'alertManager', function($routeParams, $location, $http, worldTree, $document, apertureService, navService, bubbleTypeService, geoService, encodeDotFilterFilter, alertManager) {
 	
 	return {
 		restrict: 'EA',
@@ -28,37 +28,12 @@ app.directive('navTabs', ['$routeParams', '$location', '$http', 'worldTree', '$d
 				$location.path() !== '/w/' + $routeParams.worldURL + '/search') {
 				$location.path('/w/' + $routeParams.worldURL + '/search');
 			} else {
-				// get location. use IP if we don't have it stored
-				if (geoService.location.cityName && geoService.location.lat) {
-					var locationData = {
-						lat: geoService.location.lat,
-						lng: geoService.location.lng,
-						cityName: geoService.location.cityName
-					};
+				geoService.getLocation().then(function(locationData) {
 					$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
-				} else { // use IP
-					var data = {
-						server: true,
-						params: {
-							hasLoc: false
-						}
-					};
-					$http.get('/api/geolocation', data).
-						success(function(locInfo) {
-							var locationData = {
-								lat: locInfo.lat,
-								lng: locInfo.lng,
-								cityName: locInfo.cityName,
-								src: locInfo.src,
-								timestamp: Date.now()
-							};
-							geoService.updateLocation(locationData);
-							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode'));
-						}).
-						error(function(err) {
-							console.log('err: ', err);
-						});
-				}
+				}, function(err) {
+					alertManager.addAlert('info', 'Sorry, there was a problem getting your location', true);
+					navService.reset();
+				});
 			}
 
 			navService.show('search');

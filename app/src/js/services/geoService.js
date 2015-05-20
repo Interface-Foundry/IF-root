@@ -110,7 +110,7 @@ angular.module('tidepoolsServices')
 							
 							// get both cityName AND lat,lng from IP
 							getLocationFromIP(false).then(function(locInfo) {
-								console.log('got city name :)');
+								console.log('got city name and IP location :)');
 								var newLocInfo = {
 									lat: locInfo.lat,
 									lng: locInfo.lng,
@@ -159,7 +159,9 @@ angular.module('tidepoolsServices')
 						deferred.reject('Your browser does not support location services.');
 					}
 				} else {
-					deferred.reject('Already trying to get location');
+					// return last known location
+					console.log('Already trying to get location. resolving with last known location');
+					deferred.resolve(geoService.location);
 				} 
 
 				return deferred.promise;

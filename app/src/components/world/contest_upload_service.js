@@ -32,21 +32,7 @@ function contestUploadService($upload, $q, $http, geoService, worldTree, alertMa
 			data.userLon = coords.lng;
 			return deferred.resolve(uploadPicture(file, world, data));
 		}, function(err) {
-			var newData = {
-				server: true,
-				params: {
-					hasLoc: false
-				}
-			}
-			$http.get('/api/geolocation', newData)
-				.success(function(locInfo) {
-					data.userLat = locInfo.lat;
-					data.userLon = locInfo.lng;
-					return deferred.resolve(uploadPicture(file, world, data));
-				})
-				.error(function() {
-					return deferred.resolve(uploadPicture(file, world, data));
-				})
+			return deferred.reject(err);
 		});
 
 		return deferred.promise;
