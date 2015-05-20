@@ -1,10 +1,12 @@
+// @IFDEF WEB
+
 'use strict';
 
 app.directive('downloadBanner', downloadBanner);
 
-downloadBanner.$inject = ['$window', '$rootScope', 'apertureService'];
+downloadBanner.$inject = ['$window', '$rootScope', 'apertureService', 'deviceManager'];
 
-function downloadBanner($window, $rootScope, apertureService) {
+function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 	return {
 		restrict: 'E',
 		templateUrl: 'components/download_banner/downloadBanner.html',
@@ -21,12 +23,21 @@ function downloadBanner($window, $rootScope, apertureService) {
 		var viewContainer;
 		var apertureWatch
 		var routeListener;
-		
-		nav.addClass('banner-offset');
 
 		scope.aperture = apertureService;
 		scope.closeBanner = closeBanner;
+		scope.device = deviceManager.os;
 		scope.openApp = openApp;
+
+		if (!isBannerAppropriate()) {
+			closeBanner();
+			return;
+		}
+		nav.addClass('banner-offset');
+		// navbar animation is deferred so the inital starting point does not animate
+		_.defer(function() {
+			setNavbarAnimation();
+		});
 
 		apertureWatch = scope.$watch('aperture.state', function(newVal, oldVal) {
 			if (newVal === 'aperture-full') {
@@ -53,6 +64,11 @@ function downloadBanner($window, $rootScope, apertureService) {
 			});
 		});
 
+		function setNavbarAnimation() {
+			nav.css('webkitTransition', '0.35s linear all');
+			nav.css('transition', '0.35s linear all');
+		}
+
 		function setScroll(el) {
 			el.on('scroll', throttledScroll);
 		}
@@ -73,9 +89,11 @@ function downloadBanner($window, $rootScope, apertureService) {
 
 		function cleanup() {
 			nav.removeClass('banner-offset');
-			wrap.off('scroll', throttledScroll);
-			routeListener();
-			apertureWatch();
+			if (wrap) {
+				wrap.off('scroll', throttledScroll);
+				routeListener();
+				apertureWatch();
+			}
 		}
 
 
@@ -85,6 +103,13 @@ function downloadBanner($window, $rootScope, apertureService) {
 			nav.removeClass('banner-offset');
 			banner.removeClass('banner-offset');
 			banner.removeClass('banner-adjust-up');
+		}
+
+		function isBannerAppropriate() {
+			if (scope.device === 'ios' || scope.device === 'android') {
+				return true;
+			}
+			return false;
 		}
 
 		function showBanner() {
@@ -100,8 +125,13 @@ function downloadBanner($window, $rootScope, apertureService) {
 		// https://github.com/philbot5000/CanOpen
 		// if yes, open app. if no, open link to app store
 		function openApp() {
-			$window.open('http://goo.gl/Lw6S3V');
+			if (scope.device === 'ios') {
+				$window.open('http://goo.gl/Lw6S3V');
+			} else if (scope.device === 'android') {
+				$window.open('http://play.google.com/store/apps/details?id=com.ifpbc.kip');
+			}
 		}
 
 	}
 }
+// @ENDIF

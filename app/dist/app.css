@@ -2904,8 +2904,6 @@ nav.main-nav {
   margin: 0;
   padding: 0;
   background-color: rgba(62, 82, 181, 0.96);
-  -webkit-transition: 0.35s linear all;
-  transition: 0.35s linear all;
   z-index: 1000;
 }
 .nav-title {
@@ -5297,6 +5295,7 @@ div.marker-popup-click {
   margin-top: 10px;
 }
 .banner-inline-block.kip-description {
+  font-weight: 500;
   padding-left: 10px;
   padding-top: 10px;
   width: 45vw;
