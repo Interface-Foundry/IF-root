@@ -5284,11 +5284,12 @@ div.marker-popup-click {
 }
 .banner-inline-block {
   display: inline-block;
+  height: 100%;
   position: relative;
   text-align: left;
   vertical-align: top;
 }
-.banner-inline-block img {
+.banner-inline-block .kip-icon {
   background-color: white;
   border: 1px solid #d1d0c7;
   border-radius: 10px;
@@ -5296,8 +5297,8 @@ div.marker-popup-click {
   margin-top: 10px;
 }
 .banner-inline-block.kip-description {
-  margin-left: 10px;
-  margin-top: 10px;
+  padding-left: 10px;
+  padding-top: 10px;
   width: 45vw;
 }
 .banner-inline-block.action {
@@ -5305,8 +5306,8 @@ div.marker-popup-click {
   float: right;
   font-size: 16px;
   font-weight: 400;
-  margin-right: 10px;
-  margin-top: 29px;
+  padding-right: 10px;
+  padding-top: 29px;
 }
 .banner-offset {
   transform: translate3d(0, 80px, 0);
