@@ -53,76 +53,75 @@ angular.module('tidepoolsServices')
 				// @IFDEF WEB
 				var maximumAge = maximumAge || 3.25 * 60 * 1000; // 3.25m
 				var timeout = timeout || 7 * 1000; // 7s time before resorting to old location, or IP
-				// @ ENDIF
+				// @ENDIF
 				// @IFDEF PHONEGAP
 				var maximumAge = maximumAge || 30 * 1000; // 30s
-				var timeout = timeout || 7 * 1000; // 30s
+				var timeout = timeout || 7 * 1000; // 7s
 				// @ENDIF
 				
 				var deferred = $q.defer();
 
-				if (!geoService.inProgress) {
-					if (navigator.geolocation) {
-						console.log('geo: using navigator');
+				if (navigator.geolocation) {
+					console.log('geo: using navigator');
 
-						geoService.inProgress = true;
+					geoService.inProgress = true;
 
-						function geolocationSuccess(position) {
-							console.log('geo success. onto retrieving city name :)');
-							
-							// get cityName now
-							getLocationFromIP(true, position.coords.latitude, position.coords.longitude).then(function(locInfo) {
-								console.log('got city name :)');
-								deferred.resolve(locInfo);
-							}, function(err) {
-								console.log('did not get city name :( (but initial geolocation query was successful)');
-								deferred.reject(err);
-							}).finally(function() {
-								console.log('finally leaving getLocation(). I promise (for now)');
-								geoService.inProgress = false;
-							});
-						}
-
-						function geolocationError(err) {
-							console.log('geo not successful :(, possibly becasue ', err, '. going to try and get geo from IP now');
-							
-							// get both cityName AND lat,lng from IP
-							getLocationFromIP(false).then(function(locInfo) {
-								console.log('got city name and IP location :)');
-								deferred.resolve(locInfo);
-							}, function(err) {
-								console.log('did not get city name :( (and initial geolocation query was also unsuccessful)');
-								deferred.reject(err);
-							}).finally(function() {
-								console.log('finally leaving getLocation(). I promise (for now)');
-								geoService.inProgress = false;
-							});
-						}
-
-						// note that we are implementing the timeout feature internally. this is becasue the geolocation API doesn't take the time that is spent obtaining the user's permission into account (only the time actually spent obtaining location), and we do.
-						var options = {
-							maximumAge: maximumAge
-						};
+					function geolocationSuccess(position) {
+						console.log('geo success. onto retrieving city name :)');
 						
-						navigator.geolocation.getCurrentPosition(geolocationSuccess, 
-							geolocationError, options);
-
-						$timeout(function() {
-							// force get location from IP after timeout if we still don't have a location. could be that user accepted prompt and geo is taking too long. or could be that user didn't accept or reject prompt (but if user rejected prompt, it'd auto geolocationError()).
-							if (geoService.inProgress) {
-								geolocationError('manual timeout');
-							}
-						}, timeout);
-
-
-					} else {
-						geoLocationError('browser does not support location services');
+						// get cityName now
+						getLocationFromIP(true, position.coords.latitude, position.coords.longitude).then(function(locInfo) {
+							console.log('got city name :)');
+							deferred.resolve(locInfo);
+						}, function(err) {
+							console.log('did not get city name :( (but initial geolocation query was successful)');
+							deferred.reject(err);
+						}).finally(function() {
+							console.log('finally leaving getLocation(). I promise (for now)');
+							geoService.inProgress = false;
+						});
 					}
+
+					function geolocationError(err) {
+						console.log('geo not successful :(, possibly becasue ', err, '. going to try and get geo from IP now');
+						
+						// get both cityName AND lat,lng from IP
+						getLocationFromIP(false).then(function(locInfo) {
+							console.log('got city name and IP location :)');
+							deferred.resolve(locInfo);
+						}, function(err) {
+							console.log('did not get city name :( (and initial geolocation query was also unsuccessful)');
+							deferred.reject(err);
+						}).finally(function() {
+							console.log('finally leaving getLocation(). I promise (for now)');
+							geoService.inProgress = false;
+						});
+					}
+					
+					// cache
+					// note that we are implementing the caching feature internally (instead of using options in geolocation API) because we want to cache in geolocationSuccess AND in geolocationError (where we use IP instead). API would only let us cache in success
+					if (geoService.location.lat && (geoService.location.timestamp + maximumAge) > Date.now().getTime()) {
+						console.log('using location cache');
+						deferred.resolve(geoService.location);
+						geoService.inProgress = false;
+					} else {
+						console.log('NOT using location cache');
+						navigator.geolocation.getCurrentPosition(geolocationSuccess, 
+						geolocationError);
+					}
+					
+					// timeout
+					// note that we are implementing the timeout feature internally (instead of using options in geolocation API). this is becasue the geolocation API doesn't take the time that is spent obtaining the user's permission into account (only the time actually spent obtaining location), and we do.
+					// force get location from IP after timeout if we still don't have a location. could be that user accepted prompt and geo is taking too long. or could be that user didn't accept or reject prompt (but if user rejected prompt, it'd auto geolocationError()).
+					$timeout(function() {
+						if (geoService.inProgress) {
+							geolocationError('manual timeout');
+						}
+					}, timeout);
+
 				} else {
-					// return last known location
-					console.log('Already trying to get location. resolving with last known location');
-					deferred.resolve(geoService.location);
-				} 
+					geoLocationError('browser does not support location services');
+				}
 
 				return deferred.promise;
 			}
@@ -149,7 +148,7 @@ angular.module('tidepoolsServices')
 							lng: lng || locInfo.lng,
 							cityName: locInfo.cityName,
 							src: locInfo.src,
-							timestamp: Date.now()
+							timestamp: Date.now().getTime()
 						};
 						geoService.location = newLocInfo;
 						locationAnalyticsService.log({
