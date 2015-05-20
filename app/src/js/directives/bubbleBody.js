@@ -15,7 +15,7 @@ app.directive('bubbleBody', function(apertureService) {
 			}, 100);
 			
 			element.on('scroll', handleScroll);
-			
+
 			scope.$on('$destroy', function() {
 				element.off('scroll');
 			});

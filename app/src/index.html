@@ -111,46 +111,50 @@
 		<div ng-if="show.splash === true" ng-include="'components/splash/splash.html'"></div>
 
 		<div ng-if="show.splash === false">
+			<download-banner aperture="aperture" ng-if="showBanner"></download-banner>
+				<div id="view-container">
 
-			<nav role="navigation" class="main-nav" 
-				ng-style="{'background-color': style.navBG_color}">
+					<nav role="navigation" class="main-nav" 
+						ng-style="{'background-color': style.navBG_color}">
 
-				<button class="back-button if-animate" ng-class="{'is-invisible': hideBack}" ng-click="goBack()"></button>
+						<button class="back-button if-animate" ng-class="{'is-invisible': hideBack}" ng-click="goBack()"></button>
 
-				<div class="navLogo-wrapper u-pointer" 
-					ng-class="{'is-selected': navService.status.home}" 
-					ng-click="go('/')">
-					<img src="img/kip/kipLogo_navbar.svg" class="navLogo u-centerXY">
+						<div class="navLogo-wrapper u-pointer" 
+							ng-class="{'is-selected': navService.status.home}" 
+							ng-click="go('/')">
+							<img src="img/kip/kipLogo_navbar.svg" class="navLogo u-centerXY">
+						</div>
+
+						<div class="user-chip" user-chip></div>
+
+						<nav-tabs class="view-tabs"></nav-tabs>
+					</nav>
+
+					<route-loading-indicator></route-loading-indicator>
+					<div ng-if="hide" ng-include="'components/world/aicp.html'"></div>
+					<!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
+
+					<div class="feedbackWindow" ng-show="feedback.on" ng-init="feedback.on=false">
+						<div>sup</div>
+						<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
+						<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
+						<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					</div>
+
+					<section id="aperture" ng-class="[aperture.state]">
+						<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers"></leaflet>
+					</section>
+					
+					<section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>
+					</section>
+					 
+					<div class="dialog-bg" ng-if="dialog.show" ng-click="dialog.close($event)">
+						<div ng-include="dialog.template" class="dialog"></div>
+					</div>
+
+					<drawer ng-if="userManager.loginStatus"></drawer>
 				</div>
 
-				<div class="user-chip" user-chip></div>
-
-				<nav-tabs class="view-tabs"></nav-tabs>
-			</nav>
-
-			<route-loading-indicator></route-loading-indicator>
-			<div ng-if="hide" ng-include="'components/world/aicp.html'"></div>
-			<!-- <span ng-show="nearbyBubbles.length>0" class="compass-badge badge" ng-cloak>{{nearbyBubbles.length}}</span> -->
-
-			<div class="feedbackWindow" ng-show="feedback.on" ng-init="feedback.on=false">
-				<div>sup</div>
-				<textarea class="form-control" rows="3" ng-model="feedbackText"></textarea>
-				<button class="btn btn-default" ng-click="sendFeedback()">Send Feedback</button>
-				<button type="button" class="close" ng-click="feedback.on=!feedback.on"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-			</div>
-
-			<section id="aperture" ng-class="[aperture.state]">
-				<leaflet id="leafletmap" center="map.center" markers="map.markers" paths="map.paths" maxbounds="map.maxbounds" defaults="map.defaults" layers="map.layers"></leaflet>
-			</section>
-				
-			<section id="view" ng-class="[aperture.state]" class="if-animate" ng-view>
-			</section>
-			 
-			<div class="dialog-bg" ng-if="dialog.show" ng-click="dialog.close($event)">
-				<div ng-include="dialog.template" class="dialog"></div>
-			</div>
-
-			<drawer ng-if="userManager.loginStatus"></drawer>
 
 		</div>
 	</div>

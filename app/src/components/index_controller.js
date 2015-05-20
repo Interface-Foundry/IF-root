@@ -18,6 +18,10 @@ $rootScope.if_web = false;
 $rootScope.if_phonegap = true;
 //@ENDIF
 
+if ($rootScope.if_web) {
+	$rootScope.showBanner = true;
+}
+
 angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing

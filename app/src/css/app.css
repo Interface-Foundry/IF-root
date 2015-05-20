@@ -119,8 +119,8 @@ body {
   z-index: 100;
   pointer-events: none;
   touch-action: none; 
-  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
-  transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
+  -webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) opacity, 0.35s cubic-bezier(.5,.1,0,1) height;
+  transition: 0.35s cubic-bezier(.5,.1,0,1) opacity, 0.35s cubic-bezier(.5,.1,0,1) height;
   -webkit-backface-visibility: hidden;
 
 }

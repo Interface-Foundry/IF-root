@@ -1,0 +1,17 @@
+<div id="download-banner" class="banner-offset">
+	<div class="banner-inline-block" ng-click="closeBanner()">
+		<img class="x-button" src="img/icons/ic_clear_grey600_24dp.png" />
+	</div>
+	<div class="banner-inline-block">
+		<img class="kip-icon" src="/img/kip/kip_app_icon.png" />
+	</div>
+	<div class="banner-inline-block kip-description">
+		<p>Kip</p>
+		<p>Interface Foundry PBC</p>
+		<p ng-if="device === 'ios'" >FREE - In the App Store</p>
+		<p ng-if="device === 'android'" >FREE - In Google Play</p>
+	</div>
+	<div class="banner-inline-block action">
+		<button ng-class="{ 'android-button': device === 'android', 'ios-button': device === 'ios'}" ng-click="openApp()">View</button>
+	</div>
+</div>

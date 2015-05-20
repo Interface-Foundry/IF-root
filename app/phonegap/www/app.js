@@ -5502,7 +5502,7 @@ app.directive('bubbleBody', function(apertureService) {
 			}, 100);
 			
 			element.on('scroll', handleScroll);
-			
+
 			scope.$on('$destroy', function() {
 				element.off('scroll');
 			});
@@ -24298,6 +24298,10 @@ $rootScope.if_web = true;
 $rootScope.if_phonegap = false;
 $rootScope.if_web = false;
 $rootScope.if_phonegap = true;
+if ($rootScope.if_web) {
+	$rootScope.showBanner = true;
+}
+
 angular.extend($rootScope, {globalTitle: "Kip"}); 
 
 $rootScope.hideBack = true; //controls back button showing
