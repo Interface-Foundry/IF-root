@@ -6,9 +6,12 @@
 		<img class="kip-icon" src="/img/kip/kip_app_icon.png" />
 	</div>
 	<div class="banner-inline-block kip-description">
-		Download Kip for {{device}}!
+		<p>Kip</p>
+		<p>Interface Foundry PBC</p>
+		<p ng-if="device === 'ios'" >FREE - In the App Store</p>
+		<p ng-if="device === 'android'" >FREE - In Google Play</p>
 	</div>
 	<div class="banner-inline-block action">
-		<button ng-click="openApp()">View</button>
+		<button ng-class="{ 'android-button': device === 'android', 'ios-button': device === 'ios'}" ng-click="openApp()">View</button>
 	</div>
 </div>

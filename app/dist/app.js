@@ -21949,7 +21949,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 
 		function cleanup() {
 			nav.removeClass('nav-animations');
-			hideBanner();
+			nav.removeClass('banner-offset');
 			if (wrap) {
 				wrap.off('scroll', throttledScroll);
 				routeListener();

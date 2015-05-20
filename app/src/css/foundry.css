@@ -2764,8 +2764,7 @@ div.marker-popup-click {
   height: 20px;
   float: left;
   margin-top: 30px;
-  margin-right: 10px;
-  margin-left: 10px;
+  margin-left: 5px;
 }
 .banner-inline-block {
   display: inline-block;
@@ -2778,14 +2777,21 @@ div.marker-popup-click {
   background-color: white;
   border: 1px solid #d1d0c7;
   border-radius: 10px;
-  height: 60px;
-  margin-top: 10px;
+  height: 57px;
+  margin-top: 11.5px;
 }
 .banner-inline-block.kip-description {
-  font-weight: 500;
-  padding-left: 10px;
+  padding-left: 5px;
   padding-top: 10px;
-  width: 40vw;
+  width: 47vw;
+}
+.banner-inline-block.kip-description p {
+  font-size: .9em;
+  margin: 0;
+}
+.banner-inline-block.kip-description p:first-child {
+  font-size: 1em;
+  font-weight: 500;
 }
 .banner-inline-block.action {
   color: blue;
@@ -2794,11 +2800,20 @@ div.marker-popup-click {
   padding-right: 10px;
   padding-top: 25px;
 }
-.banner-inline-block.action button {
+.android-button {
   background-color: #f43a1c;
   border: 2px solid white;
   box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.4) inset, 1px 1px 1px 0px rgba(0, 0, 0, 0.4);
   color: white;
+  font-weight: 500;
+  height: 30px;
+  padding: 0 10px;
+  width: 100%;
+}
+.ios-button {
+  background-color: inherit;
+  border: none;
+  color: #0070fd;
   font-weight: 500;
   height: 30px;
   padding: 0 10px;
