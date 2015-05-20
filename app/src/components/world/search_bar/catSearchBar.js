@@ -1,4 +1,4 @@
-app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', 'deviceManager', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter, deviceManager) {
+app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureService', 'bubbleSearchService', 'floorSelectorService', 'mapManager', 'categoryWidgetService', 'geoService', 'encodeDotFilterFilter', 'deviceManager', 'alertManager', function($location, $http, $timeout, apertureService, bubbleSearchService, floorSelectorService, mapManager, categoryWidgetService, geoService, encodeDotFilterFilter, deviceManager, alertManager) {
 
 	return {
 		restrict: 'E',
@@ -119,70 +119,22 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 
 					if (scope.mode === 'city') {
 						scope.loading = true;
-						
-						var useIP = true;
-
-						// use IP after geoService.geoTimeout is for any reason we can't get user's geolocation. could be geo taking too long, user denied request for geo, user didn't accept or reject request, etc.
-						$timeout(function() {
-							if (useIP) {
-								// use last known location if we have it, before resorting to IP
-								if (geoService.location.cityName && geoService.location.lat) {
-									$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', {
-										lat: geoService.location.lat,
-										lng: geoService.location.lng
-									});
-									scope.loading = false;
-								} else {
-									goToLocationFromIP();
-								}
-							}
-						}, geoService.geoTimeout);
-
-						// get user's current location on every search cache of geoService.cacheTime and timeout of geoService.geoTimeout
-						geoService.getLocation(geoService.cacheTime).then(function(location) {
-							useIP = false;
-
-							// get city info
-							var data = {
-								server: true,
-								params: {
-									hasLoc: true,
-									lat: location.lat,
-									lng: location.lng
-								}
-							};
-							$http.get('/api/geolocation', data).
-								success(function(locInfo) {
-									var locationData = {
-										lat: locInfo.lat,
-										lng: locInfo.lng,
-										cityName: locInfo.cityName,
-										src: locInfo.src,
-										timestamp: locInfo.timestamp
-									};
-									geoService.updateLocation(locationData);
-									$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-									scope.populateCitySearchView(scope.text, 'text', locationData);
-									scope.loading = false;
-								}).
-								error(function(err) {
-									console.log('er: ', err);
-									scope.loading = false;
-								})
+						geoService.getLocation().then(function(location) {
+							$location.path('/c/' + location.cityName + '/search/lat' + encodeDotFilterFilter(location.lat, 'encode') + '&lng' + encodeDotFilterFilter(location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
+							scope.populateCitySearchView(scope.text, 'text', location);
 						}, function(err) {
-							useIP = false;
-
-							// get location from IP
-							goToLocationFromIP();
-						})
-						
+							console.log('er: ', err);
+							alertManager.addAlert('info', 'Sorry, there was a problem getting your location', true);
+						}).finally(function() {
+							scope.loading = false;
+						});
 					} else if (scope.mode == 'home') {
-						if (geoService.location.cityName) {
-							$location.path('/c/' + geoService.location.cityName + '/search/lat' + encodeDotFilterFilter(geoService.location.lat, 'encode') + '&lng' + encodeDotFilterFilter(geoService.location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
-						} else {
-							goToLocationFromIP(true);
-						}
+						geoService.getLocation().then(function(location) {
+							$location.path('/c/' + location.cityName + '/search/lat' + encodeDotFilterFilter(location.lat, 'encode') + '&lng' + encodeDotFilterFilter(location.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
+						}, function(err) {
+							console.log('er: ', err);
+							alertManager.addAlert('info', 'Sorry, there was a problem getting your location', true);
+						});
 					} else {
 						if (inSearchView()) {
 							scope.populateSearchView(scope.text, 'text');
@@ -229,37 +181,6 @@ app.directive('catSearchBar', ['$location', '$http', '$timeout', 'apertureServic
 			function inSearchView() {
 				return $location.path().indexOf('search') > -1;
 				// else in world view
-			}
-
-			function goToLocationFromIP(locationBool) {
-				var data = {
-					server: true,
-					params: {
-						hasLoc: false
-					}
-				};
-				$http.get('/api/geolocation', data).
-					success(function(locInfo) {
-						var locationData = {
-							lat: locInfo.lat,
-							lng: locInfo.lng,
-							cityName: locInfo.cityName,
-							src: locInfo.src,
-							timestamp: locInfo.timestamp
-						};
-						geoService.updateLocation(locationData);
-						if (locationBool) {
-							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text));
-						} else {
-							$location.path('/c/' + locationData.cityName + '/search/lat' + encodeDotFilterFilter(locationData.lat, 'encode') + '&lng' + encodeDotFilterFilter(locationData.lng, 'encode') +  '/text/' + encodeURIComponent(scope.text), false);
-							scope.populateCitySearchView(scope.text, 'text', locationData);
-						}
-						scope.loading = false;
-					}).
-					error(function(err) {
-						console.log('er: ', err);
-						scope.loading = false;
-					});
 			}
 			
 		}
