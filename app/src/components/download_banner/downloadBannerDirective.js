@@ -54,6 +54,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 			routeLoadingIndicators = angular.element('.routeLoading');
 			viewContainer = angular.element('#view-container');
 			setScroll(wrap);
+			routeLoadingIndicators.addClass('banner-offset');
 		}
 
 		routeListener = $rootScope.$on('$routeChangeSuccess', function() {
@@ -91,6 +92,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		function cleanup() {
 			nav.removeClass('nav-animations');
 			nav.removeClass('banner-offset');
+			routeLoadingIndicators.removeClass('banner-offset');
 			if (wrap) {
 				wrap.off('scroll', throttledScroll);
 				routeListener();
