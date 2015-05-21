@@ -49,7 +49,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
             },
             $sort: {
                 'landmarkCategories': -1,
-                _id: -1
+                '_id': -1
             },
             $sort: {
                 score: {
