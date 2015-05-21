@@ -26800,7 +26800,7 @@ function ContestEntriesController($scope, $routeParams, $rootScope, $timeout, En
 			alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 			$timeout(function() {
 				$scope.setShowSplashReset();
-				contest.set($scope.hashtag);
+				contest.set('#' + $scope.hashtag);
 			}, 2000);	
 		}
 	}
@@ -28427,7 +28427,7 @@ $scope.verifyUpload = function(event, state) {
 		alertManager.addAlert('info', 'Please sign in before uploading your photo', true);
 		$timeout(function() {
 			$scope.setShowSplashReset();
-			contest.set($scope.wtgt.hashtags[state]);
+			contest.set(state);
 		}, 2000);
 		
 	}
