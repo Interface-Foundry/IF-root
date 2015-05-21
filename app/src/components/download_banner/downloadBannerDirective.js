@@ -92,7 +92,9 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		function cleanup() {
 			nav.removeClass('nav-animations');
 			nav.removeClass('banner-offset');
-			routeLoadingIndicators.removeClass('banner-offset');
+			if (routeLoadingIndicators) {
+				routeLoadingIndicators.removeClass('banner-offset');
+			}
 			if (wrap) {
 				wrap.off('scroll', throttledScroll);
 				routeListener();
