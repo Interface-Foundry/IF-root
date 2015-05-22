@@ -10,9 +10,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 	return {
 		restrict: 'E',
 		templateUrl: 'components/download_banner/downloadBanner.html',
-		scope: {
-			aperture: '=aperture'
-		},
+		scope: {},
 		link: link
 	};
 
@@ -132,6 +130,9 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		// https://github.com/philbot5000/CanOpen
 		// if yes, open app. if no, open link to app store
 		function openApp() {
+			if ($rootScope.showBanner === false) {
+				return;
+			}
 			if (scope.device === 'ios') {
 				$window.open('http://goo.gl/Lw6S3V');
 			} else if (scope.device === 'android') {
