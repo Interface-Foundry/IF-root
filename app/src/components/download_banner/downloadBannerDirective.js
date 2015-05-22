@@ -10,9 +10,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 	return {
 		restrict: 'E',
 		templateUrl: 'components/download_banner/downloadBanner.html',
-		scope: {
-			aperture: '=aperture'
-		},
+		scope: {},
 		link: link
 	};
 
@@ -24,6 +22,12 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		var viewContainer;
 		var apertureWatch
 		var routeListener;
+		
+		// to prevent a fast double click on the splash screen and open up app store
+		var delayButtonPress = true;
+		setTimeout(function() {
+			delayButtonPress = false;
+		}, 1000);
 
 		scope.aperture = apertureService;
 		scope.closeBanner = closeBanner;
@@ -132,6 +136,9 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		// https://github.com/philbot5000/CanOpen
 		// if yes, open app. if no, open link to app store
 		function openApp() {
+			if (delayButtonPress) {
+				return;
+			}
 			if (scope.device === 'ios') {
 				$window.open('http://goo.gl/Lw6S3V');
 			} else if (scope.device === 'android') {
