@@ -3353,9 +3353,9 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
                                 //landmark created
                                 else {
-                                    res.status(200).send([{
-                                        "_id": landmark._id
-                                    }]);
+                                    res.status(200).send([
+                                        landmark
+                                    ]);
                                 }
                             }
                         });

@@ -3,7 +3,7 @@
 app
 .directive('hrefListener', hrefListener);
 
-hrefListener.$inject = ['$location', 'newWindowService', 'navService'];
+hrefListener.$inject = ['$location', '$timeout', 'newWindowService', 'navService'];
 
 /***
  *  User generated html that includes links (world descriptions, tweets, etc)
@@ -11,7 +11,7 @@ hrefListener.$inject = ['$location', 'newWindowService', 'navService'];
  *  This directive listens for clicks on elements that could contain links.
  *  On mobile it will force the link to open in the InAppBrowser so users can return to the app.
  */
-function hrefListener($location, newWindowService, navService) {	
+function hrefListener($location, $timeout, newWindowService, navService) {	
   return {
     restrict: 'A',
     link: link
@@ -23,17 +23,19 @@ function hrefListener($location, newWindowService, navService) {
     // @ENDIF
 
     // @IFDEF PHONEGAP
-    elem.bind('click', function (e) {
+    elem.bind('touchstart', function (e) {
       e = e ||  window.event;
       var element = e.target || e.srcElement;
-
+      
       if (element.tagName == 'A') {
         if (isOutsideLink(element.href)) {
           newWindowService.go(element.href);
-          return false;
+          return false; // must return false to prevent propagation of anchor link click
         } else {
-          $location.path(element.href);
-          navService.backPages = -2;
+          // translate relative url to mobile safe format
+          var path = element.href.split('file:///')[1];
+          $location.path(path);
+          return false; // must return false to prevent propagation of anchor link click
         }
       }
     });

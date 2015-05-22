@@ -60,7 +60,7 @@ function initMarkers() {
 
 $scope.refreshButton = function(){
 	$scope.loadState = 'loading';
-	worldTree.clearCacheWorlds();
+	worldTree.clearCache('worldCache');
 	init();
 }
 
