@@ -49,11 +49,8 @@ var route = function(textQuery, lat, lng, userTime, res) {
             },
             $sort: {
                 'landmarkCategories': -1,
-                '_id': -1
+                _id: -1
             },
-            
-            $limit: 500,
-            
             $sort: {
                 score: {
                     $meta: "textScore"
@@ -65,6 +62,7 @@ var route = function(textQuery, lat, lng, userTime, res) {
 
         })
         aggregate.options = {
+            $limit: 500,
             allowDiskUse: true
         };
         aggregate.exec(
