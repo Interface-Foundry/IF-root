@@ -21746,8 +21746,12 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		var viewContainer;
 		var apertureWatch
 		var routeListener;
-		// to prevent a fast double click on the splash screen and open up 
+		
+		// to prevent a fast double click on the splash screen and open up app store
 		var delayButtonPress = true;
+		setTimeout(function() {
+			delayButtonPress = false;
+		}, 1000);
 
 		scope.aperture = apertureService;
 		scope.closeBanner = closeBanner;
@@ -21855,10 +21859,6 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 		// TODO check if app is installed on device
 		// https://github.com/philbot5000/CanOpen
 		// if yes, open app. if no, open link to app store
-
-		setTimeout(function() {
-			delayButtonPress = false;
-		}, 1000);
 		function openApp() {
 			if (delayButtonPress) {
 				return;
