@@ -21854,7 +21854,7 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 
 		setTimeout(function() {
 			delayButtonPress = false;
-		}, 500);
+		}, 1000);
 		function openApp() {
 			if (delayButtonPress) {
 				return;
