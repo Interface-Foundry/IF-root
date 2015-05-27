@@ -51,11 +51,16 @@ var route = function(textQuery, lat, lng, userTime, res) {
 
         var aggregate = landmarkSchema.aggregate(query, {
             $sort: {
+                'landmarkCategories': -1,
+                '_id': -1
+            },
+            $sort: {
                 score: {
                     $meta: "textScore"
                 }
             }
-        })
+        }).limit(500)
+
         aggregate.options = {
             allowDiskUse: true
         };
