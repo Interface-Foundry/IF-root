@@ -2319,7 +2319,7 @@ body {
 	z-index: 99;
 }
 
-.ng-leave {
+/*.ng-leave {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
 
@@ -2327,7 +2327,7 @@ body {
 	z-index: 101;
 }
 
-.ng-leave.ng-leave-active {opacity:0; z-index: 101;}
+.ng-leave.ng-leave-active {opacity:0; z-index: 101;}*/
 
 
 
@@ -2465,7 +2465,7 @@ left: 8px;
 	resize: vertical;
 }
 
-.ng-enter {
+/*.ng-enter {
 	-webkit-transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
 	transition: 0.35s cubic-bezier(.5,.1,0,1) opacity;
 
@@ -2484,7 +2484,7 @@ left: 8px;
 }
 
 .ng-leave.ng-leave-active {opacity:0;}
-
+*/
 
 .if-fromRight.ng-enter {
 -webkit-transform: translateX(100%);
