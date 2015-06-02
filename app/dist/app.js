@@ -21739,6 +21739,14 @@ function downloadBanner($window, $rootScope, apertureService, deviceManager) {
 	};
 
 	function link(scope, elem, attr) {
+
+		// hiding banner on iOS
+		if (deviceManager.os === 'ios') {
+			$rootScope.showBanner = false;
+			return;
+		}
+
+
 		var nav = angular.element('.main-nav');
 		var wrap;
 		var banner;
