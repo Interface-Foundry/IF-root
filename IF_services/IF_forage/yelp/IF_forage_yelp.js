@@ -153,14 +153,14 @@ async.whilst(
 //searches yelp per parameter
 function searchYelp(tag, done) {
 
-    console.log(tag);
+    // console.log(tag);
 	
 	console.log('------ offset --------');
-    console.log(offsetCounter);
+    // console.log(offsetCounter);
 
 
 	console.log('------ sort --------');
-    console.log(sortCounter);
+    // console.log(sortCounter);
 
     yelp.search({location: tag, limit:20, offset:offsetCounter, sort:sortCounter}, function(error, data) {
     	if (error){
@@ -188,7 +188,7 @@ function searchYelp(tag, done) {
 
 		                        if(typeof business.id=='undefined')
 		                        {
-		                            console.log('yelp doesnt have id');
+		                            // console.log('yelp doesnt have id');
 		                        }
 		                        else{
 		                            lmSchema.id = 'yelp_'+business.id;
@@ -961,7 +961,7 @@ function searchYelp(tag, done) {
 
 			                            if(err){
 
-			                                console.log("Erorr Occurred");
+			                                // console.log("Erorr Occurred");
 			                                console.log(err)
 			                            }
 			                            else if(!err)
@@ -986,12 +986,12 @@ function searchYelp(tag, done) {
 
 	        	}
 	        	else {
-	        		console.log("Yelp Api error")
+	        		// console.log("Yelp Api error")
 	        	}
 	        }
 	        else{
 
-	            console.log("Yelp Api error")
+	            // console.log("Yelp Api error")
 	        }
 
 
@@ -1058,7 +1058,7 @@ function getLatLong(business,callback){
         landmarks.model(false).find({"source_yelp.id":business.id.toString()}, function(err, docs) {
             if(err){
                 console.log("error")
-                console.log("Error Occured: "+err);
+                // console.log("Error Occured: "+err);
             }
             else if (docs.length>0){
                 //console.log("documents Found :"+business.id);

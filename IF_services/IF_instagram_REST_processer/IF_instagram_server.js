@@ -37,7 +37,7 @@ var twitterRemovals = []; //tags to remove from search
 var twitterFalseTags=[]; //via tahir
 
 // make sure the tempimages directory exists
-console.log(strings.IMAGE_SAVE_DESTINATION);
+// console.log(strings.IMAGE_SAVE_DESTINATION);
 if (!fs.existsSync(strings.IMAGE_SAVE_DESTINATION)) {
 	fs.mkdirSync(strings.IMAGE_SAVE_DESTINATION);
 }
@@ -108,7 +108,7 @@ setInterval(function(){
 async.whilst(
     function () { return true }, 
     function (callback) {
-        console.log(hashtag);
+        // console.log(hashtag);
 
         async.eachSeries(hashtag, function(tag, callback) {
             searchInstagram(tag, function() {
@@ -195,7 +195,7 @@ async.whilst(
                     if (err) {
                       return console.error(err);
                     }
-                    console.log('REMOVED FILE!')
+                    // console.log('REMOVED FILE!')
                   });
                 }
               });

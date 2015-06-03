@@ -78,7 +78,7 @@ setInterval(function(){
 async.whilst(
     function () { return true }, 
     function (callback) {
-        console.log(hashtag);
+        // console.log(hashtag);
 
         async.eachSeries(hashtag, function(tag, callback) {
             searchTwitter(tag, function() {

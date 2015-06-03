@@ -99,7 +99,7 @@ async.whilst(
 //searches meetup per parameter
 function searchMeetup(tag, done) {
 
-    console.log(tag);
+    // console.log(tag);
 
     //make Url and make request to meetup using request module
     var source = 'http://api.meetup.com/2/open_events?status=upcoming&radius=smart&zip='+tag+'&and_text=False&fields=event_hosts&limited_events=False&desc='+descSort+'&offset=0&photo-host=public&format=json&key='+meetupAPI+'&page=100'
@@ -158,7 +158,7 @@ function searchMeetup(tag, done) {
 
 	                        if(typeof result.id=='undefined')
 	                        {
-	                            console.log('meetup doesnt have id');
+	                            // console.log('meetup doesnt have id');
 	                        }
 	                        else{
 	                            lmSchema.id = 'meetup_'+result.id;
@@ -442,7 +442,7 @@ app.post('/api/process_meetups', function (req, res) {
 
     async.each(req.body.groupIDs, function(tag, callback) {
 
-    	console.log(tag);
+    	// console.log(tag);
 
     	searchMeetupGroups(tag, req.body.userID, function(){
     		setTimeout(callback, 500);
@@ -521,7 +521,7 @@ function searchMeetupGroups(tag, userID, done) {
 
 	                        if(typeof result.id=='undefined')
 	                        {
-	                            console.log('meetup doesnt have id');
+	                            // console.log('meetup doesnt have id');
 	                        }
 	                        else{
 	                            lmSchema.id = 'meetup_'+result.id;

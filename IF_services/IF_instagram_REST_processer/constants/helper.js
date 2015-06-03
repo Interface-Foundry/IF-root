@@ -50,7 +50,7 @@ var downloadImage = function(imageURL) {
                     var buffer = readChunk.sync(writeStreamDestinaton, 0, 262);
 
                     if (fileTypeProcess(buffer) == false) {
-                        console.log('bad file!');
+                        // console.log('bad file!');
                         fs.unlink(writeStreamDestinaton); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
 
@@ -75,7 +75,7 @@ var downloadImage = function(imageURL) {
                                 };
                                 s3.headObject(params, function(err, metadata) {
                                     if (err && err.code == 'NotFound') {
-                                       console.log('Not found! Saving!')
+                                       // console.log('Not found! Saving!')
                                         s3.putObject({
                                             Bucket: awsBucket,
                                             Key: fileName,
@@ -83,11 +83,11 @@ var downloadImage = function(imageURL) {
                                             ACL: 'public-read'
                                         }, function(err, data) {
                                             if (err) console.log(err);
-                                            console.log('saved!')
+                                            // console.log('saved!')
                                         }); //END OF s3.putObject 
                                     } 
                                     else {
-                                        console.log('File already exists!')
+                                        // console.log('File already exists!')
                                     }
                                 });
                             })
