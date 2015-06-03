@@ -186,12 +186,12 @@ require('./components/IF_auth/passport')(passport);
 //LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy(
 
-{
-    highWaterMark: 50 * 1024 * 1024,
-    limits: {
-        fileSize: 1024 * 1024 * 50  
+    {
+        highWaterMark: 50 * 1024 * 1024,
+        limits: {
+            fileSize: 1024 * 1024 * 50
+        }
     }
-}
 
 ));
 
@@ -591,9 +591,9 @@ function isLoggedIn(req, res, next) {
     if (!req.isAuthenticated()) {
         console.log('hitting not authenticated, req.headers is: ', req.headers)
         if (req.headers.authorization) {
-              console.log('hitting if req.headers.authorization')
+            console.log('hitting if req.headers.authorization')
             if (req.headers.authorization.indexOf('asic') > -1) {
-                 console.log('hitting if basic')
+                console.log('hitting if basic')
                 passport.authenticate('local-basic', function(err, user, info) {
                     if (err) {
                         console.log('basic error', err)
@@ -603,9 +603,9 @@ function isLoggedIn(req, res, next) {
                         res.sendStatus(401);
                     }
                     if (user) {
-                          // console.log('BASIC USER, REQ.USER IS ', req.user)
-                          req.user = user;
-                          // console.log('BASIC USER IS: ', req.user)
+                        // console.log('BASIC USER, REQ.USER IS ', req.user)
+                        req.user = user;
+                        // console.log('BASIC USER IS: ', req.user)
                         return next();
                     }
                 })(req, res, next)
@@ -613,14 +613,14 @@ function isLoggedIn(req, res, next) {
                 console.log('hitting if bearer')
                 passport.authenticate('bearer', function(err, user, info) {
                     if (err) {
-                         console.log('bearer error', err)
+                        console.log('bearer error', err)
                         res.sendStatus(401);
                     }
                     if (!user) {
                         res.sendStatus(401);
                     }
                     if (user) {
-                           console.log('BEARER USER IS: ', user)
+                        console.log('BEARER USER IS: ', user)
                         return next();
 
                     }
@@ -833,19 +833,19 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                 file.pipe(fstream);
 
                 fstream.on('close', function() {
-        
+
                     var buffer = readChunk.sync(tempPath, 0, 262);
 
                     if (fileTypeProcess(buffer) == false) {
                         fs.unlink(tempPath); //Need to add an alert if there are several attempts to upload bad files here
                     } else {
-                
-                            //AUTO-REORIENT
-                            im.convert([tempPath, '-auto-orient', '-quality', '0.8','-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
+
+                        //AUTO-REORIENT
+                        im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                                 if (err) console.log(err)
 
                                 fs.readFile(tempPath, function(err, fileData) {
-                                 
+
                                     var s3 = new AWS.S3();
 
                                     s3.putObject({
@@ -857,7 +857,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                                         if (err) {
                                             console.log(err);
                                         } else {
-                                             
+
                                             res.write("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
 
                                             res.end();
@@ -866,7 +866,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                                     });
                                 }); //END OF FS READFILE
                             }) //END OF IM CONVERT
-                  
+
                     }
                 });
             }
@@ -889,7 +889,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
     //capturing incoming extra data in upload
     req.busboy.on('field', function(key, val) {
-            // console.log('Field [' + key + ']: value: ' + val);
+        // console.log('Field [' + key + ']: value: ' + val);
         uploadContents += val;
     });
 
@@ -916,7 +916,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
         } else {
 
 
-        // console.log('*Successfully passed busboy filters.')
+            // console.log('*Successfully passed busboy filters.')
             var stuff_to_hash = filename + (new Date().toString());
             var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
             var fileType = filename.split('.').pop();
@@ -944,46 +944,46 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                     } else {
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
-                            if (err) console.log(err)
-                            fs.readFile(tempPath, function(err, fileData) {
-                                var s3 = new AWS.S3();
-                                s3.putObject({
-                                    Bucket: 'if-server-general-images',
-                                    Key: awsKey,
-                                    Body: fileData,
-                                    ACL: 'public-read'
-                                }, function(err, data) {
-                                    if (err)
-                                        console.log(err);
-                                    else {
-                                        // res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-                                        fs.unlink(tempPath);
-                                        //additional content was passed with the image, handle it here
-                                        //Then save the contest entry
-                                        if (uploadContents) {
-                                            try {
-                                                uploadContents = JSON.parse(uploadContents);
-                                            } catch (err) {
-												console.error('could not parse uploadContents json');
-                                                console.error(err);
-												console.error(uploadContents);
+                                if (err) console.log(err)
+                                fs.readFile(tempPath, function(err, fileData) {
+                                    var s3 = new AWS.S3();
+                                    s3.putObject({
+                                        Bucket: 'if-server-general-images',
+                                        Key: awsKey,
+                                        Body: fileData,
+                                        ACL: 'public-read'
+                                    }, function(err, data) {
+                                        if (err)
+                                            console.log(err);
+                                        else {
+                                            // res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
+                                            fs.unlink(tempPath);
+                                            //additional content was passed with the image, handle it here
+                                            //Then save the contest entry
+                                            if (uploadContents) {
+                                                try {
+                                                    uploadContents = JSON.parse(uploadContents);
+                                                } catch (err) {
+                                                    console.error('could not parse uploadContents json');
+                                                    console.error(err);
+                                                    console.error(uploadContents);
+                                                }
+                                                if (uploadContents.type == 'retail_campaign') {
+                                                    // var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                                    // uploadContents.description = newString;
+                                                    submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
+                                                        //Retrieve new saved contest entry ID
+                                                        console.log('submitted data is..', data)
+                                                        if (data && data._id) {
+                                                            newentryID = data._id;
+                                                        }
+                                                        res.send(data)
+                                                            // res.send(data)
+                                                    }); //contest entry, send to bac
+                                                }
+                                            } else {
+                                                return res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
                                             }
-                                            if (uploadContents.type == 'retail_campaign') {
-                                                // var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                // uploadContents.description = newString;
-                                                submitContestEntry("https://s3.amazonaws.com/if-server-general-images/" + awsKey, uploadContents, req.user._id, function(data) {
-                                                    //Retrieve new saved contest entry ID
-                                                    console.log('submitted data is..', data)
-													if (data && data._id) {
-														newentryID = data._id;
-													}
-                                                    res.send(data)
-                                                        // res.send(data)
-                                                }); //contest entry, send to bac
-                                            }
-                                        } else { 
-											return res.send("https://s3.amazonaws.com/if-server-general-images/" + awsKey);
-										}
 
                                             //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
 
@@ -1077,7 +1077,7 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
                                 }); // END OF FS READFILE
                             }) //END OF IM CONVERT
 
-                       
+
                     } //END OF INNER ELSE
                 }) //END OF FS.STREAM ON
         } //END OF OUTER ELSE
@@ -2473,9 +2473,11 @@ app.get('/api/worlds/:id', function(req, res) {
                                         if (req.user.submissions) {
                                             var contestSubmissions = [];
                                             req.user.submissions.forEach(function(el) {
-                                                if (contest._id) {
-                                                    if (el.worldID == data._id && el.contestID == contest._id) {
-                                                        contestSubmissions.push(el);
+                                                if (contest) {
+                                                    if (contest._id) {
+                                                        if (el.worldID == data._id && el.contestID == contest._id) {
+                                                            contestSubmissions.push(el);
+                                                        }
                                                     }
                                                 }
                                             })
@@ -2967,15 +2969,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                             }
                         }
 
-                        if (req.body.permissions){
-                            if (req.body.permissions.hidden){
+                        if (req.body.permissions) {
+                            if (req.body.permissions.hidden) {
                                 lm.permissions.hidden = true;
-                            }   
-                            else {
+                            } else {
                                 lm.permissions.hidden = false;
                             }
-                        }
-                        else {
+                        } else {
                             lm.permissions.hidden = false;
                         }
 
@@ -3209,15 +3209,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                         }
                     }
 
-                    if (req.body.permissions){
-                        if (req.body.permissions.hidden){
+                    if (req.body.permissions) {
+                        if (req.body.permissions.hidden) {
                             lm.permissions.hidden = true;
-                        }   
-                        else {
+                        } else {
                             lm.permissions.hidden = false;
                         }
-                    }
-                    else {
+                    } else {
                         lm.permissions.hidden = false;
                     }
 
@@ -3523,129 +3521,128 @@ app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
 
     switch (req.params.collection) {
         case 'worldchat':
-                worldchatSchema.findById(sID, function(err, chat) {
-                    if (err) {
-                        return handleError(res, err);
-                    }
-                    if (!chat) {
-                        return res.sendStatus(404);
-                    }
+            worldchatSchema.findById(sID, function(err, chat) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                if (!chat) {
+                    return res.sendStatus(404);
+                }
 
-                    //is this your chat?
-                    if (chat.userID == req.user._id || req.user.admin) {
+                //is this your chat?
+                if (chat.userID == req.user._id || req.user.admin) {
 
-                        worldchatSchema.remove({ _id: sID }, function(err) {
-                            if (err) {
-                                res.sendStatus(500);
-                                console.log(err);
-                            }
-                            else {
-                                res.sendStatus(200);
-                            }
-                        });
-                    }
-                    else {
-                        res.sendStatus(403); //nope it's not!
-                    }      
-                });
-        break;
+                    worldchatSchema.remove({
+                        _id: sID
+                    }, function(err) {
+                        if (err) {
+                            res.sendStatus(500);
+                            console.log(err);
+                        } else {
+                            res.sendStatus(200);
+                        }
+                    });
+                } else {
+                    res.sendStatus(403); //nope it's not!
+                }
+            });
+            break;
 
         case 'landmarks':
-                landmarkSchema.findById(sID, function(err, lm) {
-                    if (err) {
-                        return handleError(res, err);
-                    }
-                    if (!lm) {
-                        return res.sendStatus(404);
-                    }
+            landmarkSchema.findById(sID, function(err, lm) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                if (!lm) {
+                    return res.sendStatus(404);
+                }
 
-                    //is this your bubble?
-                    if (lm.permissions){
-                        if (lm.permissions.ownerID == req.user._id || req.user.admin) { 
+                //is this your bubble?
+                if (lm.permissions) {
+                    if (lm.permissions.ownerID == req.user._id || req.user.admin) {
 
-                            landmarkSchema.remove({ _id: sID }, function(err) {
-                                if (err) {
-                                    res.sendStatus(500);
-                                    console.log(err);
-                                }
-                                else {
-                                    res.sendStatus(200);
-                                }
-                            });
+                        landmarkSchema.remove({
+                            _id: sID
+                        }, function(err) {
+                            if (err) {
+                                res.sendStatus(500);
+                                console.log(err);
+                            } else {
+                                res.sendStatus(200);
+                            }
+                        });
+                    } else {
+                        res.sendStatus(403); //nope it's not!
+                    }
+                } else {
+                    res.sendStatus(403); //nope it's not!
+                }
+
+            });
+            break;
+
+        case 'user':
+            //suicide route
+            User.findById(sID, function(err, lm) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                if (!lm) {
+                    return res.sendStatus(404);
+                }
+
+                console.log(lm._id);
+                console.log(req.user._id);
+                //is this you?
+                if (req.user.admin) {
+
+                    User.remove({
+                        _id: sID
+                    }, function(err) {
+                        if (err) {
+                            res.sendStatus(500);
+                            console.log(err);
+                        } else {
+                            res.sendStatus(200);
                         }
-                        else {
-                            res.sendStatus(403); //nope it's not!
-                        }                   
-                    }
-                    else {
-                        res.sendStatus(403); //nope it's not!
-                    }
-        
-                });
+                    });
+                } else {
+                    res.sendStatus(403); //nope it's not!
+                }
+            });
             break;
 
-            case 'user':
-                //suicide route
-                User.findById(sID, function(err, lm) {
-                    if (err) {
-                        return handleError(res, err);
-                    }
-                    if (!lm) {
-                        return res.sendStatus(404);
-                    }
+        case 'contestentry':
+            contestEntrySchema.findById(sID, function(err, lm) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                if (!lm) {
+                    return res.sendStatus(404);
+                }
 
-                    console.log(lm._id);
-                    console.log(req.user._id);
-                    //is this you?
-                    if (req.user.admin) { 
+                //is this your contest entry?
+                if (lm.userID == req.user._id || req.user.admin) {
 
-                        User.remove({ _id: sID }, function(err) {
-                            if (err) {
-                                res.sendStatus(500);
-                                console.log(err);
-                            }
-                            else {
-                                res.sendStatus(200);
-                            }
-                        });
-                    }
-                    else {
-                        res.sendStatus(403); //nope it's not!
-                    }                   
-                });
+                    contestEntrySchema.remove({
+                        _id: sID
+                    }, function(err) {
+                        if (err) {
+                            res.sendStatus(500);
+                            console.log(err);
+                        } else {
+                            res.sendStatus(200);
+                        }
+                    });
+                } else {
+                    res.sendStatus(403); //nope it's not!
+                }
+            });
             break;
 
-            case 'contestentry':
-                contestEntrySchema.findById(sID, function(err, lm) {
-                    if (err) {
-                        return handleError(res, err);
-                    }
-                    if (!lm) {
-                        return res.sendStatus(404);
-                    }
-
-                    //is this your contest entry?
-                    if (lm.userID == req.user._id || req.user.admin) { 
-
-                        contestEntrySchema.remove({ _id: sID }, function(err) {
-                            if (err) {
-                                res.sendStatus(500);
-                                console.log(err);
-                            }
-                            else {
-                                res.sendStatus(200);
-                            }
-                        });
-                    }
-                    else {
-                        res.sendStatus(403); //nope it's not!
-                    }                   
-                });
-            break;
-
-            default:
-                res.sendStatus(403); //not a valid collection
-                console.log('not a valid collection to delete from');
+        default:
+            res.sendStatus(403); //not a valid collection
+            console.log('not a valid collection to delete from');
     }
 
 });
