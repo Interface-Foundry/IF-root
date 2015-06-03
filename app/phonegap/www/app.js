@@ -21843,10 +21843,10 @@ function aicpRoutingService($location, $routeParams) {
     if (today < 138) {
       $location.path(path + '');
       return {worldURL: 'aicpweek2015'};
-    } else if (today === 156) {
+    } else if (today === 155) {
       $location.path('/w/aicp_2015_thursday');
       return {worldURL: ''};
-    } else if (today === 155) {
+    } else if (today === 154) {
       $location.path('/w/aicp_2015_wednesday');
       return {worldURL: ''};
     } else {
