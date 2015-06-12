@@ -15,6 +15,7 @@ app.post('/gitpush', function(req, res) {
 	if (req.body.ref && req.body.ref.indexOf('Bubblli') > -1) {
 		console.log(req.body);
 		deploy();
+    test();
 	}
 	res.sendStatus(200);
 });
@@ -28,10 +29,24 @@ app.get('/revision', function(req, res) {
 	res.send(rev);
 });
 
-
+/**
+ * Deploys new code to pikachu after a commit to the githubs
+ * @returns {boolean}
+ */
 var deploy = function() {
 	console.log('Deploying new code to pikachu');
 	exec('bash pikachu_deploy.sh');
-}
+  return true;
+};
+
+/**
+ * Runs all the tests we have set up
+ * @returns {boolean}
+ */
+var test = function() {
+  console.log('running tests');
+  exec('npm test');
+  return true;
+};
 
 app.listen(9090);
