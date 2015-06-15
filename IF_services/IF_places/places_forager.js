@@ -80,7 +80,7 @@ var zipHigh = 99950;
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 var sortCounter = 0; //sort type, switches between 0 (best by search query), and 2, sorted by highest rating
 
-//search meetup in loops
+//search places in loops
 async.whilst(
     function() {
         return true
@@ -150,9 +150,12 @@ function searchPlaces(type, zip, fin) {
                         newPlace.loc.coordinates[0] = place.geometry.location.lat;
                         newPlace.loc.coordinates[1] = place.geometry.location.lng;
                         newPlace.loc.type = 'Point';
-                        newPlace.save(function(saved) {
-                            console.log('Save Google Place!', saved)
-                            done()
+                        uniqueID(place.id, function(output) {
+                            newPlace.ud = output;
+                            newPlace.save(function(saved) {
+                                console.log('Save Google Place!', saved)
+                                done()
+                            })
                         })
                     } else {
                         console.log('Matches exist, next place..')
