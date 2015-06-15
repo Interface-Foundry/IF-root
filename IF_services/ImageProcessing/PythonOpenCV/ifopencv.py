@@ -10,10 +10,12 @@ def resizeLargeImage(img):
     height, width, channels = img.shape
     if height > max_size or width > max_size:
         if height > width:
-            res = cv2.resize(img, (width/height*max_size, max_size), interpolation = cv2.INTER_CUBIC)
+            width = max_size * width / height
+            height = max_size
         else:
-            res = cv2.resize(img, (max_size, height/width*max_size), interpolation = cv2.INTER_CUBIC)
-        return res
+            height = max_size * height / width
+            width = max_size
+        return cv2.resize(img, (width, height), interpolation = cv2.INTER_CUBIC)
     else:
         return img
 

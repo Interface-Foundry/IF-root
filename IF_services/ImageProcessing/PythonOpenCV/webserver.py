@@ -8,6 +8,8 @@ class FindItems(resource.Resource):
 
     # right now this handles every request to the server
     def render_GET(self, request):
+        urlpath = request.URLPath()
+        print urlpath
         request.setHeader("content-type", "application/json")
         if "url" in request.args:
             s3url = request.args["url"][0]
