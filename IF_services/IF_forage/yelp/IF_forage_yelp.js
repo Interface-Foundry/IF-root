@@ -71,7 +71,7 @@ var yelp = require("yelp").createClient({
 
 */
 
-var awsBucket = "if.forage.yelp.images";
+var awsBucket = "if.forage.google.images";
 var zipLow = 1001;
 var zipHigh = 99950;
 

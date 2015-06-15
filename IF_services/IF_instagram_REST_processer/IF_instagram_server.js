@@ -75,9 +75,7 @@ setInterval(function(){
         hashtag = []; //clear array before 
 
         async.each(docs, function( doc, callback) {
-
             if(doc.instagram==true){
-
                 if(hashtag.indexOf(doc.worldTag)==-1)
                 {
                     hashtag.push(doc.worldTag);   
