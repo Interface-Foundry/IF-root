@@ -199,12 +199,6 @@ var landmarkSchema = new Schema({
     source_google_on: Boolean,
     source_google: {
         formatted_address: String,
-        geometry: {
-            location: {
-                lat: Number,
-                lng: Number
-            }
-        },
         icon: String,
         place_id: String,
         photos: [{

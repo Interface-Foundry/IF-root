@@ -10,7 +10,13 @@ var http = require('http');
 var im = require("imagemagick");
 var crypto = require('crypto');
 var AWS = require('aws-sdk');
-
+var urlify = require('urlify').create({
+    addEToUmlauts: true,
+    szToSs: true,
+    spaces: "_",
+    nonPrintable: "_",
+    trim: true
+});
 
 
 app.use(logger('dev'));
@@ -113,7 +119,7 @@ async.whilst(
 
 
 //searches google places
-function searchPlaces(type, zip, done) {
+function searchPlaces(type, zip, fin) {
     var queryTermsToGetPlaceID = (type + "+" + zip)
         .replace(/,/g, "")
         .replace(/\s/g, "+");
@@ -127,27 +133,13 @@ function searchPlaces(type, zip, done) {
         var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
 
         if (resultsValid) {
-            body.results.forEach(function(place) {
-              // console.log('Saving place: ', place)
+            async.each(body.results, function(place, done) {
+                // console.log('Saving place: ', place)
                 landmarks.find({
-                    'source_google.placeID': place.place_id
+                    'id': place.id
                 }, function(err, matches) {
                     if (err) console.log(err)
                     if (matches.length < 1) {
-                        //     source_google: {
-                        //     placeID: String,
-                        //     icon: String,
-                        //     opening_hours: [Schema.Types.Mixed],
-                        //     weekday_text: [String],
-                        //     international_phone_number: String,
-                        //     price_level: Number,
-                        //     reviews: [Schema.Types.Mixed],
-                        //     url: String, //google's key is just url
-                        //     website: String,
-                        //     types: [String],
-                        //     utc_offset: Number,
-                        //     vicinity: String
-                        // }
                         console.log('Creating landmark!')
                         var newPlace = new landmarks();
                         newPlace.name = place.name;
@@ -156,18 +148,63 @@ function searchPlaces(type, zip, done) {
                         newPlace.source_google.types = place.types;
                         newPlace.source_google.reference = place.reference;
                         newPlace.loc.coordinates[0] = place.geometry.location.lat;
-                         newPlace.loc.coordinates[1] = place.geometry.location.lng;
+                        newPlace.loc.coordinates[1] = place.geometry.location.lng;
+                        newPlace.loc.type = 'Point';
                         newPlace.save(function(saved) {
                             console.log('Save Google Place!', saved)
+                            done()
                         })
+                    } else {
+                        console.log('Matches exist, next place..')
+                        done()
                     }
 
                 })
+            }, function() {
+                console.log('Finished set, next set..')
+                fin()
             })
-
         } else {
             console.log("no valid results returned from queryGooglePlaceID for", type, zip);
         }
+    });
+}
+
+
+function uniqueID(input, callback) {
+
+    var uniqueIDer = urlify(input);
+    urlify(uniqueIDer, function() {
+        db.collection('users').findOne({
+            'profileID': uniqueIDer
+        }, function(err, data) {
+            if (data) {
+                var uniqueNumber = 1;
+                var newUnique;
+
+                async.forever(function(next) {
+                        var uniqueNum_string = uniqueNumber.toString();
+                        newUnique = data.profileID + uniqueNum_string;
+
+                        db.collection('users').findOne({
+                            'profileID': newUnique
+                        }, function(err, data) {
+
+                            if (data) {
+                                uniqueNumber++;
+                                next();
+                            } else {
+                                next('unique!'); // This is where the looping is stopped
+                            }
+                        });
+                    },
+                    function() {
+                        callback(newUnique);
+                    });
+            } else {
+                callback(uniqueIDer);
+            }
+        });
     });
 }
 
