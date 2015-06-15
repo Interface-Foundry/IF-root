@@ -2,16 +2,16 @@ var browser = require('browser');
 var opencv = require('../../IF_services/ImageProcessing/JavascriptWrapper');
 require('chai').should();
 
-var S3ImageURLs = [
-  '',
-  '',
-  ''
-];
+var S3ImageURLs = {
+  blank: 'https://s3.amazonaws.com/if-server-general-images/2015/5/Untitled.png',
+  domoShirt: 'https://s3.amazonaws.com/if-server-general-images/2015/5/IMG_20150611_181649-4.jpg',
+  shirtAndPants: 'https://s3.amazonaws.com/if-server-general-images/2015/5/IMG_20150611_181649-2.jpg'
+};
 
 
 describe('opencv item detection', function() {
   it('should return an empty array when no images are detected', function(done) {
-    opencv.findItemsInImage(S3ImageURLs[0], function(err, data) {
+    opencv.findItemsInImage(S3ImageURLs.blank, function(err, data) {
       if (err) { done(err) }
       data.should.have.property('items');
       data.items.should.be.instanceOf(Array);
@@ -21,7 +21,7 @@ describe('opencv item detection', function() {
   });
 
   it('should return a single item for the Domo shirt image', function(done) {
-    opencv.findItemsInImage(S3ImageURLs[1], function(err, data) {
+    opencv.findItemsInImage(S3ImageURLs.domoShirt, function(err, data) {
       if (err) { done(err) }
       data.should.have.property('items');
       data.items.should.be.instanceOf(Array);
@@ -31,7 +31,7 @@ describe('opencv item detection', function() {
   });
 
   it('should return two items for the shirt and pants image', function(done) {
-    opencv.findItemsInImage(S3ImageURLs[2], function(err, data) {
+    opencv.findItemsInImage(S3ImageURLs.shirtAndPants, function(err, data) {
       if (err) { done(err) }
       data.should.have.property('items');
       data.items.should.be.instanceOf(Array);
