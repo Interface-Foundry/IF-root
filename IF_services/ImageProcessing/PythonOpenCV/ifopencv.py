@@ -1,3 +1,4 @@
+import json
 import urllib
 import numpy
 import cv2
@@ -24,11 +25,25 @@ def getFromFile(filename):
 
 #Get Image from S3: input url, output image python object
 def getFromS3(url):
-    tmpfile = urllib.urlretrieve(url)
+    (tmpfile, _) = urllib.urlretrieve(url)
     return getFromFile(tmpfile)
 
 
 #Extract Foreground: input image, output foreground image
+def extractForeground(image):
+    return image
+
+
 #K-mean Segmentation: input image, output segmented image
+def kMeanSegmentation(image):
+    return image
+
+
 #Find Blobs: input image, output array of blob centers
+def findBlobs(image):
+    return []
+
+
 #Find Faces: input image, output array of face centers
+def findFaces(image):
+    return []

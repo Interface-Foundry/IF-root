@@ -14,9 +14,12 @@ class FindItems(resource.Resource):
         else:
             raise NameError("Must provide 'url' querystring parameter")
 
+        img = ifopencv.getFromS3(s3url)
+        img = ifopencv.extractForeground(img)
+        items = ifopencv.findBlobs(img)
 
-
-        return json.dumps({"items": []})
+        return json.dumps({"items": items})
 
 endpoints.serverFromString(reactor, "tcp:9999").listen(server.Site(FindItems()))
+print "Python OpenCV processing server running on port 9999"
 reactor.run()
