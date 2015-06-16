@@ -114,17 +114,6 @@ async.whilst(
 		    		//reset offset
 		    		offsetCounter = 0;
 
-		    		//rotating through sort counters
-		    		// if (sortCounter == 0){
-		    		// 	sortCounter = 2;
-		    		// }
-		    		// else if (sortCounter == 2){
-		    		// 	sortCounter = 0;
-		    		// }
-		    		// else {
-		    		// 	sortCounter = 0;
-		    		// }
-
 		    		if (sortCounter == 2){
 		    			sortCounter = 0;
 		    		}
@@ -442,7 +431,7 @@ function searchYelp(tag, done) {
 							        }
 
 							        function saveNewLandmark(styleRes){
-
+zx
 			                        	if(typeof business.image_url == 'undefined'){
 			                        		lmSchema.avatar = 'img/IF/yelp_default.jpg';
 			                        		doneLandmarkSave();

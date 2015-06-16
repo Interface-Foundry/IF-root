@@ -200,8 +200,7 @@ var landmarkSchema = new Schema({
     source_google: {
         place_id: String,
         types: [String],
-        reference: String,
-        formatted_address: String,
+        address: String,
         formatted_phone_number: String,
         icon: String,
         opening_hours: [String],
