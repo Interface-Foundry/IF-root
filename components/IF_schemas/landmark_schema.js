@@ -198,17 +198,18 @@ var landmarkSchema = new Schema({
     },
     source_google_on: Boolean,
     source_google: {
-        formatted_address: String,
-        icon: String,
         place_id: String,
-        photos: [{
-            height: Number,
-            html_attributions: [],
-            photo_reference: String,
-            width: Number
-        }],
+        types: [String],
         reference: String,
-        types: [String]
+        formatted_address: String,
+        formatted_phone_number: String,
+        icon: String,
+        opening_hours: [String],
+        open_now: Boolean,
+        website: String,
+        vicinity: String,
+        utc_offset: Number,
+        city: String
     },
     source_yelp_on: Boolean,
     source_yelp: {

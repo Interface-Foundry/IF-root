@@ -14,10 +14,15 @@ var urlify = require('urlify').create({
     addEToUmlauts: true,
     szToSs: true,
     spaces: "_",
-    nonPrintable: "_",
+    nonPrintable: "",
     trim: true
 });
+var q = require('q');
 
+//Default Place style
+var forumStyle = require('./forum_theme.json');
+var cloudMapName = 'forum';
+var cloudMapID = 'interfacefoundry.jh58g2al';
 
 app.use(logger('dev'));
 
@@ -35,6 +40,7 @@ var mongoose = require('mongoose'),
 //var styleSchema = require('../../../components/IF_schemas/style_schema.js');
 // var styles = require('./style_schema.js');
 var landmarks = require('../../components/IF_schemas/landmark_schema.js');
+var styles = require('../../components/IF_schemas/style_schema.js');
 
 global.config = require('../../config');
 
@@ -134,35 +140,69 @@ function searchPlaces(type, zip, fin) {
 
         if (resultsValid) {
             async.each(body.results, function(place, done) {
-                // console.log('Saving place: ', place)
-                landmarks.find({
-                    'id': place.id
-                }, function(err, matches) {
-                    if (err) console.log(err)
-                    if (matches.length < 1) {
-                        console.log('Creating landmark!')
-                        var newPlace = new landmarks();
-                        newPlace.name = place.name;
-                        newPlace.id = place.id;
-                        newPlace.source_google.place_id = place.place_id;
-                        newPlace.source_google.types = place.types;
-                        newPlace.source_google.reference = place.reference;
-                        newPlace.loc.coordinates[0] = place.geometry.location.lat;
-                        newPlace.loc.coordinates[1] = place.geometry.location.lng;
-                        newPlace.loc.type = 'Point';
-                        uniqueID(place.id, function(output) {
-                            newPlace.ud = output;
-                            newPlace.save(function(saved) {
-                                console.log('Save Google Place!', saved)
-                                done()
+                var newPlace = null;
+                async.series([
+                        function(callback) {
+                            //Check if place already exists in db, if not create new place
+                            landmarks.find({
+                                'source_google.place_id': place.place_id
+                            }, function(err, matches) {
+                                if (err) console.log(err)
+                                if (matches.length < 1) {
+                                    console.log('Creating Place!')
+                                    newPlace = new landmarks();
+                                    newPlace.name = place.name;
+                                    newPlace.source_google.place_id = place.place_id;
+                                    newPlace.source_google.types = place.types;
+                                    newPlace.source_google.reference = place.reference;
+                                    newPlace.loc.coordinates[0] = place.geometry.location.lat;
+                                    newPlace.loc.coordinates[1] = place.geometry.location.lng;
+                                    newPlace.loc.type = 'Point';
+                                    saveStyle(newPlace).then(function() { //creating new style to add to landmark
+                                        // console.log('Inside saveStyle, newPlace is: ', newPlace)
+                                        callback(null)
+                                    });
+                                } else {
+                                    console.log('Matches exist, next place..')
+                                    callback(null)
+                                }
                             })
-                        })
-                    } else {
-                        console.log('Matches exist, next place..')
-                        done()
-                    }
+                        },
+                        function(callback) {
+                            //Get place details from Google Places
+                            if (newPlace == null) {
+                                console.log('Not a new place')
+                                callback(null);
+                            } else {
+                                addGoogleDetails(place.place_id, place.name, newPlace).then(function() {
+                                    //Add city name to landmark id and then uniqueize it
+                                    var nameCity = place.name.concat('_'+newPlace.source_google.city)
+                                    uniqueID(nameCity).then(function(output) {
+                                            newPlace.id = output;
+                                            callback(null);
+                                        })
+                                        // console.log('Added details to newPlace, ', newPlace)
 
-                })
+                                })
+                            }
+                        },
+                        function(callback) {
+                            //Annnd save the place
+                            if (!newPlace) {
+                                callback(null)
+                            } else {
+                                newPlace.save(function(err, saved) {
+                                    if (err) console.log(err)
+                                    console.log('Saved!')
+                                    callback(null)
+                                })
+                            }
+                        }
+                    ],
+                    // optional callback
+                    function(err, results) {
+                        done()
+                    });
             }, function() {
                 console.log('Finished set, next set..')
                 fin()
@@ -174,12 +214,12 @@ function searchPlaces(type, zip, fin) {
 }
 
 
-function uniqueID(input, callback) {
-
-    var uniqueIDer = urlify(input);
+function uniqueID(name) {
+    var deferred = q.defer();
+    var uniqueIDer = urlify(name);
     urlify(uniqueIDer, function() {
-        db.collection('users').findOne({
-            'profileID': uniqueIDer
+        landmarks.findOne({
+            'id': uniqueIDer
         }, function(err, data) {
             if (data) {
                 var uniqueNumber = 1;
@@ -187,12 +227,10 @@ function uniqueID(input, callback) {
 
                 async.forever(function(next) {
                         var uniqueNum_string = uniqueNumber.toString();
-                        newUnique = data.profileID + uniqueNum_string;
-
-                        db.collection('users').findOne({
-                            'profileID': newUnique
+                        newUnique = data.id + uniqueNum_string;
+                        landmarks.findOne({
+                            'id': newUnique
                         }, function(err, data) {
-
                             if (data) {
                                 uniqueNumber++;
                                 next();
@@ -202,13 +240,94 @@ function uniqueID(input, callback) {
                         });
                     },
                     function() {
-                        callback(newUnique);
+                        deferred.resolve(newUnique)
+
                     });
             } else {
-                callback(uniqueIDer);
+                deferred.resolve(uniqueIDer)
+
             }
         });
     });
+    return deferred.promise
+}
+
+//loading style from JSON, saving
+function saveStyle(place) {
+    var deferred = q.defer();
+    var st = new styles()
+    st.name = forumStyle.name;
+    st.bodyBG_color = forumStyle.bodyBG_color;
+    st.titleBG_color = forumStyle.titleBG_color;
+    st.navBG_color = forumStyle.navBG_color;
+    st.landmarkTitle_color = forumStyle.landmarkTitle_color;
+    st.categoryTitle_color = forumStyle.categoryTitle_color;
+    st.widgets.twitter = forumStyle.twitter;
+    st.widgets.instagram = forumStyle.instagram;
+    st.widgets.upcoming = forumStyle.upcoming;
+    st.widgets.category = forumStyle.category;
+    st.widgets.messages = forumStyle.messages;
+    st.widgets.streetview = forumStyle.streetview;
+    st.widgets.nearby = forumStyle.nearby;
+    st.save(function(err, style) {
+        if (err) console.log(err);
+        place.style.styleID = style._id;
+        place.style.maps.cloudMapID = cloudMapID;
+        place.style.maps.cloudMapName = cloudMapName;
+        deferred.resolve();
+    })
+    return deferred.promise;
+}
+
+
+function addGoogleDetails(placeID, name, newPlace) {
+    var deferred = q.defer();
+    var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+
+    request({
+        uri: queryURLToGetDetails,
+        json: true
+    }, function(error, response, body) {
+        // console.log("Queried Google details for", name, queryURLToGetDetails);
+
+        if (!error && response.statusCode == 200) {
+            if (typeof body.result.address_components == 'undefined') {
+              newPlace.source_google.city = ''
+            } else {
+              // console.log('city: ',body.result.address_components[2].long_name)
+              newPlace.source_google.city = body.result.address_components[2].long_name
+            }
+
+            newPlace.source_google.icon = body.result.icon;
+            if (typeof body.result.opening_hours == 'undefined') {
+                newPlace.source_google.opening_hours = "";
+            } else {
+                newPlace.source_google.opening_hours = JSON.stringify(body.result.opening_hours.weekday_text);
+                newPlace.open_now = body.result.opening_hours.open_now;
+            }
+
+            if (typeof body.result.international_phone_number == 'undefined') {
+                newPlace.source_google.international_phone_number = "";
+            } else {
+                newPlace.source_google.international_phone_number = body.result.international_phone_number;
+            }
+            newPlace.source_google.price_level = body.result.price_level;
+            newPlace.source_google.url = body.result.url;
+            if (typeof body.result.website == 'undefined') {
+                newPlace.source_google.website = "";
+            } else {
+                newPlace.source_google.website = body.result.website;
+            }
+            newPlace.source_google.types = body.result.types;
+            newPlace.type = body.result.types[0];
+            newPlace.source_google.utc_offset = body.result.utc_offset;
+            newPlace.source_google.vicinity = body.result.vicinity;
+            deferred.resolve(newPlace)
+        } else {
+            deferred.resolve(null)
+        }
+    });
+    return deferred.promise;
 }
 
 //server port 
