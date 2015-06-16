@@ -1,6 +1,6 @@
 import json
 import urllib
-import numpy
+import numpy as np
 import cv2
 
 
@@ -33,19 +33,43 @@ def getFromS3(url):
 
 #Extract Foreground: input image, output foreground image
 def extractForeground(image):
+    print "TODO implement extractForeground"
     return image
 
 
 #K-mean Segmentation: input image, output segmented image
 def kMeanSegmentation(image):
+    print "TODO implement kMeanSegmentation"
     return image
 
 
 #Find Blobs: input image, output array of blob centers
 def findBlobs(image):
+    print "TODO implement findBlobs"
+
+    # Convert to grayscale
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Set up the detector with default parameters.
+    detector = cv2.SimpleBlobDetector()
+
+    # Detect blobs.
+    keypoints = detector.detect(image)
+
+    # Draw detected blobs as red circles.
+    # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
+    im_with_keypoints = cv2.drawKeypoints(image, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+    # Show keypoints
+    cv2.imshow("Keypoints", im_with_keypoints)
+    cv2.waitKey(0)
     return []
 
 
 #Find Faces: input image, output array of face centers
 def findFaces(image):
+    print "TODO implement findFaces"
     return []
+
+def cv2version():
+    return cv2.__version__

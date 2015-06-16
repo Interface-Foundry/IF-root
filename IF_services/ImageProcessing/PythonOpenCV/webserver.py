@@ -24,4 +24,5 @@ class FindItems(resource.Resource):
 
 endpoints.serverFromString(reactor, "tcp:9999").listen(server.Site(FindItems()))
 print "Python OpenCV processing server running on port 9999"
+print "Using OpenCV python module version " + ifopencv.cv2version()
 reactor.run()
