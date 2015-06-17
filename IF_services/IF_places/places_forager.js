@@ -1,15 +1,9 @@
-// https://maps.googleapis.com/maps/api/place/textsearch/json?query=cafe+New+York+food&sensor=false&location=40.67,-73.94&radius=100&key=AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4
-// ChIJ85ZfVFcPK4cRuwSHLukcrAA
 var express = require('express'),
     app = module.exports.app = express();
 var request = require('request');
 var logger = require('morgan');
 var async = require('async');
 var fs = require('fs');
-var http = require('http');
-var im = require("imagemagick");
-var crypto = require('crypto');
-var AWS = require('aws-sdk');
 var urlify = require('urlify').create({
     addEToUmlauts: true,
     szToSs: true,
@@ -18,7 +12,7 @@ var urlify = require('urlify').create({
     trim: true
 });
 var q = require('q');
-var querystring = require('querystring')
+
 
 //Default Place style
 var forumStyle = require('./forum_theme.json');
@@ -48,45 +42,16 @@ global.config = require('../../config');
 mongoose.connect(global.config.mongodb.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
-//---------------//
-///////////
-//Require Request Module for making api calls to meetup
+
+
 var request = require('request');
-
-// var forumStyle = require('./forum_theme.json');
-
 var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
-
-/*
-  CREATED FILE FOR AWS KEYS:
-
-  You need to set up your AWS security credentials before the sample code is able to connect to AWS. 
-  You can do this by creating a file named "credentials" at ~/.aws/ and saving the following lines in the file:
-
-  [default]
-  aws_access_key_id = <your access key id>
-  aws_secret_access_key = <your secret key>
-
-  File contents:
-
-  [default]
-  aws_access_key_id = AKIAJZ4N55EN4XBYAG2Q
-  aws_secret_access_key = /lx51QZDgPdlSs/wQVJPZ5yL9sm5/4m2Rbng9EoD
-
-*/
-
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
 var zipLow = 10001;
 var zipHigh = 99950;
-
 var requestNum = 0;
-
-
-// var zipLow = 92867;
-// var zipHigh = 92868;
-
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 
 //search places in loops
@@ -95,9 +60,7 @@ async.whilst(
         return true
     },
     function(callback) {
-
         var count = zipLow;
-
         async.whilst(
             function() {
                 return count != zipHigh;
@@ -146,11 +109,11 @@ async.whilst(
 function searchPlaces(coords, fin) {
     //****Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1]).then(function(results) {
-            if (results.length > 20) {
-                //Limit result set for testing purposes
-                results = results.slice(0, 19)
-                    // console.log('Got results!', results.length)
-            }
+            // if (results.length > 20) {
+            //     //Limit result set for testing purposes
+            //     results = results.slice(0, 19)
+            //         // console.log('Got results!', results.length)
+            // }
             async.each(results, function(place, done) {
                         var newPlace = null;
                         async.series([
@@ -228,12 +191,8 @@ function searchPlaces(coords, fin) {
                             ],
                             //final callback in series
                             function(err, results) {
-
                                 done()
-
-
                             }); //END OF ASYNC SERIES
-
                     },
                     function() {
                         console.log('Finished set, next set..');
@@ -252,14 +211,9 @@ function radarSearch(lat, lng) {
     var radius = 50000,
         types = 'clothing_store',
         key = googleAPI,
-        // location= lat.toString() + ',' + lng.toString();
         location = lng + ',' + lat
-
-    // https://maps.googleapis.com/maps/api/place/radarsearch/json?location=51.503186,-0.126446&radius=5000&types=museum&key=API_KEY
     var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?radius=" + radius + '&types=' + types + '&location=' + location + '&key=' + googleAPI
     console.log('Radar searching..')
-
-
     request({
         uri: url,
         json: true
@@ -281,9 +235,6 @@ function radarSearch(lat, lng) {
             console.log('Radar Search request error: ', error)
         }
     })
-
-
-
     return deferred.promise;
 }
 
