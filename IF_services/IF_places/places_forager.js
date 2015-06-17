@@ -77,12 +77,14 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, function() {
                         count++;
-                        setTimeout(callback, 4000); // Wait before going on to the next zip
+                        wait(callback, 3000); // Wait before going on to the next zip
                     })
+                },function(err) {
+                  fin();
                 });
             },
             function(err) {
-                setTimeout(callback, 10000); // Wait before looping over the zip again
+                wait(callback, 10000); // Wait before looping over the zip again
             }
         );
     },
@@ -99,7 +101,7 @@ async.whilst(
             offsetCounter = offsetCounter + 20;
         }
 
-        setTimeout(callback, 10000); // Wait before looping over the zip again
+        wait(callback, 10000); // Wait before looping over the zip again
 
     }
 );
@@ -107,7 +109,7 @@ async.whilst(
 
 //searches google places
 function searchPlaces(coords, fin) {
-    //****Radar search places for max 200 results and get place_ids
+    //Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1]).then(function(results) {
             // if (results.length > 20) {
             //     //Limit result set for testing purposes
@@ -147,6 +149,8 @@ function searchPlaces(coords, fin) {
                                             newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lng);
                                             newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lat);
                                             newPlace.loc.type = 'Point';
+                                            newPlace.tags = [];
+                                            newPlace.tags.push('clothing');
                                             saveStyle(newPlace).then(function() { //creating new style to add to landmark
                                                 callback(null)
                                             });
@@ -158,7 +162,6 @@ function searchPlaces(coords, fin) {
                                 },
                                 //Now fill in the details of the place
                                 function(callback) {
-
                                     if (newPlace == null) {
                                         // console.log('Not a new place')
                                         callback(null);
@@ -172,8 +175,11 @@ function searchPlaces(coords, fin) {
                                                     newPlace.id = output;
                                                     callback(null);
                                                 })
+                                            },function(err) {
+                                              console.log('Details ERROR', err)
+                                              callback(null);
                                             })
-                                        }, 200);
+                                        }, 100);
                                     }
                                 },
                                 function(callback) {
@@ -312,14 +318,21 @@ function getLatLong(zipcode, callback) {
             uri: string
         },
         function(error, response, body) {
-            var parseTest = JSON.parse(body);
-            if (parseTest.features && parseTest.features.length) {
-                if (parseTest.features[0]) {
-                    var results = JSON.parse(body).features[0].center;
-                    results[0].toString();
-                    results[1].toString();
-                    deferred.resolve(results)
+
+            if (!error && response.statusCode == 200) {
+                var parseTest = JSON.parse(body);
+                if (parseTest.features && parseTest.features.length) {
+                    if (parseTest.features[0]) {
+                        var results = JSON.parse(body).features[0].center;
+                        results[0].toString();
+                        results[1].toString();
+                        console.log('lat long: ', results)
+                        deferred.resolve(results)
+                    }
                 }
+            } else {
+               console.log("Get Lat Long ERROR", error);
+            deferred.reject(error)
             }
         });
     return deferred.promise
