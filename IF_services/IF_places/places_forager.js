@@ -18,6 +18,7 @@ var urlify = require('urlify').create({
     trim: true
 });
 var q = require('q');
+var querystring = require('querystring')
 
 //Default Place style
 var forumStyle = require('./forum_theme.json');
@@ -75,7 +76,7 @@ var cloudMapID = 'interfacefoundry.jh58g2al';
 
 */
 
-var googleAPI = 'AIzaSyCEtavbQS0Qo_lWF70njqYRfLhIMXJbndw';
+var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
 var zipLow = 1001;
 var zipHigh = 99950;
@@ -113,7 +114,7 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, function() {
                         count++;
-                        setTimeout(callback, 6000); // Wait before going on to the next tag
+                        setTimeout(callback, 1000); // Wait before going on to the next tag
                     })
                 });
             },
@@ -143,154 +144,103 @@ async.whilst(
 
 //searches google places
 function searchPlaces(coords, fin) {
+    //Change this to q promise, its better
 
-    async.waterfall([
-        //****Radar search places for max 200 results and get place_ids
-        function(callback) {
-            // console.log('!', coords)
-            requestPlaces(coords[0], coords[1]).then(function(results) {
-                if (results.length > 10) {
-                    results.slice(0, 9)
-                }
-                callback(null, results)
-            })
-        },
-        //****Create landmark and fill in details of place for each place in result set
-        function(results, callback) {
-            //For each place in result set
-            console.log('Second function in waterfall results.length: ', results.length)
-            async.each(results, function(place, done) {
-                    //Check for anamoly zip codes in Google Places API text search, such as 01006 that give foreign country results
-                    // if (place.vicinity.toLowerCase().indexOf('united states') < 1) {
-                    //     //If foreign address result found
-                    //     console.log('Foreign Address: ', place.vicinity, '. Skipping set')
-                    //     fin()
-                    // }
-                    var newPlace = null;
-                    async.series([
-                            //First check if landmark exists, if not create a new one
-                            function(callback) {
-                              console.log('Checking for existing,creating landmark')
-                                //Check if place already exists in db, if not create new place
-                                landmarks.find({
-                                    'source_google.place_id': place.place_id
-                                }, function(err, matches) {
-                                    if (err) console.log(err)
-                                    if (matches.length < 1) {
-                                        // console.log('Creating Place!')
-                                        newPlace = new landmarks();
-                                        newPlace.world = true;
-                                        newPlace.source_google.place_id = place.place_id;
-                                        newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lat);
-                                        newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lng);
-                                        newPlace.loc.type = 'Point';
-                                        saveStyle(newPlace).then(function() { //creating new style to add to landmark
-                                            console.log('Created new landmark')
-                                            callback(null)
-                                        });
-                                    } else {
-                                        console.log('Matches exist, next place..')
-                                        callback(null)
-                                    }
-                                })
-                            },
-                            //Now fill in the details of the place
-                            function(callback) {
-                              console.log('Filling in details of place')
-                                if (newPlace == null) {
-                                    console.log('Not a new place')
-                                    callback(null);
-                                } else {
-                                 
-                                    addGoogleDetails(place.place_id, newPlace).then(function(place) {
-                                         console.log('Got Details!',place)
-                                        newPlace.name = place.name;
-                                        newPlace.source_google.address = place.vicinity;
-                                        newPlace.source_google.types = place.types;
-                                        //Add city name to landmark id and then uniqueize it
-                                        var nameCity = place.name.concat('_' + newPlace.source_google.city)
-                                        console.log('nameCity: ', nameCity)
-                                        uniqueID(nameCity).then(function(output) {
-                                            console.log('LEL IS THIS EVEN OUTPUT LIKE SRS', output)
-                                            newPlace.id = output;
-                                            callback(null);
-                                        })
-                                    })
-                                }
-                            },
-                            function(callback) {
-                                //Annnd save the place
-                                if (!newPlace) {
-                                    callback(null)
-                                } else {
-                                    newPlace.save(function(err, saved) {
-                                        if (err) console.log(err)
-                                            // console.log('Saved!')
-                                        callback(null)
-                                    })
-                                }
-                            }
-                        ],
-                        //final callback in series
-                        function(err, results) {
-                            done()
-                        }); //END OF ASYNC SERIES
-                }, function() {
-                    console.log('Finished set, next set..');
-                    console.log('Requested ', requestNum, ' times.');
-                    fin()
-                }) //END OF ASYNC EACH
+    //****Radar search places for max 200 results and get place_ids
+    radarSearch(coords[0], coords[1]).then(function(results) {
+        if (results.length > 10) {
+            //Limit result set for testing purposes
+            results = results.slice(0, 10)
+            console.log('Got results!', results.length)
         }
-    ], function(err, results) {
-        console.log('SUPER FINISHED SHOULD NOT HIT HIS')
-            // result now equals 'done'
-    });
-
-
-
-
+        async.each(results, function(place, done) {
+                var newPlace = null;
+                async.series([
+                        //First check if landmark exists, if not create a new one
+                        function(callback) {
+                            console.log('Checking if place already in db...')
+                                //Check if place already exists in db, if not create new place
+                            landmarks.find({
+                                'source_google.place_id': place.place_id
+                            }, function(err, matches) {
+                                if (err) console.log(err)
+                                if (matches.length < 1) {
+                                    console.log('Creating Place!')
+                                    newPlace = new landmarks();
+                                    newPlace.world = true;
+                                    newPlace.source_google.place_id = place.place_id;
+                                    newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lat);
+                                    newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lng);
+                                    newPlace.loc.type = 'Point';
+                                    saveStyle(newPlace).then(function() { //creating new style to add to landmark
+                                        // console.log('Created new landmark')
+                                        callback(null)
+                                    });
+                                } else {
+                                    console.log('Matches exist, next place..')
+                                    callback(null)
+                                }
+                            })
+                        },
+                        //Now fill in the details of the place
+                        function(callback) {
+                            console.log('Filling in details of place')
+                            if (newPlace == null) {
+                                // console.log('Not a new place')
+                                callback(null);
+                            } else {
+                                addGoogleDetails(newPlace).then(function(place) {
+                                    //Add city name to landmark id and then uniqueize it
+                                    var nameCity = place.name.concat('_' + newPlace.source_google.city)
+                                    uniqueID(nameCity).then(function(output) {
+                                        newPlace.id = output;
+                                        callback(null);
+                                    })
+                                })
+                            }
+                        },
+                        function(callback) {
+                            //Annnd save the place
+                            if (!newPlace) {
+                                callback(null)
+                            } else {
+                                newPlace.save(function(err, saved) {
+                                    if (err) console.log(err)
+                                        // console.log('Saved!')
+                                    callback(null)
+                                })
+                            }
+                        }
+                    ],
+                    //final callback in series
+                    function(err, results) {
+                        done()
+                    }); //END OF ASYNC SERIES
+            }, function() {
+                console.log('Finished set, next set..');
+                console.log('Requested ', requestNum, ' times.');
+                fin()
+            }) //END OF ASYNC EACH
+    },function(err){
+      console.log('No radar results, err: ', err)
+      fin()
+    })
 }
 
-
-
-// var more = false;
-// var finalset = []
-
-// async.whilst(
-//     function() {
-//         return more = true;
-//     },
-//     function(callback) {
-//         requestPlaces().then(function() {
-//             callback();
-//         }, function(err) {
-//             if (err) console.log('asycn whilst error: ', err)
-//             callback();
-//         })
-//     },
-//     function(err) {}
-// );
-
-
-function requestPlaces(lat, lng) {
+function radarSearch(lat, lng) {
     var deferred = q.defer();
-
-    var location = '40.7410986,-73.9888682'
-    var qs = {
-        location: location,
-        radius: 50000,
-        types: 'clothing_store',
-        key: googleAPI
-    }
+    var radius = 50000,
+        types = 'clothing_store',
+        key = googleAPI,
+        // location= lat.toString() + ',' + lng.toString();
+        location = lat+','+lng
 
     // https://maps.googleapis.com/maps/api/place/radarsearch/json?location=51.503186,-0.126446&radius=5000&types=museum&key=API_KEY
-    var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?"
+    var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?radius=" + radius + '&types=' + types + '&location=' + location + '&key=' + googleAPI
 
     request({
         uri: url,
-        json: true,
-        useQuerystring: true,
-        qs: qs
+        json: true
     }, function(error, response, body) {
         requestNum++;
         var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
@@ -298,43 +248,39 @@ function requestPlaces(lat, lng) {
             //Add results to previous results
             // console.log('request results: ', body)
             deferred.resolve(body.results);
-           
+
         } else {
             if (error) console.log(error)
-            console.log("no valid results",response);
+            console.log("no valid results", error);
             deferred.reject();
         }
     })
 
-     return deferred.promise;
+    return deferred.promise;
 }
 
 
-function addGoogleDetails(placeID, newPlace) {
-  console.log('hitting addGoogleDetails, placeID: ',placeID, 'newPlace: ',newPlace)
+function addGoogleDetails(newPlace) {
     var deferred = q.defer();
-    var queryURLToGetDetails = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + googleAPI;
+    var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + newPlace.source_google.place_id + "&key=" + googleAPI;
 
     request({
-        uri: queryURLToGetDetails,
+        uri: url,
         json: true
     }, function(error, response, body) {
         requestNum++;
-        // console.log("Queried Google details for", name, queryURLToGetDetails);
-
         if (!error && response.statusCode == 200) {
-
+            newPlace.name = body.result.name
             if (typeof body.result.address_components == 'undefined') {
                 newPlace.source_google.city = ''
             } else {
-                // console.log('city: ',body.result.address_components[2].long_name)
                 if (body.result.address_components[2].long_name == 'united_states') {
                     newPlace.source_google.city == body.result.address_components[1].long_name
                 } else {
                     newPlace.source_google.city = body.result.address_components[2].long_name
                 }
             }
-
+            console.log("Details query success", newPlace.source_google.city);
             newPlace.source_google.icon = body.result.icon;
             if (typeof body.result.opening_hours == 'undefined') {
                 newPlace.source_google.opening_hours = "";
@@ -342,7 +288,6 @@ function addGoogleDetails(placeID, newPlace) {
                 newPlace.source_google.opening_hours = JSON.stringify(body.result.opening_hours.weekday_text);
                 newPlace.open_now = body.result.opening_hours.open_now;
             }
-
             if (typeof body.result.international_phone_number == 'undefined') {
                 newPlace.source_google.international_phone_number = "";
             } else {
@@ -358,10 +303,11 @@ function addGoogleDetails(placeID, newPlace) {
             newPlace.source_google.types = body.result.types;
             newPlace.type = body.result.types[0];
             newPlace.source_google.utc_offset = body.result.utc_offset;
-            newPlace.source_google.vicinity = body.result.vicinity;
+            newPlace.source_google.address = body.result.vicinity;
             deferred.resolve(newPlace)
         } else {
-            deferred.resolve(null)
+            console.log("Details query FAIL");
+            deferred.reject(error)
         }
     });
     return deferred.promise;
@@ -395,7 +341,6 @@ function getLatLong(zipcode, callback) {
 
 
 function uniqueID(name) {
-  console.log('hitting uniqueID')
     var deferred = q.defer();
     var uniqueIDer = urlify(name);
     urlify(uniqueIDer, function() {
@@ -405,7 +350,6 @@ function uniqueID(name) {
             if (data) {
                 var uniqueNumber = 1;
                 var newUnique;
-
                 async.forever(function(next) {
                         var uniqueNum_string = uniqueNumber.toString();
                         newUnique = data.id + uniqueNum_string;
@@ -421,14 +365,16 @@ function uniqueID(name) {
                         });
                     },
                     function() {
+                      console.log(newUnique)
                         deferred.resolve(newUnique)
                     });
             } else {
+                 console.log(uniqueIDer)
                 deferred.resolve(uniqueIDer)
             }
         });
     });
-    console.log('inside uniqueID', deferred.promise)
+    console.log('uniqueID end', deferred.promise)
     return deferred.promise
 }
 
