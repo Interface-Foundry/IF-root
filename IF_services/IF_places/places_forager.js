@@ -49,8 +49,9 @@ var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
-var zipLow = 10001;
-var zipHigh = 99950;
+var zipLow = 10013;
+var zipHigh = 11692;
+// var zipHigh = 99950;
 var requestNum = 0;
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 
@@ -79,8 +80,10 @@ async.whilst(
                         count++;
                         wait(callback, 3000); // Wait before going on to the next zip
                     })
-                },function(err) {
-                  fin();
+                }, function(err) {
+                    console.log('Could not get lat long for: ' + zipCodeQuery + '.. skipping to next zipcode.')
+                    count++;
+                    callback()
                 });
             },
             function(err) {
@@ -116,7 +119,7 @@ function searchPlaces(coords, fin) {
             //     results = results.slice(0, 19)
             //         // console.log('Got results!', results.length)
             // }
-            async.each(results, function(place, done) {
+            async.eachSeries(results, function(place, done) {
                         var newPlace = null;
                         async.series([
                                 //First check if landmark exists, if not create a new one
@@ -127,6 +130,7 @@ function searchPlaces(coords, fin) {
                                     }, function(err, matches) {
                                         if (err) console.log(err)
                                         if (matches.length < 1) {
+                                            // console.log('No match found for ', place.place_id)
                                             newPlace = new landmarks();
                                             newPlace.world = true;
                                             newPlace.newStatus = true;
@@ -151,7 +155,13 @@ function searchPlaces(coords, fin) {
                                             newPlace.loc.type = 'Point';
                                             newPlace.tags = [];
                                             newPlace.tags.push('clothing');
+                                            newPlace.category = {
+                                                name: 'place',
+                                                avatar: '',
+                                                hiddenPresent: false
+                                            }
                                             saveStyle(newPlace).then(function() { //creating new style to add to landmark
+                                                // console.log('newPlace: ',newPlace)
                                                 callback(null)
                                             });
                                         } else {
@@ -162,22 +172,27 @@ function searchPlaces(coords, fin) {
                                 },
                                 //Now fill in the details of the place
                                 function(callback) {
+                                    // console.log('Next callback')
                                     if (newPlace == null) {
                                         // console.log('Not a new place')
                                         callback(null);
                                     } else {
                                         wait(function() {
-                                            // console.log('Waiting..')
+                                            // console.log('New Place')
+                                            var rcount = 1;
+                                            // console.log('Requesting details')
                                             addGoogleDetails(newPlace).then(function(place) {
+                                                // console.log('place.name is :', place.name, 'city is: ', newPlace.source_google.city)
                                                 //Add city name to landmark id and then uniqueize it
+
                                                 uniqueID(place.name, newPlace.source_google.city).then(function(output) {
                                                     // console.log('output: ', output)
                                                     newPlace.id = output;
                                                     callback(null);
                                                 })
-                                            },function(err) {
-                                              console.log('Details ERROR', err)
-                                              callback(null);
+                                            }, function(err) {
+                                                console.log('Details ERROR', err)
+                                                callback(null);
                                             })
                                         }, 100);
                                     }
@@ -187,6 +202,7 @@ function searchPlaces(coords, fin) {
                                     if (!newPlace) {
                                         callback(null)
                                     } else {
+                                        console.log('Saved ',newPlace.id)
                                         newPlace.save(function(err, saved) {
                                             if (err) console.log(err)
                                                 // console.log('Saved: ', newPlace.id)
@@ -197,6 +213,7 @@ function searchPlaces(coords, fin) {
                             ],
                             //final callback in series
                             function(err, results) {
+                                // console.log('Final callback', results)
                                 done()
                             }); //END OF ASYNC SERIES
                     },
@@ -214,7 +231,7 @@ function searchPlaces(coords, fin) {
 
 function radarSearch(lat, lng) {
     var deferred = q.defer();
-    var radius = 50000,
+    var radius = 500,
         types = 'clothing_store',
         key = googleAPI,
         location = lng + ',' + lat
@@ -224,21 +241,13 @@ function radarSearch(lat, lng) {
         uri: url,
         json: true
     }, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
+        if ((!error) && (response.statusCode == 200) && (body.results.length >= 1)) {
             requestNum++;
-            var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
-            if (resultsValid) {
-                //Add results to previous results
-                // console.log('request results: ', body)
-                deferred.resolve(body.results);
-
-            } else {
-                if (error) console.log(error)
-                console.log("no valid results", error);
-                deferred.reject();
-            }
+            console.log('Radar search success: ', body.results.length)
+            deferred.resolve(body.results);
         } else {
             console.log('Radar Search request error: ', error)
+            deferred.reject();
         }
     })
     return deferred.promise;
@@ -248,7 +257,8 @@ function radarSearch(lat, lng) {
 function addGoogleDetails(newPlace) {
     var deferred = q.defer();
     var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + newPlace.source_google.place_id + "&key=" + googleAPI;
-    console.log('Retreiving details..')
+
+
     request({
         uri: url,
         json: true
@@ -256,22 +266,30 @@ function addGoogleDetails(newPlace) {
         requestNum++;
 
         if (!error && response.statusCode == 200) {
-            // console.log('Details Success.')
+
+            if (typeof body.result.address_components == 'undefined') {
+                newPlace.source_google.city = ''
+            } else if (body.result.address_components[2] && body.result.address_components[2].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.source_google.city = body.result.address_components[2].long_name
+            } else if (body.result.address_components[1] && body.result.address_components[1].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.source_google.city = body.result.address_components[1].long_name
+            } else if (body.result.address_components[0] && body.result.address_components[0].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.source_google.city = body.result.address_components[0].long_name
+            } else {
+                newPlace.source_google.city = ''
+            }
+
             if (typeof body.result.name == 'undefined') {
                 newPlace.name = body.result.vicinity;;
             } else {
                 newPlace.name = body.result.name
             }
-            if (typeof body.result.address_components == 'undefined') {
-                newPlace.source_google.city = ''
+
+            if (typeof body.result.icon == 'undefined') {
+                newPlace.source_google.icon = "";
             } else {
-                if (body.result.address_components[2].long_name == 'united_states') {
-                    newPlace.source_google.city == body.result.address_components[3].long_name
-                } else {
-                    newPlace.source_google.city = body.result.address_components[2].long_name
-                }
+                newPlace.source_google.icon = body.result.icon;
             }
-            newPlace.source_google.icon = body.result.icon;
             if (typeof body.result.opening_hours == 'undefined') {
                 newPlace.source_google.opening_hours = "";
             } else {
@@ -283,26 +301,29 @@ function addGoogleDetails(newPlace) {
             } else {
                 newPlace.source_google.international_phone_number = body.result.international_phone_number;
             }
-            newPlace.source_google.price_level = body.result.price_level;
-            newPlace.source_google.url = body.result.url;
+            // newPlace.source_google.price_level = body.result.price_level;
+            // newPlace.source_google.url = body.result.url;
             if (typeof body.result.website == 'undefined') {
                 newPlace.source_google.website = "";
             } else {
                 newPlace.source_google.website = body.result.website;
             }
-            newPlace.source_google.types = body.result.types;
-            newPlace.type = body.result.types[0];
-            newPlace.category = {
-                name: 'place',
-                avatar: '',
-                hiddenPresent: false
+            if (typeof body.result.types == 'undefined') {
+                newPlace.source_google.types = "";
+                newPlace.type = 'clothing_store';
+            } else {
+                newPlace.source_google.types = body.result.types;
+                newPlace.type = body.result.types[0];
             }
-            newPlace.source_google.utc_offset = body.result.utc_offset;
-            newPlace.source_google.address = body.result.vicinity;
-
+            if (typeof body.result.vicinity == 'undefined') {
+                newPlace.source_google.address = "";
+            } else {
+                newPlace.source_google.address = body.result.vicinity;
+            }
+            // console.log('in details: ', newPlace)
             deferred.resolve(newPlace)
         } else {
-            console.log("Details query FAIL", error);
+            console.log("Details query FAIL", error, response.statusCode);
             deferred.reject(error)
         }
     });
@@ -310,6 +331,7 @@ function addGoogleDetails(newPlace) {
 }
 
 function getLatLong(zipcode, callback) {
+    //10014 is a problem, returns empty
     var deferred = q.defer();
     var string = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places-v1/';
     string = string + '+' + zipcode;
@@ -321,18 +343,22 @@ function getLatLong(zipcode, callback) {
 
             if (!error && response.statusCode == 200) {
                 var parseTest = JSON.parse(body);
-                if (parseTest.features && parseTest.features.length) {
-                    if (parseTest.features[0]) {
+                // console.log('parseTest.features[0]: ',parseTest.features[0])
+                if (parseTest.features && parseTest.features[0].center.length > 1) {
+                    if (parseTest.features.length >= 1) {
                         var results = JSON.parse(body).features[0].center;
                         results[0].toString();
                         results[1].toString();
-                        console.log('lat long: ', results)
+                        console.log('lat long for ' + zipcode + ' : ', results)
                         deferred.resolve(results)
                     }
+                } else {
+                    console.log('getLatLong failed for zipcode: ' + zipcode)
+                    deferred.reject()
                 }
             } else {
-               console.log("Get Lat Long ERROR", error);
-            deferred.reject(error)
+                console.log("Get Lat Long ERROR", error);
+                deferred.reject(error)
             }
         });
     return deferred.promise
@@ -344,7 +370,13 @@ function getLatLong(zipcode, callback) {
 function uniqueID(name, city) {
     var deferred = q.defer();
     var name = urlify(name)
-    var city = urlify(city)
+    if (city == '') {
+        var city = Math.floor(Math.random() * 6) + 1
+        city = city.toString();
+    } else {
+        var city = urlify(city)
+    }
+
     var nameCity = name.concat('_' + city)
     var unique = nameCity.toLowerCase();
     // console.log('unique: ', unique)

@@ -206,7 +206,6 @@ var landmarkSchema = new Schema({
         opening_hours: [String],
         open_now: Boolean,
         website: String,
-        utc_offset: Number,
         city: String
     },
     source_yelp_on: Boolean,
