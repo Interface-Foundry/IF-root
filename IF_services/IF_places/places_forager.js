@@ -58,7 +58,7 @@ var requestNum = 0;
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
 
 //START
-var zipLow = 10119;
+var zipLow = 10001;
 //END
 var zipHigh = 11692;
 
@@ -275,6 +275,38 @@ function addGoogleDetails(newPlace) {
 
         if (!error && response.statusCode == 200) {
 
+            //NAME
+            if (typeof body.result.name == 'undefined') {
+                newPlace.name = body.result.vicinity;;
+            } else {
+                newPlace.name = body.result.name
+            }
+            //TYPE
+            if (typeof body.result.types == 'undefined') {
+                newPlace.source_google.types = "";
+                newPlace.type = 'clothing_store';
+            } else {
+                newPlace.source_google.types = body.result.types;
+                newPlace.type = body.result.types[0];
+            }
+            //CITY
+            if (typeof body.result.address_components == 'undefined') {
+                newPlace.source_google.city = ''
+            } else if (body.result.address_components[2] && body.result.address_components[2].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.source_google.city = body.result.address_components[2].long_name
+            } else if (body.result.address_components[1] && body.result.address_components[1].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.source_google.city = body.result.address_components[1].long_name
+            } else if (body.result.address_components[0] && body.result.address_components[0].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.source_google.city = body.result.address_components[0].long_name
+            } else {
+                newPlace.source_google.city = ''
+            }
+            //VICINITY
+            if (typeof body.result.vicinity == 'undefined') {
+                newPlace.source_google.address = "";
+            } else {
+                newPlace.source_google.address = body.result.vicinity;
+            }
             //PHONE
             if (typeof body.result.international_phone_number == 'undefined') {
                 newPlace.source_google.international_phone_number = "";
@@ -296,7 +328,6 @@ function addGoogleDetails(newPlace) {
             } else {
                 newPlace.source_google.website = body.result.website;
             }
-
             //URL
             if (typeof body.result.url == 'undefined') {
                 newPlace.source_google.url = "";
@@ -307,47 +338,13 @@ function addGoogleDetails(newPlace) {
             if (typeof body.result.price_level == 'undefined') {
                 newPlace.source_google.price_level = null;
             } else {
-                console.log('PRICE LEVEL: ', body.result.price_level  )
-                newPlace.source_google.price_level = body.result.price_level 
+                newPlace.source_google.price_level = body.result.price_level
             }
-            // newPlace.source_google.price_level = body.result.price_level;
-
-
-            if (typeof body.result.address_components == 'undefined') {
-                newPlace.source_google.city = ''
-            } else if (body.result.address_components[2] && body.result.address_components[2].long_name.toLowerCase().indexOf('united states') < 1) {
-                newPlace.source_google.city = body.result.address_components[2].long_name
-            } else if (body.result.address_components[1] && body.result.address_components[1].long_name.toLowerCase().indexOf('united states') < 1) {
-                newPlace.source_google.city = body.result.address_components[1].long_name
-            } else if (body.result.address_components[0] && body.result.address_components[0].long_name.toLowerCase().indexOf('united states') < 1) {
-                newPlace.source_google.city = body.result.address_components[0].long_name
-            } else {
-                newPlace.source_google.city = ''
-            }
-
-            if (typeof body.result.name == 'undefined') {
-                newPlace.name = body.result.vicinity;;
-            } else {
-                newPlace.name = body.result.name
-            }
-
+            //ICON
             if (typeof body.result.icon == 'undefined') {
                 newPlace.source_google.icon = "";
             } else {
                 newPlace.source_google.icon = body.result.icon;
-            }
-
-            if (typeof body.result.types == 'undefined') {
-                newPlace.source_google.types = "";
-                newPlace.type = 'clothing_store';
-            } else {
-                newPlace.source_google.types = body.result.types;
-                newPlace.type = body.result.types[0];
-            }
-            if (typeof body.result.vicinity == 'undefined') {
-                newPlace.source_google.address = "";
-            } else {
-                newPlace.source_google.address = body.result.vicinity;
             }
             // console.log('in details: ', newPlace)
             deferred.resolve(newPlace)
