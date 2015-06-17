@@ -1,3 +1,7 @@
+//TODO 
+//ADD MORE DETAILS FOR EACH STORE
+//STORE LATLNG/ZIPCODE PAIR IN MONGO
+
 var express = require('express'),
     app = module.exports.app = express();
 var request = require('request');
@@ -49,7 +53,7 @@ var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
-var zipLow = 10001;
+var zipLow = 10041;
 var zipHigh = 11692;
 // var zipHigh = 99950;
 var requestNum = 0;
@@ -76,12 +80,12 @@ async.whilst(
                 }
                 console.log('Searching zipcode: ', zipCodeQuery)
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
-                    searchPlaces(coords, function() {
+                    searchPlaces(coords, zipCodeQuery,function() {
                         count++;
-                        wait(callback, 2000); // Wait before going on to the next zip
+                        wait(callback, 1000); // Wait before going on to the next zip
                     })
                 }, function(err) {
-                    console.log('Could not get lat long for: ' + zipCodeQuery + '.. skipping to next zipcode.')
+                    // console.log('ERROR: Could not get lat long for: ' + zipCodeQuery+err)
                     count++;
                     callback()
                 });
@@ -111,7 +115,7 @@ async.whilst(
 
 
 //searches google places
-function searchPlaces(coords, fin) {
+function searchPlaces(coords, zipcode, fin) {
     //Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1]).then(function(results) {
             // if (results.length > 20) {
@@ -119,7 +123,9 @@ function searchPlaces(coords, fin) {
             //     results = results.slice(0, 19)
             //         // console.log('Got results!', results.length)
             // }
+            var saveCount = 0
             async.eachSeries(results, function(place, done) {
+                        
                         var newPlace = null;
                         async.series([
                                 //First check if landmark exists, if not create a new one
@@ -202,7 +208,8 @@ function searchPlaces(coords, fin) {
                                     if (!newPlace) {
                                         callback(null)
                                     } else {
-                                        console.log('Saved ',newPlace.id)
+                                        console.log('Saved ', newPlace.id)
+                                        saveCount++;
                                         newPlace.save(function(err, saved) {
                                             if (err) console.log(err)
                                                 // console.log('Saved: ', newPlace.id)
@@ -213,12 +220,12 @@ function searchPlaces(coords, fin) {
                             ],
                             //final callback in series
                             function(err, results) {
-                                // console.log('Final callback', results)
+
                                 done()
                             }); //END OF ASYNC SERIES
                     },
                     function() {
-                        console.log('Finished set, next set..');
+                        console.log('Finished..created ' + saveCount + ' new stores for zipcode: ',zipcode)
                         console.log('Requested ', requestNum, ' times.');
                         fin()
                     }) //END OF ASYNC EACH
@@ -340,11 +347,10 @@ function getLatLong(zipcode, callback) {
             uri: string
         },
         function(error, response, body) {
-
             if (!error && response.statusCode == 200) {
                 var parseTest = JSON.parse(body);
                 // console.log('parseTest.features[0]: ',parseTest.features[0])
-                if (parseTest.features && parseTest.features[0].center.length > 1) {
+                if (parseTest.features[0] && parseTest.features[0].center.length > 1) {
                     if (parseTest.features.length >= 1) {
                         var results = JSON.parse(body).features[0].center;
                         results[0].toString();
@@ -353,11 +359,11 @@ function getLatLong(zipcode, callback) {
                         deferred.resolve(results)
                     }
                 } else {
-                    console.log('getLatLong failed for zipcode: ' + zipcode)
+                    console.log('ERROR for ',zipcode,' body: ',parseTest, error)
                     deferred.reject()
                 }
             } else {
-                console.log("Get Lat Long ERROR", error);
+                console.log('ERROR for ',zipcode,' body: ',parseTest,error)
                 deferred.reject(error)
             }
         });
