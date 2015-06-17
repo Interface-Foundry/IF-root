@@ -53,11 +53,14 @@ var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
-var zipLow = 10041;
-var zipHigh = 11692;
 // var zipHigh = 99950;
 var requestNum = 0;
 var offsetCounter = 0; //offset, increases by multiples of 20 until it reaches 600
+
+//START
+var zipLow = 10119;
+//END
+var zipHigh = 11692;
 
 //search places in loops
 async.whilst(
@@ -80,7 +83,7 @@ async.whilst(
                 }
                 console.log('Searching zipcode: ', zipCodeQuery)
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
-                    searchPlaces(coords, zipCodeQuery,function() {
+                    searchPlaces(coords, zipCodeQuery, function() {
                         count++;
                         wait(callback, 1000); // Wait before going on to the next zip
                     })
@@ -125,7 +128,7 @@ function searchPlaces(coords, zipcode, fin) {
             // }
             var saveCount = 0
             async.eachSeries(results, function(place, done) {
-                        
+
                         var newPlace = null;
                         async.series([
                                 //First check if landmark exists, if not create a new one
@@ -225,7 +228,7 @@ function searchPlaces(coords, zipcode, fin) {
                             }); //END OF ASYNC SERIES
                     },
                     function() {
-                        console.log('Finished..created ' + saveCount + ' new stores for zipcode: ',zipcode)
+                        console.log('Finished..created ' + saveCount + ' new stores for zipcode: ', zipcode)
                         console.log('Requested ', requestNum, ' times.');
                         fin()
                     }) //END OF ASYNC EACH
@@ -264,8 +267,6 @@ function radarSearch(lat, lng) {
 function addGoogleDetails(newPlace) {
     var deferred = q.defer();
     var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + newPlace.source_google.place_id + "&key=" + googleAPI;
-
-
     request({
         uri: url,
         json: true
@@ -273,6 +274,44 @@ function addGoogleDetails(newPlace) {
         requestNum++;
 
         if (!error && response.statusCode == 200) {
+
+            //PHONE
+            if (typeof body.result.international_phone_number == 'undefined') {
+                newPlace.source_google.international_phone_number = "";
+            } else {
+                newPlace.source_google.international_phone_number = body.result.international_phone_number;
+            }
+            //OPENING HOURS
+            if (typeof body.result.opening_hours == 'undefined') {
+                newPlace.source_google.opening_hours = "";
+            } else {
+                // console.log(body.result.opening_hours.weekday_text)
+                newPlace.source_google.opening_hours = body.result.opening_hours.weekday_text;
+                //Open now would need to be calculated on front-end
+                // newPlace.source_google.open_now = body.result.opening_hours.open_now;
+            }
+            //WEBSITE
+            if (typeof body.result.website == 'undefined') {
+                newPlace.source_google.website = "";
+            } else {
+                newPlace.source_google.website = body.result.website;
+            }
+
+            //URL
+            if (typeof body.result.url == 'undefined') {
+                newPlace.source_google.url = "";
+            } else {
+                newPlace.source_google.url = body.result.url;
+            }
+            //PRICE
+            if (typeof body.result.price_level == 'undefined') {
+                newPlace.source_google.price_level = null;
+            } else {
+                console.log('PRICE LEVEL: ', body.result.price_level  )
+                newPlace.source_google.price_level = body.result.price_level 
+            }
+            // newPlace.source_google.price_level = body.result.price_level;
+
 
             if (typeof body.result.address_components == 'undefined') {
                 newPlace.source_google.city = ''
@@ -297,24 +336,7 @@ function addGoogleDetails(newPlace) {
             } else {
                 newPlace.source_google.icon = body.result.icon;
             }
-            if (typeof body.result.opening_hours == 'undefined') {
-                newPlace.source_google.opening_hours = "";
-            } else {
-                newPlace.source_google.opening_hours = JSON.stringify(body.result.opening_hours.weekday_text);
-                newPlace.open_now = body.result.opening_hours.open_now;
-            }
-            if (typeof body.result.international_phone_number == 'undefined') {
-                newPlace.source_google.international_phone_number = "";
-            } else {
-                newPlace.source_google.international_phone_number = body.result.international_phone_number;
-            }
-            // newPlace.source_google.price_level = body.result.price_level;
-            // newPlace.source_google.url = body.result.url;
-            if (typeof body.result.website == 'undefined') {
-                newPlace.source_google.website = "";
-            } else {
-                newPlace.source_google.website = body.result.website;
-            }
+
             if (typeof body.result.types == 'undefined') {
                 newPlace.source_google.types = "";
                 newPlace.type = 'clothing_store';
@@ -359,11 +381,11 @@ function getLatLong(zipcode, callback) {
                         deferred.resolve(results)
                     }
                 } else {
-                    console.log('ERROR for ',zipcode,' body: ',parseTest, error)
+                    console.log('ERROR for ', zipcode)
                     deferred.reject()
                 }
             } else {
-                console.log('ERROR for ',zipcode,' body: ',parseTest,error)
+                console.log('ERROR for ')
                 deferred.reject(error)
             }
         });

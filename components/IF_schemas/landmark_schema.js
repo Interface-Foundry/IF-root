@@ -201,12 +201,13 @@ var landmarkSchema = new Schema({
         place_id: String,
         types: [String],
         address: String,
-        formatted_phone_number: String,
+        international_phone_number: String,
         icon: String,
         opening_hours: [String],
-        open_now: Boolean,
         website: String,
-        city: String
+        city: String,
+        url: String,
+        price_level: Number
     },
     source_yelp_on: Boolean,
     source_yelp: {
