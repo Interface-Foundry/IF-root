@@ -49,7 +49,7 @@ var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
-var zipLow = 10013;
+var zipLow = 10001;
 var zipHigh = 11692;
 // var zipHigh = 99950;
 var requestNum = 0;
@@ -78,7 +78,7 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, function() {
                         count++;
-                        wait(callback, 3000); // Wait before going on to the next zip
+                        wait(callback, 2000); // Wait before going on to the next zip
                     })
                 }, function(err) {
                     console.log('Could not get lat long for: ' + zipCodeQuery + '.. skipping to next zipcode.')
@@ -194,7 +194,7 @@ function searchPlaces(coords, fin) {
                                                 console.log('Details ERROR', err)
                                                 callback(null);
                                             })
-                                        }, 100);
+                                        }, 50);
                                     }
                                 },
                                 function(callback) {
