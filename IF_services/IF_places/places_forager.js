@@ -1,6 +1,7 @@
 //TODO 
-//ADD MORE DETAILS FOR EACH STORE
 //STORE LATLNG/ZIPCODE PAIR IN MONGO
+//Increase RADIUS for NON CITIES
+//Fix overall loop
 
 var express = require('express'),
     app = module.exports.app = express();
@@ -35,9 +36,6 @@ var mongoose = require('mongoose'),
     monguurl = require('monguurl');
 
 //----MONGOOOSE----//
-
-//var styleSchema = require('../../../components/IF_schemas/style_schema.js');
-// var styles = require('./style_schema.js');
 var landmarks = require('../../components/IF_schemas/landmark_schema.js');
 var styles = require('../../components/IF_schemas/style_schema.js');
 
@@ -275,6 +273,19 @@ function addGoogleDetails(newPlace) {
 
         if (!error && response.statusCode == 200) {
 
+            //ADDRESS
+            if (typeof body.result.address_components == 'undefined') {
+                newPlace.source_google.address = ''
+            } else {
+                var addy = ''
+                newPlace.source_google.address = body.result.address_components.forEach(function(el) {
+                  addy= addy +' '+el.long_name;
+                })
+                 newPlace.source_google.address = addy.trim()
+                // console.log('ADDRESS:', newPlace.source_google.address )
+            }
+
+
             //NAME
             if (typeof body.result.name == 'undefined') {
                 newPlace.name = body.result.vicinity;;
@@ -302,11 +313,11 @@ function addGoogleDetails(newPlace) {
                 newPlace.source_google.city = ''
             }
             //VICINITY
-            if (typeof body.result.vicinity == 'undefined') {
-                newPlace.source_google.address = "";
-            } else {
-                newPlace.source_google.address = body.result.vicinity;
-            }
+            // if (typeof body.result.vicinity == 'undefined') {
+            //     newPlace.source_google.address = "";
+            // } else {
+            //     newPlace.source_google.address = body.result.vicinity;
+            // }
             //PHONE
             if (typeof body.result.international_phone_number == 'undefined') {
                 newPlace.source_google.international_phone_number = "";
