@@ -114,7 +114,7 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, function() {
                         count++;
-                        setTimeout(callback, 1000); // Wait before going on to the next tag
+                        setTimeout(callback, 4000); // Wait before going on to the next tag
                     })
                 });
             },
@@ -144,36 +144,31 @@ async.whilst(
 
 //searches google places
 function searchPlaces(coords, fin) {
-    //Change this to q promise, its better
-
     //****Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1]).then(function(results) {
-        if (results.length > 10) {
+        if (results.length > 20) {
             //Limit result set for testing purposes
-            results = results.slice(0, 10)
-            console.log('Got results!', results.length)
+            results = results.slice(0, 19)
+            // console.log('Got results!', results.length)
         }
         async.each(results, function(place, done) {
                 var newPlace = null;
                 async.series([
                         //First check if landmark exists, if not create a new one
                         function(callback) {
-                            console.log('Checking if place already in db...')
-                                //Check if place already exists in db, if not create new place
+                            //Check if place already exists in db, if not create new place
                             landmarks.find({
                                 'source_google.place_id': place.place_id
                             }, function(err, matches) {
                                 if (err) console.log(err)
                                 if (matches.length < 1) {
-                                    console.log('Creating Place!')
                                     newPlace = new landmarks();
                                     newPlace.world = true;
                                     newPlace.source_google.place_id = place.place_id;
-                                    newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lat);
-                                    newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lng);
+                                    newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lng);
+                                    newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lat);
                                     newPlace.loc.type = 'Point';
                                     saveStyle(newPlace).then(function() { //creating new style to add to landmark
-                                        // console.log('Created new landmark')
                                         callback(null)
                                     });
                                 } else {
@@ -184,15 +179,17 @@ function searchPlaces(coords, fin) {
                         },
                         //Now fill in the details of the place
                         function(callback) {
-                            console.log('Filling in details of place')
                             if (newPlace == null) {
                                 // console.log('Not a new place')
                                 callback(null);
                             } else {
                                 addGoogleDetails(newPlace).then(function(place) {
+                                    if (place.name == undefined) {
+                                      console.log('PLACE NAME IS UNDEFINED: ',place)
+                                    }
                                     //Add city name to landmark id and then uniqueize it
-                                    var nameCity = place.name.concat('_' + newPlace.source_google.city)
-                                    uniqueID(nameCity).then(function(output) {
+                                    uniqueID(place.name, newPlace.source_google.city).then(function(output) {
+                                        console.log('output: ', output)
                                         newPlace.id = output;
                                         callback(null);
                                     })
@@ -206,7 +203,7 @@ function searchPlaces(coords, fin) {
                             } else {
                                 newPlace.save(function(err, saved) {
                                     if (err) console.log(err)
-                                        // console.log('Saved!')
+                                    console.log('Saved: ', newPlace.id)
                                     callback(null)
                                 })
                             }
@@ -221,9 +218,9 @@ function searchPlaces(coords, fin) {
                 console.log('Requested ', requestNum, ' times.');
                 fin()
             }) //END OF ASYNC EACH
-    },function(err){
-      console.log('No radar results, err: ', err)
-      fin()
+    }, function(err) {
+        console.log('No radar results, err: ', err)
+        fin()
     })
 }
 
@@ -233,26 +230,31 @@ function radarSearch(lat, lng) {
         types = 'clothing_store',
         key = googleAPI,
         // location= lat.toString() + ',' + lng.toString();
-        location = lat+','+lng
+        location = lng + ',' + lat
 
     // https://maps.googleapis.com/maps/api/place/radarsearch/json?location=51.503186,-0.126446&radius=5000&types=museum&key=API_KEY
     var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?radius=" + radius + '&types=' + types + '&location=' + location + '&key=' + googleAPI
-
+    console.log('Radar searching..')
     request({
         uri: url,
         json: true
     }, function(error, response, body) {
-        requestNum++;
-        var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
-        if (resultsValid) {
-            //Add results to previous results
-            // console.log('request results: ', body)
-            deferred.resolve(body.results);
+        if (!error && response.statusCode == 200) {
+            requestNum++;
+            setTimeout(null, 6000);
+            var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
+            if (resultsValid) {
+                //Add results to previous results
+                // console.log('request results: ', body)
+                deferred.resolve(body.results);
 
+            } else {
+                if (error) console.log(error)
+                console.log("no valid results", error);
+                deferred.reject();
+            }
         } else {
-            if (error) console.log(error)
-            console.log("no valid results", error);
-            deferred.reject();
+          console.log('Radar Search request error: ', error)
         }
     })
 
@@ -263,24 +265,29 @@ function radarSearch(lat, lng) {
 function addGoogleDetails(newPlace) {
     var deferred = q.defer();
     var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + newPlace.source_google.place_id + "&key=" + googleAPI;
-
+        console.log('Retreiving details..')
     request({
         uri: url,
         json: true
     }, function(error, response, body) {
         requestNum++;
+        setTimeout(null, 6000);
         if (!error && response.statusCode == 200) {
-            newPlace.name = body.result.name
+            console.log('Details Success.')
+            if (typeof body.result.name == 'undefined') {
+                newPlace.name = body.result.vicinity;;
+            } else {
+                newPlace.name = body.result.name
+            }
             if (typeof body.result.address_components == 'undefined') {
                 newPlace.source_google.city = ''
             } else {
                 if (body.result.address_components[2].long_name == 'united_states') {
-                    newPlace.source_google.city == body.result.address_components[1].long_name
+                    newPlace.source_google.city == body.result.address_components[3].long_name
                 } else {
                     newPlace.source_google.city = body.result.address_components[2].long_name
                 }
             }
-            console.log("Details query success", newPlace.source_google.city);
             newPlace.source_google.icon = body.result.icon;
             if (typeof body.result.opening_hours == 'undefined') {
                 newPlace.source_google.opening_hours = "";
@@ -306,7 +313,7 @@ function addGoogleDetails(newPlace) {
             newPlace.source_google.address = body.result.vicinity;
             deferred.resolve(newPlace)
         } else {
-            console.log("Details query FAIL");
+            console.log("Details query FAIL", error);
             deferred.reject(error)
         }
     });
@@ -322,14 +329,12 @@ function getLatLong(zipcode, callback) {
             uri: string
         },
         function(error, response, body) {
-            // console.log('getLatLng results: ', body)
             var parseTest = JSON.parse(body);
             if (parseTest.features && parseTest.features.length) {
                 if (parseTest.features[0]) {
                     var results = JSON.parse(body).features[0].center;
                     results[0].toString();
                     results[1].toString();
-                    console.log('in latlng', results)
                     deferred.resolve(results)
                 }
             }
@@ -340,19 +345,25 @@ function getLatLong(zipcode, callback) {
 
 
 
-function uniqueID(name) {
+function uniqueID(name, city) {
     var deferred = q.defer();
-    var uniqueIDer = urlify(name);
-    urlify(uniqueIDer, function() {
-        landmarks.findOne({
-            'id': uniqueIDer
+    var name = urlify(name)
+    var city = urlify(city)
+    var nameCity = name.concat('_'+city)
+    var unique = nameCity.toLowerCase();
+    console.log('unique: ', unique)
+    urlify(unique, function() {
+        landmarks.find({
+            'id': unique
         }, function(err, data) {
-            if (data) {
+          if (err) console.log('Match finding err, ',err)
+            if (data.length > 0) {
+                console.log('id already exists: ', data[0].id)
                 var uniqueNumber = 1;
-                var newUnique;
+                var newUnique 
                 async.forever(function(next) {
                         var uniqueNum_string = uniqueNumber.toString();
-                        newUnique = data.id + uniqueNum_string;
+                        newUnique = data[0].id + uniqueNum_string;
                         landmarks.findOne({
                             'id': newUnique
                         }, function(err, data) {
@@ -365,16 +376,16 @@ function uniqueID(name) {
                         });
                     },
                     function() {
-                      console.log(newUnique)
+                        // console.log('A: ',newUnique)
                         deferred.resolve(newUnique)
                     });
             } else {
-                 console.log(uniqueIDer)
-                deferred.resolve(uniqueIDer)
+                console.log(unique+' is already unique')
+                deferred.resolve(unique)
             }
         });
     });
-    console.log('uniqueID end', deferred.promise)
+    // console.log('uniqueID end', deferred.promise)
     return deferred.promise
 }
 
