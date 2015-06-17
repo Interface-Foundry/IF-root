@@ -78,7 +78,7 @@ var cloudMapID = 'interfacefoundry.jh58g2al';
 
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
-var zipLow = 1001;
+var zipLow = 10001;
 var zipHigh = 99950;
 
 var requestNum = 0;
@@ -114,12 +114,12 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, function() {
                         count++;
-                        setTimeout(callback, 4000); // Wait before going on to the next tag
+                        setTimeout(callback, 4000); // Wait before going on to the next zip
                     })
                 });
             },
             function(err) {
-                setTimeout(callback, 10000); // Wait before looping over the hashtags again
+                setTimeout(callback, 10000); // Wait before looping over the zip again
             }
         );
     },
@@ -136,7 +136,7 @@ async.whilst(
             offsetCounter = offsetCounter + 20;
         }
 
-        setTimeout(callback, 10000); // Wait before looping over the hashtags again
+        setTimeout(callback, 10000); // Wait before looping over the zip again
 
     }
 );
@@ -146,82 +146,105 @@ async.whilst(
 function searchPlaces(coords, fin) {
     //****Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1]).then(function(results) {
-        if (results.length > 20) {
-            //Limit result set for testing purposes
-            results = results.slice(0, 19)
-            // console.log('Got results!', results.length)
-        }
-        async.each(results, function(place, done) {
-                var newPlace = null;
-                async.series([
-                        //First check if landmark exists, if not create a new one
-                        function(callback) {
-                            //Check if place already exists in db, if not create new place
-                            landmarks.find({
-                                'source_google.place_id': place.place_id
-                            }, function(err, matches) {
-                                if (err) console.log(err)
-                                if (matches.length < 1) {
-                                    newPlace = new landmarks();
-                                    newPlace.world = true;
-                                    newPlace.source_google.place_id = place.place_id;
-                                    newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lng);
-                                    newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lat);
-                                    newPlace.loc.type = 'Point';
-                                    saveStyle(newPlace).then(function() { //creating new style to add to landmark
-                                        callback(null)
-                                    });
-                                } else {
-                                    console.log('Matches exist, next place..')
-                                    callback(null)
-                                }
-                            })
-                        },
-                        //Now fill in the details of the place
-                        function(callback) {
-                            if (newPlace == null) {
-                                // console.log('Not a new place')
-                                callback(null);
-                            } else {
-                                addGoogleDetails(newPlace).then(function(place) {
-                                    if (place.name == undefined) {
-                                      console.log('PLACE NAME IS UNDEFINED: ',place)
-                                    }
-                                    //Add city name to landmark id and then uniqueize it
-                                    uniqueID(place.name, newPlace.source_google.city).then(function(output) {
-                                        console.log('output: ', output)
-                                        newPlace.id = output;
-                                        callback(null);
+            if (results.length > 20) {
+                //Limit result set for testing purposes
+                results = results.slice(0, 19)
+                    // console.log('Got results!', results.length)
+            }
+            async.each(results, function(place, done) {
+                        var newPlace = null;
+                        async.series([
+                                //First check if landmark exists, if not create a new one
+                                function(callback) {
+                                    //Check if place already exists in db, if not create new place
+                                    landmarks.find({
+                                        'source_google.place_id': place.place_id
+                                    }, function(err, matches) {
+                                        if (err) console.log(err)
+                                        if (matches.length < 1) {
+                                            newPlace = new landmarks();
+                                            newPlace.world = true;
+                                            newPlace.newStatus = true;
+                                            newPlace.parentID = '';
+                                            newPlace.hasloc = true;
+                                            newPlace.valid = true;
+                                            newPlace.views = 0;
+                                            newPlace.hasTime = false;
+                                            newPlace.resources = {
+                                                hashtag: ''
+                                            };
+                                            newPlace.permissions = {
+                                                ownerID: '553e5480a4bdda8c18c1edbc',
+                                                hidden: false
+                                            };
+                                            newPlace.time = new Date()
+                                            newPlace.world_id = '';
+                                            newPlace.widgets = forumStyle.widgets;
+                                            newPlace.source_google.place_id = place.place_id;
+                                            newPlace.loc.coordinates[0] = parseFloat(place.geometry.location.lng);
+                                            newPlace.loc.coordinates[1] = parseFloat(place.geometry.location.lat);
+                                            newPlace.loc.type = 'Point';
+                                            saveStyle(newPlace).then(function() { //creating new style to add to landmark
+                                                callback(null)
+                                            });
+                                        } else {
+                                            // console.log('Matches exist, next place..')
+                                            callback(null)
+                                        }
                                     })
-                                })
-                            }
-                        },
-                        function(callback) {
-                            //Annnd save the place
-                            if (!newPlace) {
-                                callback(null)
-                            } else {
-                                newPlace.save(function(err, saved) {
-                                    if (err) console.log(err)
-                                    console.log('Saved: ', newPlace.id)
-                                    callback(null)
-                                })
-                            }
-                        }
-                    ],
-                    //final callback in series
-                    function(err, results) {
-                        done()
-                    }); //END OF ASYNC SERIES
-            }, function() {
-                console.log('Finished set, next set..');
-                console.log('Requested ', requestNum, ' times.');
-                fin()
-            }) //END OF ASYNC EACH
-    }, function(err) {
-        console.log('No radar results, err: ', err)
-        fin()
-    })
+                                },
+                                //Now fill in the details of the place
+                                function(callback) {
+
+                                    if (newPlace == null) {
+                                        // console.log('Not a new place')
+                                        callback(null);
+                                    } else {
+                                        wait(function() {
+                                            // console.log('Waiting..')
+                                            addGoogleDetails(newPlace).then(function(place) {
+                                                //Add city name to landmark id and then uniqueize it
+                                                uniqueID(place.name, newPlace.source_google.city).then(function(output) {
+                                                    // console.log('output: ', output)
+                                                    newPlace.id = output;
+                                                    callback(null);
+                                                })
+                                            })
+                                        }, 200);
+                                    }
+                                },
+                                function(callback) {
+                                    //Annnd save the place
+                                    if (!newPlace) {
+                                        callback(null)
+                                    } else {
+                                        newPlace.save(function(err, saved) {
+                                            if (err) console.log(err)
+                                                // console.log('Saved: ', newPlace.id)
+                                            callback(null)
+                                        })
+                                    }
+                                }
+                            ],
+                            //final callback in series
+                            function(err, results) {
+
+                                done()
+
+
+                            }); //END OF ASYNC SERIES
+
+                    },
+                    function() {
+                        console.log('Finished set, next set..');
+                        console.log('Requested ', requestNum, ' times.');
+                        fin()
+                    }) //END OF ASYNC EACH
+        },
+        function(err) {
+            console.log('No radar results, err: ', err)
+            fin()
+        })
 }
 
 function radarSearch(lat, lng) {
@@ -235,13 +258,14 @@ function radarSearch(lat, lng) {
     // https://maps.googleapis.com/maps/api/place/radarsearch/json?location=51.503186,-0.126446&radius=5000&types=museum&key=API_KEY
     var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?radius=" + radius + '&types=' + types + '&location=' + location + '&key=' + googleAPI
     console.log('Radar searching..')
+
+
     request({
         uri: url,
         json: true
     }, function(error, response, body) {
         if (!error && response.statusCode == 200) {
             requestNum++;
-            setTimeout(null, 6000);
             var resultsValid = ((!error) && (response.statusCode == 200) && (body.results.length >= 1));
             if (resultsValid) {
                 //Add results to previous results
@@ -254,9 +278,11 @@ function radarSearch(lat, lng) {
                 deferred.reject();
             }
         } else {
-          console.log('Radar Search request error: ', error)
+            console.log('Radar Search request error: ', error)
         }
     })
+
+
 
     return deferred.promise;
 }
@@ -265,15 +291,15 @@ function radarSearch(lat, lng) {
 function addGoogleDetails(newPlace) {
     var deferred = q.defer();
     var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + newPlace.source_google.place_id + "&key=" + googleAPI;
-        console.log('Retreiving details..')
+    console.log('Retreiving details..')
     request({
         uri: url,
         json: true
     }, function(error, response, body) {
         requestNum++;
-        setTimeout(null, 6000);
+
         if (!error && response.statusCode == 200) {
-            console.log('Details Success.')
+            // console.log('Details Success.')
             if (typeof body.result.name == 'undefined') {
                 newPlace.name = body.result.vicinity;;
             } else {
@@ -309,8 +335,14 @@ function addGoogleDetails(newPlace) {
             }
             newPlace.source_google.types = body.result.types;
             newPlace.type = body.result.types[0];
+            newPlace.category = {
+                name: 'place',
+                avatar: '',
+                hiddenPresent: false
+            }
             newPlace.source_google.utc_offset = body.result.utc_offset;
             newPlace.source_google.address = body.result.vicinity;
+
             deferred.resolve(newPlace)
         } else {
             console.log("Details query FAIL", error);
@@ -349,18 +381,18 @@ function uniqueID(name, city) {
     var deferred = q.defer();
     var name = urlify(name)
     var city = urlify(city)
-    var nameCity = name.concat('_'+city)
+    var nameCity = name.concat('_' + city)
     var unique = nameCity.toLowerCase();
-    console.log('unique: ', unique)
+    // console.log('unique: ', unique)
     urlify(unique, function() {
         landmarks.find({
             'id': unique
         }, function(err, data) {
-          if (err) console.log('Match finding err, ',err)
+            if (err) console.log('Match finding err, ', err)
             if (data.length > 0) {
-                console.log('id already exists: ', data[0].id)
+                // console.log('id already exists: ', data[0].id)
                 var uniqueNumber = 1;
-                var newUnique 
+                var newUnique
                 async.forever(function(next) {
                         var uniqueNum_string = uniqueNumber.toString();
                         newUnique = data[0].id + uniqueNum_string;
@@ -380,7 +412,7 @@ function uniqueID(name, city) {
                         deferred.resolve(newUnique)
                     });
             } else {
-                console.log(unique+' is already unique')
+                // console.log(unique+' is already unique')
                 deferred.resolve(unique)
             }
         });
@@ -399,13 +431,13 @@ function saveStyle(place) {
     st.navBG_color = forumStyle.navBG_color;
     st.landmarkTitle_color = forumStyle.landmarkTitle_color;
     st.categoryTitle_color = forumStyle.categoryTitle_color;
-    st.widgets.twitter = forumStyle.twitter;
-    st.widgets.instagram = forumStyle.instagram;
-    st.widgets.upcoming = forumStyle.upcoming;
-    st.widgets.category = forumStyle.category;
-    st.widgets.messages = forumStyle.messages;
-    st.widgets.streetview = forumStyle.streetview;
-    st.widgets.nearby = forumStyle.nearby;
+    st.widgets.twitter = forumStyle.widgets.twitter;
+    st.widgets.instagram = forumStyle.widgets.instagram;
+    st.widgets.upcoming = forumStyle.widgets.upcoming;
+    st.widgets.category = forumStyle.widgets.category;
+    st.widgets.messages = forumStyle.widgets.messages;
+    st.widgets.streetview = forumStyle.widgets.streetview;
+    st.widgets.nearby = forumStyle.widgets.nearby;
     st.save(function(err, style) {
         if (err) console.log(err);
         place.style.styleID = style._id;
@@ -414,6 +446,12 @@ function saveStyle(place) {
         deferred.resolve();
     })
     return deferred.promise;
+}
+
+function wait(callback, delay) {
+    var startTime = new Date().getTime();
+    while (new Date().getTime() < startTime + delay);
+    callback();
 }
 
 
