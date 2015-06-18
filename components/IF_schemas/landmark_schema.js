@@ -207,7 +207,14 @@ var landmarkSchema = new Schema({
         website: String,
         city: String,
         url: String,
-        price_level: Number
+        price_level: Number,
+
+    },
+    source_instagram_users: {
+        instagram_users: [String]
+    },
+    source_instagram_photo: {
+        imgurl: String
     },
     source_yelp_on: Boolean,
     source_yelp: {

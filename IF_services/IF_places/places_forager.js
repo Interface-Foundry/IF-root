@@ -1,7 +1,4 @@
-//TODO 
-//STORE LATLNG/ZIPCODE PAIR IN MONGO
 //Increase RADIUS for NON CITIES
-//Fix overall loop
 
 var express = require('express'),
     app = module.exports.app = express();
@@ -38,6 +35,7 @@ var mongoose = require('mongoose'),
 //----MONGOOOSE----//
 var landmarks = require('../../components/IF_schemas/landmark_schema.js');
 var styles = require('../../components/IF_schemas/style_schema.js');
+var geozip = require('../../components/IF_schemas/geozip_schema.js');
 
 global.config = require('../../config');
 
@@ -83,7 +81,7 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, zipCodeQuery, function() {
                         count++;
-                        wait(callback, 1000); // Wait before going on to the next zip
+                        wait(callback, 500); // Wait before going on to the next zip
                     })
                 }, function(err) {
                     // console.log('ERROR: Could not get lat long for: ' + zipCodeQuery+err)
@@ -99,18 +97,7 @@ async.whilst(
     function(err) {
         console.log('Requested ', requestNum, ' times.')
             //iterating over offset to get all the yelps
-        if (offsetCounter >= 60) {
-
-            //reset offset
-            offsetCounter = 0;
-
-        } else {
-            //incrementing until 60
-            offsetCounter = offsetCounter + 20;
-        }
-
-        wait(callback, 10000); // Wait before looping over the zip again
-
+        wait(callback, 10000); // Wait before looping over ALL zip codes
     }
 );
 
@@ -201,7 +188,7 @@ function searchPlaces(coords, zipcode, fin) {
                                                 console.log('Details ERROR', err)
                                                 callback(null);
                                             })
-                                        }, 50);
+                                        }, 30);
                                     }
                                 },
                                 function(callback) {
@@ -271,7 +258,7 @@ function addGoogleDetails(newPlace) {
     }, function(error, response, body) {
         requestNum++;
 
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode == 200 && body.result) {
 
             //ADDRESS
             if (typeof body.result.address_components == 'undefined') {
@@ -279,18 +266,22 @@ function addGoogleDetails(newPlace) {
             } else {
                 var addy = ''
                 newPlace.source_google.address = body.result.address_components.forEach(function(el) {
-                  addy= addy +' '+el.long_name;
+                    addy = addy + ' ' + el.long_name;
                 })
-                 newPlace.source_google.address = addy.trim()
-                // console.log('ADDRESS:', newPlace.source_google.address )
+                newPlace.source_google.address = addy.trim()
+                    // console.log('ADDRESS:', newPlace.source_google.address )
             }
 
 
             //NAME
             if (typeof body.result.name == 'undefined') {
-                newPlace.name = body.result.vicinity;;
+                newPlace.name = body.result.vicinity;
             } else {
                 newPlace.name = body.result.name
+                var nameTag = urlify(body.result.name).split('_')
+                nameTag.forEach(function(tag) {
+                    newPlace.tags.push(tag)
+                })
             }
             //TYPE
             if (typeof body.result.types == 'undefined') {
@@ -312,12 +303,6 @@ function addGoogleDetails(newPlace) {
             } else {
                 newPlace.source_google.city = ''
             }
-            //VICINITY
-            // if (typeof body.result.vicinity == 'undefined') {
-            //     newPlace.source_google.address = "";
-            // } else {
-            //     newPlace.source_google.address = body.result.vicinity;
-            // }
             //PHONE
             if (typeof body.result.international_phone_number == 'undefined') {
                 newPlace.source_google.international_phone_number = "";
@@ -368,35 +353,69 @@ function addGoogleDetails(newPlace) {
 }
 
 function getLatLong(zipcode, callback) {
-    //10014 is a problem, returns empty
     var deferred = q.defer();
-    var string = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places-v1/';
-    string = string + '+' + zipcode;
-    string = string + '.json?access_token=pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
-    request({
-            uri: string
-        },
-        function(error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var parseTest = JSON.parse(body);
-                // console.log('parseTest.features[0]: ',parseTest.features[0])
-                if (parseTest.features[0] && parseTest.features[0].center.length > 1) {
-                    if (parseTest.features.length >= 1) {
-                        var results = JSON.parse(body).features[0].center;
-                        results[0].toString();
-                        results[1].toString();
-                        console.log('lat long for ' + zipcode + ' : ', results)
-                        deferred.resolve(results)
+    //Check if geozip exists in DB 
+    geozip.findOne({
+        valid: true,
+        zipcode: zipcode
+    }, function(err, result) {
+        if (err) console.log(err)
+        if (result && result.coords) {
+            // console.log('!!!Geozip already exists in db.')
+            console.log('Coordinates for zipcode: ' + zipcode + ' : ', result.coords)
+            deferred.resolve(result.coords)
+        } else {
+            console.log('querying mapbox.')
+            var string = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places-v1/';
+            string = string + '+' + zipcode;
+            string = string + '.json?access_token=pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
+            request({
+                    uri: string
+                },
+                function(error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        var parseTest = JSON.parse(body);
+                        if (parseTest.features[0] && parseTest.features[0].center.length > 1) {
+                            if (parseTest.features.length >= 1) {
+                                var results = JSON.parse(body).features[0].center;
+                                results[0].toString();
+                                results[1].toString();
+                                console.log('Saving coords to db.')
+                                var newCoords = new geozip();
+                                newCoords.coords = results;
+                                newCoords.zipcode = zipcode;
+                                newCoords.valid = true;
+                                newCoords.save(function(err, saved) {
+                                    if (err) console.log(err)
+                                    console.log('geozip saved!')
+                                })
+                                console.log('Coordinates for zipcode: ' + zipcode + ' : ', results)
+                                deferred.resolve(results)
+                            }
+                        } else {
+                            var errCoords = new geozip();
+                            errCoords.zipcode = zipcode;
+                            errCoords.valid = false
+                            errCoords.save(function(err, saved) {
+
+                            })
+                            console.log('ERROR for ', zipcode)
+                            deferred.reject()
+                        }
+                    } else {
+                        var errCoords = new geozip();
+                        errCoords.zipcode = zipcode;
+                        errCoords.valid = false
+                        errCoords.save(function(err, saved) {
+                        })
+                        console.log('ERROR for ', zipcode)
+                        deferred.reject()
+                        console.log('ERROR for ')
+                        deferred.reject(error)
                     }
-                } else {
-                    console.log('ERROR for ', zipcode)
-                    deferred.reject()
-                }
-            } else {
-                console.log('ERROR for ')
-                deferred.reject(error)
-            }
-        });
+                });
+        } //end of else
+    })
     return deferred.promise
 }
 
