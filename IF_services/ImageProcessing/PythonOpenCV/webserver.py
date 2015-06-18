@@ -17,8 +17,7 @@ class FindItems(resource.Resource):
             raise NameError("Must provide 'url' querystring parameter")
 
         img = ifopencv.getFromS3(s3url)
-        img = ifopencv.extractForeground(img)
-        items = ifopencv.findBlobs(img)
+        items = ifopencv.findItems(img)
 
         return json.dumps({"items": items})
 
