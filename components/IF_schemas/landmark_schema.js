@@ -265,7 +265,39 @@ var landmarkSchema = new Schema({
     tags: {
         type: [String],
         index: true
-    } //search tags
+    }, //search tags
+    price: Number,
+    likes: [{
+        userId: String,
+        timeLiked: Date
+    }],
+    /* 
+    comments: virtual property, array of worldchats
+    
+    person who commented
+    body of comment
+    avatar or person
+    time of comment
+    etc, see worldchats
+    */
+    tags: {
+        colors: [],
+        categories: [],
+        text: []
+    },
+    ownerUserName: String,
+    ownerUserId: String,
+    ownerMongoId: String,
+    itemImageURL: [String],
+    reports: [{
+        reporterUserId: String,
+        timeReported: Date,
+        comment: String,
+        reason: String
+    }],
+    
+
+
 }, {
     toObject: {
         virtuals: true

@@ -128,7 +128,16 @@ var userSchema = mongoose.Schema({
             type: String,
             default: 'user'
         }
-    }]
+    }],
+    // likes: virtual prop of user's "like" collection
+    // dislikes: virtual prop of user's "dislike" collection
+    recentSearches: {
+        searchQuery: {},
+        lastTimeSearched: Date,
+        tracked: Boolean
+    },
+    defaultPriceRange: Number,
+    defaultSearchRadius: Number
 });
 
 // generating a hash
