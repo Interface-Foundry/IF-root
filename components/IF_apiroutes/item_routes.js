@@ -68,17 +68,16 @@ router.use(function(req, res, next) {
 });
 
 //Trending - lat/lng
-router.get('/', function(req, res) {
-    console.log('-_-')
-    // req.query.lat;
-    // req.query.lng;
-    // req.query.skip;
+router.post('/trending', function(req, res) {
+    // req.body.lat;
+    // req.body.lon;
     var loc = {
         type: 'Point',
         coordinates: []
     };
+
     loc.coordinates.push(req.query.lat);
-    loc.coordinates.push(req.query.lng);
+    loc.coordinates.push(req.query.lon);
 
     //Get neighborhood name based on coordinates
     shapefile.read('../../IF_services/areas/ZillowNeighborhoods-NY.shp', function(err, area){
@@ -90,7 +89,7 @@ router.get('/', function(req, res) {
     var query = {
         spherical: true,
         maxDistance: 1 / 111.12, //1km radius
-        skip: parseInt(req.query.skip),
+        skip: parseInt(req.query.count),
         sort: {
             like_count: -1
         },
@@ -107,7 +106,7 @@ router.get('/', function(req, res) {
 router.get('/:id', function(req, res) {
     // req.query.skip;
     var query = {
-        skip: parseInt(req.query.skip),
+        skip: parseInt(req.query.count),
         limit: 20,
     };
     landmark.findOne(req.params.id, query, function(err, item) {
