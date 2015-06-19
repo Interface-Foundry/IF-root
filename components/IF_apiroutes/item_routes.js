@@ -1,5 +1,58 @@
 'use strict';
 
+
+/*
+POST /api/items/search
+{
+    text: "something tag la",
+    colors: ['FF00FF', 'FF00FF'],
+    categories: ['shoes'],
+    price: 1, // or 2, 3, or 4
+    radius: .5, // miles
+    loc: {lat: 34, lon: -77}
+}
+
+Response:
+{
+    results: [],
+    query: {
+        text: "something tag la",
+        colors: ['FF00FF', 'FF00FF'],
+        categories: ['shoes'],
+        price: 1, // or 2, 3, or 4
+        radius: .5, // miles
+        loc: {lat: 34, lon: -77}
+    },
+    links: {
+        self: 'api/items/search'
+        next: 'api/items/search?page=2&count=50',
+        last: null
+    }
+}
+
+
+POST /api/items/trending
+{
+    loc: {lat: 34, lon: -77}
+}
+
+Response:
+{
+    results: [
+        { category: 'Trending in SoHo', results: []},
+        { category: 'Trending Halloween Costumes', results: []},
+    },
+
+    links: {
+        self: 
+        next: 'api/items/trending?lat=.......page=2&count=50',
+        last: 
+    }
+}
+
+
+*/
+
 var express = require('express'),
     router = express.Router(),
     landmarkSchema = require('../IF_schemas/landmark_schema.js'),
