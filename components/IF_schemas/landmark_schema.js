@@ -11,7 +11,7 @@ var landmarkSchema = new Schema({
     id: {
         type: String,
         unique: true,
-        lowercase:true
+        lowercase: true
     },
     world: Boolean,
     parentID: {
@@ -41,11 +41,11 @@ var landmarkSchema = new Schema({
         room_name: String
     },
     // loc_nickname : {  //for places using nickname i.e. "BASECAMP" with static loc. populate as drop down after nickname add for user select more
-    // 	name: String,
-    // 	type: {
-    //    		type: String
-    //  	},
-    //  	coordinates: []
+    //  name: String,
+    //  type: {
+    //          type: String
+    //      },
+    //      coordinates: []
     // },
     summary: String,
     description: String, //full HTML?
@@ -53,7 +53,7 @@ var landmarkSchema = new Schema({
     subType: {
         type: [String],
         index: true
-    }, // type of event/place	
+    }, // type of event/place   
     category: { //only for landmarks (world:false)
         name: {
             type: String,
@@ -124,7 +124,7 @@ var landmarkSchema = new Schema({
         etherpad: String,
         external_calendar: String
     },
-    splash_banner:{
+    splash_banner: {
         imgSrc: String,
         linkUrl: String
     },
@@ -139,20 +139,20 @@ var landmarkSchema = new Schema({
     },
     updated_time: Date, // TO DO
     // source_fb: { //source of data bubble (is facebook event api)
-    // 	is_source: Boolean,
-    // 	id: String,
-    // 	cover: {
-    // 		id: String,
-    // 		source: String,
-    // 		offset_y: Number,
-    // 		offset_x: Number
-    // 	},
-    // 	owner: String,
-    // 	parent_group: String,
-    // 	privacy: String,
-    // 	ticket_uri: String,
-    // 	updated_time: Date,
-    // 	venue: String
+    //  is_source: Boolean,
+    //  id: String,
+    //  cover: {
+    //      id: String,
+    //      source: String,
+    //      offset_y: Number,
+    //      offset_x: Number
+    //  },
+    //  owner: String,
+    //  parent_group: String,
+    //  privacy: String,
+    //  ticket_uri: String,
+    //  updated_time: Date,
+    //  venue: String
     // },
     source_meetup_on: Boolean,
     source_meetup: {
@@ -271,6 +271,7 @@ var landmarkSchema = new Schema({
         userId: String,
         timeLiked: Date
     }],
+    like_count: Number,
     /* 
     comments: virtual property, array of worldchats
     
@@ -295,7 +296,7 @@ var landmarkSchema = new Schema({
         comment: String,
         reason: String
     }],
-    
+
 
 
 }, {
@@ -311,9 +312,9 @@ landmarkSchema.index({
     loc: '2dsphere'
 });
 
- landmarkSchema.virtual('parentName').set(function(name) {
-                        return name;
-                    });
+landmarkSchema.virtual('parentName').set(function(name) {
+    return name;
+});
 
 //indexing for search
 landmarkSchema.index({
