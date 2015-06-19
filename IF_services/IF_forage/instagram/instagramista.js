@@ -54,7 +54,7 @@ var instagramUsers = [
 /**
  * number of days to go back into the past when scraping
  */
-var days = 1;
+var days = 14;
 var daysInMilliseconds = 1000 * 60 * 60 * 24 * days;
 
 /**
@@ -101,6 +101,7 @@ instagramUsers.map(function(user) {
             // otherwise save this exciting new instagram post to our database
             var filename = user.username + '/' + helper.getFileNameFromURL(post.images.standard_resolution.url);
             var landmark = new Landmarks({
+                id: user.username + post.id,
                 source_instagram_post: {
                     id: post.id,
                     created_time: post.created_time,
