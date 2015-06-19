@@ -234,23 +234,18 @@ var landmarkSchema = new Schema({
         rating_image: String
     },
     source_instagram_post: {
-        user: {
-            name: String,
-            screen_name: String,
-            userId: Number,
-            userId_str: Number,
-            profile_image_url: String
-        },
+        id: String,
+        created_time: Number, // the created time on Instagram, utc timestamp
         img_url: String, // Assuming this is the low resolution
         original_url: String, // Assuming this is the original size
         local_path: [String], // There could be multiple images being saved
         text: { type: String},
         tags: [{ type: String, index: true }],
-        created: {
+        created: {  // the time it was posted to Kip
             type: Date,
             default: Date.now
         }
-    }
+    },
     widgets: {
         twitter: Boolean,
         instagram: Boolean,

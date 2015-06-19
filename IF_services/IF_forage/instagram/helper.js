@@ -1,20 +1,13 @@
 var https = require('https');
 var fs = require('fs');
 var url = require('url');
-var im = require('imagemagick'); //must also install imagemagick package on server /!\
 
 var readChunk = require('read-chunk');
 var fileTypeProcess = require('file-type');
 
 var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
-var awsBucket = "if.instagram.images";
-
-var lists = require('./lists');
-var strings = require('./strings');
-var credentials = require('./credentials');
-
-var instagramModel = require('../models/instagram');
+var awsBucket = "if.kip.apparel.images";
 
 var isNull = function(value) {
     return (value == null);
@@ -29,7 +22,7 @@ var convertUnixTimestampToDate = function(epoch) {
     return new Date(epochInt);
 }
 
-var getFileNameFromURL = function(imageURL) {
+var getFileNameFromURL = module.exports.getFileNameFromURL = function(imageURL) {
     return url.parse(imageURL).pathname.split('/').pop();
 }
 
@@ -108,11 +101,6 @@ var downloadImage = function(imageURL) {
     }
     return
 }
-
-
-
-
-
 
 var getImagesToBeSaved = function(imageObjectImages) {
     var imageObjectImagesList = [];
@@ -203,13 +191,7 @@ var downloadWithImageList = function(listImageURL) {
         downloadImage(listImageURL[i]['url']);
 }
 
-exports.applyCredentials = function(instagramObject) {
-    var listOfCredentialObjects = credentials.CREDENTIAL_LIST;
-    for (var i = 0; i < listOfCredentialObjects.length; i++)
-        instagramObject.use(listOfCredentialObjects[i]);
-}
-
-exports.downloadImageObject = function(imageObject) {
+module.exports.downloadImageObject = function(imageObject) {
 
     // Download the predefined images from image object
     var imageObjectImages = imageObject[strings.INSTAGRAM_IMAGE_FIELD];
