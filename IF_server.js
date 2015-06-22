@@ -637,8 +637,8 @@ function isLoggedIn(req, res, next) {
 }
 
 
-
-// Query
+// New Search
+app.use(require('./components/IF_search/items'));
 
 // SEARCH
 // What u lookin at?
