@@ -30,27 +30,6 @@ Response:
     }
 }
 
-
-POST /api/items/trending
-{
-    loc: {lat: 34, lon: -77}
-}
-
-Response:
-{
-    results: [
-        { category: 'Trending in SoHo', results: []},
-        { category: 'Trending Halloween Costumes', results: []},
-    },
-
-    links: {
-        self: 
-        next: 'api/items/trending?lat=.......page=2&count=50',
-        last: 
-    }
-}
-
-
 */
 
 var express = require('express'),
@@ -69,8 +48,24 @@ router.use(function(req, res, next) {
 
 //Trending - lat/lng
 router.post('/trending', function(req, res) {
-    // req.body.lat;
-    // req.body.lon;
+//     POST / api / items / trending
+       // {
+       //     loc: {lat: 34, lon: -77}
+       // }
+
+   // Response:
+   // {
+   //     results: [
+   //         { category: 'Trending in SoHo', results: []},
+   //         { category: 'Trending Halloween Costumes', results: []},
+   //     },
+
+   //     links: {
+   //         self: 
+   //         next: 'api/items/trending?lat=.......page=2&count=50',
+   //         last: 
+   //     }
+   // }
     var loc = {
         type: 'Point',
         coordinates: []
@@ -80,7 +75,7 @@ router.post('/trending', function(req, res) {
     loc.coordinates.push(req.query.lon);
 
     //Get neighborhood name based on coordinates
-    shapefile.read('../../IF_services/areas/ZillowNeighborhoods-NY.shp', function(err, area){
+    shapefile.read('../../IF_services/NY.geojson', function(err, area){
         console.log('Shapefile: ',area)
         // if (req.query.lng > area.bbox[1] && req.query.lng )
     })
