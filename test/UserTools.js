@@ -12,17 +12,22 @@ var users = {
 module.exports = {
   logout: function(done) {
     browser.get('/api/user/logout', function(e, r, body) {
-	  if (e) {
-		throw new Error(e);
-		done(e);
-	  } else {
-		done();
-	  }
-	});
+      done();
+    })
+  },
+  logoutBefore: function() {
+    before(function(done) {
+      module.exports.logout(done);
+    });
   },
   login: function(user, done) {
     browser.post({url: '/api/user/login', json: true, body:  user}, function(e, r, body) {
       done(e, body);
+    });
+  },
+  loginBefore: function(user) {
+    before(function(done) {
+      module.exports.login(user, done)
     });
   },
   users: users
