@@ -281,7 +281,7 @@ var landmarkSchema = new Schema({
     time of comment
     etc, see worldchats
     */
-    tags: {
+    itemTags: {
         colors: [],
         categories: [],
         text: []
