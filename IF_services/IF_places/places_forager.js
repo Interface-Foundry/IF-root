@@ -176,19 +176,43 @@ function searchPlaces(coords, zipcode, fin) {
                                             var rcount = 1;
                                             // console.log('Requesting details')
                                             addGoogleDetails(newPlace).then(function(place) {
-                                                // console.log('place.name is :', place.name, 'city is: ', newPlace.source_google.city)
-                                                //Add city name to landmark id and then uniqueize it
-
-                                                uniqueID(place.name, newPlace.source_google.city).then(function(output) {
-                                                    // console.log('output: ', output)
-                                                    newPlace.id = output;
-                                                    callback(null);
-                                                })
+                                                callback(null);
                                             }, function(err) {
                                                 console.log('Details ERROR', err)
                                                 callback(null);
                                             })
                                         }, 30);
+                                    }
+                                },
+                                function(callback) {
+                                    //Find neighborhood and city name via python area finder server
+                                    if (newPlace == null) {
+                                        // console.log('Not a new place')
+                                        callback(null);
+                                    } else {
+                                        areaFind(newPlace).then(function(place) {
+                                            var input = ''
+                                                //Add neighborhood or city name to landmark id and then uniqueize it
+                                            if (place.city !== undefined) {
+                                                 console.log('-City')
+                                                input = place.city;
+                                            } 
+                                            else if (place.neighborhood !== undefined) {
+                                                console.log('-Neighborhood')
+                                                input = place.neighborhood 
+                                            } else {
+                                                input = place.backupinput;
+                                                console.log('-Backup Input',place.backupinput)
+                                            }
+                                            uniqueID(place.name, input).then(function(output) {
+                                                console.log('OUTPUT: ', output)
+                                                newPlace.id = output;
+                                                callback(null);
+                                            })
+                                        }, function(err) {
+                                            console.log('areaFind ERROR', err)
+                                            callback(null);
+                                        })
                                     }
                                 },
                                 function(callback) {
@@ -208,7 +232,6 @@ function searchPlaces(coords, zipcode, fin) {
                             ],
                             //final callback in series
                             function(err, results) {
-
                                 done()
                             }); //END OF ASYNC SERIES
                     },
@@ -291,18 +314,7 @@ function addGoogleDetails(newPlace) {
                 newPlace.source_google.types = body.result.types;
                 newPlace.type = body.result.types[0];
             }
-            //CITY
-            if (typeof body.result.address_components == 'undefined') {
-                newPlace.source_google.city = ''
-            } else if (body.result.address_components[2] && body.result.address_components[2].long_name.toLowerCase().indexOf('united states') < 1) {
-                newPlace.source_google.city = body.result.address_components[2].long_name
-            } else if (body.result.address_components[1] && body.result.address_components[1].long_name.toLowerCase().indexOf('united states') < 1) {
-                newPlace.source_google.city = body.result.address_components[1].long_name
-            } else if (body.result.address_components[0] && body.result.address_components[0].long_name.toLowerCase().indexOf('united states') < 1) {
-                newPlace.source_google.city = body.result.address_components[0].long_name
-            } else {
-                newPlace.source_google.city = ''
-            }
+
             //PHONE
             if (typeof body.result.international_phone_number == 'undefined') {
                 newPlace.source_google.international_phone_number = "";
@@ -342,7 +354,22 @@ function addGoogleDetails(newPlace) {
             } else {
                 newPlace.source_google.icon = body.result.icon;
             }
-            // console.log('in details: ', newPlace)
+
+            //BACKUP INPUT
+            //This is the backup input to uniqueize ID in case areaFind does not return neighborhood and city
+            if (typeof body.result.address_components == 'undefined') {
+                newPlace.backupinput = ''
+            } else if (body.result.address_components[2] && body.result.address_components[2].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.backupinput = body.result.address_components[2].long_name
+            } else if (body.result.address_components[1] && body.result.address_components[1].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.backupinput = body.result.address_components[1].long_name
+            } else if (body.result.address_components[0] && body.result.address_components[0].long_name.toLowerCase().indexOf('united states') < 1) {
+                newPlace.backupinput = body.result.address_components[0].long_name
+            } else {
+                newPlace.backupinput = ''
+            }
+            // console.log('newPlace.backupinput: ',newPlace.backupinput)
+
             deferred.resolve(newPlace)
         } else {
             console.log("Details query FAIL", error, response.statusCode);
@@ -406,8 +433,7 @@ function getLatLong(zipcode, callback) {
                         var errCoords = new geozip();
                         errCoords.zipcode = zipcode;
                         errCoords.valid = false
-                        errCoords.save(function(err, saved) {
-                        })
+                        errCoords.save(function(err, saved) {})
                         console.log('ERROR for ', zipcode)
                         deferred.reject()
                         console.log('ERROR for ')
@@ -419,6 +445,27 @@ function getLatLong(zipcode, callback) {
     return deferred.promise
 }
 
+function areaFind(place) {
+    var deferred = q.defer();
+    //Get neighborhood name based on coordinates
+    var options = {
+        method: 'GET'
+    }
+    // console.log('areaFind: place.loc',place.loc)
+    request('http://localhost:9998/findArea?lat=' + place.loc.coordinates[1] + '&lon=' + place.loc.coordinates[0], options, function(error, response, body) {
+        if (!error && response.statusCode == 200 && body !== undefined) {
+            console.log('areaFind body: ', body)
+            var data = JSON.parse(body)
+            place.source_google.neighborhood = data.area.trim();
+            place.source_google.city = data.city.trim();
+            deferred.resolve(place)
+        } else {
+            console.log('Area find returned no results.')
+            deferred.resolve(place)
+        }
+    })
+    return deferred.promise;
+}
 
 
 
