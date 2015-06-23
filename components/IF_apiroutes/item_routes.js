@@ -93,22 +93,32 @@ router.post('/', function(req, res) {
         newitem.ownerUserName = req.user.name;
         newitem.ownerUserId = req.user.profileID;
         newitem.ownerMongoId = req.user._id;
+        //parent Bubble will be sent from post body
+        newitem.parentID = req.body.parentID;
         //s3 imgURL will be sent from post body
         newitem.itemImageURL = req.body.imgURL;
-        var item = _.extend(newitem, req.body);
-        //Save item
-        item.save(
-            function(err, item) {
-                if (err) {
-                    console.log(err)
-                }
-                redisClient.rpush('snaps', item._id, function(err, reply) {
-                    console.log('item added to redis snaps queue');
-                    console.log('created item is..', item)
-                    res.send(item)
-                });
-                
-            })
+        //setting location of item to location of parent
+        landmark.findOne({
+            _id: req.body.parentID
+        }, function(err, parent) {
+            if (err) console.log(err);
+            if (!parent) return res.send(440);
+            newitem.loc = parent.loc;
+            var item = _.extend(newitem, req.body);
+            //Save item
+            item.save(
+                function(err, item) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    redisClient.rpush('snaps', item._id, function(err, reply) {
+                        console.log('item added to redis snaps queue');
+                        console.log('created item is..', item)
+                        res.send(item)
+                    });
+
+                })
+        })
     } else {
         console.log('you are not authorized...stand down..')
     }
