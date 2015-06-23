@@ -10,6 +10,7 @@ var fs = require('fs');
 // ============================================
 var base_config = {
   env: env,
+  isProduction: false,
   host: os.hostname(),
   mongodb: {
     url: 'mongodb://localhost:27017/if'

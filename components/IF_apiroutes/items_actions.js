@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express.Router();
+var db = require('../IF_schemas/db');
 
 /**
  * This should be mounted at /api/items
@@ -12,6 +13,19 @@ var defaultResponse = {
   err: null,
   status: '(⌒‿⌒)'
 };
+
+// All of these actions require an item to be present in the database
+app.use('/:mongoId/:action', function(req, res, next) {
+  db.Landmarks.findById(req.params.mongoId, function(err, item) {
+    if (err && !global.config.isProduction) {
+      return res.send({err: err});
+    } else if (item) {
+      return next();
+    } else {
+      return res.send({err: 'Could not find item'})
+    }
+  });
+});
 
 app.post('/:mongoId/like', function(req, res) {
   if (USE_MOCK_DATA) {
