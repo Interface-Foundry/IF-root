@@ -16,14 +16,24 @@ var defaultResponse = {
 
 // All of these actions require an item to be present in the database
 app.use('/:mongoId/:action', function(req, res, next) {
+  if (USE_MOCK_DATA && req.params.mongoId === '1234') {
+    return next();
+  }
+
   db.Landmarks.findById(req.params.mongoId, function(err, item) {
+
+    // do not send real error message in production, just dev/test
     if (err && !global.config.isProduction) {
       return res.send({err: err});
-    } else if (item) {
-      return next();
-    } else {
+    }
+
+    // send a generic error message for production errors or if the item doesn't exist
+    if ((err && global.config.isProduction) || !item) {
       return res.send({err: 'Could not find item'})
     }
+
+    // otherwise continue happily
+    next();
   });
 });
 

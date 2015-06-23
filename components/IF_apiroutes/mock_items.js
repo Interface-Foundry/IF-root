@@ -7,6 +7,8 @@ module.exports.exampleInstagramPost = {
 };
 
 module.exports.example = {
+  _id: '1234',
+  id: 'item1234',
   parentID: '',
   valid: true,
   status: 'public',
