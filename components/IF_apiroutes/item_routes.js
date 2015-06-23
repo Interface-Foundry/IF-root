@@ -42,15 +42,15 @@ var express = require('express'),
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 //Trending - lat/lng
-router.get('/trending', function(req, res) {
+router.post('/trending', function(req, res) {
 
     var loc = {
         type: 'Point',
         coordinates: []
     };
 
-    loc.coordinates.push(parseFloat(req.query.lat));
-    loc.coordinates.push(parseFloat(req.query.lon));
+    loc.coordinates.push(parseFloat(req.body.lat));
+    loc.coordinates.push(parseFloat(req.body.lon));
 
     //Get neighborhood name based on coordinates
     var options = {
@@ -59,7 +59,7 @@ router.get('/trending', function(req, res) {
 
     request('http://localhost:9998/findArea?lat=' + loc.coordinates[0] + '&lon=' + loc.coordinates[1], options, function(error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log('req.body: ', req.query)
+            console.log('req.body: ', req.body)
             var area = JSON.parse(body)
 
             var response = {
