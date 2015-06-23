@@ -1,13 +1,15 @@
+//ARGUMENTS
+
+//Radius (Default 800)
+var radius = process.argv[2] ? process.argv[2] : 800
+//Starting zipcode (default 10001)
+var zipLow = process.argv[3] ? process.argv[3] : 10001
+//Ending zipcode
+var zipHigh = process.argv[4] ? process.argv[4] : 11692
+
 //TODO:
 // Increase RADIUS for NON CITIES
 
-//Modify params here
-//START
-var zipLow = 10001;
-//END
-var zipHigh = 11692;
-var radius = 800;
-// radius: 500 yielded 5389 places and 2078 geozips for nyc
 
 var express = require('express'),
     app = module.exports.app = express(),
@@ -200,19 +202,21 @@ function searchPlaces(coords, zipcode, fin) {
                                         areaFind(newPlace).then(function(place) {
                                             var input = ''
                                                 //Add neighborhood or city name to landmark id and then uniqueize it
-                                            if (place.city !== undefined) {
-                                                 console.log('-City')
-                                                input = place.city;
+                                            if (place.source_google.city !== undefined) {
+                                                 // console.log('-City')
+                                                input = place.source_google.city;
                                             } 
-                                            else if (place.neighborhood !== undefined) {
-                                                console.log('-Neighborhood')
-                                                input = place.neighborhood 
+                                            else if (place.source_google.neighborhood !== undefined) {
+                                                // console.log('-Neighborhood')
+                                                input = place.source_google.neighborhood 
                                             } else {
                                                 input = place.backupinput;
-                                                console.log('-Backup Input',place.backupinput)
+                                                // console.log('-Backup Input',place.backupinput)
                                             }
+
+                                            // console.log('INPUT: ', input)
                                             uniqueID(place.name, input).then(function(output) {
-                                                console.log('OUTPUT: ', output)
+                                                // console.log('OUTPUT: ', output)
                                                 newPlace.id = output;
                                                 callback(null);
                                             })
@@ -268,7 +272,7 @@ function radarSearch(lat, lng, zipcode) {
         if ((!error) && (response.statusCode == 200) && (body.results.length >= 1)) {
             requestNum++;
             console.log('Radar search success: ', body.results.length)
-            var logData = 'For radius: ',radius,', zipcode: ',zipcode,' , results: ',body.results.length,'.'
+            var logData = 'For radius: '+radius+', zipcode: '+zipcode+' , results: '+body.results.length+'.'
             //Write results to local log file.
             // fs.open('./log.md', 'w', function(err,fd) {
                 fs.appendFile('log.md', logData, function(err) {
@@ -468,7 +472,6 @@ function areaFind(place) {
     // console.log('areaFind: place.loc',place.loc)
     request('http://localhost:9998/findArea?lat=' + place.loc.coordinates[1] + '&lon=' + place.loc.coordinates[0], options, function(error, response, body) {
         if (!error && response.statusCode == 200 && body !== undefined) {
-            console.log('areaFind body: ', body)
             var data = JSON.parse(body)
             place.source_google.neighborhood = data.area.trim();
             place.source_google.city = data.city.trim();
