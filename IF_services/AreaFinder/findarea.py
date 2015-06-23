@@ -58,7 +58,7 @@ class findArea(resource.Resource):
             result = feat_in.GetFieldAsString(idx_reg)
             area = result.strip().split(",")[0]
             print lat,lon,area
-            return area
+            return json.dumps({"area": area})
  
 endpoints.serverFromString(reactor, "tcp:9998").listen(server.Site(findArea()))
 print "Python AreaFind server running on port 9998"

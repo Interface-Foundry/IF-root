@@ -42,35 +42,34 @@ var express = require('express'),
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 //Trending - lat/lng
-router.post('/trending', function(req, res) {
-    
+router.get('/trending', function(req, res) {
+
     var loc = {
         type: 'Point',
         coordinates: []
     };
 
-    loc.coordinates.push(parseFloat(req.body.lat));
-    loc.coordinates.push(parseFloat(req.body.lon));
+    loc.coordinates.push(parseFloat(req.query.lat));
+    loc.coordinates.push(parseFloat(req.query.lon));
 
     //Get neighborhood name based on coordinates
     var options = {
-        method: 'HEAD'
+        method: 'GET'
     }
 
-    console.log('hitting',loc.coordinates[0],loc.coordinates[1])
     request('http://localhost:9998/findArea?lat=' + loc.coordinates[0] + '&lon=' + loc.coordinates[1], options, function(error, response, body) {
         if (!error && response.statusCode == 200) {
-            console.log('req.body: ',body)
-            // var body = JSON.parse(body)
+            console.log('req.body: ', req.query)
+            var area = JSON.parse(body)
 
             var response = {
                 results: [],
                 links: {
                     self: 'api/items/trending',
-                    next: 'api/items/trending?page='+req.query.page,
+                    next: 'api/items/trending?page=' + req.query.page,
                     last: null
                 },
-                query: req.body
+                query: req.query
             }
 
             var skip = parseInt(req.body.page) * 20;
@@ -89,7 +88,7 @@ router.post('/trending', function(req, res) {
                 if (!items) return res.send(440);
 
                 var obj = {
-                    category: 'Trending in ' + body.area,
+                    category: 'Trending in ' + area.area,
                     results: items
                 }
                 response.results.push(obj)
@@ -103,7 +102,7 @@ router.post('/trending', function(req, res) {
 
 //Get item given an item ID
 router.get('/:id', function(req, res) {
-    // req.query.skip;
+
     var query = {
         skip: parseInt(req.query.count),
         limit: 20,
