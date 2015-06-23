@@ -36,6 +36,10 @@ var base_config = {
     'consumerKey': 'vgmujlff2vflhtutplkaf15h',
     'consumerSecret': 'hub4tmkp966ir5q4jaaa41qc4l',
     'callbackURL': 'https://kipapp.co/auth/meetup/callback'
+  },
+
+  neighborhoodServer: {
+    url: 'http://localhost:9998'
   }
 };
 
