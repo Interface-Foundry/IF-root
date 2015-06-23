@@ -100,6 +100,9 @@ describe.only('items CRUD operations', function() {
                     done(e);
                 });
             });
+            it('should be ownder of item', function() {
+                body.ownerUserName.should.equal(req.user.name);
+            });
             it('should not return 401 unauthorized', function() {
                 body.should.not.throw(Error)
             });
