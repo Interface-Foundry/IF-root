@@ -10,16 +10,19 @@ var express = require('express'),
 
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
-
 //Get item given an item ID
 router.get('/:id', function(req, res) {
-
     landmark.findOne(req.params.id, function(err, item) {
         if (err) {
             console.log(err);
-            return res.send(500);
+            return res.send({
+                err: err
+            });
         }
-        if (!item) return res.send(440);
+        if (!item) return res.send({
+            err: 'No no, item no here.'
+        })
+
         res.send(item);
     });
 });
@@ -46,10 +49,14 @@ router.post('/', function(req, res) {
             function(err, item) {
                 if (err) {
                     console.log(err)
-                    return res.send(500);
+                    return res.send({
+                        err: err
+                    });
                 }
                 redisClient.rpush('snaps', item._id, function(err, reply) {
-                    if (err) console.log('REDIS QUEUE ERR: ', err)
+                    if (err) console.log('REDIS QUEUE ERR: ', {
+                        err: 'Error in redis processer'
+                    })
                     console.log('item added to redis snaps queue', reply);
                     console.log('created item is..', item)
                     res.send(item)
@@ -57,8 +64,9 @@ router.post('/', function(req, res) {
 
             })
     } else {
-        console.log('you are not authorized...stand down..')
-        res.send(401);
+        res.send({
+            err: 'You must log in first.'
+        });
     }
 })
 
@@ -70,10 +78,14 @@ router.put('/:id', function(req, res) {
             id: req.params.id
         }, function(err, result) {
             if (err) {
-                return handleError(res, err);
+                return res.send({
+                    err: err
+                });
             }
             if (!result) {
-                return res.send(404);
+                return res.send({
+                    err: 'No no, item no here.'
+                })
             }
 
             if (req.user._id == result.ownerMongoId) { //Merge existing item with updated object from frontend
@@ -90,24 +102,32 @@ router.put('/:id', function(req, res) {
                     })
             } else {
                 console.log('you are not authorized...stand down..')
-                res.send(401);
+                res.send({
+                    err: 'You are not authorized to edit this item'
+                });
             }
         })
     } else {
         console.log('you are not authorized...stand down..')
-        res.send(401);
+        res.send({
+            err: 'You must log in first.'
+        });
     }
 })
 
 //delete an item
-router.delete('/:id', function(req, res) {
+router.post('/:id/delete', function(req, res) {
     if (req.user) {
         landmark.findOne(req.params.id, function(err, item) {
             if (err) {
-                return handleError(res, err);
+                return res.send({
+                    err: err
+                });
             }
             if (!item) {
-                return res.send(404);
+                return res.send({
+                    err: 'No no, item no here.'
+                })
             }
 
             if (req.user._id == result.ownerMongoId) {
@@ -122,13 +142,17 @@ router.delete('/:id', function(req, res) {
                 })
             } else {
                 console.log('you are not authorized...stand down..')
-                res.send(401);
+                res.send({
+                    err: 'You are not authorized to edit this item'
+                });
             }
 
         })
     } else {
         console.log('you are not authorized...stand down..')
-        res.send(401);
+        res.send({
+            err: 'You must log in first.'
+        });
     }
 })
 
