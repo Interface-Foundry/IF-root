@@ -12,7 +12,7 @@ var searchQuery = {
   loc: TestLocations.SoHoNYC.loc
 };
 
-describe.only('items search', function() {
+describe('items search', function() {
   describe('not logged in', function() {
 
     var body;

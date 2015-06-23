@@ -542,6 +542,7 @@ app.get('/api/user/loggedin', function(req, res) {
 });
 
 //--- ITEM ROUTER ----//
+app.use('/api/items', require('./components/IF_apiroutes/items_actions'));
 app.use('/api/items', require('./components/IF_apiroutes/items_crud'));
 //--- PLACES ROUTER ----//
 app.use('/api/places', require('./components/IF_apiroutes/place_routes'));
