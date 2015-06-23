@@ -19,6 +19,7 @@ module.exports = {
   findArea: function(lat, lon, callback) {
     request('findArea?lat=' + encodeURIComponent(lat) + '&lon='+ encodeURIComponent(lon), function(e, r, body) {
       if (e) {callback(e)}
+        console.log(e,r,body)
       callback(null, body);
     });
   }

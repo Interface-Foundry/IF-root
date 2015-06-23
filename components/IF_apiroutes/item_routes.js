@@ -34,67 +34,71 @@ Response:
 
 var express = require('express'),
     router = express.Router(),
-    landmarkSchema = require('../IF_schemas/landmark_schema.js'),
+    landmark = require('../IF_schemas/landmark_schema.js'),
     _ = require('underscore'),
-    shapefile = require('shapefile')
+    shapefile = require('shapefile'),
+    request = require('request')
 
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
-router.use(function(req, res, next) {
-    if (req.query.number || req.query.tags) {
-        next();
-    }
-});
-
 //Trending - lat/lng
 router.post('/trending', function(req, res) {
-//     POST / api / items / trending
-       // {
-       //     loc: {lat: 34, lon: -77}
-       // }
-
-   // Response:
-   // {
-   //     results: [
-   //         { category: 'Trending in SoHo', results: []},
-   //         { category: 'Trending Halloween Costumes', results: []},
-   //     },
-
-   //     links: {
-   //         self: 
-   //         next: 'api/items/trending?lat=.......page=2&count=50',
-   //         last: 
-   //     }
-   // }
+    
     var loc = {
         type: 'Point',
         coordinates: []
     };
 
-    loc.coordinates.push(req.query.lat);
-    loc.coordinates.push(req.query.lon);
+    loc.coordinates.push(parseFloat(req.body.lat));
+    loc.coordinates.push(parseFloat(req.body.lon));
 
     //Get neighborhood name based on coordinates
-    shapefile.read('../../IF_services/NY.geojson', function(err, area){
-        console.log('Shapefile: ',area)
-        // if (req.query.lng > area.bbox[1] && req.query.lng )
+    var options = {
+        method: 'HEAD'
+    }
+
+    console.log('hitting',loc.coordinates[0],loc.coordinates[1])
+    request('http://localhost:9998/findArea?lat=' + loc.coordinates[0] + '&lon=' + loc.coordinates[1], options, function(error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log('req.body: ',body)
+            // var body = JSON.parse(body)
+
+            var response = {
+                results: [],
+                links: {
+                    self: 'api/items/trending',
+                    next: 'api/items/trending?page='+req.query.page,
+                    last: null
+                },
+                query: req.body
+            }
+
+            var skip = parseInt(req.body.page) * 20;
+            var query = {
+                spherical: true,
+                maxDistance: 1 / 111.12, //1km radius
+                skip: skip,
+                sort: {
+                    like_count: -1
+                },
+                limit: 20,
+            };
+
+            landmark.geoNear(loc, query, function(err, items) {
+                if (err) console.log(err);
+                if (!items) return res.send(440);
+
+                var obj = {
+                    category: 'Trending in ' + body.area,
+                    results: items
+                }
+                response.results.push(obj)
+                console.log('hitting', response)
+                res.send(response);
+            });
+        }
     })
 
-
-    var query = {
-        spherical: true,
-        maxDistance: 1 / 111.12, //1km radius
-        skip: parseInt(req.query.count),
-        sort: {
-            like_count: -1
-        },
-        limit: 20,
-    };
-    landmark.geoNear(loc, query, function(err, items) {
-        if (err) console.log(err);
-        if (!items) return res.send(440);
-        res.send(items);
-    });
 })
 
 //Get item given an item ID

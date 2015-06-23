@@ -12,23 +12,24 @@ import os
 #pip install ipython
 #may need to install pip and ogr
 
-class findArea():
+class findArea(resource.Resource):
     isLeaf = True
 
     def render_GET(self, request):
         # urlpath = request.URLPath()
         # print urlpath
         request.setHeader("content-type", "application/json")
-        lat = request.args["lat"]
-        lon = request.args["lon"]
+        lat = float(request.args["lat"][0])
+        lon = float(request.args["lon"][0])
 
         #Find Area
+        # 'ESRI Shapefile' for shapefiles
         drv = ogr.GetDriverByName('ESRI Shapefile') #We will load a shape file
-        ds_in = drv.Open("./NY.shp")    #Get the contents of the shape file
+        ds_in = drv.Open("./Flickr/Polygons/polygons.shp")    #Get the contents of the shape file
         lyr_in = ds_in.GetLayer(0)    #Get the shape file's first layer
 
         #Put the title of the field you are interested in here
-        idx_reg = lyr_in.GetLayerDefn().GetFieldIndex("NAME")
+        idx_reg = lyr_in.GetLayerDefn().GetFieldIndex("label")
 
         #If the latitude/longitude we're going to use is not in the projection
         #of the shapefile, then we will get erroneous results.
@@ -54,16 +55,11 @@ class findArea():
 
         #Loop through the overlapped features and display the field of interest
         for feat_in in lyr_in:
-            print lon, lat, feat_in.GetFieldAsString(idx_reg)
-
-        area = feat_in.GetFieldAsString(idx_reg)
-
-        #Take command-line input and do all this
-        # check(float(sys.argv[1]),float(sys.argv[2]))
-        #check(-95,47)
-
-        return json.dumps({"area": area})
-
+            result = feat_in.GetFieldAsString(idx_reg)
+            area = result.strip().split(",")[0]
+            print lat,lon,area
+            return area
+ 
 endpoints.serverFromString(reactor, "tcp:9998").listen(server.Site(findArea()))
 print "Python AreaFind server running on port 9998"
 reactor.run()
