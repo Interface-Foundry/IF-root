@@ -39,56 +39,36 @@ var forumStyle = require('./forum_theme.json');
 
 var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
-//---------------//
-//JR Yelp Creds
-// var yelp = require("yelp").createClient({
-//     consumer_key: "dyjR4bZkmcD_CpOTYx2Ekg",
-//     consumer_secret: "Coq5UbKKXYWmPy3TZf9hmNODirg",
-//     token: "_dDYbpK4qdeV3BWlm6ShoQdKUnz1IwCO",
-//     token_secret: "VGCPbsf9bN2SJi7IlM5-uYf4a98"
-// });
-
-//April Yelp Creds:
-var yelp = require("yelp")
-    .createClient({
-        consumer_key: "hV6pIDq0pR-urBu-XhlwOQ",
-        consumer_secret: "MuIF9fe4Bjcwbmopwc75eGPVpaA",
-        token: "wt2O1ykkgdxe6Z0ZJ9ZmwzwWJyYUp-IN",
-        token_secret: "UTvnuUiZMtxqfZRCEMzxtLh3C2o"
-    });
-
-//April Google Creds:
-//var googleAPI = 'AIzaSyAfVLiPr4LMvICmL64m3LDpU6uaW5OV_6c';
 
 //JR Google Creds:
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var startLoopTime = new Date();
 
-countYelpRecords();
+countGoogleRecords();
 
-function countYelpRecords(){
+function countGoogleRecords(){
 
     landmarks.model(false)
         .find()
-        .exists('source_yelp.id')
+        .exists('source_google.id')
         .exec(function(err, docs) {
             if (err) {
                 console.log("Error Occured: ", err);
             } else if (docs.length > 0) {
                 var sizeOfDb = docs.length;
                 console.log("sizeOfDb: ", sizeOfDb);
-                findLatestYelpRecord(sizeOfDb);
+                findLatestGoogleRecord(sizeOfDb);
             } else {
-                console.log('No Yelp documents in database');
+                console.log('No Google Places in database');
             }
         });
 }
 
-function findLatestYelpRecord(sizeOfDb) {
-    console.log("finding newest yelp record");
+function findLatestGoogleRecord(sizeOfDb) {
+    console.log("finding newest google record");
     landmarks.model(false)
         .find()
-        .exists('source_yelp.id')
+        .exists('source_google.id')
         .sort("-_id")
         .limit(1)
         .exec(function(err, docs) {
@@ -98,17 +78,17 @@ function findLatestYelpRecord(sizeOfDb) {
                 console.log("Newest yelp record and time created", docs[0].name, docs[0].time.created);
                 var docZero = docs[0];
                 (function(counter, docZero, sizeOfDb){
-                    repeaterThroughYelpRecords(counter, docZero, sizeOfDb);
+                    repeaterThroughGoogleRecords(counter, docZero, sizeOfDb);
                     })(0, docZero, sizeOfDb);
             } else {
-                console.log('No Documents found in findLatestYelpRecord');
+                console.log('No Documents found in findLatestGoogleRecord');
             }
         });
 }
 
 
 
-function repeaterThroughYelpRecords(i, doc, sizeOfDb){
+function repeaterThroughGoogleRecords(i, doc, sizeOfDb){
 
     if (i < sizeOfDb){
 
@@ -117,7 +97,7 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
         (function(){
             landmarks.model(false)
                 .find()
-                .exists('source_yelp.id')
+                .exists('source_google.id')
                 .where("_id")
                 .lt(doc._id)
                 .sort("-_id")
@@ -131,12 +111,12 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
                     }
                     else if (docs < 1){
                         console.log("docs < 1"); //this should only happen after the loop finishes
-                        repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb); 
+                        repeaterThroughGoogleRecords(i + 1, docs[0], sizeOfDb); 
                     }
                     else {
                         setTimeout(function(){
                             queryGooglePlaceID(docs[0]);
-                            repeaterThroughYelpRecords(i + 1, docs[0], sizeOfDb);
+                            repeaterThroughGoogleRecords(i + 1, docs[0], sizeOfDb);
                         }, 2000);
                     }
                 });            
@@ -144,7 +124,7 @@ function repeaterThroughYelpRecords(i, doc, sizeOfDb){
     }
     else {
         var endLoopTime = new Date();
-        console.log("Done with all Yelp records in database. Records (i): ", i, (endLoopTime - startLoopTime)/1000, "seconds"); //Google allows 100,000 queries per day. Each loop/doc involves two google queries
+        console.log("Done with all Google records in database. Records (i): ", i, (endLoopTime - startLoopTime)/1000, "seconds"); //Google allows 100,000 queries per day. Each loop/doc involves two google queries
     }
 
 }
