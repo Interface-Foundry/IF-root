@@ -15,7 +15,10 @@ var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 router.get('/:id', function(req, res) {
 
     landmark.findOne(req.params.id, function(err, item) {
-        if (err) console.log(err);
+        if (err) {
+            console.log(err);
+            return res.send(500);
+        }
         if (!item) return res.send(440);
         res.send(item);
     });
@@ -23,7 +26,7 @@ router.get('/:id', function(req, res) {
 
 //Create a new item
 router.post('/', function(req, res) {
-    if (req.user.admin) {
+    if (req.user) {
         var newitem = new landmark();
         var loc = {
             type: 'Point',
@@ -43,23 +46,26 @@ router.post('/', function(req, res) {
             function(err, item) {
                 if (err) {
                     console.log(err)
+                    return res.send(500);
                 }
                 redisClient.rpush('snaps', item._id, function(err, reply) {
-                    console.log('item added to redis snaps queue');
+                    if (err) console.log('REDIS QUEUE ERR: ', err)
+                    console.log('item added to redis snaps queue', reply);
                     console.log('created item is..', item)
                     res.send(item)
                 });
-                
+
             })
     } else {
         console.log('you are not authorized...stand down..')
+        res.send(401);
     }
 })
 
 
 //Update an item
 router.put('/:id', function(req, res) {
-    if (req.user.admin) {
+    if (req.user) {
         landmark.findOne({
             id: req.params.id
         }, function(err, result) {
@@ -69,25 +75,33 @@ router.put('/:id', function(req, res) {
             if (!result) {
                 return res.send(404);
             }
-            //Merge existing item with updated object from frontend
-            var item = _.extend(result, req.body);
-            //Save item
-            item.save(
-                function(err, item) {
-                    if (err) {
-                        console.log(err)
-                    }
-                    console.log('updated item is..', item)
-                })
+
+            if (req.user._id == result.ownerMongoId) { //Merge existing item with updated object from frontend
+                var item = _.extend(result, req.body);
+                //Save item
+                item.save(
+                    function(err, item) {
+                        if (err) {
+                            console.log(err)
+                            return res.send(500);
+                        }
+                        console.log('updated item is..', item)
+                        res.send(item)
+                    })
+            } else {
+                console.log('you are not authorized...stand down..')
+                res.send(401);
+            }
         })
     } else {
         console.log('you are not authorized...stand down..')
+        res.send(401);
     }
 })
 
 //delete an item
 router.delete('/:id', function(req, res) {
-    if (req.user.admin) {
+    if (req.user) {
         landmark.findOne(req.params.id, function(err, item) {
             if (err) {
                 return handleError(res, err);
@@ -95,17 +109,26 @@ router.delete('/:id', function(req, res) {
             if (!item) {
                 return res.send(404);
             }
-            //Delete entry
-            item.remove(function(err) {
-                if (err) {
-                    console.log(err)
-                }
-                res.sendStatus(200);
-                console.log('deleted!')
-            })
+
+            if (req.user._id == result.ownerMongoId) {
+                //Delete entry
+                item.remove(function(err) {
+                    if (err) {
+                        console.log(err)
+                        return res.send(500);
+                    }
+                    res.sendStatus(200);
+                    console.log('deleted!')
+                })
+            } else {
+                console.log('you are not authorized...stand down..')
+                res.send(401);
+            }
+
         })
     } else {
         console.log('you are not authorized...stand down..')
+        res.send(401);
     }
 })
 
