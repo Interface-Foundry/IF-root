@@ -208,7 +208,7 @@ var landmarkSchema = new Schema({
         city: String,
         url: String,
         price_level: Number,
-
+        neighborhood: String
     },
     source_instagram_users: {
         instagram_users: [String]
