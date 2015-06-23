@@ -4,7 +4,7 @@ var app = express.Router();
 var defaultResultCount = 20;
 var searchItemsUrl = '/api/items/search';
 
-var mockItems = require('./mock_items.js');
+var mockItems = require('./../IF_apiroutes/mock_items.js');
 var USE_MOCK_DATA = true;
 
 app.post(searchItemsUrl, function(req, res) {
