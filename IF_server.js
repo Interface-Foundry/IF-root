@@ -542,7 +542,8 @@ app.get('/api/user/loggedin', function(req, res) {
 });
 
 //--- ITEM ROUTER ----//
-app.use('/api/items', require('./components/IF_apiroutes/item_routes'));
+app.use('/api/items', require('./components/IF_apiroutes/items_actions'));
+app.use('/api/items', require('./components/IF_apiroutes/items_crud'));
 //--- PLACES ROUTER ----//
 app.use('/api/places', require('./components/IF_apiroutes/place_routes'));
 //--- SUPER USER ROUTER ----//
@@ -3723,8 +3724,57 @@ app.all('/*', function(req, res, next) {
 });
 
 
+/**
+ * Error handling
+ *
+ * WAYS TO HANDLE ERRORS:
+ *
+ * return next("Some error message")
+ *
+ * (or if you have an err object from mongoose or something)
+ * err.niceMessage = "Item not found"
+ * return next(err);
+ *
+ * (you can also include a devMessage to help debugging)
+ * err.devMessage = "Redis failed"
+ * return next(err);
+ */
+app.use(function(err, req, res, next) {
+  // first print the route
+  console.error('Error at ' + req.method + ' ' + req.originalUrl);
 
+  // handle the case where someone does next('You must log in first') or whatever
+  if (typeof err === 'string') {
+    err = {
+      niceMessage: err
+    };
+  }
 
+  // log stuff to the console
+  if (err.niceMessage) {
+    console.error(err.niceMessage);
+  }
+  if (err.devMessage) {
+    console.error(err.devMessage);
+  }
+  console.error(err.stack || 'No stack');
+
+  // add a nice message for the user if there is none
+  err.niceMessage = err.niceMessage || '(＞﹏＜) Sorry, Kip hit an error.';
+
+  // send a response, friendly in production but verbose in dev
+  if (global.config.isProduction) {
+    res.send({
+      err: {
+        niceMessage: err.niceMessage
+      }
+    });
+  } else {
+    res.send({
+      err: err
+    });
+  }
+});
 
 
 //3 Hour checkup on size of image directories, emails if over 10gb
