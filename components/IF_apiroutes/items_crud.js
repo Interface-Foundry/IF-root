@@ -74,7 +74,7 @@ router.put('/:id', function (req, res, next) {
         return next(err);
       }
 
-      if (req.user._id == result.ownerMongoId) { //Merge existing item with updated object from frontend
+      if (result && req.user._id == result.ownerMongoId) { //Merge existing item with updated object from frontend
         var item = _.extend(result, req.body);
         //Save item
         item.save(
