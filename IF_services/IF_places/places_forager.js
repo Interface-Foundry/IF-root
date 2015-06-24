@@ -1,16 +1,12 @@
 //ARGUMENTS
-
-//Radius (Default 800)
-var radius = process.argv[2] ? parseFloat(process.argv[2]) : 800
-    //Starting zipcode (default 10001)
-var zipLow = process.argv[3] ? process.argv[3] : 10001
-    //Ending zipcode
-var zipHigh = process.argv[4] ? process.argv[4] : 11692
-    //TESTING ONLY
-var testMode = process.argv[5] ? process.argv[5] : 'false';
-var radiusMax = process.argv[6] ? parseFloat(process.argv[6]) : 1000;
-
-
+//For testing different radius params
+var testMode = process.argv[2] ? process.argv[2] : 'false';
+//Radius 
+var radius = process.argv[3] ? parseFloat(process.argv[3]) : 800
+var radiusMax = process.argv[4] ? parseFloat(process.argv[4]) : 1000;
+//Zipcode
+var zipLow = process.argv[5] ? process.argv[5] : 10001
+var zipHigh = process.argv[6] ? process.argv[6] : 11692
 
 //TODO:
 // Increase RADIUS for NON CITIES
@@ -131,7 +127,7 @@ async.whilst(
                     if (radius !== radiusMax) {
                         radius += 20
                     } else {
-                         fs.appendFile('scraped.log', '******Finished*****', function(err) {
+                        fs.appendFile('scraped.log', '******Finished*****', function(err) {
                             if (err) throw err;
                         });
                         return console.log('Finished Testing Radiuses!')
