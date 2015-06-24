@@ -63,14 +63,23 @@ app.post('/:mongoId/deletecomment', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+    if (!req.user) {
+        return next('You must log in first');
+    }
     db.Worldchat.findOne({
         '_id': req.params.mongoId
-    }).remove(function(err, comment) {
+    }, function(err, comment) {
         if (err) return next(err)
-        console.log('comment deleted.')
-        res.sendStatus(200);
-    })
-});
+        if (comment.userID !== req.user._id) {
+            return next('You are not authorized to delete this comment');
+        }
+
+        comment.remove(function(err, comment) {
+            console.log('comment deleted.')
+            res.sendStatus(200);
+        })
+    });
+})
 
 //front-end will send tags object in post body
 // {
@@ -83,11 +92,18 @@ app.post('/:mongoId/tag', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+    if (!req.user) {
+        return next('You must log in first');
+    }
     var tagObj = req.body.tags
     db.Landmarks.findOne({
         '_id': req.params.mongoId
     }, function(err, item) {
         if (err) return next(err)
+        if (item.ownerUserId !== req.user._id) {
+            return next('You are not authorized to add tags to this item');
+        }
+
         for (var type in tagObj) {
             if (tagObj.hasOwnProperty(type)) {
                 tagObj[type].forEach(function(tag) {
@@ -107,10 +123,16 @@ app.post('/:mongoId/deletetag', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+    if (!req.user) {
+        return next('You must log in first');
+    }
     db.Landmarks.findOne({
         '_id': req.params.mongoId
     }, function(err, item) {
         if (err) return next(err)
+        if (item.ownerUserId !== req.user._id) {
+            return next('You are not authorized to delete tags for this item');
+        }
         req.body.tags.forEach(function(tagToDelete) {
             var i = item.itemTags.text.length;
             while (i--) {
