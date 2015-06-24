@@ -74,6 +74,9 @@ describe('items CRUD operations', function () {
         body.should.equal(200)
       });
     })
+
+
+    //comment emoji test
   });
 })
 ;
