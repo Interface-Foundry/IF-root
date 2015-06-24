@@ -10,7 +10,6 @@ var mockItems = require('./mock_items.js');
 var USE_MOCK_DATA = true;
 
 var defaultResponse = {
-  err: null,
   status: '(⌒‿⌒)'
 };
 
@@ -21,15 +20,9 @@ app.use('/:mongoId/:action', function(req, res, next) {
   }
 
   db.Landmarks.findById(req.params.mongoId, function(err, item) {
-
-    // do not send real error message in production, just dev/test
-    if (err && !global.config.isProduction) {
-      return res.send({err: err});
-    }
-
-    // send a generic error message for production errors or if the item doesn't exist
-    if ((err && global.config.isProduction) || !item) {
-      return res.send({err: 'Could not find item'})
+    if (err) {
+      err.niceMessage = 'Could not find item';
+      return next(err);
     }
 
     // otherwise continue happily

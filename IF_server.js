@@ -3724,8 +3724,45 @@ app.all('/*', function(req, res, next) {
 });
 
 
+/**
+ * Error handling
+ * If you want to add a friendly message for production, add it to err.niceMessage
+ * You can also add debugging help to err.devMessage
+ */
+app.use(function(err, req, res, next) {
 
+  // handle the case where someone does next('You must log in first') or whatever
+  if (typeof err === 'string') {
+    err = {
+      niceMessage: err
+    };
+  }
 
+  // log stuff to the console
+  if (err.niceMessage) {
+    console.error(err.niceMessage);
+  }
+  if (err.devMessage) {
+    console.error(err.devMessage);
+  }
+  console.error(err.stack || 'No stack');
+
+  // add a nice message for the user if there is none
+  err.niceMessage = err.niceMessage || '(＞﹏＜) Sorry, Kip hit an error.';
+
+  // send a response, friendly in production but verbose in dev
+  if (global.config.isProduction) {
+    res.send({
+      err: {
+        niceMessage: err.niceMessage
+      }
+    });
+  } else {
+    res.send({
+      err: err
+    });
+  }
+});
 
 
 //3 Hour checkup on size of image directories, emails if over 10gb
