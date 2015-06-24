@@ -282,7 +282,7 @@ var landmarkSchema = new Schema({
         userId: String,
         timeFaved: Date
     }],
-    fav_count: Number,
+    fave_count: Number,
     rejects: [String],
     /* 
     comments: virtual property, array of worldchats

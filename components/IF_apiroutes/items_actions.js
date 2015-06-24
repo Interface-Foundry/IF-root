@@ -153,11 +153,12 @@ app.post('/:mongoId/deletetag', function(req, res, next) {
     })
 });
 
-app.post('/:mongoId/fav', function(req, res) {
-    if (USE_MOCK_DATA) {
+app.post('/:mongoId/fave', function(req, res, next) {
+    if (!USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
 
+    console.log(req.user);
     if (!req.user) {
         return next('Must be logged in to fave an item');
     }
@@ -194,7 +195,7 @@ app.post('/:mongoId/fav', function(req, res) {
     }
 });
 
-app.post('/:mongoId/unfav', function(req, res) {
+app.post('/:mongoId/unfave', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
@@ -224,7 +225,7 @@ app.post('/:mongoId/unfav', function(req, res) {
       })
 });
 
-app.post('/:mongoId/reject', function(req, res) {
+app.post('/:mongoId/reject', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
@@ -241,7 +242,7 @@ app.post('/:mongoId/reject', function(req, res) {
       })
 });
 
-app.post('/:mongoId/unreject', function(req, res) {
+app.post('/:mongoId/unreject', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
@@ -270,10 +271,23 @@ app.post('/:mongoId/deletesnap', function(req, res) {
     }
 });
 
-app.post('/:mongoId/report', function(req, res) {
+app.post('/:mongoId/report', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+
+    if (!req.item.reports) {
+        req.item.reports = [req.body];
+    } else {
+        req.item.reports.push(req.body);
+    }
+    req.item.save(function(e) {
+        if (e) {
+            e.niceMessage = 'Oops there was a problem processing your feedback.  Please try again';
+            return next(e);
+        }
+        return res.send(defaultResponse);
+    });
 });
 
 module.exports = app;

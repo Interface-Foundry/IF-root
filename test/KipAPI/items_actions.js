@@ -15,7 +15,7 @@ var mockItem = {
             lon: -73.990638
         }
     },
-    {
+    itemTags: {
         colors: [],
         categories: [],
         text: []
@@ -29,8 +29,8 @@ var mockItem = {
         timeReported: Date,
         comment: String,
         reason: String
-    }],
-}
+    }]
+};
 
 var mockComment1 = {
     _id:'4321',
@@ -70,20 +70,54 @@ var query = {
     msg: 'hello world!'
 }
 
-describe('item action', function() {
-    it('should return a body with "err" and "status" properties', function(done) {
-        browser.post('/api/items/1234/like', function(e, r, b) {
-            should.not.exist(b.err);
-            should.exist(b.status);
-            done();
-        });
+describe('item actions', function() {
+  describe('doing anything while logged out', function() {
+    UserTools.logoutBefore();
+    it('should blow up because you must has login for to make action fun times', function(done) {
+      browser.post('/api/items/1234/fave', function(e, r, b) {
+        should.exist(b.err);
+        done();
+      });
     });
-
-    describe('not logged in', function() {
-        before(function(done) {
-            UserTools.logout(done);
+  });
+  describe('faveing an item', function() {
+    var peach;
+    before(function(done) {
+      UserTools.login(UserTools.users.peach, function(e, user) {
+        peach = user;
+        browser.post('/api/items/1234/fave', function(e, r, body) {
+          done();
         });
+      });
     });
+    it('should put peach in the faves array', function(done) {
+      browser.get('/api/items/1234', function(e, r, body) {
+        var peachFavesIt = body.faves.reduce(function(p, o) {
+          return p || o.userId === peach._id.toString();
+        }, false);
+        peachFavesIt.should.equal(true);
+      });
+    });
+  });
+  describe('un-faveing an item', function() {
+    var peach;
+    before(function (done) {
+      UserTools.login(UserTools.users.peach, function (e, user) {
+        peach = user;
+        browser.post('/api/items/1234/unfave', function (e, r, body) {
+          done();
+        });
+      });
+    });
+    it('should take peach out of the faves array', function (done) {
+      browser.get('/api/items/1234', function (e, r, body) {
+        var peachFavesIt = body.faves.reduce(function (p, o) {
+          return p || o.userId === peach._id.toString();
+        }, false);
+        peachFavesIt.should.equal(false);
+      });
+    });
+  });
 
     describe('logged in as Princess Peach', function() {
         before(function(done) {
@@ -114,9 +148,6 @@ describe('item action', function() {
                 });
             });
         })
-
-
-
 
     })
 

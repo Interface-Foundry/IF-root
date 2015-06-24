@@ -15,7 +15,7 @@ module.exports.example = {
   hasLoc: true,
   loc: {
     type: 'Point',
-    coordinates: {lat: 40.7240168, lon: -74.0009368} // in SoHo
+    coordinates: {lat: 40.7240168, lon: -74.0009368}
   },
   itemTags: {
     color: ["000000", "FFFFFF"],
@@ -23,11 +23,11 @@ module.exports.example = {
     text: ['tag1', 'tag2', 'reallyreallylongtag3']
   },
   price: 2,
-  likes: [{
+  faves: [{
     userId: 'userid',
     timeLiked: new Date(1435014076000)
   }],
-  like_count: 10000,
+  fave_count: 1,
   ownerUserName: 'OwnerUserName',
   ownerUserId: 'owneruserid',
   ownerMongoId: '',
