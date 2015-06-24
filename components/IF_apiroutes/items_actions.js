@@ -42,7 +42,6 @@ app.post('/:mongoId/unlike', function(req, res) {
     }
 });
 
-//mongoId is item._id
 app.post('/:mongoId/comment', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
@@ -58,7 +57,6 @@ app.post('/:mongoId/comment', function(req, res) {
     })
 });
 
-//mongoId is comment._id
 app.post('/:mongoId/deletecomment', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
@@ -66,19 +64,22 @@ app.post('/:mongoId/deletecomment', function(req, res) {
     if (!req.user) {
         return next('You must log in first');
     }
-    db.Worldchat.findOne({
+    db.Landmarks.findOne({
         '_id': req.params.mongoId
-    }, function(err, comment) {
+    }, function(err, item) {
         if (err) return next(err)
-        if (comment.userID !== req.user._id) {
-            return next('You are not authorized to delete this comment');
-        }
-
-        comment.remove(function(err, comment) {
-            console.log('comment deleted.')
-            res.sendStatus(200);
+        item.getComments(function(err, comments) {
+            if (err) return next(err)
+            comments.forEach(function(comment) {
+                if (comment.userID !== req.user._id) {
+                    comment.remove(function(err, comment) {
+                        console.log('comment deleted.')
+                        res.sendStatus(200);
+                    })
+                }
+            })
         })
-    });
+    })
 })
 
 //front-end will send tags object in post body
