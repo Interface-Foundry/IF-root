@@ -42,7 +42,7 @@ app.post('/:mongoId/unlike', function(req, res) {
     }
 });
 
-app.post('/:mongoId/comment', function(req, res) {
+app.post('/:mongoId/comment', function(req, res,next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
@@ -57,7 +57,7 @@ app.post('/:mongoId/comment', function(req, res) {
     })
 });
 
-app.post('/:mongoId/deletecomment', function(req, res) {
+app.post('/:mongoId/deletecomment', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
@@ -80,6 +80,7 @@ app.post('/:mongoId/deletecomment', function(req, res) {
             })
         })
     })
+
 })
 
 //front-end will send tags object in post body
@@ -89,7 +90,7 @@ app.post('/:mongoId/deletecomment', function(req, res) {
 //  }
 //note: cloudsight will pull color 
 //which will be auto-matched on backend to nearest color available
-app.post('/:mongoId/tag', function(req, res) {
+app.post('/:mongoId/tag', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
@@ -120,7 +121,7 @@ app.post('/:mongoId/tag', function(req, res) {
     })
 });
 //front-end will send array of tag strings to delete in post body
-app.post('/:mongoId/deletetag', function(req, res) {
+app.post('/:mongoId/deletetag', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
