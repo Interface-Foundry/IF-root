@@ -2,7 +2,7 @@
 //For testing different radius params
 var testMode = process.argv[2] ? process.argv[2] : 'false';
 //Radius 
-var radius = process.argv[3] ? parseFloat(process.argv[3]) : 800
+var radius = process.argv[3] ? parseFloat(process.argv[3]) : 600
 var radiusMax = process.argv[4] ? parseFloat(process.argv[4]) : 1000;
 //Zipcode
 var zipLow = process.argv[5] ? process.argv[5] : 10001
@@ -125,7 +125,7 @@ async.whilst(
                         })
                         //Increment Radius
                     if (radius !== radiusMax) {
-                        radius += 20
+                        radius += 50
                     } else {
                         fs.appendFile('scraped.log', '******Finished*****', function(err) {
                             if (err) throw err;
