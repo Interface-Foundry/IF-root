@@ -3760,6 +3760,7 @@ app.use(function(err, req, res, next) {
   err.niceMessage = err.niceMessage || '(＞﹏＜) Sorry, Kip hit an error.';
 
   // send a response, friendly in production but verbose in dev
+  if (res.headerSent){ return; } // prevent buggy things from multiple errors and next(err) calls
   if (global.config.isProduction) {
     res.send({
       err: {

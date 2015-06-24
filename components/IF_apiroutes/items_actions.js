@@ -25,6 +25,8 @@ app.use('/:mongoId/:action', function(req, res, next) {
             return next(err);
         }
 
+        req.item = item;
+
         // otherwise continue happily
         next();
     });
@@ -155,24 +157,105 @@ app.post('/:mongoId/fav', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+
+    if (!req.user) {
+        return next('Must be logged in to fave an item');
+    }
+
+    // check to see if user has faved yet. there might be a better way with $push,
+    // but i don't want to end up with multiple faves from the same user :/
+    var hasFaved = req.item.faves.reduce(function(p, o) {
+        return p || (o.userId === req.user._id.toString());
+    }, false);
+
+    if (!hasFaved) {
+        // update the item
+        req.item.faves.push({userId: req.user.id, timeLiked: new Date()});
+        req.item.save(function(e) {
+            if (e) {
+                e.niceMessage = 'Oops there was an error faveing the item.';
+                e.devMessage = 'Error adding fave to item collection';
+                return next(e);
+            }
+            res.send(defaultResponse);
+        });
+
+        // update the cached list of faves
+        db.Users.update({_id: req.user._id},
+          {$addToSet: {faves: req.user._id.toString()}}, function(e) {
+            if (e) {
+                e.niceMessage = 'Oops there was an error faveing the item.';
+                e.devMessage = 'Error adding fave to user collection';
+                return next(e);
+            }
+        })
+    } else {
+        res.send(defaultResponse);
+    }
 });
 
 app.post('/:mongoId/unfav', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+
+    if (!req.user) {
+        return next('Must be logged in to un-fave an item');
+    }
+
+    // update the item
+    db.Items.update({_id: req.params.mongoId},
+      { $pull: {faves: {userId: req.user._id.toString()}}}, function(e) {
+          if (e) {
+              e.niceMessage = 'Could not un-fave the item';
+              e.devMessage = 'un-fave failed for Items collection';
+              return next(e);
+          } else {
+              res.send(defaultResponse);
+          }
+      });
+
+    // update the users cache of faved things
+    db.Users.update({_id: req.user._id},
+      {$pull: {faves: req.user._id.toString()}}, function(e) {
+          e.niceMessage = 'Could not un-fave the item';
+          e.devMessage = 'un-fave failed for Items collection';
+          return next(e);
+      })
 });
 
 app.post('/:mongoId/reject', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+
+    // update the users list of cached rejects
+    db.Users.update({_id: req.user._id},
+      {$addToSet: {rejects: req.params.mongoId}}, function(e) {
+          if (e) {
+              e.niceMessage('Could not reject the item, maybe you should fave it ;)');
+              return next(e);
+          } else {
+              return res.send(defaultResponse);
+          }
+      })
 });
 
 app.post('/:mongoId/unreject', function(req, res) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
+
+    // update the users list of cached rejects
+    db.Users.update({_id: req.user._id},
+      {$pull: {rejects: req.params.mongoId}}, function(e) {
+          if (e) {
+              e.niceMessage('Could not un-reject the item');
+              return next(e);
+          } else {
+              return res.send(defaultResponse);
+          }
+      });
 });
 
 app.post('/:mongoId/snap', function(req, res) {

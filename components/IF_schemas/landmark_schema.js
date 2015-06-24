@@ -278,11 +278,12 @@ var landmarkSchema = new Schema({
         index: true
     }, //search tags
     price: Number,
-    likes: [{
+    faves: [{
         userId: String,
-        timeLiked: Date
+        timeFaved: Date
     }],
-    like_count: Number,
+    fav_count: Number,
+    rejects: [String],
     /* 
     comments: virtual property, array of worldchats
     
