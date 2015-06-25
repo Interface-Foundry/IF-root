@@ -3,9 +3,9 @@ var app = express.Router();
 var db = require('../IF_schemas/db');
 var async = require('async')
 var rsvp = require('rsvp');
-    /**
-     * This should be mounted at /api/items
-     */
+/**
+ * This should be mounted at /api/items
+ */
 
 var mockItems = require('./../../test/KipAPI/mock_items.js');
 var USE_MOCK_DATA = false;
@@ -40,9 +40,7 @@ app.post('/:mongoId/comment', function(req, res, next) {
 
     // check if comment exists already (double submit?)
     var commentExists = req.item.comments.reduce(function(p, o) {
-        return p || (o.userMongoId === comment.userMongoId
-          && o.comment === comment.comment
-          && o.timeCommented === comment.timeCommented);
+        return p || (o.userMongoId === comment.userMongoId && o.comment === comment.comment && o.timeCommented === comment.timeCommented);
     }, false);
 
     if (commentExists) {
@@ -66,12 +64,15 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
     }
 
     // $pull removes all documents matching the query from the array
-    req.item.update({$pull: {
-        comments: {
-            userId: req.user._id.toString(),
-            comment: req.body.comment,
-            timeCommented: req.body.timeCommented
-        }}}, function(e) {
+    req.item.update({
+        $pull: {
+            comments: {
+                userId: req.user._id.toString(),
+                comment: req.body.comment,
+                timeCommented: req.body.timeCommented
+            }
+        }
+    }, function(e) {
         if (e) {
             e.niceMessage = 'Could not delete comment on item';
             return next(e);
@@ -126,7 +127,10 @@ app.post('/:mongoId/tag', function(req, res, next) {
     });
 });
 
-
+// body: {
+//   “type”: “colors” or “categories” or “text”,
+//   “value”: “whatever”
+// }
 //front-end will send array of tag strings to delete in post body
 app.post('/:mongoId/deletetag', function(req, res, next) {
     if (!req.user) {
@@ -139,14 +143,16 @@ app.post('/:mongoId/deletetag', function(req, res, next) {
         if (item.ownerUserId !== req.user._id) {
             return next('You are not authorized to delete tags for this item');
         }
-        req.body.tags.forEach(function(tagToDelete) {
-            var i = item.itemTags.text.length;
-            while (i--) {
-                if (item.itemTags.text[i] == tagToDelete) {
-                    item.itemTags.text.splice(i, 1);
-                }
+        var type = req.body.type.trim();
+        var val = req.body.value.trim();
+        var i = item.itemTags[type].length;
+        while (i--) {
+            if (item.itemTags[type][i] == val) {
+                item.itemTags[type].splice(i, 1);
+                break;
             }
-        })
+        }
+
         item.save(function(err, item) {
             if (err) return next(err)
             res.sendStatus(200);
@@ -168,7 +174,10 @@ app.post('/:mongoId/fave', function(req, res, next) {
 
     if (!hasFaved) {
         // update the item
-        req.item.faves.push({userId: req.user._id.toString(), timeFaved: new Date()});
+        req.item.faves.push({
+            userId: req.user._id.toString(),
+            timeFaved: new Date()
+        });
         req.item.save(function(e) {
             if (e) {
                 e.niceMessage = 'Oops there was an error faveing the item.';
@@ -179,8 +188,13 @@ app.post('/:mongoId/fave', function(req, res, next) {
         });
 
         // update the cached list of faves
-        db.Users.update({_id: req.user._id},
-          {$addToSet: {faves: req.item._id.toString()}}, function(e) {
+        db.Users.update({
+            _id: req.user._id
+        }, {
+            $addToSet: {
+                faves: req.item._id.toString()
+            }
+        }, function(e) {
             if (e) {
                 e.niceMessage = 'Oops there was an error faveing the item.';
                 e.devMessage = 'Error adding fave to user collection';
@@ -199,26 +213,37 @@ app.post('/:mongoId/unfave', function(req, res, next) {
 
     // update the item
     console.log(req.user._id.toString());
-    req.item.update({$pull: {faves: {userId: req.user._id.toString()}}}, function(e) {
-          if (e) {
-              e.niceMessage = 'Could not un-fave the item';
-              e.devMessage = 'un-fave failed for Items collection';
-              return next(e);
-          } else {
-              res.send(defaultResponse);
-          }
-      });
+    req.item.update({
+        $pull: {
+            faves: {
+                userId: req.user._id.toString()
+            }
+        }
+    }, function(e) {
+        if (e) {
+            e.niceMessage = 'Could not un-fave the item';
+            e.devMessage = 'un-fave failed for Items collection';
+            return next(e);
+        } else {
+            res.send(defaultResponse);
+        }
+    });
 
 
     // update the users cache of faved things
-    db.Users.update({_id: req.user._id},
-      {$pull: {faves: req.item._id.toString()}}, function(e) {
-          if (e) {
-              e.niceMessage = 'Could not un-fave the item';
-              e.devMessage = 'un-fave failed for Items collection';
-              next(e);
-          }
-      });
+    db.Users.update({
+        _id: req.user._id
+    }, {
+        $pull: {
+            faves: req.item._id.toString()
+        }
+    }, function(e) {
+        if (e) {
+            e.niceMessage = 'Could not un-fave the item';
+            e.devMessage = 'un-fave failed for Items collection';
+            next(e);
+        }
+    });
 
 });
 
@@ -228,15 +253,20 @@ app.post('/:mongoId/reject', function(req, res, next) {
     }
 
     // update the users list of cached rejects
-    db.Users.update({_id: req.user._id},
-      {$addToSet: {rejects: req.params.mongoId}}, function(e) {
-          if (e) {
-              e.niceMessage('Could not reject the item, maybe you should fave it ;)');
-              return next(e);
-          } else {
-              return res.send(defaultResponse);
-          }
-      })
+    db.Users.update({
+        _id: req.user._id
+    }, {
+        $addToSet: {
+            rejects: req.params.mongoId
+        }
+    }, function(e) {
+        if (e) {
+            e.niceMessage('Could not reject the item, maybe you should fave it ;)');
+            return next(e);
+        } else {
+            return res.send(defaultResponse);
+        }
+    })
 });
 
 app.post('/:mongoId/unreject', function(req, res, next) {
@@ -245,15 +275,20 @@ app.post('/:mongoId/unreject', function(req, res, next) {
     }
 
     // update the users list of cached rejects
-    db.Users.update({_id: req.user._id},
-      {$pull: {rejects: req.params.mongoId}}, function(e) {
-          if (e) {
-              e.niceMessage('Could not un-reject the item');
-              return next(e);
-          } else {
-              return res.send(defaultResponse);
-          }
-      });
+    db.Users.update({
+        _id: req.user._id
+    }, {
+        $pull: {
+            rejects: req.params.mongoId
+        }
+    }, function(e) {
+        if (e) {
+            e.niceMessage('Could not un-reject the item');
+            return next(e);
+        } else {
+            return res.send(defaultResponse);
+        }
+    });
 });
 
 app.post('/:mongoId/snap', function(req, res) {
