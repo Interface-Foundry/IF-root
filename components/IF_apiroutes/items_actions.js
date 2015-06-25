@@ -6,7 +6,7 @@ var async = require('async')
      * This should be mounted at /api/items
      */
 
-var mockItems = require('./mock_items.js');
+var mockItems = require('./../../test/KipAPI/mock_items.js');
 var USE_MOCK_DATA = true;
 
 var defaultResponse = {

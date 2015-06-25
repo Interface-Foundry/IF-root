@@ -5,7 +5,7 @@ var should = require('chai').should();
 
 var mockItem = {
     _id: '1234',
-    name: 'Veraci Bag',
+    name: 'Versaci Bag',
     id: 'versacibag1',
     world: false,
     parentID: '1234',
@@ -20,9 +20,9 @@ var mockItem = {
         categories: [],
         text: []
     },
-    ownerUserName: '',
-    ownerUserId: String,
-    ownerMongoId: String,
+    ownerUserName: 'Princess Peach',
+    ownerUserId: 'peach',
+    ownerMongoId: '55799f4a76256a9342b03bad',
     itemImageURL: [String],
     reports: [{
         reporterUserId: String,

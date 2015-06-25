@@ -1,3 +1,5 @@
+var deepcopy = require('deepcopy');
+
 
 module.exports.exampleInstagramPost = {
   id: 'abcd',
@@ -15,10 +17,10 @@ module.exports.example = {
   hasLoc: true,
   loc: {
     type: 'Point',
-    coordinates: {lat: 40.7240168, lon: -74.0009368}
+    coordinates: [-74.0009368, 40.7240168]
   },
   itemTags: {
-    color: ["000000", "FFFFFF"],
+    colors: ["000000", "FFFFFF"],
     categories: ["category1", "category2"],
     text: ['tag1', 'tag2', 'reallyreallylongtag3']
   },
@@ -40,6 +42,14 @@ module.exports.example = {
     comment: 'Comment text',
     timeCommented: new Date("2015-6-11T02:46:34.812Z")
   }]
+};
+
+module.exports.getExample = function() {
+  var i = deepcopy(module.exports.example);
+  delete i._id;
+  i.id = 'item' + (Math.random()*1000000000|0);
+  i.testData = true;
+  return i;
 };
 
 module.exports.getResultsArray = function(num) {
