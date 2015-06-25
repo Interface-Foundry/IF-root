@@ -42,7 +42,7 @@ describe('item actions', function() {
     });
   });
 
-  describe('doing actions while logged in', function() {
+  describe.only('doing actions while logged in', function() {
     var peach;
     before(function (done) {
       UserTools.login(UserTools.users.peach, function (e, user) {
@@ -113,5 +113,46 @@ describe('item actions', function() {
         })
       });
     });
+
+
+    var itemTags = {
+      categories: ["category1", "category1000"],
+      text: ["superfluous", "melancholy"]
+    };
+
+    // from mock_items.js
+    var originalTags = {
+      colors: ["000000", "FFFFFF"],
+      categories: ["category1", "category2"],
+      text: ['tag1', 'tag2', 'reallyreallylongtag3']
+    };
+
+    var expectedTags = {
+      colors: ["000000", "FFFFFF"],
+      categories: ["category1", "category2", "category1000"],
+      text: ['tag1', 'tag2', 'reallyreallylongtag3', "superfluous", "melancholy"]
+    };
+
+    it('should allow peach to add tags to her item', function(done) {
+      browser.post('/api/items/' + item._id + '/tag', {
+        body: itemTags
+      }, function (e, r, body) {
+        getTestItem(function (item) {
+          item.itemTags.should.eql(expectedTags);
+          done();
+        });
+      });
+    });
+
+    it('should allow peach to remove tags from her item', function(done) {
+      browser.post('/api/items/' + item._id + '/deletetag', {
+        body: itemTags
+      }, function (e, r, body) {
+        getTestItem(function (item) {
+          item.itemTags.should.eql(expectedTags);
+          done();
+        });
+      });
+    })
   });
 });

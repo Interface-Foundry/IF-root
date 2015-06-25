@@ -2,6 +2,7 @@ var express = require('express');
 var app = express.Router();
 var db = require('../IF_schemas/db');
 var async = require('async')
+var rsvp = require('rsvp');
     /**
      * This should be mounted at /api/items
      */
@@ -87,40 +88,47 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
 //note: cloudsight will pull color 
 //which will be auto-matched on backend to nearest color available
 app.post('/:mongoId/tag', function(req, res, next) {
-    if (USE_MOCK_DATA) {
-        return res.send(defaultResponse);
-    }
     if (!req.user) {
         return next('You must log in first');
     }
-    var tagObj = req.body.tags
-    db.Landmarks.findOne({
-        '_id': req.params.mongoId
-    }, function(err, item) {
-        if (err) return next(err)
-        if (item.ownerUserId !== req.user._id) {
-            return next('You are not authorized to add tags to this item');
-        }
 
-        for (var type in tagObj) {
-            if (tagObj.hasOwnProperty(type)) {
-                tagObj[type].forEach(function(tag) {
-                    item.itemTags[type].push(tag)
-                })
+    if (req.user._id.toString() !== req.item.ownerMongoId) {
+        return next('You are not authorized to add tags to this item');
+    }
+
+
+    console.log(req.item.itemTags);
+    if (req.body.text) {
+        req.body.text.map(function(tag) {
+            if (req.item.itemTags.text.indexOf(tag) < 0) {
+                req.item.itemTags.text.push(tag);
             }
+        });
+    }
+
+    if (req.body.categories) {
+        req.body.categories.map(function(tag) {
+            if (req.item.itemTags.categories.indexOf(tag) < 0) {
+                req.item.itemTags.categories.push(tag);
+            }
+        });
+    }
+
+    console.log(req.item.itemTags);
+
+    req.item.save(function(e) {
+        if (e) {
+            e.niceMessage = 'Could not save tags';
+            return next(e);
+        } else {
+            return res.send(req.item.itemTags);
         }
-        item.save(function(err, item) {
-            if (err) return next(err)
-            res.sendStatus(200);
-            console.log('Tags added: ', item.itemTags)
-        })
-    })
+    });
 });
+
+
 //front-end will send array of tag strings to delete in post body
 app.post('/:mongoId/deletetag', function(req, res, next) {
-    if (USE_MOCK_DATA) {
-        return res.send(defaultResponse);
-    }
     if (!req.user) {
         return next('You must log in first');
     }
