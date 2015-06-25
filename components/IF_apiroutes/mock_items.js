@@ -7,9 +7,9 @@ module.exports.exampleInstagramPost = {
 };
 
 module.exports.example = {
-  _id: '1234',
+  _id: '558b2ad7a0d6b1f2c542107f',
   id: 'item1234',
-  parentID: '',
+  parentID: '5589e68d1938dac55f0eb7a7',
   valid: true,
   status: 'public',
   hasLoc: true,
@@ -25,14 +25,21 @@ module.exports.example = {
   price: 2,
   faves: [{
     userId: 'userid',
-    timeLiked: new Date(1435014076000)
+    timeFaved: new Date("2015-6-11T02:45:34.812Z")
   }],
   fave_count: 1,
-  ownerUserName: 'OwnerUserName',
-  ownerUserId: 'owneruserid',
-  ownerMongoId: '',
-  itemImageURL: ['https://placekitten.com/600/600', 'https://placekitten.com/600/600']
-
+  ownerUserName: 'Princess Peach',
+  ownerUserId: 'peach',
+  ownerMongoId: '55799f4a76256a9342b03bad',
+  itemImageURL: ['https://placekitten.com/600/600', 'https://placekitten.com/600/600'],
+  comments: [{
+    userId: 'peach',
+    userName: 'Princess Peach',
+    userAvatar: 'https://s3.amazonaws.com/if-server-avatars/2',
+    userMongoId: '55799f4a76256a9342b03bad',
+    comment: 'Comment text',
+    timeCommented: new Date("2015-6-11T02:46:34.812Z")
+  }]
 };
 
 module.exports.getResultsArray = function(num) {

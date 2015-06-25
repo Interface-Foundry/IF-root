@@ -286,9 +286,9 @@ var landmarkSchema = new Schema({
     rejects: [String],
     comments: [{
         userId: String,
+        userProfileId: String,
         userName: String,
         userAvatar: String,
-        userMongoId: String,
         comment: String,
         timeCommented: Date
     }],

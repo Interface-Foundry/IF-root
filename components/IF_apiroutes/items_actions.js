@@ -52,8 +52,8 @@ app.post('/:mongoId/comment', function(req, res, next) {
         return next('You must log in first');
     }
     var comment = req.body;
-    comment.userId = req.user.id;
-    comment.userMongoId = req.user._id.toString();
+    comment.userId = req.user._id.toString();
+    comment.userProfileId = req.user.profileID;
     comment.userAvatar = user.avatar;
 
     // check if comment exists already (double submit?)
@@ -88,7 +88,7 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
 
     // $pull removes all documents matching the query from the array
     req.item.update({$pull: {comments: {
-        userMongoId: req.user._id.toString(),
+        userId: req.user._id.toString(),
         comment: req.body.comment,
         timeCommented: req.body.timeCommented}}}, function(e) {
         if (e) {
