@@ -1,7 +1,9 @@
 var mongoose = require('mongoose');
 var config = global.config || require('config');
 
-mongoose.connect(config.mongodb.url);
+if (mongoose.connection.readyState == 0) {
+  mongoose.connect(config.mongodb.url);
+}
 
 /**
  * This file lets us do things like:
@@ -19,6 +21,7 @@ var schemas = [
   {filename: 'anon_user_schema', single: 'AnonUser', plural: 'AnonUsers'},
   {filename: 'contest_schema', single: 'Contest', plural: 'Contests'},
   {filename: 'contestEntry_schema', single: 'ContestEntry', plural: 'ContestEntries'},
+  {filename: 'geozip_schema', single: 'GeoZip', plural: 'GeoZips'},
   {filename: 'instagram_schema', single: 'Instagram', plural: 'Instagrams'},
   {filename: 'landmark_schema', single: 'Landmark', plural: 'Landmarks'},
   {filename: 'project_schema', single: 'Project', plural: 'Projects'},

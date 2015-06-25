@@ -10,6 +10,7 @@
     "connect-busboy": "*",
     "connect-flash": "~0.1.1",
     "cookie-parser": "*",
+    "deepcopy": "^0.5.0",
     "ejs": "~0.8.5",
     "express": "~4.0.0",
     "express-session": "~1.0.0",

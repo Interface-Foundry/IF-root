@@ -12,10 +12,12 @@ var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 //Get item given an item ID
 router.get('/:id', function (req, res, next) {
-  landmark.findOne(req.params.id, function (err, item) {
+  landmark.findById(req.params.id, function (err, item) {
     if (err) {
       err.niceMessage = 'No no, item no here.';
       return next(err);
+    } else if (!item) {
+      return next("No no, item no here.");
     }
 
     res.send(item);
@@ -66,24 +68,20 @@ router.post('/', function (req, res, next) {
 //Update an item
 router.put('/:id', function (req, res, next) {
   if (req.user) {
-    landmark.findOne({
-      id: req.params.id
-    }, function (err, result) {
+    landmark.findById(req.params.id, function (err, item) {
       if (err) {
         err.niceMessage = 'No no, item no here.';
         return next(err);
       }
 
-      if (result && req.user._id == result.ownerMongoId) { //Merge existing item with updated object from frontend
-        var item = _.extend(result, req.body);
+      if (item && req.user._id.toString() === item.ownerMongoId) { //Merge existing item with updated object from frontend
+        item = _.extend(item, req.body);
         //Save item
-        item.save(
-          function (err, item) {
+        item.save(function (err, item) {
             if (err) {
               err.niceMessage = 'Could not update item';
               return next(err);
             }
-            console.log('updated item is..', item);
             res.send(item)
           })
       } else {
@@ -100,13 +98,18 @@ router.put('/:id', function (req, res, next) {
 //delete an item
 router.post('/:id/delete', function (req, res, next) {
   if (req.user) {
-    landmark.findOne(req.params.id, function (err, item) {
+    landmark.findById(req.params.id, function (err, item) {
       if (err) {
         err.niceMessage = 'No no, item no here.';
         return next(err);
       }
 
-      if (req.user._id == result.ownerMongoId) {
+      if (!item) {
+        // no problem, item doesn't exist.  this is idempotency
+        res.sendStatus(200);
+      }
+
+      if (req.user._id.toString() === item.ownerMongoId) {
         //Delete entry
         item.remove(function (err) {
           if (err) {

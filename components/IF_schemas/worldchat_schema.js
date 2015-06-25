@@ -6,19 +6,11 @@ var Schema = mongoose.Schema, ObjectID = Schema.ObjectID;
 
 // define the schema for our user model
 var worldchatSchema = mongoose.Schema({
-    roomID: String, //pointed @ bubble object ID
-	kind: String, 
-    nick: String, //address 
+    roomID: String, //pointed @ item ID
     userID: String,
     msg: String,
-    pic: String,
-    href: String,
     time: { type: Date, default: Date.now },
-    avatar: String,
-    sticker: {
-	    img: String,
-	    _id: String
-    }
+    avatar: String
 });
 
 

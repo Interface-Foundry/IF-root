@@ -13,7 +13,7 @@ var base_config = {
   isProduction: false,
   host: os.hostname(),
   mongodb: {
-    url: 'mongodb://localhost:27017/if'
+    url: 'mongodb://localhost:27017/foundry'
   },
   redis: {
     port: 6379,

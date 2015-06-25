@@ -129,8 +129,8 @@ var userSchema = mongoose.Schema({
             default: 'user'
         }
     }],
-    // likes: virtual prop of user's "like" collection
-    // dislikes: virtual prop of user's "dislike" collection
+    faves: [String], // virtual prop of user's "like" collection
+    rejects: [String], // list of rejected mongoIds here for quicker querying
     recentSearches: {
         searchQuery: {},
         lastTimeSearched: Date,

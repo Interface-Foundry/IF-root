@@ -4,7 +4,8 @@ monguurl = require('monguurl');
 
 //schema construction
 var Schema = mongoose.Schema,
-    ObjectID = Schema.ObjectID;
+    ObjectID = Schema.ObjectID,
+    worldchatSchema = require('./worldchat_schema.js');
 
 var landmarkSchema = new Schema({
     name: String,
@@ -244,9 +245,14 @@ var landmarkSchema = new Schema({
         img_url: String, // Assuming this is the low resolution
         original_url: String, // Assuming this is the original size
         local_path: [String], // There could be multiple images being saved
-        text: { type: String},
-        tags: [{ type: String, index: true }],
-        created: {  // the time it was posted to Kip
+        text: {
+            type: String
+        },
+        tags: [{
+            type: String,
+            index: true
+        }],
+        created: { // the time it was posted to Kip
             type: Date,
             default: Date.now
         }
@@ -272,20 +278,20 @@ var landmarkSchema = new Schema({
         index: true
     }, //search tags
     price: Number,
-    likes: [{
+    faves: [{
         userId: String,
-        timeLiked: Date
+        timeFaved: Date
     }],
-    like_count: Number,
-    /* 
-    comments: virtual property, array of worldchats
-    
-    person who commented
-    body of comment
-    avatar or person
-    time of comment
-    etc, see worldchats
-    */
+    fave_count: Number,
+    rejects: [String],
+    comments: [{
+        userId: String,
+        userProfileId: String,
+        userName: String,
+        userAvatar: String,
+        comment: String,
+        timeCommented: Date
+    }],
     itemTags: {
         colors: [],
         categories: [],
@@ -320,6 +326,13 @@ landmarkSchema.index({
 landmarkSchema.virtual('parentName').set(function(name) {
     return name;
 });
+
+//instance method to get comments
+landmarkSchema.methods.getComments = function(cb) {
+    worldchatSchema.find({
+        'roomID': this._id
+    }, cb)
+};
 
 //indexing for search
 landmarkSchema.index({
