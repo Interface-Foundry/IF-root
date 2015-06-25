@@ -12,7 +12,7 @@ var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 //Get item given an item ID
 router.get('/:id', function (req, res, next) {
-  landmark.findOne(req.params.id, function (err, item) {
+  landmark.findById(req.params.id, function (err, item) {
     if (err) {
       err.niceMessage = 'No no, item no here.';
       return next(err);

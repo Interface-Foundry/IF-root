@@ -30,8 +30,8 @@ module.exports = {
       module.exports.login(user, done)
     });
   },
-  loggedIn: function(user, done) {
-    browser.get({url: '/api/user/loggedin'}, , function(e, r, body) {
+  loggedIn: function(done) {
+    browser.get({url: '/api/user/loggedin'}, function(e, r, body) {
       done(body);
     });
   },
