@@ -7,15 +7,13 @@ mongoose.connect('mongodb://localhost/if');
 var userid = '551427e8cbe66207224fea26';
 var baduserid = '561427e8cbe66207224fea26';
 
-var a = new Analytics({
-	analyticsUserId: userid,
-	loc: {type: 'Point', coordinates: [0, 0]}
-});
+var db = require('./db');
 
-a.save(function(err) {
-	if (err) {
-		console.log(err);
-	} else {
-		console.log('success');
-	}
+db.Landmarks.findOne({}, function(e, l) {
+	l.update({$push: {'tags': 'clothing'}}, function(e) {
+		db.Landmarks.findOne({_id: l._id}, function(e, l2) {
+			console.log(l2.tags);
+			debugger;
+		})
+	});
 });

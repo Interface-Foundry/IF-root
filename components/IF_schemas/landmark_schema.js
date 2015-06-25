@@ -284,15 +284,14 @@ var landmarkSchema = new Schema({
     }],
     fave_count: Number,
     rejects: [String],
-    /* 
-    comments: virtual property, array of worldchats
-    
-    person who commented
-    body of comment
-    avatar or person
-    time of comment
-    etc, see worldchats
-    */
+    comments: [{
+        userId: String,
+        userName: String,
+        userAvatar: String,
+        userMongoId: String,
+        comment: String,
+        timeCommented: Date
+    }],
     itemTags: {
         colors: [],
         categories: [],

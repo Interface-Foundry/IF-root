@@ -44,19 +44,38 @@ app.post('/:mongoId/unlike', function(req, res) {
     }
 });
 
-app.post('/:mongoId/comment', function(req, res,next) {
+app.post('/:mongoId/comment', function(req, res, next) {
     if (USE_MOCK_DATA) {
         return res.send(defaultResponse);
     }
-    var comment = new db.Worldchat();
-    comment.roomID = req.params.mongoId;
-    comment.userID = req.user._id;
-    comment.msg = req.body.msg;
-    comment.avatar = user.avatar;
-    comment.save(function(err, comment) {
-        if (err) return next(err)
-        return comment
-    })
+    if (!req.user) {
+        return next('You must log in first');
+    }
+    var comment = req.body;
+    comment.userId = req.user.id;
+    comment.userMongoId = req.user._id.toString();
+    comment.userAvatar = user.avatar;
+
+    // check if comment exists already (double submit?)
+    var commentExists = req.item.comments.reduce(function(p, o) {
+        return p || (o.userMongoId === comment.userMongoId
+          && o.comment === comment.comment
+          && o.timeCommented === comment.timeCommented);
+    }, false);
+
+    if (commentExists) {
+        res.send(defaultResponse);
+    } else {
+        req.item.comments.push(comment);
+        req.item.save(function(e) {
+            if (e) {
+                e.niceMessage = 'Could not post comment on the item';
+                return next(e);
+            } else {
+                res.send(defaultResponse);
+            }
+        })
+    }
 });
 
 app.post('/:mongoId/deletecomment', function(req, res, next) {
@@ -66,24 +85,19 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
     if (!req.user) {
         return next('You must log in first');
     }
-    db.Landmarks.findOne({
-        '_id': req.params.mongoId
-    }, function(err, item) {
-        if (err) return next(err)
-        item.getComments(function(err, comments) {
-            if (err) return next(err)
-            comments.forEach(function(comment) {
-                if (comment.userID !== req.user._id) {
-                    comment.remove(function(err, comment) {
-                        console.log('comment deleted.')
-                        res.sendStatus(200);
-                    })
-                }
-            })
-        })
-    })
 
-})
+    // $pull removes all documents matching the query from the array
+    req.item.update({$pull: {comments: {
+        userMongoId: req.user._id.toString(),
+        comment: req.body.comment,
+        timeCommented: req.body.timeCommented}}}, function(e) {
+        if (e) {
+            e.niceMessage = 'Could not delete comment on item';
+            return next(e);
+        }
+        res.send(defaultResponse);
+    });
+});
 
 //front-end will send tags object in post body
 // {
@@ -205,8 +219,7 @@ app.post('/:mongoId/unfave', function(req, res, next) {
     }
 
     // update the item
-    db.Items.update({_id: req.params.mongoId},
-      { $pull: {faves: {userId: req.user._id.toString()}}}, function(e) {
+    req.item.update({$pull: {faves: {userId: req.user._id.toString()}}}, function(e) {
           if (e) {
               e.niceMessage = 'Could not un-fave the item';
               e.devMessage = 'un-fave failed for Items collection';
