@@ -27,7 +27,7 @@ module.exports.example = {
   price: 2,
   faves: [{
     userId: 'userid',
-    timeFaved: new Date("2015-6-11T02:45:34.812Z")
+    timeFaved: new Date("2015-06-11T02:45:34.812Z")
   }],
   fave_count: 1,
   ownerUserName: 'Princess Peach',
@@ -35,12 +35,12 @@ module.exports.example = {
   ownerMongoId: '55799f4a76256a9342b03bad',
   itemImageURL: ['https://placekitten.com/600/600', 'https://placekitten.com/600/600'],
   comments: [{
-    userId: 'peach',
+    userId: '55799f4a76256a9342b03bad',
+    userProfileId: 'peach',
     userName: 'Princess Peach',
     userAvatar: 'https://s3.amazonaws.com/if-server-avatars/2',
-    userMongoId: '55799f4a76256a9342b03bad',
     comment: 'Comment text',
-    timeCommented: new Date("2015-6-11T02:46:34.812Z")
+    timeCommented: new Date("2015-06-11T02:46:34.812Z")
   }]
 };
 

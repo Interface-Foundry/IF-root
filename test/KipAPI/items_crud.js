@@ -9,7 +9,7 @@ var params = {
 
 var mockItems = require('./mock_items');
 
-describe.only('items CRUD operations', function () {
+describe('items CRUD operations', function () {
   describe('not logged in', function () {
     before(function (done) {
       UserTools.logout(done);

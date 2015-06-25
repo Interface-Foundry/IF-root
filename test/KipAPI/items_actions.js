@@ -2,153 +2,157 @@ var browser = require('browser');
 var UserTools = require('../UserTools');
 var TestLocations = require('../TestLocations');
 var should = require('chai').should();
-
-var mockItem = {
-    _id: '1234',
-    name: 'Versaci Bag',
-    id: 'versacibag1',
-    world: false,
-    parentID: '1234',
-    loc: {
-        loc: {
-            lat: 40.7352793,
-            lon: -73.990638
-        }
-    },
-    itemTags: {
-        colors: [],
-        categories: [],
-        text: []
-    },
-    ownerUserName: 'Princess Peach',
-    ownerUserId: 'peach',
-    ownerMongoId: '55799f4a76256a9342b03bad',
-    itemImageURL: [String],
-    reports: [{
-        reporterUserId: String,
-        timeReported: Date,
-        comment: String,
-        reason: String
-    }]
-};
-
-var mockComment1 = {
-    _id:'4321',
-    roomID: mockItem._id,
-    userID: 'notpeachesid',
-    msg: 'i am bowser',
-    time: {
-        type: Date,
-        default: Date.now
-    },
-    avatar: 'url'
-}
-
-var mockComment2 = {
-    _id: '1234',
-    roomID: mockItem._id,
-    userID: 'peachesid',
-    msg: 'save me mario',
-    time: {
-        type: Date,
-        default: Date.now
-    },
-    avatar: 'url'
-}
-
-
-var params = {
-    itemId: '1234',
-    commentId: '1234',
-}
-
-var query = {
-    obj: {
-        categories: ['shoes'],
-        text: ['striped', 'versaci', 'formal']
-    },
-    msg: 'hello world!'
-}
+var mockItems = require('./mock_items');
 
 describe('item actions', function() {
-  describe('doing anything while logged out', function() {
+
+  // make a test item
+  var item;
+  before(function(done) {
+    UserTools.login(UserTools.users.peach, function() {
+      var i = mockItems.getExample();
+      browser.post('/api/items/', {
+        body: i
+      }, function(e, r, body) {
+        item = body;
+        done();
+      });
+    });
+  });
+
+  // delete it after everything's done
+  after(function(done) {
+    browser.post('/api/items/' + item._id + '/delete', done);
+  });
+
+  // helper for getting the test item
+  var getTestItem = function(callback) {
+    browser.get('/api/items/' + item._id, function(e, r, body) {
+      callback(body);
+    });
+  };
+
+  describe('doing actions while logged out', function() {
     UserTools.logoutBefore();
     it('should blow up because you must has login for to make action fun times', function(done) {
-      browser.post('/api/items/1234/fave', function(e, r, b) {
+      browser.post('/api/items/' + item._id + '/fave', function(e, r, b) {
         should.exist(b.err);
         done();
       });
     });
   });
-  describe('faveing an item', function() {
-    var peach;
-    before(function(done) {
-      UserTools.login(UserTools.users.peach, function(e, user) {
-        peach = user;
-        browser.post('/api/items/1234/fave', function(e, r, body) {
-          done();
-        });
-      });
-    });
-    it('should put peach in the faves array', function(done) {
-      browser.get('/api/items/1234', function(e, r, body) {
-        var peachFavesIt = body.faves.reduce(function(p, o) {
-          return p || o.userId === peach._id.toString();
-        }, false);
-        peachFavesIt.should.equal(true);
-      });
-    });
-  });
-  describe('un-faveing an item', function() {
+
+  describe.only('doing actions while logged in', function() {
     var peach;
     before(function (done) {
       UserTools.login(UserTools.users.peach, function (e, user) {
         peach = user;
-        browser.post('/api/items/1234/unfave', function (e, r, body) {
+        done();
+      });
+    });
+
+    it('should allow peach to fave an item', function (done) {
+      browser.post('/api/items/' + item._id + '/fave', function (e, r, body) {
+        getTestItem(function (item) {
+          var peachFavesIt = item.faves.reduce(function (p, o) {
+            return p || o.userId === peach._id.toString();
+          }, false);
+          peachFavesIt.should.equal(true);
+          UserTools.loggedIn(function (u) {
+            u.faves.should.contain(item._id.toString());
+            done();
+          });
+        });
+      });
+    });
+
+    it('should allow peach to un-fave an item', function (done) {
+      browser.post('/api/items/' + item._id + '/unfave', function (e, r, body) {
+        getTestItem(function (item) {
+          var peachFavesIt = item.faves.reduce(function (p, o) {
+            return p || o.userId === peach._id.toString();
+          }, false);
+          peachFavesIt.should.equal(false);
+          UserTools.loggedIn(function (u) {
+            u.faves.should.not.contain(item._id.toString());
+            done();
+          });
+        });
+      });
+    });
+
+    var comment = {
+      comment: 'comment' + (Math.random()*100000000|0),
+      timeCommented: new Date()
+    };
+
+    it('should allow peach to comment on an item', function (done) {
+      browser.post('/api/items/' + item._id + '/comment', {
+        body: comment
+      }, function (e, r, body) {
+        getTestItem(function (item) {
+          var commentExists = item.comments.reduce(function (p, o) {
+            return p || (o.comment === comment.comment);
+          }, false);
+          commentExists.should.equal(true);
+          done();
+        })
+      });
+    });
+
+    it('should allow peach to delete her comment', function (done) {
+      browser.post('/api/items/' + item._id + '/deletecomment', {
+        body: comment
+      }, function (e, r, body) {
+        getTestItem(function (item) {
+          var commentExists = item.comments.reduce(function (p, o) {
+            return p || (o.comment === comment.comment);
+          }, false);
+          commentExists.should.equal(false);
+          done();
+        })
+      });
+    });
+
+
+    var itemTags = {
+      categories: ["category1", "category1000"],
+      text: ["superfluous", "melancholy"]
+    };
+
+    // from mock_items.js
+    var originalTags = {
+      colors: ["000000", "FFFFFF"],
+      categories: ["category1", "category2"],
+      text: ['tag1', 'tag2', 'reallyreallylongtag3']
+    };
+
+    var expectedTags = {
+      colors: ["000000", "FFFFFF"],
+      categories: ["category1", "category2", "category1000"],
+      text: ['tag1', 'tag2', 'reallyreallylongtag3', "superfluous", "melancholy"]
+    };
+
+    it('should allow peach to add tags to her item', function(done) {
+      browser.post('/api/items/' + item._id + '/tag', {
+        body: itemTags
+      }, function (e, r, body) {
+        getTestItem(function (item) {
+          item.itemTags.should.eql(expectedTags);
           done();
         });
       });
     });
-    it('should take peach out of the faves array', function (done) {
-      browser.get('/api/items/1234', function (e, r, body) {
-        var peachFavesIt = body.faves.reduce(function (p, o) {
-          return p || o.userId === peach._id.toString();
-        }, false);
-        peachFavesIt.should.equal(false);
-      });
-    });
-  });
 
-    describe('logged in as Princess Peach', function() {
-        before(function(done) {
-            UserTools.login(UserTools.users.peach, function(err, user) {
-                var user = user;
-            });
+    it('should allow peach to remove tags from her item', function(done) {
+      browser.post('/api/items/' + item._id + '/deletetag', {
+        body: itemTags
+      }, function (e, r, body) {
+        getTestItem(function (item) {
+          item.itemTags.should.eql(expectedTags);
+          done();
         });
-
-        describe('commenting on an item', function() {
-            it('should return a worldchat object', function(done) {
-                browser.post('/api/items/' + params.itemId, {
-                    body: query.obj
-                }, function(e, r, body) {
-                    body.should.be.instanceof(Object);
-                    body.should.have.ownProperty('roomID');
-                    body.should.have.ownProperty('userID');
-                    body.should.have.ownProperty('msg');
-                    body.should.have.ownProperty('time');
-                    body.should.have.ownProperty('avatar');
-                });
-            });
-        })
-
-        describe('deleting a comment', function() {
-            it('should respond with 200 if user is the one who made the comment', function(done) {
-                browser.post('/api/items/' + params.itemId + '/deletecomment', function(e, r, body) {
-                  body.should.equal(200)
-                });
-            });
-        })
-
+      });
     })
-
+  });
 });
