@@ -1,15 +1,13 @@
-//ARGUMENTS
+//------ARGUMENTS-------//
 //For testing different radius params
 var testMode = process.argv[2] ? process.argv[2] : 'false';
 //Radius 
-var radius = process.argv[3] ? parseFloat(process.argv[3]) : 600
+var radius = process.argv[3] ? parseFloat(process.argv[3]) : 500
 var radiusMax = process.argv[4] ? parseFloat(process.argv[4]) : 1000;
 //Zipcode
 var zipLow = process.argv[5] ? process.argv[5] : 10001
 var zipHigh = process.argv[6] ? process.argv[6] : 11692
-
-//TODO:
-// Increase RADIUS for NON CITIES
+//----------------------//
 
 var express = require('express'),
     app = module.exports.app = express(),
@@ -64,10 +62,9 @@ var cloudMapID = 'interfacefoundry.jh58g2al';
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
 // var zipHigh = 99950;
+var placeCount = 0;
+var saveCount = 0;
 var requestNum = 0;
-var saveCount = 0
-
-
 
 //search places in loops
 async.whilst(
@@ -92,7 +89,7 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, zipCodeQuery, function() {
                         count++;
-                        wait(callback, 500); // Wait before going on to the next zip
+                        wait(callback, 500); 
                     })
                 }, function(err) {
                     // console.log('ERROR: Could not get lat long for: ' + zipCodeQuery+err)
@@ -102,35 +99,24 @@ async.whilst(
             },
             function(err) {
                 //*****FOR TESTING ONLY!!!*****
-                //Log results and clear foraged mongo places each loop
+                //Log results each loop
                 if (testMode == 'true') {
                     console.log('In Test mode...')
-                    var logData = '\nFor radius ' + radius + ': \n  Requested: ' + requestNum + '\n  Scraped : ' + saveCount + '. \n'
+                    var logData = '\nFor radius ' + radius + ' - '+zipLow + ' to ' + zipHigh + ': \n  Requested: ' + requestNum + '.\n  Found : ' + placeCount + '. ' + '\n  Saved : ' + saveCount + '. \n'
                     fs.appendFile('scraped.log', logData, function(err) {
                         if (err) throw err;
+                        placeCount = 0;
                         requestNum = 0;
                         saveCount = 0;
                     });
-
-                    landmarks.find({
-                            'source_google.place_id': {
-                                $exists: true
-                            }
-                        }).remove(function(err, result) {
-                            if (err) {
-                                err.devMessage = 'places_forager clearing scraped mongo places failed.'
-                                return next(err)
-                            }
-                            console.log('Cleared scraped places.', result)
-                        })
-                        //Increment Radius
+                    //Increment Radius
                     if (radius !== radiusMax) {
                         radius += 50
                     } else {
                         fs.appendFile('scraped.log', '******Finished*****', function(err) {
                             if (err) throw err;
                         });
-                        return console.log('Finished Testing Radiuses!')
+                        return console.log('Finished Testing!')
                     }
                 }
                 console.log('Restarting loop.')
@@ -149,7 +135,7 @@ function searchPlaces(coords, zipcode, fin) {
     //Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1], zipcode).then(function(results) {
             async.eachSeries(results, function(place, done) {
-
+                        placeCount++;
                         var newPlace = null;
                         async.series([
                                 //First check if landmark exists, if not create a new one
