@@ -2,12 +2,17 @@
 //For testing different radius params
 var testMode = process.argv[2] ? process.argv[2] : 'false';
 //Radius 
-var radius = process.argv[3] ? parseFloat(process.argv[3]) : 500
-var radiusMax = process.argv[4] ? parseFloat(process.argv[4]) : 1000;
+var radius = process.argv[3] ? parseFloat(process.argv[3]) : 50000
+var radiusMax = process.argv[4] ? parseFloat(process.argv[4]) : 5000;
 //Zipcode
 var zipLow = process.argv[5] ? process.argv[5] : 10001
 var zipHigh = process.argv[6] ? process.argv[6] : 11692
-//----------------------//
+    //----------------------//
+
+
+//-----ZIP CODES OF INTEREST IN NYC----//
+var watchlist = [10012, 10013, 10014, 10001, 10018, 10016, 10019, 10022]
+//------------------------------------//
 
 var express = require('express'),
     app = module.exports.app = express(),
@@ -89,7 +94,7 @@ async.whilst(
                 var coords = getLatLong(zipCodeQuery).then(function(coords) {
                     searchPlaces(coords, zipCodeQuery, function() {
                         count++;
-                        wait(callback, 500); 
+                        wait(callback, 500);
                     })
                 }, function(err) {
                     // console.log('ERROR: Could not get lat long for: ' + zipCodeQuery+err)
@@ -102,7 +107,7 @@ async.whilst(
                 //Log results each loop
                 if (testMode == 'true') {
                     console.log('In Test mode...')
-                    var logData = '\nFor radius ' + radius + ' - '+zipLow + ' to ' + zipHigh + ': \n  Requested: ' + requestNum + '.\n  Found : ' + placeCount + '. ' + '\n  Saved : ' + saveCount + '. \n'
+                    var logData = '\nFor radius ' + radius + ' and Range: ' + zipLow + ' to ' + zipHigh + ': \n  Requested: ' + requestNum + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n'
                     fs.appendFile('scraped.log', logData, function(err) {
                         if (err) throw err;
                         placeCount = 0;
@@ -111,9 +116,9 @@ async.whilst(
                     });
                     //Increment Radius
                     if (radius !== radiusMax) {
-                        radius += 50
+                        radius += 500
                     } else {
-                        fs.appendFile('scraped.log', '******Finished*****', function(err) {
+                        fs.appendFile('scraped.log', '******Finished*****\n', function(err) {
                             if (err) throw err;
                         });
                         return console.log('Finished Testing!')
@@ -134,6 +139,14 @@ async.whilst(
 function searchPlaces(coords, zipcode, fin) {
     //Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1], zipcode).then(function(results) {
+        //Log places found for zipcodes on watchlist
+            watchlist.forEach(function(watched) {
+                if (zipcode == watched) {
+                    fs.appendFile('scraped.log', zipcode + ': ' + results.length+' \n', function(err) {
+                        if (err) throw err;
+                    });
+                }
+            })
             async.eachSeries(results, function(place, done) {
                         placeCount++;
                         var newPlace = null;
@@ -150,7 +163,6 @@ function searchPlaces(coords, zipcode, fin) {
                                                 devMessage: 'forager line 160'
                                             })
                                         }
-
                                         if (matches.length < 1) {
                                             // console.log('No match found for ', place.place_id)
                                             newPlace = new landmarks();
