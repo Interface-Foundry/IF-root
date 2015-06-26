@@ -137,7 +137,8 @@ var userSchema = mongoose.Schema({
         tracked: Boolean
     },
     defaultPriceRange: Number,
-    defaultSearchRadius: Number
+    defaultSearchRadius: Number,
+    following: [String]
 });
 
 // generating a hash

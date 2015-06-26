@@ -95,7 +95,6 @@ describe('items CRUD operations', function () {
       browser.post('/api/items/' + postedItem._id.toString() + '/delete', function (e, r, body) {
         // then trying to get it should fail hard
         browser.get('/api/items/' + postedItem._id.toString(), function (e, r, body) {
-          console.log(body);
           should.exist(body.err);
           should.exist(body.err.niceMessage);
           done();

@@ -25,6 +25,8 @@ app.use('/:mongoId/:action', function(req, res, next) {
         if (err) {
             err.niceMessage = 'Could not find item';
             return next(err);
+        } else if (!item) {
+            return next('Could not find item');
         }
 
         req.item = item;

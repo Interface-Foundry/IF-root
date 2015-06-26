@@ -3,10 +3,19 @@ var browser = require('browser');
 var users = {
   kip: {},
   peach: {
-    email: 'princesspeach@interfacefoundry.com',
-    password: 'princesspeach'
+    creds: {
+      email: 'princesspeach@interfacefoundry.com',
+      password: 'princesspeach'
+    },
+    _id: '55799f4a76256a9342b03bad'
   },
-  bowser: {}
+  sonic: {
+    creds: {
+      email: 'sonic@interfacefoundry.com',
+      password: 'princesspeach'
+    },
+    _id: '558d819ca0d6b1f2c5421080'
+  }
 };
 
 module.exports = {
@@ -21,7 +30,7 @@ module.exports = {
     });
   },
   login: function(user, done) {
-    browser.post({url: '/api/user/login', json: true, body:  user}, function(e, r, body) {
+    browser.post({url: '/api/user/login', json: true, body:  user.creds}, function(e, r, body) {
       done(e, body);
     });
   },

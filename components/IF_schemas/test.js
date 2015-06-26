@@ -9,11 +9,6 @@ var baduserid = '561427e8cbe66207224fea26';
 
 var db = require('./db');
 
-db.Landmarks.findOne({}, function(e, l) {
-	l.update({$push: {'tags': 'clothing'}}, function(e) {
-		db.Landmarks.findOne({_id: l._id}, function(e, l2) {
-			console.log(l2.tags);
-			debugger;
-		})
-	});
-});
+db.Activity.getActivityForUserId(1234, function(err, acticity) {
+	console.log(acticity);
+})
