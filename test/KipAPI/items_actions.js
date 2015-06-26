@@ -143,6 +143,7 @@ describe('item actions', function() {
       browser.post('/api/items/' + item._id + '/tag', {
         body: itemTags
       }, function (e, r, body) {
+        should.not.exist(body.err);
         getTestItem(function (item) {
           item.itemTags.should.eql(expectedTags);
           done();
@@ -154,6 +155,7 @@ describe('item actions', function() {
       browser.post('/api/items/' + item._id + '/deletetag', {
         body: {type: 'text', value: 'superfluous'}
       }, function (e, r, body) {
+        should.not.exist(body.err);
         getTestItem(function (item) {
           item.itemTags.should.eql(expectedTagsAfterDelete);
           done();

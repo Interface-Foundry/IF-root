@@ -30,6 +30,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
         }
 
         req.item = item;
+        req.ownsItem = item.owner.mongoId === req.user._id.toString();
 
         // otherwise continue happily
         next();
@@ -38,13 +39,16 @@ app.use('/:mongoId/:action', function(req, res, next) {
 
 app.post('/:mongoId/comment', function(req, res, next) {
     var comment = req.body;
-    comment.userId = req.user._id.toString();
-    comment.userProfileId = req.user.profileID;
-    comment.userAvatar = req.user.avatar;
+    comment.user = {
+        mongoId: req.user._id.toString(),
+        profileID: req.user.profileID,
+        name: req.user.name,
+        avatar: req.user.avatar
+    };
 
     // check if comment exists already (double submit?)
     var commentExists = req.item.comments.reduce(function(p, o) {
-        return p || (o.userMongoId === comment.userMongoId && o.comment === comment.comment && o.timeCommented === comment.timeCommented);
+        return p || (o.user.mongoId === comment.user.mongoId && o.comment === comment.comment && o.timeCommented === comment.timeCommented);
     }, false);
 
     if (commentExists) {
@@ -89,7 +93,7 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
 //note: cloudsight will pull color 
 //which will be auto-matched on backend to nearest color available
 app.post('/:mongoId/tag', function(req, res, next) {
-    if (req.user._id.toString() !== req.item.ownerMongoId) {
+    if (!req.ownsItem) {
         return next('You are not authorized to add tags to this item');
     }
 
@@ -128,7 +132,7 @@ app.post('/:mongoId/tag', function(req, res, next) {
 // }
 //front-end will send array of tag strings to delete in post body
 app.post('/:mongoId/deletetag', function(req, res, next) {
-    if (req.item.ownerMongoId !== req.user._id.toString()) {
+    if (!req.ownsItem) {
         return next('You are not authorized to delete tags for this item');
     }
 

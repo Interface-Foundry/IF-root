@@ -15,9 +15,20 @@ var landmarkSchema = new Schema({
         lowercase: true
     },
     world: Boolean,
-    parentID: {
-        type: String,
-        index: true
+    parent: {
+        mongoId: {
+            type: String,
+            index: true
+        },
+        name: String
+    },
+    owner: {
+        mongoId: {
+            type: String,
+            index: true
+        },
+        profileID: String,
+        name: String
     },
     valid: Boolean, //are all req. items inputted
     status: String, //'draft' 'archived' 'public'
@@ -285,10 +296,12 @@ var landmarkSchema = new Schema({
     fave_count: Number,
     rejects: [String],
     comments: [{
-        userId: String,
-        userProfileId: String,
-        userName: String,
-        userAvatar: String,
+        user: {
+            mongoId: String,
+            profileID: String,
+            name: String,
+            avatar: String
+        },
         comment: String,
         timeCommented: Date
     }],
@@ -297,16 +310,13 @@ var landmarkSchema = new Schema({
         categories: [],
         text: []
     },
-    ownerUserName: String,
-    ownerUserId: String,
-    ownerMongoId: String,
     itemImageURL: [String],
     reports: [{
         reporterUserId: String,
         timeReported: Date,
         comment: String,
         reason: String
-    }],
+    }]
 
 
 

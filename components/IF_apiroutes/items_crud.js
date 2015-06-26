@@ -74,7 +74,7 @@ router.put('/:id', function (req, res, next) {
         return next(err);
       }
 
-      if (item && req.user._id.toString() === item.ownerMongoId) { //Merge existing item with updated object from frontend
+      if (item && req.user._id.toString() === item.owner.mongoId) { //Merge existing item with updated object from frontend
         item = _.extend(item, req.body);
         //Save item
         item.save(function (err, item) {
@@ -109,7 +109,7 @@ router.post('/:id/delete', function (req, res, next) {
         res.sendStatus(200);
       }
 
-      if (req.user._id.toString() === item.ownerMongoId) {
+      if (req.user._id.toString() === item.owner.mongoId) {
         //Delete entry
         item.remove(function (err) {
           if (err) {
