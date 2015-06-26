@@ -15,7 +15,12 @@ var defaultResponse = {
 };
 
 // All of these actions require an item to be present in the database
+// They also require you to be logged in (except the report route)
 app.use('/:mongoId/:action', function(req, res, next) {
+    if (!req.user && req.params.action !== 'report') {
+        return next('You must log in first');
+    }
+
     db.Landmarks.findById(req.params.mongoId, function(err, item) {
         if (err) {
             err.niceMessage = 'Could not find item';
@@ -30,9 +35,6 @@ app.use('/:mongoId/:action', function(req, res, next) {
 });
 
 app.post('/:mongoId/comment', function(req, res, next) {
-    if (!req.user) {
-        return next('You must log in first');
-    }
     var comment = req.body;
     comment.userId = req.user._id.toString();
     comment.userProfileId = req.user.profileID;
@@ -59,10 +61,6 @@ app.post('/:mongoId/comment', function(req, res, next) {
 });
 
 app.post('/:mongoId/deletecomment', function(req, res, next) {
-    if (!req.user) {
-        return next('You must log in first');
-    }
-
     // $pull removes all documents matching the query from the array
     req.item.update({
         $pull: {
@@ -89,16 +87,13 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
 //note: cloudsight will pull color 
 //which will be auto-matched on backend to nearest color available
 app.post('/:mongoId/tag', function(req, res, next) {
-    if (!req.user) {
-        return next('You must log in first');
-    }
-
     if (req.user._id.toString() !== req.item.ownerMongoId) {
         return next('You are not authorized to add tags to this item');
     }
 
-
-    console.log(req.item.itemTags);
+    // Manually compile the set of tags
+    // Could have used mongodb's $addToSet feature, but that would require two round trips to
+    // the db server, where this manual way is only one.
     if (req.body.text) {
         req.body.text.map(function(tag) {
             if (req.item.itemTags.text.indexOf(tag) < 0) {
@@ -114,8 +109,6 @@ app.post('/:mongoId/tag', function(req, res, next) {
             }
         });
     }
-
-    console.log(req.item.itemTags);
 
     req.item.save(function(e) {
         if (e) {
@@ -133,39 +126,37 @@ app.post('/:mongoId/tag', function(req, res, next) {
 // }
 //front-end will send array of tag strings to delete in post body
 app.post('/:mongoId/deletetag', function(req, res, next) {
-    if (!req.user) {
-        return next('You must log in first');
+    if (req.item.ownerMongoId !== req.user._id.toString()) {
+        return next('You are not authorized to delete tags for this item');
     }
-    db.Landmarks.findOne({
-        '_id': req.params.mongoId
-    }, function(err, item) {
-        if (err) return next(err)
-        if (item.ownerUserId !== req.user._id) {
-            return next('You are not authorized to delete tags for this item');
-        }
-        var type = req.body.type.trim();
-        var val = req.body.value.trim();
-        var i = item.itemTags[type].length;
-        while (i--) {
-            if (item.itemTags[type][i] == val) {
-                item.itemTags[type].splice(i, 1);
-                break;
-            }
-        }
 
-        item.save(function(err, item) {
-            if (err) return next(err)
-            res.sendStatus(200);
-            console.log('Tags added.')
-        })
-    })
+    if (!req.body.type || !req.body.value) {
+        var e = {};
+        e.niceMessage = 'Could not delete tag';
+        e.devMessage = 'Request body must be {type: "type", value: "tag"}';
+        return next(e);
+    }
+
+    // Delete tags using mongodb's $pull method
+    var pull = {}; // {itemTags.type: value}
+    pull['itemTags.' + req.body.type] = req.body.value;
+    req.item.update({$pull: pull}, function(e) {
+        if (e) {
+            e.niceMessage = 'Could not delete tag ' + req.body.value;
+            e.devMessage = 'Error with $pull in delete tags';
+            return next(e);
+        }
+        db.Landmarks.findById(req.item._id, function(e, item) {
+            if (e) {
+                e.niceMessage = 'Could not delete tag ' + req.body.value;
+                return next(e);
+            }
+            res.send(item.itemTags);
+        });
+    });
 });
 
 app.post('/:mongoId/fave', function(req, res, next) {
-    if (!req.user) {
-        return next('Must be logged in to fave an item');
-    }
-
     // check to see if user has faved yet. there might be a better way with $push,
     // but i don't want to end up with multiple faves from the same user :/
     var hasFaved = req.item.faves.reduce(function(p, o) {
@@ -207,10 +198,6 @@ app.post('/:mongoId/fave', function(req, res, next) {
 });
 
 app.post('/:mongoId/unfave', function(req, res, next) {
-    if (!req.user) {
-        return next('Must be logged in to un-fave an item');
-    }
-
     // update the item
     console.log(req.user._id.toString());
     req.item.update({
@@ -248,10 +235,6 @@ app.post('/:mongoId/unfave', function(req, res, next) {
 });
 
 app.post('/:mongoId/reject', function(req, res, next) {
-    if (USE_MOCK_DATA) {
-        return res.send(defaultResponse);
-    }
-
     // update the users list of cached rejects
     db.Users.update({
         _id: req.user._id
@@ -270,10 +253,6 @@ app.post('/:mongoId/reject', function(req, res, next) {
 });
 
 app.post('/:mongoId/unreject', function(req, res, next) {
-    if (USE_MOCK_DATA) {
-        return res.send(defaultResponse);
-    }
-
     // update the users list of cached rejects
     db.Users.update({
         _id: req.user._id

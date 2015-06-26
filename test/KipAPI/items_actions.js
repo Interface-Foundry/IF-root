@@ -42,7 +42,7 @@ describe('item actions', function() {
     });
   });
 
-  describe.only('doing actions while logged in', function() {
+  describe('doing actions while logged in', function() {
     var peach;
     before(function (done) {
       UserTools.login(UserTools.users.peach, function (e, user) {
@@ -133,6 +133,12 @@ describe('item actions', function() {
       text: ['tag1', 'tag2', 'reallyreallylongtag3', "superfluous", "melancholy"]
     };
 
+    var expectedTagsAfterDelete = {
+      colors: ["000000", "FFFFFF"],
+      categories: ["category1", "category2", "category1000"],
+      text: ['tag1', 'tag2', 'reallyreallylongtag3', "melancholy"]
+    };
+
     it('should allow peach to add tags to her item', function(done) {
       browser.post('/api/items/' + item._id + '/tag', {
         body: itemTags
@@ -146,10 +152,10 @@ describe('item actions', function() {
 
     it('should allow peach to remove tags from her item', function(done) {
       browser.post('/api/items/' + item._id + '/deletetag', {
-        body: itemTags
+        body: {type: 'text', value: 'superfluous'}
       }, function (e, r, body) {
         getTestItem(function (item) {
-          item.itemTags.should.eql(expectedTags);
+          item.itemTags.should.eql(expectedTagsAfterDelete);
           done();
         });
       });
