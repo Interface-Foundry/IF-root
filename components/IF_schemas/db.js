@@ -16,6 +16,7 @@ if (mongoose.connection.readyState == 0) {
  * @type {{filename: string, single: string, plural: string}[]}
  */
 var schemas = [
+  {filename: 'activity_schema', single: 'Activity', plural: 'Activities'},
   {filename: 'analytics_schema', single: 'Analytic', plural: 'Analytics'},
   {filename: 'announcements_schema', single: 'Announcement', plural: 'Announcements'},
   {filename: 'anon_user_schema', single: 'AnonUser', plural: 'AnonUsers'},
