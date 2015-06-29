@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var Promise = require('bluebird');
 
 /**
  * Log activity for activity feeds
@@ -34,6 +35,17 @@ var activitySchema = mongoose.Schema({
   // which users have seen this
   seenBy: [String]
 });
+
+/**
+ * Adds a specified userMongoId to the array.  Does not save it, so you should call save() yourself.
+ * @param userMongoId
+ */
+activitySchema.methods.addUser = function(userMongoId) {
+  if (this.userIds.indexOf(userMongoId) < 0) {
+    this.userIds.push(userMongoId);
+  }
+};
+
 
 var Activity = mongoose.model('Activity', activitySchema);
 

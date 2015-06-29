@@ -24,7 +24,7 @@ describe('login process', function() {
   });
 });
 
-describe.only('user utility function', function() {
+describe('user utility function', function() {
   describe('getMentionedUsers', function() {
     it('should return the correct users', function(done) {
       db.User.getMentionedUsers('hello @peach and @bowser89!')

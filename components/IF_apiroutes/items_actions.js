@@ -37,7 +37,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
             userIds: [req.user._id.toString(), req.item.owner.mongoId.toString()],
             landmarkIds: [req.item._id.toString()],
             activityTime: new Date(),
-            activityAction: req.params.action,
+            activityAction: 'item.' + req.params.action.toLowerCase()
             data: {},
             publicVisible: true,
             privateVisible: true,
@@ -64,19 +64,26 @@ app.post('/:mongoId/comment', function(req, res, next) {
     }, false);
 
     if (commentExists) {
-        res.send(defaultResponse);
-    } else {
-        req.item.comments.push(comment);
-        req.item.save(function(e) {
-            if (e) {
-                e.niceMessage = 'Could not post comment on the item';
-                return next(e);
-            } else {
-                res.send(defaultResponse);
-            }
+        return res.send(defaultResponse);
+    }
+
+    // New comment
+    req.item.comments.push(comment);
+    req.item.save(function(e) {
+        if (e) {
+            e.niceMessage = 'Could not post comment on the item';
+            return next(e);
+        } else {
+            res.send(defaultResponse);
+        }
+    });
+
+    // Definitely save the activity for a snap comment
+    db.Users.getMentionedUsers(comment.comment).then(function(users) {
+        users.map(function(u) {
+            req.activity.addUser(u._id.toString());
         });
 
-        // Definitely save the activity for a snap comment
         req.activity.data = {
             comment: comment
         };
@@ -86,7 +93,9 @@ app.post('/:mongoId/comment', function(req, res, next) {
                 next(err);
             }
         });
-    }
+    }, function(err) {
+        next(err);
+    });
 });
 
 app.post('/:mongoId/deletecomment', function(req, res, next) {
