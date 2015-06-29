@@ -12,9 +12,8 @@ var getMyLatestActivity = function(callback) {
   browser.get('/api/users/'+peachId+'/activity/me', function(e, r, b) {
     should.equal(e, null);
     should.not.exist(b.err);
-    callback(b.results.sort(function(a, b) {
-      return a.activityTime < b.activityTime;
-    })[0]);
+    console.log(b.results);
+    callback(b.results[0]);
   });
 };
 
@@ -23,7 +22,7 @@ var getFollowersLatestActivity = function(callback) {
     should.equal(e, null);
     should.not.exist(b.err);
     callback(b.results.sort(function(a, b) {
-      return a.activityTime < b.activityTime;
+      return a.activityTime > b.activityTime;
     })[0]);
   });
 };

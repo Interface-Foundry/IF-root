@@ -59,7 +59,6 @@ router.post('/', function (req, res, next) {
       }
       console.log('item added to redis snaps queue', reply);
       console.log('created item is..', item);
-      res.send(item)
     });
 
 
@@ -72,7 +71,7 @@ router.post('/', function (req, res, next) {
     });
 
     a.saveAsync().then(function() {
-      console.log('saved an action');
+      res.send(item)
     }).catch(next);
   });
 });

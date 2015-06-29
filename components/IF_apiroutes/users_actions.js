@@ -58,7 +58,10 @@ app.post('/:mongoId/unfollow', function(req, res, next) {
 app.get('/:mongoId/activity/me', function(req, res, next) {
   if (!req.user) { return next('Must be logged in to get activity') }
 
-  db.Activities.find({userIds: req.user._id.toString()}).execAsync()
+  db.Activities.find({userIds: req.user._id.toString()})
+    .sort({activityTime: -1})
+    .limit(10)
+    .execAsync()
     .then(function(activities) {
       res.send({
         results: activities,
