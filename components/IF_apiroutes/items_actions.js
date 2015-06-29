@@ -118,16 +118,16 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
         }
         res.send(defaultResponse);
 
-        // remove the comment activity from all users' feeds if they delete the comment
-        db.Activities.remove({
-            'data.comment.user.mongoId': req.user._id.toString(),
-            'data.comment.comment': req.body.comment,
-            'data.comment.timeCommented': req.body.timeCommented
-        }, function(err) {
-            if (err) {
-                next(err);
-            }
-        });
+        // add an activity for the comment deletion
+        req.activity.data = {
+            comment: req.body.comment,
+            commenter: req.user.getSimpleUser(),
+            owner: req.item.owner,
+            item: req.item.getSimpleItem()
+        };
+        req.activity.privateVisible = false;
+        req.activity.publicVisible = false;
+        req.activity.saveAsync().catch(next);
     });
 });
 
