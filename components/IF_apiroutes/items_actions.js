@@ -32,6 +32,18 @@ app.use('/:mongoId/:action', function(req, res, next) {
         req.item = item;
         req.ownsItem = item.owner.mongoId === req.user._id.toString();
 
+        // create an activity object for this action, only save it to the db in each route, though
+        req.activity = new db.Activity({
+            userIds: [req.user._id.toString(), req.item.owner.mongoId.toString()],
+            landmarkIds: [req.item._id.toString()],
+            activityTime: new Date(),
+            activityAction: req.params.action,
+            data: {},
+            publicVisible: true,
+            privateVisible: true,
+            seenBy: [req.user._id.toString()]
+        });
+
         // otherwise continue happily
         next();
     });
@@ -62,7 +74,18 @@ app.post('/:mongoId/comment', function(req, res, next) {
             } else {
                 res.send(defaultResponse);
             }
-        })
+        });
+
+        // Definitely save the activity for a snap comment
+        req.activity.data = {
+            comment: comment
+        };
+
+        req.activity.save(function(err) {
+            if (err) {
+                next(err);
+            }
+        });
     }
 });
 
@@ -71,7 +94,7 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
     req.item.update({
         $pull: {
             comments: {
-                userId: req.user._id.toString(),
+                'user.mongoId': req.user._id.toString(),
                 comment: req.body.comment,
                 timeCommented: req.body.timeCommented
             }
@@ -82,6 +105,17 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
             return next(e);
         }
         res.send(defaultResponse);
+
+        // remove the comment activity from all users' feeds if they delete the comment
+        db.Activities.remove({
+            'data.comment.user.mongoId': req.user._id.toString(),
+            'data.comment.comment': req.body.comment,
+            'data.comment.timeCommented': req.body.timeCommented
+        }, function(err) {
+            if (err) {
+                next(err);
+            }
+        });
     });
 });
 

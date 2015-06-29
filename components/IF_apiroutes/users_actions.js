@@ -55,6 +55,18 @@ app.post('/:mongoId/unfollow', function(req, res, next) {
   });
 });
 
+app.get('/:mongoId/activity/me', function(req, res, next) {
+  if (!req.user) { return next('Must be logged in to get activity') }
+
+  db.Activities.find({userIds: req.user._id.toString()}).execAsync()
+    .then(function(activities) {
+      res.send({
+        results: activities,
+        links: {}
+      });
+    }).catch(next);
+});
+
 app.get('/notifications', function(req, res, next) {
   if (!req.user) {
     return next('You must log in first');

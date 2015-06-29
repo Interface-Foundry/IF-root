@@ -40,10 +40,12 @@ module.exports.example = {
   },
   itemImageURL: ['https://placekitten.com/600/600', 'https://placekitten.com/600/600'],
   comments: [{
-    userId: '55799f4a76256a9342b03bad',
-    userProfileId: 'peach',
-    userName: 'Princess Peach',
-    userAvatar: 'https://s3.amazonaws.com/if-server-avatars/2',
+    user: {
+      mongoId: '55799f4a76256a9342b03bad',
+      profileID: 'peach',
+      name: 'Princess Peach',
+      avatar: 'https://s3.amazonaws.com/if-server-avatars/2',
+    },
     comment: 'Comment text',
     timeCommented: new Date("2015-06-11T02:46:34.812Z")
   }]

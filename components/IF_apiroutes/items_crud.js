@@ -6,7 +6,8 @@ var express = require('express'),
   _ = require('underscore'),
   shapefile = require('shapefile'),
   request = require('request'),
-  redisClient = require('../../redis.js');
+  redisClient = require('../../redis.js'),
+  db = require('../IF_schemas/db');
 
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
@@ -61,6 +62,18 @@ router.post('/', function (req, res, next) {
       res.send(item)
     });
 
+
+    // add activity for this thing
+    var a = new db.Activity({
+      userIds: [req.user._id.toString()], //todo add ids for @user tags
+      landmarkIds: [item._id.toString()],
+      activityAction: 'item.post',
+      seenBy: [req.user._id.toString()]
+    });
+
+    a.saveAsync().then(function() {
+      console.log('saved an action');
+    }).catch(next);
   });
 });
 

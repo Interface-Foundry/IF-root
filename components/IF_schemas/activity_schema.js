@@ -10,7 +10,10 @@ var activitySchema = mongoose.Schema({
   // mongoIds of all landmarks involved
   landmarkIds: [String],
 
-  activityTime: Date,
+  activityTime: {
+    type: Date,
+    default: new Date()
+  },
 
   // an identifier such as fave, follow, etc
   activityAction: String,
@@ -19,8 +22,17 @@ var activitySchema = mongoose.Schema({
   data: {},
 
   // can others see it
-  publicVisible: Boolean,
-  privateVisible: Boolean
+  publicVisible: {
+    type: Boolean,
+    default: true
+  },
+  privateVisible: {
+    type: Boolean,
+    default: true
+  },
+
+  // which users have seen this
+  seenBy: [String]
 });
 
 var Activity = mongoose.model('Activity', activitySchema);

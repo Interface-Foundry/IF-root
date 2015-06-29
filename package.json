@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "~0.9.0",
     "bcrypt-nodejs": "latest",
+    "bluebird": "^2.9.30",
     "body-parser": "1.4.3",
     "connect-busboy": "*",
     "connect-flash": "~0.1.1",
@@ -20,7 +21,7 @@
     "moment": "~2.7.0",
     "mongodb-wrapper": "0.4.x",
     "mongojs": "*",
-    "mongoose": "~3.8.12",
+    "mongoose": "~4.x",
     "mongoose-text-search": "~0.0.2",
     "monguurl": "~0.1.0",
     "morgan": "~1.0.0",

@@ -91,6 +91,7 @@ describe('item actions', function() {
         body: comment
       }, function (e, r, body) {
         getTestItem(function (item) {
+          console.log(item.comments);
           var commentExists = item.comments.reduce(function (p, o) {
             return p || (o.comment === comment.comment);
           }, false);
@@ -105,6 +106,7 @@ describe('item actions', function() {
         body: comment
       }, function (e, r, body) {
         getTestItem(function (item) {
+          console.log(item.comments);
           var commentExists = item.comments.reduce(function (p, o) {
             return p || (o.comment === comment.comment);
           }, false);
