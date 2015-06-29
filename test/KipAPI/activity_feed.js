@@ -117,16 +117,13 @@ describe.only('activity feed', function () {
         });
     });
 
-});
-describe.skip('blah', function() {
-
-    it('should show a private activity when peach faves an item', function (done) {
-        var i = mockItems.getExample();
+    it('should show a public activity when peach faves an item', function (done) {
+        var i = item;
         browser.post('/api/items/' + i._id + '/fave', function (e, r, body) {
             body.should.eql(defaultResponse)
             getMyLatestActivity(function (activity) {
                 activity.privateVisible.should.equal(true);
-                activity.publicVisible.should.equal(false);
+                activity.publicVisible.should.equal(true);
                 activity.userIds.should.contain(peachId.toString());
                 activity.userIds.should.contain(i.owner.mongoId.toString());
                 activity.landmarkIds.should.contain(i._id.toString())
@@ -141,14 +138,14 @@ describe.skip('blah', function() {
                 activity.data.item.mongoId.should.equal(i._id.toString())
                 activity.data.item.id.should.equal(i.id)
                 activity.data.item.name.should.equal(i.name)
-                activity.data.item.itemImageURL.should.eql(i.ImageURL)
+                activity.data.item.itemImageURL.should.eql(i.itemImageURL)
                 done();
             });
         });
     });
 
     it('should show a private activity when peach unfaves an item', function (done) {
-        var i = mockItems.getExample();
+        var i = item;
         browser.post('/api/items/' + i._id + '/unfave', function (e, r, body) {
             body.should.eql(defaultResponse)
             getMyLatestActivity(function (activity) {
@@ -168,7 +165,7 @@ describe.skip('blah', function() {
                 activity.data.item.mongoId.should.equal(i._id.toString())
                 activity.data.item.id.should.equal(i.id)
                 activity.data.item.name.should.equal(i.name)
-                activity.data.item.itemImageURL.should.eql(i.ImageURL)
+                activity.data.item.itemImageURL.should.eql(i.itemImageURL)
                 done();
             });
         });
@@ -180,7 +177,7 @@ describe.skip('blah', function() {
     };
 
     it('should show an activity when peach comments on an item', function (done) {
-        var i = mockItems.getExample();
+        var i = item;
         browser.post('/api/items/' + i._id + '/comment', {
             body: comment
         }, function (e, r, body) {
@@ -201,7 +198,7 @@ describe.skip('blah', function() {
                 activity.data.item.mongoId.should.equal(i._id.toString())
                 activity.data.item.id.should.equal(i.id)
                 activity.data.item.name.should.equal(i.name)
-                activity.data.item.itemImageURL.should.eql(i.ImageURL)
+                activity.data.item.itemImageURL.should.eql(i.itemImageURL)
                 activity.activityAction.should.equal('item.comment')
                 done();
             });
@@ -209,7 +206,7 @@ describe.skip('blah', function() {
     });
 
     it('should show a private activity when peach deletes her comment on an item', function (done) {
-        var i = mockItems.getExample();
+        var i = item;
         browser.post('/api/items/' + i._id + '/deletecomment', {
             body: comment
         }, function (e, r, body) {
@@ -230,7 +227,7 @@ describe.skip('blah', function() {
                 activity.data.item.mongoId.should.equal(i._id.toString())
                 activity.data.item.id.should.equal(i.id)
                 activity.data.item.name.should.equal(i.name)
-                activity.data.item.itemImageURL.should.eql(i.ImageURL)
+                activity.data.item.itemImageURL.should.eql(i.itemImageURL)
                 activity.activityAction.should.equal('item.deletecomment')
                 done();
             });

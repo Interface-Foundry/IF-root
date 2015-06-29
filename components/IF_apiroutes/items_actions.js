@@ -85,7 +85,10 @@ app.post('/:mongoId/comment', function(req, res, next) {
         });
 
         req.activity.data = {
-            comment: comment
+            comment: comment,
+            commenter: req.user.getSimpleUser(),
+            owner: req.item.owner,
+            item: req.item.getSimpleItem()
         };
 
         req.activity.save(function(err) {
@@ -245,7 +248,8 @@ app.post('/:mongoId/fave', function(req, res, next) {
         // add an activity
         req.activity.data = {
             item: req.item.getSimpleItem(),
-            faver: req.user.getSimpleUser()
+            faver: req.user.getSimpleUser(),
+            owner: req.item.owner
         };
         req.activity.saveAsync().then(function() {
         }).catch(next);
