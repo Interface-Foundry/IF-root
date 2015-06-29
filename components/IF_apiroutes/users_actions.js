@@ -41,7 +41,21 @@ app.post('/:mongoId/follow', function(req, res, next) {
       err.niceMessage = 'Could not follow ' + req.targetUser.name + '. Please try again :)';
       return next(err);
     }
-    res.send(defaultResponse);
+
+    // add an activity
+    var activity = new db.Activity({
+      userIds: [req.user._id.toString(), req.targetUser._id.toString()],
+      activityAction: 'user.follow',
+      data: {
+        follower: req.user.getSimpleUser(),
+        followed: req.targetUser.getSimpleUser()
+      },
+      seenBy: [req.user._id.toString()]
+    });
+
+    activity.saveAsync().then(function() {
+      res.send(defaultResponse);
+    }).catch(next);
   });
 });
 

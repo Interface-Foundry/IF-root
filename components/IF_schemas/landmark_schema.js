@@ -344,6 +344,16 @@ landmarkSchema.methods.getComments = function(cb) {
     }, cb)
 };
 
+// gets a simple json rep of the item for thumbnails etc
+landmarkSchema.methods.getSimpleItem = function() {
+    return {
+        mongoId: this._id.toString(),
+        id: this.id,
+        name: this.name,
+        itemImageURL: this.itemImageURL
+    }
+};
+
 //indexing for search
 landmarkSchema.index({
     name: "text",

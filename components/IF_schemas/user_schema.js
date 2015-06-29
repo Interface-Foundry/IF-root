@@ -151,6 +151,16 @@ userSchema.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.local.password);
 };
 
+// returns a simple user json object
+userSchema.methods.getSimpleUser = function() {
+    return {
+        mongoId: this._id.toString(),
+        profileID: this.profileID,
+        name: this.name,
+        avatar: this.avatar
+    };
+};
+
 // create the model for users and expose it to our app
 var User = mongoose.model('User', userSchema);
 

@@ -240,7 +240,16 @@ app.post('/:mongoId/fave', function(req, res, next) {
                 e.devMessage = 'Error adding fave to user collection';
                 return next(e);
             }
-        })
+        });
+
+        // add an activity
+        req.activity.data = {
+            item: req.item.getSimpleItem(),
+            faver: req.user.getSimpleUser()
+        };
+        req.activityAction.saveAsync.then(function() {
+        }).catch(next);
+
     } else {
         res.send(defaultResponse);
     }
