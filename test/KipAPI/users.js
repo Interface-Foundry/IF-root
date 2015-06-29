@@ -24,14 +24,15 @@ describe('login process', function() {
   });
 });
 
-describe('user utility function', function() {
+describe.only('user utility function', function() {
   describe('getMentionedUsers', function() {
     it('should return the correct users', function(done) {
       db.User.getMentionedUsers('hello @peach and @bowser89!')
         .then(function(users) {
-          users.length.should.equal(1);
+          users.length.should.equal(2);
           var profileIDs = users.map(function(u) { return u.profileID});
           profileIDs.should.contain('peach');
+          profileIDs.should.contain('bowser89');
           done();
         }, function(e) {
           throw e;

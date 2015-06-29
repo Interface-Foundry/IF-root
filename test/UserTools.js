@@ -15,6 +15,13 @@ var users = {
       password: 'princesspeach'
     },
     _id: '558d819ca0d6b1f2c5421080'
+  },
+  bowser: {
+    creds: {
+      email: 'bowser@interfacefoundry.com',
+      password: 'princesspeach'
+    },
+    _id: '558d819ca0d6b1f2c5421080'
   }
 };
 
