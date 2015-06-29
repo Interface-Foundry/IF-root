@@ -1,5 +1,6 @@
 var browser = require('browser');
 var UserTools = require('../UserTools');
+var db = require('../../components/IF_schemas/db');
 require('chai').should();
 
 describe('login process', function() {
@@ -19,6 +20,23 @@ describe('login process', function() {
         body.should.equal('Internal Server Error');
         done();
       });
+    });
+  });
+});
+
+describe.only('user utility function', function() {
+  describe('getMentionedUsers', function() {
+    it('should return the correct users', function(done) {
+      db.User.getMentionedUsers('hello @peach and @bowser89!')
+        .then(function(users) {
+          users.length.should.equal(2);
+          var profileIDs = users.map(function(u) { return u.profileID});
+          profileIDs.should.contain('peach');
+          profileIDs.should.contain('bowser89');
+          done();
+        }, function(e) {
+          throw e;
+        });
     });
   });
 });

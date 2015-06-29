@@ -21,6 +21,16 @@ var users = {
         profileID: 'sonic101',
         name: 'Sonic',
         avatar: 'avatarlink'
+    },
+    bowser: {
+        creds: {
+            email: 'bowser@interfacefoundry.com',
+            password: 'princesspeach'
+        },
+        _id: '558d819ca0d6b1f2c5421080',
+        profileID: 'bowser101',
+        name: 'Bowser',
+        avatar: 'avatarlink'
     }
 };
 

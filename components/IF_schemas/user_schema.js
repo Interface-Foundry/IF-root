@@ -152,4 +152,33 @@ userSchema.methods.validPassword = function(password) {
 };
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('User', userSchema);
+var User = mongoose.model('User', userSchema);
+
+
+/**
+ * Finds all the users who are mentioned in some text, where a mention is
+ * something like "nice dress @peach" where peach is the profileID.
+ * @param text example "hello @peach and @bowser89!"
+ * @param callback
+ */
+User.getMentionedUsers = function(text, callback) {
+    var profileIDs = []; // example ['peach', 'bowser89']
+    var regex = /[\s\w]*@([\w\n]+)[^\w^\n]*/g;
+
+    // find ALL the matches
+    var match = regex.exec(text);
+    while (match != null) {
+        profileIDs.push(match[1]);
+        match = regex.exec(text);
+    }
+
+    var query = User.find({profileID: {$in: profileIDs}});
+
+    if (typeof callback === 'function') {
+        query.exec(callback);
+    } else {
+        return query.exec();
+    }
+};
+
+module.exports = User;
