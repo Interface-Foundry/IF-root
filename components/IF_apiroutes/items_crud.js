@@ -67,7 +67,11 @@ router.post('/', function (req, res, next) {
       userIds: [req.user._id.toString()], //todo add ids for @user tags
       landmarkIds: [item._id.toString()],
       activityAction: 'item.post',
-      seenBy: [req.user._id.toString()]
+      seenBy: [req.user._id.toString()],
+      data: {
+        owner: req.user.getSimpleUser(),
+        item: item.getSimpleItem()
+      }
     });
 
     a.saveAsync().then(function() {

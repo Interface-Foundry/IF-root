@@ -55,6 +55,7 @@ module.exports.getExample = function() {
   var i = deepcopy(module.exports.example);
   delete i._id;
   i.id = 'item' + (Math.random()*1000000000|0);
+  i.name = 'test item';
   i.testData = true;
   return i;
 };

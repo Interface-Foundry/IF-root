@@ -13,7 +13,7 @@ var activitySchema = mongoose.Schema({
 
   activityTime: {
     type: Date,
-    default: new Date()
+    default: Date.now
   },
 
   // an identifier such as fave, follow, etc

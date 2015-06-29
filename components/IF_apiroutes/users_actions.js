@@ -35,6 +35,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
   });
 });
 
+// req.user follows :mongoId user
 app.post('/:mongoId/follow', function(req, res, next) {
   req.user.update({$addToSet: {following: req.params.mongoId}}, function(err) {
     if (err) {

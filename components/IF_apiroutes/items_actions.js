@@ -37,7 +37,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
             userIds: [req.user._id.toString(), req.item.owner.mongoId.toString()],
             landmarkIds: [req.item._id.toString()],
             activityTime: new Date(),
-            activityAction: 'item.' + req.params.action.toLowerCase()
+            activityAction: 'item.' + req.params.action.toLowerCase(),
             data: {},
             publicVisible: true,
             privateVisible: true,
@@ -247,7 +247,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
             item: req.item.getSimpleItem(),
             faver: req.user.getSimpleUser()
         };
-        req.activityAction.saveAsync.then(function() {
+        req.activity.saveAsync().then(function() {
         }).catch(next);
 
     } else {
