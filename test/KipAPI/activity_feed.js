@@ -5,7 +5,7 @@ var should = require('chai').should();
 var mockItems = require('./mock_items');
 
 var peachId = UserTools.users.peach._id.toString();
-var peach = UserTools.users.peach;
+var peach;
 var defaultResponse = {
     status: '(⌒‿⌒)'
 };
@@ -38,7 +38,9 @@ describe.only('activity feed', function () {
     //test item
     var item;
 
-    UserTools.loginBefore(UserTools.users.peach);
+    UserTools.loginBefore(UserTools.users.peach, function(err, user) {
+        peach = user;
+    });
 
     // delete it after everything's done
     after(function (done) {
@@ -90,9 +92,6 @@ describe.only('activity feed', function () {
         });
     });
 
-});
-describe.skip('blah', function() {
-
     it('should post a private activity to my feed when I unfollow someone', function (done) {
         var sonic = UserTools.users.sonic;
         browser.post('/api/users/' + peachId + '/unfollow', {
@@ -100,7 +99,7 @@ describe.skip('blah', function() {
         }, function (e, r, body) {
             body.should.eql(defaultResponse)
             getMyLatestActivity(function (activity) {
-                activity.privateVisible.should.equal(true);
+                activity.privateVisible.should.equal(false);
                 activity.publicVisible.should.equal(false);
                 activity.userIds.should.contain(peachId.toString());
                 activity.userIds.should.contain(sonic._id.toString());
@@ -117,6 +116,9 @@ describe.skip('blah', function() {
             });
         });
     });
+
+});
+describe.skip('blah', function() {
 
     it('should show a private activity when peach faves an item', function (done) {
         var i = mockItems.getExample();
