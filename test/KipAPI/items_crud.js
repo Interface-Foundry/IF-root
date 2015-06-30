@@ -19,8 +19,10 @@ describe('items CRUD operations', function () {
         should.equal(e, null);
         body.should.be.instanceof(Object);
         body._id.toString().should.equal(params.id);
-        body.should.have.ownProperty('ownerUserName');
-        body.should.have.ownProperty('ownerMongoId');
+        body.should.have.ownProperty('owner');
+        body.owner.should.have.ownProperty('name');
+        body.owner.should.have.ownProperty('mongoId');
+        body.owner.should.have.ownProperty('profileID');
         body.should.have.ownProperty('itemImageURL');
         done(e);
       });
@@ -57,10 +59,9 @@ describe('items CRUD operations', function () {
         body.itemTags.text.length.should.not.equal(0);
         body.itemTags.colors.length.should.not.equal(0);
         body.itemTags.categories.length.should.not.equal(0);
-        body.should.have.ownProperty('ownerUserName');
-        body.ownerUserName.should.equal(peach.name);
-        body.should.have.ownProperty('ownerMongoId');
-        body.ownerMongoId.should.equal(peach._id.toString());
+        body.should.have.ownProperty('owner');
+        body.owner.name.should.equal(peach.name);
+        body.owner.mongoId.should.equal(peach._id.toString());
         body.should.have.ownProperty('itemImageURL');
         body.itemImageURL.should.be.instanceof(Array);
         body.itemImageURL.length.should.equal(2);
@@ -79,10 +80,9 @@ describe('items CRUD operations', function () {
         body.itemTags.text.length.should.not.equal(0);
         body.itemTags.colors.length.should.not.equal(0);
         body.itemTags.categories.length.should.not.equal(0);
-        body.should.have.ownProperty('ownerUserName');
-        body.ownerUserName.should.equal(peach.name);
-        body.should.have.ownProperty('ownerMongoId');
-        body.ownerMongoId.should.equal(peach._id.toString());
+        body.should.have.ownProperty('owner');
+        body.owner.name.should.equal(peach.name);
+        body.owner.mongoId.should.equal(peach._id.toString());
         body.should.have.ownProperty('itemImageURL');
         body.itemImageURL.should.be.instanceof(Array);
         body.itemImageURL.length.should.equal(2);
@@ -95,7 +95,6 @@ describe('items CRUD operations', function () {
       browser.post('/api/items/' + postedItem._id.toString() + '/delete', function (e, r, body) {
         // then trying to get it should fail hard
         browser.get('/api/items/' + postedItem._id.toString(), function (e, r, body) {
-          console.log(body);
           should.exist(body.err);
           should.exist(body.err.niceMessage);
           done();

@@ -15,9 +15,21 @@ var landmarkSchema = new Schema({
         lowercase: true
     },
     world: Boolean,
-    parentID: {
-        type: String,
-        index: true
+    parent: {
+        mongoId: {
+            type: String,
+            index: true
+        },
+        name: String,
+        id: String
+    },
+    owner: {
+        mongoId: {
+            type: String,
+            index: true
+        },
+        profileID: String,
+        name: String
     },
     valid: Boolean, //are all req. items inputted
     status: String, //'draft' 'archived' 'public'
@@ -285,10 +297,12 @@ var landmarkSchema = new Schema({
     fave_count: Number,
     rejects: [String],
     comments: [{
-        userId: String,
-        userProfileId: String,
-        userName: String,
-        userAvatar: String,
+        user: {
+            mongoId: String,
+            profileID: String,
+            name: String,
+            avatar: String
+        },
         comment: String,
         timeCommented: Date
     }],
@@ -297,9 +311,6 @@ var landmarkSchema = new Schema({
         categories: [],
         text: []
     },
-    ownerUserName: String,
-    ownerUserId: String,
-    ownerMongoId: String,
     itemImageURL: [String],
     reports: [{
         reporterUserId: String,
@@ -307,6 +318,9 @@ var landmarkSchema = new Schema({
         comment: String,
         reason: String
     }],
+
+    // make it easy to kill test data
+    testData: Boolean
 
 
 
@@ -332,6 +346,16 @@ landmarkSchema.methods.getComments = function(cb) {
     worldchatSchema.find({
         'roomID': this._id
     }, cb)
+};
+
+// gets a simple json rep of the item for thumbnails etc
+landmarkSchema.methods.getSimpleItem = function() {
+    return {
+        mongoId: this._id.toString(),
+        id: this.id,
+        name: this.name,
+        itemImageURL: this.itemImageURL
+    }
 };
 
 //indexing for search

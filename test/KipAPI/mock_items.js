@@ -11,7 +11,6 @@ module.exports.exampleInstagramPost = {
 module.exports.example = {
   _id: '558b2ad7a0d6b1f2c542107f',
   id: 'item1234',
-  parentID: '5589e68d1938dac55f0eb7a7',
   valid: true,
   status: 'public',
   hasLoc: true,
@@ -30,15 +29,23 @@ module.exports.example = {
     timeFaved: new Date("2015-06-11T02:45:34.812Z")
   }],
   fave_count: 1,
-  ownerUserName: 'Princess Peach',
-  ownerUserId: 'peach',
-  ownerMongoId: '55799f4a76256a9342b03bad',
+  parent: {
+    mongoId: '5589e68d1938dac55f0eb7a7',
+    name: 'Loft'
+  },
+  owner: {
+    mongoId: '55799f4a76256a9342b03bad',
+    profileID: 'peach',
+    name: 'Princess Peach'
+  },
   itemImageURL: ['https://placekitten.com/600/600', 'https://placekitten.com/600/600'],
   comments: [{
-    userId: '55799f4a76256a9342b03bad',
-    userProfileId: 'peach',
-    userName: 'Princess Peach',
-    userAvatar: 'https://s3.amazonaws.com/if-server-avatars/2',
+    user: {
+      mongoId: '55799f4a76256a9342b03bad',
+      profileID: 'peach',
+      name: 'Princess Peach',
+      avatar: 'https://s3.amazonaws.com/if-server-avatars/2',
+    },
     comment: 'Comment text',
     timeCommented: new Date("2015-06-11T02:46:34.812Z")
   }]
@@ -48,6 +55,7 @@ module.exports.getExample = function() {
   var i = deepcopy(module.exports.example);
   delete i._id;
   i.id = 'item' + (Math.random()*1000000000|0);
+  i.name = 'test item';
   i.testData = true;
   return i;
 };

@@ -6,7 +6,8 @@ var express = require('express'),
   _ = require('underscore'),
   shapefile = require('shapefile'),
   request = require('request'),
-  redisClient = require('../../redis.js');
+  redisClient = require('../../redis.js'),
+  db = require('../IF_schemas/db');
 
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
@@ -58,9 +59,24 @@ router.post('/', function (req, res, next) {
       }
       console.log('item added to redis snaps queue', reply);
       console.log('created item is..', item);
-      res.send(item)
     });
 
+
+    // add activity for this thing
+    var a = new db.Activity({
+      userIds: [req.user._id.toString()], //todo add ids for @user tags
+      landmarkIds: [item._id.toString()],
+      activityAction: 'item.post',
+      seenBy: [req.user._id.toString()],
+      data: {
+        owner: req.user.getSimpleUser(),
+        item: item.getSimpleItem()
+      }
+    });
+
+    a.saveAsync().then(function() {
+      res.send(item)
+    }).catch(next);
   });
 });
 
@@ -74,7 +90,7 @@ router.put('/:id', function (req, res, next) {
         return next(err);
       }
 
-      if (item && req.user._id.toString() === item.ownerMongoId) { //Merge existing item with updated object from frontend
+      if (item && req.user._id.toString() === item.owner.mongoId) { //Merge existing item with updated object from frontend
         item = _.extend(item, req.body);
         //Save item
         item.save(function (err, item) {
@@ -109,7 +125,7 @@ router.post('/:id/delete', function (req, res, next) {
         res.sendStatus(200);
       }
 
-      if (req.user._id.toString() === item.ownerMongoId) {
+      if (req.user._id.toString() === item.owner.mongoId) {
         //Delete entry
         item.remove(function (err) {
           if (err) {

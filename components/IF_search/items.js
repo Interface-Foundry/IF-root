@@ -1,8 +1,9 @@
 var express = require('express');
 var app = express.Router();
+var db = require('../IF_schemas/db');
+var elasticsearch = require('elasticsearch');
 
 var defaultResultCount = 20;
-var searchItemsUrl = '/api/items/search';
 
 var mockItems = require('./../../test/KipAPI/mock_items.js');
 var USE_MOCK_DATA = true;
@@ -10,6 +11,7 @@ var USE_MOCK_DATA = true;
 /**
  * Item Search
  */
+var searchItemsUrl = '/api/items/search';
 app.post(searchItemsUrl, function(req, res) {
   // page is 0-indexed
   var page = parseInt(req.query.page) || 0;
@@ -30,6 +32,11 @@ app.post(searchItemsUrl, function(req, res) {
       results: mockItems.getResultsArray(defaultResultCount)
     });
   }
+
+  // elasticsearch impl
+
+
+  // mongo impl
 });
 
 
