@@ -8,9 +8,9 @@ var users = {
             password: 'princesspeach'
         },
         _id: '55799f4a76256a9342b03bad',
-        profileID: 'peach101',
+        profileID: 'peach',
         name: 'Princess Peach',
-        avatar: 'avatarlink'
+        avatar: 'https://s3.amazonaws.com/if-server-avatars/2'
     },
     sonic: {
         creds: {
@@ -18,19 +18,19 @@ var users = {
             password: 'princesspeach'
         },
         _id: '558d819ca0d6b1f2c5421080',
-        profileID: 'sonic101',
-        name: 'Sonic',
-        avatar: 'avatarlink'
+        profileID: 'sonic',
+        name: 'Sonic the Hedgehog',
+        avatar: 'https://s3.amazonaws.com/if-server-avatars/2'
     },
     bowser: {
         creds: {
             email: 'bowser@interfacefoundry.com',
             password: 'princesspeach'
         },
-        _id: '558d819ca0d6b1f2c5421080',
-        profileID: 'bowser101',
+        _id: '559183ffa0d6b1f2c5421082',
+        profileID: 'bowser89',
         name: 'Bowser',
-        avatar: 'avatarlink'
+        avatar: 'https://s3.amazonaws.com/if-server-avatars/2'
     }
 };
 
@@ -54,9 +54,12 @@ module.exports = {
             done(e, body);
         });
     },
-    loginBefore: function(user) {
+    loginBefore: function(user, cb) {
         before(function(done) {
-            module.exports.login(user, done)
+            module.exports.login(user, function(e, u) {
+                cb(e, u);
+                done();
+            })
         });
     },
     loggedIn: function(done) {

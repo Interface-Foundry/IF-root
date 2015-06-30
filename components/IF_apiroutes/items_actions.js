@@ -83,16 +83,13 @@ app.post('/:mongoId/comment', function(req, res, next) {
         users.map(function(u) {
             req.activity.addUser(u._id.toString());
         });
-
         req.activity.data = {
-            comment: comment
+            comment: comment,
+            commenter: req.user.getSimpleUser(),
+            owner: req.item.owner,
+            item: req.item.getSimpleItem()
         };
-
-        req.activity.save(function(err) {
-            if (err) {
-                next(err);
-            }
-        });
+        req.activity.saveAsync().catch(next);
     }, function(err) {
         next(err);
     });
@@ -115,17 +112,16 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
         }
         res.send(defaultResponse);
 
-        // remove the comment activity from all users' feeds if they delete the comment
-        db.Activities.remove({
-            'data.comment.user.mongoId': req.user._id.toString(),
-            'data.comment.comment': req.body.comment,
-            'data.comment.timeCommented': req.body.timeCommented
-
-        }, function(err) {
-            if (err) {
-                next(err);
-            }
-        });
+        // add an activity for the comment deletion
+        req.activity.data = {
+            comment: req.body.comment,
+            commenter: req.user.getSimpleUser(),
+            owner: req.item.owner,
+            item: req.item.getSimpleItem()
+        };
+        req.activity.privateVisible = false;
+        req.activity.publicVisible = false;
+        req.activity.saveAsync().catch(next);
     });
 });
 
@@ -190,7 +186,9 @@ app.post('/:mongoId/deletetag', function(req, res, next) {
     // Delete tags using mongodb's $pull method
     var pull = {}; // {itemTags.type: value}
     pull['itemTags.' + req.body.type] = req.body.value;
-    req.item.update({$pull: pull}, function(e) {
+    req.item.update({
+        $pull: pull
+    }, function(e) {
         if (e) {
             e.niceMessage = 'Could not delete tag ' + req.body.value;
             e.devMessage = 'Error with $pull in delete tags';
@@ -245,17 +243,11 @@ app.post('/:mongoId/fave', function(req, res, next) {
 
         // add an activity
         req.activity.data = {
-            userIds: [req.user._id.toString(), req.item.owner.mongoId],
-            landmarkIds: [req.item._id.toString()],
             item: req.item.getSimpleItem(),
             faver: req.user.getSimpleUser(),
-            owner: req.item.owner,
-            activityAction: 'item.fave',
-            privateVisible: true,
-            publicVisible: true,
+            owner: req.item.owner
         };
-        req.activity.saveAsync().then(function() {
-        }).catch(next);
+        req.activity.saveAsync().then(function() {}).catch(next);
 
     } else {
         res.send(defaultResponse);
@@ -277,19 +269,15 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             e.devMessage = 'un-fave failed for Items collection';
             return next(e);
         } else {
-               // add an activity
+            // add an activity
             req.activity.data = {
-            userIds: [req.user._id.toString(), req.item.owner.mongoId],
-            landmarkIds: [req.item._id.toString()],
-            item: req.item.getSimpleItem(),
-            faver: req.user.getSimpleUser(),
-            owner: req.item.owner,
-            activityAction: 'item.unfave',
-            privateVisible: false,
-            publicVisible: false
-        };
-        req.activity.saveAsync().then(function() {
-        }).catch(next);
+                item: req.item.getSimpleItem(),
+                faver: req.user.getSimpleUser(),
+                owner: req.item.owner          
+            };
+            req.activity.privateVisible= false;
+            req.activity.publicVisible= false;
+            req.activity.saveAsync().then(function() {}).catch(next);
             res.send(defaultResponse);
         }
     });

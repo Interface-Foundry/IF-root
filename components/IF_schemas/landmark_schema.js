@@ -20,7 +20,8 @@ var landmarkSchema = new Schema({
             type: String,
             index: true
         },
-        name: String
+        name: String,
+        id: String
     },
     owner: {
         mongoId: {
@@ -316,7 +317,10 @@ var landmarkSchema = new Schema({
         timeReported: Date,
         comment: String,
         reason: String
-    }]
+    }],
+
+    // make it easy to kill test data
+    testData: Boolean
 
 
 
