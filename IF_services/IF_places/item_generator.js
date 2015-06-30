@@ -62,6 +62,7 @@ db.Users.find({profileID: {$in: ['bowser89', 'peach', 'sonic']}}).exec().then(fu
             itemTags: {
                 text: [clothing]
             },
+            price: (Math.random()*3|0) + 1,
             itemImageURL: ['https://s3.amazonaws.com/if-server-avatars/2', 'https://s3.amazonaws.com/if-server-avatars/2'],
             testData: true
         });
