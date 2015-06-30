@@ -9,6 +9,9 @@ module.exports = {
   mongodb: {
     url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/foundry'.replace('password', process.env.MONGOPW)
   },
+  elasticsearch: {
+    url: 'http://elasticsearch-cerulean.kipapp.co:9200'
+  },
   redis: {
     port: 6379,
     url: 'redis-thunder.internal.kipapp.co',

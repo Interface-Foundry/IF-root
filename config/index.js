@@ -15,6 +15,9 @@ var base_config = {
   mongodb: {
     url: 'mongodb://localhost:27017/foundry'
   },
+  elasticsearch: {
+    url: 'http://pikachu.kipapp.co:9200'
+  },
   redis: {
     port: 6379,
     url: 'localhost',

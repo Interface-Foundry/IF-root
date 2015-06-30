@@ -5,14 +5,14 @@ var should = require('chai').should();
 
 var searchQuery = {
   text: 'vintage',
-  colors: ['000000'],
-  categories: ['shoes'],
+  colors: [],
+  categories: [],
   price: 2,
   radius:.5,
   loc: TestLocations.SoHoNYC.loc
 };
 
-describe('items search', function() {
+describe.only('items search', function() {
   describe('not logged in', function() {
 
     var body;
