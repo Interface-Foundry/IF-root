@@ -72,7 +72,8 @@ app.post(searchItemsUrl, function (req, res, next) {
 
 
     var fuzzyQuery = {
-        size: 30,
+        size: defaultResultCount,
+        from: page * defaultResultCount,
         index: "foundry",
         type: "landmarks",
         body: {
