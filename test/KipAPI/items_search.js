@@ -4,13 +4,15 @@ var TestLocations = require('../TestLocations');
 var should = require('chai').should();
 
 var searchQuery = {
-  text: 'vintage',
-  colors: ['000000'],
-  categories: ['shoes'],
+  text: 'dress',
+  colors: [],
+  categories: [],
   price: 2,
   radius:.5,
-  loc: TestLocations.SoHoNYC.loc
+  loc: TestLocations.UnionSquareNYC.loc
 };
+
+var pageLength = 20;
 
 describe('items search', function() {
   describe('not logged in', function() {
@@ -28,7 +30,7 @@ describe('items search', function() {
     it('should contain a results section', function() {
       body.should.have.property('results');
       body.results.should.be.instanceof(Array);
-      body.results.length.should.not.equal(0);
+      body.results.length.should.equal(pageLength);
     });
 
     it('should contain links for search pages', function() {
@@ -61,7 +63,7 @@ describe('items search', function() {
     it('should contain a results section', function() {
       body.should.have.property('results');
       body.results.should.be.instanceof(Array);
-      body.results.length.should.not.equal(0);
+      body.results.length.should.equal(pageLength);
     });
 
     it('should contain links for search pages', function() {
@@ -93,6 +95,7 @@ describe('items search', function() {
           b.links.first.should.equal('/api/items/search');
           should.not.exist(b.links.last);
           b.results.should.be.instanceof(Array);
+          b.results.length.should.equal(pageLength);
           done();
         });
       });

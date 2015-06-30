@@ -83,19 +83,13 @@ app.post('/:mongoId/comment', function(req, res, next) {
         users.map(function(u) {
             req.activity.addUser(u._id.toString());
         });
-
         req.activity.data = {
             comment: comment,
             commenter: req.user.getSimpleUser(),
             owner: req.item.owner,
             item: req.item.getSimpleItem()
         };
-
-        req.activity.save(function(err) {
-            if (err) {
-                next(err);
-            }
-        });
+        req.activity.saveAsync().catch(next);
     }, function(err) {
         next(err);
     });
@@ -192,7 +186,9 @@ app.post('/:mongoId/deletetag', function(req, res, next) {
     // Delete tags using mongodb's $pull method
     var pull = {}; // {itemTags.type: value}
     pull['itemTags.' + req.body.type] = req.body.value;
-    req.item.update({$pull: pull}, function(e) {
+    req.item.update({
+        $pull: pull
+    }, function(e) {
         if (e) {
             e.niceMessage = 'Could not delete tag ' + req.body.value;
             e.devMessage = 'Error with $pull in delete tags';
@@ -251,8 +247,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
             faver: req.user.getSimpleUser(),
             owner: req.item.owner
         };
-        req.activity.saveAsync().then(function() {
-        }).catch(next);
+        req.activity.saveAsync().then(function() {}).catch(next);
 
     } else {
         res.send(defaultResponse);
@@ -274,6 +269,15 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             e.devMessage = 'un-fave failed for Items collection';
             return next(e);
         } else {
+            // add an activity
+            req.activity.data = {
+                item: req.item.getSimpleItem(),
+                faver: req.user.getSimpleUser(),
+                owner: req.item.owner          
+            };
+            req.activity.privateVisible= false;
+            req.activity.publicVisible= false;
+            req.activity.saveAsync().then(function() {}).catch(next);
             res.send(defaultResponse);
         }
     });

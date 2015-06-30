@@ -34,7 +34,7 @@ var getFollowersLatestActivity = function (callback) {
     }, 100);
 };
 
-describe.only('activity feed', function () {
+describe('activity feed', function () {
     //test item
     var item;
 
