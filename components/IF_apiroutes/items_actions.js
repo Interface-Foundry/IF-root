@@ -120,6 +120,7 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
             'data.comment.user.mongoId': req.user._id.toString(),
             'data.comment.comment': req.body.comment,
             'data.comment.timeCommented': req.body.timeCommented
+
         }, function(err) {
             if (err) {
                 next(err);
@@ -244,8 +245,14 @@ app.post('/:mongoId/fave', function(req, res, next) {
 
         // add an activity
         req.activity.data = {
+            userIds: [req.user._id.toString(), req.item.owner.mongoId],
+            landmarkIds: [req.item._id.toString()],
             item: req.item.getSimpleItem(),
-            faver: req.user.getSimpleUser()
+            faver: req.user.getSimpleUser(),
+            owner: req.item.owner,
+            activityAction: 'item.fave',
+            privateVisible: true,
+            publicVisible: true,
         };
         req.activity.saveAsync().then(function() {
         }).catch(next);
@@ -270,6 +277,19 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             e.devMessage = 'un-fave failed for Items collection';
             return next(e);
         } else {
+               // add an activity
+            req.activity.data = {
+            userIds: [req.user._id.toString(), req.item.owner.mongoId],
+            landmarkIds: [req.item._id.toString()],
+            item: req.item.getSimpleItem(),
+            faver: req.user.getSimpleUser(),
+            owner: req.item.owner,
+            activityAction: 'item.unfave',
+            privateVisible: false,
+            publicVisible: false
+        };
+        req.activity.saveAsync().then(function() {
+        }).catch(next);
             res.send(defaultResponse);
         }
     });

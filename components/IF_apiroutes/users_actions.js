@@ -47,6 +47,8 @@ app.post('/:mongoId/follow', function(req, res, next) {
     var activity = new db.Activity({
       userIds: [req.user._id.toString(), req.targetUser._id.toString()],
       activityAction: 'user.follow',
+      privateVisible: true,
+      publicVisible: true,
       data: {
         follower: req.user.getSimpleUser(),
         followed: req.targetUser.getSimpleUser()
@@ -66,7 +68,24 @@ app.post('/:mongoId/unfollow', function(req, res, next) {
       err.niceMessage = 'Could not unfollow ' + req.targetUser.name + '. Please try again to unfollow that horrible wretched person :)';
       return next(err);
     }
-    res.send(defaultResponse);
+
+        // add an activity
+    var activity = new db.Activity({
+      userIds: [req.user._id.toString(), req.targetUser._id.toString()],
+      activityAction: 'user.unfollow',
+      privateVisible: false,
+      publicVisible: false,
+      data: {
+        follower: req.user.getSimpleUser(),
+        followed: req.targetUser.getSimpleUser()
+      },
+      seenBy: [req.user._id.toString()]
+    });
+
+    activity.saveAsync().then(function() {
+      res.send(defaultResponse);
+    }).catch(next);
+
   });
 });
 
