@@ -4,7 +4,7 @@ var TestLocations = require('../TestLocations');
 var should = require('chai').should();
 
 var searchQuery = {
-  text: 'vintage',
+  text: 'dress',
   colors: [],
   categories: [],
   price: 2,
@@ -12,7 +12,7 @@ var searchQuery = {
   loc: TestLocations.SoHoNYC.loc
 };
 
-describe.only('items search', function() {
+describe('items search', function() {
   describe('not logged in', function() {
 
     var body;

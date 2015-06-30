@@ -57,7 +57,9 @@ module.exports = {
     loginBefore: function(user, cb) {
         before(function(done) {
             module.exports.login(user, function(e, u) {
-                cb(e, u);
+                if (typeof cb === 'function') {
+                    cb(e, u);
+                }
                 done();
             })
         });

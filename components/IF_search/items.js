@@ -2,6 +2,23 @@ var express = require('express');
 var app = express.Router();
 var db = require('../IF_schemas/db');
 var elasticsearch = require('elasticsearch');
+// logs elasticsearch stuff, flesh out later once we know what's useful
+var ESLogger = function(config) {
+    var defaultLogger = function(){};
+
+    this.error = defaultLogger;
+    this.warning = defaultLogger;
+    this.info = defaultLogger;
+    this.debug = defaultLogger;
+    this.trace = defaultLogger;
+    this.close = defaultLogger;
+};
+var es = new elasticsearch.Client({
+    host: global.config.elasticsearch.url,
+    log: ESLogger
+});
+
+
 
 var defaultResultCount = 20;
 
@@ -21,29 +38,87 @@ var USE_MOCK_DATA = false;
  */
 var searchItemsUrl = '/api/items/search';
 app.post(searchItemsUrl, function (req, res, next) {
+    console.log(req.body);
+
     // page is 0-indexed
     var page = parseInt(req.query.page) || 0;
 
-    // make some links which allow easy page traversal on the client
-    var links = {
-        self: req.originalUrl,
-        next: searchItemsUrl + '?page=' + (page + 1),
-        prev: page == 0 ? null : searchItemsUrl + '?page=' + (page - 1),
-        first: searchItemsUrl,
-        last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
+    var responseBody = {
+        links: {
+            self: req.originalUrl,
+            next: searchItemsUrl + '?page=' + (page + 1),
+            prev: page == 0 ? null : searchItemsUrl + '?page=' + (page - 1),
+            first: searchItemsUrl,
+            last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
+        },
+        query: req.body,
+        results: []
     };
 
     if (USE_MOCK_DATA) {
-        return res.send({
-            query: req.body,
-            links: links,
-            results: mockItems.getResultsArray(defaultResultCount)
-        });
+        responseBody.results = mockItems.getResultsArray(defaultResultCount);
+        return res.send(responseBody);
     }
 
-    var radiusInMeters = req.body.radius * 1609.34; // convert miles to meters
-
     // elasticsearch impl
+    // update fuzziness of query based on search term length
+    var fuzziness = 0;
+    var q = req.body.text;
+    if (q.length >= 4) {
+        fuzziness = 1;
+    } else if (q.length >= 6) {
+        fuzziness = 2;
+    }
+
+
+    var fuzzyQuery = {
+        size: 30,
+        index: "foundry",
+        type: "landmarks",
+        body: {
+            query: {
+                filtered: {
+                    query: {
+                        multi_match: {
+                            query: q,
+                            fuzziness: fuzziness,
+                            prefix_length: 1,
+                            type: "best_fields",
+                            fields: ["name^2", "id", "summary", "itemTags", "comments"],
+                            tie_breaker: 0.2,
+                            minimum_should_match: "30%"
+                        }
+                    },
+                    filter: {
+                        geo_distance: {
+                            distance: (req.body.radius || "0.5") + "mi",
+                            "loc.coordinates": {
+                                lat: req.body.loc.lat,
+                                lon: req.body.loc.lon
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    es.search(fuzzyQuery)
+        .then(function(results) {
+            responseBody.results = results.hits.hits.map(function(r) {
+                var doc = r._source;
+                doc._id = r._id;
+                return doc;
+            });
+            console.log(JSON.stringify(fuzzyQuery, null, 2));
+            console.log(JSON.stringify(results, null, 2));
+            res.send(responseBody);
+        }, function(err) {
+            next(err);
+        });
+
+
+    return;
 
 
     // mongo impl
