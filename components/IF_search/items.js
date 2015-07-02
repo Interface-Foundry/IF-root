@@ -38,7 +38,6 @@ var USE_MOCK_DATA = false;
  */
 var searchItemsUrl = '/api/items/search';
 app.post(searchItemsUrl, function (req, res, next) {
-    console.log(req.body);
 
     // page is 0-indexed
     var page = parseInt(req.query.page) || 0;
@@ -70,6 +69,24 @@ app.post(searchItemsUrl, function (req, res, next) {
         fuzziness = 2;
     }
 
+    var filter = {
+        bool: {
+            must: [{
+                geo_distance: {
+                    distance: (req.body.radius || "0.5") + "mi",
+                    "loc.coordinates": {
+                        lat: req.body.loc.lat,
+                        lon: req.body.loc.lon
+                    }
+                }
+            }]
+        }
+    };
+
+    if (req.body.price && [1, 2, 3, 4].indexOf(req.body.price) > -1) {
+        filter.bool.must.push({term: {price: req.body.price}});
+    }
+
 
     var fuzzyQuery = {
         size: defaultResultCount,
@@ -90,15 +107,7 @@ app.post(searchItemsUrl, function (req, res, next) {
                             minimum_should_match: "30%"
                         }
                     },
-                    filter: {
-                        geo_distance: {
-                            distance: (req.body.radius || "0.5") + "mi",
-                            "loc.coordinates": {
-                                lat: req.body.loc.lat,
-                                lon: req.body.loc.lon
-                            }
-                        }
-                    }
+                    filter: filter
                 }
             }
         }
@@ -111,8 +120,6 @@ app.post(searchItemsUrl, function (req, res, next) {
                 doc._id = r._id;
                 return doc;
             });
-            console.log(JSON.stringify(fuzzyQuery, null, 2));
-            console.log(JSON.stringify(results, null, 2));
             res.send(responseBody);
         }, function(err) {
             next(err);
