@@ -1,4 +1,3 @@
-var db = require('../../../components/IF_schemas/db');
 var cheerio = require('cheerio');
 var request = require('request');
 var Promise = require('bluebird');
@@ -42,6 +41,7 @@ var scrape = module.exports = function(url){
             item.loves = parseInt($('span#loveboxCount').text());
             item.description = $('p[itemprop="description"]').parent().text();
             item.brand = $('span[itemprop="brand"]').text();
+            item.categories = $('ul.shoptiques-breadcrumb li').toArray().map(function(l) { return $(l).text()});
 
             // make one item per color
             var colors = $('#product-detail .colors a');
