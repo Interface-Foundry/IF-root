@@ -1,49 +1,135 @@
 var http = require("http");
 var cheerio = require("cheerio");
-var pageIndex = '';
-var pageCount = 1;
 var response_text = "";
 var fs = require('fs')
 var zipCheck = [];
 var q = require('q');
 var async = require('async');
+var hash = require('./hash.js')
 
-var options = {
-    host: "zipatlas.com",
-    path: ''
-};
 var fin = false;
 var currentStateIndex = 0;
 var col = 1
-    //Navigate from home page to individual state page for each state
+
 async.whilst(
     function() {
         return !fin
     },
-    function(callback) {
-        // console.log('Going to state: ', options, currentStateIndex,col)
-        gotoState(options, currentStateIndex, col).then(function(path) {
-            // options.path = path;
-            currentStateIndex++;
-            callback(null);
-        }).catch(function(err) {
-            console.log('hitting catch', err)
-            done = true;
-            callback(err)
-        })
+    function(cb) {
+        var options = {
+            host: "zipatlas.com",
+            path: ''
+        };
+        console.log('Starting...', currentStateIndex)
+            //Navigate from home page to to zipcode population density page
+        async.waterfall([
+                function(callback) {
+                    gotoStatePage(options, currentStateIndex, col)
+                        .then(function(path) {
+                            var deferred = q.defer()
+                            options.path = path;
+                            var stateName = options.path.split('/us/')[1].split('.')[0].trim()
+                            var state = capitalizeFirstLetter(stateName)
+                            for (var key in hash) {
+                                if (hash.hasOwnProperty(key)) {
+                                    if (hash[key] === state) {
+                                        var shortName = key
+                                        break 
+                                    }
+                                }
+                            }
+                            currentStateIndex++;
+                            if (col == 1 && currentStateIndex == 52) {
+                                console.log('Next column!')
+                                col = 2
+                                currentStateIndex = 0
+                            } else if (col == 2 && currentStateIndex == 50) {
+                                console.log('Finished!!')
+                                fin = true;
+                            }
+                            options.path = '/us/'+shortName.toLowerCase()+'/zip-code-comparison/population-density.htm'
+                            callback(null, options)
+                        })
+                },
+                function(options, shortName, callback) {
+                    console.log('Collecting data...', options)
+                    var done = false;
+                    var pageIndex = '';
+                    var pageCount = 1;
+                    //Recursively call collectData() until it reaches the final page results
+                    async.whilst(
+                            function() {
+                                return !done
+                            },
+                            function(callback) {
+                                collectData(options).then(function() {
+                                    console.log('collectData() called', options.path)
+                                    pageCount++;
+                                    pageIndex = '.' + pageCount.toString();
+                                    options.path = '/us/'+shortName.toLowerCase()+'/zip-code-comparison/population-density' + pageIndex + '.htm'
+                                    callback(null);
+                                }).catch(function(err) {
+                                    console.log('hitting catch', err)
+                                    done = true;
+                                    callback(err)
+                                })
+                            },
+                            function(err) {
+                                console.log('Finished! Setting options back to homepage..')
+                                options = {
+                                    host: "zipatlas.com",
+                                    path: ''
+                                };
+                                done = true;
+                                cb();
+                            }) //END OF ASYNC.WHILST
+                }
+            ],
+            function(err, result) {
+                console.log(err)
+                console.log('Finished!')
+            }); //END OF ASYNC.WATERFALL
     },
     function(err) {
         console.log(err)
         console.log('Finished!')
     })
 
-function gotoState(options, index, col) {
-    if (index == 25) {
-        console.log('Next column!')
-        col = 2
-        index = 0
-    }
 
+function gotoZipPage(options) {
+    var deferred = q.defer();
+    var request = http.request(options, function(resp) {
+        resp.setEncoding("utf8");
+        resp.on("data", function(chunk) {
+            response_text += chunk;
+        });
+        resp.on("end", function() {
+            if (resp.statusCode != 200) {
+                console.log('status Code: ', resp.statusCode)
+                deferred.reject()
+            } else {
+                $ = cheerio.load(response_text);
+                // console.log(response_text) 
+                var link = $("a:contains('Density')")['1'].attribs.href
+                    // console.log('this should be correct: ', link)
+                deferred.resolve(link)
+            }
+        })
+    })
+    request.end();
+    return deferred.promise
+}
+
+
+function gotoDensityPage(options) {
+    console.log('inside density!!: ', options.path)
+    var deferred = q.defer();
+    var link = '/us/' + shortName + '/city-comparison/population-density.html'
+    deferred.resolve(link)
+    return deferred.promise
+}
+
+function gotoStatePage(options, index, col) {
     var deferred = q.defer();
     var request = http.request(options, function(resp) {
         resp.setEncoding("utf8");
@@ -61,20 +147,14 @@ function gotoState(options, index, col) {
                 if (col == 1) {
                     if (firstCol[index].name == 'a') {
                         console.log('Got new link: ', firstCol[index].attribs.href)
-                        deferred.resolve(firstCol[index].attribs.href);
                         currentStateIndex++
+                        deferred.resolve(firstCol[index].attribs.href);
                     }
                 } else if (col == 2) {
-                    if (index == 24) {
-
-                    } else {
-                        if (secondCol[index].name == 'a') {
-                            console.log(secondCol[index].attribs.href)
-                            deferred.resolve(secondCol[index].attribs.href);
-                            currentStateIndex++
-                        } else {
-
-                        }
+                    if (secondCol[index].name == 'a') {
+                        console.log('Got new link: ', secondCol[index].attribs.href)
+                        deferred.resolve(secondCol[index].attribs.href);
+                        currentStateIndex++
                     }
                 }
             }
@@ -84,7 +164,7 @@ function gotoState(options, index, col) {
     return deferred.promise
 }
 
-function gotoDensity(options) {
+function collectData(options) {
     var deferred = q.defer();
     var request = http.request(options, function(resp) {
         resp.setEncoding("utf8");
@@ -94,63 +174,26 @@ function gotoDensity(options) {
         resp.on("end", function() {
             if (resp.statusCode != 200) {
                 console.log('status Code: ', resp.statusCode)
-                deferred.reject()
+                deferred.reject(resp.statusCode)
             } else {
                 $ = cheerio.load(response_text);
-                var link = $(":contains('Population Density in')").attribs.href
-                console.log(link)
-            }
-        })
-    })
-}
 
+                var firstIndex = ($("span.link").text().length) - 8
+                var lastIndex = ($("span.link").text().length)
+                var next = $("span.link").text().substr($("span.link").text().length - 7, $("span.link").text().length)
+                console.log('NEXT: ', next)
+                if (next !== 'Next >>') {
+                    console.log('Last Page!')
+                    return deferred.reject()
+                }
 
+                // console.log(firstIndex, lastIndex)
+                // if (!next) {
+                //     return deferred.reject()
+                // }
 
-// var options2 = {
-//     host: "zipatlas.com",
-//     path: "/us/ny/zip-code-comparison/population-density.htm"
-// };
-
-// var done = false;
-// //Recursively call connect() until it reaches the final page
-// async.whilst(
-//     function() {
-//         return !done
-//     },
-//     function(callback) {
-//         collect(options2).then(function() {
-//             pageCount++;
-//             pageIndex = '.' + pageCount.toString();
-//             options2.path = '/us/ny/zip-code-comparison/population-density' + pageIndex + '.htm';
-//             console.log('new options: ', options)
-//             callback(null, options);
-//         }).catch(function(err) {
-//             console.log('hitting catch', err)
-//             done = true;
-//             callback(err)
-//         })
-//     },
-//     function(err) {
-//         console.log('Finished!')
-//     })
-
-
-
-function collect(options) {
-    var deferred = q.defer();
-    var request = http.request(options, function(resp) {
-        console.log('Page: ', pageIndex)
-        resp.setEncoding("utf8");
-        resp.on("data", function(chunk) {
-            response_text += chunk;
-        });
-        resp.on("end", function() {
-            if (resp.statusCode != 200) {
-                console.log('status Code: ', resp.statusCode)
-                deferred.reject()
-            } else {
-                $ = cheerio.load(response_text);
                 var text = $(":contains('Zip Code')").parent().parent().find("tr").each(function(tr_index, tr) {
+
                     var th_text = $(this).find(".report_header").text();
                     var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, "");
                     var zipcode = $(this).find("td .report_data").eq(1).text();
@@ -165,7 +208,7 @@ function collect(options) {
                             var string = JSON.stringify(json)
                             fs.appendFile('density.json', string + ',\n', function(err) {
                                 if (err) throw err;
-                                console.log(string)
+                                // console.log(string)
                             });
                         }
                     }
@@ -176,4 +219,8 @@ function collect(options) {
     });
     request.end();
     return deferred.promise;
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }

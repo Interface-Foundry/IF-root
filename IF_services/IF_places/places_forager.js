@@ -16,7 +16,7 @@ var errCount = 0;
 // //Ending zipcode
 // var zipHigh = process.argv[5] ? process.argv[5] : 11692
 
-// 
+
 //Using nyc actual zipcode only
 var zipLow = (logMode == 'true') ? process.argv[4] : Math.min.apply(null, nyc.zipcodes)
 var zipHigh = (logMode == 'true') ? process.argv[5] : Math.max.apply(null, nyc.zipcodes) 
