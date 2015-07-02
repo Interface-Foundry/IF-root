@@ -69,6 +69,8 @@ app.post(searchItemsUrl, function (req, res, next) {
         fuzziness = 2;
     }
 
+    // here's some reading on filtered queries
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-filtered-query.html#_multiple_filters
     var filter = {
         bool: {
             must: [{
@@ -83,11 +85,12 @@ app.post(searchItemsUrl, function (req, res, next) {
         }
     };
 
+    // if the price is specified, add a price filter
     if (req.body.price && [1, 2, 3, 4].indexOf(req.body.price) > -1) {
         filter.bool.must.push({term: {price: req.body.price}});
     }
 
-
+    // put it all together in a filtered fuzzy query
     var fuzzyQuery = {
         size: defaultResultCount,
         from: page * defaultResultCount,
@@ -117,7 +120,7 @@ app.post(searchItemsUrl, function (req, res, next) {
         .then(function(results) {
             responseBody.results = results.hits.hits.map(function(r) {
                 var doc = r._source;
-                doc._id = r._id;
+                doc._id = r._id; // elasticsearch strips out the _id field for some inane reason
                 return doc;
             });
             res.send(responseBody);
