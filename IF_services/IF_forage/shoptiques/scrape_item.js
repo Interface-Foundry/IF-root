@@ -17,10 +17,10 @@ var scrape = module.exports = function(url){
             var item = {};
             var boutique = {};
 
-            // boutique
+            // boutique`
             boutique.source = "shoptique";  // in case we have to hide all these some day in one big batch
             boutique.name = $('div.boutique-introduction a').text();
-            boutique.shoptiquesUrl = 'http://wwww.shoptiques.com' + $('div.boutique-introduction a').attr('href');
+            boutique.url = url;
             boutique.neighborhood = $('div.boutique-neighborhood').text();
             boutique.addressText = $('div.address').text();
             boutique.city = $('div.address').attr('data-city');

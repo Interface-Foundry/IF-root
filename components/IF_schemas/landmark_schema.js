@@ -269,6 +269,8 @@ var landmarkSchema = new Schema({
             default: Date.now
         }
     },
+    source_shoptique_item: {},
+    source_shoptique_store: {},
     widgets: {
         twitter: Boolean,
         instagram: Boolean,
