@@ -50,9 +50,8 @@ var scrape = module.exports = function(url){
                 var i = deepcopy(item);
                 i.color = $(c).attr('data-color');
                 i.colorName = $(c).attr('data-color-name');
-                i.colorImage = $(c).attr('style').replace(/.*url\(/, '').replace(')', '');
+                i.colorImage = $(c).attr('style').replace(/.*url\('/, '').replace('\')', '');
                 i.colorId = $(c).attr('data-id');
-                debugger;
                 i.images = $('div.carousel-holder a[data-id="' + i.colorId + '"]').toArray().map(function(a) {
                     return  $(a).attr('href');
                 });
