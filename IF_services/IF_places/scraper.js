@@ -1,8 +1,8 @@
 var http = require("http");
+var request = require("request");
 var cheerio = require("cheerio");
 var response_text = "";
-var fs = require('fs')
-var zipCheck = [];
+var fs = require('graceful-fs')
 var q = require('q');
 var async = require('async');
 var hash = require('./hash.js')
@@ -33,8 +33,8 @@ async.whilst(
                             for (var key in hash) {
                                 if (hash.hasOwnProperty(key)) {
                                     if (hash[key] === state) {
-                                        var shortName = key
-                                        break 
+                                        var shortName = key.toLowerCase().trim()
+                                        break
                                     }
                                 }
                             }
@@ -47,12 +47,11 @@ async.whilst(
                                 console.log('Finished!!')
                                 fin = true;
                             }
-                            options.path = '/us/'+shortName.toLowerCase()+'/zip-code-comparison/population-density.htm'
-                            callback(null, options)
+                            options.path = '/us/' + shortName + '/zip-code-comparison/population-density.htm'
+                            callback(null, shortName, options)
                         })
                 },
-                function(options, shortName, callback) {
-                    console.log('Collecting data...', options)
+                function(shortName, options, callback) {
                     var done = false;
                     var pageIndex = '';
                     var pageCount = 1;
@@ -62,20 +61,22 @@ async.whilst(
                                 return !done
                             },
                             function(callback) {
-                                collectData(options).then(function() {
-                                    console.log('collectData() called', options.path)
-                                    pageCount++;
-                                    pageIndex = '.' + pageCount.toString();
-                                    options.path = '/us/'+shortName.toLowerCase()+'/zip-code-comparison/population-density' + pageIndex + '.htm'
-                                    callback(null);
-                                }).catch(function(err) {
-                                    console.log('hitting catch', err)
-                                    done = true;
-                                    callback(err)
-                                })
+                                setTimeout(function() {
+                                    collectData(options, shortName).then(function() {
+                                        pageCount++;
+                                        pageIndex = '.' + pageCount.toString();
+                                        options.path = '/us/' + shortName + '/zip-code-comparison/population-density' + pageIndex + '.htm'
+                                        console.log('Collecting from: ', options.path)
+                                        callback(null);
+                                    }).catch(function(err) {
+                                        console.log('collectData err: ', err)
+                                        done = true;
+                                        callback(err)
+                                    })
+                                }, 1000);
                             },
                             function(err) {
-                                console.log('Finished! Setting options back to homepage..')
+                                console.log('Finished! Going back to homepage..')
                                 options = {
                                     host: "zipatlas.com",
                                     path: ''
@@ -96,37 +97,75 @@ async.whilst(
     })
 
 
-function gotoZipPage(options) {
+function collectData(options, shortName) {
     var deferred = q.defer();
+
+    // request(options, function(err, res, body) {
+    //     if (err) console.log(err);
+    //     var data = JSON.parse(body);
+    // })
+
     var request = http.request(options, function(resp) {
         resp.setEncoding("utf8");
+
         resp.on("data", function(chunk) {
             response_text += chunk;
         });
+
         resp.on("end", function() {
             if (resp.statusCode != 200) {
                 console.log('status Code: ', resp.statusCode)
-                deferred.reject()
+                deferred.reject(resp.statusCode)
             } else {
                 $ = cheerio.load(response_text);
-                // console.log(response_text) 
-                var link = $("a:contains('Density')")['1'].attribs.href
-                    // console.log('this should be correct: ', link)
-                deferred.resolve(link)
+
+                var firstIndex = ($("span.link").text().length) - 8
+                var lastIndex = ($("span.link").text().length)
+                var next = $("span.link").text().substr($("span.link").text().length - 7, $("span.link").text().length)
+                console.log('Next page: ', next)
+                if (next !== 'Next >>') {
+                    console.log('Last Page!')
+                    return deferred.reject()
+                }
+
+                var text = $(":contains('Zip Code')").parent().parent().find("tr").each(function(tr_index, tr) {
+                    var th_text = $(this).find(".report_header").text();
+                    var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, "");
+                    var zipcode = $(this).find("td .report_data").eq(1).text();
+                    var location = $(this).find("td .report_data").eq(2).text();
+                    var city = $(this).find("td .report_data").eq(3).text();
+                    var population = $(this).find("td .report_data").eq(4).text();
+                    var density = $(this).find("td .report_data").eq(5).text();
+                    if (zipcode !== '') {
+                        var json = {
+                            state: shortName,
+                            zipcode: zipcode,
+                            location: location,
+                            city: city,
+                            population: population,
+                            density: density
+                        }
+                        var string = JSON.stringify(json)
+                        fs.appendFile('data.json', string + ',\n', function(err) {
+                            if (err) {
+                                console.log('Append file error: ', err)
+                                throw err;
+                            }
+                        });
+                    }
+                });
+
+                deferred.resolve();
             }
-        })
-    })
+        });
+    });
+
+    request.on("error", function(e) {
+        throw "Error: " + e.message;
+    });
+
     request.end();
-    return deferred.promise
-}
-
-
-function gotoDensityPage(options) {
-    console.log('inside density!!: ', options.path)
-    var deferred = q.defer();
-    var link = '/us/' + shortName + '/city-comparison/population-density.html'
-    deferred.resolve(link)
-    return deferred.promise
+    return deferred.promise;
 }
 
 function gotoStatePage(options, index, col) {
@@ -164,62 +203,7 @@ function gotoStatePage(options, index, col) {
     return deferred.promise
 }
 
-function collectData(options) {
-    var deferred = q.defer();
-    var request = http.request(options, function(resp) {
-        resp.setEncoding("utf8");
-        resp.on("data", function(chunk) {
-            response_text += chunk;
-        });
-        resp.on("end", function() {
-            if (resp.statusCode != 200) {
-                console.log('status Code: ', resp.statusCode)
-                deferred.reject(resp.statusCode)
-            } else {
-                $ = cheerio.load(response_text);
 
-                var firstIndex = ($("span.link").text().length) - 8
-                var lastIndex = ($("span.link").text().length)
-                var next = $("span.link").text().substr($("span.link").text().length - 7, $("span.link").text().length)
-                console.log('NEXT: ', next)
-                if (next !== 'Next >>') {
-                    console.log('Last Page!')
-                    return deferred.reject()
-                }
-
-                // console.log(firstIndex, lastIndex)
-                // if (!next) {
-                //     return deferred.reject()
-                // }
-
-                var text = $(":contains('Zip Code')").parent().parent().find("tr").each(function(tr_index, tr) {
-
-                    var th_text = $(this).find(".report_header").text();
-                    var prop_name = th_text.trim().toLowerCase().replace(/[^a-z]/g, "");
-                    var zipcode = $(this).find("td .report_data").eq(1).text();
-                    var density = $(this).find("td .report_data").eq(5).text();
-                    if (zipcode !== '') {
-                        if (zipCheck.join('').indexOf(zipcode.toString()) == -1) {
-                            zipCheck.push(zipcode);
-                            var json = {
-                                zipcode: zipcode,
-                                density: density
-                            }
-                            var string = JSON.stringify(json)
-                            fs.appendFile('density.json', string + ',\n', function(err) {
-                                if (err) throw err;
-                                // console.log(string)
-                            });
-                        }
-                    }
-                });
-                deferred.resolve();
-            }
-        });
-    });
-    request.end();
-    return deferred.promise;
-}
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
