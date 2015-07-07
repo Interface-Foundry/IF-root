@@ -42,6 +42,7 @@ var landmarkSchema = new Schema({
         },
         coordinates: []
     },
+    addressString: String,
     loc_nickname: String,
     loc_info: {
         loc_nickname: String,
@@ -223,12 +224,6 @@ var landmarkSchema = new Schema({
         price_level: Number,
         neighborhood: String
     },
-    source_instagram_users: {
-        instagram_users: [String]
-    },
-    source_instagram_photo: {
-        imgurl: String
-    },
     source_yelp_on: Boolean,
     source_yelp: {
         id: {
@@ -251,6 +246,7 @@ var landmarkSchema = new Schema({
         business_image_md5: String,
         rating_image: String
     },
+    source_instagram_user: {},
     source_instagram_post: {
         id: String,
         created_time: Number, // the created time on Instagram, utc timestamp

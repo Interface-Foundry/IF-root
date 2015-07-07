@@ -1,5 +1,5 @@
 var getAddressInfo = require('./getAddressInfo');
 
-getAddressInfo('770 asf  dfaswegf k').then(function(a) {
-    console.log(a);
+getAddressInfo('7 For All Mankind New York').then(function(a) {
+    console.log(JSON.stringify(a));
 });
