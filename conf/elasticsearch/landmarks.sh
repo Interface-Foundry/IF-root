@@ -1,11 +1,14 @@
 #!/bin/bash
 
-set -e
-
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+# kill the connector
+sudo killall mongo-connector
+rm -f oplog.timestamp
+
+set -e
 # first kill all things if they exist
-curl -XDELETE localhost:9200/if
+curl -XDELETE localhost:9200/foundry
 
 echo
 echo "sleeping for 5s while clean up executes"
