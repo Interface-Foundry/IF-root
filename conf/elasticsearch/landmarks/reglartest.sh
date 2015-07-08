@@ -1,8 +1,8 @@
-curl -XGET localhost:9200/if/landmarks/_search?pretty=t -d '{
+curl -XGET localhost:9200/foundry/landmarks/_search?pretty=t -d '{
 "query":
 {
 	"multi_match": {
-		"query":                "food",
+		"query":                "loft",
 		"type":                 "best_fields", 
 		"fields":               [ "name", "summary" ],
 		"fuzziness": 2,

@@ -1,4 +1,4 @@
-curl -XPUT 'localhost:9200/if' -d '
+curl -XPUT 'localhost:9200/foundry' -d '
 {
 	"mappings": {
 		"landmarks": {
