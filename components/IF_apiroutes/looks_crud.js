@@ -39,6 +39,7 @@ router.post('/', function(req, res, next) {
                 look.ownerIds.push(snap.owner.mongoId);
                 look.imgURLs.push(snap.itemImageURL);
                 look.tags.push(snap.itemTags)
+                callback(null)
             })
         }, function(err) {
             if (err) {
