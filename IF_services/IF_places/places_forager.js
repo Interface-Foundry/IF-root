@@ -126,14 +126,14 @@ db.Zipcodes.find({
                     function(callback) {
                         async.eachSeries(zips, function(zip, callback) {
                                 var zipcode = zip.zipcode
-                                var city = zip.city
+                                var zipObj = zip
                                 //This number needs to be refined for max results 
                                 var factor = 2000
                                 var area = zip.area * 1609.34 * factor
                                 radius = area ? Math.sqrt((area) / 3.14159) : 3000
                                 console.log('Searching: ', zipcode, ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
                                 var coords = getLatLong(zipcode).then(function(coords) {
-                                    searchPlaces(coords, zipcode, city, function() {
+                                    searchPlaces(coords, zipcode, zipObj, function() {
                                         count++;
                                         wait(callback, 300);
                                     })
@@ -194,8 +194,8 @@ db.Zipcodes.find({
 
 
 //searches google places
-function searchPlaces(coords, zipcode, city, fin) {
-    radarSearch(coords[0], coords[1], zipcode, city).then(function(results) {
+function searchPlaces(coords, zipcode, zipObj, fin) {
+    radarSearch(coords[0], coords[1], zipcode, zipObj).then(function(results) {
             var saveCount = 0
                 //**change this to each for faster processing but duplicate ID errors for some reason
             async.eachSeries(results, function(place, done) {
@@ -251,17 +251,14 @@ function searchPlaces(coords, zipcode, city, fin) {
                                 //Now fill in the details of the place
                                 function(callback) {
                                     if (newPlace == null) {
-
-                                        callback(null);
+                                        callback('Not a new place');
                                     } else {
-
                                         wait(function() {
-
                                             addGoogleDetails(newPlace).then(function(place) {
                                                 callback(null);
                                             }, function(err) {
                                                 console.log('Details ERROR', err)
-                                                callback(null);
+                                                callback(err);
                                             })
                                         }, 30);
                                     }
@@ -310,6 +307,7 @@ function searchPlaces(coords, zipcode, city, fin) {
                             ],
                             //final callback in series
                             function(err, results) {
+                                // console.log('Finished processing.',err)
                                 done()
                             }); //END OF ASYNC SERIES
                     },
@@ -321,19 +319,19 @@ function searchPlaces(coords, zipcode, city, fin) {
                                 places: placeCount
                             }
                         }, function(err, results) {
-                            if (err) return console.log('err: ', err)
-                            console.log(placeCount + ' places total. Saved ' + saveCount + ' new places.')
+                            if (err) console.log('err: ', err)
+                            console.log('Saved ' + saveCount + ' new places.')
                             fin()
                         })
                     }) //END OF ASYNC EACH
         },
         function(err) {
-            // console.log('No radar results, err: ', err)
+            if (err) console.log(err)
             fin()
         })
 }
 
-function radarSearch(lat, lng, zipcode, city) {
+function radarSearch(lat, lng, zipcode, zipObj) {
     var deferred = q.defer();
     var types = 'clothing_store',
         key = googleAPI,
@@ -345,10 +343,10 @@ function radarSearch(lat, lng, zipcode, city) {
     }, function(error, response, body) {
         if ((!error) && (response.statusCode == 200) && (body.results.length >= 1)) {
             requestNum++;
-            console.log(city + ', ' + currentState + ' ' + zipcode + ': Found ', body.results.length, ' places.')
+            console.log(zipObj.city + ', ' + currentState + ' ' + zipcode + ': Area: '+zipObj.area+', Population: '+ zipObj.pop + ', Density: ' + zipObj.density + '\nFound ', body.results.length, ' places.')
             deferred.resolve(body.results);
         } else {
-            console.log(city + ', ' + currentState + ' ' + zipcode + ': No places...')
+            console.log(zipObj.city + ', ' + currentState + ' ' + zipcode + ': No places...')
             deferred.reject();
         }
     })
