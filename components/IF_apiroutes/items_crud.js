@@ -78,6 +78,19 @@ router.post('/', function(req, res, next) {
                     item: item.getSimpleItem()
                 }
             });
+
+            //Increment users snapCount
+            req.user.update({
+                $inc: {
+                    snapCount: 1
+                }
+            }, function(err) {
+                if (err) {
+                    err.niceMessage = 'Could not increment users snapCount';
+                    console.log(err)
+                }
+            })
+
             a.saveAsync().then(function() {
                 res.send(item)
             }).catch(next);
@@ -137,6 +150,17 @@ router.post('/:id/delete', function(req, res, next) {
                         err.niceMessage = 'Could not delete item';
                         return next(err);
                     }
+                    //Decrement users snapCount
+                    req.user.update({
+                        $inc: {
+                            snapCount: -1
+                        }
+                    }, function(err) {
+                        if (err) {
+                            err.niceMessage = 'Could not decrement users snapCount';
+                            console.log(err)
+                        }
+                    })
                     res.sendStatus(200);
                     console.log('deleted!')
                 })

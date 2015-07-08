@@ -139,7 +139,8 @@ var userSchema = mongoose.Schema({
     defaultPriceRange: Number,
     defaultSearchRadius: Number,
     following: [String],
-    followers: [String]
+    followers: [String],
+    snapCount: Number
 });
 
 // generating a hash
