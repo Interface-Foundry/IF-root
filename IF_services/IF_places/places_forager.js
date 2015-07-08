@@ -4,10 +4,8 @@ var db = require('../../components/IF_schemas/db');
 
 //Log mode
 var logMode = process.argv[2] ? process.argv[2] : 'false'
-    //Radius *40324 meters = 25 miles
-var radius = process.argv[3] ? process.argv[3] : 1000
-var state = process.argv[4] ? process.argv[4] : 'NY'
-    //Limit radius
+
+//Optional
 var radiusMax = 40324
 var errCount = 0;
 
@@ -44,28 +42,83 @@ var cloudMapID = 'interfacefoundry.jh58g2al';
 var googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 var awsBucket = "if.forage.google.images";
 
-//Counters
+//Other variables
 var placeCount = 0;
 var saveCount = 0;
 var requestNum = 0;
+var radius = 0
 
 
+var states = [
+    "AL",
+    "AK",
+    "AZ",
+    "AR",
+    "CA",
+    "CO",
+    "CT",
+    "DE",
+    "FL",
+    "GA",
+    "HI",
+    "ID",
+    "IL",
+    "IN",
+    "IA",
+    "KS",
+    "KY",
+    "LA",
+    "ME",
+    "MD",
+    "MA",
+    "MI",
+    "MN",
+    "MS",
+    "MO",
+    "MT",
+    "NE",
+    "NV",
+    "NH",
+    "NJ",
+    "NM",
+    "NY",
+    "NC",
+    "ND",
+    "OH",
+    "OK",
+    "OR",
+    "PA",
+    "RI",
+    "SC",
+    "SD",
+    "TN",
+    "TX",
+    "UT",
+    "VT",
+    "VA",
+    "WA",
+    "WV",
+    "WI",
+    "WY"
+]
+
+var stateIndex = 0
+var currentState = process.argv[3] ? process.argv[3] : states[stateIndex]
 
 //search places in loops
 db.Zipcodes.find({
-        'state': state
+        'state': currentState
     }).then(function(zips) {
         if (zips.length < 1) {
             return console.log('No zipcodes found!')
         }
-
         async.whilst(
             function() {
                 return true
             },
             function(callback) {
                 var count = 0;
-                console.log('...Searching state: ' + state)
+                console.log('...Searching state: ' + currentState)
                 async.whilst(
                     function() {
                         return count <= zips.length
@@ -73,15 +126,14 @@ db.Zipcodes.find({
                     function(callback) {
                         async.eachSeries(zips, function(zip, callback) {
                                 var zipcode = zip.zipcode
-                                var area = zip.area * 1609.34 * 1000
-                                // Divide the area( in square units) by Pi(approximately 3.14159).
-                                // Example: 303, 000 / 3.14159 = 96447.98
-                                // Take the square root of the result(Example: 310.56).This is the radius.
-                                // Now double the radius to get the diameter(Example: 621.12 meters).
-                                var radius = Math.sqrt((area)/3.14159)
-                                console.log('Searching: ', zipcode,' with radius: '+ radius + ' for area: '+zip.area + ' miles.')
+                                var city = zip.city
+                                //This number needs to be refined for max results 
+                                var factor = 2000
+                                var area = zip.area * 1609.34 * factor
+                                radius = area ? Math.sqrt((area) / 3.14159) : 3000
+                                console.log('Searching: ', zipcode, ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
                                 var coords = getLatLong(zipcode).then(function(coords) {
-                                    searchPlaces(coords, zipcode, function() {
+                                    searchPlaces(coords, zipcode, city, function() {
                                         count++;
                                         wait(callback, 300);
                                     })
@@ -101,24 +153,34 @@ db.Zipcodes.find({
                     function(err) {
                         //Log results each loop
                         if (logMode == 'true') {
-                            var logData = '\nFor State: ' + state + ': \n  Requested: ' + requestNum + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' + '  Errors : ' + errCount + ' \n'
+                            var logData = '\nFor State: ' + currentState + ': \n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' + '  Factor : ' + factor + ' \n'
                             fs.appendFile('places.log', logData, function(err) {
                                 if (err) throw err;
                                 placeCount = 0;
                                 requestNum = 0;
                                 saveCount = 0;
                             });
-                            //Increment Radius
-                            // if (radius !== radiusMax) {
-                            //     radius += 500
-                            // } else {
-                                fs.appendFile('places.log', '******Finished*****\n', function(err) {
-                                    if (err) throw err;
-                                });
-                                return console.log('Finished Testing!')
-                            // }
+                     
+                            fs.appendFile('places.log', '******Finished*****\n', function(err) {
+                                if (err) throw err;
+                            });
+                            return console.log('Finished Testing!')
+                                // }
                         }
-                        console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
+                        console.log('Finished '+currentState+'!')
+                        stateIndex++;
+                        if (states[stateIndex]){
+                            currentState = states[stateIndex]
+                        } else {
+                            //Restart at first state
+                            stateIndex = 0;
+                            currentState = states[stateIndex]
+                            if (logMode) {
+                                //Increase factor by 50
+                                factor += 50
+                            }
+                        }
+                        console.log('Starting '+currentState+'...')
                         wait(callback, 300); // Wait before looping over the zip again
                     }
                 );
@@ -132,9 +194,8 @@ db.Zipcodes.find({
 
 
 //searches google places
-function searchPlaces(coords, zipcode, fin) {
-    //Radar search places for max 200 results and get place_ids
-    radarSearch(coords[0], coords[1], zipcode).then(function(results) {
+function searchPlaces(coords, zipcode, city, fin) {
+    radarSearch(coords[0], coords[1], zipcode, city).then(function(results) {
             var saveCount = 0
                 //**change this to each for faster processing but duplicate ID errors for some reason
             async.eachSeries(results, function(place, done) {
@@ -232,7 +293,7 @@ function searchPlaces(coords, zipcode, fin) {
                                     if (!newPlace) {
                                         callback(null)
                                     } else {
-                                        console.log('Saved ', newPlace.id)
+                                        // console.log('Saved ', newPlace.id)
                                         saveCount++;
                                         newPlace.save(function(err, saved) {
                                             if (err) {
@@ -261,34 +322,33 @@ function searchPlaces(coords, zipcode, fin) {
                             }
                         }, function(err, results) {
                             if (err) return console.log('err: ', err)
-                            console.log(placeCount + ' places total. Saved ' + saveCount + ' new stores for zipcode: ', zipcode)
+                            console.log(placeCount + ' places total. Saved ' + saveCount + ' new places.')
                             fin()
                         })
                     }) //END OF ASYNC EACH
         },
         function(err) {
-            console.log('No radar results, err: ', err)
+            // console.log('No radar results, err: ', err)
             fin()
         })
 }
 
-function radarSearch(lat, lng, zipcode) {
+function radarSearch(lat, lng, zipcode, city) {
     var deferred = q.defer();
     var types = 'clothing_store',
         key = googleAPI,
         location = lng + ',' + lat
     var url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?radius=" + radius + '&types=' + types + '&location=' + location + '&key=' + googleAPI
-        // console.log('Radar searching..')
     request({
         uri: url,
         json: true
     }, function(error, response, body) {
         if ((!error) && (response.statusCode == 200) && (body.results.length >= 1)) {
             requestNum++;
-            console.log('Searching...found ', body.results.length, ' places for zipcode: ', zipcode)
+            console.log(city + ', ' + currentState + ' ' + zipcode + ': Found ', body.results.length, ' places.')
             deferred.resolve(body.results);
         } else {
-            console.log('Radar Search request error: ', error)
+            console.log(city + ', ' + currentState + ' ' + zipcode + ': No places...')
             deferred.reject();
         }
     })
@@ -556,10 +616,9 @@ function wait(callback, delay) {
 }
 
 
-
 //server port 
 app.listen(3137, 'localhost', function() {
-    console.log("3137 ~ ~");
+    console.log("Running..");
 }).on('error', function(err) {
     console.log('on error handler');
     console.log(err);
