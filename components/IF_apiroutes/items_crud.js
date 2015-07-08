@@ -70,12 +70,12 @@ router.post('/', function (req, res, next) {
       seenBy: [req.user._id.toString()],
       data: {
         owner: req.user.getSimpleUser(),
-        item: item.getSimpleItem()
+        look: look.getSimpleLook()
       }
     });
 
     a.saveAsync().then(function() {
-      res.send(item)
+      res.send(look)
     }).catch(next);
   });
 });

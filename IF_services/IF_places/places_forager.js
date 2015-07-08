@@ -50,60 +50,64 @@ var radius = 0
 
 
 var states = [
-    "AL",
-    "AK",
-    "AZ",
-    "AR",
-    "CA",
-    "CO",
-    "CT",
-    "DE",
-    "FL",
-    "GA",
-    "HI",
-    "ID",
-    "IL",
-    "IN",
-    "IA",
-    "KS",
-    "KY",
-    "LA",
-    "ME",
-    "MD",
-    "MA",
-    "MI",
-    "MN",
-    "MS",
-    "MO",
-    "MT",
-    "NE",
-    "NV",
-    "NH",
-    "NJ",
-    "NM",
-    "NY",
-    "NC",
-    "ND",
-    "OH",
-    "OK",
-    "OR",
-    "PA",
-    "RI",
-    "SC",
-    "SD",
-    "TN",
-    "TX",
-    "UT",
-    "VT",
-    "VA",
-    "WA",
-    "WV",
-    "WI",
-    "WY"
+    // "NY",
+    // "CA"
+    // ,
+    "NJ"
+    // ,
+    // "AL",
+    // "AK",
+    // "AZ",
+    // "AR",
+    // "CO",
+    // "CT",
+    // "DE",
+    // "FL",
+    // "GA",
+    // "HI",
+    // "ID",
+    // "IL",
+    // "IN",
+    // "IA",
+    // "KS",
+    // "KY",
+    // "LA",
+    // "ME",
+    // "MD",
+    // "MA",
+    // "MI",
+    // "MN",
+    // "MS",
+    // "MO",
+    // "MT",
+    // "NE",
+    // "NV",
+    // "NH",
+    // "NM",
+    // "NC",
+    // "ND",
+    // "OH",
+    // "OK",
+    // "OR",
+    // "PA",
+    // "RI",
+    // "SC",
+    // "SD",
+    // "TN",
+    // "TX",
+    // "UT",
+    // "VT",
+    // "VA",
+    // "WA",
+    // "WV",
+    // "WI",
+    // "WY"
 ]
 
 var stateIndex = 0
 var currentState = process.argv[3] ? process.argv[3] : states[stateIndex]
+    //This number needs to be refined for max results 
+var factor = 2000
 
 //search places in loops
 db.Zipcodes.find({
@@ -116,19 +120,19 @@ db.Zipcodes.find({
             function() {
                 return true
             },
-            function(callback) {
+            function(start) {
                 var count = 0;
                 console.log('...Searching state: ' + currentState)
                 async.whilst(
                     function() {
                         return count <= zips.length
                     },
-                    function(callback) {
+                    function(cb) {
                         async.eachSeries(zips, function(zip, callback) {
                                 var zipcode = zip.zipcode
                                 var zipObj = zip
-                                //This number needs to be refined for max results 
-                                var factor = 2000
+
+
                                 var area = zip.area * 1609.34 * factor
                                 radius = area ? Math.sqrt((area) / 3.14159) : 3000
                                 console.log('Searching: ', zipcode, ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
@@ -146,7 +150,8 @@ db.Zipcodes.find({
                                 if (err) {
                                     console.log('Err: ', err);
                                 } else {
-                                    console.log('Places foraged in zipcodes.');
+                                    // console.log('Finished ', currentState, '.')
+                                    cb(err)
                                 }
                             });
                     },
@@ -160,16 +165,11 @@ db.Zipcodes.find({
                                 requestNum = 0;
                                 saveCount = 0;
                             });
-                     
-                            fs.appendFile('places.log', '******Finished*****\n', function(err) {
-                                if (err) throw err;
-                            });
-                            return console.log('Finished Testing!')
-                                // }
+
                         }
-                        console.log('Finished '+currentState+'!')
+                        console.log('Finished ' + currentState + '!')
                         stateIndex++;
-                        if (states[stateIndex]){
+                        if (states[stateIndex]) {
                             currentState = states[stateIndex]
                         } else {
                             //Restart at first state
@@ -180,25 +180,25 @@ db.Zipcodes.find({
                                 factor += 50
                             }
                         }
-                        console.log('Starting '+currentState+'...')
-                        wait(callback, 300); // Wait before looping over the zip again
+                        console.log('Starting ' + currentState + '...')
+                        wait(start, 300); // Wait before looping over the zip again
                     }
                 );
             },
             function(err) {
                 console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
-                wait(callback, 300); // Wait before looping over the zip again
+                wait(start, 300); // Wait before looping over the zip again
             }
         );
     }) //END OF FIND NY ZIPCODES
 
 
 //searches google places
-function searchPlaces(coords, zipcode, zipObj, fin) {
+function searchPlaces(coords, zipcode, zipObj, zipDone) {
     radarSearch(coords[0], coords[1], zipcode, zipObj).then(function(results) {
             var saveCount = 0
                 //**change this to each for faster processing but duplicate ID errors for some reason
-            async.eachSeries(results, function(place, done) {
+            async.eachSeries(results, function(place, placeDone) {
                         placeCount++;
                         var newPlace = null;
                         async.series([
@@ -258,14 +258,14 @@ function searchPlaces(coords, zipcode, zipObj, fin) {
                                                 callback(null);
                                             }, function(err) {
                                                 console.log('Details ERROR', err)
-                                                callback(err);
+                                                callback(null);
                                             })
                                         }, 30);
                                     }
                                 },
                                 function(callback) {
                                     //Find neighborhood and city name via python area finder server
-                                    if (newPlace == null) {
+                                    if (newPlace == null || newPlace.name == null) {
                                         // console.log('Not a new place')
                                         callback(null);
                                     } else {
@@ -307,8 +307,8 @@ function searchPlaces(coords, zipcode, zipObj, fin) {
                             ],
                             //final callback in series
                             function(err, results) {
-                                // console.log('Finished processing.',err)
-                                done()
+                                // if (err) console.log('Skipping place...',err)
+                                placeDone()
                             }); //END OF ASYNC SERIES
                     },
                     function() {
@@ -321,17 +321,18 @@ function searchPlaces(coords, zipcode, zipObj, fin) {
                         }, function(err, results) {
                             if (err) console.log('err: ', err)
                             console.log('Saved ' + saveCount + ' new places.')
-                            fin()
+                            zipDone()
                         })
                     }) //END OF ASYNC EACH
         },
         function(err) {
-            if (err) console.log(err)
-            fin()
+            if (err) console.log('Line 333: ',err)
+            zipDone()
         })
 }
 
 function radarSearch(lat, lng, zipcode, zipObj) {
+    console.log(zipObj.city + ', ' + currentState + ' ' + zipcode + ': Area: ' + zipObj.area + ', Population: ' + zipObj.pop + ', Density: ' + zipObj.density)
     var deferred = q.defer();
     var types = 'clothing_store',
         key = googleAPI,
@@ -343,10 +344,10 @@ function radarSearch(lat, lng, zipcode, zipObj) {
     }, function(error, response, body) {
         if ((!error) && (response.statusCode == 200) && (body.results.length >= 1)) {
             requestNum++;
-            console.log(zipObj.city + ', ' + currentState + ' ' + zipcode + ': Area: '+zipObj.area+', Population: '+ zipObj.pop + ', Density: ' + zipObj.density + '\nFound ', body.results.length, ' places.')
+            console.log('Found ', body.results.length, ' places.')
             deferred.resolve(body.results);
         } else {
-            console.log(zipObj.city + ', ' + currentState + ' ' + zipcode + ': No places...')
+            console.log('No places...')
             deferred.reject();
         }
     })
@@ -450,7 +451,7 @@ function addGoogleDetails(newPlace) {
             }
             deferred.resolve(newPlace)
         } else {
-            console.log("Details query FAIL", error, response.statusCode);
+            // console.log("Details query FAIL", error, response.statusCode);
             deferred.reject(error)
         }
     });

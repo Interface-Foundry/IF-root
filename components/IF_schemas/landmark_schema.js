@@ -289,7 +289,10 @@ var landmarkSchema = new Schema({
         type: [String],
         index: true
     }, //search tags
-    price: Number,
+    price: {
+        val: Number,
+        currency: String
+    },
     faves: [{
         userId: String,
         timeFaved: Date

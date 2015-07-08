@@ -539,9 +539,14 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
+
+
 //--- ITEM ROUTER ----//
 app.use('/api/items', require('./components/IF_apiroutes/items_actions'));
 app.use('/api/items', require('./components/IF_apiroutes/items_crud'));
+//--- LOOK ROUTER ----//
+// app.use('/api/looks', require('./components/IF_apiroutes/looks_actions'));
+app.use('/api/looks',require('./components/IF_apiroutes/looks_crud'));
 //--- USER ROUTER ----//
 app.use('/api/users', require('./components/IF_apiroutes/users_actions'));
 app.use('/api/users', require('./components/IF_apiroutes/users_crud'));
@@ -886,41 +891,29 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
 
 });
 
-//upload pictures not for avatars
+//Upload pictures for snaps and looks
 app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
-
-    // console.log('Headers for upload',req.headers)
+    // console.log('user-AGENT IS ', req.headers)
+    // var iphone = req.headers['user-agent'].indexOf('iPhone') > -1 ? true : false;
 
     var uploadContents = '';
-
     //capturing incoming extra data in upload
     req.busboy.on('field', function(key, val) {
         // console.log('Field [' + key + ']: value: ' + val);
         uploadContents += val;
     });
-
-    //Detect if captured on iPhone and set iphone boolean
-    // console.log('user-AGENT IS ', req.headers)
-    // var iphone = req.headers['user-agent'].indexOf('iPhone') > -1 ? true : false;
-
-
     var fstream;
     req.pipe(req.busboy);
-
     req.busboy.on('file', function(fieldname, file, filename, filesize, mimetype) {
-
         console.log('hitting busboy file event: ', fieldname, filename, filesize, mimetype)
-
         if (!mimetype == 'image/jpeg' || !mimetype == 'image/png' || !mimetype == 'image/gif' || !mimetype == 'image/jpg') {
             console.log("Incorrect mime type.");
             res.send(500, 'Please use .jpg .png or .gif');
         }
         if (parseFloat(req.headers['content-length']) > 50000000) {
-
             console.log("Filesize too large.");
             res.sendStatus(500, 'File size is too large.')
         } else {
-
 
             // console.log('*Successfully passed busboy filters.')
             var stuff_to_hash = filename + (new Date().toString());
@@ -993,90 +986,90 @@ app.post('/api/uploadPicture', isLoggedIn, function(req, res) {
 
                                             //CLOUDSIGHT STUFF: Run aws image and retrieve description, store in hashtag of contest entry
 
-                                            var options = {
-                                                url: "https://api.cloudsightapi.com/image_requests",
-                                                headers: {
-                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-                                                },
-                                                qs: {
-                                                    'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
-                                                    'image_request[locale]': 'en-US',
-                                                    'image_request[language]': 'en'
-                                                }
-                                            }
+                                            // var options = {
+                                            //     url: "https://api.cloudsightapi.com/image_requests",
+                                            //     headers: {
+                                            //         "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                            //     },
+                                            //     qs: {
+                                            //         'image_request[remote_image_url]': "https://s3.amazonaws.com/if-server-general-images/" + awsKey,
+                                            //         'image_request[locale]': 'en-US',
+                                            //         'image_request[language]': 'en'
+                                            //     }
+                                            // }
 
-                                            request.post(options, function(err, res, body) {
-                                                    if (err) console.error(err);
-                                                    try {
-                                                        var data = JSON.parse(body);
-                                                    } catch (e) {
-                                                        console.error('could not parse cloudsight response');
-                                                        console.error(body);
-                                                    }
+                                            // request.post(options, function(err, res, body) {
+                                            //         if (err) console.error(err);
+                                            //         try {
+                                            //             var data = JSON.parse(body);
+                                            //         } catch (e) {
+                                            //             console.error('could not parse cloudsight response');
+                                            //             console.error(body);
+                                            //         }
 
-                                                    var results = {
-                                                        status: 'not completed'
-                                                    };
-                                                    var description = '';
+                                            //         var results = {
+                                            //             status: 'not completed'
+                                            //         };
+                                            //         var description = '';
 
-                                                    var tries = 0;
+                                            //         var tries = 0;
 
-                                                    async.whilst(
-                                                        function() {
-                                                            return (results.status == 'not completed' && tries < 10);
-                                                        },
-                                                        function(callback) {
+                                            //         async.whilst(
+                                            //             function() {
+                                            //                 return (results.status == 'not completed' && tries < 10);
+                                            //             },
+                                            //             function(callback) {
 
-                                                            var options = {
-                                                                url: "https://api.cloudsightapi.com/image_responses/" + data.token,
-                                                                headers: {
-                                                                    "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-                                                                }
-                                                            }
+                                            //                 var options = {
+                                            //                     url: "https://api.cloudsightapi.com/image_responses/" + data.token,
+                                            //                     headers: {
+                                            //                         "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+                                            //                     }
+                                            //                 }
 
-                                                            request(options, function(err, res, body) {
-                                                                if (err) console.error(err);
-                                                                console.log('cloudsight status is..', body)
-                                                                try {
-                                                                    var body_parsed = JSON.parse(body);
-                                                                } catch (e) {
-                                                                    console.error('could not parse some cloudsight api call');
-                                                                    console.error(body);
-                                                                }
-                                                                body = body_parsed;
-                                                                if (body.status == 'completed') {
-                                                                    results.status = 'completed';
-                                                                    description = body.name;
+                                            //                 request(options, function(err, res, body) {
+                                            //                     if (err) console.error(err);
+                                            //                     console.log('cloudsight status is..', body)
+                                            //                     try {
+                                            //                         var body_parsed = JSON.parse(body);
+                                            //                     } catch (e) {
+                                            //                         console.error('could not parse some cloudsight api call');
+                                            //                         console.error(body);
+                                            //                     }
+                                            //                     body = body_parsed;
+                                            //                     if (body.status == 'completed') {
+                                            //                         results.status = 'completed';
+                                            //                         description = body.name;
 
-                                                                    var newString = description.replace(/[^A-Z0-9]/ig, "");
-                                                                    uploadContents.description = newString;
+                                            //                         var newString = description.replace(/[^A-Z0-9]/ig, "");
+                                            //                         uploadContents.description = newString;
 
-                                                                    contestEntrySchema.findOneAndUpdate({
-                                                                            _id: newentryID
-                                                                        }, {
-                                                                            $push: {
-                                                                                contestTag: {
-                                                                                    tag: uploadContents.description
-                                                                                }
-                                                                            }
-                                                                        },
-                                                                        function(err, result) {
-                                                                            if (err) console.log(err);
+                                            //                         contestEntrySchema.findOneAndUpdate({
+                                            //                                 _id: newentryID
+                                            //                             }, {
+                                            //                                 $push: {
+                                            //                                     contestTag: {
+                                            //                                         tag: uploadContents.description
+                                            //                                     }
+                                            //                                 }
+                                            //                             },
+                                            //                             function(err, result) {
+                                            //                                 if (err) console.log(err);
 
 
-                                                                            console.log('contest updated with cloudsight', result)
-                                                                        })
+                                            //                                 console.log('contest updated with cloudsight', result)
+                                            //                             })
 
-                                                                } //END OF BODY.STATUS COMPLETED
-                                                            })
+                                            //                     } //END OF BODY.STATUS COMPLETED
+                                            //                 })
 
-                                                            tries++;
-                                                            setTimeout(callback, 5000);
-                                                        },
-                                                        function(err) {
+                                            //                 tries++;
+                                            //                 setTimeout(callback, 5000);
+                                            //             },
+                                            //             function(err) {
 
-                                                        }); //END OF ASYNC WHILST
-                                                }) //END OF CLOUDSIGHT REQUEST
+                                            //             }); //END OF ASYNC WHILST
+                                            //     }) //END OF CLOUDSIGHT REQUEST
 
                                         } //END OF ELSE
                                     }); //END OF S3 PUT OBJECT
