@@ -2,6 +2,10 @@ var express = require('express');
 var app = express.Router();
 var db = require('../IF_schemas/db');
 var elasticsearch = require('elasticsearch');
+
+// set up the fake data for the /trending api
+var request = require('request');
+
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
     var defaultLogger = function(){};
@@ -28,13 +32,21 @@ var USE_MOCK_DATA = false;
 /**
  * Item Search
  * post body: {
-	text: "something tag la",
-	colors: ['FF00FF', 'FF00FF'],
-	categories: ['shoes'],
-	price: 1, // or 2, 3, or 4
-	radius: .5, // miles
-	loc: {lat: 34, lon: -77}
+	"text": "something tag la",
+	"colors": ['FF00FF', 'FF00FF'],
+	"categories": ['shoes'],
+	"price": 1, // or 2, 3, or 4
+	"radius": .5, // miles
+	"loc": {"lat": 34, "lon": -77}
   }
+
+ example:
+ {
+	"text": "dress",
+	"price": 2,
+	"radius": 0.5,
+	"loc": {"lat": 40.7352793, "lon": -73.990638}
+ }
  */
 var searchItemsUrl = '/api/items/search';
 app.post(searchItemsUrl, function (req, res, next) {
@@ -90,6 +102,9 @@ app.post(searchItemsUrl, function (req, res, next) {
         filter.bool.must.push({term: {price: req.body.price}});
     }
 
+    // only items, not worlds
+    filter.bool.must.push({term: {world: false}});
+
     // put it all together in a filtered fuzzy query
     var fuzzyQuery = {
         size: defaultResultCount,
@@ -105,7 +120,7 @@ app.post(searchItemsUrl, function (req, res, next) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^2", "id", "summary", "itemTags", "comments"],
+                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }
@@ -181,16 +196,26 @@ app.post(trendingItemsUrl, function (req, res, next) {
         last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
     };
 
-    if (USE_MOCK_DATA) {
-        return res.send({
+
+
+    request.post('http://localhost:2997/api/items/search', {
+        body: {
+            "text": "summer",
+            "radius": 0.5,
+            "loc": {"lat": 40.7352793, "lon": -73.990638}
+        },
+        json: true
+    }, function (e, r, body) {
+
+        res.send({
             query: req.body,
             links: links,
             results: [{
-                category: 'Trending in Neighborhood1',
-                results: mockItems.getResultsArray(defaultResultCount)
+                category: 'Trending in Summer',
+                results: body.results
             }, {
-                category: 'Trending in Neighborhood2',
-                results: mockItems.getResultsArray(defaultResultCount)
+                category: 'Trending near you',
+                results: body.results
             }, {
                 category: 'Related to Holiday1',
                 results: mockItems.getResultsArray(defaultResultCount)
@@ -199,7 +224,9 @@ app.post(trendingItemsUrl, function (req, res, next) {
                 results: mockItems.getResultsArray(defaultResultCount)
             }]
         });
-    }
+    });
+
+    return;
 
     var loc = {
         type: 'Point',
@@ -207,11 +234,9 @@ app.post(trendingItemsUrl, function (req, res, next) {
     };
 
     //Get neighborhood name based on coordinates
-    var options = {
-        method: 'GET'
-    };
+    var url = global.config.neighborhoodServer.url + '/findArea?lat=' + loc.coordinates[0] + '&lon=' + loc.coordinates[1];
 
-    request(global.config.neighborhoodServer.url + '/findArea?lat=' + loc.coordinates[0] + '&lon=' + loc.coordinates[1], options, function (error, response, body) {
+    request.get(url, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             console.log('req.body: ', req.body)
             var area = JSON.parse(body)

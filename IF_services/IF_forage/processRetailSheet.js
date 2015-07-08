@@ -52,7 +52,6 @@ setTimeout(function() {
         return db.Landmarks.findOne({
             'source_instagram_user.username': instagramId
         }).exec().then(function (landmark) {
-            debugger;
             if (landmark) {
                 console.log('already have entry for instagram account', instagramId);
                 return landmark;

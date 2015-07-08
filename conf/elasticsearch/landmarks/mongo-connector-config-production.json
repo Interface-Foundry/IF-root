@@ -1,12 +1,5 @@
 {
   "mainAddress": "mongodb-r1:27017",
-  "authentication": {
-    "adminUsername": "ifappuser",
-	"password": "<change me>"
-  },
-  "namespaces": {
-    "include": ["if.landmarks"]
-  },
   "docManagers": [{
     "docManager": "elastic_doc_manager",
     "targetURL": "localhost:9200"

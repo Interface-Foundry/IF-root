@@ -34,7 +34,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
 
         // create an activity object for this action, only save it to the db in each route, though
         req.activity = new db.Activity({
-            userIds: [req.user._id.toString(), req.item.owner.mongoId.toString()],
+            userIds: [],
             landmarkIds: [req.item._id.toString()],
             activityTime: new Date(),
             activityAction: 'item.' + req.params.action.toLowerCase(),
@@ -43,6 +43,14 @@ app.use('/:mongoId/:action', function(req, res, next) {
             privateVisible: true,
             seenBy: [req.user._id.toString()]
         });
+
+        if (req.user && req.user_id) {
+            req.activity.userIds.push(req.user._id.toString());
+        }
+
+        if (req.item.owner && req.item.owner.mongoId) {
+            req.activity.userIds.push(req.item.owner.mongoId.toString());
+        }
 
         // otherwise continue happily
         next();

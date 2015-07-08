@@ -318,7 +318,11 @@ var landmarkSchema = new Schema({
     }],
 
     // make it easy to kill test data
-    testData: Boolean
+    testData: {
+        type: Boolean,
+        default: false
+    }
+
 
 
 
