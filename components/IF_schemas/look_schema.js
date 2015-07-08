@@ -48,11 +48,11 @@ var lookSchema = mongoose.Schema({
         type: Schema.Types.ObjectId,
         ref: 'landmarkModel'
     }],
-    ownerIds: [{
+    snapOwnerIds: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
     }],
-    imgURLs: [
+    snapURLs: [
         [String]
     ],
     tags: [{

@@ -29,44 +29,33 @@ router.post('/', function(req, res, next) {
     look.owner.name = req.user.name;
     look.owner.profileID = req.user.profileID;
     look.owner.mongoId = req.user._id;
-    //front-end is sending base64 buffer stream
-    upload.uploadLook(look.owner.profileID,look.base64).then(function(imgURL) {
+    upload.uploadPicture(look.owner.profileID, look.base64).then(function(imgURL) {
         look.lookImg = imgURL;
-        //populate data for each snap in look
-        async.eachSeries(look.snapIDs, function(snapId, callback) {
-            db.Landmarks.findById(snapId, function(err, snap) {
-                look.snapIds.push(snapId);
-                look.ownerIds.push(snap.owner.mongoId);
-                look.imgURLs.push(snap.itemImageURL);
-                look.tags.push(snap.itemTags)
-                callback(null)
-            })
-        }, function(err) {
+        look.save(function(err, look) {
             if (err) {
-                err.niceMessage = 'Error populating snap data for look.';
+                err.niceMessage = 'Could not save look';
                 return next(err);
             }
-            look.save(function(err, item) {
-                if (err) {
-                    err.niceMessage = 'Could not save look';
-                    return next(err);
+            // add activity for this thing
+            var a = new db.Activity({
+                userIds: [req.user._id.toString()], //todo add ids for @user tags
+                landmarkIds: [look._id.toString()],
+                activityAction: 'look.post',
+                seenBy: [req.user._id.toString()],
+                data: {
+                    owner: req.user.getSimpleUser(),
+                    look: look.getSimpleLook()
                 }
-                // add activity for this thing
-                var a = new db.Activity({
-                    userIds: [req.user._id.toString()], //todo add ids for @user tags
-                    landmarkIds: [look._id.toString()],
-                    activityAction: 'look.post',
-                    seenBy: [req.user._id.toString()],
-                    data: {
-                        owner: req.user.getSimpleUser(),
-                        look: look.getSimpleLook()
-                    }
-                });
-                a.saveAsync().then(function() {
-                    res.send(look)
-                }).catch(next);
             });
+            a.saveAsync().then(function() {
+                res.send(look)
+            }).catch(next);
         });
+    }).catch(function(err) {
+        if (err) {
+            err.niceMessage = 'Error uploading picture';
+            return next(err);
+        }
     })
 });
 

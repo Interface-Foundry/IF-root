@@ -10,7 +10,7 @@ var express = require('express'),
 
 module.exports = {
     //Upload pictures for looks
-    uploadLook: function(profileID, base64) {
+    uploadPicture: function(profileID, base64) {
         var deferred = q.defer();
         var stuff_to_hash = profileID + (new Date().toString());
         var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
@@ -25,6 +25,7 @@ module.exports = {
         }).pipe(writeStream);
         writeStream.on('close', function() {
                 fs.readFile(tempPath, function(err, fileData) {
+                    if (err) deferred.reject(err)
                     var s3 = new AWS.S3();
                     s3.putObject({
                         Bucket: 'if-server-general-images',
@@ -32,13 +33,12 @@ module.exports = {
                         Body: fileData,
                         ACL: 'public-read'
                     }, function(err, data) {
-                        if (err)
-                            console.log(err);
+                        if (err) deferred.reject(err)
                         else {
                             fs.unlink(tempPath);
                             var imgURL = "https://s3.amazonaws.com/if-server-general-images/" + awsKey
                             deferred.resolve(imgURL)
-                        } 
+                        }
                     }); //s3
                 }); //fs.readFile
             }) //writeStream.on
