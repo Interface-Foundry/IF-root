@@ -1,7 +1,7 @@
 import json
 from twisted.web import server, resource
 from twisted.internet import reactor, endpoints
-import ogr
+from osgeo import ogr
 from IPython import embed
 import sys
 import urllib
