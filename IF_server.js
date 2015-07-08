@@ -66,6 +66,7 @@ var bubble_search = require('./components/IF_search/bubble_search');
 //----MONGOOOSE & SCHEMAS----//
 var mongoose = require('mongoose'),
     stickerSchema = require('./components/IF_schemas/sticker_schema.js'),
+    zipcodeSchema = require('./components/IF_schemas/zipcode_schema.js'),
     landmarkSchema = require('./components/IF_schemas/landmark_schema.js'),
     styleSchema = require('./components/IF_schemas/style_schema.js'),
     projectSchema = require('./components/IF_schemas/project_schema.js'),
@@ -3740,41 +3741,43 @@ app.all('/*', function(req, res, next) {
  * return next(err);
  */
 app.use(function(err, req, res, next) {
-  // first print the route
-  console.error('Error at ' + req.method + ' ' + req.originalUrl);
+    // first print the route
+    console.error('Error at ' + req.method + ' ' + req.originalUrl);
 
-  // handle the case where someone does next('You must log in first') or whatever
-  if (typeof err === 'string') {
-    err = {
-      niceMessage: err
-    };
-  }
+    // handle the case where someone does next('You must log in first') or whatever
+    if (typeof err === 'string') {
+        err = {
+            niceMessage: err
+        };
+    }
 
-  // log stuff to the console
-  if (err.niceMessage) {
-    console.error(err.niceMessage);
-  }
-  if (err.devMessage) {
-    console.error(err.devMessage);
-  }
-  console.error(err.stack || 'No stack');
+    // log stuff to the console
+    if (err.niceMessage) {
+        console.error(err.niceMessage);
+    }
+    if (err.devMessage) {
+        console.error(err.devMessage);
+    }
+    console.error(err.stack || 'No stack');
 
-  // add a nice message for the user if there is none
-  err.niceMessage = err.niceMessage || '(＞﹏＜) Sorry, Kip hit an error.';
+    // add a nice message for the user if there is none
+    err.niceMessage = err.niceMessage || '(＞﹏＜) Sorry, Kip hit an error.';
 
-  // send a response, friendly in production but verbose in dev
-  if (res.headerSent){ return; } // prevent buggy things from multiple errors and next(err) calls
-  if (global.config.isProduction) {
-    res.send({
-      err: {
-        niceMessage: err.niceMessage
-      }
-    });
-  } else {
-    res.send({
-      err: err
-    });
-  }
+    // send a response, friendly in production but verbose in dev
+    if (res.headerSent) {
+        return;
+    } // prevent buggy things from multiple errors and next(err) calls
+    if (global.config.isProduction) {
+        res.send({
+            err: {
+                niceMessage: err.niceMessage
+            }
+        });
+    } else {
+        res.send({
+            err: err
+        });
+    }
 });
 
 

@@ -10,6 +10,7 @@ var hash = require('./hash.js')
 var fin = false;
 var currentStateIndex = 0;
 var col = 1
+var shortName = '';
 
 async.whilst(
     function() {
@@ -21,23 +22,27 @@ async.whilst(
             path: ''
         };
         console.log('Starting...', currentStateIndex)
-            //Navigate from home page to to zipcode population density page
+        
         async.waterfall([
                 function(callback) {
+                    //Navigate to page with data
                     gotoStatePage(options, currentStateIndex, col)
                         .then(function(path) {
                             var deferred = q.defer()
                             options.path = path;
                             var stateName = options.path.split('/us/')[1].split('.')[0].trim()
                             var state = capitalizeFirstLetter(stateName)
+
                             for (var key in hash) {
                                 if (hash.hasOwnProperty(key)) {
                                     if (hash[key] === state) {
-                                        var shortName = key.toLowerCase().trim()
+                                        shortName = key.toLowerCase().trim()
+                                        console.log('State: '+state+' '+shortName)
                                         break
                                     }
                                 }
                             }
+
                             currentStateIndex++;
                             if (col == 1 && currentStateIndex == 52) {
                                 console.log('Next column!')
@@ -51,29 +56,29 @@ async.whilst(
                             callback(null, shortName, options)
                         })
                 },
+                //Collect data for each page 
                 function(shortName, options, callback) {
-                    var done = false;
+                    var end = false;
                     var pageIndex = '';
                     var pageCount = 1;
-                    //Recursively call collectData() until it reaches the final page results
                     async.whilst(
                             function() {
-                                return !done
+                                return !end
                             },
-                            function(callback) {
+                            function(done) {
                                 setTimeout(function() {
                                     collectData(options, shortName).then(function() {
                                         pageCount++;
                                         pageIndex = '.' + pageCount.toString();
                                         options.path = '/us/' + shortName + '/zip-code-comparison/population-density' + pageIndex + '.htm'
                                         console.log('Collecting from: ', options.path)
-                                        callback(null);
+                                        done(null);
                                     }).catch(function(err) {
                                         console.log('collectData err: ', err)
-                                        done = true;
-                                        callback(err)
+                                        end = true;
+                                        done(err)
                                     })
-                                }, 1000);
+                                }, 2000);
                             },
                             function(err) {
                                 console.log('Finished! Going back to homepage..')
@@ -81,7 +86,7 @@ async.whilst(
                                     host: "zipatlas.com",
                                     path: ''
                                 };
-                                done = true;
+                                end = true;
                                 cb();
                             }) //END OF ASYNC.WHILST
                 }
@@ -99,12 +104,6 @@ async.whilst(
 
 function collectData(options, shortName) {
     var deferred = q.defer();
-
-    // request(options, function(err, res, body) {
-    //     if (err) console.log(err);
-    //     var data = JSON.parse(body);
-    // })
-
     var request = http.request(options, function(resp) {
         resp.setEncoding("utf8");
 
@@ -138,7 +137,7 @@ function collectData(options, shortName) {
                     var density = $(this).find("td .report_data").eq(5).text();
                     if (zipcode !== '') {
                         var json = {
-                            state: shortName,
+                            state: city.split(',')[1].trim(),
                             zipcode: zipcode,
                             location: location,
                             city: city,
@@ -161,7 +160,13 @@ function collectData(options, shortName) {
     });
 
     request.on("error", function(e) {
-        throw "Error: " + e.message;
+        console.log("Error: " + e)
+        console.log("Waiting 4 seconds and skipping this page...")
+        setTimeout(function () {
+            deferred.resolve();
+            request.end();
+            return deferred.promise;
+        },4000)
     });
 
     request.end();

@@ -1,6 +1,6 @@
 var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
-//var mongoose = require('mongoose');
+var mongoose = require('mongoose');
 var config = global.config || require('config');
 
 if (mongoose.connection.readyState == 0) {
@@ -34,7 +34,8 @@ var schemas = [
   {filename: 'twitter_schema', single: 'Twitter', plural: 'Twitters'},
   {filename: 'user_schema', single: 'User', plural: 'Users'},
   {filename: 'visit_schema', single: 'Visit', plural: 'Visits'},
-  {filename: 'worldchat_schema', single: 'Worldchat', plural: 'Worldchats'}
+  {filename: 'worldchat_schema', single: 'Worldchat', plural: 'Worldchats'},
+  {filename: 'zipcode_schema', single: 'Zipcode', plural: 'Zipcodes'}
 ];
 
 module.exports = {

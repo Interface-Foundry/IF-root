@@ -1,5 +1,4 @@
-//Array of zipcodes testing
-var nyc = require('./nyc_zipcodes.js')
+var db = require('../../components/IF_schemas/db');
 
 //ARGUMENTS
 
@@ -7,23 +6,11 @@ var nyc = require('./nyc_zipcodes.js')
 var logMode = process.argv[2] ? process.argv[2] : 'false'
     //Radius *40324 meters = 25 miles
 var radius = process.argv[3] ? process.argv[3] : 1000
+var state = process.argv[4] ? process.argv[4] : 'NY'
     //Limit radius
 var radiusMax = 40324
 var errCount = 0;
 
-// //Starting zipcode 
-// var zipLow = process.argv[4] ? process.argv[4] : 10001
-// //Ending zipcode
-// var zipHigh = process.argv[5] ? process.argv[5] : 11692
-
-
-//Using nyc actual zipcode only
-var zipLow = (logMode == 'true') ? process.argv[4] : Math.min.apply(null, nyc.zipcodes)
-var zipHigh = (logMode == 'true') ? process.argv[5] : Math.max.apply(null, nyc.zipcodes) 
-
-//national zips: 1001 - 99950
-//nyc zips: 10001 - 11692
-//la zips: 90001 - 91607
 
 var express = require('express'),
     app = module.exports.app = express(),
@@ -51,13 +38,6 @@ var cloudMapID = 'interfacefoundry.jh58g2al';
 //----MONGOOOSE----//
 var landmarks = require('../../components/IF_schemas/landmark_schema.js');
 var styles = require('../../components/IF_schemas/style_schema.js');
-var geozip = require('../../components/IF_schemas/geozip_schema.js');
-global.config = require('../../config');
-mongoose.connect(global.config.mongodb.url);
-var db_mongoose = mongoose.connection;
-db_mongoose.on('error', console.error.bind(console, 'connection error:'));
-
-
 var request = require('request');
 var cloudMapName = 'forum';
 var cloudMapID = 'interfacefoundry.jh58g2al';
@@ -72,77 +52,83 @@ var requestNum = 0;
 
 
 //search places in loops
-async.whilst(
-    function() {
-        return true
-    },
-    function(callback) {
-        var count = zipLow;
-        console.log('...Staring forager.. \n...Radius: ' + radius + '\n...Range: ' + zipLow + ' - ' + zipHigh)
+db.Zipcodes.find({
+        'state': state
+    }).then(function(zips) {
+        if (zips.length < 1) {
+            return console.log('No zipcodes found!')
+        }
+
         async.whilst(
             function() {
-                return count != zipHigh;
+                return true
             },
             function(callback) {
-
-                var zipCodeQuery;
-                //so number will format as zip code digit with 0 in front
-                if (count < 10000) {
-                    zipCodeQuery = '0' + parseInt(count);
-                } else {
-                    zipCodeQuery = parseInt(count);
-                }
-
-                //REMEMBER TO DELETE THIS, ONLY FOR TESTING NYC DATA SET
-                if (logMode == 'true') {
-                    if (nyc.zipcodes.indexOf(zipCodeQuery) == -1) {
-                        console.log(zipCodeQuery + ' doesnt exist in nyc.. skipping!')
-                        count++;
-                        wait(callback, 100);
+                var count = 0;
+                console.log('...Searching state: ' + state)
+                async.whilst(
+                    function() {
+                        return count <= zips.length
+                    },
+                    function(callback) {
+                        async.eachSeries(zips, function(zip, callback) {
+                                var zipcode = zip.zipcode
+                                var area = zip.area * 1609.34 * 1000
+                                // Divide the area( in square units) by Pi(approximately 3.14159).
+                                // Example: 303, 000 / 3.14159 = 96447.98
+                                // Take the square root of the result(Example: 310.56).This is the radius.
+                                // Now double the radius to get the diameter(Example: 621.12 meters).
+                                var radius = Math.sqrt((area)/3.14159)
+                                console.log('Searching: ', zipcode,' with radius: '+ radius + ' for area: '+zip.area + ' miles.')
+                                var coords = getLatLong(zipcode).then(function(coords) {
+                                    searchPlaces(coords, zipcode, function() {
+                                        count++;
+                                        wait(callback, 300);
+                                    })
+                                }, function(err) {
+                                    count++;
+                                    callback();
+                                });
+                            },
+                            function done(err) {
+                                if (err) {
+                                    console.log('Err: ', err);
+                                } else {
+                                    console.log('Places foraged in zipcodes.');
+                                }
+                            });
+                    },
+                    function(err) {
+                        //Log results each loop
+                        if (logMode == 'true') {
+                            var logData = '\nFor State: ' + state + ': \n  Requested: ' + requestNum + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' + '  Errors : ' + errCount + ' \n'
+                            fs.appendFile('places.log', logData, function(err) {
+                                if (err) throw err;
+                                placeCount = 0;
+                                requestNum = 0;
+                                saveCount = 0;
+                            });
+                            //Increment Radius
+                            // if (radius !== radiusMax) {
+                            //     radius += 500
+                            // } else {
+                                fs.appendFile('places.log', '******Finished*****\n', function(err) {
+                                    if (err) throw err;
+                                });
+                                return console.log('Finished Testing!')
+                            // }
+                        }
+                        console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
+                        wait(callback, 300); // Wait before looping over the zip again
                     }
-                }
-
-                console.log('Searching: ', zipCodeQuery)
-                var coords = getLatLong(zipCodeQuery).then(function(coords) {
-                    searchPlaces(coords, zipCodeQuery, function() {
-                        count++;
-                        wait(callback, 300);
-                    })
-                }, function(err) {
-                    count++;
-                    callback();
-                });
+                );
             },
             function(err) {
-                //Log results each loop
-                if (logMode == 'true') {
-                    var logData = '\nFor radius ' + radius + ' and Range: ' + zipLow + ' to ' + zipHigh + ': \n  Requested: ' + requestNum + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' + '  Errors : ' + errCount + ' \n'
-                    fs.appendFile('places.log', logData, function(err) {
-                        if (err) throw err;
-                        placeCount = 0;
-                        requestNum = 0;
-                        saveCount = 0;
-                    });
-                    //Increment Radius
-                    if (radius !== radiusMax) {
-                        radius += 500
-                    } else {
-                        fs.appendFile('places.log', '******Finished*****\n', function(err) {
-                            if (err) throw err;
-                        });
-                        return console.log('Finished Testing!')
-                    }
-                }
                 console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
                 wait(callback, 300); // Wait before looping over the zip again
             }
         );
-    },
-    function(err) {
-        console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
-        wait(callback, 300); // Wait before looping over the zip again
-    }
-);
+    }) //END OF FIND NY ZIPCODES
 
 
 //searches google places
@@ -150,7 +136,7 @@ function searchPlaces(coords, zipcode, fin) {
     //Radar search places for max 200 results and get place_ids
     radarSearch(coords[0], coords[1], zipcode).then(function(results) {
             var saveCount = 0
-            //**change this to each for faster processing but duplicate ID errors for some reason
+                //**change this to each for faster processing but duplicate ID errors for some reason
             async.eachSeries(results, function(place, done) {
                         placeCount++;
                         var newPlace = null;
@@ -231,12 +217,6 @@ function searchPlaces(coords, zipcode, fin) {
                                             var input = (place.backupinput !== undefined) ? place.backupinput :
                                                 ((place.source_google.neighborhood !== undefined) ? place.source_google.neighborhood : undefined)
 
-                                            // if (place.source_google.neighborhood !== undefined) {
-                                            //     input = place.source_google.neighborhood
-                                            //         // console.log('neighborhood')
-                                            // } else {
-
-                                            // }
                                             uniqueID(place.name, input).then(function(output) {
                                                 newPlace.id = output;
                                                 callback(null);
@@ -273,9 +253,17 @@ function searchPlaces(coords, zipcode, fin) {
                             }); //END OF ASYNC SERIES
                     },
                     function() {
-                        console.log('Finished..created ' + saveCount + ' new stores for zipcode: ', zipcode)
-                        console.log('Requested ', requestNum, ' times.');
-                        fin()
+                        db.Zipcode.update({
+                            'zipcode': zipcode
+                        }, {
+                            $set: {
+                                places: placeCount
+                            }
+                        }, function(err, results) {
+                            if (err) return console.log('err: ', err)
+                            console.log(placeCount + ' places total. Saved ' + saveCount + ' new stores for zipcode: ', zipcode)
+                            fin()
+                        })
                     }) //END OF ASYNC EACH
         },
         function(err) {
@@ -298,11 +286,6 @@ function radarSearch(lat, lng, zipcode) {
         if ((!error) && (response.statusCode == 200) && (body.results.length >= 1)) {
             requestNum++;
             console.log('Searching...found ', body.results.length, ' places for zipcode: ', zipcode)
-                // var logData = 'For radius: '+radius+', zipcode: '+zipcode+' , results: '+body.results.length+'.'
-                //     fs.appendFile('log.md', logData, function(err) {
-                //         if (err) throw err;
-                //         console.log('The "data to append" was appended to file!');
-                //     });
             deferred.resolve(body.results);
         } else {
             console.log('Radar Search request error: ', error)
@@ -418,18 +401,16 @@ function addGoogleDetails(newPlace) {
 
 function getLatLong(zipcode, callback) {
     var deferred = q.defer();
-    //Check if geozip exists in DB 
-    geozip.findOne({
-        valid: true,
+    //Check if zipcode exists in DB 
+    db.Zipcodes.findOne({
         zipcode: zipcode
     }, function(err, result) {
         if (err) console.log(err)
-        if (result && result.coords) {
-            // console.log('!!!Geozip already exists in db.')
+        if (result && result.loc.coordinates) {
             // console.log('Coordinates for zipcode: ' + zipcode + ' : ', result.coords)
-            deferred.resolve(result.coords)
+            deferred.resolve(result.loc.coordinates)
         } else {
-            console.log('querying mapbox.')
+            console.log('Querying mapbox for coordinates based on zipcode..')
             var string = 'http://api.tiles.mapbox.com/v4/geocode/mapbox.places-v1/';
             string = string + '+' + zipcode;
             string = string + '.json?access_token=pk.eyJ1IjoiaW50ZXJmYWNlZm91bmRyeSIsImEiOiItT0hjYWhFIn0.2X-suVcqtq06xxGSwygCxw';
@@ -445,35 +426,22 @@ function getLatLong(zipcode, callback) {
                                 results[0].toString();
                                 results[1].toString();
                                 console.log('Saving coords to db.')
-                                var newCoords = new geozip();
-                                newCoords.coords = results;
+                                var newCoords = new db.Zipcode();
+                                newCoords.loc.coordinates = results;
                                 newCoords.zipcode = zipcode;
-                                newCoords.valid = true;
                                 newCoords.save(function(err, saved) {
                                     if (err) console.log(err)
-                                    console.log('geozip saved!')
+                                    console.log('Zipcode saved!')
                                 })
                                 console.log('Coordinates for zipcode: ' + zipcode + ' : ', results)
                                 deferred.resolve(results)
                             }
                         } else {
-                            var errCoords = new geozip();
-                            errCoords.zipcode = zipcode;
-                            errCoords.valid = false
-                            errCoords.save(function(err, saved) {
-
-                            })
                             console.log('ERROR for ', zipcode)
                             deferred.reject()
                         }
                     } else {
-                        var errCoords = new geozip();
-                        errCoords.zipcode = zipcode;
-                        errCoords.valid = false
-                        errCoords.save(function(err, saved) {})
-                        console.log('ERROR for ', zipcode)
-                        deferred.reject()
-                        console.log('ERROR for ')
+                        console.log('ERROR in zipcode')
                         deferred.reject(error)
                     }
                 });
