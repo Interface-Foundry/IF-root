@@ -8,6 +8,9 @@ module.exports = {
   // geoipURL: 'http://web-server-charmander.kipapp.co:8080/',
   facebookAuth: {
     callbackURL: 'http://pikachu.kipapp.co/auth/facebook/callback'
+  },
+  elasticsearch: {
+    url: 'http://localhost:9200'
   }
 
   // FACEBOOK_ID:      'app-id',
