@@ -35,7 +35,7 @@ var USE_MOCK_DATA = false;
 	"text": "something tag la",
 	"colors": ['FF00FF', 'FF00FF'],
 	"categories": ['shoes'],
-	"price": 1, // or 2, 3, or 4
+	"priceRange": 1, // or 2, 3, or 4
 	"radius": .5, // miles
 	"loc": {"lat": 34, "lon": -77}
   }
@@ -43,7 +43,7 @@ var USE_MOCK_DATA = false;
  example:
  {
 	"text": "dress",
-	"price": 2,
+	"priceRange": 2,
 	"radius": 0.5,
 	"loc": {"lat": 40.7352793, "lon": -73.990638}
  }
@@ -98,8 +98,8 @@ app.post(searchItemsUrl, function (req, res, next) {
     };
 
     // if the price is specified, add a price filter
-    if (req.body.price && [1, 2, 3, 4].indexOf(req.body.price) > -1) {
-        filter.bool.must.push({term: {price: req.body.price}});
+    if (req.body.priceRange && [1, 2, 3, 4].indexOf(req.body.priceRange) > -1) {
+        filter.bool.must.push({term: {price: req.body.priceRange}});
     }
 
     // only items, not worlds
