@@ -4,7 +4,9 @@ var express = require('express'),
     router = express.Router(),
     _ = require('underscore'),
     db = require('../IF_schemas/db'),
-    upload = require('../../IF_services/upload')
+    upload = require('../../IF_services/upload'),
+    uniquer = require('../../IF_services/uniquer'),
+    async = require('async')
 
 //Get look given a look ID
 router.get('/:id', function(req, res, next) {
@@ -27,36 +29,58 @@ router.post('/', function(req, res, next) {
     var look = new db.Look();
     look = _.extend(look, req.body);
     look.owner.name = req.user.name;
-    look.owner.profileID = req.user.profileID;
     look.owner.mongoId = req.user._id;
-    upload.uploadPicture(look.owner.profileID, look.base64).then(function(imgURL) {
-        look.lookImg = imgURL;
-        look.save(function(err, look) {
-            if (err) {
-                err.niceMessage = 'Could not save look';
-                return next(err);
-            }
-            // add activity for this thing
-            var a = new db.Activity({
-                userIds: [req.user._id.toString()], //todo add ids for @user tags
-                landmarkIds: [look._id.toString()],
-                activityAction: 'look.post',
-                seenBy: [req.user._id.toString()],
-                data: {
-                    owner: req.user.getSimpleUser(),
-                    look: look.getSimpleLook()
+    look.owner.profileID = req.user.profileID;
+    async.waterfall([
+        function(callback) {
+            //Create a unique id field
+            uniquer.uniqueId(look.name, 'Looks').then(function(unique) {
+                look.id = unique;
+                callback(null, look);
+            }).catch(function(err) {
+                callback(err)
+            })
+        },
+        function(look, callback) {
+            //Upload look image to Amazon S3
+            upload.uploadPicture(look.owner.profileID, look.base64).then(function(imgURL) {
+                look.lookImg = imgURL;
+                callback(null, look);
+            }).catch(function(err) {
+                callback(err)
+            })
+        },
+        function(look, callback) {
+          //Save look in db
+            look.save(function(err, look) {
+                if (err) {
+                    err.niceMessage = 'Could not save look';
+                    return callback(err)
                 }
+                console.log('New Look created!', look)
+                callback(null, look);
             });
-            a.saveAsync().then(function() {
-                res.send(look)
-            }).catch(next);
-        });
-    }).catch(function(err) {
+        }
+    ], function(err, look) {
         if (err) {
-            err.niceMessage = 'Error uploading picture';
+            err.niceMessage = 'Error processing Look';
             return next(err);
         }
-    })
+        // add activity
+        var a = new db.Activity({
+            userIds: [req.user._id.toString()], //todo add ids for @user tags
+            landmarkIds: [look._id.toString()],
+            activityAction: 'look.post',
+            seenBy: [req.user._id.toString()],
+            data: {
+                owner: req.user.getSimpleUser(),
+                look: look.getSimpleLook()
+            }
+        });
+        a.saveAsync().then(function() {
+            res.send(look)
+        }).catch(next);
+    });
 });
 
 

@@ -13,6 +13,10 @@ var lookSchema = mongoose.Schema({
     },
     description: String,
     lookImg: String,
+    status: {
+        type: String,
+        enum: ['public', 'private']
+    },
     views: Number,
     owner: {
         mongoId: {
@@ -43,24 +47,22 @@ var lookSchema = mongoose.Schema({
         comment: String,
         reason: String
     }],
-    //--Each index in these arrays represents a snap and should be in sync--//
-    snapIds: [{
-        type: Schema.Types.ObjectId,
-        ref: 'landmarkModel'
-    }],
-    snapOwnerIds: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-    }],
-    snapURLs: [
-        [String]
-    ],
-    tags: [{
+    snaps: [{
+        mongoId: {
+            type: Schema.Types.ObjectId,
+            ref: 'landmarkModel'
+        },
+        snapOwnerId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        snapURLs: [String],
+        tags: {
             colors: [],
             categories: [],
             text: []
-        }]
-    //----------------------------------------------------------------------//
+        }
+    }]
 });
 
 // gets a simple json rep of the look for thumbnails etc
