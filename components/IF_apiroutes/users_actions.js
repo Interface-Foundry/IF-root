@@ -118,6 +118,41 @@ app.get('/:mongoId/activity/me', function(req, res, next) {
         }).catch(next);
 });
 
+app.get('/:mongoId/activity/followers', function(req, res, next) {
+    if (!req.user) {
+        return next('Must be logged in to get activity')
+    }
+    //needs testing
+    db.Users.findById(req.user._id).then(function(user) {
+        var followers = user.followers.join(' ')
+        db.Activities.find({
+                $text: {
+                    $search: followers
+                }
+            }, {
+                score: {
+                    $meta: "textScore"
+                }
+            })
+            .sort({
+                score: {
+                    $meta: 'textScore'
+                }
+            })
+            .sort({
+                activityTime: -1
+            })
+            .limit(10)
+            .execAsync()
+            .then(function(activities) {
+                res.send({
+                    results: activities,
+                    links: {}
+                });
+            }).catch(next);
+    })
+});
+
 //get all snaps for user in collage screen
 app.get('/:mongoId/snaps', function(req, res, next) {
     if (!req.user) {
