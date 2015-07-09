@@ -5,7 +5,8 @@ var express = require('express'),
     _ = require('underscore'),
     q = require('q'),
     async = require('async'),
-    AWS = require('aws-sdk')
+    AWS = require('aws-sdk'),
+    crypto = require('crypto')
 
 module.exports = {
     //Upload pictures to Amazon S3 for snaps and looks

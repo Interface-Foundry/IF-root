@@ -26,8 +26,15 @@ router.post('/', function(req, res, next) {
     if (!req.user) {
         return next('You must log in first');
     }
+    
+    // console.log('req.body',req.body)
     var look = new db.Look();
     look = _.extend(look, req.body);
+    look.owner = {
+      name: '',
+      mongoId: '',
+      profileID: ''
+    }
     look.owner.name = req.user.name;
     look.owner.mongoId = req.user._id;
     look.owner.profileID = req.user.profileID;

@@ -30,7 +30,6 @@ router.put('/:id', function(req, res, next) {
                 err.niceMessage = 'No no, item no here.';
                 return next(err);
             }
-
             if (item && req.user._id.toString() === item.owner.mongoId) { //Merge existing item with updated object from frontend
                 item = _.extend(item, req.body);
                 //Save item
