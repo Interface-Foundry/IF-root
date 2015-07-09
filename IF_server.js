@@ -140,11 +140,11 @@ app.use(morgan('dev')); // log every request to the console
 app.use(cookieParser('rachelwantstomakecakebutneedseggs')); // read cookies (needed for auth)
 
 app.use(bodyParser.urlencoded({
-    extended: true
+    extended: true, limit:'5mb'
 })); // get information from html forms
 
 app.use(bodyParser.json({
-    extended: true
+    extended: true, limit:'5mb'
 })); // get information from html forms
 
 // passport to express requires

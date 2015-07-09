@@ -7,7 +7,8 @@ var express = require('express'),
     redisClient = require('../../redis.js'),
     db = require('../IF_schemas/db'),
     upload = require('../../IF_services/upload'),
-    uniquer = require('../../IF_services/uniquer');
+    uniquer = require('../../IF_services/uniquer'),
+    async = require('async');
 
 //Create a new snap
 router.post('/', function(req, res, next) {
@@ -15,17 +16,17 @@ router.post('/', function(req, res, next) {
         return next('You must log in first');
     }
     var newItem = new db.Landmark();
-    newItem = _.extend(newitem, req.body);
+    newItem = _.extend(newItem, req.body);
     newItem.world = false;
     newItem.owner.mongoId = req.user._id;
     newItem.owner.profileID = req.user.profileID;
     newItem.owner.name = req.user.name;
     //Create a unique id field
-    uniquer.uniqueId(newItem.name, 'Landmarks').then(function(unique) {
+    uniquer.uniqueId(newItem.owner.profileID, 'Landmarks').then(function(unique) {
         newItem.id = unique;
         //Upload each image in snap to Amazon S3
         async.eachSeries(newItem.base64, function(buffer, callback) {
-            upload.uploadPicture(look.owner.profileID, buffer).then(function(imgURL) {
+            upload.uploadPicture(newItem.owner.profileID, buffer).then(function(imgURL) {
                 newItem.itemImageURL.push(imgURL)
                 callback(null)
             }).catch(function(err) {
@@ -51,8 +52,6 @@ router.post('/', function(req, res, next) {
                         err.devMessage = 'REDIS QUEUE ERR';
                         return next(err);
                     }
-                    console.log('item added to redis snaps queue', reply);
-                    console.log('created item is..', item);
                 });
                 // add activity for this thing
                 var a = new db.Activity({
@@ -65,7 +64,7 @@ router.post('/', function(req, res, next) {
                         item: item.getSimpleItem()
                     }
                 });
-                //Increment users snapCount
+                // Increment users snapCount
                 req.user.update({
                     $inc: {
                         snapCount: 1

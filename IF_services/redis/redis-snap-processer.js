@@ -1,17 +1,12 @@
 var mongoose = require('mongoose'),
-    localdb = 'mongodb://localhost:27017/if',
-    landmark = require('../../components/IF_schemas/landmark_schema.js'),
+    // localdb = 'mongodb://localhost:27017/if',
+    db = require('../../components/IF_schemas/db'),
     redis = require('redis'),
     client = redis.createClient(),
     request = require('request'),
     async = require('async'),
-    opencv = require('../ImageProcessing/OpenCVJavascriptWrapper/index.js')
-
-mongoose.connect(localdb, function(err) {
-    if (err) {
-        console.error(err);
-    }
-});
+    opencv = require('../ImageProcessing/OpenCVJavascriptWrapper/index.js'),
+    q = require('q')
 
 client.on("connect", function(err) {
     console.log("Connected to redis");
@@ -22,23 +17,17 @@ client.on("connect", function(err) {
 //and updates and saves landmark
 setInterval(function() {
     client.lrange('snaps', 0, -1, function(err, snaps) {
+        console.log(snaps.length, ' items for processing.')
         snaps.map(function(snap_str) {
-            var snap;
-            try {
-                snap = JSON.parse(snap_str);
-            } catch (e) {
-                console.error('Error JSON.parsing analytics doc' + snap_str);
-                // remove from processing queue
-                client.lrem('snaps', 1, snap_str, redis.print);
-                return;
-            }
+            var snap = snap_str.toString().trim()
             async.waterfall([
                     function(callback) {
                         //Retrieve imgURL from landmark
                         getImageUrl(snap).then(function(url) {
+                            console.log('Retrieved image URL: ', url)
                             callback(null, url)
                         }, function(err) {
-                            console.log('getImageUrl error.', err)
+                            console.log('getImageUrl error.', snap)
                             callback(err)
                         })
                     },
@@ -58,42 +47,47 @@ setInterval(function() {
                         cloudSight(url, data).then(function(tags) {
                             callback(null, tags)
                         }, function(err) {
-                            console.log('getImageUrl error.', err)
+                            console.log('cloudSight error.', err)
                             callback(err)
                         })
                     },
                     function(tags, callback) {
                         //Update and save landmark
-                        updateDB(snap, tags).then(function() {
+                        updateDB(snap, tags).then(function(snap) {
+                            console.log('Saved!', snap)
                             callback(null)
                         }, function(err) {
-                            console.log('getImageUrl error.', err)
+                            console.log('Save error.', err)
                             callback(err)
                         })
                     }
                 ],
                 //Final callback
                 function(err, results) {
-                    //Remove from redis queue
+                    console.log('Error: ', err)
+                        //Remove from redis queue
                     client.lrem('snaps', 1, snap_str, redis.print);
                 });
         });
     });
-}, 10);
+}, 4000);
 
 
 //HELPER FUNCTIONS
 function getImageUrl(landmarkID) {
     var deferred = q.defer();
-    landmark.findOne({
-        _id: landmarkID
-    }, function(err, landmark) {
+    db.Landmarks.findById(landmarkID, function(err, landmark) {
         if (err) deferred.reject(err)
-        if (landmark && landmark.source_instagram_photo.imgurl) {
-            imgurl = landmark.source_instagram_photo.imgurl
-            deferred.resolve(imgurl);
+        if (landmark) {
+            if (landmark.source_instagram_post.img_url){
+                deferred.resolve(img_url)
+            } else if (landmark.itemImageURL.length > 0){
+                //First img only for now, change later
+                deferred.resolve(landmark.itemImageURL[0])
+            }
         } else {
-            deferred.reject()
+            console.log('id: ', landmarkID, ' landmark: ', landmark)
+            deferred.reject('No imgURL found in snap')
         }
     })
     return deferred.promise;
@@ -197,7 +191,7 @@ function updateDB(landmarkID, tags) {
                 landmark.save(function(err, saved) {
                     if (err) console.log(err)
                     console.log('Updated landmark:', saved)
-                    deferred.resolve();
+                    deferred.resolve(saved);
                 })
             } else {
                 deferred.reject()
