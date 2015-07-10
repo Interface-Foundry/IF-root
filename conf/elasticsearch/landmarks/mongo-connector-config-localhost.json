@@ -1,7 +1,0 @@
-{
-  "mainAddress": "localhost:27017",
-  "docManagers": [{
-    "docManager": "elastic_doc_manager",
-    "targetURL": "localhost:9200"
-  }]
-}

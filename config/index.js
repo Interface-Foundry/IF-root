@@ -13,7 +13,15 @@ var base_config = {
   isProduction: false,
   host: os.hostname(),
   mongodb: {
-    url: 'mongodb://localhost:27017/foundry'
+    url: 'mongodb://localhost:27017/foundry',
+    options: {
+      server: {
+        poolSize: 5,
+        socketOptions: {
+          keepAlive: 1
+        }
+      }
+    }
   },
   elasticsearch: {
     url: 'http://pikachu.kipapp.co:9200'
