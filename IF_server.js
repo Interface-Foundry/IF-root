@@ -106,6 +106,11 @@ app.get('/api/healthcheck', function(req, res) {
     res.send(200);
 });
 
+// git
+if (!global.config.isProduction) {
+    app.use('/git', require('./components/IF_superuser/git'));
+}
+
 // proxy. in production, we sit behind a proxy but still want secure session cookies
 if (global.config.isProduction) {
     app.set('trust proxy', 1); // trust first proxy
