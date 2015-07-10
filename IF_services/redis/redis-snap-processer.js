@@ -43,7 +43,8 @@ var timer = new InvervalTimer(function() {
                                 })
                             },
                             function(url, data, callback) {
-                                //Process image through cloudsight
+                                console.log('reaching cloudsight', url)
+                                    //Process image through cloudsight
                                 cloudSight(url, data).then(function(tags) {
                                     console.log('cloudSight finished.', tags)
                                     callback(null, tags)
@@ -79,18 +80,6 @@ var timer = new InvervalTimer(function() {
         }) // end of client lrange, callback)
 }, 5000);
 
-
-
-
-
-
-
-
-
-
-
-
-
 //HELPER FUNCTIONS
 function getImageUrl(landmarkID) {
     var deferred = q.defer();
@@ -118,7 +107,7 @@ function cloudSight(imgURL, data) {
     if (data.items == undefined) {
         console.log('OpenCV did not segment image.')
         async.eachSeries(imgURL, function iterator(img, done) {
-            console.log('tagging images')
+            console.log('tagging images', img)
             var tags = []
             qs = {
                 'image_request[remote_image_url]': img,
@@ -148,27 +137,44 @@ function cloudSight(imgURL, data) {
     } else {
         var tags = []
         async.eachSeries(data.items, function iterator(item, done) {
-            qs = {
-                'image_request[remote_image_url]': imgURL,
-                'image_request[locale]': 'en-US',
-                'image_request[language]': 'en',
-                'focus[x]': item[0],
-                'focus[y]': item[1]
-            }
-            getTags(qs).then(function(tags) {
-                tags.concat(tags)
-                done()
-            }).catch(function(err) {
-                if (err) console.log('omg', err)
-                done()
-            })
-        }, function(err) {
-            if (err) {
-                console.log('Finished Error: ', err)
-                deferred.reject(err);
-            }
-            deferred.resolve(tags)
-        }); //End of eachseries
+                console.log('I guess its hittin this', item)
+                var coords = []
+                var length = item.length;
+                if (length / 2 >= 1) {
+                    var sets = length / 2;
+                    while (item.length) {
+                        for (var i = 0; i < sets; i++) {
+                            coords[i] = item.splice(0, 2);
+                        }
+                    }
+                }
+                console.log('coords: ', coords)
+                async.eachSeries(coords, function iterator(coord, callback) {
+                    qs = {
+                        'image_request[remote_image_url]': imgURL,
+                        'image_request[locale]': 'en-US',
+                        'image_request[language]': 'en',
+                        'focus[x]': coord[0],
+                        'focus[y]': coord[1]
+                    }
+                    getTags(qs).then(function(tags) {
+                        tags.concat(tags)
+                        callback()
+                    }).catch(function(err) {
+                        if (err) console.log('omg', err)
+                        callback()
+                    })
+                }, function(err) {
+                    done()
+                });
+            },
+            function(err) {
+                if (err) {
+                    console.log('Finished Error: ', err)
+                    deferred.reject(err);
+                }
+                deferred.resolve(tags)
+            }); //End of eachseries
     }
 
     return deferred.promise;
