@@ -12,70 +12,83 @@ client.on("connect", function(err) {
     console.log("Connected to redis");
 });
 
-var finished = false;
-setInterval(function() {
+var timer = new InvervalTimer(function() {
     client.lrange('snaps', 0, -1, function(err, snaps) {
-        if (snaps.length > 0 && !finished) {
-            finished = !finished
-            console.log('Processing...'+snaps.length + ' items for processing.')
-            async.mapSeries(snaps, function(snap_str) {
-                var snap = snap_str.toString().trim()
-                async.waterfall([
-                        function(callback) {
-                            //Retrieve imgURL from landmark
-                            getImageUrl(snap).then(function(url) {
-                                console.log('Retrieved image URL: ', url)
-                                callback(null, url)
-                            }, function(err) {
-                                console.log('getImageUrl error.', snap)
-                                callback(err)
-                            })
-                        },
-                        function(url, callback) {
-                            //OpenCV processing
-                            opencv.findItemsInImage(url, function(err, data) {
-                                if (err)
-                                    return callback(err)
-                                console.log('opencv')
-                                    //data is {items: [[xcenter,ycenter]]}
-                                callback(null, url, data)
-                            })
-                        },
-                        function(url, data, callback) {
-                            //Process image through cloudsight
-                            cloudSight(url, data).then(function(tags) {
-                                console.log('cloudSight finished.', tags)
-                                callback(null, tags)
-                            }).catch(function(err) {
-                                console.log('cloudSight error.', err)
-                                callback(err)
-                            })
-                        },
-                        function(tags, callback) {
-                            //Update and save landmark
-                            updateDB(snap, tags).then(function(snap) {
-                                console.log('Saved!', snap)
-                                callback(null)
-                            }).catch(function(err) {
-                                console.log('Save error.', err)
-                                callback(err)
-                            })
-                        }
-                    ],
-                    //snap is done processing
-                    function(err, results) {
-                        console.log('Error: ', err)
-                            //Remove from redis queue
-                        client.lrem('snaps', 1, snap_str, redis.print);
-                    });
-            }, function(err, results) {
-                //all snaps are done processing
-                finished = !finished
-                // console.log('Queue: ', client.llen())
-            });
-        }
-    }); // end of client lrange
-}, 6000);
+            console.log('Queue: ' + snaps.length)
+            if (snaps.length > 0) {
+                console.log('Pausing timer')
+                timer.pause();
+                console.log('Processing...' + snaps.length + ' items for processing.')
+                async.mapSeries(snaps, function(snap_str) {
+                    var snap = snap_str.toString().trim()
+                    async.waterfall([
+                            function(callback) {
+                                //Retrieve imgURL from landmark
+                                getImageUrl(snap).then(function(url) {
+                                    console.log('Retrieved image URL.. ')
+                                    callback(null, url)
+                                }, function(err) {
+                                    console.log('getImageUrl error.', snap)
+                                    callback(err)
+                                })
+                            },
+                            function(url, callback) {
+                                //OpenCV processing
+                                opencv.findItemsInImage(url, function(err, data) {
+                                    if (err)
+                                        return callback(err)
+                                            // console.log('opencv')
+                                            //data is {items: [[xcenter,ycenter]]}
+                                    callback(null, url, data)
+                                })
+                            },
+                            function(url, data, callback) {
+                                //Process image through cloudsight
+                                cloudSight(url, data).then(function(tags) {
+                                    console.log('cloudSight finished.', tags)
+                                    callback(null, tags)
+                                }).catch(function(err) {
+                                    console.log('cloudSight error.', err)
+                                    callback(err)
+                                })
+                            },
+                            function(tags, callback) {
+                                //Update and save landmark
+                                updateDB(snap, tags).then(function(snap) {
+                                    console.log('Saved!', snap)
+                                    callback(null)
+                                }).catch(function(err) {
+                                    console.log('Save error.', err)
+                                    callback(err)
+                                })
+                            }
+                        ],
+                        //snap is done processing
+                        function(err, results) {
+                            console.log('Error: ', err)
+                                //Remove from redis queue
+                            client.lrem('snaps', 1, snap_str);
+                            timer.resume()
+                        });
+                }, function(err, results) {
+                    //all snaps are done processing
+                    console.log('Resuming timer!')
+                    timer.resume()
+                });
+            }
+        }) // end of client lrange, callback)
+}, 5000);
+
+
+
+
+
+
+
+
+
+
+
 
 
 //HELPER FUNCTIONS
@@ -101,9 +114,11 @@ function getImageUrl(landmarkID) {
 function cloudSight(imgURL, data) {
     var deferred = q.defer();
     var qs = {}
-    //If OpenCV Image processing failed
+        //If OpenCV Image processing failed
     if (data.items == undefined) {
+        console.log('OpenCV did not segment image.')
         async.eachSeries(imgURL, function iterator(img, done) {
+            console.log('tagging images')
             var tags = []
             qs = {
                 'image_request[remote_image_url]': img,
@@ -113,18 +128,24 @@ function cloudSight(imgURL, data) {
             getTags(qs).then(function(tags) {
                 tags.concat(tags)
                 done()
+            }).catch(function(err) {
+                if (err) console.log(err)
+                done()
             })
         }, function(err) {
             if (err) {
                 console.log('Finished Error: ', err)
                 deferred.reject(err);
             }
-            console.log('Finished tagging: ', tags)
-            deferred.resolve(tags)
+            console.log('Finished looking for tags..', tags)
+            if (tags == undefined) {
+                deferred.reject('No tags found')
+            } else {
+                deferred.resolve(tags)
+            }
         }); //End of eachseries
-    //If OpenCV Image processing did not fail
+        //If OpenCV Image processing did not fail
     } else {
-        console.log('SHOULD NOT BE HITTING DIS')
         var tags = []
         async.eachSeries(data.items, function iterator(item, done) {
             qs = {
@@ -136,6 +157,9 @@ function cloudSight(imgURL, data) {
             }
             getTags(qs).then(function(tags) {
                 tags.concat(tags)
+                done()
+            }).catch(function(err) {
+                if (err) console.log('omg', err)
                 done()
             })
         }, function(err) {
@@ -159,6 +183,7 @@ function getTags(qs) {
         },
         qs: qs
     }
+    var tags = []
     request.post(options, function(err, res, body) {
             if (err) return deferred.reject(err)
             try {
@@ -175,7 +200,7 @@ function getTags(qs) {
             var tries = 0;
             async.whilst(
                 function() {
-                    return (results.status == 'not completed' && tries < 7);
+                    return (results.status == 'not completed' && tries < 5);
                 },
                 function(callback) {
                     var options = {
@@ -202,17 +227,24 @@ function getTags(qs) {
                                 //TODO: Filter out common words
                             var uncommonArray = getUncommon(body.name)
                             tags.push(uncommonArray);
-                            return deferred.resolve(tags)
                         } //END OF BODY.STATUS COMPLETED
                     })
                     tries++;
-                    console.log(tries + "/7 tries.")
-                    setTimeout(callback, 5000);
+                    console.log(tries + "/5 tries.")
+                    setTimeout(callback, 3000);
                 },
                 function(err) {
-                    if (err) return deferred.reject(err)
-                    
+                    if (err) {
+                        return deferred.reject(err)
+                    }
+                    // console.log('Exited async whilst, tags: ', tags)
+                    if (tags.length > 0) {
+                        deferred.resolve(tags)
+                    } else {
+                        deferred.reject('no tags found')
+                    }
                 }); //END OF ASYNC WHILST
+
         }) //END OF CLOUDSIGHT REQUEST
     return deferred.promise
 }
@@ -220,7 +252,7 @@ function getTags(qs) {
 function updateDB(landmarkID, tags) {
         // tags is ['man','red','striped','sweater']
         var deferred = q.defer();
-        landmark.findOne({
+        db.Landmarks.findOne({
             _id: landmarkID
         }, function(err, landmark) {
             if (err) deferred.reject(err)
@@ -265,4 +297,38 @@ function getUncommon(sentence, common) {
         }
     }
     return uncommonArr;
+}
+
+function InvervalTimer(callback, interval) {
+    var timerId, startTime, remaining = 0;
+    var state = 0; //  0 = idle, 1 = running, 2 = paused, 3= resumed
+
+    this.pause = function() {
+        if (state != 1) return;
+
+        remaining = interval - (new Date() - startTime);
+        clearInterval(timerId);
+        state = 2;
+    };
+
+    this.resume = function() {
+        if (state != 2) return;
+
+        state = 3;
+        setTimeout(this.timeoutCallback, remaining);
+    };
+
+    this.timeoutCallback = function() {
+        if (state != 3) return;
+
+        callback();
+
+        startTime = new Date();
+        timerId = setInterval(callback, interval);
+        state = 1;
+    };
+
+    startTime = new Date();
+    timerId = setInterval(callback, interval);
+    state = 1;
 }
