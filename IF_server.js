@@ -106,6 +106,11 @@ app.get('/api/healthcheck', function(req, res) {
     res.send(200);
 });
 
+// proxy. in production, we sit behind a proxy but still want secure session cookies
+if (global.config.isProduction) {
+    app.set('trust proxy', 1); // trust first proxy
+}
+
 //express compression
 var oneDay = 86400000;
 var compression = require('compression');
@@ -163,6 +168,10 @@ app.use(session({
         client: redisClient
     }),
     secret: 'rachelwantstomakecakebutneedseggs',
+    cookie: {
+        maxAge: 10*365*24*60*60*1000,
+        secure: global.config.isProduction
+    },
     resave: true,
     saveUninitialized: true
 }));
