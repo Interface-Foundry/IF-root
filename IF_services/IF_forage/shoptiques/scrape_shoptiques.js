@@ -1,16 +1,11 @@
 var db = require('../../../components/IF_schemas/db');
 var redisClient = require('./redis');
-var cheerio = require('cheerio');
 var request = require('request');
 var Promise = require('bluebird');
 var scrapeItem = require('./scrape_item');
 var getAddressInfo = require('../getAddressInfo');
+var _ = require('lodash');
 
-
-var status = {
-    SUCCESS: '0',
-    FAILURE: '1'
-};
 
 /**
  * scraping shoptique - processing the queue
@@ -25,101 +20,104 @@ var status = {
  *
  */
 
-var minSecondsBetweenScrape = 10;
-var maxSecondsBetweenScrape = 100;
+redisClient.lpop('items-toprocess', function (e, url) {
+    if (typeof url === 'undefined') {
+        return;
+    }
+    console.log('URL:', url);
 
+    // first check if this has been processed yet.
+    db.Landmarks.findOne({'source_shoptique_item.url': url}, function (e, r) {
+        if (r !== null) {
+            // don't process
+            console.log(url, 'has already been processsed');
+            return;
+        }
 
-// Scrape items
-// one page every two seconds
-setInterval(function() {
-    redisClient.lpop('items-toprocess', function(e,url) {
-        console.log('URL:', url);
+        console.log('scraping shoptiques item', url);
+        scrapeItem(url).then(function (res) {
+            console.log('done scraping shoptiques item', url);
+            // Insert the store if necessary
+            var boutique = res.boutique;
 
-        // first check if this has been processed yet.
-        redisClient.get(url, function(e, r) {
-            if (r !== null) {
-                // don't process
-                console.log(url, 'has already been processsed');
-                return;
-            }
-
-            console.log('scraping shoptiques');
-            scrapeItem(url).then(function (res) {
-                console.log('done scraping shoptiques');
-                // Insert the store if necessary
-                var boutique = res.boutique;
-
-                // first check if we've inserted this shoptique info yet
-                db.Landmarks.findOne({'source_shoptique_store.id': boutique.id}).execAsync()
-                    .then(function (store) {
-                        // only adding in the shoptiques stores now, not matching thems to
-                        // stores we already have in the DB from google/users.
-                        // Can match and merge later with http://blog.yhathq.com/posts/fuzzy-matching-with-yhat.html
-                        if (!store) {
-                            console.log('creating new record in the db');
-                            console.log('fecthing loc data for', boutique.addressText);
-                            return getAddressInfo(boutique.addressText).then(function (addr) {
-                                console.log(addr);
-                                store = new db.Landmarks({
-                                    source_shoptique_store: boutique,
-                                    name: boutique.name,
-                                    id: boutique.name.replace(/[^\w]+/g, '').toLowerCase() + boutique.id,
-                                    world: true,
-                                    valid: true
-                                });
-                                if (addr) {
-                                    store.loc = {
-                                        type: 'Point',
-                                        coordinates: [addr.geometry.location.lng, addr.geometry.location.lat]
-                                    };
-                                }
-                                return store.save();
+            // first check if we've inserted this shoptique info yet
+            db.Landmarks.findOne({'source_shoptique_store.id': boutique.id}).execAsync()
+                .then(function (store) {
+                    // only adding in the shoptiques stores now, not matching thems to
+                    // stores we already have in the DB from google/users.
+                    // Can match and merge later with http://blog.yhathq.com/posts/fuzzy-matching-with-yhat.html
+                    if (!store) {
+                        console.log('creating new record in the db');
+                        console.log('fecthing loc data for', boutique.addressText);
+                        return getAddressInfo(boutique.addressText).then(function (addr) {
+                            console.log(addr);
+                            store = new db.Landmarks({
+                                source_shoptique_store: boutique,
+                                name: boutique.name,
+                                id: boutique.name.replace(/[^\w]+/g, '').toLowerCase() + boutique.id,
+                                world: true,
+                                valid: true
                             });
-                        } else {
-                            return store;
-                        }
-                    }).then(function (store) {
-                        console.log('using store', store.name, store.id, store._id.toString());
-                        // add any new items to the db
-                        var itemPromises = res.items.map(function (i) {
-                            var item = new db.Landmark({
-                                source_shoptique_item: i,
-                                name: i.name,
-                                id: i.id + '.' + i.colorId,
-                                parent: {
-                                    mongoId: store._id.toString(),
-                                    name: store.name,
-                                    id: store.id
-                                },
-                                loc: store.get('loc'),
-                                description: i.description,
-                                itemTags: {
-                                    text: i.categories.concat([i.colorName]),
-                                    categories: i.categories
-                                },
-                                itemImageURL: i.images
-                            });
-                            console.log('saving item', item);
-                            return item.save();
-                        });
-
-                        return Promise.all(itemPromises);
-                    }).then(function () {
-                        console.log('processed item', url);
-                        redisClient.set(url, '0', function (e, r) {
-                            if (e) {
-                                console.error(e);
+                            if (addr) {
+                                store.loc = {
+                                    type: 'Point',
+                                    coordinates: [addr.geometry.location.lng, addr.geometry.location.lat]
+                                };
                             }
+                            return store.save();
                         });
-                    }).catch(function (err) {
-                        console.error(err);
-                        redisClient.set(url, err, function (e, r) {
-                            if (e) {
-                                console.error(e);
-                            }
+                    } else {
+                        return store;
+                    }
+                }).then(function (store) {
+                    console.log('using store', store.name, store.id, store._id.toString());
+                    // add any new items to the db
+                    var itemPromises = res.items.map(function (i) {
+                        var item = new db.Landmark({
+                            source_shoptique_item: i,
+                            world: false,
+                            name: i.name,
+                            id: i.id + '.' + i.colorId,
+                            price: i.price,
+                            priceRange: db.Landmark.priceToPriceRange(i.price),
+                            parent: {
+                                mongoId: store._id.toString(),
+                                name: store.name,
+                                id: store.id
+                            },
+                            loc: store.get('loc'),
+                            description: i.description,
+                            itemTags: {
+                                text: i.categories.concat([i.colorName]),
+                                categories: i.categories
+                            },
+                            itemImageURL: i.images
                         });
+                        console.log('saving item', item);
+                        return item.save();
                     });
-            }).catch(console.error.bind(console));
-        });
+
+                    return Promise.all(itemPromises);
+                }).then(function () {
+                    return db.Landmarks.find({'source_shoptique_item.url': {$in: res.items[0].related}})
+                        .select('source_shoptique_item.url').exec()
+                        .then(function(lm) {
+                            lm = lm.map(function(l) { return l.source_shoptique_item.url});
+                            _.difference(res.related, lm).map(function(itemUrl) {
+                                redisClient.rpush('items-toprocess', itemUrl, function (err, reply) {
+                                    if (err) {
+                                        return console.error(err);
+                                    }
+                                    console.log('added item', itemUrl, 'to redis processing queue');
+                                });
+                            })
+                        })
+                }).then(function () {
+                    console.log('processed item', url);
+                }).catch(function (err) {
+                    console.error('error with item', url);
+                    console.error(err);
+                });
+        }).catch(console.error.bind(console));
     });
-}, 2*1000);
+});
