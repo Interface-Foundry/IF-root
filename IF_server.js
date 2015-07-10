@@ -83,9 +83,7 @@ var mongoose = require('mongoose'),
 var env = process.env.NODE_ENV || 'development';
 console.log("running in $env mode".replace('$env', env));
 
-mongoose.connect(global.config.mongodb.url);
-var db_mongoose = mongoose.connection;
-db_mongoose.on('error', console.error.bind(console, 'connection error:'));
+var db = require('db');
 //---------------//
 
 http.globalAgent.maxSockets = 100;
@@ -100,10 +98,8 @@ var socket = require('./components/IF_chat/socket.js');
 //===== EXPRESS INIT =====//
 
 var express = require('express'),
-    app = module.exports.app = express(),
-    // cors = require('cors'),
-    //db = require('mongojs').connect('if'); //THIS IS TEMPORARY!!!! remove once all mongojs queries changed to mongoose
-    db = db_mongoose; // TODO refactor this... i don't really know where it came from
+    app = module.exports.app = express()
+    // cors = require('cors')
 
 // add in health check before sessions
 app.get('/api/healthcheck', function(req, res) {
@@ -1947,7 +1943,7 @@ app.post('/api/user/emailUpdate', isLoggedIn, function(req, res) {
 
     var newEmail = sanitize(req.body.updatedEmail);
     if (validateEmail(newEmail)) {
-        db.collection('users').findOne({
+        db.Users.findOne({
             'local.email': newEmail
         }, function(err, data) {
             if (data) {
@@ -1976,7 +1972,7 @@ function uniqueProfileID(input, callback) {
 
     var uniqueIDer = urlify(input);
     urlify(uniqueIDer, function() {
-        db.collection('users').findOne({
+        db.Users.findOne({
             'profileID': uniqueIDer
         }, function(err, data) {
             if (data) {
@@ -1987,7 +1983,7 @@ function uniqueProfileID(input, callback) {
                         var uniqueNum_string = uniqueNumber.toString();
                         newUnique = data.profileID + uniqueNum_string;
 
-                        db.collection('users').findOne({
+                        db.Users.findOne({
                             'profileID': newUnique
                         }, function(err, data) {
 
@@ -2178,7 +2174,7 @@ app.get('/api/:collection', function(req, res) {
                     $options: 'i'
                 }
             };
-            db.collection('landmarks').find(qw).sort({
+            db.Landmarks.find(qw).sort({
                 _id: -1
             }).toArray(addSearch(req, res));
             //searchResults.push(search);
@@ -2393,7 +2389,7 @@ app.get('/api/stickers/:id', function(req, res) {
 app.get('/api/worlds/:id', function(req, res) {
 
     if (req.query.m == "true") {
-        db.collection('landmarks').findOne({
+        db.Landmarks.findOne({
             _id: objectId(req.params.id),
             world: true
         }, function(err, data) {
@@ -2412,7 +2408,7 @@ app.get('/api/worlds/:id', function(req, res) {
     else {
         console.log('ID', req.params.id)
         console.log('LOWERCASE', req.params.id.toLowerCase())
-        db.collection('landmarks').findOne({
+        db.Landmarks.findOne({
             id: req.params.id.toLowerCase(),
             world: true
         }, function(err, data) {
@@ -2866,7 +2862,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
             input = input.toLowerCase();
             var uniqueIDer = urlify(input);
             urlify(uniqueIDer, function() {
-                db.collection('landmarks').findOne({
+                db.Landmarks.findOne({
                     'id': uniqueIDer,
                     'world': worldVal
                 }, function(err, data) {
@@ -2878,7 +2874,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
                                 var uniqueNum_string = uniqueNumber.toString();
                                 newUnique = data.id + uniqueNum_string;
 
-                                db.collection('landmarks').findOne({
+                                db.Landmarks.findOne({
                                     'id': newUnique,
                                     'world': worldVal
                                 }, function(err, data) {
@@ -3661,14 +3657,6 @@ app.put('/api/:collection/mapReduce', function(req, res) {
     };
     req.body.options.verbose = false;
     db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));
-})
-
-// Command (count, distinct, find, aggregate)
-app.put('/api/:collection/:cmd', function(req, res) {
-    if (req.params.cmd === 'distinct') {
-        req.body = req.body.key
-    }
-    db.collection(req.params.collection)[req.params.cmd](req.body, fn(req, res));
 })
 
 
