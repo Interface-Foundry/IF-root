@@ -75,6 +75,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
                     var itemPromises = res.items.map(function (i) {
                         var item = new db.Landmark({
                             source_shoptique_item: i,
+                            world: false,
                             name: i.name,
                             id: i.id + '.' + i.colorId,
                             price: i.price,
@@ -98,7 +99,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
 
                     return Promise.all(itemPromises);
                 }).then(function () {
-                    return db.Landmarks.find({'source_shoptique_item.url': {$in: res.related}})
+                    return db.Landmarks.find({'source_shoptique_item.url': {$in: res.items[0].related}})
                         .select('source_shoptique_item.url').exec()
                         .then(function(lm) {
                             lm = lm.map(function(l) { return l.source_shoptique_item.url});

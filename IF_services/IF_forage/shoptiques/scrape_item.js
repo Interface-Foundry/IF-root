@@ -21,7 +21,7 @@ var scrape = module.exports = function(url){
             // boutique`
             boutique.source = "shoptique";  // in case we have to hide all these some day in one big batch
             boutique.name = $('div.boutique-introduction a').text();
-            boutique.url = $('div.boutique-introduction a').attr('href');
+            boutique.url = 'http://www.shoptiques.com' + $('div.boutique-introduction a').attr('href');
             boutique.neighborhood = $('div.boutique-neighborhood').text();
             boutique.addressText = $('div.address').text();
             boutique.city = $('div.address').attr('data-city');
@@ -50,6 +50,8 @@ var scrape = module.exports = function(url){
             item.brand = $('span[itemprop="brand"]').text();
             item.categories = $('ul.shoptiques-breadcrumb li').toArray().map(function(l) { return $(l).text()});
             item.url = url;
+            item.related = $('div.complete-look a.img[href*="/products/"]').toArray().map(function(w){return 'http://www.shoptiques.com' + $(w).attr('href')});
+
 
             // make one item per color
             var colors = $('#product-detail .colors a');
@@ -65,14 +67,9 @@ var scrape = module.exports = function(url){
                 });
                 return i;
             });
-
-            // related stuff
-            var related = $('div.complete-look a.img[href*="/products/"]').toArray().map(function(w){return $(w).attr('href')});
-
             resolve({
                 items: items,
-                boutique: boutique,
-                related: related
+                boutique: boutique
             });
         }
 
