@@ -2,6 +2,7 @@ var cheerio = require('cheerio');
 var request = require('request');
 var Promise = require('bluebird');
 var deepcopy = require('deepcopy');
+var fs = require('fs');
 
 /**
  * This file scrapes the data from a specific shoptique item url
@@ -12,7 +13,7 @@ var deepcopy = require('deepcopy');
  */
 var scrape = module.exports = function(url){
     return new Promise(function(resolve, reject) {
-        request.get(url, function(e, r, b) {
+        function scrapeBody(b) {
             var $ = cheerio.load(b);
             var item = {};
             var boutique = {};
@@ -20,7 +21,7 @@ var scrape = module.exports = function(url){
             // boutique`
             boutique.source = "shoptique";  // in case we have to hide all these some day in one big batch
             boutique.name = $('div.boutique-introduction a').text();
-            boutique.url = url;
+            boutique.url = $('div.boutique-introduction a').attr('href');
             boutique.neighborhood = $('div.boutique-neighborhood').text();
             boutique.addressText = $('div.address').text();
             boutique.city = $('div.address').attr('data-city');
@@ -28,8 +29,14 @@ var scrape = module.exports = function(url){
             boutique.description = $('div.boutique-introduction div.description').text();
             boutique.image = $('div.product-boutique div.top-left-image img').attr('data-src');
             boutique.followersCount = $('div.followers').text();
-            boutique.idString = $('div.followers').attr('id').replace('follower_count_', '');
-            boutique.id = parseInt(boutique.idString);
+            var followerIdHack = $('div.followers').attr('id');
+            if (followerIdHack) {
+                boutique.idString = followerIdHack.replace('follower_count_', '');
+                boutique.id = parseInt(boutique.idString);
+            } else {
+                boutique.idString = 'shoptique_' + url.split('/').pop();
+                boutique.id = Math.random()*100000000|0;
+            }
 
             // item
             item.source = "shoptique";
@@ -42,6 +49,7 @@ var scrape = module.exports = function(url){
             item.description = $('p[itemprop="description"]').parent().text();
             item.brand = $('span[itemprop="brand"]').text();
             item.categories = $('ul.shoptiques-breadcrumb li').toArray().map(function(l) { return $(l).text()});
+            item.url = url;
 
             // make one item per color
             var colors = $('#product-detail .colors a');
@@ -58,12 +66,33 @@ var scrape = module.exports = function(url){
                 return i;
             });
 
+            // related stuff
+            var related = $('div.complete-look a.img[href*="/products/"]').toArray().map(function(w){return $(w).attr('href')});
+
             resolve({
                 items: items,
-                boutique: boutique
+                boutique: boutique,
+                related: related
             });
+        }
 
-        });
+        var filename = __dirname + url.replace(/.*shoptiques.com\//, '/');
+        if (fs.existsSync(filename)) {
+            fs.readFile(filename, {encoding: 'utf8'}, function(err, data) {
+                debugger;
+                if (err) { return console.error(err); }
+                scrapeBody(data);
+            });
+        } else {
+            request(url, function(e, r, b) {
+                debugger;
+                fs.writeFile(filename, b, {encoding: 'utf8'}, function(err) {
+                    if (err) { return console.error(err); }
+                    console.log('saved', filename);
+                });
+                scrapeBody(b);
+            });
+        }
     });
 };
 

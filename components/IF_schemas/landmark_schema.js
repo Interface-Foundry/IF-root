@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 //textSearch = require('mongoose-text-search');
 monguurl = require('monguurl');
+var accounting = require('accounting');
 
 //schema construction
 var Schema = mongoose.Schema,
@@ -376,4 +377,28 @@ landmarkSchema.index({
 });
 
 
-module.exports = mongoose.model('landmarkModel', landmarkSchema, 'landmarks');
+var Landmark = module.exports = mongoose.model('landmarkModel', landmarkSchema, 'landmarks');
+
+/**
+ * Returns the number of dollar signs indicating the expensiveness of a price.
+ * example 69.99 returns 2
+ * @param p
+ * @returns {number}
+ */
+Landmark.priceToPriceRange = function(p) {
+    if (typeof p === 'undefined') {
+        return p;
+    } else if (typeof p === 'string') {
+        p = accounting.unformat(p);
+    }
+
+    if (p < 50) {
+        return 1;
+    } else if (p < 100) {
+        return 2;
+    } else if (p < 200) {
+        return 3;
+    } else {
+        return 4;
+    }
+};

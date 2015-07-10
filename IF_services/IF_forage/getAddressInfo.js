@@ -14,3 +14,16 @@ var getAddressInfo = module.exports = function(address) {
         }
     });
 };
+
+//var getAddressInfo = module.exports = function(loc) {
+//    var latlng = loc.lat + ',' + loc.lon;
+//    var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$LATLNG&key=$KEY'
+//        .replace('$KEY', googleAPI)
+//        .replace('$LATLNG', latlng);
+//    return request.get(url).then(function(res) {
+//        res = JSON.parse(res);
+//        if (res.results.length >= 1) {
+//            return res.results[0];
+//        }
+//    });
+//};
