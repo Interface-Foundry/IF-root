@@ -13,6 +13,7 @@ var lookSchema = mongoose.Schema({
     },
     description: String,
     lookImg: String,
+    tags: [String],
     status: {
         type: String,
         enum: ['public', 'private']
@@ -56,7 +57,7 @@ var lookSchema = mongoose.Schema({
             type: Schema.Types.ObjectId,
             ref: 'User'
         },
-        snapURLs: [String],
+        snapURLs: String,
         tags: {
             colors: [],
             categories: [],

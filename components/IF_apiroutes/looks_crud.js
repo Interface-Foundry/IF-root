@@ -38,10 +38,12 @@ router.post('/', function(req, res, next) {
     look.owner.name = req.user.name;
     look.owner.mongoId = req.user._id;
     look.owner.profileID = req.user.profileID;
+    var input = look.name ? look.name : Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+
     async.waterfall([
         function(callback) {
             //Create a unique id field
-            uniquer.uniqueId(look.name, 'Looks').then(function(unique) {
+            uniquer.uniqueId(input, 'Looks').then(function(unique) {
                 look.id = unique;
                 callback(null, look);
             }).catch(function(err) {
