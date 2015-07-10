@@ -23,9 +23,9 @@ router.get('/:id', function(req, res, next) {
 
 //Create a new look
 router.post('/', function(req, res, next) {
-    if (!req.user) {
-        return next('You must log in first');
-    }
+    // if (!req.user) {
+    //     return next('You must log in first');
+    // }
     
     // console.log('req.body',req.body)
     var look = new db.Look();
@@ -38,7 +38,7 @@ router.post('/', function(req, res, next) {
     look.owner.name = req.user.name;
     look.owner.mongoId = req.user._id;
     look.owner.profileID = req.user.profileID;
-    var input = look.name ? look.name : Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+    var input = req.user.profileID
 
     async.waterfall([
         function(callback) {

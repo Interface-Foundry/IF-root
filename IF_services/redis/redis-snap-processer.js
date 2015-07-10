@@ -211,7 +211,7 @@ function getTags(qs) {
                 },
                 function(err) {
                     if (err) return deferred.reject(err)
-                    console.log('Finished tagging...')
+                    
                 }); //END OF ASYNC WHILST
         }) //END OF CLOUDSIGHT REQUEST
     return deferred.promise

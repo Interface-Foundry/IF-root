@@ -859,11 +859,8 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                         //AUTO-REORIENT
                         im.convert([tempPath, '-auto-orient', '-quality', '0.8', '-format', '%[exif:orientation]', tempPath], function(err, stdout, stderr) {
                                 if (err) console.log(err)
-
                                 fs.readFile(tempPath, function(err, fileData) {
-
                                     var s3 = new AWS.S3();
-
                                     s3.putObject({
                                         Bucket: 'if-server-avatar-images',
                                         Key: awsKey,
@@ -873,9 +870,7 @@ app.post('/api/upload', isLoggedIn, function(req, res) {
                                         if (err) {
                                             console.log(err);
                                         } else {
-
                                             res.write("https://s3.amazonaws.com/if-server-avatar-images/" + awsKey);
-
                                             res.end();
                                             fs.unlink(tempPath);
                                         }
