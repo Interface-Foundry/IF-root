@@ -1,5 +1,5 @@
 var mongoose = require('mongoose'),
-    // localdb = 'mongodb://localhost:27017/if',
+    _ = require('underscore'),
     db = require('../../components/IF_schemas/db'),
     redis = require('redis'),
     client = redis.createClient(),
@@ -7,8 +7,8 @@ var mongoose = require('mongoose'),
     async = require('async'),
     opencv = require('../ImageProcessing/OpenCVJavascriptWrapper/index.js'),
     q = require('q'),
-    //TODO: This list may need some modifying
-    common = "the,it,is,a,an,and,by,to,he,she,they,we,i,are,to,for,of";
+    //TODO: These lists may need to be improved
+    common = "the,it,is,a,an,and,by,to,he,she,they,we,i,are,to,for,of,with"
 
 client.on("connect", function(err) {
     console.log("Connected to redis");
@@ -109,11 +109,10 @@ function cloudSight(imgURL, data) {
     var qs = {};
     var results = []
         //----If OpenCV Image processing does not return coordinates----//
-    if (data.items == undefined) {
+    if (data.items == undefined || data.items == null || (data.items.length == 1 && data.items.coords == null) ) {
         console.log('OpenCV did not find coordinates.')
         async.eachSeries(imgURL, function iterator(img, done) {
-            console.log('tagging images', img)
-
+            console.log('tagging image:', img)
             qs = {
                 'image_request[remote_image_url]': img,
                 'image_request[locale]': 'en-US',
@@ -140,14 +139,15 @@ function cloudSight(imgURL, data) {
         }); //End of eachseries
         //----If OpenCV Image processing did not fail----//
     } else {
-        console.log('OpenCV successfully returned focus coordinates.')
+        console.log('OpenCV successfully returned focus coordinates.',data.items)
             //---For each image
         async.eachSeries(imgURL, function iterator(img, finishedImage) {
                 var failCount = 0;
                 //---For each set of coordinates
                 async.eachSeries(data.items, function iterator(item, finishedCoord) {
                             var lastIndex = item.coords.length
-                            console.log(lastIndex + ' focal points found for current image.')
+                            console.log(lastIndex + ' focal points found for current image.',item.coords)
+
                                 //---For each request to cloudsight
                             async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
                                 qs = {
@@ -162,7 +162,7 @@ function cloudSight(imgURL, data) {
                                     finishedRequest()
                                 }).catch(function(err) {
                                     if (err) {
-                                        console.log('Line 174 Error: ', err)
+                                        console.log('Error: ', err)
                                         failCount++
                                         if (failCount == item.coords.length) {
                                             console.log('No tags found in any of the focus points!')
@@ -177,16 +177,15 @@ function cloudSight(imgURL, data) {
                                 })
                             }, function(err) {
                                 if (err) {
-                                    console.log('Line 174 Error: ', err)
+                                    console.log('Error: ', err)
                                     return finishedCoord(err)
                                 }
                                 finishedCoord()
                             });
-
                         },
                         function(err) {
                             if (err) {
-                                console.log('Line 178 Error: ', err)
+                                console.log('Error: ', err)
                                 return finishedImage(err)
                             }
                             finishedImage()
@@ -195,7 +194,7 @@ function cloudSight(imgURL, data) {
                 if (err) {
                     return deferred.reject(err)
                 }
-                console.log('LINE 199! tags:', results)
+                // console.log('LINE 199! tags:', results)
                 deferred.resolve(results)
             }) //End: Eachseries images
     } //end of else
@@ -250,6 +249,9 @@ function getTags(qs) {
                             return deferred.reject(e)
                         }
                         body = body_parsed;
+                        if (body.status == 'skipped') {
+                            return deferred.reject(body.status)
+                        }
                         if (body.status == 'completed') {
                             results.status = 'completed';
                             description = body.name;
@@ -281,6 +283,14 @@ function getTags(qs) {
 
 function updateDB(landmarkID, tags) {
     // tags is ['man','red','striped','sweater']
+    // or [['womens','blue'],['jacket','mens']]
+    if (Object.prototype.toString.call(tags[0]) === '[object Array]') {
+        tags = _.flatten(tags);
+    }
+    var colors = colorHex(tags);
+    tags = _.difference(tags, colors);
+    tags = eliminateDuplicates(tags);
+    colors = eliminateDuplicates(colors)
     var deferred = q.defer();
     db.Landmarks.findOne({
         _id: landmarkID
@@ -288,12 +298,14 @@ function updateDB(landmarkID, tags) {
         if (err) deferred.reject(err)
         if (landmark) {
             tags.forEach(function(tag) {
-                //TODO: MIGHT UPDATE THIS SINCE LANDMARKSCHEMA TAGS PROPERTY WILL CHANGE
                 landmark.itemTags.text.push(tag)
+            })
+            colors.forEach(function(color) {
+                landmark.itemTags.colors.push(color)
             })
             landmark.save(function(err, saved) {
                 if (err) console.log(err)
-                    // console.log('Updated landmark:', saved)
+                    //console.log('Updated landmark:', saved)
                 deferred.resolve(saved);
             })
         } else {
@@ -329,6 +341,48 @@ function parseTags(sentence, common) {
         }
     }
     return uncommonArr;
+}
+
+function colorHex(tags) {
+    var hexCodes = [{
+        'red':'#ea0000'
+    }, {
+        'orange': '#f7a71c'
+    }, {
+        'yellow': '#fcda1f'
+    }, {
+        'green': '#89c90d'
+    }, {
+        'aqua': '#7ce9ed'
+    }, {
+        'blue': '#00429c'
+    }, {
+        'purple': '#751ed7'
+    }, {
+        'pink': '#f75dc4'
+    }, {
+        'white': '#ffffff'
+    }, {
+        'grey': '#999999'
+    }, {
+        'black': '#000000'
+    }, {
+        'brown': '#663300'
+    }]
+    var colors = []
+    hexCodes.forEach(function(hash) {
+        for (var key in hash) {
+            if (hash.hasOwnProperty(key)) {
+                tags.forEach(function(tag) {
+                    // console.log('******Tag:'+tag+' key:'+key)
+                    if (key.trim() == tag.trim()) {
+                        colors.push(tag);
+                    }
+                })
+            }
+        }
+    })
+    return colors
 }
 
 function eliminateDuplicates(arr) {

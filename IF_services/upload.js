@@ -16,9 +16,11 @@ module.exports = {
         var stuff_to_hash = profileID + (new Date().toString());
         var object_key = crypto.createHash('md5').update(stuff_to_hash).digest('hex');
         var fileType = base64.split(';')[0].split('/')[1];
-        var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
+        // var date_in_path = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
         var current = object_key + "." + fileType;
-        var awsKey = date_in_path + current;
+        var awsKey = 
+        // date_in_path + 
+        current;
         var s3 = new AWS.S3();
         s3.putObject({
             Bucket: 'if-server-general-images',
