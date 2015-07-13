@@ -12,15 +12,15 @@ var express = require('express'),
 
 //Create a new snap
 router.post('/', function(req, res, next) {
-    // if (!req.user) {
-    //     return next('You must log in first');
-    // }
+    if (!req.user) {
+        return next('You must log in first');
+    }
     var newItem = new db.Landmark();
     newItem = _.extend(newItem, req.body);
     newItem.world = false;
-    newItem.owner.mongoId = req.body.user._id;
-    newItem.owner.profileID = req.body.user.profileID;
-    newItem.owner.name = req.body.user.name;
+    newItem.owner.mongoId = req.user._id;
+    newItem.owner.profileID = req.user.profileID;
+    newItem.owner.name = req.user.name;
     //Create a unique id field
     uniquer.uniqueId(newItem.owner.profileID, 'Landmarks').then(function(unique) {
         newItem.id = unique;
@@ -55,30 +55,30 @@ router.post('/', function(req, res, next) {
                     }
                 });
                 // add activity for this thing
-                // var a = new db.Activity({
-                //     userIds: [req.user._id.toString()], //todo add ids for @user tags
-                //     landmarkIds: [item._id.toString()],
-                //     activityAction: 'item.post',
-                //     seenBy: [req.user._id.toString()],
-                //     data: {
-                //         owner: req.user.getSimpleUser(),
-                //         item: item.getSimpleItem()
-                //     }
-                // });
+                var a = new db.Activity({
+                    userIds: [req.user._id.toString()], //todo add ids for @user tags
+                    landmarkIds: [item._id.toString()],
+                    activityAction: 'item.post',
+                    seenBy: [req.user._id.toString()],
+                    data: {
+                        owner: req.user.getSimpleUser(),
+                        item: item.getSimpleItem()
+                    }
+                });
                 // Increment users snapCount
-                // req.user.update({
-                //     $inc: {
-                //         snapCount: 1
-                //     }
-                // }, function(err) {
-                //     if (err) {
-                //         err.niceMessage = 'Could not increment users snapCount';
-                //         console.log(err)
-                //     }
-                // })
-                // a.saveAsync().then(function() {
-                //     res.send(item)
-                // }).catch(next);
+                req.user.update({
+                    $inc: {
+                        snapCount: 1
+                    }
+                }, function(err) {
+                    if (err) {
+                        err.niceMessage = 'Could not increment users snapCount';
+                        console.log(err)
+                    }
+                })
+                a.saveAsync().then(function() {
+                    res.send(item)
+                }).catch(next);
             });
         })
     }).catch(function(err) {

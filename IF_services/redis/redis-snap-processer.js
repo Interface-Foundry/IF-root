@@ -25,7 +25,7 @@ var timer = new InvervalTimer(function() {
                             function(callback) {
                                 //Retrieve imgURL from landmark
                                 getImageUrl(snap).then(function(url) {
-                                    console.log('Retrieved image URL.. ')
+                                    console.log('Retrieved image URL array..',url)
                                     callback(null, url)
                                 }, function(err) {
                                     console.log('getImageUrl error.', snap)
@@ -39,6 +39,7 @@ var timer = new InvervalTimer(function() {
                                         return callback(err)
                                             // console.log('opencv')
                                             //data is {items: [[xcenter,ycenter]]}
+                                    console.log('data: ',data)
                                     callback(null, url, data)
                                 })
                             },
@@ -103,9 +104,9 @@ function getImageUrl(landmarkID) {
 function cloudSight(imgURL, data) {
     var deferred = q.defer();
     var qs = {}
-        //If OpenCV Image processing failed
+        //----If OpenCV Image processing does not return coordinates----//
     if (data.items == undefined) {
-        console.log('OpenCV did not segment image.')
+        console.log('OpenCV did not find coordinates.')
         async.eachSeries(imgURL, function iterator(img, done) {
             console.log('tagging images', img)
             var tags = []
@@ -133,48 +134,63 @@ function cloudSight(imgURL, data) {
                 deferred.resolve(tags)
             }
         }); //End of eachseries
-        //If OpenCV Image processing did not fail
+        //----If OpenCV Image processing did not fail----//
     } else {
-        var tags = []
-        async.eachSeries(data.items, function iterator(item, done) {
-                console.log('I guess its hittin this', item)
-                var coords = []
-                var length = item.length;
-                if (length / 2 >= 1) {
-                    var sets = length / 2;
-                    while (item.length) {
-                        for (var i = 0; i < sets; i++) {
-                            coords[i] = item.splice(0, 2);
+
+        var tags = [];
+        //Index of image to be processed
+        // var i = 0;
+        console.log('OpenCV successfully returned focus coordinates.')
+        //For each image
+        async.eachSeries(imgURL, function iterator(img, done) {
+                // i++;
+                //For each set of coordinates
+                async.eachSeries(data.items, function iterator(item, done) {
+                        console.log('I guess its hittin this', item)
+                        var coords = []
+                        var length = item.length;
+                        if (length / 2 >= 1) {
+                            var sets = length / 2;
+                            while (item.length) {
+                                for (var i = 0; i < sets; i++) {
+                                    coords[i] = item.splice(0, 2);
+                                }
+                            }
                         }
-                    }
-                }
-                console.log('coords: ', coords)
-                async.eachSeries(coords, function iterator(coord, callback) {
-                    qs = {
-                        'image_request[remote_image_url]': imgURL,
-                        'image_request[locale]': 'en-US',
-                        'image_request[language]': 'en',
-                        'focus[x]': coord[0],
-                        'focus[y]': coord[1]
-                    }
-                    getTags(qs).then(function(tags) {
-                        tags.concat(tags)
-                        callback()
-                    }).catch(function(err) {
-                        if (err) console.log('omg', err)
-                        callback()
-                    })
-                }, function(err) {
-                    done()
-                });
-            },
-            function(err) {
-                if (err) {
-                    console.log('Finished Error: ', err)
-                    deferred.reject(err);
-                }
-                deferred.resolve(tags)
-            }); //End of eachseries
+                        console.log('coords: ', coords)
+                            //Make a request to Cloudsight API to get tags
+                        async.eachSeries(coords, function iterator(coord, callback) {
+                            qs = {
+                                'image_request[remote_image_url]': img,
+                                'image_request[locale]': 'en-US',
+                                'image_request[language]': 'en',
+                                'focus[x]': coord[0][0],
+                                'focus[y]': coord[1][1]
+                            }
+                            getTags(qs).then(function(tags) {
+                                tags.concat(tags)
+                                callback()
+                            }).catch(function(err) {
+                                if (err) console.log('omg', err)
+                                callback()
+                            })
+                        }, function(err) {
+                            done()
+                        });
+                    },
+                    function(err) {
+                        if (err) {
+                            console.log('Finished Error: ', err)
+                            done(err)
+                        }
+                        deferred.resolve(tags)
+                    }); //End: Eachseries coordinates
+            }, function(err) {
+
+            }) //End: Eachseries images
+
+
+
     }
 
     return deferred.promise;
@@ -189,6 +205,8 @@ function getTags(qs) {
         },
         qs: qs
     }
+
+    console.log('getTags: options.qs: ' + JSON.stringify(options.qs))
     var tags = []
     request.post(options, function(err, res, body) {
             if (err) return deferred.reject(err)
