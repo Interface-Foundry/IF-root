@@ -6,7 +6,9 @@ var mongoose = require('mongoose'),
     request = require('request'),
     async = require('async'),
     opencv = require('../ImageProcessing/OpenCVJavascriptWrapper/index.js'),
-    q = require('q')
+    q = require('q'),
+    //TODO: This list may need some modifying
+    common = "the,it,is,a,an,and,by,to,he,she,they,we,i,are,to,for,of";
 
 client.on("connect", function(err) {
     console.log("Connected to redis");
@@ -18,14 +20,14 @@ var timer = new InvervalTimer(function() {
             if (snaps.length > 0) {
                 console.log('Pausing timer')
                 timer.pause();
-                console.log('Processing...' + snaps.length + ' items for processing.')
+                console.log(snaps.length + ' items for processing.')
                 async.mapSeries(snaps, function(snap_str) {
                     var snap = snap_str.toString().trim()
                     async.waterfall([
                             function(callback) {
                                 //Retrieve imgURL from landmark
                                 getImageUrl(snap).then(function(url) {
-                                    console.log('Retrieved image URL array..',url)
+                                    console.log('Retrieved image URL array..')
                                     callback(null, url)
                                 }, function(err) {
                                     console.log('getImageUrl error.', snap)
@@ -37,21 +39,22 @@ var timer = new InvervalTimer(function() {
                                 opencv.findItemsInImage(url, function(err, data) {
                                     if (err)
                                         return callback(err)
-                                            // console.log('opencv')
-                                            //data is {items: [[xcenter,ycenter]]}
-                                    console.log('data: ',data)
                                     callback(null, url, data)
                                 })
                             },
                             function(url, data, callback) {
-                                console.log('reaching cloudsight', url)
-                                    //Process image through cloudsight
+                                // console.log('reaching cloudsight', url)
+                                //Process image through cloudsight
                                 cloudSight(url, data).then(function(tags) {
                                     console.log('cloudSight finished.', tags)
                                     callback(null, tags)
                                 }).catch(function(err) {
                                     console.log('cloudSight error.', err)
-                                    callback(err)
+                                    if (err == 'no tags found') {
+                                        //Remove from redis queue
+                                        client.lrem('snaps', 1, snap_str);
+                                        timer.resume()
+                                    }
                                 })
                             },
                             function(tags, callback) {
@@ -103,20 +106,21 @@ function getImageUrl(landmarkID) {
 
 function cloudSight(imgURL, data) {
     var deferred = q.defer();
-    var qs = {}
+    var qs = {};
+    var results = []
         //----If OpenCV Image processing does not return coordinates----//
     if (data.items == undefined) {
         console.log('OpenCV did not find coordinates.')
         async.eachSeries(imgURL, function iterator(img, done) {
             console.log('tagging images', img)
-            var tags = []
+
             qs = {
                 'image_request[remote_image_url]': img,
                 'image_request[locale]': 'en-US',
                 'image_request[language]': 'en'
             }
             getTags(qs).then(function(tags) {
-                tags.concat(tags)
+                results = results.concat(tags)
                 done()
             }).catch(function(err) {
                 if (err) console.log(err)
@@ -127,86 +131,87 @@ function cloudSight(imgURL, data) {
                 console.log('Finished Error: ', err)
                 deferred.reject(err);
             }
-            console.log('Finished looking for tags..', tags)
-            if (tags == undefined) {
+            console.log('Finished looking for tags..', results)
+            if (results == undefined) {
                 deferred.reject('No tags found')
             } else {
-                deferred.resolve(tags)
+                deferred.resolve(results)
             }
         }); //End of eachseries
         //----If OpenCV Image processing did not fail----//
     } else {
-
-        var tags = [];
-        //Index of image to be processed
-        // var i = 0;
         console.log('OpenCV successfully returned focus coordinates.')
-        //For each image
-        async.eachSeries(imgURL, function iterator(img, done) {
-                // i++;
-                //For each set of coordinates
-                async.eachSeries(data.items, function iterator(item, done) {
-                        console.log('I guess its hittin this', item)
-                        var coords = []
-                        var length = item.length;
-                        if (length / 2 >= 1) {
-                            var sets = length / 2;
-                            while (item.length) {
-                                for (var i = 0; i < sets; i++) {
-                                    coords[i] = item.splice(0, 2);
+            //---For each image
+        async.eachSeries(imgURL, function iterator(img, finishedImage) {
+                var failCount = 0;
+                //---For each set of coordinates
+                async.eachSeries(data.items, function iterator(item, finishedCoord) {
+                            var lastIndex = item.coords.length
+                            console.log(lastIndex + ' focal points found for current image.')
+                                //---For each request to cloudsight
+                            async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
+                                qs = {
+                                    'image_request[remote_image_url]': img,
+                                    'image_request[locale]': 'en-US',
+                                    'image_request[language]': 'en',
+                                    'focus[x]': coord[0] + coord[2] / 2,
+                                    'focus[y]': coord[1] + coord[3] / 2
                                 }
+                                getTags(qs).then(function(tags) {
+                                    results = results.concat(tags[0]);
+                                    finishedRequest()
+                                }).catch(function(err) {
+                                    if (err) {
+                                        console.log('Line 174 Error: ', err)
+                                        failCount++
+                                        if (failCount == item.coords.length) {
+                                            console.log('No tags found in any of the focus points!')
+                                            return finishedRequest(err)
+                                        } else {
+                                            console.log('No tags found for this focal point.')
+                                            return finishedRequest()
+                                        }
+                                    }
+
+                                    finishedRequest()
+                                })
+                            }, function(err) {
+                                if (err) {
+                                    console.log('Line 174 Error: ', err)
+                                    return finishedCoord(err)
+                                }
+                                finishedCoord()
+                            });
+
+                        },
+                        function(err) {
+                            if (err) {
+                                console.log('Line 178 Error: ', err)
+                                return finishedImage(err)
                             }
-                        }
-                        console.log('coords: ', coords)
-                            //Make a request to Cloudsight API to get tags
-                        async.eachSeries(coords, function iterator(coord, callback) {
-                            qs = {
-                                'image_request[remote_image_url]': img,
-                                'image_request[locale]': 'en-US',
-                                'image_request[language]': 'en',
-                                'focus[x]': coord[0][0],
-                                'focus[y]': coord[1][1]
-                            }
-                            getTags(qs).then(function(tags) {
-                                tags.concat(tags)
-                                callback()
-                            }).catch(function(err) {
-                                if (err) console.log('omg', err)
-                                callback()
-                            })
-                        }, function(err) {
-                            done()
-                        });
-                    },
-                    function(err) {
-                        if (err) {
-                            console.log('Finished Error: ', err)
-                            done(err)
-                        }
-                        deferred.resolve(tags)
-                    }); //End: Eachseries coordinates
+                            finishedImage()
+                        }) //End: Eachseries coordinates
             }, function(err) {
-
+                if (err) {
+                    return deferred.reject(err)
+                }
+                console.log('LINE 199! tags:', results)
+                deferred.resolve(results)
             }) //End: Eachseries images
-
-
-
-    }
-
+    } //end of else
     return deferred.promise;
 }
 
 function getTags(qs) {
     var deferred = q.defer();
     var options = {
-        url: "https://api.cloudsightapi.com/image_requests",
-        headers: {
-            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-        },
-        qs: qs
-    }
-
-    console.log('getTags: options.qs: ' + JSON.stringify(options.qs))
+            url: "https://api.cloudsightapi.com/image_requests",
+            headers: {
+                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+            },
+            qs: qs
+        }
+        // console.log('getTags: options.qs: ' + JSON.stringify(options.qs))
     var tags = []
     request.post(options, function(err, res, body) {
             if (err) return deferred.reject(err)
@@ -222,9 +227,10 @@ function getTags(qs) {
             };
             var description = '';
             var tries = 0;
+            var limit = 10
             async.whilst(
                 function() {
-                    return (results.status == 'not completed' && tries < 5);
+                    return (results.status == 'not completed' && tries < limit);
                 },
                 function(callback) {
                     var options = {
@@ -249,12 +255,12 @@ function getTags(qs) {
                             description = body.name;
                             console.log('Cloudsight Tag: ', body)
                                 //TODO: Filter out common words
-                            var uncommonArray = getUncommon(body.name)
+                            var uncommonArray = parseTags(body.name, common)
                             tags.push(uncommonArray);
                         } //END OF BODY.STATUS COMPLETED
                     })
                     tries++;
-                    console.log(tries + "/5 tries.")
+                    console.log(tries + "/" + limit + " tries.")
                     setTimeout(callback, 3000);
                 },
                 function(err) {
@@ -274,42 +280,44 @@ function getTags(qs) {
 }
 
 function updateDB(landmarkID, tags) {
-        // tags is ['man','red','striped','sweater']
-        var deferred = q.defer();
-        db.Landmarks.findOne({
-            _id: landmarkID
-        }, function(err, landmark) {
-            if (err) deferred.reject(err)
-            if (landmark) {
-                tags.forEach(function(tag) {
-                    //TODO: MIGHT UPDATE THIS SINCE LANDMARKSCHEMA TAGS PROPERTY WILL CHANGE
-                    landmark.tags.text.push(tag)
-                })
-                landmark.save(function(err, saved) {
-                    if (err) console.log(err)
-                    console.log('Updated landmark:', saved)
-                    deferred.resolve(saved);
-                })
-            } else {
-                deferred.reject()
-            }
-        })
-        return deferred.promise;
-    }
-    //TODO: This list may need some modifying
-var common = "the,it,is,a,an,by,to,he,she,they,we,i,are,to,for,of";
+    // tags is ['man','red','striped','sweater']
+    var deferred = q.defer();
+    db.Landmarks.findOne({
+        _id: landmarkID
+    }, function(err, landmark) {
+        if (err) deferred.reject(err)
+        if (landmark) {
+            tags.forEach(function(tag) {
+                //TODO: MIGHT UPDATE THIS SINCE LANDMARKSCHEMA TAGS PROPERTY WILL CHANGE
+                landmark.itemTags.text.push(tag)
+            })
+            landmark.save(function(err, saved) {
+                if (err) console.log(err)
+                    // console.log('Updated landmark:', saved)
+                deferred.resolve(saved);
+            })
+        } else {
+            deferred.reject()
+        }
+    })
+    return deferred.promise;
+}
 
-function getUncommon(sentence, common) {
+
+function parseTags(sentence, common) {
+    sentence = sentence.replace(/'/g, "");
+
     var wordArr = sentence.match(/\w+/g),
         commonObj = {},
         uncommonArr = [],
-        word, i;
+        word, i, uniqueArray = []
+    var uniqueArray = eliminateDuplicates(wordArr)
     common = common.split(',');
     for (i = 0; i < common.length; i++) {
         commonObj[common[i].trim()] = true;
     }
-    for (i = 0; i < wordArr.length; i++) {
-        word = wordArr[i].trim().toLowerCase();
+    for (i = 0; i < uniqueArray.length; i++) {
+        word = uniqueArray[i].trim().toLowerCase();
         if (!commonObj[word]) {
             //Change any "man" or "woman" to "mens" and "womens"
             if (word == 'man') {
@@ -322,6 +330,22 @@ function getUncommon(sentence, common) {
     }
     return uncommonArr;
 }
+
+function eliminateDuplicates(arr) {
+    var i,
+        len = arr.length,
+        out = [],
+        obj = {};
+
+    for (i = 0; i < len; i++) {
+        obj[arr[i]] = 0;
+    }
+    for (i in obj) {
+        out.push(i);
+    }
+    return out;
+}
+
 
 function InvervalTimer(callback, interval) {
     var timerId, startTime, remaining = 0;
