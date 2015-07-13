@@ -1,8 +1,8 @@
 var express = require('express');
 var app = express.Router();
 var db = require('../IF_schemas/db');
-var async = require('async')
-var rsvp = require('rsvp');
+var async = require('async');
+var RSVP = require('rsvp');
 /**
  * This should be mounted at /api/items
  */
@@ -72,7 +72,7 @@ app.post('/:mongoId/comment', function(req, res, next) {
     }, false);
 
     if (commentExists) {
-        return res.send(defaultResponse);
+        return res.send({item: req.item});
     }
 
     // New comment
@@ -82,7 +82,7 @@ app.post('/:mongoId/comment', function(req, res, next) {
             e.niceMessage = 'Could not post comment on the item';
             return next(e);
         } else {
-            res.send(defaultResponse);
+            res.send({item: req.item});
         }
     });
 
@@ -118,7 +118,9 @@ app.post('/:mongoId/deletecomment', function(req, res, next) {
             e.niceMessage = 'Could not delete comment on item';
             return next(e);
         }
-        res.send(defaultResponse);
+        db.Landmarks.findById(req.item._id, function(e, doc) {
+            res.send({item: doc});
+        });
 
         // add an activity for the comment deletion
         req.activity.data = {
@@ -169,7 +171,7 @@ app.post('/:mongoId/tag', function(req, res, next) {
             e.niceMessage = 'Could not save tags';
             return next(e);
         } else {
-            return res.send(req.item.itemTags);
+            return res.send({item: req.item});
         }
     });
 });
@@ -207,7 +209,7 @@ app.post('/:mongoId/deletetag', function(req, res, next) {
                 e.niceMessage = 'Could not delete tag ' + req.body.value;
                 return next(e);
             }
-            res.send(item.itemTags);
+            res.send({item: item});
         });
     });
 });
@@ -219,34 +221,41 @@ app.post('/:mongoId/fave', function(req, res, next) {
         return p || (o.userId === req.user._id.toString());
     }, false);
 
-    if (!hasFaved) {
-        // update the item
-        req.item.faves.push({
-            userId: req.user._id.toString(),
-            timeFaved: new Date()
-        });
-        req.item.save(function(e) {
-            if (e) {
-                e.niceMessage = 'Oops there was an error faveing the item.';
-                e.devMessage = 'Error adding fave to item collection';
-                return next(e);
-            }
-            res.send(defaultResponse);
-        });
+    if (hasFaved) {
+        return res.send({item: req.item, user: req.user});
+    }
 
-        // update the cached list of faves
-        db.Users.update({
-            _id: req.user._id
-        }, {
-            $addToSet: {
-                faves: req.item._id.toString()
-            }
-        }, function(e) {
-            if (e) {
-                e.niceMessage = 'Oops there was an error faveing the item.';
-                e.devMessage = 'Error adding fave to user collection';
-                return next(e);
-            }
+
+
+    // update the item
+    req.item.faves.push({
+        userId: req.user._id.toString(),
+        timeFaved: new Date()
+    });
+
+    req.item.save(function(e) {
+        if (e) {
+            e.niceMessage = 'Oops there was an error faveing the item.';
+            e.devMessage = 'Error adding fave to item collection';
+            return next(e);
+        }
+    });
+
+    // update the cached list of faves
+    db.Users.update({
+        _id: req.user._id
+    }, {
+        $addToSet: {
+            faves: req.item._id.toString()
+        }
+    }, function(e) {
+        if (e) {
+            e.niceMessage = 'Oops there was an error faveing the item.';
+            e.devMessage = 'Error adding fave to user collection';
+            return next(e);
+        }
+        db.Users.findById(req.user_id, function(e, u) {
+            res.send({item: req.item, user: u});
         });
 
         // add an activity
@@ -256,56 +265,51 @@ app.post('/:mongoId/fave', function(req, res, next) {
             owner: req.item.owner
         };
         req.activity.saveAsync().then(function() {}).catch(next);
-
-    } else {
-        res.send(defaultResponse);
-    }
+    });
 });
 
 app.post('/:mongoId/unfave', function(req, res, next) {
     // update the item
-    console.log(req.user._id.toString());
-    req.item.update({
+    var itemPromise = req.item.update({
         $pull: {
             faves: {
                 userId: req.user._id.toString()
             }
         }
-    }, function(e) {
-        if (e) {
-            e.niceMessage = 'Could not un-fave the item';
-            e.devMessage = 'un-fave failed for Items collection';
-            return next(e);
-        } else {
-            // add an activity
-            req.activity.data = {
-                item: req.item.getSimpleItem(),
-                faver: req.user.getSimpleUser(),
-                owner: req.item.owner          
-            };
-            req.activity.privateVisible= false;
-            req.activity.publicVisible= false;
-            req.activity.saveAsync().then(function() {}).catch(next);
-            res.send(defaultResponse);
-        }
+    }).exec().then(function() {
+        return db.Landmarks.findById(req.item._id);
     });
 
-
     // update the users cache of faved things
-    db.Users.update({
+    var userPromise = db.Users.update({
         _id: req.user._id
     }, {
         $pull: {
             faves: req.item._id.toString()
         }
-    }, function(e) {
-        if (e) {
-            e.niceMessage = 'Could not un-fave the item';
-            e.devMessage = 'un-fave failed for Items collection';
-            next(e);
-        }
+    }).exec().then(function() {
+        return db.Users.findById(req.user._id);
     });
 
+    // send a response with the updated item and user
+    RSVP.hash({item: itemPromise, user: userPromise})
+        .then(function(results) {
+            res.send(results);
+
+            // add an activity
+            req.activity.data = {
+                item: req.item.getSimpleItem(),
+                faver: req.user.getSimpleUser(),
+                owner: req.item.owner
+            };
+            req.activity.privateVisible= false;
+            req.activity.publicVisible= false;
+            req.activity.saveAsync().then(function() {}).catch(next);
+    }, function(e) {
+            e.niceMessage = 'Could not un-fave the item';
+            e.devMessage = 'un-fave failed for Items collection';
+            return next(e);
+    });
 });
 
 app.post('/:mongoId/reject', function(req, res, next) {
@@ -321,7 +325,9 @@ app.post('/:mongoId/reject', function(req, res, next) {
             e.niceMessage('Could not reject the item, maybe you should fave it ;)');
             return next(e);
         } else {
-            return res.send(defaultResponse);
+            db.Users.findById(req.user._id, function(e, doc) {
+                return res.send({user: doc});
+            });
         }
     })
 });
@@ -339,7 +345,9 @@ app.post('/:mongoId/unreject', function(req, res, next) {
             e.niceMessage('Could not un-reject the item');
             return next(e);
         } else {
-            return res.send(defaultResponse);
+            db.Users.findById(req.user._id, function(e, doc) {
+                return res.send({user: doc});
+            });
         }
     });
 });
@@ -371,7 +379,7 @@ app.post('/:mongoId/report', function(req, res, next) {
             e.niceMessage = 'Oops there was a problem processing your feedback.  Please try again';
             return next(e);
         }
-        return res.send(defaultResponse);
+        return res.send({item: req.item});
     });
 });
 

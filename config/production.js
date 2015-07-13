@@ -18,6 +18,9 @@ module.exports = {
     elasticsearch: {
         url: 'http://elasticsearch-cerulean.kipapp.co:9200'
     },
+    elasticsearchElk: {
+        url: 'http://analytics-db-mew.internal.kipapp.co:9200'
+    },
     redis: {
         port: 6379,
         url: 'redis-thunder.internal.kipapp.co',
