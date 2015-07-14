@@ -27,7 +27,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
     console.log('URL:', url);
 
     // first check if this has been processed yet.
-    db.Landmarks.findOne({'source_shoptique_item.url': url}, function (e, r) {
+    db.Landmarks.findOne({'source_shoptiques_item.url': url}, function (e, r) {
         if (r !== null) {
             // don't process
             console.log(url, 'has already been processsed');
@@ -41,7 +41,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
             var boutique = res.boutique;
 
             // first check if we've inserted this shoptique info yet
-            db.Landmarks.findOne({'source_shoptique_store.id': boutique.id}).execAsync()
+            db.Landmarks.findOne({'source_shoptiques_store.id': boutique.id}).execAsync()
                 .then(function (store) {
                     // only adding in the shoptiques stores now, not matching thems to
                     // stores we already have in the DB from google/users.
@@ -52,7 +52,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
                         return getAddressInfo(boutique.addressText).then(function (addr) {
                             console.log(addr);
                             store = new db.Landmarks({
-                                source_shoptique_store: boutique,
+                                source_shoptiques_store: boutique,
                                 name: boutique.name,
                                 id: boutique.name.replace(/[^\w]+/g, '').toLowerCase() + boutique.id,
                                 world: true,
@@ -74,7 +74,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
                     // add any new items to the db
                     var itemPromises = res.items.map(function (i) {
                         var item = new db.Landmark({
-                            source_shoptique_item: i,
+                            source_shoptiques_item: i,
                             world: false,
                             name: i.name,
                             id: i.id + '.' + i.colorId,
@@ -99,10 +99,10 @@ redisClient.lpop('items-toprocess', function (e, url) {
 
                     return Promise.all(itemPromises);
                 }).then(function () {
-                    return db.Landmarks.find({'source_shoptique_item.url': {$in: res.items[0].related}})
-                        .select('source_shoptique_item.url').exec()
+                    return db.Landmarks.find({'source_shoptiques_item.url': {$in: res.items[0].related}})
+                        .select('source_shoptiques_item.url').exec()
                         .then(function(lm) {
-                            lm = lm.map(function(l) { return l.source_shoptique_item.url});
+                            lm = lm.map(function(l) { return l.source_shoptiques_item.url});
                             _.difference(res.related, lm).map(function(itemUrl) {
                                 redisClient.rpush('items-toprocess', itemUrl, function (err, reply) {
                                     if (err) {

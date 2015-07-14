@@ -1,3 +1,4 @@
+var logger = require('../IF_logging/if_logger');
 module.exports = function(app, passport, landmarkSchema) {
 
 // normal routes ===============================================================
@@ -11,6 +12,10 @@ module.exports = function(app, passport, landmarkSchema) {
 
 	// LOGOUT ==============================
 	app.get('/api/user/logout', function(req, res) {
+		logger.log({
+			user: req.user && req.user._id,
+			message: 'logout'
+		});
 		req.logout();
 		res.redirect('/login');
 	});
@@ -73,6 +78,11 @@ module.exports = function(app, passport, landmarkSchema) {
 			// console.log('--------- /API/USER/LOGIN -------------');
 			// console.log(req);
 			res.status(200).send(req.user);
+			logger.log({
+				message: 'login',
+				type: 'local',
+				user: req.user && req.user._id
+			});
 		});
 
 		app.post('/api/user/login-basic', passport.authenticate('local-basic', {}), 
@@ -80,6 +90,11 @@ module.exports = function(app, passport, landmarkSchema) {
 			console.log('req.body is.', req.body)
 			console.log('req.user is', req.user)
 			res.status(200).send(req.user);
+			logger.log({
+				message: 'login',
+				type: 'basic',
+				user: req.user && req.user._id
+			});
 		});
 
 
@@ -108,6 +123,11 @@ module.exports = function(app, passport, landmarkSchema) {
 
 		}), function(req,res){
 			res.send(req.user);
+			logger.log({
+				message: 'signup',
+				type: 'local',
+				user: req.user && req.user._id
+			});
 		});
 
 	// facebook -------------------------------
@@ -123,6 +143,11 @@ module.exports = function(app, passport, landmarkSchema) {
 		}), function (req, res) {
 		  res.redirect(req.session.redirect || '/');
 		  delete req.session.redirect;
+			logger.log({
+				message: 'login',
+				type: 'facebook',
+				user: req.user && req.user._id
+			});
 		});
 
 	// twitter --------------------------------
@@ -144,17 +169,32 @@ module.exports = function(app, passport, landmarkSchema) {
 
 	// iOS Facebook Auth --------------------------------
 		app.route('/auth/facebook/mobile_signin').post(function(req, res, next){
-			console.log('f_sign in');
-
 			passport.authenticate('client_facebook', function(err, user, info){
 				if (err || !user){
 					res.status(400).send(info);
+					logger.log({
+						err: info,
+						message: 'login failed',
+						type: 'facebook.mobile',
+						user: req.user && req.user._id
+					});
 				} else {
 					req.login(user, function(err){
 						if (err){
 							res.status(400).send(err);
+							logger.log({
+								err: err,
+								message: 'login failed',
+								type: 'facebook.mobile',
+								user: req.user && req.user._id
+							});
 						} else {
 							res.json(user);
+							logger.log({
+								message: 'login',
+								type: 'facebook.mobile',
+								user: req.user && req.user._id
+							});
 						}
 					});
 					//res.json(user);
@@ -189,6 +229,11 @@ module.exports = function(app, passport, landmarkSchema) {
 	app.get('/auth/bearer', passport.authenticate('bearer', { session: false }),
 		function(req, res) {
 	        res.send(200,'logged in');
+			logger.log({
+				message: 'login',
+				type: 'bearer',
+				user: req.user && req.user._id
+			});
 	    }
 	);
 

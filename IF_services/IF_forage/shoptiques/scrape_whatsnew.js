@@ -23,9 +23,9 @@ request.get('http://www.shoptiques.com/whats-new', function(e, r, body) {
     });
 
     db.Landmarks.find({
-        'source_shoptique_item.url': {$in: urls}
-    }).select('source_shoptique_item.url').exec().then(function(lm) {
-        lm = lm.map(function(l) { return l.source_shoptique_item.url});
+        'source_shoptiques_item.url': {$in: urls}
+    }).select('source_shoptiques_item.url').exec().then(function(lm) {
+        lm = lm.map(function(l) { return l.source_shoptiques_item.url});
         var toScrape = _.difference(urls, lm);
 
         toScrape.map(function(itemUrl) {
