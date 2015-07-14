@@ -41,6 +41,7 @@ var urlify = require('urlify').create({
 });
 var request = require('request');
 var morgan = require('morgan');
+var logger = require('./components/IF_logging/if_logger');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
@@ -249,6 +250,13 @@ app.post('/feedback', function(req, res) {
             console.error(err);
         }
         res.send('email sent');
+    });
+
+    // log it to our aggregation server
+    logger.log({
+        message: 'feedback',
+        feedback: req.body,
+        user: req.user && req.user._id
     });
 });
 
@@ -3730,7 +3738,7 @@ app.all('/*', function(req, res, next) {
  * err.devMessage = "Redis failed"
  * return next(err);
  */
-app.use(function(err, req, res, next) {
+app.use(function error_handler(err, req, res, next) {
     // first print the route
     console.error('Error at ' + req.method + ' ' + req.originalUrl);
 
@@ -3768,6 +3776,13 @@ app.use(function(err, req, res, next) {
             err: err
         });
     }
+
+    // send the error to our aggregation server
+    logger.log({
+        message: 'error',
+        req: logger.reqProperties(req),
+        err: err
+    });
 });
 
 
@@ -3839,4 +3854,5 @@ app.use(function(err, req, res, next) {
 
 server.listen(2997, function() {
     console.log("Illya casting magic on 2997 ~ ~ ♡");
+    logger.log('started server');
 });

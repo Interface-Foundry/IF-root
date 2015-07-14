@@ -4,6 +4,8 @@
  */
 var config = require('config');
 var traceback = require('traceback');
+var os = require('os');
+var hostname = os.hostname();
 
 var getStackInfo = function() {
     var stack = traceback();
@@ -28,7 +30,8 @@ module.exports.log = function(data) {
     }
 
     data["@timestamp"] = new Date();
-    data["version"] = "1";
+    data.version = "1";
+    data.hostname = hostname;
     data.stack = getStackInfo();
 
     // only log to elasticsearch if we can
@@ -50,4 +53,17 @@ module.exports.log = function(data) {
 
     // always log to the console
     console.log(data);
+};
+
+module.exports.reqProperties = function(req) {
+    // never log a password
+    if (req.body && req.body.password) {
+        req.body.password = '<password hidden>';
+    }
+
+    return {
+        method: req.method,
+        route: req.path,
+        body: req.body
+    }
 };
