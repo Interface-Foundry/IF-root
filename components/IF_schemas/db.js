@@ -1,10 +1,21 @@
 var Promise = require("bluebird");
 var mongoose = Promise.promisifyAll(require('mongoose'));
-var mongoose = require('mongoose');
 var config = global.config || require('config');
+var logger = require('../IF_logging/if_logger');
 
 if (mongoose.connection.readyState == 0) {
     mongoose.connect(config.mongodb.url, config.mongodb.options);
+    var db_conn = mongoose.connection;
+    db_conn.on('error', function(err) {
+        logger.log({
+            message: 'error connecting to mongodb',
+            err: err,
+            config: config.mongodb
+        });
+    });
+    db_conn.on('open', function(){
+        console.log('connected to mongodb', config.mongodb.url);
+    });
 }
 
 /**
@@ -51,3 +62,13 @@ schemas.map(function (schema) {
     module.exports[schema.single] = model;
     module.exports[schema.plural] = model;
 });
+
+
+/**
+ * Expose a function called "map" which iterates over each collection.
+ */
+module.exports.map = function(cb) {
+    schemas.map(function(schema) {
+        return module.exports[schema.single];
+    }).map(cb);
+};

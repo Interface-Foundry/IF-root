@@ -6,6 +6,8 @@ var config = require('config');
 var traceback = require('traceback');
 var os = require('os');
 var hostname = os.hostname();
+var filename = require.main.filename.split('/').pop();
+console.log('logging data to elasticsearch "logstash-node/' + filename + '"');
 
 var getStackInfo = function() {
     var stack = traceback();
@@ -41,7 +43,8 @@ module.exports.log = function(data) {
         });
 
         es.index({
-            index: 'logstash-webserver',
+            index: 'logstash-node',
+            type: filename,
             body: data
         }, function(e, r) {
             // who watches the watchers

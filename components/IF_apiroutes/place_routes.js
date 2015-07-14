@@ -20,6 +20,7 @@ router.get('/:id', function(req, res) {
     });
 })
 
+
 //Return closest 5 places for nearest bubble suggestions
 router.post('/nearest', function(req, res) {
     var loc = {
@@ -42,7 +43,9 @@ router.post('/nearest', function(req, res) {
                 }
             }
         }, {
+
             "$limit": 10
+
         }],
         function(err, places) {
             if (err) console.log(err);
@@ -50,6 +53,7 @@ router.post('/nearest', function(req, res) {
             res.send(places);
         });
 })
+
 
 
 module.exports = router;

@@ -7,7 +7,7 @@ module.exports = {
     geoipURL: 'http://127.0.0.1:8080/json/',
     // geoipURL: 'http://www.freegeoip.net/json/',
     mongodb: {
-        url: 'mongodb://flareon.internal.kipapp.co,jolteon.internal.kipapp.co,vaporeon.internal.kipapp.co',
+        url: 'mongodb://flareon.internal.kipapp.co/foundry,jolteon.internal.kipapp.co/foundry,vaporeon.internal.kipapp.co/foundry',
         options: {
             replset: {
                 rs_name: 'foundry'
