@@ -19,7 +19,7 @@ class FindItems(resource.Resource):
                 s3url = url
                 img = ifopencv.getFromS3(s3url)
                 coords = ifopencv.findItems(img)
-                result = {"index": i,"coords": coords, }
+                result = {"index": i,"coords": coords}
                 results.append(result)
         else:
             raise NameError("Must provide 'url' querystring parameter")

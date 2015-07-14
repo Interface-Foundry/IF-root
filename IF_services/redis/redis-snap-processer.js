@@ -108,8 +108,9 @@ function cloudSight(imgURL, data) {
     var deferred = q.defer();
     var qs = {};
     var results = []
+    console.log('Data: ', data.items)
         //----If OpenCV Image processing does not return coordinates----//
-    if (data.items == undefined || data.items == null || (data.items.length == 1 && data.items.coords == null) ) {
+    if (data.items == undefined || data.items == null || (data.items.coords && data.items.coords.length < 1) ) {
         console.log('OpenCV did not find coordinates.')
         async.eachSeries(imgURL, function iterator(img, done) {
             console.log('tagging image:', img)
