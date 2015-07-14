@@ -63,7 +63,11 @@ var lookSchema = mongoose.Schema({
             categories: [],
             text: []
         }
-    }]
+    }],
+    created: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 // gets a simple json rep of the look for thumbnails etc
