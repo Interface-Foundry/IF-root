@@ -17,7 +17,7 @@ var Promise = require('bluebird');
  *
  *
  */
-var neighborhood = 'california/los-angeles';
+var neighborhoods = ["alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "florida", "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "las-vegas", "london", "long-island", "louisiana", "maine", "maryland", "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana", "montauk", "nebraska", "nevada", "new-hampshire", "new-jersey", "new-mexico", "new-york", "new_york_city", "north-carolina", "north-dakota", "ohio", "oklahoma", "oregon", "paris", "pennsylvania", "rhode-island", "san-diego", "san_francisco", "south-carolina", "south-dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington-dc", "washington-state", "west-virginia", "wisconsin", "wyoming"];
 
 // gets all the items from a catalog page
 var scrapeCatalogPage = function(url) {
@@ -42,20 +42,27 @@ var scrapeCatalogPage = function(url) {
                 });
             });
 
+            if (promises.length === 0) {
+                return reject();
+            }
+
             Promise.all(promises).then(resolve).catch(reject);
         });
     });
 };
 
 var offset = 0;
-var urlFormat = 'http://www.shoptiques.com/neighborhoods/$n?max=90&offset=X'.replace('$n', neighborhood);
+var urlFormat = 'http://www.shoptiques.com/neighborhoods/$n?max=90&offset=X';
+var neighborhoodIndex = 0;
 var seed = function() {
-    url = urlFormat.replace('X', offset);
+    url = urlFormat.replace('X', offset).replace('$n', neighborhoods[neighborhoodIndex]);
     scrapeCatalogPage(url).then(function() {
         offset += 90;
         seed();
     }).catch(function(e) {
-        console.error(e);
+        neighborhoodIndex++;
+        offset = 0;
+        seed();
     });
 };
 
