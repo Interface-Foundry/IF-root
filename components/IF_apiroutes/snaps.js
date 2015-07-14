@@ -46,6 +46,7 @@ router.post('/', function(req, res, next) {
                     err.niceMessage = 'Could not save item';
                     return next(err);
                 }
+                console.log(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
                         err.niceMessage = 'Could not save item';

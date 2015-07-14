@@ -303,6 +303,11 @@ function updateDB(landmarkID, tags) {
             colors.forEach(function(color) {
                 landmark.itemTags.colors.push(color)
             })
+
+            //Eliminate dupes again for already existing user inputted tags
+            tags = eliminateDuplicates(tags);
+            colors = eliminateDuplicates(colors);
+
             landmark.save(function(err, saved) {
                 if (err) console.log(err)
                     //console.log('Updated landmark:', saved)
@@ -374,9 +379,8 @@ function colorHex(tags) {
         for (var key in hash) {
             if (hash.hasOwnProperty(key)) {
                 tags.forEach(function(tag) {
-                    // console.log('******Tag:'+tag+' key:'+key)
                     if (key.trim() == tag.trim()) {
-                        colors.push(tag);
+                        colors.push(hash[key]);
                     }
                 })
             }
