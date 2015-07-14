@@ -20,6 +20,7 @@ router.get('/:id', function(req, res) {
     });
 })
 
+
 //Return closest 5 places for nearest bubble suggestions
 router.post('/nearest', function(req, res) {
     var loc = {
@@ -28,17 +29,29 @@ router.post('/nearest', function(req, res) {
     };
     loc.coordinates.push(parseFloat(req.body.lat));
     loc.coordinates.push(parseFloat(req.body.lon));
-    var query = {
-        'source_google.place_id':{$exists:true},
-        spherical: true,
-        limit: 5
-    };
-    landmark.geoNear(loc,query, function(err, places) {
-        if (err) console.log(err);
-        if (!places) return res.send(440);
-        res.send(places);
-    });
+    landmark.aggregate(
+        [{
+            "$geoNear": {
+                "near": loc,
+                "spherical": true,
+                "distanceField": "dis"
+            }
+        }, {
+            "$match": {
+                "source_google.place_id": {
+                    "$exists": true
+                }
+            }
+        }, {
+            "$limit": 5
+        }],
+        function(err, places) {
+            if (err) console.log(err);
+            if (!places) return res.send(440);
+            res.send(places);
+        });
 })
+
 
 
 module.exports = router;
