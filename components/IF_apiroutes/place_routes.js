@@ -29,6 +29,7 @@ router.post('/nearest', function(req, res) {
     loc.coordinates.push(parseFloat(req.body.lat));
     loc.coordinates.push(parseFloat(req.body.lon));
     var query = {
+        'source_google.place_id':{$exists:true},
         spherical: true,
         limit: 5
     };

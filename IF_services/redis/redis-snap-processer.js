@@ -27,7 +27,7 @@ var timer = new InvervalTimer(function() {
                             function(callback) {
                                 //Retrieve imgURL from landmark
                                 getImageUrl(snap).then(function(url) {
-                                    console.log('Retrieved image URL array..')
+                                    console.log('Retrieved image URL array..',url)
                                     callback(null, url)
                                 }, function(err) {
                                     console.log('getImageUrl error.', snap)
@@ -37,16 +37,15 @@ var timer = new InvervalTimer(function() {
                             function(url, callback) {
                                 //OpenCV processing
                                 opencv.findItemsInImage(url, function(err, data) {
-                                    if (err)
-                                        return callback(err)
+                                    if (err) console.log('OpenCV Error: ', err)
+
                                     callback(null, url, data)
                                 })
                             },
                             function(url, data, callback) {
-                                // console.log('reaching cloudsight', url)
                                 //Process image through cloudsight
                                 cloudSight(url, data).then(function(tags) {
-                                    console.log('cloudSight finished.', tags)
+                                    // console.log('cloudSight finished.', tags)
                                     callback(null, tags)
                                 }).catch(function(err) {
                                     console.log('cloudSight error.', err)
@@ -70,7 +69,7 @@ var timer = new InvervalTimer(function() {
                         ],
                         //snap is done processing
                         function(err, results) {
-                            console.log('Error: ', err)
+                            if (err) console.log('Error: ', err)
                                 //Remove from redis queue
                             client.lrem('snaps', 1, snap_str);
                             timer.resume()
@@ -109,11 +108,15 @@ function cloudSight(imgURL, data) {
     var qs = {};
     var results = []
     console.log('Data: ', data.items)
+    var items = data.items
         //----If OpenCV Image processing does not return coordinates----//
-    if (data.items == undefined || data.items == null || (data.items.coords && data.items.coords.length < 1) ) {
-        console.log('OpenCV did not find coordinates.')
-        async.eachSeries(imgURL, function iterator(img, done) {
-            console.log('tagging image:', img)
+    var i = 0;
+    async.eachSeries(imgURL, function iterator(img, done) {
+        console.log('Processing image '+(i+1)+'/'+(imgURL.length+1))
+        var item = items[i]
+        console.log('tagging image:', img)
+        if (items == undefined || items == null || item == null || item.coords == null || (item.coords && item.coords.length < 1)) {
+            console.log('OpenCV did not find coordinates.')
             qs = {
                 'image_request[remote_image_url]': img,
                 'image_request[locale]': 'en-US',
@@ -121,84 +124,139 @@ function cloudSight(imgURL, data) {
             }
             getTags(qs).then(function(tags) {
                 results = results.concat(tags)
+                i++;
                 done()
             }).catch(function(err) {
                 if (err) console.log(err)
+                i++;
                 done()
             })
-        }, function(err) {
-            if (err) {
-                console.log('Finished Error: ', err)
-                deferred.reject(err);
-            }
-            console.log('Finished looking for tags..', results)
-            if (results == undefined) {
-                deferred.reject('No tags found')
-            } else {
-                deferred.resolve(results)
-            }
-        }); //End of eachseries
+        }
         //----If OpenCV Image processing did not fail----//
-    } else {
-        console.log('OpenCV successfully returned focus coordinates.',data.items)
-            //---For each image
-        async.eachSeries(imgURL, function iterator(img, finishedImage) {
-                var failCount = 0;
-                //---For each set of coordinates
-                async.eachSeries(data.items, function iterator(item, finishedCoord) {
-                            var lastIndex = item.coords.length
-                            console.log(lastIndex + ' focal points found for current image.',item.coords)
-
-                                //---For each request to cloudsight
-                            async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
-                                qs = {
-                                    'image_request[remote_image_url]': img,
-                                    'image_request[locale]': 'en-US',
-                                    'image_request[language]': 'en',
-                                    'focus[x]': coord[0] + coord[2] / 2,
-                                    'focus[y]': coord[1] + coord[3] / 2
-                                }
-                                getTags(qs).then(function(tags) {
-                                    results = results.concat(tags[0]);
-                                    finishedRequest()
-                                }).catch(function(err) {
-                                    if (err) {
-                                        console.log('Error: ', err)
-                                        failCount++
-                                        if (failCount == item.coords.length) {
-                                            console.log('No tags found in any of the focus points!')
-                                            return finishedRequest(err)
-                                        } else {
-                                            console.log('No tags found for this focal point.')
-                                            return finishedRequest()
-                                        }
-                                    }
-
-                                    finishedRequest()
-                                })
-                            }, function(err) {
-                                if (err) {
-                                    console.log('Error: ', err)
-                                    return finishedCoord(err)
-                                }
-                                finishedCoord()
-                            });
-                        },
-                        function(err) {
-                            if (err) {
-                                console.log('Error: ', err)
-                                return finishedImage(err)
-                            }
-                            finishedImage()
-                        }) //End: Eachseries coordinates
+        else {
+             console.log('OpenCV found coordinates.')
+            var lastIndex = item.coords.length
+            //Limit focal points to 2 max
+             if (lastIndex >= 2) {
+                item.coords = item.coords.splice(0, 2)
+            }
+            console.log(item.coords.length + ' focal points found for current image.', item.coords)
+           
+            //---For each request to cloudsight
+            async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
+                qs = {
+                    'image_request[remote_image_url]': img,
+                    'image_request[locale]': 'en-US',
+                    'image_request[language]': 'en',
+                    'focus[x]': coord[0] + coord[2] / 2,
+                    'focus[y]': coord[1] + coord[3] / 2
+                }
+                getTags(qs).then(function(tags) {
+                    results = results.concat(tags[0]);
+                    finishedRequest()
+                }).catch(function(err) {
+                    if (err) {
+                        console.log('Error: ', err)
+                        failCount++
+                        if (failCount == item.coords.length) {
+                            console.log('No tags found in any of the focus points!')
+                            return finishedRequest(err)
+                        } else {
+                            console.log('No tags found for this focal point.')
+                            return finishedRequest()
+                        }
+                    }
+                    finishedRequest()
+                })
             }, function(err) {
                 if (err) {
-                    return deferred.reject(err)
+                    console.log('Error: ', err)
+                    return done(err)
                 }
-                // console.log('LINE 199! tags:', results)
-                deferred.resolve(results)
-            }) //End: Eachseries images
-    } //end of else
+                done()
+            });
+        } //End of if coords found
+    }, function(err) {
+        if (err) {
+            console.log('Finished Error: ', err)
+            deferred.reject(err);
+        }
+        console.log('Finished looking for tags..', results)
+        if (results == undefined) {
+            deferred.reject('No tags found')
+        } else {
+            deferred.resolve(results)
+        }
+    }); //End of eachseries
+
+    //     //----If OpenCV Image processing did not fail----//
+    // } else {
+    //     // console.log('OpenCV successfully returned focus coordinates.',data.items)
+    //     //---For each image
+    //     async.eachSeries(imgURL, function iterator(img, finishedImage) {
+    //             var failCount = 0;
+    //             //---For each set of coordinates
+    //             async.eachSeries(data.items, function iterator(item, finishedCoord) {
+    //                         var lastIndex = item.coords.length
+    //                         console.log(lastIndex + ' focal points found for current image.', item.coords)
+    //                         if (lastIndex >= 2) {
+    //                             console.log('Limiting coordinates to two sets only..')
+    //                             item.coords = item.coords.splice(0, 2)
+    //                             console.log('New coords: ', item.coords)
+    //                         }
+
+    //                         //---For each request to cloudsight
+    //                         async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
+    //                             qs = {
+    //                                 'image_request[remote_image_url]': img,
+    //                                 'image_request[locale]': 'en-US',
+    //                                 'image_request[language]': 'en',
+    //                                 'focus[x]': coord[0] + coord[2] / 2,
+    //                                 'focus[y]': coord[1] + coord[3] / 2
+    //                             }
+    //                             getTags(qs).then(function(tags) {
+    //                                 results = results.concat(tags[0]);
+    //                                 finishedRequest()
+    //                             }).catch(function(err) {
+    //                                 if (err) {
+    //                                     console.log('Error: ', err)
+    //                                     failCount++
+    //                                     if (failCount == item.coords.length) {
+    //                                         console.log('No tags found in any of the focus points!')
+    //                                         return finishedRequest(err)
+    //                                     } else {
+    //                                         console.log('No tags found for this focal point.')
+    //                                         return finishedRequest()
+    //                                     }
+    //                                 }
+
+    //                                 finishedRequest()
+    //                             })
+    //                         }, function(err) {
+    //                             if (err) {
+    //                                 console.log('Error: ', err)
+    //                                 return finishedCoord(err)
+    //                             }
+    //                             finishedCoord()
+    //                         });
+    //                     },
+    //                     function(err) {
+    //                         if (err) {
+    //                             console.log('Error: ', err)
+    //                             return finishedImage(err)
+    //                         }
+    //                         finishedImage()
+    //                     }) //End: Eachseries coordinates
+    //         }, function(err) {
+    //             if (err) {
+    //                 return deferred.reject(err)
+    //             }
+    //             // console.log('LINE 199! tags:', results)
+    //             deferred.resolve(results)
+    //         }) //End: Eachseries images
+    // } //end of else
+
+
     return deferred.promise;
 }
 
@@ -324,7 +382,7 @@ function updateDB(landmarkID, tags) {
 
 function parseTags(sentence, common) {
     sentence = sentence.replace(/'/g, "");
-
+    sentence = sentence.replace(/-/g, "");
     var wordArr = sentence.match(/\w+/g),
         commonObj = {},
         uncommonArr = [],
@@ -342,7 +400,10 @@ function parseTags(sentence, common) {
                 word = 'mens'
             } else if (word == 'woman') {
                 word = 'womens'
+            } else if (word == 'tshirt') {
+                word = 't-shirt'
             }
+
             uncommonArr.push(word);
         }
     }
@@ -351,7 +412,7 @@ function parseTags(sentence, common) {
 
 function colorHex(tags) {
     var hexCodes = [{
-        'red':'#ea0000'
+        'red': '#ea0000'
     }, {
         'orange': '#f7a71c'
     }, {
