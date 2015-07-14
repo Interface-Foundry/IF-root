@@ -9,27 +9,24 @@ class FindItems(resource.Resource):
     # right now this handles every request to the server
     def render_GET(self, request):
         urlpath = request.URLPath()
-        print urlpath
         request.setHeader("content-type", "application/json")
         if "url" in request.args:
-            urls = request.args["url"]
+            urls = request.args["url"][0].split(',')
+            print urls
             # print len(urls)
             results = list()
             enumurls = list(enumerate(urls, start=0))
-            for i, url in enumurls:
-                print i
+            for url in urls:
                 s3url = url
                 try:
                     img = ifopencv.getFromS3(s3url)
-                except AttributeError:
-                    print 'hitting exception'
-                    result = {"index": i,"coords": None} 
+                    coords = ifopencv.findItems(img)
+                    result = {"coords": coords}  
                     results.append(result)
-                    pass
-                coords = ifopencv.findItems(img)
-                result = {"index": i,"coords": coords}  
-                results.append(result)
-                print 'is this real life'                                                             
+                except AttributeError:
+                    result = {"coords": None} 
+                    results.append(result)
+                    continue                                                      
         else:
             raise NameError("Must provide 'url' querystring parameter")
         print results

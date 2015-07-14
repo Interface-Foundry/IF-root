@@ -20,14 +20,14 @@ var timer = new InvervalTimer(function() {
             if (snaps.length > 0) {
                 console.log('Pausing timer')
                 timer.pause();
-                console.log(snaps.length + ' items for processing.')
+                console.log(snaps.length + ' snap(s) for processing.')
                 async.mapSeries(snaps, function(snap_str) {
                     var snap = snap_str.toString().trim()
                     async.waterfall([
                             function(callback) {
                                 //Retrieve imgURL from landmark
                                 getImageUrl(snap).then(function(url) {
-                                    console.log('Retrieved image URL array..',url)
+                                    console.log('Retrieved image URL array..')
                                     callback(null, url)
                                 }, function(err) {
                                     console.log('getImageUrl error.', snap)
@@ -107,16 +107,22 @@ function cloudSight(imgURL, data) {
     var deferred = q.defer();
     var qs = {};
     var results = []
-    console.log('Data: ', data.items)
+    // console.log('Data: ', data.items)
     var items = data.items
-        //----If OpenCV Image processing does not return coordinates----//
+
     var i = 0;
+
     async.eachSeries(imgURL, function iterator(img, done) {
-        console.log('Processing image '+(i+1)+'/'+(imgURL.length+1))
+        if (items == undefined || items == null) {
+             console.log('OpenCV did not find coordinates..', JSON.stringify(items))
+            return done()
+        }
         var item = items[i]
-        console.log('tagging image:', img)
-        if (items == undefined || items == null || item == null || item.coords == null || (item.coords && item.coords.length < 1)) {
-            console.log('OpenCV did not find coordinates.')
+        i++;
+        console.log('Processing image:' + i + '/' + (imgURL.length))
+        //----If OpenCV Image processing does not return coordinates----//
+        if (item == null || item.coords == null || (item.coords && item.coords.length < 1)) {
+            console.log('OpenCV did not find coordinates.', JSON.stringify(item))
             qs = {
                 'image_request[remote_image_url]': img,
                 'image_request[locale]': 'en-US',
@@ -124,24 +130,22 @@ function cloudSight(imgURL, data) {
             }
             getTags(qs).then(function(tags) {
                 results = results.concat(tags)
-                i++;
                 done()
             }).catch(function(err) {
                 if (err) console.log(err)
-                i++;
                 done()
             })
         }
         //----If OpenCV Image processing did not fail----//
         else {
-             console.log('OpenCV found coordinates.')
+            console.log('OpenCV found coordinates.')
             var lastIndex = item.coords.length
             //Limit focal points to 2 max
-             if (lastIndex >= 2) {
+            if (lastIndex >= 2) {
                 item.coords = item.coords.splice(0, 2)
             }
-            console.log(item.coords.length + ' focal points found for current image.', item.coords)
-           
+            console.log(item.coords.length + ' focal point(s) found for current image.')
+
             //---For each request to cloudsight
             async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
                 qs = {
@@ -152,7 +156,7 @@ function cloudSight(imgURL, data) {
                     'focus[y]': coord[1] + coord[3] / 2
                 }
                 getTags(qs).then(function(tags) {
-                    results = results.concat(tags[0]);
+                    results = results.concat(tags);
                     finishedRequest()
                 }).catch(function(err) {
                     if (err) {

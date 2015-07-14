@@ -165,7 +165,6 @@ db.Zipcodes.find({
                                 requestNum = 0;
                                 saveCount = 0;
                             });
-
                         }
                         console.log('Finished ' + currentState + '!')
                         stateIndex++;
