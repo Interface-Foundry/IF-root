@@ -62,3 +62,13 @@ schemas.map(function (schema) {
     module.exports[schema.single] = model;
     module.exports[schema.plural] = model;
 });
+
+
+/**
+ * Expose a function called "map" which iterates over each collection.
+ */
+module.exports.map = function(cb) {
+    schemas.map(function(schema) {
+        return module.exports[schema.single];
+    }).map(cb);
+};
