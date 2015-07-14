@@ -15,47 +15,48 @@ var Promise = require('bluebird');
  *
  * after everything is processed, it becomes its own key, with a value indicating the success or failure
  *
+ *
  */
+var neighborhood = 'california/los-angeles';
 
 // gets all the items from a catalog page
 var scrapeCatalogPage = function(url) {
-    console.log('processing catalog page', url);
-    request.get(url, function(e, r, b) {
-        var $ = cheerio.load(b);
-        $('div.products div.productImageHolder a.img').toArray().map(function(a) {
-            var itemUrl = 'http://www.shoptiques.com' + $(a).attr('href');
+    return new Promise(function(resolve, reject) {
+        console.log('processing catalog page', url);
+        request.get(url, function (e, r, b) {
+            if (e) {
+                return reject(e);
+            }
+            var $ = cheerio.load(b);
+            var promises = $('div.products div.productImageHolder a.img').toArray().map(function (a) {
+                var itemUrl = 'http://www.shoptiques.com' + $(a).attr('href');
 
-            redisClient.rpush('items-toprocess', itemUrl, function(err, reply) {
-                if (err) { return console.error(err); }
-                console.log('added item', itemUrl);
+                return new Promise(function(resolve, reject) {
+                    redisClient.rpush('items-toprocess', itemUrl, function (err, reply) {
+                        if (err) {
+                            return console.error(err);
+                        }
+                        console.log('added item', itemUrl);
+                        resolve();
+                    });
+                });
             });
+
+            Promise.all(promises).then(resolve).catch(reject);
         });
     });
 };
 
-// stealthily seed our queue with all the cataloged items
-var stealtySeed = function() {
-    return new Promise(function(resolve, reject) {
-        var seedUrlFormat = 'http://www.shoptiques.com/neighborhoods/new_york_city?max=90&offset=X';
-        var interval = 90;
-        var maxOffset = 3330;
-
-        var urls = [];
-        for (var offset = 0; offset <= maxOffset; offset += interval) {
-            urls.push(seedUrlFormat.replace('X', offset));
-        }
-
-        // scape one page every minute, popping off a url from the array each time
-        setInterval(function() {
-            if (urls.length === 0) {
-                resolve();
-            }
-            var url = urls.splice(0, 1);
-            scrapeCatalogPage(url[0]);
-        }, 1000);
+var offset = 0;
+var urlFormat = 'http://www.shoptiques.com/neighborhoods/$n?max=90&offset=X'.replace('$n', neighborhood);
+var seed = function() {
+    url = urlFormat.replace('X', offset);
+    scrapeCatalogPage(url).then(function() {
+        offset += 90;
+        seed();
+    }).catch(function(e) {
+        console.error(e);
     });
 };
 
-stealtySeed().then(function(){
-    console.log('done seeding. scrape away');
-}).catch(console.log.bind(console));
+seed();
