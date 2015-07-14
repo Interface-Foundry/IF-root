@@ -18,8 +18,8 @@ var scrape = module.exports = function(url){
             var item = {};
             var boutique = {};
 
-            // boutique`
-            boutique.source = "shoptique";  // in case we have to hide all these some day in one big batch
+            // boutique
+            boutique.source = "shoptiques";  // in case we have to hide all these some day in one big batch
             boutique.name = $('div.boutique-introduction a').text();
             boutique.url = 'http://www.shoptiques.com' + $('div.boutique-introduction a').attr('href');
             boutique.neighborhood = $('div.boutique-neighborhood').text();
@@ -39,7 +39,7 @@ var scrape = module.exports = function(url){
             }
 
             // item
-            item.source = "shoptique";
+            item.source = "shoptiques";
             item.name = $('div.hidden-phone div.product-name>h1').text().trim();
             item.idString = $('div.hidden-phone div.product-name>h1').attr('id');
             item.id = parseInt(item.idString.replace('p-', ''));
@@ -63,7 +63,7 @@ var scrape = module.exports = function(url){
                 i.colorImage = $(c).attr('style').replace(/.*url\('/, '').replace('\')', '');
                 i.colorId = $(c).attr('data-id');
                 i.images = $('div.carousel-holder a[data-id="' + i.colorId + '"]').toArray().map(function(a) {
-                    return  $(a).attr('href');
+                    return  $(a).attr('href').replace('_l.jpg', '_m.jpg');
                 });
                 return i;
             });
@@ -76,13 +76,11 @@ var scrape = module.exports = function(url){
         var filename = __dirname + url.replace(/.*shoptiques.com\//, '/');
         if (fs.existsSync(filename)) {
             fs.readFile(filename, {encoding: 'utf8'}, function(err, data) {
-                debugger;
                 if (err) { return console.error(err); }
                 scrapeBody(data);
             });
         } else {
             request(url, function(e, r, b) {
-                debugger;
                 fs.writeFile(filename, b, {encoding: 'utf8'}, function(err) {
                     if (err) { return console.error(err); }
                     console.log('saved', filename);
