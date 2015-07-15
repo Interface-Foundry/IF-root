@@ -350,6 +350,30 @@ function parseTags(sentence, common) {
 function categorize(tags) {
     // Swimwear, Tops, Outerwear,Skirts, Tights & Leggings, Pants, Shoes, Accessories, Underwear, Jewerly
     var categories = [];
+    var pants = [
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        ''
+    ]
+    var tightsleggings = [
+        'tights',
+        'leggings',
+    ]
     var skirts = [
         'skirt',
         'miniskirt',
