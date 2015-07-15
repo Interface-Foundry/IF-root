@@ -566,8 +566,8 @@ app.use('/api/items', require('./components/IF_apiroutes/items_crud'));
 // app.use('/api/looks', require('./components/IF_apiroutes/looks_actions'));
 app.use('/api/looks',require('./components/IF_apiroutes/looks_crud'));
 //--- USER ROUTER ----//
-app.use('/api/users', require('./components/IF_apiroutes/users_actions'));
 app.use('/api/users', require('./components/IF_apiroutes/users_crud'));
+app.use('/api/users', require('./components/IF_apiroutes/users_actions'));
 //--- PLACES ROUTER ----//
 app.use('/api/places', require('./components/IF_apiroutes/place_routes'));
 //--- SUPER USER ROUTER ----//
