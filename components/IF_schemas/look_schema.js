@@ -13,7 +13,11 @@ var lookSchema = mongoose.Schema({
     },
     description: String,
     lookImg: String,
-    tags: [String],
+    lookTags: {
+        colors: [],
+        categories: [],
+        text: []
+    },
     status: {
         type: String,
         enum: ['public', 'private']

@@ -131,8 +131,6 @@ db.Zipcodes.find({
                         async.eachSeries(zips, function(zip, callback) {
                                 var zipcode = zip.zipcode
                                 var zipObj = zip
-
-
                                 var area = zip.area * 1609.34 * factor
                                 radius = area ? Math.sqrt((area) / 3.14159) : 3000
                                 console.log('Searching: ', zipcode, ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
@@ -289,7 +287,7 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                     if (!newPlace) {
                                         callback(null)
                                     } else {
-                                        // console.log('Saved ', newPlace.id)
+                                        console.log('Saved ', newPlace.id)
                                         saveCount++;
                                         newPlace.save(function(err, saved) {
                                             if (err) {

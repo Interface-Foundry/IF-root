@@ -101,7 +101,6 @@ app.get('/:mongoId/activity/me', function(req, res, next) {
     if (!req.user) {
         return next('Must be logged in to get activity')
     }
-
     db.Activities.find({
             userIds: req.user._id.toString()
         })

@@ -24,24 +24,30 @@ router.get('/:id', function(req, res, next) {
 //Create a new look
 router.post('/', function(req, res, next) {
     if (!req.user) {
+        // req.user = req.body.user
         return next('You must log in first');
     }
-    
-    // console.log('req.body',req.body)
+    // console.log('req.user:', req.user)
     var look = new db.Look();
+    look.lookTags = {
+        colors: [],
+        catgories: [],
+        text: []
+    };
     look = _.extend(look, req.body);
     look.owner = {
-      name: '',
-      mongoId: '',
-      profileID: ''
+        name: '',
+        mongoId: '',
+        profileID: ''
     }
     look.owner.name = req.user.name;
     look.owner.mongoId = req.user._id;
     look.owner.profileID = req.user.profileID;
-    var input = req.user.profileID
+    var input = req.user.profileID;
     async.waterfall([
         function(callback) {
             //Create a unique id field
+            // console.log('Create a unique id field..')
             uniquer.uniqueId(input, 'Looks').then(function(unique) {
                 look.id = unique;
                 callback(null, look);
@@ -49,17 +55,59 @@ router.post('/', function(req, res, next) {
                 callback(err)
             })
         },
+        //Collect tags from each snap in look 
         function(look, callback) {
+            // console.log('Collecting tags from snaps..')
+            async.eachSeries(look.snaps, function(snap, finished) {
+                db.Landmarks.findById(snap.mongoId, function(err, result) {
+                    if (err) {
+                        err.niceMessage = 'Could not find snap included in look.';
+                        return finished(err)
+                    }
+                    result.itemTags.colors.forEach(function(snapColorTag) {
+                        var lookColorTags = look.lookTags.colors.join(' ')
+                        if (lookColorTags.indexOf(snapColorTag) == -1) {
+                            look.lookTags.colors.push(snapColorTag)
+                        }
+                    })
+                    result.itemTags.categories.forEach(function(snapCategoryTag) {
+                        var lookCategoryTags = look.lookTags.categories.join(' ');
+                        if (lookColorTags.indexOf(snapCategoryTag) == -1) {
+                            look.lookTags.categories.push(snapCategoryTag)
+                        }
+                    })
+                    result.itemTags.text.forEach(function(snapTextTag) {
+                        var lookTextTags = look.lookTags.text.join(' ');
+                        if (lookTextTags.indexOf(snapTextTag) == -1) {
+                            look.lookTags.text.push(snapTextTag)
+                        }
+                    })
+                })
+                finished();
+            }, function(err) {
+                if (err) {
+                    err.niceMessage = 'Could not collect tags from snaps.';
+                    return callback(err)
+                }
+                callback(null, look);
+            })
+        },
+        function(look, callback) {
+            // console.log('Uploading look to Amazon S3..')
             //Upload look image to Amazon S3
             upload.uploadPicture(look.owner.profileID, look.base64).then(function(imgURL) {
                 look.lookImg = imgURL;
                 callback(null, look);
             }).catch(function(err) {
-                callback(err)
+                if (err) {
+                    err.niceMessage = 'Could not upload image.';
+                    return callback(err)
+                }
             })
         },
         function(look, callback) {
-          //Save look in db
+            // console.log('Saving..')
+            //Save look in db
             look.save(function(err, look) {
                 if (err) {
                     err.niceMessage = 'Could not save look';

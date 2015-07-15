@@ -107,20 +107,20 @@ function cloudSight(imgURL, data) {
     var deferred = q.defer();
     var qs = {};
     var results = []
-    // console.log('Data: ', data.items)
+        // console.log('Data: ', data.items)
     var items = data.items
 
     var i = 0;
 
     async.eachSeries(imgURL, function iterator(img, done) {
         if (items == undefined || items == null) {
-             console.log('OpenCV did not find coordinates..', JSON.stringify(items))
+            console.log('OpenCV did not find coordinates..', JSON.stringify(items))
             return done()
         }
         var item = items[i]
         i++;
         console.log('Processing image:' + i + '/' + (imgURL.length))
-        //----If OpenCV Image processing does not return coordinates----//
+            //----If OpenCV Image processing does not return coordinates----//
         if (item == null || item.coords == null || (item.coords && item.coords.length < 1)) {
             console.log('OpenCV did not find coordinates.', JSON.stringify(item))
             qs = {
@@ -140,7 +140,7 @@ function cloudSight(imgURL, data) {
         else {
             console.log('OpenCV found coordinates.')
             var lastIndex = item.coords.length
-            //Limit focal points to 2 max
+                //Limit focal points to 2 max
             if (lastIndex >= 2) {
                 item.coords = item.coords.splice(0, 2)
             }
@@ -192,74 +192,6 @@ function cloudSight(imgURL, data) {
             deferred.resolve(results)
         }
     }); //End of eachseries
-
-    //     //----If OpenCV Image processing did not fail----//
-    // } else {
-    //     // console.log('OpenCV successfully returned focus coordinates.',data.items)
-    //     //---For each image
-    //     async.eachSeries(imgURL, function iterator(img, finishedImage) {
-    //             var failCount = 0;
-    //             //---For each set of coordinates
-    //             async.eachSeries(data.items, function iterator(item, finishedCoord) {
-    //                         var lastIndex = item.coords.length
-    //                         console.log(lastIndex + ' focal points found for current image.', item.coords)
-    //                         if (lastIndex >= 2) {
-    //                             console.log('Limiting coordinates to two sets only..')
-    //                             item.coords = item.coords.splice(0, 2)
-    //                             console.log('New coords: ', item.coords)
-    //                         }
-
-    //                         //---For each request to cloudsight
-    //                         async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
-    //                             qs = {
-    //                                 'image_request[remote_image_url]': img,
-    //                                 'image_request[locale]': 'en-US',
-    //                                 'image_request[language]': 'en',
-    //                                 'focus[x]': coord[0] + coord[2] / 2,
-    //                                 'focus[y]': coord[1] + coord[3] / 2
-    //                             }
-    //                             getTags(qs).then(function(tags) {
-    //                                 results = results.concat(tags[0]);
-    //                                 finishedRequest()
-    //                             }).catch(function(err) {
-    //                                 if (err) {
-    //                                     console.log('Error: ', err)
-    //                                     failCount++
-    //                                     if (failCount == item.coords.length) {
-    //                                         console.log('No tags found in any of the focus points!')
-    //                                         return finishedRequest(err)
-    //                                     } else {
-    //                                         console.log('No tags found for this focal point.')
-    //                                         return finishedRequest()
-    //                                     }
-    //                                 }
-
-    //                                 finishedRequest()
-    //                             })
-    //                         }, function(err) {
-    //                             if (err) {
-    //                                 console.log('Error: ', err)
-    //                                 return finishedCoord(err)
-    //                             }
-    //                             finishedCoord()
-    //                         });
-    //                     },
-    //                     function(err) {
-    //                         if (err) {
-    //                             console.log('Error: ', err)
-    //                             return finishedImage(err)
-    //                         }
-    //                         finishedImage()
-    //                     }) //End: Eachseries coordinates
-    //         }, function(err) {
-    //             if (err) {
-    //                 return deferred.reject(err)
-    //             }
-    //             // console.log('LINE 199! tags:', results)
-    //             deferred.resolve(results)
-    //         }) //End: Eachseries images
-    // } //end of else
-
 
     return deferred.promise;
 }
@@ -383,7 +315,6 @@ function updateDB(landmarkID, tags) {
     return deferred.promise;
 }
 
-
 function parseTags(sentence, common) {
     sentence = sentence.replace(/'/g, "");
     sentence = sentence.replace(/-/g, "");
@@ -412,6 +343,164 @@ function parseTags(sentence, common) {
         }
     }
     return uncommonArr;
+}
+
+
+
+function categorize(tags) {
+    // Swimwear, Tops, Outerwear,Skirts, Tights & Leggings, Pants, Shoes, Accessories, Underwear, Jewerly
+    var categories = [];
+    var skirts = [
+        'skirt',
+        'miniskirt',
+        'mini-skirt',
+        'a-line',
+        'aline',
+        'aline-skirt'
+        'ballerina',
+        'ballerina-skirt',
+        'denimskirt',
+        'denim-skirt',
+        'jobskirt',
+        'job-skirt',
+        'job',
+        'microskirt',
+        'micro-skirt',
+        'pencil',
+        'pencil-skirt',
+        'pencilskirt',
+        'praire',
+        'praire-skirt',
+        'praireskirt',
+        'rah-rah',
+        'rahrah',
+        'tutu',
+        'wrap-skirt',
+        'wrap',
+        'leatherskirt',
+        'leather-skirt'
+    ]
+    var tops = [
+        'top',
+        'dress',
+        'shirt',
+        'sweater',
+        'tshirt',
+        't-shirt',
+        'sleeveless',
+        'long-sleeve',
+        'longsleeve',
+        'vest',
+        'jersey',
+        'dress-shirt',
+        'dressshirt',
+        'button-down',
+        'buttondown',
+        'polo',
+        'polo-shirt',
+        'tank',
+        'tanktop',
+        'tank-top',
+        'blouse',
+        'henley',
+        'crop',
+        'croptop',
+        'crop-top',
+        'tube',
+        'tubetop',
+        'tube-top',
+        'jeantop',
+        'jean-top',
+        'halter',
+        'haltertop',
+        'turtle',
+        'turtleneck',
+        'turtle-neck'
+    ]
+    var outerwear = [
+        'jacket',
+        'coat',
+        'blazer',
+        'hoodie',
+        'suit',
+        'windbreaker',
+        'parka',
+        'leather-jacket',
+        'leatherjacket',
+        'harrington',
+        'harrington-jacket',
+        'harringtonjacket',
+        'poncho',
+        'robe',
+        'shawl',
+        'tuxedo',
+        'overcoat',
+        'over-coat',
+        'sport-coat',
+        'sportcoat',
+        'waistcoat',
+        'waist-coat',
+        'duffle',
+        'dufflecoat',
+        'duffle-coat',
+        'peacoat',
+        'pea',
+        'britishwarm',
+        'british-warm',
+        'ulster',
+        'ulster-coat',
+        'winterjacket',
+        'winter-jacket',
+        'puffer',
+        'puffer-jacket',
+        'cagoule',
+        'chesterfield',
+        'cover-coat',
+        'covercoat',
+        'duffle-coat',
+        'bomber',
+        'bomber-jacket',
+        'bomberjacket',
+        'trench',
+        'trenchcoat',
+        'trench-coat',
+        'rain',
+        'raincoat',
+        'guardjacket',
+        'guard-jacket',
+        'mess',
+        'mess-jacket',
+        'messjacket',
+        'opera',
+        'operacoat',
+        'opera-coat',
+        'shrug'
+    ]
+    var swimwear = [
+        'swim',
+        'swimwear',
+        'swim-wear',
+        'swimsuit',
+        'swim-suit',
+        'swim-briefs',
+        'swimbriefs',
+        'wet',
+        'wetsuit',
+        'wet-suit',
+        'surfer',
+        'surf'
+        'trunks',
+        'bikini',
+        'boardshorts',
+        'board',
+        'drysuit',
+        'dry',
+        'one-piece',
+        'onepiece',
+        'rashguard',
+        'rash'
+    ]
+
 }
 
 function colorHex(tags) {
