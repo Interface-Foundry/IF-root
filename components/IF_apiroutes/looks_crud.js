@@ -72,7 +72,7 @@ router.post('/', function(req, res, next) {
                     })
                     result.itemTags.categories.forEach(function(snapCategoryTag) {
                         var lookCategoryTags = look.lookTags.categories.join(' ');
-                        if (lookColorTags.indexOf(snapCategoryTag) == -1) {
+                        if (lookCategoryTags.indexOf(snapCategoryTag) == -1) {
                             look.lookTags.categories.push(snapCategoryTag)
                         }
                     })
