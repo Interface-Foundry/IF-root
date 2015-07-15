@@ -58,10 +58,17 @@ app.get('/:xmongoId/activity', function (req, res, next) {
 
 /**
  * GET /api/users/:mongoId/followers/activity
+ * GET /api/users/:mongoId/following/activity
+ *
+ * (This route handles both)
  */
-app.get('/:xmongoId/followers/activity', function (req, res, next) {
+app.get('/:xmongoId/:followxxx/activity', function (req, res, next) {
+    if (['followers', 'following'].indexOf(req.params.followxxx) < 0) {
+        return next();
+    }
+
     db.Activities.find({
-        userIds: {$in: req.user.followers}
+        userIds: {$in: req.user[req.params.followxxx]}
     })
         .sort({
             activityTime: -1
@@ -187,12 +194,19 @@ app.get('/:xmongoId/getAll', function (req, res, next) {
         }).catch(next);
 });
 
+/**
+ * GET /api/users/:mongoId/followers
+ * GET /api/users/:mongoId/following
+ */
+app.get('/:xmongoId/:followxxx', function(req, res, next) {
+    if (['followers', 'following'].indexOf(req.params.followxxx) < 0) {
+        return next();
+    }
 
-app.get('/:xmongoId/followers', function(req, res, next) {
-    // get the last 30 from the followers string
-    var followers = req.targetUser.followers.slice(-30);
+    // get the last 30 from the followers/following string array
+    var follows = req.targetUser[req.params.followxxx].slice(-30);
     db.Users.find({
-            _id: {$in: followers}
+            _id: {$in: follows}
         })
         .execAsync()
         .then(function(users) {
