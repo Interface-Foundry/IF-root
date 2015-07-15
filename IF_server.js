@@ -3749,6 +3749,9 @@ app.use(function error_handler(err, req, res, next) {
         };
     }
 
+    err.method = req.method;
+    err.path = req.originalUrl;
+
     // log stuff to the console
     if (err.niceMessage) {
         console.error(err.niceMessage);
