@@ -13,6 +13,7 @@ var express = require('express'),
 //Create a new snap
 router.post('/', function(req, res, next) {
     if (!req.user) {
+           // req.user = req.body.user
         return next('You must log in first');
     }
     var newItem = new db.Landmark();

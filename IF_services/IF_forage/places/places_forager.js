@@ -51,37 +51,36 @@ var radius = 0
 
 var states = [
     "NY",
-    "CA"
-    ,
-    "NJ"
-    ,
-    "AL",
-    "AK",
+    "NJ",
+    "CA",
+    "IL",
+    "FL",
+    "TX",
+    "NV",
+    "IN",
+    "PA",
+    "RI",
+    "CT",
+    "MI",
     "AZ",
     "AR",
     "CO",
-    "CT",
     "DE",
-    "FL",
     "GA",
     "HI",
     "ID",
-    "IL",
-    "IN",
     "IA",
     "KS",
     "KY",
     "LA",
     "ME",
     "MD",
-    "MA",
-    "MI",
+    "MA",  
     "MN",
     "MS",
     "MO",
     "MT",
     "NE",
-    "NV",
     "NH",
     "NM",
     "NC",
@@ -89,19 +88,18 @@ var states = [
     "OH",
     "OK",
     "OR",
-    "PA",
-    "RI",
     "SC",
     "SD",
     "TN",
-    "TX",
     "UT",
     "VT",
     "VA",
     "WA",
     "WV",
     "WI",
-    "WY"
+    "WY",
+    "AL",
+    "AK"
 ]
 
 var stateIndex = 0
@@ -323,7 +321,7 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                     }) //END OF ASYNC EACH
         },
         function(err) {
-            if (err) console.log('Line 333: ',err)
+            if (err) console.log('Line 333: ', err)
             zipDone()
         })
 }

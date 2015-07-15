@@ -69,7 +69,7 @@ var timer = new InvervalTimer(function() {
                         ],
                         //snap is done processing
                         function(err, results) {
-                            if (err) console.log('Error: ', err)
+                            if (err) console.log('72 Error: ', err)
                                 //Remove from redis queue
                             client.lrem('snaps', 1, snap_str);
                             timer.resume()
@@ -118,8 +118,9 @@ function cloudSight(imgURL, data) {
             return done()
         }
         var item = items[i]
+        var failCount = 0
         i++;
-        console.log('Processing image:' + i + '/' + (imgURL.length))
+        console.log('Processing image: ' + i + '/' + (imgURL.length))
             //----If OpenCV Image processing does not return coordinates----//
         if (item == null || item.coords == null || (item.coords && item.coords.length < 1)) {
             console.log('OpenCV did not find coordinates.', JSON.stringify(item))
@@ -160,7 +161,7 @@ function cloudSight(imgURL, data) {
                     finishedRequest()
                 }).catch(function(err) {
                     if (err) {
-                        console.log('Error: ', err)
+                        console.log('163 Error: ', err)
                         failCount++
                         if (failCount == item.coords.length) {
                             console.log('No tags found in any of the focus points!')
@@ -174,8 +175,8 @@ function cloudSight(imgURL, data) {
                 })
             }, function(err) {
                 if (err) {
-                    console.log('Error: ', err)
-                    return done(err)
+                    console.log('177 Error: ', err)
+                    return done()
                 }
                 done()
             });
@@ -183,11 +184,13 @@ function cloudSight(imgURL, data) {
     }, function(err) {
         if (err) {
             console.log('Finished Error: ', err)
-            deferred.reject(err);
+                // deferred.reject(err);
         }
         console.log('Finished looking for tags..', results)
-        if (results == undefined) {
-            deferred.reject('No tags found')
+        if (results.length < 1) {
+            return deferred.reject('No Tags found.')
+        } else if (results == undefined) {
+            return deferred.reject('No tags found')
         } else {
             deferred.resolve(results)
         }
@@ -283,6 +286,7 @@ function updateDB(landmarkID, tags) {
         tags = _.flatten(tags);
     }
     var colors = colorHex(tags);
+    var categories = categorize(tags);
     tags = _.difference(tags, colors);
     tags = eliminateDuplicates(tags);
     colors = eliminateDuplicates(colors)
@@ -298,14 +302,18 @@ function updateDB(landmarkID, tags) {
             colors.forEach(function(color) {
                 landmark.itemTags.colors.push(color)
             })
+            categories.forEach(function(category) {
+                landmark.itemTags.categories.push(category)
+            })
 
             //Eliminate dupes again for already existing user inputted tags
-            tags = eliminateDuplicates(tags);
-            colors = eliminateDuplicates(colors);
+            landmark.itemTags.text = eliminateDuplicates(landmark.itemTags.text);
+            landmark.itemTags.colors = eliminateDuplicates(landmark.itemTags.colors);
+            landmark.itemTags.categories = eliminateDuplicates(landmark.itemTags.categories);
 
             landmark.save(function(err, saved) {
                 if (err) console.log(err)
-                    //console.log('Updated landmark:', saved)
+                console.log('Updated landmark:', saved)
                 deferred.resolve(saved);
             })
         } else {
@@ -345,186 +353,327 @@ function parseTags(sentence, common) {
     return uncommonArr;
 }
 
+// outerwear, dresses, tops, skirts, pants, underwear, activewear (formerly swimwear), tights & leggings, shoes, bags, accessories, jewelry
 
 
 function categorize(tags) {
-    // Swimwear, Tops, Outerwear,Skirts, Tights & Leggings, Pants, Shoes, Accessories, Underwear, Jewerly
-    var categories = [];
-    var pants = [
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        ''
-    ]
-    var tightsleggings = [
-        'tights',
-        'leggings',
-    ]
-    var skirts = [
-        'skirt',
-        'miniskirt',
-        'mini-skirt',
-        'a-line',
-        'aline',
-        'aline-skirt'
-        'ballerina',
-        'ballerina-skirt',
-        'denimskirt',
-        'denim-skirt',
-        'jobskirt',
-        'job-skirt',
-        'job',
-        'microskirt',
-        'micro-skirt',
-        'pencil',
-        'pencil-skirt',
-        'pencilskirt',
-        'praire',
-        'praire-skirt',
-        'praireskirt',
-        'rah-rah',
-        'rahrah',
-        'tutu',
-        'wrap-skirt',
-        'wrap',
-        'leatherskirt',
-        'leather-skirt'
-    ]
-    var tops = [
-        'top',
-        'dress',
-        'shirt',
-        'sweater',
-        'tshirt',
-        't-shirt',
-        'sleeveless',
-        'long-sleeve',
-        'longsleeve',
-        'vest',
-        'jersey',
-        'dress-shirt',
-        'dressshirt',
-        'button-down',
-        'buttondown',
-        'polo',
-        'polo-shirt',
-        'tank',
-        'tanktop',
-        'tank-top',
-        'blouse',
-        'henley',
-        'crop',
-        'croptop',
-        'crop-top',
-        'tube',
-        'tubetop',
-        'tube-top',
-        'jeantop',
-        'jean-top',
-        'halter',
-        'haltertop',
-        'turtle',
-        'turtleneck',
-        'turtle-neck'
-    ]
-    var outerwear = [
-        'jacket',
-        'coat',
-        'blazer',
-        'hoodie',
-        'suit',
-        'windbreaker',
-        'parka',
-        'leather-jacket',
-        'leatherjacket',
-        'harrington',
-        'harrington-jacket',
-        'harringtonjacket',
-        'poncho',
-        'robe',
-        'shawl',
-        'tuxedo',
-        'overcoat',
-        'over-coat',
-        'sport-coat',
-        'sportcoat',
-        'waistcoat',
-        'waist-coat',
-        'duffle',
-        'dufflecoat',
-        'duffle-coat',
-        'peacoat',
-        'pea',
-        'britishwarm',
-        'british-warm',
-        'ulster',
-        'ulster-coat',
-        'winterjacket',
-        'winter-jacket',
-        'puffer',
-        'puffer-jacket',
-        'cagoule',
-        'chesterfield',
-        'cover-coat',
-        'covercoat',
-        'duffle-coat',
-        'bomber',
-        'bomber-jacket',
-        'bomberjacket',
-        'trench',
-        'trenchcoat',
-        'trench-coat',
-        'rain',
-        'raincoat',
-        'guardjacket',
-        'guard-jacket',
-        'mess',
-        'mess-jacket',
-        'messjacket',
-        'opera',
-        'operacoat',
-        'opera-coat',
-        'shrug'
-    ]
-    var swimwear = [
-        'swim',
-        'swimwear',
-        'swim-wear',
-        'swimsuit',
-        'swim-suit',
-        'swim-briefs',
-        'swimbriefs',
-        'wet',
-        'wetsuit',
-        'wet-suit',
-        'surfer',
-        'surf'
-        'trunks',
-        'bikini',
-        'boardshorts',
-        'board',
-        'drysuit',
-        'dry',
-        'one-piece',
-        'onepiece',
-        'rashguard',
-        'rash'
-    ]
 
+    var snapCategories = [];
+    var categories = [{
+        'Tops': [
+            'top',
+            'shirt',
+            'sweater',
+            'tshirt',
+            't-shirt',
+            'sleeveless',
+            'long-sleeve',
+            'longsleeve',
+            'vest',
+            'jersey',
+            'dress-shirt',
+            'dressshirt',
+            'button-down',
+            'buttondown',
+            'polo',
+            'polo-shirt',
+            'tank',
+            'tanktop',
+            'tank-top',
+            'blouse',
+            'henley',
+            'crop',
+            'croptop',
+            'crop-top',
+            'tube',
+            'tubetop',
+            'tube-top',
+            'jeantop',
+            'jean-top',
+            'halter',
+            'haltertop',
+            'turtle',
+            'turtleneck',
+            'turtle-neck'
+        ]
+    }, {
+        'Dresses': [
+            'dress',
+            'sundress',
+            'wedding',
+            'maxi',
+            'gown',
+            'bubble',
+            'tiered',
+            'corset',
+            'tea',
+            'teadress',
+            'wrap',
+            'wrapdress',
+            'blouson',
+            'halter',
+            'babydoll',
+            'bodycon'
+        ]
+    }, {
+        'Outerwear': [
+            'jacket',
+            'coat',
+            'blazer',
+            'hoodie',
+            'suit',
+            'windbreaker',
+            'parka',
+            'leather-jacket',
+            'leatherjacket',
+            'harrington',
+            'harrington-jacket',
+            'harringtonjacket',
+            'poncho',
+            'robe',
+            'shawl',
+            'tuxedo',
+            'overcoat',
+            'over-coat',
+            'sport-coat',
+            'sportcoat',
+            'waistcoat',
+            'waist-coat',
+            'duffle',
+            'dufflecoat',
+            'duffle-coat',
+            'peacoat',
+            'pea',
+            'britishwarm',
+            'british-warm',
+            'ulster',
+            'ulster-coat',
+            'winterjacket',
+            'winter-jacket',
+            'puffer',
+            'puffer-jacket',
+            'cagoule',
+            'chesterfield',
+            'cover-coat',
+            'covercoat',
+            'duffle-coat',
+            'bomber',
+            'bomber-jacket',
+            'bomberjacket',
+            'trench',
+            'trenchcoat',
+            'trench-coat',
+            'rain',
+            'raincoat',
+            'guardjacket',
+            'guard-jacket',
+            'mess',
+            'mess-jacket',
+            'messjacket',
+            'opera',
+            'operacoat',
+            'opera-coat',
+            'shrug'
+        ]
+    }, {
+        'Pants': [
+            'shorts',
+            'pants',
+            'pant',
+            'jeans',
+            'jean',
+            'trousers',
+            'trouser',
+            'chaps',
+            'cargo',
+            'capri',
+            'palazzo',
+            'palazzos',
+            'chinos',
+            'chino',
+            'khaki',
+            'khakis',
+            'overalls',
+            'yoga-pants',
+            'yogapants',
+            'lowrise',
+            'lowrise-pants',
+            'lowrisepants',
+            'sweatpants',
+            'sweat-pants',
+            'parachute',
+            'phat',
+            'pedal-pushers',
+            'pedalpushers',
+            'dresspants',
+            'dress-pants',
+            'bellbottoms',
+            'bell-bottoms',
+            'cycling',
+            'highwater',
+            'high-water',
+            'bermuda',
+            'windpants',
+            'wind-pants'
+        ]
+    }, {
+        'Shoes': [
+            'shoe',
+            'shoes',
+            'sneaker',
+            'sneakers',
+            'boot',
+            'boots',
+            'slipper',
+            'slippers',
+            'sandal',
+            'sandals',
+            'spat',
+            'spats',
+            'croc',
+            'crocs',
+            'dress-shoes',
+            'boot',
+            'boots',
+            'flip-flops',
+            'flip-flop',
+            'sandal',
+            'heels',
+            'high-heels',
+            'highheels'
+        ]
+    }, {
+        'Skirts': [
+            'skirt',
+            'miniskirt',
+            'mini-skirt',
+            'a-line',
+            'aline',
+            'aline-skirt',
+            'ballerina',
+            'ballerina-skirt',
+            'denimskirt',
+            'denim-skirt',
+            'jobskirt',
+            'job-skirt',
+            'job',
+            'microskirt',
+            'micro-skirt',
+            'pencil-skirt',
+            'pencilskirt',
+            'praire',
+            'praire-skirt',
+            'praireskirt',
+            'rah-rah',
+            'rahrah',
+            'tutu',
+            'wrap-skirt',
+            'wrapskirt',
+            'leatherskirt',
+            'leather-skirt'
+        ]
+    }, {
+        'Accessories': [
+            'handbag',
+            'handbags',
+            'sunglasses',
+            'watch',
+            'wristwatch',
+            'scarf',
+            'sash',
+            'headband',
+            'glasses',
+            'cufflink',
+            'tie',
+            'necktie',
+            'bow',
+            'bowtie',
+            'belt',
+            'bandana',
+            'suspenders',
+            'wallet'
+        ]
+    }, {
+        'Activewear': [
+            'swim',
+            'swimwear',
+            'swim-wear',
+            'swimsuit',
+            'swim-suit',
+            'swim-briefs',
+            'swimbriefs',
+            'wet',
+            'wetsuit',
+            'wet-suit',
+            'surfer',
+            'surf',
+            'trunks',
+            'bikini',
+            'boardshorts',
+            'board',
+            'drysuit',
+            'dry',
+            'one-piece',
+            'onepiece',
+            'rashguard',
+            'rash',
+            'yoga',
+            'sports'
+        ]
+    }, {
+        'Jewelry': [
+            'earrings',
+            'earring',
+            'necklace',
+            'ring',
+            'brooch',
+            'brooches',
+            'bracelet',
+            'bracelets',
+            'amethyst',
+            'emerald',
+            'jade',
+            'jasper',
+            'ruby',
+            'sapphire',
+            'diamond',
+            'gold'
+        ]
+    }, {
+        'Underwear': [
+            'underwear',
+            'underpants',
+            'boxers',
+            'briefs',
+            'boxer',
+            'brief',
+            'panties',
+            'slip',
+            'hoisery',
+            'bra',
+            'bras'
+        ]
+    }, {
+        'Tights & Leggings': [
+            'tights',
+            'leggings',
+            'legging'
+        ]
+    }]
+    categories.forEach(function(category) {
+        for (var key in category) {
+            if (category.hasOwnProperty(key)) {
+                tags.forEach(function(tag) {
+                    for (var i = 0; i < category[key].length; i++) {
+                        if (category[key][i].trim() == tag.trim()) {
+                            snapCategories.push(key);
+                        }
+                    }
+                })
+            }
+        }
+    })
+    return snapCategories
 }
 
 function colorHex(tags) {

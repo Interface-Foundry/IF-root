@@ -20,7 +20,7 @@ app.use('/:x/:action', function(req, res, next) {
         return next('Hi. You must log in first. (´• ω •`)ﾉ');
     }
 
-    if (req.targetMongoId === req.user._id.toString() && req.params.action !== 'snaps') {
+    if (req.targetMongoId === req.user._id.toString()) {
         return next('You can\'t ' + req.params.action + ' yourself (・_・//)');
     }
 });
