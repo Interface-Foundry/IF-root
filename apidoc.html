@@ -1,0 +1,261 @@
+<html>
+    <head>
+        <title>Kip API Doc</title>
+        <!-- based on http://codepen.io/javve/pen/zpuKF -->
+        <style>
+            .list {
+                font-family:sans-serif;
+                margin:0;
+                padding:20px 0 0;
+            }
+            .list > li {
+                display:block;
+                background-color: #eee;
+                padding:10px;
+                box-shadow: inset 0 1px 0 #fff;
+            }
+            .avatar {
+                max-width: 150px;
+            }
+            img {
+                max-width: 100%;
+            }
+            h3 {
+                font-size: 16px;
+                margin:0 0 0.3rem;
+                font-weight: normal;
+                font-weight:bold;
+            }
+            p {
+                margin:0;
+            }
+
+            input {
+                border:solid 1px #ccc;
+                border-radius: 5px;
+                padding:7px 14px;
+                margin-bottom:10px
+            }
+            input:focus {
+                outline:none;
+                border-color:#aaa;
+            }
+            .sort {
+                padding:8px 30px;
+                border-radius: 6px;
+                border:none;
+                display:inline-block;
+                color:#fff;
+                text-decoration: none;
+                background-color: #28a8e0;
+                height:30px;
+            }
+            .sort:hover {
+                text-decoration: none;
+                background-color:#1b8aba;
+            }
+            .sort:focus {
+                outline:none;
+            }
+            .sort:after {
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 5px solid transparent;
+                content:"";
+                position: relative;
+                top:-10px;
+                right:-5px;
+            }
+            .sort.asc:after {
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #fff;
+                content:"";
+                position: relative;
+                top:13px;
+                right:-5px;
+            }
+            .sort.desc:after {
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 5px solid #fff;
+                content:"";
+                position: relative;
+                top:-10px;
+                right:-5px;
+            }
+            .method:after {
+                content: " "
+            }
+            .response:before {
+                content: "reponse: "
+            }
+            .body:before {
+                content: "body: "
+            }
+        </style>
+    </head>
+    <body>
+    <div id="api">
+        <input class="search" placeholder="Search" />
+        <button class="sort" data-sort="route">
+            Sort by route
+        </button>
+
+        <ul class="list">
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId</span></h3>
+                <pre class="response">User</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/following/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/faves</span></h3>
+                <pre class="response">{result: [Landmark or Look], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/snaps</span></h3>
+                <pre class="response">{result: [Landmark], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/looks</span></h3>
+                <pre class="response">{result: [Look], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/getAll</span></h3>
+                <pre class="response">{result: [Landmark or Look], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers</span></h3>
+                <pre class="response">{result: [User], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/following</span></h3>
+                <pre class="response">{result: [User], links: {}}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/users/:mongoId/follow</span></h3>
+                <pre class="response">'(⌒‿⌒)'</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/users/:mongoId/unfollow</span></h3>
+                <pre class="response">'(⌒‿⌒)'</pre>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/items/:mongoId</span></h3>
+                <pre class="response">Item</pre>
+            </li>
+            <li>
+                <h3><span class="method">PUT</span><span class="route">/api/items/:mongoId</span></h3>
+                <pre class="response">Item</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/delete</span></h3>
+                <pre class="response">200</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/comment</span></h3>
+                <pre class="body">{
+        comment: String,
+        timeCommented: Date,
+        userId: String, (optional, can figure out on back end)
+        userName: String, (optional, can figure out on back end)
+        userAvatar: String, (optional, can figure out on back end)
+        userMongoId: String (optional, can figure out on back end)
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/deletecomment</span></h3>
+                <pre class="body">{
+        comment: String,
+        timeCommented: Date,
+        userId: String, (optional, can figure out on back end)
+        userName: String, (optional, can figure out on back end)
+        userAvatar: String, (optional, can figure out on back end)
+        userMongoId: String (optional, can figure out on back end)
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/tag</span></h3>
+                <pre class="body">{
+	“type”: “colors” or “categories” or “text”,
+	“value”: “whatever”
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/deletetag</span></h3>
+                <pre class="body">{
+	“type”: “colors” or “categories” or “text”,
+	“value”: “whatever”
+}</pre>
+                <pre class="response">{item: Item}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/fave</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/unfave</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/reject</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/unreject</span></h3>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/:mongoId/report</span></h3>
+                <pre class="body">{
+	timeReported: result of +new Date(),
+	comment: “some comment”,
+	reason: “some reason”
+}</pre>
+                <pre class="response">{item: Item, user: User}</pre>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/api/items/search</span></h3>
+                <pre class="body">{
+	text: "something tag la", (required?)
+	colors: ['FF00FF', 'FF00FF'], (optional)
+	categories: ['shoes'], (optional)
+	price: 1, // or 2, 3, or 4 (optional)
+	radius: .5, // miles (optional, defaults to 0.5 miles)
+	loc: {lat: 34, lon: -77} (required)
+}</pre>
+                <pre class="response">{result: [Landmark], links: {}, query: {}}</pre>
+            </li>
+        </ul>
+
+    </div>
+    <script src="http://listjs.com/no-cdn/list.js"></script>
+    <script>
+        var options = {
+            valueNames: [ 'route', 'body', 'response', 'method' ]
+        };
+
+        var userList = new List('api', options);
+    </script>
+    </body>
+</html>
