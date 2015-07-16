@@ -5,7 +5,7 @@ var db = require('db');
 //Log mode
 var logMode = process.argv[2] ? process.argv[2] : 'false'
 var testMode = process.argv[3] ? process.argv[3] : 'false'
-//Optional
+    //Optional
 var radiusMax = 40324
 var errCount = 0;
 
@@ -146,7 +146,7 @@ var nyc = [
 
 var stateIndex = 0;
 var currentState = states[stateIndex]
-//This number needs to be refined for max results 
+    //This number needs to be refined for max results 
 var factor = 100;
 
 async.whilst(
@@ -158,7 +158,9 @@ async.whilst(
             'state': currentState
         }
         var test = {
-            'zipcode': { $in: nyc}
+            'zipcode': {
+                $in: nyc
+            }
         }
         var query = testMode ? test : normal;
         //search places in loops
@@ -168,8 +170,13 @@ async.whilst(
                 }
 
                 if (logMode) {
-
+                    console.log('Log Mode On.')
                 }
+                if (testMode) {
+                    console.log('Test Mode On.')
+                    currentState = 'NY'
+                }
+
                 var count = 0;
                 console.log('...Searching state: ' + currentState)
                 async.whilst(
@@ -181,7 +188,8 @@ async.whilst(
                                 var zipcode = zip.zipcode
                                 var area = zip.area * 1609.34 * factor
                                 radius = area ? Math.sqrt((area) / 3.14159) : 3000
-                                console.log('Searching: ', zipcode, ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
+                                zip.neighborhood = zip.neighborhood ? zip.neighborhood : '';
+                                console.log('Searching: ', zipcode+' '+ zip.neighborhood+ ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
                                 var coords = getLatLong(zipcode).then(function(coords) {
                                     searchPlaces(coords, zipcode, zip, function() {
                                         count++;
@@ -204,7 +212,7 @@ async.whilst(
                     function(err) {
                         //Log results each loop
                         if (logMode == 'true') {
-                            var logData = '\nFor State: ' + currentState + '\nFactor : ' + factor + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' 
+                            var logData = '\nFor State: ' + currentState + '\nFactor : ' + factor + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n'
                             fs.appendFile('places.log', logData, function(err) {
                                 if (err) throw err;
                                 placeCount = 0;
@@ -222,11 +230,12 @@ async.whilst(
                                 //Restart at first state
                             stateIndex = 0;
                             currentState = states[stateIndex]
-                            if (testMode) {
-                                console.log('Increasing factor by 100')
+                        }
+
+                        if (testMode) {
+                            console.log('Increasing factor by 100')
                                 //Increase factor by 100
-                                factor += 100
-                            }
+                            factor += 100
                         }
                         wait(start, 300); // Wait before looping over the zip again
                     }
