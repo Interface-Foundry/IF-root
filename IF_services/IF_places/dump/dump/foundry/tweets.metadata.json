@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"foundry.tweets"},{"v":1,"unique":true,"key":{"tweetID":1},"name":"tweetID_1","ns":"foundry.tweets","background":true},{"v":1,"key":{"text":1},"name":"text_1","ns":"foundry.tweets","background":true},{"v":1,"key":{"hashtags":1},"name":"hashtags_1","ns":"foundry.tweets","background":true}]}
