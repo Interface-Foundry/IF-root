@@ -4,7 +4,7 @@ var db = require('db');
 
 //Log mode
 var logMode = process.argv[2] ? process.argv[2] : 'false'
-
+var testMode = process.argv[3] ? process.argv[3] : 'false'
 //Optional
 var radiusMax = 40324
 var errCount = 0;
@@ -48,7 +48,6 @@ var saveCount = 0;
 var requestNum = 0;
 var radius = 0
 
-
 var states = [
     "NY",
     "NJ",
@@ -75,7 +74,7 @@ var states = [
     "LA",
     "ME",
     "MD",
-    "MA",  
+    "MA",
     "MN",
     "MS",
     "MO",
@@ -102,23 +101,75 @@ var states = [
     "AK"
 ]
 
-var stateIndex = 0
-var currentState = process.argv[3] ? process.argv[3] : states[stateIndex]
-    //This number needs to be refined for max results 
-var factor = 2000
+var nyc = [
+    "10001",
+    "10002",
+    "10003",
+    "10005",
+    "10006",
+    "10007",
+    "10009",
+    "10010",
+    "10011",
+    "10013",
+    "10014",
+    "10016",
+    "10017",
+    "10018",
+    "10019",
+    "10020",
+    "10021",
+    "10022",
+    "10023",
+    "10024",
+    "10025",
+    "10026",
+    "10027",
+    "10028",
+    "10029",
+    "10030",
+    "10031",
+    "10032",
+    "10033",
+    "10034",
+    "10035",
+    "10036",
+    "10037",
+    "10038",
+    "10039",
+    "10040",
+    "10044",
+    "10128",
+    "10280",
+    "10012"
+]
 
-//search places in loops
-db.Zipcodes.find({
-        'state': currentState
-    }).then(function(zips) {
-        if (zips.length < 1) {
-            return console.log('No zipcodes found!')
+var stateIndex = 0;
+var currentState = states[stateIndex]
+//This number needs to be refined for max results 
+var factor = 100;
+
+async.whilst(
+    function() {
+        return true
+    },
+    function(start) {
+        var normal = {
+            'state': currentState
         }
-        async.whilst(
-            function() {
-                return true
-            },
-            function(start) {
+        var test = {
+            'zipcode': { $in: nyc}
+        }
+        var query = testMode ? test : normal;
+        //search places in loops
+        db.Zipcodes.find(query).then(function(zips) {
+                if (zips.length < 1) {
+                    return console.log('No zipcodes found!')
+                }
+
+                if (logMode) {
+
+                }
                 var count = 0;
                 console.log('...Searching state: ' + currentState)
                 async.whilst(
@@ -128,12 +179,11 @@ db.Zipcodes.find({
                     function(cb) {
                         async.eachSeries(zips, function(zip, callback) {
                                 var zipcode = zip.zipcode
-                                var zipObj = zip
                                 var area = zip.area * 1609.34 * factor
                                 radius = area ? Math.sqrt((area) / 3.14159) : 3000
                                 console.log('Searching: ', zipcode, ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
                                 var coords = getLatLong(zipcode).then(function(coords) {
-                                    searchPlaces(coords, zipcode, zipObj, function() {
+                                    searchPlaces(coords, zipcode, zip, function() {
                                         count++;
                                         wait(callback, 300);
                                     })
@@ -154,7 +204,7 @@ db.Zipcodes.find({
                     function(err) {
                         //Log results each loop
                         if (logMode == 'true') {
-                            var logData = '\nFor State: ' + currentState + ': \n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' + '  Factor : ' + factor + ' \n'
+                            var logData = '\nFor State: ' + currentState + '\nFactor : ' + factor + '\n  Found : ' + placeCount + ' ' + '\n  Saved : ' + saveCount + ' \n' 
                             fs.appendFile('places.log', logData, function(err) {
                                 if (err) throw err;
                                 placeCount = 0;
@@ -162,30 +212,33 @@ db.Zipcodes.find({
                                 saveCount = 0;
                             });
                         }
-                        console.log('Finished ' + currentState + '!')
+                        console.log('Finished ' + currentState + '!, Count: ' + count + 'zips.length: ' + zips.length)
                         stateIndex++;
                         if (states[stateIndex]) {
                             currentState = states[stateIndex]
+
                         } else {
-                            //Restart at first state
+                            console.log('Restarting all states...')
+                                //Restart at first state
                             stateIndex = 0;
                             currentState = states[stateIndex]
-                            if (logMode) {
-                                //Increase factor by 50
-                                factor += 50
+                            if (testMode) {
+                                console.log('Increasing factor by 100')
+                                //Increase factor by 100
+                                factor += 100
                             }
                         }
-                        console.log('Starting ' + currentState + '...')
                         wait(start, 300); // Wait before looping over the zip again
                     }
                 );
-            },
-            function(err) {
-                console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
-                wait(start, 300); // Wait before looping over the zip again
-            }
-        );
-    }) //END OF FIND NY ZIPCODES
+            }) //END OF FIND NY ZIPCODES
+    },
+    function(err) {
+        console.log('Requested ', requestNum, ' times. \n Restarting Loop..')
+        wait(start, 300); // Wait before looping over the zip again
+    }
+);
+
 
 
 //searches google places

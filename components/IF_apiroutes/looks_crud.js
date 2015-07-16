@@ -8,6 +8,10 @@ var express = require('express'),
     uniquer = require('../../IF_services/uniquer'),
     async = require('async')
 
+var categories = 'Outerwear, Dresses, Tops, Skirts, Pants, Underwear, Activewear, Tights & Leggings, Shoes, Bags, Accessories, Jewelry'
+
+
+
 //Get look given a look ID
 router.get('/:id', function(req, res, next) {
     db.Look.findById(req.params.id, function(err, item) {
@@ -66,19 +70,20 @@ router.post('/', function(req, res, next) {
                     }
                     result.itemTags.colors.forEach(function(snapColorTag) {
                         var lookColorTags = look.lookTags.colors.join(' ')
-                        if (lookColorTags.indexOf(snapColorTag) == -1) {
+                        if (lookColorTags.indexOf(snapColorTag.trim()) == -1) {
                             look.lookTags.colors.push(snapColorTag)
                         }
                     })
                     result.itemTags.categories.forEach(function(snapCategoryTag) {
                         var lookCategoryTags = look.lookTags.categories.join(' ');
-                        if (lookCategoryTags.indexOf(snapCategoryTag) == -1) {
+                        //Check if category doesn't already exist AND it's a valid category
+                        if (lookCategoryTags.indexOf(snapCategoryTag.trim()) == -1 && categories.indexOf(snapCategoryTag.trim())> -1) {
                             look.lookTags.categories.push(snapCategoryTag)
                         }
                     })
                     result.itemTags.text.forEach(function(snapTextTag) {
                         var lookTextTags = look.lookTags.text.join(' ');
-                        if (lookTextTags.indexOf(snapTextTag) == -1) {
+                        if (lookTextTags.indexOf(snapTextTag.trim()) == -1) {
                             look.lookTags.text.push(snapTextTag)
                         }
                     })

@@ -573,9 +573,22 @@ function categorize(tags) {
             'leather-skirt'
         ]
     }, {
-        'Accessories': [
+        'Bags': [
+            'backpack',
             'handbag',
+            'hand-bag'
             'handbags',
+            'chanel',
+            'duffel',
+            'satchel',
+            'tote',
+            'messenger',
+            'saddle',
+            'clutch',
+            'wristlet'
+        ]
+    }, {
+        'Accessories': [
             'sunglasses',
             'watch',
             'wristwatch',
