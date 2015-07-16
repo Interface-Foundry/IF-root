@@ -5,9 +5,8 @@ var db = require('db');
 //Log mode
 var logMode = process.argv[2] ? process.argv[2] : 'false'
 var testMode = process.argv[3] ? process.argv[3] : 'false'
-    //Optional
-var radiusMax = 40324
-var errCount = 0;
+var factor = process.argv[4] ? process.argv[4] : 100
+
 
 
 var express = require('express'),
@@ -47,6 +46,7 @@ var placeCount = 0;
 var saveCount = 0;
 var requestNum = 0;
 var radius = 0
+var errCount = 0;
 
 var states = [
     "NY",
@@ -146,8 +146,6 @@ var nyc = [
 
 var stateIndex = 0;
 var currentState = states[stateIndex]
-    //This number needs to be refined for max results 
-var factor = 100;
 
 async.whilst(
     function() {
@@ -175,6 +173,7 @@ async.whilst(
                 if (testMode) {
                     console.log('Test Mode On.')
                     currentState = 'NY'
+                    console.log('Current Factor: '+factor)
                 }
 
                 var count = 0;
@@ -189,7 +188,7 @@ async.whilst(
                                 var area = zip.area * 1609.34 * factor
                                 radius = area ? Math.sqrt((area) / 3.14159) : 3000
                                 zip.neighborhood = zip.neighborhood ? zip.neighborhood : '';
-                                console.log('Searching: ', zipcode+' '+ zip.neighborhood+ ' with radius: ' + radius + ' for area: ' + zip.area + ' miles.')
+                                console.log('Searching: ', zipcode + ' with Radius: ' + radius)
                                 var coords = getLatLong(zipcode).then(function(coords) {
                                     searchPlaces(coords, zipcode, zip, function() {
                                         count++;
@@ -220,7 +219,7 @@ async.whilst(
                                 saveCount = 0;
                             });
                         }
-                        console.log('Finished ' + currentState + '!, Count: ' + count + 'zips.length: ' + zips.length)
+                        console.log('Finished ' + currentState + '!')
                         stateIndex++;
                         if (states[stateIndex]) {
                             currentState = states[stateIndex]
@@ -254,9 +253,7 @@ async.whilst(
 function searchPlaces(coords, zipcode, zipObj, zipDone) {
     radarSearch(coords[0], coords[1], zipcode, zipObj).then(function(results) {
             var saveCount = 0
-                //**change this to each for faster processing but duplicate ID errors for some reason
             async.eachSeries(results, function(place, placeDone) {
-                        placeCount++;
                         var newPlace = null;
                         async.series([
                                 //First check if landmark exists, if not create a new one
@@ -266,8 +263,8 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                         'source_google.place_id': place.place_id
                                     }, function(err, matches) {
                                         if (err) console.log(err)
-                                        if (matches.length < 1) {
-                                            // console.log('No match found for ', place.place_id)
+                                        if (matches.length < 1 || testMode) {
+                                            
                                             newPlace = new landmarks();
                                             newPlace.world = true;
                                             newPlace.newStatus = true;
@@ -307,7 +304,7 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                 },
                                 //Now fill in the details of the place
                                 function(callback) {
-                                    if (newPlace == null) {
+                                    if (newPlace == null && !testMode) {
                                         callback('Not a new place');
                                     } else {
                                         wait(function() {
@@ -347,7 +344,7 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                     if (!newPlace) {
                                         callback(null)
                                     } else {
-                                        console.log('Saved ', newPlace.id)
+                                        // console.log('Saved ', newPlace.id)
                                         saveCount++;
                                         newPlace.save(function(err, saved) {
                                             if (err) {
@@ -377,7 +374,7 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                             }
                         }, function(err, results) {
                             if (err) console.log('err: ', err)
-                            console.log('Saved ' + saveCount + ' new places.')
+                            // console.log('Saved ' + saveCount + ' new places.')
                             zipDone()
                         })
                     }) //END OF ASYNC EACH
@@ -389,7 +386,8 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
 }
 
 function radarSearch(lat, lng, zipcode, zipObj) {
-    console.log(zipObj.city + ', ' + currentState + ' ' + zipcode + ': Area: ' + zipObj.area + ', Population: ' + zipObj.pop + ', Density: ' + zipObj.density)
+    var neighborhood = zipObj.neighborhood ? zipObj.neighborhood  : 'null'
+    console.log('Neighborhood: '+ neighborhood+', Area: ' + zipObj.area + ', Population: ' + zipObj.pop + ', Density: ' + zipObj.density)
     var deferred = q.defer();
     var types = 'clothing_store',
         key = googleAPI,
@@ -422,7 +420,7 @@ function addGoogleDetails(newPlace) {
         requestNum++;
 
         if (!error && response.statusCode == 200 && body.result) {
-
+          
             //ADDRESS
             if (typeof body.result.address_components == 'undefined') {
                 newPlace.source_google.address = ''
@@ -432,6 +430,18 @@ function addGoogleDetails(newPlace) {
                     addy = addy + ' ' + el.long_name;
                 })
                 newPlace.source_google.address = addy.trim()
+            }
+
+            //If test mode on, we want to test if the place is within the testing region and not outside the state
+            if (testMode) {
+                if (newPlace.source_google.address.indexOf('New York') > -1) {
+                    placeCount++
+                    // console.log('Place is within NYC.' + placeCount)
+                } else {
+                    console.log('Place is out of bounds!')
+                }
+            } else {
+                placeCount++
             }
 
             //NAME
