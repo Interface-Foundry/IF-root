@@ -1,14 +1,10 @@
 var db = require('db');
 
-//ARGUMENTS
-
-//Log mode
-var logMode = process.argv[2] ? process.argv[2] : 'false'
-var testMode = process.argv[3] ? process.argv[3] : 'false'
-var factor = process.argv[4] ? process.argv[4] : 100
-
-
-
+//Arguments
+var logMode = process.argv[2] ? process.argv[2] : 'false',
+    testMode = process.argv[3] ? process.argv[3] : 'false',
+    factor = process.argv[4] ? process.argv[4] : 100
+    //Modules
 var express = require('express'),
     app = module.exports.app = express(),
     request = require('request'),
@@ -173,7 +169,7 @@ async.whilst(
                 if (testMode) {
                     console.log('Test Mode On.')
                     currentState = 'NY'
-                    console.log('Current Factor: '+factor)
+                    console.log('Current Factor: ' + factor)
                 }
 
                 var count = 0;
@@ -232,9 +228,9 @@ async.whilst(
                         }
 
                         if (testMode) {
-                            console.log('Increasing factor by 100')
+                            console.log('Increasing factor by 350')
                                 //Increase factor by 100
-                            factor += 100
+                            factor = parseInt(factor) + 350
                         }
                         wait(start, 300); // Wait before looping over the zip again
                     }
@@ -247,9 +243,6 @@ async.whilst(
     }
 );
 
-
-
-//searches google places
 function searchPlaces(coords, zipcode, zipObj, zipDone) {
     radarSearch(coords[0], coords[1], zipcode, zipObj).then(function(results) {
             var saveCount = 0
@@ -264,7 +257,6 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                     }, function(err, matches) {
                                         if (err) console.log(err)
                                         if (matches.length < 1 || testMode) {
-                                            
                                             newPlace = new landmarks();
                                             newPlace.world = true;
                                             newPlace.newStatus = true;
@@ -319,16 +311,14 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                 },
                                 function(callback) {
                                     //Find neighborhood and city name via python area finder server
-                                    if (newPlace == null || newPlace.name == null) {
+                                    if (newPlace == null || newPlace.name == null || testMode) {
                                         // console.log('Not a new place')
                                         callback(null);
                                     } else {
                                         areaFind(newPlace).then(function(place) {
-
                                             //Add neighborhood or city name to landmark id and then uniqueize it
                                             var input = (place.backupinput !== undefined) ? place.backupinput :
                                                 ((place.source_google.neighborhood !== undefined) ? place.source_google.neighborhood : undefined)
-
                                             uniqueID(place.name, input).then(function(output) {
                                                 newPlace.id = output;
                                                 callback(null);
@@ -341,22 +331,20 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                                 },
                                 function(callback) {
                                     //Annnd save the place
-                                    if (!newPlace) {
-                                        callback(null)
-                                    } else {
-                                        // console.log('Saved ', newPlace.id)
-                                        saveCount++;
-                                        newPlace.save(function(err, saved) {
-                                            if (err) {
-                                                wait(function() {
-                                                    errCount++
-                                                    console.log('Error saving: ', err)
-                                                }, 500);
-
-                                            }
-                                            callback(null)
-                                        })
+                                    if (!newPlace || testMode) {
+                                        return callback(null)
                                     }
+                                    // console.log('Saved ', newPlace.id)
+                                    saveCount++;
+                                    newPlace.save(function(err, saved) {
+                                        if (err) {
+                                            wait(function() {
+                                                errCount++
+                                                console.log('Error saving: ', err)
+                                            }, 500);
+                                        }
+                                        callback(null)
+                                    })
                                 }
                             ],
                             //final callback in series
@@ -374,7 +362,7 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
                             }
                         }, function(err, results) {
                             if (err) console.log('err: ', err)
-                            // console.log('Saved ' + saveCount + ' new places.')
+                                // console.log('Saved ' + saveCount + ' new places.')
                             zipDone()
                         })
                     }) //END OF ASYNC EACH
@@ -386,8 +374,8 @@ function searchPlaces(coords, zipcode, zipObj, zipDone) {
 }
 
 function radarSearch(lat, lng, zipcode, zipObj) {
-    var neighborhood = zipObj.neighborhood ? zipObj.neighborhood  : 'null'
-    console.log('Neighborhood: '+ neighborhood+', Area: ' + zipObj.area + ', Population: ' + zipObj.pop + ', Density: ' + zipObj.density)
+    var neighborhood = zipObj.neighborhood ? zipObj.neighborhood : 'null'
+    console.log('Neighborhood: ' + neighborhood + ', Area: ' + zipObj.area + ', Population: ' + zipObj.pop + ', Density: ' + zipObj.density)
     var deferred = q.defer();
     var types = 'clothing_store',
         key = googleAPI,
@@ -420,7 +408,7 @@ function addGoogleDetails(newPlace) {
         requestNum++;
 
         if (!error && response.statusCode == 200 && body.result) {
-          
+
             //ADDRESS
             if (typeof body.result.address_components == 'undefined') {
                 newPlace.source_google.address = ''
@@ -432,13 +420,29 @@ function addGoogleDetails(newPlace) {
                 newPlace.source_google.address = addy.trim()
             }
 
+            //INPUT
+            var components = body.result.address_components
+            if (typeof components == 'undefined' || components == null || components == '') {
+                newPlace.backupinput = ''
+            } else {
+                for (var i = 0; i < components.length; i++) {
+                    if (components[i].long_name.toLowerCase().trim().indexOf('united states') == -1 && components[i].long_name.toLowerCase().trim().indexOf('main street') == -1 && components[i].long_name.match(/\d+/g) == null && components[i].long_name.length < 22) {
+                        newPlace.backupinput = components[i].long_name
+                        break
+                    }
+                }
+            }
+
+
             //If test mode on, we want to test if the place is within the testing region and not outside the state
             if (testMode) {
                 if (newPlace.source_google.address.indexOf('New York') > -1) {
                     placeCount++
-                    // console.log('Place is within NYC.' + placeCount)
+                    return deferred.resolve(newPlace)
+                        // console.log('Place is within NYC.' + placeCount)
                 } else {
                     console.log('Place is out of bounds!')
+                    return deferred.resolve(newPlace)
                 }
             } else {
                 placeCount++
@@ -503,19 +507,7 @@ function addGoogleDetails(newPlace) {
                 newPlace.source_google.icon = body.result.icon;
             }
 
-            //BACKUP INPUT
-            //This is the backup input to uniqueize ID in case areaFind does not return neighborhood and city
-            var components = body.result.address_components
-            if (typeof components == 'undefined' || components == null || components == '') {
-                newPlace.backupinput = ''
-            } else {
-                for (var i = 0; i < components.length; i++) {
-                    if (components[i].long_name.toLowerCase().trim().indexOf('united states') == -1 && components[i].long_name.toLowerCase().trim().indexOf('main street') == -1 && components[i].long_name.match(/\d+/g) == null && components[i].long_name.length < 22) {
-                        newPlace.backupinput = components[i].long_name
-                        break
-                    }
-                }
-            }
+
             deferred.resolve(newPlace)
         } else {
             // console.log("Details query FAIL", error, response.statusCode);

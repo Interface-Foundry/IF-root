@@ -309,7 +309,8 @@ var landmarkSchema = new Schema({
     itemTags: {
         colors: [],
         categories: [],
-        text: []
+        text: [],
+        auto: []
     },
     itemImageURL: [String],
     reports: [{

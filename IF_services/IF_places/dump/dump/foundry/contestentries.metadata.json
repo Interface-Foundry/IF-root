@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"foundry.contestentries"},{"v":1,"key":{"userID":1},"name":"userID_1","ns":"foundry.contestentries","background":true},{"v":1,"key":{"contestTag.tag":1},"name":"contestTag.tag_1","ns":"foundry.contestentries","background":true}]}

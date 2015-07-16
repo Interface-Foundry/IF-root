@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"foundry.stickers"},{"v":1,"key":{"ownerID":1},"name":"ownerID_1","ns":"foundry.stickers","background":true},{"v":1,"key":{"roomID":1},"name":"roomID_1","ns":"foundry.stickers","background":true}]}
