@@ -140,7 +140,10 @@ var userSchema = mongoose.Schema({
     defaultSearchRadius: Number,
     following: [String],
     followers: [String],
-    snapCount: Number
+    snapCount: Number,
+    kips: Number,
+    description: String,
+    location: String
 });
 
 // generating a hash
