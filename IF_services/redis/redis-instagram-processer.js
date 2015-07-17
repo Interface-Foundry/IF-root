@@ -12,12 +12,12 @@ var mongoose = require('mongoose'),
     fs = require('fs'),
     im = require('imagemagick'),
     crypto = require('crypto'),
-    AWS = require('aws-sdk');
+    AWS = require('aws-sdk'),
+    uniquer = require('../uniquer.js');
 
 client.on("connect", function(err) {
     console.log("Connected to redis");
 });
-
 
 var timer = new InvervalTimer(function() {
     client.lrange('scraped', 0, -1, function(err, items) {
@@ -28,11 +28,12 @@ var timer = new InvervalTimer(function() {
                 console.log(items.length + ' item(s) for processing.')
                 async.mapSeries(items, function(item) {
                     var item = item.toString().trim()
+                    console.log(item)
                     async.waterfall([
                             //Retrieve imgURL from landmark
                             function(callback) {
                                 getImageUrl(item).then(function(url) {
-                                    console.log('Retrieved image ..')
+                                    console.log('Retrieved images ..')
                                     callback(null, url)
                                 }, function(err) {
                                     console.log('getImageUrl error.', item)
@@ -45,42 +46,48 @@ var timer = new InvervalTimer(function() {
                                     if (err) {
                                         return callback(err)
                                     }
-                                    var coords = data.items[0];
-                                    if (coords == null || (coords && coords.length < 1)) {
-                                        console.log('OpenCV did not find coordinates.')
-                                        return callback(err)
-                                    }
-                                    callback(null, url, data)
-                                })
-                            },
-                            //Crop image
-                            function(url, data, callback) {
-                                cropImage(url, data).then(function(images) {
-                                    console.log('Finished cropping image.')
-                                    callback(null, images)
-                                }).catch(function(err) {
-                                    console.log('Cropping error: ', err)
-                                    callback(null, null)
+                                    var objects = data.items
+                                    callback(null, url, objects)
                                 })
                             },
                             //Process image through cloudsight
-                            function(images, callback) {
-                                cloudSight(images).then(function(tags) {
+                            function(url, objects, callback) {
+                                cloudSight(url, objects).then(function(tags) {
                                     // console.log('cloudSight finished.', tags)
-                                    callback(null, tags)
+                                    callback(null, url, objects, tags)
                                 }).catch(function(err) {
                                     console.log('cloudSight error.', err)
-                                    if (err == 'no tags found') {
-                                        //Remove from redis queue
-                                        client.lrem('scraped', 1, snap_str);
-                                        timer.resume()
-                                    }
+                                    //Remove from redis queue
+                                    client.lrem('scraped', 1, snap_str);
+                                    timer.resume()
+                                })
+                            },
+                            //Crop image
+                            function(url, objects, tags, callback) {
+                                cropImage(url, objects, tags).then(function(images) {
+                                    console.log('Finished cropping image.')
+                                    callback(null, url, images, tags)
+                                }).catch(function(err) {
+                                    console.log('Cropping error: ', err)
+                                    callback(null, url, null, tags)
                                 })
                             },
                             //Update and save landmark
-                            function(tags, callback) {
-                                updateDB(item, tags).then(function(item) {
-                                    console.log('Saved!', item)
+                            function(url, images, tags, callback) {
+                                if (images) {
+                                    var newItems = [];
+                                    for (var i = 0; i < tags.length; i++) {
+                                        var newItem = {
+                                            tags: tags[i],
+                                            originalImage: url
+                                        }
+                                        newItem.image = (i == 0) ? images[1] : images[0];
+                                        newItem.tags = newItem.tags[0]
+                                        newItems.push(newItem)
+                                    }
+                                }
+                                var update = images ? newItems : null
+                                updateDB(update, item,tags).then(function(item) {
                                     callback(null)
                                 }).catch(function(err) {
                                     console.log('Save error.', err)
@@ -105,19 +112,113 @@ var timer = new InvervalTimer(function() {
 }, 5000);
 
 //HELPER FUNCTIONS
-function cropImage(url, data) {
+function updateDB(newItems, landmarkID,tags) {
+    console.log('inside updateDB.. tags: ', tags)
+    //First update original item by adding cloudsighted tags.
+    var allTags = [];
+    if (newItems !== null) {
+        newItems.forEach(function(item) {
+            allTags = allTags.concat(item.tags)
+        })
+    } else {
+        allTags = tags[0][0]
+    }
+    var colors = colorHex(allTags);
+    var categories = categorize(allTags);
+    //Get rid of color or category tags in tags
+    allTags = _.difference(allTags, colors);
+    allTags = _.difference(allTags, categories);
+    //Eliminate dupes
+    allTags = eliminateDuplicates(allTags);
+    colors = eliminateDuplicates(colors);
+    categories = eliminateDuplicates(categories);
+    var deferred = q.defer();
+    db.Landmarks.findOne({
+        _id: landmarkID
+    }, function(err, landmark) {
+        if (err) return deferred.reject(err)
+        if (landmark) {
+            allTags.forEach(function(tag) {
+                landmark.itemTags.text.push(tag)
+            })
+            colors.forEach(function(color) {
+                landmark.itemTags.colors.push(color)
+            })
+            categories.forEach(function(category) {
+                    landmark.itemTags.categories.push(category)
+                })
+                //Eliminate dupes again for already existing tags
+            landmark.itemTags.text = eliminateDuplicates(landmark.itemTags.text);
+            landmark.itemTags.colors = eliminateDuplicates(landmark.itemTags.colors);
+            landmark.itemTags.categories = eliminateDuplicates(landmark.itemTags.categories);
+            landmark.save(function(err, original) {
+                if (err) return deferred.reject(err)
+                console.log('Updated landmark:', original)
+                if (!newItems) return deferred.resolve()
+                    //For each new item create a landmark in db
+                if (newItems !== null) {
+                    async.eachSeries(newItems, function Iterator(newItem, done) {
+                        var instagram = new db.Landmark();
+                        //TODO: Change the coordinates to location of where instagram was taken
+                        instagram.loc = original.loc;
+                        instagram.source_instagram_post = original.source_instagram_post;
+                        instagram.itemImageURL.push(newItem.originalImage);
+                        instagram.itemImageURL.push(newItem.image);
+                        var colors = colorHex(newItem.tags)
+                        var categories = categorize(newItem.tags)
+                        var text = _.difference(newItem.tags, colors);
+                        text = _.difference(newItem.tags, categories);
+                        //Eliminate dupes
+                        text = eliminateDuplicates(text);
+                        colors = eliminateDuplicates(colors);
+                        categories = eliminateDuplicates(categories);
+                        instagram.itemTags.text = text;
+                        instagram.itemTags.colors = colors;
+                        instagram.itemTags.categories = categories;
+                        //TODO: Random name generation, for now, Princess Peach
+                        var name = 'Princess Peach' + Math.floor(1000 + Math.random() * 9000).toString()
+                        uniquer.uniqueId(name, 'Landmarks').then(function(id) {
+                            instagram.id = id;
+                            instagram.save(function(err, saved) {
+                                if (err) {
+                                    return deferred.reject(err)
+                                }
+                                console.log('New item created!: ', saved)
+                                done()
+                            })
+                        })
+                    }, function(err) {
+                        deferred.resolve()
+                    })
+                } //end of if newItems is array
+            })
+        } else {
+            deferred.reject()
+        }
+    })
+
+    return deferred.promise;
+}
+
+function cropImage(url, objects, tags) {
+    // console.log('inside cropImage url: ',url)
     var deferred = q.defer();
     var croppedImages = [];
-    var coords = data.items[0];
+    var coords = objects[0].coords
+    if (coords.length <= 1) {
+        deferred.reject('No coordinates')
+    }
     //Limit objects in image to 2 max
     if (coords.length >= 2) {
         coords = coords.splice(0, 2)
     }
+    var croppedImages = [];
     async.eachSeries(coords, function iterator(coord, callback) {
-            var hash = crypto.createHash('md5')
+            var stuff = Math.random().toString(36).replace(/[^a-z]+/g, '')
+            var hash = crypto.createHash('md5').update(stuff).digest('hex');
             var filename = hash + '.jpg'
-            var tempPath = "IF_services/redis/temp/" + filename
-            request(url, {
+            var tempPath = "/tmp/" + filename
+            request(url[0], {
                 encoding: 'binary'
             }, function(err, response, body) {
                 if (err) {
@@ -131,10 +232,13 @@ function cropImage(url, data) {
                         if (err) {
                             return callback(err)
                         }
-                        console.log('Image features: ', features);
-                        // { format: 'JPEG', width: 3904, height: 2622, depth: 8 }
-                        //Crop the image
-                        im.convert([tempPath, '-crop', coord[2] + 'x' + coord[3] + '+' + coord[1] + '+' + coord[2], tempPath], function(err, stdout, stderr) {
+                        // console.log('Image features: ', features.pagegeometry);
+                        var width = parseInt(features['page geometry'].split('x')[0])
+                        var height = parseInt(features['page geometry'].split('x')[1].split('+')[0])
+                            // console.log('width: ',width,' height: ',height, 'coord[0',coord[0],'coord[1]',coord[1],'coord[2]',coord[2],'coord[3]',coord[3])
+                            // width:  450  height:  450 coord[0 389 coord[1] 249 coord[2] 46 coord[3] 56
+                            //Crop the image
+                        im.convert([tempPath, '-crop', coord[0] + 'x' + coord[1] + '+' + coord[2] + '+' + coord[3], tempPath], function(err, stdout, stderr) {
                                 if (err) {
                                     return callback(err)
                                 }
@@ -143,8 +247,7 @@ function cropImage(url, data) {
                                         return callback(err)
                                     }
                                     var s3 = new AWS.S3();
-                                    var date = (new Date().getUTCFullYear()) + "/" + (new Date().getUTCMonth()) + "/"
-                                    var awsKey = date + filename
+                                    var awsKey = filename;
                                     s3.putObject({
                                         Bucket: 'if-server-general-images',
                                         Key: awsKey,
@@ -173,29 +276,87 @@ function cropImage(url, data) {
     return deferred.promise
 }
 
-function cloudSight(images, data) {
+
+function cloudSight(imgArray, objects) {
     var deferred = q.defer();
     var qs = {};
     var results = []
-    async.eachSeries(images, function iterator(img, finishedRequest) {
-        qs = {
-            'image_request[remote_image_url]': img,
-            'image_request[locale]': 'en-US',
-            'image_request[language]': 'en'
+    var items = objects
+    var i = 0;
+    async.eachSeries(imgArray, function iterator(img, done) {
+        if (items == undefined || items == null) {
+            console.log('OpenCV did not find coordinates..', JSON.stringify(items))
+            return done()
         }
-        getTags(qs).then(function(tags) {
-            results = results.concat(tags);
-            finishedRequest()
-        }).catch(function(err) {
-            if (err) {
-                console.log('No tags found for this focal point.')
-                return finishedRequest()
+        var item = items[i]
+        var failCount = 0
+        i++;
+        console.log('Processing image: ' + i + '/' + (imgArray.length))
+            //----If OpenCV Image processing does not return coordinates----//
+        if (item == null || item.coords == null || (item.coords && item.coords.length < 1)) {
+            console.log('OpenCV did not find coordinates.', JSON.stringify(item))
+            qs = {
+                'image_request[remote_image_url]': img,
+                'image_request[locale]': 'en-US',
+                'image_request[language]': 'en'
             }
-            finishedRequest()
-        })
+            getTags(qs).then(function(tags) {
+                console.log('Tags: ', tags)
+                results[i] = tags
+                done()
+            }).catch(function(err) {
+                if (err) console.log(err)
+                done()
+            })
+        }
+        //----If OpenCV Image processing did not fail----//
+        else {
+            console.log('OpenCV found coordinates.')
+            var lastIndex = item.coords.length
+                //Limit focal points to 2 max
+            if (lastIndex >= 2) {
+                item.coords = item.coords.splice(0, 2)
+            }
+            console.log(item.coords.length + ' focal point(s) found for current image.')
+                //---For each request to cloudsight
+            async.eachSeries(item.coords, function iterator(coord, finishedRequest) {
+                qs = {
+                    'image_request[remote_image_url]': img,
+                    'image_request[locale]': 'en-US',
+                    'image_request[language]': 'en',
+                    'focus[x]': coord[0] + coord[2] / 2,
+                    'focus[y]': coord[1] + coord[3] / 2
+                }
+                getTags(qs).then(function(tags) {
+                    results.push(tags);
+                    // console.log('Line 259 TAGS!! : ', tags)
+                    finishedRequest()
+                }).catch(function(err) {
+                    if (err) {
+                        console.log('163 Error: ', err)
+                        failCount++
+                        if (failCount == item.coords.length) {
+                            console.log('No tags found in any of the focus points!')
+                            return finishedRequest(err)
+                        } else {
+                            console.log('No tags found for this focal point.')
+                            return finishedRequest()
+                        }
+                    }
+                    finishedRequest()
+                })
+            }, function(err) {
+                if (err) {
+                    console.log('177 Error: ', err)
+                    return done()
+                }
+                done()
+            });
+        } //End of if coords found
     }, function(err) {
         if (err) {
-            return deferred.reject(err);
+            console.log('Finished Error: ', err)
+                // deferred.reject(err);
         }
         console.log('Finished looking for tags..', results)
         if (results.length < 1) {
@@ -205,7 +366,7 @@ function cloudSight(images, data) {
         } else {
             deferred.resolve(results)
         }
-    }); //End of eachseries
+    }); //End of each series
     return deferred.promise;
 }
 
@@ -214,15 +375,14 @@ function getImageUrl(landmarkID) {
     db.Landmarks.findById(landmarkID, function(err, landmark) {
         if (err) deferred.reject(err)
         if (landmark) {
-            if (landmark.source_instagram_post.img_url) {
-                deferred.resolve(img_url)
-            } else if (landmark.itemImageURL) {
+            if (landmark.itemImageURL.length >= 1) {
+                // console.log('landmark.itemImageURL: ', landmark)
                 //First img only for now, change later
                 deferred.resolve(landmark.itemImageURL)
+            } else {
+                console.log('id: ', landmarkID, ' landmark: ', landmark)
+                deferred.reject('No imgURL found in snap')
             }
-        } else {
-            console.log('id: ', landmarkID, ' landmark: ', landmark)
-            deferred.reject('No imgURL found in snap')
         }
     })
     return deferred.promise;
@@ -231,13 +391,12 @@ function getImageUrl(landmarkID) {
 function getTags(qs) {
     var deferred = q.defer();
     var options = {
-            url: "https://api.cloudsightapi.com/image_requests",
-            headers: {
-                "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
-            },
-            qs: qs
-        }
-        // console.log('getTags: options.qs: ' + JSON.stringify(options.qs))
+        url: "https://api.cloudsightapi.com/image_requests",
+        headers: {
+            "Authorization": "CloudSight cbP8RWIsD0y6UlX-LohPNw"
+        },
+        qs: qs
+    }
     var tags = []
     request.post(options, function(err, res, body) {
             if (err) return deferred.reject(err)
@@ -296,7 +455,6 @@ function getTags(qs) {
                     if (err) {
                         return deferred.reject(err)
                     }
-                    // console.log('Exited async whilst, tags: ', tags)
                     if (tags.length > 0) {
                         deferred.resolve(tags)
                     } else {
@@ -306,54 +464,6 @@ function getTags(qs) {
 
         }) //END OF CLOUDSIGHT REQUEST
     return deferred.promise
-}
-
-function updateDB(landmarkID, tags) {
-    // tags is ['man','red','striped','sweater']
-    // or [['womens','blue'],['jacket','mens']]
-    if (Object.prototype.toString.call(tags[0]) === '[object Array]') {
-        tags = _.flatten(tags);
-    }
-    var colors = colorHex(tags);
-    var categories = categorize(tags);
-    //Get rid of color or category tags in tags
-    tags = _.difference(tags, colors);
-    tags = _.difference(tags, categories);
-    //Eliminate dupes
-    tags = eliminateDuplicates(tags);
-    colors = eliminateDuplicates(colors);
-    categories = eliminateDuplicates(categories);
-    var deferred = q.defer();
-    db.Landmarks.findOne({
-        _id: landmarkID
-    }, function(err, landmark) {
-        if (err) deferred.reject(err)
-        if (landmark) {
-            tags.forEach(function(tag) {
-                landmark.itemTags.text.push(tag)
-            })
-            colors.forEach(function(color) {
-                landmark.itemTags.colors.push(color)
-            })
-            categories.forEach(function(category) {
-                landmark.itemTags.categories.push(category)
-            })
-
-            //Eliminate dupes again for already existing tags
-            landmark.itemTags.text = eliminateDuplicates(landmark.itemTags.text);
-            landmark.itemTags.colors = eliminateDuplicates(landmark.itemTags.colors);
-            landmark.itemTags.categories = eliminateDuplicates(landmark.itemTags.categories);
-
-            landmark.save(function(err, saved) {
-                if (err) console.log(err)
-                console.log('Updated landmark:', saved)
-                deferred.resolve(saved);
-            })
-        } else {
-            deferred.reject()
-        }
-    })
-    return deferred.promise;
 }
 
 function parseTags(sentence) {
@@ -396,6 +506,7 @@ function categorize(tags) {
     var categories = [{
         'Tops': [
             'top',
+            'cardigan',
             'shirt',
             'sweater',
             'tshirt',
@@ -610,7 +721,7 @@ function categorize(tags) {
         'Bags': [
             'backpack',
             'handbag',
-            'hand-bag'
+            'hand-bag',
             'handbags',
             'chanel',
             'duffel',

@@ -230,7 +230,7 @@ async.whilst(
                         if (testMode) {
                             console.log('Increasing factor by 350')
                                 //Increase factor by 100
-                            factor = parseInt(factor) + 350
+                            factor = parseInt(factor) + 500
                         }
                         wait(start, 300); // Wait before looping over the zip again
                     }
