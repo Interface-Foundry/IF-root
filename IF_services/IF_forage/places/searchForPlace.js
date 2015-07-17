@@ -3,7 +3,7 @@ var Promise = require('bluebird');
 
 
 var key = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
-var url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=$KEY&location=$LAT,$LON&radius=100'
+var urlTemplate = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=$KEY&location=$LAT,$LON&radius=100'
     .replace('$KEY', key);
 
 /**
@@ -19,15 +19,15 @@ module.exports = function(loc, name, address) {
             return reject('loc is required and should be {lat: lat, lon: lon}');
         }
 
-        url = url.replace('$LAT', loc.lat)
+        var url = urlTemplate.replace('$LAT', loc.lat)
             .replace('$LON', loc.lon);
 
         if (name && typeof name === 'string') {
-            url += '&name=' + name;
+            url += '&name=' + encodeURIComponent(name);
         }
 
         if (address && typeof address === 'string') {
-            url += '&keyword=' + address;
+            url += '&keyword=' + encodeURIComponent(address);
         }
 
         request.get(url, {json: true}, function(e, r, body) {
@@ -44,12 +44,9 @@ module.exports = function(loc, name, address) {
 
                 if (place) {
                     resolve(place);
-                } else {
-                    reject({message: 'no place found', failePlaces: body.results});
                 }
-            } else {
-                reject({message: 'no place found', failedPlaces: body.results});
             }
+            reject({message: 'no place found', query: {loc: loc, name: name, addres: address}, failePlaces: body, url: url});
         });
     });
 };
