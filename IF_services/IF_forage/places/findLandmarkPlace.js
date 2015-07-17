@@ -13,7 +13,11 @@ db.Landmarks.find({world: true, 'addressString': {$exists: true}, 'source_google
             }
             return search({lon: r.loc.coordinates[0], lat: r.loc.coordinates[1]}, r.name, r.addressString)
                 .then(function(google_stuff) {
-                    r.source_google = google_stuff; // TODO make conform with source_google in the schema
+                    r.source_google = {
+                        place_id: google_stuff.place_id,
+                        types: google_stuff.types,
+                        address: google_stuff.vicinity
+                    };
                     return r;
                 }, function(err) {
                     console.error('error for place', r._id);

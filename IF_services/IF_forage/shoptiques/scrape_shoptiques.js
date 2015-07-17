@@ -49,7 +49,7 @@ redisClient.lpop('items-toprocess', function (e, url) {
                     if (!store) {
                         console.log('creating new record in the db');
                         console.log('fecthing loc data for', boutique.addressText);
-                        return getAddressInfo(boutique.addressText).then(function (addr) {
+                        return getAddressInfo(boutique.addressText + ' ' + boutique.state).then(function (addr) {
                             console.log(addr);
                             store = new db.Landmarks({
                                 source_shoptiques_store: boutique,
