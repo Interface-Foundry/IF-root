@@ -127,6 +127,16 @@ router.post('/', function(req, res, next) {
             err.niceMessage = 'Error processing Look';
             return next(err);
         }
+        // add kips to the user
+        db.Users.update({
+            _id: req.user._id
+        }, {$inc: {kip: 5}}, function(err) {
+            if (err) {
+                // todo log error to ELK
+                console.error(err);
+            }
+        });
+
         // add activity
         var a = new db.Activity({
             userIds: [req.user._id.toString()], //todo add ids for @user tags

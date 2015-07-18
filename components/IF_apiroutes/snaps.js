@@ -65,10 +65,11 @@ router.post('/', function(req, res, next) {
                         item: item.getSimpleItem()
                     }
                 });
-                // Increment users snapCount
+                // Increment users snapCount and kips!
                 req.user.update({
                     $inc: {
-                        snapCount: 1
+                        snapCount: 1,
+                        kips: 5
                     }
                 }, function(err) {
                     if (err) {
