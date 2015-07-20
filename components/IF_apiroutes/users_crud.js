@@ -122,7 +122,7 @@ app.get('/:xmongoId/faves', function (req, res, next) {
  */
 app.get('/:xmongoId/snaps', function (req, res, next) {
     db.Landmarks.find({
-        'owner.mongoId': req.xmongoId,
+        'owner.mongoId': req.targetMongoId,
         world: false
     })
         .sort({

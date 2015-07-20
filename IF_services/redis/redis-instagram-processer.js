@@ -46,6 +46,7 @@ var timer = new InvervalTimer(function() {
                                     if (err) {
                                         return callback(err)
                                     }
+                                    // console.log('data: ', data)
                                     var objects = data.items
                                     callback(null, url, objects)
                                 })
@@ -65,7 +66,10 @@ var timer = new InvervalTimer(function() {
                             //Crop image
                             function(url, objects, tags, callback) {
                                 cropImage(url, objects, tags).then(function(images) {
-                                    console.log('Finished cropping image.')
+                                    console.log('Finished cropping image: ',images)
+                                    if (images.length < 1) {
+                                        return callback(null, url, null, tags)
+                                    }
                                     callback(null, url, images, tags)
                                 }).catch(function(err) {
                                     console.log('Cropping error: ', err)
@@ -82,6 +86,7 @@ var timer = new InvervalTimer(function() {
                                             originalImage: url
                                         }
                                         newItem.image = (i == 0) ? images[1] : images[0];
+
                                         newItem.tags = newItem.tags[0]
                                         newItems.push(newItem)
                                     }
@@ -112,8 +117,93 @@ var timer = new InvervalTimer(function() {
 }, 5000);
 
 //HELPER FUNCTIONS
+
+
+
+function cropImage(url, objects, tags) {
+    // console.log('inside cropImage url: ',url)
+    var deferred = q.defer();
+    var croppedImages = [];
+    var coords = objects[0].coords
+    if (coords.length <= 1) {
+        deferred.reject('No coordinates')
+    }
+    //Limit objects in image to 2 max
+    if (coords.length >= 2) {
+        coords = coords.splice(0, 2)
+    }
+    var croppedImages = [];
+    async.eachSeries(coords, function iterator(coord, callback) {
+            var stuff = Math.random().toString(36).replace(/[^a-z]+/g, '')
+            var hash = crypto.createHash('md5').update(stuff).digest('hex');
+            var filename = hash + '.jpg'
+            var tempPath = "/tmp/" + filename
+            request(url[0], {
+                encoding: 'binary'
+            }, function(err, response, body) {
+                if (err) {
+                    return callback(err)
+                }
+                fs.writeFile(tempPath, body, 'binary', function(err) {
+                    if (err) {
+                        return callback(err)
+                    }
+                    im.identify(tempPath, function(err, features) {
+                        if (err) {
+                            return callback(err)
+                        }
+                        console.log('Image features: ', features['page geometry']);
+                        var width = parseInt(features['page geometry'].split('x')[0])
+                        var height = parseInt(features['page geometry'].split('x')[1].split('+')[0])
+                            // console.log('width: ',width,' height: ',height, 'coord[0',coord[0],'coord[1]',coord[1],'coord[2]',coord[2],'coord[3]',coord[3])
+                            // width:  450  height:  450 coord[0 389 coord[1] 249 coord[2] 46 coord[3] 56
+                        if (coord[0] < (width * .4)) {
+                            console.log('CROPS ARE NOT BIG ENOUGH', coord[0],width,coord[1],height)
+                            return callback(err)
+                        } 
+                        //Crop the image
+                        im.convert([tempPath, '-crop', coord[0] + 'x' + coord[1] + '+' + coord[2] + '+' + coord[3], tempPath], function(err, stdout, stderr) {
+                                if (err) {
+                                    return callback(err)
+                                }
+                                fs.readFile(tempPath, function(err, fileData) {
+                                    if (err) {
+                                        return callback(err)
+                                    }
+                                    var s3 = new AWS.S3();
+                                    var awsKey = filename;
+                                    s3.putObject({
+                                        Bucket: 'if-server-general-images',
+                                        Key: awsKey,
+                                        Body: fileData,
+                                        ACL: 'public-read'
+                                    }, function(err, data) {
+                                        if (err) {
+                                            return callback(err)
+                                        }
+                                        croppedImages.push("https://s3.amazonaws.com/if-server-general-images/" + awsKey)
+                                        fs.unlink(tempPath);
+                                        callback()
+                                    });
+                                }); //end of readfile
+                            }) //end of convert
+                    }); // end of identify
+                }); // end of writefile
+            }); //end of request
+        },
+        function done(err) {
+            if (err) {
+                return deferred.reject(err)
+            }
+            deferred.resolve(croppedImages)
+        });
+    return deferred.promise
+}
+
+
+
 function updateDB(newItems, landmarkID,tags) {
-    console.log('inside updateDB.. tags: ', tags)
+    console.log('inside updateDB.. newItems: ', newItems)
     //First update original item by adding cloudsighted tags.
     var allTags = [];
     if (newItems !== null) {
@@ -200,81 +290,6 @@ function updateDB(newItems, landmarkID,tags) {
     return deferred.promise;
 }
 
-function cropImage(url, objects, tags) {
-    // console.log('inside cropImage url: ',url)
-    var deferred = q.defer();
-    var croppedImages = [];
-    var coords = objects[0].coords
-    if (coords.length <= 1) {
-        deferred.reject('No coordinates')
-    }
-    //Limit objects in image to 2 max
-    if (coords.length >= 2) {
-        coords = coords.splice(0, 2)
-    }
-    var croppedImages = [];
-    async.eachSeries(coords, function iterator(coord, callback) {
-            var stuff = Math.random().toString(36).replace(/[^a-z]+/g, '')
-            var hash = crypto.createHash('md5').update(stuff).digest('hex');
-            var filename = hash + '.jpg'
-            var tempPath = "/tmp/" + filename
-            request(url[0], {
-                encoding: 'binary'
-            }, function(err, response, body) {
-                if (err) {
-                    return callback(err)
-                }
-                fs.writeFile(tempPath, body, 'binary', function(err) {
-                    if (err) {
-                        return callback(err)
-                    }
-                    im.identify(tempPath, function(err, features) {
-                        if (err) {
-                            return callback(err)
-                        }
-                        // console.log('Image features: ', features.pagegeometry);
-                        var width = parseInt(features['page geometry'].split('x')[0])
-                        var height = parseInt(features['page geometry'].split('x')[1].split('+')[0])
-                            // console.log('width: ',width,' height: ',height, 'coord[0',coord[0],'coord[1]',coord[1],'coord[2]',coord[2],'coord[3]',coord[3])
-                            // width:  450  height:  450 coord[0 389 coord[1] 249 coord[2] 46 coord[3] 56
-                            //Crop the image
-                        im.convert([tempPath, '-crop', coord[0] + 'x' + coord[1] + '+' + coord[2] + '+' + coord[3], tempPath], function(err, stdout, stderr) {
-                                if (err) {
-                                    return callback(err)
-                                }
-                                fs.readFile(tempPath, function(err, fileData) {
-                                    if (err) {
-                                        return callback(err)
-                                    }
-                                    var s3 = new AWS.S3();
-                                    var awsKey = filename;
-                                    s3.putObject({
-                                        Bucket: 'if-server-general-images',
-                                        Key: awsKey,
-                                        Body: fileData,
-                                        ACL: 'public-read'
-                                    }, function(err, data) {
-                                        if (err) {
-                                            return callback(err)
-                                        }
-                                        croppedImages.push("https://s3.amazonaws.com/if-server-general-images/" + awsKey)
-                                        fs.unlink(tempPath);
-                                        callback()
-                                    });
-                                }); //end of readfile
-                            }) //end of convert
-                    }); // end of identify
-                }); // end of writefile
-            }); //end of request
-        },
-        function done(err) {
-            if (err) {
-                return deferred.reject(err)
-            }
-            deferred.resolve(croppedImages)
-        });
-    return deferred.promise
-}
 
 
 function cloudSight(imgArray, objects) {
