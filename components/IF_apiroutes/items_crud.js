@@ -7,7 +7,8 @@ var express = require('express'),
     shapefile = require('shapefile'),
     request = require('request'),
     redisClient = require('../../redis.js'),
-    db = require('../IF_schemas/db');
+    db = require('../IF_schemas/db'),
+    mock_places = require('../../test/KipAPI/mock_places');
 
 //Get item given an item ID
 router.get('/:id', function(req, res, next) {
@@ -22,10 +23,10 @@ router.get('/:id', function(req, res, next) {
         result.item = item;
         db.Landmarks.findById(item.parent.mongoId, function(err, place) {
             if (err) {
-                err.niceMessage = 'Could not find store for this item.';
+                err.niceMessage = 'Error finding store.';
                 return next(err);
             } else if (!place) {
-                return next("Could not find store for this item.");
+                result.place = mock_places.getExample()
             }
             result.parent = place;
             res.send(result);
