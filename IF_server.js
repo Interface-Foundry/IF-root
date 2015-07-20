@@ -30,7 +30,6 @@ var submitContestEntry = require('./components/IF_contests/IF_contests.js');
 
 var crypto = require('crypto');
 var validator = require('validator');
-var passport = require('passport');
 var flash = require('connect-flash');
 var urlify = require('urlify').create({
     addEToUmlauts: true,
@@ -141,10 +140,8 @@ app.use(express.static(__dirname + '/app/dist', {
 //   }
 // }));
 
-//===== PASSPORT TO EXPRESS=====//
 // set up express app
 app.use(morgan('dev')); // log every request to the console
-app.use(cookieParser('rachelwantstomakecakebutneedseggs')); // read cookies (needed for auth)
 
 app.use(bodyParser.urlencoded({
     extended: true, limit:'5mb'
@@ -152,10 +149,7 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json({
     extended: true, limit:'5mb'
-})); // get information from html forms
-
-// passport to express requires
-// app.use(session({ secret: 'rachelwantstomakecakebutneedseggs' })); // session secret to 'prevent' session hijacking 
+}));
 
 
 
@@ -167,33 +161,9 @@ app.use(bodyParser.json({
 
 var redisClient = require('./redis.js');
 
+app.use('/', require('./components/IF_auth/new_auth'));
 
-// Sesh
-app.use(session({
-    store: new RedisStore({
-        client: redisClient
-    }),
-    secret: 'rachelwantstomakecakebutneedseggs',
-    cookie: {
-        maxAge: 10*365*24*60*60*1000,
-        secure: global.config.isProduction
-    },
-    resave: true,
-    saveUninitialized: true
-}));
-
-app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
 app.use(flash()); // use connect-flash for flash messages stored in session
-
-
-//===================//
-
-
-
-
-// passport config
-require('./components/IF_auth/passport')(passport);
 
 //LIMITING UPLOADS TO 10MB  ///This is not working
 app.use(connectBusboy(
@@ -211,9 +181,6 @@ app.use(connectBusboy(
 
 // Socket.io Communication
 io.sockets.on('connection', socket);
-
-// passport routes ======================================================================
-require('./components/IF_auth/auth_routes.js')(app, passport, landmarkSchema); // load our routes and pass in our app and fully configured passport
 
 //-------------------------------------//
 //---- Sending Feedback via Email -----//
@@ -550,7 +517,7 @@ var fn = function(req, res) {
 
 // route to test if the user is logged in or not 
 app.get('/api/user/loggedin', function(req, res) {
-    if (req.isAuthenticated()) {
+    if (req.user) {
         res.send(req.user);
     } else {
         res.sendStatus(500);
@@ -617,49 +584,10 @@ app.get('/api/user/profile', isLoggedIn, function(req, res) {
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
-    if (!req.isAuthenticated()) {
-        console.log('hitting not authenticated, req.headers is: ', req.headers)
-        if (req.headers.authorization) {
-            console.log('hitting if req.headers.authorization')
-            if (req.headers.authorization.indexOf('asic') > -1) {
-                console.log('hitting if basic')
-                passport.authenticate('local-basic', function(err, user, info) {
-                    if (err) {
-                        console.log('basic error', err)
-                        res.sendStatus(401);
-                    }
-                    if (!user) {
-                        res.sendStatus(401);
-                    }
-                    if (user) {
-                        // console.log('BASIC USER, REQ.USER IS ', req.user)
-                        req.user = user;
-                        // console.log('BASIC USER IS: ', req.user)
-                        return next();
-                    }
-                })(req, res, next)
-            } else if (req.headers.authorization.indexOf('earer') > -1) {
-                console.log('hitting if bearer')
-                passport.authenticate('bearer', function(err, user, info) {
-                    if (err) {
-                        console.log('bearer error', err)
-                        res.sendStatus(401);
-                    }
-                    if (!user) {
-                        res.sendStatus(401);
-                    }
-                    if (user) {
-                        console.log('BEARER USER IS: ', user)
-                        return next();
-
-                    }
-                })(req, res, next)
-            }
-        }
-
-
+    if (req.user) {
+        next();
     } else {
-        return next();
+        next("Must be logged in");
     }
 }
 
@@ -3674,20 +3602,7 @@ app.put('/api/:collection/mapReduce', function(req, res) {
     };
     req.body.options.verbose = false;
     db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));
-})
-
-
-// //for routing auth to passport
-// var router = express.Router();
-// router.get('/auth/*', function (req, res, next) {
-//   next();
-// })
-// app.use(router);
-
-// app.all('/w/*', function(req, res) {
-//   console.log('asdf '+req.url);
-// });
-
+});
 
 
 //for routing all else to angular
