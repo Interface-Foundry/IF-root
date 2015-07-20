@@ -238,7 +238,17 @@ app.post('/:mongoId/fave', function(req, res, next) {
         });
     }
 
-
+    // give the snapper points
+    if (req.item.owner && req.item.owner.mongoId) {
+        db.Users.update({
+            _id: req.item.owner.mongoId
+        }, {$inc: {kip: 5}}, function(err) {
+            if (err) {
+                // todo log error to ELK
+                console.error(err);
+            }
+        });
+    }
 
     // update the item
     req.item.faves.push({
