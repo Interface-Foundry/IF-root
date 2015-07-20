@@ -121,6 +121,7 @@ app.get('/:xmongoId/faves', function (req, res, next) {
  * GET /api/users/:mongoId/snaps
  */
 app.get('/:xmongoId/snaps', function (req, res, next) {
+    console.log('targetMongoId:', req.targetMongoId)
     db.Landmarks.find({
         'owner.mongoId': req.targetMongoId,
         world: false
