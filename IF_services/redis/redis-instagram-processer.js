@@ -59,7 +59,7 @@ var timer = new InvervalTimer(function() {
                                 }).catch(function(err) {
                                     console.log('cloudSight error.', err)
                                     //Remove from redis queue
-                                    client.lrem('scraped', 1, snap_str);
+                                    client.lrem('scraped', 1, item);
                                     timer.resume()
                                 })
                             },
@@ -78,7 +78,7 @@ var timer = new InvervalTimer(function() {
                             },
                             //Update and save landmark
                             function(url, images, tags, callback) {
-                                if (images) {
+                                if (images && images.length > 1) {
                                     var newItems = [];
                                     for (var i = 0; i < tags.length; i++) {
                                         var newItem = {
@@ -91,7 +91,7 @@ var timer = new InvervalTimer(function() {
                                         newItems.push(newItem)
                                     }
                                 }
-                                var update = images ? newItems : null
+                                var update = (images && images.length > 1) ? newItems : null
                                 updateDB(update, item,tags).then(function(item) {
                                     callback(null)
                                 }).catch(function(err) {
@@ -117,8 +117,6 @@ var timer = new InvervalTimer(function() {
 }, 5000);
 
 //HELPER FUNCTIONS
-
-
 
 function cropImage(url, objects, tags) {
     // console.log('inside cropImage url: ',url)
@@ -157,7 +155,7 @@ function cropImage(url, objects, tags) {
                         var height = parseInt(features['page geometry'].split('x')[1].split('+')[0])
                             // console.log('width: ',width,' height: ',height, 'coord[0',coord[0],'coord[1]',coord[1],'coord[2]',coord[2],'coord[3]',coord[3])
                             // width:  450  height:  450 coord[0 389 coord[1] 249 coord[2] 46 coord[3] 56
-                        if (coord[0] < (width * .4)) {
+                        if (coord[0] < (width * .6)) {
                             console.log('CROPS ARE NOT BIG ENOUGH', coord[0],width,coord[1],height)
                             return callback(err)
                         } 
@@ -286,7 +284,6 @@ function updateDB(newItems, landmarkID,tags) {
             deferred.reject()
         }
     })
-
     return deferred.promise;
 }
 
