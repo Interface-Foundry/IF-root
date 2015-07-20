@@ -54,7 +54,13 @@ module.exports.example = {
     "address" : "902 Broadway New York New York United States 11211",
     "place_id" : "ChIJbV9pxzeUwokRx_3FG9Z04Bc",
     "opening_hours" : [
-      ""
+      "Monday: 10:00 am – 7:00 pm",
+      "Tuesday: 10:00 am – 7:00 pm",
+      "Wednesday: 10:00 am – 7:00 pm",
+      "Thursday: 10:00 am – 7:00 pm",
+      "Friday: 10:00 am – 7:00 pm",
+      "Saturday: 10:00 am – 7:00 pm",
+      "Sunday: 11:00 am – 7:00 pm"
     ],
     "types" : [
       "shoe_store",
