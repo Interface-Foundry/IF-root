@@ -46,7 +46,7 @@ router.post('/', function(req, res, next) {
                     err.niceMessage = 'Could not save item';
                     return next(err);
                 }
-                redisClient.rpush('scraped', item._id, function(err, reply) {
+                redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
                         err.niceMessage = 'Could not save item';
                         err.devMessage = 'REDIS QUEUE ERR';
