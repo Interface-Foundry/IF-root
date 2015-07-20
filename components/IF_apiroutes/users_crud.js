@@ -5,7 +5,7 @@ var express = require('express'),
     db = require('../IF_schemas/db');
 
 // sets req.targetMongoId and req.targetUser
-app.use('/:mongoId*', function (req, res, next) {
+app.use('/:mongoId*', function(req, res, next) {
     if (req.params.mongoId === 'me') {
         if (req.user && req.user._id) {
             req.targetMongoId = req.user._id;
@@ -16,7 +16,7 @@ app.use('/:mongoId*', function (req, res, next) {
         }
     } else {
         req.targetMongoId = req.params.mongoId;
-        db.Users.findById(req.targetMongoId, function (e, user) {
+        db.Users.findById(req.targetMongoId, function(e, user) {
             if (e || !user) {
                 var err = e || {};
                 err.niceMessage = 'Could not find user ＼(º □ º 〃)/';
@@ -32,23 +32,23 @@ app.use('/:mongoId*', function (req, res, next) {
 /**
  * GET /api/users/:mongoId
  */
-app.get('/:xmongoId', function (req, res, next) {
+app.get('/:xmongoId', function(req, res, next) {
     res.send(req.targetUser);
 });
 
 /**
  * GET /api/users/:mongoId/activity
  */
-app.get('/:xmongoId/activity', function (req, res, next) {
+app.get('/:xmongoId/activity', function(req, res, next) {
     db.Activities.find({
-        userIds: req.targetMongoId
-    })
+            userIds: req.targetMongoId
+        })
         .sort({
             activityTime: -1
         })
         .limit(30)
         .execAsync()
-        .then(function (activities) {
+        .then(function(activities) {
             res.send({
                 results: activities,
                 links: {}
@@ -62,20 +62,22 @@ app.get('/:xmongoId/activity', function (req, res, next) {
  *
  * (This route handles both)
  */
-app.get('/:xmongoId/:followxxx/activity', function (req, res, next) {
+app.get('/:xmongoId/:followxxx/activity', function(req, res, next) {
     if (['followers', 'following'].indexOf(req.params.followxxx) < 0) {
         return next();
     }
 
     db.Activities.find({
-        userIds: {$in: req.user[req.params.followxxx]}
-    })
+            userIds: {
+                $in: req.user[req.params.followxxx]
+            }
+        })
         .sort({
             activityTime: -1
         })
         .limit(30)
         .execAsync()
-        .then(function (activities) {
+        .then(function(activities) {
             res.send({
                 results: activities,
                 links: {}
@@ -89,19 +91,23 @@ app.get('/:xmongoId/:followxxx/activity', function (req, res, next) {
  * TODO return faved looks and snaps by time FAVED not created
  * (could do this easily with the help of the activity collection)
  */
-app.get('/:xmongoId/faves', function (req, res, next) {
+app.get('/:xmongoId/faves', function(req, res, next) {
     db.Landmarks.find({
-        '_id': {$in: req.targetUser.faves}
-    })
+            '_id': {
+                $in: req.targetUser.faves
+            }
+        })
         .sort({
             'time.created': -1
         })
         .limit(30)
         .execAsync()
-        .then(function (snaps) {
+        .then(function(snaps) {
             return db.Looks.find({
-                _id: {$in: req.targetUser.faves}
-            })
+                    _id: {
+                        $in: req.targetUser.faves
+                    }
+                })
                 .sort({
                     'created': -1
                 })
@@ -120,18 +126,24 @@ app.get('/:xmongoId/faves', function (req, res, next) {
 /**
  * GET /api/users/:mongoId/snaps
  */
-app.get('/:xmongoId/snaps', function (req, res, next) {
+app.get('/:xmongoId/snaps', function(req, res, next) {
     console.log('targetMongoId:', req.targetMongoId)
     db.Landmarks.find({
-        'owner.mongoId': req.targetMongoId,
-        world: false
-    })
+            'owner.mongoId': req.targetMongoId,
+            world: false
+        })
         .sort({
             'time.created': -1
         })
         .limit(30)
         .execAsync()
-        .then(function (snaps) {
+        .then(function(snaps) {
+            //For snaps without user inputted tags, show the auto-tags instead
+            snaps.forEach(function(snap) {
+                if (snap.itemTags.text.length < 1) {
+                    snap.itemTags.text = snap.itemTags.auto
+                }
+            })
             res.send({
                 results: snaps,
                 links: {}
@@ -142,16 +154,16 @@ app.get('/:xmongoId/snaps', function (req, res, next) {
 /**
  * GET /api/users/:mongoId/looks
  */
-app.get('/:xmongoId/looks', function (req, res, next) {
+app.get('/:xmongoId/looks', function(req, res, next) {
     db.Looks.find({
-        'owner.mongoId': req.targetMongoId
-    })
+            'owner.mongoId': req.targetMongoId
+        })
         .sort({
             'created': -1
         })
         .limit(30)
         .execAsync()
-        .then(function (looks) {
+        .then(function(looks) {
             res.send({
                 results: looks,
                 links: {}
@@ -163,29 +175,29 @@ app.get('/:xmongoId/looks', function (req, res, next) {
  * GET /api/users/:mongoId/getAll
  * gets all snaps AND looks for a user.  pretty crazy, huh?
  */
-app.get('/:xmongoId/getAll', function (req, res, next) {
+app.get('/:xmongoId/getAll', function(req, res, next) {
     db.Looks.find({
-        owner: {
-            mongoId: req.targetMongoId.toString()
-        }
-    })
+            owner: {
+                mongoId: req.targetMongoId.toString()
+            }
+        })
         .sort({
             created: -1
         })
         .limit(30)
         .execAsync()
-        .then(function (looks) {
+        .then(function(looks) {
             return db.Landmarks.find({
-                owner: {
-                    mongoId: req.targetMongoId.toString()
-                }
-            })
+                    owner: {
+                        mongoId: req.targetMongoId.toString()
+                    }
+                })
                 .sort({
                     'time.created': -1
                 })
                 .limit(30)
                 .execAsync()
-                .then(function (snaps) {
+                .then(function(snaps) {
                     var all = looks.concat(snaps)
                     res.send({
                         results: all,
@@ -207,7 +219,9 @@ app.get('/:xmongoId/:followxxx', function(req, res, next) {
     // get the last 30 from the followers/following string array
     var follows = req.targetUser[req.params.followxxx].slice(-30);
     db.Users.find({
-            _id: {$in: follows}
+            _id: {
+                $in: follows
+            }
         })
         .execAsync()
         .then(function(users) {

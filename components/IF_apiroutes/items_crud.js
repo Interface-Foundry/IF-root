@@ -11,14 +11,25 @@ var express = require('express'),
 
 //Get item given an item ID
 router.get('/:id', function(req, res, next) {
+    var result = {};
     landmark.findById(req.params.id, function(err, item) {
         if (err) {
-            err.niceMessage = 'No no, item no here.';
+            err.niceMessage = 'No item found.';
             return next(err);
         } else if (!item) {
-            return next("No no, item no here.");
+            return next("No item found.");
         }
-        res.send(item);
+        result.item = item;
+        db.Landmarks.findById(item.parent.mongoId, function(err, place) {
+            if (err) {
+                err.niceMessage = 'Could not find store for this item.';
+                return next(err);
+            } else if (!place) {
+                return next("Could not find store for this item.");
+            }
+            result.parent = place;
+            res.send(result);
+        })
     });
 });
 

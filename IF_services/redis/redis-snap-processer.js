@@ -54,9 +54,9 @@ var timer = new InvervalTimer(function() {
                                 }).catch(function(err) {
                                     console.log('cloudSight error.', err)
                                         //Remove from redis queue
-                                        client.lrem('snaps', 1, snap_str);
-                                        timer.resume()
-                                        callback(err)
+                                    client.lrem('snaps', 1, snap_str);
+                                    timer.resume()
+                                    callback(err)
                                 })
                             },
                             function(tags, callback) {
@@ -316,7 +316,7 @@ function updateDB(landmarkID, tags) {
 
             landmark.save(function(err, saved) {
                 if (err) console.log(err)
-                console.log('Updated landmark:', saved)
+                    // console.log('Updated landmark:', saved)
                 deferred.resolve(saved);
             })
         } else {
@@ -657,6 +657,7 @@ function categorize(tags) {
         ]
     }, {
         'Underwear': [
+            'brassiere',
             'underwear',
             'underpants',
             'boxers',
