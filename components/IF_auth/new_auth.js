@@ -5,6 +5,19 @@ var db = require('db');
 var secret = 'SlytherinOrGTFO';
 var expiresInMinutes = 10*365*24*60; // 10 years
 
+/**
+ * Creates a json web token for a user
+ * @param user
+ */
+var getToken = function(user) {
+    var jwtUser = {
+        sub: user._id.toString(),
+        name: user.name
+    };
+
+    return jwt.sign(jwtUser, secret, {expiresInMinutes: expiresInMinutes});
+};
+
 
 /**
  * Populate req.user if possible
@@ -54,19 +67,80 @@ app.post('/api/auth/login', function(req, res, next) {
                     return next('invalid password');
                 }
 
-                var jwtUser = {
-                    sub: user._id.toString(),
-                    name: user.name
-                };
-
-                var token = jwt.sign(jwtUser, secret, {expiresInMinutes: expiresInMinutes});
                 res.json({
                     user: user,
-                    token: token
+                    token: getToken(user)
                 });
             });
         }, next);
 });
 
+/**
+ * Expects at minimum {data: {userID, name}}
+ */
+app.post('/api/auth/verify-facebook', function(req, res, next) {
+    if (!req.body || !req.body.data || !req.body.data.userID) {
+        return next("Error completing facebook registration or sign-in");
+    }
+
+    db.Users.findOne({'facebook.id': req.body.data.userID})
+        .then(function(user) {
+            if (!user) {
+                var u = new db.User({
+                    facebook: {
+                        id: req.body.data.userID,
+                        name: req.body.data.name
+                    },
+                    name: req.body.data.name
+                });
+                return u.save(function(err, user) {
+                    if (err) { console.error (err); }
+                    res.json({
+                        user: user,
+                        token: getToken(user)
+                    });
+                });
+            }
+
+            res.json({
+                user: user,
+                token: getToken(user)
+            });
+        });
+});
+
+/**
+ * Expects at minimum {data: {userID, name}}
+ */
+app.post('/api/auth/verify-google', function(req, res, next) {
+    if (!req.body || !req.body.data || !req.body.data.userID) {
+        return next("Error completing google registration or sign-in");
+    }
+
+    db.Users.findOne({'google.id': req.body.data.userID})
+        .then(function(user) {
+            if (!user) {
+                var u = new db.User({
+                    google: {
+                        id: req.body.data.userID,
+                        name: req.body.data.name
+                    },
+                    name: req.body.data.name
+                });
+                return u.save(function(err, user) {
+                    if (err) { console.error (err); }
+                    res.json({
+                        user: user,
+                        token: getToken(user)
+                    });
+                });
+            }
+
+            res.json({
+                user: user,
+                token: getToken(user)
+            });
+        });
+});
 
 module.exports = app;
