@@ -79,19 +79,20 @@ app.post('/api/auth/login', function(req, res, next) {
  * Expects at minimum {data: {userID, name}}
  */
 app.post('/api/auth/verify-facebook', function(req, res, next) {
-    if (!req.body || !req.body.data || !req.body.data.userID) {
+    debugger;
+    if (!req.body || !req.body.user || !req.body.user.id) {
         return next("Error completing facebook registration or sign-in");
     }
 
-    db.Users.findOne({'facebook.id': req.body.data.userID})
+    db.Users.findOne({'facebook.id': req.body.user.id})
         .then(function(user) {
             if (!user) {
                 var u = new db.User({
                     facebook: {
-                        id: req.body.data.userID,
-                        name: req.body.data.name
+                        id: req.body.user.id,
+                        name: req.body.user.name
                     },
-                    name: req.body.data.name
+                    name: req.body.user.name
                 });
                 return u.save(function(err, user) {
                     if (err) { console.error (err); }
