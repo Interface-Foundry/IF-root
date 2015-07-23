@@ -54,7 +54,11 @@ var userSchema = mongoose.Schema({
     },
     google: {
         id: String,
-        name: String
+        name: String,
+        url: String,
+        displayName: String,
+        picture: String,
+        thumbnail: String
     },
     twitter: {
         id: String,
