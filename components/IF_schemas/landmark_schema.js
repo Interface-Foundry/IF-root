@@ -319,6 +319,8 @@ var landmarkSchema = new Schema({
         comment: String,
         reason: String
     }],
+    linkback: String, // linking back to a page you may have found an item
+    linkbackname: String, // the display name for the link
 
     // make it easy to kill test data
     testData: {
