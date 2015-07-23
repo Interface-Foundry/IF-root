@@ -41,7 +41,9 @@ app.get('/:xmongoId', function(req, res, next) {
  */
 app.get('/:xmongoId/activity', function(req, res, next) {
     db.Activities.find({
-            userIds: req.targetMongoId
+            userIds: req.targetMongoId,
+            privateVisible: true,
+            publicVisible: true
         })
         .sort({
             activityTime: -1
