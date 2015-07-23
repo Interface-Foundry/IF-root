@@ -2,6 +2,7 @@ var app = require('express').Router();
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var db = require('db');
+var axios = require('axios');
 var secret = 'SlytherinOrGTFO';
 var expiresInMinutes = 10*365*24*60; // 10 years
 
@@ -35,7 +36,10 @@ app.use(function(req, res, next) {
 
     token = token.split(' ').pop();
     jwt.verify(token, secret, function(err, decoded) {
-        if (err) { next(err); }
+        if (err) {
+            console.error(err);
+            return next();
+        }
         if (decoded && decoded.sub) {
             // todo replace with something better than a full-fledged db call
             db.Users.findById(decoded.sub, function(e, u) {
@@ -79,14 +83,24 @@ app.post('/api/auth/login', function(req, res, next) {
  * Expects at minimum {data: {userID, name}}
  */
 app.post('/api/auth/verify-facebook', function(req, res, next) {
-    debugger;
-    if (!req.body || !req.body.user || !req.body.user.id) {
+    if (!req.body || !req.body.user || !req.body.user.id || !req.body.auth) {
         return next("Error completing facebook registration or sign-in");
     }
 
-    db.Users.findOne({'facebook.id': req.body.user.id})
-        .then(function(user) {
-            if (!user) {
+    var fb_token = req.body.auth.authResponse.accessToken;
+
+    axios.get('https://graph.facebook.com/v2.4/me?access_token=' + fb_token)
+        .then(function(fb_res) {
+            if (fb_res.data.id !== req.body.user.id) {
+                throw new Error('Facebook credential mismatch between user ids ' + fb_res.data.id + ' and ' + req.body.user.id);
+            }
+
+            return db.Users.findOne({'facebook.id': req.body.user.id})
+        })
+        .then(function(user){
+            if (user) {
+                return user;
+            } else {
                 var u = new db.User({
                     facebook: {
                         id: req.body.user.id,
@@ -94,20 +108,19 @@ app.post('/api/auth/verify-facebook', function(req, res, next) {
                     },
                     name: req.body.user.name
                 });
-                return u.save(function(err, user) {
-                    if (err) { console.error (err); }
-                    res.json({
-                        user: user,
-                        token: getToken(user)
+                return axios.get('https://graph.facebook.com/v2.4/me/picture?redirect=false&height=300&width=300&access_token=' + fb_token)
+                    .then(function(pic) {
+                        u.avatar = pic.data.data.url;
+                        return u.save();
                     });
-                });
             }
-
+        })
+        .then(function(user) {
             res.json({
                 user: user,
                 token: getToken(user)
             });
-        });
+        }, next);
 });
 
 /**

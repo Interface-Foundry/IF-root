@@ -6,6 +6,7 @@
   "dependencies": {
     "accounting": "^0.4.1",
     "async": "~0.9.0",
+    "axios": "^0.5.4",
     "bcrypt": "^0.8.3",
     "bcrypt-nodejs": "latest",
     "bluebird": "^2.9.30",
