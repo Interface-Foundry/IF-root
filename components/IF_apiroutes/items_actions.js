@@ -356,6 +356,7 @@ app.post('/:mongoId/reject', function(req, res, next) {
         } else {
             db.Users.findById(req.user._id, function(e, doc) {
                 return res.send({
+                    item: req.item,
                     user: doc
                 });
             });
@@ -378,6 +379,7 @@ app.post('/:mongoId/unreject', function(req, res, next) {
         } else {
             db.Users.findById(req.user._id, function(e, doc) {
                 return res.send({
+                    item: req.item,
                     user: doc
                 });
             });
@@ -424,6 +426,7 @@ app.post('/:mongoId/report', function(req, res, next) {
             return next(e);
         }
         return res.send({
+            user: req.user,
             item: req.item
         });
     });
