@@ -52,6 +52,14 @@ var userSchema = mongoose.Schema({
         timezone: Number,
         bio: String
     },
+    google: {
+        id: String,
+        name: String,
+        url: String,
+        displayName: String,
+        picture: String,
+        thumbnail: String
+    },
     twitter: {
         id: String,
         token: String,
