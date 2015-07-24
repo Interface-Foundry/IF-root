@@ -16,7 +16,7 @@ module.exports = {
         //url: 'mongodb://ifappuser:password@mongodb-r1.kipapp.co,mongodb-r2.kipapp.co/foundry'.replace('password', process.env.MONGOPW)
     },
     elasticsearch: {
-        url: 'http://elasticsearch-cerulean.kipapp.co:9200'
+        url: 'http://elasticsearch-cerulean.internal.kipapp.co:9200'
     },
     elasticsearchElk: {
         url: 'http://analytics-db-mew.internal.kipapp.co:9200'
