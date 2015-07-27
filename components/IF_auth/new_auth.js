@@ -46,6 +46,7 @@ app.use(function(req, res, next) {
                 if (e) {next(e)}
                 if (u) {
                     req.user = u;
+                    req.userId = u._id.toString();
                 }
                 next();
             });
