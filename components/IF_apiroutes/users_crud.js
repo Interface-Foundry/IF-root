@@ -2,7 +2,8 @@
 
 var express = require('express'),
     app = express.Router(),
-    db = require('../IF_schemas/db');
+    db = require('../IF_schemas/db'),
+    _ = require('lodash');
 
 // sets req.targetMongoId and req.targetUser
 app.use('/:mongoId*', function (req, res, next) {
@@ -34,6 +35,24 @@ app.use('/:mongoId*', function (req, res, next) {
  */
 app.get('/:xmongoId', function (req, res, next) {
     res.send(req.targetUser);
+});
+
+/**
+ * PUT /api/users/:mongoId
+ */
+app.put('/:xmongoId', function(req, res, next) {
+    if (req.userId !== req.targetMongoId) {
+        return next({niceMessage: "Sorry, you can't update other people's profiles."})
+    } else if (req.targetMongoId !== req.body._id) {
+        return next({niceMessage: "Sorry, you can't update other people's profiles."}, {devMessage: "target and body user id mismatch."})
+    }
+    _.merge(req.user, req.body)
+
+    req.user.save(function(err) {
+        if (err) {
+            next(err);
+        }
+    })
 });
 
 /**
