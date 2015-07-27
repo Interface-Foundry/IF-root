@@ -3,13 +3,14 @@
 var express = require('express'),
     app = express.Router(),
     db = require('../IF_schemas/db'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    upload = require('../../IF_services/upload');
 
 // sets req.targetMongoId and req.targetUser
 app.use('/:mongoId*', function(req, res, next) {
     if (req.params.mongoId === 'me') {
         if (req.user && req.user._id) {
-            req.targetMongoId = req.user._id;
+            req.targetMongoId = req.user._id.toString();
             req.targetUser = req.user;
             next();
         } else {
@@ -41,18 +42,45 @@ app.get('/:xmongoId', function(req, res, next) {
  * PUT /api/users/:mongoId
  */
 app.put('/:xmongoId', function(req, res, next) {
+    debugger;
     if (req.userId !== req.targetMongoId) {
         return next({niceMessage: "Sorry, you can't update other people's profiles."})
     } else if (req.targetMongoId !== req.body._id) {
         return next({niceMessage: "Sorry, you can't update other people's profiles."}, {devMessage: "target and body user id mismatch."})
     }
-    _.merge(req.user, req.body)
+    _.merge(req.user, req.body);
 
-    req.user.save(function(err) {
+    req.user.save(function(err, user) {
         if (err) {
-            next(err);
+            return next(err);
         }
+
+        res.send(user);
     })
+});
+
+
+/**
+ * POST /api/users/avatar
+ * Change my avatar
+ */
+app.post('/:xmongoId/avatar', function(req, res, next) {
+    if (!req.userId) {
+        return next('You must log in to change your avatar');
+    } else if (!req.body.base64) {
+        return next('Please select a picture to upload');
+    }
+
+    // upload to s3
+    upload.uploadPicture(req.user.profileID, req.body.base64)
+        .then(function(imgURL) {
+                res.send({avatar: imgURL});
+            }, function(err) {
+                if (err) {
+                    err.niceMessage = 'Error uploading image';
+                    return next(err);
+                }
+            })
 });
 
 /**
