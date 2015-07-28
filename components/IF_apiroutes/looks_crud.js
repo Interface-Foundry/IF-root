@@ -113,12 +113,13 @@ router.post('/', function(req, res, next) {
         function(look, callback) {
             // console.log('Saving..')
             //Save look in db
+            look.snapIds = look.snaps.map(function(s){ return s.mongoId; });
             look.save(function(err, look) {
                 if (err) {
                     err.niceMessage = 'Could not save look';
                     return callback(err)
                 }
-                console.log('New Look created!', look)
+                console.log('New Look created!', look);
                 callback(null, look);
             });
         }
@@ -165,6 +166,8 @@ router.put('/:id', function(req, res, next) {
             }
             if (look && req.user._id.toString() === look.owner.mongoId) { //Merge existing item with updated object from frontend
                 look = _.extend(look, req.body);
+                //make sure the snapIds are correct
+                look.snapIds = look.snaps.map(function(s) { return s.mongoId; });
                 //Save item
                 look.save(function(err, item) {
                     if (err) {

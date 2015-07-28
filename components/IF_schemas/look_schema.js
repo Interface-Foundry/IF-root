@@ -68,6 +68,7 @@ var lookSchema = mongoose.Schema({
             text: []
         }
     }],
+    snapIds: [Schema.Types.ObjectId],
     created: {
         type: Date,
         default: Date.now
