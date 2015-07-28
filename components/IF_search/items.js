@@ -120,7 +120,7 @@ app.post(searchItemsUrl, function (req, res, next) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description"],
+                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description", "parent.name"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }
