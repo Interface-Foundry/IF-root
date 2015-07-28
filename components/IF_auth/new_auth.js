@@ -4,7 +4,7 @@ var bcrypt = require('bcrypt');
 var db = require('db');
 var axios = require('axios');
 var secret = 'SlytherinOrGTFO';
-var expiresInMinutes = 10*365*24*60; // 10 years
+var expiresInMinutes = 10 * 365 * 24 * 60; // 10 years
 
 /**
  * Creates a json web token for a user
@@ -16,7 +16,9 @@ var getToken = function(user) {
         name: user.name
     };
 
-    return jwt.sign(jwtUser, secret, {expiresInMinutes: expiresInMinutes});
+    return jwt.sign(jwtUser, secret, {
+        expiresInMinutes: expiresInMinutes
+    });
 };
 
 
@@ -43,7 +45,9 @@ app.use(function(req, res, next) {
         if (decoded && decoded.sub) {
             // todo replace with something better than a full-fledged db call
             db.Users.findById(decoded.sub, function(e, u) {
-                if (e) {next(e)}
+                if (e) {
+                    next(e)
+                }
                 if (u) {
                     req.user = u;
                     req.userId = u._id.toString();
@@ -62,8 +66,12 @@ app.post('/api/auth/login', function(req, res, next) {
         next("Must pass in {email, password}");
     }
 
-    db.Users.findOne({'local.email': req.body.email})
+    db.Users.findOne({
+            'local.email': req.body.email
+        })
         .then(function(user) {
+            if (!user) next('Could not find user for that email.')
+
             bcrypt.compare(req.body.password, user.local.password, function(err, ok) {
                 if (err) {
                     return next(err)
@@ -78,6 +86,30 @@ app.post('/api/auth/login', function(req, res, next) {
                 });
             });
         }, next);
+});
+
+/**
+ * Expects {email, password}
+ */
+app.post('/api/auth/signup', function(req, res, next) {
+    if (!req.body || !req.body.email || !req.body.password) {
+        next("Must pass in {email, password}");
+    }
+    var newUser = new db.Users()
+    newUser.local.email = req.body.email;
+    var salt = bcrypt.genSaltSync(10);
+    // Hash the password with the salt
+    var hash = bcrypt.hashSync(req.body.password, salt);
+    newUser.local.password = hash;
+    newUser.save(function(err, savedUser) {
+        if (err || !savedUser) next('Could not create user.')
+            console.log('savedUser: ',savedUser)
+        res.json({
+            user: savedUser,
+            token: getToken(savedUser)
+        });
+
+    }, next);
 });
 
 /**
@@ -96,9 +128,11 @@ app.post('/api/auth/verify-facebook', function(req, res, next) {
                 throw new Error('Facebook credential mismatch between user ids ' + fb_res.data.id + ' and ' + req.body.user.id);
             }
 
-            return db.Users.findOne({'facebook.id': req.body.user.id})
+            return db.Users.findOne({
+                'facebook.id': req.body.user.id
+            })
         })
-        .then(function(user){
+        .then(function(user) {
             if (user) {
                 return user;
             } else {
@@ -132,7 +166,9 @@ app.post('/api/auth/verify-google', function(req, res, next) {
         return next("Error completing google registration or sign-in");
     }
 
-    db.Users.findOne({'google.id': req.body.user.id})
+    db.Users.findOne({
+            'google.id': req.body.user.id
+        })
         .then(function(user) {
             if (!user) {
                 var u = new db.User({
@@ -141,7 +177,9 @@ app.post('/api/auth/verify-google', function(req, res, next) {
                     avatar: req.body.user.picture
                 });
                 return u.save(function(err, user) {
-                    if (err) { console.error (err); }
+                    if (err) {
+                        console.error(err);
+                    }
                     res.json({
                         user: user,
                         token: getToken(user)
