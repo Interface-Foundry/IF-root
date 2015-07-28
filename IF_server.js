@@ -524,6 +524,9 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
+
+//--- SEARCH BABY ----//
+app.use(require('./components/IF_search/items'));
 //--- SNAP ROUTE ----//
 app.use('/api/snaps', require('./components/IF_apiroutes/snaps'));
 //--- ITEM ROUTER ----//
@@ -591,9 +594,6 @@ function isLoggedIn(req, res, next) {
     }
 }
 
-
-// New Search
-app.use(require('./components/IF_search/items'));
 
 // SEARCH
 // What u lookin at?
