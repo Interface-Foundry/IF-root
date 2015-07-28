@@ -5,6 +5,7 @@ var db = require('db');
 var axios = require('axios');
 var secret = 'SlytherinOrGTFO';
 var expiresInMinutes = 10 * 365 * 24 * 60; // 10 years
+var uniquer = require('../../IF_services/uniquer.js')
 
 /**
  * Creates a json web token for a user
@@ -70,7 +71,9 @@ app.post('/api/auth/login', function(req, res, next) {
             'local.email': req.body.email
         })
         .then(function(user) {
-            if (!user) next('Could not find user for that email.')
+            if (!user || user == null) {
+                return next('Could not find user for that email.')
+            }
 
             bcrypt.compare(req.body.password, user.local.password, function(err, ok) {
                 if (err) {
@@ -93,23 +96,37 @@ app.post('/api/auth/login', function(req, res, next) {
  */
 app.post('/api/auth/signup', function(req, res, next) {
     if (!req.body || !req.body.email || !req.body.password) {
-        next("Must pass in {email, password}");
+        return next("Must pass in {email, password}");
     }
-    var newUser = new db.Users()
-    newUser.local.email = req.body.email;
-    var salt = bcrypt.genSaltSync(10);
-    // Hash the password with the salt
-    var hash = bcrypt.hashSync(req.body.password, salt);
-    newUser.local.password = hash;
-    newUser.save(function(err, savedUser) {
-        if (err || !savedUser) next('Could not create user.')
-            console.log('savedUser: ',savedUser)
-        res.json({
-            user: savedUser,
-            token: getToken(savedUser)
-        });
-
-    }, next);
+    db.Users.findOne({
+            'local.email': req.body.email
+        })
+        .then(function(user) {
+            if (user) {
+                return next('A user already exists for the email provided.')
+            }
+            var newUser = new db.Users()
+            newUser.local.email = req.body.email;
+            var name = req.body.email.split('@')[0].trim()
+            uniquer.uniqueId(name, 'User').then(function(profileID) {
+                newUser.profileID = profileID
+                var salt = bcrypt.genSaltSync(10);
+                var hash = bcrypt.hashSync(req.body.password, salt);
+                newUser.local.password = hash;
+                newUser.save(function(err, savedUser) {
+                    if (err || !savedUser) {
+                        return next('Could not create user.')
+                    }
+                    console.log('savedUser: ', savedUser)
+                    res.json({
+                        user: savedUser,
+                        token: getToken(savedUser)
+                    });
+                })
+            }).catch(function(err) {
+                return next('Error creating a unique profile ID.')
+            });
+        }, next)
 });
 
 /**

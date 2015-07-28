@@ -13,13 +13,15 @@
      uniqueId: function(input, collection) {
          var deferred = q.defer();
          var newUnique;
+         // console.log('input: ',input, collection)
          urlify(input, function() {
              db[collection].find({
                  'id': input
              }, function(err, data) {
-                 if (err) return deferred.reject(err)
+                 if (err) {
+                     return deferred.reject(err)
+                 }
                  if (data.length > 0) {
-                     // console.log('id already exists: ', data[0].id)
                      var uniqueNumber = 1;
                      async.forever(function(next) {
                              var uniqueNum_string = uniqueNumber.toString();
@@ -27,21 +29,23 @@
                              db[collection].findOne({
                                  'id': newUnique
                              }, function(err, data) {
+                                 if (err) {
+                                     return deferred.reject(err)
+                                 }
                                  if (data) {
                                      uniqueNumber++;
                                      next();
                                  } else {
-                                    // console.log('newUnique: ',newUnique)
+                                     // console.log('newUnique: ',newUnique)
                                      next('unique!'); // This is where the looping is stopped
                                  }
                              });
                          },
                          function() {
-                             // console.log('A: ',newUnique)
                              deferred.resolve(newUnique)
                          });
                  } else {
-                     // console.log(unique+' is already unique')
+                     console.log(input +' is already unique')
                      deferred.resolve(input)
                  }
              });
