@@ -8,6 +8,7 @@ build.xml
 .idea/*
 *.swp
 venv
+node_modules
 
 # Compiled source #
 ###################

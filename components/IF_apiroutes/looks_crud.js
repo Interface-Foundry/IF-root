@@ -2,7 +2,7 @@
 
 var express = require('express'),
     router = express.Router(),
-    _ = require('underscore'),
+    _ = require('lodash'),
     db = require('../IF_schemas/db'),
     upload = require('../../IF_services/upload'),
     uniquer = require('../../IF_services/uniquer'),

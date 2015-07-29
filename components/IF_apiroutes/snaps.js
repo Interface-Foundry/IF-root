@@ -2,7 +2,7 @@
 
 var express = require('express'),
     router = express.Router(),
-    _ = require('underscore'),
+    _ = require('lodash'),
     request = require('request'),
     redisClient = require('../../redis.js'),
     db = require('../IF_schemas/db'),

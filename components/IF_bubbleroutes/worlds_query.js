@@ -1,4 +1,4 @@
-var _ = require('underscore'),
+var _ = require('lodash'),
     mongoose = require('mongoose'),
     landmarkSchema = require('../IF_schemas/landmark_schema.js');
 

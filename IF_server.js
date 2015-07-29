@@ -48,7 +48,7 @@ var bodyParser = require('body-parser');
 var AWS = require('aws-sdk');
 var readChunk = require('read-chunk');
 var fileTypeProcess = require('file-type');
-var _ = require('underscore');
+var _ = require('lodash');
 var sanitize = require('mongo-sanitize');
 // var multer  = require('multer');
 

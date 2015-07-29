@@ -2,7 +2,7 @@
 
 var express = require('express'),
     router = express.Router(),
-    _ = require('underscore'),
+    _ = require('lodash'),
     q = require('q'),
     async = require('async'),
     AWS = require('aws-sdk'),
