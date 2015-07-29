@@ -6,6 +6,23 @@ var express = require('express'),
     _ = require('lodash'),
     upload = require('../../IF_services/upload');
 
+// Gets all the usernames
+app.get('/usernames', function(req, res, next) {
+    db.Users
+        .find({})
+        .select('profileID')
+        .exec(function(err, users) {
+            if (err) {
+                next(err);
+            } else {
+                res.send(users.reduce(function(hash, u) {
+                    hash[u.profileID] = u._id;
+                    return hash;
+                }, {}));
+            }
+        });
+});
+
 // sets req.targetMongoId and req.targetUser
 app.use('/:mongoId*', function(req, res, next) {
     if (req.params.mongoId === 'me') {
@@ -42,12 +59,15 @@ app.get('/:xmongoId', function(req, res, next) {
  * PUT /api/users/:mongoId
  */
 app.put('/:xmongoId', function(req, res, next) {
-    debugger;
     if (req.userId !== req.targetMongoId) {
         return next({niceMessage: "Sorry, you can't update other people's profiles."})
     } else if (req.targetMongoId !== req.body._id) {
         return next({niceMessage: "Sorry, you can't update other people's profiles."}, {devMessage: "target and body user id mismatch."})
     }
+    if (req.body.profileID) {
+        req.body.profileID = req.body.profileID.toLowerCase();
+    }
+
     _.merge(req.user, req.body);
 
     req.user.save(function(err, user) {

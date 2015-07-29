@@ -114,7 +114,8 @@ var userSchema = mongoose.Schema({
         type: String,
         unique: true,
         lowercase: true,
-        index: true
+        index: true,
+        required: true
     },
     permissions: [{
 
