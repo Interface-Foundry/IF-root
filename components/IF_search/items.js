@@ -208,12 +208,6 @@ app.post(trendingItemsUrl, function (req, res, next) {
             }, {
                 category: 'Trending near you',
                 results: body.results
-            }, {
-                category: 'Related to Holiday1',
-                results: mockItems.getResultsArray(defaultResultCount)
-            }, {
-                category: 'Other Snaps Near You',
-                results: mockItems.getResultsArray(defaultResultCount)
             }]
         });
     });
