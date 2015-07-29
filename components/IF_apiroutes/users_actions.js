@@ -23,10 +23,22 @@ app.use('/:x/:action', function(req, res, next) {
     if (req.targetMongoId === req.user._id.toString()) {
         return next('You can\'t ' + req.params.action + ' yourself (・_・//)');
     }
+
+    next();
 });
 
 // req.user follows :mongoId user
 app.post('/:mongoId/follow', function(req, res, next) {
+    req.targetUser.update({
+        $addToSet: {
+            followers: req.userId
+        }
+    }, function(err) {
+        if (err) {
+            next(err);
+        }
+    });
+
     req.user.update({
         $addToSet: {
             following: req.targetMongoId
@@ -57,6 +69,12 @@ app.post('/:mongoId/follow', function(req, res, next) {
 });
 
 app.post('/:mongoId/unfollow', function(req, res, next) {
+    req.targetUser.update({
+        $pull: {
+            followers: req.userId
+        }
+    }, function(e) { if (e) { next(e) }});
+
     req.user.update({
         $pull: {
             following: req.targetMongoId
