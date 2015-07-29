@@ -69,7 +69,8 @@
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha test",
-    "debugtest": "node debug ./node_modules/mocha/bin/mocha test"
+    "debugtest": "node debug ./node_modules/mocha/bin/mocha test",
+    "start": "node IF_server.js"
   },
   "repository": {
     "type": "git",
