@@ -22,12 +22,9 @@ var es = new elasticsearch.Client({
     log: ESLogger
 });
 
-
+console.log('using elasticsearch', global.config.elasticsearch.url);
 
 var defaultResultCount = 20;
-
-var mockItems = require('./../../test/KipAPI/mock_items.js');
-var USE_MOCK_DATA = false;
 
 /**
  * Item Search
@@ -65,11 +62,6 @@ app.post(searchItemsUrl, function (req, res, next) {
         query: req.body,
         results: []
     };
-
-    if (USE_MOCK_DATA) {
-        responseBody.results = mockItems.getResultsArray(defaultResultCount);
-        return res.send(responseBody);
-    }
 
     // elasticsearch impl
     // update fuzziness of query based on search term length
@@ -111,6 +103,7 @@ app.post(searchItemsUrl, function (req, res, next) {
         from: page * defaultResultCount,
         index: "foundry",
         type: "landmarks",
+        fields: [],
         body: {
             query: {
                 filtered: {
@@ -133,12 +126,11 @@ app.post(searchItemsUrl, function (req, res, next) {
 
     es.search(fuzzyQuery)
         .then(function(results) {
-            responseBody.results = results.hits.hits.map(function(r) {
-                var doc = r._source;
-                doc._id = r._id; // elasticsearch strips out the _id field for some inane reason
-                return doc;
+            var ids = results.hits.hits.map(function(r) { return r._id; });
+            db.Landmarks.find({_id: {$in: ids}}, function(err, results) {
+                responseBody.results = results;
+                res.send(responseBody);
             });
-            res.send(responseBody);
         }, function(err) {
             next(err);
         });
