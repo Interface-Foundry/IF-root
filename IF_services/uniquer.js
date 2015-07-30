@@ -12,20 +12,24 @@
  module.exports = {
      uniqueId: function(input, collection) {
          var deferred = q.defer();
+         input = input.trim().toLowerCase()
          var newUnique;
          // console.log('input: ',input, collection)
-         urlify(input, function() {
+         urlify(input, function(input) {
+            console.log('INPUT!!:',input)
              db[collection].find({
                  'id': input
              }, function(err, data) {
                  if (err) {
                      return deferred.reject(err)
                  }
+                 console.log('DATAL',data)
                  if (data.length > 0) {
+                    console.log('wtf')
                      var uniqueNumber = 1;
                      async.forever(function(next) {
                              var uniqueNum_string = uniqueNumber.toString();
-                             newUnique = data[0].id + uniqueNum_string;
+                             newUnique = data[0].id + '_' +uniqueNum_string;
                              db[collection].findOne({
                                  'id': newUnique
                              }, function(err, data) {
@@ -45,7 +49,7 @@
                              deferred.resolve(newUnique)
                          });
                  } else {
-                     console.log(input +' is already unique')
+                     // console.log(input +' is already unique')
                      deferred.resolve(input)
                  }
              });
