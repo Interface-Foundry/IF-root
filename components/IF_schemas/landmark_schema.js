@@ -44,6 +44,7 @@ var landmarkSchema = new Schema({
         coordinates: []
     },
     addressString: String,
+    tel: String,
     loc_nickname: String,
     loc_info: {
         loc_nickname: String,
