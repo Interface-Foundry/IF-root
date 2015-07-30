@@ -2,6 +2,7 @@ var express = require('express');
 var app = express.Router();
 var db = require('../IF_schemas/db');
 var elasticsearch = require('elasticsearch');
+var Promise = require('bluebird');
 
 // set up the fake data for the /trending api
 var request = require('request');
@@ -64,34 +65,48 @@ app.post(searchItemsUrl, function (req, res, next) {
         results: []
     };
 
+
+    search(req.body, page)
+        .then(function(results) {
+            responseBody.results = results;
+            res.send(responseBody);
+        }, next)
+});
+
+/**
+ * Takes any query, normalizes it, and performs a search
+ * @param q
+ * @param page
+ * @returns {*}
+ */
+function search(q, page) {
     //
     // Normalize query
     //
-    var q = req.body;
 
     // text should be a string
     if (q.text && (typeof q.text !== 'string')) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.text must be a string, was ' + q.text});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.text must be a string, was ' + q.text});
     }
 
     // categories should be an array
     if (q.categories && !(q.categories instanceof Array)) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.categories must be an array, was ' + q.categories});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.categories must be an array, was ' + q.categories});
     }
 
     // color should be an array
     if (q.color && !(q.color instanceof Array)) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.color must be an array, was ' + q.color});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.color must be an array, was ' + q.color});
     }
 
     // priceRange should be a number 1-4
     if (q.priceRange && [1, 2, 3, 4].indexOf(q.priceRange) < 0) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange});
     }
 
     // radius needs to be number parseable
     if (q.radius && isNaN(parseFloat(q.radius))) {
-        return next({
+        return Promise.reject({
             niceMessage: 'Could not complete search',
             devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange
         });
@@ -101,35 +116,28 @@ app.post(searchItemsUrl, function (req, res, next) {
 
     // loc should be {lon: Number, lat: Number}
     if (!q.loc) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.loc is required'});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc is required'});
     } else if (!q.loc.lat || !q.loc.lon) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties, was ' + q.loc});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties, was ' + q.loc});
     } else if (isNaN(parseFloat(q.loc.lat)) || isNaN(parseFloat(q.loc.lon))) {
-        return next({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties to be numbers, was ' + q.loc});
+        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties to be numbers, was ' + q.loc});
     } else {
         q.loc.lat = parseFloat(q.loc.lat);
         if (q.loc.lat > 90 || q.loc.lat < -90) {
-            return next({niceMessage: 'Could not complete search', devMessage: 'q.loc.lat must be valid latitude, was ' + q.loc.lat});
+            return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc.lat must be valid latitude, was ' + q.loc.lat});
         }
         q.loc.lon = parseFloat(q.loc.lon);
         if (q.loc.lon > 180 || q.loc.lon < -180) {
-            return next({niceMessage: 'Could not complete search', devMessage: 'q.loc.lon must be valid longitude, was ' + q.loc.lon});
+            return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc.lon must be valid longitude, was ' + q.loc.lon});
         }
     }
-    
-    var search;
+
     if (q.text) {
-        search = textSearch;
+        return textSearch(q, page);
     } else {
-        search = filterSearch;
+        return filterSearch(q, page);
     }
-    
-    search(q, page)
-        .then(function(results) {
-            responseBody.results = results;
-            res.send(responseBody);
-        }, next)
-});
+}
 
 /**
  * Search implementation for a query that has text
