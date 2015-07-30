@@ -122,7 +122,10 @@ router.get('/:xid/toplooks', function(req, res, next) {
     // todo sort
     // todo paginate, limit
     var page = 0;
-    db.Looks.find({'snapIds': req.item._id}, function(err, looks) {
+    db.Looks
+        .find({'snapIds': req.item._id})
+        .limit(20)
+        .exec(function(err, looks) {
         if (err) {
             return next(err);
         }
