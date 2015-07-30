@@ -3,6 +3,7 @@ var app = express.Router();
 var db = require('../IF_schemas/db');
 var elasticsearch = require('elasticsearch');
 var Promise = require('bluebird');
+var _ = require('lodash');
 
 // set up the fake data for the /trending api
 var request = require('request');
@@ -281,7 +282,60 @@ app.post(trendingItemsUrl, function (req, res, next) {
         last: null // there's no such thing as a last search result.  we have a long tail of non-relevant results
     };
 
+    req.body.radius = 2;
 
+    // TODO curate text categories based on user's preferences
+    var textCategories = ['Summer', 'Vintage'].map(function(str) {
+        var q = _.cloneDeep(req.body);
+        q.text = str;
+        return search(q, 0)
+            .then(function(res) {
+                return {
+                    category: 'Trending in "' + str + '"',
+                    results: res
+                }
+            })
+    });
+
+    // TODO get neighborhood from user location
+    var neighborhoods = [{
+        name: 'SoHo, NYC',
+        loc: {lat: 40.7240168, lon: -74.0009368}
+    }].map(function(n) {
+            var q = {loc: n.loc};
+            return search(q, 0)
+                .then(function(res) {
+                    return {
+                        category: 'Trending in ' + n.name,
+                        results: res
+                    }
+                })
+        });
+
+    var nearYou = search(req.body, 0)
+        .then(function(res) {
+            return {
+                category: 'Trending near you',
+                results: res
+            }
+        });
+
+    Promise.settle(_.flatten([textCategories, neighborhoods, nearYou]))
+        .then(function(results) {
+            res.send({
+                query: req.body,
+                links: links,
+                results: results.reduce(function(full, r) {
+                    if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0) {
+                        full.push(r._settledValue)
+                    }
+                    return full;
+                }, [])
+            });
+        }, next);
+
+
+    return;
 
     request.post('http://localhost:2997/api/items/search', {
         body: {
@@ -305,7 +359,6 @@ app.post(trendingItemsUrl, function (req, res, next) {
         });
     });
 
-    return;
 
     var loc = {
         type: 'Point',
