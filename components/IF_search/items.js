@@ -24,7 +24,8 @@ var es = new elasticsearch.Client({
 
 console.log('using elasticsearch', global.config.elasticsearch.url);
 
-var defaultResultCount = 20;
+var pageSize = 20;
+var defaultRadius = 2;
 
 /**
  * Item Search
@@ -63,13 +64,87 @@ app.post(searchItemsUrl, function (req, res, next) {
         results: []
     };
 
+    //
+    // Normalize query
+    //
+    var q = req.body;
+
+    // text should be a string
+    if (q.text && (typeof q.text !== 'string')) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.text must be a string, was ' + q.text});
+    }
+
+    // categories should be an array
+    if (q.categories && !(q.categories instanceof Array)) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.categories must be an array, was ' + q.categories});
+    }
+
+    // color should be an array
+    if (q.color && !(q.color instanceof Array)) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.color must be an array, was ' + q.color});
+    }
+
+    // priceRange should be a number 1-4
+    if (q.priceRange && [1, 2, 3, 4].indexOf(q.priceRange) < 0) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange});
+    }
+
+    // radius needs to be number parseable
+    if (q.radius && isNaN(parseFloat(q.radius))) {
+        return next({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange
+        });
+    } else {
+        q.radius = parseFloat(q.radius);
+    }
+
+    // loc should be {lon: Number, lat: Number}
+    if (!q.loc) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.loc is required'});
+    } else if (!q.loc.lat || !q.loc.lon) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties, was ' + q.loc});
+    } else if (isNaN(parseFloat(q.loc.lat)) || isNaN(parseFloat(q.loc.lon))) {
+        return next({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties to be numbers, was ' + q.loc});
+    } else {
+        q.loc.lat = parseFloat(q.loc.lat);
+        if (q.loc.lat > 90 || q.loc.lat < -90) {
+            return next({niceMessage: 'Could not complete search', devMessage: 'q.loc.lat must be valid latitude, was ' + q.loc.lat});
+        }
+        q.loc.lon = parseFloat(q.loc.lon);
+        if (q.loc.lon > 180 || q.loc.lon < -180) {
+            return next({niceMessage: 'Could not complete search', devMessage: 'q.loc.lon must be valid longitude, was ' + q.loc.lon});
+        }
+    }
+    
+    var search;
+    if (q.text) {
+        search = textSearch;
+    } else {
+        search = filterSearch;
+    }
+    
+    search(q, page)
+        .then(function(results) {
+            responseBody.results = results;
+            res.send(responseBody);
+        }, next)
+});
+
+/**
+ * Search implementation for a query that has text
+ * Need to use elasticsearch for this
+ * @param q query (must contain at least "text" and "loc" properties)
+ * @param page
+ */
+function textSearch(q, page) {
+
     // elasticsearch impl
     // update fuzziness of query based on search term length
     var fuzziness = 0;
-    var q = req.body.text;
-    if (q.length >= 4) {
+    if (q.text.length >= 4) {
         fuzziness = 1;
-    } else if (q.length >= 6) {
+    } else if (q.text.length >= 6) {
         fuzziness = 2;
     }
 
@@ -79,10 +154,10 @@ app.post(searchItemsUrl, function (req, res, next) {
         bool: {
             must: [{
                 geo_distance: {
-                    distance: (req.body.radius || "0.5") + "mi",
+                    distance: (q.radius || defaultRadius) + "mi",
                     "loc.coordinates": {
-                        lat: req.body.loc.lat,
-                        lon: req.body.loc.lon
+                        lat: q.loc.lat,
+                        lon: q.loc.lon
                     }
                 }
             }]
@@ -90,8 +165,8 @@ app.post(searchItemsUrl, function (req, res, next) {
     };
 
     // if the price is specified, add a price filter
-    if (req.body.priceRange && [1, 2, 3, 4].indexOf(req.body.priceRange) > -1) {
-        filter.bool.must.push({term: {price: req.body.priceRange}});
+    if (q.priceRange) {
+        filter.bool.must.push({term: {price: q.priceRange}});
     }
 
     // only items, not worlds
@@ -99,8 +174,8 @@ app.post(searchItemsUrl, function (req, res, next) {
 
     // put it all together in a filtered fuzzy query
     var fuzzyQuery = {
-        size: defaultResultCount,
-        from: page * defaultResultCount,
+        size: pageSize,
+        from: page * pageSize,
         index: "foundry",
         type: "landmarks",
         fields: [],
@@ -109,7 +184,7 @@ app.post(searchItemsUrl, function (req, res, next) {
                 filtered: {
                     query: {
                         multi_match: {
-                            query: q,
+                            query: q.text,
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
@@ -124,45 +199,55 @@ app.post(searchItemsUrl, function (req, res, next) {
         }
     };
 
-    es.search(fuzzyQuery)
+    return es.search(fuzzyQuery)
         .then(function(results) {
             var ids = results.hits.hits.map(function(r) { return r._id; });
-            db.Landmarks.find({_id: {$in: ids}}, function(err, results) {
-                responseBody.results = results;
-                res.send(responseBody);
-            });
-        }, function(err) {
-            next(err);
+            return db.Landmarks.find({_id: {$in: ids}}).exec();
         });
+}
 
+/**
+ * Search implementation for a query that does not have text
+ * Just use mongodb
+ * @param q query (must contain at least loc" property)
+ * @param page
+ */
+function filterSearch(q, page) {
 
-    return;
+    var radius = q.radius || defaultRadius; // miles
+    radius = 1609.344 * radius; // meters
 
-
-    // mongo impl
     var query = {
         world: false,
         loc: {
             $near: {
                 $geometry: {
                     type: "Point",
-                    coordinates: [req.body.loc.lon, req.body.loc.lat]
+                    coordinates: [q.loc.lon, q.loc.lat]
                 },
-                $maxDistance: radiusInMeters,
+                $maxDistance: radius,
                 $minDistance: 0
             }
         }
     };
 
-    db.Landmarks.find(query).execAsync()
-        .then(function(items) {
-            res.send({
-                query: req.body,
-                links: links,
-                results: items
-            });
-        }).catch(next);
-});
+    if (q.priceRange) {
+        query.price = q.priceRange;
+    }
+
+    if (q.categories) {
+        query['itemTags.categories'] = {$in: q.categories};
+    }
+
+    if (q.color) {
+        query['itemTags.color'] = {$in: q.color};
+    }
+
+    return db.Landmarks
+        .find(query)
+        .limit(pageSize)
+        .exec();
+}
 
 
 /**
@@ -233,7 +318,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
                 query: req.body
             };
 
-            var skip = parseInt(req.body.page) * defaultResultCount;
+            var skip = parseInt(req.body.page) * pageSize;
             var query = {
                 spherical: true,
                 maxDistance: 1 / 111.12, //1km radius
@@ -241,7 +326,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
                 sort: {
                     like_count: -1
                 },
-                limit: defaultResultCount
+                limit: pageSize
             };
 
             landmark.geoNear(loc, query, function (err, items) {
