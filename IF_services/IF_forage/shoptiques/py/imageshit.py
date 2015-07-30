@@ -18,16 +18,19 @@ cmd_template = "convert $SRC -resize 640X640> -size 640X640 xc:white +swap -grav
 #
 # Mongo
 #
-client = pymongo.MongoClient()
+url = 'mongodb://localhost:27017'
+client = pymongo.MongoClient(url)
 db = client['foundry']
 landmarks = db['landmarks']
 
+count = 0
 
 done = False
 while not done:
     item = landmarks.find_one({
         'world': False,
         'source_shoptiques_item.images': {'$exists': True},
+        'processedImages': {'$ne': True},
         'loc': {
             '$near': {
                 '$geometry': {
@@ -40,8 +43,11 @@ while not done:
     if not item:
         done = True
         continue
+    print item['_id']
 
     print item['parent']['id'] + ' - ' + item['name']
+
+    newUrls = []
 
     for image in item['source_shoptiques_item']['images']:
         key = item['parent']['id'] + '/' + image.split('/').pop()
@@ -56,9 +62,17 @@ while not done:
             continue
 
         # send to S3
-        s3.Object(bucketName, key).put(Body=open('out.jpg', 'rb'))
+        s3.Object(bucketName, key).put(Body=open('out.jpg', 'rb'), ACL='public-read')
+        newUrls.append(newUrl)
     # debugging
-    done = True
+    landmarks.update({
+        '_id': item['_id']
+    }, {
+        '$set': {
+            'itemImageURL': newUrls,
+            'processedImages': True
+        }
+    })
 
 
 print "Finished"
