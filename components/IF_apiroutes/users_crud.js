@@ -139,7 +139,9 @@ app.get('/:xmongoId/:followxxx/activity', function(req, res, next) {
     db.Activities.find({
             userIds: {
                 $in: req.user[req.params.followxxx]
-            }
+            },
+            privateVisible: true,
+            publicVisible: true
         })
         .sort({
             activityTime: -1
