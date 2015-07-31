@@ -57,7 +57,7 @@ router.post('/', function(req, res, next) {
                 newPlace.time.created = new Date()
                 newPlace.world_id = '';
                 newPlace.widgets = forumStyle.widgets;
-                newPlace.source_google.place_id = req.body.place_id;
+                newPlace.source_google.place_id = reqp.body.place_id;
 
                 newPlace.loc.type = 'Point';
                 newPlace.tags = [];
@@ -90,7 +90,7 @@ router.post('/', function(req, res, next) {
                     return next(err);
                 }
                 if (parent && parent.source_google.place_id) {
-                    createItem(req, res, parent.souce_google.place_id)
+                    createItem(req, res, parent.source_google.place_id)
                 } else {
                     err.niceMessage = 'That store does not exist.';
                     return next(err);
@@ -102,6 +102,7 @@ router.post('/', function(req, res, next) {
         }
     }
 });
+
 
 function createItem(req, res, newPlace) {
     var newItem = new db.Landmark();
