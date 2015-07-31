@@ -12,7 +12,11 @@ module.exports = {
   geoipURL: 'http://www.freegeoip.net/',
   facebookAuth: {
     callbackURL: 'http://localhost.kipapp.co/auth/facebook/callback'
+  },
+  mongodb: {
+    url: 'mongodb://pikachu.kipapp.co:27017/foundry'
   }
+
 
   // FACEBOOK_ID:      'app-id',
   // FACEBOOK_SECRET:  'secret',
