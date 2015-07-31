@@ -104,62 +104,6 @@ router.post('/', function(req, res, next) {
     }
 });
 
-{
-    "__v": 0,
-    "id": "a_2",
-    "world": false,
-    "price": 77,
-    "_id": "55bbe29f07783b9d5afd621c",
-    "testData": false,
-    "reports": [],
-    "itemImageURL": ["https://s3.amazonaws.com/if-server-general-images/c6a73a422ffbfa9657b1e8d0f23f11a7.png"],
-    "i(lldb) temTags": {
-        "text": []
-    },
-    "comments": [],
-    "rejects": [],
-    "faves": [],
-    "tags": [],
-    "source_instagram_post": {
-        "created": "2015-07-31T21:03:27.682Z",
-        "tags": [],
-        "local_path": []
-    },
-    "source_google": {
-        "opening_hours": [],
-        "types": []
-    },
-    "source_meetup": {
-        "event_hosts": []
-    },
-    "permissions": {
-        (lldb)
-        "admins": [], "viewers": []
-    },
-    "time": {
-        "created": "2015-07-31T21:03:27.682Z"
-    },
-    "style": {
-        "maps": {
-            "localMapArray": []
-        }
-    },
-    "landmarkCategories": [],
-    "subType": [],
-    "loc": {
-        "type": "Point",
-        "coordinates": [-73.985792, 40.739751]
-    },
-    "owner": {
-        "profileID": "a",
-        "mongoId": "55ba7dace1f64(lldb) 46c1a118e14"
-    },
-    "parent": {
-        "name": "Turquoise Spa Inc",
-        "id": "0a0eb6220897c7fa084f3e77c604ae4e44eb633c"
-    }
-}
-
 
 function createItem(req, res, newPlace) {
     var newItem = new db.Landmark();
