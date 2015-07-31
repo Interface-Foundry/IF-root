@@ -44,7 +44,7 @@ app.use('/:mongoId/:action', function(req, res, next) {
             seenBy: [req.user._id.toString()]
         });
 
-        if (req.user && req.user_id) {
+        if (req.user && req.userId) {
             req.activity.userIds.push(req.user._id.toString());
         }
 
@@ -277,7 +277,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
             e.devMessage = 'Error adding fave to user collection';
             return next(e);
         }
-        db.Users.findById(req.user_id, function(e, u) {
+        db.Users.findById(req.userId, function(e, u) {
             res.send({
                 item: req.item,
                 user: u
