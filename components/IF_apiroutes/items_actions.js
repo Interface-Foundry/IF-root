@@ -342,6 +342,34 @@ app.post('/:mongoId/unfave', function(req, res, next) {
 });
 
 app.post('/:mongoId/reject', function(req, res, next) {
+    // check to see if user has rejected yet. there might be a better way with $push,
+    // but i don't want to end up with multiple rejects from the same user :/
+    var hasRejectd = req.item.rejects.reduce(function(p, o) {
+        return p || (o.userId === req.user._id.toString());
+    }, false);
+
+    if (hasRejectd) {
+        return res.send({
+            item: req.item,
+            user: req.user
+        });
+    }
+
+    // update the item
+    req.item.rejects.push({
+        userId: req.user._id.toString(),
+        timeRejected: new Date()
+    });
+    req.item.rejects_count = req.item.rejects.length;
+
+    req.item.save(function(e) {
+        if (e) {
+            e.niceMessage = 'Oops there was an error rejecting the item.';
+            e.devMessage = 'Error adding reject to item collection';
+            return next(e);
+        }
+    });
+
     // update the users list of cached rejects
     db.Users.update({
         _id: req.user._id
@@ -365,26 +393,50 @@ app.post('/:mongoId/reject', function(req, res, next) {
 });
 
 app.post('/:mongoId/unreject', function(req, res, next) {
-    // update the users list of cached rejects
-    db.Users.update({
+    // update the item
+    var itemPromise = req.item.update({
+        $pull: {
+            rejects: {
+                userId: req.user._id.toString()
+            }
+        }
+    }).exec().then(function() {
+        return db.Landmarks.findById(req.item._id);
+    });
+
+    // update the users cache of rejectd things
+    var userPromise = db.Users.update({
         _id: req.user._id
     }, {
         $pull: {
-            rejects: req.params.mongoId
+            rejects: req.item._id.toString()
         }
-    }, function(e) {
-        if (e) {
-            e.niceMessage('Could not un-reject the item');
-            return next(e);
-        } else {
-            db.Users.findById(req.user._id, function(e, doc) {
-                return res.send({
-                    item: req.item,
-                    user: doc
-                });
-            });
-        }
+    }).exec().then(function() {
+        return db.Users.findById(req.user._id);
     });
+
+    // send a response with the updated item and user
+    RSVP.hash({
+        item: itemPromise,
+        user: userPromise
+    })
+        .then(function(results) {
+            res.send(results);
+
+            // add an activity
+            req.activity.data = {
+                item: req.item.getSimpleItem(),
+                rejectr: req.user.getSimpleUser(),
+                owner: req.item.owner
+            };
+            req.activity.privateVisible = false;
+            req.activity.publicVisible = false;
+            req.activity.saveAsync().then(function() {}).catch(next);
+        }, function(e) {
+            e.niceMessage = 'Could not un-reject the item';
+            e.devMessage = 'un-reject failed for Items collection';
+            return next(e);
+        });
 });
 
 app.post('/:mongoId/snap', function(req, res) {
