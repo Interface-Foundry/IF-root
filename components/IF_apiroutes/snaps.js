@@ -57,7 +57,7 @@ router.post('/', function(req, res, next) {
                 newPlace.time.created = new Date()
                 newPlace.world_id = '';
                 newPlace.widgets = forumStyle.widgets;
-                newPlace.source_google.place_id = reqp.body.place_id;
+                newPlace.source_google.place_id = req.body.place_id;
 
                 newPlace.loc.type = 'Point';
                 newPlace.tags = [];
