@@ -117,14 +117,17 @@
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/activity</span></h3>
                 <pre class="response">{results: [Activity], links: {}}</pre>
-            </li>
-            <li>
-                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers/activity</span></h3>
-                <pre class="response">{results: [Activity], links: {}}</pre>
+                <p>Gets the activity for the specified user.  "/api/users/me/activity" would get the activity for the logged-in user</p>
             </li>
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/following/activity</span></h3>
                 <pre class="response">{results: [Activity], links: {}}</pre>
+                <p>Gets the activity for the people that the specified user follows.  "/api/users/me/following/activity" would get the activity for the people that the logged-in user follows.</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers/activity</span></h3>
+                <pre class="response">{results: [Activity], links: {}}</pre>
+                <p>Gets the activity for the specified user's followers.  "/api/users/me/followers/activity" would get the activity for the logged-in user's followers.  Probably not useful.</p>
             </li>
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/faves</span></h3>
