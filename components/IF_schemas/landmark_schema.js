@@ -296,7 +296,11 @@ var landmarkSchema = new Schema({
         timeFaved: Date
     }],
     fave_count: Number,
-    rejects: [String],
+    rejects: [{
+        userId: String,
+        timeRejected: Date
+    }],
+    reject_count: Number,
     comments: [{
         user: {
             mongoId: String,
