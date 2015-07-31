@@ -37,7 +37,8 @@ router.post('/', function(req, res, next) {
                 return next(err);
             }
             if (place) {
-                createItem(req, res, place)
+                console.log('Place already exists..')
+                return createItem(req, res, place)
             } else {
                 var newPlace = new db.Landmark();
                 newPlace.world = true;
@@ -90,8 +91,7 @@ router.post('/', function(req, res, next) {
                     return next(err);
                 }
                 if (parent && parent.source_google.place_id) {
-                    console.log('PARENT!!!:', parent)
-                    createItem(req, res, parent.source_google.place_id)
+                    createItem(req, res, parent)
                 } else {
                     err.niceMessage = 'That store does not exist.';
                     return next(err);
@@ -107,12 +107,12 @@ router.post('/', function(req, res, next) {
 
 function createItem(req, res, newPlace) {
     var newItem = new db.Landmark();
+    newItem = _.extend(newItem, req.body);
     if (newPlace) {
         newItem.parent.mongoId = newPlace._id;
         newItem.parent.name = newPlace.name;
         newItem.parent.id = newPlace.id;
     }
-    newItem = _.extend(newItem, req.body);
     newItem.loc.coordinates[0] = newPlace.loc.coordinates[0];
     newItem.loc.coordinates[1] = newPlace.loc.coordinates[1];
     newItem.world = false;
@@ -144,6 +144,7 @@ function createItem(req, res, newPlace) {
                     err.niceMessage = 'Could not save item';
                     return next(err);
                 }
+                console.log ('ITEM SAVE OMDG:', item)
                 res.send(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
