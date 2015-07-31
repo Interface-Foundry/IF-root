@@ -16,16 +16,15 @@
          var newUnique;
          // console.log('input: ',input, collection)
          urlify(input, function(input) {
-            console.log('INPUT!!:',input)
+            // console.log('INPUT!!:',input)
              db[collection].find({
                  'id': input
              }, function(err, data) {
                  if (err) {
                      return deferred.reject(err)
                  }
-                 console.log('DATAL',data)
+                 // console.log('DATAL',data)
                  if (data.length > 0) {
-                    console.log('wtf')
                      var uniqueNumber = 1;
                      async.forever(function(next) {
                              var uniqueNum_string = uniqueNumber.toString();

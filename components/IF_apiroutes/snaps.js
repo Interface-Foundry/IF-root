@@ -8,14 +8,93 @@ var express = require('express'),
     db = require('../IF_schemas/db'),
     upload = require('../../IF_services/upload'),
     uniquer = require('../../IF_services/uniquer'),
-    async = require('async');
+    async = require('async'),
+    q = require('q'),
+    urlify = require('urlify').create({
+        addEToUmlauts: true,
+        szToSs: true,
+        spaces: "_",
+        nonPrintable: "",
+        trim: true
+    }),
+    forumStyle = require('../../IF_services/IF_forage/places/forum_theme.json'),
+    googleAPI = 'AIzaSyAj29IMUyzEABSTkMbAGE-0Rh7B39PVNz4';
 
 //Create a new snap
 router.post('/', function(req, res, next) {
     if (!req.user) {
         return next('You must log in first');
     }
+
+    //If no place was found for this item, create a new place.
+    if (req.body.place_id) {
+        //First check if it really doesn't exist in the db yet
+        db.Landmarks.findOne({
+            'source_google.place_id': req.body.place_id
+        }, function(err, place) {
+            if (err) {
+                err.niceMessage = 'Error checking for existing place.';
+                return next(err);
+            }
+            if (place) {
+                createItem(req, res, place)
+            } else {
+                var newPlace = new db.Landmark();
+                newPlace.world = true;
+                newPlace.newStatus = true;
+                newPlace.parentID = '';
+                newPlace.hasloc = true;
+                newPlace.valid = true;
+                newPlace.views = 0;
+                newPlace.hasTime = false;
+                newPlace.resources = {
+                    hashtag: ''
+                };
+                newPlace.permissions = {
+                    ownerID: '553e5480a4bdda8c18c1edbc',
+                    hidden: false
+                };
+                newPlace.time.created = new Date()
+                newPlace.world_id = '';
+                newPlace.widgets = forumStyle.widgets;
+                newPlace.source_google.place_id = req.body.place_id;
+                newPlace.loc.coordinates[0] = parseFloat(req.body.loc.coordinates[1]);
+                newPlace.loc.coordinates[1] = parseFloat(req.body.loc.coordinates[0]);
+                newPlace.loc.type = 'Point';
+                newPlace.tags = [];
+                newPlace.tags.push('clothing');
+                newPlace.category = {
+                    name: 'place',
+                    avatar: '',
+                    hiddenPresent: false
+                }
+
+                addGoogleDetails(newPlace, req.body.place_id).then(function(newPlace) {
+                    uniquer.uniqueId(newPlace.name, 'Landmark').then(function(output) {
+                        newPlace.id = output;
+                        newPlace.save(function(err, saved) {
+                            if (err) {
+                                return next('Error saving new place')
+                            }
+                            saveStyle(newPlace)
+                            createItem(req, res, newPlace)
+                        })
+                    })
+                })
+            }
+        })
+    } else {
+        createItem(req, res)
+    }
+});
+
+function createItem(req, res, newPlace) {
     var newItem = new db.Landmark();
+    if (newPlace) {
+        newItem.parent.mongoId = newPlace._id;
+        newItem.parent.name = newPlace.name;
+        newItem.parent.id = newPlace.id;
+    }
     newItem = _.extend(newItem, req.body);
     newItem.world = false;
     newItem.owner.mongoId = req.user._id;
@@ -46,6 +125,7 @@ router.post('/', function(req, res, next) {
                     err.niceMessage = 'Could not save item';
                     return next(err);
                 }
+                res.send(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
                         err.niceMessage = 'Could not save item';
@@ -66,18 +146,17 @@ router.post('/', function(req, res, next) {
                 });
                 // Increment users snapCount
                 req.user.update({
-                    $inc: {
-                        snapCount: 1
-                    }
-                }, function(err) {
-                    if (err) {
-                        err.niceMessage = 'Could not increment users snapCount';
-                        console.log(err)
-                    }
-                })
-                a.saveAsync().then(function() {
-                    res.send(item)
-                }).catch(next);
+                        $inc: {
+                            snapCount: 1
+                        }
+                    }, function(err) {
+                        if (err) {
+                            err.niceMessage = 'Could not increment users snapCount';
+                            console.log(err)
+                        }
+                    })
+                    //Save Activity
+                a.saveAsync().then(function() {}).catch(next);
             });
         })
     }).catch(function(err) {
@@ -86,7 +165,129 @@ router.post('/', function(req, res, next) {
             return next(err);
         }
     })
-});
+}
 
+
+function addGoogleDetails(newPlace, place_id) {
+    var deferred = q.defer();
+    var url = "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + place_id + "&key=" + googleAPI;
+    request({
+        uri: url,
+        json: true
+    }, function(error, response, body) {
+        if (!error && response.statusCode == 200 && body.result) {
+            //LOCATION
+            newPlace.loc.coordinates[0] = parseFloat(body.result.geometry.location.lng);
+            newPlace.loc.coordinates[1] = parseFloat(body.result.geometry.location.lat);
+            //ADDRESS
+            if (typeof body.result.address_components == 'undefined') {
+                newPlace.source_google.address = ''
+            } else {
+                var addy = ''
+                newPlace.source_google.address = body.result.address_components.forEach(function(el) {
+                    addy = addy + ' ' + el.long_name;
+                })
+                newPlace.source_google.address = addy.trim()
+            }
+            //INPUT
+            var components = body.result.address_components
+            if (typeof components == 'undefined' || components == null || components == '') {
+                newPlace.backupinput = ''
+            } else {
+                for (var i = 0; i < components.length; i++) {
+                    if (components[i].long_name.toLowerCase().trim().indexOf('united states') == -1 && components[i].long_name.toLowerCase().trim().indexOf('main street') == -1 && components[i].long_name.match(/\d+/g) == null && components[i].long_name.length < 22) {
+                        newPlace.backupinput = components[i].long_name
+                        break
+                    }
+                }
+            }
+            //NAME
+            if (typeof body.result.name == 'undefined') {
+                newPlace.name = body.result.vicinity;
+            } else {
+                newPlace.name = body.result.name
+                var nameTag = urlify(body.result.name).split('_')
+                nameTag.forEach(function(tag) {
+                    newPlace.tags.push(tag)
+                })
+            }
+            //TYPE
+            if (typeof body.result.types == 'undefined') {
+                newPlace.source_google.types = "";
+                newPlace.type = 'clothing_store';
+            } else {
+                newPlace.source_google.types = body.result.types;
+                newPlace.type = body.result.types[0];
+            }
+            //PHONE
+            if (typeof body.result.international_phone_number == 'undefined') {
+                newPlace.source_google.international_phone_number = "";
+            } else {
+                newPlace.source_google.international_phone_number = body.result.international_phone_number;
+            }
+            //OPENING HOURS
+            if (typeof body.result.opening_hours == 'undefined') {
+                newPlace.source_google.opening_hours = "";
+            } else {
+                newPlace.source_google.opening_hours = body.result.opening_hours.weekday_text;
+            }
+            //WEBSITE
+            if (typeof body.result.website == 'undefined') {
+                newPlace.source_google.website = "";
+            } else {
+                newPlace.source_google.website = body.result.website;
+            }
+            //URL
+            if (typeof body.result.url == 'undefined') {
+                newPlace.source_google.url = "";
+            } else {
+                newPlace.source_google.url = body.result.url;
+            }
+            //PRICE
+            if (typeof body.result.price_level == 'undefined') {
+                newPlace.source_google.price_level = null;
+            } else {
+                newPlace.source_google.price_level = body.result.price_level
+            }
+            //ICON
+            if (typeof body.result.icon == 'undefined') {
+                newPlace.source_google.icon = "";
+            } else {
+                newPlace.source_google.icon = body.result.icon;
+            }
+            deferred.resolve(newPlace)
+        } else {
+            deferred.reject(error)
+        }
+    });
+    return deferred.promise;
+}
+
+//loading style from JSON, saving
+function saveStyle(place) {
+    var deferred = q.defer();
+    var st = new db.Style()
+    st.name = forumStyle.name;
+    st.bodyBG_color = forumStyle.bodyBG_color;
+    st.titleBG_color = forumStyle.titleBG_color;
+    st.navBG_color = forumStyle.navBG_color;
+    st.landmarkTitle_color = forumStyle.landmarkTitle_color;
+    st.categoryTitle_color = forumStyle.categoryTitle_color;
+    st.widgets.twitter = forumStyle.widgets.twitter;
+    st.widgets.instagram = forumStyle.widgets.instagram;
+    st.widgets.upcoming = forumStyle.widgets.upcoming;
+    st.widgets.category = forumStyle.widgets.category;
+    st.widgets.messages = forumStyle.widgets.messages;
+    st.widgets.streetview = forumStyle.widgets.streetview;
+    st.widgets.nearby = forumStyle.widgets.nearby;
+    st.save(function(err, style) {
+        if (err) console.log(err);
+        place.style.styleID = style._id;
+        place.style.maps.cloudMapID = cloudMapID;
+        place.style.maps.cloudMapName = cloudMapName;
+        deferred.resolve();
+    })
+    return deferred.promise;
+}
 
 module.exports = router;
