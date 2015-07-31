@@ -58,8 +58,7 @@ router.post('/', function(req, res, next) {
                 newPlace.world_id = '';
                 newPlace.widgets = forumStyle.widgets;
                 newPlace.source_google.place_id = req.body.place_id;
-                newPlace.loc.coordinates[0] = parseFloat(req.body.loc.coordinates[1]);
-                newPlace.loc.coordinates[1] = parseFloat(req.body.loc.coordinates[0]);
+
                 newPlace.loc.type = 'Point';
                 newPlace.tags = [];
                 newPlace.tags.push('clothing');
@@ -84,7 +83,23 @@ router.post('/', function(req, res, next) {
             }
         })
     } else {
-        createItem(req, res)
+        if (req.body.parent.mongoId) {
+            db.Landmarks.findById(req.body.parent.mongoId, function(err, parent) {
+                if (err) {
+                    err.niceMessage = 'Error checking for existing place.';
+                    return next(err);
+                }
+                if (parent && parent.source_google.place_id) {
+                    createItem(req, res, parent.souce_google.place_id)
+                } else {
+                    err.niceMessage = 'That store does not exist.';
+                    return next(err);
+                }
+            })
+        } else {
+            err.niceMessage = 'You must choose a store.';
+            return next(err);
+        }
     }
 });
 
@@ -96,6 +111,8 @@ function createItem(req, res, newPlace) {
         newItem.parent.id = newPlace.id;
     }
     newItem = _.extend(newItem, req.body);
+    newItem.loc.coordinates[0] = newPlace.loc.coordinates[0];
+    newItem.loc.coordinates[1] = newPlace.loc.coordinates[1];
     newItem.world = false;
     newItem.owner.mongoId = req.user._id;
     newItem.owner.profileID = req.user.profileID;
