@@ -171,7 +171,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
     }
 
     // update the look
-    req.look.faveLooks.push({
+    req.look.faves.push({
         userId: req.user._id.toString(),
         timeFaved: new Date()
     });
@@ -198,6 +198,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
             return next(e);
         }
         db.Users.findById(req.userId, function(e, u) {
+            console.log('RESULT:', req.look, u)
             res.send({
                 look: req.look,
                 user: u
@@ -215,56 +216,50 @@ app.post('/:mongoId/fave', function(req, res, next) {
 });
 
 app.post('/:mongoId/unfave', function(req, res, next) {
-    // update the look
-    db.Looks.update({
+
+    var lookPromise = req.look.update({
         $pull: {
-            faveLooks: {
+            faves: {
                 userId: req.user._id.toString()
             }
         }
-    }, function(err, result) {
-        if (err) {
-            err.niceMessage = 'Oops there was an error unfaveing the item.';
-            err.devMessage = 'Error unfaving';
-            return next(err);
-        }
-
-        db.Users.update({
-            _id: req.user._id
-        }, {
-            $pull: {
-                faveLooks: req.look._id.toString()
-            }
-        }, function(err, result) {
-            if (err) {
-                err.niceMessage = 'Oops there was an error unfaveing the item.';
-                err.devMessage = 'Error unfaving';
-                return next(err);
-            }
-            db.Looks.find({
-                faveLooks: {
-                    userId: req.user._id.toString()
-                }
-            }, function(err, look) {
-                console.log('UPDARTED LOOK!!!', look)
-                res.send({
-                    look: look,
-                    user: req.user
-                });
-            });
-
-        });
-
-        // add an activity
-        req.activity.data = {
-            look: req.look.getSimpleLook(),
-            faver: req.user.getSimpleUser(),
-            owner: req.look.owner
-        };
-        req.activity.privateVisible = false;
-        req.activity.publicVisible = false;
-        req.activity.saveAsync().then(function() {}).catch(next);
+    }).exec().then(function() {
+        return db.Looks.findById(req.look._id);
     });
+
+    // update the users cache of faved things
+    var userPromise = db.Users.update({
+        _id: req.user._id
+    }, {
+        $pull: {
+            faveLooks: req.look._id.toString()
+        }
+    }).exec().then(function() {
+        return db.Users.findById(req.user._id);
+    });
+
+    // send a response with the updated item and user
+    RSVP.hash({
+            look: lookPromise,
+            user: userPromise
+        })
+        .then(function(results) {
+            res.send(results);
+
+            // add an activity
+            req.activity.data = {
+                look: req.look.getSimpleLook(),
+                faver: req.user.getSimpleUser(),
+                owner: req.look.owner
+            };
+            req.activity.privateVisible = false;
+            req.activity.publicVisible = false;
+            req.activity.saveAsync().then(function() {}).catch(next);
+        }, function(e) {
+            e.niceMessage = 'Could not un-fave the look';
+            e.devMessage = 'un-fave failed for Looks collection';
+            return next(e);
+        });
 })
 
 
