@@ -366,6 +366,34 @@
         };
 
         var userList = new List('api', options);
+        var s = document.querySelector('input');
+
+        // prepopulate search if q present
+        if (window.location.search) {
+            s.value = window.location.search.replace('?q=', '');
+
+            if ("createEvent" in document) {
+                var evt = document.createEvent("HTMLEvents");
+                evt.initEvent("keyup", false, true);
+                s.dispatchEvent(evt);
+            }
+            else
+                s.fireEvent("onkeyup");
+        }
+
+        if (history.pushState) {
+            userList.on('updated', function () {
+                if (!s.value) {
+                    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                    window.history.pushState({path: newurl}, '', newurl);
+                } else {
+                    newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?q=' + s.value;
+                    window.history.pushState({path: newurl}, '', newurl);
+                }
+            })
+        }
+
+
     </script>
     </body>
 </html>
