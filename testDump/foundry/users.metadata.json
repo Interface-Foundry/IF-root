@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":1,"key":{"_id":1},"name":"_id_","ns":"foundry.users"},{"v":1,"key":{"profileID":1},"name":"profileID_1","ns":"foundry.users","background":true},{"v":1,"unique":true,"key":{"local.email":1},"name":"local.email_1","ns":"foundry.users","sparse":true}]}
