@@ -237,13 +237,21 @@ app.post('/:mongoId/unfave', function(req, res, next) {
         return db.Users.findById(req.user._id);
     });
 
+    db.Users.findById(req.userId, function(e, u) {
+        res.send({
+            look: req.look,
+            user: u
+        });
+    });
+
+
     // send a response with the updated look and user
     RSVP.hash({
             look: lookPromise,
             user: userPromise
         })
         .then(function(results) {
-            res.send(results);
+            // res.send(results);
 
             // add an activity
             req.activity.data = {
