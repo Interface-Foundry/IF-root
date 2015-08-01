@@ -117,17 +117,17 @@
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/activity</span></h3>
                 <pre class="response">{results: [Activity], links: {}}</pre>
-                <p>Gets the activity for the specified user.  "/api/users/me/activity" would get the activity for the logged-in user</p>
+                <p class="description">Gets the activity for the specified user.  "/api/users/me/activity" would get the activity for the logged-in user</p>
             </li>
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/following/activity</span></h3>
                 <pre class="response">{results: [Activity], links: {}}</pre>
-                <p>Gets the activity for the people that the specified user follows.  "/api/users/me/following/activity" would get the activity for the people that the logged-in user follows.</p>
+                <p class="description">Gets the activity for the people that the specified user follows.  "/api/users/me/following/activity" would get the activity for the people that the logged-in user follows.</p>
             </li>
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/followers/activity</span></h3>
                 <pre class="response">{results: [Activity], links: {}}</pre>
-                <p>Gets the activity for the specified user's followers.  "/api/users/me/followers/activity" would get the activity for the logged-in user's followers.  Probably not useful.</p>
+                <p class="description">Gets the activity for the specified user's followers.  "/api/users/me/followers/activity" would get the activity for the logged-in user's followers.  Probably not useful.</p>
             </li>
             <li>
                 <h3><span class="method">GET</span><span class="route">/api/users/:mongoId/faves</span></h3>
@@ -326,13 +326,43 @@
 }
 </pre>
             </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/email/confirm</span></h3>
+                <p class="description">Trigger the sending of a confirmation email.  Must be logged in to use.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/email/confirm</span></h3>
+                <p class="description">This is what users click on in the confirmation email to confirm their identity.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/email/request_confirm/:token</span></h3>
+                <p class="description">This is what users click on to confirm their identity from "email/confirm" view on the web.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/forgot</span></h3>
+                <pre class="body">{"email": String}</pre>
+                <p class="description">Trigger the sending of an email that contains a link to reset your password.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">GET</span><span class="route">/reset/:token</span></h3>
+                <p class="description">This is what users click on in the confirmation email to reset their password.  It takes you to the the reset password view on the web.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/reset/:token</span></h3>
+                <pre class="body">{"password": String}</pre>
+                <p class="description">Sets a new password for the user.  Also sends a success email telling the user their password was changed.  (bubblli auth)</p>
+            </li>
+            <li>
+                <h3><span class="method">POST</span><span class="route">/resetConfirm/:token</span></h3>
+                <p class="description">Looks like this route is just here for sanity-checking.  (bubblli auth)</p>
+            </li>
         </ul>
 
     </div>
     <script src="http://listjs.com/no-cdn/list.js"></script>
     <script>
         var options = {
-            valueNames: [ 'route', 'body', 'response', 'method' ]
+            valueNames: [ 'route', 'body', 'response', 'method', 'description' ]
         };
 
         var userList = new List('api', options);
