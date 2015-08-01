@@ -159,7 +159,7 @@ app.post('/api/auth/verify-facebook', function(req, res, next) {
                         name: req.body.user.name
                     },
                     name: req.body.user.name,
-                    profileID: name.toLowerCase().replace(/[^\w]/g, '') + (Math.random()*100000|0)
+                    profileID: req.body.user.name.toLowerCase().replace(/[^\w]/g, '') + (Math.random()*100000|0)
                 });
                 return axios.get('https://graph.facebook.com/v2.4/me/picture?redirect=false&height=300&width=300&access_token=' + fb_token)
                     .then(function(pic) {
