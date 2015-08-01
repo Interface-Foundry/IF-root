@@ -535,6 +535,7 @@ app.use('/api/items', require('./components/IF_apiroutes/items_actions'));
 //--- LOOK ROUTER ----//
 // app.use('/api/looks', require('./components/IF_apiroutes/looks_actions'));
 app.use('/api/looks',require('./components/IF_apiroutes/looks_crud'));
+app.use('/api/looks',require('./components/IF_apiroutes/looks_actions'));
 //--- USER ROUTER ----//
 app.use('/api/users', require('./components/IF_apiroutes/users_crud'));
 app.use('/api/users', require('./components/IF_apiroutes/users_actions'));
