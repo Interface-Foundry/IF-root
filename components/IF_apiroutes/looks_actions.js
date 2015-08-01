@@ -216,57 +216,36 @@ app.post('/:mongoId/fave', function(req, res, next) {
 
 app.post('/:mongoId/unfave', function(req, res, next) {
     // update the look
-    var lookPromise = req.look.update({
+    req.look.update({
         $pull: {
             faves: {
                 userId: req.user._id.toString()
             }
         }
     }).exec().then(function() {
-        db.Users.findById(req.userId, function(e, u) {
+        db.Users.update({
+            _id: req.user._id
+        }, {
+            $pull: {
+                faves: req.look._id.toString()
+            }
+        }).exec().then(function() {
             res.send({
-                look: req.look.faves,
-                user: u
+                look: req.look,
+                user: req.user
             });
         });
-        return db.Landmarks.findById(req.look._id);
     });
 
-
-
-    // update the users cache of faved things
-    var userPromise = db.Users.update({
-        _id: req.user._id
-    }, {
-        $pull: {
-            faves: req.look._id.toString()
-        }
-    }).exec().then(function() {
-        return db.Users.findById(req.user._id);
-    });
-
-    // send a response with the updated look and user
-    RSVP.hash({
-            look: lookPromise,
-            user: userPromise
-        })
-        .then(function(results) {
-            // res.send(results);
-
-            // add an activity
-            req.activity.data = {
-                look: req.look.getSimpleLook(),
-                faver: req.user.getSimpleUser(),
-                owner: req.look.owner
-            };
-            req.activity.privateVisible = false;
-            req.activity.publicVisible = false;
-            req.activity.saveAsync().then(function() {}).catch(next);
-        }, function(e) {
-            e.niceMessage = 'Could not un-fave the look';
-            e.devMessage = 'un-fave failed for Look collection';
-            return next(e);
-        });
+    // add an activity
+    req.activity.data = {
+        look: req.look.getSimpleLook(),
+        faver: req.user.getSimpleUser(),
+        owner: req.look.owner
+    };
+    req.activity.privateVisible = false;
+    req.activity.publicVisible = false;
+    req.activity.saveAsync().then(function() {}).catch(next);
 });
 
 module.exports = app;
