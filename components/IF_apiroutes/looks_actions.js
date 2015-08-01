@@ -216,7 +216,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
 
 app.post('/:mongoId/unfave', function(req, res, next) {
     // update the look
-    req.look.update({
+    db.Looks.update({
         $pull: {
             faves: {
                 userId: req.user._id.toString()
@@ -228,6 +228,7 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             err.devMessage = 'Error unfaving';
             return next(err);
         }
+        console.log('UPDARTED LOOK!!!', req.look)
         db.Users.update({
             _id: req.user._id
         }, {
