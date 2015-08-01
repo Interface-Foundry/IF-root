@@ -524,6 +524,9 @@ app.get('/api/user/loggedin', function(req, res) {
     }
 });
 
+// handle cors
+app.use(require('cors')());
+
 
 //--- SEARCH BABY ----//
 app.use(require('./components/IF_search/items'));
