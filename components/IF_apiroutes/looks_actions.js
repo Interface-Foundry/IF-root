@@ -171,7 +171,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
     }
 
     // update the look
-    req.look.faves.push({
+    req.look.faveLooks.push({
         userId: req.user._id.toString(),
         timeFaved: new Date()
     });
@@ -189,7 +189,7 @@ app.post('/:mongoId/fave', function(req, res, next) {
         _id: req.user._id
     }, {
         $addToSet: {
-            faves: req.look._id.toString()
+            faveLooks: req.look._id.toString()
         }
     }, function(e) {
         if (e) {
@@ -218,7 +218,7 @@ app.post('/:mongoId/unfave', function(req, res, next) {
     // update the look
     db.Looks.update({
         $pull: {
-            faves: {
+            faveLooks: {
                 userId: req.user._id.toString()
             }
         }
@@ -233,7 +233,7 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             _id: req.user._id
         }, {
             $pull: {
-                faves: req.look._id.toString()
+                faveLooks: req.look._id.toString()
             }
         }, function(err, result) {
             if (err) {
@@ -242,7 +242,7 @@ app.post('/:mongoId/unfave', function(req, res, next) {
                 return next(err);
             }
             db.Looks.find({
-                faves: {
+                faveLooks: {
                     userId: req.user._id.toString()
                 }
             }, function(err, look) {

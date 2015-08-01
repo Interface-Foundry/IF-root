@@ -139,6 +139,7 @@ var userSchema = mongoose.Schema({
         }
     }],
     faves: [String], // virtual prop of user's "like" collection
+    faveLooks: [String],
     rejects: [String], // list of rejected mongoIds here for quicker querying
     recentSearches: {
         searchQuery: {},
