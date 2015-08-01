@@ -243,8 +243,13 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             user: userPromise
         })
         .then(function(results) {
-            res.send(results);
-
+            // res.send(results);
+            db.Users.findById(req.userId, function(e, u) {
+                res.send({
+                    item: req.look,
+                    user: u
+                });
+            });
             // add an activity
             req.activity.data = {
                 look: req.look.getSimpleLook(),
