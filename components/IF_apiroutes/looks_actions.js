@@ -222,19 +222,30 @@ app.post('/:mongoId/unfave', function(req, res, next) {
                 userId: req.user._id.toString()
             }
         }
-    }).exec().then(function() {
+    }, function(err, result) {
+        if (err) {
+            err.niceMessage = 'Oops there was an error unfaveing the item.';
+            err.devMessage = 'Error unfaving';
+            return next(err);
+        }
         db.Users.update({
             _id: req.user._id
         }, {
             $pull: {
                 faves: req.look._id.toString()
             }
-        }).exec().then(function() {
+        }, function(err, result) {
+            if (err) {
+                err.niceMessage = 'Oops there was an error unfaveing the item.';
+                err.devMessage = 'Error unfaving';
+                return next(err);
+            }
             res.send({
                 look: req.look,
                 user: req.user
             });
         });
+
     });
 
     // add an activity
