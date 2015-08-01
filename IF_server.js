@@ -109,6 +109,8 @@ app.get('/api/healthcheck', function(req, res) {
     res.send(200);
 });
 
+app.use('/styles', require('../kip/IF_server'));
+
 //express compression
 var oneDay = 86400000;
 var compression = require('compression');
