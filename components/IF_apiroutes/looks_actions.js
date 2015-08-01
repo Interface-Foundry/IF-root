@@ -267,4 +267,27 @@ app.post('/:mongoId/unfave', function(req, res, next) {
     });
 })
 
+
+app.post('/:mongoId/report', function(req, res, next) {
+    if (USE_MOCK_DATA) {
+        return res.send(defaultResponse);
+    }
+
+    if (!req.look.reports) {
+        req.look.reports = [req.body];
+    } else {
+        req.look.reports.push(req.body);
+    }
+    req.look.save(function(e) {
+        if (e) {
+            e.niceMessage = 'Oops there was a problem processing your feedback.  Please try again';
+            return next(e);
+        }
+        return res.send({
+            user: req.user,
+            item: req.look
+        });
+    });
+});
+
 module.exports = app;
