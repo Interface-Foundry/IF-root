@@ -223,8 +223,16 @@ app.post('/:mongoId/unfave', function(req, res, next) {
             }
         }
     }).exec().then(function() {
+        db.Users.findById(req.userId, function(e, u) {
+            res.send({
+                look: req.look.faves,
+                user: u
+            });
+        });
         return db.Landmarks.findById(req.look._id);
     });
+
+
 
     // update the users cache of faved things
     var userPromise = db.Users.update({
@@ -244,12 +252,7 @@ app.post('/:mongoId/unfave', function(req, res, next) {
         })
         .then(function(results) {
             // res.send(results);
-            db.Users.findById(req.userId, function(e, u) {
-                res.send({
-                    item: req.look,
-                    user: u
-                });
-            });
+
             // add an activity
             req.activity.data = {
                 look: req.look.getSimpleLook(),
