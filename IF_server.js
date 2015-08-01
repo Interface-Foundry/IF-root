@@ -3774,7 +3774,11 @@ app.use(function error_handler(err, req, res, next) {
 //     res.send(generate_xml_sitemap());     
 // })
 
-server.listen(2997, function() {
-    console.log("Illya casting magic on 2997 ~ ~ ♡");
-    logger.log('started server');
-});
+if (module.parent) {
+    module.exports = app;
+} else {
+    server.listen(9090, function () {
+        console.log("Illya casting magic on 9090 ~ ~ ♡");
+        logger.log('started server');
+    });
+}
