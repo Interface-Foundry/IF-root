@@ -192,7 +192,8 @@ app.post('/api/auth/verify-google', function(req, res, next) {
                 var u = new db.User({
                     google: req.body.user,
                     name: req.body.user.name,
-                    avatar: req.body.user.picture
+                    avatar: req.body.user.picture,
+                    profileID: req.body.user.name.toLowerCase().replace(/[^\w]/g, '') + (Math.random()*100000| 0)
                 });
                 return u.save(function(err, user) {
                     if (err) {
