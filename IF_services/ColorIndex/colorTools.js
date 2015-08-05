@@ -27,7 +27,8 @@ var getVibrantColors = function(url) {
  *  [{Vibrant: ]
  */
 var findColorsForLandmark = function(landmark) {
-    return Promise.settle(landmarks.itemImageUrl.map(function(url) {
+    console.log(landmark.itemImageURL);
+    return Promise.settle(landmark.itemImageURL.map(function(url) {
         return getVibrantColors(url);
     })).then(function(results) {
         return results.reduce(function(colors, r) {
@@ -54,14 +55,19 @@ var test = function() {
         }).catch(console.error.bind(console));
 
     var db = require('db');
-    db.Landmarks.findOne({'itemImageUrls.0': {$exists: true}})
+    db.Landmarks.findOne({'itemImageURL.0': {$exists: true}})
         .then(function(l) {
-            return findColorsForLandmark(l);
+            var p = findColorsForLandmark(l);
+            p.then(function(l) {
+                console.log(l);
+            }, function(e) {
+                console.log(e);
+            })
         }).then(function(colors) {
-            colors.should.be.an.array
+            colors.should.be.an.array;
             colors[0].should.have.property('Vibrant');
             console.log(colors);
-        });
+        }, console.log.bind(console));
 }
 
 /**
