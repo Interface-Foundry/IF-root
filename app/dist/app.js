@@ -19464,7 +19464,7 @@ angular.module('tidepoolsServices')
                     password: password
                 }
 
-                $http.post('/api/user/login', data, {
+                $http.post('/api/auth/login', data, {
                         server: true
                     })
                     .success(function(data) {
@@ -19590,7 +19590,7 @@ angular.module('tidepoolsServices')
                     password: userManager.signup.password
                 }
 
-                $http.post('/api/user/signup', data, {
+                $http.post('/api/auth/signup', data, {
                         server: true
                     })
                     .success(function(user) {
