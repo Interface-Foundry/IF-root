@@ -24,6 +24,10 @@ var landmarkSchema = new Schema({
         name: String,
         id: String
     },
+    parentID: {
+       type: String,
+       index: true
+   },
     owner: {
         mongoId: {
             type: String,
