@@ -144,7 +144,7 @@ function createItem(req, res, newPlace) {
                     err.niceMessage = 'Could not save item';
                     return next(err);
                 }
-                console.log ('ITEM SAVE OMDG:', item)
+                console.log('ITEM SAVE OMDG:', item)
                 res.send(item)
                 redisClient.rpush('snaps', item._id, function(err, reply) {
                     if (err) {
@@ -166,16 +166,32 @@ function createItem(req, res, newPlace) {
                 });
                 // Increment users snapCount
                 req.user.update({
-                        $inc: {
-                            snapCount: 1
-                        }
-                    }, function(err) {
-                        if (err) {
-                            err.niceMessage = 'Could not increment users snapCount';
-                            console.log(err)
-                        }
-                    })
-                    //Save Activity
+                    $inc: {
+                        snapCount: 1
+                    }
+                }, function(err) {
+                    if (err) {
+                        err.niceMessage = 'Could not increment users snapCount';
+                        console.log(err)
+                    }
+                })
+
+                // add kips to the user
+               req.user.update({
+                    _id: req.user._id
+                }, {
+                    $inc: {
+                        kips: 5
+                    }
+                }, function(err) {
+                    if (err) {
+                        // todo log error to ELK
+                        console.error(err);
+                    }
+
+                    console.log('Kips added!')
+                });
+                //Save Activity
                 a.saveAsync().then(function() {}).catch(next);
             });
         })
