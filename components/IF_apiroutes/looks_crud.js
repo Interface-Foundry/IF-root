@@ -125,9 +125,9 @@ router.post('/', function(req, res, next) {
             return next(err);
         }
         // add kips to the user
-        db.Users.update({
+        req.user.update({
             _id: req.user._id
-        }, {$inc: {kips: 5}}, function(err) {
+        }, {$inc: {kips: 10}}, function(err) {
             if (err) {
                 // todo log error to ELK
                 console.error(err);
