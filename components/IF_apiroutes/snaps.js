@@ -189,7 +189,7 @@ function createItem(req, res, newPlace) {
                         console.error(err);
                     }
 
-                    console.log('Kips added!')
+                    console.log('Kips added!', req.user.kips)
                 });
                 //Save Activity
                 a.saveAsync().then(function() {}).catch(next);

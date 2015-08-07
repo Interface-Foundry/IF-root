@@ -28,7 +28,6 @@ router.get('/:id', function(req, res, next) {
 //Create a new look
 router.post('/', function(req, res, next) {
     if (!req.user) {
-        // req.user = req.body.user
         return next('You must log in first');
     }
     // console.log('req.user:', req.user)
@@ -51,7 +50,6 @@ router.post('/', function(req, res, next) {
     async.waterfall([
         function(callback) {
             //Create a unique id field
-            // console.log('Create a unique id field..')
             uniquer.uniqueId(input, 'Looks').then(function(unique) {
                 look.id = unique;
                 callback(null, look);
@@ -61,7 +59,6 @@ router.post('/', function(req, res, next) {
         },
         //Collect tags from each snap in look 
         function(look, callback) {
-            // console.log('Collecting tags from snaps..')
             async.eachSeries(look.snaps, function(snap, finished) {
                 db.Landmarks.findById(snap.mongoId, function(err, result) {
                     if (err) {
@@ -98,7 +95,6 @@ router.post('/', function(req, res, next) {
             })
         },
         function(look, callback) {
-            // console.log('Uploading look to Amazon S3..')
             //Upload look image to Amazon S3
             upload.uploadPicture(look.owner.profileID, look.base64).then(function(imgURL) {
                 look.lookImg = imgURL;
@@ -137,7 +133,7 @@ router.post('/', function(req, res, next) {
                 console.error(err);
             }
 
-            console.log('Kips added!')
+            console.log('Kips added!', req.user.kips)
         });
 
         // add activity
