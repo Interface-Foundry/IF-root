@@ -188,7 +188,6 @@ function createItem(req, res, newPlace) {
                         // todo log error to ELK
                         console.error(err);
                     }
-
                     console.log('Kips added!', req.user.kips)
                 });
                 //Save Activity

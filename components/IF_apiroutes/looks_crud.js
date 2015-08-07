@@ -74,7 +74,7 @@ router.post('/', function(req, res, next) {
                     result.itemTags.categories.forEach(function(snapCategoryTag) {
                         var lookCategoryTags = look.lookTags.categories.join(' ');
                         //Check if category doesn't already exist AND it's a valid category
-                        if (lookCategoryTags.indexOf(snapCategoryTag.trim()) == -1 && categories.indexOf(snapCategoryTag.trim())> -1) {
+                        if (lookCategoryTags.indexOf(snapCategoryTag.trim()) == -1 && categories.indexOf(snapCategoryTag.trim()) > -1) {
                             look.lookTags.categories.push(snapCategoryTag)
                         }
                     })
@@ -109,14 +109,30 @@ router.post('/', function(req, res, next) {
         function(look, callback) {
             // console.log('Saving..')
             //Save look in db
-            look.snapIds = look.snaps.map(function(s){ return s.mongoId; });
+            look.snapIds = look.snaps.map(function(s) {
+                return s.mongoId;
+            });
             look.save(function(err, look) {
                 if (err) {
                     err.niceMessage = 'Could not save look';
                     return callback(err)
                 }
-                console.log('New Look created!', look);
-                callback(null, look);
+                // add kips to the user
+                req.user.update({
+                    _id: req.user._id
+                }, {
+                    $inc: {
+                        kips: 5
+                    }
+                }, function(err) {
+                    if (err) {
+                        // todo log error to ELK
+                        console.error(err);
+                    }
+                    console.log('Kips added!', req.user.kips)
+                    callback(null, look);
+                });
+
             });
         }
     ], function(err, look) {
@@ -124,17 +140,6 @@ router.post('/', function(req, res, next) {
             err.niceMessage = 'Error processing Look';
             return next(err);
         }
-        // add kips to the user
-        req.user.update({
-            _id: req.user._id
-        }, {$inc: {kips: 5}}, function(err) {
-            if (err) {
-                // todo log error to ELK
-                console.error(err);
-            }
-
-            console.log('Kips added!', req.user.kips)
-        });
 
         // add activity
         var a = new db.Activity({
@@ -165,7 +170,9 @@ router.put('/:id', function(req, res, next) {
             if (look && req.user._id.toString() === look.owner.mongoId) { //Merge existing item with updated object from frontend
                 look = _.extend(look, req.body);
                 //make sure the snapIds are correct
-                look.snapIds = look.snaps.map(function(s) { return s.mongoId; });
+                look.snapIds = look.snaps.map(function(s) {
+                    return s.mongoId;
+                });
                 //Save item
                 look.save(function(err, item) {
                     if (err) {
