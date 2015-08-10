@@ -1,5 +1,5 @@
 var db = require('../../../components/IF_schemas/db');
-var redisClient = require('./redis');
+var job = require('job');
 var request = require('request');
 var Promise = require('bluebird');
 var scrapeItem = require('./scrape_item');
@@ -20,9 +20,10 @@ var _ = require('lodash');
  *
  */
 
-redisClient.lpop('items-toprocess', function (e, url) {
+var scrapeShoptiques = job('scrape-shoptiques-item', function (data, done) {
+    var url = data.url;
     if (typeof url === 'undefined') {
-        return;
+        return done();
     }
     console.log('URL:', url);
 
@@ -104,20 +105,22 @@ redisClient.lpop('items-toprocess', function (e, url) {
                         .then(function(lm) {
                             lm = lm.map(function(l) { return l.source_shoptiques_item.url});
                             _.difference(res.related, lm).map(function(itemUrl) {
-                                redisClient.rpush('items-toprocess', itemUrl, function (err, reply) {
-                                    if (err) {
-                                        return console.error(err);
-                                    }
-                                    console.log('added item', itemUrl, 'to redis processing queue');
+                                scrapeShoptiques({
+                                    url: itemUrl
                                 });
                             })
                         })
                 }).then(function () {
                     console.log('processed item', url);
+                    done();
                 }).catch(function (err) {
                     console.error('error with item', url);
                     console.error(err);
+                    done(err);
                 });
-        }).catch(console.error.bind(console));
+        }).catch(function(e) {
+            console.error(e);
+            done(e);
+        });
     });
 });

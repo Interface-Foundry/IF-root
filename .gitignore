@@ -11,6 +11,7 @@ venv
 node_modules/*
 !node_modules/config
 !node_modules/db
+!node_modules/job.js
 
 # Compiled source #
 ###################

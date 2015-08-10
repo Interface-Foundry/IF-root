@@ -1,5 +1,5 @@
 var db = require('../../../components/IF_schemas/db');
-var redisClient = require('./redis');
+var job = require('job');
 var cheerio = require('cheerio');
 var request = require('request');
 var Promise = require('bluebird');
@@ -16,7 +16,10 @@ var _ = require('lodash');
  *
  */
 
+var scrapeShoptiques = job('scrape-shoptiques-item');
+
 request.get('http://www.shoptiques.com/whats-new', function(e, r, body) {
+    console.log('got whats new');
     var $ = cheerio.load(body);
     var urls = $('div.products div.name-price a').toArray().map(function(a) {
         return 'http://shoptiques.com' + $(a).attr('href');
@@ -29,11 +32,8 @@ request.get('http://www.shoptiques.com/whats-new', function(e, r, body) {
         var toScrape = _.difference(urls, lm);
 
         toScrape.map(function(itemUrl) {
-            redisClient.rpush('items-toprocess', itemUrl, function (err, reply) {
-                if (err) {
-                    return console.error(err);
-                }
-                console.log('added item', itemUrl);
+            scrapeShoptiques({
+                url: itemUrl
             });
         });
     });
