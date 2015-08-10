@@ -63,12 +63,12 @@ router.post('/', function(req, res, next) {
 
                 db.Landmarks.findById(snap.mongoId, function(err, result) {
                     if (err) {
-                        err.niceMessage = 'Could not find snap included in look.';
-                        console.log(err)
+                        // err.niceMessage = 'Could not find snap included in look.';
+                        // console.log(err)
                         return finished();
                     }
                     if (!result) {
-                        console.log('Could not find snap included in look.')
+                        // console.log('Could not find snap included in look.')
                         return finished();
                     }
 
@@ -112,20 +112,6 @@ router.post('/', function(req, res, next) {
                     return callback(err)
                 }
             })
-        },
-        function(look, callback) {
-            // console.log('Saving..')
-            //Save look in db
-            look.snapIds = look.snaps.map(function(s) {
-                return s.mongoId;
-            });
-            look.save(function(err, look) {
-                if (err) {
-                    err.niceMessage = 'Could not save look';
-                    return callback(err)
-                }
-                res.send(look)
-            });
         }
     ], function(err, look) {
         if (err) {
@@ -133,34 +119,47 @@ router.post('/', function(req, res, next) {
             return next(err);
         }
 
-        
-        // add kips to the user
-        req.user.update({
-            _id: req.user._id
-        }, {
-            $inc: {
-                kips: 5
-            }
-        }, function(err) {
+        //Save look in db
+        look.snapIds = look.snaps.map(function(s) {
+            return s.mongoId;
+        });
+        look.save(function(err, look) {
             if (err) {
-                // todo log error to ELK
-                console.error(err);
+                err.niceMessage = 'Could not save look';
+                return callback(err)
             }
-            console.log('Kips added!', req.user.kips)
+
+            // add kips to the user
+            req.user.update({
+                _id: req.user._id
+            }, {
+                $inc: {
+                    kips: 5
+                }
+            }, function(err) {
+                if (err) {
+                    // todo log error to ELK
+                    console.error(err);
+                }
+                console.log('Kips added!', req.user.kips)
+            });
+
+            // add activity
+            var a = new db.Activity({
+                userIds: [req.user._id.toString()], //todo add ids for @user tags
+                landmarkIds: [look._id.toString()],
+                activityAction: 'look.post',
+                seenBy: [req.user._id.toString()],
+                data: {
+                    owner: req.user.getSimpleUser(),
+                    look: look.getSimpleLook()
+                }
+            });
+            a.saveAsync().then(function() {}).catch(next);
+
+            res.send(look)
         });
-        // add activity
-        var a = new db.Activity({
-            userIds: [req.user._id.toString()], //todo add ids for @user tags
-            landmarkIds: [look._id.toString()],
-            activityAction: 'look.post',
-            seenBy: [req.user._id.toString()],
-            data: {
-                owner: req.user.getSimpleUser(),
-                look: look.getSimpleLook()
-            }
-        });
-        a.saveAsync().then(function() {
-        }).catch(next);
+
     });
 });
 
