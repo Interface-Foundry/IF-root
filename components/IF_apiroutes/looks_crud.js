@@ -60,11 +60,19 @@ router.post('/', function(req, res, next) {
         //Collect tags from each snap in look 
         function(look, callback) {
             async.eachSeries(look.snaps, function(snap, finished) {
+                console.log('SNAPS: ', snap)
                 db.Landmarks.findById(snap.mongoId, function(err, result) {
                     if (err) {
                         err.niceMessage = 'Could not find snap included in look.';
-                        return finished(err)
+                        console.log(err)
+                        return finished();
                     }
+                    if (!result) {
+                        err.niceMessage = 'Could not find snap included in look.';
+                        console.log(err)
+                        return finished();
+                    }
+
                     result.itemTags.colors.forEach(function(snapColorTag) {
                         var lookColorTags = look.lookTags.colors.join(' ')
                         if (lookColorTags.indexOf(snapColorTag.trim()) == -1) {
@@ -117,8 +125,8 @@ router.post('/', function(req, res, next) {
                     err.niceMessage = 'Could not save look';
                     return callback(err)
                 }
-                // add kips to the user
-                req.user.update({
+                  // add kips to the user
+               req.user.update({
                     _id: req.user._id
                 }, {
                     $inc: {
@@ -130,7 +138,7 @@ router.post('/', function(req, res, next) {
                         console.error(err);
                     }
                     console.log('Kips added!', req.user.kips)
-                    callback(null, look);
+                    callback(null,look)
                 });
 
             });
