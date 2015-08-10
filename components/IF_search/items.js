@@ -68,6 +68,33 @@ app.post(searchItemsUrl, function (req, res, next) {
 
 
     search(req.body, page)
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 5;
+                console.log('searching radius', req.body.radius);
+                return search(req.body);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 50;
+                console.log('searching radius', req.body.radius);
+                return search(req.body);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 500;
+                console.log('searching radius', req.body.radius);
+                return search(req.body);
+            } else {
+                return res;
+            }
+        })
         .then(function(results) {
             responseBody.results = results;
             res.send(responseBody);
@@ -147,6 +174,7 @@ function search(q, page) {
  * @param page
  */
 function textSearch(q, page) {
+    console.log('text search', q);
 
     // elasticsearch impl
     // update fuzziness of query based on search term length
@@ -222,6 +250,7 @@ function textSearch(q, page) {
  * @param page
  */
 function filterSearch(q, page) {
+    console.log('filter search', q);
 
     var radius = q.radius || defaultRadius; // miles
     radius = 1609.344 * radius; // meters
@@ -244,13 +273,15 @@ function filterSearch(q, page) {
         query.price = q.priceRange;
     }
 
-    if (q.categories) {
+    if (q.categories && q.categories.length > 0) {
         query['itemTags.categories'] = {$in: q.categories};
     }
 
     if (q.color) {
         query['itemTags.color'] = {$in: q.color};
     }
+
+    console.log(query);
 
     return db.Landmarks
         .find(query)
@@ -313,6 +344,33 @@ app.post(trendingItemsUrl, function (req, res, next) {
         });
 
     var nearYou = search(req.body, 0)
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 5;
+                console.log('searching radius', req.body.radius);
+                return search(req.body);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 50;
+                console.log('searching radius', req.body.radius);
+                return search(req.body);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 500;
+                console.log('searching radius', req.body.radius);
+                return search(req.body);
+            } else {
+                return res;
+            }
+        })
         .then(function(res) {
             return {
                 category: 'Trending near you',
