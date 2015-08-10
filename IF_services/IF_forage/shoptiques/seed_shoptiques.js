@@ -19,8 +19,6 @@ var Promise = require('bluebird');
  */
 var neighborhoods = ["alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "florida", "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "las-vegas", "london", "long-island", "louisiana", "maine", "maryland", "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana", "montauk", "nebraska", "nevada", "new-hampshire", "new-jersey", "new-mexico", "new-york", "new_york_city", "north-carolina", "north-dakota", "ohio", "oklahoma", "oregon", "paris", "pennsylvania", "rhode-island", "san-diego", "san_francisco", "south-carolina", "south-dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington-dc", "washington-state", "west-virginia", "wisconsin", "wyoming"];
 
-neighborhoods = ["iowa"];
-
 var scrapeShoptiques = job('scrape-shoptiques-item');
 
 // gets all the items from a catalog page

@@ -32,7 +32,7 @@ var scrapeShoptiques = job('scrape-shoptiques-item', function (data, done) {
         if (r !== null) {
             // don't process
             console.log(url, 'has already been processsed');
-            return;
+            return done();
         }
 
         console.log('scraping shoptiques item', url);
