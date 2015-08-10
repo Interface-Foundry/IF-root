@@ -68,8 +68,7 @@ router.post('/', function(req, res, next) {
                         return finished();
                     }
                     if (!result) {
-                        err.niceMessage = 'Could not find snap included in look.';
-                        console.log(err)
+                        console.log('Could not find snap included in look.')
                         return finished();
                     }
 
