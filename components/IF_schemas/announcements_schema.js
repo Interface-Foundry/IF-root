@@ -28,4 +28,6 @@ var announcementsSchema = mongoose.Schema({
 });
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('announcements', announcementsSchema);
+
+var db = require('./bubbllidb');
+module.exports = db.model('announcements', announcementsSchema);

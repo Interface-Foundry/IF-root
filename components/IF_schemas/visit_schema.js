@@ -14,4 +14,5 @@ var visitSchema = mongoose.Schema({
 
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('visit', visitSchema);
+var db = require('./bubbllidb');
+module.exports = db.model('visit', visitSchema);

@@ -19,8 +19,9 @@ var mongoose = require('mongoose');
 			lastedited: { type: Date, default: Date.now}
 		}
 
-	}); 
+	});
 
 
 
-module.exports = mongoose.model('projectModel', projectSchema, 'projects');
+var db = require('./bubbllidb');
+module.exports = db.model('projectModel', projectSchema, 'projects');

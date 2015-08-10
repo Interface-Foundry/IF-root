@@ -8,6 +8,7 @@ var mongoose = require('mongoose');
 		worldTag: String,
 		twitter: Boolean,
 		instagram: Boolean
-	}); 
+	});
 
-module.exports = mongoose.model('serverwidgetsModel', serverwidgetsSchema, 'serverwidgets');
+var db = require('./bubbllidb');
+module.exports = db.model('serverwidgetsModel', serverwidgetsSchema, 'serverwidgets');

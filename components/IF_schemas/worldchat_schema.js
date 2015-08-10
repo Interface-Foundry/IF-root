@@ -23,4 +23,5 @@ var worldchatSchema = mongoose.Schema({
 
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('worldchat', worldchatSchema);
+var db = require('./bubbllidb');
+module.exports = db.model('worldchat', worldchatSchema);

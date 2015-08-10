@@ -41,7 +41,8 @@ var mongoose = require('mongoose');
 			streetview: Boolean,
 			nearby: Boolean
 		}
-	}); 
+	});
 
 
-module.exports = mongoose.model('styleModel', styleSchema, 'styles');
+var db = require('./bubbllidb');
+module.exports = db.model('styleModel', styleSchema, 'styles');

@@ -52,4 +52,5 @@ var contestSchema = mongoose.Schema({
 });
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('contest', contestSchema);
+var db = require('./bubbllidb');
+module.exports = db.model('contest', contestSchema);

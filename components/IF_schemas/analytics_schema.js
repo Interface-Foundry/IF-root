@@ -40,4 +40,6 @@ analyticsSchema.path('analyticsUserId').validate(function(value, cb) {
 analyticsSchema.index({loc:'2dsphere'});
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('analytics', analyticsSchema);
+
+var db = require('./bubbllidb');
+module.exports = db.model('analytics', analyticsSchema);

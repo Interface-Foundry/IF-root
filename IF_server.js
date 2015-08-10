@@ -82,8 +82,7 @@ var mongoose = require('mongoose'),
 var env = process.env.NODE_ENV || 'development';
 console.log("running in $env mode".replace('$env', env));
 
-mongoose.connect(config.mongodb.url);
-var db_mongoose = mongoose.connection;
+var db_mongoose = require('./components/IF_schemas/bubbllidb');
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
 

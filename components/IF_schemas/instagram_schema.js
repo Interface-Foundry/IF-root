@@ -26,4 +26,6 @@ var instagramSchema = mongoose.Schema({
 instagramSchema.index({tags:1});
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('instagram', instagramSchema);
+
+var db = require('./bubbllidb');
+module.exports = db.model('instagram', instagramSchema);

@@ -32,4 +32,6 @@ var anonUserSchema = mongoose.Schema({
 //landmarkSchema.index({loc:'2dsphere'});
 
 // create the model for users and expose it to our app
-module.exports = mongoose.model('anonusers', anonUserSchema);
+
+var db = require('./bubbllidb');
+module.exports = db.model('anonusers', anonUserSchema);

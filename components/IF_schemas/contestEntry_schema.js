@@ -34,5 +34,6 @@ var contestEntrySchema = mongoose.Schema({
     distanceFromWorld: Number
 });
 
+var db = require('./bubbllidb');
 // create the model for users and expose it to our app
-module.exports = mongoose.model('contestEntry', contestEntrySchema);
+module.exports = db.model('contestEntry', contestEntrySchema);

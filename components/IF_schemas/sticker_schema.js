@@ -32,4 +32,5 @@ var stickerSchema = new Schema({
 });
 
 
-module.exports = mongoose.model('stickerModel', stickerSchema, 'stickers');
+var db = require('./bubbllidb');
+module.exports = db.model('stickerModel', stickerSchema, 'stickers');

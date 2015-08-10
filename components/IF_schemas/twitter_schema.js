@@ -40,4 +40,5 @@ var tweetSchema = mongoose.Schema({
 
 tweetSchema.index({hashtags:1});
 
-module.exports = mongoose.model('tweets', tweetSchema);
+var db = require('./bubbllidb');
+module.exports = db.model('tweets', tweetSchema);

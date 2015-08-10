@@ -281,5 +281,5 @@ landmarkSchema.index({
     tags: "text"
 });
 
-
-module.exports = mongoose.model('landmarkModel', landmarkSchema, 'landmarks');
+var db = require('./bubbllidb');
+module.exports = db.model('landmarkModel', landmarkSchema, 'landmarks');
