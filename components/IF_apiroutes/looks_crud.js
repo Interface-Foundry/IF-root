@@ -124,6 +124,7 @@ router.post('/', function(req, res, next) {
                     err.niceMessage = 'Could not save look';
                     return callback(err)
                 }
+                res.send(look)
             });
         }
     ], function(err, look) {
@@ -132,7 +133,7 @@ router.post('/', function(req, res, next) {
             return next(err);
         }
 
-        res.send(look)
+        
         // add kips to the user
         req.user.update({
             _id: req.user._id
