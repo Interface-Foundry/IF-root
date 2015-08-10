@@ -60,7 +60,7 @@ router.post('/', function(req, res, next) {
         //Collect tags from each snap in look 
         function(look, callback) {
             async.eachSeries(look.snaps, function(snap, finished) {
-                console.log('SNAPS: ', snap)
+
                 db.Landmarks.findById(snap.mongoId, function(err, result) {
                     if (err) {
                         err.niceMessage = 'Could not find snap included in look.';
@@ -124,22 +124,6 @@ router.post('/', function(req, res, next) {
                     err.niceMessage = 'Could not save look';
                     return callback(err)
                 }
-                  // add kips to the user
-               req.user.update({
-                    _id: req.user._id
-                }, {
-                    $inc: {
-                        kips: 5
-                    }
-                }, function(err) {
-                    if (err) {
-                        // todo log error to ELK
-                        console.error(err);
-                    }
-                    console.log('Kips added!', req.user.kips)
-                    callback(null,look)
-                });
-
             });
         }
     ], function(err, look) {
@@ -148,6 +132,21 @@ router.post('/', function(req, res, next) {
             return next(err);
         }
 
+        res.send(look)
+        // add kips to the user
+        req.user.update({
+            _id: req.user._id
+        }, {
+            $inc: {
+                kips: 5
+            }
+        }, function(err) {
+            if (err) {
+                // todo log error to ELK
+                console.error(err);
+            }
+            console.log('Kips added!', req.user.kips)
+        });
         // add activity
         var a = new db.Activity({
             userIds: [req.user._id.toString()], //todo add ids for @user tags
@@ -160,7 +159,6 @@ router.post('/', function(req, res, next) {
             }
         });
         a.saveAsync().then(function() {
-            res.send(look)
         }).catch(next);
     });
 });
