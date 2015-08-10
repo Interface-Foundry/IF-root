@@ -30,7 +30,6 @@ router.post('/', function(req, res, next) {
     if (!req.user) {
         return next('You must log in first');
     }
-    // console.log('req.user:', req.user)
     var look = new db.Look();
     look.lookTags = {
         colors: [],
@@ -54,62 +53,62 @@ router.post('/', function(req, res, next) {
                 look.id = unique;
                 callback(null, look);
             }).catch(function(err) {
-                callback(err)
+                return next(err)
             })
         },
         //Collect tags from each snap in look 
         function(look, callback) {
-            async.eachSeries(look.snaps, function(snap, finished) {
 
-                db.Landmarks.findById(snap.mongoId, function(err, result) {
+
+            async.each(look.snaps, function(snap, finished) {
+                    db.Landmarks.findById(snap.mongoId, function(err, result) {
+                        if (err) {
+                            err.niceMessage = 'Could not find snap included in look.';
+                            // console.log(err)
+                            return finished();
+                        }
+                        if (result) {
+                            result.itemTags.colors.forEach(function(snapColorTag) {
+                                var lookColorTags = look.lookTags.colors.join(' ')
+                                if (lookColorTags.indexOf(snapColorTag.trim()) == -1) {
+                                    look.lookTags.colors.push(snapColorTag)
+                                }
+                            })
+                            result.itemTags.categories.forEach(function(snapCategoryTag) {
+                                var lookCategoryTags = look.lookTags.categories.join(' ');
+                                //Check if category doesn't already exist AND it's a valid category
+                                if (lookCategoryTags.indexOf(snapCategoryTag.trim()) == -1 && categories.indexOf(snapCategoryTag.trim()) > -1) {
+                                    look.lookTags.categories.push(snapCategoryTag)
+                                }
+                            })
+                            result.itemTags.text.forEach(function(snapTextTag) {
+                                var lookTextTags = look.lookTags.text.join(' ');
+                                if (lookTextTags.indexOf(snapTextTag.trim()) == -1) {
+                                    look.lookTags.text.push(snapTextTag)
+                                }
+                            })
+                        }
+                    })
+                    finished();
+                }, function(err) {
                     if (err) {
-                        // err.niceMessage = 'Could not find snap included in look.';
+                        err.niceMessage = 'Could not collect tags from snaps.';
                         // console.log(err)
-                        return finished();
-                    }
-                    if (!result) {
-                        // console.log('Could not find snap included in look.')
-                        return finished();
                     }
 
-                    result.itemTags.colors.forEach(function(snapColorTag) {
-                        var lookColorTags = look.lookTags.colors.join(' ')
-                        if (lookColorTags.indexOf(snapColorTag.trim()) == -1) {
-                            look.lookTags.colors.push(snapColorTag)
-                        }
-                    })
-                    result.itemTags.categories.forEach(function(snapCategoryTag) {
-                        var lookCategoryTags = look.lookTags.categories.join(' ');
-                        //Check if category doesn't already exist AND it's a valid category
-                        if (lookCategoryTags.indexOf(snapCategoryTag.trim()) == -1 && categories.indexOf(snapCategoryTag.trim()) > -1) {
-                            look.lookTags.categories.push(snapCategoryTag)
-                        }
-                    })
-                    result.itemTags.text.forEach(function(snapTextTag) {
-                        var lookTextTags = look.lookTags.text.join(' ');
-                        if (lookTextTags.indexOf(snapTextTag.trim()) == -1) {
-                            look.lookTags.text.push(snapTextTag)
-                        }
-                    })
-                })
-                finished();
-            }, function(err) {
-                if (err) {
-                    err.niceMessage = 'Could not collect tags from snaps.';
-                    return callback(err)
-                }
-                callback(null, look);
-            })
+                    callback(null, look);
+                }) //End of async.eachSeries
         },
         function(look, callback) {
             //Upload look image to Amazon S3
             upload.uploadPicture(look.owner.profileID, look.base64).then(function(imgURL) {
                 look.lookImg = imgURL;
+
                 callback(null, look);
             }).catch(function(err) {
                 if (err) {
                     err.niceMessage = 'Could not upload image.';
-                    return callback(err)
+                    return next(err)
                 }
             })
         }
@@ -118,7 +117,6 @@ router.post('/', function(req, res, next) {
             err.niceMessage = 'Error processing Look';
             return next(err);
         }
-
         //Save look in db
         look.snapIds = look.snaps.map(function(s) {
             return s.mongoId;
@@ -126,24 +124,25 @@ router.post('/', function(req, res, next) {
         look.save(function(err, look) {
             if (err) {
                 err.niceMessage = 'Could not save look';
-                return callback(err)
+                return next(err)
             }
-
-            // add kips to the user
-            req.user.update({
-                _id: req.user._id
-            }, {
-                $inc: {
-                    kips: 5
-                }
-            }, function(err) {
-                if (err) {
-                    // todo log error to ELK
-                    console.error(err);
-                }
-                console.log('Kips added!', req.user.kips)
-            });
-
+            if (!req.user.kips) {
+                console.log('user has no kips')
+                req.user.kips = 5
+            } else {
+                // add kips to the user
+                req.user.update({
+                    $inc: {
+                        kips: 5
+                    }
+                }, function(err) {
+                    if (err) {
+                        // todo log error to ELK
+                        console.error(err);
+                    }
+                    console.log('Kips added! ',req.user.kips)
+                });
+            }
             // add activity
             var a = new db.Activity({
                 userIds: [req.user._id.toString()], //todo add ids for @user tags
@@ -156,7 +155,7 @@ router.post('/', function(req, res, next) {
                 }
             });
             a.saveAsync().then(function() {}).catch(next);
-
+            // console.log('look._id', look._id)
             res.send(look)
         });
 
