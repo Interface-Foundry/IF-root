@@ -380,9 +380,9 @@ module.exports = function(passport) {
 
     passport.use(new FacebookStrategy({
 
-            clientID: global.config.facebookAuth.clientID,
-            clientSecret: global.config.facebookAuth.clientSecret,
-            callbackURL: global.config.facebookAuth.callbackURL,
+            clientID: config.facebookAuth.clientID,
+            clientSecret: config.facebookAuth.clientSecret,
+            callbackURL: config.facebookAuth.callbackURL,
             passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
 
         },

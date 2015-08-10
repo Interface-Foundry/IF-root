@@ -1,5 +1,5 @@
 var redis = require('redis');
-var client = redis.createClient(global.config.redis.port, global.config.redis.url, global.config.redis.options);
+var client = redis.createClient(config.redis.port, config.redis.url, config.redis.options);
  
 client.on('connect', function() {
     console.log('connected to redis server');

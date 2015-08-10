@@ -22,7 +22,7 @@ var connectBusboy = require('connect-busboy');
 var mmm = require('mmmagic'),
     Magic = mmm.Magic;
 
-global.config = require('./config'); // pulls in config/index.js
+var config = require('./config'); // pulls in config/index.js
 
 var mailerTransport = require('./components/IF_mail/IF_mail.js');
 var submitContestEntry = require('./components/IF_contests/IF_contests.js');
@@ -82,7 +82,7 @@ var mongoose = require('mongoose'),
 var env = process.env.NODE_ENV || 'development';
 console.log("running in $env mode".replace('$env', env));
 
-mongoose.connect(global.config.mongodb.url);
+mongoose.connect(config.mongodb.url);
 var db_mongoose = mongoose.connection;
 db_mongoose.on('error', console.error.bind(console, 'connection error:'));
 //---------------//
@@ -259,7 +259,7 @@ function puts(error, stdout, stderr) {
 
 }
 
-console.log('using greegeoip server', global.config.geoipURL);
+console.log('using greegeoip server', config.geoipURL);
 
 
 //---------------------------------------//
