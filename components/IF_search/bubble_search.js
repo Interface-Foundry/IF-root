@@ -1,6 +1,6 @@
 var _ = require('underscore'),
 mongoose = require('mongoose'),
-sanitize = require('mongo-sanitize');
+sanitize = require('mongo-sanitize'),
 landmarkSchema = require('../IF_schemas/landmark_schema.js');
 
 var route = function(searchType, query, res){
