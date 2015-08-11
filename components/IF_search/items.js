@@ -72,7 +72,7 @@ app.post(searchItemsUrl, function (req, res, next) {
             if (res.length < 20) {
                 req.body.radius = 5;
                 console.log('searching radius', req.body.radius);
-                return search(req.body);
+                return search(req.body, page);
             } else {
                 return res;
             }
@@ -81,7 +81,7 @@ app.post(searchItemsUrl, function (req, res, next) {
             if (res.length < 20) {
                 req.body.radius = 50;
                 console.log('searching radius', req.body.radius);
-                return search(req.body);
+                return search(req.body, page);
             } else {
                 return res;
             }
@@ -90,7 +90,7 @@ app.post(searchItemsUrl, function (req, res, next) {
             if (res.length < 20) {
                 req.body.radius = 500;
                 console.log('searching radius', req.body.radius);
-                return search(req.body);
+                return search(req.body, page);
             } else {
                 return res;
             }
@@ -236,6 +236,8 @@ function textSearch(q, page) {
         }
     };
 
+    console.log(JSON.stringify(fuzzyQuery));
+
     return es.search(fuzzyQuery)
         .then(function(results) {
             var ids = results.hits.hits.map(function(r) { return r._id; });
@@ -348,7 +350,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
             if (res.length < 20) {
                 req.body.radius = 5;
                 console.log('searching radius', req.body.radius);
-                return search(req.body);
+                return search(req.body, 0);
             } else {
                 return res;
             }
@@ -357,7 +359,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
             if (res.length < 20) {
                 req.body.radius = 50;
                 console.log('searching radius', req.body.radius);
-                return search(req.body);
+                return search(req.body, 0);
             } else {
                 return res;
             }
@@ -366,7 +368,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
             if (res.length < 20) {
                 req.body.radius = 500;
                 console.log('searching radius', req.body.radius);
-                return search(req.body);
+                return search(req.body, 0);
             } else {
                 return res;
             }
