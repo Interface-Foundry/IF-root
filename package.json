@@ -29,6 +29,7 @@
     "instagram-node": "^0.5.7",
     "instagram-realtime": "~0.0.4",
     "jsonwebtoken": "^5.0.4",
+    "kue": "^0.9.4",
     "lodash": "^3.10.0",
     "method-override": "~1.0.0",
     "mmmagic": "^0.3.15",
