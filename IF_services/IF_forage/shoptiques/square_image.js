@@ -19,8 +19,9 @@ var args = "$SRC -resize 640X640> -size 640X640 xc:white +swap -gravity center -
 
 
 var squareImage = job('square-shoptiques-image', function(data, done) {
+    console.log('processing', data.id);
     db.Landmarks.findById(data.id).exec(function(e, item) {
-
+        console.log(item.name);
         // make sure the source image is the highest quality. the actual used image will be smaller, though
         item.source_shoptiques_item.images = item.source_shoptiques_item.images.map(function (u) {
             return u.replace('_m.jpg', '_l.jpg');
@@ -34,6 +35,8 @@ var squareImage = job('square-shoptiques-image', function(data, done) {
                 var newUrl = bucketUrlPrefex + key;
                 var a = args.replace('$SRC', u).split(' ');
                 var s = spawn(cmd, a, {stdio: ['pipe', 'pipe', process.stderr]});
+
+                console.log('converting', u, 'to', newUrl);
 
                 s3.upload({
                     Bucket: bucketName,
@@ -79,6 +82,7 @@ db.Landmarks.find({
     'source_shoptiques_item.images': {$exists: true},
     'itemImageURL.0': /shoptiques/
 }).select('_id').exec(function(err, items) {
+    console.log('found', items.length, 'items to process');
     items.map(function(i) {
         squareImage({
             id: i._id.toString()
