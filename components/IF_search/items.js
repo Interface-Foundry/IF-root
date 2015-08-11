@@ -225,7 +225,7 @@ function textSearch(q, page) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description", "parent.name"],
+                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description", "parent.name^2"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }
@@ -318,7 +318,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
     req.body.radius = 2;
 
     // TODO curate text categories based on user's preferences
-    var textCategories = ['Summer', 'Vintage'].map(function(str) {
+    var textCategories = ['Fall', 'School'].map(function(str) {
         var q = _.cloneDeep(req.body);
         q.text = str;
         return search(q, 0)
