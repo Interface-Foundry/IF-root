@@ -92,7 +92,9 @@ var scrapeShoptiques = job('scrape-shoptiques-item', function (data, done) {
                                 text: i.categories.concat([i.colorName]),
                                 categories: i.categories
                             },
-                            itemImageURL: i.images
+                            itemImageURL: i.images,
+                            linkback: url,
+                            linkbackname: 'shoptiques.com'
                         });
                         console.log('saving item', item);
                         return item.save();
