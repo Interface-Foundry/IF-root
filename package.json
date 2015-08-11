@@ -63,6 +63,7 @@
     "traceback": "^0.3.1",
     "underscore": "^1.8.3",
     "urlify": "~0.3.5",
+    "uuid": "^2.0.1",
     "validator": "^3.42.0"
   },
   "devDependencies": {
