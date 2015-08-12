@@ -1,10 +1,38 @@
-html
-    h1 #{name}
-    div.images
-        each url in itemImageURL
-            img(src=url)
-    div.tags
-        input(name="tag")
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title Kip Tagging
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css")
+        link(href="/normalize.css" rel="stylesheet" type="text/css")
+        link(href="/skeleton.css" rel="stylesheet" type="text/css")
+        link(href="/kiptags.css" rel="stylesheet" type="text/css")
 
-    div.save
-        input(type="submit" value="save")
+    body
+        .container
+            .row.images
+                each url in itemImageURL
+                    .four.columns
+                        img.u-max-full-width(src=url)
+            .row
+                h1 #{name}
+                
+            .row
+                .six.columns
+                    label(for="type") Item Type
+                        input.u-full-width(name="type" placeholder="maxi dress, necklace, etc" id="item-type")
+                .six.columns
+                    label(for="genre") Genre
+                        input.u-full-width(name="genre" placeholder="formal, grunge, etc" id="item-genre")
+
+            .row
+                .twelve.columns
+                    label(for="description") Description
+                        textarea.u-full-width(name="description" placeholder="ex: v neck blouse with three-quarter length button cuffed sleeves" id="item-description")
+            .row
+                .four.columns
+                    label(for="color") Color
+                    button Choose Color
+
+            .row
+                input(type="submit" value="save")

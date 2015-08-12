@@ -22,6 +22,8 @@ app.get('/', function(req, res, next) {
     }
 });
 
+app.use(express.static('static'));
+
 app.listen(8081, function() {
     console.log('app listening on port 8081');
 })
