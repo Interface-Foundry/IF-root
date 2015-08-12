@@ -40,6 +40,36 @@ var anineBing = {
 };
 sites.push(anineBing);
 
+
+var creaturesOfComfort = {
+    getUrls: function() {
+        var url = 'http://shop.creaturesofcomfort.us/newarrivals.aspx';
+        return new Promise(function(resolve, reject) {
+            request(url, function (e, r, b) {
+                if (e) {
+                    reject(e);
+                }
+                var $ = cheerio.load(b);
+                var urls = $('.product_wrapper>a.product_details').map(function(){
+                    return 'http://shop.creaturesofcomfort.us' + $(this).attr('href')
+                }).toArray();
+                resolve(urls);
+            })
+        });
+    },
+    storeName: 'Creatures of Comfort',
+    storeAddress: '7971 Melrose Ave, Los Angeles, CA 90046',
+    storeLoc: {type: 'Point', coordinates: [-118.3634901, 34.0839154]},
+    storeId: 'creaturesofcomfort',
+    linkbackname: 'creaturesofcomfort.us',
+    name: '.productDetailText>h1',
+    price: '.price',
+    description: '.description',
+    itemImageURL: 'a.MagicThumb-swap=>href'
+}
+sites.push(creaturesOfComfort);
+
+
 function seed(site) {
     (new Promise(function(resolve, reject) {
         //make sure there's a user who is the owner in the database
