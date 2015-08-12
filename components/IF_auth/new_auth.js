@@ -5,7 +5,9 @@ var db = require('db');
 var axios = require('axios');
 var secret = 'SlytherinOrGTFO';
 var expiresInMinutes = 10 * 365 * 24 * 60; // 10 years
-var uniquer = require('../../IF_services/uniquer.js')
+var uniquer = require('../../IF_services/uniquer.js');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
 /**
  * Creates a json web token for a user
@@ -22,6 +24,9 @@ var getToken = function(user) {
     });
 };
 
+app.use(cookieParser());
+app.use(bodyParser.json());
+
 
 /**
  * Populate req.user if possible
@@ -32,7 +37,7 @@ var getToken = function(user) {
  *  "Bearer [json web token]"
  */
 app.use(function(req, res, next) {
-    var token = req.headers['authorization'];
+    var token = req.headers['authorization'] || req.cookies.kipAuth;
     if (!token) {
         return next();
     }
@@ -83,9 +88,11 @@ app.post('/api/auth/login', function(req, res, next) {
                     return next('invalid password');
                 }
 
+                var token = getToken(user);
+                res.cookie('kipAuth', token);
                 res.json({
                     user: user,
-                    token: getToken(user)
+                    token: token
                 });
             });
         }, next);
@@ -118,9 +125,11 @@ app.post('/api/auth/signup', function(req, res, next) {
                         return next('Could not create user.')
                     }
                     console.log('savedUser: ', savedUser)
+                    var token = getToken(savedUser);
+                    res.cookie('kipAuth', token);
                     res.json({
                         user: savedUser,
-                        token: getToken(savedUser)
+                        token: token
                     });
                 })
             }).catch(function(err) {
@@ -169,6 +178,7 @@ app.post('/api/auth/verify-facebook', function(req, res, next) {
             }
         })
         .then(function(user) {
+            res.cookie('kipAuth', getToken(user));
             res.json({
                 user: user,
                 token: getToken(user)
@@ -206,6 +216,7 @@ app.post('/api/auth/verify-google', function(req, res, next) {
                 });
             }
 
+            res.cookie('kipAuth', getToken(user));
             res.json({
                 user: user,
                 token: getToken(user)

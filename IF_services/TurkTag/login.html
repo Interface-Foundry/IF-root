@@ -1,0 +1,63 @@
+<html>
+<style>
+    body {
+        font-family: monospace;
+    }
+    div {
+        padding: 0 0 5px 0;
+    }
+</style>
+<script src="http://adodson.com/hello.js/dist/hello.all.min.js"></script>
+<!-- nanoajax -->
+<script type="text/javascript">!function(e,t){function n(){if(t.XMLHttpRequest)return new t.XMLHttpRequest;try{return new t.ActiveXObject("MSXML2.XMLHTTP.3.0")}catch(e){}throw new Error("no xmlhttp request able to be created")}function r(e,t,n){e[t]=e[t]||n}t.nanoajax=e,e.ajax=function(e,t){"string"==typeof e&&(e={url:e});var a=e.headers||{},o=e.body,u=e.method||(o?"POST":"GET"),i=e.withCredentials||!1,s=n();s.onreadystatechange=function(){4==s.readyState&&t(s.status,s.responseText,s)},o&&(r(a,"X-Requested-With","XMLHttpRequest"),r(a,"Content-Type","application/x-www-form-urlencoded")),s.open(u,e.url,!0),s.withCredentials=i;for(var c in a)s.setRequestHeader(c,a[c]);s.send(o)}}({},function(){return this}());</script>
+<script>
+    hello.init({
+        facebook: 1401271990193674
+        //google: GOOGLE_CLIENT_ID
+    });
+
+    hello.on('auth.login', function(auth) {
+
+        // Call user information, for the given network
+        hello(auth.network).api('/me').then(function(r) {
+            // Inject it into the container
+            nanoajax.ajax({url: '/api/auth/verify-facebook', method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+                user: r,
+                auth: {authResponse: {accessToken: auth.authResponse.access_token}}
+            })}, function (code, responseText, request) {
+                if (code === 200) {
+                    location.reload();
+                }
+            })
+        });
+    });
+
+    function kipLogin() {
+        nanoajax.ajax({url: '/api/auth/login', method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        })}, function (code, responseText, request) {
+            if (code === 200) {
+                location.reload();
+            }
+        });
+
+        return false;
+    }
+</script>
+<div>
+    plz log in to kip
+</div>
+<form onsubmit="return kipLogin()">
+    <input id="email" name="email" placeholder="email" type="email">
+    <input id = "password" name="password" placeholder="password" type="password">
+    <input type="submit" value="log in">
+</form>
+<div>
+    or
+</div>
+<div>
+    <button onclick="hello('facebook').login()">facebook</button>
+</div>
+<div id="profile"></div>
+</html>
