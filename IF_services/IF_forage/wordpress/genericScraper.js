@@ -26,7 +26,7 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
 
 
     // first check if we have already scraped this thing
-    db.landmarks
+    db.Landmarks
         .findOne({'source_generic_item.url': data.url})
         .exec(function(e, l) {
             if (e) {
@@ -38,7 +38,8 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
                 return done();
             }
 
-            request(url, function(e, r, b) {
+            request(data.url, function(e, r, b) {
+                debugger;
                 if (e) {
                     console.error(e);
                     return done(e);
@@ -46,7 +47,6 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
 
                 // Load the page
                 var $ = cheerio.load(b);
-                var item = {};
 
                 // We are only interested in a specific section of the page
                 var section = $(data.wrapper);
@@ -54,15 +54,16 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
                 // turn 'img.product-thumbnail=>data-image-full' into
                 // $('img.product-thumbnail').map(function(){return $(this).attr('data-image-full');}).get()
                 var scrapeArray = function(str) {
+                    debugger;
                     if (str.indexOf('=>') > 0) {
                         str = str.split('=>');
                         return section.find(str[0]).map(function() {
-                            return $(this).attr(str[0]);
-                        })
+                            return $(this).attr(str[1]);
+                        }).toArray();
                     } else {
                         return section.find(str).map(function() {
                             return $(this).text();
-                        })
+                        }).toArray();
                     }
                 }
 
@@ -76,11 +77,14 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
                 }
 
                 // Create a new landmark for the item
-                item = {
+                var item = {
+                    parent: data.parent,
+                    owner: data.owner,
                     source_generic_item: {
                         url: data.url,
                         images: scrapeArray(data.itemImageURL)
                     },
+                    loc: data.loc,
                     name: scrapeString(data.name),
                     id: uuid.v4(),
                     itemImageURL: scrapeArray(data.itemImageURL),
@@ -97,7 +101,7 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
                 }
 
                 if (data.price) {
-                    item.price = scrapeString(data.price).replace('$', '') || 0;
+                    item.price = scrapeString(data.price).replace(/[\$\,]/g, '') || 0;
                 }
 
                 if (data.categories) {
@@ -106,42 +110,15 @@ var scrapeSite = job('scrape-generic-site', function(data, done) {
                     }
                 }
 
-                item = new db.Landmark(item);
-
-                // add in the parent's info
-                db.Landmarks.findById(data.parentId)
-                    .exec(function(e, parent) {
-                        if (e) {
-                            return done(e);
-                        }
-
-                        item.parent = {
-                            mongoId: data.parentId,
-                            name: parent.name,
-                            id: parent.id
-                        }
-
-                        // todo add owner
-                        db.Users.findById(data.ownerId)
-                            .exec(function(e, owner) {
-                                if (e) {
-                                    return done(e);
-                                }
-
-                                item.owner = {
-                                    mongoId: data.ownerId,
-                                    name: owner.name,
-                                    profileID: owner.profileID
-                                }
-
-                                item.save(function(e) {
-                                    if (e) {
-                                        return done(e);
-                                    }
-                                    done();
-                                });
-                            })
-                    })
+                var i = new db.Landmark(item);
+                i.save(function(e, i) {
+                    if (e) {
+                        console.error(e);
+                        return done(e);
+                    }
+                    console.log(JSON.stringify(i.toObject()));
+                    done();
+                })
             })
         })
 });
