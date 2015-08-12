@@ -68,6 +68,33 @@ app.post(searchItemsUrl, function(req, res, next) {
 
 
     search(req.body, page)
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 5;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, page);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 50;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, page);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 500;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, page);
+            } else {
+                return res;
+            }
+        })
         .then(function(results) {
             responseBody.results = results;
             res.send(responseBody);
@@ -174,6 +201,7 @@ function search(q, page) {
  * @param page
  */
 function textSearch(q, page) {
+    console.log('text search', q);
 
     // elasticsearch impl
     // update fuzziness of query based on search term length
@@ -232,7 +260,7 @@ function textSearch(q, page) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description", "parent.name"],
+                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description", "parent.name^2"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }
@@ -242,6 +270,8 @@ function textSearch(q, page) {
             }
         }
     };
+
+    console.log(JSON.stringify(fuzzyQuery));
 
     return es.search(fuzzyQuery)
         .then(function(results) {
@@ -263,6 +293,7 @@ function textSearch(q, page) {
  * @param page
  */
 function filterSearch(q, page) {
+    console.log('filter search', q);
 
     var radius = q.radius || defaultRadius; // miles
     radius = 1609.344 * radius; // meters
@@ -285,10 +316,9 @@ function filterSearch(q, page) {
         query.price = q.priceRange;
     }
 
-    if (q.categories) {
-        query['itemTags.categories'] = {
-            $in: q.categories
-        };
+    if (q.categories && q.categories.length > 0) {
+        query['itemTags.categories'] = {$in: q.categories};
+
     }
 
     if (q.color) {
@@ -296,6 +326,8 @@ function filterSearch(q, page) {
             $in: q.color
         };
     }
+
+    console.log(query);
 
     return db.Landmarks
         .find(query)
@@ -330,7 +362,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
     req.body.radius = 2;
 
     // TODO curate text categories based on user's preferences
-    var textCategories = ['Summer', 'Vintage'].map(function(str) {
+    var textCategories = ['Fall', 'School'].map(function(str) {
         var q = _.cloneDeep(req.body);
         q.text = str;
         return search(q, 0)
@@ -365,6 +397,33 @@ app.post(trendingItemsUrl, function(req, res, next) {
 
 
     var nearYou = search(req.body, 0)
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 5;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, 0);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 50;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, 0);
+            } else {
+                return res;
+            }
+        })
+        .then(function(res) {
+            if (res.length < 20) {
+                req.body.radius = 500;
+                console.log('searching radius', req.body.radius);
+                return search(req.body, 0);
+            } else {
+                return res;
+            }
+        })
         .then(function(res) {
             return {
                 category: 'Trending in ' + res,

@@ -1,5 +1,5 @@
 var db = require('../../../components/IF_schemas/db');
-var redisClient = require('./redis');
+var job = require('job');
 var cheerio = require('cheerio');
 var request = require('request');
 var Promise = require('bluebird');
@@ -19,6 +19,8 @@ var Promise = require('bluebird');
  */
 var neighborhoods = ["alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "florida", "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "las-vegas", "london", "long-island", "louisiana", "maine", "maryland", "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana", "montauk", "nebraska", "nevada", "new-hampshire", "new-jersey", "new-mexico", "new-york", "new_york_city", "north-carolina", "north-dakota", "ohio", "oklahoma", "oregon", "paris", "pennsylvania", "rhode-island", "san-diego", "san_francisco", "south-carolina", "south-dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington-dc", "washington-state", "west-virginia", "wisconsin", "wyoming"];
 
+var scrapeShoptiques = job('scrape-shoptiques-item');
+
 // gets all the items from a catalog page
 var scrapeCatalogPage = function(url) {
     return new Promise(function(resolve, reject) {
@@ -32,13 +34,10 @@ var scrapeCatalogPage = function(url) {
                 var itemUrl = 'http://www.shoptiques.com' + $(a).attr('href');
 
                 return new Promise(function(resolve, reject) {
-                    redisClient.rpush('items-toprocess', itemUrl, function (err, reply) {
-                        if (err) {
-                            return console.error(err);
-                        }
-                        console.log('added item', itemUrl);
-                        resolve();
+                    scrapeShoptiques({
+                        url: itemUrl
                     });
+                    resolve();
                 });
             });
 
