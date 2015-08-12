@@ -1,13 +1,13 @@
 var db = require('db');
 var express = require('express');
-var cookieParser = require('cookie-parser');
 var app = express();
 var job = require('job');
 
 // Use the same authentication as regular kip
 app.use('/', require('../../components/IF_auth/new_auth'));
 
-app.use(cookieParser());
+app.set('view engine', 'jade');
+app.set('views', '.');
 
 // get a page bitches
 app.get('/', function(req, res, next) {
@@ -16,7 +16,9 @@ app.get('/', function(req, res, next) {
         res.sendfile(__dirname + '/login.html');
     } else {
         // send a random page
-        res.send('yay');
+        getItem(function(item) {
+            res.render('item', item.toObject());
+        });
     }
 });
 
@@ -36,5 +38,12 @@ job('item-turk-tag', function(data, done) {
  * Gets an item that needs to be tagged from the process queue
  */
 function getItem(cb) {
-
+    db.Landmarks.findOne({
+        world: false,
+        'source_shoptiques_item.images.2': {$exists: true}
+        //'source_shoptiques_item.url': {$exists: true}
+    }).exec(function(e, i) {
+        if (e) { console.error(e) }
+        cb(i);
+    })
 }

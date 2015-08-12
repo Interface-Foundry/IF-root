@@ -28,6 +28,7 @@
     "imagemagick": "~0.1.3",
     "instagram-node": "^0.5.7",
     "instagram-realtime": "~0.0.4",
+    "jade": "^1.11.0",
     "jsonwebtoken": "^5.0.4",
     "kue": "^0.9.4",
     "lodash": "^3.10.0",

@@ -1,0 +1,10 @@
+html
+    h1 #{name}
+    div.images
+        each url in itemImageURL
+            img(src=url)
+    div.tags
+        input(name="tag")
+
+    div.save
+        input(type="submit" value="save")
