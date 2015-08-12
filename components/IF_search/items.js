@@ -437,11 +437,9 @@ app.post(trendingItemsUrl, function(req, res, next) {
                 query: req.body,
                 links: links,
                 results: results.reduce(function(full, r) {
-                    if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0) {
+                    if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0 && r._settledValue.category.length < 50 ) {
                         full.push(r._settledValue)
-                    } else {
-                        console.log('**', r._settledValue)
-                    }
+                    } 
                     return full;
                 }, [])
             });
