@@ -6,11 +6,11 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 
 // set up the fake data for the /trending api
-var request = require('request');
+var request = Promise.promisify(require('request'));
 
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
-    var defaultLogger = function(){};
+    var defaultLogger = function() {};
 
     this.error = defaultLogger;
     this.warning = defaultLogger;
@@ -32,24 +32,24 @@ var defaultRadius = 2;
 /**
  * Item Search
  * post body: {
-	"text": "something tag la",
-	"colors": ['FF00FF', 'FF00FF'],
-	"categories": ['shoes'],
-	"priceRange": 1, // or 2, 3, or 4
-	"radius": .5, // miles
-	"loc": {"lat": 34, "lon": -77}
+    "text": "something tag la",
+    "colors": ['FF00FF', 'FF00FF'],
+    "categories": ['shoes'],
+    "priceRange": 1, // or 2, 3, or 4
+    "radius": .5, // miles
+    "loc": {"lat": 34, "lon": -77}
   }
 
  example:
  {
-	"text": "dress",
-	"priceRange": 2,
-	"radius": 0.5,
-	"loc": {"lat": 40.7352793, "lon": -73.990638}
+    "text": "dress",
+    "priceRange": 2,
+    "radius": 0.5,
+    "loc": {"lat": 40.7352793, "lon": -73.990638}
  }
  */
 var searchItemsUrl = '/api/items/search';
-app.post(searchItemsUrl, function (req, res, next) {
+app.post(searchItemsUrl, function(req, res, next) {
 
     // page is 0-indexed
     var page = parseInt(req.query.page) || 0;
@@ -87,22 +87,34 @@ function search(q, page) {
 
     // text should be a string
     if (q.text && (typeof q.text !== 'string')) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.text must be a string, was ' + q.text});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.text must be a string, was ' + q.text
+        });
     }
 
     // categories should be an array
     if (q.categories && !(q.categories instanceof Array)) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.categories must be an array, was ' + q.categories});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.categories must be an array, was ' + q.categories
+        });
     }
 
     // color should be an array
     if (q.color && !(q.color instanceof Array)) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.color must be an array, was ' + q.color});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.color must be an array, was ' + q.color
+        });
     }
 
     // priceRange should be a number 1-4
     if (q.priceRange && [1, 2, 3, 4].indexOf(q.priceRange) < 0) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.priceRange must be a number 1-4, was ' + q.priceRange
+        });
     }
 
     // radius needs to be number parseable
@@ -117,19 +129,34 @@ function search(q, page) {
 
     // loc should be {lon: Number, lat: Number}
     if (!q.loc) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc is required'});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.loc is required'
+        });
     } else if (!q.loc.lat || !q.loc.lon) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties, was ' + q.loc});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.loc is required and needs "lat" and "lon" properties, was ' + q.loc
+        });
     } else if (isNaN(parseFloat(q.loc.lat)) || isNaN(parseFloat(q.loc.lon))) {
-        return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc is required and needs "lat" and "lon" properties to be numbers, was ' + q.loc});
+        return Promise.reject({
+            niceMessage: 'Could not complete search',
+            devMessage: 'q.loc is required and needs "lat" and "lon" properties to be numbers, was ' + q.loc
+        });
     } else {
         q.loc.lat = parseFloat(q.loc.lat);
         if (q.loc.lat > 90 || q.loc.lat < -90) {
-            return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc.lat must be valid latitude, was ' + q.loc.lat});
+            return Promise.reject({
+                niceMessage: 'Could not complete search',
+                devMessage: 'q.loc.lat must be valid latitude, was ' + q.loc.lat
+            });
         }
         q.loc.lon = parseFloat(q.loc.lon);
         if (q.loc.lon > 180 || q.loc.lon < -180) {
-            return Promise.reject({niceMessage: 'Could not complete search', devMessage: 'q.loc.lon must be valid longitude, was ' + q.loc.lon});
+            return Promise.reject({
+                niceMessage: 'Could not complete search',
+                devMessage: 'q.loc.lon must be valid longitude, was ' + q.loc.lon
+            });
         }
     }
 
@@ -175,11 +202,19 @@ function textSearch(q, page) {
 
     // if the price is specified, add a price filter
     if (q.priceRange) {
-        filter.bool.must.push({term: {price: q.priceRange}});
+        filter.bool.must.push({
+            term: {
+                price: q.priceRange
+            }
+        });
     }
 
     // only items, not worlds
-    filter.bool.must.push({term: {world: false}});
+    filter.bool.must.push({
+        term: {
+            world: false
+        }
+    });
 
     // put it all together in a filtered fuzzy query
     var fuzzyQuery = {
@@ -210,8 +245,14 @@ function textSearch(q, page) {
 
     return es.search(fuzzyQuery)
         .then(function(results) {
-            var ids = results.hits.hits.map(function(r) { return r._id; });
-            return db.Landmarks.find({_id: {$in: ids}}).exec();
+            var ids = results.hits.hits.map(function(r) {
+                return r._id;
+            });
+            return db.Landmarks.find({
+                _id: {
+                    $in: ids
+                }
+            }).exec();
         });
 }
 
@@ -245,11 +286,15 @@ function filterSearch(q, page) {
     }
 
     if (q.categories) {
-        query['itemTags.categories'] = {$in: q.categories};
+        query['itemTags.categories'] = {
+            $in: q.categories
+        };
     }
 
     if (q.color) {
-        query['itemTags.color'] = {$in: q.color};
+        query['itemTags.color'] = {
+            $in: q.color
+        };
     }
 
     return db.Landmarks
@@ -269,7 +314,7 @@ function filterSearch(q, page) {
  * }
  */
 var trendingItemsUrl = '/api/items/trending';
-app.post(trendingItemsUrl, function (req, res, next) {
+app.post(trendingItemsUrl, function(req, res, next) {
     // page is 0-indexed
     var page = parseInt(req.query.page) || 0;
 
@@ -297,25 +342,32 @@ app.post(trendingItemsUrl, function (req, res, next) {
             })
     });
 
-    // TODO get neighborhood from user location
-    var neighborhoods = [{
-        name: 'SoHo, NYC',
-        loc: {lat: 40.7240168, lon: -74.0009368}
-    }].map(function(n) {
-            var q = {loc: n.loc};
-            return search(q, 0)
-                .then(function(res) {
-                    return {
-                        category: 'Trending in ' + n.name,
-                        results: res
-                    }
-                })
-        });
+    var neighborhoods = new Promise(function(resolve, reject) {
+        var q = {
+            loc: req.body.loc
+        };
+        var loc = {
+            type: 'Point',
+            coordinates: [parseFloat(req.body.loc.lat), parseFloat(req.body.loc.lon)]
+        };
+        var url = global.config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
+        return Promise.settle([search(q, 0), request(url)])
+            .then(function(results) {
+                var area = JSON.parse(results[1].value()[0].body)
+                var items = results[0].value()
+                data = {
+                    category: 'Trending in ' + area.area,
+                    results: items
+                }
+                resolve(data)
+            })
+    })
+
 
     var nearYou = search(req.body, 0)
         .then(function(res) {
             return {
-                category: 'Trending near you',
+                category: 'Trending in ' + res,
                 results: res
             }
         });
@@ -328,6 +380,8 @@ app.post(trendingItemsUrl, function (req, res, next) {
                 results: results.reduce(function(full, r) {
                     if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0) {
                         full.push(r._settledValue)
+                    } else {
+                        console.log('**', r._settledValue)
                     }
                     return full;
                 }, [])
@@ -341,10 +395,13 @@ app.post(trendingItemsUrl, function (req, res, next) {
         body: {
             "text": "summer",
             "radius": 0.5,
-            "loc": {"lat": 40.7352793, "lon": -73.990638}
+            "loc": {
+                "lat": 40.7352793,
+                "lon": -73.990638
+            }
         },
         json: true
-    }, function (e, r, body) {
+    }, function(e, r, body) {
 
         res.send({
             query: req.body,
@@ -360,50 +417,7 @@ app.post(trendingItemsUrl, function (req, res, next) {
     });
 
 
-    var loc = {
-        type: 'Point',
-        coordinates: [parseFloat(req.body.lat), parseFloat(req.body.lon)]
-    };
 
-    //Get neighborhood name based on coordinates
-    var url = global.config.neighborhoodServer.url + '/findArea?lat=' + loc.coordinates[0] + '&lon=' + loc.coordinates[1];
-
-    request.get(url, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            console.log('req.body: ', req.body)
-            var area = JSON.parse(body)
-
-            var response = {
-                results: [],
-                links: links,
-                query: req.body
-            };
-
-            var skip = parseInt(req.body.page) * pageSize;
-            var query = {
-                spherical: true,
-                maxDistance: 1 / 111.12, //1km radius
-                skip: skip,
-                sort: {
-                    like_count: -1
-                },
-                limit: pageSize
-            };
-
-            landmark.geoNear(loc, query, function (err, items) {
-                if (err) console.log(err);
-                if (!items) return res.send(440);
-
-                var obj = {
-                    category: 'Trending in ' + area.area,
-                    results: items
-                }
-                response.results.push(obj)
-                console.log('hitting', response)
-                res.send(response);
-            });
-        }
-    })
 
 })
 
