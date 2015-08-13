@@ -13,7 +13,7 @@ html(lang="en")
             .row.images
                 each url in item.itemImageURL
                     .four.columns
-                        img.u-max-full-width(src=url)
+                        img.u-max-full-width(data-src=url)
             .row
                 h1 #{item.name}
 
@@ -30,9 +30,9 @@ html(lang="en")
                     label(for="description") Description
                         textarea.u-full-width(name="description" placeholder="ex: v neck blouse with three-quarter length button cuffed sleeves" id="item-description")
             .row
-                .four.columns
+                .twelve.columns
                     label(for="color") Color
-                    button Choose Color
+                    .colors
 
             .row
                 button(onclick="save()") save
@@ -54,4 +54,5 @@ html(lang="en")
 
         script(src="/konami.js")
         script(src="/zepto.min.js")
+        script(src="/Vibrant.min.js")
         script(src="/kiptags.js")

@@ -341,7 +341,7 @@ var landmarkSchema = new Schema({
             itemType: String,
             genre: String,
             description: String,
-            color: String // hex value
+            colors: [] // array of hsl values (so array of vectors)
         }
     },
     flags: {
