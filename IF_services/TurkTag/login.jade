@@ -1,0 +1,29 @@
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title Kip Tagging
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css")
+        link(href="/normalize.css" rel="stylesheet" type="text/css")
+        link(href="/skeleton.css" rel="stylesheet" type="text/css")
+        link(href="/kiptags.css" rel="stylesheet" type="text/css")
+
+    body
+        .container
+            .row
+                h2.u-full-width.u-textAlignCenter plz log in to kip
+            .row.u-centerY
+                .five.columns
+                    form.u-full-width(onsubmit="return kipLogin()")
+                        input.u-full-width#email(name="email" type="email" placeholder="email")
+                        input.u-full-width#password(name="password" type="password" placeholder="password")
+                        input.u-full-width(type="submit" value="log in")
+                .two.columns
+                    .u-full-width.u-textAlignCenter.u-extraPaddingY - or -
+                .five.columns
+                    button.u-full-width(onclick="hello('facebook').login()") facebook
+
+        script(src="/konami.js")
+        script(src="/zepto.min.js")
+        script(src="/hello.all.min.js")
+        script(src="/login.js")
