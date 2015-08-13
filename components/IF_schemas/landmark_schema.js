@@ -333,6 +333,19 @@ var landmarkSchema = new Schema({
     testData: {
         type: Boolean,
         default: false
+    },
+
+    // Additional processing data
+    meta: {
+        humanTags: {
+            itemType: String,
+            genre: String,
+            description: String,
+            color: String // hex value
+        }
+    },
+    flags: {
+        humanProcessed: Boolean
     }
 
 

@@ -11,12 +11,12 @@ html(lang="en")
     body
         .container
             .row.images
-                each url in itemImageURL
+                each url in item.itemImageURL
                     .four.columns
                         img.u-max-full-width(src=url)
             .row
-                h1 #{name}
-                
+                h1 #{item.name}
+
             .row
                 .six.columns
                     label(for="type") Item Type
@@ -35,4 +35,23 @@ html(lang="en")
                     button Choose Color
 
             .row
-                input(type="submit" value="save")
+                button(onclick="save()") save
+                input(type="hidden" value=item._id id="id")
+
+
+            .row.konami.u-hidden
+                .twelve.columns
+                    label Item
+                    pre
+                        code.
+                            #{JSON.stringify(item, null, 2)}
+            .row.konami.u-hidden
+                .twelve.columns
+                    label User
+                    pre
+                        code.
+                            #{JSON.stringify(user, null, 2)}
+
+        script(src="/konami.js")
+        script(src="/zepto.min.js")
+        script(src="/kiptags.js")

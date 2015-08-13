@@ -13,12 +13,31 @@ app.set('views', '.');
 app.get('/', function(req, res, next) {
     if (!req.user) {
         // send login wall
-        res.sendfile(__dirname + '/login.html');
+        res.render('login');
     } else {
         // send a random page
         getItem(function(item) {
-            res.render('item', item.toObject());
+            res.render('item', {item: item.toObject(), user: req.user});
         });
+    }
+});
+
+app.post('/kiptag', function(req, res, next) {
+    if (!req.user) {
+        next('Must be logged in');
+    } else {
+        db.Landmarks
+            .findById(req.body.id)
+            .exec(function(e, l) {
+                if (e) { return next(e) }
+                l.flags.humanProcessed = true;
+                l.meta.humanTags = req.body;
+                delete l.meta.humanTags.id;
+                l.save(function(e) {
+                    if (e) { return next(e) }
+                    res.send('y.y');
+                })
+            })
     }
 });
 
@@ -42,7 +61,8 @@ job('item-turk-tag', function(data, done) {
 function getItem(cb) {
     db.Landmarks.findOne({
         world: false,
-        'source_shoptiques_item.images.2': {$exists: true}
+        'flags.humanProcessed': {$ne: true},
+        'itemImageURL.2': {$exists: true}
         //'source_shoptiques_item.url': {$exists: true}
     }).exec(function(e, i) {
         if (e) { console.error(e) }
