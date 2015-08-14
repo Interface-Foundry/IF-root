@@ -1,7 +1,8 @@
 var db = require('db');
 var express = require('express');
 var app = express();
-var job = require('job');
+var TestLocations = require('../../test/TestLocations');
+var neighborhood = TestLocations.UnionSquareNYC;
 
 // Use the same authentication as regular kip
 app.use('/', require('../../components/IF_auth/new_auth'));
@@ -56,10 +57,16 @@ function getItem(cb) {
         world: false,
         'flags.humanProcessed': {$ne: true},
         'flags.humanProcessedTime': {$exists: false},
-        'itemImageURL.2': {$exists: true}
-        //'source_shoptiques_item.url': {$exists: true}
+        'itemImageURL.2': {$exists: true},
+        loc: {
+            $near: {
+                $geometry: {
+                    type: 'Point',
+                    coordinates: [neighborhood.loc.lon, neighborhood.loc.lat]
+                }
+            }
+        }
     }).exec(function(e, i) {
-        debugger;
         if (e) { console.error(e) }
         i.flags.humanProcessedTime = new Date();
         i.save();
