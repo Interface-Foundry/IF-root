@@ -338,6 +338,7 @@ var landmarkSchema = new Schema({
     // Additional processing data
     meta: {
         humanTags: {
+            taggedBy: String,
             itemType: String,
             itemStyle: String,
             itemEvent: String,

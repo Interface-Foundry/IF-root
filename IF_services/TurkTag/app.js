@@ -34,6 +34,7 @@ app.post('/kiptag', function(req, res, next) {
                 l.flags.humanProcessed = true;
                 l.flags.humanProcessedTime = new Date();
                 l.meta.humanTags = req.body;
+                l.meta.humanTags.taggedBy = req.userId;
                 delete l.meta.humanTags.id;
                 l.save(function(e) {
                     if (e) { return next(e) }

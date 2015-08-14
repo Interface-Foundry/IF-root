@@ -19,18 +19,18 @@ html(lang="en")
 
             .row
                 .six.columns
-                    label(for="type") Item Type
+                    label(for="type") What type of item is this?
                         input.u-full-width(name="type" placeholder="top, skirt, dress" id="item-type" autocomplete="off")
-                    label(for="style") Item Style
-                        input.u-full-width(name="style" placeholder="vintage, modern" autocomplete="off" id="item-style")
-                    label(for="event") Item Event
-                        input.u-full-width(name="event" placeholder="for office, for dates, for swimming, for party" autocomplete="off" id="item-event")
-                    label(for="detail") Item Detail
+                    label(for="style") What style of item?
+                        input.u-full-width(name="style" placeholder="modern, vintage, cool, cute, sexy" autocomplete="off" id="item-style")
+                    label(for="event") When would someone wear this item?
+                        input.u-full-width(name="event" placeholder="office, date, swimming, party" autocomplete="off" id="item-event")
+                    label(for="detail") Item detail
                         input.u-full-width(name="detail" placeholder="collar, long sleeve, buttons" autocomplete="off" id="item-detail")
-                    label(for="fabric") Item Fabric
+                    label(for="fabric") Item fabric
                         input.u-full-width(name="fabric" placeholder="polka dot, plain, silk, linen" autocomplete="off" id="item-fabric")
                 .six.columns
-                    label(for="color") Color
+                    label(for="color") Select the colors you see on the item
                     .colors
 
             .row
@@ -50,6 +50,10 @@ html(lang="en")
                     pre
                         code.
                             #{JSON.stringify(user, null, 2)}
+            hr
+            .row
+                .twelve.columns.u-textAlignCenter.
+                    Interface Foundry PBC © 2015
 
         script(src="/konami.js")
         script(src="/zepto.min.js")
