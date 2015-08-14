@@ -28,34 +28,19 @@ module.exports.scrapeItemDetail = function(url, row) {
             // We might only interested in a specific section of the page
             var section = $(row.ContentWrapper || 'body');
 
-            var item = {
-                source_generic_item: {
-                    url: url,
-                    images: section.kipScrapeArray(row.ItemImages)
-                },
-                name: section.kipScrapeString(row.ItemName),
-                id: uuid.v4(),
-                itemImageURL: section.kipScrapeArray(row.ItemImages),
-                linkback: url
-            };
-
-            if (row.RelatedItemURLs) {
-                item.source_generic_item.related = section.kipScrapeArray(row.RelatedItemURLs);
-            }
-
-            if (row.ItemDescription) {
-                item.description = section.kipScrapeString(row.ItemDescription);
-            }
-
-            if (row.ItemPrice) {
-                item.price = section.kipScrapeString(row.ItemPrice).replace(/[\$\,]/g, '') || 0;
-            }
-
-            if (row.ItemCategories) {
-                item.itemTags = {
-                    categories: section.kipScrapeArray(row.ItemCategories)
+            var item = scrapingUtils.itemStringFields.reduce(function(item, k) {
+                if (row[k]) {
+                    item[k] = section.kipScrapeString(row[k]);
                 }
-            }
+                return item;
+            }, {});
+
+            item = scrapingUtils.itemArrayFields.reduce(function(item, k) {
+                if (row[k]) {
+                    item[k] = section.kipScrapeArray(row[k]);
+                }
+                return item;
+            }, item);
 
             resolve(item);
         })
@@ -74,7 +59,6 @@ module.exports.scrapeSiteCatalog = function(row) {
             var $ = cheerio.load(b);
             scrapingUtils.addPlugins($);
 
-            console.log('scraping', row.StoreURL, 'with', row.URLSelector);
             var urls = $('body').kipScrapeArray(row.URLSelector).map(function(url) {
 
                 // make sure the url is valid.  sometimes they're just '/something/here' so

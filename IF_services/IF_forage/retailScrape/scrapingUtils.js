@@ -37,3 +37,6 @@ module.exports.addPlugins = function($) {
         }
     };
 };
+
+module.exports.itemStringFields = ['ItemName', 'ItemPrice', 'ItemDescription'];
+module.exports.itemArrayFields = ['ItemImages', 'RelatedItemURLs', 'ItemTags'];
