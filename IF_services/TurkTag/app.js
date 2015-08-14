@@ -31,6 +31,7 @@ app.post('/kiptag', function(req, res, next) {
             .exec(function(e, l) {
                 if (e) { return next(e) }
                 l.flags.humanProcessed = true;
+                l.flags.humanProcessedTime = new Date();
                 l.meta.humanTags = req.body;
                 delete l.meta.humanTags.id;
                 l.save(function(e) {
@@ -48,24 +49,20 @@ app.listen(8081, function() {
 })
 
 /**
- * Item process queue
- */
-var nextItem;
-job('item-turk-tag', function(data, done) {
-    done();
-});
-
-/**
  * Gets an item that needs to be tagged from the process queue
  */
 function getItem(cb) {
     db.Landmarks.findOne({
         world: false,
         'flags.humanProcessed': {$ne: true},
+        'flags.humanProcessedTime': {$exists: false},
         'itemImageURL.2': {$exists: true}
         //'source_shoptiques_item.url': {$exists: true}
     }).exec(function(e, i) {
+        debugger;
         if (e) { console.error(e) }
+        i.flags.humanProcessedTime = new Date();
+        i.save();
         cb(i);
     })
 }

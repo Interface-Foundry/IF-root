@@ -347,7 +347,8 @@ var landmarkSchema = new Schema({
         }
     },
     flags: {
-        humanProcessed: Boolean
+        humanProcessed: Boolean,
+        humanProcessedTime: Date
     }
 
 
