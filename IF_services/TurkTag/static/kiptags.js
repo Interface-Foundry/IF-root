@@ -18,7 +18,7 @@ function save() {
             itemEvent: $('#item-event').val(),
             itemDetail: $('#item-detail').val(),
             itemFabric: $('#item-style').val(),
-            colors: $('.color>button').map(function() { return $(this).attr('data-hsl')}).toArray()
+            colors: $('.colors>button.selected').map(function() { return $(this).attr('data-hsl')}).toArray().map(function(a) { return JSON.parse(a)})
         }),
         success: function() {
             console.log('funky animation part 2');
@@ -51,7 +51,7 @@ function save() {
                     }
                     colors.push(v[s].getHex());
                     $b.css('background-color', v[s].getHex());
-                    $b.attr('data-hsl', v[s].getHsl());
+                    $b.attr('data-hsl', JSON.stringify(v[s].getHsl()));
                     $colors.append($b);
                 });
             })

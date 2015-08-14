@@ -1,47 +1,50 @@
 var db = require('db');
 var express = require('express');
 var app = express();
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var uuid = require('uuid');
 var TestLocations = require('../../test/TestLocations');
 var neighborhood = TestLocations.UnionSquareNYC;
 
 // Use the same authentication as regular kip
-app.use('/', require('../../components/IF_auth/new_auth'));
+//app.use('/', require('../../components/IF_auth/new_auth'));
+
+// Use cookie session ids
+app.use(cookieParser());
+app.use(bodyParser.json());
 
 app.set('view engine', 'jade');
 app.set('views', '.');
 
 // get a page bitches
 app.get('/', function(req, res, next) {
-    if (!req.user) {
-        // send login wall
-        res.render('login');
-    } else {
-        // send a random page
-        getItem(function(item) {
-            res.render('item', {item: item.toObject(), user: req.user});
-        });
+    if (!req.cookies.kiptagsid) {
+        res.cookie('kiptagsid', uuid.v4());
     }
+
+    // send a random page
+    getItem(function(item) {
+        res.render('item', {item: item.toObject(), user: req.user});
+    });
 });
 
 app.post('/kiptag', function(req, res, next) {
-    if (!req.user) {
-        next('Must be logged in');
-    } else {
-        db.Landmarks
-            .findById(req.body.id)
-            .exec(function(e, l) {
+    db.Landmarks
+        .findById(req.body.id)
+        .exec(function(e, l) {
+            if (e) { return next(e) }
+            l.flags.humanProcessed = true;
+            l.flags.humanProcessedTime = new Date();
+            l.meta.humanTags = req.body;
+            if (req.cookies.kiptagsid)
+                l.meta.humanTags.taggedBy = req.cookies.kiptagsid;
+            delete l.meta.humanTags.id;
+            l.save(function(e) {
                 if (e) { return next(e) }
-                l.flags.humanProcessed = true;
-                l.flags.humanProcessedTime = new Date();
-                l.meta.humanTags = req.body;
-                l.meta.humanTags.taggedBy = req.userId;
-                delete l.meta.humanTags.id;
-                l.save(function(e) {
-                    if (e) { return next(e) }
-                    res.send('y.y');
-                })
+                res.send('y.y');
             })
-    }
+        })
 });
 
 app.use(express.static('static'));
