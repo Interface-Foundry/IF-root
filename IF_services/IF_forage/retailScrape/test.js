@@ -7,6 +7,14 @@ var scrapingUtils = require('./scrapingUtils');
 getRows().then(function(rows) {
     console.log('got rows');
     async.eachSeries(rows, function(r, done) {
+        if (process.argv[2]) {
+            var regex = RegExp(process.argv[2]);
+            if (!r.LinkbackName.match(regex)) {
+                return done();
+            }
+        }
+
+
         console.log('\n---------------------------------\n'.blue)
         console.log('processing'.green, r.LinkbackName);
         var url;
