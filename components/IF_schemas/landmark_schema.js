@@ -339,8 +339,10 @@ var landmarkSchema = new Schema({
     meta: {
         humanTags: {
             itemType: String,
-            genre: String,
-            description: String,
+            itemStyle: String,
+            itemEvent: String,
+            itemDetail: String,
+            itemFabric: String,
             colors: [] // array of hsl values (so array of vectors)
         }
     },

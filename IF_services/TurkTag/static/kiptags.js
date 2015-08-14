@@ -1,4 +1,5 @@
 console.log('thanks for helping kip (◕‿◕)♡');
+var kipBaseUrl = '';
 
 new Konami(function() {
     $('.konami').removeClass('u-hidden');
@@ -7,14 +8,16 @@ new Konami(function() {
 function save() {
 
     $.ajax({
-        url: '/kiptag',
+        url: kipBaseUrl + '/kiptag',
         type: 'POST',
         headers: {'Content-Type': 'application/json'},
         data: JSON.stringify({
             id: $('#id').val(),
             itemType: $('#item-type').val(),
-            genre: $('#item-genre').val(),
-            description: $('item-description').val(),
+            itemStyle: $('#item-style').val(),
+            itemEvent: $('#item-event').val(),
+            itemDetail: $('#item-detail').val(),
+            itemFabric: $('#item-style').val(),
             colors: $('.color>button').map(function() { return $(this).attr('data-hsl')}).toArray()
         }),
         success: function() {
