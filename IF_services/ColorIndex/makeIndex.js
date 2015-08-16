@@ -8,7 +8,10 @@ function next() {
     }).exec().then(function(l) {
         return colorTools.findColorsForLandmark(l)
             .then(function(c) {
-                l.itemTags.colors = c;
+                l.colors = c;
+                l.itemTags.colors = c.vibrantColors.reduce(function(colors, swatch) {
+
+                }, []);
                 return l.save();
             }, function(e) {
                 console.log(e);

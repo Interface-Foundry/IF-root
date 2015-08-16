@@ -14,13 +14,7 @@ var getVibrantColors = function(url) {
             if (e) {
                 reject(e);
             }
-            var vibrantColors = s.reduce(function(colors, swatch) {
-                return {
-                    hex: swatch.getHex(),
-                    hsl: swatch.getHsl()
-                };
-            });
-            resolve(vibrantColors);
+            resolve(s);
         });
     });
 };
@@ -37,15 +31,14 @@ var findColorsForLandmark = function(landmark) {
     return Promise.settle(landmark.itemImageURL.map(function(url) {
         return getVibrantColors(url);
     })).then(function(results) {
-        var vibrantColors = results.reduce(function(colors, r) {
+        return results.reduce(function(colors, r) {
             if (r.isFulfilled()) {
-                colors.push(r.value());
+                if (r.value().Vibrant) {
+                    colors.push(r.value().Vibrant.hsl);
+                }
             }
             return colors;
         }, [])
-        return {
-            vibrantColors: vibrantColors
-        }; // todo the other color extraction library
     });
 };
 
@@ -79,25 +72,6 @@ var test = function() {
         }, console.log.bind(console));
 }
 
-var hThreshold = .2;
-var sThreshold = .5;
-var lTHreshold = .5;
-
-/**
- * Finds landmarks that have colors that are similar by HSL
- * @param color
- * @returns something awsome that you can use to find landmarks by color
- */
-var getLandmarkColorQuery = function(color) {
-    return {
-        'itemTags.colors': {$elemMatch: {
-            '0': {$gte: color[0] - hThreshold, $lte: color[0] + hThreshold},
-            '1': {$gte: color[1] - sThreshold, $lte: color[1] + sThreshold},
-            '2': {$gte: color[2] - lTHreshold, $lte: color[2] + lTHreshold}
-        }}
-    }
-}
-
 /**
  * Expose a both the main module and the test function
  * @type {{getImageHSL: Function, findColorsForLandmark: Function, test: Function}}
@@ -105,8 +79,7 @@ var getLandmarkColorQuery = function(color) {
 module.exports = {
     getVibrantColors: getVibrantColors,
     findColorsForLandmark: findColorsForLandmark,
-    test: test,
-    getLandmarkColorQuery: getLandmarkColorQuery
+    test: test
 };
 
 // by default run tests if not require'd
