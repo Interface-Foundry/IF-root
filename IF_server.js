@@ -2578,13 +2578,14 @@ app.get('/api/worlds/:id', function(req, res) {
 // Save 
 app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
+    // da eff is up in this shit.  how the eff do you get such legacy code with a one year old startup?
+    // i am going to call my bishop and request last rites.  (pronounced "biss-hop")
+
     if (req.body.worldID) {
         req.body.worldID = req.body.worldID.toLowerCase();
     }
 
     if (req.url == "/api/styles/create") {
-
-
         editStyle(); //edit style
     }
 
@@ -2593,9 +2594,6 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
     }
 
     if (req.url == "/api/worldchat/create") {
-
-        //console.log('image '+req.body.img);
-
         var wc = new worldchatSchema({
             userID: req.body.userID,
             roomID: req.body.roomID,
@@ -2627,9 +2625,7 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
         });
     }
 
-    if ((req.url == "/api/stickers/create") && req.body.roomID
-        //&& req.user._id
-        && req.body.name) {
+    if ((req.url == "/api/stickers/create") && req.body.roomID && req.body.name) {
 
         var sticker = new stickerSchema({
             name: req.body.name,
@@ -3459,12 +3455,13 @@ app.post('/api/:collection/create', isLoggedIn, function(req, res) {
 
 
 // Delete
-app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
+app.delete('/api/:collection/:id', isLoggedIn, function(req, res, next) {
 
     var sID = sanitize(req.params.id);
 
     switch (req.params.collection) {
         case 'worldchat':
+            return next('THERE IS NO MORE CHAT.  CHAT IS DEAD.  LONG LIVE THE ROBOT EMPIRE.')
             worldchatSchema.findById(sID, function(err, chat) {
                 if (err) {
                     return handleError(res, err);
@@ -3493,6 +3490,7 @@ app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
             break;
 
         case 'landmarks':
+            return next('This route deprecated.  Please contact your local sith lord with questions or comments');
             landmarkSchema.findById(sID, function(err, lm) {
                 if (err) {
                     return handleError(res, err);
@@ -3592,20 +3590,24 @@ app.delete('/api/:collection/:id', isLoggedIn, function(req, res) {
 });
 
 //Group
-app.put('/api/:collection/group', function(req, res) {
-    db.collection(req.params.collection).group(req.body, fn(req, res));
+app.put('/api/:collection/group', function(req, res, next) {
+    return next("this route is no longer available.  For comments or complaints, please contact your local sith lord.");
+    //db.collection(req.params.collection).group(req.body, fn(req, res));
+
 })
 
 // MapReduce
-app.put('/api/:collection/mapReduce', function(req, res) {
-    if (!req.body.options) {
-        req.body.options = {}
-    };
-    req.body.options.out = {
-        inline: 1
-    };
-    req.body.options.verbose = false;
-    db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));
+app.put('/api/:collection/mapReduce', function(req, res, next) {
+    return next("this route is no longer available.  For comments or complaints, please contact your local sith lord.");
+    //
+    //if (!req.body.options) {
+    //    req.body.options = {}
+    //};
+    //req.body.options.out = {
+    //    inline: 1
+    //};
+    //req.body.options.verbose = false;
+    //db.collection(req.params.collection).mapReduce(req.body.map, req.body.reduce, req.body.options, fn(req, res));
 });
 
 
