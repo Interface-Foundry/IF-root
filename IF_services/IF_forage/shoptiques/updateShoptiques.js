@@ -5,6 +5,7 @@ var request = require('request');
 
 var query = {
     world: false,
+    valid: true,
     'source_shoptiques_item.url': {$exists: true},
     loc: {
         $near: {
@@ -35,9 +36,14 @@ var next = function() {
                 return next();
             }
 
-            l.source_shoptiques_item.description = d;
-            l.description = d;
-            console.log(d);
+            if (d) {
+                console.log(d);
+                l.source_shoptiques_item.description = d;
+                l.description = d;
+            } else {
+                console.log('no description found, marking as invalid');
+                l.valid = false;
+            }
             l.save(function() {
                 setTimeout(function() {
                     next();
@@ -55,6 +61,9 @@ function getDescription(url, callback) {
         if (e) return callback(e);
         var $ = cheerio.load(b);
         var d = $('[itemprop="description"]').text().trim();
+        if (!d) {
+
+        }
         callback(null, d);
     })
 }
