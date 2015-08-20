@@ -8,17 +8,7 @@ var request = require('request')
 
 function getItem() {
     return new Promise(function(resolve, reject) {
-        var scrapeHost = 'www.zara.com';
-        var scrapePath = '/us/en/woman/coats/a-line-coat-c269183p2846559.html';
-        var url = scrapeHost.concat(scrapePath)
-        var options = {
-            host: scrapeHost,
-            port: 80,
-            path: scrapePath,
-            headers: {
-                origin: 'http://shenaniganslimited.com'
-            }
-        };
+        var url = 'http://www.zara.com/us/en/woman/blazers/crepe-blazer-c756615p2897570.html';
         //construct newItem object
         var newItem = {
             src: url, //drop in URL we're scraping from
@@ -26,11 +16,16 @@ function getItem() {
             physicalStores: []
         };
 
-        http.get(options, function(res) {
-            res.on("data", function(chunk) {
+        var options = {
+            url: 'http://www.zara.com/us/en/woman/blazers/crepe-blazer-c756615p2897570.html',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+            }
+        };
+        request(options, function(error, response, body) {
+            if ((!error) && (response.statusCode == 200)) {
 
-                $ = cheerio.load(chunk); //load HTML
-
+                $ = cheerio.load(body); //load HTML
                 //getting the item price, adding to object
                 if ($('span.price')) {
                     var price = $('p.price>span.price').attr('data-price')
@@ -48,40 +43,36 @@ function getItem() {
                 }
 
                 //iterate on images found in HTML
-                $('img').each(function(i, elem) {
+                $('img.image-big').each(function(i, elem) {
                     if (elem.attribs) { //check for attributes
-                        if (elem.attribs.class) { //is the image classy?
-                            if (elem.attribs.class.indexOf("image-big") > -1) { //detects if this is one of the product images, not an unrelated image 
-
-                                if (i == 0) { //grab item details on first iteration since it's the same for each image in series (except for last image for some reason) (is this a good idea? probably not!)
-                                    newItem.partNumber = elem.attribs['sb-id']; //used by Inditex API
-                                    newItem.campaign = elem.attribs['data-ref'].split('-')[1]; //ID after '-' is the campaign code, used by Inditex API
-                                    newItem.name = elem.attribs['data-name'];
-                                    newItem.category = elem.attribs['data-category'];
-                                }
-
-                                if (elem.attribs['data-src']) {
-                                    newItem.images.push('https:' + elem.attribs['data-src'].split('?')[0]); //push images to array after removing URL params
-                                }
-                                //console.log(newItem);
-                            }
+                        if (i == 0) { //grab item details on first iteration since it's the same for each image in series (except for last image for some reason) (is this a good idea? probably not!)
+                            newItem.partNumber = elem.attribs['sb-id']; //used by Inditex API
+                            newItem.campaign = elem.attribs['data-ref'].split('-')[1]; //ID after '-' is the campaign code, used by Inditex API
+                            newItem.name = elem.attribs['data-name'];
+                            newItem.category = elem.attribs['data-category'];
+                        }
+                        if (elem.attribs['data-src']) {
+                            newItem.images.push('https:' + elem.attribs['data-src'].split('?')[0]); //push images to array after removing URL params
                         }
                     }
                 });
-            });
 
-            res.on("end", function() {
                 if (newItem.storeId && newItem.category) {
+                    // console.log('newItem: ', newItem)
                     resolve(newItem)
                 } else {
                     console.log('missing params', newItem);
                     reject('missing params')
                 }
-            });
+            } else {
+                if (error) {
+                    console.log('error: ', error)
+                } else if (response.statusCode !== 200) {
+                    console.log('response.statusCode: ', response.statusCode)
+                }
+            }
 
-        }).on('error', function(e) {
-            console.log("Got error: " + e.message);
-        });
+        })
     })
 }
 
@@ -91,71 +82,91 @@ function getLocations(newItem) {
         var lat = '40.7135097';
         var lng = '-73.9859414';
         var catalogId = '21053'; //hard to scrape this from site, but seems like this number is arbitrary...
+        var options = {
+            url: 'http://www.zara.com/webapp/wcs/stores/servlet/StoreLocatorResultPage?showOnlyDeliveryShops=false&isPopUp=false&storeCountryCode=US&catalogId=' + catalogId + '&country=US&categoryId=' + newItem.category + '&langId=-1&showSelectButton=true&storeId=' + newItem.storeId + '&latitude=' + lat + '&longitude=' + lng + '&ajaxCall=true',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+            }
+        };
 
-        var url = 'http://www.zara.com/webapp/wcs/stores/servlet/StoreLocatorResultPage?showOnlyDeliveryShops=false&isPopUp=false&storeCountryCode=US&catalogId=' + catalogId + '&country=US&categoryId=' + newItem.category + '&langId=-1&showSelectButton=true&storeId=' + newItem.storeId + '&latitude=' + lat + '&longitude=' + lng + '&ajaxCall=true'
-
-        request({
-            url: url
-        }, function(error, response, body) {
+        request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
                 $ = cheerio.load(body); //load HTML
-
-                async.eachSeries($('li'), function(elem, callback) {
+                // console.log('body:', body)
+                async.eachSeries($('li'), function(li, callback1) {
+                        // console.log('li', li)
                         var count = 0;
                         var newPhysicalStore = {};
+                        async.eachSeries(li.children, function(elem, callback2) {
+                                // console.log('!!!!Elem.attribs', elem.attribs)
+                                if (!elem.attribs) return callback2()
 
-                        for (var i = 0; i < elem.children.length; i++) {
-                            if (elem.children[i].attribs) {
-                                if (elem.children[i].attribs.class == 'lat') {
-                                    newPhysicalStore.lat = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'lat') {
+                                    newPhysicalStore.lat = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'lng') {
-                                    newPhysicalStore.lng = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'lng') {
+                                    newPhysicalStore.lng = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'shopType') {
-                                    newPhysicalStore.shopType = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'shopType') {
+                                    newPhysicalStore.shopType = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storeId') {
-                                    newPhysicalStore.storeId = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storeId') {
+                                    newPhysicalStore.storeId = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storeAddress') {
-                                    newPhysicalStore.storeAddress = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storeAddress') {
+                                    newPhysicalStore.storeAddress = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storeZipCode') {
-                                    newPhysicalStore.storeZipCode = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storeZipCode') {
+                                    newPhysicalStore.storeZipCode = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storeCity') {
-                                    newPhysicalStore.storeCity = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storeCity') {
+                                    newPhysicalStore.storeCity = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storeCountry') {
-                                    newPhysicalStore.storeCountry = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storeCountry') {
+                                    newPhysicalStore.storeCountry = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storePhone1') {
-                                    newPhysicalStore.storePhone1 = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storePhone1') {
+                                    newPhysicalStore.storePhone1 = elem.attribs.value;
                                 }
-                                if (elem.children[i].attribs.class == 'storeSections') {
-                                    newPhysicalStore.storeSections = elem.children[i].attribs.value;
+                                if (elem.attribs.class == 'storeSections') {
+                                    newPhysicalStore.storeSections = elem.attribs.value;
                                 }
-                            }
-                            if (count == elem.children.length - 1) { ///ommgmggmgmgmgmgmggggg =____=
                                 saveStore(newPhysicalStore).then(function(store) {
-                                    newItem.physicalStores.push({
-                                        mongoId: store._id,
-                                        zaraStoreId: newPhysicalStore.storeId
-                                    });
+                                    // console.log('Saved store:', store)
+                                    if (newPhysicalStore.storeId !== undefined) {
+                                        // console.log('pushing.')
+                                        newItem.physicalStores.push({
+                                            mongoId: store._id,
+                                            zaraStoreId: newPhysicalStore.storeId
+                                        });
+                                    }
                                     count++;
-                                    callback()
+                                    callback2()
                                 }).catch(function(err) {
                                     console.log(err)
                                 })
-                            }
-                            count++;
-                        }
+
+                            }, function(err) {
+                                if (err) {
+                                    console.log('Async inner each err: ', err)
+                                }
+
+
+                                callback1()
+                            }) //End of inner each
                     },
                     function(err) {
-                        console.log('Done processing stores.')
+                        if (err) {
+                            console.log('Async outer each err: ', err)
+                        }
+                        newItem.physicalStores = newItem.physicalStores.filter(function(val, i, array) {
+                            if (i !== 0) {
+                                return array[i].zaraStoreId !== array[i - 1].zaraStoreId
+                            }
+                        })
+                        console.log('Done processing stores.', newItem.physicalStores)
                         resolve(newItem)
-                    });
+                    }); //End of outer each
             } else {
                 console.log('e: ', error, 'response: ', response)
                 reject('Error requesting locations', error)
@@ -169,41 +180,38 @@ function getLocations(newItem) {
 function getInventory(newItem) {
     var result;
     var storeIds = newItem.physicalStores.map(function(obj) {
-        return obj.storeId
+        return obj.zaraStoreId
     })
+    console.log('storeIds: ', storeIds)
     return new Promise(function(resolve, reject) {
-        // console.log(3)
-        // var options = {
-        //     host: 'itxrest.inditex.com',
-        //     port: 80,
-        //     headers: {
-        //         origin: 'http://santiagoandjowarskilimited.com'
-        //     },
-        //     path: '/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + newItem.campaign + '/product/part-number/' + newItem.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
-        // };
-
         var url = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + newItem.campaign + '/product/part-number/' + newItem.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
-
-        request({
-            url: url
-        }, function(error, response, body) {
+        var options = {
+            url: url,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+            }
+        };
+        request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
-                var inventory = body.split('undefined')[1]
-                    // console.log('NEWITEM: ', newItem, '\nINVENTORY: ', inventory)
+                var inventory = body
                 resolve(inventory)
             } else {
-                if (error) reject(error)
-                else reject('Bad response from inventory request')
+                if (error) {
+                    console.log('error: ', error)
+                    reject(error)
+                } else {
+                	  console.log('response:', response)
+                    reject('Bad response from inventory request')
+                }
             }
-
         })
-
     })
 }
 
 function saveItem(newItem) {
     return new Promise(function(resolve, reject) {
-        var i = new db.Landmark(newItem);
+        var i = new db.Landmark();
+        i.source_zara_item = newItem;
         i.save(function(e, i) {
             if (e) {
                 console.error(e);
@@ -262,7 +270,7 @@ function saveStore(store) {
                                 console.error(e);
                                 return reject(e);
                             }
-                            console.log('Saved store! : ', newStore.source_zara_store);
+                            // console.log('Saved store! : ', newStore.source_zara_store);
                             resolve(newStore);
                         })
                     })
