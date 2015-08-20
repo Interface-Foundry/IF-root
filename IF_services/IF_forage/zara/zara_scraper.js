@@ -8,61 +8,86 @@ var request = require('request')
 
 var Stores = []
 var url = 'http://www.zara.com/us/en/woman/tops/view-all/pleated-top-c733890p2776295.html';
+//Var to store existing item 
+var existingItem;
+//Flag if item exists
+var exists = false;
 
 async.waterfall([
-    function(callback) {
-        checkIfScraped(url).then(callback(null,url)).catch(function(err) {
-            callback(err)
-        })
-    },
-    function(url,callback) {
-        getItem(url).then(function(item) {
-            callback(null, item)
-        }).catch(function(err) {
-            callback(err)
-        })
-    },
-    function(item, callback) {
-        getLocations(item).then(function(item) {
-            callback(null, item)
-        }).catch(function(err) {
-            callback(err)
-        })
-    },
-    function(item, callback) {
-        getInventory(item).then(function(inventory) {
-            callback(null, item, inventory)
-        }).catch(function(err) {
-            callback(err)
-        })
-    },
-    function(item, inventory, callback) {
-        updateInventory(inventory, item).then(function(item) {
-            callback(null, item)
-        }).catch(function(err) {
-            callback(err)
-        })
-    },
-    function(item, callback) {
-        saveStores(item).then(function(item) {
-            callback(null, item)
-        }).catch(function(err) {
-            callback(err)
-        })
-    },
-    function(item, callback) {
-        saveItems(item).then(function(items) {
-            callback(null, items)
-        }).catch(function(err) {
-            callback(err)
-        })
-    }
-], function(err, items) {
-    if (err) {
-        console.log(err)
-    }
-    console.log('finished scraping item!!', items)
-});
+        function(callback) {
+            checkIfScraped(url).then(function(existingItem) {
+                if (existingItem) {
+                    exists = true;
+                    callback(null, existingItem)
+                } else {
+                    callback(null)
+                }
+            }).catch(function(err) {
+                callback(err)
+            })
+        },
+        function(existingItem, callback) {
+            console.log('exists: ', exists, 'existingItem: ', existingItem)
+            if (!exists) {
+                getItem(url).then(function(item) {
+                    callback(null, item)
+                }).catch(function(err) {
+                    callback(err)
+                })
+            } else if (exists) {
+                callback(null, existingItem)
+            }
+        },
+        function(item, callback) {
+            if (!exists) {
+                getLocations(item).then(function(item) {
+                    callback(null, item)
+                }).catch(function(err) {
+                    callback(err)
+                })
+            } else if (exists) {
+                callback(null, item)
+            }
+        },
+        function(item, callback) {
+            getInventory(item).then(function(inventory) {
+                callback(null, item, inventory)
+            }).catch(function(err) {
+                callback(err)
+            })
+        },
+        function(item, inventory, callback) {
+            updateInventory(inventory, item).then(function(item) {
+                callback(null, item)
+            }).catch(function(err) {
+                callback(err)
+            })
+        },
+        function(item, callback) {
+            if (!exists) {
+                saveStores(item).then(function(item) {
+                    callback(null, item)
+                }).catch(function(err) {
+                    callback(err)
+                })
+            } else if (exists) {
+                callback(null, item)
+            }
+        },
+        function(item, callback) {
+            saveItems(item).then(function(items) {
+                callback(null, items)
+            }).catch(function(err) {
+                callback(err)
+            })
+        }
+    ],
+    function(err, items) {
+        if (err) {
+            console.log(err)
+        }
+        console.log('finished scraping item!!', items)
+    });
 
 
 function checkIfScraped(url) {
@@ -73,15 +98,18 @@ function checkIfScraped(url) {
                 'source_zara_item.src': url.trim()
             })
             .exec(function(e, l) {
-                if (l) {;
-                    reject('Item already exists!')
+                if (l) {
+                    existing = true
+                    return resolve(l)
                 }
                 if (!l) {
-                    return resolve(url)
+                    existing = false
+                    return resolve()
                 }
                 if (e) {
-                    //if some mongo error happened here just go ahead with the process
-                    resolve(url)
+                    //if some mongo error happened here just pretend it doesn't exist and go ahead with the process
+                    existing = false
+                    return resolve()
                 }
             })
     })
@@ -92,7 +120,7 @@ function getItem(url) {
     return new Promise(function(resolve, reject) {
         //construct newItem object
         var newItem = {
-            src: url, 
+            src: url,
             images: [],
             physicalStores: []
         };
@@ -231,11 +259,11 @@ function getLocations(newItem) {
                             }
                         })
                         Stores = Stores.filter(function(val, i, array) {
-                            if (i !== 0) {
-                                return array[i].storeId !== array[i - 1].storeId
-                            }
-                        })
-                        // console.log('Done processing stores.', Stores)
+                                if (i !== 0) {
+                                    return array[i].storeId !== array[i - 1].storeId
+                                }
+                            })
+                            // console.log('Done processing stores.', Stores)
                         resolve(newItem)
                     }); //End of outer each
             } else {
@@ -250,8 +278,8 @@ function getLocations(newItem) {
 function getInventory(newItem) {
     var result;
     var storeIds = newItem.physicalStores.map(function(obj) {
-            return obj.zaraStoreId
-        })
+        return obj.zaraStoreId
+    })
 
     return new Promise(function(resolve, reject) {
         var url = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + newItem.campaign + '/product/part-number/' + newItem.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
@@ -289,9 +317,7 @@ function updateInventory(inventory, newItem) {
         if (inventory.stocks && inventory.stocks.length > 0) {
             inventory.stocks.forEach(function(stock) {
                 newItem.physicalStores.forEach(function(store) {
-                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
                     if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
-                        // console.log('MATCH')
                         store.inventory = stock.sizeStocks;
                     }
                 })
@@ -303,8 +329,6 @@ function updateInventory(inventory, newItem) {
         }
     })
 }
-
-
 
 function saveStores(item) {
     return new Promise(function(resolve, reject) {
@@ -355,9 +379,8 @@ function saveStores(item) {
                 return reject(err)
             }
             item.physicalStores = item.physicalStores.filter(function(val, i) {
-                    return val !== 'null'
-                })
-                // console.log('-_- Updated item: ', item)
+                return val !== 'null'
+            })
             resolve(item)
         })
     })
@@ -365,31 +388,43 @@ function saveStores(item) {
 
 function saveItems(newItem) {
     return new Promise(function(resolve, reject) {
-        var savedItems = []
-        async.eachSeries(Stores, function(store, callback) {
-            var i = new db.Landmark();
-            i.source_zara_item = newItem;
-            i.hasloc = true;
-            // console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
-            i.loc.coordinates[0] = parseFloat(store.lng);
-            i.loc.coordinates[1] = parseFloat(store.lat);
-            uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
-                i.id = output;
-                i.save(function(e, item) {
-                    if (e) {
-                        console.error(e);
-                        return callback();
-                    }
-                    savedItems.push(item)
-                    callback()
+
+        if (!exists) {
+            var savedItems = []
+            async.eachSeries(Stores, function(store, callback) {
+                var i = new db.Landmark();
+                i.source_zara_item = newItem;
+                i.hasloc = true;
+                i.loc.coordinates[0] = parseFloat(store.lng);
+                i.loc.coordinates[1] = parseFloat(store.lat);
+                uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
+                    i.id = output;
+                    i.save(function(e, item) {
+                        if (e) {
+                            console.error(e);
+                            return callback();
+                        }
+                        savedItems.push(item)
+                        callback()
+                    })
                 })
+            }, function(err) {
+                if (err) {
+                    // console.log('Error in saveItems: ',err)
+                    reject(err)
+                }
+                resolve(savedItems)
             })
-        }, function(err) {
-            if (err) {
-                // console.log('Error in saveItems: ',err)
-                reject(err)
-            }
-            resolve(savedItems)
-        })
+        } else if (exists){
+        	newItem.save(function(err,item) {
+        		if (err) {
+        			console.log('Error updating item inventory',err)
+        			return reject(err)
+        		}
+        		console.log('Updated item inventory!')
+        		resolve(item)
+        	})
+        }
+
     })
 }
