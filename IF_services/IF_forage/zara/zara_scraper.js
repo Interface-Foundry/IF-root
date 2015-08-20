@@ -1,3 +1,5 @@
+//TODO: DECOUPLE STORE SCRAPER WITH ITEM SCRAPER
+//Check inventory field in existing item with updated inventory !
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -8,17 +10,18 @@ var request = require('request')
 
 var Stores = []
 var url = 'http://www.zara.com/us/en/woman/tops/view-all/pleated-top-c733890p2776295.html';
-//Var to store existing item 
-var existingItem;
+//global var to store existing item 
+existingItem = {};
 //Flag if item exists
-var exists = false;
+exists = false;
 
 async.waterfall([
         function(callback) {
-            checkIfScraped(url).then(function(existingItem) {
-                if (existingItem) {
+            checkIfScraped(url).then(function(item) {
+                if (item) {
                     exists = true;
-                    callback(null, existingItem)
+                    existingItem = item; //store for later updating in db
+                    callback(null, item)
                 } else {
                     callback(null)
                 }
@@ -27,7 +30,7 @@ async.waterfall([
             })
         },
         function(existingItem, callback) {
-            console.log('exists: ', exists, 'existingItem: ', existingItem)
+            // console.log('exists: ', exists, 'existingItem: ', existingItem)
             if (!exists) {
                 getItem(url).then(function(item) {
                     callback(null, item)
@@ -276,15 +279,19 @@ function getLocations(newItem) {
 }
 
 function getInventory(newItem) {
-    var result;
-    var storeIds = newItem.physicalStores.map(function(obj) {
+
+	 var Item = !exists ? newItem : newItem.source_zara_item
+
+    var storeIds = Item.physicalStores.map(function(obj) {
         return obj.zaraStoreId
-    })
+    }) 
+
+    console.log('~~~storeIds',storeIds)
 
     return new Promise(function(resolve, reject) {
-        var url = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + newItem.campaign + '/product/part-number/' + newItem.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
+        var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + Item.campaign + '/product/part-number/' + Item.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
         var options = {
-            url: url,
+            url: apiUrl,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
@@ -312,20 +319,23 @@ function getInventory(newItem) {
 }
 
 function updateInventory(inventory, newItem) {
+
+	 var Item = !exists ? newItem : newItem.source_zara_item
+
     return new Promise(function(resolve, reject) {
         console.log('')
         if (inventory.stocks && inventory.stocks.length > 0) {
             inventory.stocks.forEach(function(stock) {
-                newItem.physicalStores.forEach(function(store) {
+                Item.physicalStores.forEach(function(store) {
                     if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
                         store.inventory = stock.sizeStocks;
                     }
                 })
             })
-            resolve(newItem)
+            resolve(Item)
         } else {
             console.log('no inventory? ', inventory)
-            resolve(newItem)
+            resolve(Item)
         }
     })
 }
@@ -415,15 +425,16 @@ function saveItems(newItem) {
                 }
                 resolve(savedItems)
             })
-        } else if (exists){
-        	newItem.save(function(err,item) {
-        		if (err) {
-        			console.log('Error updating item inventory',err)
-        			return reject(err)
-        		}
-        		console.log('Updated item inventory!')
-        		resolve(item)
-        	})
+        } else if (exists) {
+        	existingItem.source_zara_item = newItem;	
+            existingItem.save(function(err, item) {
+                if (err) {
+                    console.log('Error updating item inventory', err)
+                    return reject(err)
+                }
+                console.log('Updated item inventory!')
+                resolve(item)
+            })
         }
 
     })
