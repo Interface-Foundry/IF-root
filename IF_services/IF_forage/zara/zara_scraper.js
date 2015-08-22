@@ -1,6 +1,5 @@
 //TODO: DECOUPLE STORE SCRAPER WITH ITEM SCRAPER
 //Check inventory field in existing item with updated inventory !
-var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
@@ -9,7 +8,7 @@ var uniquer = require('../../uniquer');
 var request = require('request')
 
 var Stores = []
-var url = 'http://www.zara.com/us/en/woman/tops/view-all/pleated-top-c733890p2776295.html';
+var url = 'http://www.zara.com/us/en/woman/dresses/view-all/printed-tunic-c733885p2979532.html';
 //global var to store existing item 
 existingItem = {};
 //Flag if item exists
@@ -23,14 +22,13 @@ async.waterfall([
                     existingItem = item; //store for later updating in db
                     callback(null, item)
                 } else {
-                    callback(null)
+                    callback(null, null)
                 }
             }).catch(function(err) {
                 callback(err)
             })
         },
         function(existingItem, callback) {
-            // console.log('exists: ', exists, 'existingItem: ', existingItem)
             if (!exists) {
                 getItem(url).then(function(item) {
                     callback(null, item)
@@ -42,48 +40,45 @@ async.waterfall([
             }
         },
         function(item, callback) {
-            if (!exists) {
-                getLocations(item).then(function(item) {
-                    callback(null, item)
-                }).catch(function(err) {
-                    callback(err)
-                })
-            } else if (exists) {
-                callback(null, item)
-            }
+            loadStores().then(function(stores) {
+                callback(null, item, stores)
+            }).catch(function(err) {
+                callback(err)
+            })
         },
-        function(item, callback) {
-            getInventory(item).then(function(inventory) {
+        function(item, stores, callback) {
+            getInventory(item, stores).then(function(inventory) {
                 callback(null, item, inventory)
             }).catch(function(err) {
                 callback(err)
             })
         },
         function(item, inventory, callback) {
-            updateInventory(inventory, item).then(function(item) {
+            createItems(inventory, item).then(function(item) {
                 callback(null, item)
-            }).catch(function(err) {
-                callback(err)
-            })
-        },
-        function(item, callback) {
-            if (!exists) {
-                saveStores(item).then(function(item) {
-                    callback(null, item)
-                }).catch(function(err) {
-                    callback(err)
-                })
-            } else if (exists) {
-                callback(null, item)
-            }
-        },
-        function(item, callback) {
-            saveItems(item).then(function(items) {
-                callback(null, items)
             }).catch(function(err) {
                 callback(err)
             })
         }
+        // ,
+        // function(item, callback) {
+        //     if (!exists) {
+        //         saveStores(item).then(function(item) {
+        //             callback(null, item)
+        //         }).catch(function(err) {
+        //             callback(err)
+        //         })
+        //     } else if (exists) {
+        //         callback(null, item)
+        //     }
+        // },
+        // function(item, callback) {
+        //     saveItems(item).then(function(items) {
+        //         callback(null, items)
+        //     }).catch(function(err) {
+        //         callback(err)
+        //     })
+        // }
     ],
     function(err, items) {
         if (err) {
@@ -125,7 +120,7 @@ function getItem(url) {
         var newItem = {
             src: url,
             images: [],
-            physicalStores: []
+            inventory: []
         };
 
         var options = {
@@ -169,8 +164,7 @@ function getItem(url) {
                     }
                 });
 
-                if (newItem.storeId && newItem.category) {
-                    // console.log('newItem: ', newItem)
+                if (newItem.storeId) {
                     resolve(newItem)
                 } else {
                     console.log('missing params', newItem);
@@ -179,14 +173,36 @@ function getItem(url) {
             } else {
                 if (error) {
                     console.log('error: ', error)
+                    reject(error)
                 } else if (response.statusCode !== 200) {
                     console.log('response.statusCode: ', response.statusCode)
+                    reject(response.statusCode)
                 }
             }
         })
     })
 }
 
+function loadStores() {
+    return new Promise(function(resolve, reject) {
+        db.Landmarks.find({
+            'source_zara_store': {
+                $exists: true
+            }
+        }, function(e, stores) {
+            if (e) {
+                console.log(e)
+                reject(e)
+            }
+            if (!stores) {
+                reject('No stores in db.')
+            }
+            if (stores) {
+                resolve(stores)
+            }
+        })
+    })
+}
 
 function getLocations(newItem) {
     return new Promise(function(resolve, reject) {
@@ -194,7 +210,7 @@ function getLocations(newItem) {
         var lng = '-73.9859414';
         var catalogId = '21053'; //hard to scrape this from site, but seems like this number is arbitrary...
         var options = {
-            url: 'http://www.zara.com/webapp/wcs/stores/servlet/StoreLocatorResultPage?showOnlyDeliveryShops=false&isPopUp=false&storeCountryCode=US&catalogId=' + catalogId + '&country=US&categoryId=' + newItem.category + '&langId=-1&showSelectButton=true&storeId=' + newItem.storeId + '&latitude=' + lat + '&longitude=' + lng + '&ajaxCall=true',
+            url: 'http://www.zara.com/webapp/wcs/stores/servlet/StoreLocatorResultPage?showOnlyDeliveryShops=false&isPopUp=false&storeCountryCode=US&catalogId=0&country=US&categoryId=' + newItem.category + '&langId=-1&showSelectButton=true&storeId=' + newItem.storeId + '&latitude=' + lat + '&longitude=' + lng + '&ajaxCall=true',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows 8; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
@@ -219,9 +235,6 @@ function getLocations(newItem) {
                                     newPhysicalStore.shopType = elem.attribs.value;
                                 }
                                 if (elem.attribs.class == 'storeId') {
-                                    newItem.physicalStores.push({
-                                        zaraStoreId: elem.attribs.value
-                                    })
                                     newPhysicalStore.storeId = elem.attribs.value;
                                 }
                                 if (elem.attribs.class == 'storeAddress') {
@@ -278,15 +291,14 @@ function getLocations(newItem) {
     })
 }
 
-function getInventory(newItem) {
+function getInventory(newItem, stores) {
 
-	 var Item = !exists ? newItem : newItem.source_zara_item
+    var Item = !exists ? newItem : newItem.source_zara_item
+    var storeIds = stores.map(function(obj) {
+        return obj.source_zara_store.storeId
+    })
 
-    var storeIds = Item.physicalStores.map(function(obj) {
-        return obj.zaraStoreId
-    }) 
-
-    console.log('~~~storeIds',storeIds)
+    console.log('~~~storeIds', storeIds)
 
     return new Promise(function(resolve, reject) {
         var apiUrl = 'http://itxrest.inditex.com/LOMOServiciosRESTCommerce-ws/common/1/stock/campaign/' + Item.campaign + '/product/part-number/' + Item.partNumber + '?physicalStoreId=' + storeIds.join() + '&ajaxCall=true'
@@ -302,7 +314,7 @@ function getInventory(newItem) {
                 if (!body.stocks) {
                     console.log('no stocks property in body getInventory()')
                 }
-                var inventory = body
+                var inventory = body.stocks
                 resolve(inventory)
             } else {
                 if (error) {
@@ -318,25 +330,164 @@ function getInventory(newItem) {
     })
 }
 
-function updateInventory(inventory, newItem) {
+function createItems(inventory, newItem) {
+    // console.log('newItem:',newItem)
+    var savedItems = []
 
-	 var Item = !exists ? newItem : newItem.source_zara_item
+    //proxy var to make things easier, sorry :/
+    if (exists) {
+        var Item = newItem.source_zara_item
+    }
+
+    //switch up how newItem is treated depending on if it exists or not 
+    newItem = exists ? newItem.source_zara_item : newItem
 
     return new Promise(function(resolve, reject) {
-        console.log('')
-        if (inventory.stocks && inventory.stocks.length > 0) {
-            inventory.stocks.forEach(function(stock) {
-                Item.physicalStores.forEach(function(store) {
-                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
-                        store.inventory = stock.sizeStocks;
-                    }
-                })
-            })
-            resolve(Item)
+        if (inventory && inventory.length > 0) {
+            var count = 0;
+            async.eachSeries(inventory, function(store, callback) {
+                    console.log('storeId: ',store.physicalStoreId)
+                        //If item exists
+                        if (exists) {
+                            //And the current store in inventory list is the items parent store
+                            if (Item.storeId == inventory[count].physicalStoreId) {
+                                //Update items inventory info
+                                db.Landmarks.update({
+                                    '_id': Item._id
+                                }, {
+                                    $set: {
+                                        'inventory': inventory[count].sizeStocks
+                                    }
+                                }, function(e, result) {
+                                    if (e) {
+                                        console.log(e)
+                                        count++
+                                        return callback()
+                                    }
+                                    console.log('Updated inventory: \n', result)
+                                    count++
+                                    callback()
+                                })
+                            }
+                        }
+
+                        //First check if item/inventorystore pair exists already
+                        db.Landmarks.findOne({
+                                'source_zara_item.name': newItem.name,
+                                'source_zara_item.storeId': inventory[count].physicalStoreId
+                            }, function(e, match) {
+                                if (e) {
+                                    console.log(e)
+                                }
+                                if (match) {
+                                    count++
+                                    callback()
+                                }
+                                if (!match) {
+
+                                    //No existing matches in db, create a new item.
+                                    var i = new db.Landmark();
+                                    i.source_zara_item = newItem;
+                                    i.hasloc = true;
+                                    i.loc.coordinates[0] = parseFloat(store.lng);
+                                    i.loc.coordinates[1] = parseFloat(store.lat);
+                                    uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
+                                        i.id = output;
+                                        //Check if the store with storeId exists in db
+                                        db.Landmarks.findOne({
+                                            'source_zara_store.storeId': store.physicalStoreId
+                                        }, function(e, s) {
+                                            if (e) {
+                                                console.log(e)
+                                                count++
+                                                return callback()
+                                            }
+                                            if (s) {
+                                                console.log('FOUND!!! FUCKER',s.source_zara_store.storeId)
+                                                i.parent.mongoId = s._id;
+                                                i.parent.name = s.id;
+                                                i.parent.id = s.id;
+                                            } else if (!s) {
+                                                //The parent store doesn't exist in db, skip this item for now.
+                                                console.log('Store in inventory list doesnt exist in the db!')
+                                                count++
+                                                return callback()
+                                            }
+                                            //Save item
+                                            i.save(function(e, item) {
+                                                if (e) {
+                                                    console.error(e);
+                                                }
+                                                savedItems.push(item)
+                                                console.log('Saved item! ', item.id)
+                                                count++
+                                                callback();
+                                            })
+                                        })
+                                    })
+                                }
+                            }) //end of findOne
+                    },
+                    function(e) {
+                        if (e) {
+                            console.log(e)
+                        }
+                        resolve(savedItems)
+                    }) //end of async.foreachof
+
         } else {
             console.log('no inventory? ', inventory)
-            resolve(Item)
+            resolve()
         }
+    })
+}
+
+
+
+
+
+
+function saveItems(newItem) {
+    return new Promise(function(resolve, reject) {
+
+        if (!exists) {
+            var savedItems = []
+            async.eachSeries(Stores, function(store, callback) {
+                var i = new db.Landmark();
+                i.source_zara_item = newItem;
+                i.hasloc = true;
+                i.loc.coordinates[0] = parseFloat(store.lng);
+                i.loc.coordinates[1] = parseFloat(store.lat);
+                uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
+                    i.id = output;
+                    i.save(function(e, item) {
+                        if (e) {
+                            console.error(e);
+                            return callback();
+                        }
+                        savedItems.push(item)
+                        callback()
+                    })
+                })
+            }, function(err) {
+                if (err) {
+                    // console.log('Error in saveItems: ',err)
+                    reject(err)
+                }
+                resolve(savedItems)
+            })
+        } else if (exists) {
+            existingItem.source_zara_item = newItem;
+            existingItem.save(function(err, item) {
+                if (err) {
+                    console.log('Error updating item inventory', err)
+                    return reject(err)
+                }
+                console.log('Updated item inventory!')
+                resolve(item)
+            })
+        }
+
     })
 }
 
@@ -393,49 +544,5 @@ function saveStores(item) {
             })
             resolve(item)
         })
-    })
-}
-
-function saveItems(newItem) {
-    return new Promise(function(resolve, reject) {
-
-        if (!exists) {
-            var savedItems = []
-            async.eachSeries(Stores, function(store, callback) {
-                var i = new db.Landmark();
-                i.source_zara_item = newItem;
-                i.hasloc = true;
-                i.loc.coordinates[0] = parseFloat(store.lng);
-                i.loc.coordinates[1] = parseFloat(store.lat);
-                uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
-                    i.id = output;
-                    i.save(function(e, item) {
-                        if (e) {
-                            console.error(e);
-                            return callback();
-                        }
-                        savedItems.push(item)
-                        callback()
-                    })
-                })
-            }, function(err) {
-                if (err) {
-                    // console.log('Error in saveItems: ',err)
-                    reject(err)
-                }
-                resolve(savedItems)
-            })
-        } else if (exists) {
-        	existingItem.source_zara_item = newItem;	
-            existingItem.save(function(err, item) {
-                if (err) {
-                    console.log('Error updating item inventory', err)
-                    return reject(err)
-                }
-                console.log('Updated item inventory!')
-                resolve(item)
-            })
-        }
-
     })
 }
