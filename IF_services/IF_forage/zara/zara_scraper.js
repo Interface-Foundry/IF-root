@@ -374,7 +374,7 @@ function createItems(inventory, newItem) {
                         //First check if item/inventorystore pair exists already
                         db.Landmarks.findOne({
                                 'source_zara_item.name': newItem.name,
-                                'source_zara_item.storeId': inventory[count].physicalStoreId
+                                'source_zara_item.storeId': store.physicalStoreId
                             }, function(e, match) {
                                 if (e) {
                                     console.log(e)
