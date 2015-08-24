@@ -10,6 +10,10 @@ var states = require('./states')
 var stateIndex = 0;
 var currentState = states[stateIndex]
 
+//Since there arent too many zara stores in the US (54 total), 
+//...if notFoundCount goes past 20 just skip to next state instead of iterating through every remaining zipcode in the state
+var notFoundCount = 0;
+
 async.whilst(
     function() {
         return true
@@ -60,9 +64,18 @@ async.whilst(
                                 if (stores && stores.length > 0) {
                                     console.log('Scraped ', stores.length, ' stores.')
                                 }
-                                // console.log('.')
+                                else if (stores && stores.length < 1) {
+                                    notFoundCount++
+                                }
+
+                                if (notFoundCount >= 50) {
+                                    notFoundCount = 0;
+                                    return cb('Done with state.')
+                                }
+
+                                console.log('.')
                                 count++
-                                finishedZipcode()
+                                wait(finishedZipcode, 500)
 
                             })
                         },
@@ -71,8 +84,8 @@ async.whilst(
                                 console.log(err);
                                 cb()
                             } else {
-                                console.log('Done with state.')
-                                cb()
+                                // console.log('Done with state.')
+                                cb('Done with state.')
                             }
                         });
                 },
@@ -265,6 +278,7 @@ function saveStores(stores) {
                                 if (e) {
                                     return callback()
                                 }
+                                // console.log('new store: ', newStore)
                                 Stores.push(newStore)
                                 callback()
                             })

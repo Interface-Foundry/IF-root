@@ -1,22 +1,19 @@
 module.exports = [
-    "AR",
     "NY",
+    "NJ",
     "CA",
+    "CT",
+    "PA",
+    "FL",
+    "AR",
     "IN",
     "ME",
     "RI",
-    "NJ",
-    "FL",
-    "PA",
     "IL",
     "TX",
     "NV",
-
-
-    "CT",
     "MI",
     "AZ",
-
     "CO",
     "DE",
     "GA",
@@ -26,7 +23,6 @@ module.exports = [
     "KS",
     "KY",
     "LA",
-
     "MD",
     "MA",
     "MN",
