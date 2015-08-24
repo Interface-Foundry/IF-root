@@ -6,6 +6,7 @@ var async = require('async');
 // var uniquer = require('../../uniquer');
 var request = require('request');
 var urlapi = require('url');
+var _ = require('underscore');
 
 var Stores = []
 var url = 'http://www.urbanoutfitters.com/urban/catalog/productdetail.jsp?id=33749656&category=W-ADIDAS';
@@ -27,13 +28,13 @@ async.waterfall([
             callback(err)
         })
     },
-    // function(item, callback) {
-    //     getInventory(item).then(function(item) {
-    //         callback(null, item)
-    //     }).catch(function(err) {
-    //         callback(err)
-    //     })
-    // },
+    function(item, callback) {
+        getInventory(item).then(function(item) {
+            callback(null, item)
+        }).catch(function(err) {
+            callback(err)
+        })
+    },
     // function(item, callback) {
     //     getInventory(item).then(function(inventory) {
     //         callback(null, item, inventory)
@@ -66,7 +67,7 @@ async.waterfall([
     if (err) {
         console.log(err)
     }
-    console.log('finished scraping item!!', items)
+    //console.log('finished scraping item!!', items)
 });
 
 
@@ -104,11 +105,11 @@ function getItem(url) {
         //console.log(queryURL);
         var newItems = []; //multiple colors for item == multiple items
         //construct newItem object
-        var newItem = {
-            src: url, 
-            images: [],
-            colors: []
-        };
+        // var newItem = {
+        //     src: url, 
+        //     images: [],
+        //     colors: []
+        // };
         var latestColor;
 
         var options = {
@@ -122,125 +123,56 @@ function getItem(url) {
 
                 //console.log(body);
                 body = JSON.parse(body);
+ 
+                for (var i = 0; i < body.product.skusInfo.length; i++) {  //get all the skuIDs
 
-                for (var i = 0; i < body['product']['colors'].length; i++) { 
-
-                    newItems[i] = {
-                        images: [],
-                        src: url
+                    newItems[i] = { //make new item object in array of items
+                        name: body.product.skusInfo[i].description + ' ' + body.product.skusInfo[i].color,
+                        src: url,
+                        skuId: body.product.skusInfo[i].skuId, //used to query for inventory  (this is a UNIQUE id for each color/size of each item)
+                        productId: body.product.skusInfo[i].productIds[0], //the parent id for the item (use this just for getting image URLs below)
+                        price: body['product']['skusInfo'][0]['priceLists'][0]['salePrice'], //might not be super accurate if there are price changes on some items based on garment size
+                        color: body.product.skusInfo[i].color,
+                        colorId: body.product.skusInfo[i].colorId,
+                        size: body.product.skusInfo[i].size,
+                        sizeId: body.product.skusInfo[i].sizeId
                     }
 
-                    for (var z = 0; z < body['product']['colors'][i]['viewCode'].length; z++) { 
-                        newItems[i].images.push('http://images.urbanoutfitters.com/is/image/UrbanOutfitters/' + body['product']['colors'][i].id + '_' + body['product']['colors'][i]['viewCode'][z] + '?$mlarge$&defaultImage=');
+                    if (body.product.skusInfo.length == i + 1){ 
+                        getImages();
                     }
-                    newItems[i].name = body['product']['displayName'] + ' ' + body['product']['colors'][i]['displayName'];
-                    newItems[i].productId = body['product']['productId'];
-                    //newItem.push();
-                    // latestColor = body['product']['colors'][i].id);
-                    // if (body['product']['colors'][i].id))
-                    //newItems.push(newItem);
                 }
 
-                console.log(newItems);
+                function getImages(){
 
-                // $ = cheerio.load(body); //load HTML
+                     for (var i = 0; i < body['product']['colors'].length; i++) { //looping through colors (each color is another item to add to DB)
 
-                // newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
+                        var collectedImages = []; //viewcodes are used to display correct image in series (collect all viewcodes to know pics available for each color of each item)
 
-                //API QUERY FOR ITEM INFO
-                //http://www.urbanoutfitters.com/api/v1/product/33749656?siteCode=urban
+                        for (var z = 0; z < body['product']['colors'][i]['viewCode'].length; z++) { //looping through the viewcodes to get all images for each color
 
-                // $('.product-swatches').filter(function(){
-                //     var data = $(this);
+                            //collecting images for each item color based on viewcodes (photo angles)
+                            collectedImages.push('http://images.urbanoutfitters.com/is/image/UrbanOutfitters/' + body['product']['colors'][i].id + '_' + body['product']['colors'][i]['viewCode'][z] + '?$mlarge$&defaultImage=');
+                          
+                            if (body['product']['colors'][i]['viewCode'].length == z + 1){  //end of for loop for this item viewcode count
+                                var imgsToObjs = _.filter(newItems, function(obj) { return obj.colorId == body['product']['colors'][i].colorCode }); //find the items in our newItems array to add our images to (based on color)
+                                for (var x = 0; x < imgsToObjs.length; x++) { //iterate through _.filter results to find all items that match current color code
+                                    imgsToObjs[x].images = collectedImages; //push collectedImages to each item that matches color
+                                }
+                            }
+                        }
 
-                //    // console.log(data);
-                // });
-
-                // //iterate on images found in HTML
-                // $('img').each(function(i, elem) {
-
-                //     //console.log(elem);
-
-                //     // if (elem.parent){
-                //     //     if(elem.parent.attribs){
-                //     //         if(elem.parent.attribs['ng-include']){
-                //     //             if(elem.parent.attribs['ng-include'].indexOf('product-detail') > -1){
-
-                //     //                 console.log(elem.parent.children);
-
-
-                //     //             }
-                //     //         }
-                //     //     }
-                //     // }
-
-                //         if (elem.attribs['ng-include']){ 
-                //             console.log(elem.attribs['ng-include']);
-                //             if (elem.attribs['ng-include'].indexOf('product-detail') > -1){ //sort the two types of images to collect
-                //                 //"http://www.urbanoutfitters.com/urban/images/swatches/33749656_010_s.png"
-
-                //                 console.log(elem);
-
-
-                //                 // if (elem.attribs.src.indexOf('/images/swatches/') > -1){ //get color swatches
-
-                //                 //     var n = elem.attribs.src.lastIndexOf('/');
-                //                 //     var result = elem.attribs.src.substring(n + 1);
-
-                //                 //     //console.log(result);
-
-                //                 // }
-
-                //                 // //Collect color numbers first, then collect all images on page 
-                //                 // //loop through ng-repeat 
-
-
-                //                 // if (elem.attribs.src.indexOf("/product/Mini") > -1){ //finding all images that have Mini (all images to scrape)         
-                //                 //     var s = elem.attribs.src.replace("Mini", "Large"); //get the bigger one
-                //                 //     newItem.images.push(s);
-                //                 // }
-                //             }
-                //         }
-                //     //}
-                // });
-
-                // //////////Construct item name from Brand Name + Product Name /////////////
-                // var brandName = '';
-                // //get brand name
-                // $("section[id='brand-title']").map(function(i, section) {
-                //     for (var i = 0; i < section.children.length; i++) { 
-                //         if (section.children[i].name == 'h2'){
-                //            brandName = section.children[i].children[0].children[0].data;               
-                //         }
-                //     }
-                // });
-                // //get product name
-                // $("section[id='product-title']").map(function(i, section) {
-                //     for (var i = 0; i < section.children.length; i++) { 
-                //         if (section.children[i].name == 'h1'){
-                //            newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
-                //         }
-                //     }
-                // });
-                // //////////////////////////////////////////////////////////////////////////
-
-                // //get item price
-                // $('td').each(function(i, elem) {
-                //     if (elem.attribs.class.indexOf('item-price') > -1){
-                //        newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
-                //     }
-                // });
-
-                // //get the styleId to query nordstrom server with from the product URL. lastindexof gets item from end of URL. 
-                // //split('?') kills anything after productID in URL
-                // newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
-
-                // if (newItem.styleId) {
-                //     resolve(newItem);
-                // } else {
-                //     console.log('missing params', newItem);
-                //     reject('missing params')
-                // }
+                        //END OF LOOP, MOVE ON NOW to getting inventory
+                        if (body['product']['colors'].length == i + 1){ 
+                            if (newItems[0].productId) { //if there's at least one item in array that has a productId
+                                resolve(newItems); //go to inventory query
+                            } else {
+                                console.log('missing params', newItem);
+                                reject('missing params')
+                            }
+                        }
+                    }  
+                }
 
             } else {
                 if (error) {
@@ -254,69 +186,81 @@ function getItem(url) {
 }
 
 
-function getInventory(newItem) {
+function getInventory(newItems) {
     return new Promise(function(resolve, reject) {
 
-        var postalcode = '10002'; //iterate through all zipcodes
-        var radius = '100'; //max is 100 miles
+        console.log(newItems);
+
+        var postalcode = '66006'; //iterate through all zipcodes? chose this one because we can probably querying whole USA with this lat lng in center of map
+        var radius = '6000'; //max is 6000 miles i think? so like...the whole USA? looks like it works :)
         var physicalStores = [];
 
-        var url = 'http://shop.nordstrom.com/es/GetStoreAvailability?styleid='+newItem.styleId+'&type=Style&instoreavailability=true&radius='+radius+'&postalcode='+postalcode+'&format=json';
-        
-        var options = {
-            url: url,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
-            }
-        };
-        request(options, function(error, response, body) {
-            if ((!error) && (response.statusCode == 200)) {
-                body = JSON.parse(body);
-                body = JSON.parse(body); //o.m.g. request, just do the double parse and don't ask 
+        async.eachSeries(newItems, function iterator(item, callback) {
 
-                async.eachSeries(body["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
+            var url = 'http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance='+radius+'&selectedColor='+item.colorId+'&skuId='+item.skuId+'&zipCode='+postalcode+'';
 
-                    var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/'+item.StoreNumber+'?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
-    
-                    var options = {
-                        url: url,
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
-                        }
-                    };
-                    request(options, function(error, response, body) {
-                        body = JSON.parse(body);
-                        var storeObj = {
-                            name: body.StoreCollection[0].StoreName,
-                            type: body.StoreCollection[0].StoreType,
-                            StreetAddress: body.StoreCollection[0].StreetAddress,
-                            City: body.StoreCollection[0].City,
-                            State: body.StoreCollection[0].State,
-                            PostalCode: body.StoreCollection[0].PostalCode,
-                            PhoneNumber: body.StoreCollection[0].PhoneNumber,
-                            Hours: body.StoreCollection[0].Hours,
-                            Lat: body.StoreCollection[0].Latitude,
-                            Lng: body.StoreCollection[0].Longitude
-                        }
-                        physicalStores.push(storeObj);     
-                        setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
-                    });
-
-                },function(err,res){
-                    console.log('newItem: ', newItem);
-                    console.log('stores in zip code '+postalcode+' have '+newItem.name+': ', physicalStores);
-                });
-
-            } else {
-                if (error) {
-                    console.log('getinventory error ')
-                    reject(error)
-                } else {
-                    console.log('bad response')
-                    reject('Bad response from inventory request')
+            var options = {
+                url: url,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                 }
-            }
-        })
+            };
+            request(options, function(error, response, body) {
+                if ((!error) && (response.statusCode == 200)) {
+                    body = JSON.parse(body);
+
+                    console.log(body);
+
+
+                    //ONLY CREATE ITEMS BASED ON COLOR / PRODUCT ID, not size. just query here to determine if any size is in stock matchng that product id + color
+
+                    // async.eachSeries(body["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
+
+                    //     var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/'+item.StoreNumber+'?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
+        
+                    //     var options = {
+                    //         url: url,
+                    //         headers: {
+                    //             'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+                    //         }
+                    //     };
+                    //     request(options, function(error, response, body) {
+                    //         body = JSON.parse(body);
+                    //         var storeObj = {
+                    //             name: body.StoreCollection[0].StoreName,
+                    //             type: body.StoreCollection[0].StoreType,
+                    //             StreetAddress: body.StoreCollection[0].StreetAddress,
+                    //             City: body.StoreCollection[0].City,
+                    //             State: body.StoreCollection[0].State,
+                    //             PostalCode: body.StoreCollection[0].PostalCode,
+                    //             PhoneNumber: body.StoreCollection[0].PhoneNumber,
+                    //             Hours: body.StoreCollection[0].Hours,
+                    //             Lat: body.StoreCollection[0].Latitude,
+                    //             Lng: body.StoreCollection[0].Longitude
+                    //         }
+                    //         physicalStores.push(storeObj);     
+                    //         setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+                    //     });
+
+
+
+                } else {
+                    if (error) {
+                        console.log('getinventory error ')
+                        reject(error)
+                    } else {
+                        console.log('bad response')
+                        reject('Bad response from inventory request')
+                    }
+                }
+            });
+
+            setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+        },function(err,res){
+            console.log('done');
+        });
+
+
 
     });
 }
