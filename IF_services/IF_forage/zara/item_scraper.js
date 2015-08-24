@@ -3,68 +3,95 @@ var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
-var request = require('request')
+var request = require('request');
 
-var Stores = []
-var url = 'http://www.zara.com/us/en/man/jackets/view-all/suede-jacket-c758501p2774455.html';
-//global var to store existing item 
-existingItem = {};
-//Flag if item exists
-exists = false;
 
-async.waterfall([
-        function(callback) {
-            checkIfScraped(url).then(function(items) {
-                if (items.length > 0) {
-                    exists = true;
-                    existingItems = items; //proxy var for later processing
-                    callback(null, items)
-                } else {
-                    callback(null, null)
+
+module.exports = function scrapeItem(url) {
+
+    //set global var to indicate category based on catalog url
+    if (url.toString().trim().indexOf('/woman') > -1) {
+        category = 'womens'
+    } else if (url.toString().trim().indexOf('/trf') > -1) {
+        category = 'trf'
+    } else if (url.toString().trim().indexOf('/man') > -1) {
+        category = 'mens'
+    } else if (url.toString().trim().indexOf('/girl') > -1) {
+        category = 'girls'
+    } else if (url.toString().trim().indexOf('/boy') > -1) {
+        category = 'boys'
+    } else if (url.toString().trim().indexOf('/baby-girl') > -1) {
+        category = 'baby-girls'
+    } else if (url.toString().trim().indexOf('/baby-boy') > -1) {
+        category = 'baby-boys'
+    } else if (url.toString().trim().indexOf('/mini') > -1) {
+        category = 'mini'
+    }
+
+    //Flag if item exists
+    exists = false;
+
+    return new Promise(function(resolve, reject) {
+        async.waterfall([
+                function(callback) {
+                    checkIfScraped(url).then(function(items) {
+                        if (items.length > 0) {
+                            exists = true;
+                            existingItems = items; //proxy var for later processing
+                            callback(null, items)
+                        } else {
+                            callback(null, null)
+                        }
+                    }).catch(function(err) {
+                        callback(err)
+                    })
+                },
+                function(existingItems, callback) {
+                    if (!exists) {
+                        scrapeDetails(url).then(function(item) {
+                            callback(null, item)
+                        }).catch(function(err) {
+                            callback(err)
+                        })
+                    } else if (exists) {
+                        callback(null, existingItems)
+                    }
+                },
+                function(item, callback) {
+                    loadStores().then(function(stores) {
+                        callback(null, item, stores)
+                    }).catch(function(err) {
+                        callback(err)
+                    })
+                },
+                function(item, stores, callback) {
+                    getInventory(item, stores).then(function(inventory) {
+                        callback(null, item, inventory)
+                    }).catch(function(err) {
+                        callback(err)
+                    })
+                },
+                function(item, inventory, callback) {
+                    processItems(inventory, item).then(function(savedItems) {
+                        callback(null, savedItems)
+                    }).catch(function(err) {
+                        callback(err)
+                    })
                 }
-            }).catch(function(err) {
-                callback(err)
-            })
-        },
-        function(existingItems, callback) {
-            if (!exists) {
-                scrapeDetails(url).then(function(item) {
-                    callback(null, item)
-                }).catch(function(err) {
-                    callback(err)
-                })
-            } else if (exists) {
-                callback(null, existingItems)
-            }
-        },
-        function(item, callback) {
-            loadStores().then(function(stores) {
-                callback(null, item, stores)
-            }).catch(function(err) {
-                callback(err)
-            })
-        },
-        function(item, stores, callback) {
-            getInventory(item, stores).then(function(inventory) {
-                callback(null, item, inventory)
-            }).catch(function(err) {
-                callback(err)
-            })
-        },
-        function(item, inventory, callback) {
-            processItems(inventory, item).then(function(savedItems) {
-                callback(null, savedItems)
-            }).catch(function(err) {
-                callback(err)
-            })
-        }
-    ],
-    function(err, items) {
-        if (err) {
-            console.log(err)
-        }
-        console.log('Finished scraping ', items.length, ' items!')
-    });
+            ],
+            function(err, items) {
+                if (err) {
+                    console.log(err)
+                    reject(err)
+                }
+                if (!exists) {
+                    console.log('Processed ', items.length, ' items.')
+                }
+
+                resolve()
+            });
+    })
+}
 
 
 function checkIfScraped(url) {
@@ -132,6 +159,15 @@ function scrapeDetails(url) {
                             newItem.campaign = elem.attribs['data-ref'].split('-')[1]; //ID after '-' is the campaign code, used by Inditex API
                             newItem.name = elem.attribs['data-name'];
                             newItem.category = elem.attribs['data-category'];
+                            newItem.type = category
+
+                            //Create a bool to exclude kids and baby items from searchability for now
+                            var acceptableCategories = 'womens,mens,trf'
+                            if (acceptableCategories.indexOf(newItem.type) == -1) {
+                                newItem.searchable = false;
+                            } else {
+                                newItem.searchable = true;
+                            }
                         }
                         if (elem.attribs['data-src']) {
                             newItem.images.push('https:' + elem.attribs['data-src'].split('?')[0]); //push images to array after removing URL params
@@ -182,10 +218,10 @@ function loadStores() {
 }
 
 
-function getInventory(newItem, stores) {
+function getInventory(itemData, stores) {
 
     //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
-    var Item = !exists ? newItem : newItem[0].source_zara_item
+    var Item = !exists ? itemData : itemData[0].source_zara_item
         //Map-out storeIds out of array to use in URL query below.
     var storeIds = stores.map(function(obj) {
         return obj.source_zara_store.storeId
@@ -222,7 +258,7 @@ function getInventory(newItem, stores) {
 }
 
 function processItems(inventory, itemData) {
-    var savedItems = []
+
     return new Promise(function(resolve, reject) {
         if (!inventory && inventory.length < 1) {
             return reject('No inventory found for this item. Aborting.')
@@ -245,7 +281,7 @@ function processItems(inventory, itemData) {
                                 count++
                                 return callback()
                             }
-                            console.log('Updated inventory for store: ',store.physicalStoreId)
+                            console.log('Updated inventory for store: ', store.physicalStoreId)
                             count++
                             callback()
                         })
@@ -256,12 +292,14 @@ function processItems(inventory, itemData) {
                     callback()
                 })
             }, function(err) {
-                console.log('Finished updating inventory.')
+                // console.log('Finished updating inventory.')
+                resolve('Finished updating inventory.')
             })
         } //end of if item exists
 
         //If item has not been scraped, create a new item in db for each store in inventory list
         if (!exists) {
+            var savedItems = []
             var count = 0;
             async.eachSeries(inventory, function(store, callback) {
                         //Create new item for each store in inventory list.
@@ -299,7 +337,12 @@ function processItems(inventory, itemData) {
                                         i.loc.coordinates[0] = parseFloat(s.loc.coordinates[0]);
                                         i.loc.coordinates[1] = parseFloat(s.loc.coordinates[1]);
                                         i.parent.mongoId = s._id;
-                                        i.parent.name = s.id;
+                                        if (s.name) {
+                                            i.parent.name = s.name;
+                                        } else {
+                                            i.parent.name = s.id
+                                        }
+
                                         i.parent.id = s.id;
                                     }
                                     //Save item
@@ -308,7 +351,7 @@ function processItems(inventory, itemData) {
                                             console.error(e);
                                         }
                                         savedItems.push(item)
-                                        console.log('Saved', savedItems.length, 'items.')
+                                        console.log('Saved ', item.id)
                                         count++
                                         callback();
                                     })

@@ -272,6 +272,7 @@ function saveStores(stores) {
                         n.hasloc = true;
                         n.loc.coordinates[0] = parseFloat(store.lng);
                         n.loc.coordinates[1] = parseFloat(store.lat);
+                        n.name = 'Zara ' + store.storeAddress
                         uniquer.uniqueId('zara ' + store.storeAddress, 'Landmark').then(function(output) {
                             n.id = output;
                             n.save(function(e, newStore) {
