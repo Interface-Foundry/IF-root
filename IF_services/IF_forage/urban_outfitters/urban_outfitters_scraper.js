@@ -4,10 +4,15 @@ var cheerio = require('cheerio');
 var Promise = require('bluebird');
 var async = require('async');
 // var uniquer = require('../../uniquer');
-var request = require('request')
+var request = require('request');
+var urlapi = require('url');
 
 var Stores = []
-var url = 'http://shop.nordstrom.com/s/canada-goose-kensington-down-parka-with-genuine-coyote-fur-trim/3591024';
+var url = 'http://www.urbanoutfitters.com/urban/catalog/productdetail.jsp?id=33749656&category=W-ADIDAS';
+
+// http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance=50&selectedColor=054&skuId=32175697&zipCode=10002
+// skuId ---> need to iterate through all sku based on size (or what is the main URL sku??)
+
 
 async.waterfall([
     // function(callback) {
@@ -22,13 +27,13 @@ async.waterfall([
             callback(err)
         })
     },
-    function(item, callback) {
-        getInventory(item).then(function(item) {
-            callback(null, item)
-        }).catch(function(err) {
-            callback(err)
-        })
-    },
+    // function(item, callback) {
+    //     getInventory(item).then(function(item) {
+    //         callback(null, item)
+    //     }).catch(function(err) {
+    //         callback(err)
+    //     })
+    // },
     // function(item, callback) {
     //     getInventory(item).then(function(inventory) {
     //         callback(null, item, inventory)
@@ -90,14 +95,24 @@ function checkIfScraped(url) {
 
 function getItem(url) {
     return new Promise(function(resolve, reject) {
+
+        // var queryURL = url.substring(url.lastIndexOf("/") + 1).split('?')[0]; //get product ID from URL
+        // queryURL =  //use ID to query for item
+
+        // console.log();
+
+        //console.log(queryURL);
+        var newItems = []; //multiple colors for item == multiple items
         //construct newItem object
         var newItem = {
             src: url, 
-            images: []
+            images: [],
+            colors: []
         };
+        var latestColor;
 
         var options = {
-            url: url,
+            url: 'http://www.urbanoutfitters.com/api/v1/product/'+getParameterByName('id')+'',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
@@ -105,62 +120,133 @@ function getItem(url) {
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
 
-                $ = cheerio.load(body); //load HTML
+                //console.log(body);
+                body = JSON.parse(body);
 
-                //iterate on images found in HTML
-                $('img').each(function(i, elem) {
-                    if (elem.attribs){
-                        if (elem.attribs.src){ //sort the two types of images to collect
-                            if (elem.attribs.src.indexOf("/product/Mini") > -1){ //finding all images that have Mini (all images to scrape)         
-                                var s = elem.attribs.src.replace("Mini", "Large"); //get the bigger one
-                                newItem.images.push(s);
-                            }
-                        }
+                for (var i = 0; i < body['product']['colors'].length; i++) { 
+
+                    newItems[i] = {
+                        images: [],
+                        src: url
                     }
-                });
 
-                //////////Construct item name from Brand Name + Product Name /////////////
-                var brandName = '';
-                //get brand name
-                $("section[id='brand-title']").map(function(i, section) {
-                    for (var i = 0; i < section.children.length; i++) { 
-                        if (section.children[i].name == 'h2'){
-                           brandName = section.children[i].children[0].children[0].data;               
-                        }
+                    for (var z = 0; z < body['product']['colors'][i]['viewCode'].length; z++) { 
+                        newItems[i].images.push('http://images.urbanoutfitters.com/is/image/UrbanOutfitters/' + body['product']['colors'][i].id + '_' + body['product']['colors'][i]['viewCode'][z] + '?$mlarge$&defaultImage=');
                     }
-                });
-                //get product name
-                $("section[id='product-title']").map(function(i, section) {
-                    for (var i = 0; i < section.children.length; i++) { 
-                        if (section.children[i].name == 'h1'){
-                           newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
-                        }
-                    }
-                });
-                //////////////////////////////////////////////////////////////////////////
-
-                //get item price
-                $('td').each(function(i, elem) {
-                    if (elem.attribs.class.indexOf('item-price') > -1){
-                       newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
-                    }
-                });
-
-                //get the styleId to query nordstrom server with from the product URL. lastindexof gets item from end of URL. 
-                //split('?') kills anything after productID in URL
-                newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
-
-                if (newItem.styleId) {
-                    resolve(newItem);
-                } else {
-                    console.log('missing params', newItem);
-                    reject('missing params');
+                    newItems[i].name = body['product']['displayName'] + ' ' + body['product']['colors'][i]['displayName'];
+                    newItems[i].productId = body['product']['productId'];
+                    //newItem.push();
+                    // latestColor = body['product']['colors'][i].id);
+                    // if (body['product']['colors'][i].id))
+                    //newItems.push(newItem);
                 }
+
+                console.log(newItems);
+
+                // $ = cheerio.load(body); //load HTML
+
+                // newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
+
+                //API QUERY FOR ITEM INFO
+                //http://www.urbanoutfitters.com/api/v1/product/33749656?siteCode=urban
+
+                // $('.product-swatches').filter(function(){
+                //     var data = $(this);
+
+                //    // console.log(data);
+                // });
+
+                // //iterate on images found in HTML
+                // $('img').each(function(i, elem) {
+
+                //     //console.log(elem);
+
+                //     // if (elem.parent){
+                //     //     if(elem.parent.attribs){
+                //     //         if(elem.parent.attribs['ng-include']){
+                //     //             if(elem.parent.attribs['ng-include'].indexOf('product-detail') > -1){
+
+                //     //                 console.log(elem.parent.children);
+
+
+                //     //             }
+                //     //         }
+                //     //     }
+                //     // }
+
+                //         if (elem.attribs['ng-include']){ 
+                //             console.log(elem.attribs['ng-include']);
+                //             if (elem.attribs['ng-include'].indexOf('product-detail') > -1){ //sort the two types of images to collect
+                //                 //"http://www.urbanoutfitters.com/urban/images/swatches/33749656_010_s.png"
+
+                //                 console.log(elem);
+
+
+                //                 // if (elem.attribs.src.indexOf('/images/swatches/') > -1){ //get color swatches
+
+                //                 //     var n = elem.attribs.src.lastIndexOf('/');
+                //                 //     var result = elem.attribs.src.substring(n + 1);
+
+                //                 //     //console.log(result);
+
+                //                 // }
+
+                //                 // //Collect color numbers first, then collect all images on page 
+                //                 // //loop through ng-repeat 
+
+
+                //                 // if (elem.attribs.src.indexOf("/product/Mini") > -1){ //finding all images that have Mini (all images to scrape)         
+                //                 //     var s = elem.attribs.src.replace("Mini", "Large"); //get the bigger one
+                //                 //     newItem.images.push(s);
+                //                 // }
+                //             }
+                //         }
+                //     //}
+                // });
+
+                // //////////Construct item name from Brand Name + Product Name /////////////
+                // var brandName = '';
+                // //get brand name
+                // $("section[id='brand-title']").map(function(i, section) {
+                //     for (var i = 0; i < section.children.length; i++) { 
+                //         if (section.children[i].name == 'h2'){
+                //            brandName = section.children[i].children[0].children[0].data;               
+                //         }
+                //     }
+                // });
+                // //get product name
+                // $("section[id='product-title']").map(function(i, section) {
+                //     for (var i = 0; i < section.children.length; i++) { 
+                //         if (section.children[i].name == 'h1'){
+                //            newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
+                //         }
+                //     }
+                // });
+                // //////////////////////////////////////////////////////////////////////////
+
+                // //get item price
+                // $('td').each(function(i, elem) {
+                //     if (elem.attribs.class.indexOf('item-price') > -1){
+                //        newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
+                //     }
+                // });
+
+                // //get the styleId to query nordstrom server with from the product URL. lastindexof gets item from end of URL. 
+                // //split('?') kills anything after productID in URL
+                // newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
+
+                // if (newItem.styleId) {
+                //     resolve(newItem);
+                // } else {
+                //     console.log('missing params', newItem);
+                //     reject('missing params')
+                // }
+
             } else {
                 if (error) {
                     console.log('error: ', error)
                 } else if (response.statusCode !== 200) {
-                    console.log('response.statusCode: ', response.statusCode);
+                    console.log('response.statusCode: ', response.statusCode)
                 }
             }
         })
@@ -345,4 +431,11 @@ function saveItems(newItem) {
             resolve(savedItems)
         })
     })
+}
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(url);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
