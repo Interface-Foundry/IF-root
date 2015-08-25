@@ -135,7 +135,8 @@ function getItem(url) {
                         color: body.product.skusInfo[i].color,
                         colorId: body.product.skusInfo[i].colorId,
                         size: body.product.skusInfo[i].size,
-                        sizeId: body.product.skusInfo[i].sizeId
+                        sizeId: body.product.skusInfo[i].sizeId,
+                        physicalStores: []
                     }
 
                     if (body.product.skusInfo.length == i + 1){ 
@@ -189,17 +190,17 @@ function getItem(url) {
 function getInventory(newItems) {
     return new Promise(function(resolve, reject) {
 
-        console.log(newItems);
-
         var postalcode = '66006'; //iterate through all zipcodes? chose this one because we can probably querying whole USA with this lat lng in center of map
         var radius = '6000'; //max is 6000 miles i think? so like...the whole USA? looks like it works :)
-        var physicalStores = [];
+        //var physicalStores = [];
+        //var colorIdsTemp = [];
 
         async.eachSeries(newItems, function iterator(item, callback) {
 
-            var url = 'http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance='+radius+'&selectedColor='+item.colorId+'&skuId='+item.skuId+'&zipCode='+postalcode+'';
+           // colorIdsTemp.push(item.colorId);
 
-            var options = {
+            var url = 'http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance='+radius+'&selectedColor='+item.colorId+'&skuId='+item.skuId+'&zipCode='+postalcode+'';
+            var options = { 
                 url: url,
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
@@ -207,42 +208,9 @@ function getInventory(newItems) {
             };
             request(options, function(error, response, body) {
                 if ((!error) && (response.statusCode == 200)) {
+
                     body = JSON.parse(body);
-
-                    console.log(body);
-
-
-                    //ONLY CREATE ITEMS BASED ON COLOR / PRODUCT ID, not size. just query here to determine if any size is in stock matchng that product id + color
-
-                    // async.eachSeries(body["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
-
-                    //     var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/'+item.StoreNumber+'?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
-        
-                    //     var options = {
-                    //         url: url,
-                    //         headers: {
-                    //             'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
-                    //         }
-                    //     };
-                    //     request(options, function(error, response, body) {
-                    //         body = JSON.parse(body);
-                    //         var storeObj = {
-                    //             name: body.StoreCollection[0].StoreName,
-                    //             type: body.StoreCollection[0].StoreType,
-                    //             StreetAddress: body.StoreCollection[0].StreetAddress,
-                    //             City: body.StoreCollection[0].City,
-                    //             State: body.StoreCollection[0].State,
-                    //             PostalCode: body.StoreCollection[0].PostalCode,
-                    //             PhoneNumber: body.StoreCollection[0].PhoneNumber,
-                    //             Hours: body.StoreCollection[0].Hours,
-                    //             Lat: body.StoreCollection[0].Latitude,
-                    //             Lng: body.StoreCollection[0].Longitude
-                    //         }
-                    //         physicalStores.push(storeObj);     
-                    //         setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
-                    //     });
-
-
+                    item.physicalStores = body.stores; //put store results in each item object
 
                 } else {
                     if (error) {
@@ -254,13 +222,101 @@ function getInventory(newItems) {
                     }
                 }
             });
-
             setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
         },function(err,res){
-            console.log('done');
+
+            var finalItems = [];
+            var currentColorId = '';
+            var iterateCheck = 0;
+
+            var colorItemObjs = _.groupBy(newItems, 'colorId'); //group items by colorId
+
+            for (var key in colorItemObjs) { 
+
+                for (var z = 0; z < colorItemObjs[key].length; z++) { 
+
+                    //ADD TO CURRENT ITEM BY COLOR
+                    if (colorItemObjs[key][z].colorId == currentColorId){ 
+
+                        finalItems[iterateCheck].sizeIds.push({ //store the sizes for each product / color
+                            skuId: colorItemObjs[key][z].skuId,
+                            size: colorItemObjs[key][z].size,
+                            sizeId: colorItemObjs[key][z].sizeId
+                        });
+
+                        if (colorItemObjs[key][z].physicalStores){ //add stores for additional item sizes if there are results
+                            for (var x = 0; x < colorItemObjs[key][z].physicalStores.length; x++) {
+                                finalItems[iterateCheck].physicalStores.push(colorItemObjs[key][z].physicalStores[x]);
+                            }
+                        }
+                    }
+                    //CREATE NEW ITEM BY COLOR
+                    else {  
+
+                        currentColorId = colorItemObjs[key][z].colorId; //update currentColorId with latest color in array
+
+                        var newItem = { //create final items (there's a better way to do this with underscore =_=)
+                            productId: colorItemObjs[key][z].productId,
+                            name: colorItemObjs[key][z].name,
+                            price: colorItemObjs[key][z].price,
+                            color: colorItemObjs[key][z].color,
+                            colorId: colorItemObjs[key][z].colorId,
+                            src: colorItemObjs[key][z].src,
+                            sizeIds: [],
+                            images: colorItemObjs[key][z].images,
+                            physicalStores: []
+                        };
+
+                        newItem.sizeIds.push({ //store the sizes for each product / color
+                            skuId: colorItemObjs[key][z].skuId,
+                            size: colorItemObjs[key][z].size,
+                            sizeId: colorItemObjs[key][z].sizeId
+                        });
+
+                        if (colorItemObjs[key][z].physicalStores){ //add stores if there are results
+                            for (var x = 0; x < colorItemObjs[key][z].physicalStores.length; x++) {
+                                newItem.physicalStores.push(colorItemObjs[key][z].physicalStores[x]);
+                            }
+                        }
+
+                        //create new item
+                        finalItems.push(newItem); //add final item by color (will contain all sizes and skuIDs per size)
+                    }
+                }
+
+                iterateCheck++;
+
+                //ON FINAL Z LOOP END
+                if (Object.keys(colorItemObjs).length == iterateCheck){ //fake async
+                    finalOutput(finalItems);
+                }
+
+            }
+
+
+            function finalOutput(finalItems){
+
+                for (var z = 0; z < finalItems.length; z++) {
+
+                    //console.log(finalItems[z].physicalStores.length);
+
+                    var newStores = _.uniq(finalItems[z].physicalStores, 'storeName'); //remove duplicate physical stores
+
+                    //console.log(newStores.length);
+
+                    finalItems[z].physicalStores = newStores;
+                    //console.log(finalItems[z].physicalStores.length);
+
+                }
+
+                //FINAL OUTPUT!!!!!!!
+                console.log('FINAL SCRAPE OUTPUT');
+                console.log(finalItems); //END FINAL ITEMS HERE!!!!!
+
+            }
+            
+            
         });
-
-
 
     });
 }
