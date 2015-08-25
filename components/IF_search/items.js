@@ -4,6 +4,7 @@ var db = require('../IF_schemas/db');
 var elasticsearch = require('elasticsearch');
 var Promise = require('bluebird');
 var _ = require('lodash');
+var deepcopy = require('deepcopy');
 
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
@@ -278,11 +279,35 @@ function textSearch(q, page) {
             var ids = results.hits.hits.map(function(r) {
                 return r._id;
             });
-            return db.Landmarks.find({
+
+            var users = db.Users.find({
+                $or: [{
+                    'profileID': q.text
+                }, {
+                    'local.email': q.text
+                }]
+            }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
+
+            var items = db.Landmarks.find({
                 _id: {
                     $in: ids
                 }
             }).exec();
+
+            return Promise.settle([users, items]).then(function(arry) {
+                var u = arry[0];
+                var i = arry[1];
+
+                if (u.isFulfilled() && i.isFulfilled()) {
+                    var results = u.value().concat(i.value())
+                    return results
+                } else if (i.isFulfilled() && !u.isFulfilled()) {
+                    return i
+                } else if (u.isFulfilled() && !i.isFulfilled()) {
+                    return u
+                }
+            })
+
         });
 }
 
@@ -317,7 +342,9 @@ function filterSearch(q, page) {
     }
 
     if (q.categories && q.categories.length > 0) {
-        query['itemTags.categories'] = {$in: q.categories};
+        query['itemTags.categories'] = {
+            $in: q.categories
+        };
 
     }
 
@@ -385,13 +412,17 @@ app.post(trendingItemsUrl, function(req, res, next) {
         var url = global.config.neighborhoodServer.url + '/findArea?lat=' + req.body.loc.lat + '&lon=' + req.body.loc.lon;
         return Promise.settle([search(q, 0), request(url)])
             .then(function(results) {
-                var area = JSON.parse(results[1].value()[0].body)
-                var items = results[0].value()
-                data = {
-                    category: 'Trending in ' + area.area,
-                    results: items
+                if (results[0].isFulfilled() && results[1].isFulfilled()) {
+                    var area = JSON.parse(results[1].value()[0].body)
+                    var items = results[0].value()
+                    data = {
+                        category: 'Trending in ' + area.area,
+                        results: items
+                    }
+                    resolve(data)
+                } else {
+                    console.log('!!!!', results[1].reason())
                 }
-                resolve(data)
             })
     })
 
@@ -437,9 +468,9 @@ app.post(trendingItemsUrl, function(req, res, next) {
                 query: req.body,
                 links: links,
                 results: results.reduce(function(full, r) {
-                    if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0 && r._settledValue.category.length < 50 ) {
+                    if (r._settledValue && r._settledValue.results && r._settledValue.results.length > 0 && r._settledValue.category.length < 50) {
                         full.push(r._settledValue)
-                    } 
+                    }
                     return full;
                 }, [])
             });
