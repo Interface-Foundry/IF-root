@@ -99,7 +99,7 @@ function checkIfScraped(url) {
     return new Promise(function(resolve, reject) {
         db.Landmarks
             .find({
-                'source_zara_item.src': url.toString().trim()
+                'source_generic_item.src': url.toString().trim()
             })
             .exec(function(e, items) {
                 if (items) {
@@ -199,7 +199,7 @@ function scrapeDetails(url) {
 function loadStores() {
     return new Promise(function(resolve, reject) {
         db.Landmarks.find({
-            'source_zara_store': {
+            'source_generic_store': {
                 $exists: true
             }
         }, function(e, stores) {
@@ -221,10 +221,10 @@ function loadStores() {
 function getInventory(itemData, stores) {
 
     //We switch var Item reference depending on whether this is a whole new item or an existing one in the db.
-    var Item = !exists ? itemData : itemData[0].source_zara_item
+    var Item = !exists ? itemData : itemData[0].source_generic_item
         //Map-out storeIds out of array to use in URL query below.
     var storeIds = stores.map(function(obj) {
-        return obj.source_zara_store.storeId
+        return obj.source_generic_store.storeId
     })
 
     return new Promise(function(resolve, reject) {
@@ -267,13 +267,13 @@ function processItems(inventory, itemData) {
         if (exists) {
             async.eachSeries(itemData, function(item, callback) {
                 async.eachSeries(inventory, function(store, callback2) {
-                    if (item.source_zara_item.storeId == store.physicalStoreId) {
+                    if (item.source_generic_item.storeId == store.physicalStoreId) {
                         //Use sizeStocks property in inventory item if it exists, top-level if not. 
                         var query = store.sizeStocks ? store.sizeStocks : store;
                         //Update items inventory info
                         item.update({
                             $set: {
-                                'source_zara_item.inventory': query
+                                'source_generic_item.inventory': query
                             }
                         }, function(e, result) {
                             if (e) {
@@ -304,12 +304,12 @@ function processItems(inventory, itemData) {
             async.eachSeries(inventory, function(store, callback) {
                         //Create new item for each store in inventory list.
                         var i = new db.Landmark();
-                        i.source_zara_item = itemData;
-                        i.source_zara_item.storeId = store.physicalStoreId.toString().trim();
+                        i.source_generic_item = itemData;
+                        i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
                         if (store.sizeStocks) {
-                            i.source_zara_item.inventory = store.sizeStocks;
+                            i.source_generic_item.inventory = store.sizeStocks;
                         } else {
-                            i.source_zara_item.inventory = store
+                            i.source_generic_item.inventory = store
                         }
 
                         i.hasloc = true;
@@ -317,7 +317,7 @@ function processItems(inventory, itemData) {
                         uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
                                 i.id = output;
                                 db.Landmarks.findOne({
-                                    'source_zara_store.storeId': store.physicalStoreId.toString().trim()
+                                    'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
                                     if (err) {
                                         console.log(err)

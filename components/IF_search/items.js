@@ -302,9 +302,9 @@ function textSearch(q, page) {
                     var results = u.value().concat(i.value())
                     return results
                 } else if (i.isFulfilled() && !u.isFulfilled()) {
-                    return i
+                    return i.value()
                 } else if (u.isFulfilled() && !i.isFulfilled()) {
-                    return u
+                    return u.value()
                 }
             })
 
@@ -421,7 +421,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
                     }
                     resolve(data)
                 } else {
-                    console.log('!!!!', results[1].reason())
+                    console.log(results[1].reason())
                 }
             })
     })

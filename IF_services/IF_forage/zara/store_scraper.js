@@ -258,7 +258,7 @@ function saveStores(stores) {
         async.each(stores, function(store, callback) {
             db.Landmarks
                 .findOne({
-                    'source_zara_store.storeId': store.storeId
+                    'source_generic_store.storeId': store.storeId
                 })
                 .exec(function(e, s) {
                     if (e) {
@@ -267,7 +267,7 @@ function saveStores(stores) {
                     }
                     if (!s) {
                         var n = new db.Landmark();
-                        n.source_zara_store = store;
+                        n.source_generic_store = store;
                         n.world = true;
                         n.hasloc = true;
                         n.loc.coordinates[0] = parseFloat(store.lng);
