@@ -206,7 +206,7 @@ router.post('/:id/delete', function(req, res, next) {
             }
 
             if (!look) {
-                res.sendStatus(200);
+                return res.send(200);
             }
 
             if (req.user._id.toString() === look.owner.mongoId) {
@@ -216,7 +216,7 @@ router.post('/:id/delete', function(req, res, next) {
                         err.niceMessage = 'Could not delete item';
                         return next(err);
                     }
-                    res.sendStatus(200);
+                    res.send(200);
                     console.log('deleted!')
                 })
             } else {

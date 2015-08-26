@@ -23,7 +23,7 @@ router.post('/:id/delete', function(req, res, next) {
 
             if (!item) {
                 // no problem, item doesn't exist.  this is idempotency
-                res.sendStatus(200);
+                return res.send(200);
             }
 
             if (req.user._id.toString() === item.owner.mongoId) {
@@ -44,7 +44,7 @@ router.post('/:id/delete', function(req, res, next) {
                             console.log(err)
                         }
                     })
-                    res.sendStatus(200);
+                    res.send(200);
                     console.log('deleted!')
                 })
             } else {
