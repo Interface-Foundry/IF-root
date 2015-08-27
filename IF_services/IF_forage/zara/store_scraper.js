@@ -65,6 +65,7 @@ async.whilst(
                                     console.log('Scraped ', stores.length, ' stores.')
                                 }
                                 else if (stores && stores.length < 1) {
+                                    console.log('No new stores found for zipcode.')
                                     notFoundCount++
                                 }
 
@@ -279,7 +280,8 @@ function saveStores(stores) {
                                 if (e) {
                                     return callback()
                                 }
-                                // console.log('new store: ', newStore)
+
+                                console.log('new store: ', newStore.source_generic_store.storeId)
                                 Stores.push(newStore)
                                 callback()
                             })

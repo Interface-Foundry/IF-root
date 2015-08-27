@@ -15,7 +15,7 @@ var boys = 'http://www.zara.com/us/en/new-in/boy-c286503.html'
 var babygirls = 'http://www.zara.com/us/en/new-in/baby-girl-c286504.html'
 var babyboys = 'http://www.zara.com/us/en/new-in/baby-boy-c286505.html'
 var mini = 'http://www.zara.com/us/en/new-in/mini-c286506.html'
-var catalogs = [mini, babygirls, mens, trf, girls, womens, boys, babyboys]
+var catalogs = [womens, mens, trf, girls, boys, mini, babygirls, babyboys]
 
 //This will loop forever through each of the catalogs listed above
 async.whilst(

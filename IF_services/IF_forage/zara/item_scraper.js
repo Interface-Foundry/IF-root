@@ -85,7 +85,7 @@ module.exports = function scrapeItem(url) {
                     reject(err)
                 }
                 if (!exists) {
-                    console.log('Processed ', items.length, ' items.')
+                    // console.log('Processed ', items.length, ' items.')
                 }
 
                 resolve()
@@ -317,7 +317,7 @@ function processItems(inventory, itemData) {
                         uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
                                 i.id = output;
                                 db.Landmarks.findOne({
-                                    'source_generic_store.storeId': store.physicalStoreId.toString().trim()
+                                    'source_generic_store.storeId': store.physicalStoreId
                                 }, function(err, s) {
                                     if (err) {
                                         console.log(err)
@@ -325,9 +325,12 @@ function processItems(inventory, itemData) {
                                         return callback()
                                     }
 
+
+
                                     if (!s) {
                                         //The parent store doesn't exist in db, skip this item for now.
-                                        console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
+                                        // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
+                                                  console.log('missing id: ',store.physicalStoreId.toString().trim())
                                         count++
                                         return callback()
                                     }
