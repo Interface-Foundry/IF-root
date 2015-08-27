@@ -4,9 +4,8 @@ var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
 var request = require('request');
-
-console.log('You are running the wrong file, please run item_navigator.js.')
-
+//Global var to hold fake user object
+owner = {}
 
 module.exports = function scrapeItem(url) {
 
@@ -34,6 +33,13 @@ module.exports = function scrapeItem(url) {
 
     return new Promise(function(resolve, reject) {
         async.waterfall([
+                function(callback) {
+                    loadFakeUser().then(function(items) {
+                        callback(null)
+                    }).catch(function(err) {
+                        callback(null)
+                    })
+                },
                 function(callback) {
                     checkIfScraped(url).then(function(items) {
                         if (items.length > 0) {
@@ -85,14 +91,49 @@ module.exports = function scrapeItem(url) {
                     console.log(err)
                     reject(err)
                 }
-                if (!exists) {
-                }
+                if (!exists) {}
 
                 resolve()
             });
     })
 }
 
+
+function loadFakeUser() {
+    return new Promise(function(resolve, reject) {
+        db.Users
+            .findOne({
+                'profileID': 'zara1204'
+            }).exec(function(e, o) {
+                if (o) {
+                    owner.profileID = o.profileID
+                    owner.name = o.name;
+                    owner.mongoId = o._id
+                    resolve()
+                }
+                if (!o) {
+                    var fake = new db.User()
+                    fake.name = 'Zara'
+                    fake.profileID = 'zara1204'
+                    fake.save(function(err, o) {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log(o.profileID)
+                            owner.profileID = o.profileID
+                            owner.name = o.name;
+                            owner.mongoId = o._id
+                            resolve()
+                        }
+                    })
+                }
+                if (e) {
+                    console.log(e)
+                    reject(e)
+                }
+            })
+    })
+}
 
 function checkIfScraped(url) {
     // first check if we have already scraped this thing
@@ -126,7 +167,8 @@ function scrapeDetails(url) {
         var newItem = {
             src: url,
             images: [],
-            inventory: []
+            inventory: [],
+            color: ''
         };
 
         var options = {
@@ -149,6 +191,10 @@ function scrapeDetails(url) {
                     newItem.price = $('span').attr('data-price').replace(/[^\d.-]/g, ''); //removing the 'USD' but keeping the .00 float val
                 } else if ($('span').attr('price')) {
                     newItem.price = $('span').attr('price').replace(/[^\d.-]/g, '');
+                }
+
+                if ($('div.colors div.imgCont')) {
+                    newItem.color = $('div.colors div.imgCont')['0'].attribs.title
                 }
 
                 //iterate on images found in HTML
@@ -305,7 +351,19 @@ function processItems(inventory, itemData) {
                         //Create new item for each store in inventory list.
                         var i = new db.Landmark();
                         i.name = itemData.name;
+                        i.owner = owner;
                         i.source_generic_item = itemData;
+                        i.itemImageURL = itemData.images;
+                        var tags = i.name.split(' ').map(function(word) {
+                            return word.toString().toLowerCase()
+                        })
+                        i.itemTags.text.push('Zara')
+                        tags.forEach(function(tag) {
+                            i.itemTags.text.push(tag)
+                        })
+                        i.itemTags.text.push(itemData.type)
+                        i.itemTags.colors.push(itemData.color)
+
                         i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
                         if (store.sizeStocks) {
                             i.source_generic_item.inventory = store.sizeStocks;
@@ -325,13 +383,10 @@ function processItems(inventory, itemData) {
                                         count++
                                         return callback()
                                     }
-
-
-
                                     if (!s) {
                                         //The parent store doesn't exist in db, skip this item for now.
                                         // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
-                                        console.log('missing id: ',store.physicalStoreId)
+                                        console.log('missing id: ', store.physicalStoreId)
                                         count++
                                         return callback()
                                     }

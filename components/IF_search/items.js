@@ -285,6 +285,10 @@ function textSearch(q, page) {
                     'profileID': q.text
                 }, {
                     'local.email': q.text
+                }, {
+                    'facebook.email': q.text
+                },{
+                    'name': q.text
                 }]
             }).select('-local.password -local.confirmedEmail -contact -bubbleRole -permissions').exec()
 
