@@ -624,6 +624,10 @@ setInterval(function() {
     });
 }, 15000);
 */
+
+
+
+
 // Search route
 app.get('/api/textsearch', function(req, res, next) {
     if (elasticsearch_up) {
