@@ -304,6 +304,7 @@ function saveStores(item, inventory) {
                                 if (!store) {
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
+                                    newStore.addressString = storeObj.StreetAddress.concat(', '+storeObj.City).concat(', '+storeObj.PostalCode)
                                     newStore.id = output;
                                     newStore.world = true;
                                     newStore.name = storeObj.name;
@@ -317,7 +318,7 @@ function saveStores(item, inventory) {
                                         if (e) {
                                             console.log('Error saving new store: ', e)
                                         }
-                                        console.log('Saved store.', s.id)
+                                        console.log('Saved store.', s.addressString)
                                         notFound = false;
                                         //Push into proxy array for cloning items at the end of eachseries
                                         Stores.push(s)

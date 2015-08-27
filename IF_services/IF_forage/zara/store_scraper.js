@@ -269,6 +269,7 @@ function saveStores(stores) {
                     if (!s) {
                         var n = new db.Landmark();
                         n.source_generic_store = store;
+                        n.addressString = store.storeAddress + ' ' + store.storeCity + ' ' + store.storeZipCode + ' ' + store.storeCountry
                         n.world = true;
                         n.hasloc = true;
                         n.loc.coordinates[0] = parseFloat(store.lng);
