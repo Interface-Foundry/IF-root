@@ -13,128 +13,133 @@ var urlify = require('urlify').create({
 });
 var request = require('request');
 var states = require('../zara/states')
-var stateIndex = 0;
-var currentState = states[stateIndex]
-var url = 'http://shop.nordstrom.com/s/canada-goose-kensington-down-parka-with-genuine-coyote-fur-trim/3591024';
 
-//For every url above iterate through all zipcodes on top level and each waterfall will be for one zipcode
+module.exports = function(url) {
 
+    return new Promise(function(resolve, reject) {
 
-//Basically for each item iterate through every zipcode and save all the returned stores, and clone the item for each store.
-//Steps:
-//For each item style Id
-//1. Iterate through all zipcodes given a radius
-//2. Create store (with unique store ID and identifier) if it does not exist
-//3. Create new item for each store 
-//4.
-//5.
+        stateIndex = 0;
+        currentState = states[stateIndex]
+        notFoundCount = 0;
 
 
+        async.whilst(
+            function() {
+                return states[stateIndex]
+            },
+            function(loop) {
 
-async.whilst(
-    function() {
-        return true
-    },
-    function(loop) {
-        var query = {
-            'state': currentState
-        }
-        db.Zipcodes.find(query).then(function(zips) {
-            var count = 0;
-            console.log('Current state: ' + currentState)
-            async.whilst(
-                function() {
-                    return count <= zips.length
-                },
-                function(cb) {
-                    async.eachSeries(zips, function(zip, finishedZipcode) {
-                            zipcode = zip.zipcode
+                var query = {
+                    'state': currentState
+                }
 
-                            async.waterfall([
-                                function(callback) {
-                                    scrapeItem(url).then(function(item) {
-                                        callback(null, item, zipcode)
-                                    }).catch(function(err) {
-                                        callback(err)
-                                    })
+                db.Zipcodes.find(query).then(function(zips) {
+                    var count = 0;
+                    console.log('Current state: ' + currentState)
+                    async.whilst(
+                        function() {
+                            return count <= zips.length
+                        },
+                        function(cb) {
+
+                            async.eachSeries(zips, function(zip, finishedZipcode) {
+                                    zipcode = zip.zipcode
+
+                                    async.waterfall([
+                                        function(callback) {
+                                            scrapeItem(url).then(function(item) {
+
+                                                callback(null, item, zipcode)
+                                            }).catch(function(err) {
+                                                callback(err)
+                                            })
+                                        },
+                                        function(item, zipcode, callback) {
+                                            getInventory(item, zipcode).then(function(inventory) {
+                                                // console.log('hitting this?',inventory)
+                                                callback(null, item, inventory)
+                                            }).catch(function(err) {
+                                                callback(err)
+                                            })
+                                        },
+                                        function(item, inventory, callback) {
+                                            saveStores(item, inventory).then(function(stores) {
+                                                callback(null, item, stores)
+                                            }).catch(function(err) {
+                                                callback(err)
+                                            })
+                                        },
+                                        function(item, stores, callback) {
+                                            saveItems(item, stores).then(function(items) {
+                                                callback(null, item, stores)
+                                            }).catch(function(err) {
+                                                callback(err)
+                                            })
+                                        },
+                                        function(item, stores, callback) {
+                                            getLatLong(zipcode).then(function(coords) {
+                                                callback(null, item, stores, coords)
+                                            }).catch(function(err) {
+                                                callback(err)
+                                            })
+                                        },
+                                        function(item, stores, coords, callback) {
+                                            updateInventory(item, stores, coords).then(function() {
+                                                callback(null, item)
+                                            }).catch(function(err) {
+                                                callback(err)
+                                            })
+                                        }
+                                    ], function(err, item) {
+                                        if (err) {
+                                            console.log(err)
+                                        }
+
+                                        //Prematurely ejects states if no new stores found after 15 zipcode searches to save time
+                                        if (notFoundCount >= 15) {
+                                            notFoundCount = 0;
+                                            return cb('Finished ' + currentState + '.')
+                                        }
+                                        count++
+                                        finishedZipcode()
+                                    });
+
                                 },
-                                function(item, zipcode, callback) {
-                                    getInventory(item, zipcode).then(function(inventory) {
-                                        callback(null, item, inventory)
-                                    }).catch(function(err) {
-                                        callback(err)
-                                    })
-                                },
-                                function(item, inventory, callback) {
-                                    saveStores(item, inventory).then(function(stores) {
-                                        callback(null, item, stores)
-                                    }).catch(function(err) {
-                                        callback(err)
-                                    })
-                                },
-                                function(item, stores, callback) {
-                                    saveItems(item, stores).then(function(items) {
-                                        callback(null, item, stores)
-                                    }).catch(function(err) {
-                                        callback(err)
-                                    })
-                                },
-                                function(item, stores, callback) {
-                                    getLatLong(zipcode).then(function(coords) {
-                                        callback(null, item, stores, coords)
-                                    }).catch(function(err) {
-                                        callback(err)
-                                    })
-                                },
-                                function(item, stores, coords, callback) {
-                                    updateInventory(item, stores, coords).then(function() {
-                                        callback(null, item)
-                                    }).catch(function(err) {
-                                        callback(err)
-                                    })
-                                }
-                            ], function(err, item) {
-                                if (err) {
-                                    // console.log('!!',err)
-                                }
-                                console.log('Finished scraping: ', item.name)
-                                count++
-                                finishedZipcode()
-                            });
-
+                                function(err) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        cb('Done with state.')
+                                    }
+                                });
                         },
                         function(err) {
                             if (err) {
                                 console.log(err);
-                                cb()
-                            } else {
-                                // console.log('Done with state.')
-                                cb('Done with state.')
                             }
-                        });
-                },
-                function(err) {
-                    if (err) {
-                        console.log(err);
-                    }
-                    //Log results each loop
-                    console.log('Finished ' + currentState + '.')
-                    stateIndex++;
-                    if (states[stateIndex]) {
-                        currentState = states[stateIndex]
-                    } else {
-                        console.log('Restarting...')
-                        stateIndex = 0;
-                        currentState = states[stateIndex]
-                    }
-                    wait(loop, 3000)
-                }
-            );
-        })
-    },
-    function(err) {
-        wait(loop, 3000)
-    });
+                            stateIndex++;
+                            if (states[stateIndex]) {
+                                currentState = states[stateIndex]
+                                console.log('Next state..')
+                                loop()
+                            } else {
+                                console.log('Finished all states!')
+                                return resolve()
+                            }
+
+                        }
+                    );
+                })
+
+            },
+            function(err) {
+                if (err) console.log(err)
+
+                resolve()
+            })
+    })
+
+}
 
 
 function scrapeItem(url) {
@@ -249,6 +254,9 @@ function getInventory(newItem, zipcode) {
 function saveStores(item, inventory) {
     return new Promise(function(resolve, reject) {
         var Stores = [];
+        //bool to increment notFoundCount
+        var notFound = true;
+
         async.eachSeries(inventory["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
             var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
             var options = {
@@ -259,7 +267,13 @@ function saveStores(item, inventory) {
             };
 
             request(options, function(error, response, body) {
+                // console.log('body', body)
                 body = JSON.parse(body);
+
+                if (!body.StoreCollection[0]) {
+                    console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
+                    return callback()
+                }
                 var storeObj = {
                     storeId: item.StoreNumber,
                     name: body.StoreCollection[0].StoreName,
@@ -304,7 +318,8 @@ function saveStores(item, inventory) {
                                             console.log('Error saving new store: ', e)
                                         }
                                         console.log('Saved store.', s.id)
-                                            //Push into proxy array for cloning items at the end of eachseries
+                                        notFound = false;
+                                        //Push into proxy array for cloning items at the end of eachseries
                                         Stores.push(s)
                                         setTimeout(function() {
                                             return callback()
@@ -325,7 +340,9 @@ function saveStores(item, inventory) {
 
         }, function(err, res) {
             if (err) console.log(err)
-
+            if (notFound) {
+                notFoundCount++
+            }
             resolve(Stores)
         })
     })
@@ -454,11 +471,11 @@ function updateInventory(item, stores, coords) {
             }, {
                 'loc': {
                     //Since the inventory check for nordstrom only returns results 100 miles within zipcode
-                    //We get a central lat long for the current zipcode and run a geowithin 120 miles (extra 20 miles to compensate for errors)
+                    //We get a central lat long for the current zipcode and run a geowithin 100 miles
                     //Otherwise mongo would remove all items outside the current zip that match the query.
                     $geoWithin: {
                         $centerSphere: [
-                            [parseFloat(coords[0]), parseFloat(coords[1])], 120 / 3963.2
+                            [parseFloat(coords[0]), parseFloat(coords[1])], 103 / 3963.2
                         ]
                     }
                 }
