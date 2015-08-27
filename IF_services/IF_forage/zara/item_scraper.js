@@ -5,6 +5,7 @@ var async = require('async');
 var uniquer = require('../../uniquer');
 var request = require('request');
 
+console.log('You are running the wrong file, please run item_navigator.js.')
 
 
 module.exports = function scrapeItem(url) {
@@ -303,6 +304,7 @@ function processItems(inventory, itemData) {
             async.eachSeries(inventory, function(store, callback) {
                         //Create new item for each store in inventory list.
                         var i = new db.Landmark();
+                        i.name = itemData.name;
                         i.source_generic_item = itemData;
                         i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
                         if (store.sizeStocks) {
@@ -316,7 +318,7 @@ function processItems(inventory, itemData) {
                         uniquer.uniqueId(itemData.name, 'Landmark').then(function(output) {
                                 i.id = output;
                                 db.Landmarks.findOne({
-                                    'source_generic_store.storeId': store.physicalStoreId
+                                    'source_generic_store.storeId': store.physicalStoreId.toString().trim()
                                 }, function(err, s) {
                                     if (err) {
                                         console.log(err)
@@ -329,7 +331,7 @@ function processItems(inventory, itemData) {
                                     if (!s) {
                                         //The parent store doesn't exist in db, skip this item for now.
                                         // console.log('Store in list doesnt exist in the db: ', store.physicalStoreId)
-                                                  console.log('missing id: ',store.physicalStoreId.toString().trim())
+                                        console.log('missing id: ',store.physicalStoreId)
                                         count++
                                         return callback()
                                     }

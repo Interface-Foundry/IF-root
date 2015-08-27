@@ -203,7 +203,7 @@ function scrapeStores(coords) {
                                         newPhysicalStore.shopType = elem.attribs.value;
                                     }
                                     if (elem.attribs.class == 'storeId') {
-                                        newPhysicalStore.storeId = elem.attribs.value;
+                                        newPhysicalStore.storeId = elem.attribs.value.toString().trim();
                                     }
                                     if (elem.attribs.class == 'storeAddress') {
                                         newPhysicalStore.storeAddress = elem.attribs.value;
