@@ -85,7 +85,6 @@ module.exports = function scrapeItem(url) {
                     reject(err)
                 }
                 if (!exists) {
-                    // console.log('Processed ', items.length, ' items.')
                 }
 
                 resolve()
