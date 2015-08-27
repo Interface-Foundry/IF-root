@@ -42,7 +42,7 @@ module.exports = function scrapeItem(url) {
                 },
                 function(callback) {
                     checkIfScraped(url).then(function(items) {
-                        if (items.length > 0) {
+                        if (items && items.length > 0) {
                             exists = true;
                             existingItems = items; //proxy var for later processing
                             callback(null, items)
