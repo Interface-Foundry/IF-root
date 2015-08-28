@@ -6,10 +6,11 @@ var async = require('async');
 // var uniquer = require('../../uniquer');
 var request = require('request');
 var UglifyJS = require("uglifyjs");
+var _ = require('underscore');
 
 
 var Stores = []
-var url = 'http://www.menswearhouse.com/mens-clothes/mens-outerwear/classic-fit-regular-outerwear/pronto-uomo-navy-blue-bib-coat-707X707Y01';
+var url = 'http://www.menswearhouse.com/mens-shoes/mens-dress-shoes/joseph-abboud-bixby-brown-cap-toe-lace-up-dress-shoes-403U03';
 //http://www.menswearhouse.com/mens-shoes/mens-dress-shoes/joseph-abboud-bixby-brown-cap-toe-lace-up-dress-shoes-403U03
 //http://www.menswearhouse.com/mens-clothes/mens-outerwear/modern-fit-trim-outerwear/pronto-blue-modern-fit-moto-jacket-cognac-726F726G03
 
@@ -95,10 +96,10 @@ function checkIfScraped(url) {
 function getItem(url) {
     return new Promise(function(resolve, reject) {
         //construct newItem object
-        var newItem = {
-            src: url, 
-            images: []
-        };
+        // var newItem = {
+        //     src: url, 
+        //     images: []
+        // };
 
         var newItems = [];
 
@@ -113,7 +114,15 @@ function getItem(url) {
 
                 $ = cheerio.load(body); //load HTML
 
+                var itemCountLoop = 0; //used to compare num items to current loop
                 var itemCount = 0;
+
+                //initial count of num of items to collect
+                $('div').each(function(i, elem) {
+                    if (elem.attribs && elem.attribs.id && elem.attribs.id.indexOf('current_') > -1){
+                        itemCountLoop++;
+                    }
+                });
 
                 //iterate on images found in HTML
                 $('div').each(function(i, elem) {
@@ -121,12 +130,13 @@ function getItem(url) {
                         if(elem.attribs.id){
                             if (elem.attribs.id.indexOf('current_') > -1){
 
-//                                console.log('current_ ',elem.children[0].data);
+                                //console.log('current_ ',elem.children[0].data);
                                 if (elem.children[0].data.length > 5){
                                     //NEW ITEM CREATED (BY COLOR)
                                     var itemCollect = {
                                         sizeIds: [],
-                                        images: []
+                                        images: [],
+                                        physicalStores: []
                                     };
                                     newItems.push(itemCollect);
                                     newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
@@ -180,19 +190,16 @@ function getItem(url) {
                                         return uncommonArr;
                                     }
                                     function getStopWords() {
-                                        return ["featuring","up","upper","details","detail","down","featuring","featuring","look","interior","exterior","multiple","single","a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your", "ain't", "aren't", "can't", "could've", "couldn't", "didn't", "doesn't", "don't", "hasn't", "he'd", "he'll", "he's", "how'd", "how'll", "how's", "i'd", "i'll", "i'm", "i've", "isn't", "it's", "might've", "mightn't", "must've", "mustn't", "shan't", "she'd", "she'll", "she's", "should've", "shouldn't", "that'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "wasn't", "we'd", "we'll", "we're", "weren't", "what'd", "what's", "when'd", "when'll", "when's", "where'd", "where'll", "where's", "who'd", "who'll", "who's", "why'd", "why'll", "why's", "won't", "would've", "wouldn't", "you'd", "you'll", "you're", "you've"];
+                                        return ["free","stand","features","adds","full","extra","featuring","up","upper","details","detail","down","featuring","featuring","look","interior","exterior","multiple","single","a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your", "ain't", "aren't", "can't", "could've", "couldn't", "didn't", "doesn't", "don't", "hasn't", "he'd", "he'll", "he's", "how'd", "how'll", "how's", "i'd", "i'll", "i'm", "i've", "isn't", "it's", "might've", "mightn't", "must've", "mustn't", "shan't", "she'd", "she'll", "she's", "should've", "shouldn't", "that'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "wasn't", "we'd", "we'll", "we're", "weren't", "what'd", "what's", "when'd", "when'll", "when's", "where'd", "where'll", "where's", "who'd", "who'll", "who's", "why'd", "why'll", "why's", "won't", "would've", "wouldn't", "you'd", "you'll", "you're", "you've"];
                                     }
                                     //http://stackoverflow.com/questions/9751413/removing-duplicate-element-in-an-array
                                     function eliminateDuplicates(arr) {
-                                        var i,
-                                          len=arr.length,
-                                          out=[],
-                                          obj={};
+                                        var i,len=arr.length,out=[],obj={};
                                          for (i=0;i<len;i++) {
-                                         obj[arr[i]]=0;
+                                            obj[arr[i]]=0;
                                          }
                                          for (i in obj) {
-                                         out.push(i);
+                                            out.push(i);
                                          }
                                          return out;
                                     }
@@ -230,28 +237,26 @@ function getItem(url) {
 
 
                                 if (elem.children[0].data.length > 5){
-
-                                    newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regListPrice;
-
-                                    if (!newItems[itemCount].price){
+                                    newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regListPrice; //get item price
+                                    if (!newItems[itemCount].price){ //get this price if the other one doesn't exist (backup)
                                         newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regOfferPrice;
                                     }
-                                    // //NEW ITEM CREATED (BY COLOR)
-                                    // var itemCollect = {
-                                    //     sizeIds: [],
-                                    //     images: []
-                                    // };
-                                    // newItems.push(itemCollect);
-                                    // newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
                                 }
-
-
-
-                                console.log(newItems[itemCount]);
-                                //NOTE THE IMAGE INSERTED IS HUGE!!!!
 
                                 //console.log('pdpprices_ ',elem.children[0].data);
                                 itemCount++; //SHOULD GO LAST IN LOOP, used to select index in newItems array
+                                
+                                //ALL ITEMS ARE COLLECTED, NOW MOVE ON TO INVENTORY
+                                if (itemCount == itemCountLoop){
+                                    if (newItems[0]) {
+                                        //console.log(newItems);
+                                        resolve(newItems);
+                                    } else {
+                                        console.log('missing params', newItems[0]);
+                                        reject('missing params');
+                                    }                                    
+                                }
+
                             }
 
                         }
@@ -302,87 +307,6 @@ function getItem(url) {
                     }
                 }
 
-
-    //CHECK INVENTORY NUM TO API CALLS ON WEBPAGE!!!!!!!!
-
-
-
-    // readItemCatentryId: function(productId) {
-    //     var container = document.getElementById("swatches_" + productId);
-    //     if (!container) {
-    //         return
-    //     }
-    //     var data = eval("(" + container.innerHTML + ")");
-    //     if (!data || !data.colorMap) {
-    //         return
-    //     }
-    //     this.currentItemCatentryId = data.colorMap.buyableCatEntryId;
-    //     this.currentItemId = this.currentItemCatentryId;
-    //     if (this.currentItemCatentryId && this.currentItemCatentryId.indexOf("_") > -1) {
-    //         var catPairs = this.currentItemCatentryId.split("_");
-    //         this.currentItemId = catPairs[0];
-    //         this.currentItemCatentryId = catPairs[0];
-    //         console.log("currentItemCatentryId set to :" + this.currentItemCatentryId + ">> currentItemAvailablity :" + catPairs[1]);
-    //         var add_cart_id = "#add-to-cart_" + this.currentProductId;
-    //         console.log("Current Selected Product Swatch Id: " + this.currentProductId);
-    //         if (catPairs[1] == "INSTORE") {
-    //             jQuery(add_cart_id).text("Out Of Stock");
-    //             jQuery(add_cart_id).removeClass("blue-btn");
-    //             jQuery(add_cart_id).addClass("oos-btn")
-    //         } else {
-    //             if (catPairs[1] == "ONLINE") {
-    //                 this.getElementById("puis-feature").hide();
-    //                 this.getElementById("puis-selected-item-web-only").show();
-    //                 var colorTxt = "Color: " + this.currentItemColor;
-    //                 return
-    //             } else {
-    //                 jQuery(add_cart_id).text("Add to Cart");
-    //                 jQuery(add_cart_id).removeClass("oos-btn");
-    //                 jQuery(add_cart_id).addClass("blue-btn")
-    //             }
-    //         }
-    //         this.getElementById("puis-feature").show();
-    //         this.getElementById("puis-selected-item-web-only").hide()
-    //     }
-    // },
-
-                //////////Construct item name from Brand Name + Product Name /////////////
-                // var brandName = '';
-                // //get brand name
-                // $("section[id='brand-title']").map(function(i, section) {
-                //     for (var i = 0; i < section.children.length; i++) { 
-                //         if (section.children[i].name == 'h2'){
-                //            brandName = section.children[i].children[0].children[0].data;               
-                //         }
-                //     }
-                // });
-                // //get product name
-                // $("section[id='product-title']").map(function(i, section) {
-                //     for (var i = 0; i < section.children.length; i++) { 
-                //         if (section.children[i].name == 'h1'){
-                //            newItem.name = brandName + ' ' + section.children[i].children[0].data; //add brand name + product name together            
-                //         }
-                //     }
-                // });
-                // //////////////////////////////////////////////////////////////////////////
-
-                // //get item price
-                // $('td').each(function(i, elem) {
-                //     if (elem.attribs.class.indexOf('item-price') > -1){
-                //        newItem.price = elem.children[1].children[0].data.replace(/[^\d.-]/g, ''); //remove dollar sign symbol
-                //     }
-                // });
-
-                // //get the styleId to query nordstrom server with from the product URL. lastindexof gets item from end of URL. 
-                // //split('?') kills anything after productID in URL
-                // newItem.styleId = newItem.src.substring(newItem.src.lastIndexOf("/") + 1).split('?')[0];  
-
-                // if (newItem.styleId) {
-                //     resolve(newItem);
-                // } else {
-                //     console.log('missing params', newItem);
-                //     reject('missing params');
-                // }
             } else {
                 if (error) {
                     console.log('error: ', error)
@@ -395,7 +319,7 @@ function getItem(url) {
 }
 
 
-function getInventory(newItem) {
+function getInventory(newItems) {
     return new Promise(function(resolve, reject) {
 
         //catalogId 
@@ -421,67 +345,61 @@ function getInventory(newItem) {
 
 
 //<input type="hidden" value="700478997" id="currProductId" name="currProductId">
-
-        var postalcode = '10002'; //iterate through all zipcodes
-        var radius = '100'; //max is 100 miles
-        var physicalStores = [];
-
-        var url = 'http://shop.nordstrom.com/es/GetStoreAvailability?styleid='+newItem.styleId+'&type=Style&instoreavailability=true&radius='+radius+'&postalcode='+postalcode+'&format=json';
         
-        var options = {
-            url: url,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
-            }
-        };
-        request(options, function(error, response, body) {
-            if ((!error) && (response.statusCode == 200)) {
-                body = JSON.parse(body);
-                body = JSON.parse(body); //o.m.g. request, just do the double parse and don't ask 
+        var lat = 40.74071;
+        var lng = -73.99418;
+        var radius = 200; //i think this is max? idk
 
-                async.eachSeries(body["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
+        async.eachSeries(newItems, function iterator(item, callback) {
 
-                    var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/'+item.StoreNumber+'?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
-    
-                    var options = {
-                        url: url,
-                        headers: {
-                            'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+            async.eachSeries(item.sizeIds, function iterator(item2, callback2) {
+
+                var url = 'http://www.menswearhouse.com/StoreLocatorInventoryCheck?catalogId=12004&langId=-1&storeId=12751&distance='+radius+'&latlong='+lat+','+lng+'&partNumber='+item2.partNumber+''; //note: you can get a list of all stores by lat lng by removing the partNumber val
+                var options = { 
+                    url: url,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+                    }
+                };
+                request(options, function(error, response, body) {
+                    if ((!error) && (response.statusCode == 200)) {
+
+                        item2.physicalStores = eval("(" + body + ")").result; //put store results in each item object
+
+                        for (var x in eval("(" + body + ")").result){
+                            item.physicalStores.push(eval("(" + body + ")").result[x]);
                         }
-                    };
-                    request(options, function(error, response, body) {
-                        body = JSON.parse(body);
-                        var storeObj = {
-                            name: body.StoreCollection[0].StoreName,
-                            type: body.StoreCollection[0].StoreType,
-                            StreetAddress: body.StoreCollection[0].StreetAddress,
-                            City: body.StoreCollection[0].City,
-                            State: body.StoreCollection[0].State,
-                            PostalCode: body.StoreCollection[0].PostalCode,
-                            PhoneNumber: body.StoreCollection[0].PhoneNumber,
-                            Hours: body.StoreCollection[0].Hours,
-                            Lat: body.StoreCollection[0].Latitude,
-                            Lng: body.StoreCollection[0].Longitude
+                        
+                    } else {
+                        if (error) {
+                            console.log('getinventory error ')
+                            reject(error)
+                        } else {
+                            console.log('bad response')
+                            reject('Bad response from inventory request')
                         }
-                        physicalStores.push(storeObj);     
-                        setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
-                    });
-
-                },function(err,res){
-                    console.log('newItem: ', newItem);
-                    console.log('stores in zip code '+postalcode+' have '+newItem.name+': ', physicalStores);
+                    }
                 });
 
-            } else {
-                if (error) {
-                    console.log('getinventory error ')
-                    reject(error)
-                } else {
-                    console.log('bad response')
-                    reject('Bad response from inventory request')
-                }
-            }
-        })
+                setTimeout(function() { callback2() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+            },function(err,res){
+
+                item.physicalStores = _.uniq(item.physicalStores, 'stlocId'); //remove duplicate physical stores
+
+                setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+            });
+
+        },function(err,res){
+
+            //DONE GETTING ALL SIZES FOR ALL ITEMS AND COLORS
+            console.log('/////////////////// FINAL ITEMS ///////////////////');
+            //******* DATA NOTES *********
+            //******* physicalStores = list of stores that carry this item
+            //******* parentProductId = unique Id parent for all item colors and sizes. use this to check if the item was scraped 
+            console.log(newItems); // the items (sorted by color, item created per color)
+
+        });
+
 
     });
 }
