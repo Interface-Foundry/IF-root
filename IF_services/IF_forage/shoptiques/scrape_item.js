@@ -46,7 +46,8 @@ var scrape = module.exports = function(url){
             item.priceString = $('div.hidden-phone div.product-name span.product-price>span').text();
             item.price = parseFloat(item.priceString.replace('$', '')) || 0;
             item.loves = parseInt($('span#loveboxCount').text());
-            item.description = $('p[itemprop="description"]').parent().text();
+            item.description = $('[itemprop="description"]').text();
+            item.fullDescription = $('[itemprop="description"]').parent().text();
             item.brand = $('span[itemprop="brand"]').text();
             item.categories = $('ul.shoptiques-breadcrumb li').toArray().map(function(l) { return $(l).text()});
             item.url = url;

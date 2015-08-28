@@ -1,4 +1,5 @@
 console.log('thanks for helping kip (◕‿◕)♡');
+var kipBaseUrl = '';
 
 new Konami(function() {
     $('.konami').removeClass('u-hidden');
@@ -7,15 +8,17 @@ new Konami(function() {
 function save() {
 
     $.ajax({
-        url: '/kiptag',
+        url: kipBaseUrl + '/kiptag',
         type: 'POST',
         headers: {'Content-Type': 'application/json'},
         data: JSON.stringify({
             id: $('#id').val(),
             itemType: $('#item-type').val(),
-            genre: $('#item-genre').val(),
-            description: $('item-description').val(),
-            colors: $('.color>button').map(function() { return $(this).attr('data-hsl')}).toArray()
+            itemStyle: $('#item-style').val(),
+            itemEvent: $('#item-event').val(),
+            itemDetail: $('#item-detail').val(),
+            itemFabric: $('#item-style').val(),
+            colors: $('.colors>button.selected').map(function() { return $(this).attr('data-hsl')}).toArray().map(function(a) { return JSON.parse(a)})
         }),
         success: function() {
             console.log('funky animation part 2');
@@ -48,7 +51,7 @@ function save() {
                     }
                     colors.push(v[s].getHex());
                     $b.css('background-color', v[s].getHex());
-                    $b.attr('data-hsl', v[s].getHsl());
+                    $b.attr('data-hsl', JSON.stringify(v[s].getHsl()));
                     $colors.append($b);
                 });
             })
