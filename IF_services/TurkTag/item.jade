@@ -19,19 +19,19 @@ html(lang="en")
 
             .row
                 .six.columns
-                    label(for="type") Item Type
-                        input.u-full-width(name="type" placeholder="maxi dress, necklace, etc" id="item-type")
-                .six.columns
-                    label(for="genre") Genre
-                        input.u-full-width(name="genre" placeholder="formal, grunge, etc" id="item-genre")
+                    label(for="type") What type of item is this?
+                        input.u-full-width(name="type" placeholder="top, skirt, dress" id="item-type" autocomplete="off")
+                    label(for="style") What style of item?
+                        input.u-full-width(name="style" placeholder="modern, vintage, cool, cute, sexy" autocomplete="off" id="item-style")
+                    label(for="event") When would someone wear this item?
+                        input.u-full-width(name="event" placeholder="office, date, swimming, party" autocomplete="off" id="item-event")
+                    label(for="detail") Item detail
+                        input.u-full-width(name="detail" placeholder="collar, long sleeve, buttons" autocomplete="off" id="item-detail")
+                    label(for="fabric") Item material
+                        input.u-full-width(name="fabric" placeholder="silk, linen, polka dot, plain" autocomplete="off" id="item-fabric")
 
-            .row
-                .twelve.columns
-                    label(for="description") Description
-                        textarea.u-full-width(name="description" placeholder="ex: v neck blouse with three-quarter length button cuffed sleeves" id="item-description")
-            .row
-                .twelve.columns
-                    label(for="color") Color
+                .six.columns
+                    label(for="color") Select the colors you see on the item
                     .colors
 
             .row
@@ -51,6 +51,10 @@ html(lang="en")
                     pre
                         code.
                             #{JSON.stringify(user, null, 2)}
+            hr
+            .row
+                .twelve.columns.u-textAlignCenter.
+                    Interface Foundry PBC © 2015
 
         script(src="/konami.js")
         script(src="/zepto.min.js")
