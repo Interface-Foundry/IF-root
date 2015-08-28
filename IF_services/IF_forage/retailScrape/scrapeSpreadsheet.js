@@ -57,7 +57,7 @@ function getItemUrls(data, done) {
 var scrapers = require('./scrapers');
 
 scrapers.scrapeSiteCatalog(data).then(function(urls) {
-  urls.slice(0,2).map(function(u) {
+  urls.map(function(u) {
     done({
       row: data,
       url: u
@@ -138,8 +138,13 @@ function log(data, done) {
 console.log(data)
 }
 
+function processImages(data, done) {
+// i kind of forget what needs to happen here.
+}
+
 quickflow.connect(startingPoint, getStore)
 quickflow.connect(getStore, getItemUrls)
 quickflow.connect(getItemUrls, scrapeItem)
 quickflow.connect(scrapeItem, log)
+quickflow.connect(scrapeItem, processImages)
 if (!module.parent) quickflow.run()
