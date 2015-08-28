@@ -426,3 +426,9 @@ Landmark.priceToPriceRange = function(p) {
         return 4;
     }
 };
+
+Landmark.generateIdFromName = function(name) {
+    if (!name) { name = 'item' + (Math.random()*1000000000|0).toString(32) }
+    name = name.toLowerCase().replace(/[^\w^\d]/g, '');
+    return name + '_' + (Math.random()*1000000000000000|0).toString(32);
+}
