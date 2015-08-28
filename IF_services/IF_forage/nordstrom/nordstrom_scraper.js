@@ -12,16 +12,21 @@ var urlify = require('urlify').create({
     trim: true
 });
 var request = require('request');
-var states = require('../zara/states')
+var states = require('../zara/states');
+//Global var to hold category
+cat = '';
+//Global var to hold fake user object
+owner = {}
 
-module.exports = function(url) {
+module.exports = function(url, category) {
+
+    cat = category;
 
     return new Promise(function(resolve, reject) {
 
         stateIndex = 0;
         currentState = states[stateIndex]
         notFoundCount = 0;
-
 
         async.whilst(
             function() {
@@ -44,11 +49,16 @@ module.exports = function(url) {
 
                             async.eachSeries(zips, function(zip, finishedZipcode) {
                                     zipcode = zip.zipcode
-
                                     async.waterfall([
                                         function(callback) {
+                                            loadFakeUser().then(function() {
+                                                callback(null)
+                                            }).catch(function(err) {
+                                                callback(null)
+                                            })
+                                        },
+                                        function(callback) {
                                             scrapeItem(url).then(function(item) {
-
                                                 callback(null, item, zipcode)
                                             }).catch(function(err) {
                                                 callback(err)
@@ -141,6 +151,43 @@ module.exports = function(url) {
 
 }
 
+function loadFakeUser() {
+    return new Promise(function(resolve, reject) {
+        db.Users
+            .findOne({
+                'profileID': 'nordstrom4201'
+            }).exec(function(e, o) {
+                if (o) {
+                    owner.profileID = o.profileID
+                    owner.name = o.name;
+                    owner.mongoId = o._id
+                    resolve()
+                }
+                if (!o) {
+                    var fake = new db.User()
+                    fake.name = 'Nordstrom'
+                    fake.profileID = 'nordstrom4201'
+                    fake.save(function(err, o) {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            console.log(o.profileID)
+                            owner.profileID = o.profileID
+                            owner.name = o.name;
+                            owner.mongoId = o._id
+                            resolve()
+                        }
+                    })
+                }
+                if (e) {
+                    console.log(e)
+                    reject(e)
+                }
+            })
+    })
+}
+
+
 
 function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
@@ -156,10 +203,19 @@ function scrapeItem(url) {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
         };
+
         request(options, function(error, response, body) {
             if ((!error) && (response.statusCode == 200)) {
 
                 $ = cheerio.load(body); //load HTML
+
+                var colors = [];
+
+                $('div#color-buttons button.option-label img').each(function(i, elem) {
+                    colors.push(elem.attribs.alt)
+                })
+
+                newItem.colors = colors;
 
                 //iterate on images found in HTML
                 $('img').each(function(i, elem) {
@@ -266,10 +322,12 @@ function saveStores(item, inventory) {
                 }
             };
 
-            request(options, function(error, response, body) {
-                // console.log('body', body)
-                body = JSON.parse(body);
 
+
+            request(options, function(error, response, body) {
+           
+                body = JSON.parse(body);
+                     console.log('***Body', body)
                 if (!body.StoreCollection[0]) {
                     console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
                     return callback()
@@ -288,6 +346,10 @@ function saveStores(item, inventory) {
                     Lng: body.StoreCollection[0].Longitude
                 }
 
+// TODO: Create new items for each new color:
+// How to do it: Just search using URL below the name of the product which will return DOM tags with the styleIDs required to query the Inventory URL to get the correct inventory info
+// SEARCH URL
+// http://shop.nordstrom.com/sr?origin=keywordsearch&contextualcategoryid=0&keyword=maggy-london-illusion-yoke-crepe-sheath-dress-regular-petite
                 //Construct our own unique storeId 
                 uniquer.uniqueId(body.StoreCollection[0].StoreName, 'Landmark').then(function(output) {
                         //Check if store exists in db
@@ -304,7 +366,7 @@ function saveStores(item, inventory) {
                                 if (!store) {
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
-                                    newStore.addressString = storeObj.StreetAddress.concat(', '+storeObj.City).concat(', '+storeObj.PostalCode)
+                                    newStore.addressString = storeObj.StreetAddress.concat(', ' + storeObj.City).concat(', ' + storeObj.PostalCode)
                                     newStore.id = output;
                                     newStore.world = true;
                                     newStore.name = storeObj.name;
@@ -369,8 +431,25 @@ function saveItems(newItem, Stores) {
                 if (!i) {
                     var item = new db.Landmarks();
                     item.source_generic_item = newItem;
-                    //This field is required in item in order to remove out of stock items in the update inventory func
+                    item.price = parseFloat(newItem.price);
+                    item.owner = owner;
+                    item.name = item.source_generic_item.name
                     item.source_generic_item.storeId = store.source_generic_store.storeId;
+                    item.linkback = item.source_generic_item.src;
+                    item.linkbackname = 'nordstrom.com';
+                    item.itemImageURL = item.source_generic_item.images;
+                    var tags = item.name.split(' ').map(function(word) {
+                        word = word.replace(/\W/g, '')
+                        return word.toString().toLowerCase()
+                    })
+                    tags.forEach(function(tag) {
+                        item.itemTags.text.push(tag)
+                    })
+                    item.source_generic_item.colors.forEach(function(color) {
+                        item.itemTags.colors.push(color)
+                    })
+                    item.itemTags.text.push('nordstrom')
+                    item.itemTags.text.push(cat)
                     item.parent.mongoId = store._id;
                     item.parent.name = store.name;
                     item.parent.id = store.id;
@@ -387,7 +466,7 @@ function saveItems(newItem, Stores) {
                                 console.error(e);
                             }
                             savedItems.push(i)
-                                // console.log('Saved item', i)
+                            console.log('Saved item', i.name)
                             return callback();
                         })
                     })
@@ -402,7 +481,7 @@ function saveItems(newItem, Stores) {
         }, function(err) {
             if (err) console.log(err)
 
-            console.log('Saved ', savedItems.length)
+            console.log('Saved ', savedItems)
 
             resolve(savedItems)
         });

@@ -350,14 +350,17 @@ function processItems(inventory, itemData) {
             async.eachSeries(inventory, function(store, callback) {
                         //Create new item for each store in inventory list.
                         var i = new db.Landmark();
+                        i.source_generic_item = itemData;
+                        i.price = parseFloat(itemData.price);
+                        i.itemImageURL = itemData.images;
                         i.name = itemData.name;
                         i.owner = owner;
-                        i.source_generic_item = itemData;
-                        i.itemImageURL = itemData.images;
+                        i.linkback = itemData.src;
+                        i.linkbackname = 'zara.com'
                         var tags = i.name.split(' ').map(function(word) {
                             return word.toString().toLowerCase()
                         })
-                        i.itemTags.text.push('Zara')
+                        i.itemTags.text.push('zara')
                         tags.forEach(function(tag) {
                             i.itemTags.text.push(tag)
                         })
@@ -410,7 +413,7 @@ function processItems(inventory, itemData) {
                                             console.error(e);
                                         }
                                         savedItems.push(item)
-                                        console.log('Saved ', item.id)
+                                        // console.log('Saved ', ite)
                                         count++
                                         callback();
                                     })
@@ -421,6 +424,7 @@ function processItems(inventory, itemData) {
                         if (e) {
                             console.log('If item not exists async each error: ', e)
                         }
+                        console.log('Saved ',savedItems.length,' items.')
                         resolve(savedItems)
                     }) //end of async.eachSeries
         } //end of if not exists

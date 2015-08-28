@@ -63,8 +63,7 @@ async.whilst(
                                 }
                                 if (stores && stores.length > 0) {
                                     console.log('Scraped ', stores.length, ' stores.')
-                                }
-                                else if (stores && stores.length < 1) {
+                                } else if (stores && stores.length < 1) {
                                     console.log('No new stores found for zipcode.')
                                     notFoundCount++
                                 }
@@ -164,92 +163,92 @@ function getLatLong(zipcode, callback) {
 
 function scrapeStores(coords) {
     return new Promise(function(resolve, reject) {
-            var Stores = [];
-            var lng = coords[0];
-            var lat = coords[1];
-            var url = 'http://www.zara.com/webapp/wcs/stores/servlet/StoreLocatorResultPage?showOnlyDeliveryShops=false&isPopUp=false&storeCountryCode=US&catalogId=0&country=US&categoryId=0&langId=-1&showSelectButton=true&storeId=11719&latitude=' + lat.toString().trim() + '&longitude=' + lng.toString().trim() + '&ajaxCall=true'
-            var options = {
-                url: url,
-                headers: {
-                    'User-Agent': 'Mozilla/7.0 (Windows 8; en-US;) Gecko/20080311 Firefox/3.0'
+        var Stores = [];
+        var lng = coords[0];
+        var lat = coords[1];
+        var url = 'http://www.zara.com/webapp/wcs/stores/servlet/StoreLocatorResultPage?showOnlyDeliveryShops=false&isPopUp=false&storeCountryCode=US&catalogId=0&country=US&categoryId=0&langId=-1&showSelectButton=true&storeId=11719&latitude=' + lat.toString().trim() + '&longitude=' + lng.toString().trim() + '&ajaxCall=true'
+        var options = {
+            url: url,
+            headers: {
+                'User-Agent': 'Mozilla/7.0 (Windows 8; en-US;) Gecko/20080311 Firefox/3.0'
+            }
+        };
+
+        // console.log('**URL: ',url)
+        request(options, function(error, response, body) {
+            if ((!error) && (response.statusCode == 200)) {
+                // console.log('URL: ', url)
+                // console.log('Body: ',body)
+                $ = cheerio.load(body); //load HTML
+
+                if ($('html').attr('id') == 'GenericErrorPage') {
+                    console.log('Uh oh, Blocked!')
+                    return reject('GenericErrorPage')
                 }
-            };
+                async.eachSeries($('li'), function(li, callback1) {
+                        var count = 0;
+                        var newPhysicalStore = {};
+                        async.eachSeries(li.children, function(elem, callback2) {
 
-            // console.log('**URL: ',url)
-            request(options, function(error, response, body) {
-                    if ((!error) && (response.statusCode == 200)) {
-                        // console.log('URL: ', url)
-                            // console.log('Body: ',body)
-                        $ = cheerio.load(body); //load HTML
+                                if (!elem.attribs) return callback2()
 
-                        if ($('html').attr('id') == 'GenericErrorPage') {
-                        console.log('Uh oh, Blocked!')
-                        return reject('GenericErrorPage')
-                    }
-                    async.eachSeries($('li'), function(li, callback1) {
-                            var count = 0;
-                            var newPhysicalStore = {};
-                            async.eachSeries(li.children, function(elem, callback2) {
-
-                                    if (!elem.attribs) return callback2()
-
-                                    if (elem.attribs.class == 'lat') {
-                                        newPhysicalStore.lat = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'lng') {
-                                        newPhysicalStore.lng = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'shopType') {
-                                        newPhysicalStore.shopType = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'storeId') {
-                                        newPhysicalStore.storeId = elem.attribs.value.toString().trim();
-                                    }
-                                    if (elem.attribs.class == 'storeAddress') {
-                                        newPhysicalStore.storeAddress = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'storeZipCode') {
-                                        newPhysicalStore.storeZipCode = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'storeCity') {
-                                        newPhysicalStore.storeCity = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'storeCountry') {
-                                        newPhysicalStore.storeCountry = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'storePhone1') {
-                                        newPhysicalStore.storePhone1 = elem.attribs.value;
-                                    }
-                                    if (elem.attribs.class == 'storeSections') {
-                                        newPhysicalStore.storeSections = elem.attribs.value;
-                                    }
-                                    Stores.push(newPhysicalStore)
-                                    callback2()
-                                }, function(err) {
-                                    if (err) {
-                                        console.log('Async inner each err: ', err)
-                                    }
-                                    callback1()
-                                }) //End of inner each
-                        },
-                        function(err) {
-                            if (err) {
-                                console.log('Async outer each err: ', err)
-                            }
-                            //Get rid of duplicates
-                            Stores = Stores.filter(function(val, i, array) {
-                                    if (i !== 0) {
-                                        return array[i].storeId !== array[i - 1].storeId
-                                    }
-                                })
-                                // console.log('Done processing stores.', Stores)
-                            resolve(Stores)
-                        }); //End of outer each
-                } else {
-                    console.log('e: ', error, 'response: ', response)
-                    reject('Error requesting locations', error)
-                }
-            })
+                                if (elem.attribs.class == 'lat') {
+                                    newPhysicalStore.lat = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'lng') {
+                                    newPhysicalStore.lng = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'shopType') {
+                                    newPhysicalStore.shopType = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'storeId') {
+                                    newPhysicalStore.storeId = elem.attribs.value.toString().trim();
+                                }
+                                if (elem.attribs.class == 'storeAddress') {
+                                    newPhysicalStore.storeAddress = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'storeZipCode') {
+                                    newPhysicalStore.storeZipCode = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'storeCity') {
+                                    newPhysicalStore.storeCity = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'storeCountry') {
+                                    newPhysicalStore.storeCountry = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'storePhone1') {
+                                    newPhysicalStore.storePhone1 = elem.attribs.value;
+                                }
+                                if (elem.attribs.class == 'storeSections') {
+                                    newPhysicalStore.storeSections = elem.attribs.value;
+                                }
+                                Stores.push(newPhysicalStore)
+                                callback2()
+                            }, function(err) {
+                                if (err) {
+                                    console.log('Async inner each err: ', err)
+                                }
+                                callback1()
+                            }) //End of inner each
+                    },
+                    function(err) {
+                        if (err) {
+                            console.log('Async outer each err: ', err)
+                        }
+                        //Get rid of duplicates
+                        Stores = Stores.filter(function(val, i, array) {
+                                if (i !== 0) {
+                                    return array[i].storeId !== array[i - 1].storeId
+                                }
+                            })
+                            // console.log('Done processing stores.', Stores)
+                        resolve(Stores)
+                    }); //End of outer each
+            } else {
+                console.log('e: ', error, 'response: ', response)
+                reject('Error requesting locations', error)
+            }
+        })
     })
 }
 
@@ -272,6 +271,8 @@ function saveStores(stores) {
                         n.addressString = store.storeAddress + ' ' + store.storeCity + ' ' + store.storeZipCode + ' ' + store.storeCountry
                         n.world = true;
                         n.hasloc = true;
+                        i.linkback = 'http://www.zara.com';
+                        i.linkbackname = 'zara.com'
                         n.loc.coordinates[0] = parseFloat(store.lng);
                         n.loc.coordinates[1] = parseFloat(store.lat);
                         n.name = 'Zara ' + store.storeAddress
