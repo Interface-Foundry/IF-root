@@ -9,7 +9,9 @@ var UglifyJS = require("uglifyjs");
 
 
 var Stores = []
-var url = 'http://www.menswearhouse.com/mens-clothes/mens-outerwear/modern-fit-trim-outerwear/pronto-blue-modern-fit-moto-jacket-cognac-726F726G03';
+var url = 'http://www.menswearhouse.com/mens-clothes/mens-outerwear/classic-fit-regular-outerwear/pronto-uomo-navy-blue-bib-coat-707X707Y01';
+//http://www.menswearhouse.com/mens-shoes/mens-dress-shoes/joseph-abboud-bixby-brown-cap-toe-lace-up-dress-shoes-403U03
+//http://www.menswearhouse.com/mens-clothes/mens-outerwear/modern-fit-trim-outerwear/pronto-blue-modern-fit-moto-jacket-cognac-726F726G03
 
 async.waterfall([
     // function(callback) {
@@ -116,32 +118,97 @@ function getItem(url) {
                 //iterate on images found in HTML
                 $('div').each(function(i, elem) {
                     if (elem.attribs){
-
-                        //console.log(elem.attribs);
                         if(elem.attribs.id){
                             if (elem.attribs.id.indexOf('current_') > -1){
 
-                                //console.log('current_ ',elem.children[0].data);
+//                                console.log('current_ ',elem.children[0].data);
                                 if (elem.children[0].data.length > 5){
                                     //NEW ITEM CREATED (BY COLOR)
                                     var itemCollect = {
-                                        sizeIds: []
+                                        sizeIds: [],
+                                        images: []
                                     };
                                     newItems.push(itemCollect);
-                                    console.log(newItems[itemCount]);
                                     newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
-                                    console.log('test',newItems);
                                 }
-
-
-
                             }
                             else if (elem.attribs.id.indexOf('detail_') > -1){
 
-                               // console.log('detail_ ',elem.children[0].data);
+                                if (elem.children[0].data.length > 5){ //prevent false positive data
 
-                                itemCollect.parentProductId = elem.children[0].data.parentProductId;
-                                readItemPartNumbers(itemCollect.parentProductId);
+                                    if (elem.children[0].data.length < 70){ //filter data glitch
+                                        var detailObj = elem.children[0].next.next.data.replace('",','{ ProdDetail:{'); //fixing glitchy data incoming from mens warehouse
+                                    }
+                                    else {
+                                        var detailObj = elem.children[0].data; //no data glitch, proceed
+                                    }
+                                    
+                                    newItems[itemCount].parentProductId = eval("(" + detailObj + ")").ProdDetail.parentProductId; //get parent product ID
+                                    newItems[itemCount].src = eval("(" + detailObj + ")").ProdDetail.SocialURL; //get parent product ID
+
+                                    ////////// EXTRACT TAGS //////////
+                                    var details = eval("(" + detailObj  + ")").ProdDetail.details.split("|"); //from details
+                                    if (eval("(" + detailObj  + ")").ProdDetail.longDesc){
+                                        var longDesc = eval("(" + detailObj  + ")").ProdDetail.longDesc.split(" "); //from longDescription
+                                    }
+                                    else {
+                                        var longDesc = ['']; //no longDesc
+                                    }
+                                    var tagMerge = details.concat(longDesc);
+                                    tagMerge = details.concat(longDesc).join(" ");
+
+                                    newItems[itemCount].tags = getNoneStopWords(tagMerge); //add tags to newItem
+                                    newItems[itemCount].tags = eliminateDuplicates(newItems[itemCount].tags);
+
+                                    //remove STOP words from: 
+                                    // http://stackoverflow.com/questions/6686718/javascript-code-to-filter-out-common-words-in-a-string
+                                    function getNoneStopWords(sentence) {
+                                        var common = getStopWords();
+                                        var wordArr = sentence.match(/\w+/g),
+                                            commonObj = {},
+                                            uncommonArr = [],
+                                            word, i;
+                                        for (i = 0; i < common.length; i++) {
+                                            commonObj[ common[i].trim() ] = true;
+                                        }
+                                        for (i = 0; i < wordArr.length; i++) {
+                                            word = wordArr[i].trim().toLowerCase();
+                                            if (!commonObj[word]) {
+                                                uncommonArr.push(word);
+                                            }
+                                        }
+                                        return uncommonArr;
+                                    }
+                                    function getStopWords() {
+                                        return ["featuring","up","upper","details","detail","down","featuring","featuring","look","interior","exterior","multiple","single","a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your", "ain't", "aren't", "can't", "could've", "couldn't", "didn't", "doesn't", "don't", "hasn't", "he'd", "he'll", "he's", "how'd", "how'll", "how's", "i'd", "i'll", "i'm", "i've", "isn't", "it's", "might've", "mightn't", "must've", "mustn't", "shan't", "she'd", "she'll", "she's", "should've", "shouldn't", "that'll", "that's", "there's", "they'd", "they'll", "they're", "they've", "wasn't", "we'd", "we'll", "we're", "weren't", "what'd", "what's", "when'd", "when'll", "when's", "where'd", "where'll", "where's", "who'd", "who'll", "who's", "why'd", "why'll", "why's", "won't", "would've", "wouldn't", "you'd", "you'll", "you're", "you've"];
+                                    }
+                                    //http://stackoverflow.com/questions/9751413/removing-duplicate-element-in-an-array
+                                    function eliminateDuplicates(arr) {
+                                        var i,
+                                          len=arr.length,
+                                          out=[],
+                                          obj={};
+                                         for (i=0;i<len;i++) {
+                                         obj[arr[i]]=0;
+                                         }
+                                         for (i in obj) {
+                                         out.push(i);
+                                         }
+                                         return out;
+                                    }
+                                    ///////////////////////////////////////
+
+                                    var imageURL = eval("(" + detailObj  + ")").ProdDetail.ProdFullImage;
+                                    newItems[itemCount].images.push('http://images.menswearhouse.com/is/image/TMW/'+imageURL+'?$40Zoom$'); //get parent product ID
+
+                                    //GET IMAGES
+                                   //http://images.menswearhouse.com/is/image/TMW/MW40_726F_03_PRONTO_BLUE_COGNAC_SET?$40Zoom$
+                                   //MW40_726F_03_PRONTO_BLUE_COGNAC_SET
+
+
+                                   readItemPartNumbers(); //parse item parts
+
+                                }
 
                             }
                             else if (elem.attribs.id.indexOf('swatches_') > -1){
@@ -154,53 +221,65 @@ function getItem(url) {
                                 //console.log('sizes_ ',elem.children[0].data);
 
                                 if (elem.children[0].data.length > 5){ //prevent false positive data
-                                   itemCollect.sizeMap = eval("(" + elem.children[0].data + ")").sizeMap; //lol idk but it works
-                                   readProductSizes(itemCollect.parentProductId);
-
+                                   newItems[itemCount].sizeMap = eval("(" + elem.children[0].data + ")").sizeMap; //blah blah JS container or smthing
+                                   readProductSizes();
                                 }
+
                             }
                             else if (elem.attribs.id.indexOf('pdpprices_') > -1){
 
+
+                                if (elem.children[0].data.length > 5){
+
+                                    newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regListPrice;
+
+                                    if (!newItems[itemCount].price){
+                                        newItems[itemCount].price = eval("(" + elem.children[0].data + ")").PriceDetail.regOfferPrice;
+                                    }
+                                    // //NEW ITEM CREATED (BY COLOR)
+                                    // var itemCollect = {
+                                    //     sizeIds: [],
+                                    //     images: []
+                                    // };
+                                    // newItems.push(itemCollect);
+                                    // newItems[itemCount].itemPartNumbersMap = elem.children[0].data;
+                                }
+
+
+
+                                console.log(newItems[itemCount]);
+                                //NOTE THE IMAGE INSERTED IS HUGE!!!!
+
                                 //console.log('pdpprices_ ',elem.children[0].data);
-                                itemCount++; //SHOULD GO LAST IN LOOP
-
-
+                                itemCount++; //SHOULD GO LAST IN LOOP, used to select index in newItems array
                             }
+
                         }
-
-
                     }
                 });
 
                 function readItemPartNumbers(productId) {
-
-                    var dataString = itemCollect.itemPartNumbersMap;    
+                    var dataString = newItems[itemCount].itemPartNumbersMap;    
                     var pairs = dataString.split("|");
                     var partNumbers = [];
                     for (var j in pairs) {
                         var nvp = pairs[j].split(" ");
+
+                        //MISSING ONE ITEM IN PartNumberMap !!!
                         if (nvp.length == 2 && nvp[0] && nvp[1]) {
-                            itemCollect.sizeIds.push({ //add item + part numbers to itemCollect
+                            newItems[itemCount].sizeIds.push({ //add item + part numbers to itemCollect
                                 itemNumber: nvp[0],
                                 partNumber: nvp[1]
                             });
                         }
                     }
-   
-                    itemCollect.name = eval("(" + itemCollect.itemPartNumbersMap + ")").cmProdInfo.shortDesc;
+                    newItems[itemCount].name = eval("(" + newItems[itemCount].itemPartNumbersMap + ")").cmProdInfo.shortDesc; //get the short description from itempartnummap
                 }
 
 
                 function readProductSizes(productId) {
-                    // if (!data || !data.sizeMap || !data.sizeMap.xSizes) {
-                    //     this.hasSizes = false;
-                    //     return
-                    // }
-                    console.log(itemCollect.sizeIds);
                     var sizeMap = {};
-
-                    var sizes = itemCollect.sizeMap.xSizes.split("|");
-
+                    var sizes = newItems[itemCount].sizeMap.xSizes.split("|");
                     for (var i in sizes) {
                         var s = sizes[i].split("_");
                         if (s && s[0] && s[1] && s[2]) {
@@ -213,10 +292,19 @@ function getItem(url) {
                             }
                         }
                     }
-                    
-                    console.log('sizeMap ',sizeMap);
-
+                    //match sizeMap to sizeIds
+                    for (var i in newItems[itemCount].sizeIds){
+                        var itemNumber = newItems[itemCount].sizeIds[i].itemNumber;
+                        if (sizeMap[''+newItems[itemCount].sizeIds[i].itemNumber+''] && sizeMap[''+newItems[itemCount].sizeIds[i].itemNumber+''].size){
+                            var sizeName = sizeMap[''+newItems[itemCount].sizeIds[i].itemNumber+''].size;
+                            newItems[itemCount].sizeIds[i].sizeName = sizeName;
+                        }
+                    }
                 }
+
+
+    //CHECK INVENTORY NUM TO API CALLS ON WEBPAGE!!!!!!!!
+
 
 
     // readItemCatentryId: function(productId) {
