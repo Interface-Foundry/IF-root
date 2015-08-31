@@ -25,6 +25,10 @@ module.exports = {
         port: 6379,
         url: 'redis-thunder.internal.kipapp.co',
         options: {}
+    },
+
+    neighborhoodServer: {
+        url: 'http://pikachu.internal.kipapp.co:9998'
     }
     // // Server IP
     // ip:       process.env.OPENSHIFT_NODEJS_IP ||
