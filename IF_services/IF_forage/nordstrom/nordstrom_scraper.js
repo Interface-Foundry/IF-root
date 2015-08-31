@@ -1,3 +1,8 @@
+// TODO: Create new items for each new color:
+// How to do it: Just search using URL below the name of the product which will return DOM tags with the styleIDs required to query the Inventory URL to get the correct inventory info
+// SEARCH URL
+// http://shop.nordstrom.com/sr?origin=keywordsearch&contextualcategoryid=0&keyword=maggy-london-illusion-yoke-crepe-sheath-dress-regular-petite
+
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -40,88 +45,108 @@ module.exports = function(url, category) {
 
                 db.Zipcodes.find(query).then(function(zips) {
                     var count = 0;
-                    console.log('Current state: ' + currentState)
+                    console.log('\nCurrent state: ' + currentState)
                     async.whilst(
                         function() {
                             return count <= zips.length
                         },
                         function(cb) {
+                            //Load owner user 
+                            loadFakeUser().then(function() {
+                                    //For each zipcode
+                                    async.eachSeries(zips, function(zip, finishedZipcode) {
+                                            zipcode = zip.zipcode
+                                            getColorUrls(url).then(function(colorUrls) {
+                                                    if (!colorUrls) {
+                                                        colorUrls = []
+                                                        colorUrls[0] = url
+                                                    }
+                                                    //For each color available for item
+                                                    async.eachSeries(colorUrls, function(url, finishedItem) {
+                                                            console.log('Scraping>>>', url)
+                                                                //Process Item
+                                                            async.waterfall([
+                                                                        function(callback) {
+                                                                            scrapeItem(url).then(function(item) {
+                                                                                callback(null, item, zipcode)
+                                                                            }).catch(function(err) {
+                                                                                callback(err)
+                                                                            })
+                                                                        },
+                                                                        function(item, zipcode, callback) {
+                                                                            getInventory(item, zipcode).then(function(inventory) {
+                                                                                // console.log('hitting this?',inventory)
+                                                                                callback(null, item, inventory)
+                                                                            }).catch(function(err) {
+                                                                                callback(err)
+                                                                            })
+                                                                        },
+                                                                        function(item, inventory, callback) {
+                                                                            saveStores(item, inventory).then(function(stores) {
+                                                                                callback(null, item, stores)
+                                                                            }).catch(function(err) {
+                                                                                callback(err)
+                                                                            })
+                                                                        },
+                                                                        function(item, stores, callback) {
+                                                                            saveItems(item, stores).then(function(items) {
+                                                                                callback(null, item, stores)
+                                                                            }).catch(function(err) {
+                                                                                callback(err)
+                                                                            })
+                                                                        },
+                                                                        function(item, stores, callback) {
+                                                                            getLatLong(zipcode).then(function(coords) {
+                                                                                callback(null, item, stores, coords)
+                                                                            }).catch(function(err) {
+                                                                                callback(err)
+                                                                            })
+                                                                        },
+                                                                        function(item, stores, coords, callback) {
+                                                                            updateInventory(item, stores, coords).then(function() {
+                                                                                callback(null, item)
+                                                                            }).catch(function(err) {
+                                                                                callback(err)
+                                                                            })
+                                                                        }
+                                                                    ],
+                                                                    function(err) {
+                                                                        if (err) console.log(err)
+                                                                        finishedItem()
+                                                                    }) //end of async waterfall processing item
 
-                            async.eachSeries(zips, function(zip, finishedZipcode) {
-                                    zipcode = zip.zipcode
-                                    async.waterfall([
-                                        function(callback) {
-                                            loadFakeUser().then(function() {
-                                                callback(null)
-                                            }).catch(function(err) {
-                                                callback(null)
-                                            })
-                                        },
-                                        function(callback) {
-                                            scrapeItem(url).then(function(item) {
-                                                callback(null, item, zipcode)
-                                            }).catch(function(err) {
-                                                callback(err)
-                                            })
-                                        },
-                                        function(item, zipcode, callback) {
-                                            getInventory(item, zipcode).then(function(inventory) {
-                                                // console.log('hitting this?',inventory)
-                                                callback(null, item, inventory)
-                                            }).catch(function(err) {
-                                                callback(err)
-                                            })
-                                        },
-                                        function(item, inventory, callback) {
-                                            saveStores(item, inventory).then(function(stores) {
-                                                callback(null, item, stores)
-                                            }).catch(function(err) {
-                                                callback(err)
-                                            })
-                                        },
-                                        function(item, stores, callback) {
-                                            saveItems(item, stores).then(function(items) {
-                                                callback(null, item, stores)
-                                            }).catch(function(err) {
-                                                callback(err)
-                                            })
-                                        },
-                                        function(item, stores, callback) {
-                                            getLatLong(zipcode).then(function(coords) {
-                                                callback(null, item, stores, coords)
-                                            }).catch(function(err) {
-                                                callback(err)
-                                            })
-                                        },
-                                        function(item, stores, coords, callback) {
-                                            updateInventory(item, stores, coords).then(function() {
-                                                callback(null, item)
-                                            }).catch(function(err) {
-                                                callback(err)
-                                            })
-                                        }
-                                    ], function(err, item) {
-                                        if (err) {
-                                            console.log(err)
-                                        }
+                                                        }, function(err) {
+                                                            if (err) {
+                                                                console.log(err)
+                                                            }
+                                                            //Prematurely ejects states if no new stores found after 15 zipcode searches to save time
+                                                            if (notFoundCount >= 50) {
+                                                                notFoundCount = 0;
+                                                                return cb('Finished ' + currentState + '.')
+                                                            }
+                                                            count++
+                                                            finishedZipcode()
+                                                        }) //end of each series for colors
 
-                                        //Prematurely ejects states if no new stores found after 15 zipcode searches to save time
-                                        if (notFoundCount >= 15) {
-                                            notFoundCount = 0;
-                                            return cb('Finished ' + currentState + '.')
-                                        }
-                                        count++
-                                        finishedZipcode()
-                                    });
 
-                                },
-                                function(err) {
-                                    if (err) {
-                                        console.log(err);
-                                    } else {
-                                        cb('Done with state.')
-                                    }
-                                });
+                                                }).catch(function(err) {
+                                                    console.log(err)
+                                                    cb()
+                                                }) // end of getColors
+
+                                        },
+                                        function(err) {
+                                            if (err) {
+                                                console.log(err);
+                                            } else {
+                                                cb('Done with state.')
+                                            }
+                                        });
+
+                                }).catch(function(err) {
+                                    console.log('Could not load owner user.')
+
+                                }) //end of load user
                         },
                         function(err) {
                             if (err) {
@@ -136,11 +161,8 @@ module.exports = function(url, category) {
                                 console.log('Finished all states!')
                                 return resolve()
                             }
-
-                        }
-                    );
+                        });
                 })
-
             },
             function(err) {
                 if (err) console.log(err)
@@ -148,7 +170,6 @@ module.exports = function(url, category) {
                 resolve()
             })
     })
-
 }
 
 function loadFakeUser() {
@@ -187,6 +208,97 @@ function loadFakeUser() {
     })
 }
 
+function getColorUrls(url) {
+    return new Promise(function(resolve, reject) {
+        var colorUrls = [];
+        var colors = [];
+        var results = []
+        var searchString = url.split('/s/')[1].split('/')[0];
+        var searchUrl = 'http://shop.nordstrom.com/sr?origin=keywordsearch&contextualcategoryid=0&keyword=' + searchString
+        var baseUrl = 'http://shop.nordstrom.com'
+        var options = {
+            url: searchUrl,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+            }
+        };
+
+        request(options, function(error, response, body) {
+            if ((!error) && (response.statusCode == 200)) {
+
+                $ = cheerio.load(body); //load HTML
+
+                var obj = $('div.search-results-right-container a');
+                var clr = $('li.selected a')
+
+                //Gather all available selected colors
+                for (var i in clr) {
+                    if (clr[i].attribs && clr[i].attribs.title) {
+                        colors.push(clr[i].attribs.title)
+                    }
+                }
+
+                //Here we filter out items with no selected color 
+                // for (var key in obj) {
+                //     if (obj[key].attribs && obj[key].attribs.title && obj[key].attribs['aria-selected']) {
+                //         // console.log(obj[key].attribs)
+                //         if (obj[key].attribs['aria-selected'] == 'True') {
+                //             // .closest('.fashion-display')
+                //             // console.log(obj[key].parent.parent.parent.parent.children[1])
+                //         }
+                //     }
+                // }
+
+                for (var key in obj) {
+
+                    if (obj[key].attribs && obj[key].attribs.href && obj[key].attribs.href.indexOf('/s/') > -1 && obj[key].attribs.href.indexOf('#reviewTabs') == -1) {
+                        var newUrl = baseUrl + obj[key].attribs.href
+                            // console.log(newUrl)
+                        colorUrls.push(newUrl)
+                    }
+
+
+                }
+
+                console.log('Found ' + colorUrls.length + ' colors for this item.')
+
+
+
+                // if (colorUrls.length > colors.length) {
+                //     console.log('colors: ', colors, '\n colorUrls: ', colorUrls)
+                // }
+
+
+                for (var i = 0; i < colors.length; i++) {
+
+                    var object = {
+                        color: colors[i],
+                        url: colorUrls[i]
+                    }
+                    results.push(object)
+                }
+                // console.log('done')
+                if (colorUrls.length > 0) {
+                    resolve(colorUrls)
+                } else {
+                    resolve()
+                }
+
+
+
+            } else {
+                if (error) {
+                    console.log('error: ', error)
+                } else if (response.statusCode !== 200) {
+                    console.log('response.statusCode: ', response.statusCode);
+                }
+                reject()
+            }
+        })
+
+    })
+}
+
 
 
 function scrapeItem(url) {
@@ -209,13 +321,13 @@ function scrapeItem(url) {
 
                 $ = cheerio.load(body); //load HTML
 
-                var colors = [];
+                // var colors = [];
 
-                $('div#color-buttons button.option-label img').each(function(i, elem) {
-                    colors.push(elem.attribs.alt)
-                })
+                // $('div#color-buttons button.option-label img').each(function(i, elem) {
+                //     colors.push(elem.attribs.alt)
+                // })
 
-                newItem.colors = colors;
+                // newItem.colors = colors;
 
                 //iterate on images found in HTML
                 $('img').each(function(i, elem) {
@@ -293,6 +405,7 @@ function getInventory(newItem, zipcode) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
                 body = JSON.parse(body); //o.m.g. request, just do the double parse and don't ask 
+
                 resolve(body)
             } else {
                 if (error) {
@@ -325,9 +438,9 @@ function saveStores(item, inventory) {
 
 
             request(options, function(error, response, body) {
-           
+
                 body = JSON.parse(body);
-                     console.log('***Body', body)
+                // console.log('***Body', body)
                 if (!body.StoreCollection[0]) {
                     console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
                     return callback()
@@ -346,10 +459,7 @@ function saveStores(item, inventory) {
                     Lng: body.StoreCollection[0].Longitude
                 }
 
-// TODO: Create new items for each new color:
-// How to do it: Just search using URL below the name of the product which will return DOM tags with the styleIDs required to query the Inventory URL to get the correct inventory info
-// SEARCH URL
-// http://shop.nordstrom.com/sr?origin=keywordsearch&contextualcategoryid=0&keyword=maggy-london-illusion-yoke-crepe-sheath-dress-regular-petite
+
                 //Construct our own unique storeId 
                 uniquer.uniqueId(body.StoreCollection[0].StoreName, 'Landmark').then(function(output) {
                         //Check if store exists in db
@@ -380,7 +490,7 @@ function saveStores(item, inventory) {
                                         if (e) {
                                             console.log('Error saving new store: ', e)
                                         }
-                                        console.log('Saved store.', s.addressString)
+                                        console.log('Saved store.', s.id)
                                         notFound = false;
                                         //Push into proxy array for cloning items at the end of eachseries
                                         Stores.push(s)
@@ -443,11 +553,11 @@ function saveItems(newItem, Stores) {
                         return word.toString().toLowerCase()
                     })
                     tags.forEach(function(tag) {
-                        item.itemTags.text.push(tag)
-                    })
-                    item.source_generic_item.colors.forEach(function(color) {
-                        item.itemTags.colors.push(color)
-                    })
+                            item.itemTags.text.push(tag)
+                        })
+                        // item.source_generic_item.colors.forEach(function(color) {
+                        //     item.itemTags.colors.push(color)
+                        // })
                     item.itemTags.text.push('nordstrom')
                     item.itemTags.text.push(cat)
                     item.parent.mongoId = store._id;
@@ -465,8 +575,9 @@ function saveItems(newItem, Stores) {
                             if (e) {
                                 console.error(e);
                             }
+                            console.log('Saved item!', i.id)
                             savedItems.push(i)
-                            console.log('Saved item', i.name)
+                                // console.log('Saved item', i.name)
                             return callback();
                         })
                     })
@@ -474,14 +585,14 @@ function saveItems(newItem, Stores) {
 
                 //If item exists in db 
                 else if (i) {
-                    // console.log('Item already exists.', i._id)
+                    console.log('Item already exists.', i._id)
                     callback()
                 }
             })
         }, function(err) {
             if (err) console.log(err)
 
-            console.log('Saved ', savedItems)
+            console.log('Saved ', savedItems.length)
 
             resolve(savedItems)
         });

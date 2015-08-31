@@ -27,7 +27,7 @@ var handbags = {
     category: 'Handbags',
     url: 'http://shop.nordstrom.com/c/handbags-new-arrivals?origin=leftnav'
 }
-var catalogs = [womens, mens, wshoes, handbags, mshoes]
+var catalogs = [womens, handbags, mens, mshoes, wshoes]
 
 //This will loop forever through each of the catalogs listed above
 async.whilst(
@@ -74,9 +74,9 @@ function loadCatalog(category) {
                     var detailsUrl = item.attribs.href;
                     detailsUrl = 'http://shop.nordstrom.com' + detailsUrl.toString().trim()
 
-                    console.log('Scraping>>>', detailsUrl)
+                    // console.log('Scraping>>>', detailsUrl)
 
-                    item_scraper(detailsUrl,category.category).then(function(result) {
+                    item_scraper(detailsUrl, category.category).then(function(result) {
                         console.log('Done.**')
                         wait(callback, 3000)
                     }).catch(function(err) {
