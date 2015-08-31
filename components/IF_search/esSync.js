@@ -1,6 +1,7 @@
 var db = require('db');
 var elasticsearch = require('elasticsearch');
 var config = require('config');
+var kip = require('kip');
 
 // logs elasticsearch stuff, flesh out later once we know what's useful
 var ESLogger = function(config) {
@@ -42,7 +43,7 @@ var esKipSchemaBase = {
         type: "date"
     },
     tags: {
-        typs: 'string'
+        type: 'string'
     },
     miscText: {
         type: "string"
@@ -132,7 +133,44 @@ var esUserSchema = _.merge({}, esKipSchemaBase, {
 
 
 function createIndexes() {
-// todo
+    es.indices.delete({
+        index: 'kip'
+    }, function (e) {
+        var body ={ mappings: {
+            items:
+            {
+                properties: schemaToMapping(esItemSchema)
+            }
+        }};
+        kip.prettyPrint(body);
+        es.indices.create({
+            index: 'kip',
+            body: body
+        }, function(e) {
+            if (kip.err(e)) return;
+            console.log('created new mapping for items')
+            db.Landmarks.update({world: false}, {'flags.mustUpdateElasticsearch': true}, {multi: true}, function() {
+                console.log('marked all existing items for update');
+                GO();
+            })
+        })
+    })
+}
+
+createIndexes();
+
+function schemaToMapping(schema) {
+    var s = _.cloneDeep(schema);
+    return Object.keys(s).reduce(function(mapping, k) {
+        var prop = s[k];
+        if (prop.type === 'object' && typeof prop.properties !== 'undefined') {
+            mapping[k] = schemaToMapping(prop.properties);
+            return mapping;
+        }
+        delete prop.source;
+        mapping[k] = prop;
+        return mapping;
+    }, {})
 }
 
 
@@ -180,8 +218,6 @@ function GO() {
 
         })
 }
-
-GO();
 
 function mongoToEs(schema, doc) {
     return Object.keys(schema).reduce(function(esDoc, k) {

@@ -6,6 +6,7 @@ var config = require('config');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var deepcopy = require('deepcopy');
+var kip = require('kip');
 
 // set up the fake data for the /trending api
 var request = Promise.promisify(require('request'));
@@ -221,7 +222,7 @@ function textSearch(q, page) {
             must: [{
                 geo_distance: {
                     distance: (q.radius || defaultRadius) + "mi",
-                    "loc.coordinates": {
+                    "geolocation": {
                         lat: q.loc.lat,
                         lon: q.loc.lon
                     }
@@ -234,24 +235,17 @@ function textSearch(q, page) {
     if (q.priceRange) {
         filter.bool.must.push({
             term: {
-                price: q.priceRange
+                priceRange: q.priceRange
             }
         });
     }
-
-    // only items, not worlds
-    filter.bool.must.push({
-        term: {
-            world: false
-        }
-    });
 
     // put it all together in a filtered fuzzy query
     var fuzzyQuery = {
         size: pageSize,
         from: page * pageSize,
-        index: "foundry",
-        type: "landmarks",
+        index: "kip",
+        type: "items",
         fields: [],
         body: {
             query: {
@@ -262,7 +256,7 @@ function textSearch(q, page) {
                             fuzziness: fuzziness,
                             prefix_length: 1,
                             type: "best_fields",
-                            fields: ["name^2", "id", "summary", "itemTags", "comments", "description", "parent.name^2"],
+                            fields: ["name^3", "id^2", "parentName^2", "tags^2", "categories", "description"],
                             tie_breaker: 0.2,
                             minimum_should_match: "30%"
                         }
@@ -272,8 +266,7 @@ function textSearch(q, page) {
             }
         }
     };
-
-    console.log(JSON.stringify(fuzzyQuery));
+    kip.prettyPrint(fuzzyQuery)
 
     return es.search(fuzzyQuery)
         .then(function(results) {
@@ -313,7 +306,7 @@ function textSearch(q, page) {
                 }
             })
 
-        });
+        }, kip.err);
 }
 
 /**

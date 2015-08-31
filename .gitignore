@@ -12,6 +12,7 @@ node_modules/*
 !node_modules/config
 !node_modules/db
 !node_modules/job.js
+!node_modules/kip.js
 
 # Compiled source #
 ###################
