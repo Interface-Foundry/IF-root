@@ -240,3 +240,11 @@ function mongoToEs(schema, doc) {
 GO();
 // alternatively, if you want to blow away the current index and recreate
 // the entire elasticsaerch index, comment out GO() and call CreateIndexes();
+
+/*
+also, here's what you'll want in your crontab if you use crontabs
+
+* * * * * node /home/ubuntu/IF-root/components/IF_search/esSync 2>&1 >>/home/ubuntu/esSync.log
+0 0 * * * rm /home/ubuntu/esSync.log
+
+ */
