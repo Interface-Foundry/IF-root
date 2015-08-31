@@ -2,8 +2,8 @@
 
 set -e
 
-# snatch latest bubblli code
-git fetch origin && git reset --hard Bubblli
+# snatch latest kip code
+git fetch origin && git pull --rebase
 
 # redeploy
 pm2 restart IF_server
