@@ -68,10 +68,12 @@
     "traceback": "^0.3.1",
     "tsv": "^0.2.0",
     "underscore": "^1.8.3",
+    "unirest": "^0.4.2",
     "url": "^0.10.3",
     "urlify": "~0.3.5",
     "uuid": "^2.0.1",
-    "validator": "^3.42.0"
+    "validator": "^3.42.0",
+    "vvv": "^1.1.0"
   },
   "devDependencies": {
     "chai": "^3.0.0",
