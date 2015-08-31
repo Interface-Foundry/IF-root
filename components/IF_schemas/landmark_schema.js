@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 //textSearch = require('mongoose-text-search');
-monguurl = require('monguurl');
+var monguurl = require('monguurl');
 var accounting = require('accounting');
 
 //schema construction
@@ -353,7 +353,8 @@ var landmarkSchema = new Schema({
     },
     flags: {
         humanProcessed: Boolean,
-        humanProcessedTime: Date
+        humanProcessedTime: Date,
+        mustUpdateElasticsearch: Boolean
     }
 
 

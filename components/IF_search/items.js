@@ -2,6 +2,7 @@ var express = require('express');
 var app = express.Router();
 var db = require('../IF_schemas/db');
 var elasticsearch = require('elasticsearch');
+var config = require('config');
 var Promise = require('bluebird');
 var _ = require('lodash');
 var deepcopy = require('deepcopy');
@@ -21,7 +22,7 @@ var ESLogger = function(config) {
     this.close = defaultLogger;
 };
 var es = new elasticsearch.Client({
-    host: global.config.elasticsearch.url,
+    host: config.elasticsearch.url,
     log: ESLogger
 });
 
