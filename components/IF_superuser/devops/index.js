@@ -17,6 +17,15 @@ commitProcess.stdout.on('data', function(data) {
     console.log('on commit', commit);
 });
 
+app.use(function(req, res, next) {
+    console.log('hitting devops route');
+    if (req.user && req.user.admin) {
+        next();
+    } else {
+        next({devMessage: 'not admin for devops'})
+    }
+})
+
 // shows you what commit we're running
 app.get('/commit', function(req, res) {
     res.set('Content-Type', 'text/plain');
