@@ -350,6 +350,7 @@ function processItems(inventory, itemData) {
             async.eachSeries(inventory, function(store, callback) {
                         //Create new item for each store in inventory list.
                         var i = new db.Landmark();
+                        i.world = false;
                         i.source_generic_item = itemData;
                         i.price = parseFloat(itemData.price);
                         i.itemImageURL = itemData.images;

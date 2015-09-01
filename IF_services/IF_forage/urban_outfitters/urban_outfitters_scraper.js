@@ -313,6 +313,63 @@ function cloneItems(newItems) {
 }
 
 
+function saveItems(newItem) {
+    return new Promise(function(resolve, reject) {
+        var savedItems = []
+        async.eachSeries(Stores, function(store, callback) {
+            var i = new db.Landmark();
+            i.source_zara_item = newItem;
+            i.world = false;
+            i.hasloc = true;
+            // console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
+            i.loc.coordinates[0] = parseFloat(store.lng);
+            i.loc.coordinates[1] = parseFloat(store.lat);
+            uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
+                i.id = output;
+                i.save(function(e, item) {
+                    if (e) {
+                        console.error(e);
+                        return callback();
+                    }
+                    savedItems.push(item)
+                    callback()
+                })
+            })
+        }, function(err) {
+            if (err) {
+                // console.log('Error in saveItems: ',err)
+                reject(err)
+            }
+            resolve(savedItems)
+        })
+    })
+}
+
+
+function updateInventory(inventory, newItem) {
+    return new Promise(function(resolve, reject) {
+        console.log('')
+        if (inventory.stocks && inventory.stocks.length > 0) {
+            inventory.stocks.forEach(function(stock) {
+                newItem.physicalStores.forEach(function(store) {
+                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
+                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
+                        // console.log('MATCH')
+                        store.inventory = stock.sizeStocks;
+                    }
+                })
+            })
+            resolve(newItem)
+        } else {
+            console.log('no inventory? ', inventory)
+            resolve(newItem)
+        }
+    })
+}
+
+
+
+
 function saveStores(items) {
     return new Promise(function(resolve, reject) {
         var storeIds = []
@@ -372,60 +429,6 @@ function saveStores(items) {
         })
     })
 }
-
-function saveItems(newItem) {
-    return new Promise(function(resolve, reject) {
-        var savedItems = []
-        async.eachSeries(Stores, function(store, callback) {
-            var i = new db.Landmark();
-            i.source_zara_item = newItem;
-            i.hasloc = true;
-            // console.log('LNG: ', parseFloat(store.lng), 'LAT: ', parseFloat(store.lat))
-            i.loc.coordinates[0] = parseFloat(store.lng);
-            i.loc.coordinates[1] = parseFloat(store.lat);
-            uniquer.uniqueId(newItem.name, 'Landmark').then(function(output) {
-                i.id = output;
-                i.save(function(e, item) {
-                    if (e) {
-                        console.error(e);
-                        return callback();
-                    }
-                    savedItems.push(item)
-                    callback()
-                })
-            })
-        }, function(err) {
-            if (err) {
-                // console.log('Error in saveItems: ',err)
-                reject(err)
-            }
-            resolve(savedItems)
-        })
-    })
-}
-
-
-function updateInventory(inventory, newItem) {
-    return new Promise(function(resolve, reject) {
-        console.log('')
-        if (inventory.stocks && inventory.stocks.length > 0) {
-            inventory.stocks.forEach(function(stock) {
-                newItem.physicalStores.forEach(function(store) {
-                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
-                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
-                        // console.log('MATCH')
-                        store.inventory = stock.sizeStocks;
-                    }
-                })
-            })
-            resolve(newItem)
-        } else {
-            console.log('no inventory? ', inventory)
-            resolve(newItem)
-        }
-    })
-}
-
 
 
 

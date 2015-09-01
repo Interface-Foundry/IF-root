@@ -61,11 +61,12 @@ function getStores() {
 function createStores(stores) {
     return new Promise(function(resolve, reject) {
         var Stores = []
+        var storeId = parseInt(store.number).toString();
 
         async.eachSeries(stores, function(store, callback) {
-            var storeId = parseInt(store.number).toString();
+
             if (store.country_code !== 'US') {
-              return callback()
+                return callback()
             }
             db.Landmarks
                 .findOne({
@@ -79,13 +80,15 @@ function createStores(stores) {
                     }
                     if (!s) {
                         var n = new db.Landmark();
+                        n.world = true;
                         n.source_generic_store = store;
+                        n.source_generic_store.storeId = storeId
                         if (store.address_2 == null) {
-                          store.address_2 = ''
+                            store.address_2 = ''
                         }
                         n.addressString = store.address_1 + ' ' + store.address_2 + ' ' + store.city + ' ' + store.postal_code + ' ' + store.country_code
                         n.tel = store.phone_number;
-                        n.world = true;
+                        
                         n.hasloc = true;
                         n.linkback = 'http://www.urbanoutfitters.com';
                         n.linkbackname = 'urbanoutfitters.com'
