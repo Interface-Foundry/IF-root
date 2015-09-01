@@ -106,11 +106,6 @@ app.get('/api/healthcheck', function(req, res) {
     res.send(200);
 });
 
-// git
-if (!global.config.isProduction) {
-    app.use('/git', require('./components/IF_superuser/git'));
-}
-
 // proxy. in production, we sit behind a proxy but still want secure session cookies
 if (global.config.isProduction) {
     app.set('trust proxy', 1); // trust first proxy
@@ -554,8 +549,11 @@ app.use('/api/instagrams', require('./components/IF_apiroutes/instagram_routes')
 //--- IP GEOLOCATION AND NAME ROUTER ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
+// devops
+if (!global.config.isProduction) {
+    app.use('/devops', require('./components/IF_superuser/devops'));
+}
 
-//--- CHAT DELECT ----//
 app.use('/api/geolocation', require('./components/IF_apiroutes/geo_routes'));
 
 

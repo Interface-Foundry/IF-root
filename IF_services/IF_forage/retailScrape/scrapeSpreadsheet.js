@@ -5,51 +5,10 @@ function startingPoint(data, done) {
 var getRows = require('./getRows');
 getRows().then(function(rows) {
   rows.map(function(r) {
-    done(r)
+    if (r.StoreName && r.StoreLat && r.StoreLon) {
+      done(r)
+    }
   })
-})
-}
-
-function getStore(data, done) {
-if (!data.StoreId) {
-  throw new Error('no ID for store')
-}
-
-var db = require('db');
-
-db.Landmarks.findOne({id: data.StoreId}, function(e, s) {
-  if (e) throw e;
-  if (s) {
-    data.store = s;
-    return done(data)
-  }
-  
-  // uh oh have to make a new store aaaaand user for it
-  var user = new db.User({
-    addr: data.StoreAddress,
-    name: data.StoreName,
-    profileID: data.StoreId
-  })
-  user.save();
-  var store = new db.Landmark({
-    name: data.StoreName,
-    id: data.StoreId,
-    world: true,
-    owner: {
-      mongoId: user._id.toString(),
-      profileID: user.profileID,
-      name: user.name
-    },
-    valid: true,
-    loc: {
-      type: 'Point',
-      coordinates: [data.StoreLon, data.StoreLat]
-    },
-    addressString: data.StoreAddress
-  })
-  store.save();
-  data.store = store.toObject();
-  done(data);
 })
 }
 
@@ -142,9 +101,56 @@ function processImages(data, done) {
 // i kind of forget what needs to happen here.
 }
 
-quickflow.connect(startingPoint, getStore)
-quickflow.connect(getStore, getItemUrls)
+function getStoreFromRow(data, done) {
+if (!data.StoreId) {
+  throw new Error('no ID for store')
+}
+
+var db = require('db');
+
+db.Landmarks.findOne({id: data.StoreId}, function(e, s) {
+  if (e) throw e;
+  if (s) {
+    s.loc.coordinates = [parseFloat(data.StoreLon), parseFloat(data.StoreLat)];
+    s.save(function() {
+      data.store = s.toObject();
+      done(data);
+    })
+    return
+  }
+  
+  // uh oh have to make a new store aaaaand user for it
+  var user = new db.User({
+    addr: data.StoreAddress,
+    name: data.StoreName,
+    profileID: data.StoreId
+  })
+  user.save();
+  var store = new db.Landmark({
+    name: data.StoreName,
+    id: data.StoreId,
+    world: true,
+    owner: {
+      mongoId: user._id.toString(),
+      profileID: user.profileID,
+      name: user.name
+    },
+    valid: true,
+    loc: {
+      type: 'Point',
+      coordinates: [parseFloat(data.StoreLon), parseFloat(data.StoreLat)]
+    },
+    addressString: data.StoreAddress
+  })
+  store.save();
+  data.store = store.toObject();
+  done(data);
+})
+}
+
+quickflow.connect(startingPoint, getStoreFromRow)
 quickflow.connect(getItemUrls, scrapeItem)
 quickflow.connect(scrapeItem, log)
 quickflow.connect(scrapeItem, processImages)
+quickflow.connect(getStoreFromRow, getItemUrls)
 if (!module.parent) quickflow.run()

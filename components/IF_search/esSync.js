@@ -157,8 +157,6 @@ function createIndexes() {
     })
 }
 
-createIndexes();
-
 function schemaToMapping(schema) {
     var s = _.cloneDeep(schema);
     return Object.keys(s).reduce(function(mapping, k) {
@@ -239,48 +237,14 @@ function mongoToEs(schema, doc) {
     }, {})
 }
 
-function indexTestDoc(doc) {
-    var user = {
-        id: 'pbrandt1',
-        name: 'peter',
-        description: 'peter is a fake person on the internet',
-        location: 'Washington, DC',
-        faves: ['1', '1345', 'asdfghlk1']
-    }
+GO();
+// alternatively, if you want to blow away the current index and recreate
+// the entire elasticsaerch index, comment out GO() and call CreateIndexes();
 
-    var item = {
+/*
+also, here's what you'll want in your crontab if you use crontabs
 
-    }
+* * * * * node /home/ubuntu/IF-root/components/IF_search/esSync 2>&1 >>/home/ubuntu/esSync.log
+0 0 * * * rm /home/ubuntu/esSync.log
 
-    var stpore = {
-        "_id" : "55a758b81a026e77067c9eef",
-        "source_shoptiques_store" : {
-            "id" : 1525,
-            "idString" : "1525",
-            "followersCount" : "672",
-            "image" : "http://ecdn2.shoptiques.net/boutiques/97e8697e-093a-4a46-b825-b6b5615d3854_l.jpg",
-            "description" : "\r\n\tUnique clothing and accessories for women. \r\n",
-            "state" : "NJ",
-            "city" : "Passaic",
-            "addressText" : "156 Main Avenue, Passaic",
-            "neighborhood" : "New Jersey",
-            "url" : "http://www.shoptiques.com/boutiques/Pink-Orchid",
-            "name" : "Pink Orchid",
-            "source" : "shoptiques"
-        },
-        "name" : "Pink Orchid",
-        "id" : "pinkorchid1525",
-        "comments" : [],
-        "rejects" : [],
-        "faves" : [],
-        "tags" : [],
-        "loc" : {
-            "type" : "Point",
-            "coordinates" : [
-                -74.1286233999999951,
-                40.8444367999999969
-            ]
-        },
-        "__v" : 0
-    }
-}
+ */

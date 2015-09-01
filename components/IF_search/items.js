@@ -455,7 +455,7 @@ app.post(trendingItemsUrl, function(req, res, next) {
         })
         .then(function(res) {
             return {
-                category: 'Trending in ' + res,
+                category: 'Trending near you',
                 results: res
             }
         });
