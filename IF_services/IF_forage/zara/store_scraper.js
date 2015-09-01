@@ -258,7 +258,8 @@ function saveStores(stores) {
         async.each(stores, function(store, callback) {
             db.Landmarks
                 .findOne({
-                    'source_generic_store.storeId': store.storeId
+                    'source_generic_store.storeId': store.storeId,
+                     'linkbackname': 'zara.com'
                 })
                 .exec(function(e, s) {
                     if (e) {
@@ -271,8 +272,9 @@ function saveStores(stores) {
                         n.addressString = store.storeAddress + ' ' + store.storeCity + ' ' + store.storeZipCode + ' ' + store.storeCountry
                         n.world = true;
                         n.hasloc = true;
-                        i.linkback = 'http://www.zara.com';
-                        i.linkbackname = 'zara.com'
+                        n.tel = store.storePhone1
+                        n.linkback = 'http://www.zara.com';
+                        n.linkbackname = 'zara.com'
                         n.loc.coordinates[0] = parseFloat(store.lng);
                         n.loc.coordinates[1] = parseFloat(store.lat);
                         n.name = 'Zara ' + store.storeAddress

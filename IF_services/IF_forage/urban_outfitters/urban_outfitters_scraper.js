@@ -22,26 +22,27 @@ async.waterfall([
     //     })
     // },
     function(callback) {
-        getItem(url).then(function(item) {
+        scrapeItem(url).then(function(item) {
             callback(null, item)
         }).catch(function(err) {
             callback(err)
         })
     },
     function(item, callback) {
-        getInventory(item).then(function(item) {
-            callback(null, item)
+        cloneItems(item).then(function(items) {
+            console.log('Items: ', items[0].physicalStores[0])
+            callback(null, items)
         }).catch(function(err) {
             callback(err)
         })
     },
-    // function(item, callback) {
-    //     getInventory(item).then(function(inventory) {
-    //         callback(null, item, inventory)
-    //     }).catch(function(err) {
-    //         callback(err)
-    //     })
-    // },
+    function(items, callback) {
+        saveStores(items).then(function(item) {
+            callback(null, item)
+        }).catch(function(err) {
+            callback(err)
+        })
+    }
     // function(item, inventory, callback) {
     //     updateInventory(inventory, item).then(function(item) {
     //         callback(null, item)
@@ -49,13 +50,7 @@ async.waterfall([
     //         callback(err)
     //     })
     // },
-    // function(item, callback) {
-    //     saveStores(item).then(function(item) {
-    //         callback(null, item)
-    //     }).catch(function(err) {
-    //         callback(err)
-    //     })
-    // },
+
     // function(item, callback) {
     //     saveItems(item).then(function(items) {
     //         callback(null, items)
@@ -94,7 +89,7 @@ function checkIfScraped(url) {
 }
 
 
-function getItem(url) {
+function scrapeItem(url) {
     return new Promise(function(resolve, reject) {
 
         // var queryURL = url.substring(url.lastIndexOf("/") + 1).split('?')[0]; //get product ID from URL
@@ -113,7 +108,7 @@ function getItem(url) {
         var latestColor;
 
         var options = {
-            url: 'http://www.urbanoutfitters.com/api/v1/product/'+getParameterByName('id')+'',
+            url: 'http://www.urbanoutfitters.com/api/v1/product/' + getParameterByName('id') + '',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
             }
@@ -123,8 +118,8 @@ function getItem(url) {
 
                 //console.log(body);
                 body = JSON.parse(body);
- 
-                for (var i = 0; i < body.product.skusInfo.length; i++) {  //get all the skuIDs
+
+                for (var i = 0; i < body.product.skusInfo.length; i++) { //get all the skuIDs
 
                     newItems[i] = { //make new item object in array of items
                         name: body.product.skusInfo[i].description + ' ' + body.product.skusInfo[i].color,
@@ -139,14 +134,14 @@ function getItem(url) {
                         physicalStores: []
                     }
 
-                    if (body.product.skusInfo.length == i + 1){ 
+                    if (body.product.skusInfo.length == i + 1) {
                         getImages();
                     }
                 }
 
-                function getImages(){
+                function getImages() {
 
-                     for (var i = 0; i < body['product']['colors'].length; i++) { //looping through colors (each color is another item to add to DB)
+                    for (var i = 0; i < body['product']['colors'].length; i++) { //looping through colors (each color is another item to add to DB)
 
                         var collectedImages = []; //viewcodes are used to display correct image in series (collect all viewcodes to know pics available for each color of each item)
 
@@ -154,9 +149,11 @@ function getItem(url) {
 
                             //collecting images for each item color based on viewcodes (photo angles)
                             collectedImages.push('http://images.urbanoutfitters.com/is/image/UrbanOutfitters/' + body['product']['colors'][i].id + '_' + body['product']['colors'][i]['viewCode'][z] + '?$mlarge$&defaultImage=');
-                          
-                            if (body['product']['colors'][i]['viewCode'].length == z + 1){  //end of for loop for this item viewcode count
-                                var imgsToObjs = _.filter(newItems, function(obj) { return obj.colorId == body['product']['colors'][i].colorCode }); //find the items in our newItems array to add our images to (based on color)
+
+                            if (body['product']['colors'][i]['viewCode'].length == z + 1) { //end of for loop for this item viewcode count
+                                var imgsToObjs = _.filter(newItems, function(obj) {
+                                    return obj.colorId == body['product']['colors'][i].colorCode
+                                }); //find the items in our newItems array to add our images to (based on color)
                                 for (var x = 0; x < imgsToObjs.length; x++) { //iterate through _.filter results to find all items that match current color code
                                     imgsToObjs[x].images = collectedImages; //push collectedImages to each item that matches color
                                 }
@@ -164,7 +161,7 @@ function getItem(url) {
                         }
 
                         //END OF LOOP, MOVE ON NOW to getting inventory
-                        if (body['product']['colors'].length == i + 1){ 
+                        if (body['product']['colors'].length == i + 1) {
                             if (newItems[0].productId) { //if there's at least one item in array that has a productId
                                 resolve(newItems); //go to inventory query
                             } else {
@@ -172,7 +169,7 @@ function getItem(url) {
                                 reject('missing params')
                             }
                         }
-                    }  
+                    }
                 }
 
             } else {
@@ -187,7 +184,7 @@ function getItem(url) {
 }
 
 
-function getInventory(newItems) {
+function cloneItems(newItems) {
     return new Promise(function(resolve, reject) {
 
         var postalcode = '66006'; //iterate through all zipcodes? chose this one because we can probably querying whole USA with this lat lng in center of map
@@ -197,15 +194,15 @@ function getInventory(newItems) {
 
         async.eachSeries(newItems, function iterator(item, callback) {
 
-            var url = 'http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance='+radius+'&selectedColor='+item.colorId+'&skuId='+item.skuId+'&zipCode='+postalcode+'';
-            var options = { 
+            var url = 'http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance=' + radius + '&selectedColor=' + item.colorId + '&skuId=' + item.skuId + '&zipCode=' + postalcode + '';
+            var options = {
                 url: url,
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                 }
             };
 
-            console.log('URL', url)
+            // console.log('URL', url)
 
             request(options, function(error, response, body) {
                 if ((!error) && (response.statusCode == 200)) {
@@ -223,9 +220,11 @@ function getInventory(newItems) {
                 }
             });
 
-            setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+            setTimeout(function() {
+                callback()
+            }, 800); //slowly collecting stores that carry item cause there's a rate limiter on the API
 
-        },function(err,res){
+        }, function(err, res) {
 
             var finalItems = [];
             var currentColorId = '';
@@ -233,12 +232,12 @@ function getInventory(newItems) {
 
             var colorItemObjs = _.groupBy(newItems, 'colorId'); //group items by colorId
 
-            for (var key in colorItemObjs) { 
+            for (var key in colorItemObjs) {
 
-                for (var z = 0; z < colorItemObjs[key].length; z++) { 
+                for (var z = 0; z < colorItemObjs[key].length; z++) {
 
                     //ADD TO CURRENT ITEM BY COLOR
-                    if (colorItemObjs[key][z].colorId == currentColorId){ 
+                    if (colorItemObjs[key][z].colorId == currentColorId) {
 
                         finalItems[iterateCheck].sizeIds.push({ //store the sizes for each product / color
                             skuId: colorItemObjs[key][z].skuId,
@@ -246,14 +245,14 @@ function getInventory(newItems) {
                             sizeId: colorItemObjs[key][z].sizeId
                         });
 
-                        if (colorItemObjs[key][z].physicalStores){ //add stores for additional item sizes if there are results
+                        if (colorItemObjs[key][z].physicalStores) { //add stores for additional item sizes if there are results
                             for (var x = 0; x < colorItemObjs[key][z].physicalStores.length; x++) {
                                 finalItems[iterateCheck].physicalStores.push(colorItemObjs[key][z].physicalStores[x]);
                             }
                         }
                     }
                     //CREATE NEW ITEM BY COLOR
-                    else {  
+                    else {
 
                         currentColorId = colorItemObjs[key][z].colorId; //update currentColorId with latest color in array
 
@@ -275,7 +274,7 @@ function getInventory(newItems) {
                             sizeId: colorItemObjs[key][z].sizeId
                         });
 
-                        if (colorItemObjs[key][z].physicalStores){ //add stores if there are results
+                        if (colorItemObjs[key][z].physicalStores) { //add stores if there are results
                             for (var x = 0; x < colorItemObjs[key][z].physicalStores.length; x++) {
                                 newItem.physicalStores.push(colorItemObjs[key][z].physicalStores[x]);
                             }
@@ -289,72 +288,42 @@ function getInventory(newItems) {
                 iterateCheck++;
 
                 //ON FINAL Z LOOP END
-                if (Object.keys(colorItemObjs).length == iterateCheck){ //fake async
+                if (Object.keys(colorItemObjs).length == iterateCheck) { //fake async
                     finalOutput(finalItems);
                 }
 
             }
 
-
-            function finalOutput(finalItems){
-
-                for (var z = 0; z < finalItems.length; z++) {
-
-                    //console.log(finalItems[z].physicalStores.length);
-
-                    var newStores = _.uniq(finalItems[z].physicalStores, 'storeName'); //remove duplicate physical stores
-
-                    //console.log(newStores.length);
-
-                    finalItems[z].physicalStores = newStores;
-                    //console.log(finalItems[z].physicalStores.length);
-
-                }
-
-                //FINAL OUTPUT!!!!!!!
-                console.log('FINAL SCRAPE OUTPUT');
-                console.log(finalItems); //END FINAL ITEMS HERE!!!!!
-
+            function finalOutput(finalItems) {
+                finalItems.forEach(function(item) {
+                    item.physicalStores.forEach(function(store) {
+                            store.storeId = store.link.indexOf('/id=')[1]
+                        })
+                        //Remove duplicates
+                    item.physicalStores = _.uniq(item.physicalStores, 'storeId');
+                    item.physicalStores = _.uniq(item.physicalStores, 'storeName');
+                })
+                return resolve(finalItems)
             }
-            
-            
+
+
         });
 
     });
 }
 
 
-function updateInventory(inventory, newItem) {
-    return new Promise(function(resolve, reject) {
-        console.log('')
-        if (inventory.stocks && inventory.stocks.length > 0) {
-            inventory.stocks.forEach(function(stock) {
-                newItem.physicalStores.forEach(function(store) {
-                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
-                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
-                        // console.log('MATCH')
-                        store.inventory = stock.sizeStocks;
-                    }
-                })
-            })
-            resolve(newItem)
-        } else {
-            console.log('no inventory? ', inventory)
-            resolve(newItem)
-        }
-    })
-}
-
-
-
-function saveStores(item) {
+function saveStores(items) {
     return new Promise(function(resolve, reject) {
         var storeIds = []
         var count = 0
-        async.each(Stores, function(store, callback) {
+        async.each(items, function(item, callback) {
+            var store = item.physicalStores[count]
+
             db.Landmarks
                 .findOne({
-                    'source_zara_store.storeId': store.storeId
+                    'source_generic_store.storeId': store.storeId,
+                    'linkbackname': 'nordstrom.com'
                 })
                 .exec(function(e, s) {
                     if (e) {
@@ -434,6 +403,31 @@ function saveItems(newItem) {
         })
     })
 }
+
+
+function updateInventory(inventory, newItem) {
+    return new Promise(function(resolve, reject) {
+        console.log('')
+        if (inventory.stocks && inventory.stocks.length > 0) {
+            inventory.stocks.forEach(function(stock) {
+                newItem.physicalStores.forEach(function(store) {
+                    // console.log('stock.physicalStoreId', stock.physicalStoreId, 'store.zaraStoreId', store.zaraStoreId)
+                    if (stock.physicalStoreId.toString().trim() == store.zaraStoreId.toString().trim()) {
+                        // console.log('MATCH')
+                        store.inventory = stock.sizeStocks;
+                    }
+                })
+            })
+            resolve(newItem)
+        } else {
+            console.log('no inventory? ', inventory)
+            resolve(newItem)
+        }
+    })
+}
+
+
+
 
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");

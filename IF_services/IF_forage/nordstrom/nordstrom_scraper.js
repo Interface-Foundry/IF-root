@@ -482,6 +482,7 @@ function saveStores(item, inventory) {
                                     newStore.source_generic_store = storeObj;
                                     newStore.addressString = storeObj.StreetAddress.concat(', ' + storeObj.City).concat(', ' + storeObj.PostalCode)
                                     newStore.id = output;
+                                    newStore.tel = storeObj.PhoneNumber;
                                     newStore.world = true;
                                     newStore.name = storeObj.name;
                                     newStore.hasloc = true;
