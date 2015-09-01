@@ -28,7 +28,7 @@ module.exports = {
     },
 
     neighborhoodServer: {
-        url: 'http://pikachu.internal.kipapp.co:9998'
+        url: 'http://localhost:9998'
     }
     // // Server IP
     // ip:       process.env.OPENSHIFT_NODEJS_IP ||
