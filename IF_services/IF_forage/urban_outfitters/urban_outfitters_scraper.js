@@ -197,8 +197,6 @@ function getInventory(newItems) {
 
         async.eachSeries(newItems, function iterator(item, callback) {
 
-           // colorIdsTemp.push(item.colorId);
-
             var url = 'http://www.urbanoutfitters.com/urban/catalog/availability_include_store_json.jsp?country=US&distance='+radius+'&selectedColor='+item.colorId+'&skuId='+item.skuId+'&zipCode='+postalcode+'';
             var options = { 
                 url: url,
@@ -206,9 +204,11 @@ function getInventory(newItems) {
                     'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
                 }
             };
+
+            console.log('URL', url)
+
             request(options, function(error, response, body) {
                 if ((!error) && (response.statusCode == 200)) {
-
                     body = JSON.parse(body);
                     item.physicalStores = body.stores; //put store results in each item object
 
@@ -222,7 +222,9 @@ function getInventory(newItems) {
                     }
                 }
             });
+
             setTimeout(function() { callback() }, 800);  //slowly collecting stores that carry item cause there's a rate limiter on the API
+
         },function(err,res){
 
             var finalItems = [];

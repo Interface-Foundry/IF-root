@@ -1,8 +1,3 @@
-// TODO: Create new items for each new color:
-// How to do it: Just search using URL below the name of the product which will return DOM tags with the styleIDs required to query the Inventory URL to get the correct inventory info
-// SEARCH URL
-// http://shop.nordstrom.com/sr?origin=keywordsearch&contextualcategoryid=0&keyword=maggy-london-illusion-yoke-crepe-sheath-dress-regular-petite
-
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -21,7 +16,7 @@ var states = require('../zara/states');
 //Global var to hold category
 cat = '';
 //Global var to hold fake user object
-owner = {}
+owner = {};
 
 module.exports = function(url, category) {
 
@@ -68,7 +63,10 @@ module.exports = function(url, category) {
                                                             async.waterfall([
                                                                         function(callback) {
                                                                             scrapeItem(url).then(function(item) {
-                                                                                callback(null, item, zipcode)
+                                                                                wait(function() {
+                                                                                    callback(null, item, zipcode)
+                                                                                }, 3000)
+
                                                                             }).catch(function(err) {
                                                                                 callback(err)
                                                                             })
@@ -405,7 +403,6 @@ function getInventory(newItem, zipcode) {
             if ((!error) && (response.statusCode == 200)) {
                 body = JSON.parse(body);
                 body = JSON.parse(body); //o.m.g. request, just do the double parse and don't ask 
-
                 resolve(body)
             } else {
                 if (error) {
@@ -413,10 +410,14 @@ function getInventory(newItem, zipcode) {
                     reject(error)
                 } else {
                     console.log('bad response')
-                    reject('Bad response from inventory request')
+                    wait(function() {
+                        reject('Bad response from inventory request')
+                    }, 10000)
+
                 }
             }
         })
+
     })
 }
 
@@ -441,8 +442,11 @@ function saveStores(item, inventory) {
 
                 body = JSON.parse(body);
                 // console.log('***Body', body)
-                if (!body.StoreCollection[0]) {
-                    console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
+                if (!body.StoreCollection || !body.StoreCollection[0]) {
+
+                    wait(10000, function() {
+                        console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
+                    })
                     return callback()
                 }
                 var storeObj = {
@@ -560,6 +564,13 @@ function saveItems(newItem, Stores) {
                         // })
                     item.itemTags.text.push('nordstrom')
                     item.itemTags.text.push(cat)
+                    //Get rid of blank tags
+                    var i = item.itemTags.text.length
+                    while (i--) {
+                        if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ' ) {
+                            item.itemTags.text.splice(i,1)
+                        }
+                    }
                     item.parent.mongoId = store._id;
                     item.parent.name = store.name;
                     item.parent.id = store.id;
@@ -647,9 +658,6 @@ function getLatLong(zipcode) {
     })
 }
 
-
-
-
 function updateInventory(item, stores, coords) {
     return new Promise(function(resolve, reject) {
         var storeIds = stores.map(function(store) {
@@ -681,4 +689,11 @@ function updateInventory(item, stores, coords) {
             resolve(item)
         })
     })
+}
+
+
+function wait(callback, delay) {
+    var startTime = new Date().getTime();
+    while (new Date().getTime() < startTime + delay);
+    callback();
 }
