@@ -35,8 +35,11 @@ module.exports = function scrapeItem(url) {
 
     //Flag if item exists
     exists = false;
+    //To account for multi-color items
+    multiColors = []
 
     return new Promise(function(resolve, reject) {
+
         async.waterfall([
                 function(callback) {
                     // console.log(1)
@@ -101,6 +104,10 @@ module.exports = function scrapeItem(url) {
                 if (err) {
                     console.log(err)
                     reject(err)
+                }
+
+                if (multiColors.length > 0) {
+
                 }
                 // if (items) {
                 //     console.log('Saved ',items, ' items.')
@@ -175,6 +182,7 @@ function checkIfScraped(url) {
 
 
 function scrapeDetails(url) {
+
     return new Promise(function(resolve, reject) {
         //construct newItem object
         var newItem = {
@@ -208,20 +216,7 @@ function scrapeDetails(url) {
                 }
 
                 if ($('div.colors div.imgCont')) {
-                    // if ($('div.colors div.imgCont img').length > 1) {
-                    //     var multicolors = []
-                    //     var images = $('div.colors div.imgCont img')
-                    //     for (var key in images) {
-                    //         if (images[key].attribs && images[key].attribs.src) {
-                    //             multicolors.push(images[key].attribs.src.split(' ')[0].split('/')[images[key].attribs.src.split(' ')[0].split('/').length - 1].split('_')[0])
-                    //         }
-                    //     }
-                    //     // return console.log('Multiple colors found!: ', multicolors)
-                    //         // 05431282812
-                    //         //05431282605
-                    // } else {
-                        newItem.color = $('div.colors div.imgCont')[0].attribs.title
-                    // }
+                    newItem.color = $('div.colors div.imgCont')[0].attribs.title
                 }
 
                 //iterate on images found in HTML
@@ -267,6 +262,7 @@ function scrapeDetails(url) {
                 }
             }
         })
+
     })
 }
 
@@ -479,7 +475,7 @@ function processItems(inventory, itemData) {
                                             console.error(e);
                                         }
                                         savedItems.push(item)
-                                        console.log('Saved ', item.itemTags)
+                                        // console.log('Saved ', item.itemTags)
                                         count++
                                         callback();
                                     })
