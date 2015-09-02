@@ -1,29 +1,31 @@
 var db = require('db');
-var async = require('async')
+var async = require('async');
+var tagParser = require('../tagParser');
 
 db.Landmarks.find({
-    'source_generic_store.storeSections': {
+    'source_generic_item': {
         $exists: true
-    }
+    },
+    'linkbackname': 'zara.com'
 }, function(err, items) {
     if (err) console.log(err)
     console.log('Found ', items.length)
-    async.each(items, function iterator(i, callback) {
-            if (i.name.indexOf('Zara') > -1 && !i.linkback && !i.linkbackname) {
-                i.linkback = 'http://www.zara.com'
-                i.linkbackname = 'zara.com'
+    async.eachSeries(items, function iterator(i, callback) {
+            if (i.itemTags.text.length > 0) {
+                console.log('.')
+                i.itemTags.text = tagParser.parse(i.itemTags.text)
             }
 
-            i.save(function(err, si) {
+            i.save(function(err, saved) {
                 if (err) console.log(err)
-                // console.log('fixed!', is.linkback)
+                    console.log('fixed!', saved.itemTags.text)
                 callback()
             })
         },
         function(err) {
             if (err) console.log(err)
 
-              console.log('Finished!')
+            console.log('Finished!')
         })
 
 })

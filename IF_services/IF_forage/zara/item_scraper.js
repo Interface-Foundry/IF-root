@@ -1,15 +1,14 @@
-// TODO: Check if basic query is diff from browser query 
-// Implement part numbers (color and size) in order to get ALL TEH INVENTORY
-// 
-// 
-//NYC and NJ Zara stores dont seem to use ITIDEX for some reason...
-//OR the new items are only available for certain stores. In that case you'll have to scrape all the pages other than new
+// TODO: Colors and more pages
+
+// 3074,3818,3037,1260,3946,303,3036
+var request = require('request');
 var cheerio = require('cheerio');
 var db = require('db');
 var Promise = require('bluebird');
 var async = require('async');
 var uniquer = require('../../uniquer');
-var request = require('request');
+var tagParser = require('../tagParser')
+
 //Global var to hold fake user object
 owner = {}
 
@@ -195,6 +194,7 @@ function scrapeDetails(url) {
             if ((!error) && (response.statusCode == 200)) {
 
                 $ = cheerio.load(body); //load HTML
+
                 //getting the item price, adding to object
                 if ($('span.price')) {
                     var price = $('p.price>span.price').attr('data-price')
@@ -208,7 +208,20 @@ function scrapeDetails(url) {
                 }
 
                 if ($('div.colors div.imgCont')) {
-                    newItem.color = $('div.colors div.imgCont')['0'].attribs.title
+                    // if ($('div.colors div.imgCont img').length > 1) {
+                    //     var multicolors = []
+                    //     var images = $('div.colors div.imgCont img')
+                    //     for (var key in images) {
+                    //         if (images[key].attribs && images[key].attribs.src) {
+                    //             multicolors.push(images[key].attribs.src.split(' ')[0].split('/')[images[key].attribs.src.split(' ')[0].split('/').length - 1].split('_')[0])
+                    //         }
+                    //     }
+                    //     // return console.log('Multiple colors found!: ', multicolors)
+                    //         // 05431282812
+                    //         //05431282605
+                    // } else {
+                        newItem.color = $('div.colors div.imgCont')[0].attribs.title
+                    // }
                 }
 
                 //iterate on images found in HTML
@@ -331,7 +344,7 @@ function getInventory(itemData, stores) {
 function processItems(inventory, itemData) {
 
     return new Promise(function(resolve, reject) {
-        // This variable will hold items in inventory for an item that has been scraped but was newly stocked in new stores
+        // Bool to check if item was scraped but newly stocked at other stores
         var newlyStocked = false;
 
         if (!inventory && inventory.length < 1) {
@@ -360,7 +373,8 @@ function processItems(inventory, itemData) {
                             callback()
                         })
                     } else {
-                        //If no matches were found, then it means this could be an itemUrl that was scraped but was newly stocked at other stores. 
+                        //If no matches were found and you checked all the stores in inventory list, 
+                        //then it means this could be an item that was scraped but was newly stocked at other stores. 
                         if (inventory[inventory.length - 1].physicalStoreId == store.physicalStoreId) {
                             newlyStocked = true;
                         }
@@ -380,6 +394,8 @@ function processItems(inventory, itemData) {
         if (!exists || newlyStocked) {
             var savedItems = []
             var count = 0;
+
+            //If newlyStocked it means there were items existing in db but they were newly stocked at other stores.
             if (newlyStocked) {
                 var storeIds = itemData.map(function(item) {
                     return item.source_generic_item.storeId
@@ -412,7 +428,11 @@ function processItems(inventory, itemData) {
                         })
                         i.itemTags.text.push('zara')
                         i.itemTags.text.push(itemData.type)
-                        i.itemTags.colors.push(itemData.color)
+                        i.itemTags.text.push(itemData.color)
+                        i.itemTags.text = tagParser.parse(i.itemTags.text)
+                        if (tagParser.colorize(itemData.color)) {
+                            i.itemTags.colors.push(tagParser.colorize(itemData.color))
+                        }
                         i.source_generic_item.storeId = store.physicalStoreId.toString().trim();
                         if (store.sizeStocks) {
                             i.source_generic_item.inventory = store.sizeStocks;
@@ -459,7 +479,7 @@ function processItems(inventory, itemData) {
                                             console.error(e);
                                         }
                                         savedItems.push(item)
-                                        console.log('Saved ', item)
+                                        console.log('Saved ', item.itemTags)
                                         count++
                                         callback();
                                     })
