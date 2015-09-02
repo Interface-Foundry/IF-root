@@ -27,7 +27,7 @@ var handbags = {
     category: 'Handbags',
     url: 'http://shop.nordstrom.com/c/handbags-new-arrivals?origin=leftnav'
 }
-var catalogs = [womens, handbags, mens, mshoes, wshoes]
+var catalogs = [handbags, womens, mens, mshoes, wshoes]
 
 //This will loop forever through each of the catalogs listed above
 async.whilst(

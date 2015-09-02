@@ -1,3 +1,5 @@
+// TODO: Getting blocked, figure out header changing system - Check out line 433
+
 var http = require('http');
 var cheerio = require('cheerio');
 var db = require('db');
@@ -412,7 +414,7 @@ function getInventory(newItem, zipcode) {
                     console.log('bad response')
                     wait(function() {
                         reject('Bad response from inventory request')
-                    }, 10000)
+                    }, 30000)
 
                 }
             }
@@ -428,25 +430,35 @@ function saveStores(item, inventory) {
         var notFound = true;
 
         async.eachSeries(inventory["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
+            var newUrl = 'http://shop.nordstrom.com/st/524/directions'
+            //524 is storeId
             var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
             var options = {
                 url: url,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate, sdch',
+                    'Accept-Language': 'en-US,en;q=0.8,ja;q=0.6',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                    // 'Host': 'i.nordstromimage.com',
+                    'Pragma': 'no-cache',
+                    'Referer': 'http://shop.nordstrom.com/s/volcom-fieldtrip-print-canvas-backpack/4144314?origin=keywordsearch',
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36'
                 }
             };
 
-
+            console.log('url   ',url)
 
             request(options, function(error, response, body) {
 
                 body = JSON.parse(body);
-                // console.log('***Body', body)
+                console.log('***Body', body)
                 if (!body.StoreCollection || !body.StoreCollection[0]) {
 
-                    wait(10000, function() {
+                    wait(function() {
                         console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
-                    })
+                    }, 30000)
                     return callback()
                 }
                 var storeObj = {
@@ -565,11 +577,11 @@ function saveItems(newItem, Stores) {
                         // })
                     item.itemTags.text.push('nordstrom')
                     item.itemTags.text.push(cat)
-                    //Get rid of blank tags
+                        //Get rid of blank tags
                     var i = item.itemTags.text.length
                     while (i--) {
-                        if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ' ) {
-                            item.itemTags.text.splice(i,1)
+                        if (item.itemTags.text[i] == '' || item.itemTags.text[i] == ' ') {
+                            item.itemTags.text.splice(i, 1)
                         }
                     }
                     item.parent.mongoId = store._id;
