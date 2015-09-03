@@ -428,7 +428,8 @@ function saveStores(item, inventory) {
         var notFound = true;
 
         async.eachSeries(inventory["PersonalizedLocationInfo"].Stores, function iterator(item, callback) {
-            var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
+           // var url = 'http://test.api.nordstrom.com/v1/storeservice/storenumber/' + item.StoreNumber + '?format=json&apikey=pyaz9x8yd64yb2cfbwc5qd6n';
+            var url = 'http://shop.nordstrom.com/st/'+ item.StoreNumber +'/directions';
             var options = {
                 url: url,
                 headers: {
@@ -439,33 +440,92 @@ function saveStores(item, inventory) {
 
 
             request(options, function(error, response, body) {
+                $ = cheerio.load(body); //load HTML
 
-                body = JSON.parse(body);
+                // if (!body.StoreCollection || !body.StoreCollection[0]) {
+
+                //     wait(10000, function() {
+                //         console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
+                //     })
+                //     return callback()
+                // }
+                //body = JSON.parse(body);
                 // console.log('***Body', body)
-                if (!body.StoreCollection || !body.StoreCollection[0]) {
 
-                    wait(10000, function() {
-                        console.log('Body returned empty results.  Possibly blocked by Nordstrom. Try changing IP.')
-                    })
-                    return callback()
-                }
                 var storeObj = {
-                    storeId: item.StoreNumber,
-                    name: body.StoreCollection[0].StoreName,
-                    type: body.StoreCollection[0].StoreType,
-                    StreetAddress: body.StoreCollection[0].StreetAddress,
-                    City: body.StoreCollection[0].City,
-                    State: body.StoreCollection[0].State,
-                    PostalCode: body.StoreCollection[0].PostalCode,
-                    PhoneNumber: body.StoreCollection[0].PhoneNumber,
-                    Hours: body.StoreCollection[0].Hours,
-                    Lat: body.StoreCollection[0].Latitude,
-                    Lng: body.StoreCollection[0].Longitude
-                }
+                    storeId: item.StoreNumber
+                };
+
+                //iterate on images found in HTML
+                $('div').each(function(i, elem) {
+                    if (elem.attribs && elem.attribs.class) {
+
+                        if (elem.attribs.class == 'leftColumn'){ //get store name
+                            storeObj.name = elem.children[0].children[0].data.replace(/[\n\t\r]/g,""); //the replace here is removing preceding and trailer \r \n \t stuff
+                        }
+
+                        if (elem.attribs.class == 'storeAddress'){ //get street address and phone number
+                            for (var i in elem.children){
+                                if (elem.children[i].data){
+                                    var cleanData = elem.children[i].data.replace(/\./g, "").replace(/[\n\t\r]/g,""); //remove periods from phone num
+
+                                    if (/^[(]{0,1}[0-9]{3}[)]{0,1}[-\s\.]{0,1}[0-9]{3}[-\s\.]{0,1}[0-9]{4}$/.test(cleanData)){ //is it a phone #?
+                                        storeObj.PhoneNumber = cleanData;
+                                    }   
+                                    else if (!storeObj.StreetAddress){ //if no street data , create data key
+                                        storeObj.StreetAddress = elem.children[i].data;
+                                    } 
+                                    else {  //street data already started, continue adding
+                                        storeObj.StreetAddress = storeObj.StreetAddress + ' ' + elem.children[i].data;
+                                        storeObj.StreetAddress = storeObj.StreetAddress.replace(/[\n\t\r]/g,"");
+                                    }
+                                    
+                                }
+                            }                       
+                        }
+
+                        if (elem.attribs.class == 'date'){ //get store hours
+                            for (var i in elem.children){
+                                if (elem.children[i].data){
+                                    if (!storeObj.Hours){ //if no street data , create data key
+                                        storeObj.Hours = elem.children[i].data;
+                                    } 
+                                    else {  //street data already started, continue adding
+                                        storeObj.Hours = storeObj.Hours + ' ' + elem.children[i].data;
+                                        storeObj.Hours = storeObj.Hours.replace(/[\n\t\r]/g,"");
+                                    }
+                                    
+                                }
+                            }                       
+                        }
+
+                        if (elem.attribs.class == 'errorMessage hidden'){ //get lat lng inside here
+                            storeObj.Lat = elem.next.attribs['lat-value'];       
+                            storeObj.Lng = elem.next.attribs['lon-value'];                   
+                        }
+                    }
+                });
+
+                //console.log(storeObj);
+
+
+                // var storeObj = {
+                //     storeId: item.StoreNumber,
+                //     name: body.StoreCollection[0].StoreName,
+                //     type: body.StoreCollection[0].StoreType,
+                //     StreetAddress: body.StoreCollection[0].StreetAddress,
+                //     City: body.StoreCollection[0].City,
+                //     State: body.StoreCollection[0].State,
+                //     PostalCode: body.StoreCollection[0].PostalCode,
+                //     PhoneNumber: body.StoreCollection[0].PhoneNumber,
+                //     Hours: body.StoreCollection[0].Hours,
+                //     Lat: body.StoreCollection[0].Latitude,
+                //     Lng: body.StoreCollection[0].Longitude
+                // }
 
 
                 //Construct our own unique storeId 
-                uniquer.uniqueId(body.StoreCollection[0].StoreName, 'Landmark').then(function(output) {
+                uniquer.uniqueId(storeObj.name, 'Landmark').then(function(output) {
                         //Check if store exists in db
                         db.Landmarks.findOne({
                                 'source_generic_store.storeId': storeObj.storeId
@@ -480,7 +540,7 @@ function saveStores(item, inventory) {
                                 if (!store) {
                                     var newStore = new db.Landmarks();
                                     newStore.source_generic_store = storeObj;
-                                    newStore.addressString = storeObj.StreetAddress.concat(', ' + storeObj.City).concat(', ' + storeObj.PostalCode)
+                                    newStore.addressString = storeObj.StreetAddress;
                                     newStore.id = output;
                                     newStore.tel = storeObj.PhoneNumber;
                                     newStore.world = true;
