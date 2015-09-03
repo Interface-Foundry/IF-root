@@ -394,60 +394,66 @@ app.post(trendingItemsUrl, function(req, res, next) {
         return search(q, 0)
             .then(function(res) {
 
-                // function distance(lat1, lon1, lat2, lon2, unit) {
-                //     var radlat1 = Math.PI * lat1 / 180
-                //     var radlat2 = Math.PI * lat2 / 180
-                //     var radlon1 = Math.PI * lon1 / 180
-                //     var radlon2 = Math.PI * lon2 / 180
-                //     var theta = lon1 - lon2
-                //     var radtheta = Math.PI * theta / 180
-                //     var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-                //     dist = Math.acos(dist)
-                //     dist = dist * 180 / Math.PI
-                //     dist = dist * 60 * 1.1515
-                //     if (unit == "K") {
-                //         dist = dist * 1.609344
-                //     }
-                //     if (unit == "N") {
-                //         dist = dist * 0.8684
-                //     }
-                //     return dist
-                // }
+                console.log('\n\n\n\n\n\n\n\n****Is this happening?')
 
-                // function compare(a, b) {
-                //     if (a.distance < b.distance)
-                //         return -1;
-                //     if (a.distance > b.distance)
-                //         return 1;
-                //     return 0;
-                // }
+                function distance(lat1, lon1, lat2, lon2, unit) {
+                    var radlat1 = Math.PI * lat1 / 180
+                    var radlat2 = Math.PI * lat2 / 180
+                    var radlon1 = Math.PI * lon1 / 180
+                    var radlon2 = Math.PI * lon2 / 180
+                    var theta = lon1 - lon2
+                    var radtheta = Math.PI * theta / 180
+                    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+                    dist = Math.acos(dist)
+                    dist = dist * 180 / Math.PI
+                    dist = dist * 60 * 1.1515
+                    if (unit == "K") {
+                        dist = dist * 1.609344
+                    }
+                    if (unit == "N") {
+                        dist = dist * 0.8684
+                    }
+                    return dist
+                }
 
-                // var previous_name;
-                // var duplicates = []
-                // res.sort({
-                //     'name': 1
-                // }).forEach(function(current) {
-                //     if (current.name === previous_name) {
-                //         var rating = {
-                //             _id: current._id,
-                //             name: current.name,
-                //             distance: distance(q.loc.lat, q.loc.lon, current.loc.coordinates[1], current.loc.coordinates[0])
-                //         }
-                //         duplicates.push(rating)
-                //     }
-                //     previous_name = current.name;
-                // });
+                function compare(a, b) {
+                    if (a.distance < b.distance)
+                        return -1;
+                    if (a.distance > b.distance)
+                        return 1;
+                    return 0;
+                }
 
-                // var duplicates2 = _.groupBy(duplicates,name)
+                var previous_name;
+                var duplicates = []
 
-                // console.log('duplicates2: ',duplicates2)
+                res.sort({
+                    'name': 1
+                }).forEach(function(current) {
+                    if (current.name === previous_name) {
+                        var rating = {
+                            _id: current._id,
+                            name: current.name,
+                            distance: distance(q.loc.lat, q.loc.lon, current.loc.coordinates[1], current.loc.coordinates[0])
+                        }
+                        duplicates.push(rating)
+                    }
+                    previous_name = current.name;
+                });
 
-                // console.log('Closest item: ', duplicates2.sort(compare)[0].distance, 'Duplicates', duplicates);
+                var duplicates2 = _.groupBy(duplicates,name)
+
+                // duplicates2.sort(compare)[0].distance
+
+                console.log('Duplicates2: ',duplicates2)
+
+                console.log('Duplicates', duplicates);
 
                 return {
                     category: 'Trending in "' + str + '"',
                     results: res
                 }
+
                 
             })
     });
